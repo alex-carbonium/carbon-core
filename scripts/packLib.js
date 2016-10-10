@@ -39,7 +39,7 @@ function dropSourceMapReferences(outPath){
     }
 }
 
-var config = require("./make-webpack-config")(Object.assign({    
+var config = require("./make-core-config")(Object.assign({
     minimize: true,
     debug: false,
     host: "",

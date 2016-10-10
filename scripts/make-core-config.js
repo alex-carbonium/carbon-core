@@ -15,7 +15,7 @@ var defaults = {
 
 function getEntry(settings){
     var entry = {
-        app: fullPath("../mylibs/SketchFacade"),
+        core: fullPath("../mylibs/SketchFacade"),
         api: fullPath("../mylibs/CarbonApi")
     };
     return entry;
@@ -84,25 +84,20 @@ function getLoaders(settings){
     var plugins = [
         require.resolve("babel-plugin-transform-runtime"),
         require.resolve("babel-plugin-add-module-exports"),
-        fullPath("../../babel/classType"),
+        fullPath("./babel/classType"),
         //remove when babel 6 has proper support for decorators
         require.resolve("babel-plugin-transform-decorators-legacy")
     ];
 
     if (!settings.trace){
-        plugins.push(fullPath("../../babel/removeDebug"));
+        plugins.push(fullPath("./babel/removeDebug"));
         plugins.push(require.resolve("babel-plugin-transform-remove-console"));
-    }
-    if(settings.minimize) {
-        plugins.push(require.resolve("babel-plugin-transform-react-constant-elements"));
-        plugins.push(require.resolve("babel-plugin-transform-react-inline-elements"));
     }
     var babelSettings = {
         babelrc: false, //do not use settings from referenced packages
         "presets": [
             require.resolve("babel-preset-es2015"),
-            require.resolve("babel-preset-stage-0"),
-            require.resolve("babel-preset-react")
+            require.resolve("babel-preset-stage-0")
         ],
         "plugins": plugins,
         ast:false
