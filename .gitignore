@@ -1,0 +1,16 @@
+*.orig
+
+libs/*
+mylibs/export/*
+mylibs/ui/android/*
+mylibs/ui/ios/*
+mylibs/ui/behavior/*
+mylibs/ui/childrenBehavior/*
+mylibs/ui/charts/*
+mylibs/ui/dynamics/*
+mylibs/ui/samples/*
+mylibs/ui/shapes/*
+mylibs/ui/web/*
+mylibs/ui/win8/*
+mylibs/ui/wp8/*
+mylibs/viewmodels/*
