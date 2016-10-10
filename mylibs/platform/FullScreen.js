@@ -154,7 +154,7 @@ define(["platform/All", "utils/dom"], function(All, domUtil){
             stop_browser_behavior: {touchAction: 'auto'},
             drag_min_distance: 1
         };
-        require(["hammer"], function(Hammer){
+        require(["hammerjs"], function(Hammer){
             Hammer(app.platform.htmlPanel, options)
                 .on("tap", function(e){
                     Environment.controller.onmousedown(createAppEvent(e));

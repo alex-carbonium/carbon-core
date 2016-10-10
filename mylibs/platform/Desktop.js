@@ -11,7 +11,7 @@ import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import backend from "../backend";
-import Hammer from "hammer";
+import Hammer from "hammerjs";
 
 var debug = require("DebugUtil")("carb:desktop");
 

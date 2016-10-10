@@ -26,7 +26,7 @@ function getOutput(settings){
     };
 
     output.path = fullPath("../target");
-    output.filename = "carbon-[name].js";
+    output.filename = "carbon-[name]-[hash].js";
     output.library = "carbon-[name]";
     output.libraryTarget = "umd";
     console.log("Writing lib to " + output.path + output.filename);    
@@ -36,8 +36,7 @@ function getOutput(settings){
 function getResolve(settings){
     var resolves = {
         root: [fullPath("../mylibs")],
-        alias: {            
-            //"jquery" : fullPath("../js/libs/jquery-1.8.2")            
+        alias: {
         },
         extensions: ["", ".es6.js", ".js", ".jsx", ".less", ".html"]
     };
@@ -68,14 +67,14 @@ function getPlugins(settings){
         plugins.push(new webpack.NormalModuleReplacementPlugin(/DebugUtil/, fullPath("../mylibs/emptyDebug.js")));
     }
     if (settings.minimize){
-        // plugins.push(
-        //     new webpack.optimize.UglifyJsPlugin({
-        //         compressor: {
-        //             warnings: false
-        //         }
-        //     }),
-        //     new webpack.optimize.DedupePlugin()
-        // );        
+        plugins.push(
+            new webpack.optimize.UglifyJsPlugin({
+                compressor: {
+                    warnings: false
+                }
+            }),
+            new webpack.optimize.DedupePlugin()
+        );
     }
 
     return plugins;
@@ -113,7 +112,12 @@ function getLoaders(settings){
     var excludedFolders = ["node_modules", "libs", "generated"];    
     var excludes = new RegExp(
         excludedFolders.map(x => "[\/\\\\]" + x + "[\/\\\\]").join("|"));
-    var loaders = [                
+    var loaders = [
+        {
+            test: /\.js$/,
+            include: /oidc\-client/,
+            loaders: [babelLoader]
+        },
         {
             test: /\.js$/,
             loaders: [babelLoader],
