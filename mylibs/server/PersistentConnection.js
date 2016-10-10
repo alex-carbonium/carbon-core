@@ -148,7 +148,7 @@ function updateQueryString(){
     }
 }
 
-export default class PersistentConnection extends StateMachine{
+class PersistentConnection extends StateMachine{
     constructor(app){
         super();
         this._app = app;

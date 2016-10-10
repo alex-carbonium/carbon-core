@@ -12,16 +12,7 @@ if (!sketch.ui.common){
 }
 window.debug = require("debug");
 
-window.Perf = require("react-addons-perf")
-
-require("jquery");
-
-require("./libs/jquery.filedrop");
-require("./libs/jquery-ui-1.10.3.custom");
 require("webExtensions");
-require("./libs/jqueryExtensions");
-
-require("imports?this=>window!./libs/modernizr-2.8.2");
 
 require("script");
 require("Strings");
@@ -36,8 +27,7 @@ window.backend = backend;
 
 require("webExtensions");
 require("analytics");
-require("./../Scripts/jquery.signalR-2.1.1");
-require("./../Scripts/jquery.cookie");
+require("./libs/jquery.signalR-2.1.1");
 
 require("commands/AllCommands");
 require("framework/Deferred");
@@ -67,24 +57,6 @@ require("ui/common/DockPanel");
 require("ui/common/AlignPanel");
 require("ui/common/ClickSpot");
 require("ui/common/StackPanel");
-
-require("ui/charts/ChartContainer");
-require("ui/charts/LineChart");
-require("ui/charts/BarChart");
-require("ui/charts/DonutChart");
-
-require("ui/behavior/CheckboxBehavior");
-require("ui/behavior/DropDownBehavior");
-require("ui/behavior/ProgressBehavior");
-require("ui/behavior/ScrollBarBehavior");
-require("ui/behavior/SliderBehavior");
-require("ui/behavior/SwitchBehavior");
-require("ui/childrenBehavior/ChildPropertyBehavior");
-require("ui/childrenBehavior/ChildrenVisibleBehavior");
-require("ui/childrenBehavior/SelectedItemBehavior");
-require("ui/childrenBehavior/SeparationBehavior");
-require("ui/childrenBehavior/ChildrenCountBehavior");
-require("ui/childrenBehavior/ChildrenWidthBehavior");
 
 require("svg/SvgPath");
 

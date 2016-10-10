@@ -1,0 +1,9 @@
+// auto-generated with node ./scripts/jsClient.js
+import backend from "../backend";
+export default {
+    {{#operations}}
+    {{name}}: function({{&paramList}}){
+        return backend.{{method}}(backend.{{endpoint}} + "{{&url}}"{{#paramString}}, { {{paramString}} }{{/paramString}});
+    }{{^isLast}},{{/isLast}}
+    {{/operations}}
+}

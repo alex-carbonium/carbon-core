@@ -1,6 +1,6 @@
 import DeferredPrimitives from "../framework/sync/DeferredPrimitives";
 
-define(["windows/Dialog", "viewmodels/LoadUnsavedChangesDialog", "framework/sync/Primitive"], function(Dialog, LoadUnsavedChangesDialog, Primitive) {
+define(["windows/Dialog", "framework/sync/Primitive"], function(Dialog, Primitive) {
     var fwk = sketch.framework;
 
 

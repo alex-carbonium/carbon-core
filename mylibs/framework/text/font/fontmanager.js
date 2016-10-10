@@ -1,4 +1,4 @@
-export default class FontManager {
+class FontManager {
     constructor(){
         this._fonts = [];
         this._defaultFont = null;
