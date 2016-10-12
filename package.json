@@ -42,6 +42,7 @@
     "bluebird": "3.4.1",
     "clipboard": "1.5.12",
     "hammerjs": "2.0.8",
+    "jquery": "1.9.1",
     "oidc-client": "1.1.0",
     "opentype.js": "0.6.4",
     "stacktrace-js": "1.3.1",

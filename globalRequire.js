@@ -27,6 +27,7 @@ window.backend = backend;
 
 require("webExtensions");
 require("analytics");
+require("jquery/jquery.min");
 require("./libs/jquery.signalR-2.1.1");
 
 require("commands/AllCommands");

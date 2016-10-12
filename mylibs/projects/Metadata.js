@@ -5,7 +5,7 @@ define(function(){
                 displayName: "Web stencils",
                 url: "projects/WebProject",
                 exports: "sketch.projects.Project",
-                fontsWithIcons: ["NinjamockBasic2", "NinjamockBasic"],
+                fontsWithIcons: ["NinjamockBasic2"],
                 requireDeps: ["charts"],
                 resourcePrefixes: ["web."]
             },
