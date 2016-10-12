@@ -31,6 +31,19 @@ export function throttle(func, limit){
     }
 }
 
+export function contextScale(context){
+    var devicePixelRatio = window.devicePixelRatio || 1;
+    var backingStoreRatio = context.backingStorePixelRatio ||
+        context.webkitBackingStorePixelRatio ||
+        context.mozBackingStorePixelRatio ||
+        context.msBackingStorePixelRatio ||
+        context.oBackingStorePixelRatio ||
+        1;
+
+    // on some machines it is non integer, it affects rendering
+    return 0 | (devicePixelRatio / backingStoreRatio);
+}
+
 var primitiveTypeNames = {};
 for (let t in PrimitiveType){
     let n = PrimitiveType[t];

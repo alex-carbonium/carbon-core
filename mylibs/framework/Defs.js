@@ -20,6 +20,13 @@ export var ChangeMode = {
     Self: 2 //update node only
 };
 
+export var TileSize = {
+    Auto:0,
+    Small:1,
+    Large:2,
+    XLarge:3
+}
+
 export var DockStyle = {
     Left: 0,
     Top: 1,

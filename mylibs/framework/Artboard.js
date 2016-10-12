@@ -4,7 +4,7 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import Page from "framework/Page";
 import {isPointInRect} from "math/math";
 import SharedColors from "ui/SharedColors";
-import {ChangeMode} from "./Defs";
+import {ChangeMode, TileSize} from "./Defs";
 import RelayoutEngine from "./relayout/RelayoutEngine";
 import PropertyStateRecorder from "framework/PropertyStateRecorder";
 import ModelStateListener from "framework/sync/ModelStateListener";
@@ -18,10 +18,7 @@ import Environment from "environment";
 //TODO: measure artboard rendering time
 //TODO: cache artboard to inmemorty canvas
 
-
 // TODO: artboard states
-
-
 // 9. Duplicate artboard should duplicate all state boards
 // 8. disable duplicate and copy/paste for stateboard
 // 12. property override on viewer
@@ -287,6 +284,10 @@ class Artboard extends Container {
             props.states !== undefined
         || props.name !== undefined) {
             this._refreshMetadata();
+        }
+
+        if(props.showInToolbox !== undefined){
+            Selection.refreshSelection();
         }
     }
 
@@ -650,6 +651,28 @@ PropertyMetadata.registerForType(Artboard, {
         useInModel: true,
         defaultValue: []
     },
+    tileSize: {
+        displayName: "Tile size",
+        type: "tileSize",
+        defaultValue:TileSize.Small
+    },
+    insertAsContent: {
+        displayName: "Insert as content",
+        type:'checkbox',
+        defaultValue:false
+    },
+    toolboxGroup: {
+        displayName: "Group name",
+        type:'text',
+        defaultValue:'Custom'
+    },
+    prepareVisibility(props){
+        return {
+            tileSize: props.showInToolbox,
+            insertAsContent: props.showInToolbox,
+            toolboxGroup: props.showInToolbox
+        }
+    },
     groups: function () {
         return [
             {
@@ -669,7 +692,7 @@ PropertyMetadata.registerForType(Artboard, {
             },
             {
                 label: "User stencils",
-                properties: ["showInToolbox", "allowHorizontalResize", "allowVerticalResize"],
+                properties: ["showInToolbox", "allowHorizontalResize", "allowVerticalResize", "tileSize", "insertAsContent", "toolboxGroup"],
                 expanded: true
             },
             {

@@ -83,6 +83,7 @@ module.exports = {
     "PrimitiveType": Defs.PrimitiveType,
     "PatchType": Defs.PatchType,
     "ChangeMode": Defs.ChangeMode,
+    "TileSize": Defs.TileSize,
     "FontManager": require("./OpenTypeFontManager"),
     "Tiler": require("./ui/toolbox/tiler"),
     "Context": require("./framework/render/Context"),
@@ -99,6 +100,8 @@ module.exports = {
     "Devices": Defs.Devices,
 
     "createUUID": Util.createUUID,
+
+    "ToolboxConfiguration": require("./ui/toolbox/ToolboxConfiguration"),
 
     "AppPropsChanged": require("./commands/AppPropsChanged"),
     "CompositeCommand": require("./framework/commands/CompositeCommand"),

@@ -30,7 +30,6 @@ export default class ArtboardTemplateControl extends UIElement {
             this._container = null;
         }
 
-
         this._setupCustomProperties(artboard);
 
         if (this.props.stateId) {
@@ -257,10 +256,20 @@ PropertyMetadata.registerForType(ArtboardTemplateControl, {
     overflow: {
         defaultValue: Overflow.Clip
     },
+    prepareVisibility: function (props, selection, view) {
+        if(selection.elements) {
+            var elements = selection.elements;
+        } else {
+            elements=[];
+        }
+        return {
+            stateId:((elements.length == 1) && elements[0]._artboard && elements[0]._artboard.props && elements[0]._artboard.props.states && elements[0]._artboard.props.states.length > 1)
+        }
+    },
     groups(){
         return [{
             label: "",
-            properties: ["source"] // TODO:remove
+            properties: ["source"]
         }]
     }
 })
