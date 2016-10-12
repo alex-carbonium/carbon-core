@@ -4,7 +4,8 @@ import ContextPool from "framework/render/ContextPool";
 import Environment from "environment";
 import FileProxy from "server/FileProxy";
 import Deferred from "framework/Deferred";
-
+import {createUUID} from "util";
+import Matrix from "math/matrix";
 
 var PADDING = 5;
 var _configCache = {};
@@ -31,6 +32,7 @@ export default class ToolboxConfiguration {
         var i = 0;
         var countOnLine = 1;
         var renderTasks = [];
+
         while (elementWithTiles[i].tileSize === TileSize.XLarge && i < elementWithTiles.length) {
             var element = elementWithTiles[i].element;
             var tileSize = elementWithTiles[i].tileSize;
@@ -73,32 +75,44 @@ export default class ToolboxConfiguration {
         var width = lastX;
         var contextScale = 1;//Environment.view.contextScale;
         var context = ContextPool.getContext(width, height, contextScale);
-        var env = {finalRender: true};
+        var env = {finalRender: true, pageMatrix:Matrix.Identity, setupContext:()=>{},contextScale:contextScale, offscreen:true};
+        var elementsMap = {};
         for (var i = 0; i < renderTasks.length; ++i) {
             var t = renderTasks[i];
             var element = elementWithTiles[i].element;
             var w = element.width();
             var h = element.height();
             var scale = t.data.scale;
-            context.resetTransform();
+            context.save();
             context.scale(contextScale, contextScale);
+
+            context.beginPath();
+            context.rect(t.x, t.y, t.data.width, t.data.height);
+            context.clip();
 
             context.translate(t.x + 0 | (t.data.width - w * scale) / 2, t.y + 0 | (t.data.height - h * scale) / 2);
 
             context.scale(scale, scale);
             element.drawSelf(context, w, h, env);
-            outConfig.push({
+            context.restore();
+
+            elementsMap[element.id()] = {
                 "autoPosition": "center",
                 "id": element.id(),
                 "realHeight": w,
                 "realWidth": h,
                 "spriteMap": [t.x * contextScale, t.y * contextScale, t.data.width * contextScale, t.data.height * contextScale],
                 "title": element.name()
-            });
+            };
         }
 
-        return context.canvas.toDataURL("image/png");
-        ;
+        for(var i = elements.length -1 ; i >= 0 ; --i){
+            outConfig.push(elementsMap[elements[i].id()]);
+        }
+
+        var res =  context.canvas.toDataURL("image/png");
+        ContextPool.releaseContext(context);
+        return res;
     }
 
     static getConfigForPage(page){
@@ -123,6 +137,8 @@ export default class ToolboxConfiguration {
             page.setProps({toolboxConfigUrl:null});
             return Deferred.createResolvedPromise({groups:[]});
         }
+
+        var configId = createUUID();
 
         var groupedElements = {};
         for(var i = 0; i < elements.length; ++i){
@@ -156,11 +172,11 @@ export default class ToolboxConfiguration {
             promises.push(makeGroup(group, groupedElements[group]));
         }
 
-        var config = {groups:groups};
+        var config = {groups:groups, id:configId};
         return Deferred.when(promises)
             .then(()=>FileProxy.uploadPublicFile(JSON.stringify(config)))
             .then((data)=>{
-                page.setProps({toolboxConfigUrl:data.url});
+                page.setProps({toolboxConfigUrl:data.url, toolboxConfigId:configId});
                 return config;
             })
     }

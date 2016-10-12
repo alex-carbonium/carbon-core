@@ -452,7 +452,6 @@ class App extends DataNode {
         this.pageRemoved = fwk.EventHelper.createEvent();
         this.pageChanged = fwk.EventHelper.createEvent();
         this.pageChanging = fwk.EventHelper.createEvent();
-        // this.pageVersionChanged = fwk.EventHelper.createEvent();
         this.loadedFromJson = fwk.EventHelper.createEvent();
         this.savedToJson = fwk.EventHelper.createEvent();
 
@@ -1027,9 +1026,6 @@ class App extends DataNode {
             }
         }
 
-        //TODO: still needed?
-        //incrementAffectedPageVersions.call(this, primitive);
-
         this.logEvent.raise(primitive);
     }
 
@@ -1288,12 +1284,6 @@ class App extends DataNode {
         };
     }
 
-    markChangedPagesToRefreshThumbnails(primitives) {
-        var pageIds = Primitive.mapChangedPageIds(primitives);
-        for (var id in pageIds) {
-            this.incrementPageVersion(id, pageIds[id]);
-        }
-    }
 
     getDefaultCategories() {
         return ["Editing"];
@@ -1519,12 +1509,6 @@ class App extends DataNode {
     removeStory(story) {
         this.removeChild(story);
         this.storyRemoved.raise(story);
-    }
-
-    incrementPageVersion(pageId, delta) {
-        //var page = this.getPageById(pageId);
-        //page.version(page.version() + delta);
-        //this.pageVersionChanged.raise(page);
     }
 }
 

@@ -1,5 +1,6 @@
 import Artboard from "framework/Artboard";
 import StateBoard from "framework/StateBoard";
+import EventHelper from "framework/EventHelper";
 import Page from "framework/Page";
 import PropertyMetadata from "framework/PropertyMetadata";
 import {unionRect} from "math/geometry";
@@ -20,6 +21,7 @@ class ArtboardPage extends Page {
     constructor() {
         super();
         this._artboardNames = {};
+        this.toolboxConfigIsDirty = EventHelper.createEvent();
     }
 
     initPage(view) {
@@ -167,7 +169,9 @@ class ArtboardPage extends Page {
         this.setActiveArtboard(NullArtboard);
     }
 
-
+    get isToolboxConfigDirty(){
+        return true;
+    }
 
 
     _onMouseUp(event) {
@@ -287,6 +291,11 @@ class ArtboardPage extends Page {
             Array.prototype.push.apply(primitives, res);
         }
         return primitives;
+    }
+
+    makeToolboxConfigDirty(){
+        this.setProps({toolboxConfigId:null});
+        this.toolboxConfigIsDirty.raise();
     }
 }
 

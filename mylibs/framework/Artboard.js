@@ -121,6 +121,17 @@ class Artboard extends Container {
     }
 
     draw(context, environment) {
+
+        context.save();
+        context.fillStyle = "#9EA2a6";
+        context.beginPath();
+        var scale = Environment.view.scale() *Environment.view.contextScale;
+        var s4 = 4/scale;
+        context.rect(this.x() + this.width(), this.y()+s4, s4, this.height());
+        context.rect(this.x() + s4, this.y()+this.height(), this.width(), s4);
+        context.fill();
+        context.restore();
+
         super.draw(context, environment);
 
         if (this._recorder && this._recorder.statesCount() > 1) {
@@ -141,8 +152,8 @@ class Artboard extends Container {
         } else {
             context.fillStyle = SharedColors.ArtboardText;
         }
-        context.font = (0 | (14 / scale)) + "px Lato, LatoLight, Arial, Helvetica, sans-serif";
-        context.rect(0, -20 / scale, this.width(), 20 / scale);
+        context.font = (0 | (10 / scale)) + "px Lato, LatoLight, Arial, Helvetica, sans-serif";
+        context.rect(0, -16 / scale, this.width(), 16 / scale);
         context.clip();
 
         context.fillText(this.headerText(), 0, -5 / scale);
@@ -358,8 +369,10 @@ class Artboard extends Container {
         this.runtimeProps.version++;
         var parent = this.parent();
         if(parent){
-            parent.runtimeProps.version = parent.runtimeProps.version || 1;
-            parent.runtimeProps.version++;
+            parent.incrementVersion();
+            if(this.props.showInToolbox){
+                parent.makeToolboxConfigDirty();
+            }
         }
     }
 

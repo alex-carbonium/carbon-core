@@ -276,6 +276,11 @@ class Page extends Layer {
         return this.props.version;
     }
 
+    incrementVersion(){
+        this.runtimeProps.version = this.runtimeProps.version || 1;
+        this.runtimeProps.version++;
+    }
+
     initPage(view) {
         this._view = view;
         this._initialized = true;
@@ -483,7 +488,9 @@ class Page extends Layer {
         context.fillRect(0, 0, w, h);
         this.renderContentTile(context, 0, 0, scale);
 
-        return context.canvas.toDataURL("image/png");
+        var res =  context.canvas.toDataURL("image/png");
+        ContextPool.releaseContext(context);
+        return res;
     }
 
 

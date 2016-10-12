@@ -130,7 +130,6 @@ export default class ModelSyncProxy {
         this.applyPrimitives()
             .then(() => {
                 Invalidate.request();
-                this._app.markChangedPagesToRefreshThumbnails(primitives);
             })
             .catch(e => {
                 this._app.syncBroken(true);

@@ -47,14 +47,20 @@ class Shape extends UIElement {
             Brush.stroke(borderBrush, context, 0, 0, w, h);
         } else {
             var clipingRect = this.getBoundingBoxGlobal(false, true);
-            var p1 = environment.pageMatrix.transformPoint2(clipingRect.x, clipingRect.y);
-            var p2 = environment.pageMatrix.transformPoint2(clipingRect.x + clipingRect.width, clipingRect.y + clipingRect.height);
-            p1.x = Math.max(0, 0 | p1.x * environment.contextScale);
-            p1.y = Math.max(0, 0 | p1.y * environment.contextScale);
-            p2.x = 0 | p2.x * environment.contextScale + .5;
-            p2.y = 0 | p2.y * environment.contextScale + .5;
-            var sw = (p2.x - p1.x);
-            var sh = (p2.y - p1.y);
+            if(!environment.offscreen) {
+                var p1 = environment.pageMatrix.transformPoint2(clipingRect.x, clipingRect.y);
+                var p2 = environment.pageMatrix.transformPoint2(clipingRect.x + clipingRect.width, clipingRect.y + clipingRect.height);
+                p1.x = Math.max(0, 0 | p1.x * environment.contextScale);
+                p1.y = Math.max(0, 0 | p1.y * environment.contextScale);
+                p2.x = 0 | p2.x * environment.contextScale + .5;
+                p2.y = 0 | p2.y * environment.contextScale + .5;
+                var sw = (p2.x - p1.x);
+                var sh = (p2.y - p1.y);
+            } else {
+                sw = 0 | clipingRect.width * environment.contextScale + .5;
+                sh = 0 | clipingRect.height * environment.contextScale + .5;
+                p1 = {x:0, y:0};
+            }
 
             var offContext = ContextPool.getContext(sw, sh, environment.contextScale);
             offContext.clearRect(0, 0, sw, sh);
@@ -65,7 +71,9 @@ class Shape extends UIElement {
             offContext.translate(-p1.x, -p1.y);
             environment.setupContext(offContext);
 
-            this.globalViewMatrix().applyToContext(offContext);
+            if(!environment.offscreen) {
+                this.globalViewMatrix().applyToContext(offContext);
+            }
 
             offContext.beginPath();
             this.drawPath(offContext, w, h);
@@ -79,7 +87,9 @@ class Shape extends UIElement {
             offContext.fillStyle = "black";
             offContext.fill();
 
-            context.resetTransform();
+            if(!environment.offscreen) {
+                context.resetTransform();
+            }
 
             context.drawImage(offContext.canvas, p1.x, p1.y);
 

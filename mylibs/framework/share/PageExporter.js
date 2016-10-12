@@ -2,10 +2,19 @@ import StyleManager from "framework/style/StyleManager";
 import {StyleType} from "framework/Defs";
 import {createUUID} from "../../util";
 import ArtboardTemplateControl from "framework/ArtboardTemplateControl";
+import ToolboxConfiguration from "ui/toolbox/ToolboxConfiguration";
+import Deferred from "framework/Deferred";
 
 export default class PageExporter {
     prepareShareData(page) {
         var clone = page.clone();
+
+        var promise;
+        if(!page.props.toolboxConfigId || this.page.isToolboxConfigDirty){
+            promise = ToolboxConfiguration.buildToolboxConfig(page);
+        } else {
+            promise = Deferred.createResolvedPromise();
+        }
 
         var i = 10; // to avoid infinite recursion in case of bugs
         while(this.expandNestedControls(clone) && i >=0){
@@ -15,14 +24,18 @@ export default class PageExporter {
         var styles = [];
         var textStyles = [];
         this.populatePageStyles(clone, styles, textStyles);
-        var data = {
-            page:clone.toJSON(),
-            styles:styles,
-            textStyles:textStyles
-            // add here any external dependencies
-        }
 
-        return data;
+        return promise.then(()=>{
+            clone.setProps({toolboxConfigUrl:page.props.toolboxConfigUrl, toolboxConfigId:page.props.toolboxConfigId});
+            return {
+                page:clone.toJSON(),
+                styles:styles,
+                textStyles:textStyles,
+                publishDate:new Date(),
+                publishedBy:App.Current.companyId()
+                // add here any external dependencies
+            }
+        });
     }
 
     expandNestedControls(page){
