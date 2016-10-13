@@ -1279,8 +1279,8 @@ class App extends DataNode {
         var htmlParent = $(this.platform.viewContainerElement());
         var parentOffset = htmlParent.offset();
         return {
-            x: parentOffset.left + point.x - htmlParent.scrollLeft(),
-            y: parentOffset.top + point.y - htmlParent.scrollTop()
+            x: parentOffset.left + point.x - this.activePage.scrollX(),
+            y: parentOffset.top + point.y - this.activePage.scrollY()
         };
     }
 

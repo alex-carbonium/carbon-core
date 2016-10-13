@@ -54,7 +54,7 @@ module.exports = {
     "Template": require("./framework/Template"),
     "Container": require("./framework/Container"),
     "GroupContainer": require("./framework/GroupContainer"),
-    "PlaceholderElement": require("./framework/PlaceHolderElement"),
+    // "PlaceholderElement": require("./framework/PlaceHolderElement"),
     "Page": require("./framework/Page"),
     "CommandManager": require("./framework/commands/CommandManager"),
     "Brush": require("./framework/Brush"),

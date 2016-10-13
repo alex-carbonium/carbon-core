@@ -106,15 +106,15 @@ function dropElementOn(event, newParent, target) {
     } else {
         if (!target.id()) {
             target.setProps({id: createUUID(), x: pos.x, y: pos.y}, ChangeMode.Root);
-            if (target.__type__ === "PlaceholderElement") {//stragnge that instanceof doesn't work} instanceof PlaceholderElement){
-                if (index !== undefined) {
-                    newParent.insert(target, index, ChangeMode.Root);
-                } else {
-                    newParent.add(target, ChangeMode.Root);
-                }
-            } else {
+            // if (target.__type__ === "PlaceholderElement") {//stragnge that instanceof doesn't work} instanceof PlaceholderElement){
+            //     if (index !== undefined) {
+            //         newParent.insert(target, index, ChangeMode.Root);
+            //     } else {
+            //         newParent.add(target, ChangeMode.Root);
+            //     }
+            // } else {
                 newParent.insert(target, index);
-            }
+            // }
         } else {
             var props = {x: pos.x, y: pos.y, width: this.width(), height: this.height()};
 

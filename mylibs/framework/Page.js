@@ -315,6 +315,7 @@ class Page extends Layer {
         var elements = [];
         var contentContainer = this.getContentContainer();
 
+
         each(Selection.selectedElements(), function (el) {
             if (el.canAccept(element, true)) {
                 container = el;
