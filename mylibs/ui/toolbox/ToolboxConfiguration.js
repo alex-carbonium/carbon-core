@@ -33,7 +33,7 @@ export default class ToolboxConfiguration {
         var countOnLine = 1;
         var renderTasks = [];
 
-        while (elementWithTiles[i].tileSize === TileSize.XLarge && i < elementWithTiles.length) {
+        while (i < elementWithTiles.length && elementWithTiles[i].tileSize === TileSize.XLarge) {
             var element = elementWithTiles[i].element;
             var tileSize = elementWithTiles[i].tileSize;
             var data = tiler.fitToTile(element.width(), element.height(), tileSize, PADDING);
@@ -46,8 +46,8 @@ export default class ToolboxConfiguration {
 
         var counter = 0;
         var lastX = x;
-        var prevTileSize = elementWithTiles[i].tileSize;
         while (i < elementWithTiles.length) {
+            var prevTileSize = elementWithTiles[i].tileSize;
             var element = elementWithTiles[i].element;
             var tileSize = elementWithTiles[i].tileSize;
 

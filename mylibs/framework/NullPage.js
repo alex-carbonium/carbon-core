@@ -2,7 +2,6 @@
 import PropertyMetadata from "framework/PropertyMetadata";
 
 define(function () {
-    var fwk = sketch.framework;
     // fwk.PropertyMetadata.extend("sketch.framework.Page", {
     //     "sketch.framework.NullPage": {
     //
@@ -16,6 +15,10 @@ define(function () {
             },
             parent:function(){
 
+            },
+
+            isInitialized:function(){
+                return true;
             },
             init:function(view){
             },

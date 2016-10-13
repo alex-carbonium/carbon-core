@@ -2,7 +2,6 @@ import UIElement from "framework/UIElement";
 import ResizeDimension from "framework/ResizeDimension";
 import Matrix from "math/matrix";
 import CompositeElement from "framework/CompositeElement";
-import PlaceholderElement from "framework/PlaceHolderElement";
 import SelectComposite from "framework/SelectComposite";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Container from "framework/Container";

@@ -11,6 +11,10 @@ class StateBoard extends Artboard {
 
     get artboard() {
         if (!this._artboard) {
+            if(this.parent() === NullContainer){
+                return null;
+            }
+
             this._artboard = this.parent().findNodeByIdBreadthFirst(this.props.masterId);
             if(this._artboard) {
                 this._artboard.linkStateBoard(this);

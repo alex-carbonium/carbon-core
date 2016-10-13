@@ -87,6 +87,7 @@ module.exports = {
     "FontManager": require("./OpenTypeFontManager"),
     "Tiler": require("./ui/toolbox/tiler"),
     "Context": require("./framework/render/Context"),
+    "ContextPool": require("./framework/render/ContextPool"),
     "ImageSource": require("./framework/ImageSource"),
     "Deferred": require("./framework/Deferred"),
     "Resources": require("./framework/Resources"),

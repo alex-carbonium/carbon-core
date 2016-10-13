@@ -454,7 +454,7 @@ class Artboard extends Container {
                 if(element === this && (propName === 'x' || propName == 'y' )){
                     continue;
                 }
-                if (propName === 'customProperties' || propName === 'state' || propName === "states" || propName === "actions") {
+                if (propName === 'customProperties' || propName === 'state' || propName === "states" || propName === "actions" || propName === "showInToolbox" || propName === "tileSize" || propName === "insertAsContent") {
                     continue;
                 }
                 if (!this._recorder.hasStatePropValue(stateBoard.stateId, element.id(), propName)) {

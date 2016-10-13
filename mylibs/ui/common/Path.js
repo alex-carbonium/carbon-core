@@ -1330,10 +1330,11 @@ PropertyMetadata.registerForType(Path, {
         ];
     },
     prepareVisibility(props){
+        var editMode = props.mode === "edit";
         return {
-            currentPointX: props.currentPointType !== null,
-            currentPointY: props.currentPointType !== null,
-            currentPointType: props.currentPointType !== null,
+            currentPointX: editMode && props.currentPointType !== null,
+            currentPointY: editMode && props.currentPointType !== null,
+            currentPointType: editMode && props.currentPointType !== null,
             pointRounding: props.mode === "edit"
         };
     }
