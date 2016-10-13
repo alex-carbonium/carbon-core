@@ -48,6 +48,7 @@ module.exports = {
     "CompositeElement": require("./framework/CompositeElement"),
     "ImageElement": require("./framework/ImageElement"),
     "Frame": require("./framework/Frame"),
+    "FrameSource": require("./framework/FrameSource"),
     "TemplatedElement": require("./framework/TemplatedElement"),
     "NoSelectionElement": require("./framework/NoSelectionElement"),
     "Template": require("./framework/Template"),

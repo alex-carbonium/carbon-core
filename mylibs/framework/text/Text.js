@@ -128,7 +128,7 @@ export default class Text extends UIElement {
         if (verticalOffset !== 0){
             context.translate(0, verticalOffset);
         }
-        this.runtimeProps.engine.render(context, this.runtimeProps.drawSelection, verticalOffset, environment.view.focused());
+        this.runtimeProps.engine.render(context, this.runtimeProps.drawSelection, verticalOffset, environment.view?environment.view.focused():false);
 
         context.restore();
     }
