@@ -15,6 +15,7 @@ import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import SnapController from "framework/SnapController";
 import Box from "framework/Box";
+import {debounce} from "../../util";
 
 var CP_HANDLE_RADIUS = 3;
 var CP_HANDLE_RADIUS2 = 6;
@@ -69,8 +70,8 @@ var getClickedPoint = function (x, y) {
         sy = this.height() / this._sourceRect.height;
     }
 
-    for (var i = 0, len = this._points.length; i < len; ++i) {
-        var pt = this._points[i];
+    for (var i = 0, len = this.points.length; i < len; ++i) {
+        var pt = this.points[i];
         pt.idx = i;
         var x2 = pos.x - pt.x * sx
             , y2 = pos.y - pt.y * sy;
@@ -93,8 +94,8 @@ var getClickedHandlePoint = function (x, y) {
     }
 
 
-    for (var i = 0, len = this._points.length; i < len; ++i) {
-        var pt = this._points[i];
+    for (var i = 0, len = this.points.length; i < len; ++i) {
+        var pt = this.points[i];
         pt.idx = i;
         if (isLinePoint(pt)) {
             continue;
@@ -150,8 +151,8 @@ var scalePointsToNewSize = function (rect, oldRect) {
 
     if (rect.x == oldRect.x || rect.width != oldRect.width) {
         var scale = rect.width / oldRect.width;
-        for (var i = 0; i < this._points.length; ++i) {
-            var pt = this._points[i];
+        for (var i = 0; i < this.points.length; ++i) {
+            var pt = this.points[i];
             pt.x *= scale;
             pt.cp1x *= scale;
             pt.cp2x *= scale;
@@ -160,11 +161,12 @@ var scalePointsToNewSize = function (rect, oldRect) {
     }
 
     if (this.flipHorizontal()) {
-        for (var i = 0; i < this._points.length; ++i) {
-            var pt = this._points[i];
+        for (var i = 0; i < this.points.length; ++i) {
+            var pt = this.points[i];
             pt.x = rect.width - pt.x;
             pt.cp1x = rect.width - pt.cp1x;
             pt.cp2x = rect.width - pt.cp2x;
+            this._roundPoint(pt)
         }
         this.flipHorizontal(false);
     }
@@ -172,8 +174,8 @@ var scalePointsToNewSize = function (rect, oldRect) {
     if (rect.y == oldRect.y || rect.height != oldRect.height) {
         scale = rect.height / oldRect.height;
 
-        for (i = 0; i < this._points.length; ++i) {
-            pt = this._points[i];
+        for (i = 0; i < this.points.length; ++i) {
+            pt = this.points[i];
             pt.y *= scale;
             pt.cp1y *= scale;
             pt.cp2y *= scale;
@@ -182,8 +184,8 @@ var scalePointsToNewSize = function (rect, oldRect) {
     }
 
     if (this.flipVertical()) {
-        for (var i = 0; i < this._points.length; ++i) {
-            var pt = this._points[i];
+        for (var i = 0; i < this.points.length; ++i) {
+            var pt = this.points[i];
             pt.y = rect.height - pt.y;
             pt.cp1y = rect.height - pt.cp1y;
             pt.cp2y = rect.height - pt.cp2y;
@@ -196,22 +198,40 @@ var scalePointsToNewSize = function (rect, oldRect) {
 };
 
 function moveAllPoints(dx, dy) {
-    for (var i = 0, len = this._points.length; i < len; ++i) {
-        var pt = this._points[i];
+    for (var i = 0, len = this.points.length; i < len; ++i) {
+        var pt = this.points[i];
         pt.x -= dx;
         pt.y -= dy;
         pt.cp1x -= dx;
         pt.cp2x -= dx;
         pt.cp1y -= dy;
         pt.cp2y -= dy;
+        this._roundPoint(pt);
     }
 }
 
 class Path extends Shape {
     constructor() {
         super();
-        this._points = [];
+        this.points = [];
+        this._lastPoints = [];
         this._currentPoint = null;
+        this.save = debounce(this._save.bind(this), 1000);
+    }
+
+    _save(){
+        var newPoints = this.points.slice();
+        this.props.points = this._lastPoints;
+        this.setProps({points:newPoints});
+        this._lastPoints = this.points;
+    }
+
+    get points(){
+        return this.props.points;
+    }
+
+    set points(value) {
+        this.setProps({points:value});
     }
 
     controlPointForPosition(pos) {
@@ -219,13 +239,13 @@ class Path extends Shape {
     }
 
     pointAtIndex(idx) {
-        return this._points[idx];
+        return this.points[idx];
     }
 
     removeControlPoint(pt) {
-        for (var i = 0; i < this._points.length; ++i) {
-            if (this._points[i] === pt) {
-                this._points.splice(i, 1);
+        for (var i = 0; i < this.points.length; ++i) {
+            if (this.points[i] === pt) {
+                this.points.splice(i, 1);
                 return;
             }
         }
@@ -245,8 +265,8 @@ class Path extends Shape {
     }
 
     indexOfPoint(pt) {
-        for (var i = 0; i < this._points.length; ++i) {
-            if (this._points[i] === pt) {
+        for (var i = 0; i < this.points.length; ++i) {
+            if (this.points[i] === pt) {
                 return i;
             }
         }
@@ -255,7 +275,7 @@ class Path extends Shape {
     }
 
     removePointAtIndex(idx) {
-        this._points.splice(idx, 1);
+        this.points.splice(idx, 1);
 
         if (this.mode() === 'edit') {
             SnapController.calculateSnappingPointsForPath(this);
@@ -323,35 +343,41 @@ class Path extends Shape {
             return;
 
         this._initPoint(point);
-        this._points.push(point);
+        this.points.push(point);
 
         if (this.mode() === 'edit') {
             SnapController.calculateSnappingPointsForPath(this);
         }
+
+        this.save();
 
         return point;
     }
 
     insertPointAtIndex(point, idx) {
         this._initPoint(point);
-        this._points.splice(idx, 0, point);
+        this.points.splice(idx, 0, point);
 
         if (this.mode() === 'edit') {
             SnapController.calculateSnappingPointsForPath(this);
         }
+
+        this.save();
 
         return point;
     }
 
     changePointAtIndex(point, idx) {
-        this._points.splice(idx, 1, point);
+        this.points.splice(idx, 1, point);
         if (this.mode() === 'edit') {
             SnapController.calculateSnappingPointsForPath(this);
         }
+
+        this.save();
     }
 
     length() {
-        return this._points.length;
+        return this.points.length;
     }
 
     select() {
@@ -715,8 +741,8 @@ class Path extends Shape {
             var handlePoint = this._handlePoint || this._hoverHandlePoint;
             var hoverPoint = this._currentPoint || this._hoverPoint;
 
-            for (var i = 0, len = this._points.length; i < len; ++i) {
-                var pt = this._points[i];
+            for (var i = 0, len = this.points.length; i < len; ++i) {
+                var pt = this.points[i];
                 var tpt = {x: pt.x * sx, y: pt.y * sy};
 
                 clearStyle();
@@ -771,12 +797,8 @@ class Path extends Shape {
         }
     }
 
-    get points() {
-        return this._points;
-    }
-
     drawPath(context, w, h) {
-        if (this._points.length == 0) {
+        if (this.points.length == 0) {
             return;
         }
 
@@ -787,7 +809,7 @@ class Path extends Shape {
         }
 
         var pt;
-        var points = this._points;
+        var points = this.points;
         var prevPt = pt = points[0];
         context.moveTo(pt.x * sx, pt.y * sy);
         for (var i = 1, len = points.length; i < len; ++i) {
@@ -829,8 +851,8 @@ class Path extends Shape {
         var maxx = rect.x + rect.width;
         var maxy = rect.y + rect.height;
 
-        for (var i = 0; i < this._points.length; ++i) {
-            var p = this._points[i];
+        for (var i = 0; i < this.points.length; ++i) {
+            var p = this.points[i];
             minx = Math.min(minx, p.x);
             minx = Math.min(minx, p.cp1x);
             minx = Math.min(minx, p.cp2x);
@@ -893,7 +915,7 @@ class Path extends Shape {
 
     adjustBoundaries() {
         //happens when all add-point commands are rolled back
-        if (this._points.length <= 1) {
+        if (this.points.length <= 1) {
             return;
         }
 
@@ -941,16 +963,18 @@ class Path extends Shape {
 
         this._sourceRect = this.getBoundaryRect();
         this._internalChange = false;
+
+        this.save();
     }
 
     getInsertPointData(pointInfo) {
         var pt = {x: pointInfo.x, y: pointInfo.y, idx: pointInfo.idx};
         var t = pointInfo.t;
         var len = this.length();
-        var p4 = clone(this._points[pointInfo.idx]);
+        var p4 = clone(this.points[pointInfo.idx]);
         p4.idx = pointInfo.idx;
         var p1idx = (pointInfo.idx - 1 + len) % len;
-        var p1 = clone(this._points[p1idx]);
+        var p1 = clone(this.points[p1idx]);
         p1.idx = p1idx;
 
         if (isLinePoint(p4) && isLinePoint(p1)) {
@@ -1023,7 +1047,7 @@ class Path extends Shape {
         pos.x /= sx;
         pos.y /= sy;
         var resPt = null;
-        var prevPt = this._points[0];
+        var prevPt = this.points[0];
         dist = (dist || 4) / Environment.view.scale();
 
         function checkDistance(pt, prevPt, idx) {
@@ -1056,14 +1080,14 @@ class Path extends Shape {
             }
         }
 
-        for (var i = 1; i < this._points.length; ++i) {
-            var pt = this._points[i];
+        for (var i = 1; i < this.points.length; ++i) {
+            var pt = this.points[i];
             checkDistance(pt, prevPt, i);
             prevPt = pt;
         }
 
         if (this.closed()) {
-            checkDistance(this._points[0], prevPt, 0);
+            checkDistance(this.points[0], prevPt, 0);
         }
 
         return resPt;
@@ -1071,7 +1095,7 @@ class Path extends Shape {
 
     polygonArea() {
         var area = 0;
-        var points = this._points;
+        var points = this.points;
 
         for (var i = 0, len = points.length; i < len; i++) {
             var j = (i + 1) % len;
@@ -1110,38 +1134,38 @@ class Path extends Shape {
 
     toJSON(includeDefaults) {
         var current = UIElement.prototype.toJSON.call(this, includeDefaults);
-        var points = current.points = [];
-        for (var i = 0; i < this._points.length; ++i) {
-            points.push(clone(this._points[i]));
-        }
+        // var points = current.points = [];
+        // for (var i = 0; i < this.points.length; ++i) {
+        //     points.push(clone(this.points[i]));
+        // }
         return current;
     }
 
     clone() {
         var c = super.clone();
-        c._points = this._points.slice();
+        c.points = this.points.slice();
         c._sourceRect = this._sourceRect;
         return c;
     }
 
     mirrorClone() {
         var c = super.mirrorClone();
-        c._points = this._points.slice();
+        c.points = this.points.slice();
         c._sourceRect = this._sourceRect;
         return c;
     }
 
     fromJSON(data) {
-        this._points.length = 0;
+        this.points.length = 0;
 
         var current = UIElement.prototype.fromJSON.call(this, data);
-        for (var i = 0; i < data.points.length; ++i) {
-            this.addPoint(data.points[i]);
-        }
+        // for (var i = 0; i < data.points.length; ++i) {
+        //     this.addPoint(data.points[i]);
+        // }
 
         this._currentPoint = null;
         this._handlePoint = null;
-        if (data.points.length) {
+        if (data.props.points&&data.props.points.length) {
             this._sourceRect = this.getGlobalBoundingBox();
             this._sourceRect.width = Math.max(this._sourceRect.width, 1);
             this._sourceRect.height = Math.max(this._sourceRect.height, 1);
@@ -1151,7 +1175,7 @@ class Path extends Shape {
     }
 
     elements(offset, angle, origin) {
-        var points = this._points;
+        var points = this.points;
         var res = [];
         if (!points.length) {
             return res;
@@ -1305,6 +1329,9 @@ PropertyMetadata.registerForType(Path, {
         editable: false,
         useInModel: false,
         defaultValue: "resize"
+    },
+    points:{
+        defaultValue:[]
     },
     groups () {
         return [

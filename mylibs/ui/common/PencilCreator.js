@@ -58,13 +58,13 @@ define(["ui/common/EditModeAction", "ui/common/Path"], function(EditModeAction, 
         return {
             _constructor:function (app) {
                 this._app = app;
-                this._points = [];
+                this.points = [];
                 this._attachMode = "select";
                 this._detachMode = "resize";
             },
             mousedown: function(event){
                 this._mousepressed = true;
-                this._points.push({x:event.x, y:event.y});
+                this.points.push({x:event.x, y:event.y});
                 event.handled = true;
                 return false;
             },
@@ -80,7 +80,7 @@ define(["ui/common/EditModeAction", "ui/common/Path"], function(EditModeAction, 
                     element.setProps(defaultSettings);
                 }
 
-                var points = DouglasPeucker(this._points, 1.5 / scale);
+                var points = DouglasPeucker(this.points, 1.5 / scale);
 
                 element.addPoint(points[0]);
 
@@ -101,7 +101,7 @@ define(["ui/common/EditModeAction", "ui/common/Path"], function(EditModeAction, 
                     App.Current.activePage.dropToPage(element.x(), element.y(), element);
                 }
                 Selection.makeSelection([element]);
-                this._points=[];
+                this.points=[];
                 if(SystemConfiguration.ResetActiveToolToDefault) {
                     App.Current.actionManager.invoke("movePointer");
                 }
@@ -110,7 +110,7 @@ define(["ui/common/EditModeAction", "ui/common/Path"], function(EditModeAction, 
                 if(this._mousepressed){
                     var x = event.x
                         , y = event.y;
-                    this._points.push({x:x, y:y});
+                    this.points.push({x:x, y:y});
                     Invalidate.requestUpperOnly();
                     event.handled = true;
                 }
@@ -118,12 +118,12 @@ define(["ui/common/EditModeAction", "ui/common/Path"], function(EditModeAction, 
             layerdraw: function(context){
                 if(this._mousepressed){
                     context.save();
-                    var pt = this._points[0];
+                    var pt = this.points[0];
                     context.beginPath();
                     context.fillStyle = "black";
                     context.moveTo(pt.x, pt.y);
-                    for(var i = 1; i<this._points.length;++i){
-                        pt = this._points[i];
+                    for(var i = 1; i<this.points.length; ++i){
+                        pt = this.points[i];
                         context.lineTo(pt.x, pt.y);
                     }
                     context.stroke();

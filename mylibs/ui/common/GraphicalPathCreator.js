@@ -57,7 +57,7 @@ export default klass(EditModeAction, (function () {
             this._type = type;
             this._app = app;
             this._parameters = parameters;
-            this._points = [];
+            this.points = [];
             this._element = null;
             this._attachMode = "edit";
             this._detachMode = "resize";

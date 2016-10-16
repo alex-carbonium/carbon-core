@@ -7,13 +7,13 @@ export default klass2("sketch.commands.AddPathPointCommand", Command, {
         this._path = path;
         this._point = point;
         this._parent = path.parent();
-        this._position = path._points.length;
+        this._position = path.points.length;
     },
     transparent:function(){
         return true;
     },
     execute:function(){
-        if(!this._path._points.length) {
+        if(!this._path.points.length) {
             this._parent.add(this._path);
         }
         this._path.insertPointAtIndex(this._point, this._position);
