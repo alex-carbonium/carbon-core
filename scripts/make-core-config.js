@@ -4,6 +4,7 @@ var extend = require("node.extend");
 
 var defaults = {
     minimize   : false,
+    noUglify   : false,
     debug      : true,        
     port       : 8080,
     host       : "http://localhost",
@@ -26,7 +27,7 @@ function getOutput(settings){
     };
 
     output.path = fullPath("../target");
-    output.filename = "carbon-[name]-[hash].js";
+    output.filename = "carbon-[name]-[chunkhash].js";
     output.library = "carbon-[name]";
     output.libraryTarget = "umd";
     console.log("Writing lib to " + output.path + output.filename);    
@@ -66,14 +67,13 @@ function getPlugins(settings){
         plugins.push(new webpack.NormalModuleReplacementPlugin(/debug/, fullPath("../mylibs/emptyDebug.js")));
         plugins.push(new webpack.NormalModuleReplacementPlugin(/DebugUtil/, fullPath("../mylibs/emptyDebug.js")));
     }
-    if (settings.minimize){
+    if (settings.minimize && !settings.noUglify){
         plugins.push(
             new webpack.optimize.UglifyJsPlugin({
                 compressor: {
                     warnings: false
                 }
-            }),
-            new webpack.optimize.DedupePlugin()
+            })
         );
     }
 
