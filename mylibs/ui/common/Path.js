@@ -305,8 +305,10 @@ class Path extends Shape {
 
     switchToEditMode(edit) {
         if (edit) {
+            this._currentPoint = null;
             if (this._sourceRect) {
                 scalePointsToNewSize.call(this, this.getBoundaryRect(), this._sourceRect);
+                this.save();
                 this.captureMouse();
             }
             SnapController.calculateSnappingPointsForPath(this);
