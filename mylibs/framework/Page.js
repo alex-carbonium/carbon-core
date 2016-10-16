@@ -80,14 +80,18 @@ class Page extends Layer {
                     var found = false;
                     if (child.multiselectTransparent) {
                         child.getChildren && child.getChildren().forEach((e) => {
-                            if (!e.multiselectTransparent && getElementsInFrameHit(e, rect, scale)) {
+                            if (
+                                !e.multiselectTransparent && getElementsInFrameHit(e, rect, scale)
+                            ) {
                                 selection.push(e);
                                 found = true;
                             }
-                        });
+                        })
+                        ;
                         return !found && child.multiselectTransparent === true;
                     }
-                });
+                })
+                ;
             }
             else if (getElementsInFrameHit(element, rect, scale)) {
                 selection.push(element);
@@ -145,14 +149,14 @@ class Page extends Layer {
     scrollX() {
         if (arguments.length === 1) {
             this._scrollX = arguments[0];
-            
-            if(this._minScrollX != null && this._scrollX < this._minScrollX){
+
+            if (this._minScrollX != null && this._scrollX < this._minScrollX) {
                 this._scrollX = this._minScrollX;
             }
-            else if(this._maxScrollX != null && this._scrollX > this._maxScrollX){
+            else if (this._maxScrollX != null && this._scrollX > this._maxScrollX) {
                 this._scrollX = this._maxScrollX;
             }
-            
+
             this.updatePageMatrix();
         }
         return this._scrollX;
@@ -161,14 +165,14 @@ class Page extends Layer {
     scrollY(value) {
         if (arguments.length === 1) {
             this._scrollY = arguments[0];
-            
-            if(this._minScrollY != null && this._scrollY < this._minScrollY){
-               this._scrollY = this._minScrollY;
+
+            if (this._minScrollY != null && this._scrollY < this._minScrollY) {
+                this._scrollY = this._minScrollY;
             }
             else if (this._maxScrollY != null && this._scrollY > this._maxScrollY) {
                 this._scrollY = this._maxScrollY;
             }
-            
+
             this.updatePageMatrix();
         }
         return this._scrollY;
@@ -276,7 +280,7 @@ class Page extends Layer {
         return this.props.version;
     }
 
-    incrementVersion(){
+    incrementVersion() {
         this.runtimeProps.version = this.runtimeProps.version || 1;
         this.runtimeProps.version++;
     }
@@ -484,29 +488,38 @@ class Page extends Layer {
         }
 
         var scale = w / sw;
-        var context = ContextPool.getContext(w, h, Environment.view.contextScale);
+        var contextScale = 1;//options.contextScale || 1;
+        var context = ContextPool.getContext(w, h, contextScale);
         context.fillStyle = '#b7babd';
-        context.fillRect(0, 0, w, h);
-        this.renderContentTile(context, 0, 0, scale);
+        context.fillRect(0, 0, w * contextScale, h * contextScale);
+        this.renderContentTile(context, 0, 0, scale, contextScale);
 
-        var res =  context.canvas.toDataURL("image/png");
+        var res = context.canvas.toDataURL("image/png");
         ContextPool.releaseContext(context);
         return res;
     }
 
-
-    renderContentTile(context, x, y, zoom) {
+    renderContentTile(context, x, y, zoom, contextScale) {
         var rect = this.getContentOuterSize();
 
-        var w = rect.width,
-            h = rect.height;
-
         context.save();
-        context.scale(zoom, zoom);
-
-        context.translate(x - rect.x, y - rect.y);
+        context.scale(contextScale, contextScale);
+        var matrix = new Matrix();
+        matrix.scale(zoom, zoom);
+        matrix.translate(x - rect.x, y - rect.y);
+        matrix.applyToContext(context)
         this.invalidate();
-        this.drawSelf(context, w, h, {finalRender:true});
+        this.draw(context, {
+            finalRender: true, pageMatrix: matrix, setupContext: (context) => {
+                context.scale(contextScale, contextScale);
+                matrix.applyToContext(context);
+            },
+            view: {
+                scale: () =>1,
+                focused:()=>false,
+                contextScale: contextScale
+            }
+        });
         context.restore();
     }
 

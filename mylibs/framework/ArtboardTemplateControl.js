@@ -18,13 +18,17 @@ export default class ArtboardTemplateControl extends UIElement {
         this._allowHResize = this._artboard.props.allowHorizontalResize;
         this._allowVResize = this._artboard.props.allowVerticalResize;
 
-        if (!this._allowHResize && !this._allowVResize) {
-            var props = {width: artboard.width(), height: artboard.height()};
-            this.setProps(props);
+        var props = {};
+        if (!this._allowHResize) {
+            props.width = artboard.width();
         }
 
-        this._cloneFromArtboard(artboard);
+        if (!this._allowVResize) {
+            props.height = artboard.height();
+        }
+        this.setProps(props);
 
+        this._cloneFromArtboard(artboard);
 
         this._setupCustomProperties(artboard);
 
@@ -148,17 +152,24 @@ export default class ArtboardTemplateControl extends UIElement {
 
     _changeState(stateId) {
         var defaultState = this._artboard._recorder.getStateById('default');
+
+        this._container.setProps({
+            width: this._artboard.width(),
+            height: this._artboard.height()}
+            );
+
         PropertyStateRecorder.applyState(this._container, defaultState);
         if (stateId !== 'default') {
             var newState = this._artboard._recorder.getStateById(stateId);
             PropertyStateRecorder.applyState(this._container, newState);
         }
 
-        // size of container can be changed
-        this.setProps({
-            width: this._container.width(),
-            height: this._container.height()
+        this._container.setProps({
+            width: this.width(),
+            height: this.height()
         });
+
+        this._container.arrange({oldValue: this._artboard.getBoundaryRect(), newValue: this.getBoundaryRect()});
     }
 
     _updateCustomProperties() {
