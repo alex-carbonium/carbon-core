@@ -1,13 +1,28 @@
-﻿$jobs = @()
+﻿param(    
+    [switch] $Debug = $false
+)
 
-Remove-Item .\target\* -Recurse -ErrorAction Ignore
+$ErrorActionPreference = "Stop"
 
-$jobs += Start-Job -ScriptBlock {
-    Set-Location $args[0]
-        
-    npm install --loglevel=error
-    npm run packLib -- --noColors   
+try
+{
+    Push-Location $PSScriptRoot    
 
-} -ArgumentList $PSScriptRoot
+    Remove-Item .\target\* -Recurse -ErrorAction Ignore
 
-$jobs | % {$_ | Receive-job -Wait -AutoRemoveJob}
+    if (-not $Debug)
+    {
+        npm install --loglevel=error
+    }
+
+    $params = @("run", "packLib", "--", "--noColors")
+    if ($Debug)
+    {
+        $params += "--noUglify"
+    }            
+    & npm $params
+}
+finally
+{
+    Pop-Location
+}
