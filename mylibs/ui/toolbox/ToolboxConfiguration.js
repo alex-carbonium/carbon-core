@@ -11,7 +11,8 @@ var PADDING = 5;
 var _configCache = {};
 export default class ToolboxConfiguration {
 
-    static renderElementsToSprite(elements, outConfig) {
+    static renderElementsToSprite(elements, outConfig, size, contextScale) {
+        contextScale = contextScale || 1;
         if (!elements.length) {
             return "";
         }
@@ -73,9 +74,11 @@ export default class ToolboxConfiguration {
         }
 
         var width = lastX;
-        var contextScale = 1;//Environment.view.contextScale;
+        size.width = width;
+        size.height = height;
         var context = ContextPool.getContext(width, height, contextScale);
-        var env = {finalRender: true, pageMatrix:Matrix.Identity, setupContext:()=>{},contextScale:contextScale, offscreen:true};
+        context.clearRect(0,0, context.width, context.height);
+        var env = {finalRender: true,  setupContext:()=>{},contextScale:contextScale, offscreen:true, view:{scale:()=>1, contextScale}};
         var elementsMap = {};
         for (var i = 0; i < renderTasks.length; ++i) {
             var t = renderTasks[i];
@@ -83,17 +86,25 @@ export default class ToolboxConfiguration {
             var w = element.width();
             var h = element.height();
             var scale = t.data.scale;
+            var matrix = Matrix.Identity.clone();
             context.save();
             context.scale(contextScale, contextScale);
-
             context.beginPath();
             context.rect(t.x, t.y, t.data.width, t.data.height);
             context.clip();
 
-            context.translate(t.x + 0 | (t.data.width - w * scale) / 2, t.y + 0 | (t.data.height - h * scale) / 2);
+            env.setupContext=(context) => {
+                context.scale(contextScale, contextScale);
+                env.pageMatrix.applyToContext(context);
+            }
 
-            context.scale(scale, scale);
-            element.drawSelf(context, w, h, env);
+            matrix.translate(t.x + 0 | (t.data.width - w * scale) / 2, t.y + 0 | (t.data.height - h * scale) / 2);
+            matrix.scale(scale, scale);
+            matrix.append(element.viewMatrix().clone().invert());
+            env.pageMatrix = matrix;
+            matrix.applyToContext(context);
+
+            element.draw(context, env);
             context.restore();
 
             elementsMap[element.id()] = {
@@ -106,8 +117,10 @@ export default class ToolboxConfiguration {
             };
         }
 
-        for(var i = elements.length -1 ; i >= 0 ; --i){
-            outConfig.push(elementsMap[elements[i].id()]);
+        if(outConfig) {
+            for (var i = elements.length - 1; i >= 0; --i) {
+                outConfig.push(elementsMap[elements[i].id()]);
+            }
         }
 
         var res =  context.canvas.toDataURL("image/png");
@@ -150,22 +163,32 @@ export default class ToolboxConfiguration {
         var groups = [];
         function makeGroup(group, elements){
             var config = [];
-            var spriteUrl = ToolboxConfiguration.renderElementsToSprite(elements, config);
+            var size ={};
+            var spriteUrl = ToolboxConfiguration.renderElementsToSprite(elements, config, size);
+
+            var spriteUrl2x = ToolboxConfiguration.renderElementsToSprite(elements, null, size, 2);
             var group = {
                 name:group,
                 templates:config
             };
             groups.push(group);
-
-            var deferred = Deferred.create();
+            var d1 = Deferred.create();
+            var d2 = Deferred.create();
 
             FileProxy.uploadPublicImage(spriteUrl)
                 .then((data)=>{
                     group.spriteUrl = data.url;
-                    deferred.resolve();
+                    d1.resolve();
                 });
 
-            return deferred.promise();
+            FileProxy.uploadPublicImage(spriteUrl2x)
+                .then((data)=>{
+                group.spriteUrl2x = data.url;
+                group.size = size;
+                d2.resolve();
+            });
+
+            return Deferred.when(d1, d2);
         }
         var promises = [];
         for(var group in groupedElements) {

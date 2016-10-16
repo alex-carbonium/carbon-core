@@ -533,7 +533,7 @@ klass2("sketch.framework.UIElement", DataNode, {
         var customScale = this.customScale();
 
         var scaleX, scaleY;
-        scaleX = scaleY = Environment.view.scale();
+        scaleX = scaleY = environment.view.scale();
         if (customScale) {
             scaleX = 1 / customScale.x;
         }

@@ -120,19 +120,29 @@ class Artboard extends Container {
         return super.displayName();
     }
 
-    draw(context, environment) {
-
+    _drawShadow(context, environment) {
+        if(environment.offscreen){
+            return;
+        }
         context.save();
         context.fillStyle = "#9EA2a6";
         context.beginPath();
-        var scale = Environment.view.scale() *Environment.view.contextScale;
+        var scale = environment.view.scale() *environment.view.contextScale;
         var s4 = 4/scale;
         context.rect(this.x() + this.width(), this.y()+s4, s4, this.height());
         context.rect(this.x() + s4, this.y()+this.height(), this.width(), s4);
         context.fill();
         context.restore();
+    }
+
+    draw(context, environment) {
+        this._drawShadow(context, environment);
 
         super.draw(context, environment);
+
+        if(environment.offscreen){
+            return;
+        }
 
         if (this._recorder && this._recorder.statesCount() > 1) {
             this._renderStatesFrame(context);

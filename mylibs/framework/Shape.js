@@ -47,7 +47,7 @@ class Shape extends UIElement {
             Brush.stroke(borderBrush, context, 0, 0, w, h);
         } else {
             var clipingRect = this.getBoundingBoxGlobal(false, true);
-            if(!environment.offscreen) {
+            if(true || !environment.offscreen) {
                 var p1 = environment.pageMatrix.transformPoint2(clipingRect.x, clipingRect.y);
                 var p2 = environment.pageMatrix.transformPoint2(clipingRect.x + clipingRect.width, clipingRect.y + clipingRect.height);
                 p1.x = Math.max(0, 0 | p1.x * environment.contextScale);
@@ -71,9 +71,9 @@ class Shape extends UIElement {
             offContext.translate(-p1.x, -p1.y);
             environment.setupContext(offContext);
 
-            if(!environment.offscreen) {
+            // if(!environment.offscreen) {
                 this.globalViewMatrix().applyToContext(offContext);
-            }
+            // }
 
             offContext.beginPath();
             this.drawPath(offContext, w, h);
@@ -87,9 +87,9 @@ class Shape extends UIElement {
             offContext.fillStyle = "black";
             offContext.fill();
 
-            if(!environment.offscreen) {
+            // if(!environment.offscreen) {
                 context.resetTransform();
-            }
+            // }
 
             context.drawImage(offContext.canvas, p1.x, p1.y);
 

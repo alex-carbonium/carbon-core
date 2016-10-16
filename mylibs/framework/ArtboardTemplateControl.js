@@ -23,12 +23,8 @@ export default class ArtboardTemplateControl extends UIElement {
             this.setProps(props);
         }
 
-        if (this._needToClone()) {
-            this._cloneFromArtboard(artboard);
-        }
-        else {
-            this._container = null;
-        }
+        this._cloneFromArtboard(artboard);
+
 
         this._setupCustomProperties(artboard);
 
@@ -73,8 +69,14 @@ export default class ArtboardTemplateControl extends UIElement {
         this.setProps(res);
     }
 
+    updateViewMatrix() {
+        super.updateViewMatrix();
+        this._container && this._container.updateViewMatrix();
+    }
+
     _cloneFromArtboard(artboard) {
         var container = this._container = new Container();
+        container.parent(this);
         container.setProps({
             width: artboard.width(),
             height: artboard.height(),
@@ -95,13 +97,6 @@ export default class ArtboardTemplateControl extends UIElement {
         return this._artboard != null ? 'user:' + this._artboard.name() : super.systemType();
     }
 
-    _needToClone() {
-        return (this._allowHResize && this.width() !== this._artboard.width())
-            || (this._allowVResize && this.height() !== this._artboard.height())
-        || this._artboard.props.customProperties.length
-        || this._artboard._recorder.statesCount() > 1;
-    }
-
     onArtboardChanged() {
         this._initFromArtboard();
     }
@@ -113,11 +108,11 @@ export default class ArtboardTemplateControl extends UIElement {
         if (this._allowHResize && this._allowVResize) {
             return super.resizeDimensions();
         }
-        if(this._allowVResize){
+        if (this._allowVResize) {
             return 1;
         }
 
-        if(this._allowHResize){
+        if (this._allowHResize) {
             return 2;
         }
     }
@@ -127,7 +122,7 @@ export default class ArtboardTemplateControl extends UIElement {
         if (props.source !== undefined) {
             if (props.source.pageId !== oldProps.source.pageId && props.source.artboardId !== oldProps.source.artboardId) {
                 var page = App.Current.getPageById(props.source.pageId);
-                if(page) {
+                if (page) {
                     this._artboard = page.getArtboardById(props.source.artboardId);
                 }
                 delete this.runtimeProps.artboardVersion;
@@ -214,9 +209,6 @@ export default class ArtboardTemplateControl extends UIElement {
         if (this._container) {
             return this._container.getChildren();
         }
-        if (this._artboard) {
-            return this._artboard.getChildren();
-        }
 
         return null;
     }
@@ -224,8 +216,6 @@ export default class ArtboardTemplateControl extends UIElement {
     drawSelf() {
         if (this._container) {
             this._container.drawSelf.apply(this._container, arguments);
-        } else if (this._artboard) {
-            this._artboard.drawSelf.apply(this._artboard, arguments);
         } else {
             super.drawSelf.apply(this, arguments);
         }
@@ -247,7 +237,7 @@ PropertyMetadata.registerForType(ArtboardTemplateControl, {
     source: {
         displayName: "Artboard",
         type: "artboard",
-        defaultValue:{artboardId:null, pageId:null}
+        defaultValue: {artboardId: null, pageId: null}
     },
     stateId: {
         displayName: "State",
@@ -257,13 +247,13 @@ PropertyMetadata.registerForType(ArtboardTemplateControl, {
         defaultValue: Overflow.Clip
     },
     prepareVisibility: function (props, selection, view) {
-        if(selection.elements) {
+        if (selection.elements) {
             var elements = selection.elements;
         } else {
-            elements=[];
+            elements = [];
         }
         return {
-            stateId:((elements.length == 1) && elements[0]._artboard && elements[0]._artboard.props && elements[0]._artboard.props.states && elements[0]._artboard.props.states.length > 1)
+            stateId: ((elements.length == 1) && elements[0]._artboard && elements[0]._artboard.props && elements[0]._artboard.props.states && elements[0]._artboard.props.states.length > 1)
         }
     },
     groups(){
