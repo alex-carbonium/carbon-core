@@ -261,6 +261,7 @@ export function ldexp(mantissa, exponent) {
         : mantissa * Math.pow(2, exponent);
 }
 
+
 export function isControlPolygonFlatEnough(bezierPoints, degree) {
     var findBezierRootsErrorThreshold = ldexp(1, -(findBezierRootsMaximumDepth - 1));
 
@@ -515,4 +516,24 @@ export function tsort(edges) {
     }
 
     return {success: true, sorted: sorted};
+}
+
+export function multiplyVectorConst(point, constant) {
+    return {x: point.x * constant, y: point.y * constant};
+}
+
+
+export function addVectors() {
+    var p = {x: 0, y: 0};
+    for (var i = 0; i < arguments.length; ++i) {
+        p.x += arguments[i].x;
+        p.y += arguments[i].y;
+    }
+
+    return p;
+}
+export function subVectors(p1, p2) {
+    var p = {x: p1.x-p2.x, y: p1.y-p2.y};
+
+    return p;
 }

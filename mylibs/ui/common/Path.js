@@ -9,6 +9,7 @@ import commandManager from "framework/commands/CommandManager";
 import Brush from "framework/Brush";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Matrix from "math/matrix";
+import {multiplyVectorConst, addVectors, subVectors} from "math/math";
 import Shape from "framework/Shape";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
@@ -219,19 +220,19 @@ class Path extends Shape {
         this.save = debounce(this._save.bind(this), 1000);
     }
 
-    _save(){
+    _save() {
         var newPoints = this.points.slice();
         this.props.points = this._lastPoints;
-        this.setProps({points:newPoints});
+        this.setProps({points: newPoints});
         this._lastPoints = this.points;
     }
 
-    get points(){
+    get points() {
         return this.props.points;
     }
 
     set points(value) {
-        this.setProps({points:value});
+        this.setProps({points: value});
     }
 
     controlPointForPosition(pos) {
@@ -420,6 +421,17 @@ class Path extends Shape {
     mouseup() {
         delete this._altPressed;
         var pt = this._currentPoint || this._handlePoint;
+        if(this._bendingData){
+            this._bendingData = null;
+            SnapController.clearActiveSnapLines();
+            this._currentPoint = null;
+            this._handlePoint = null;
+            this.releaseMouse();
+            this.adjustBoundaries();
+            this.invalidate();
+            return;
+        }
+
         if (pt != null) {
             SnapController.clearActiveSnapLines();
             this._currentPoint = null;
@@ -431,6 +443,90 @@ class Path extends Shape {
                 //  commandManager.execute(new ChangePathPointCommand(this, pt, this._originalPoint));
             }
         }
+    }
+
+    bendPoints(newPos, data) {
+        // p2 = (Bc - (Ac + Iij)*p0 - (Ec - Kij)*p3 - Bdtij  ) / DD;
+        var Bc = multiplyVectorConst(newPos, 1 / data.C);
+        var p2 = multiplyVectorConst(
+            addVectors(
+                Bc,
+                multiplyVectorConst(data.p0, -(data.Ac + data.Iij)),
+                multiplyVectorConst(data.p3, -(data.Ec - data.Kij)),
+                multiplyVectorConst(data.Bdtij, -1),
+            ),
+            1 / data.DD
+        );
+
+        // p1 = Bc - Ac*p0 - Dc*p2 -Ec*p3
+        var p1 = addVectors(
+            Bc,
+            multiplyVectorConst(data.p0, -data.Ac),
+            multiplyVectorConst(p2, -data.Dc),
+            multiplyVectorConst(data.p3, -data.Ec)
+        );
+
+        var p0 = clone(this.points[data.idx - 1]);
+        var p3 = clone(this.points[data.idx]);
+
+        p0.cp2x = p1.x;
+        p0.cp2y = p1.y;
+        p3.cp1x = p2.x;
+        p3.cp1y = p2.y;
+        this.changePointAtIndex(p0, data.idx - 1);
+        this.changePointAtIndex(p3, data.idx);
+    }
+
+    calculateOriginalBendingData(point) {
+        var p0 = this.points[point.idx - 1];
+        var p3 = this.points[point.idx];
+        var p1 = {x: p0.cp2x, y: p0.cp2y};
+        var p2 = {x: p3.cp1x, y: p3.cp1y};
+        var t = point.t;
+        var t_2 = t * t;
+        var t_3 = t_2 * t;
+        var tm1 = 1 - t;
+        var tm1_2 = tm1 * tm1;
+        var tm1_3 = tm1_2 * tm1;
+
+        var A = tm1_3;
+        var C = 3 * tm1_2 * t;
+        var D = 3 * tm1 * t_2;
+        var E = t_3;
+
+        var Bt = addVectors(
+            multiplyVectorConst(p0, A),
+            multiplyVectorConst(p1, C),
+            multiplyVectorConst(p2, D),
+            multiplyVectorConst(p3, E)
+        );
+
+        var I = 3 * tm1_2;
+        var J = 6 * tm1 * t;
+        var K = 3 * t_2;
+
+        var Bdt = addVectors(
+            multiplyVectorConst(subVectors(p1, p0), I),
+            multiplyVectorConst(subVectors(p2, p1), J),
+            multiplyVectorConst(subVectors(p3, p2), K)
+        );
+        var IJ = I - J;
+        return {
+            Bt: Bt,
+            C: C,
+            Ac: A / C,
+            Dc: D / C,
+            Ec: E / C,
+            Bdtij: multiplyVectorConst(Bdt, 1 / IJ),
+            Iij: I / IJ,
+            Kij: K / IJ,
+            DD: D / C - (J-K) / IJ ,
+            idx: point.idx,
+            p0: p0,
+            p3: p3
+        };
+        // p2 = (Bc - Ac*p0 - Ec*p3 - Bdtij - Iij*p0 - Kij*p3) / DD;
+        // p1 = Bc - Ac*p0 - Dc*p2 -Ec*p3
     }
 
     mousedown(event) {
@@ -467,6 +563,16 @@ class Path extends Shape {
                 this.captureMouse();
             } else if (this._pointOnPath) {
                 event.handled = true;
+
+                if (event.event.altKey) {
+                    this._bendingData = this.calculateOriginalBendingData(this._pointOnPath);
+                    // set bending handler
+                    this._pointOnPath = null;
+                    this.captureMouse();
+                    return;
+                }
+
+
                 var data = this.getInsertPointData(this._pointOnPath);
                 if (data.length === 1) {
                     var newPoint = this.insertPointAtIndex(data[0], data[0].idx);
@@ -475,7 +581,6 @@ class Path extends Shape {
                     this.changePointAtIndex(data[1], data[1].idx);
                     newPoint = this.insertPointAtIndex(data[2], data[2].idx);
                 }
-                // commandManager.execute(new InsertPathPointCommand(this, this._pointOnPath));
 
                 this._currentPoint = newPoint;
                 this._originalPoint = clone(newPoint);
@@ -492,6 +597,20 @@ class Path extends Shape {
         }
 
         var pos = {x: event.x, y: event.y};
+
+
+        if(this._bendingData){
+            event.handled = true;
+
+            pos = SnapController.applySnappingForPoint(pos);
+
+            pos = this.globalViewMatrixInverted().transformPoint(pos);
+            this._roundPoint(pos);
+
+            this.bendPoints(pos, this._bendingData);
+
+            return;
+        }
 
 
         if (this._currentPoint != null) {
@@ -885,10 +1004,10 @@ class Path extends Shape {
 
         var matrix = this.globalViewMatrix();
 
-        var p1 = matrix.transformPoint2(minx-l, miny-t);
-        var p2 = matrix.transformPoint2(maxx + r, miny-t);
+        var p1 = matrix.transformPoint2(minx - l, miny - t);
+        var p2 = matrix.transformPoint2(maxx + r, miny - t);
         var p3 = matrix.transformPoint2(maxx + r, maxy + b);
-        var p4 = matrix.transformPoint2(minx-l, maxy + b);
+        var p4 = matrix.transformPoint2(minx - l, maxy + b);
 
         var xs = [p1.x, p2.x, p3.x, p4.x];
         var ys = [p1.y, p2.y, p3.y, p4.y];
@@ -954,7 +1073,7 @@ class Path extends Shape {
 
         this._internalChange = true;
         var props = {
-            x:x,
+            x: x,
             y: y,
             width: Math.round(width),
             height: Math.round(height)
@@ -1167,7 +1286,7 @@ class Path extends Shape {
 
         this._currentPoint = null;
         this._handlePoint = null;
-        if (data.props.points&&data.props.points.length) {
+        if (data.props.points && data.props.points.length) {
             this._sourceRect = this.getGlobalBoundingBox();
             this._sourceRect.width = Math.max(this._sourceRect.width, 1);
             this._sourceRect.height = Math.max(this._sourceRect.height, 1);
@@ -1332,8 +1451,8 @@ PropertyMetadata.registerForType(Path, {
         useInModel: false,
         defaultValue: "resize"
     },
-    points:{
-        defaultValue:[]
+    points: {
+        defaultValue: []
     },
     groups () {
         return [

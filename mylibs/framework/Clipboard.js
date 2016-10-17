@@ -36,7 +36,8 @@ class Clipboard {
             this._htmlElement = null;
         }
     }
-    onCopy = (e) => {
+
+    onCopy=(e) => {
         if (e && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")){
             return;
         }
