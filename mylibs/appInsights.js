@@ -5,14 +5,16 @@ var appInsights=window.appInsights||function(config){
     });
 
 if (window.telemetryKey){
-    appInsights.queue.push(function(){
-        appInsights.context.addTelemetryInitializer(function(envelope){
-            var telemetryItem = envelope.data.baseData;
-            telemetryItem.properties = telemetryItem.properties || {};
-            telemetryItem.properties.appBuild = window.appBuild;
+    if (appInsights.queue){ //happens if appinsights is somehow initialized twice
+        appInsights.queue.push(function(){
+            appInsights.context.addTelemetryInitializer(function(envelope){
+                var telemetryItem = envelope.data.baseData;
+                telemetryItem.properties = telemetryItem.properties || {};
+                telemetryItem.properties.appBuild = window.appBuild;
+            });
         });
-    });
-    appInsights.trackPageView();
+        appInsights.trackPageView();
+    }
 
     if (window.telemetryKey){
         window.appInsights=appInsights;
