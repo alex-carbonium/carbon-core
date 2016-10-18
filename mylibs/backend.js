@@ -33,13 +33,13 @@ var backend = {
     raiseLoginNeeded: function(){
         this.loginNeeded.raise(this.isGuest());
     },
-    init: function(logger, endpoints, options){
+    init: function(logger, endpoints){
         this.servicesEndpoint = endpoints.services;
         this.storageEndpoint = endpoints.storage;
         this.cdnEndpoint = endpoints.cdn;
         this.fileEndpoint = endpoints.file;
 
-        this._globalOptions = Object.assign({}, globalOptions, options);
+        this._globalOptions = Object.assign({}, globalOptions);
         this.logger = logger;
 
         Log.logger = logger;
@@ -62,6 +62,9 @@ var backend = {
         this._userManager.events.addSilentRenewError(e => {
             logger.error("Token renew error", e);
         });
+    },
+    initOptions: function(options){
+        this._globalOptions = Object.assign({}, this._globalOptions, options);
     },
     setConnection: function(connection){
         this._connection = connection;

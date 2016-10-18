@@ -144,7 +144,7 @@ module.exports = function(settings){
         output        : getOutput(settings),
         resolve       : getResolve(settings),
         resolveLoader : {
-            root  : fullPath("node_modules")            
+            root  : fullPath("../node_modules")
         },
         amd: {jQuery: true},
         module: {
