@@ -352,6 +352,7 @@ define(function () {
                     pn.x = p1.x + u*dx;
                     pn.y = p1.y + u*dy;
                 }
+                pn.t = u;
             }
             return distanceSq(pn, pa);
         },
