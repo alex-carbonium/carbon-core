@@ -519,6 +519,7 @@ define(function (require) {
             // });
 
             this.registerAction("editText", "Edit text", "Edit", function () {
+
             }, "");
 
             this.actionPerformed.bind(this, checkConditions);

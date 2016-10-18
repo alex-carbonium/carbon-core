@@ -86,7 +86,7 @@ var getClickedPoint = function (x, y) {
 var getClickedHandlePoint = function (x, y) {
     var pos = this.globalViewMatrixInverted().transformPoint2(x, y);
 
-    var zoom = Environment.view.scale();
+    var zoom = Environment.view.scale() * Environment.view.contextScale;
     var sx = 1,
         sy = 1;
     if (this._sourceRect) {
@@ -217,7 +217,7 @@ class Path extends Shape {
         this.points = [];
         this._lastPoints = [];
         this._currentPoint = null;
-        this.save = debounce(this._save.bind(this), 1000);
+        this.save = debounce(this._save.bind(this), 500);
     }
 
     _save() {
@@ -243,6 +243,20 @@ class Path extends Shape {
         return this.points[idx];
     }
 
+    set nextPoint(value){
+        if(value != this._nextPoint){
+            Invalidate.requestUpperOnly();
+        }
+        this._nextPoint = value;
+        if(this._nextPoint){
+            this._initPoint(value);
+        }
+    }
+
+    get nextPoint(){
+        return this._nextPoint;
+    }
+
     removeControlPoint(pt) {
         for (var i = 0; i < this.points.length; ++i) {
             if (this.points[i] === pt) {
@@ -252,17 +266,40 @@ class Path extends Shape {
         }
     }
 
-    _roundPoint(pt) {
+    _roundvalue(value) {
         if (this.props.pointRounding === 0) {
-            pt.x = (0 | pt.x * 100) / 100;
-            pt.y = (0 | pt.y * 100) / 100;
+            value = (0 | value * 100) / 100;
         } else if (this.props.pointRounding === 1) {
-            pt.x = (0 | pt.x * 2 + .5) / 2;
-            pt.y = (0 | pt.y * 2 + .5) / 2;
+            value = (0 | value * 2 + .5) / 2;
         } else {
-            pt.x = Math.round(pt.x);
-            pt.y = Math.round(pt.y);
+            value = Math.round(value);
         }
+
+        return value;
+    }
+
+    _roundPoint(pt) {
+        var x,y;
+        if (this.props.pointRounding === 0) {
+            x = (0 | pt.x * 100) / 100;
+            y = (0 | pt.y * 100) / 100;
+        } else if (this.props.pointRounding === 1) {
+            x = (0 | pt.x * 2 + .5) / 2;
+            y = (0 | pt.y * 2 + .5) / 2;
+        } else {
+            x = Math.round(pt.x);
+            y = Math.round(pt.y);
+        }
+        if(pt.type != PointType.Straight && pt.type !== undefined) {
+            var dx = pt.x - x;
+            var dy = pt.y - y;
+            pt.cp1x -= dx;
+            pt.cp2x -= dx;
+            pt.cp1y -= dy;
+            pt.cp2y -= dy;
+        }
+        pt.x = x;
+        pt.y = y;
     }
 
     indexOfPoint(pt) {
@@ -339,6 +376,7 @@ class Path extends Shape {
                 point.type = PointType.Assymetric;
             }
         }
+
     }
 
     addPoint(point) {
@@ -399,12 +437,16 @@ class Path extends Shape {
         }
     }
 
+    edit(){
+        this.mode("edit");
+        this._internalChange = true;
+        Selection.refreshSelection();
+        this._internalChange = false;
+    }
+
     dblclick(event) {
         if (this.mode() !== "edit") {
-            this.mode("edit");
-            this._internalChange = true;
-            Selection.refreshSelection();
-            this._internalChange = false;
+            this.edit();
         } else {
             var pt = getClickedPoint.call(this, event.x, event.y);
             if (pt) {
@@ -420,8 +462,8 @@ class Path extends Shape {
 
     mouseup() {
         delete this._altPressed;
-        var pt = this._currentPoint || this._handlePoint;
-        if(this._bendingData){
+
+        if (this._bendingData) {
             this._bendingData = null;
             SnapController.clearActiveSnapLines();
             this._currentPoint = null;
@@ -432,6 +474,7 @@ class Path extends Shape {
             return;
         }
 
+        var pt = this._currentPoint || this._handlePoint;
         if (pt != null) {
             SnapController.clearActiveSnapLines();
             this._currentPoint = null;
@@ -466,19 +509,25 @@ class Path extends Shape {
             multiplyVectorConst(data.p3, -data.Ec)
         );
 
-        var p0 = clone(this.points[data.idx - 1]);
+        var len = this.length();
+        var p1idx = (data.idx - 1 + len) % len;
+        var p0 = clone(this.points[p1idx]);
         var p3 = clone(this.points[data.idx]);
 
         p0.cp2x = p1.x;
         p0.cp2y = p1.y;
         p3.cp1x = p2.x;
         p3.cp1y = p2.y;
-        this.changePointAtIndex(p0, data.idx - 1);
+        p0.type = PointType.Disconnected;
+        p3.type = PointType.Disconnected;
+        this.changePointAtIndex(p0, p1idx);
         this.changePointAtIndex(p3, data.idx);
     }
 
     calculateOriginalBendingData(point) {
-        var p0 = this.points[point.idx - 1];
+        var len = this.length();
+        var p1idx = (point.idx - 1 + len) % len;
+        var p0 = this.points[p1idx];
         var p3 = this.points[point.idx];
         var p1 = {x: p0.cp2x, y: p0.cp2y};
         var p2 = {x: p3.cp1x, y: p3.cp1y};
@@ -520,7 +569,7 @@ class Path extends Shape {
             Bdtij: multiplyVectorConst(Bdt, 1 / IJ),
             Iij: I / IJ,
             Kij: K / IJ,
-            DD: D / C - (J-K) / IJ ,
+            DD: D / C - (J - K) / IJ,
             idx: point.idx,
             p0: p0,
             p3: p3
@@ -564,7 +613,7 @@ class Path extends Shape {
             } else if (this._pointOnPath) {
                 event.handled = true;
 
-                if (event.event.altKey) {
+                if (!event.event.altKey) {
                     this._bendingData = this.calculateOriginalBendingData(this._pointOnPath);
                     // set bending handler
                     this._pointOnPath = null;
@@ -599,16 +648,14 @@ class Path extends Shape {
         var pos = {x: event.x, y: event.y};
 
 
-        if(this._bendingData){
+        if (this._bendingData) {
             event.handled = true;
 
             pos = SnapController.applySnappingForPoint(pos);
-
             pos = this.globalViewMatrixInverted().transformPoint(pos);
-            this._roundPoint(pos);
-
             this.bendPoints(pos, this._bendingData);
 
+            Invalidate.request();
             return;
         }
 
@@ -617,6 +664,7 @@ class Path extends Shape {
             pos = SnapController.applySnappingForPoint(pos);
 
             pos = this.globalViewMatrixInverted().transformPoint(pos);
+
             this._roundPoint(pos);
 
             var newX = pos.x
@@ -632,6 +680,8 @@ class Path extends Shape {
                 this._currentPoint.cp2x -= dx;
                 this._currentPoint.cp2y -= dy;
 
+                // this._roundPoint(this._currentPoint);
+
 
                 this.setProps({currentPointX: newX, currentPointY: newY});
 
@@ -641,7 +691,7 @@ class Path extends Shape {
         } else if (this._handlePoint != null) {
             pos = SnapController.applySnappingForPoint(pos);
             pos = this.globalViewMatrixInverted().transformPoint(pos);
-            this._roundPoint(pos);
+            // this._roundPoint(pos);
             var pt = this._handlePoint;
             var newX = pos.x,
                 newY = pos.y;
@@ -740,7 +790,7 @@ class Path extends Shape {
         return this.props.closed;
     }
 
-    prepareProps(changes) {
+    prepareProps(changes){
         if (changes.width !== undefined && changes.width < 1) {
             changes.width = 1;
         }
@@ -748,29 +798,24 @@ class Path extends Shape {
         if (changes.height !== undefined && changes.height < 1) {
             changes.height = 1;
         }
+
+        if (changes.currentPointX !== undefined && this._currentPoint) {
+            changes.currentPointX = this._roundvalue(changes.currentPointX);
+        }
+
+        if (changes.currentPointY !== undefined && this._currentPoint) {
+            changes.currentPointY = this._roundvalue(changes.currentPointY);
+        }
+
+        if (changes.pointRounding) {
+            moveAllPoints.call(this, 0, 0);
+        }
     }
 
     propsUpdated(props, oldProps) {
         if (props.currentPointType !== undefined && this._selectedPoint) {
             this._selectedPoint.type = props.currentPointType;
             Invalidate.request();
-        }
-        var doRound = false;
-        if (props.currentPointX !== undefined && this._currentPoint) {
-            this._currentPoint.x = props.currentPointX;
-            doRound = true;
-        }
-        if (props.currentPointY !== undefined && this._currentPoint) {
-            this._currentPoint.y = props.currentPointY;
-            doRound = true;
-        }
-
-        if (doRound) {
-            this._roundPoint(this._currentPoint);
-        }
-
-        if (props.pointRounding) {
-            moveAllPoints.call(this, 0, 0);
         }
 
         UIElement.prototype.propsUpdated.apply(this, arguments);
@@ -847,6 +892,9 @@ class Path extends Shape {
             }
 
             this.drawPath(context, w, h);
+            if(this.nextPoint && this.points.length && !this.closed()){
+                drawSegment.call(this, context, this.nextPoint, this.points[this.points.length-1], sx, sy);
+            }
             context.stroke();
 
             var needClearStyle = true;
@@ -1169,7 +1217,7 @@ class Path extends Shape {
         pos.y /= sy;
         var resPt = null;
         var prevPt = this.points[0];
-        dist = (dist || 4) / Environment.view.scale();
+        dist = (dist || 4) / Environment.view.scale() * Environment.view.contextScale;
 
         function checkDistance(pt, prevPt, idx) {
             if (isLinePoint(pt) && isLinePoint(prevPt)) {
@@ -1245,7 +1293,7 @@ class Path extends Shape {
             return 'move_handle';
         }
 
-        if (this._pointOnPath) {
+        if (this._pointOnPath && event.event.altKey) {
             return "add_point";
         }
 

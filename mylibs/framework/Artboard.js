@@ -307,7 +307,8 @@ class Artboard extends Container {
             this._refreshMetadata();
         }
 
-        if(props.showInToolbox !== undefined){
+        if(props.showInToolbox !== undefined && Selection.isOnlyElementSelected(this)){
+
             Selection.refreshSelection();
         }
     }
@@ -675,17 +676,17 @@ PropertyMetadata.registerForType(Artboard, {
         defaultValue: []
     },
     tileSize: {
-        displayName: "Tile size",
+        displayName: "@tilesize",
         type: "tileSize",
         defaultValue:TileSize.Small
     },
     insertAsContent: {
-        displayName: "Insert as content",
+        displayName: "@ascontent",
         type:'checkbox',
         defaultValue:false
     },
     toolboxGroup: {
-        displayName: "Group name",
+        displayName: "@groupname",
         type:'text',
         defaultValue:'Custom'
     },
