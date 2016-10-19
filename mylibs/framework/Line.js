@@ -4,6 +4,8 @@ import Path from "ui/common/Path";
 import {PointDirection} from "framework/Defs";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
+import Selection from "framework/SelectionModel";
+import SnapController from "framework/SnapController";
 
 var fwk = sketch.framework;
 
@@ -34,10 +36,18 @@ var LinePoint = {
         frame.resizingElement = resizingElement;
         frame.globalViewMatrix = frame.element.globalViewMatrix();
 
+        var container = frame.element.primitiveRoot();
+        if (!container && frame.element instanceof SelectComposite) {
+            container = frame.element.first().primitiveRoot();
+        }
+
+        SnapController.calculateSnappingPoints(container);
+
         Environment.view.layer3.add(resizingElement);
     },
     release (frame) {
         var e = frame.resizingElement;
+        SnapController.clearActiveSnapLines();
         if (e) {
             var minX = Math.min(e.x1(), e.x2());
             var maxX = Math.max(e.x1(), e.x2());
@@ -73,6 +83,7 @@ var LinePoint = {
 
             Environment.view.layer3.remove(e);
             e.dispose();
+            Selection.refreshSelection();
         }
     },
     rotateCursorPointer (index, angle) {
@@ -81,6 +92,16 @@ var LinePoint = {
     change (frame, dx, dy, point, event) {
         if (!frame.resizingElement) {
             return;
+        }
+
+        var oldx = event.x;
+        var oldy = event.y;
+        if ((event.event.ctrlKey || event.event.metaKey)) {
+            var newPoint = event;
+        } else {
+            newPoint = SnapController.applySnappingForPoint(event, frame.element.getSnapPoints());
+            dx += newPoint.x - oldx;
+            dy += newPoint.y - oldy;
         }
 
         point.x += dx;

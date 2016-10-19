@@ -75,10 +75,10 @@ export default {
 
             if (Math.abs(dx) > Math.abs(dy)) {
                 newHeight = newWidth / originalRatio;
-                dy = (newHeight - original.height) / point.rv[1];
+                dy = (newHeight - original.height) / (point.rv[1] || 1);
             } else {
                 newWidth = newHeight * originalRatio;
-                dx = (newWidth - original.width) / point.rv[0];
+                dx = (newWidth - original.width) / (point.rv[0] || 1);
             }
         }
 
@@ -94,8 +94,8 @@ export default {
 
         if (event.event.altKey) {
             var newOrigin = origin;
-            newWidth = newWidth + point.rv[0] * dx;
-            newHeight = newHeight + point.rv[1] * dy;
+           // newWidth = newWidth + point.rv[0] * dx;
+            //newHeight = newHeight + point.rv[1] * dy;
         } else {
             newOrigin = sketch.math2d.rotatePoint({
                 x: origin.x + dx / 2,

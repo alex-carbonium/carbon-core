@@ -6,6 +6,7 @@ import AllCommands from "commands/AllCommands";
 import SystemConfiguration from "SystemConfiguration";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
+import SnapController from "framework/SnapController";
 
 
 export default klass(EditModeAction, (function () {
@@ -38,9 +39,21 @@ export default klass(EditModeAction, (function () {
             this._attachMode = "select";
             this._detachMode = "resize";
         },
+        detach(){
+            EditModeAction.prototype.detach.apply(this, arguments);
+            SnapController.clearActiveSnapLines();
+        },
         mousedown: function (event) {
             this._mousepressed = true;
-            this._startPoint = {x: event.x, y: event.y};
+
+            if (event.event.ctrlKey || event.event.metaKey) {
+                var pos = event;
+            }
+            else {
+                pos = SnapController.applySnappingForPoint(event);
+            }
+
+            this._startPoint = {x: pos.x, y: pos.y};
             event.handled = true;
             this._element = new Line();
             var defaultSettings = App.Current.defaultShapeSettings();
@@ -76,9 +89,24 @@ export default klass(EditModeAction, (function () {
             }
         },
         mousemove: function (event) {
+            var artboard = App.Current.activePage.getArtboardAtPoint(event);
+            if (artboard != this._hoverArtboard) {
+                this._hoverArtboard = artboard;
+                if (artboard) {
+                    SnapController.calculateSnappingPoints(artboard);
+                }
+            }
+
+            if (event.event.ctrlKey || event.event.metaKey) {
+                var pos = event;
+            }
+            else {
+                pos = SnapController.applySnappingForPoint(event);
+            }
+
             if (this._mousepressed) {
-                var x = event.x,
-                    y = event.y;
+                var x = pos.x,
+                    y = pos.y;
                 if (event.event.shiftKey) {
                     var point = angleAdjuster.adjust(this._startPoint, {x: x, y: y});
                     x = point.x;
