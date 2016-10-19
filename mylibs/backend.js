@@ -1,8 +1,9 @@
 import {createUUID} from "./util";
 import EventHelper from "./framework/EventHelper";
 import Promise from "bluebird";
-import UserManager from "oidc-client/src/UserManager"
-import Log from "oidc-client/src/Log"
+import UserManager from "oidc-client/src/UserManager";
+import Log from "oidc-client/src/Log";
+import globals from "./globals";
 
 var contentTypes = {
     json: 0,
@@ -25,7 +26,7 @@ var globalOptions = {
     }
 };
 
-var backend = {
+var backend = globals.backend || {
     _globalOptions: globalOptions,
     sessionId: createUUID(),
     loginNeeded: EventHelper.createEvent(),
@@ -34,6 +35,10 @@ var backend = {
         this.loginNeeded.raise(this.isGuest());
     },
     init: function(logger, endpoints){
+        if (this._ready){
+            return;
+        }
+
         this.servicesEndpoint = endpoints.services;
         this.storageEndpoint = endpoints.storage;
         this.cdnEndpoint = endpoints.cdn;
@@ -62,6 +67,7 @@ var backend = {
         this._userManager.events.addSilentRenewError(e => {
             logger.error("Token renew error", e);
         });
+        this._ready = true;
     },
     initOptions: function(options){
         this._globalOptions = Object.assign({}, this._globalOptions, options);
@@ -358,4 +364,5 @@ function handleServerError(data){
     }
 }
 
+globals.backend = backend;
 export default backend;
