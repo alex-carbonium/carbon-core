@@ -34,6 +34,7 @@ var completePath = function () {
         else {
             commandManager.execute(new RemovePathPointCommand(this._element, this._element.pointAtIndex(0)));
         }
+        this._element.nextPoint = null;
         this._element = null;
     }
     this._currentPoint = null;

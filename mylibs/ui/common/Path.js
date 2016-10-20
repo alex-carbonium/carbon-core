@@ -6,6 +6,7 @@ import ResizeDimension from "framework/ResizeDimension";
 import InsertPathPointCommand from "commands/path/InsertPathPointCommand";
 import ChangePathPointCommand from "commands/path/ChangePathPointCommand";
 import commandManager from "framework/commands/CommandManager";
+import actionManager from "ui/ActionManager";
 import Brush from "framework/Brush";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Matrix from "math/matrix";
@@ -17,6 +18,7 @@ import Environment from "environment";
 import SnapController from "framework/SnapController";
 import Box from "framework/Box";
 import {debounce} from "../../util";
+import Command from "framework/commands/Command";
 
 var CP_HANDLE_RADIUS = 3;
 var CP_HANDLE_RADIUS2 = 6;
@@ -54,6 +56,22 @@ function updateSelectedPoint(pt) {
         Selection.refreshSelection();
         this._internalChange = false;
     }
+}
+
+function addToSelectedPoints(pt) {
+    if (this._selectedPoint && !Object.keys(this._selectedPoints).length) {
+        this._selectedPoints[this._selectedPoint.idx] = this._selectedPoint;
+    }
+    if (this._selectedPoints[pt.idx]) {
+        delete this._selectedPoints[pt.idx];
+    } else {
+        this._selectedPoints[pt.idx] = pt;
+    }
+    Invalidate.requestUpperOnly();
+}
+
+function clearSelectedPoints() {
+    this._selectedPoints = {};
 }
 
 var isLinePoint = function (pt) {
@@ -211,13 +229,71 @@ function moveAllPoints(dx, dy) {
     }
 }
 
+
+function moveCurrentPoint(dx, dy){
+    var keys = Object.keys(this._selectedPoints);
+    if(keys.length){
+        for(var i = 0; i < keys.length; ++i){
+            var p = this._selectedPoints[keys[i]];
+            p.x -= dx;
+            p.y -= dy;
+            p.cp1x -= dx;
+            p.cp1y -= dy;
+            p.cp2x -= dx;
+            p.cp2y -= dy;
+        }
+        this._groupMove = true;
+    } else {
+        this._currentPoint.x -= dx;
+        this._currentPoint.y -= dy;
+        this._currentPoint.cp1x -= dx;
+        this._currentPoint.cp1y -= dy;
+        this._currentPoint.cp2x -= dx;
+        this._currentPoint.cp2y -= dy;
+        this.setProps({currentPointX: this._currentPoint.x, currentPointY: this._currentPoint.y});
+    }
+}
+
+class DeleteCurrentPoints extends Command {
+    constructor(path) {
+        super();
+        this.path = path;
+    }
+
+    transparent() {
+        return true;
+    }
+
+    execute() {
+        var keys = Object.keys(this.path._selectedPoints).map(k=>k-0).sort((a,b)=>b-a);
+        if (keys.length) {
+            for (var i = 0; i < keys.length; ++i) {
+                this.path.removePointAtIndex(keys[i]);
+            }
+            clearSelectedPoints.call(this.path);
+        } else {
+            this.path.removePointAtIndex(this.path._selectedPoint.idx);
+        }
+
+        updateSelectedPoint.call(this.path, null);
+    }
+}
+
 class Path extends Shape {
     constructor() {
         super();
         this.points = [];
         this._lastPoints = [];
         this._currentPoint = null;
+        this._selectedPoints = {};
         this.save = debounce(this._save.bind(this), 500);
+    }
+
+    constructDeleteCommand() {
+        if (this._selectedPoint && this.points.length > 2) {
+            return new DeleteCurrentPoints(this);
+        }
+        return super.constructDeleteCommand();
     }
 
     _save() {
@@ -243,17 +319,17 @@ class Path extends Shape {
         return this.points[idx];
     }
 
-    set nextPoint(value){
-        if(value != this._nextPoint){
+    set nextPoint(value) {
+        if (value != this._nextPoint) {
             Invalidate.requestUpperOnly();
         }
         this._nextPoint = value;
-        if(this._nextPoint){
+        if (this._nextPoint) {
             this._initPoint(value);
         }
     }
 
-    get nextPoint(){
+    get nextPoint() {
         return this._nextPoint;
     }
 
@@ -264,6 +340,12 @@ class Path extends Shape {
                 return;
             }
         }
+    }
+
+    getMaxOuterBorder(){
+        var res = super.getMaxOuterBorder();
+
+        return res * 4;
     }
 
     _roundvalue(value) {
@@ -279,7 +361,7 @@ class Path extends Shape {
     }
 
     _roundPoint(pt) {
-        var x,y;
+        var x, y;
         if (this.props.pointRounding === 0) {
             x = (0 | pt.x * 100) / 100;
             y = (0 | pt.y * 100) / 100;
@@ -290,7 +372,7 @@ class Path extends Shape {
             x = Math.round(pt.x);
             y = Math.round(pt.y);
         }
-        if(pt.type != PointType.Straight && pt.type !== undefined) {
+        if (pt.type != PointType.Straight && pt.type !== undefined) {
             var dx = pt.x - x;
             var dy = pt.y - y;
             pt.cp1x -= dx;
@@ -341,7 +423,17 @@ class Path extends Shape {
         return this.props.mode;
     }
 
+    cancel(){
+        this.mode("resize");
+        this._internalChange = true;
+        Selection.refreshSelection();
+        this._internalChange = false;
+    }
+
     switchToEditMode(edit) {
+        if(this._cancelBinding){
+            this._cancelBinding.dispose();
+        }
         if (edit) {
             this._currentPoint = null;
             if (this._sourceRect) {
@@ -350,8 +442,11 @@ class Path extends Shape {
                 this.captureMouse();
             }
             SnapController.calculateSnappingPointsForPath(this);
+
+            this._cancelBinding = actionManager.subscribe('cancel', this.cancel.bind(this));
         } else {
             this.releaseMouse();
+            this._cancelBinding = null;
         }
     }
 
@@ -437,7 +532,7 @@ class Path extends Shape {
         }
     }
 
-    edit(){
+    edit() {
         this.mode("edit");
         this._internalChange = true;
         Selection.refreshSelection();
@@ -460,7 +555,7 @@ class Path extends Shape {
         }
     }
 
-    mouseup() {
+    mouseup(event) {
         delete this._altPressed;
 
         if (this._bendingData) {
@@ -472,6 +567,10 @@ class Path extends Shape {
             this.adjustBoundaries();
             this.invalidate();
             return;
+        }
+
+        if (this._selectedPoint && !event.event.shiftKey && !this._groupMove) {
+            clearSelectedPoints.call(this);
         }
 
         var pt = this._currentPoint || this._handlePoint;
@@ -582,11 +681,19 @@ class Path extends Shape {
         var x = event.x,
             y = event.y;
 
+        this._groupMove = false;
+
         if (this.mode() !== "edit") {
             return;
         }
 
         var pt = getClickedPoint.call(this, x, y);
+
+        if (pt && event.event.shiftKey) {
+            addToSelectedPoints.call(this, pt);
+        } else if(!pt || !this._selectedPoints[pt.idx]) {
+            clearSelectedPoints.call(this);
+        }
 
         updateSelectedPoint.call(this, pt);
 
@@ -672,18 +779,7 @@ class Path extends Shape {
                 , dx = this._currentPoint.x - newX
                 , dy = this._currentPoint.y - newY;
             if (dx || dy) {
-                this._currentPoint.x = newX;
-                this._currentPoint.y = newY;
-
-                this._currentPoint.cp1x -= dx;
-                this._currentPoint.cp1y -= dy;
-                this._currentPoint.cp2x -= dx;
-                this._currentPoint.cp2y -= dy;
-
-                // this._roundPoint(this._currentPoint);
-
-
-                this.setProps({currentPointX: newX, currentPointY: newY});
+                moveCurrentPoint.call(this, dx, dy);
 
                 Invalidate.request();
             }
@@ -790,7 +886,7 @@ class Path extends Shape {
         return this.props.closed;
     }
 
-    prepareProps(changes){
+    prepareProps(changes) {
         if (changes.width !== undefined && changes.width < 1) {
             changes.width = 1;
         }
@@ -892,8 +988,8 @@ class Path extends Shape {
             }
 
             this.drawPath(context, w, h);
-            if(this.nextPoint && this.points.length && !this.closed()){
-                drawSegment.call(this, context, this.nextPoint, this.points[this.points.length-1], sx, sy);
+            if (this.nextPoint && this.points.length && !this.closed()) {
+                drawSegment.call(this, context, this.nextPoint, this.points[this.points.length - 1], sx, sy);
             }
             context.stroke();
 
@@ -947,7 +1043,7 @@ class Path extends Shape {
 
                     clearStyle();
                 }
-                if (pt === hoverPoint || pt === this._selectedPoint) {
+                if (pt === hoverPoint || pt === this._selectedPoint || this._selectedPoints[pt.idx]) {
                     context.fillStyle = POINT_STROKE;
                     needClearStyle = true;
                 }
@@ -1432,7 +1528,7 @@ class Path extends Shape {
 PropertyMetadata.registerForType(Path, {
     closed: {
         defaultValue: false,
-        type: "onOff",
+        type: "checkbox",
         useInModel: true,
         editable: true,
         displayName: "Closed"
@@ -1505,7 +1601,7 @@ PropertyMetadata.registerForType(Path, {
     groups () {
         return [
             {
-                label: "",
+                label: "@selectedPoint",
                 properties: ["currentPointX", "currentPointY", "currentPointType"]
             },
             {
@@ -1520,7 +1616,7 @@ PropertyMetadata.registerForType(Path, {
             },
             {
                 label: "Settings",
-                properties: ["pointRounding"],
+                properties: ["pointRounding", "closed"],
                 expanded: true
             }
         ];

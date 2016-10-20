@@ -128,7 +128,7 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
             },
             _renderMaskedElements: function (context, mask, i, items, environment) {
 
-                if (environment.finalRender) {
+                if (environment.finalRender || !mask.drawPath) {
                     var clipingRect = mask.getBoundingBoxGlobal(false, true);
                     var p1 = environment.pageMatrix.transformPoint2(clipingRect.x, clipingRect.y);
                     var p2 = environment.pageMatrix.transformPoint2(clipingRect.x + clipingRect.width, clipingRect.y + clipingRect.height);
@@ -161,10 +161,14 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
 
                     offContext.beginPath();
                     mask.viewMatrix().applyToContext(offContext);
-                    mask.drawPath(offContext, mask.width(), mask.height());
                     offContext.globalCompositeOperation = "destination-in";
-                    offContext.fillStyle = "black";
-                    offContext.fill2();
+                    if(mask.drawPath) {
+                        mask.drawPath(offContext, mask.width(), mask.height());
+                        offContext.fillStyle = "black";
+                        offContext.fill2();
+                    } else {
+                        mask.drawSelf(offContext, mask.width(), mask.height(), environment);
+                    }
 
                     offContext.restore();
 

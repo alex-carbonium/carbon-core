@@ -2,7 +2,7 @@ import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 
 define([ "math/matrix", "framework/Deferred"], function (Matrix, Deferred) {
-    var fwk = sketch.framework, platform = sketch.platform, ui = sketch.ui;
+    var fwk = sketch.framework, platform = sketch.platform;
     var viewId = "#viewContainer";
 
     var elementCanvas;
@@ -13,7 +13,7 @@ define([ "math/matrix", "framework/Deferred"], function (Matrix, Deferred) {
         return elementCanvas;
     }
 
-    return klass2("sketch.platform.All", null, (function () {
+    return klass2("PlatformAll", null, (function () {
         var dialog = null;
 
         /**
@@ -69,8 +69,6 @@ define([ "math/matrix", "framework/Deferred"], function (Matrix, Deferred) {
             }
         };
 
-
-
         var registerUIActions = function(app){
             app.actionManager.registerAction("focusToolboxSearch", "Focus on toolbox search", "Focus", function(){
                 var model = ko.dataFor($(".toolboxSearchDiv .search-input")[0]);
@@ -79,14 +77,6 @@ define([ "math/matrix", "framework/Deferred"], function (Matrix, Deferred) {
                 }
             });
         };
-
-        //var onViewContainerScrolled = function(e){
-        //    if(this._scale != this.view.scale()){
-        //        return;
-        //    }
-        //    this.view.scrollY(e.target.scrollTop, true);
-        //    this.view.scrollX(e.target.scrollLeft, true);
-        //};
 
         function findFirstSharedPage(app){
             return null;
@@ -106,23 +96,15 @@ define([ "math/matrix", "framework/Deferred"], function (Matrix, Deferred) {
             _constructor:function () {
                 this._lastPageState = {};
                 this.onresized = fwk.EventHelper.createEvent();
-                //this._scrollHandler = EventHandler(this, onViewContainerScrolled).closure();
 
                 //scrollbars are never larger than 18x18, does it matter that this is always hardcoded?
                 this._scrollbarSize = {width: 18, height: 18};
-
-                //this._contextReady = fwk.Deferred.create();
             },
             run:function (/*App*/app) {
                 this.app = app;
-                var that = this;
 
                 this.setupFullScreenApi();
                 this.createCanvas();
-
-                //this.viewManagertoken = fwk.pubSub.subscribe("switchViewMode", function(){
-                //    that.switchViewMode();
-                //});
 
                 this.platformSpecificRunCode();
 
