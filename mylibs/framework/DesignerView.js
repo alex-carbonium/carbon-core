@@ -5,6 +5,7 @@ import ViewBase from "framework/ViewBase";
 import SelectionModel from "./SelectionModel";
 import Cursor from "framework/Cursor";
 import Invalidate from "framework/Invalidate";
+import PixelGrid from "framework/render/PixelGrid"
 
 function setupLayers(Layer) {
     this.layer3 = new Layer(this);
@@ -26,6 +27,9 @@ class DesignerView extends ViewBase {
             color: Brush.createFromColor("red")
         });
         this.guideFontString = Font.cssString(this.guideFont);
+
+        this.pixelGrid = new PixelGrid(this);
+        this.showPixelGrid(true);
     }
 
     setup(deps) {
@@ -57,7 +61,23 @@ class DesignerView extends ViewBase {
             this._invalidateRequestedToken.dispose();
             this._invalidateRequestedToken = null;
         }
+    }
 
+    draw(){
+        super.draw.apply(this, arguments);
+        if(this.showPixelGrid()) {
+            this.pixelGrid.updateGrid();
+        }
+    }
+
+    showPixelGrid(value) {
+        if (value !== undefined) {
+            if(this._pixelGrid !== value && !value){
+                this.pixelGrid.clear();
+            }
+            this._pixelGrid = value;
+        }
+        return this._pixelGrid;
     }
 
     focus() {

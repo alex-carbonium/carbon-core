@@ -134,10 +134,8 @@ export default class ViewBase {
 
         var matrix = new Matrix();
 
-        var dx = 0 | this.scrollX() / scale;
-        dx = this.scrollX() - dx * scale;
-        var dy = 0 | this.scrollY() / scale;
-        dy = this.scrollY() - dy * scale;
+        var dx = this.scrollX() % scale;
+        var dy = this.scrollY() % scale;
         matrix.translate(-(0 | (this.scrollX()) / scale), -(0 | (this.scrollY()) / scale));
 
         var pageMatrix = this._page.pageMatrix;
@@ -152,7 +150,7 @@ export default class ViewBase {
         this.context.resetTransform();
         this.context.clearRect(0, 0, vw, vh);
         this.context.imageSmoothingEnabled = false;
-        this.context.translate(-dx, -dy);
+        this.context.translate(-dx * this.contextScale, -dy * this.contextScale);
         this.context.drawImage(context.canvas, 0, 0, sw, sh, 0, 0, vw, vh);
         this.context.restore();
         context.restore();
