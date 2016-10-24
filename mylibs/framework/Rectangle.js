@@ -16,7 +16,7 @@ const PointSize = 4;
 const PointOffset = 10;
 
 function getOffsetForPoint(w, h, scale, value) {
-    var d = ((!value)?PointOffset:0) / scale;
+    var d = ((!value) ? PointOffset : 0) / scale;
     var rx = (w - d) / 2;
     var ry = (h - d) / 2;
 
@@ -89,7 +89,7 @@ var LineDirectionPoint = {
         var p1 = {x: rect.width * rv[0], y: rect.height * rv[2]};
 
         var dw = 0, dh = 0;
-        if(w2 > h2){
+        if (w2 > h2) {
             dw = h2 - w2;
         } else {
             dh = w2 - h2;
@@ -116,12 +116,12 @@ var LineDirectionPoint = {
         }
 
         var maxRadius = Math.min(w2, h2);
-        var newRadius = 0|parameter * maxRadius;
+        var newRadius = 0 | parameter * maxRadius;
 
         var r = clone(frame.resizingElement._clone.cornerRadius());
         r.locked = !event.event.altKey;
 
-        if(!r.locked) {
+        if (!r.locked) {
             r[point.prop] = newRadius;
         } else {
             r.upperLeft = newRadius;
@@ -147,7 +147,7 @@ class Rectangle extends Shape {
             , y2 = y1 + this.height()
             , cr = this.cornerRadius();
 
-        var mr = Math.min(this.width()/2, this.height()/2);
+        var mr = Math.min(this.width() / 2, this.height() / 2);
 
         if (cr.upperLeft === 0) {
             path.addPoint({x: x1, y: y1});
@@ -183,7 +183,7 @@ class Rectangle extends Shape {
         path.styleId(this.styleId());
 
         path.adjustBoundaries();
-        path.setProps({x:this.x(), y:this.y(), angle:this.angle()});
+        path.setProps({x: this.x(), y: this.y(), angle: this.angle()});
 
         return path;
     }
@@ -243,7 +243,12 @@ class Rectangle extends Shape {
         var borderBrush = this.borderBrush();
 
         this.drawPath(context, w, h);
-        Brush.fill(this.backgroundBrush(), context, 0, 0, w, h);
+        if (w < 2 || h < 2) {
+            // if the shape is too small we should not use fill brush, since borders are overlap anyway
+            Brush.fill(borderBrush, context, 0, 0, w, h);
+        } else {
+            Brush.fill(this.backgroundBrush(), context, 0, 0, w, h);
+        }
 
         if (!borderBrush || !borderBrush.type || !borderBrush.strokePosition) {
             Brush.stroke(borderBrush, context, 0, 0, w, h);
@@ -269,10 +274,10 @@ class Rectangle extends Shape {
         var r1 = cornerRadius.upperLeft;
 
         if (!cornerRadius.locked || r1) {
-            var mr = Math.min(w/2, h/2);
-            var r2 = cornerRadius.locked?r1:cornerRadius.upperRight,
-                r3 = cornerRadius.locked?r1:cornerRadius.bottomLeft,
-                r4 = cornerRadius.locked?r1:cornerRadius.bottomRight;
+            var mr = Math.min(w / 2, h / 2);
+            var r2 = cornerRadius.locked ? r1 : cornerRadius.upperRight,
+                r3 = cornerRadius.locked ? r1 : cornerRadius.bottomLeft,
+                r4 = cornerRadius.locked ? r1 : cornerRadius.bottomRight;
             context.roundedRectDifferentRadiusesPath(0, 0, w, h,
                 Math.min(mr, r1),
                 Math.min(mr, r2),

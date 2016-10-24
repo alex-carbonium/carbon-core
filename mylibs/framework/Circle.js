@@ -124,7 +124,13 @@ class Circle extends Shape {
         this.drawPath(context, w, h);
         
         var borderBrush = this.borderBrush();
-        Brush.fill(this.backgroundBrush(), context, 0, 0, w, h);
+
+        if (w < 2 || h < 2) {
+            // if the shape is too small we should not use fill brush, since borders are overlap anyway
+            Brush.fill(borderBrush, context, 0, 0, w, h);
+        } else {
+            Brush.fill(this.backgroundBrush(), context, 0, 0, w, h);
+        }
 
         if (!borderBrush || !borderBrush.type || !borderBrush.strokePosition) {
             Brush.stroke(borderBrush, context, 0, 0, w, h);

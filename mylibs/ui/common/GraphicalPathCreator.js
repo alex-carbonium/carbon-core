@@ -1,5 +1,5 @@
 import EditModeAction from "ui/common/EditModeAction";
-import AngleAdjuster from "math/AngleAdjuster";
+import angleAdjuster from "math/AngleAdjuster";
 import RemovePathPointCommand from "commands/path/RemovePathPointCommand";
 import InsertPathPointCommand from "commands/path/InsertPathPointCommand";
 import AddPathPointCommand from "commands/path/AddPathPointCommand";
@@ -14,7 +14,6 @@ import Invalidate from "framework/Invalidate";
 import SnapController from "framework/SnapController";
 
 
-var angleAdjuster = new AngleAdjuster(15);
 var closeCurrentPath = function (pt) {
     commandManager.execute(this._element.constructPropsChangedCommand({closed: true}, {closed: false}));
     this._element.closed(true);

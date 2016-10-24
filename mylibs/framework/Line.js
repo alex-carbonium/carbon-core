@@ -6,6 +6,7 @@ import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import Selection from "framework/SelectionModel";
 import SnapController from "framework/SnapController";
+import angleAdjuster from "math/AngleAdjuster";
 
 var fwk = sketch.framework;
 
@@ -94,12 +95,23 @@ var LinePoint = {
             return;
         }
 
-        var oldx = event.x;
-        var oldy = event.y;
+        var oldx = event.x + 0.5 | 0;
+        var oldy = event.y + 0.5 | 0;
         if ((event.event.ctrlKey || event.event.metaKey)) {
-            var newPoint = event;
-        } else {
-            newPoint = SnapController.applySnappingForPoint(event, frame.element.getSnapPoints());
+            var newPoint = {x: oldx, y: oldy};
+        } else if (event.event.shiftKey) {
+            var p;
+            if (point.p === 1) {
+                p = {x: frame.element.x() + frame.element.x2(), y: frame.element.y() + frame.element.y2()};
+            } else {
+                p = {x: frame.element.x() + frame.element.x1(), y: frame.element.y() + frame.element.y1()};
+            }
+            newPoint = angleAdjuster.adjust(p, {x: oldx, y: oldy});
+            dx += newPoint.x - oldx;
+            dy += newPoint.y - oldy;
+        }
+        else {
+            newPoint = SnapController.applySnappingForPoint({x: oldx, y: oldy}, frame.element.getSnapPoints());
             dx += newPoint.x - oldx;
             dy += newPoint.y - oldy;
         }
@@ -193,14 +205,26 @@ class Line extends Shape {
             y1 = this.y1(),
             x2 = this.x2(),
             y2 = this.y2();
-        if (x1 == x2) {
-            x1 += .5;
-            x2 += .5;
+
+        var stroke = this.borderBrush();
+        if (stroke) {
+            var dw = stroke.lineWidth / 2;
+            var vx = x2 - x1;
+            var vy = y2 - y1;
+
+            var d = Math.sqrt(vx * vx + vy * vy);
+            vx = vx / d * dw;
+            vy = vy / d * dw;
+            var t = vx;
+            vx = vy;
+            vy = -t;
+
+            x1 += vx;
+            x2 += vx;
+            y1 += vy;
+            y2 += vy;
         }
-        if (y1 == y2) {
-            y1 += .5;
-            y2 += .5;
-        }
+
         context.linePath(x1, y1, x2, y2);
     }
 
@@ -213,7 +237,7 @@ class Line extends Shape {
         }
 
         this.drawPath(context, w, h);
-        
+
         Brush.fill(this.backgroundBrush(), context, 0, 0, w, h);
         Brush.stroke(this.borderBrush(), context, 0, 0, w, h);
 
@@ -294,9 +318,10 @@ class Line extends Shape {
                     x: 0,
                     y: 0,
                     cursor: 10,
+                    p: 1,
                     update (p, x, y) {
-                        p.x = x + that.x1();
-                        p.y = y + that.y1();
+                        p.x = x + that.x1() + 0.5 | 0;
+                        p.y = y + that.y1() + 0.5 | 0;
                     },
                     updateElement (e, dx, dy) {
                         e.x1(e.x1() + dx);
@@ -308,10 +333,11 @@ class Line extends Shape {
                     moveDirection: PointDirection.Any,
                     x: 0,
                     y: 0,
+                    p: 2,
                     cursor: 10,
                     update (p, x, y) {
-                        p.x = x + that.x2();
-                        p.y = y + that.y2();
+                        p.x = x + that.x2() + 0.5 | 0;
+                        p.y = y + that.y2() + 0.5 | 0;
                     },
                     updateElement (e, dx, dy) {
                         e.x2(e.x2() + dx);
@@ -337,7 +363,7 @@ fwk.PropertyMetadata.registerForType(Line, {
         displayName: "start y",
         defaultValue: 0,
         useInModel: true
-    } ,
+    },
     x2: {
         displayName: "end x",
         defaultValue: 0,

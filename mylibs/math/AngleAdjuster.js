@@ -1,10 +1,10 @@
 define(function() {
 
-    var AngleAndjuster = function(angleStep) {
+    var AngleAdjuster = function(angleStep) {
         this.angleStep = angleStep;
     };
 
-    AngleAndjuster.prototype.getAngle = function(startPoint, endPoint){
+    AngleAdjuster.prototype.getAngle = function(startPoint, endPoint){
         var dx = endPoint.x - startPoint.x;
         var dy = -(endPoint.y - startPoint.y);
 
@@ -25,7 +25,7 @@ define(function() {
         return inDegrees;
     };
 
-    AngleAndjuster.prototype.getLineByAngle = function(angle, startPoint, endPoint){
+    AngleAdjuster.prototype.getLineByAngle = function(angle, startPoint, endPoint){
         var angle2 = angle * Math.PI/180;
         var newX =  endPoint.x - startPoint.x;
         var newY =  endPoint.y - startPoint.y;
@@ -35,7 +35,7 @@ define(function() {
         return {x:x, y:y};
     };
 
-    AngleAndjuster.prototype.adjust = function(startPoint, endPoint) {
+    AngleAdjuster.prototype.adjust = function(startPoint, endPoint) {
         var angle = this.getAngle.call(this, startPoint, endPoint);
         var floor = Math.floor(angle/this.angleStep);
         if ( angle%this.angleStep > this.angleStep/2 ) {
@@ -52,5 +52,5 @@ define(function() {
         return angle * (Math.PI/180);
     }
 
-    return AngleAndjuster;
+    return new AngleAdjuster(15);
 });

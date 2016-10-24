@@ -1,5 +1,5 @@
 import EditModeAction from "ui/common/EditModeAction";
-import AngleAdjuster from "math/AngleAdjuster";
+import angleAdjuster from "math/AngleAdjuster";
 import commandManager from "framework/commands/CommandManager";
 import Line from "framework/Line";
 import AllCommands from "commands/AllCommands";
@@ -11,7 +11,6 @@ import SnapController from "framework/SnapController";
 
 export default klass(EditModeAction, (function () {
     var angleStep = 15;
-    var angleAdjuster = new AngleAdjuster(15);
 
     function resize(x1, y1, x2, y2) {
         var left = Math.min(x1, x2);
@@ -105,8 +104,8 @@ export default klass(EditModeAction, (function () {
             }
 
             if (this._mousepressed) {
-                var x = pos.x,
-                    y = pos.y;
+                var x = pos.x + 0.5 | 0,
+                    y = pos.y + 0.5 | 0;
                 if (event.event.shiftKey) {
                     var point = angleAdjuster.adjust(this._startPoint, {x: x, y: y});
                     x = point.x;
