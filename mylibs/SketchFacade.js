@@ -138,5 +138,6 @@ module.exports = {
     "StoryAction": require("./stories/StoryAction"),
     "StoryType": Defs.StoryType,
 
-    "Invalidate": require("./framework/Invalidate")
+    "Invalidate": require("./framework/Invalidate"),
+    "NameProvider": require("./ui/NameProvider")
 };

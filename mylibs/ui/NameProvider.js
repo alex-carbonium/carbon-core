@@ -8,4 +8,8 @@ export default class NameProvider {
     nextName(type) {
 
     }
+
+    assignNewName(element){
+
+    }
 }

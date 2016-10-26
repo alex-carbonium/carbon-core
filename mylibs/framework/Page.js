@@ -7,6 +7,7 @@ import Selection from "framework/SelectionModel";
 import PropertyMetadata from "framework/PropertyMetadata";
 import ContextPool from "framework/render/ContextPool";
 import Environment from "environment";
+import NameProvider from "ui/NameProvider";
 
 var fwk = sketch.framework;
 
@@ -69,6 +70,14 @@ class Page extends Layer {
         this.onDeactivated = fwk.EventHelper.createEvent();
 
         this._initialized = false;
+    }
+
+    get nameProvider(){
+        if(!this._nameProvider){
+            this._nameProvider = new NameProvider(this);
+        }
+
+        return this._nameProvider;
     }
 
     getElementsInRect(rect) {
