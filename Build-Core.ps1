@@ -21,6 +21,8 @@ try
         $params += "--noUglify"
     }            
     & npm $params
+
+    Remove-Item .\target\*.map
 }
 finally
 {
