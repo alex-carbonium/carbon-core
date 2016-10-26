@@ -17,7 +17,7 @@ define(["projects/Project"], function (Project) {
                             background:fwk.Brush.White
                         },
                         icon:{
-                            borderWidth:3,
+                            strokeWidth:3,
                             circleBrush:fwk.Brush.createFromColor("#686868")
                         }
                     },

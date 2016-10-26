@@ -1,15 +1,14 @@
-define(["framework/Container", "framework/DockArrangeStrategy", "framework/PropertyMetadata"], function(Container, DockArrangeStrategy, PropertyMetadata){
-    PropertyMetadata.extend("sketch.framework.Container", {
-               "sketch.ui.common.DockPanel": {
+import Container from "../../framework/Container";
+import PropertyMetadata from "../../framework/PropertyMetadata";
+import {ArrangeStrategies, Types} from "../../framework/Defs";
 
-               }
-           });
+export default class DockPanel extends Container {
 
+}
+DockPanel.prototype.t = Types.DockPanel;
 
-    //obsolete, use fwk.Container.CreateDock()
-    return klass2('sketch.ui.common.DockPanel', Container, {
-        _constructor: function(){
-            this.arrangeStrategy(new DockArrangeStrategy(this));
-        }
-    });
+PropertyMetadata.registerForType(DockPanel, {
+    arrangeStrategy: {
+        defaultValue: ArrangeStrategies.Dock
+    }
 });

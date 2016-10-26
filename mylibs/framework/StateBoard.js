@@ -1,6 +1,7 @@
 import Artboard from "./Artboard";
 import PropertyMetadata from "framework/PropertyMetadata";
 import ModelStateListener from "framework/sync/ModelStateListener";
+import {Types} from "./Defs";
 
 class StateBoard extends Artboard {
 
@@ -137,6 +138,7 @@ class StateBoard extends Artboard {
         this._transfering = false;
     }
 }
+StateBoard.prototype.t = Types.StateBoard;
 
 
 PropertyMetadata.registerForType(StateBoard, {
@@ -145,7 +147,7 @@ PropertyMetadata.registerForType(StateBoard, {
             {
                 label: "Appearance",
                 expanded: false,
-                properties: ["visible", "backgroundBrush"]
+                properties: ["visible", "fill"]
             },
             {
                 label: "Layout",

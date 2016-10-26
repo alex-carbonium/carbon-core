@@ -1,6 +1,7 @@
 import UIElement from "framework/UIElement";
 import Environment from "environment";
 import SnapController from "framework/SnapController";
+import {Types} from "../framework/Defs";
 
 var debug = require("DebugUtil")("carb:resizeFramePoint");
 
@@ -20,7 +21,7 @@ export default {
         context.stroke();
     },
     capture: function (frame) {
-        var resizingElement = UIElement.construct('DraggingElement', frame.element, false, true);
+        var resizingElement = UIElement.construct(Types.DraggingElement, frame.element, false, true);
         frame.resizingElement = resizingElement;
         frame.originalRect = frame.element.getBoundaryRectGlobal();
         frame.rotationOrigin = frame.element.rotationOrigin(true);

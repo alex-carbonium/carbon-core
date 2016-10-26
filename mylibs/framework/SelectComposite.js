@@ -1,6 +1,8 @@
 import DefaultFrameType from "decorators/DefaultFrameType";
 import CompositeElement from "./CompositeElement";
 import Environment from "environment";
+import PropertyMetadata from "./PropertyMetadata";
+import {Types} from "./Defs";
 
 define(["decorators/ActiveFrame", "framework/ResizeDimension"], function (ActiveFrame, ResizeDimension) {
     var fwk = sketch.framework;
@@ -126,7 +128,9 @@ define(["decorators/ActiveFrame", "framework/ResizeDimension"], function (Active
         }
     });
 
-    fwk.PropertyMetadata.registerForType(SelectComposite, {});
+    SelectComposite.prototype.t = Types.SelectComposite;
+
+    PropertyMetadata.registerForType(SelectComposite, {});
 
     return SelectComposite;
 });

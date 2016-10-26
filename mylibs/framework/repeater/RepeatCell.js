@@ -1,7 +1,7 @@
 import Container from "../Container";
 import PropertyMetadata from "../PropertyMetadata";
 import Brush from "../Brush";
-import {Overflow} from "../Defs";
+import {Overflow, Types} from "../Defs";
 
 export default class RepeatCell extends Container{
     displayType(){
@@ -14,11 +14,12 @@ export default class RepeatCell extends Container{
         return null;
     }
 }
+RepeatCell.prototype.t = Types.RepeatCell;
 
 RepeatCell.prototype._angleEditable = false;
 
 PropertyMetadata.registerForType(RepeatCell, {
-    // backgroundBrush: {
+    // fill: {
     //     defaultValue: Brush.createFromColor("lightgreen")
     // },
     trackChildren: {

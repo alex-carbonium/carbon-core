@@ -4,29 +4,29 @@
 //     var fwk = sketch.framework;
 //     var cellCommonMethods = {
 //         initProperties: function(){
-//             this.properties.borderBrush.editable(false);
-//             this.properties.borderWidth.editable(false);
-//             this.properties.createProperty("topBorderBrush", "Top border color", fwk.Brush.Black).ofType(fwk.PropertyTypes.stroke);
-//             this.properties.createProperty("bottomBorderBrush", "Bottom border color", fwk.Brush.Black).ofType(fwk.PropertyTypes.stroke);
-//             this.properties.createProperty("leftBorderBrush", "Left border color", fwk.Brush.Black).ofType(fwk.PropertyTypes.stroke);
-//             this.properties.createProperty("rightBorderBrush", "Right border color", fwk.Brush.Black).ofType(fwk.PropertyTypes.stroke);
-//             this.properties.createProperty("topBorderWidth", "Top border width", 1).ofType(fwk.PropertyTypes.spinner);
-//             this.properties.createProperty("bottomBorderWidth", "Bottom border width", 1).ofType(fwk.PropertyTypes.spinner);
-//             this.properties.createProperty("leftBorderWidth", "Left border width", 1).ofType(fwk.PropertyTypes.spinner);
-//             this.properties.createProperty("rightBorderWidth", "Right border width", 1).ofType(fwk.PropertyTypes.spinner);
+//             this.properties.stroke.editable(false);
+//             this.properties.strokeWidth.editable(false);
+//             this.properties.createProperty("topstroke", "Top border color", fwk.Brush.Black).ofType(fwk.PropertyTypes.stroke);
+//             this.properties.createProperty("bottomstroke", "Bottom border color", fwk.Brush.Black).ofType(fwk.PropertyTypes.stroke);
+//             this.properties.createProperty("leftstroke", "Left border color", fwk.Brush.Black).ofType(fwk.PropertyTypes.stroke);
+//             this.properties.createProperty("rightstroke", "Right border color", fwk.Brush.Black).ofType(fwk.PropertyTypes.stroke);
+//             this.properties.createProperty("topstrokeWidth", "Top border width", 1).ofType(fwk.PropertyTypes.spinner);
+//             this.properties.createProperty("bottomstrokeWidth", "Bottom border width", 1).ofType(fwk.PropertyTypes.spinner);
+//             this.properties.createProperty("leftstrokeWidth", "Left border width", 1).ofType(fwk.PropertyTypes.spinner);
+//             this.properties.createProperty("rightstrokeWidth", "Right border width", 1).ofType(fwk.PropertyTypes.spinner);
 //         },
 //
 //         getStyle:function(){
 //             var data = {};
-//             this.properties.topBorderBrush.toJSON(true, data, '');
-//             this.properties.bottomBorderBrush.toJSON(true, data, '');
-//             this.properties.leftBorderBrush.toJSON(true, data, '');
-//             this.properties.rightBorderBrush.toJSON(true, data, '');
-//             this.properties.topBorderWidth.toJSON(true, data, '');
-//             this.properties.bottomBorderWidth.toJSON(true, data, '');
-//             this.properties.leftBorderWidth.toJSON(true, data, '');
-//             this.properties.rightBorderWidth.toJSON(true, data, '');
-//             this.properties.backgroundBrush.toJSON(true, data, '');
+//             this.properties.topstroke.toJSON(true, data, '');
+//             this.properties.bottomstroke.toJSON(true, data, '');
+//             this.properties.leftstroke.toJSON(true, data, '');
+//             this.properties.rightstroke.toJSON(true, data, '');
+//             this.properties.topstrokeWidth.toJSON(true, data, '');
+//             this.properties.bottomstrokeWidth.toJSON(true, data, '');
+//             this.properties.leftstrokeWidth.toJSON(true, data, '');
+//             this.properties.rightstrokeWidth.toJSON(true, data, '');
+//             this.properties.fill.toJSON(true, data, '');
 //             this.properties.opacity.toJSON(true, data, '');
 //
 //             return data;
@@ -37,96 +37,96 @@
 //         propertiesChanged:function(events){
 //             var that = this;
 //             each(events, function(event) {
-//                 if(event.property === 'topBorderWidth') {
+//                 if(event.property === 'topstrokeWidth') {
 //                     var table = that.parent();
 //                     if(that.row() !== 0) {
 //                         var relatedCell =  table.cell(that.row()-1, that.column());
 //                         relatedCell.unbindPropertyChanged();
-//                         relatedCell.bottomBorderWidth(event.newValue);
+//                         relatedCell.bottomstrokeWidth(event.newValue);
 //                         relatedCell.bindPropertyChanged();
 //                     }
-//                 } else if(event.property === 'bottomBorderWidth') {
+//                 } else if(event.property === 'bottomstrokeWidth') {
 //                     var table = that.parent();
 //                     if(that.row() !== table.rowsCount() - 1) {
 //                         var relatedCell =  table.cell(that.row()+1, that.column());
 //                         relatedCell.unbindPropertyChanged();
-//                         relatedCell.topBorderWidth(event.newValue);
+//                         relatedCell.topstrokeWidth(event.newValue);
 //                         relatedCell.bindPropertyChanged();
 //                     }
-//                 } else if(event.property === 'topBorderBrush') {
+//                 } else if(event.property === 'topstroke') {
 //                     var table = that.parent();
 //                     if(that.row() !== 0) {
 //                         var relatedCell =  table.cell(that.row()-1, that.column());
 //                         relatedCell.unbindPropertyChanged();
-//                         relatedCell.bottomBorderBrush(event.newValue);
+//                         relatedCell.bottomstroke(event.newValue);
 //                         relatedCell.bindPropertyChanged();
 //                     }
-//                 } else if(event.property === 'bottomBorderBrush') {
+//                 } else if(event.property === 'bottomstroke') {
 //                     var table = that.parent();
 //                     if(that.row() !== table.rowsCount() - 1) {
 //                         var relatedCell =  table.cell(that.row()+1, that.column());
 //                         relatedCell.unbindPropertyChanged();
-//                         relatedCell.topBorderBrush(event.newValue);
+//                         relatedCell.topstroke(event.newValue);
 //                         relatedCell.bindPropertyChanged();
 //                     }
-//                 } else if(event.property === 'leftBorderWidth') {
+//                 } else if(event.property === 'leftstrokeWidth') {
 //                     var table = that.parent();
 //                     if(that.column() !== 0) {
 //                         var relatedCell =  table.cell(that.row(), that.column() - 1);
 //                         relatedCell.unbindPropertyChanged();
-//                         relatedCell.rightBorderWidth(event.newValue);
+//                         relatedCell.rightstrokeWidth(event.newValue);
 //                         relatedCell.bindPropertyChanged();
 //                     }
-//                 } else if(event.property === 'rightBorderWidth') {
+//                 } else if(event.property === 'rightstrokeWidth') {
 //                     var table = that.parent();
 //                     if(that.column() !== table.columnsCount() - 1) {
 //                         var relatedCell =  table.cell(that.row(), that.column() + 1);
 //                         relatedCell.unbindPropertyChanged();
-//                         relatedCell.leftBorderWidth(event.newValue);
+//                         relatedCell.leftstrokeWidth(event.newValue);
 //                         relatedCell.bindPropertyChanged();
 //                     }
-//                 } else if(event.property === 'leftBorderBrush') {
+//                 } else if(event.property === 'leftstroke') {
 //                     var table = that.parent();
 //                     if(that.column() !== 0) {
 //                         var relatedCell =  table.cell(that.row(), that.column() - 1);
 //                         relatedCell.unbindPropertyChanged();
-//                         relatedCell.rightBorderBrush(event.newValue);
+//                         relatedCell.rightstroke(event.newValue);
 //                         relatedCell.bindPropertyChanged();
 //                     }
-//                 } else if(event.property === 'rightBorderBrush') {
+//                 } else if(event.property === 'rightstroke') {
 //                     var table = that.parent();
 //                     if(that.column() !== table.columnsCount() - 1) {
 //                         var relatedCell =  table.cell(that.row(), that.column() + 1);
 //                         relatedCell.unbindPropertyChanged();
-//                         relatedCell.leftBorderBrush(event.newValue);
+//                         relatedCell.leftstroke(event.newValue);
 //                         relatedCell.bindPropertyChanged();
 //                     }
 //                 }
 //             });
 //         },
-//         topBorderBrush:function(value) {
-//             return this.properties.topBorderBrush.value(value);
+//         topstroke:function(value) {
+//             return this.properties.topstroke.value(value);
 //         },
-//         bottomBorderBrush:function(value) {
-//             return this.properties.bottomBorderBrush.value(value);
+//         bottomstroke:function(value) {
+//             return this.properties.bottomstroke.value(value);
 //         },
-//         leftBorderBrush:function(value) {
-//             return this.properties.leftBorderBrush.value(value);
+//         leftstroke:function(value) {
+//             return this.properties.leftstroke.value(value);
 //         },
-//         rightBorderBrush:function(value) {
-//             return this.properties.rightBorderBrush.value(value);
+//         rightstroke:function(value) {
+//             return this.properties.rightstroke.value(value);
 //         },
-//         topBorderWidth:function(value) {
-//             return this.properties.topBorderWidth.value(value);
+//         topstrokeWidth:function(value) {
+//             return this.properties.topstrokeWidth.value(value);
 //         },
-//         bottomBorderWidth:function(value) {
-//             return this.properties.bottomBorderWidth.value(value);
+//         bottomstrokeWidth:function(value) {
+//             return this.properties.bottomstrokeWidth.value(value);
 //         },
-//         leftBorderWidth:function(value) {
-//             return this.properties.leftBorderWidth.value(value);
+//         leftstrokeWidth:function(value) {
+//             return this.properties.leftstrokeWidth.value(value);
 //         },
-//         rightBorderWidth:function(value) {
-//             return this.properties.rightBorderWidth.value(value);
+//         rightstrokeWidth:function(value) {
+//             return this.properties.rightstrokeWidth.value(value);
 //         },
 //         column : function (/*Number*/value) {
 //             return this.field("_column", value, 0);

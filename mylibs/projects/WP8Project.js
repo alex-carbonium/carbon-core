@@ -62,7 +62,7 @@ define(["projects/Project"], function(Project){
                             '&font':{size:29}
                         },
                         icon:{
-                            borderWidth:3,
+                            strokeWidth:3,
                             circleBrush:fwk.Brush.createFromColor("#686868")
                         }
                     },

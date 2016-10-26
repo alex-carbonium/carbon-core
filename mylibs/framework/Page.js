@@ -1,14 +1,12 @@
 import Layer from "./Layer";
 import Matrix from "math/matrix";
-import {ChangeMode} from "./Defs";
-import ModelStateListener from "framework/sync/ModelStateListener";
+import {ChangeMode, Types} from "./Defs";
 import {areRectsIntersecting} from "math/math";
 import Selection from "framework/SelectionModel";
 import PropertyMetadata from "framework/PropertyMetadata";
 import ContextPool from "framework/render/ContextPool";
-import Environment from "environment";
-
-var fwk = sketch.framework;
+import EventHelper from "./EventHelper";
+import Brush from "./Brush";
 
 function getElementsInFrameHit(element, rect, scale) {
     if (!element.canSelect() || element.locked()) {
@@ -65,8 +63,8 @@ class Page extends Layer {
 
         this.nativeElements = [];
 
-        this.onActivated = fwk.EventHelper.createEvent();
-        this.onDeactivated = fwk.EventHelper.createEvent();
+        this.onActivated = EventHelper.createEvent();
+        this.onDeactivated = EventHelper.createEvent();
 
         this._initialized = false;
     }
@@ -328,7 +326,7 @@ class Page extends Layer {
         });
 
         var selectedElement = Selection.selectedElement();
-        if (!container && selectedElement && selectedElement.__type__ === element.__type__) {
+        if (!container && selectedElement && selectedElement.t === element.t) {
             container = selectedElement.parent();
         }
 
@@ -587,16 +585,16 @@ class Page extends Layer {
 
         //setTimeout(function(){
         //    var p1 = sketch.ui.common.Path.rectangle(50, 50, 300, 200);
-        //    p1.borderBrush(fwk.Brush.createFromColor("blue"));
+        //    p1.stroke(fwk.Brush.createFromColor("blue"));
         //    this.add(p1);
         //
         //    var p2 = sketch.ui.common.Path.circleAtPoint({x:355, y:240}, 125);
-        //    p2.borderBrush(fwk.Brush.createFromColor("red"));
+        //    p2.stroke(fwk.Brush.createFromColor("red"));
         //    this.add(p2);
         //
         //
         //    var newPath = sketch.ui.common.Path.xor(p1, p2);
-        //    newPath.backgroundBrush(fwk.Brush.createFromColor("green"));
+        //    newPath.fill(fwk.Brush.createFromColor("green"));
         //    this.add(newPath);
         //}.bind(this), 500);
     }
@@ -771,7 +769,7 @@ class Page extends Layer {
 
 
 }
-
+Page.prototype.t = Types.Page;
 
 PropertyMetadata.registerForType(Page, {
     width: {
@@ -813,7 +811,7 @@ PropertyMetadata.registerForType(Page, {
     // },
     background: {
         displayName: "Background",
-        defaultValue: fwk.Brush.Empty,
+        defaultValue: Brush.Empty,
         type: "fill"
     },
     isDeleted: {
@@ -823,7 +821,4 @@ PropertyMetadata.registerForType(Page, {
     }
 });
 
-
-fwk.Page = Page;
-
-export default fwk.Page;
+export default Page;

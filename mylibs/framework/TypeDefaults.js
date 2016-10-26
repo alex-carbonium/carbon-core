@@ -1,3 +1,1 @@
-define( function () {
-    return {};
-});
+export default {};

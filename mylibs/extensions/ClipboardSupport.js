@@ -40,12 +40,12 @@ define(["framework/commands/CommandManager", "server/ContentProxy", "projects/Me
             for (var i = 0, l = elements.length; i < l; ++i){
                 var e = elements[i];
                 e.applyVisitor(function(c){
-                    if (c instanceof fwk.TemplatedElement){
-                        var template = c.getTemplate();
-                        if (!template.system() && !templates[template.templateId()]){
-                            templates[template.templateId()] = template;
-                        }
-                    }
+                    // if (c instanceof fwk.TemplatedElement){
+                    //     var template = c.getTemplate();
+                    //     if (!template.system() && !templates[template.templateId()]){
+                    //         templates[template.templateId()] = template;
+                    //     }
+                    // }
                 });
             }
             var result = [];

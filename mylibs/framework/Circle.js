@@ -1,10 +1,9 @@
 ﻿import Shape from "framework/Shape";
 import Brush from "framework/Brush";
-import StrokePosition from "framework/StrokePosition";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Path from "ui/common/Path";
 import * as math from "math/math";
-
+import {Types, StrokePosition} from "./Defs";
 
 class Circle extends Shape {
     hitTest (/*Point*/point, scale) {
@@ -15,7 +14,7 @@ class Circle extends Shape {
         var matrix = this.globalViewMatrixInverted();
         point = matrix.transformPoint(point);
 
-        if (this.backgroundBrush() && this.backgroundBrush().type) {
+        if (this.fill() && this.fill().type) {
             let rect = this.getHitTestBox(scale);
             return math.isPointInEllipse(rect, point);
         }
@@ -24,15 +23,15 @@ class Circle extends Shape {
 
         var innerRect, outerRect;
 
-        var borderBrush = this.borderBrush();
-        if (borderBrush.strokePosition === 0) {
-            outerRect = math.adjustRectSize(rect, borderBrush.lineWidth / 2 + 1);
-            innerRect = math.adjustRectSize(rect, -(borderBrush.lineWidth / 2 + 1));
-        } else if (borderBrush.strokePosition === 1) {
+        var stroke = this.stroke();
+        if (stroke.position === 0) {
+            outerRect = math.adjustRectSize(rect, stroke.lineWidth / 2 + 1);
+            innerRect = math.adjustRectSize(rect, -(stroke.lineWidth / 2 + 1));
+        } else if (stroke.position === 1) {
             outerRect = math.adjustRectSize(rect, 1);
-            innerRect = math.adjustRectSize(rect, -(borderBrush.lineWidth + 1));
+            innerRect = math.adjustRectSize(rect, -(stroke.lineWidth + 1));
         } else {
-            outerRect = math.adjustRectSize(rect, borderBrush.lineWidth + 1);
+            outerRect = math.adjustRectSize(rect, stroke.lineWidth + 1);
             innerRect = math.adjustRectSize(rect, -1);
         }
 
@@ -87,9 +86,9 @@ class Circle extends Shape {
         });
         path.addPoint({x: x1, y: y1 + h2, type: 2, cp2x: x1, cp2y: y1 + h2 - dy, cp1x: x1, cp1y: y1 + h2 + dy});
         path.closed(true);
-        // path.borderWidth(this.borderWidth());
-        path.backgroundBrush(this.backgroundBrush());
-        path.borderBrush(this.borderBrush());
+        // path.strokeWidth(this.strokeWidth());
+        path.fill(this.fill());
+        path.stroke(this.stroke());
         path.styleId(this.styleId());
 
         path.adjustBoundaries();
@@ -123,33 +122,34 @@ class Circle extends Shape {
 
         this.drawPath(context, w, h);
         
-        var borderBrush = this.borderBrush();
+        var stroke = this.stroke();
 
         if (w < 2 || h < 2) {
             // if the shape is too small we should not use fill brush, since borders are overlap anyway
-            Brush.fill(borderBrush, context, 0, 0, w, h);
+            Brush.fill(stroke, context, 0, 0, w, h);
         } else {
-            Brush.fill(this.backgroundBrush(), context, 0, 0, w, h);
+            Brush.fill(this.fill(), context, 0, 0, w, h);
         }
 
-        if (!borderBrush || !borderBrush.type || !borderBrush.strokePosition) {
-            Brush.stroke(borderBrush, context, 0, 0, w, h);
+        if (!stroke || !stroke.type || !stroke.position) {
+            Brush.stroke(stroke, context, 0, 0, w, h);
         } else {
             context.beginPath();
-            var lw = borderBrush.lineWidth;
+            var lw = stroke.lineWidth;
             var db = lw / 2;
-            if (borderBrush.strokePosition === StrokePosition.Outside) {
+            if (stroke.position === StrokePosition.Outside) {
                 lw = -lw;
                 db = -db;
             }
             context.translate(db, db);
             this.drawPath(context, w - lw, h - lw);
-            Brush.stroke(borderBrush, context, 0, 0, w - lw, h - lw);
+            Brush.stroke(stroke, context, 0, 0, w - lw, h - lw);
         }
 
         context.restore();
     }
 }
+Circle.prototype.t = Types.Circle;
 
 PropertyMetadata.registerForType(Circle, {
 });
@@ -175,9 +175,6 @@ Circle.fromSvgElement = function (element, options) {
     }
     if (parsedAttributes.stroke) {
         circle.strokeBrush(Brush.createFromColor(parsedAttributes.stroke));
-    }
-    if (parsedAttributes.strokeWidth) {
-        circle.strokeWidth(parsedAttributes.strokeWidth);
     }
     if (parsedAttributes.left) {
         circle.x(parsedAttributes.left);

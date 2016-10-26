@@ -1,5 +1,5 @@
-
 import PropertyMetadata from "framework/PropertyMetadata";
+import {Types} from "./Defs";
 
 define(function () {
     // fwk.PropertyMetadata.extend("sketch.framework.Page", {
@@ -135,6 +135,7 @@ define(function () {
         }
     })());
 
+NullPage.prototype.t = Types.NullPage;
 
 PropertyMetadata.registerForType(NullPage, {
 });

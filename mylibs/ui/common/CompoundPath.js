@@ -6,7 +6,7 @@ import UIElement from "framework/UIElement";
 import BezierCurve from "math/bezierCurve";
 import PropertyMetadata from "framework/PropertyMetadata";
 import PropertyTracker from "framework/PropertyTracker";
-import {Overflow} from "framework/Defs";
+import {Overflow, Types} from "framework/Defs";
 import Path from "ui/common/Path";
 import Selection from "framework/SelectionModel";
 
@@ -166,13 +166,13 @@ class CompoundPath extends Container {
             for(var i = 0; i < this.result.length; ++i) {
                 var p = this.result[i].clone();
                 p.joinMode("union");
-                p.backgroundBrush(this.backgroundBrush());
-                p.borderBrush(this.borderBrush());
+                p.fill(this.fill());
+                p.stroke(this.stroke());
                 path.add(p);
             }
         }
-        path.backgroundBrush(this.backgroundBrush());
-        path.borderBrush(this.borderBrush());
+        path.fill(this.fill());
+        path.stroke(this.stroke());
         path.name(this.displayName());
         path.styleId(this.styleId());
         path.setProps({x:this.x(), y:this.y(), width:this.width(), height:this.height()});
@@ -228,7 +228,7 @@ class CompoundPath extends Container {
                 point = this.global2local(point);
             }
 
-            var brush = this.backgroundBrush();
+            var brush = this.fill();
             if (this.lockedGroup() && (!brush || !brush.type)) {
                 for (var path of this.result) {
                     var p = path.getPointIfClose(point, 8);
@@ -310,9 +310,8 @@ class CompoundPath extends Container {
         if (this.result) {
             this.drawPath(context, w, h);
 
-            Brush.fill(this.backgroundBrush(), context, 0, 0, w, h);
-            // context.lineWidth = this.borderWidth();
-            Brush.stroke(this.borderBrush(), context, 0, 0, w, h);
+            Brush.fill(this.fill(), context, 0, 0, w, h);
+            Brush.stroke(this.stroke(), context, 0, 0, w, h);
         }
         context.restore();
     }
@@ -358,7 +357,10 @@ class CompoundPath extends Container {
             e.enablePropsTracking();
         })
     }
+
+
 }
+CompoundPath.prototype.t = Types.CompoundPath;
 
 PropertyMetadata.registerForType(CompoundPath, {
     allowMoveOutChildren: {

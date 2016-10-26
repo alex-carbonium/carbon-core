@@ -2,7 +2,6 @@ import commandManager from "framework/commands/CommandManager";
 import Primitive from "framework/sync/Primitive_Handlers";
 import Rollbacks from "framework/sync/Rollbacks";
 import Resources from "framework/Resources";
-import Template from "framework/Template";
 import eventHelper from "framework/EventHelper";
 import DeferredPrimitives from "./framework/sync/DeferredPrimitives";
 

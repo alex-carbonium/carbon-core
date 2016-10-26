@@ -1,6 +1,6 @@
 ﻿import TypeDefaults from "./TypeDefaults";
 import Brush from "./Brush";
-import {TextAlign, FontStyle, FontScript, UnderlineStyle} from "./Defs";
+import {TextAlign, FontStyle, FontScript, UnderlineStyle, Types} from "./Defs";
 
 var defaults = {
     family: "Open Sans",
@@ -19,11 +19,11 @@ var defaults = {
 };
 
 function FontType(){
-    this.__type__ = "Font";
+    this.t = Types.Font;
 }
 FontType.prototype = defaults;
 
-var fontDefault = TypeDefaults["Font"] = function(){
+var fontDefault = TypeDefaults[Types.Font] = function(){
     return new FontType();
 };
 
@@ -51,7 +51,7 @@ Font.cssString = function(font, scale){
 };
 
 Font.isFont = function(object){
-    return object && object.__type__ === "Font";
+    return object && object.t === "Font";
 };
 
 Font.toString = function(font){

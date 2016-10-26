@@ -306,6 +306,6 @@ class SectionDecorator {
     }
 }
 
-SectionDecorator.prototype.__type__ = "SectionDecorator";
+SectionDecorator.prototype.t = "SectionDecorator";
 
 export default SectionDecorator;

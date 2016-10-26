@@ -1,4 +1,6 @@
-define(["framework/ObjectCache", "framework/PropertyTypes", "framework/TypeDefaults"], function(ObjectCache, PropertyTypes, TypeDefaults){
+import {Types} from "./Defs";
+
+define(["framework/ObjectCache", "framework/TypeDefaults"], function(ObjectCache, TypeDefaults){
     var Quad = sketch.framework.QuadAndLock = {};
 
     var defaults = {
@@ -10,11 +12,11 @@ define(["framework/ObjectCache", "framework/PropertyTypes", "framework/TypeDefau
     };
 
     function QuadAndLockType(){
-        this.__type__ = "sketch.framework.QuadAndLock";
+        this.t = Types.QuadAndLock;
     }
 
     QuadAndLockType.prototype = defaults;
-    var quadAndLockTypeDefault =  TypeDefaults["sketch.framework.QuadAndLock"] = function(){return new QuadAndLockType();}
+    var quadAndLockTypeDefault =  TypeDefaults[Types.QuadAndLock] = function(){return new QuadAndLockType();}
 
 
     Quad.createFromObject = function(obj){
@@ -26,8 +28,6 @@ define(["framework/ObjectCache", "framework/PropertyTypes", "framework/TypeDefau
     };
 
     Quad.Default = Quad.createFromObject({});
-
-    //PropertyTypes.quadAndLock.defaultValue = Quad.Default;
 
     return Quad;
 });

@@ -1,15 +1,16 @@
-import {ArrangeStrategies, Overflow, StackAlign, StackOrientation, ChangeMode} from "./Defs";
+import {Types, ArrangeStrategies, Overflow, StackAlign, StackOrientation, ChangeMode} from "./Defs";
 import ArrangeStrategy from "./ArrangeStrategy";
 import ContextPool from "framework/render/ContextPool";
 import CorruptedElement from "framework/CorruptedElement";
 import {areRectsEqual} from "math/math";
 import Selection from "framework/SelectionModel"
 import Environment from "environment";
+import PropertyMetadata from "./PropertyMetadata";
 
 define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"], function (UIElement, QuadAndLock, logger, Matrix) {
     var fwk = sketch.framework;
 
-    klass2('sketch.framework.Container', UIElement, (function () {
+    var Container = klass(UIElement, (function () {
         var isLockGroup = function () {
             var selected = false;
             var that = this;
@@ -20,7 +21,7 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                 var selectedElement = Selection.selectedElement();
 
                 // TODO: cut dependency between select composite, and use instanceOf
-                if (selectedElement && selectedElement.__type__ === 'SelectComposite') {
+                if (selectedElement && selectedElement.t === 'SelectComposite') {
                     var partOfSelection = false;
                     selectedElement.each(function (e) {
                         if (that == e) {
@@ -79,7 +80,7 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
             },
 
             fillBackground: function (context, l, t, w, h) {
-                if (this.backgroundBrush() && fwk.Brush.canApply(this.backgroundBrush()) && this.standardBackground()) {
+                if (this.fill() && fwk.Brush.canApply(this.fill()) && this.standardBackground()) {
                     context.save();
                     var cornerRadius = this.cornerRadius();
                     if (cornerRadius !== fwk.QuadAndLock.Default) {
@@ -91,15 +92,14 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                     } else {
                         context.rectPath(l, t, w, h, true);
                     }
-                    fwk.Brush.fill(this.backgroundBrush(), context, l, t, w, h);
+                    fwk.Brush.fill(this.fill(), context, l, t, w, h);
                     context.restore();
                 }
             },
             strokeBorder: function (context, l, t, w, h) {
                 //not supported for iphone
-                if (this.borderBrush() && fwk.Brush.canApply(this.borderBrush()) && this.standardBackground()) {
+                if (this.stroke() && fwk.Brush.canApply(this.stroke()) && this.standardBackground()) {
                     context.save();
-                    // context.lineWidth = this.borderWidth();
                     var cornerRadius = this.cornerRadius();
                     if (cornerRadius !== fwk.QuadAndLock.Default) {
                         context.roundedRectDifferentRadiusesPath(l, t, w, h,
@@ -114,7 +114,7 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                     if (dash) {
                         context.setLineDash(dash);
                     }
-                    fwk.Brush.stroke(this.borderBrush(), context, l, t, w, h);
+                    fwk.Brush.stroke(this.stroke(), context, l, t, w, h);
                     context.restore();
                 }
             },
@@ -230,19 +230,19 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                         var child = items[i];
                         if (child.clipMask()) {
                             if (child.visible()) {
-                                var b = child.props.borderBrush;
-                                child.props.borderBrush = null;
+                                var b = child.props.stroke;
+                                child.props.stroke = null;
                                 this.drawChildSafe(child, context, environment);
-                                child.props.borderBrush = b;
+                                child.props.stroke = b;
                             }
                             context.save();
                             this._renderMaskedElements(context, child, i++, items, environment);
                             context.restore();
                             if (child.visible()) {
-                                var b = child.backgroundBrush();
-                                child.setProps({backgroundBrush: null}, ChangeMode.Self);
+                                var b = child.fill();
+                                child.setProps({fill: null}, ChangeMode.Self);
                                 this.drawChildSafe(child, context, environment);
-                                child.setProps({backgroundBrush: b}, ChangeMode.Self);
+                                child.setProps({fill: b}, ChangeMode.Self);
                             }
                             break;
                         }
@@ -403,7 +403,7 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                 return result && element.canBeAccepted(this);
             },
             mousedown: function (event) {
-                fwk.Container.Super.mousedown.call(this, event); //to hide inplace editor
+                Container.Super.mousedown.call(this, event); //to hide inplace editor
                 this.delegateToChildren("mousedown", event);
 
                 if (this.enableGroupLocking()) {
@@ -718,7 +718,7 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                 return this.field("_isAtomicInModel", value, false);
             },
             toJSON: function (includeDefaults) {
-                var current = fwk.Container.prototype.SuperKlass.toJSON.apply(this, arguments);
+                var current = Container.prototype.SuperKlass.toJSON.apply(this, arguments);
                 if (!this.isAtomicInModel()) {
                     var children = current.children = [];
                     for (var i = 0; i < this.children.length; i++) {
@@ -746,7 +746,7 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
             },
             fromJSON: function (data) {
                 //this.lockArrange();
-                fwk.Container.prototype.SuperKlass.fromJSON.apply(this, arguments)
+                Container.prototype.SuperKlass.fromJSON.apply(this, arguments)
                 this.childrenFromJSON(data.children);
                 //this.unlockArrange();
                 return this;
@@ -799,10 +799,10 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                     }
                 }
 
-                fwk.Container.prototype.SuperKlass.dispose.apply(this, arguments)
+                Container.prototype.SuperKlass.dispose.apply(this, arguments)
             },
             toString: function () {
-                return this.__type__.substr(this.__type__.lastIndexOf(".") + 1)
+                return this.t.substr(this.t.lastIndexOf(".") + 1)
                     + ": "
                     + map(this.getChildren(), function (x) {
                         return x.toString()
@@ -811,125 +811,125 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
         };
     })());
 
-    fwk.PropertyMetadata.extend("sketch.framework.UIElement", {
-        "sketch.framework.Container": {
-            angle: {
-                editorArgument: 0,
-                useInModel: false,
-                editable: false,
-                validate: [{minMax: [0, 0]}]
-            },
-            arrangeStrategy: {
-                defaultValue: ArrangeStrategies.Canvas
-            },
-            stackAlign: {
-                defaultValue: StackAlign.Default
-            },
-            stackOrientation: {
-                defaultValue: StackOrientation.Vertical
-            },
-            padding: {
-                displayName: "Padding",
-                type: "box",
-                useInModel: true,
-                editable: false,
-                defaultValue: fwk.Box.Default
-            },
-            dropPositioning: {
-                displayName: "Drop position",
-                type: "choice",
-                possibleValues: {"none": "None", "vertical": "Vertical", "horizontal": "Horizontal"},
-                useInModel: true,
-                editable: false,
-                defaultValue: "none"
-            },
-            enableGroupLocking: {
-                displayName: "Group locking",
-                type: "trueFalse",
-                useInModel: true,
-                editable: false,
-                defaultValue: false
-            },
-            overflow: {
-                defaultValue: Overflow.Visible,
-                displayName: "Overflow",
-                type: "dropdown",
-                options: {
-                    width: 1 / 2,
-                    items: [
-                        {name: "Clip", value: Overflow.Clip},
-                        {name: "Visible", value: Overflow.Visible},
-                        {name: "Grow and shrink horizontally", value: Overflow.AdjustHorizontal},
-                        {name: "Grow and shrink vertically", value: Overflow.AdjustVertical},
-                        {name: "Grow and shrink", value: Overflow.AdjustBoth},
-                        {name: "Grow horizontally", value: Overflow.ExpandHorizontal},
-                        {name: "Grow vertically", value: Overflow.ExpandVertical},
-                        {name: "Grow", value: Overflow.ExpandBoth}
-                    ]
-                }
-            },
-            cornerRadius: {
-                displayName: "Border radius",
-                type: "quadAndLock",
-                useInModel: true,
-                editable: true,
-                defaultValue: QuadAndLock.Default
-            },
-            allowMoveOutChildren: {
-                displayName: "Allow drag elements out",
-                type: "checkbox",
-                useInModel: true,
-                editable: true,
-                defaultValue: true,
-            },
-            groups: function (element) {
-                var ownGroups = [
-                    {
-                        label: element ? element.displayType() : '',
-                        properties: ["overflow"]
-                    }
-                ];
+    Container.prototype.t = Types.Container;
 
-                var baseGroups = fwk.PropertyMetadata.findAll("sketch.framework.UIElement").groups();
-                return ownGroups.concat(baseGroups).concat([
-                    {
-                        label: "Settings",
-                        properties: ["allowMoveOutChildren"]
-                    }
-                ]);
+PropertyMetadata.registerForType(Container, {
+        angle: {
+            editorArgument: 0,
+            useInModel: false,
+            editable: false,
+            validate: [{minMax: [0, 0]}]
+        },
+        arrangeStrategy: {
+            defaultValue: ArrangeStrategies.Canvas
+        },
+        stackAlign: {
+            defaultValue: StackAlign.Default
+        },
+        stackOrientation: {
+            defaultValue: StackOrientation.Vertical
+        },
+        padding: {
+            displayName: "Padding",
+            type: "box",
+            useInModel: true,
+            editable: false,
+            defaultValue: fwk.Box.Default
+        },
+        dropPositioning: {
+            displayName: "Drop position",
+            type: "choice",
+            possibleValues: {"none": "None", "vertical": "Vertical", "horizontal": "Horizontal"},
+            useInModel: true,
+            editable: false,
+            defaultValue: "none"
+        },
+        enableGroupLocking: {
+            displayName: "Group locking",
+            type: "trueFalse",
+            useInModel: true,
+            editable: false,
+            defaultValue: false
+        },
+        overflow: {
+            defaultValue: Overflow.Visible,
+            displayName: "Overflow",
+            type: "dropdown",
+            options: {
+                width: 1 / 2,
+                items: [
+                    {name: "Clip", value: Overflow.Clip},
+                    {name: "Visible", value: Overflow.Visible},
+                    {name: "Grow and shrink horizontally", value: Overflow.AdjustHorizontal},
+                    {name: "Grow and shrink vertically", value: Overflow.AdjustVertical},
+                    {name: "Grow and shrink", value: Overflow.AdjustBoth},
+                    {name: "Grow horizontally", value: Overflow.ExpandHorizontal},
+                    {name: "Grow vertically", value: Overflow.ExpandVertical},
+                    {name: "Grow", value: Overflow.ExpandBoth}
+                ]
             }
+        },
+        cornerRadius: {
+            displayName: "Border radius",
+            type: "quadAndLock",
+            useInModel: true,
+            editable: true,
+            defaultValue: QuadAndLock.Default
+        },
+        allowMoveOutChildren: {
+            displayName: "Allow drag elements out",
+            type: "checkbox",
+            useInModel: true,
+            editable: true,
+            defaultValue: true,
+        },
+        groups: function (element) {
+            var ownGroups = [
+                {
+                    label: element ? element.displayType() : '',
+                    properties: ["overflow"]
+                }
+            ];
+
+            var baseGroups = PropertyMetadata.findAll(Types.Element).groups();
+            return ownGroups.concat(baseGroups).concat([
+                {
+                    label: "Settings",
+                    properties: ["allowMoveOutChildren"]
+                }
+            ]);
         }
     });
 
 
-    fwk.Container.createCanvas = function () {
-        var container = new fwk.Container();
+    Container.createCanvas = function () {
+        var container = new Container();
         container.arrangeStrategy(ArrangeStrategies.Canvas);
         return container;
     };
-    fwk.Container.createStackHorizontal = function () {
-        var container = new fwk.Container();
+    Container.createStackHorizontal = function () {
+        var container = new Container();
         container.setProps({
             arrangeStrategy: ArrangeStrategies.Stack,
             stackOrientation: StackOrientation.Horizontal
         });
         return container;
     };
-    fwk.Container.createStackVertical = function () {
-        var container = new fwk.Container();
+    Container.createStackVertical = function () {
+        var container = new Container();
         container.arrangeStrategy(ArrangeStrategies.Stack);
         return container;
     };
-    fwk.Container.createDock = function () {
-        var container = new fwk.Container();
+    Container.createDock = function () {
+        var container = new Container();
         container.arrangeStrategy(ArrangeStrategies.Dock);
         return container;
     };
-    fwk.Container.createAlign = function () {
-        var container = new fwk.Container();
+    Container.createAlign = function () {
+        var container = new Container();
         container.arrangeStrategy(ArrangeStrategies.Align);
         return container;
     };
 
-    return fwk.Container;
+    return Container;
 });

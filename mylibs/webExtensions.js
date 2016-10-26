@@ -2,7 +2,3 @@
 if (window && !(window.location.origin)) {
     window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
 }
-
-HTMLImageElement.prototype.setSource=function(value){
-    this.src = value;
-};

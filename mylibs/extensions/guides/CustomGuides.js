@@ -2,6 +2,7 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import Brush from "framework/Brush";
 import tinycolor from "tinycolor2/tinycolor";
 import Guide from "./Guide";
+import {Types} from "../../framework/Defs";
 
 class CustomGuides extends Guide{
     constructor(view){
@@ -26,7 +27,7 @@ class CustomGuides extends Guide{
             }
         }
 
-        Brush.stroke(this.borderBrush(), context);
+        Brush.stroke(this.stroke(), context);
 
         context.restore();
     }
@@ -46,7 +47,7 @@ class CustomGuides extends Guide{
             }
         }
 
-        Brush.stroke(this.borderBrush(), context);
+        Brush.stroke(this.stroke(), context);
 
         context.restore();
     }
@@ -109,21 +110,22 @@ class CustomGuides extends Guide{
         return -1;
     }
 }
+CustomGuides.prototype.t = Types.CustomGuide;
 
 CustomGuides.setDefaultStrokeHsl = function(hsl){
     var strokeRgb = tinycolor(hsl).toRgbString();
     var strokeBrush = Brush.createFromColor(strokeRgb);
-    var prototype = PropertyMetadata.getPropsPrototype(CustomGuides.prototype.__type__);
-    prototype.borderBrush = strokeBrush;
+    var prototype = PropertyMetadata.getPropsPrototype(CustomGuides.prototype.t);
+    prototype.stroke = strokeBrush;
 };
 
 CustomGuides.setDefaultOpacity = function(opacity){
-    var prototype = PropertyMetadata.getPropsPrototype(CustomGuides.prototype.__type__);
+    var prototype = PropertyMetadata.getPropsPrototype(CustomGuides.prototype.t);
     prototype.opacity = opacity;
 };
 
 PropertyMetadata.registerForType(CustomGuides, {
-    borderBrush: {
+    stroke: {
         defaultValue: Brush.createFromColor("red")
     },
     opacity: {

@@ -2,7 +2,7 @@ import Shape from "framework/Shape";
 import PropertyMetadata from "framework/PropertyMetadata";
 import DefaultFrameType from "decorators/DefaultFrameType";
 import UIElement from "framework/UIElement";
-import {PointDirection} from "framework/Defs";
+import {PointDirection, Types} from "framework/Defs";
 import LineDirectionPoint from "decorators/LineDirectionPoint";
 import RotateFramePoint from "decorators/RotateFramePoint";
 import Environment from "environment";
@@ -144,7 +144,7 @@ class Star extends Shape {
     }
 
     convertToPath() {
-        var path = UIElement.construct('Path');
+        var path = UIElement.construct(Types.Path);
 
         var step = Math.PI / this.pointsCount();
         var r1 = this.externalRadius(),
@@ -170,8 +170,8 @@ class Star extends Shape {
         }
 
         path.closed(true);
-        path.backgroundBrush(this.backgroundBrush());
-        path.borderBrush(this.borderBrush());
+        path.fill(this.fill());
+        path.stroke(this.stroke());
         path.styleId(this.styleId());
 
         path.x(0);
@@ -262,6 +262,7 @@ class Star extends Shape {
         return frame;
     }
 }
+Star.prototype.t = Types.Star;
 
 PropertyMetadata.registerForType(Star, {
     externalRadius: {

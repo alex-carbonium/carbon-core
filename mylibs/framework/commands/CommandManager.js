@@ -1,4 +1,4 @@
-define(["framework/Properties"], function(Properties){
+define(function(){
     var fwk = sketch.framework;
 
     var record = function(entry){
@@ -12,9 +12,7 @@ define(["framework/Properties"], function(Properties){
         _constructor: function(){
             this.stack = [];
             this.index = -1;
-            this.properties = new Properties();
-            this.properties.createProperty('canUndo', 'Undo', false);
-            this.properties.createProperty('canRedo', 'Redo', false);
+            this.stateChanged = fwk.EventHelper.createEvent();
             this.onCommandExecuting = fwk.EventHelper.createEvent();
             this.onCommandExecuted = fwk.EventHelper.createEvent();
             this.onCommandRolledBack = fwk.EventHelper.createEvent();
@@ -22,8 +20,7 @@ define(["framework/Properties"], function(Properties){
         },
 
         _setProperties: function(canUndo, canRedo){
-            this.properties.set("canUndo", canUndo);
-            this.properties.set("canRedo", canRedo);
+            this.stateChanged.raise({canUndo, canRedo});
         },
 
         execute: function(cmd){
@@ -66,6 +63,9 @@ define(["framework/Properties"], function(Properties){
         },
 
         undoPrevious: function(){
+            if (this.index === 0){
+                return;
+            }
             var cmd = this.stack[this.index--];
             record.call(this, "U:" + cmd.toString());
             cmd.rollback();
@@ -74,18 +74,14 @@ define(["framework/Properties"], function(Properties){
         },
 
         redoNext: function(){
+            if (this.index >= this.stack.length - 1){
+                return;
+            }
             var cmd = this.stack[++this.index];
             record.call(this, "R:" + cmd.toString());
             cmd.execute(true);
             this.onCommandExecuted.raise(cmd, true);
             this._setProperties(true, this.index < this.stack.length - 1);
-        },
-
-        canUndo: function(){
-            return this.properties.canUndo.value();
-        },
-        canRedo: function(){
-            return this.properties.canRedo.value();
         },
 
         subscribe: function(CommandKlass, handler) {

@@ -1,3 +1,5 @@
+import {Types} from "./Defs";
+
 define(["framework/TypeDefaults"], function(TypeDefaults) {
     var Box = sketch.framework.Box = {};
 
@@ -9,11 +11,11 @@ define(["framework/TypeDefaults"], function(TypeDefaults) {
     };
 
     function BoxType(){
-        this.__type__ = "Box";
+        this.t = Types.Box;
     }
     BoxType.prototype = defaults;
 
-    var boxDefault = TypeDefaults["Box"] = function(){return new BoxType();};
+    var boxDefault = TypeDefaults[Types.Box] = function(){return new BoxType();};
 
     Box.createFromObject = function(obj){
         return Object.assign(boxDefault(), obj);

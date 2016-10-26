@@ -11,7 +11,7 @@ export default class StateMachine {
         var changed = newState !== this.state;
         this.state = newState;
         if (changed){
-            logger.info(this.__type__ + ": " + newState + (arg ? " (" + JSON.stringify(arg) + ")" : ""));
+            logger.info(this.constructor.name + ": " + newState + (arg ? " (" + JSON.stringify(arg) + ")" : ""));
             this.stateChanged.raise(newState, arg);
         }
     }

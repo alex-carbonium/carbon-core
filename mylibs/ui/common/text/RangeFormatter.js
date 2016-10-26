@@ -1,6 +1,6 @@
 import UIElement from "framework/UIElement";
 import PropertyMetadata from "framework/PropertyMetadata";
-import {TextAlign, ChangeMode} from "framework/Defs";
+import {TextAlign, ChangeMode, Types} from "framework/Defs";
 import Font from "framework/Font";
 
 var debug = require("DebugUtil")("carb:rangeFormatter");
@@ -136,6 +136,7 @@ export default class RangeFormatter extends UIElement {
         return this._element.displayName();
     }
 }
+RangeFormatter.prototype.t = Types.RangeFormatter;
 
 PropertyMetadata.registerForType(RangeFormatter, {
     textStyleId: {

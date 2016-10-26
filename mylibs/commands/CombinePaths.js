@@ -41,8 +41,8 @@ export default klass(Command, {
         } else {
             path = new CompoundPath();
 
-            path.backgroundBrush(e0.backgroundBrush());
-            path.borderBrush(e0.borderBrush());
+            path.fill(e0.fill());
+            path.stroke(e0.stroke());
             path.name(e0.displayName());
             path.styleId(e0.styleId());
 

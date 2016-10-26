@@ -451,14 +451,10 @@ define(function (require) {
             }, "");
 
             this.registerAction("undo", "Undo", "Project actions", function () {
-                if (fwk.commandManager.canUndo()) {
-                    fwk.commandManager.undoPrevious();
-                }
+                fwk.commandManager.undoPrevious();
             }, "ui-undo");
             this.registerAction("redo", "Redo", "Project actions", function () {
-                if (fwk.commandManager.canRedo()) {
-                    fwk.commandManager.redoNext();
-                }
+                fwk.commandManager.redoNext();
             }, "ui-redo");
             this.registerAction("newPagePortrait", "New portrait page", "New page", function () {
                 that.app.project.addNewPage("portrait");

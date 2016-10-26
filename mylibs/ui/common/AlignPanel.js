@@ -1,14 +1,14 @@
-define(["framework/Container", "framework/AlignArrangeStrategy", "framework/PropertyMetadata"], function(Container, AlignArrangeStrategy, PropertyMetadata){
-    PropertyMetadata.extend("sketch.framework.Container", {
-            "sketch.ui.common.AlignPanel": {
+import Container from "../../framework/Container";
+import PropertyMetadata from "../../framework/PropertyMetadata";
+import {ArrangeStrategies, Types} from "../../framework/Defs";
 
-            }
-        });
+export default class AlignPanel extends Container {
 
-    //obsolete, use fwk.Container.CreateAlign()
-    return klass2('sketch.ui.common.AlignPanel', Container, {
-        _constructor: function(){
-            this.arrangeStrategy(new AlignArrangeStrategy(this));
-        }
-    });
+}
+AlignPanel.prototype.t = Types.AlignPanel;
+
+PropertyMetadata.registerForType(AlignPanel, {
+    arrangeStrategy: {
+        defaultValue: ArrangeStrategies.Align
+    }
 });

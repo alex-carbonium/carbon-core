@@ -638,7 +638,6 @@ if (isBrowser && !global.cancelAnimationFrame){
 sketch.types = {};
 global.klass2 = function klass2(name, parent, props){
     var value = klass(parent, props, name);
-    value.prototype.__type__ = name;
 
     var current = isBrowser ? global : GLOBAL;
     var components = name.split('.');
@@ -659,8 +658,8 @@ global.klass2 = function klass2(name, parent, props){
         current[className] = value;
     }
 
-    sketch.types[value.prototype.__type__] = {
-        parentType: parent && parent.prototype.__type__ ? parent.prototype.__type__ : null
+    sketch.types[value.prototype.t] = {
+        parentType: parent && parent.prototype.t ? parent.prototype.t : null
     };
 
     return value;

@@ -1,15 +1,14 @@
-define(["framework/Container", "framework/StackArrangeStrategy", "framework/PropertyMetadata"], function(Container, StackArrangeStrategy, PropertyMetadata) {
-    PropertyMetadata.extend("sketch.framework.Container", {
-       "sketch.ui.common.StackPanel": {
+import Container from "../../framework/Container";
+import PropertyMetadata from "../../framework/PropertyMetadata";
+import {ArrangeStrategies, Types} from "../../framework/Defs";
 
-       }
-   });
+export default class StackPanel extends Container {
 
+}
+StackPanel.prototype.t = Types.StackPanel;
 
-    //obsolete, use fwk.Container.CreateStack()
-    return klass2('sketch.ui.common.StackPanel', Container, {
-        _constructor: function(){
-            this.arrangeStrategy(new StackArrangeStrategy(this));
-        }
-    });
+PropertyMetadata.registerForType(StackPanel, {
+    arrangeStrategy: {
+        defaultValue: ArrangeStrategies.Stack
+    }
 });

@@ -1,12 +1,13 @@
 import Shape from "framework/Shape";
 import Brush from "framework/Brush";
 import Path from "ui/common/Path";
-import {PointDirection} from "framework/Defs";
+import {PointDirection, Types} from "./Defs";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import Selection from "framework/SelectionModel";
 import SnapController from "framework/SnapController";
 import angleAdjuster from "math/AngleAdjuster";
+import PropertyMetadata from "./PropertyMetadata";
 
 var fwk = sketch.framework;
 
@@ -103,7 +104,7 @@ var LinePoint = {
             var p;
             if (point.p === 1) {
                 p = {x: frame.element.x() + frame.element.x2(), y: frame.element.y() + frame.element.y2()};
-            } else {
+        } else {
                 p = {x: frame.element.x() + frame.element.x1(), y: frame.element.y() + frame.element.y1()};
             }
             newPoint = angleAdjuster.adjust(p, {x: oldx, y: oldy});
@@ -192,8 +193,7 @@ class Line extends Shape {
         path.addPoint({x: l + x1, y: t + y1});
         path.addPoint({x: l + x2, y: t + y2});
 
-        path.borderWidth(this.borderWidth());
-        path.borderBrush(this.borderBrush());
+        path.stroke(this.stroke());
         path.angle(this.angle());
         path.adjustBoundaries();
 
@@ -206,7 +206,7 @@ class Line extends Shape {
             x2 = this.x2(),
             y2 = this.y2();
 
-        var stroke = this.borderBrush();
+        var stroke = this.stroke();
         if (stroke) {
             var dw = stroke.lineWidth / 2;
             var vx = x2 - x1;
@@ -237,9 +237,9 @@ class Line extends Shape {
         }
 
         this.drawPath(context, w, h);
-
-        Brush.fill(this.backgroundBrush(), context, 0, 0, w, h);
-        Brush.stroke(this.borderBrush(), context, 0, 0, w, h);
+        
+        Brush.fill(this.fill(), context, 0, 0, w, h);
+        Brush.stroke(this.stroke(), context, 0, 0, w, h);
 
         context.restore();
     }
@@ -350,10 +350,9 @@ class Line extends Shape {
         return frame;
     }
 }
+Line.prototype.t = Types.Line;
 
-Line.prototype.__type__ = 'sketch.framework.Line';
-
-fwk.PropertyMetadata.registerForType(Line, {
+PropertyMetadata.registerForType(Line, {
     x1: {
         displayName: "start x",
         defaultValue: 0,
@@ -363,7 +362,7 @@ fwk.PropertyMetadata.registerForType(Line, {
         displayName: "start y",
         defaultValue: 0,
         useInModel: true
-    },
+    } ,
     x2: {
         displayName: "end x",
         defaultValue: 0,
@@ -383,7 +382,7 @@ fwk.PropertyMetadata.registerForType(Line, {
             {
                 label: "Appearance",
                 expanded: false,
-                properties: ["visible", "opacity", "backgroundBrush", "borderBrush"]
+                properties: ["visible", "opacity", "fill", "stroke"]
             },
             {
                 label: "Layout",

@@ -151,7 +151,7 @@
 //     return klass(Rectangle, {
 //         _constructor:function (element, type) {
 //             this._type = type;
-//             this.backgroundBrush(BAR_BRUSH);
+//             this.fill(BAR_BRUSH);
 //
 //             this.canSelect(false);
 //             this.canDrag(false);
@@ -184,7 +184,7 @@
 //             var scale = Environment.view.scale();
 //
 //             context.rectPath(barRect.x, barRect.y, barRect.width, barRect.height);
-//             fwk.Brush.fill(this.backgroundBrush(), context, barRect.x, barRect.y, barRect.width, barRect.height);
+//             fwk.Brush.fill(this.fill(), context, barRect.x, barRect.y, barRect.width, barRect.height);
 //
 //             if(this._snapLineToAdd) {
 //                 drawSnapLine.call(this, context, barRect, elementRect, this._snapLineToAdd, scale);

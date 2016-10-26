@@ -431,7 +431,7 @@ export default class TextTool extends EditModeAction {
         return "black";
     }
     _resizeBackgroundIfNeeded(){
-        if (this._editedElement.backgroundBrush() === Brush.Empty && this._editedElement.borderBrush() === Brush.Empty){
+        if (this._editedElement.fill() === Brush.Empty && this._editedElement.stroke() === Brush.Empty){
             return;
         }
         if (this._editedElement.width() === this._editClone.width() && this._editedElement.height() === this._editClone.height()){

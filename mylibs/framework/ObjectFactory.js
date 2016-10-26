@@ -58,13 +58,13 @@ export default {
         return res;
     },
     fromJSON: function(data){
-        if (data.type === null) {
+        if (data.t === null) {
             throw 'Invalid data, type is not specified';
         }
 
         try {
             ModelStateListener.stop();
-            var element = this.fromType(data.type);
+            var element = this.fromType(data.t);
             element.__state = 1;
             element.fromJSON(data);
             delete element.__state;
@@ -85,8 +85,8 @@ export default {
     },
     tryUpdateWithPrototype: function (props, name) {
         var value = props[name];
-        if (value && value.__type__) {
-            var type = value.__type__;
+        if (value && value.t) {
+            var type = value.t;
             var defaultFunc = TypeDefaults[type];
             var defaults = {};
             if (defaultFunc) {

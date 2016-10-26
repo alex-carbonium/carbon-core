@@ -2,6 +2,7 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import Brush from "framework/Brush";
 import tinycolor from "tinycolor2/tinycolor";
 import Guide from "./Guide";
+import {Types} from "../../framework/Defs";
 
 class LayoutGridColumns extends Guide {
     draw(context){
@@ -15,7 +16,7 @@ class LayoutGridColumns extends Guide {
             context.rect(x, 0, w, this.props.rect.height);
         }
 
-        Brush.fill(this.backgroundBrush(), context);
+        Brush.fill(this.fill(), context);
 
         context.restore();
     }
@@ -43,18 +44,17 @@ class LayoutGridColumns extends Guide {
         }
     }
 }
-
-LayoutGridColumns.prototype.__type__ = "LayoutGridColumns";
+LayoutGridColumns.prototype.t = Types.LayoutGridColumns;
 
 LayoutGridColumns.setDefaultFillHsl = function(hsl){
     var rgb = tinycolor(hsl).toRgbString();
     var brush = Brush.createFromColor(rgb);
-    var prototype = PropertyMetadata.getPropsPrototype(LayoutGridColumns.prototype.__type__);
-    prototype.backgroundBrush = brush;
+    var prototype = PropertyMetadata.getPropsPrototype(LayoutGridColumns.prototype.t);
+    prototype.fill = brush;
 };
 
 LayoutGridColumns.setDefaultOpacity = function(opacity){
-    var prototype = PropertyMetadata.getPropsPrototype(LayoutGridColumns.prototype.__type__);
+    var prototype = PropertyMetadata.getPropsPrototype(LayoutGridColumns.prototype.t);
     prototype.opacity = opacity;
 };
 
@@ -62,10 +62,10 @@ PropertyMetadata.registerForType(LayoutGridColumns, {
     opacity: {
         defaultValue: .25
     },
-    borderBrush: {
+    stroke: {
         defaultValue: Brush.None
     },
-    backgroundBrush: {
+    fill: {
         defaultValue: Brush.createFromColor("cyan")
     }
 });

@@ -13,6 +13,7 @@ import RelayoutEngine from "framework/relayout/RelayoutEngine";
 import SystemConfiguration from "SystemConfiguration";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
+import {Types} from "../../framework/Defs";
 
 const ARTBOARD_SPACE = 100;
 
@@ -298,9 +299,7 @@ class ArtboardPage extends Page {
         this.toolboxConfigIsDirty.raise();
     }
 }
-
-
-ArtboardPage.prototype.__type__ = "ArtboardPage";
+ArtboardPage.prototype.t = Types.ArtboardPage;
 
 PropertyMetadata.registerForType(ArtboardPage, {
 });

@@ -8,15 +8,16 @@ import Invalidate from "framework/Invalidate";
 import ExtensionBase from "./ExtensionBase";
 import DesignerView from "framework/DesignerView";
 import Layer from "framework/Layer";
+import PropertyMetadata from "../framework/PropertyMetadata";
 
 var fwk = sketch.framework;
-var HighlightBrush = Brush.createFromColor(SharedColors.Highlight, 1);
+var HighlightBrush = Brush.createFromColor(SharedColors.Highlight);
 
 
 class ResizeHint extends Rectangle {
     constructor() {
         super();
-        this.backgroundBrush(fwk.Brush.Black);
+        this.fill(fwk.Brush.Black);
         this.opacity(0.7);
     }
 
@@ -72,9 +73,6 @@ class ResizeHint extends Rectangle {
         }
     }
 }
-
-ResizeHint.prototype.__type__ = "ResizeHint";
-fwk.PropertyMetadata.registerForType(ResizeHint, {});
 
 var onDraggingElement = function (event) {
     if (event.target != null && event.target.canAccept(event.element) && !(event.target instanceof Layer), event) {
@@ -184,8 +182,7 @@ function updateSelectionRects() {
         } else {
             var control = new Rectangle();
             control.setProps({
-                borderBrush: HighlightBrush,
-                borderWidth: 1,
+                stroke: HighlightBrush,
                 width: selection.rect.width,
                 height: selection.rect.height,
                 x: selection.rect.x,
@@ -333,7 +330,7 @@ export default class DropVisualization extends ExtensionBase {
         app.addLoadRef();
         this._dropLine = new Line();
         this._dropLine.setProps({
-            borderBrush: fwk.Brush.createFromColor("red")
+            stroke: fwk.Brush.createFromColor("red")
         });
         this._dropLine.crazySupported(false);
         this._dropLine.hitVisible(false);

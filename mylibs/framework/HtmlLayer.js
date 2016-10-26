@@ -6,11 +6,11 @@ define(["framework/Layer"], function (Layer) {
     function renderTree(node, parentHtmlElement){
         var element;
         if (node.x === null) return;
-        var borderWidth = (node.borderWidth || 1),
-            borderWidth2 = (borderWidth / 2),
+        var strokeWidth = (node.strokeWidth || 1),
+            strokeWidth2 = (strokeWidth / 2),
             scale = Environment.view.scale(),
-            x = ~~(node.x * scale - borderWidth2),
-            y = ~~(node.y * scale - borderWidth2),
+            x = ~~(node.x * scale - strokeWidth2),
+            y = ~~(node.y * scale - strokeWidth2),
             width = ~~(node.width),
             height = ~~(node.height),
             id = node.meta ? node.meta.id : 0;
@@ -41,7 +41,7 @@ define(["framework/Layer"], function (Layer) {
                 });
                 if (node.borderColor){
                     element.css({"border-color": node.borderColor,
-                        "border-width": borderWidth + "px",
+                        "border-width": strokeWidth + "px",
                         "border-style": node.dashPattern ? "dashed" : "solid"});
                 }
                 if (node.backgroundColor){

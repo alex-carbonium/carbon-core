@@ -1,6 +1,7 @@
 ﻿import Rectangle from "framework/Rectangle";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Invalidate from "framework/Invalidate";
+import {Types} from "./Defs";
 
 var fwk = sketch.framework;
 
@@ -11,8 +12,8 @@ class SelectFrame extends Rectangle {
         var startX, startY;
         var that = this;
 
-        this.borderBrush(fwk.Brush.Empty);
-        this.backgroundBrush(fwk.Brush.createFromColor('rgba(150,180, 250, 0.3)'));
+        this.stroke(fwk.Brush.Empty);
+        this.fill(fwk.Brush.createFromColor('rgba(150,180, 250, 0.3)'));
 
         this.onselect = onselect;
 
@@ -61,6 +62,7 @@ class SelectFrame extends Rectangle {
         return false;
     }
 }
+SelectFrame.prototype.t = Types.SelectFrame;
 
 PropertyMetadata.registerForType(SelectFrame, {});
 
