@@ -7,6 +7,7 @@ import Invalidate from "framework/Invalidate";
 import actionManager from "ui/ActionManager";
 import RepeatViewListener from "framework/repeater/RepeatViewListener";
 import TouchHelper from "./TouchHelper";
+import Artboard from "framework/Artboard";
 
 function onselect(rect) {
     var selection = this.app.activePage.getElementsInRect(rect);
@@ -30,6 +31,12 @@ function stopDrag(event) {
     }
 
     var element = this._draggingOverElement;
+    var parent = that._draggingElement._element.parent();
+    if(parent instanceof Artboard){
+        if(areRectsIntersecting(that._draggingElement.getBoundaryRectGlobal(), parent.getBoundaryRectGlobal())){
+            element = parent;
+        }
+    }
     if (element !== null) {
         if (event.altKey) {
             that._draggingElement.dropCopyOn(eventData, element);
@@ -312,22 +319,37 @@ export default class DesignerController {
         this._mouseDownData = eventData;
 
         this._bubbleMouseEvent(eventData, "mousedown");
-        Selection.directSelectionEnabled(eventData.event.altKey);
+
         // apply default behavior
         if (!eventData.handled) {
-            for (var i = 0; i < this.view._layersReverse.length; i++) {
-                var layer = this.view._layersReverse[i];
-                var element = layer.hitElement(eventData, this.view.scale());
-                if (element !== null) {
-                    eventData.element = element;
-                    if (element.canDrag()) {
-                        this._startDraggingData = eventData;
-                        eventData.handled = true;
-                    } else if (element.canSelect() && !element.locked()) {
-                        eventData.handled = true;
-                    }
+            Selection.directSelectionEnabled(eventData.event.altKey);
 
-                    break;
+            var selectedElement = Selection.selectedElement();
+            // first check current selection
+            if(selectedElement.hitTest(eventData, this.view.scale())) {
+                eventData.element = selectedElement;
+                if (selectedElement.canDrag()) {
+                    this._startDraggingData = eventData;
+                    eventData.handled = true;
+                } else if (selectedElement.canSelect() && !selectedElement.locked()) {
+                    eventData.handled = true;
+                }
+            } else {
+
+                for (var i = 0; i < this.view._layersReverse.length; i++) {
+                    var layer = this.view._layersReverse[i];
+                    var element = layer.hitElement(eventData, this.view.scale());
+                    if (element !== null) {
+                        eventData.element = element;
+                        if (element.canDrag()) {
+                            this._startDraggingData = eventData;
+                            eventData.handled = true;
+                        } else if (element.canSelect() && !element.locked()) {
+                            eventData.handled = true;
+                        }
+
+                        break;
+                    }
                 }
             }
             Selection.directSelectionEnabled(false);
