@@ -2,7 +2,7 @@ import TypeDefaults from "./TypeDefaults";
 import Brush from "./Brush";
 import Promise from "bluebird";
 import backend from "../backend";
-import {ContentSizing} from "./Defs";
+import {ContentSizing, Types} from "./Defs";
 import {fitRect, fillRect} from "../math/Fitting";
 
 var FrameSource = {};
@@ -21,7 +21,7 @@ FrameSourceType.prototype = {
     type:FrameSource.types.font
 };
 
-var FrameSourceDefault = TypeDefaults["FrameSource"] = function(){
+var FrameSourceDefault = TypeDefaults[Types.FrameSource] = function(){
     return new FrameSourceType();
 };
 
@@ -89,10 +89,10 @@ function drawSprite(source, context, x, y, w, h) {
 
 function ensureTemplateLoaded(source) {
     if (!source._template) {
-        source._template = new fwk.TemplatedElement();
-        source._template.setProps({templateId:source.templateId});
-        source.width = source._template.width();
-        source.height = source._template.height();
+        // source._template = new fwk.TemplatedElement();
+        // source._template.setProps({templateId:source.templateId});
+        // source.width = source._template.width();
+        // source.height = source._template.height();
     }
 }
 

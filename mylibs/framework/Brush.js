@@ -1,23 +1,38 @@
-﻿import Resources from "framework/Resources";
-import ObjectCache from "framework/ObjectCache";
-import PropertyMetadata from "framework/PropertyMetadata";
-import PropertyTypes from "framework/PropertyTypes";
-import StrokePosition from "framework/StrokePosition";
-import Invalidate from "framework/Invalidate";
+﻿import Resources from "./Resources";
+import Invalidate from "./Invalidate";
+import TypeDefaults from "./TypeDefaults";
+import {Types, StrokePosition} from "./Defs";
+
 var Brush = sketch.framework.Brush = {};
+
+var BrushType = {
+    empty: 0,
+    color: 1,
+    gradient: 2,
+    resource: 3,
+    pattern: 4
+};
+
+var defaults = {
+    type: BrushType.color,
+    position: StrokePosition.Inside,
+    lineWidth: 1
+};
+function BrushConstructor(){
+    this.t = Types.Brush;
+}
+BrushConstructor.prototype = defaults;
+var brushDefault = TypeDefaults[Types.Brush] = function(){
+    return new BrushConstructor();
+};
 
 Brush.canApply = function (brushObject) {
     return brushObject && brushObject.type && brushObject.value;
-}
+};
 
 Brush.toString = function (brushObject) {
     return brushObject.type + " " + brushObject.value;
-}
-
-Brush.doesSupportMode = function (brushObject, mode) {
-    return true;//this._type.isValuePossible(mode);
-}
-
+};
 
 Brush.getBrush = function (brushObject, context, l, t, w, h) {
     var type = brushObject.type;
@@ -27,10 +42,10 @@ Brush.getBrush = function (brushObject, context, l, t, w, h) {
 
     if (canApply) {
         switch (type) {
-            case "color":
+            case BrushType.color:
                 brush = value;
                 break;
-            case "gradient":
+            case BrushType.gradient:
                 var d = value.direction || "down";
                 var lingrad = context.createLinearGradient(l, t, l, t + h); //down
                 if (d == "up") {
@@ -60,19 +75,17 @@ Brush.getBrush = function (brushObject, context, l, t, w, h) {
                 }
                 brush = lingrad;
                 break;
-            case "resourceGradient":
-            case "resource":
+            case BrushType.resource:
                 var r = Resources.getSystemResource(value);
                 if (!r) {
                     throw "Resource not found: " + value;
                 }
                 brush = r.value;
                 return Brush.getBrush(r.value, context, l, t, w, h);
-            case "empty":
+            case BrushType.empty:
                 brush = null;
                 break;
-            case "customPattern":
-            case "resourcePattern":
+            case BrushType.pattern:
                 var image = Resources[value];
                 if (image) {
                     brush = context.createPattern(image, "repeat");
@@ -87,11 +100,11 @@ Brush.getBrush = function (brushObject, context, l, t, w, h) {
     }
 
     return brush;
-}
+};
 
 Brush.clone = function (brushObject) {
-    return Object.assign({}, brushObject);
-}
+    return Brush.createFromObject(brushObject);
+};
 
 Brush.toGradient = function (brushObject) {
     var sliders = Resources[brushObject.value()] || [];
@@ -158,142 +171,50 @@ Brush.toCss = function (brush) {
     var style = {};
     if (brush) {
         switch (brush.type) {
-            case null:
-            case "empty":
+            case BrushType.empty:
                 style.backgroundImage = 'url("/target/res/app/transparency1.png")';
                 break;
-            case "color":
+            case BrushType.color:
                 style.backgroundColor = brush.value;
                 break;
-            case "resource":
+            case BrushType.resource:
                 var r = Resources.getSystemResource(brush.value);
                 return Brush.toCss(r.value);
         }
     }
     return style;
 };
-//doesSupportMode:function (mode) {
-//           return this._type.isValuePossible(mode);
-//       },
-
-Brush.PossibleValues = {
-    "null": "Empty",
-    color: "Color",
-    gradient: "Custom gradient",
-    resource: "Resource",
-    resourceGradient: "Resource gradient",
-    resourcePattern: "Resource pattern",
-    customPattern: "Custom pattern"
-};
-
-Brush.hashKey = function (parameters) {
-    return parameters.type + "#" + JSON.stringify(parameters);
-};
-
 
 Brush.create = function (type, value) {
-    //cache = cache === undefined ? true : cache;
-    var param = {};
-
-    param.__type__ = "sketch.framework.Brush";
-    param.type = type;
-    param.value = value;
-
-    //if (cache){
-    //    return ObjectCache.instance.getOrPut(
-    //        "sketch.framework.Brush",
-    //        Brush.hashKey(param),
-    //        function(){
-    //            return param;
-    //        });
-    //}
-    return param;
+    return this.createFromObject({type, value});
 };
 
 Brush.createFromObject = function (parameters) {
-    parameters.__type__ = "sketch.framework.Brush";
-    return parameters;
+    return Object.assign(brushDefault(), parameters);
 };
 
-Brush.createFromColor = function (color, width) {
-    var param = {};
-    param.__type__ = "sketch.framework.Brush";
-    param.type = "color";
-    param.value = color;
-    param.lineWidth = width || 1;
-    param.strokePosition = 1;
-    return param;
+Brush.extend = function(...brushes){
+    return this.createFromObject(Object.assign({}, ...brushes));
 };
 
-Brush.createFromGradientResource = function (key, width) {
-    var param = {};
-    param.__type__ = "sketch.framework.Brush";
-    param.type = "resourceGradient";
-    param.value = key;
-    param.lineWidth = width;
-    return param;
+Brush.createFromColor = function (color) {
+    return this.createFromObject({/*type = color by default*/ value: color});
 };
 
 Brush.createEmptyBrush = function () {
-    var param = {};
-    param.__type__ = "sketch.framework.Brush";
-    param.type = null;
-    param.value = null;
-    param.lineWidth = 0;
-    return param;
+    return this.createFromObject({type: BrushType.empty});
 };
 
-Brush.createFromGradientPoints = function (points, width) {
-    var param = {};
-    param.__type__ = "sketch.framework.Brush";
-    param.type = "gradient";
-    param.value = points;
-    param.lineWidth = width;
-
-    return param;
-};
-
-Brush.createFromResourcePattern = function (url) {
-    var param = {};
-    param.__type__ = "sketch.framework.Brush";
-    param.type = "resourcePattern";
-    param.value = url;
-    return param;
+Brush.createFromGradientPoints = function (points) {
+    return this.createFromObject({type: BrushType.gradient, value: points});
 };
 
 Brush.createFromResource = function (resourceId) {
-    var param = {};
-    param.__type__ = "sketch.framework.Brush";
-    param.type = "resource";
-    param.value = resourceId;
-    return param;
+    return this.createFromObject({type: BrushType.resource, value: resourceId});
 };
 
 Brush.Black = Object.freeze(Brush.createFromColor('#000'));
 Brush.White = Object.freeze(Brush.createFromColor('#fff'));
 Brush.Empty = Brush.None = Object.freeze(Brush.createEmptyBrush());
-
-PropertyMetadata.extend({
-    "sketch.framework.Brush": {
-        type: {
-            useInModel: true,
-            possibleValues: Brush.PossibleValues
-        },
-        value: {
-            useInModel: true
-        },
-        lineWidth: {
-            useInModel: true,
-            defaultValue:1
-        },
-        strokePosition: {
-            useInModel: true,
-            defaultValue: StrokePosition.Inside
-        }
-    }
-});
-
-PropertyTypes.fill.defaultValue = Brush.Empty;
-PropertyTypes.stroke.defaultValue = Brush.Empty;
 
 export default Brush;

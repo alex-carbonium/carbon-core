@@ -2,7 +2,7 @@ import UIElement from "./UIElement";
 import FrameSource from "./FrameSource";
 import PropertyMetadata from "./PropertyMetadata";
 import Brush from "./Brush";
-import {ContentSizing, Overflow} from "./Defs";
+import {ContentSizing, Overflow, Types} from "./Defs";
 import Invalidate from "./Invalidate";
 
 // function onLoaded(source){
@@ -41,15 +41,15 @@ function sourceChanged(source){
         FrameSource.init(source).then(function(source){
             that.props.source = source;
             if (source && source.type === fwk.FrameSource.types.font){
-                if (that.backgroundBrush()){
-                    //this.properties.backgroundBrush.show();
-                    //this.properties.borderBrush.show();
+                if (that.fill()){
+                    //this.properties.fill.show();
+                    //this.properties.stroke.show();
                     fillStrokeChanged.call(that);
                 }
             } else{
-                //if (this.properties.backgroundBrush){
-                //    this.properties.backgroundBrush.hide();
-                //    this.properties.borderBrush.hide();
+                //if (this.properties.fill){
+                //    this.properties.fill.hide();
+                //    this.properties.stroke.hide();
                 //}
             }
             onLoaded.call(that, source);
@@ -131,9 +131,10 @@ export default class Frame extends UIElement {
         return "Image";
     }
 }
+Frame.prototype.t = Types.Frame;
 
 PropertyMetadata.registerForType(Frame, {
-    backgroundBrush: {
+    fill: {
         defaultValue: Brush.createFromResource("default.text")
     },
     source: {

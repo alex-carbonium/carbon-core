@@ -1,4 +1,5 @@
-import CompositeCommand from "../framework/commands/CompositeCommand";
+import Selection from "../framework/SelectionModel";
+
 
 define(["framework/commands/Command", "framework/sync/Primitive"], function(Command){
     var fwk = sketch.framework;
@@ -29,14 +30,18 @@ define(["framework/commands/Command", "framework/sync/Primitive"], function(Comm
                     break;
             }
 
+            var newSelection  = [];
             for(var i = 0; i < selection.length; ++i) {
                 var element = selection[i];
                 var clone = element.clone();
+                App.Current.activePage.nameProvider.assignNewName(clone);
                 clone.x(element.x() + xoffset);
                 clone.y(element.y() + yoffset);
 
                 element.parent().add(clone);
+                newSelection.push(clone);
             }
+            Selection.makeSelection(newSelection);
         }
     }
 

@@ -43,14 +43,10 @@ require("framework/Rectangle");
 require("framework/Line");
 require("framework/Star");
 
-require("framework/ImageSource");
-
 require("ui/BasicIcons");
 require("ui/Basic2Icons");
 require("ui/AndroidIcons");
 
-require("ui/common/Image");
-require("ui/common/Icon");
 require("ui/common/Table");
 require("ui/common/TableCell");
 require("ui/common/Canvas");

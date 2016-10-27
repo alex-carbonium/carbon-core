@@ -16,8 +16,9 @@ import PropertyTracker from "framework/PropertyTracker";
 import Page from "framework/Page";
 import StyleManager from "framework/style/StyleManager";
 import OpenTypeFontManager from "./OpenTypeFontManager";
-import {FontWeight, FontStyle, PatchType, ChangeMode, StoryType, StyleType} from "./framework/Defs";
+import {Types, FontWeight, FontStyle, PatchType, ChangeMode, StoryType, StyleType} from "./framework/Defs";
 import Font from "./framework/Font";
+import GroupContainer from "./framework/GroupContainer";
 import CommandManager from "framework/commands/CommandManager";
 import NullPage from "framework/NullPage";
 import ModelStateListener from "framework/sync/ModelStateListener";
@@ -26,7 +27,6 @@ import PrimitiveHandler from "framework/sync/Primitive_Handlers";
 import PrimitiveSetCommand from "commands/PrimitiveSetCommand";
 import {createUUID, formatPrimitive} from "./util";
 import DesignerController from "framework/DesignerController";
-import RepeatViewListener from "framework/repeater/RepeatViewListener";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
@@ -54,7 +54,6 @@ var SelectComposite = require("framework/SelectComposite");
 var SelectFrame = require("framework/SelectFrame");
 var extensions = require("extensions/All");
 var actionManager = require("ui/ActionManager");
-var MinMax = require("framework/validation/MinMax");
 var ProjectsMetadata = require("projects/Metadata");
 var domUtil = require("utils/dom");
 var Stopwatch = require("./Stopwatch");
@@ -63,8 +62,6 @@ var PropertyMetadata = require("framework/PropertyMetadata");
 var WebProject = require("./projects/WebProject");
 var Path = require("./ui/common/Path");
 var CompoundPath = require("./ui/common/CompoundPath");
-
-require("framework/Template");
 
 // using
 var ui = sketch.ui,
@@ -232,7 +229,7 @@ var onBuildDefaultMenu = function (context, menu) {
                     callback: function () {
                         actionManager.invoke("ungroupElements");
                     },
-                    disabled: !selection || selection.length !== 1 || !(selection[0] instanceof sketch.framework.GroupContainer)
+                    disabled: !selection || selection.length !== 1 || !(selection[0] instanceof GroupContainer)
                 },
                 {
                     name: "Mask",
@@ -359,8 +356,8 @@ var onBuildDefaultMenu = function (context, menu) {
                     actionManager.invoke("editTemplate");
                 },
                 disabled: !selection || selection.length !== 1
-                || !(selection[0] instanceof fwk.TemplatedElement)
-                || (selection[0].system() && !DEBUG)
+                //|| !(selection[0] instanceof fwk.TemplatedElement)
+                //|| (selection[0].system() && !DEBUG)
             },
             {
                 name: "Convert to elements",
@@ -368,16 +365,11 @@ var onBuildDefaultMenu = function (context, menu) {
                 callback: function () {
                     actionManager.invoke("decomposeTemplate");
                 },
-                disabled: !selection || selection.length !== 1 || !(selection[0] instanceof fwk.TemplatedElement)
+                disabled: !selection || selection.length !== 1 /*|| !(selection[0] instanceof fwk.TemplatedElement)*/
             }
         ]
     });
 
-}
-
-function onCrazyChanged() {
-    Invalidate.request();
-    redrawToolbox.call(this);
 }
 
 function onDefaultFamilyChanged(event) {
@@ -410,11 +402,6 @@ function onDefaultFamilyChanged(event) {
 
 
 class App extends DataNode {
-
-    init(params, isDefault, selector) {
-        this.properties.init(params, isDefault, selector);
-    }
-
     constructor() {
         super(true);
         this.viewMode = "view"; //?
@@ -429,23 +416,6 @@ class App extends DataNode {
         this._mode = "edit";
         this.styleManager = StyleManager;
         var that = this;
-
-        this.properties = new fwk.Properties();
-        this.properties.metadataType(this.__type__);
-
-        this.properties.createProperty("loadRef", "LoadRef", 1);
-
-        this.properties.createProperty("isCrazy", false).useInModel();
-
-        this.properties.createProperty("theme", "Theme", null).useInModel(true);
-
-        this.properties.createProperty("projectType", "ProjectType", null);
-        this.properties.createProperty("syncBroken", false);
-
-        this.properties.createProperty("lastNotificationId", "Last notification ID", 0)
-            .useInModel();
-
-        this.properties.createProperty("satelliteProjects", []).useInModel(true);
 
         //events
         this.pageAdded = fwk.EventHelper.createEvent();
@@ -578,10 +548,6 @@ class App extends DataNode {
         this.patchProps(PatchType.Change, type === 1 ? "styles" : "textStyles", newStyle);
     }
 
-    isCrazy(value) {
-        return this.properties.isCrazy.value(value);
-    }
-
     syncBroken(value) {
         if (arguments.length === 1) {
             this._syncBroken = value;
@@ -610,16 +576,11 @@ class App extends DataNode {
         return this._isOffline;
     }
 
-    defaultFontFamily(value) {
-        return this.properties.defaultFontFamily.value(value);
-    }
-
-    satelliteProjects(value) {
-        return this.properties.satelliteProjects.value(value);
-    }
-
     loadRef(value) {
-        return this.properties.loadRef.value(value);
+        if (arguments.length === 1){
+            this.runtimeProps.loadRef = value;
+        }
+        return this.runtimeProps.loadRef || 0;
     }
 
     releaseLoadRef() {
@@ -628,10 +589,6 @@ class App extends DataNode {
 
     addLoadRef() {
         this.loadRef(this.loadRef() + 1);
-    }
-
-    projectType(value) {
-        return this.properties.projectType.value(value);
     }
 
     unload() {
@@ -743,7 +700,7 @@ class App extends DataNode {
 
     toJSON(pageIdMap) {
         var json = {
-            type: "App",
+            t: this.t,
             children: [],
             props: this.props,
             styles: this.styleManager.getStyles(1),
@@ -832,10 +789,6 @@ class App extends DataNode {
         return createUUID();
     }
 
-    lastNotificationId(value) {
-        return this.properties.lastNotificationId.value(value);
-    }
-
     setCurrentTool(tool) {
         this.currentTool = tool;
     }
@@ -916,13 +869,6 @@ class App extends DataNode {
             this.initExtensions();
         });
 
-        this.projectType('iPhoneProject');
-
-        if (sketch.params && sketch.params.projectType) {
-            this.projectType(sketch.params.projectType);
-        }
-
-
         this.platform.run(this);
 
         this.actionManager = actionManager;
@@ -967,8 +913,6 @@ class App extends DataNode {
                 that.releaseLoadRef();
 
                 //that.platform.ensureCanvasSize();
-
-                that.properties.isCrazy.bind(that, onCrazyChanged);
 
                 backend.enableLoginTimer();
             });
@@ -1272,7 +1216,7 @@ class App extends DataNode {
     }
 
     displayName() {
-        return _(this.__type__);
+        return _(this.t);
     }
 
     viewPointToScreen(point) {
@@ -1391,73 +1335,6 @@ class App extends DataNode {
         return null;
     }
 
-    loadSatelliteProjects(projectNames) {
-        var that = this;
-        var started = new Date();
-
-        var promises = [];
-        for (var i = 0, l = projectNames.length; i < l; ++i) {
-            var projectName = projectNames[i];
-            if (this.loadedProjects.indexOf(projectName) === -1 && projectName !== this.projectType()) {
-                var projectLoaded = Deferred.create();
-                var fontsLoaded = Deferred.create();
-
-                if (!promises.length) {
-                    this.addLoadRef();
-                }
-
-                (function (deferred, name) {
-                    var Project = sketch.projects[name];
-
-                    var project = new Project();
-                    project.loadSatellite(that, Deferred.create())
-                        .then(function () {
-                            if (that.loadedProjects.indexOf(name) === -1) {
-                                that.loadedProjects.push(name);
-                            }
-                            var satelliteProjects = that.satelliteProjects().slice();
-                            if (satelliteProjects.indexOf(name) === -1) {
-                                satelliteProjects.push(name);
-                                that.satelliteProjects(satelliteProjects);
-                            }
-                            deferred.resolve();
-                        })
-                        .fail(deferred.reject);
-                })(projectLoaded, projectName);
-
-                var fontConfig = this.generateWebFontConfig(fontsLoaded, projectName);
-                WebFont.load(fontConfig);
-
-                promises.push(projectLoaded.promise());
-                promises.push(fontsLoaded.promise());
-            }
-        }
-
-        if (promises.length) {
-            var promise = Deferred.when(promises);
-            promise.done(function () {
-                var timeDiff = new Date() - started;
-                if (timeDiff >= 2000) {
-                    that.releaseLoadRef();
-                }
-                else {
-                    setTimeout(function () {
-                        that.releaseLoadRef();
-                    }, 2000 - timeDiff);
-                }
-            });
-            return promise;
-        }
-        return Deferred.createResolvedPromise();
-    }
-
-    loadPersistedSatelliteProjects() {
-        var satelliteProjects = ProjectsMetadata.projects[sketch.params.projectType].deps
-            || [];
-        satelliteProjects = sketch.util.distinct(satelliteProjects.concat(this.satelliteProjects()));
-        return this.loadSatelliteProjects(satelliteProjects);
-    }
-
     shortcutsEnabled(value) {
         if (shortcut) {
             return (shortcut.active = value);
@@ -1512,58 +1389,50 @@ class App extends DataNode {
     }
 }
 
+App.prototype.t = Types.App;
 
-PropertyMetadata.extend({
-    "App": {
-        isCrazy: {
-            displayName: "Sketchy lines",
-            type: "trueFalse",
-            useInModel: true,
-            editable: true
-        },
-
-        defaultShapeSettings: {
-            defaultValue: Object.getPrototypeOf(PropertyMetadata.getDefaultProps("DefaultShapeSettings"))
-        },
-        defaultTextSettings: {
-            defaultValue: {
-                font: Font.Default,
-                textStyleName: ""
-            }
-        },
-        layoutGridStyle: {
-            defaultValue: {
-                hsl: {h: 240, s: 1, l: .5},
-                opacity: .2,
-                show: false,
-                type: "stroke"
-            }
-        },
-        defaultLayoutGridSettings: {
-            defaultValue: {
-                columnsCount: 0,
-                gutterWidth: 20,
-                autoColumnWidth: true,
-                columnWidth: undefined
-            }
-        },
-        customGuides: {
-            defaultValue: {
-                hsl: {h: 0, s: 1, l: .5},
-                opacity: 1,
-                show: true,
-                lock: false
-            }
-        },
-        styles: {
-            defaultValue: []
-        },
-        textStyles: {
-            defaultValue: []
-        },
-        dataProviders: {
-            defaultValue: []
+PropertyMetadata.registerForType(App, {
+    defaultShapeSettings: {
+        defaultValue: Object.getPrototypeOf(PropertyMetadata.getDefaultProps(Types.DefaultShapeSettings))
+    },
+    defaultTextSettings: {
+        defaultValue: {
+            font: Font.Default,
+            textStyleName: ""
         }
+    },
+    layoutGridStyle: {
+        defaultValue: {
+            hsl: {h: 240, s: 1, l: .5},
+            opacity: .2,
+            show: false,
+            type: "stroke"
+        }
+    },
+    defaultLayoutGridSettings: {
+        defaultValue: {
+            columnsCount: 0,
+            gutterWidth: 20,
+            autoColumnWidth: true,
+            columnWidth: undefined
+        }
+    },
+    customGuides: {
+        defaultValue: {
+            hsl: {h: 0, s: 1, l: .5},
+            opacity: 1,
+            show: true,
+            lock: false
+        }
+    },
+    styles: {
+        defaultValue: []
+    },
+    textStyles: {
+        defaultValue: []
+    },
+    dataProviders: {
+        defaultValue: []
     }
 });
 

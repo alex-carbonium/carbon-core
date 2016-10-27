@@ -54,7 +54,7 @@
 //             },
 //             toJSON:function(includeDefaults) {
 //                 var data = {};
-//                 data.type = this.__type__;
+//                 data.type = this.t;
 //                 data.index = this._index;
 //                 data.orientation = this._orientation;
 //                 data.elements = map(this.elements, function(element){
@@ -265,8 +265,8 @@
 //                 for(var j = 0; j < colsCount; ++j) {
 //                     var cell = this.cell(i, j);
 //                     // draw top border
-//                     var brush = cell.topBorderBrush();
-//                     var width = cell.topBorderWidth();
+//                     var brush = cell.topstroke();
+//                     var width = cell.topstrokeWidth();
 //                     var rect = cell.getBoundaryRect();
 //                     if(!lastBrush) {
 //                         lastBrush = brush;
@@ -284,9 +284,9 @@
 //                     }
 //
 //                     // draw left
-//                     context.lineWidth = cell.leftBorderWidth();
+//                     context.lineWidth = cell.leftstrokeWidth();
 //                     context.linePath(rect.x, rect.y, rect.x, rect.y+rect.height);
-//                     fwk.Brush.stroke(cell.leftBorderBrush(), context, rect.x, rect.y, rect.x, rect.y+rect.height);
+//                     fwk.Brush.stroke(cell.leftstroke(), context, rect.x, rect.y, rect.x, rect.y+rect.height);
 //                 }
 //
 //                 x2 = cell.x() + cell.width();
@@ -296,16 +296,16 @@
 //                 lastBrush = null;
 //                 lastWidth = null;
 //                 // draw right
-//                 context.lineWidth = cell.rightBorderWidth();
+//                 context.lineWidth = cell.rightstrokeWidth();
 //                 context.linePath(rect.x+rect.width, rect.y, rect.x+rect.width, rect.y+rect.height);
-//                 fwk.Brush.stroke(cell.rightBorderBrush(), context, rect.x+rect.width, rect.y, rect.x+rect.width, rect.y+rect.height);
+//                 fwk.Brush.stroke(cell.rightstroke(), context, rect.x+rect.width, rect.y, rect.x+rect.width, rect.y+rect.height);
 //             }
 //
 //             for(var j = 0; j < colsCount; ++j) {
 //                 var cell = this.cell(rowsCount - 1, j);
 //                 // draw top border
-//                 var brush = cell.bottomBorderBrush();
-//                 var width = cell.bottomBorderWidth();
+//                 var brush = cell.bottomstroke();
+//                 var width = cell.bottomstrokeWidth();
 //                 if(!lastBrush) {
 //                     lastBrush = brush;
 //                     lastWidth = width;

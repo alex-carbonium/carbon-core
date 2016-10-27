@@ -190,10 +190,10 @@ define(["framework/Shape"], function (Shape) {
             }
 
             if(options.fill){
-                this.backgroundBrush(fwk.Brush.createFromColor(options.fill));
+                this.fill(fwk.Brush.createFromColor(options.fill));
             }
             if(options.stroke){
-                this.borderBrush(fwk.Brush.createFromColor(options.stroke));
+                this.stroke(fwk.Brush.createFromColor(options.stroke));
             }
 
             var fromArray = _toString.call(path) === '[object Array]';
@@ -553,11 +553,11 @@ define(["framework/Shape"], function (Shape) {
 
             this._render(ctx, scaleX, scaleY);
 
-            fwk.Brush.fill(this.backgroundBrush(), ctx, l, t, w, h);
+            fwk.Brush.fill(this.fill(), ctx, l, t, w, h);
 
-            ctx.lineWidth = this.borderWidth();
+            //ctx.lineWidth = this.strokeWidth();
             ctx.lineCap = ctx.lineJoin = 'round';
-            fwk.Brush.stroke(this.borderBrush(), ctx, l, t, w, h);
+            fwk.Brush.stroke(this.stroke(), ctx, l, t, w, h);
 
             ctx.restore();
         },

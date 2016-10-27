@@ -3,6 +3,7 @@ import math from "math/math";
 import Matrix from "math/matrix";
 import PropertyMetadata from "framework/PropertyMetadata";
 import EventHelper from "framework/EventHelper";
+import {Types} from "./Defs";
 
 var clearChangedAreas = function (context) {
     var fillStyle = this.fillStyle();
@@ -179,8 +180,5 @@ class Layer extends Container {
         return [];
     }
 }
-
-PropertyMetadata.registerForType(Layer, {
-});
 
 export default  Layer;

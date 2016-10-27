@@ -3,8 +3,7 @@ import * as rectmath from "math/math";
 import QuadAndLock from "framework/QuadAndLock";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Brush from "framework/Brush";
-import StrokePosition from "framework/StrokePosition";
-import {PointDirection} from "framework/Defs";
+import {PointDirection, Types, StrokePosition} from "framework/Defs";
 import nearestPoint from "math/NearestPoint";
 import commandManager from "framework/commands/CommandManager";
 import Path from "ui/common/Path";
@@ -16,7 +15,7 @@ const PointSize = 4;
 const PointOffset = 10;
 
 function getOffsetForPoint(w, h, scale, value) {
-    var d = ((!value) ? PointOffset : 0) / scale;
+    var d = ((!value)?PointOffset:0) / scale;
     var rx = (w - d) / 2;
     var ry = (h - d) / 2;
 
@@ -39,7 +38,7 @@ var LineDirectionPoint = {
         context.stroke();
     },
     capture (frame) {
-        var resizingElement = UIElement.construct('DraggingElement', frame.element);
+        var resizingElement = UIElement.construct(Types.DraggingElement, frame.element);
         frame.resizingElement = resizingElement;
         resizingElement.forceDrawClone = true;
         frame.originalValue = frame.element.cornerRadius();
@@ -89,7 +88,7 @@ var LineDirectionPoint = {
         var p1 = {x: rect.width * rv[0], y: rect.height * rv[2]};
 
         var dw = 0, dh = 0;
-        if (w2 > h2) {
+        if(w2 > h2){
             dw = h2 - w2;
         } else {
             dh = w2 - h2;
@@ -116,12 +115,12 @@ var LineDirectionPoint = {
         }
 
         var maxRadius = Math.min(w2, h2);
-        var newRadius = 0 | parameter * maxRadius;
+        var newRadius = 0|parameter * maxRadius;
 
         var r = clone(frame.resizingElement._clone.cornerRadius());
         r.locked = !event.event.altKey;
 
-        if (!r.locked) {
+        if(!r.locked) {
             r[point.prop] = newRadius;
         } else {
             r.upperLeft = newRadius;
@@ -147,7 +146,7 @@ class Rectangle extends Shape {
             , y2 = y1 + this.height()
             , cr = this.cornerRadius();
 
-        var mr = Math.min(this.width() / 2, this.height() / 2);
+        var mr = Math.min(this.width()/2, this.height()/2);
 
         if (cr.upperLeft === 0) {
             path.addPoint({x: x1, y: y1});
@@ -178,12 +177,13 @@ class Rectangle extends Shape {
             path.addPoint({x: x1, y: y2 - r, cp1x: x1, cp1y: y2 - 0.45 * r});
         }
         path.closed(true);
-        path.backgroundBrush(this.backgroundBrush());
-        path.borderBrush(this.borderBrush());
+        path.fill(this.fill());
+        path.stroke(this.stroke());
         path.styleId(this.styleId());
+        path.name(this.name());
 
         path.adjustBoundaries();
-        path.setProps({x: this.x(), y: this.y(), angle: this.angle()});
+        path.setProps({x:this.x(), y:this.y(), angle:this.angle()});
 
         return path;
     }
@@ -200,10 +200,10 @@ class Rectangle extends Shape {
         if (!this.visible()) {
             return false;
         }
-        var backgroundBrush = this.backgroundBrush();
-        var borderBrush = this.borderBrush();
+        var fill = this.fill();
+        var stroke = this.stroke();
 
-        if (backgroundBrush && backgroundBrush.type) {
+        if (fill && fill.type) {
             return Shape.prototype.hitTest.apply(this, arguments);
         }
 
@@ -213,14 +213,14 @@ class Rectangle extends Shape {
         var matrix = this.globalViewMatrixInverted();
         point = matrix.transformPoint(point);
 
-        if (borderBrush.strokePosition === 0) {
-            outerRect = rectmath.adjustRectSize(rect, borderBrush.lineWidth / 2 + 1);
-            innerRect = rectmath.adjustRectSize(rect, -(borderBrush.lineWidth / 2 + 1));
-        } else if (borderBrush.strokePosition === 1) {
+        if (stroke.position === 0) {
+            outerRect = rectmath.adjustRectSize(rect, stroke.lineWidth / 2 + 1);
+            innerRect = rectmath.adjustRectSize(rect, -(stroke.lineWidth / 2 + 1));
+        } else if (stroke.position === 1) {
             outerRect = rectmath.adjustRectSize(rect, 1);
-            innerRect = rectmath.adjustRectSize(rect, -(borderBrush.lineWidth + 1));
+            innerRect = rectmath.adjustRectSize(rect, -(stroke.lineWidth + 1));
         } else {
-            outerRect = rectmath.adjustRectSize(rect, borderBrush.lineWidth + 1);
+            outerRect = rectmath.adjustRectSize(rect, stroke.lineWidth + 1);
             innerRect = rectmath.adjustRectSize(rect, -1);
         }
         return rectmath.isPointInRect(outerRect, point) && !rectmath.isPointInRect(innerRect, point);
@@ -240,29 +240,29 @@ class Rectangle extends Shape {
         if (dashPattern) {
             context.setLineDash(dashPattern);
         }
-        var borderBrush = this.borderBrush();
+        var stroke = this.stroke();
 
         this.drawPath(context, w, h);
         if (w < 2 || h < 2) {
             // if the shape is too small we should not use fill brush, since borders are overlap anyway
-            Brush.fill(borderBrush, context, 0, 0, w, h);
+            Brush.fill(stroke, context, 0, 0, w, h);
         } else {
-            Brush.fill(this.backgroundBrush(), context, 0, 0, w, h);
+            Brush.fill(this.fill(), context, 0, 0, w, h);
         }
 
-        if (!borderBrush || !borderBrush.type || !borderBrush.strokePosition) {
-            Brush.stroke(borderBrush, context, 0, 0, w, h);
+        if (!stroke || !stroke.type || !stroke.position) {
+            Brush.stroke(stroke, context, 0, 0, w, h);
         } else {
             context.beginPath();
-            var lw = borderBrush.lineWidth;
+            var lw = stroke.lineWidth;
             var db = lw / 2;
-            if (borderBrush.strokePosition === StrokePosition.Outside) {
+            if (stroke.position === StrokePosition.Outside) {
                 lw = -lw;
                 db = -db;
             }
             context.translate(db, db);
             this.drawPath(context, w - lw, h - lw);
-            Brush.stroke(borderBrush, context, 0, 0, w - lw, h - lw);
+            Brush.stroke(stroke, context, 0, 0, w - lw, h - lw);
         }
 
         context.restore();
@@ -274,10 +274,10 @@ class Rectangle extends Shape {
         var r1 = cornerRadius.upperLeft;
 
         if (!cornerRadius.locked || r1) {
-            var mr = Math.min(w / 2, h / 2);
-            var r2 = cornerRadius.locked ? r1 : cornerRadius.upperRight,
-                r3 = cornerRadius.locked ? r1 : cornerRadius.bottomLeft,
-                r4 = cornerRadius.locked ? r1 : cornerRadius.bottomRight;
+            var mr = Math.min(w/2, h/2);
+            var r2 = cornerRadius.locked?r1:cornerRadius.upperRight,
+                r3 = cornerRadius.locked?r1:cornerRadius.bottomLeft,
+                r4 = cornerRadius.locked?r1:cornerRadius.bottomRight;
             context.roundedRectDifferentRadiusesPath(0, 0, w, h,
                 Math.min(mr, r1),
                 Math.min(mr, r2),
@@ -334,6 +334,7 @@ class Rectangle extends Shape {
         return frame;
     }
 }
+Rectangle.prototype.t = Types.Rectangle;
 
 Rectangle.ATTRIBUTE_NAMES = 'x y width height rx ry transform fill stroke stroke-width'.split(' ');
 Rectangle.fromSvgElement = function (element, options) {
@@ -346,13 +347,10 @@ Rectangle.fromSvgElement = function (element, options) {
         rect.height(parsedAttributes.height);
     }
     if (parsedAttributes.fill) {
-        rect.backgroundBrush(Brush.createFromColor(parsedAttributes.fill));
+        rect.fill(Brush.createFromColor(parsedAttributes.fill));
     }
     if (parsedAttributes.stroke) {
-        rect.borderBrush(Brush.createFromColor(parsedAttributes.stroke));
-    }
-    if (parsedAttributes.strokeWidth) {
-        rect.borderBrush().lineWidth = parsedAttributes.strokeWidth;
+        rect.stroke(Brush.createFromColor(parsedAttributes.stroke));
     }
     if (parsedAttributes.left) {
         rect.x(parsedAttributes.left);

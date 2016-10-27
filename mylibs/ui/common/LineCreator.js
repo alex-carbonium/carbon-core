@@ -12,19 +12,27 @@ import SnapController from "framework/SnapController";
 export default klass(EditModeAction, (function () {
     var angleStep = 15;
 
+    function update(x1, y1, x2, y2) {
+        var props = {
+            x1, x2, y1, y2
+        }
+        this._element.prepareProps(props);
+        this._element.setProps(props);
+    }
+
     function resize(x1, y1, x2, y2) {
-        var left = Math.min(x1, x2);
-        var top = Math.min(y1, y2);
+        var minx = Math.min(x1, x2);
+        var miny = Math.min(y1, y2);
         var width = Math.abs(x1 - x2);
         var height = Math.abs(y1 - y2);
 
         var props = {
-            x1: 0,
-            y1: (y2 < y1 && x2 > x1) || (y2 > y1 && x1 > x2) ? height : 0,
-            x2: width,
-            y2: (y2 < y1 && x2 > x1) || (y2 > y1 && x1 > x2) ? 0 : height,
-            x: left,
-            y: top,
+            x1: x1 - minx,
+            y1: y1 - miny,
+            x2: x2 - minx,
+            y2: y2 - miny,
+            x: minx,
+            y: miny,
             width: width,
             height: height
         };
@@ -55,12 +63,13 @@ export default klass(EditModeAction, (function () {
             this._startPoint = {x: pos.x, y: pos.y};
             event.handled = true;
             this._element = new Line();
+            App.Current.activePage.nameProvider.assignNewName(this._element);
             var defaultSettings = App.Current.defaultShapeSettings();
             if (defaultSettings) {
                 this._element.setProps(defaultSettings);
             }
             this._element.stopTrackingResize();
-            resize.call(this, this._startPoint.x, this._startPoint.y, this._startPoint.x, this._startPoint.y);
+            update.call(this, this._startPoint.x, this._startPoint.y, this._startPoint.x, this._startPoint.y);
             event.handled = true;
             return false;
         },
@@ -70,6 +79,7 @@ export default klass(EditModeAction, (function () {
 
             if (this._element) {
                 Invalidate.requestUpperOnly();
+                resize.call(this, this._element.x1(), this._element.y1(), this._element.x2(), this._element.y2());
 
                 var w = this._element.width()
                     , h = this._element.height();
@@ -78,12 +88,13 @@ export default klass(EditModeAction, (function () {
                 }
 
                 this._element.trackResize();
+
                 App.Current.activePage.dropToPage(this._element.x(), this._element.y(), this._element);
                 var element = this._element;
                 Invalidate.request();
                 Selection.makeSelection([element]);
             }
-            if(SystemConfiguration.ResetActiveToolToDefault) {
+            if (SystemConfiguration.ResetActiveToolToDefault) {
                 App.Current.actionManager.invoke("movePointer");
             }
         },
@@ -104,14 +115,14 @@ export default klass(EditModeAction, (function () {
             }
 
             if (this._mousepressed) {
-                var x = pos.x + 0.5 | 0,
-                    y = pos.y + 0.5 | 0;
+                var x = pos.x,
+                    y = pos.y;
                 if (event.event.shiftKey) {
                     var point = angleAdjuster.adjust(this._startPoint, {x: x, y: y});
                     x = point.x;
                     y = point.y;
                 }
-                resize.call(this, this._startPoint.x, this._startPoint.y, x, y);
+                update.call(this, this._startPoint.x, this._startPoint.y, x, y);
                 Invalidate.requestUpperOnly();
                 event.handled = true;
             }

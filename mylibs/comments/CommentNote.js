@@ -1,19 +1,19 @@
 import Selection from "framework/SelectionModel";
 
-define(["framework/ImageElement", "./CommentPopup", "./CommentsModel", "./RemoveComment", "framework/commands/CommandManager"], function (ImageElement, CommentPopup, CommentsModel, RemoveComment, commandManager) {
+define(["./CommentPopup", "./CommentsModel", "./RemoveComment", "framework/commands/CommandManager"], function (CommentPopup, CommentsModel, RemoveComment, commandManager) {
     var fwk = sketch.framework;;
 
-    fwk.PropertyMetadata.extend("sketch.framework.ImageElement", {
-        "sketch.ui.common.CommentNote": {
-            commentId:{
-                displayName:"Comment id",
-                defaultValue:0,
-                useInModel:true
-            }
-        }
-    });
+    // fwk.PropertyMetadata.extend("sketch.framework.ImageElement", {
+    //     "sketch.ui.common.CommentNote": {
+    //         commentId:{
+    //             displayName:"Comment id",
+    //             defaultValue:0,
+    //             useInModel:true
+    //         }
+    //     }
+    // });
 
-    var CommentNote = klass2("sketch.ui.common.CommentNote", ImageElement, (function () {
+    var CommentNote = klass2("sketch.ui.common.CommentNote", null, (function () {
 
 
         return {
@@ -75,11 +75,11 @@ define(["framework/ImageElement", "./CommentPopup", "./CommentsModel", "./Remove
                 return false;
             },
             resize:function(value){
-                ImageElement.prototype.resize.apply(this, arguments);
+                //ImageElement.prototype.resize.apply(this, arguments);
                 CommentsModel.Instance.noteMoved(this.commentId(), this.x(), this.y());
             },
             drawSelf:function(context, w, h, environment){
-                ImageElement.prototype.drawSelf.apply(this, arguments);
+                //ImageElement.prototype.drawSelf.apply(this, arguments);
                 context.save();
                 context.fillStyle = "#fff";
                 context.globalAlpha = 0.7;

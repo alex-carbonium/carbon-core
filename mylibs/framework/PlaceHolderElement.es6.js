@@ -25,7 +25,7 @@
 //         return;
 //     }
 //     this._resolved = true;
-//     this.backgroundBrush(fwk.Brush.None);
+//     this.fill(fwk.Brush.None);
 //     this.clear();
 //     var rect = this.getBoundaryRect();
 //     rect.x = 0;
@@ -51,7 +51,7 @@
 //         //    this.promise(elementPromise);
 //         //}
 //         //this._resolved = false;
-//         //this.backgroundBrush(fwk.Brush.createFromColor("red"));
+//         //this.fill(fwk.Brush.createFromColor("red"));
 //         var {promise, templateConfig} = templatePromiseCache[templateId]||{};
 //         var element = null;
 //

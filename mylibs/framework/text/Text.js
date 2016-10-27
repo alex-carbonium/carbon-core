@@ -1,7 +1,7 @@
 import UIElement from "../UIElement";
 import Brush from "../Brush";
 import Font from "../Font";
-import {TextAlign} from "../Defs";
+import {TextAlign, Types} from "../Defs";
 import {deepEquals} from "../../util";
 import PropertyMetadata from "../PropertyMetadata";
 import TextEngine from "./textengine";
@@ -117,12 +117,12 @@ export default class Text extends UIElement {
         }
 
         context.rectPath(0, 0, w, h);
-        Brush.fill(this.backgroundBrush(), context, 0, 0, w, h);
+        Brush.fill(this.fill(), context, 0, 0, w, h);
         if (this.runtimeProps.drawText === false){
             context.restore();
             return;
         }
-        Brush.stroke(this.borderBrush(), context, 0, 0, w, h);
+        Brush.stroke(this.stroke(), context, 0, 0, w, h);
 
         var verticalOffset = this.getVerticalOffset(this.runtimeProps.engine);
         if (verticalOffset !== 0){
@@ -193,7 +193,7 @@ export default class Text extends UIElement {
         return false;
     }
 }
-
+Text.prototype.t = Types.Text;
 
 PropertyMetadata.registerForType(Text, {
     content: {

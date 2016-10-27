@@ -2,6 +2,7 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import Brush from "framework/Brush";
 import tinycolor from "tinycolor2/tinycolor";
 import Guide from "./Guide";
+import {Types} from "../../framework/Defs";
 
 class LayoutGridLines extends Guide{
     constructor(view){
@@ -27,7 +28,7 @@ class LayoutGridLines extends Guide{
             context.lineTo(x2, y2);
         }
 
-        Brush.stroke(this.borderBrush(), context);
+        Brush.stroke(this.stroke(), context);
 
         context.restore();
     }
@@ -56,23 +57,22 @@ class LayoutGridLines extends Guide{
         }
     }
 }
-
-LayoutGridLines.prototype.__type__ = "LayoutGridLines";
+LayoutGridLines.prototype.t = Types.LayoutGridLines;
 
 LayoutGridLines.setDefaultStrokeHsl = function(hsl){
     var strokeRgb = tinycolor(hsl).toRgbString();
     var strokeBrush = Brush.createFromColor(strokeRgb);
-    var prototype = PropertyMetadata.getPropsPrototype(LayoutGridLines.prototype.__type__);
-    prototype.borderBrush = strokeBrush;
+    var prototype = PropertyMetadata.getPropsPrototype(LayoutGridLines.prototype.t);
+    prototype.stroke = strokeBrush;
 };
 
 LayoutGridLines.setDefaultOpacity = function(opacity){
-    var prototype = PropertyMetadata.getPropsPrototype(LayoutGridLines.prototype.__type__);
+    var prototype = PropertyMetadata.getPropsPrototype(LayoutGridLines.prototype.t);
     prototype.opacity = opacity;
 };
 
 PropertyMetadata.registerForType(LayoutGridLines, {
-    borderBrush: {
+    stroke: {
         defaultValue: Brush.Black
     },
     opacity: {

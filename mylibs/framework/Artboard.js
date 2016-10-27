@@ -4,7 +4,7 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import Page from "framework/Page";
 import {isPointInRect} from "math/math";
 import SharedColors from "ui/SharedColors";
-import {ChangeMode, TileSize} from "./Defs";
+import {ChangeMode, TileSize, Types} from "./Defs";
 import RelayoutEngine from "./relayout/RelayoutEngine";
 import PropertyStateRecorder from "framework/PropertyStateRecorder";
 import ModelStateListener from "framework/sync/ModelStateListener";
@@ -31,7 +31,7 @@ class Artboard extends Container {
     constructor(props) {
         super(props);
         this.clipSelf(true);
-        this.backgroundBrush(Brush.White);
+        this.fill(Brush.White);
         this._dragable(true);
         this.selectFromLayersPanel = true;
 
@@ -39,12 +39,6 @@ class Artboard extends Container {
         this.noDefaultSettings = true;
         this._recorder = new PropertyStateRecorder(this);
         this._recorder.initFromJSON(this.props.states);
-
-        if (App.Current.activePage && App.Current.activePage.getNextArtboardName) {
-            this.name(App.Current.activePage.getNextArtboardName());
-        } else {
-            this.name("Artboard"); // TODO: get it from label
-        }
 
         this.runtimeProps.version = 0;
         this.customProperties = [];
@@ -255,7 +249,7 @@ class Artboard extends Container {
                 child = this.getElementById(prop.controlId);
                 childrenMap[prop.controlId] = child;
             }
-            var propMetadata = PropertyMetadata.find(child.__type__, prop.propertyName);
+            var propMetadata = PropertyMetadata.find(child.t, prop.propertyName);
             res['custom:' + prop.propertyName] = propMetadata;
         }
 
@@ -437,7 +431,7 @@ class Artboard extends Container {
         if(!this._recorder){
             return;
         }
-        var ArtboardTemplateControl = PropertyMetadata.findAll('ArtboardTemplateControl')._class;
+        var ArtboardTemplateControl = PropertyMetadata.findAll(Types.ArtboardTemplateControl)._class;
         PropertyMetadata.replaceForNamedType('user:' + this.name(), ArtboardTemplateControl, this.buildMetadata(this.props.customProperties));
     }
 
@@ -633,9 +627,13 @@ class Artboard extends Container {
         }
     }
 }
+Artboard.prototype.t = Types.Artboard;
 
 var fwk = sketch.framework;
 PropertyMetadata.registerForType(Artboard, {
+    fill: {
+        defaultValue: Brush.White
+    },
     masterPageId: {
         displayName: "Master page",
         type: "pageLink",  //masterPageEditorOptions
@@ -702,7 +700,7 @@ PropertyMetadata.registerForType(Artboard, {
             {
                 label: "Appearance",
                 expanded: false,
-                properties: ["visible", "backgroundBrush"]
+                properties: ["visible", "fill"]
             },
             {
                 label: "Layout",

@@ -583,7 +583,7 @@ export default class RulerExtension extends RuntimeExtension {
 
             context.moveTo(x + .5, 0);
             context.lineTo(x + .5, RULER_WIDTH);
-            Brush.stroke(this._customGuides.borderBrush(), context);
+            Brush.stroke(this._customGuides.stroke(), context);
 
             var text = "" + (this._newGuideX + .5 | 0);
             context.fillStyle = "white";
@@ -657,7 +657,7 @@ export default class RulerExtension extends RuntimeExtension {
 
             context.moveTo(0, y + .5);
             context.lineTo(RULER_WIDTH, y + .5);
-            Brush.stroke(this._customGuides.borderBrush(), context);
+            Brush.stroke(this._customGuides.stroke(), context);
 
             guideLabelY = y;
 

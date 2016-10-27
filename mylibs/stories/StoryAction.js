@@ -1,12 +1,13 @@
 import DataNode from "../framework/DataNode";
 import PropertyMetadata from "../framework/PropertyMetadata";
-import {ActionEvents, ActionType, AnimationType, EasingType} from "../framework/Defs";
+import {Types, ActionEvents, ActionType, AnimationType, EasingType} from "../framework/Defs";
 
 class StoryAction extends DataNode {
     constructor() {
         super(false);
     }
 }
+StoryAction.prototype.t = Types.StoryAction;
 
 PropertyMetadata.registerForType(StoryAction, {
     event: {

@@ -8,7 +8,7 @@ import {createUUID} from "../util";
 //not es6 class while uielement and container are old klasses
 export default klass({
     _constructor: function (hasChildren) {
-        this.props = PropertyMetadata.getDefaultProps(this.__type__);
+        this.props = PropertyMetadata.getDefaultProps(this.t);
         this.resetRuntimeProps();
         if (hasChildren) {
             this.children = [];
@@ -17,21 +17,34 @@ export default klass({
 
     setProps: function (props, mode = ChangeMode.Model) {
         var oldProps = {};
+        var newProps = props; //first assume all new props are different
         var propsChanged = false;
         for (var p in props) {
-            oldProps[p] = this.props[p];
-            if (props[p] !== oldProps[p]) {
+            var oldValue = this.props[p];
+            var newValue = props[p];
+            if (newValue !== oldValue) {
                 propsChanged = true;
+                oldProps[p] = oldValue;
+                if (newProps !== props){
+                    newProps[p] = newValue;
+                }
+            }
+            //if some props are the same, extract the ones which differ
+            else if (newProps === props){
+                newProps = {};
+                for (let p in oldProps){
+                    newProps[p] = props[p];
+                }
             }
         }
 
         if (mode !== ChangeMode.Self) {
-            this.trackSetProps(props, oldProps, mode);
+            this.trackSetProps(newProps, oldProps, mode);
         }
 
         if (propsChanged) {
-            Object.assign(this.props, props);
-            this.propsUpdated(props, oldProps, mode);
+            Object.assign(this.props, newProps);
+            this.propsUpdated(newProps, oldProps, mode);
         }
     },
 
@@ -339,7 +352,7 @@ export default klass({
     },
 
     toJSON(){
-        var json = {type: this.__type__, props: Object.assign({}, this.props)};
+        var json = {t: this.t, props: Object.assign({}, this.props)};
         if (this.children){
             json.children = this.children.map(x => x.toJSON());
         }

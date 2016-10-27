@@ -19,6 +19,7 @@ import SnapController from "framework/SnapController";
 import Box from "framework/Box";
 import {debounce} from "../../util";
 import Command from "framework/commands/Command";
+import {Types} from "../../framework/Defs";
 
 var CP_HANDLE_RADIUS = 3;
 var CP_HANDLE_RADIUS2 = 6;
@@ -319,17 +320,17 @@ class Path extends Shape {
         return this.points[idx];
     }
 
-    set nextPoint(value) {
-        if (value != this._nextPoint) {
+    set nextPoint(value){
+        if(value != this._nextPoint){
             Invalidate.requestUpperOnly();
         }
         this._nextPoint = value;
-        if (this._nextPoint) {
+        if(this._nextPoint){
             this._initPoint(value);
         }
     }
 
-    get nextPoint() {
+    get nextPoint(){
         return this._nextPoint;
     }
 
@@ -361,7 +362,7 @@ class Path extends Shape {
     }
 
     _roundPoint(pt) {
-        var x, y;
+        var x,y;
         if (this.props.pointRounding === 0) {
             x = (0 | pt.x * 100) / 100;
             y = (0 | pt.y * 100) / 100;
@@ -372,7 +373,7 @@ class Path extends Shape {
             x = Math.round(pt.x);
             y = Math.round(pt.y);
         }
-        if (pt.type != PointType.Straight && pt.type !== undefined) {
+        if(pt.type != PointType.Straight && pt.type !== undefined) {
             var dx = pt.x - x;
             var dy = pt.y - y;
             pt.cp1x -= dx;
@@ -532,7 +533,7 @@ class Path extends Shape {
         }
     }
 
-    edit() {
+    edit(){
         this.mode("edit");
         this._internalChange = true;
         Selection.refreshSelection();
@@ -886,7 +887,7 @@ class Path extends Shape {
         return this.props.closed;
     }
 
-    prepareProps(changes) {
+    prepareProps(changes){
         if (changes.width !== undefined && changes.width < 1) {
             changes.width = 1;
         }
@@ -928,7 +929,7 @@ class Path extends Shape {
         }
         var res = UIElement.prototype.hitTest.apply(this, arguments);
         if (res) {
-            var brush = this.backgroundBrush();
+            var brush = this.fill();
             if (!brush || !brush.type) {
                 var p = this.getPointIfClose(point, 8);
                 if (p) {
@@ -988,8 +989,8 @@ class Path extends Shape {
             }
 
             this.drawPath(context, w, h);
-            if (this.nextPoint && this.points.length && !this.closed()) {
-                drawSegment.call(this, context, this.nextPoint, this.points[this.points.length - 1], sx, sy);
+            if(this.nextPoint && this.points.length && !this.closed()){
+                drawSegment.call(this, context, this.nextPoint, this.points[this.points.length-1], sx, sy);
             }
             context.stroke();
 
@@ -1098,9 +1099,8 @@ class Path extends Shape {
     //     context.beginPath();
     //     this.drawPath(context, w, h);
     //
-    //     Brush.fill(this.backgroundBrush(), context, 0, 0, w, h);
-    //     context.lineWidth = this.borderWidth();
-    //     Brush.stroke(this.borderBrush(), context, 0, 0, w, h);
+    //     Brush.fill(this.fill(), context, 0, 0, w, h);
+    //     Brush.stroke(this.stroke(), context, 0, 0, w, h);
     //
     //     context.restore();
     // },
@@ -1397,15 +1397,6 @@ class Path extends Shape {
         return UIElement.prototype.cursor.apply(this, arguments);
     }
 
-    toJSON(includeDefaults) {
-        var current = UIElement.prototype.toJSON.call(this, includeDefaults);
-        // var points = current.points = [];
-        // for (var i = 0; i < this.points.length; ++i) {
-        //     points.push(clone(this.points[i]));
-        // }
-        return current;
-    }
-
     clone() {
         var c = super.clone();
         c.points = this.points.slice();
@@ -1522,8 +1513,8 @@ class Path extends Shape {
         this._lastPoint.cp1y = cp2.y;
         this._lastPoint.type = PointType.Assymetric;
     }
-
 }
+Path.prototype.t = Types.Path;
 
 PropertyMetadata.registerForType(Path, {
     closed: {
@@ -1533,14 +1524,14 @@ PropertyMetadata.registerForType(Path, {
         editable: true,
         displayName: "Closed"
     },
-    borderBrush: {
+    stroke: {
         defaultValue: Brush.Black,
         displayName: "Stroke brush",
         type: "stroke",
         useInModel: true,
         editable: true
     },
-    backgroundBrush: {
+    fill: {
         type: "fill",
         useInModel: true,
         editable: true,
@@ -1607,7 +1598,7 @@ PropertyMetadata.registerForType(Path, {
             {
                 label: "Appearance",
                 expanded: false,
-                properties: ["visible", "opacity", "backgroundBrush", "borderBrush", "clipMask"]
+                properties: ["visible", "opacity", "fill", "stroke", "clipMask"]
             },
             {
                 label: "Layout",
@@ -1654,13 +1645,13 @@ Path.fromSvgElement = function (element, options) {
     var path = new Path();
 
     if (parsedAttributes.fill) {
-        path.backgroundBrush(Brush.createFromColor(parsedAttributes.fill));
+        path.fill(Brush.createFromColor(parsedAttributes.fill));
     }
     if (parsedAttributes.stroke) {
-        path.borderBrush(Brush.createFromColor(parsedAttributes.stroke));
+        path.stroke(Brush.createFromColor(parsedAttributes.stroke));
     }
     if (parsedAttributes.strokeWidth) {
-        path.borderBrush().lineWidth = parsedAttributes.strokeWidth;
+        path.stroke().lineWidth = parsedAttributes.strokeWidth;
     }
 
     if (parsedAttributes.points) {

@@ -1,6 +1,6 @@
 import UIElement from "framework/UIElement";
 import PropertyMetadata from "framework/PropertyMetadata";
-import {TextAlign} from "framework/Defs";
+import {TextAlign, Types} from "framework/Defs";
 import Font from "framework/Font";
 
 export default class DefaultFormatter extends UIElement {
@@ -32,10 +32,10 @@ export default class DefaultFormatter extends UIElement {
     displayName(){
         return "Default text settings";
     }
-
 }
+DefaultFormatter.prototype.t = Types.DefaultFormatter;
 
-PropertyMetadata.registerForType(DefaultFormatter, {
+PropertyMetadata.extend({[Types.DefaultFormatter]: {
     textStyleId: {
         displayName: "Text style",
         type: "textStyleName"
@@ -57,4 +57,4 @@ PropertyMetadata.registerForType(DefaultFormatter, {
             }
         ];
     }
-});
+}});

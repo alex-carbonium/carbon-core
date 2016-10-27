@@ -2,6 +2,7 @@ import CrazyScope from "framework/CrazyManager";
 import UIElement from "framework/UIElement";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
+import {Types} from "../framework/Defs";
 
 const PointSize = 5
     , PointSize2 = 2;
@@ -42,7 +43,7 @@ export default {
         return index;
     },
     capture: function (frame) {
-        var resizingElement = UIElement.construct('DraggingElement', frame.element);
+        var resizingElement = UIElement.construct(Types.DraggingElement, frame.element);
         frame.resizingElement = resizingElement;
         frame.originalRect = frame.element.getBoundaryRectGlobal();
 

@@ -31,6 +31,7 @@ define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Ma
                 this._nextPoint = {x: pos.x, y: pos.y};
                 event.handled = true;
                 this._element = fwk.UIElement.fromType(this._type);
+                App.Current.activePage.nameProvider.assignNewName(this._element);
                 this._cursorNotMoved = true;
 
                 var defaultSettings = App.Current.defaultShapeSettings();

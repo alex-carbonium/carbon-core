@@ -13,6 +13,7 @@ import RelayoutEngine from "framework/relayout/RelayoutEngine";
 import SystemConfiguration from "SystemConfiguration";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
+import {Types} from "../../framework/Defs";
 
 const ARTBOARD_SPACE = 100;
 
@@ -30,6 +31,7 @@ class ArtboardPage extends Page {
         if (!artboard) {
             artboard = new Artboard();
             artboard.setProps({width: 1000, height: 1000, y: 0, x: 0});
+            this.nameProvider.assignNewName(artboard);
             this.add(artboard);
         }
         this.setActiveArtboard(artboard);
@@ -120,12 +122,13 @@ class ArtboardPage extends Page {
 
             var artboard = new Artboard();
             artboard.setProps({
-                name: this.getNextArtboardName(screen.name),
                 x: pos.x,
                 y: pos.y,
                 width: screen.w,
                 height: screen.h
             });
+
+            this.nameProvider.assignNewName(artboard);
 
             pos.x += screen.w + ARTBOARD_SPACE;
 
@@ -207,6 +210,8 @@ class ArtboardPage extends Page {
     }
 
     getNextArtboardName(name) {
+
+
         name = name || "Artboard";
         if (!this.children || !this._artboardNames[name]) {
             return name
@@ -298,9 +303,7 @@ class ArtboardPage extends Page {
         this.toolboxConfigIsDirty.raise();
     }
 }
-
-
-ArtboardPage.prototype.__type__ = "ArtboardPage";
+ArtboardPage.prototype.t = Types.ArtboardPage;
 
 PropertyMetadata.registerForType(ArtboardPage, {
 });

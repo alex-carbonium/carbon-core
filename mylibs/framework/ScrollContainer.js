@@ -229,7 +229,7 @@
 //
 //     klass2('sketch.framework.ScrollContainer', Container, {
 //         _constructor : function() {
-//             this.backgroundBrush(fwk.Brush.White);
+//             this.fill(fwk.Brush.White);
 //             this.activeInPreview(true);
 //
 //             this._startX = 0;
@@ -443,9 +443,9 @@
 //
 //             context.rectPath(l, t, w, h, true);
 //
-//             fwk.Brush.fill(this.backgroundBrush(), context, l, t, sw, sh);
-//             context.lineWidth = this.borderWidth();
-//             fwk.Brush.stroke(this.borderBrush(), context, l, t, sw, sh);
+//             fwk.Brush.fill(this.fill(), context, l, t, sw, sh);
+//             context.lineWidth = this.strokeWidth();
+//             fwk.Brush.stroke(this.stroke(), context, l, t, sw, sh);
 //
 //             var offset = getScrollOffset.call(this);
 //             context.translate(-offset.x , -offset.y);

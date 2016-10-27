@@ -4,6 +4,7 @@ import PropertyTracker from "framework/PropertyTracker";
 import util from "util";
 import Matrix from "math/matrix";
 import {leaveCommonProps} from "../util";
+import {Types} from "./Defs";
 
 var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
     _constructor: function(){
@@ -477,7 +478,7 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
                 || newProps.angle !== undefined
                 || newProps.x !== undefined
                 || newProps.y !== undefined
-                || (newProps.borderBrush !== undefined)
+                || (newProps.stroke !== undefined)
             ) {
                 this.updateViewMatrix();
             }
@@ -528,6 +529,8 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
         PropertyTracker.propertyChanged.unbind(this, this._onPropsChanged);
     }
 });
+
+CompositeElement.prototype.t = Types.CompositeElement;
 
 PropertyMetadata.registerForType(CompositeElement, {
     groups: function(element){

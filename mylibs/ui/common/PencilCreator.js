@@ -75,6 +75,7 @@ define(["ui/common/EditModeAction", "ui/common/Path"], function(EditModeAction, 
                 var scale = view.scale();
 
                 var element = new Path();
+                App.Current.activePage.nameProvider.assignNewName(element);
                 var defaultSettings = App.Current.defaultShapeSettings();
                 if (defaultSettings) {
                     element.setProps(defaultSettings);

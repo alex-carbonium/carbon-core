@@ -1,7 +1,5 @@
-import Properties from  "framework/Properties";
 import TypeDefaults from "framework/TypeDefaults";
 import Migrations from "migrations/MigrationRegistrar";
-import PropertyTypes from "framework/PropertyTypes";
 import PropertyTracker from "framework/PropertyTracker";
 import ObjectCache from "framework/ObjectCache";
 import ObjectFactory from "./ObjectFactory";
@@ -19,7 +17,7 @@ import ElementMove from "commands/ElementMove";
 import Matrix from "math/matrix";
 import stopwatch from "Stopwatch";
 import ResizeDimension from "framework/ResizeDimension";
-import {DockStyle, ArrangeStrategies, Overflow, HorizontalAlignment, VerticalAlignment, PointDirection} from "./Defs";
+import {Types, DockStyle, ArrangeStrategies, Overflow, HorizontalAlignment, VerticalAlignment, PointDirection} from "./Defs";
 import RotateFramePoint from "decorators/RotateFramePoint";
 import ResizeFramePoint from "decorators/ResizeFramePoint";
 import DefaultFrameType from "decorators/DefaultFrameType";
@@ -30,6 +28,7 @@ import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import DataNode from "./DataNode";
 import {createUUID, deepEquals} from "../util";
+import Intl from "../Intl";
 
 require("migrations/All");
 
@@ -40,7 +39,7 @@ fwk.Stroke = Brush;
 fwk.DockValues = {left: "Left", top: "Top", bottom: "Bottom", right: "Right", fill: "Fill"};
 
 // constructor
-klass2("sketch.framework.UIElement", DataNode, {
+var UIElement = klass(DataNode, {
     __version__: 1, // override version if element properties are changed
     _constructor: function () {
         // public variables
@@ -53,7 +52,7 @@ klass2("sketch.framework.UIElement", DataNode, {
         // this._seedNumber = new Date().getMilliseconds();
 
         if (DEBUG){
-            this.id(createUUID(this.__type__));
+            this.id(createUUID(this.t));
         }
         else{
             this.id(createUUID());
@@ -137,7 +136,7 @@ klass2("sketch.framework.UIElement", DataNode, {
             || newProps.angle !== undefined
             || newProps.x !== undefined
             || newProps.y !== undefined
-            || (newProps.borderBrush !== undefined)
+            || (newProps.stroke !== undefined)
         ) {
             this.updateViewMatrix();
         }
@@ -279,7 +278,7 @@ klass2("sketch.framework.UIElement", DataNode, {
             return;
         }
         for (var i = 0, max = this.decorators.length; i < max; i++) {
-            if (this.decorators[i].__type__ === type.prototype.__type__) {
+            if (this.decorators[i].t === type.prototype.t) {
                 this.decorators[i].detach();
                 this.decorators.splice(i, 1);
                 Invalidate.requestUpperOnly();
@@ -397,20 +396,20 @@ klass2("sketch.framework.UIElement", DataNode, {
         return rect;
     },
     getMaxOuterBorder: function () {
-        if (!this.borderBrush()) {
+        if (!this.stroke()) {
             return 0;
         }
-        var borderBrush = this.borderBrush();
-        if (borderBrush.lineWidth === 0) {
+        var stroke = this.stroke();
+        if (stroke.lineWidth === 0) {
             return 0;
         }
-        if (borderBrush.strokePosition === 0) {
-            return borderBrush.lineWidth / 2 + .5 | 0;
+        if (stroke.position === 0) {
+            return stroke.lineWidth / 2 + .5 | 0;
         }
-        if (borderBrush.strokePosition === 1) {
+        if (stroke.position === 1) {
             return 0;
         }
-        return borderBrush.lineWidth;
+        return stroke.lineWidth;
     },
     getHitTestBox: function (scale, includeMargin = false, includeBorder = true) {
         var width = this.width(),
@@ -576,12 +575,12 @@ klass2("sketch.framework.UIElement", DataNode, {
     drawSelf: function (context, w, h, environment) {
         context.save();
         context.rectPath(0, 0, w, h, true);
-        fwk.Brush.fill(this.backgroundBrush(), context, 0, 0, w, h);
+        fwk.Brush.fill(this.fill(), context, 0, 0, w, h);
         var dash = this.dashPattern();
         if (dash) {
             context.setLineDash(dash);
         }
-        fwk.Brush.stroke(this.borderBrush(), context, 0, 0, w, h);
+        fwk.Brush.stroke(this.stroke(), context, 0, 0, w, h);
         context.restore();
     },
     primitiveRoot:function() {
@@ -791,23 +790,17 @@ klass2("sketch.framework.UIElement", DataNode, {
 
         return res;
     },
-    backgroundBrush: function (value) {
+    fill: function (value) {
         if (value !== undefined) {
-            this.setProps({backgroundBrush: value});
+            this.setProps({fill: value});
         }
-        return this.props.backgroundBrush;
+        return this.props.fill;
     },
-    borderBrush: function (value) {
+    stroke: function (value) {
         if (value !== undefined) {
-            this.setProps({borderBrush: value});
+            this.setProps({stroke: value});
         }
-        return this.props.borderBrush;
-    },
-    borderWidth: function (value) {
-        if (value !== undefined) {
-            this.setProps({borderWidth: value});
-        }
-        return this.props.borderWidth;
+        return this.props.stroke;
     },
     dashPattern: function (value) {
         if (value !== undefined) {
@@ -958,7 +951,7 @@ klass2("sketch.framework.UIElement", DataNode, {
         return "UIElement";
     },
     getDescription: function () {
-        return _(this.__type__);
+        return _(this.t);
     },
     applyVisitor: function (/*Visitor*/callback) {
         return callback(this);
@@ -1041,12 +1034,12 @@ klass2("sketch.framework.UIElement", DataNode, {
         return newProps;
     },
     clone: function () {
-        var clone = fwk.UIElement.fromType(this.__type__, this.cloneProps());
+        var clone = fwk.UIElement.fromType(this.t, this.cloneProps());
         clone.id(createUUID());
         return clone;
     },
     mirrorClone: function () {
-        var clone = fwk.UIElement.fromType(this.__type__, this.cloneProps());
+        var clone = fwk.UIElement.fromType(this.t, this.cloneProps());
         return clone;
     },
     cursor: function () {
@@ -1081,24 +1074,14 @@ klass2("sketch.framework.UIElement", DataNode, {
 
             } else {
                 var value = values[name];
-                if (value && value.__type__) {
-                    var type = value.__type__;
+                if (value && value.t) {
+                    var type = value.t;
                     var defaultFunc = TypeDefaults[type];
                     var defaults = {};
                     if (defaultFunc) {
                         defaults = defaultFunc();
                     }
                     value = Object.assign(defaults, value);
-
-                    if (type.startsWith("sketch.framework.ImageSource")) {
-                        value._name = name;
-                        fwk.ImageSource.init(value).then(function (value) {
-                            var props = {};
-                            props[value._name] = value;
-                            delete value._name;
-                            that.setProps(props);
-                        });
-                    }
                 }
 
                 props[name] = value;
@@ -1110,8 +1093,8 @@ klass2("sketch.framework.UIElement", DataNode, {
     fromJSON: function (data) {
         //TODO: bring back migrations when necessary
         // if (data.props.version !== this.__version__) {
-        //     if (!Migrations.runMigrations(this.__type__, data, this.__version__)) {
-        //         throw "Migration not successful: " + this.__type__ + " from " + data.props.version + " to " + this.__version__;
+        //     if (!Migrations.runMigrations(this.t, data, this.__version__)) {
+        //         throw "Migration not successful: " + this.t + " from " + data.props.version + " to " + this.__version__;
         //     }
         //     App.Current.migrationUpgradeNotifications.push(this);
         // }
@@ -1132,10 +1115,10 @@ klass2("sketch.framework.UIElement", DataNode, {
         return this.name() || this.displayType();
     },
     displayType: function () {
-        return sketch.Strings.get(this.__type__);
+        return "type." + this.t;
     },
     systemType: function () {
-        return this.__type__;
+        return this.t;
     },
     findPropertyMetadata: function (propName) {
         return PropertyMetadata.find(this.systemType(), propName);
@@ -1144,7 +1127,7 @@ klass2("sketch.framework.UIElement", DataNode, {
         return this.field("_quickEditProperty", value, "");
     },
     toString: function () {
-        return this.__type__;
+        return this.t;
     },
     getPath: function () {
         var path = [this];
@@ -1154,7 +1137,7 @@ klass2("sketch.framework.UIElement", DataNode, {
             e = e.parent();
         }
         return this.id() + ': ' + map(path.reverse(), function (x) {
-                return x.__type__;
+                return x.t;
             }).join("->");
     },
 
@@ -1558,7 +1541,7 @@ klass2("sketch.framework.UIElement", DataNode, {
     },
 
     propertyMetadata: function(){
-        return PropertyMetadata.findAll(this.__type__);
+        return PropertyMetadata.findAll(this.t);
     },
 
     toSVG: function () {
@@ -1567,6 +1550,9 @@ klass2("sketch.framework.UIElement", DataNode, {
         return ctx.getSerializedSvg();
     }
 });
+
+fwk.UIElement = UIElement;
+
 fwk.UIElement.fromTypeString = function (type, parameters) {
     var components = type.split('.');
     var current = sketch;
@@ -1588,7 +1574,7 @@ fwk.UIElement.fromTypeString = function (type, parameters) {
 fwk.UIElement.construct = function (type) {
     var current;
     if (typeof type === "string") {
-        var typeMetadata = fwk.PropertyMetadata.findAll(type);
+        var typeMetadata = PropertyMetadata.findAll(type);
         if (typeMetadata && typeMetadata._class) {
             current = typeMetadata._class;
         }
@@ -1615,6 +1601,8 @@ fwk.UIElement.fromJSON = function (data) {
     return ObjectFactory.fromJSON(data);
 };
 
+fwk.UIElement.prototype.t = Types.Element;
+
 
 fwk.UIElement.FieldMetadata = {
     autoPosition: {
@@ -1627,7 +1615,6 @@ fwk.UIElement.FieldMetadata = {
             fill: "Fill",
             middle: "Middle"
         },
-        type: fwk.PropertyTypes.choice,
         displayName: "Auto position"
     },
     resizeDimensions: {
@@ -1638,255 +1625,250 @@ fwk.UIElement.FieldMetadata = {
             "2": "Horizontal",
             "3": "Both"
         },
-        type: fwk.PropertyTypes.choice,
         displayName: "Resize dimensions"
     },
     allowSnapping: {
         defaultValue: true,
-        type: fwk.PropertyTypes.trueFalse,
         displayName: "Allow snapping"
     },
     tags: {
         defaultValue: "Primitive",
-        type: fwk.PropertyTypes.text,
         displayName: "Tags"
     }
 };
 
-PropertyMetadata.extend({
-    "sketch.framework.UIElement": {
-        margin: {
-            displayName: "Margin",
-            type: "box",
-            defaultValue: fwk.Box.Default
+PropertyMetadata.registerForType(UIElement, {
+    margin: {
+        displayName: "Margin",
+        type: "box",
+        defaultValue: Box.Default
+    },
+    dockStyle: {
+        displayName: "Dock style",
+        type: "dropdown",
+        options: {
+            size: 1 / 2,
+            items: [
+                {name: "Left", value: DockStyle.Left},
+                {name: "Top", value: DockStyle.Top},
+                {name: "Right", value: DockStyle.Right},
+                {name: "Bottom", value: DockStyle.Bottom},
+                {name: "Fill", value: DockStyle.Fill},
+                {name: "None", value: DockStyle.None}
+            ]
         },
-        dockStyle: {
-            displayName: "Dock style",
-            type: "dropdown",
-            options: {
-                size: 1 / 2,
-                items: [
-                    {name: "Left", value: DockStyle.Left},
-                    {name: "Top", value: DockStyle.Top},
-                    {name: "Right", value: DockStyle.Right},
-                    {name: "Bottom", value: DockStyle.Bottom},
-                    {name: "Fill", value: DockStyle.Fill},
-                    {name: "None", value: DockStyle.None}
-                ]
-            },
-            defaultValue: DockStyle.None
+        defaultValue: DockStyle.None
+    },
+    horizontalAlignment: {
+        displayName: "Horizontal alignment",
+        type: "dropdown",
+        options: {
+            size: 1,
+            items: [
+                {name: "Left", value: HorizontalAlignment.Left},
+                {name: "Right", value: HorizontalAlignment.Right},
+                {name: "Stretch", value: HorizontalAlignment.Stretch},
+                {name: "Center", value: HorizontalAlignment.Center},
+                {name: "None", value: HorizontalAlignment.None}
+            ]
         },
-        horizontalAlignment: {
-            displayName: "Horizontal alignment",
-            type: "dropdown",
-            options: {
-                size: 1,
-                items: [
-                    {name: "Left", value: HorizontalAlignment.Left},
-                    {name: "Right", value: HorizontalAlignment.Right},
-                    {name: "Stretch", value: HorizontalAlignment.Stretch},
-                    {name: "Center", value: HorizontalAlignment.Center},
-                    {name: "None", value: HorizontalAlignment.None}
-                ]
-            },
-            defaultValue: HorizontalAlignment.None
+        defaultValue: HorizontalAlignment.None
+    },
+    verticalAlignment: {
+        displayName: "Vertical alignment",
+        type: "dropdown",
+        options: {
+            size: 1,
+            items: [
+                {name: "Top", value: VerticalAlignment.Top},
+                {name: "Bottom", value: VerticalAlignment.Bottom},
+                {name: "Stretch", value: VerticalAlignment.Stretch},
+                {name: "Middle", value: VerticalAlignment.Middle},
+                {name: "None", value: VerticalAlignment.None}
+            ]
         },
-        verticalAlignment: {
-            displayName: "Vertical alignment",
-            type: "dropdown",
-            options: {
-                size: 1,
-                items: [
-                    {name: "Top", value: VerticalAlignment.Top},
-                    {name: "Bottom", value: VerticalAlignment.Bottom},
-                    {name: "Stretch", value: VerticalAlignment.Stretch},
-                    {name: "Middle", value: VerticalAlignment.Middle},
-                    {name: "None", value: VerticalAlignment.None}
-                ]
-            },
-            defaultValue: VerticalAlignment.None
+        defaultValue: VerticalAlignment.None
+    },
+    visibleWhenDrag: {
+        defaultValue: true
+    },
+    width: {
+        displayName: "Width",
+        type: "numeric",
+        useInModel: true,
+        editable: true,
+        defaultValue: 0
+    },
+    height: {
+        displayName: "Height",
+        type: "numeric",
+        useInModel: true,
+        editable: true,
+        defaultValue: 0
+    },
+    name: {
+        displayName: "Name",
+        type: "text",
+        useInModel: true,
+        editable: false,
+        defaultValue: ""
+    },
+    x: {
+        displayName: "Left",
+        type: "numeric",
+        useInModel: true,
+        editable: true,
+        defaultValue: 0
+    },
+    y: {
+        displayName: "Top",
+        type: "numeric",
+        useInModel: true,
+        editable: true,
+        defaultValue: 0
+    },
+    locked: {
+        displayName: "Locked",
+        type: "toggle",
+        useInModel: true,
+        options: {
+            icon: "ico-prop_lock"
         },
-        visibleWhenDrag: {
-            defaultValue: true
-        },
-        width: {
-            displayName: "Width",
-            type: "numeric",
-            useInModel: true,
-            editable: true,
-            defaultValue: 0
-        },
-        height: {
-            displayName: "Height",
-            type: "numeric",
-            useInModel: true,
-            editable: true,
-            defaultValue: 0
-        },
-        name: {
-            displayName: "Name",
-            type: "text",
-            useInModel: true,
-            editable: false,
-            defaultValue: ""
-        },
-        x: {
-            displayName: "Left",
-            type: "numeric",
-            useInModel: true,
-            editable: true,
-            defaultValue: 0
-        },
-        y: {
-            displayName: "Top",
-            type: "numeric",
-            useInModel: true,
-            editable: true,
-            defaultValue: 0
-        },
-        locked: {
-            displayName: "Locked",
-            type: "toggle",
-            useInModel: true,
-            options: {
-                icon: "ico-prop_lock"
-            },
-            defaultValue: false
-        },
-        visible: {
-            displayName: "Visible",
-            type: "trueFalse",
-            useInModel: true,
-            editable: true,
-            defaultValue: true,
-            customizable:true
-        },
-        hitTransparent: {
-            defaultValue: false
-        },
-        opacity: {
-            displayName: "Opacity",
-            type: "numeric",
-            defaultValue: 1,
-            style: 1,
-            customizable:true,
-            options: {
-                step: .1,
-                min: 0,
-                max: 1
-            }
-        },
-        angle: {
-            displayName: "Angle",
-            type: "numeric",
-            defaultValue: 0,
-            options: {
-                size: 1 / 4,
-                min: -360,
-                max: 360
-            },
-            customizable:true
-        },
-        shadow: {
-            displayName: "Shadow",
-            useInModel: true,
-            defaultValue: fwk.Shadow.None
-        },
-        anchor: {
-            displayName: "Pin to edge",
-            type: "multiToggle",
-            useInModel: true,
-            editable: false,
-            defaultValue: fwk.Anchor.Default,
-            options: {
-                items: [
-                    {field: "left", icon: "ico-prop_pin-left"},
-                    {field: "top", icon: "ico-prop_pin-top"},
-                    {field: "right", icon: "ico-prop_pin-right"},
-                    {field: "bottom", icon: "ico-prop_pin-bottom"}
-                ],
-                size: 3 / 4
-            }
-        },
-        overflow: {
-            defaultValue: Overflow.Visible
-        },
-        backgroundBrush: {
-            displayName: "Fill",
-            type: "fill",
-            useInModel: true,
-            editable: true,
-            defaultValue: fwk.Brush.Empty,
-            style: 1,
-            customizable:true
-        },
-        borderBrush: {
-            displayName: "Stroke",
-            type: "stroke",
-            useInModel: true,
-            editable: true,
-            defaultValue: fwk.Brush.Empty,
-            style: 1,
-            customizable:true
-        },
-        dashPattern: {
-            displayName: "Dash pattern",
-            type: "dashPattern",
-            defaultValue: null,
-            style: 1,
-            customizable:true
-        },
-        clipMask: {
-            displayName: "Use as mask",
-            type: "checkbox",
-            useInModel: true,
-            defaultValue: false
-        },
-        prototyping: {
-            defaultValue: false,
-            useInModel: false,
-            editable: false
-        },
-        styleId: {
-            displayName: 'Shared style',
-            type: "styleName",
-            defaultValue: null
-        },
-        groups: function () {
-            return [
-                {
-                    label: "Style",
-                    properties: ["styleId", "opacity", "backgroundBrush", "borderBrush"]
-                },
-                {
-                    label: "Appearance",
-                    properties: ["visible", "cornerRadius", "clipMask"]
-                },
-                {
-                    label: "Layout",
-                    properties: ["width", "height", "x", "y", "anchor", "angle", "dockStyle", "horizontalAlignment", "verticalAlignment"]
-                },
-                {
-                    label: "Margin",
-                    properties: ["margin"]
-                }
-            ];
-        },
-        prepareVisibility: function (props, selection, view) {
-            if (view.prototyping()) {
-                var res = {};
-                for (var name in props) {
-                    res[name] = false;
-                }
-                return res;
-            }
-            return {
-                dockStyle: selection.parents().every(x => x.props.arrangeStrategy === ArrangeStrategies.Dock)
-            };
-        },
-        getNonRepeatableProps: function(){
-            return ["id", "name"];
+        defaultValue: false
+    },
+    visible: {
+        displayName: "Visible",
+        type: "trueFalse",
+        useInModel: true,
+        editable: true,
+        defaultValue: true,
+        customizable:true
+    },
+    hitTransparent: {
+        defaultValue: false
+    },
+    opacity: {
+        displayName: "Opacity",
+        type: "numeric",
+        defaultValue: 1,
+        style: 1,
+        customizable:true,
+        options: {
+            step: .1,
+            min: 0,
+            max: 1
         }
+    },
+    angle: {
+        displayName: "Angle",
+        type: "numeric",
+        defaultValue: 0,
+        options: {
+            size: 1 / 4,
+            min: -360,
+            max: 360
+        },
+        customizable:true
+    },
+    shadow: {
+        displayName: "Shadow",
+        useInModel: true,
+        defaultValue: Shadow.None
+    },
+    anchor: {
+        displayName: "Pin to edge",
+        type: "multiToggle",
+        useInModel: true,
+        editable: false,
+        defaultValue: fwk.Anchor.Default,
+        options: {
+            items: [
+                {field: "left", icon: "ico-prop_pin-left"},
+                {field: "top", icon: "ico-prop_pin-top"},
+                {field: "right", icon: "ico-prop_pin-right"},
+                {field: "bottom", icon: "ico-prop_pin-bottom"}
+            ],
+            size: 3 / 4
+        }
+    },
+    overflow: {
+        defaultValue: Overflow.Visible
+    },
+    fill: {
+        displayName: "Fill",
+        type: "fill",
+        useInModel: true,
+        editable: true,
+        defaultValue: fwk.Brush.Empty,
+        style: 1,
+        customizable:true
+    },
+    stroke: {
+        displayName: "Stroke",
+        type: "stroke",
+        useInModel: true,
+        editable: true,
+        defaultValue: fwk.Brush.Empty,
+        style: 1,
+        customizable:true
+    },
+    dashPattern: {
+        displayName: "Dash pattern",
+        type: "dashPattern",
+        defaultValue: null,
+        style: 1,
+        customizable:true
+    },
+    clipMask: {
+        displayName: "Use as mask",
+        type: "checkbox",
+        useInModel: true,
+        defaultValue: false
+    },
+    prototyping: {
+        defaultValue: false,
+        useInModel: false,
+        editable: false
+    },
+    styleId: {
+        displayName: 'Shared style',
+        type: "styleName",
+        defaultValue: null
+    },
+    groups: function () {
+        return [
+            {
+                label: "Style",
+                properties: ["styleId", "opacity", "fill", "stroke"]
+            },
+            {
+                label: "Appearance",
+                properties: ["visible", "cornerRadius", "clipMask"]
+            },
+            {
+                label: "Layout",
+                properties: ["width", "height", "x", "y", "anchor", "angle", "dockStyle", "horizontalAlignment", "verticalAlignment"]
+            },
+            {
+                label: "Margin",
+                properties: ["margin"]
+            }
+        ];
+    },
+    prepareVisibility: function (props, selection, view) {
+        if (view.prototyping()) {
+            var res = {};
+            for (var name in props) {
+                res[name] = false;
+            }
+            return res;
+        }
+        return {
+            dockStyle: selection.parents().every(x => x.props.arrangeStrategy === ArrangeStrategies.Dock)
+        };
+    },
+    getNonRepeatableProps: function(){
+        return ["id", "name"];
     }
 });
 

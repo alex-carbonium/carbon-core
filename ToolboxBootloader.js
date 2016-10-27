@@ -105,8 +105,8 @@ define(function(require){
                 for (var i = 0; i < placeData.length; i++){
                     //var config = placeData[i].templateConfig;
                     //var tile = new Rectangle().init({
-                    //    borderBrush: Brush.None(),
-                    //    backgroundBrush: Brush.createFromColor("lightsalmon"),
+                    //    stroke: Brush.None(),
+                    //    fill: Brush.createFromColor("lightsalmon"),
                     //    opacity: 1,
                     //    left: config.spriteMap[0],
                     //    top: config.spriteMap[1],

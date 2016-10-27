@@ -132,6 +132,7 @@ export default class GraphicalpathCreator extends EditModeAction {
             Selection.unselectAll();
             var that = this;
             this._element = UIElement.fromType(this._type, this._parameters);
+            App.Current.activePage.nameProvider.assignNewName(this._element);
             var defaultSettings = App.Current.defaultShapeSettings();
             if (defaultSettings) {
                 this._element.setProps(defaultSettings);

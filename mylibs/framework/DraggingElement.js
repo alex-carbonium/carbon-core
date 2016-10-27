@@ -6,7 +6,7 @@ import SelectComposite from "framework/SelectComposite";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Container from "framework/Container";
 import {createUUID} from "../util";
-import {ChangeMode} from "./Defs";
+import {ChangeMode, Types} from "./Defs";
 import Selection from "framework/SelectionModel";
 import Environment from "environment";
 import SnapController from "./SnapController";
@@ -106,7 +106,7 @@ function dropElementOn(event, newParent, target) {
     } else {
         if (!target.id()) {
             target.setProps({id: createUUID(), x: pos.x, y: pos.y}, ChangeMode.Root);
-            // if (target.__type__ === "PlaceholderElement") {//stragnge that instanceof doesn't work} instanceof PlaceholderElement){
+            // if (target.t === "PlaceholderElement") {//stragnge that instanceof doesn't work} instanceof PlaceholderElement){
             //     if (index !== undefined) {
             //         newParent.insert(target, index, ChangeMode.Root);
             //     } else {
@@ -398,6 +398,7 @@ class DraggingElement extends UIElement {
         UIElement.prototype.resize.call(this, rect);
     }
 }
+DraggingElement.prototype.t = Types.DraggingElement;
 
 PropertyMetadata.registerForType(DraggingElement, {});
 

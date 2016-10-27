@@ -5,7 +5,7 @@ define(function (){
             },
             toJSON: function(){
                 var json = {};
-                json.type = this.__type__;
+                json.t = this.t;
                 json.props = {};
                 return json;
             },

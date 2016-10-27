@@ -8,7 +8,7 @@ define(function(){
         },
 
         resolve: function(type){
-            var key = type.prototype.__type__;
+            var key = type.prototype.t;
             var entry = this._store[key];
             if (entry){
                 if (entry.mode === Mode.singleton){
@@ -18,7 +18,7 @@ define(function(){
             return new type();
         },
         registerInstance: function(type, instance){
-            var key = type.prototype.__type__;
+            var key = type.prototype.t;
             this._store[key] = {
                 mode: Mode.singleton,
                 instance: instance

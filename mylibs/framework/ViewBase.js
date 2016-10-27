@@ -3,7 +3,6 @@ import {areRectsIntersecting} from "math/math";
 import Matrix from "math/matrix";
 import ContextPool from "framework/render/ContextPool";
 import EventHelper from "framework/EventHelper";
-import CrazyScope from "framework/CrazyManager";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
 var Stopwatch = require("../Stopwatch");
@@ -108,10 +107,8 @@ export default class ViewBase {
     _drawLayer(layer, layerIndex, context, environment) {
         this.stopwatch.start();
         context.save();
-        CrazyScope.push(App.Current.isCrazy());
         setupLayer.call(this, layer, context);
         layer.draw(context, environment);
-        CrazyScope.pop();
 
         var subscribers = this._registredForLayerDraw[layerIndex];
         for (var i = 0; i < subscribers.length; ++i) {

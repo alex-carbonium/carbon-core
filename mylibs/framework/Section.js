@@ -2,7 +2,7 @@ import Container from "./Container";
 import Box from "./Box";
 import Brush from "./Brush";
 import PropertyMetadata from "./PropertyMetadata";
-import {Overflow, ViewTool} from "./Defs";
+import {Overflow, ViewTool, Types} from "./Defs";
 import Composite from "../framework/commands/CompositeCommand";
 import ElementDelete from "../commands/ElementDelete";
 import {isRectInRect, calculateRectIntersectionArea} from "math/math";
@@ -121,8 +121,8 @@ export default class Section extends Container {
 
     prepareProps(changes){
         super.prepareProps(changes);
-        if (changes.backgroundBrush){
-            if (Brush.equals(changes.backgroundBrush, Brush.None)){
+        if (changes.fill){
+            if (Brush.equals(changes.fill, Brush.None)){
                 changes.dashPattern = [5, 5];
             }
             else{
@@ -131,17 +131,17 @@ export default class Section extends Container {
         }
     }
 
-    backgroundBrush(value){
+    fill(value){
         if (arguments.length === 0 && this._isSectionToolActive()){
             return this.props.highlightFill;
         }
-        return super.backgroundBrush(value);
+        return super.fill(value);
     }
-    borderBrush(value){
+    stroke(value){
         if (arguments.length === 0 && this._isSectionToolActive()){
             return this.props.highlightStroke;
         }
-        return super.borderBrush(value);
+        return super.stroke(value);
     }
 
     canSelect(){
@@ -159,9 +159,11 @@ export default class Section extends Container {
     _isSectionToolActive(){
         return app.currentTool === ViewTool.Section;
     }
-};
 
-Section.prototype.__type__ = "Section";
+
+}
+Section.prototype.t = Types.Section;;
+
 Section.prototype._angleEditable = false;
 Section.prototype.selectFromLayersPanel = true;
 Section.prototype.multiselectTransparent = true;
@@ -180,7 +182,7 @@ PropertyMetadata.registerForType(Section, {
     dashPattern: {
         defaultValue: [5, 5]
     },
-    borderBrush: {
+    stroke: {
         defaultValue: sketch.framework.Brush.createFromColor("lightgray")
     },
     highlightStroke: {

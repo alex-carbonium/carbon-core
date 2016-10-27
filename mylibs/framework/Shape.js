@@ -2,8 +2,8 @@ import UIElement from "framework/UIElement";
 import ResizeDimension from "framework/ResizeDimension";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Brush from "framework/Brush";
-import StrokePosition from "framework/StrokePosition";
 import ContextPool from "framework/render/ContextPool";
+import {Types, StrokePosition} from "./Defs";
 
 class Shape extends UIElement {
 
@@ -16,35 +16,35 @@ class Shape extends UIElement {
     }
 
     _renderDraft(context, w, h) {
-        var borderBrush = this.borderBrush();
+        var stroke = this.stroke();
 
         this.drawPath(context, w, h);
-        Brush.fill(this.backgroundBrush(), context, 0, 0, w, h);
-        if (!borderBrush || !borderBrush.type || !borderBrush.strokePosition) {
+        Brush.fill(this.fill(), context, 0, 0, w, h);
+        if (!stroke || !stroke.type || !stroke.position) {
 
-            Brush.stroke(borderBrush, context, 0, 0, w, h);
-        } else if (borderBrush.strokePosition === StrokePosition.Inside) {
+            Brush.stroke(stroke, context, 0, 0, w, h);
+        } else if (stroke.position === StrokePosition.Inside) {
             context.clip();
-            Brush.stroke(borderBrush, context, 0, 0, w, h, 2);
-        } else if (borderBrush.strokePosition === StrokePosition.Outside) {
+            Brush.stroke(stroke, context, 0, 0, w, h, 2);
+        } else if (stroke.position === StrokePosition.Outside) {
             context.beginPath();
             context.rect(2 * w, -h, -3 * w, 3 * h);
             this.drawPath(context, w, h);
             context.clip();
             context.beginPath();
             this.drawPath(context, w, h);
-            Brush.stroke(borderBrush, context, 0, 0, w, h, 2);
+            Brush.stroke(stroke, context, 0, 0, w, h, 2);
         }
     }
 
     _renderFinal(context, w, h, environment) {
-        var borderBrush = this.borderBrush();
+        var stroke = this.stroke();
 
         context.beginPath();
         this.drawPath(context, w, h);
-        Brush.fill(this.backgroundBrush(), context, 0, 0, w, h);
-        if (!borderBrush || !borderBrush.type || !borderBrush.strokePosition || !this.closed()) {
-            Brush.stroke(borderBrush, context, 0, 0, w, h);
+        Brush.fill(this.fill(), context, 0, 0, w, h);
+        if (!stroke || !stroke.type || !stroke.position || !this.closed()) {
+            Brush.stroke(stroke, context, 0, 0, w, h);
         } else {
             var clipingRect = this.getBoundingBoxGlobal(false, true);
             if(true || !environment.offscreen) {
@@ -78,8 +78,8 @@ class Shape extends UIElement {
             offContext.beginPath();
             this.drawPath(offContext, w, h);
 
-            Brush.stroke(borderBrush, offContext, 0, 0, w, h, 2);
-            if (borderBrush.strokePosition === StrokePosition.Inside) {
+            Brush.stroke(stroke, offContext, 0, 0, w, h, 2);
+            if (stroke.position === StrokePosition.Inside) {
                 offContext.globalCompositeOperation = "destination-in";
             } else {
                 offContext.globalCompositeOperation = "destination-out";
@@ -113,7 +113,6 @@ class Shape extends UIElement {
         if (dashPattern) {
             context.setLineDash(dashPattern);
         }
-        // context.lineWidth = this.borderWidth();
 
         if (environment.finalRender) {
             this._renderFinal(context, w, h, environment);
@@ -127,12 +126,14 @@ class Shape extends UIElement {
     resizeDimensions() {
         return (this.mode() === "resize" ? ResizeDimension.Both : ResizeDimension.None);
     }
-
-
 }
+Shape.prototype.t = Types.Shape;
 
 PropertyMetadata.registerForType(Shape, {
-    borderBrush: {
+    fill: {
+        defaultValue: Brush.White
+    },
+    stroke: {
         displayName: "Stroke",
         type: "stroke",
         defaultValue: Brush.Black

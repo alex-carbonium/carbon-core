@@ -84,7 +84,6 @@ function getLoaders(settings){
     var plugins = [
         require.resolve("babel-plugin-transform-runtime"),
         require.resolve("babel-plugin-add-module-exports"),
-        fullPath("./babel/classType"),
         //remove when babel 6 has proper support for decorators
         require.resolve("babel-plugin-transform-decorators-legacy")
     ];

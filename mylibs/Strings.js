@@ -38,14 +38,12 @@ define(function(){
     add("Circle", "Circle");
     add("Polygon", "Polygon");
     add("Line", "Line");
-    add("sketch.framework.ImageElement", "Image");
     add("sketch.framework.GroupContainer", "Group");
     // add("sketch.ui.common.PortableDevicePanel", "Phone");
     // add("sketch.ui.common.PortableDeviceResizePanel", "Device page resize panel");
     // add("sketch.ui.common.PortableDevice", "Device");
 
     add("Path", "Path");
-    add("sketch.framework.TemplatedElement", "Asset");
 
     add("sketch.framework.NullPage", "No page");
     add("sketch.framework.NoSelectionElement", "Empty selection");

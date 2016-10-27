@@ -2,7 +2,7 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import PropertyStateRecorder from "framework/PropertyStateRecorder";
 import Container from "framework/Container";
 import UIElement from "framework/UIElement";
-import {Overflow, ChangeMode} from "./Defs";
+import {Overflow, ChangeMode, Types} from "./Defs";
 
 export default class ArtboardTemplateControl extends UIElement {
     constructor() {
@@ -76,6 +76,14 @@ export default class ArtboardTemplateControl extends UIElement {
     updateViewMatrix() {
         super.updateViewMatrix();
         this._container && this._container.updateViewMatrix();
+    }
+
+    displayType(){
+        if(this._artboard){
+            return this._artboard.name() + ' {index}';
+        }
+
+        return "Element {index}"
     }
 
     _cloneFromArtboard(artboard) {
@@ -236,6 +244,7 @@ export default class ArtboardTemplateControl extends UIElement {
         return false;
     }
 }
+ArtboardTemplateControl.prototype.t = Types.ArtboardTemplateControl;
 
 
 PropertyMetadata.registerForType(ArtboardTemplateControl, {

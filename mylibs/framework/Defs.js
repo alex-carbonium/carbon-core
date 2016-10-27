@@ -219,3 +219,75 @@ export var ContentSizing = {
     original: 5,
     manual: 6
 };
+
+export var Types = {
+    'Path': 'p',
+    'Text': 't',
+    'Element': 'e', // UIElement
+    'Container': 'w',
+    'Brush': 'b',
+    'Font': 'f',
+    'Artboard': 'a',
+    'Anchor': 'n',
+    'CorruptedElement': 'x',
+    'DraggingElement': 'd',
+    'Frame': 'F',
+    'FrameSource': 'I',
+    'GroupContainer': 'g',
+    'App': 'A',
+    'Guide': 'H',
+    'CustomGuide': 'C',
+    'LayoutGridColumns': 'L',
+    'LayoutGridLines': 'O',
+    'ArtboardTemplateControl': 'T',
+    'Circle': 'o',
+    'CompositeElement': 'm',
+    'Page': 'G',
+    'Line': 'l',
+    'NoSelectionElement': 'N',
+    'Polygon': 'y',
+    'Rectangle': 'r',
+    'Section': 'S',
+    'SelectComposite': 'M',
+    'SelectFrame': 'E',
+    'Shape': 's',
+    'Star': 'W',
+    'StateBoard': 'Q',
+    'RepeatCell': 'c',
+    'RepeatContainer': 'R',
+    'Story': 'k',
+    'StoryAction': 'K',
+    'ArtboardToolSettings': 'u',
+    'DefaultShapeSettings': 'U',
+    'CompoundPath': 'D',
+    'AlignPanel': 'Z',
+    'Canvas': 'h',
+    'DockPanel': 'V',
+    'StackPanel': 'v',
+    'DefaultFormatter': 'j',
+    'RangeFormatter': 'J',
+    'ArtboardPage': 'P',
+    'ArtboardProxyPage': 'z',
+    'NullPage': 'X',
+    'ClickSpot': 'Y',
+    'QuadAndLock': 'q',
+    'Box': 'B',
+    'Shadow': 'i'
+};
+
+if (DEBUG){
+    var map = {};
+    for (var t in Types){
+        var c = Types[t];
+        if (map.hasOwnProperty(c)){
+            throw new Error("Duplicate type code " + c);
+        }
+        map[c] = true;
+    }
+}
+
+export var StrokePosition = {
+    Center:0,
+    Inside:1,
+    Outside:2
+};

@@ -3,6 +3,7 @@ import PropertyMetadata from "./PropertyMetadata";
 import Brush from "./Brush";
 import logger from "../logger";
 import ObjectFactory from "./ObjectFactory";
+import {Types} from "./Defs";
 
 class CorruptedElement extends Rectangle {
     constructor(data) {
@@ -14,7 +15,7 @@ class CorruptedElement extends Rectangle {
             height: (props.height || 100),
             x: (props.x || 0),
             y: (props.y || 0),
-            borderBrush: (Brush.createFromColor('red'))
+            stroke: (Brush.createFromColor('red'))
         });
 
         if (data) { //else restoring from json
@@ -39,7 +40,7 @@ class CorruptedElement extends Rectangle {
     drawSelf(context, w, h) {
         Rectangle.prototype.drawSelf.apply(this, arguments);
         context.save();
-        Brush.setStroke(this.borderBrush(), context, 0, 0, w, h);
+        Brush.setStroke(this.stroke(), context, 0, 0, w, h);
         context.linePath(0, 0, 0 + w, 0 + h);
         context.stroke();
         context.linePath(0, 0 + h, 0 + w, 0);
@@ -47,6 +48,7 @@ class CorruptedElement extends Rectangle {
         context.restore();
     }
 }
+CorruptedElement.prototype.t = Types.CorruptedElement;
 
 PropertyMetadata.registerForType(CorruptedElement, {
     originalData: {

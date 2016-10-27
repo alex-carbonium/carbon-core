@@ -1,5 +1,6 @@
 import DataNode from "../framework/DataNode";
 import PropertyMetadata from "../framework/PropertyMetadata";
+import {Types} from "../framework/Defs";
 
 class Story extends DataNode {
     constructor() {
@@ -46,6 +47,7 @@ class Story extends DataNode {
         return this.id();
     }
 }
+Story.prototype.t = Types.Story;
 
 PropertyMetadata.registerForType(Story, {
     homeScreen:{

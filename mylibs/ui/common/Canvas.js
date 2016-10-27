@@ -1,11 +1,14 @@
 import Container from "../../framework/Container";
-import {ArrangeStrategies} from "../../framework/Defs";
+import PropertyMetadata from "../../framework/PropertyMetadata";
+import {ArrangeStrategies, Types} from "../../framework/Defs";
 
-class Canvas extends Container{
+export default class Canvas extends Container {
+
 }
+Canvas.prototype.t = Types.Canvas;
 
-Canvas.prototype.__type__ = "canvas";
-
-//TODO: add property metadata
-
-export default Canvas;
+PropertyMetadata.registerForType(Canvas, {
+    arrangeStrategy: {
+        defaultValue: ArrangeStrategies.Canvas
+    }
+});

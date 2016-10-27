@@ -1,4 +1,6 @@
-define(["framework/Properties", "framework/ObjectCache", "framework/TypeDefaults"], function(Properties, ObjectCache, TypeDefaults) {
+import {Types} from "./Defs";
+
+define(["framework/ObjectCache", "framework/TypeDefaults"], function(ObjectCache, TypeDefaults) {
     var Anchor = sketch.framework.Anchor = {};
 
     var defaults = {
@@ -8,11 +10,11 @@ define(["framework/Properties", "framework/ObjectCache", "framework/TypeDefaults
         bottom: false
     };
     function AnchorType(){
-        this.__type__ = "sketch.framework.Anchor";
+        this.t = Types.Anchor;
     }
     AnchorType.prototype = defaults;
 
-    var anchorDefault = TypeDefaults["sketch.framework.Anchor"] = function(){return new AnchorType()};
+    var anchorDefault = TypeDefaults[Types.Anchor] = function(){return new AnchorType()};
 
     Anchor.hashKey = function(values){
         return JSON.stringify(extend(anchorDefault(), values));

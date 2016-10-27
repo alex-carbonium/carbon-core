@@ -1,6 +1,6 @@
 import Container from "./../Container";
 import PropertyMetadata from "./../PropertyMetadata";
-import {ArrangeStrategies, Overflow, ChangeMode} from "./../Defs";
+import {ArrangeStrategies, Overflow, ChangeMode, Types} from "./../Defs";
 import RepeatCell from "./RepeatCell";
 import RepeatMarginTool from "./RepeatMarginTool";
 import RepeatFrameType from "./frame/RepeatFrameType";
@@ -274,6 +274,7 @@ export default class RepeatContainer extends Container{
         return this.selectProps(["innerMarginX", "innerMarginY", "masterWidth", "masterHeight"]);
     }
 }
+RepeatContainer.prototype.t = Types.RepeatContainer;
 
 PropertyMetadata.registerForType(RepeatContainer, {
     masterWidth: {

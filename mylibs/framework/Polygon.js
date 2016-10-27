@@ -2,7 +2,7 @@ import Shape from "framework/Shape";
 import PropertyMetadata from "framework/PropertyMetadata";
 import DefaultFrameType from "decorators/DefaultFrameType";
 import UIElement from "framework/UIElement";
-import {PointDirection} from "framework/Defs";
+import {PointDirection, Types} from "framework/Defs";
 import LineDirectionPoint from "decorators/LineDirectionPoint";
 import RotateFramePoint from "decorators/RotateFramePoint";
 import Environment from "environment";
@@ -123,7 +123,7 @@ class Polygon extends Shape {
     }
 
     convertToPath() {
-        var path = UIElement.construct('Path');
+        var path = UIElement.construct(Types.Path);
 
         var step = 2 * Math.PI / this.pointsCount();
         var r = this.radius();
@@ -142,9 +142,10 @@ class Polygon extends Shape {
         }
 
         path.closed(true);
-        path.backgroundBrush(this.backgroundBrush());
-        path.borderBrush(this.borderBrush());
+        path.fill(this.fill());
+        path.stroke(this.stroke());
         path.styleId(this.styleId());
+        path.name(this.name());
 
         path.x(0);
         path.y(0);
@@ -215,6 +216,7 @@ class Polygon extends Shape {
         return frame;
     }
 }
+Polygon.prototype.t = Types.Polygon;
 
 PropertyMetadata.registerForType(Polygon, {
     radius: {
