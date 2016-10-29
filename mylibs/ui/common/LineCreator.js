@@ -64,7 +64,7 @@ export default klass(EditModeAction, (function () {
             event.handled = true;
             this._element = new Line();
             App.Current.activePage.nameProvider.assignNewName(this._element);
-            var defaultSettings = App.Current.defaultShapeSettings();
+            var defaultSettings = App.Current.defaultLineSettings();
             if (defaultSettings) {
                 this._element.setProps(defaultSettings);
             }

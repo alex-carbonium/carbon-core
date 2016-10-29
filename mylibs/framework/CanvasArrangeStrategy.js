@@ -1,7 +1,7 @@
 var debug = require("DebugUtil")("carb:canvasArrangeStrategy");
 
 export default {
-    arrange: function(container, event){
+    arrange: function(container, event, changeMode){
         var autoHeight = container.autoHeight();
         var autoWidth = container.autoWidth();
 
@@ -56,7 +56,7 @@ export default {
                 };
 
                 if (r.width != newWidth || r.height != newHeight || r.x != newX || r.y != newY){
-                    child.setProps(newProps);
+                    child.setProps(newProps, changeMode);
                 }
             }
 
@@ -106,7 +106,7 @@ export default {
                         x: e.x() - xMin,
                         y: e.y() - yMin
                     };
-                    e.prepareAndSetProps(itemProps);
+                    e.prepareAndSetProps(itemProps, changeMode);
                 }
             }
 

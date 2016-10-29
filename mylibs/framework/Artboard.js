@@ -89,16 +89,16 @@ class Artboard extends Container {
         return this.props.name;
     }
 
-    canAccept(element){
-        if(element instanceof Artboard){
+    canAccept(element) {
+        if (element instanceof Artboard) {
             return false;
         }
 
-        if(element.props.masterId){
+        if (element.props.masterId) {
             var root = element.primitiveRoot();
             var stateboards = this.runtimeProps.stateBoards;
-            for(var i = 0; i < stateboards.length; ++i){
-                if(stateboards[i] === root){
+            for (var i = 0; i < stateboards.length; ++i) {
+                if (stateboards[i] === root) {
                     return false;
                 }
             }
@@ -107,7 +107,7 @@ class Artboard extends Container {
         return super.canAccept(element);
     }
 
-    displayName(){
+    displayName() {
         if (this._recorder.statesCount() > 1) {
             return this.props.name + " (" + this._recorder.getStateById("default").name + ")";
         }
@@ -115,16 +115,16 @@ class Artboard extends Container {
     }
 
     _drawShadow(context, environment) {
-        if(environment.offscreen){
+        if (environment.offscreen) {
             return;
         }
         context.save();
         context.fillStyle = "#9EA2a6";
         context.beginPath();
-        var scale = environment.view.scale() *environment.view.contextScale;
-        var s4 = 4/scale;
-        context.rect(this.x() + this.width(), this.y()+s4, s4, this.height());
-        context.rect(this.x() + s4, this.y()+this.height(), this.width(), s4);
+        var scale = environment.view.scale() * environment.view.contextScale;
+        var s4 = 4 / scale;
+        context.rect(this.x() + this.width(), this.y() + s4, s4, this.height());
+        context.rect(this.x() + s4, this.y() + this.height(), this.width(), s4);
         context.fill();
         context.restore();
     }
@@ -134,7 +134,7 @@ class Artboard extends Container {
 
         super.draw(context, environment);
 
-        if(environment.offscreen){
+        if (environment.offscreen) {
             return;
         }
 
@@ -167,7 +167,7 @@ class Artboard extends Container {
 
     _renderStatesFrame(context) {
         var stateboards = this.runtimeProps.stateBoards;
-        if(!stateboards || !stateboards.length){
+        if (!stateboards || !stateboards.length) {
             return;
         }
 
@@ -176,7 +176,7 @@ class Artboard extends Container {
 
         var stateboards = this.runtimeProps.stateBoards;
         var states = this.props.states;
-        if (states.length !== 0 && stateboards.length !== states.length - 1){
+        if (states.length !== 0 && stateboards.length !== states.length - 1) {
             //can happen if artboard is drawn prior to stateboards linked themselves
             stateboards = this._linkRelatedStateBoards();
         }
@@ -209,7 +209,7 @@ class Artboard extends Container {
 
     clone() {
         var clone = super.clone.apply(this, arguments);
-        if(this._recorder) {
+        if (this._recorder) {
             clone._recorder.initFromJSON(this.props.states.map(x => extend(true, {}, x)));
             clone._recorder.changeState(this.state());
         }
@@ -290,18 +290,18 @@ class Artboard extends Container {
                 this._recorder.changeState(props.state);
             }
         }
-        
-        if(oldProps.name !== undefined) {
+
+        if (oldProps.name !== undefined) {
             PropertyMetadata.removeNamedType('user:' + oldProps.name)
         }
 
-        if(props.customProperties !== undefined ||
+        if (props.customProperties !== undefined ||
             props.states !== undefined
-        || props.name !== undefined) {
+            || props.name !== undefined) {
             this._refreshMetadata();
         }
 
-        if(props.showInToolbox !== undefined && Selection.isOnlyElementSelected(this)){
+        if (props.showInToolbox !== undefined && Selection.isOnlyElementSelected(this)) {
 
             Selection.refreshSelection();
         }
@@ -321,13 +321,14 @@ class Artboard extends Container {
         }
         return this;
     }
-    primitivePath(){
+
+    primitivePath() {
         var parent = this.parent();
         if (!parent || !parent.primitiveRoot()) {
             return null;
         }
         var path = this.runtimeProps.primitivePath;
-        if (!path){
+        if (!path) {
             path = parent.primitivePath().slice();
             path[path.length - 1] = this.id();
             path.push(this.id());
@@ -335,13 +336,14 @@ class Artboard extends Container {
         }
         return path;
     }
-    primitiveRootKey(){
+
+    primitiveRootKey() {
         var parent = this.parent();
         if (!parent || !parent.primitiveRoot()) {
             return null;
         }
         var s = this.runtimeProps.primitiveRootKey;
-        if (!s){
+        if (!s) {
             s = parent.id() + this.id();
             this.runtimeProps.primitiveRootKey = s;
         }
@@ -373,15 +375,15 @@ class Artboard extends Container {
     relayoutCompleted() {
         this.runtimeProps.version++;
         var parent = this.parent();
-        if(parent){
+        if (parent) {
             parent.incrementVersion();
-            if(this.props.showInToolbox){
+            if (this.props.showInToolbox) {
                 parent.makeToolboxConfigDirty();
             }
         }
     }
 
-    get version(){
+    get version() {
         return this.runtimeProps.version;
     }
 
@@ -427,8 +429,8 @@ class Artboard extends Container {
         return this._recorder.addState(name);
     }
 
-    _refreshMetadata(){
-        if(!this._recorder){
+    _refreshMetadata() {
+        if (!this._recorder) {
             return;
         }
         var ArtboardTemplateControl = PropertyMetadata.findAll(Types.ArtboardTemplateControl)._class;
@@ -445,7 +447,7 @@ class Artboard extends Container {
 
     registerSetProps(element, props, oldProps, mode) {
         super.registerSetProps(element, props, oldProps, mode);
-        if (this.props.states.length !== 0){
+        if (this.props.states.length !== 0) {
             this._recorder.trackSetProps("default", element.id(), props, oldProps);
         }
 
@@ -456,7 +458,7 @@ class Artboard extends Container {
             var transferProps = {};
             var hasAnyProps = false;
             for (var propName in props) {
-                if(element === this && (propName === 'x' || propName == 'y' )){
+                if (element === this && (propName === 'x' || propName == 'y' )) {
                     continue;
                 }
                 if (propName === 'customProperties' || propName === 'state' || propName === "states" || propName === "actions" || propName === "showInToolbox" || propName === "tileSize" || propName === "insertAsContent") {
@@ -475,7 +477,7 @@ class Artboard extends Container {
 
     registerInsert(parent, element, index, mode) {
         super.registerInsert(parent, element, index, mode);
-        if (this.props.states.length !== 0){
+        if (this.props.states.length !== 0) {
             this._recorder.trackInsert(parent, element, index);
         }
 
@@ -509,6 +511,7 @@ class Artboard extends Container {
 
         super.trackInserted.apply(this, arguments);
     }
+
     // this on is called when somebody is deleting artboard
     trackDeleted(parent) {
         delete this.runtimeProps.primitivePath;
@@ -526,7 +529,7 @@ class Artboard extends Container {
 
     registerDelete(parent, element, index, mode) {
         super.registerDelete(parent, element, index, mode);
-        if (this.props.states.length !== 0){
+        if (this.props.states.length !== 0) {
             this._recorder.trackDelete(parent, element.id());
         }
 
@@ -551,7 +554,7 @@ class Artboard extends Container {
 
     registerChangePosition(parent, element, index, oldIndex) {
         super.registerChangePosition(parent, element, index, oldIndex);
-        if (this.props.states.length !== 0){
+        if (this.props.states.length !== 0) {
             this._recorder.trackChangePosition(parent, element.id(), index, oldIndex);
         }
 
@@ -563,14 +566,14 @@ class Artboard extends Container {
         }
     }
 
-    fromJSON(){
+    fromJSON() {
         super.fromJSON.apply(this, arguments);
-        if (this._recorder){
+        if (this._recorder) {
             this._recorder.initFromJSON(this.props.states);
         }
     }
 
-    getRecorder(){
+    getRecorder() {
         return this._recorder;
     }
 
@@ -589,7 +592,7 @@ class Artboard extends Container {
             name: this.props.name
         }, true);
 
-        for (var i = 0; i < this.children.length; i++){
+        for (var i = 0; i < this.children.length; i++) {
             var e = this.children[i];
             var clone = e.clone();
             clone.setProps({masterId: e.id()}, ChangeMode.Self);
@@ -598,19 +601,21 @@ class Artboard extends Container {
 
         this.linkStateBoard(stateBoard);
     }
+
     linkStateBoard(stateBoard) {
         stateBoard.artboard = this;
 
-        if(!stateBoard.parent() || stateBoard.parent() === NullContainer) {
+        if (!stateBoard.parent() || stateBoard.parent() === NullContainer) {
             this.parent().add(stateBoard);
         }
         this.runtimeProps.stateBoards.push(stateBoard);
     }
-    _linkRelatedStateBoards(){
+
+    _linkRelatedStateBoards() {
         var id = this.id();
         var stateBoards = this.runtimeProps.stateBoards;
         var missingLinks = this.props.states.filter(x => x.id !== "default" && !stateBoards.some(y => x.id === y.props.stateId));
-        for (var i = 0; i < missingLinks.length; i++){
+        for (var i = 0; i < missingLinks.length; i++) {
             var stateId = missingLinks[i].id;
             var stateBoard = this.parent().findNodeBreadthFirst(x => x.props.masterId === id && x.props.stateId === stateId);
             this.linkStateBoard(stateBoard);
@@ -618,12 +623,12 @@ class Artboard extends Container {
         return stateBoards;
     }
 
-    replaceAction(oldAction, newAction){
-        var index = this.props.actions.findIndex(a=>a===oldAction);
-        if(index >= 0){
+    replaceAction(oldAction, newAction) {
+        var index = this.props.actions.findIndex(a=>a === oldAction);
+        if (index >= 0) {
             var newActions = this.props.actions.slice();
             newActions.splice(index, 1, newAction);
-            this.setProps({actions:newActions});
+            this.setProps({actions: newActions});
         }
     }
 }
@@ -676,23 +681,25 @@ PropertyMetadata.registerForType(Artboard, {
     tileSize: {
         displayName: "@tilesize",
         type: "tileSize",
-        defaultValue:TileSize.Small
+        defaultValue: TileSize.Small
     },
     insertAsContent: {
         displayName: "@ascontent",
-        type:'checkbox',
-        defaultValue:false
+        type: 'checkbox',
+        defaultValue: false
     },
     toolboxGroup: {
         displayName: "@groupname",
-        type:'text',
-        defaultValue:'Custom'
+        type: 'text',
+        defaultValue: 'Custom'
     },
     prepareVisibility(props){
         return {
             tileSize: props.showInToolbox,
             insertAsContent: props.showInToolbox,
-            toolboxGroup: props.showInToolbox
+            toolboxGroup: props.showInToolbox,
+            allowVerticalResize: props.showInToolbox,
+            allowHorizontalResize: props.showInToolbox
         }
     },
     groups: function () {

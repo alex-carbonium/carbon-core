@@ -2,7 +2,7 @@ import {DockStyle, HorizontalAlignment, VerticalAlignment} from "./Defs";
 import * as margins from "math/boxMargins";
 
 export default {
-    arrange: function(container, e){
+    arrange: function(container, e, changeMode){
         var autoWidth = container.autoWidth();
         var autoHeight = container.autoHeight();
         if (e){
@@ -69,7 +69,7 @@ export default {
             }
 
             child.prepareProps(props);
-            child.setProps(props);
+            child.setProps(props, changeMode);
         }
 
         var fillerWidth = (posRight - posLeft) / fillers.length |0;
@@ -87,7 +87,7 @@ export default {
             props.height = fillerHeight + rect.height - outerBox.height;
 
             child.prepareProps(props);
-            child.setProps(props);
+            child.setProps(props, changeMode);
             //child.arrange({oldValue:rect, newValue:props});
         }
 

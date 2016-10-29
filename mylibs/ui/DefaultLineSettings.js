@@ -1,21 +1,20 @@
 import UIElement from "framework/UIElement";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Brush from "framework/Brush";
-import QuadAndLock from "framework/QuadAndLock";
 import AppPropsChanged from "commands/AppPropsChanged";
 import {Types} from "../framework/Defs";
 
-class DefaultShapeSettings extends UIElement {
+class DefaultLineSettings extends UIElement {
     constructor(app){
         super();
         this._app = app;
-        this.props = app.defaultShapeSettings() || PropertyMetadata.getDefaultProps(DefaultShapeSettings.prototype.t);
+        this.props = app.defaultLineSettings() || PropertyMetadata.getDefaultProps(DefaultLineSettings.prototype.t);
     }
 
     constructPropsChangedCommand(changes){
         var changes = extend(this.props, changes);
 
-        return new AppPropsChanged(this._app, {defaultShapeSettings: changes});
+        return new AppPropsChanged(this._app, {defaultLineSettings: changes});
     }
 
     createSelectionFrame(){
@@ -26,18 +25,13 @@ class DefaultShapeSettings extends UIElement {
         }
     }
 }
-DefaultShapeSettings.prototype.t = Types.DefaultShapeSettings;
+DefaultLineSettings.prototype.t = Types.DefaultLineSettings;
 
-PropertyMetadata.extend({[Types.DefaultShapeSettings]: {
-    fill: {
-        displayName: "Fill",
-        type: "fill",
-        defaultValue: Brush.createFromColor("#B6B6B6")
-    },
+PropertyMetadata.extend({[Types.DefaultLineSettings]: {
     stroke: {
         displayName: "Stroke",
         type: "stroke",
-        defaultValue: Brush.Empty
+        defaultValue: Brush.Black
     },
 
     opacity: {
@@ -50,21 +44,16 @@ PropertyMetadata.extend({[Types.DefaultShapeSettings]: {
         },
         defaultValue: 1
     },
-    cornerRadius: {
-        displayName: "Corner radius",
-        defaultValue: QuadAndLock.Default,
-        type: "quadAndLock"
-    },
     groups: function(){
         return [
             {
                 label: "Default Appearance",
                 expanded: true,
-                properties: ["fill", "opacity", "stroke", "cornerRadius"]
+                properties: ["opacity", "stroke"]
             }
         ];
     }
 }});
 
 
-export default DefaultShapeSettings;
+export default DefaultLineSettings;

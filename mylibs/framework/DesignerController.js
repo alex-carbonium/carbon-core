@@ -326,7 +326,7 @@ export default class DesignerController {
 
             var selectedElement = Selection.selectedElement();
             // first check current selection
-            if(selectedElement.hitTest(eventData, this.view.scale())) {
+            if(selectedElement && selectedElement.hitTest(eventData, this.view.scale())) {
                 eventData.element = selectedElement;
                 if (selectedElement.canDrag()) {
                     this._startDraggingData = eventData;

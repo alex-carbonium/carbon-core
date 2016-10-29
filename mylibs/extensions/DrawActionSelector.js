@@ -9,6 +9,7 @@ import HandTool from "ui/common/HandTool";
 import TextTool from "ui/common/text/TextTool";
 import Artboard from "framework/Artboard";
 import DefaultShapeSettings from "ui/DefaultShapeSettings";
+import DefaultLineSettings from "ui/DefaultLineSettings";
 import ArtboardToolSettings from "ui/ArtboardToolSettings";
 import {ViewTool, Types} from "../framework/Defs";
 import Star from "framework/Star";
@@ -129,7 +130,7 @@ var registerCommands = function () {
         that._lineCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._lineCreator;
         that.app.allowSelection(false);
-        Selection.makeSelection([that._defaultShapeSettings]);
+        Selection.makeSelection([that._defaultLineSettings]);
         that.app.setCurrentTool(ViewTool.Line);
     }, "ui-line");
 
@@ -231,6 +232,7 @@ export default class DrawActionSelector extends ExtensionBase {
         this._textTool = new TextTool(app);
 
         this._defaultShapeSettings = new DefaultShapeSettings(app);
+        this._defaultLineSettings = new DefaultLineSettings(app);
         this._artboardToolSettings = new ArtboardToolSettings(app);
 
         var that = this;

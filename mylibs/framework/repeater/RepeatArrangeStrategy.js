@@ -6,7 +6,7 @@ var debug = require("DebugUtil")("carb:repeatArrangeStrategy");
 
 
 var Strategy = {
-    arrange: function(container){
+    arrange: function(container, e, changeMode){
         var items = container.children;
         if (!items.length){
             return;
@@ -38,7 +38,7 @@ var Strategy = {
                     y: y * (masterHeight + container.props.innerMarginY) + offsetY,
                     name: "Cell [" + y + "," + x + "]"
                 };
-                element.setProps(props);
+                element.setProps(props, changeMode);
             }
         }
     },

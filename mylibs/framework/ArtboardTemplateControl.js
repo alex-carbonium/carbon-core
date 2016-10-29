@@ -44,8 +44,8 @@ export default class ArtboardTemplateControl extends UIElement {
             this._container.setProps({
                 width: this._allowHResize ? this.width() : artboard.width(),
                 height: this._allowVResize ? this.height() : artboard.height()
-            });
-            this._container.arrange({oldValue: artboard.getBoundaryRect(), newValue: this.getBoundaryRect()});
+            }, ChangeMode.Self);
+            this._container.arrange({oldValue: artboard.getBoundaryRect(), newValue: this.getBoundaryRect()}, null, ChangeMode.Self);
         }
     }
 
@@ -94,14 +94,15 @@ export default class ArtboardTemplateControl extends UIElement {
             height: artboard.height(),
             id: artboard.id(),
             arrangeStrategy: artboard.props.arrangeStrategy
-        });
+        }, ChangeMode.Self);
+
 
         for (var i = 0; i < artboard.children.length; i++) {
             var child = artboard.children[i];
             var clone = child.clone();
             clone.locked(true);
             clone.id(child.id())
-            container.add(clone, ChangeMode.Root);
+            container.add(clone, ChangeMode.Self);
         }
     };
 
@@ -146,8 +147,8 @@ export default class ArtboardTemplateControl extends UIElement {
             if (this._container && (props.width !== undefined || props.height !== undefined)) {
                 var oldSize = this._container.size();
                 var newSize = this.size();
-                this._container.setProps(newSize, ChangeMode.Root);
-                this._container.arrange({oldValue: oldSize, newValue: newSize});
+                this._container.setProps(newSize, ChangeMode.Self);
+                this._container.arrange({oldValue: oldSize, newValue: newSize}, null, ChangeMode.Self);
             }
 
             if (props.stateId !== undefined) {
@@ -164,7 +165,7 @@ export default class ArtboardTemplateControl extends UIElement {
         this._container.setProps({
             width: this._artboard.width(),
             height: this._artboard.height()}
-            );
+            , ChangeMode.Self);
 
         PropertyStateRecorder.applyState(this._container, defaultState);
         if (stateId !== 'default') {
@@ -175,9 +176,9 @@ export default class ArtboardTemplateControl extends UIElement {
         this._container.setProps({
             width: this.width(),
             height: this.height()
-        });
+        }, ChangeMode.Self);
 
-        this._container.arrange({oldValue: this._artboard.getBoundaryRect(), newValue: this.getBoundaryRect()});
+        this._container.arrange({oldValue: this._artboard.getBoundaryRect(), newValue: this.getBoundaryRect()}, null, ChangeMode.Self);
     }
 
     _updateCustomProperties() {
@@ -191,7 +192,7 @@ export default class ArtboardTemplateControl extends UIElement {
                 var prop = this._propertyMapping[propName];
                 var elementId = prop.controlId;
                 var element = this._container.getElementById(elementId);
-                element.setProps({[prop.propertyName]: props[propName]});
+                element.setProps({[prop.propertyName]: props[propName]}, ChangeMode.Self);
             }
         }
     }

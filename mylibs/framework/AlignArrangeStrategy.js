@@ -1,7 +1,7 @@
 import {HorizontalAlignment, VerticalAlignment} from "./Defs";
 
 export default {
-    arrange: function(container){
+    arrange: function(container, event, changeMode){
         var l = container.x(),
             t = container.y(),
             w = container.width(),
@@ -61,7 +61,7 @@ export default {
 
             if(r.width !== width || r.height !== height || r.x !== x || r.y !== y) {
                 var newRect = {x: x, y: y, width: width, height: height};
-                child.resize(newRect);
+                child.setProps(newRect, changeMode);
             }
 
             // TODO: move inside if, when all templates are fixed, so it won't be needed to do initial arrange

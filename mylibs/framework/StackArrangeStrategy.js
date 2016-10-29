@@ -29,13 +29,13 @@ function getTotalChildrenHeight(container){
 }
 
 export default {
-    arrange: function(container, e){
+    arrange: function(container, e, changeMode){
         if (container.props.stackOrientation === StackOrientation.Horizontal){
-            return this.arrangeHorizontal(container, e);
+            return this.arrangeHorizontal(container, e, changeMode);
         }
-        return this.arrangeVertical(container, e);
+        return this.arrangeVertical(container, e, changeMode);
     },
-    arrangeHorizontal: function(container, e){
+    arrangeHorizontal: function(container, e, changeMode){
         var x = container.x(), y = container.y(), w = container.width(), h = container.height();
         var pos = container.padding().left;
         var topPadding = container.padding().top;
@@ -103,7 +103,7 @@ export default {
 
             if(r.width !== width || r.height !== height || r.x !== x || r.y !== y) {
                 var newRect = {x: x, y: y, width: width, height: height};
-                child.resize(newRect);
+                child.prepareAndSetProps(newRect, changeMode);
             }
 
             pos += child.width() + child.margin().right;
@@ -120,7 +120,7 @@ export default {
         }
         return null;
     },
-    arrangeVertical: function(container, e){
+    arrangeVertical: function(container, e, changeMode){
         var x = container.x(), y = container.y(), w = container.width(), h = container.height();
         var pos = container.padding().top;
         var leftPadding = container.padding().left;
@@ -188,7 +188,7 @@ export default {
 
             if(r.width != width || r.height != height || r.x != x || r.y != y) {
                 var newRect = {x: x, y: y, width: width, height: height};
-                child.resize(newRect);
+                child.prepareAndSetProps(newRect, changeMode);
             }
 
             // TODO: move inside if, when all templates are fixed, so it won't be needed to do initial arrange

@@ -259,6 +259,7 @@ export var Types = {
     'StoryAction': 'K',
     'ArtboardToolSettings': 'u',
     'DefaultShapeSettings': 'U',
+    'DefaultLineSettings': 'UL',
     'CompoundPath': 'D',
     'AlignPanel': 'Z',
     'Canvas': 'h',

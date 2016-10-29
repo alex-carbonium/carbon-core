@@ -785,6 +785,13 @@ class App extends DataNode {
         return this.props.defaultShapeSettings;
     }
 
+    defaultLineSettings(value) {
+        if (arguments.length === 1) {
+            this.setProps({defaultLineSettings: value});
+        }
+        return this.props.defaultLineSettings;
+    }
+
     nextPageId() {
         return createUUID();
     }
@@ -1394,6 +1401,9 @@ App.prototype.t = Types.App;
 PropertyMetadata.registerForType(App, {
     defaultShapeSettings: {
         defaultValue: Object.getPrototypeOf(PropertyMetadata.getDefaultProps(Types.DefaultShapeSettings))
+    },
+    defaultLineSettings: {
+        defaultValue: Object.getPrototypeOf(PropertyMetadata.getDefaultProps(Types.DefaultLineSettings))
     },
     defaultTextSettings: {
         defaultValue: {
