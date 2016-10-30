@@ -183,6 +183,7 @@ function updateSelectionRects() {
             var control = new Rectangle();
             control.setProps({
                 stroke: HighlightBrush,
+                fill: Brush.Empty,
                 width: selection.rect.width,
                 height: selection.rect.height,
                 x: selection.rect.x,

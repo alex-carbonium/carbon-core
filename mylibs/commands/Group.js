@@ -26,6 +26,7 @@ export default {
         var pos = parent.global2local({x: x1, y: y1});
         var rect = {x: pos.x, y: pos.y, width: x2 - x1, height: y2 - y1};
         group.setProps(rect);
+        App.Current.activePage.nameProvider.assignNewName(group);
         parent.insert(group, parent.children.indexOf(element));
 
         for (let i = 0, l = sorted.length; i < l; ++i) {

@@ -3,10 +3,31 @@ import PropertyStateRecorder from "framework/PropertyStateRecorder";
 import Container from "framework/Container";
 import UIElement from "framework/UIElement";
 import {Overflow, ChangeMode, Types} from "./Defs";
+import Selection from "framework/SelectionModel";
 
 export default class ArtboardTemplateControl extends UIElement {
     constructor() {
         super();
+    }
+
+    unwrapToParent(){
+        var parent = this.parent();
+        var children = this._container.children;
+        var x = this.x();
+        var y = this.y();
+        var selection = [];
+        for(var i = 0; i < children.length; ++i){
+            var child = children[i].clone();
+            parent.add(child);
+            child.initId();
+            App.Current.activePage.nameProvider.assignNewName(child);
+            child.x(child.x() + x);
+            child.y(child.y() + y);
+            selection.push(child);
+        }
+        parent.remove(this);
+
+        Selection.makeSelection(selection);
     }
 
     _initFromArtboard() {
@@ -27,6 +48,7 @@ export default class ArtboardTemplateControl extends UIElement {
             props.height = artboard.height();
         }
         this.setProps(props);
+        this.setProps({_unwrapContent:artboard.props.insertAsContent});
 
         this._cloneFromArtboard(artboard);
 
@@ -39,6 +61,10 @@ export default class ArtboardTemplateControl extends UIElement {
         this._updateCustomProperties();
 
         this.runtimeProps.artboardVersion = artboard.runtimeProps.version;
+
+        if(!this.props.width || !this.props.height){
+            this.setProps({width:this._artboard.width(), height:this._artboard.height()});
+        }
 
         if (this._container && (this._allowHResize || this._allowVResize)) {
             this._container.setProps({
@@ -100,7 +126,6 @@ export default class ArtboardTemplateControl extends UIElement {
         for (var i = 0; i < artboard.children.length; i++) {
             var child = artboard.children[i];
             var clone = child.clone();
-            clone.locked(true);
             clone.id(child.id())
             container.add(clone, ChangeMode.Self);
         }
@@ -249,12 +274,6 @@ ArtboardTemplateControl.prototype.t = Types.ArtboardTemplateControl;
 
 
 PropertyMetadata.registerForType(ArtboardTemplateControl, {
-    width: {
-        defaultValue: 200
-    },
-    height: {
-        defaultValue: 200
-    },
     source: {
         displayName: "Artboard",
         type: "artboard",

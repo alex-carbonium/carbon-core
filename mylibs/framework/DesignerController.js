@@ -52,6 +52,10 @@ function stopDrag(event) {
             mouseX: event.mouseX,
             mouseY: event.mouseY
         });
+
+        if(draggingElement.props._unwrapContent){
+            draggingElement.unwrapToParent();
+        }
     }
 
     this.stopDraggingEvent.raise(eventData);
