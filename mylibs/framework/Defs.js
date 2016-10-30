@@ -97,7 +97,8 @@ export var ViewTool = {
     Proto: 12,
     Pencil: 13,
     Hand: 14,
-    PointerDirect: 15
+    PointerDirect: 15,
+    ArtboardViewer: 16
 };
 
 export var PointDirection = {
@@ -228,6 +229,7 @@ export var Types = {
     'Brush': 'b',
     'Font': 'f',
     'Artboard': 'a',
+    'ArtboardFrame': 'af',
     'Anchor': 'n',
     'CorruptedElement': 'x',
     'DraggingElement': 'd',

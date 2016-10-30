@@ -73,6 +73,7 @@ define(["platform/Desktop"], function(Desktop) {
             this.mapShortcut("l", "addLine");
             this.mapShortcut("y", "addPencil");
             this.mapShortcut("a", "artboardTool");
+            this.mapShortcut("shift+a", "artboardViewerTool");
             this.mapShortcut("t", "textTool");
 
             this.mapShortcut("space", "handTool", {repeatable: false});

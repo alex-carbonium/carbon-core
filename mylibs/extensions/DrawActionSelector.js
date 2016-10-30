@@ -11,6 +11,7 @@ import Artboard from "framework/Artboard";
 import DefaultShapeSettings from "ui/DefaultShapeSettings";
 import DefaultLineSettings from "ui/DefaultLineSettings";
 import ArtboardToolSettings from "ui/ArtboardToolSettings";
+import ArtboardFrame from "framework/ArtboardFrame";
 import {ViewTool, Types} from "../framework/Defs";
 import Star from "framework/Star";
 import Polygon from "framework/Polygon";
@@ -104,6 +105,15 @@ var registerCommands = function () {
         that.app.setCurrentTool(ViewTool.Artboard);
 
     }, "ui-rectangle");
+
+    actionManager.registerAction("@artboardViewerTool", "Artboard viewer tool", "Artboard", function () {
+        that.detachAll();
+        that._artboardViewer.attach(that.app, that.view, that.controller);
+        that._currentAction = that._artboardViewer;
+        that.app.allowSelection(false);
+        that.app.setCurrentTool(ViewTool.ArtboardViewer);
+
+    }, "");
 
     actionManager.registerAction("@sectionTool", "Section tool", "Section", function () {
         that.detachAll();
@@ -224,6 +234,7 @@ export default class DrawActionSelector extends ExtensionBase {
         this._polylineCreator = new GraphicalPathCreator(app, Types.Path);
         this._starCreator = new ElementDragCreator(app, Types.Star);
         this._polygonCreator = new ElementDragCreator(app, Types.Polygon);
+        this._artboardViewer = new ElementDragCreator(app, Types.ArtboardFrame);
         this._triangleCreator = new ElementDragCreator(app, Types.Polygon, {pointsCount: 3});
         this._lineCreator = new LineCreator(app);
         this._prototypingTool = new LinkingTool(app);
