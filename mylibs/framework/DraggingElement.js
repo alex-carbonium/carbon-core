@@ -287,7 +287,7 @@ class DraggingElement extends UIElement {
         }
         globalViewMatrix.applyToContext(context);
 
-        if (this._element.clipSelf() && this._element.clipDragClone()) {
+        if (true || this._element.clipSelf() && this._element.clipDragClone()) {
             context.rectPath(0, 0, w, h);
             context.clip();
         }

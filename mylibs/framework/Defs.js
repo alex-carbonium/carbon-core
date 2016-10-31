@@ -161,6 +161,12 @@ export var UnderlineStyle = {
     Dashed: 3
 };
 
+export var ContentBehavior = {
+    Original: 0,
+    Stretch: 1,
+    Scale: 2
+}
+
 export var StyleType = {
     Visual: 1,
     Text: 2
@@ -219,6 +225,11 @@ export var ContentSizing = {
     center: 4,
     original: 5,
     manual: 6
+};
+
+export var ElementState = {
+    Resize: 0,
+    Edit: 1
 };
 
 export var Types = {

@@ -106,7 +106,7 @@ var registerCommands = function () {
 
     }, "ui-rectangle");
 
-    actionManager.registerAction("@artboardViewerTool", "Artboard viewer tool", "Artboard", function () {
+    actionManager.registerAction("@artboardViewerTool", "@artboardFrameTool", "Artboard", function () {
         that.detachAll();
         that._artboardViewer.attach(that.app, that.view, that.controller);
         that._currentAction = that._artboardViewer;
