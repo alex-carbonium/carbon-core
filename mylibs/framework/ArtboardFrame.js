@@ -9,16 +9,16 @@ export default class ArtboardFrameControl extends UIElement {
         this._mode = ElementState.Resize;
     }
 
-    mode(value){
-        if(arguments.length>0){
+    mode(value) {
+        if (arguments.length > 0) {
             this._mode = value;
         }
 
         return this._mode;
     }
 
-    edit(){
-        if(this.mode() !== ElementState.Edit){
+    edit() {
+        if (this.mode() !== ElementState.Edit) {
             this.mode(ElementState.Edit);
             this._internalChange = true;
             Selection.refreshSelection();
@@ -27,7 +27,7 @@ export default class ArtboardFrameControl extends UIElement {
         }
     }
 
-    cancel(){
+    cancel() {
         this.mode(ElementState.Resize);
         this._internalChange = true;
         Selection.refreshSelection();
@@ -35,28 +35,28 @@ export default class ArtboardFrameControl extends UIElement {
         this.invalidate();
     }
 
-    mousedown(event){
-        if(this.mode() === ElementState.Edit) {
+    mousedown(event) {
+        if (this.mode() === ElementState.Edit) {
             this.captureMouse();
             this._mousePressed = true;
             event.handled = true;
-            this._startData = {x:event.x, y:event.y, ox:this.props.offsetX, oy:this.props.offsetY};
+            this._startData = {x: event.x, y: event.y, ox: this.props.offsetX, oy: this.props.offsetY};
         }
     }
 
-    mouseup(event){
-        if(this._mousePressed){
+    mouseup(event) {
+        if (this._mousePressed) {
             this.releaseMouse();
             this._mousePressed = false;
             delete this._startData;
         }
     }
 
-    mousemove(event){
-        if(this._mousePressed) {
+    mousemove(event) {
+        if (this._mousePressed) {
             var dx = event.x - this._startData.x;
             var dy = event.y - this._startData.y;
-            this.setProps({offsetX:Math.round(this._startData.ox + dx), offsetY:Math.round(this._startData.oy + dy)});
+            this.setProps({offsetX: Math.round(this._startData.ox + dx), offsetY: Math.round(this._startData.oy + dy)});
         }
     }
 
@@ -67,12 +67,12 @@ export default class ArtboardFrameControl extends UIElement {
         }
     }
 
-    dblclick(event){
+    dblclick(event) {
         this.edit();
         event.handled = true;
     }
 
-    selectFrameVisible(){
+    selectFrameVisible() {
         return this.mode() !== ElementState.Edit;
     }
 
@@ -140,7 +140,7 @@ export default class ArtboardFrameControl extends UIElement {
         }
 
         context.save();
-        if(this.props.content === ContentBehavior.Scale){
+        if (this.props.content === ContentBehavior.Scale) {
             var scaleX = this.width() / this._artboard.width();
             var scaleY = this.height() / this._artboard.height();
             context.scale(scaleX, scaleY);
@@ -149,7 +149,7 @@ export default class ArtboardFrameControl extends UIElement {
         this._artboard.drawSelf.call(this._artboard, context, this._artboard.width(), this._artboard.height(), environment);
         context.restore();
 
-        if(this.mode() === ElementState.Edit){
+        if (this.mode() === ElementState.Edit) {
             context.save();
             context.rectPath(0, 0, w, h);
             context.lineWidth = 4 * environment.view.contextScale;
@@ -186,7 +186,7 @@ PropertyMetadata.registerForType(ArtboardFrameControl, {
             size: 1,
             items: [
                 {name: "@content_original", value: ContentBehavior.Original},
-               // {name: "@content_stretch", value: ContentBehavior.Stretch},
+                // {name: "@content_stretch", value: ContentBehavior.Stretch},
                 {name: "@content_scale", value: ContentBehavior.Scale}
             ]
         },
@@ -205,10 +205,23 @@ PropertyMetadata.registerForType(ArtboardFrameControl, {
     },
 
     groups(){
-        return [{
-            label: "@settings",
-            properties: ["source", "content", "offsetX", "offsetY", "overflow"]
-        }]
+        return [
+            {
+                label: "@settings",
+                properties: ["source", "content", "offsetX", "offsetY", "overflow"]
+            },
+            {
+                label: "Style",
+                properties: ["opacity"]
+            },
+            {
+                label: "Appearance",
+                properties: ["visible"]
+            },
+            {
+                label: "Layout",
+                properties: ["width", "height", "x", "y", "anchor", "angle", "dockStyle", "horizontalAlignment", "verticalAlignment"]
+            }]
     }
 })
 
