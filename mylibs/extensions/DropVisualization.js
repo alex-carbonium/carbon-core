@@ -35,7 +35,7 @@ class ResizeHint extends Rectangle {
         var scale = environment.view.scale();
 
         var lines = this._text.split('\n');
-        var fontStyle = '12px/12px Arial';
+        var fontStyle = '10px/10px Arial';
 
         var measure = context.measureText(lines[0], fontStyle);
         var width = measure.width;
@@ -49,8 +49,8 @@ class ResizeHint extends Rectangle {
         }
         context.scale(1 / scale, 1 / scale);
 
-        var x = ~~((this._lastPoint.x + 30) * scale),
-            y = ~~((this._lastPoint.y + 30) * scale);
+        var x = ~~((this._lastPoint.x) * scale) + 30,
+            y = ~~((this._lastPoint.y) * scale) + 30;
         var l = x - 4,
             t = y - 3,
             w = width + 18,
