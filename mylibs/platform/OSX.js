@@ -62,7 +62,6 @@ define(["platform/Desktop"], function(Desktop) {
             this.mapShortcut("meta+shift+z", "redo");
 
             this.mapShortcut("f2", "editText");
-            this.mapShortcut("enter", "editText");
 
             this.mapShortcut("meta+shift+d", "debugMode");
             this.mapShortcut("p", "addPath");
@@ -75,6 +74,7 @@ define(["platform/Desktop"], function(Desktop) {
             this.mapShortcut("a", "artboardTool");
             this.mapShortcut("shift+a", "artboardViewerTool");
             this.mapShortcut("t", "textTool");
+            this.mapShortcut("i", "imageTool");
 
             this.mapShortcut("space", "handTool", {repeatable: false});
             this.mapShortcut("space", "handToolRelease", {type: "keyup"});
@@ -86,6 +86,7 @@ define(["platform/Desktop"], function(Desktop) {
             this.mapShortcut("meta+alt+shift+9", "sacred");
 
             this.mapShortcut("esc", "cancel");
+            this.mapShortcut("enter", "enter");
 
             this.mapShortcut("z", "zoomIn");
             this.mapShortcut("alt+z", "zoomOut");

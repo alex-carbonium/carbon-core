@@ -47,7 +47,7 @@ export default class TextTool extends EditModeAction {
         this._dragController.onStopped = this.onDragStopped;
 
         this._dblclickEventToken = Environment.controller.dblclickEvent.bind(this, this.onDblClick);
-        this._editTextToken = this._app.actionManager.subscribe("editText", this.onEditTextAction);
+        this._editTextToken = this._app.actionManager.subscribe("enter", this.onEditTextAction);
 
         this._onAttached = null;
     }

@@ -71,10 +71,10 @@ define(function (require) {
 
 
     var ActionManager = klass({
-        notifyActionStart: function (actionName) {
+        notifyActionStart: function (actionName, e) {
             var event = this._actionStartEvents[actionName];
             if (event) {
-                event.raise(actionName);
+                event.raise(actionName, e);
             }
         },
         notifyActionCompleted: function (actionName, result, ret) {
@@ -514,8 +514,7 @@ define(function (require) {
             //     that.app.viewModel.navigationModel.expandAndFocusOnSearch();
             // });
 
-            this.registerAction("editText", "Edit text", "Edit", function () {
-
+            this.registerAction("enter", "Enter", "", function () {
             }, "");
 
             this.actionPerformed.bind(this, checkConditions);
@@ -547,7 +546,11 @@ define(function (require) {
                 return;
             }
 
-            this.notifyActionStart(actionName);
+            var e = {handed: false};
+            this.notifyActionStart(actionName, e);
+            if (e.handled){
+                return;
+            }
 
             var cmd = action.callback();
 

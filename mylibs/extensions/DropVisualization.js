@@ -8,7 +8,7 @@ import Invalidate from "framework/Invalidate";
 import ExtensionBase from "./ExtensionBase";
 import DesignerView from "framework/DesignerView";
 import Layer from "framework/Layer";
-import PropertyMetadata from "../framework/PropertyMetadata";
+import Container from "../framework/Container";
 
 var fwk = sketch.framework;
 var HighlightBrush = Brush.createFromColor(SharedColors.Highlight);
@@ -75,7 +75,7 @@ class ResizeHint extends Rectangle {
 }
 
 var onDraggingElement = function (event) {
-    if (event.target != null && event.target.canAccept(event.element) && !(event.target instanceof Layer), event) {
+    if (event.element.isDropSupported() && event.target != null && event.target.canAccept(event.element) && !(event.target instanceof Layer), event) {
         this._target = event.target !== event.element.parent() ? event.target : null;
         this._dropData = event.target.getDropData({x: event.mouseX, y: event.mouseY}, event.element);
     } else {
@@ -83,8 +83,10 @@ var onDraggingElement = function (event) {
         this._dropData = null;
     }
     var p = event.draggingElement.position();
-    if (this._target) {
-        p = this._target.global2local(p);
+    if (event.element.showDropTarget() && this._target) {
+        if (this._target instanceof Container){
+            p = this._target.global2local(p);
+        }
         this._targetRect = this._target.getBoundaryRectGlobal();
     } else {
         p = event.element.parent().global2local(p);
@@ -92,10 +94,15 @@ var onDraggingElement = function (event) {
     }
 
     if (!this._resizing && !this._rotating) {
-        this._hint.updateText("Left: " + ~~(p.x + 0.5) + "px\nTop: " + ~~(p.y + 0.5) + "px", {
-            x: event.mouseX,
-            y: event.mouseY
-        });
+        if (event.element.showResizeHint()){
+            this._hint.updateText("Left: " + ~~(p.x + 0.5) + "px\nTop: " + ~~(p.y + 0.5) + "px", {
+                x: event.mouseX,
+                y: event.mouseY
+            });
+        }
+        else{
+            this._hint.updateText(null, null);
+        }
     }
     updateTargetRect.call(this);
 };
@@ -241,10 +248,12 @@ function onStopResizing() {
 
 function onResizing(event) {
     var rect = event.rect;
-    this._hint.updateText("Width: " + ~~(rect.width + 0.5) + "px\nHeight: " + ~~(rect.height + 0.5) + "px", {
-        x: event.mouseX,
-        y: event.mouseY
-    });
+    if (event.element.showResizeHint()){
+        this._hint.updateText("Width: " + ~~(rect.width + 0.5) + "px\nHeight: " + ~~(rect.height + 0.5) + "px", {
+            x: event.mouseX,
+            y: event.mouseY
+        });
+    }
 }
 
 function onStartRotating() {
@@ -258,7 +267,9 @@ function onStopRotating() {
 }
 
 function onRotating(event) {
-    this._hint.updateText("Angle: " + event.angle + "°", {x: event.mouseX, y: event.mouseY});
+    if (event.element.showResizeHint()){
+        this._hint.updateText("Angle: " + event.angle + "°", {x: event.mouseX, y: event.mouseY});
+    }
 }
 
 var appLoaded = function () {

@@ -30,6 +30,10 @@ require("analytics");
 require("jquery/jquery.min");
 require("./libs/jquery.signalR-2.1.1");
 
+require("ui/BasicIcons");
+require("ui/Basic2Icons");
+require("ui/AndroidIcons");
+
 require("commands/AllCommands");
 require("framework/Deferred");
 require("framework/Pubsub");
@@ -42,10 +46,6 @@ require("framework/Circle");
 require("framework/Rectangle");
 require("framework/Line");
 require("framework/Star");
-
-require("ui/BasicIcons");
-require("ui/Basic2Icons");
-require("ui/AndroidIcons");
 
 require("ui/common/Table");
 require("ui/common/TableCell");

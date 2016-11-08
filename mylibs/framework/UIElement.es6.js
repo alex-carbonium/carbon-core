@@ -256,9 +256,11 @@ var UIElement = klass(DataNode, {
         if (!this.decorators) {
             this.decorators = [];
         }
-        this.decorators.push(decorator);
-        decorator.attach(this);
-        Invalidate.requestUpperOnly();
+        if (this.decorators.indexOf(decorator) === -1){
+            this.decorators.push(decorator);
+            decorator.attach(this);
+            Invalidate.requestUpperOnly();
+        }
     },
     removeDecorator: function (decorator) {
         if (!this.decorators) {
@@ -758,9 +760,6 @@ var UIElement = klass(DataNode, {
     hitTransparent: function (value) {
         return false;
     },
-    acceptDisabled: function (value) {
-        return this.field("_acceptDisabled", value, false);
-    },
     canSelect: function (value) {
         return this.field("_canSelect", value, true);
     },
@@ -908,10 +907,19 @@ var UIElement = klass(DataNode, {
         return this.field("_scalableY", value, true);
     },
     isDropSupported: function (value) {
-        return this.field("_isDropSupported", value, true);
+        return true;
+    },
+    showResizeHint: function(){
+        return true;
+    },
+    showDropTarget: function(){
+        return true;
     },
     activeInPreview: function (value) {
         return this.field("_activeInPreview", value, false);
+    },
+    cloneWhenDragging: function(){
+        return true;
     },
     visibleWhenDrag: function (value) {
         if (value !== undefined) {

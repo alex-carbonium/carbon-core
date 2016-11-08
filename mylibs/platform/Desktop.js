@@ -1,10 +1,10 @@
 import All from "platform/All";
-import keyboard from "platform/Keyboard";
 import ActivityMonitor from "ActivityMonitor";
 import AutoSaveTimer from "AutoSaveTimer";
 import PersistentConnection from "server/PersistentConnection";
 import ConsistencyMonitor from "../ConsistencyMonitor";
-import svgParser from "svg/SvgParser";
+//TODO: circular dependency Shape -> Frame -> FrameSource -> IconsInfo -> Platform -> Desktop -> svgParser -> Shape
+//import svgParser from "svg/SvgParser";
 import domUtil from "utils/dom";
 import AnimationGroup from "framework/animation/AnimationGroup";
 import Selection from "framework/SelectionModel";

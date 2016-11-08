@@ -42,6 +42,14 @@ var registerCommands = function () {
         that.app.setCurrentTool(ViewTool.Text);
     }, "ui-text");
 
+    actionManager.registerAction("@imageTool", "Image tool", "Drawing", function () {
+        that.detachAll();
+        that._imageCreator.attach(that.app, that.view, that.controller);
+        that._currentAction = that._imageCreator;
+        that.app.allowSelection(false);
+        that.app.setCurrentTool(ViewTool.Text);
+    }, "ui-text");
+
     actionManager.registerAction("@addPath", "Pen tool", "Drawing", function () {
         that.detachAll();
         that._polylineCreator.attach(that.app, that.view, that.controller);
@@ -241,6 +249,7 @@ export default class DrawActionSelector extends ExtensionBase {
         this._pencilCreator = new PencilCreator(app);
         this._handTool = new HandTool(app);
         this._textTool = new TextTool(app);
+        this._imageCreator = new ElementDragCreator(app, Types.Frame);
 
         this._defaultShapeSettings = new DefaultShapeSettings(app);
         this._defaultLineSettings = new DefaultLineSettings(app);

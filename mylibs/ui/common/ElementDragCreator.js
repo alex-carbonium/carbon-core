@@ -3,6 +3,7 @@ import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
 import SnapController from "framework/SnapController";
 import Environment from "environment";
+import Cursor from "../../framework/Cursor";
 
 define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Matrix) {
     var fwk = sketch.framework;
@@ -15,9 +16,14 @@ define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Ma
                 this._attachMode = "select";
                 this._detachMode = "resize";
             },
+            attach: function(){
+                EditModeAction.prototype.attach.apply(this, arguments);
+                Cursor.setGlobalCursor("crosshair", true);
+            },
             detach(){
                 EditModeAction.prototype.detach.apply(this, arguments);
                 SnapController.clearActiveSnapLines();
+                Cursor.removeGlobalCursor(true);
             },
             mousedown: function (event) {
                 this._mousepressed = true;
@@ -47,6 +53,10 @@ define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Ma
                 return false;
             },
             mouseup: function (event) {
+                if (!this._mousepressed){
+                    //for example, a drag from outside causes mouseup without mousedown
+                    return;
+                }
                 this._mousepressed = false;
 
                 var view = this.view();

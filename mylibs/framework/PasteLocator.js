@@ -3,13 +3,13 @@ import Selection from "./SelectionModel";
 import Environment from "../environment";
 import {intersectRects} from "../math/math";
 
-export function choosePasteLocation(elements, bufferRect, bufferRectLocal){
+export function choosePasteLocation(elements, bufferRect, bufferRectLocal, allowMoveIn){
     //candidates: selected element and all its parents || artboard
     //1. same position - must be visible on screen and on candidate
     //2. center of visible candidate area
     //3. center of viewport
 
-    var tolerance = bufferRect.width * bufferRect.height * .5;
+    var tolerance = allowMoveIn ? 0 : bufferRect.width * bufferRect.height * .5;
 
     var viewport = Environment.view.viewportRect();
     var artboard = Environment.view.page.getActiveArtboard();
@@ -19,7 +19,7 @@ export function choosePasteLocation(elements, bufferRect, bufferRectLocal){
     if (bufferRect && selection.length === 1){
         var current = selection[0];
         do{
-            if (current.canAccept(elements[0])){
+            if (current.canAccept(elements[0], false, allowMoveIn)){
                 candidates.push(current);
             }
             current = current.parent();

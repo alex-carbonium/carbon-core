@@ -8,6 +8,7 @@ import actionManager from "ui/ActionManager";
 import RepeatViewListener from "framework/repeater/RepeatViewListener";
 import TouchHelper from "./TouchHelper";
 import Artboard from "framework/Artboard";
+import Page from "../framework/Page";
 
 function onselect(rect) {
     var selection = this.app.activePage.getElementsInRect(rect);
@@ -21,22 +22,27 @@ function stopDrag(event) {
         handled: false,
         element: draggingElement,
         x: event.x,
-        y: event.y
+        y: event.y,
+        ctrlKey: event.ctrlKey
     };
 
     var that = this;
     if (!draggingElement.isDropSupported()) {
         that._draggingElement.detach();
+        this.stopDraggingEvent.raise(eventData, null);
         return false;
     }
 
     var element = this._draggingOverElement;
-    var parent = that._draggingElement._element.parent();
-    if(parent instanceof Artboard){
-        if(areRectsIntersecting(that._draggingElement.getBoundaryRectGlobal(), parent.getBoundaryRectGlobal())){
-            element = parent;
+    if (element instanceof Page){
+        var parent = that._draggingElement._element.parent();
+        if (parent instanceof Artboard){
+            if(areRectsIntersecting(that._draggingElement.getBoundaryRectGlobal(), parent.getBoundaryRectGlobal())){
+                element = parent;
+            }
         }
     }
+
     if (element !== null) {
         if (event.altKey) {
             that._draggingElement.dropCopyOn(eventData, element);
@@ -45,6 +51,7 @@ function stopDrag(event) {
             element.dropOn(eventData);
         }
     }
+
     that._draggingElement.detach();
 
     if (draggingElement !== null) {
@@ -58,7 +65,7 @@ function stopDrag(event) {
         }
     }
 
-    this.stopDraggingEvent.raise(eventData);
+    this.stopDraggingEvent.raise(eventData, this._draggingOverElement);
 
     Selection.directSelectionEnabled(false);
 }
@@ -138,7 +145,7 @@ function _handleDraggingOver(mousePoint, draggingElement, eventData) {
     Selection.directSelectionEnabled(false);
 
     while (element !== null) {
-        if (element.canAccept(draggingElement, undefined, eventData)) {
+        if (element.canAccept(draggingElement, undefined, eventData.event.ctrlKey)) {
             dragOverElement = element;
             break;
         }
@@ -281,6 +288,8 @@ export default class DesignerController {
 
         this._cancelBinding = actionManager.subscribe('cancel', this.cancel.bind(this));
         RepeatViewListener.ensureSubscribed(this);
+
+        this.actionManager = actionManager;
     }
 
     onpanstart(event) {
@@ -567,15 +576,15 @@ export default class DesignerController {
         var eventData = this.createEventData(event);
         eventData.element = element;
         element.position({x: ~~(eventData.x - element.width() / 2), y: ~~(eventData.y - element.height() / 2)});
-        Selection.unselectAll();
         beginDrag.call(this, eventData);
         stopDragPromise
-            .then(function (e) {
+            .then(e => {
                 this.onmouseup(this.createEventData(e));
-            }.bind(this))
-            .fail(function () {
+            })
+            .catch(e => {
                 this.cancel();
-            }.bind(this));
+                this.stopDraggingEvent.raise(this.createEventData(e), null);
+            });
     }
 
 

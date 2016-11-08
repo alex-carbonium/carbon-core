@@ -345,11 +345,13 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                 element.removing();
 
                 this.releasingChild(element);
-                this.removeChild(element, mode);
+                var idx = this.removeChild(element, mode);
 
                 element.removed();
 
                 this.invalidate();
+
+                return idx;
             },
             replace: function (elementFrom, elementTo) {
                 var idx = this.positionOf(elementFrom);
@@ -379,28 +381,8 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                 //child.onresize.unbind(this._childResizeHandler);
                 child.parent(NullContainer);
             },
-            getAcceptedChildTypes: function () {
-                return null;
-            },
             canAccept: function (element) {
-                if (this.acceptDisabled()) {
-                    return false;
-                }
-
-                var types = this.getAcceptedChildTypes();
-
-                if (!types) {
-                    return element.canBeAccepted(this);
-                }
-
-                var result = false;
-                each(types, function (t) {
-                    if (element instanceof t) {
-                        result = true;
-                        return false;
-                    }
-                });
-                return result && element.canBeAccepted(this);
+                return element.canBeAccepted(this);
             },
             mousedown: function (event) {
                 Container.Super.mousedown.call(this, event); //to hide inplace editor

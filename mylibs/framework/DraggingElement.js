@@ -27,7 +27,6 @@ function applyOrthogonalMove(pos) {
 }
 
 function dropElementOn(event, newParent, target) {
-
     var pos = newParent.global2localDropPosition(this.position());
     var index = undefined;
     if (event) {
@@ -128,24 +127,27 @@ function dropElementOn(event, newParent, target) {
                 props.flipHorizontal = this.flipHorizontal();
             }
 
+            target.prepareAndSetProps(props);
+
             if (target.parent() !== newParent) {
                 newParent.insert(target, index);
             }
-            target.prepareAndSetProps(props);
         }
     }
 
-    var elements = [];
-    target.each(e => {
-        if (e.peek) {
-            var element = e.peek();
-            elements.push(element);
-        }
-        else {
-            elements.push(e);
-        }
-    });
-    Selection.makeSelection(elements);
+    //dragging element should not select, controller should do it if needed
+
+    // var elements = [];
+    // target.each(e => {
+    //     if (e.peek) {
+    //         var element = e.peek();
+    //         elements.push(element);
+    //     }
+    //     else {
+    //         elements.push(e);
+    //     }
+    // });
+    //Selection.makeSelection(elements);
 }
 
 function onMouseMove(event) {
@@ -157,19 +159,25 @@ class DraggingElement extends UIElement {
         super();
         this._element = element;
         this._clone = null;
-        var primitiveRoot = element.primitiveRoot();
-        if (primitiveRoot) {
-            this._clone = primitiveRoot.createDragClone(element);
+        if (element.cloneWhenDragging()){
+            var primitiveRoot = element.primitiveRoot();
+            if (primitiveRoot) {
+                this._clone = primitiveRoot.createDragClone(element);
+            }
+            else {
+                this._clone = element.clone();
+            }
+
+            this._element.setProps({visible: this._element.visibleWhenDrag()}, ChangeMode.Self);
+            this._clone.setProps({id: element.id()}, ChangeMode.Self); // need to have the same id for active frame
         }
-        else {
-            this._clone = element.clone();
+        else{
+            this._clone = this._element;
         }
-        this._element.setProps({visible: this._element.visibleWhenDrag()}, ChangeMode.Self);
 
         this._clone._canDraw = true;
         this._resize = resize;
         var parent = element.parent();
-        this._clone.setProps({id: element.id()}, ChangeMode.Self); // need to have the same id for active frame
         var pos = element.position();
         if (!(element instanceof CompositeElement)) {
             pos = parent.local2global(pos);
@@ -226,7 +234,7 @@ class DraggingElement extends UIElement {
 
         var x = this.x();
         var y = this.y();
-        debug("Drawing at: x=%d y=%d", x, y);
+        debug("Drawing at: x=%d y=%d Clone: x=%d y=%d", x, y, this._clone.x(), this._clone.y());
 
         context.save();
 
@@ -250,7 +258,6 @@ class DraggingElement extends UIElement {
         var oldSize = this._clone.getBoundaryRect();
         var newPos = this._element.parent().global2local({x: x, y: y});
         var rect = {x: newPos.x, y: newPos.y, width: w, height: h, angle: this.angle()};
-        debug("Resizing rect: x=%d y=%d w=%d h=%d", rect.x, rect.y, rect.width, rect.height);
         this._clone.prepareProps(rect);
         this._clone.setProps(rect, ChangeMode.Root);
 
@@ -315,8 +322,11 @@ class DraggingElement extends UIElement {
     }
 
     detach() {
+        debug("Detached");
         if (this._clone) {
-            this._clone.dispose();
+            if (this._element.cloneWhenDragging()){
+                this._clone.dispose();
+            }
             delete this._clone;
         }
 
@@ -325,7 +335,9 @@ class DraggingElement extends UIElement {
             delete this._mouseMoveHandler;
         }
         SnapController.clearActiveSnapLines();
-        this._element.setProps({visible: true}, ChangeMode.Self);
+        if (this._element.cloneWhenDragging()){
+            this._element.setProps({visible: true}, ChangeMode.Self);
+        }
         this.parent().remove(this, ChangeMode.Root);
     }
 
@@ -343,6 +355,7 @@ class DraggingElement extends UIElement {
     }
 
     dragTo(event) {
+        debug("Drag to x=%d y=%d", event.x, event.y);
         var position = this._element.beforeDragTo(event);
 
         if (event.event.shiftKey) {

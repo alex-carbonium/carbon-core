@@ -1,66 +1,38 @@
-import UIElement from "./UIElement";
+import Container from "./Container";
 import FrameSource from "./FrameSource";
 import PropertyMetadata from "./PropertyMetadata";
 import Brush from "./Brush";
 import {ContentSizing, Overflow, Types} from "./Defs";
 import Invalidate from "./Invalidate";
+import FrameEditTool from "./FrameEditTool";
+import EventHelper from "./EventHelper";
 
-// function onLoaded(source){
-//     var doResize = this.autoSize()
-//         || (this.autoSizeOnFirstLoad() && this._firstLoad);
-//
-//     this._firstLoad = false;
-//
-//     if (doResize){
-//         var w = 0, h = 0;
-//
-//         if (source){
-//             w = source.width;
-//             h = source.height;
-//         }
-//
-//         var oldBoundary = this.getBoundaryRect();
-//         var somethingChanged = w !== this.width() || h !== this.height();
-//         if (w !== this.width()){
-//             this.width(w);
-//         }
-//         if (h !== this.height()){
-//             this.height(h);
-//         }
-//         if (somethingChanged){
-//             //this.onresize.raise({oldValue: oldBoundary, newValue: this.getBoundaryRect()});
-//         }
-//         Invalidate.request();
-//     }
-// }
+const DefaultSizing = ContentSizing.fill;
 
-function sourceChanged(source){
-
-    if (source){
-        var that = this;
-        FrameSource.init(source).then(function(source){
-            that.props.source = source;
-            if (source && source.type === fwk.FrameSource.types.font){
-                if (that.fill()){
-                    //this.properties.fill.show();
-                    //this.properties.stroke.show();
-                    fillStrokeChanged.call(that);
-                }
-            } else{
-                //if (this.properties.fill){
-                //    this.properties.fill.hide();
-                //    this.properties.stroke.hide();
-                //}
-            }
-            onLoaded.call(that, source);
-        });
-
-    }
-}
-
-export default class Frame extends UIElement {
+export default class Frame extends Container {
     iconType(){
         return 'icon';
+    }
+
+    prepareProps(changes){
+        super.prepareProps.apply(this, arguments);
+        var source = changes.source || this.source();
+        if (FrameSource.isEditSupported(source)){
+            var widthChanged = changes.hasOwnProperty("width");
+            var heightChanged = changes.hasOwnProperty("height");
+            if (changes.hasOwnProperty("sizing") || widthChanged || heightChanged){
+                var oldRect = this.getContentRect();
+                var newRect = this.getContentRect();
+                if (widthChanged){
+                    newRect.width = changes.width;
+                }
+                if (heightChanged){
+                    newRect.height = changes.height;
+                }
+                FrameSource.prepareProps(changes.sizing || this.sizing(), oldRect, newRect,
+                    changes.sourceProps || this.runtimeProps.sourceProps, changes);
+            }
+        }
     }
 
     propsUpdated(newProps){
@@ -69,8 +41,11 @@ export default class Frame extends UIElement {
             delete this.runtimeProps.loaded;
             delete this.runtimeProps.sourceProps;
         }
+        if (newProps.sourceProps && this.runtimeProps.sourceProps){
+            Object.assign(this.runtimeProps.sourceProps, newProps.sourceProps);
+        }
         var source = this.source();
-        if (FrameSource.isSizingSupported(source)){
+        if (FrameSource.isEditSupported(source)){
             if (newProps.hasOwnProperty("sizing") || newProps.hasOwnProperty("width") || newProps.hasOwnProperty("height")){
                 FrameSource.resize(source, this.sizing(), this.getContentRect(), this.runtimeProps.sourceProps);
             }
@@ -105,31 +80,93 @@ export default class Frame extends UIElement {
         return this.props.sizing;
     }
 
-    drawSelf(context, w, h, environment){
+    fillBackground(){
+        if (!FrameSource.isFillSupported(this.source())){
+            super.fillBackground.apply(this, arguments);
+        }
+    }
+    strokeBorder(){
+        if (!FrameSource.isFillSupported(this.source())){
+            super.strokeBorder.apply(this, arguments);
+        }
+    }
+
+    drawSelf(){
+        if (!this.source()){
+            return;
+        }
+        super.drawSelf.apply(this, arguments);
+    }
+    drawChildren(context, w, h){
         var source = this.source();
+        if (!source){
+            return;
+        }
+
+        context.save();
+
         if (!this.runtimeProps.loaded){
             var promise = FrameSource.load(source);
             if (promise){
                 promise.then(data => {
                     if (data){
                         this.runtimeProps.sourceProps = data;
+                        if (this.props.sourceProps){
+                            Object.assign(this.runtimeProps.sourceProps, this.props.sourceProps);
+                        }
                     }
-                    FrameSource.resize(source, sizing, this.getContentRect(), this.runtimeProps.sourceProps);
+                    FrameSource.resize(source, this.sizing(), this.getContentRect(), this.runtimeProps.sourceProps);
                     Invalidate.request();
                 });
             }
             this.runtimeProps.loaded = true;
         }
-        var sizing = this.sizing();
-        FrameSource.draw(source, context, w, h, sizing, this.runtimeProps.sourceProps);
+
+        FrameSource.draw(source, context, w, h, this.props, this.runtimeProps.sourceProps);
+
+        context.restore();
+    }
+    clip(context, l, t, w, h) {
+        if (this.clipSelf()) {
+            context.rectPath(l, t, w, h);
+            context.clip();
+        }
+    }
+
+    dblclick(){
+        var source = this.source();
+        if (FrameSource.isEditSupported(source)){
+            FrameEditTool.attach(this);
+        }
+        else if (!FrameSource.hasValue(source)){
+            var e = {done: null};
+            Frame.uploadRequested.raise(e);
+            if (e.done){
+                e.done.then(urls => this.prepareAndSetProps({
+                    sizing: DefaultSizing,
+                    sourceProps: null,
+                    source: FrameSource.createFromUrl(urls[0])
+                }));
+            }
+        }
     }
     clipDragClone(){
         return true;
     }
 
-    displayType(){
-        return "Image";
+    canAccept(element, autoInsert, allowMoveInOut){
+        return element instanceof Frame && allowMoveInOut;
     }
+
+    insert(frame){
+        this.prepareAndSetProps({source: frame.props.source, sourceProps: frame.props.sourceProps});
+        this.runtimeProps.sourceProps = frame.runtimeProps.sourceProps;
+        frame.parent().remove(frame);
+        frame.runtimeProps.resized = true;
+        frame.runtimeProps.copiedFrame = this;
+    }
+
+    static uploadRequested = EventHelper.createEvent()
 }
 Frame.prototype.t = Types.Frame;
 
@@ -149,16 +186,23 @@ PropertyMetadata.registerForType(Frame, {
                 {name: "Fit proportionally", value: ContentSizing.fit},
                 {name: "Center", value: ContentSizing.center},
                 {name: "Original", value: ContentSizing.original},
-                {name: "Fit frame", value: ContentSizing.stretch}
+                {name: "Fit frame", value: ContentSizing.stretch},
+                {name: "Manual", value: ContentSizing.manual}
             ]
         },
-        defaultValue: ContentSizing.original
+        defaultValue: DefaultSizing
     },
     overflow: {
         defaultValue: Overflow.Clip
     },
     visibleWhenDrag: {
         defaultValue: false
+    },
+    prepareVisibility: function (props) {
+        var base = PropertyMetadata.findForType(Container);
+        return Object.assign({}, base, {
+            sizing: FrameSource.isEditSupported(props.source)
+        });
     },
     groups: function(element){
         var ownGroups = [
@@ -168,11 +212,11 @@ PropertyMetadata.registerForType(Frame, {
             }
         ];
 
-        var baseGroups = PropertyMetadata.findForType(UIElement).groups();
+        var baseGroups = PropertyMetadata.findForType(Container).groups();
         return ownGroups.concat(baseGroups);
     },
     getNonRepeatableProps: function(element){
-        var base = PropertyMetadata.findForType(UIElement).getNonRepeatableProps(element);
+        var base = PropertyMetadata.findForType(Container).getNonRepeatableProps(element);
         return base.concat(["source"]);
     }
 });

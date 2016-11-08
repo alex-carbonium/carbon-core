@@ -13,6 +13,8 @@ class Clipboard {
         this.buffer = null;
         this.globals = null;
         this.locals = null;
+
+        this.pastingContent = false;
     }
     attach(app){
         this._app = app;
@@ -127,7 +129,7 @@ class Clipboard {
         if (bufferElements){
             var bufferRect = combineRects.apply(null, globals);
             var bufferRectLocal = locals ? combineRects.apply(null, locals) : null;
-            var location = choosePasteLocation(bufferElements, bufferRect, bufferRectLocal);
+            var location = choosePasteLocation(bufferElements, bufferRect, bufferRectLocal, this.pastingContent);
             if (location){
                 Selection.makeSelection([]);
                 for (var i = 0; i < bufferElements.length; i++){
@@ -138,10 +140,20 @@ class Clipboard {
                     });
                     location.parent.add(element);
                 }
+
+                var newSelection;
+                if (this.pastingContent && location.parent.canSelect()){
+                    newSelection = [location.parent];
+                }
+                else{
+                    newSelection = bufferElements;
+                }
                 //cause a little blink if new element was added into the same position
-                setTimeout(() => Selection.makeSelection(bufferElements), 50);
+                setTimeout(() => Selection.makeSelection(newSelection), 50);
             }
         }
+
+        this.pastingContent = false;
     };
 
     testNativeSupport(){

@@ -4,7 +4,6 @@ define(["platform/Platform"], function(platform){
     sketch.framework.Resources["empty_view"] = emptyView;
 
     return sketch.ui.IconsInfo = {
-        "sprites": {},
         "icons": {},
         "fonts": {},
         "default": "",
