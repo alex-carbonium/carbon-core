@@ -63,7 +63,7 @@ export default class Text extends UIElement {
         }
     }
     propsUpdated(newProps, oldProps){
-        if (!newProps.keepEngine //to avoid disposal when editing inline
+        if (!this.runtimeProps.keepEngine //to avoid disposal when editing inline
             && (newProps.width !== undefined
             || newProps.height !== undefined
             || newProps.autoWidth !== undefined
