@@ -519,13 +519,13 @@ class Path extends Shape {
 
     select() {
         this._selected = true;
-        this.registerForLayerDraw(2);
+        this.registerForLayerDraw(2, this);
         Invalidate.request();
     }
 
     unselect() {
         this._selected = false;
-        this.unregisterForLayerDraw(2);
+        this.unregisterForLayerDraw(2, this);
         if (!this._internalChange) {
             Invalidate.request();
             this.mode("resize");
