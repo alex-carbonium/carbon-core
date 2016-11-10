@@ -3,10 +3,9 @@ import Primitive from "./Primitive";
 import UIElement from "framework/UIElement";
 import {PrimitiveType, ChangeMode} from "../Defs";
 import Invalidate from "framework/Invalidate";
+import Selection from "framework/SelectionModel";
 
 var debug = require("DebugUtil")("carb:primitivesSync");
-
-var fwk = sketch.framework;
 
 var handlers = {};
 
@@ -37,7 +36,7 @@ Primitive.mapChangedPageIds = function (primitives) {
 };
 
 Primitive.registerHandler(PrimitiveType.DataNodeAdd, function(container, p){
-    var element = fwk.UIElement.fromJSON(p.node);
+    var element = UIElement.fromJSON(p.node);
     container.insert(element, p.index, ChangeMode.Self);
     return element;
 });
@@ -46,6 +45,9 @@ Primitive.registerHandler(PrimitiveType.DataNodeRemove, function(container, p){
     var element = container.getImmediateChildById(p.childId);
     if (element){
         container.remove(element, ChangeMode.Self);
+        if(Selection.isElementSelected(element)){
+            Selection.unselectGroup([element]);
+        }
     }
 });
 

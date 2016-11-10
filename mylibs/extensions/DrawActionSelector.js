@@ -6,6 +6,7 @@ import PencilCreator from "ui/common/PencilCreator";
 import EditModeAction from "ui/common/EditModeAction";
 import LinkingTool from "ui/prototyping/LinkingTool";
 import HandTool from "ui/common/HandTool";
+import ArtboardsTool from "ui/common/ArtboardsTool";
 import TextTool from "ui/common/text/TextTool";
 import Artboard from "framework/Artboard";
 import DefaultShapeSettings from "ui/DefaultShapeSettings";
@@ -228,7 +229,7 @@ export default class DrawActionSelector extends ExtensionBase {
         this._currentAction = null;
         registerCommands.call(this);
         this._rectCreator = new ElementDragCreator(app, Types.Rectangle);
-        this._artboardCreator = new ElementDragCreator(app, Artboard);
+        this._artboardCreator = new ArtboardsTool(app, Artboard);
         this._sectionCreator = new SectionCreator(app);
         this._circleCreator = new ElementDragCreator(app, Types.Circle);
         this._polylineCreator = new GraphicalPathCreator(app, Types.Path);

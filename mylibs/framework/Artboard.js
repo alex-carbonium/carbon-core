@@ -114,29 +114,40 @@ class Artboard extends Container {
         return super.displayName();
     }
 
-    _drawShadow(context, environment) {
+    drawShadowPath(context, environment) {
         if (environment.offscreen) {
             return;
         }
-        context.save();
-        context.fillStyle = "#9EA2a6";
-        context.beginPath();
+
         var scale = environment.view.scale() * environment.view.contextScale;
         var s4 = 4 / scale;
         context.rect(this.x() + this.width(), this.y() + s4, s4, this.height());
         context.rect(this.x() + s4, this.y() + this.height(), this.width(), s4);
-        context.fill();
+    }
+
+    drawFrameRect(context, environment) {
+        if (environment.offscreen) {
+            return;
+        }
+        context.save();
+        context.beginPath();
+        context.strokeStyle = "#555";
+        var scale =  environment.view.scale();
+        context.lineWidth = 1 / scale;
+        context.rect(this.x() - .5 / scale, this.y() - .5 / scale,  this.width() + 1 / scale, this.height() + 1 / scale);
+        context.stroke();
         context.restore();
     }
 
     draw(context, environment) {
-        this._drawShadow(context, environment);
 
         super.draw(context, environment);
 
         if (environment.offscreen) {
             return;
         }
+
+        this.drawFrameRect(context, environment);
 
         if (this._recorder && this._recorder.statesCount() > 1) {
             this._renderStatesFrame(context);

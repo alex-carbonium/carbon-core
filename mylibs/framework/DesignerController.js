@@ -63,49 +63,6 @@ function stopDrag(event) {
     Selection.directSelectionEnabled(false);
 }
 
-function beginDrag(event) {
-    var element = event.element;
-    var elementStartPosition = element.position();
-    var globalPos = element.parent().local2global(elementStartPosition);
-    this._draggingOffset = {
-        x: event.x - elementStartPosition.x,
-        y: event.y - elementStartPosition.y
-    };
-
-    var holdOffset = {
-        x: event.x - globalPos.x,
-        y: event.y - globalPos.y
-    };
-
-    var eventData = {
-        mouseX: event.x,
-        mouseY: event.y,
-        x: event.x - this._draggingOffset.x,
-        y: event.y - this._draggingOffset.y
-    };
-
-    if (element.startDrag(eventData) !== false) {
-        this._draggingElement = new this.deps.DraggingElement(element, holdOffset);
-        var parent = element.parent();
-        if (!parent.allowMoveOutChildren(undefined, event)) {
-            this._draggingElement.cantChangeParent = true;
-            this._draggingOverElement = parent;
-        } else {
-            delete this._draggingElement.cantChangeParent;
-        }
-
-        this.view.layer3.add(this._draggingElement);
-        this._draggingOffset = {
-            x: event.x - this._draggingElement.x(),
-            y: event.y - this._draggingElement.y()
-        };
-
-        this.startDraggingEvent.raise(eventData);
-    } else {
-        this._draggingElement = null;
-    }
-}
-
 function updateEvent(event) {
     var scale = this.view.scale();
     domUtil.layerX(event, Math.round((domUtil.layerX(event) + this.view.scrollX()) * 100 / scale) / 100);
@@ -307,6 +264,51 @@ export default class DesignerController {
         this.touchHelper.onpinchend(event);
     }
 
+
+    beginDrag(event) {
+        var element = event.element;
+        var elementStartPosition = element.position();
+        var globalPos = element.parent().local2global(elementStartPosition);
+        this._draggingOffset = {
+            x: event.x - elementStartPosition.x,
+            y: event.y - elementStartPosition.y
+        };
+
+        var holdOffset = {
+            x: event.x - globalPos.x,
+            y: event.y - globalPos.y
+        };
+
+        var eventData = {
+            mouseX: event.x,
+            mouseY: event.y,
+            x: event.x - this._draggingOffset.x,
+            y: event.y - this._draggingOffset.y
+        };
+
+        if (element.startDrag(eventData) !== false) {
+            this._draggingElement = new this.deps.DraggingElement(element, holdOffset);
+            var parent = element.parent();
+            if (!parent.allowMoveOutChildren(undefined, event)) {
+                this._draggingElement.cantChangeParent = true;
+                this._draggingOverElement = parent;
+            } else {
+                delete this._draggingElement.cantChangeParent;
+            }
+
+            this.view.layer3.add(this._draggingElement);
+            this._draggingOffset = {
+                x: event.x - this._draggingElement.x(),
+                y: event.y - this._draggingElement.y()
+            };
+
+            this.startDraggingEvent.raise(eventData);
+        } else {
+            this._draggingElement = null;
+        }
+    }
+
+
     onmousedown(eventData) {
         this.mousedownEvent.raise(eventData);
         if (eventData.handled) {
@@ -408,7 +410,7 @@ export default class DesignerController {
 
         // this is needed for delayed dragging (not create dragging element before we move mouse)
         if (this._startDraggingData) {
-            beginDrag.call(this, this._startDraggingData);
+            this.beginDrag(this._startDraggingData);
             this._startDraggingData = null;
         }
 
@@ -554,6 +556,8 @@ export default class DesignerController {
                 }
             }
         }
+
+        return element;
     }
 
     onscroll(event) {
@@ -568,7 +572,7 @@ export default class DesignerController {
         eventData.element = element;
         element.position({x: ~~(eventData.x - element.width() / 2), y: ~~(eventData.y - element.height() / 2)});
         Selection.unselectAll();
-        beginDrag.call(this, eventData);
+        this.beginDrag(eventData);
         stopDragPromise
             .then(function (e) {
                 this.onmouseup(this.createEventData(e));

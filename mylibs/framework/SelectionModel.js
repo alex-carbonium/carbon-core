@@ -230,6 +230,13 @@ class SelectionModel {
         return count !== 0;
     }
 
+    unselectGroup(elements, refreshOnly) {
+        this.unselectAll(refreshOnly);
+        var currentSelection = this._selectCompositeElement.elements;
+        sketch.util.removeGroupFromArray(currentSelection, elements);
+        this._addToSelection(currentSelection, refreshOnly);
+    }
+
     clearSelection() {
         if (this.unselectAll()) {
             this._fireOnElementSelected(null);
