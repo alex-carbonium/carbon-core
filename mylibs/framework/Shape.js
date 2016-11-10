@@ -1,11 +1,14 @@
-import UIElement from "framework/UIElement";
+import Container from "./Container";
 import ResizeDimension from "framework/ResizeDimension";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Brush from "framework/Brush";
 import ContextPool from "framework/render/ContextPool";
 import {Types, StrokePosition} from "./Defs";
+import Frame from "./Frame";
+import Anchor from "./Anchor";
+import GroupContainer from "./GroupContainer";
 
-class Shape extends UIElement {
+class Shape extends Container {
 
     mode(value) {
         return this.field("_mode", value, "resize");
@@ -125,6 +128,26 @@ class Shape extends UIElement {
 
     resizeDimensions() {
         return (this.mode() === "resize" ? ResizeDimension.Both : ResizeDimension.None);
+    }
+
+    canAccept(element, autoInsert, allowMoveInOut){
+        return element instanceof Frame && allowMoveInOut;
+    }
+
+    insert(frame){
+        var rect = this.getBoundaryRect();
+        var parent = this.parent();
+        var idx = parent.remove(this);
+        this.setProps({clipMask: true, x: 0, y: 0, anchor: Anchor.All});
+
+        frame.prepareAndSetProps({x: 0, y: 0, width: rect.width, height: rect.height, anchor: Anchor.All});
+        frame.runtimeProps.resized = true;
+
+        var group = new GroupContainer();
+        group.add(this);
+        group.setProps(rect);
+        group.add(frame);
+        parent.insert(group, idx);
     }
 }
 Shape.prototype.t = Types.Shape;

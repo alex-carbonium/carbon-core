@@ -1,9 +1,10 @@
 import TypeDefaults from "./TypeDefaults";
 import Brush from "./Brush";
-import Promise from "bluebird";
 import backend from "../backend";
 import {ContentSizing, Types} from "./Defs";
 import {fitRect, fillRect} from "../math/Fitting";
+import IconsInfo from "../ui/IconsInfo";
+import Promise from "bluebird";
 
 var FrameSource = {};
 
@@ -18,52 +19,62 @@ FrameSource.types = {
 
 function FrameSourceType (){}
 FrameSourceType.prototype = {
-    type:FrameSource.types.font
+    type: FrameSource.types.url,
+    family: IconsInfo.defaultFontFamily
 };
 
 var FrameSourceDefault = TypeDefaults[Types.FrameSource] = function(){
     return new FrameSourceType();
 };
 
-function drawEmpty(context, x, y, w, h) {
-    if (w > 0 && h > 0){
-        //correct back to 0.5 translation after image element and decrease the bounding box by 1 pixel
-        //this is because clipping cuts off 0.5 pixels of stroke in FF
-        x += 2.5;
-        y += 2.5;
+var iconProps = {fill: Brush.createFromColor("#ABABAB"), stroke: Brush.Empty};
+var iconRuntimeProps = {glyph: IconsInfo.findGlyphString(IconsInfo.defaultFontFamily, "image")};
+function drawEmpty(context, w, h) {
+    context.save();
+    context.fillStyle = "#DEDEDE";
+    context.fillRect(0, 0, w, h);
 
-        w -= 3;
-        h -= 3;
-
-        context.save();
-        context.fillStyle = "#FFFFFF";
-        context.strokeStyle = "#5C5C5E";
-        context.lineWidth = 1;
-        context.rectPath(x, y, w, h, true);
-        context.fill();
-        context.stroke();
-        context.linePath(x, y, x + w, y + h);
-        context.stroke();
-        context.linePath(x + w, y, x, y + h);
-        context.stroke();
-        context.restore();
+    var iw = w;
+    var ih = h;
+    if (w > 64){
+        iw = Math.min(128, w/2 + .5|0);
     }
+    else if (w > 32){
+        iw = 32;
+    }
+    if (h > 64){
+        ih = Math.min(128, h/2 + .5|0);
+    }
+    else if (h > 32){
+        ih = 32;
+    }
+    if (iw !== w || ih !== h){
+        context.translate((w - iw)/2 + .5|0, (h - ih)/2 + .5|0);
+    }
+
+    drawFont(IconsInfo.defaultFontFamily, context, iw, ih, iconProps, iconRuntimeProps);
+
+    context.restore();
 }
 
-function drawFont(source, context, x, y, w, h) {
-    var s = Math.min(w,h)-2;
-    context.font = s+'px ' + source.fontFamily;
+function drawFont(family, context, w, h, props, runtimeProps) {
+    if (!runtimeProps || !runtimeProps.glyph){
+        return;
+    }
+
+    var s = Math.min(w,h) - 2;
+    context.font = s+'px ' + family;
     context.lineHeight = 1;
     context.textBaseline = 'middle';
 
-    var measure = context.measureText(source.str);
-    if(source.fillBrush && source.fillBrush.type){
-        Brush.setFill(source.fillBrush, context, x, y, w, h);
-        context.fillText(source.str, x + ~~((w - measure.width) /2), y + ~~(h/2));
+    var measure = context.measureText(runtimeProps.glyph);
+    if (props.fill !== Brush.Empty){
+        Brush.setFill(props.fill, context, 0, 0, w, h);
+        context.fillText(runtimeProps.glyph, ~~((w - measure.width) /2), ~~(h/2));
     }
-    if(source.strokeBrush && source.strokeBrush.type){
-        Brush.setStroke(source.strokeBrush, context, x, y, w, h);
-        context.strokeText(source.str, x + ~~((w - measure.width) /2), y + ~~(h/2));
+    if (props.stroke !== Brush.Empty){
+        Brush.setStroke(props.stroke, context, 0, 0, w, h);
+        context.strokeText(runtimeProps.glyph, ~~((w - measure.width) /2), ~~(h/2));
     }
 }
 
@@ -103,10 +114,10 @@ function drawTemplate(source, context, x, y, w, h) {
 }
 
 
-FrameSource.draw = function(source, context, w, h, sizing, sourceProps) {
+FrameSource.draw = function(source, context, w, h, props, runtimeProps) {
     switch(source.type){
         case FrameSource.types.font:
-            drawFont(source, context, x, y, w, h);
+            drawFont(source.family, context, w, h, props, runtimeProps);
             return;
         case FrameSource.types.resource:
             drawResource(source, context, x, y, w, h);
@@ -118,11 +129,11 @@ FrameSource.draw = function(source, context, w, h, sizing, sourceProps) {
             drawTemplate(source, context, x, y, w, h);
             return;
         case FrameSource.types.url:
-            drawURL(context, sourceProps);
+            drawURL(context, runtimeProps);
             return;
 
         default:
-            drawEmpty(context, x, y, w, h);
+            drawEmpty(context, w, h);
     }
 }
 
@@ -167,14 +178,17 @@ FrameSource.size = function(source){
         height: source.height
     }
 }
-FrameSource.boundaryRect = function(source) {
-    return {
-        x:0,
-        y:0,
-        width: source.width,
-        height: source.height
+FrameSource.boundaryRect = function(source, runtimeProps) {
+    switch (source.type){
+        case FrameSource.types.url:
+            if (!runtimeProps){
+                return null;
+            }
+            return getUrlImageRect(runtimeProps);
+        default:
+            return null;
     }
-}
+};
 
 function initResourceSource(source){
     if (source.resourceId){
@@ -221,9 +235,9 @@ function loadUrl(source) {
     }
 
     if(url[0] !== '/' && url[0] !== '.'
-        && url.substr(0, backend.fileEndpoint) !== backend.fileEndpoint
+        && url.substr(0, backend.fileEndpoint.length) !== backend.fileEndpoint
         && url.substr(0, "data:image/png".length) !== "data:image/png") {
-        url = backend.servicesEndpoint + "/proxy?" + url;
+        url = backend.servicesEndpoint + "/api/proxy?" + url;
     }
 
     return new Promise((resolve) => {
@@ -235,7 +249,8 @@ function loadUrl(source) {
         }
 
         image.onload = function(){
-            resolve({image});
+            var runtimeProps = {image};
+            resolve(runtimeProps);
             image.onload = null;
             image.onerror = null;
         };
@@ -258,19 +273,39 @@ function drawURL(context, runtimeProps) {
         context.drawImage(image, sr.x, sr.y, sr.width, sr.height, dr.x, dr.y, dr.width, dr.height);
     }
 }
-function resizeUrlImage(sizing, rect, runtimeProps){
+function resizeUrlImage(sizing, newRect, runtimeProps){
     if (runtimeProps.image){
         switch (sizing){
             case ContentSizing.original:
-                runtimeProps.sr = runtimeProps.dr = rect;
+                runtimeProps.sr = runtimeProps.dr = newRect;
                 break;
             case ContentSizing.fit:
                 runtimeProps.sr = getUrlImageRect(runtimeProps);
-                runtimeProps.dr = fitRect(runtimeProps.sr, rect);
+                runtimeProps.dr = fitRect(runtimeProps.sr, newRect);
                 break;
             case ContentSizing.fill:
                 runtimeProps.sr = getUrlImageRect(runtimeProps);
-                runtimeProps.dr = fillRect(runtimeProps.sr, rect);
+                runtimeProps.dr = fillRect(runtimeProps.sr, newRect);
+                break;
+            case ContentSizing.center:
+                var fsr = getUrlImageRect(runtimeProps);
+                var sw = Math.min(fsr.width, newRect.width);
+                var sh = Math.min(fsr.height, newRect.height);
+
+                runtimeProps.sr = {
+                    x: Math.abs(Math.min((newRect.width - fsr.width)/2 + .5|0, 0)),
+                    y: Math.abs(Math.min((newRect.height - fsr.height)/2 + .5|0, 0)),
+                    width: sw, height: sh
+                };
+                runtimeProps.dr = {
+                    x: Math.max((newRect.width - fsr.width)/2 + .5|0, 0),
+                    y: Math.max((newRect.height - fsr.height)/2 + .5|0, 0),
+                    width: sw, height: sh
+                };
+                break;
+            case ContentSizing.stretch:
+                runtimeProps.sr = getUrlImageRect(runtimeProps);
+                runtimeProps.dr = newRect;
                 break;
         }
     }
@@ -279,31 +314,19 @@ function getUrlImageRect(runtimeProps){
     return {x: 0, y: 0, width: runtimeProps.image.width, height: runtimeProps.image.height};
 }
 
+FrameSource.prepareProps = function(sizing, oldRect, newRect, runtimeProps, changes){
+    switch (sizing){
+        case ContentSizing.manual:
+            var dw = newRect.width - oldRect.width;
+            var dh = newRect.height - oldRect.height;
+            var ndr = Object.assign({}, runtimeProps.dr, {width: runtimeProps.dr.width + dw, height: runtimeProps.dr.height + dh});
+            changes.sourceProps = {sr: runtimeProps.sr, dr: ndr};
+            break;
+    }
+};
 
 function initFontSource(source) {
-    source = Object.assign(FrameSourceDefault(), source);
-    source.fontFamily = source.fontFamily || sketch.ui.IconsInfo.defaultFontFamily;
-    source.fillBrush = source.fillBrush || fwk.Brush.createFromResource("default.text");
-    source.strokeBrush = source.strokeBrush || fwk.Stroke.Empty;
-
-
-    var fontFamily = source.fontFamily;
-    var glyphName = source.name;
-    source.str = sketch.ui.IconsInfo.findGlyphString(fontFamily, glyphName);
-
-    if (!source.str){ //due to wrong font upgrade + new support for multiple devices inside the same project
-        for (var fontName in sketch.ui.IconsInfo.fonts){
-            if (fontName !== fontFamily){
-                source.str = sketch.ui.IconsInfo.findGlyphString(fontName, glyphName);
-                if (source.str){
-                    source.fontFamily = fontName;
-                    break;
-                }
-            }
-        }
-    }
-
-    return Deferred.createResolvedPromise(source);
+    return Promise.resolve({glyph: IconsInfo.findGlyphString(source.family, source.name)});
 }
 
 
@@ -324,23 +347,34 @@ FrameSource.load = function(source) {
     }
 };
 
-FrameSource.resize = function(source, sizing, rect, runtimeProps){
+FrameSource.resize = function(source, sizing, newRect, runtimeProps){
     if (runtimeProps){
-        resizeUrlImage(sizing, rect, runtimeProps); //only one supported for now
+        resizeUrlImage(sizing, newRect, runtimeProps); //only one supported for now
     }
 };
 
-FrameSource.isSizingSupported = function(source){
+FrameSource.isEditSupported = function(source){
+    if (!source){
+        return false;
+    }
     return source.type === FrameSource.types.url;
+};
+
+FrameSource.isFillSupported = function(source){
+    if (!source){
+        return false;
+    }
+    return source.type === FrameSource.types.font;
 };
 
 
 FrameSource.clone = function(source) {
-    return Object.assign({}, source);
+    return Object.assign(FrameSourceDefault(), source);
 }
 
 FrameSource.createFromResource = function(resourceId){
     var source = Object.assign(FrameSourceDefault(), {
+        t: Types.FrameSource,
         type:FrameSource.types.resource,
         resourceId:resourceId
     });
@@ -350,6 +384,7 @@ FrameSource.createFromResource = function(resourceId){
 
 FrameSource.createFromResourceAsync = function(resourceId){
     var source = Object.assign(FrameSourceDefault(), {
+        t: Types.FrameSource,
         type:FrameSource.types.resource,
         resourceId:resourceId
     });
@@ -360,6 +395,7 @@ FrameSource.createFromResourceAsync = function(resourceId){
 
 FrameSource.createEmpty = function(){
     var source = Object.assign(FrameSourceDefault(), {
+        t: Types.FrameSource,
         type:FrameSource.types.none
     });
 
@@ -369,6 +405,7 @@ FrameSource.createEmpty = function(){
 
 FrameSource.createFromTemplate = function(templateId){
     var source = Object.assign(FrameSourceDefault(), {
+        t: Types.FrameSource,
         type:FrameSource.types.template,
         templateId:templateId
     });
@@ -378,6 +415,7 @@ FrameSource.createFromTemplate = function(templateId){
 
 FrameSource.createFromSprite = function(spriteName, imageName){
     var source =  Object.assign(FrameSourceDefault(), {
+        t: Types.FrameSource,
         type:FrameSource.types.sprite,
         name:imageName,
         spriteName:spriteName
@@ -388,26 +426,25 @@ FrameSource.createFromSprite = function(spriteName, imageName){
 
 FrameSource.createFromUrl = function(url){
     return Object.assign(FrameSourceDefault(), {
-        type: FrameSource.types.url,
+        t: Types.FrameSource,
         url: url
     });
 };
 
-FrameSource.createFromFont = function(fontFamily, value, width, height){
+FrameSource.createFromFont = function(fontFamily, value){
     var defaultValue = FrameSourceDefault();
-    defaultValue.fontFamily = defaultValue.fontFamily || sketch.ui.IconsInfo.defaultFontFamily;
-    defaultValue.fillBrush = defaultValue.fillBrush || fwk.Brush.createFromResource("default.text");
-    defaultValue.strokeBrush = defaultValue.strokeBrush || fwk.Stroke.Empty;
 
-    var source =  Object.assign(defaultValue, {
+    var props = {
+        t: Types.FrameSource,
         type:FrameSource.types.font,
-        fontFamily:fontFamily,
-        name:value,
-        width:width||0,
-        height:height||0
-    });
+        name:value
+    };
 
-    return source;
+    if (fontFamily !== defaultValue.family){
+        props.family = fontFamily;
+    }
+
+    return Object.assign(defaultValue, props);
 };
 
 

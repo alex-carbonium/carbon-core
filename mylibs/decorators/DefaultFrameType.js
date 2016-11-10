@@ -99,14 +99,16 @@ export default {
         }
         else {
             if (frame.frame) {
-                context.save();
-                CrazyScope.push(false);
-                context.strokeStyle = this.strokeStyle;
-                context.lineWidth = 1;
-                context.rectPath(~~(x * scale), ~~(y * scale), ~~(w * scale / scaleX), ~~(h * scale / scaleY));
-                context.stroke();
-                CrazyScope.pop();
-                context.restore();
+                if (this.strokeStyle){
+                    context.save();
+                    CrazyScope.push(false);
+                    context.strokeStyle = this.strokeStyle;
+                    context.lineWidth = 1;
+                    context.rectPath(~~(x * scale), ~~(y * scale), ~~(w * scale / scaleX), ~~(h * scale / scaleY));
+                    context.stroke();
+                    CrazyScope.pop();
+                    context.restore();
+                }
             }
 
             for (var i = frame.points.length - 1; i >= 0; --i) {

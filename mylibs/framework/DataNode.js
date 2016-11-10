@@ -135,10 +135,10 @@ export default klass({
     ,
     removeChild: function (child, mode = ChangeMode.Model) {
         var idx = this.children.indexOf(child);
-        if (idx === -1) {
-            return;
+        if (idx !== -1) {
+            this.removeChildByIndex(idx, mode);
         }
-        this.removeChildByIndex(idx, mode);
+        return idx;
     }
     ,
     removeChildByIndex: function (index, mode = ChangeMode.Model) {

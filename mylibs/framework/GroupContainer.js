@@ -37,8 +37,8 @@ define(["framework/Container"], function (Container) {
             allowMoveOutChildren: function(value, eventData){
                 return Container.prototype.allowMoveOutChildren.apply(this, arguments) || (eventData && (eventData.event.ctrlKey || eventData.event.metaKey))
             },
-            canAccept: function (element, autoInsert, event) {
-                return event && (event.event.ctrlKey || event.event.metaKey);//!autoInsert && Container.prototype.canAccept.call(this, element);
+            canAccept: function (element, autoInsert, allowMoveInOut) {
+                return allowMoveInOut;//!autoInsert && Container.prototype.canAccept.call(this, element);
             },
             iconType: function () {
                 return 'group';

@@ -47,7 +47,7 @@ export default class TextTool extends EditModeAction {
         this._dragController.onStopped = this.onDragStopped;
 
         this._dblclickEventToken = Environment.controller.dblclickEvent.bind(this, this.onDblClick);
-        this._editTextToken = this._app.actionManager.subscribe("editText", this.onEditTextAction);
+        this._editTextToken = this._app.actionManager.subscribe("enter", this.onEditTextAction);
 
         this._onAttached = null;
     }
@@ -273,6 +273,7 @@ export default class TextTool extends EditModeAction {
         this._editor = this._createEditor(engine, clone);
         this._editedElement = text;
         this._editClone = clone;
+        this._editClone.runtimeProps.keepEngine = true;
 
         this._rangeFormatter = new RangeFormatter();
         this._rangeFormatter.init(this._app, engine, this._editClone, () => this._changed = true);
@@ -309,7 +310,6 @@ export default class TextTool extends EditModeAction {
             props.height = h;
         }
         if (props){
-            props.keepEngine = true;
             this._editClone.setProps(props, ChangeMode.Self);
             //this._editor.engine.updateSize(this._editClone.width(), this._editClone.height());
             this._resizeBackgroundIfNeeded();

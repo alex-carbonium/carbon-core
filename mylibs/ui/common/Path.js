@@ -440,13 +440,13 @@ class Path extends Shape {
             if (this._sourceRect) {
                 scalePointsToNewSize.call(this, this.getBoundaryRect(), this._sourceRect);
                 this.save();
-                this.captureMouse();
+                this.captureMouse(this);
             }
             SnapController.calculateSnappingPointsForPath(this);
 
             this._cancelBinding = actionManager.subscribe('cancel', this.cancel.bind(this));
         } else {
-            this.releaseMouse();
+            this.releaseMouse(this);
             this._cancelBinding = null;
         }
     }
@@ -519,17 +519,17 @@ class Path extends Shape {
 
     select() {
         this._selected = true;
-        this.registerForLayerDraw(2);
+        this.registerForLayerDraw(2, this);
         Invalidate.request();
     }
 
     unselect() {
         this._selected = false;
-        this.unregisterForLayerDraw(2);
+        this.unregisterForLayerDraw(2, this);
         if (!this._internalChange) {
             Invalidate.request();
             this.mode("resize");
-            this.releaseMouse();
+            this.releaseMouse(this);
         }
     }
 
@@ -564,7 +564,7 @@ class Path extends Shape {
             SnapController.clearActiveSnapLines();
             this._currentPoint = null;
             this._handlePoint = null;
-            this.releaseMouse();
+            this.releaseMouse(this);
             this.adjustBoundaries();
             this.invalidate();
             return;
@@ -579,7 +579,7 @@ class Path extends Shape {
             SnapController.clearActiveSnapLines();
             this._currentPoint = null;
             this._handlePoint = null;
-            this.releaseMouse();
+            this.releaseMouse(this);
             if (!pointsEqual(pt, this._originalPoint)) {
                 this.adjustBoundaries();
                 this.changePointAtIndex(pt, pt.idx);
@@ -709,7 +709,7 @@ class Path extends Shape {
             }
             this._originalPoint = clone(pt);
             this._pointOnPath = null;
-            this.captureMouse();
+            this.captureMouse(this);
         } else {
             pt = getClickedHandlePoint.call(this, x, y);
             if (pt != null) {
@@ -717,7 +717,7 @@ class Path extends Shape {
                 this._handlePoint = pt;
                 this._originalPoint = clone(pt);
                 this._pointOnPath = null;
-                this.captureMouse();
+                this.captureMouse(this);
             } else if (this._pointOnPath) {
                 event.handled = true;
 
@@ -725,7 +725,7 @@ class Path extends Shape {
                     this._bendingData = this.calculateOriginalBendingData(this._pointOnPath);
                     // set bending handler
                     this._pointOnPath = null;
-                    this.captureMouse();
+                    this.captureMouse(this);
                     return;
                 }
 
@@ -838,9 +838,9 @@ class Path extends Shape {
         if (this._pointOnPath !== pt) {
             this._pointOnPath = pt;
             if (pt) {
-                this.captureMouse();
+                this.captureMouse(this);
             } else {
-                this.releaseMouse();
+                this.releaseMouse(this);
             }
             Invalidate.requestUpperOnly();
         }
@@ -874,7 +874,7 @@ class Path extends Shape {
         }
 
         if (pt) {
-            this.captureMouse();
+            this.captureMouse(this);
         } else {
             this.releaseMouse()
         }

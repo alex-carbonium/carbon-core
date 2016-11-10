@@ -59,7 +59,7 @@ var backend = globals.backend || {
 
             silent_redirect_uri: window.location.protocol + "//" + window.location.host + "/a/renew",
             automaticSilentRenew: true,
-            silentRequestTimeout: 10000,
+            silentRequestTimeout: 30000,
             monitorSession: false,
             filterProtocolClaims: false,
             loadUserInfo: false

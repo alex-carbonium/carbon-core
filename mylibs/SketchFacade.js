@@ -56,9 +56,11 @@ module.exports = {
     "CommandManager": require("./framework/commands/CommandManager"),
     "Brush": require("./framework/Brush"),
     "Font": require("./framework/Font"),
+    "Anchor": require("./framework/Anchor"),
     "NullContainer": require("./framework/NullContainer"),
     "NullPage": require("./framework/NullPage"),
     "Primitive": require("./framework/sync/Primitive"),
+    "Shape": require("./framework/Shape"),
     "Rectangle": require("./framework/Rectangle"),
     "Circle": require("./framework/Circle"),
     "PubSub": require("./framework/Pubsub"),
@@ -86,6 +88,7 @@ module.exports = {
     "ContextPool": require("./framework/render/ContextPool"),
     "Deferred": require("./framework/Deferred"),
     "Resources": require("./framework/Resources"),
+    "Keyboard": require("./platform/Keyboard"),
     "Platform": require("./platform/Platform"),
     "StyleManager": require("./framework/style/StyleManager"),
     "DataManager": require("./framework/data/DataManager"),
@@ -131,6 +134,8 @@ module.exports = {
     "Story": require("./stories/Story"),
     "StoryAction": require("./stories/StoryAction"),
     "StoryType": Defs.StoryType,
+
+    "Fitting": require("./math/Fitting"),
 
     "Invalidate": require("./framework/Invalidate"),
     "NameProvider": require("./ui/NameProvider")

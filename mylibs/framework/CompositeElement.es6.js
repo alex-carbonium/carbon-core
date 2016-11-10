@@ -270,7 +270,9 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
         this.each(function(element){
             clone.add(element.clone());
         });
-        clone.setCommonProps(this.commonProps);
+        if (this.commonProps){
+            clone.setCommonProps(this.commonProps);
+        }
         return clone;
     },
     startDrag: function(){

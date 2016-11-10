@@ -309,6 +309,14 @@ class SnapController {
         this.snapGuides = [];
         this.clearActiveSnapLines();
     }
+
+    removeGuides(...guides){
+        for (var i = this.snapGuides.length - 1; i >= 0; --i){
+            if (guides.indexOf(this.snapGuides[i]) !== -1){
+                this.snapGuides.splice(i, 1);
+            }
+        }
+    }
 }
 
 export default new SnapController();
