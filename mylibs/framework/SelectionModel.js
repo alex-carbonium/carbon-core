@@ -81,6 +81,10 @@ class SelectionModel {
         return this._selectCompositeElement.count() === 1 && this._selectCompositeElement.has(el);
     }
 
+    count() {
+        return this._selectCompositeElement.count();
+    }
+
     selectedElement() {
         if (this._selectCompositeElement.count() === 0) {
             return null;

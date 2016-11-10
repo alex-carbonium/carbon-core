@@ -24,6 +24,25 @@ export default class ArtboardsTool extends EditModeAction {
     }
 
     mousedown(event) {
+
+        this._cursorNotMoved = true;
+
+        var artboard = App.Current.activePage.getArtboardAtPoint(event);
+        if (artboard) {
+            if (Selection.isElementSelected(artboard)) {
+                var element = Selection.selectedElement();
+            } else {
+                element = artboard;
+            }
+            if (element) {
+                this._startDraggingData = event;
+                this._startDraggingData.element = element;
+            }
+            event.handled = true;
+            return;
+        }
+
+
         this._mousepressed = true;
         if (event.event.ctrlKey || event.event.metaKey) {
             var pos = event;
@@ -72,23 +91,27 @@ export default class ArtboardsTool extends EditModeAction {
                 Selection.selectionMode('new');
             }
         }
-
-        var element = Selection.selectedElement();
-        if(element) {
-            this._startDraggingData = event;
-            this._dragging = true;
-        }
     }
 
     mouseup(event) {
         this._mousepressed = false;
         this._startDraggingData = null;
-        this._dragging = false;
+        if (this._dragging) {
+            this._dragging = false;
+            var artboard = App.Current.activePage.getArtboardAtPoint(event);
+            if(artboard && !Selection.isElementSelected(artboard)) {
+                Selection.makeSelection([artboard]);
+            }
+
+            return;
+        }
 
         if (this._element) {
+            var element = this._element;
+            this._element = null;
             Invalidate.requestUpperOnly();
-            var w = this._element.width()
-                , h = this._element.height();
+            var w = element.width()
+                , h = element.height();
             if (w === 0 && h === 0) {
                 if (this._cursorNotMoved) {
                     this.selectByClick(event);
@@ -97,10 +120,16 @@ export default class ArtboardsTool extends EditModeAction {
                 return;
             }
 
-            App.Current.activePage.dropToPage(this._element.x(), this._element.y(), this._element);
-            var element = this._element;
+            App.Current.activePage.dropToPage(element.x(), element.y(), element);
             Selection.makeSelection([element]);
             this._hoverArtboard = null;// need to rebuild snapping data TODO: consider to just add data for a new element
+        } else {
+            if (this._cursorNotMoved) {
+                this.selectByClick(event);
+                event.handled = true;
+            }
+            return;
+
         }
         if (SystemConfiguration.ResetActiveToolToDefault) {
             App.Current.actionManager.invoke("movePointer");
@@ -111,16 +140,13 @@ export default class ArtboardsTool extends EditModeAction {
 
     mousemove(event) {
 
-        if(this._startDraggingData){
-            var promise = new Promise((resolve, reject) => {
-            });
-            Environment.controller.beginDragElement(event, Selection.selectedElement(), promise);
+        if (this._startDraggingData) {
+            Environment.controller.beginDrag(this._startDraggingData);
             this._dragging = true;
             this._startDraggingData = null;
         }
 
-        if(this._dragging){
-            Environment.controller.onmousemove(event);
+        if (this._dragging) {
             return;
         }
 

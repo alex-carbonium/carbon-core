@@ -131,7 +131,7 @@ class Artboard extends Container {
         }
         context.save();
         context.beginPath();
-        context.strokeStyle = "#555";
+        context.strokeStyle = "#999";
         var scale =  environment.view.scale();
         context.lineWidth = 1 / scale;
         context.rect(this.x() - .5 / scale, this.y() - .5 / scale,  this.width() + 1 / scale, this.height() + 1 / scale);
