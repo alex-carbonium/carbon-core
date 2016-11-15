@@ -35,12 +35,9 @@ export default  {
             var props = frame.element.getPropsDiff(clone.props, oldProps);
 
             frame.element.setProps(props);
-            // frame.element._radiusRatio = clone._radiusRatio;
             commandManager.execute(frame.element.constructPropsChangedCommand(props, oldProps));
 
             frame.resizingElement.detach();
-
-            // App.Current.view.stopRotatingEvent.raise();
         }
     },
     rotateCursorPointer (index, angle) {
@@ -84,10 +81,17 @@ export default  {
         var newRadius = nearestPoint.pointDistance(p1, point);
 
         var r = {};
-        r[point.prop] = newRadius;
+        r[point.prop] = newRadius
 
         frame.resizingElement._clone.prepareProps(r);
         frame.resizingElement._clone.setProps(r);
+
+        if(r.x !== undefined || r.y !== undefined) {
+            var globalPoint = frame.resizingElement._element.parent().local2global(r);
+            r.x = globalPoint.x || r.x;
+            r.y = globalPoint.y || r.y;
+        }
+
         frame.resizingElement.setProps(r);
         Invalidate.requestUpperOnly();
     }

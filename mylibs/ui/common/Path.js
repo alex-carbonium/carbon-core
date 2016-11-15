@@ -440,8 +440,8 @@ class Path extends Shape {
             if (this._sourceRect) {
                 scalePointsToNewSize.call(this, this.getBoundaryRect(), this._sourceRect);
                 this.save();
-                this.captureMouse(this);
             }
+            this.captureMouse(this);
             SnapController.calculateSnappingPointsForPath(this);
 
             this._cancelBinding = actionManager.subscribe('cancel', this.cancel.bind(this));
@@ -564,7 +564,6 @@ class Path extends Shape {
             SnapController.clearActiveSnapLines();
             this._currentPoint = null;
             this._handlePoint = null;
-            this.releaseMouse(this);
             this.adjustBoundaries();
             this.invalidate();
             return;
@@ -579,7 +578,6 @@ class Path extends Shape {
             SnapController.clearActiveSnapLines();
             this._currentPoint = null;
             this._handlePoint = null;
-            this.releaseMouse(this);
             if (!pointsEqual(pt, this._originalPoint)) {
                 this.adjustBoundaries();
                 this.changePointAtIndex(pt, pt.idx);
@@ -837,11 +835,6 @@ class Path extends Shape {
         var pt = this.getPointIfClose({x: event.x, y: event.y});
         if (this._pointOnPath !== pt) {
             this._pointOnPath = pt;
-            if (pt) {
-                this.captureMouse(this);
-            } else {
-                this.releaseMouse(this);
-            }
             Invalidate.requestUpperOnly();
         }
 
@@ -871,12 +864,6 @@ class Path extends Shape {
 
             pt = getClickedHandlePoint.call(this, x, y);
             updateHoverHandlePoint.call(this, pt);
-        }
-
-        if (pt) {
-            this.captureMouse(this);
-        } else {
-            this.releaseMouse()
         }
     }
 

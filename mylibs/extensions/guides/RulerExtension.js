@@ -369,9 +369,9 @@ export default class RulerExtension extends RuntimeExtension {
             invalidate = true;
         }
         if (invalidate) {
-            Cursor.removeGlobalCursor();
             Invalidate.requestUpperOnly();
         }
+        Cursor.removeGlobalCursor();
     }
 
     getGuidesProperty() {

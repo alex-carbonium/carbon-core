@@ -37,6 +37,7 @@ define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Ma
                 this._nextPoint = {x: pos.x, y: pos.y};
                 event.handled = true;
                 this._element = fwk.UIElement.fromType(this._type);
+                this._element.beforeAddFromToolbox();
                 App.Current.activePage.nameProvider.assignNewName(this._element);
                 this._cursorNotMoved = true;
 
@@ -75,6 +76,7 @@ define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Ma
                     }
 
                     App.Current.activePage.dropToPage(this._element.x(), this._element.y(), this._element);
+                    this._element.afterAddFromToolbox();
                     var element = this._element;
                     Selection.makeSelection([element]);
                     this._hoverArtboard = null;// need to rebuild snapping data TODO: consider to just add data for a new element

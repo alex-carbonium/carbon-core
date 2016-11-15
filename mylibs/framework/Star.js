@@ -15,7 +15,6 @@ var radiusChanged = function (changes) {
     changes.y = y - r;
     changes.width = 2 * r;
     changes.height = 2 * r;
-    changes._originalRatio = null;
 };
 
 var StarFrameType = {
@@ -67,15 +66,12 @@ class Star extends Shape {
     }
 
     _updateSize(changes) {
-        var radiusRatio = this.props._originalRatio || (this.internalRadius() / this.externalRadius());
+        var radiusRatio = this._originalRatio || (this.internalRadius() / this.externalRadius());
         var oldSize = this.width();
         var width = changes.width || oldSize;
         var height = changes.height || oldSize;
         var size = Math.min(width, height);
         changes.externalRadius = 0 | size / 2;
-        if(changes.externalRadius == 0 && !this.props._originalRatio){
-            changes._originalRatio = radiusRatio;
-        }
         if (!isNaN(radiusRatio)) {
             changes.internalRadius = changes.externalRadius * radiusRatio;
         }
@@ -145,6 +141,14 @@ class Star extends Shape {
             context.lineTo(x, y);
         }
         context.closePath();
+    }
+
+    beforeAddFromToolbox() {
+        this._originalRatio = (this.internalRadius() / this.externalRadius());
+    }
+
+    afterAddFromToolbox() {
+        delete this._originalRatio;
     }
 
     convertToPath() {
@@ -246,9 +250,8 @@ class Star extends Shape {
                         p.from = {x: w / 2, y: h / 2};
                         p.to = {x: w / 2 + ext, y: h / 2};
                     },
-                    change: function(frame, dx, dy, point, event){
+                    change: function (frame, dx, dy, point, event) {
                         LineDirectionPoint.change(frame, dx, dy, point, event);
-                        frame.element.setProps({_originalRatio:null})
                     }
                 }
             ]

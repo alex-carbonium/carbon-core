@@ -1548,6 +1548,13 @@ var UIElement = klass(DataNode, {
         return res;
     },
 
+    beforeAddFromToolbox:function(){
+
+    },
+    afterAddFromToolbox:function(){
+
+    },
+
     propertyMetadata: function(){
         return PropertyMetadata.findAll(this.t);
     },
