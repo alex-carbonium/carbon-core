@@ -34,7 +34,19 @@ var PointType = {
     Mirrored: 1,
     Disconnected: 2,
     Assymetric: 3
-}
+};
+
+var commandLengths = {
+    m: 2,
+    l: 2,
+    h: 1,
+    v: 1,
+    c: 6,
+    s: 4,
+    q: 4,
+    t: 2,
+    a: 7
+};
 
 function pointsEqual(p1, p2) {
     if (p1 === p2) {
@@ -231,10 +243,10 @@ function moveAllPoints(dx, dy) {
 }
 
 
-function moveCurrentPoint(dx, dy){
+function moveCurrentPoint(dx, dy) {
     var keys = Object.keys(this._selectedPoints);
-    if(keys.length){
-        for(var i = 0; i < keys.length; ++i){
+    if (keys.length) {
+        for (var i = 0; i < keys.length; ++i) {
             var p = this._selectedPoints[keys[i]];
             p.x -= dx;
             p.y -= dy;
@@ -266,7 +278,7 @@ class DeleteCurrentPoints extends Command {
     }
 
     execute() {
-        var keys = Object.keys(this.path._selectedPoints).map(k=>k-0).sort((a,b)=>b-a);
+        var keys = Object.keys(this.path._selectedPoints).map(k=>k - 0).sort((a, b)=>b - a);
         if (keys.length) {
             for (var i = 0; i < keys.length; ++i) {
                 this.path.removePointAtIndex(keys[i]);
@@ -278,6 +290,112 @@ class DeleteCurrentPoints extends Command {
 
         updateSelectedPoint.call(this.path, null);
     }
+}
+
+function drawArc(path, x, y, coords) {
+    var rx = coords[0];
+    var ry = coords[1];
+    var rot = coords[2];
+    var large = coords[3];
+    var sweep = coords[4];
+    var ex = coords[5];
+    var ey = coords[6];
+    var segs = arcToSegments(ex, ey, rx, ry, large, sweep, rot, x, y);
+    for (var i=0; i<segs.length; i++) {
+        var bez = segmentToBezier.apply(this, segs[i]);
+        path.bezierCurveToPoint.apply(path, bez);
+    }
+}
+
+var arcToSegmentsCache = { },
+    segmentToBezierCache = { },
+    _join = Array.prototype.join,
+    argsString;
+
+// Generous contribution by Raph Levien, from libsvg-0.1.0.tar.gz
+function arcToSegments(x, y, rx, ry, large, sweep, rotateX, ox, oy) {
+    argsString = _join.call(arguments);
+    if (arcToSegmentsCache[argsString]) {
+        return arcToSegmentsCache[argsString];
+    }
+
+    var th = rotateX * (Math.PI/180);
+    var sin_th = Math.sin(th);
+    var cos_th = Math.cos(th);
+    rx = Math.abs(rx);
+    ry = Math.abs(ry);
+    var px = cos_th * (ox - x) * 0.5 + sin_th * (oy - y) * 0.5;
+    var py = cos_th * (oy - y) * 0.5 - sin_th * (ox - x) * 0.5;
+    var pl = (px*px) / (rx*rx) + (py*py) / (ry*ry);
+    if (pl > 1) {
+        pl = Math.sqrt(pl);
+        rx *= pl;
+        ry *= pl;
+    }
+
+    var a00 = cos_th / rx;
+    var a01 = sin_th / rx;
+    var a10 = (-sin_th) / ry;
+    var a11 = (cos_th) / ry;
+    var x0 = a00 * ox + a01 * oy;
+    var y0 = a10 * ox + a11 * oy;
+    var x1 = a00 * x + a01 * y;
+    var y1 = a10 * x + a11 * y;
+
+    var d = (x1-x0) * (x1-x0) + (y1-y0) * (y1-y0);
+    var sfactor_sq = 1 / d - 0.25;
+    if (sfactor_sq < 0) sfactor_sq = 0;
+    var sfactor = Math.sqrt(sfactor_sq);
+    if (sweep === large) sfactor = -sfactor;
+    var xc = 0.5 * (x0 + x1) - sfactor * (y1-y0);
+    var yc = 0.5 * (y0 + y1) + sfactor * (x1-x0);
+
+    var th0 = Math.atan2(y0-yc, x0-xc);
+    var th1 = Math.atan2(y1-yc, x1-xc);
+
+    var th_arc = th1-th0;
+    if (th_arc < 0 && sweep === 1){
+        th_arc += 2*Math.PI;
+    } else if (th_arc > 0 && sweep === 0) {
+        th_arc -= 2 * Math.PI;
+    }
+
+    var segments = Math.ceil(Math.abs(th_arc / (Math.PI * 0.5 + 0.001)));
+    var result = [];
+    for (var i=0; i<segments; i++) {
+        var th2 = th0 + i * th_arc / segments;
+        var th3 = th0 + (i+1) * th_arc / segments;
+        result[i] = [xc, yc, th2, th3, rx, ry, sin_th, cos_th];
+    }
+
+    return (arcToSegmentsCache[argsString] = result);
+}
+
+function segmentToBezier(cx, cy, th0, th1, rx, ry, sin_th, cos_th) {
+    argsString = _join.call(arguments);
+    if (segmentToBezierCache[argsString]) {
+        return segmentToBezierCache[argsString];
+    }
+
+    var a00 = cos_th * rx;
+    var a01 = -sin_th * ry;
+    var a10 = sin_th * rx;
+    var a11 = cos_th * ry;
+
+    var th_half = 0.5 * (th1 - th0);
+    var t = (8/3) * Math.sin(th_half * 0.5) * Math.sin(th_half * 0.5) / Math.sin(th_half);
+    var x1 = cx + Math.cos(th0) - t * Math.sin(th0);
+    var y1 = cy + Math.sin(th0) + t * Math.cos(th0);
+    var x3 = cx + Math.cos(th1);
+    var y3 = cy + Math.sin(th1);
+    var x2 = x3 + t * Math.sin(th1);
+    var y2 = y3 - t * Math.cos(th1);
+
+    return (segmentToBezierCache[argsString] = [
+        a00 * x1 + a01 * y1,      a10 * x1 + a11 * y1,
+        a00 * x2 + a01 * y2,      a10 * x2 + a11 * y2,
+        a00 * x3 + a01 * y3,      a10 * x3 + a11 * y3
+    ]);
 }
 
 class Path extends Shape {
@@ -320,17 +438,17 @@ class Path extends Shape {
         return this.points[idx];
     }
 
-    set nextPoint(value){
-        if(value != this._nextPoint){
+    set nextPoint(value) {
+        if (value != this._nextPoint) {
             Invalidate.requestUpperOnly();
         }
         this._nextPoint = value;
-        if(this._nextPoint){
+        if (this._nextPoint) {
             this._initPoint(value);
         }
     }
 
-    get nextPoint(){
+    get nextPoint() {
         return this._nextPoint;
     }
 
@@ -343,7 +461,7 @@ class Path extends Shape {
         }
     }
 
-    getMaxOuterBorder(){
+    getMaxOuterBorder() {
         var res = super.getMaxOuterBorder();
 
         return res * 4;
@@ -362,7 +480,7 @@ class Path extends Shape {
     }
 
     _roundPoint(pt) {
-        var x,y;
+        var x, y;
         if (this.props.pointRounding === 0) {
             x = (0 | pt.x * 100) / 100;
             y = (0 | pt.y * 100) / 100;
@@ -373,7 +491,7 @@ class Path extends Shape {
             x = Math.round(pt.x);
             y = Math.round(pt.y);
         }
-        if(pt.type != PointType.Straight && pt.type !== undefined) {
+        if (pt.type != PointType.Straight && pt.type !== undefined) {
             var dx = pt.x - x;
             var dy = pt.y - y;
             pt.cp1x -= dx;
@@ -424,7 +542,7 @@ class Path extends Shape {
         return this.props.mode;
     }
 
-    cancel(){
+    cancel() {
         this.mode("resize");
         this._internalChange = true;
         Selection.refreshSelection();
@@ -432,7 +550,7 @@ class Path extends Shape {
     }
 
     switchToEditMode(edit) {
-        if(this._cancelBinding){
+        if (this._cancelBinding) {
             this._cancelBinding.dispose();
         }
         if (edit) {
@@ -533,7 +651,7 @@ class Path extends Shape {
         }
     }
 
-    edit(){
+    edit() {
         this.mode("edit");
         this._internalChange = true;
         Selection.refreshSelection();
@@ -690,7 +808,7 @@ class Path extends Shape {
 
         if (pt && event.event.shiftKey) {
             addToSelectedPoints.call(this, pt);
-        } else if(!pt || !this._selectedPoints[pt.idx]) {
+        } else if (!pt || !this._selectedPoints[pt.idx]) {
             clearSelectedPoints.call(this);
         }
 
@@ -874,7 +992,7 @@ class Path extends Shape {
         return this.props.closed;
     }
 
-    prepareProps(changes){
+    prepareProps(changes) {
         if (changes.width !== undefined && changes.width < 1) {
             changes.width = 1;
         }
@@ -976,8 +1094,8 @@ class Path extends Shape {
             }
 
             this.drawPath(context, w, h);
-            if(this.nextPoint && this.points.length && !this.closed()){
-                drawSegment.call(this, context, this.nextPoint, this.points[this.points.length-1], sx, sy);
+            if (this.nextPoint && this.points.length && !this.closed()) {
+                drawSegment.call(this, context, this.nextPoint, this.points[this.points.length - 1], sx, sy);
             }
             context.stroke();
 
@@ -1487,8 +1605,16 @@ class Path extends Shape {
         this._lastPoint = this.addPoint(point);
     }
 
+    moveTo(x, y) {
+        this._lastPoint = this.addPoint({x,y});
+    }
+
     lineToPoint(point) {
         this._lastPoint = this.addPoint(point);
+    }
+
+    lineTo(x,y) {
+        this._lastPoint = this.addPoint({x,y});
     }
 
     curveToPoint(point, cp1, cp2) {
@@ -1499,6 +1625,342 @@ class Path extends Shape {
         this._lastPoint.cp1x = cp2.x;
         this._lastPoint.cp1y = cp2.y;
         this._lastPoint.type = PointType.Assymetric;
+    }
+
+    bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x,y) {
+        this._lastPoint.cp2x = cp1x;
+        this._lastPoint.cp2y = cp1y;
+        this._lastPoint.type = PointType.Assymetric;
+        this._lastPoint = this.addPoint({x,y});
+        this._lastPoint.cp1x = cp2x;
+        this._lastPoint.cp1y = cp2y;
+        this._lastPoint.type = PointType.Assymetric;
+    }
+
+    quadraticCurveTo( cx, cy, x,y) {
+        this.bezierCurveTo(x, y, cx, cy, cx, cy);
+    }
+
+
+    fromSvgString(d) {
+        var path = d.match(/[mzlhvcsqta][^mzlhvcsqta]*/gi);
+        var svgCommands = this._parsePath(path);
+        this._renderSvgCommands(svgCommands);
+        this.adjustBoundaries();
+    }
+
+    _parsePath(path) {
+        var result = [],
+            currentPath,
+            chunks,
+            parsed;
+
+        for (var i = 0, chunksParsed, len = path.length; i < len; i++) {
+            currentPath = path[i];
+            chunks = currentPath.slice(1).trim().replace(/(\d)-/g, '$1###-').split(/\s|,|###/);
+            chunksParsed = [currentPath.charAt(0)];
+
+            for (var j = 0, jlen = chunks.length; j < jlen; j++) {
+                parsed = parseFloat(chunks[j]);
+                if (!isNaN(parsed)) {
+                    chunksParsed.push(parsed);
+                }
+            }
+
+            var command = chunksParsed[0].toLowerCase(),
+                commandLength = commandLengths[command];
+
+            if (chunksParsed.length - 1 > commandLength) {
+                for (var k = 1, klen = chunksParsed.length; k < klen; k += commandLength) {
+                    result.push([chunksParsed[0]].concat(chunksParsed.slice(k, k + commandLength)));
+                }
+            }
+            else {
+                result.push(chunksParsed);
+            }
+        }
+
+        return result;
+    }
+
+    _renderSvgCommands(commands) {
+        var current, // current instruction
+            previous = null,
+            x = 0, // current x
+            y = 0, // current y
+            controlX = 0, // current control point x
+            controlY = 0, // current control point y
+            tempX,
+            tempY,
+            scaleX = 1,
+            scaleY = 1,
+            tempControlX,
+            tempControlY,
+            l = 0,//this.x(),//-((this.width() / 2) + this.pathOffset.x),
+            t = 0;//this.y();//-((this.height() / 2) + this.pathOffset.y);
+
+        for (var i = 0, len = commands.length; i < len; ++i) {
+
+            current = commands[i];
+
+            switch (current[0]) { // first letter
+
+                case 'l': // lineto, relative
+                    x += current[1] * scaleX;
+                    y += current[2] * scaleY;
+                    this.lineTo(x + l, y + t);
+                    break;
+
+                case 'L': // lineto, absolute
+                    x = current[1] * scaleX;
+                    y = current[2] * scaleY;
+                    this.lineTo(x + l, y + t);
+                    break;
+
+                case 'h': // horizontal lineto, relative
+                    x += current[1] * scaleX;
+                    this.lineTo(x + l, y + t);
+                    break;
+
+                case 'H': // horizontal lineto, absolute
+                    x = current[1] * scaleX;
+                    this.lineTo(x + l, y + t);
+                    break;
+
+                case 'v': // vertical lineto, relative
+                    y += current[1] * scaleY;
+                    this.lineTo(x + l, y + t);
+                    break;
+
+                case 'V': // verical lineto, absolute
+                    y = current[1] * scaleY;
+                    this.lineTo(x + l, y + t);
+                    break;
+
+                case 'm': // moveTo, relative
+                    x += current[1] * scaleX;
+                    y += current[2] * scaleY;
+                    // draw a line if previous command was moveTo as well (otherwise, it will have no effect)
+                    this[(previous && (previous[0] === 'm' || previous[0] === 'M')) ? 'lineTo' : 'moveTo'](x + l, y + t);
+                    break;
+
+                case 'M': // moveTo, absolute
+                    x = current[1] * scaleX;
+                    y = current[2] * scaleY;
+                    // draw a line if previous command was moveTo as well (otherwise, it will have no effect)
+                    this[(previous && (previous[0] === 'm' || previous[0] === 'M')) ? 'lineTo' : 'moveTo'](x + l, y + t);
+                    break;
+
+                case 'c': // bezierCurveTo, relative
+                    tempX = x + current[5] * scaleX;
+                    tempY = y + current[6] * scaleY;
+                    controlX = x + current[3] * scaleX;
+                    controlY = y + current[4] * scaleY;
+                    this.bezierCurveTo(
+                        x + current[1] * scaleX + l, // x1
+                        y + current[2] * scaleY + t, // y1
+                        controlX + l, // x2
+                        controlY + t, // y2
+                        tempX + l,
+                        tempY + t
+                    );
+                    x = tempX;
+                    y = tempY;
+                    break;
+
+                case 'C': // bezierCurveTo, absolute
+                    x = current[5] * scaleX;
+                    y = current[6] * scaleY;
+                    controlX = current[3] * scaleX;
+                    controlY = current[4] * scaleY;
+                    this.bezierCurveTo(
+                        current[1] * scaleX + l,
+                        current[2] * scaleY + t,
+                        controlX + l,
+                        controlY + t,
+                        x + l,
+                        y + t
+                    );
+                    break;
+
+                case 's': // shorthand cubic bezierCurveTo, relative
+
+                    // transform to absolute x,y
+                    tempX = x + current[3] * scaleX;
+                    tempY = y + current[4] * scaleY;
+
+                    // calculate reflection of previous control points
+                    controlX = controlX ? (2 * x - controlX) : x;
+                    controlY = controlY ? (2 * y - controlY) : y;
+
+                    this.bezierCurveTo(
+                        controlX + l,
+                        controlY + t,
+                        x + current[1] * scaleX + l,
+                        y + current[2] * scaleY + t,
+                        tempX + l,
+                        tempY + t
+                    );
+                    // set control point to 2nd one of this command
+                    // "... the first control point is assumed to be the reflection of the second control point on the previous command relative to the current point."
+                    controlX = x + current[1] * scaleX;
+                    controlY = y + current[2] * scaleY;
+
+                    x = tempX;
+                    y = tempY;
+                    break;
+
+                case 'S': // shorthand cubic bezierCurveTo, absolute
+                    tempX = current[3] * scaleX;
+                    tempY = current[4] * scaleY;
+                    // calculate reflection of previous control points
+                    controlX = 2 * x - controlX;
+                    controlY = 2 * y - controlY;
+                    this.bezierCurveTo(
+                        controlX + l,
+                        controlY + t,
+                        current[1] * scaleX + l,
+                        current[2] * scaleY + t,
+                        tempX + l,
+                        tempY + t
+                    );
+                    x = tempX;
+                    y = tempY;
+
+                    // set control point to 2nd one of this command
+                    // "... the first control point is assumed to be the reflection of the second control point on the previous command relative to the current point."
+                    controlX = current[1] * scaleX;
+                    controlY = current[2] * scaleY;
+
+                    break;
+
+                case 'q': // quadraticCurveTo, relative
+                    // transform to absolute x,y
+                    tempX = x + current[3] * scaleX;
+                    tempY = y + current[4] * scaleY;
+
+                    controlX = x + current[1] * scaleX;
+                    controlY = y + current[2] * scaleY;
+
+                    this.bezierCurveTo(
+                        controlX + l,
+                        controlY + t,
+                        tempX + l,
+                        tempY + t
+                    );
+                    x = tempX;
+                    y = tempY;
+                    break;
+
+                case 'Q': // quadraticCurveTo, absolute
+                    tempX = current[3] * scaleX;
+                    tempY = current[4] * scaleY;
+
+                    this.quadraticCurveTo(
+                        current[1] * scaleX + l,
+                        current[2] * scaleY + t,
+                        tempX + l,
+                        tempY + t
+                    );
+                    x = tempX;
+                    y = tempY;
+                    controlX = current[1] * scaleX;
+                    controlY = current[2] * scaleY;
+                    break;
+
+                case 't': // shorthand quadraticCurveTo, relative
+
+                    // transform to absolute x,y
+                    tempX = x + current[1] * scaleX;
+                    tempY = y + current[2] * scaleY;
+
+
+                    if (previous[0].match(/[QqTt]/) === null) {
+                        // If there is no previous command or if the previous command was not a Q, q, T or t,
+                        // assume the control point is coincident with the current point
+                        controlX = x;
+                        controlY = y;
+                    }
+                    else if (previous[0] === 't') {
+                        // calculate reflection of previous control points for t
+                        controlX = 2 * x - tempControlX;
+                        controlY = 2 * y - tempControlY;
+                    }
+                    else if (previous[0] === 'q') {
+                        // calculate reflection of previous control points for q
+                        controlX = 2 * x - controlX;
+                        controlY = 2 * y - controlY;
+                    }
+
+                    tempControlX = controlX;
+                    tempControlY = controlY;
+
+                    this.quadraticCurveTo(
+                        controlX + l,
+                        controlY + t,
+                        tempX + l,
+                        tempY + t
+                    );
+                    x = tempX;
+                    y = tempY;
+                    controlX = x + current[1] * scaleX;
+                    controlY = y + current[2] * scaleY;
+                    break;
+
+                case 'T':
+                    tempX = current[1] * scaleX;
+                    tempY = current[2] * scaleY;
+
+                    // calculate reflection of previous control points
+                    controlX = 2 * x - controlX;
+                    controlY = 2 * y - controlY;
+                    this.quadraticCurveTo(
+                        controlX + l,
+                        controlY + t,
+                        tempX + l,
+                        tempY + t
+                    );
+                    x = tempX;
+                    y = tempY;
+                    break;
+
+                case 'a':
+                    // TODO: optimize this
+                    drawArc(this, x + l, y + t, [
+                        current[1] * scaleX,
+                        current[2] * scaleY,
+                        current[3],
+                        current[4],
+                        current[5],
+                        current[6] * scaleX + x + l,
+                        current[7] * scaleY + y + t
+                    ]);
+                    x += current[6] * scaleX;
+                    y += current[7] * scaleY;
+                    break;
+
+                case 'A':
+                    // TODO: optimize this
+                    drawArc(this, x + l, y + t, [
+                        current[1] * scaleX,
+                        current[2] * scaleY,
+                        current[3],
+                        current[4],
+                        current[5],
+                        current[6] * scaleX + l,
+                        current[7] * scaleY + t
+                    ]);
+                    x = current[6] * scaleX;
+                    y = current[7] * scaleY;
+                    break;
+
+                case 'z':
+                case 'Z':
+                    this.closed(true);
+                    break;
+            }
+            previous = current;
+        }
     }
 }
 Path.prototype.t = Types.Path;
@@ -1610,6 +2072,7 @@ PropertyMetadata.registerForType(Path, {
     }
 });
 
+
 Path.smoothPoint = function (p, p1, p2, eps) {
     var vx = p2.x - p1.x
         , vy = p2.y - p1.y
@@ -1626,7 +2089,8 @@ Path.smoothPoint = function (p, p1, p2, eps) {
     return res;
 };
 
-var ATTRIBUTE_NAMES = 'points x y width height rx ry transform fill stroke stroke-width'.split(' ');
+var ATTRIBUTE_NAMES = 'd points x y width height rx ry fill fill-opacity opacity fill-rule stroke stroke-width transform'.split(' ');
+
 Path.fromSvgElement = function (element, options) {
     var parsedAttributes = sketch.svg.parseAttributes(element, ATTRIBUTE_NAMES);
     var path = new Path();
@@ -1651,6 +2115,11 @@ Path.fromSvgElement = function (element, options) {
             }
         }
     }
+
+    if (parsedAttributes.d) {
+        path.fromSvgString(parsedAttributes.d);
+    }
+
 
     path.closed(true);
     path.adjustBoundaries();

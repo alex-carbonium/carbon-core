@@ -1,5 +1,6 @@
 import Rectangle from "framework/Rectangle";
 import Circle from "framework/Circle";
+import Path from "ui/common/Path";
 
 define(function(){
     var fwk = sketch.framework;
@@ -11,7 +12,7 @@ define(function(){
     function element2Type(name){
         switch(name){
             case 'path':
-                return svg.Path;
+                return Path;
             case 'circle':
             case 'ellipse':
                 return Circle;
@@ -20,7 +21,7 @@ define(function(){
             case 'text':
                 return sketch.ui.common.Label;
             case 'polygon':
-                return sketch.ui.common.Path;
+                return Path;
         }
         return null;
     }
