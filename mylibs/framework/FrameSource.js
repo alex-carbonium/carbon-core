@@ -6,7 +6,7 @@ import {fitRect, fillRect} from "../math/Fitting";
 import IconsInfo from "../ui/IconsInfo";
 import Promise from "bluebird";
 
-var FrameSource = {};
+const FrameSource = {};
 
 FrameSource.types = {
     none:0,
@@ -23,19 +23,19 @@ FrameSourceType.prototype = {
     family: IconsInfo.defaultFontFamily
 };
 
-var FrameSourceDefault = TypeDefaults[Types.FrameSource] = function(){
+const FrameSourceDefault = TypeDefaults[Types.FrameSource] = function(){
     return new FrameSourceType();
 };
 
-var iconProps = {fill: Brush.createFromColor("#ABABAB"), stroke: Brush.Empty};
-var iconRuntimeProps = {glyph: IconsInfo.findGlyphString(IconsInfo.defaultFontFamily, "image")};
+const iconProps = {fill: Brush.createFromColor("#ABABAB"), stroke: Brush.Empty};
+const iconRuntimeProps = {glyph: IconsInfo.findGlyphString(IconsInfo.defaultFontFamily, "image")};
 function drawEmpty(context, w, h) {
     context.save();
     context.fillStyle = "#DEDEDE";
     context.fillRect(0, 0, w, h);
 
-    var iw = w;
-    var ih = h;
+    let iw = w;
+    let ih = h;
     if (w > 64){
         iw = Math.min(128, w/2 + .5|0);
     }
@@ -62,12 +62,12 @@ function drawFont(family, context, w, h, props, runtimeProps) {
         return;
     }
 
-    var s = Math.min(w,h) - 2;
+    const s = Math.min(w, h) - 2;
     context.font = s+'px ' + family;
     context.lineHeight = 1;
     context.textBaseline = 'middle';
 
-    var measure = context.measureText(runtimeProps.glyph);
+    const measure = context.measureText(runtimeProps.glyph);
     if (props.fill !== Brush.Empty){
         Brush.setFill(props.fill, context, 0, 0, w, h);
         context.fillText(runtimeProps.glyph, ~~((w - measure.width) /2), ~~(h/2));
@@ -79,7 +79,7 @@ function drawFont(family, context, w, h, props, runtimeProps) {
 }
 
 function drawResource(source, context, x, y, w, h) {
-    var sw = source.width,
+    const sw = source.width,
         sh = source.height,
         dw = w !== undefined ? w : sw,
         dh = h !== undefined ? h : sh;
@@ -90,11 +90,11 @@ function drawResource(source, context, x, y, w, h) {
 }
 
 function drawSprite(source, context, x, y, w, h) {
-    var sw = source.width,
+    const sw = source.width,
         sh = source.height;
-    var dw = w === undefined ? sw : w;
-    var dh = h === undefined ? sh : h;
-    var sprite = fwk.Resources[source.spriteName];
+    const dw = w === undefined ? sw : w;
+    const dh = h === undefined ? sh : h;
+    const sprite = fwk.Resources[source.spriteName];
     context.drawImage(sprite, source.x, source.y, sw, sh, x, y, dw, dh);
 }
 
@@ -140,7 +140,7 @@ FrameSource.draw = function(source, context, w, h, props, runtimeProps) {
 FrameSource.hasValue = function(source) {
     switch(source.type){
         case FrameSource.types.font:
-            return source.value && source.fontFamily;
+            return source.name && source.family;
         case FrameSource.types.resource:
             return source.resourceId;
         case FrameSource.types.sprite:
@@ -204,12 +204,12 @@ function initResourceSource(source){
 }
 
 function initSpriteSource(source){
-    var sprite = sketch.ui.IconsInfo.sprites[source.spriteName];
+    let sprite = sketch.ui.IconsInfo.sprites[source.spriteName];
     if (!sprite){
         throw "Sprite does not exist: " + source.spriteName;
     }
 
-    var icon = sprite.icons[source.name];
+    let icon = sprite.icons[source.name];
     if (!icon){
         throw "Icon does not exist " + source.name;
     }
@@ -228,20 +228,21 @@ function initTemplateSource(source) {
     return Deferred.createResolvedPromise(source);
 }
 
-function loadUrl(source) {
-    var url = source.url;
+function loadUrl(source, sourceProps) {
+    let url = source.url;
     if(!url){
         return Promise.resolve({empty: true});
     }
 
-    if(url[0] !== '/' && url[0] !== '.'
+    let cors = sourceProps && sourceProps.cors;
+    if (!cors && url[0] !== '/' && url[0] !== '.'
         && url.substr(0, backend.fileEndpoint.length) !== backend.fileEndpoint
         && url.substr(0, "data:image/png".length) !== "data:image/png") {
         url = backend.servicesEndpoint + "/api/proxy?" + url;
     }
 
     return new Promise((resolve) => {
-        var image = new Image();
+        const image = new Image();
 
         //data: urls cannot be loaded in safari with crossOrigin flag
         if (url.substr(0, "data:".length) !== "data:"){
@@ -249,7 +250,7 @@ function loadUrl(source) {
         }
 
         image.onload = function(){
-            var runtimeProps = {image};
+            const runtimeProps = {image};
             resolve(runtimeProps);
             image.onload = null;
             image.onerror = null;
@@ -266,10 +267,10 @@ function drawURL(context, runtimeProps) {
     if (!runtimeProps){
         return;
     }
-    var image = runtimeProps.image;
+    const image = runtimeProps.image;
     if (image){
-        var sr = runtimeProps.sr;
-        var dr = runtimeProps.dr;
+        const sr = runtimeProps.sr;
+        const dr = runtimeProps.dr;
         context.drawImage(image, sr.x, sr.y, sr.width, sr.height, dr.x, dr.y, dr.width, dr.height);
     }
 }
@@ -288,9 +289,9 @@ function resizeUrlImage(sizing, newRect, runtimeProps){
                 runtimeProps.dr = fillRect(runtimeProps.sr, newRect);
                 break;
             case ContentSizing.center:
-                var fsr = getUrlImageRect(runtimeProps);
-                var sw = Math.min(fsr.width, newRect.width);
-                var sh = Math.min(fsr.height, newRect.height);
+                const fsr = getUrlImageRect(runtimeProps);
+                const sw = Math.min(fsr.width, newRect.width);
+                const sh = Math.min(fsr.height, newRect.height);
 
                 runtimeProps.sr = {
                     x: Math.abs(Math.min((newRect.width - fsr.width)/2 + .5|0, 0)),
@@ -314,14 +315,48 @@ function getUrlImageRect(runtimeProps){
     return {x: 0, y: 0, width: runtimeProps.image.width, height: runtimeProps.image.height};
 }
 
-FrameSource.prepareProps = function(sizing, oldRect, newRect, runtimeProps, changes){
-    switch (sizing){
-        case ContentSizing.manual:
-            var dw = newRect.width - oldRect.width;
-            var dh = newRect.height - oldRect.height;
-            var ndr = Object.assign({}, runtimeProps.dr, {width: runtimeProps.dr.width + dw, height: runtimeProps.dr.height + dh});
-            changes.sourceProps = {sr: runtimeProps.sr, dr: ndr};
-            break;
+FrameSource.prepareProps = function(source, sizing, oldRect, newRect, props, runtimeProps, changes){
+    if (runtimeProps){
+        switch (sizing){
+            case ContentSizing.manual:
+                const dw = newRect.width - oldRect.width;
+                const dh = newRect.height - oldRect.height;
+                const ndr = Object.assign({}, runtimeProps.dr, {
+                    width: runtimeProps.dr.width + dw,
+                    height: runtimeProps.dr.height + dh
+                });
+                changes.sourceProps = Object.assign({}, props, {sr: runtimeProps.sr, dr: ndr});
+                break;
+        }
+    }
+
+    if (props && props.urls){
+        const ar = props.width/props.height;
+        let bestLink = null;
+        for (let i = 0; i < props.urls.links.length; i++){
+            const link = props.urls.links[i];
+            if (link.w >= newRect.width && link.w/ar >= newRect.height){
+                bestLink = link;
+                break;
+            }
+        }
+        if (bestLink === null){
+            bestLink = props.urls.links[props.urls.links.length - 1];
+        }
+        const bestUrl = props.urls.raw + bestLink.url;
+        if (bestUrl !== source.url){
+            changes.source = this.createFromUrl(bestUrl);
+            if (changes.sourceProps && changes.sourceProps.sr){
+                const scale = bestLink.w/props.cw;
+                changes.sourceProps.sr = {
+                    x: changes.sourceProps.sr.x * scale + .5|0,
+                    y: changes.sourceProps.sr.y * scale + .5|0,
+                    width: changes.sourceProps.sr.width * scale + .5|0,
+                    height: changes.sourceProps.sr.height * scale + .5|0
+                };
+            }
+            changes.sourceProps = Object.assign({}, props, changes.sourceProps, {cw: bestLink.w});
+        }
     }
 };
 
@@ -330,7 +365,7 @@ function initFontSource(source) {
 }
 
 
-FrameSource.load = function(source) {
+FrameSource.load = function(source, sourceProps) {
     switch(source.type){
         case FrameSource.types.font:
             return initFontSource(source);
@@ -341,7 +376,7 @@ FrameSource.load = function(source) {
         case FrameSource.types.template:
             return initTemplateSource(source);
         case FrameSource.types.url:
-            return loadUrl(source);
+            return loadUrl(source, sourceProps);
         default:
             return null;
     }
@@ -351,6 +386,21 @@ FrameSource.resize = function(source, sizing, newRect, runtimeProps){
     if (runtimeProps){
         resizeUrlImage(sizing, newRect, runtimeProps); //only one supported for now
     }
+};
+
+FrameSource.shouldClip = function(source, w, h, runtimeProps){
+    switch (source.type){
+        case FrameSource.types.url:
+            if (!runtimeProps){
+                return false;
+            }
+            var dr = runtimeProps.dr;
+            if (!dr){
+                return false;
+            }
+            return dr.x < 0 || dr.x + dr.width > w || dr.y < 0 || dr.y + dr.height > h;
+    }
+    return false;
 };
 
 FrameSource.isEditSupported = function(source){
@@ -373,20 +423,20 @@ FrameSource.clone = function(source) {
 }
 
 FrameSource.createFromResource = function(resourceId){
-    var source = Object.assign(FrameSourceDefault(), {
+    const source = Object.assign(FrameSourceDefault(), {
         t: Types.FrameSource,
-        type:FrameSource.types.resource,
-        resourceId:resourceId
+        type: FrameSource.types.resource,
+        resourceId: resourceId
     });
 
     return source;
 };
 
 FrameSource.createFromResourceAsync = function(resourceId){
-    var source = Object.assign(FrameSourceDefault(), {
+    const source = Object.assign(FrameSourceDefault(), {
         t: Types.FrameSource,
-        type:FrameSource.types.resource,
-        resourceId:resourceId
+        type: FrameSource.types.resource,
+        resourceId: resourceId
     });
 
     return FrameSource.init(source);
@@ -394,9 +444,9 @@ FrameSource.createFromResourceAsync = function(resourceId){
 
 
 FrameSource.createEmpty = function(){
-    var source = Object.assign(FrameSourceDefault(), {
+    const source = Object.assign(FrameSourceDefault(), {
         t: Types.FrameSource,
-        type:FrameSource.types.none
+        type: FrameSource.types.none
     });
 
     return source;
@@ -404,21 +454,21 @@ FrameSource.createEmpty = function(){
 
 
 FrameSource.createFromTemplate = function(templateId){
-    var source = Object.assign(FrameSourceDefault(), {
+    const source = Object.assign(FrameSourceDefault(), {
         t: Types.FrameSource,
-        type:FrameSource.types.template,
-        templateId:templateId
+        type: FrameSource.types.template,
+        templateId: templateId
     });
 
     return source;
 };
 
 FrameSource.createFromSprite = function(spriteName, imageName){
-    var source =  Object.assign(FrameSourceDefault(), {
+    const source = Object.assign(FrameSourceDefault(), {
         t: Types.FrameSource,
-        type:FrameSource.types.sprite,
-        name:imageName,
-        spriteName:spriteName
+        type: FrameSource.types.sprite,
+        name: imageName,
+        spriteName: spriteName
     });
 
     return source;
@@ -432,12 +482,12 @@ FrameSource.createFromUrl = function(url){
 };
 
 FrameSource.createFromFont = function(fontFamily, value){
-    var defaultValue = FrameSourceDefault();
+    const defaultValue = FrameSourceDefault();
 
-    var props = {
+    const props = {
         t: Types.FrameSource,
-        type:FrameSource.types.font,
-        name:value
+        type: FrameSource.types.font,
+        name: value
     };
 
     if (fontFamily !== defaultValue.family){

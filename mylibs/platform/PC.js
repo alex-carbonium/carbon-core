@@ -1,6 +1,11 @@
 define(["platform/Desktop"], function(Desktop) {
     return klass(Desktop, {
         _constructor: function() {
+            this.mapShortcut("1", "library1");
+            this.mapShortcut("2", "library2");
+            this.mapShortcut("3", "library3");
+            this.mapShortcut("4", "library4");
+
           this.mapShortcut("ctrl+shift+>", "fontIncreaseSize");
           this.mapShortcut("ctrl+shift+<", "fontDecreaseSize");
 
