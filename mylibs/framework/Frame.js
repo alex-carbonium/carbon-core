@@ -2,10 +2,11 @@ import Container from "./Container";
 import FrameSource from "./FrameSource";
 import PropertyMetadata from "./PropertyMetadata";
 import Brush from "./Brush";
-import {ContentSizing, Overflow, Types} from "./Defs";
+import {ContentSizing, Overflow, Types, ChangeMode} from "./Defs";
 import Invalidate from "./Invalidate";
 import FrameEditTool from "./FrameEditTool";
 import EventHelper from "./EventHelper";
+import Rectangle from "./Rectangle";
 
 const DefaultSizing = ContentSizing.fill;
 
@@ -29,8 +30,11 @@ export default class Frame extends Container {
                 if (heightChanged){
                     newRect.height = changes.height;
                 }
-                FrameSource.prepareProps(changes.sizing || this.sizing(), oldRect, newRect,
-                    changes.sourceProps || this.runtimeProps.sourceProps, changes);
+                var sourcePropsChanged = changes.hasOwnProperty("sourceProps");
+                var sourceProps = sourcePropsChanged ? changes.sourceProps : this.props.sourceProps;
+                var runtimeSourceProps = sourcePropsChanged ? changes.sourceProps : this.runtimeProps.sourceProps;
+                FrameSource.prepareProps(source, changes.sizing || this.sizing(), oldRect, newRect,
+                    sourceProps, runtimeSourceProps, changes);
             }
         }
     }
@@ -42,7 +46,12 @@ export default class Frame extends Container {
             delete this.runtimeProps.sourceProps;
         }
         if (newProps.sourceProps && this.runtimeProps.sourceProps){
-            Object.assign(this.runtimeProps.sourceProps, newProps.sourceProps);
+            if (newProps.sourceProps.sr){
+                this.runtimeProps.sourceProps.sr = newProps.sourceProps.sr;
+            }
+            if (newProps.sourceProps.dr){
+                this.runtimeProps.sourceProps.dr = newProps.sourceProps.dr;
+            }
         }
         var source = this.source();
         if (FrameSource.isEditSupported(source)){
@@ -50,6 +59,7 @@ export default class Frame extends Container {
                 FrameSource.resize(source, this.sizing(), this.getContentRect(), this.runtimeProps.sourceProps);
             }
         }
+        this.createOrUpdateClippingMask(source, newProps);
     }
 
     clone(){
@@ -97,7 +107,7 @@ export default class Frame extends Container {
         }
         super.drawSelf.apply(this, arguments);
     }
-    drawChildren(context, w, h){
+    drawChildren(context, w, h, environment){
         var source = this.source();
         if (!source){
             return;
@@ -106,14 +116,20 @@ export default class Frame extends Container {
         context.save();
 
         if (!this.runtimeProps.loaded){
-            var promise = FrameSource.load(source);
+            var promise = FrameSource.load(source, this.props.sourceProps);
             if (promise){
                 promise.then(data => {
                     if (data){
                         this.runtimeProps.sourceProps = data;
                         if (this.props.sourceProps){
-                            Object.assign(this.runtimeProps.sourceProps, this.props.sourceProps);
+                            if (this.props.sourceProps.sr){
+                                this.runtimeProps.sourceProps.sr = this.props.sourceProps.sr;
+                            }
+                            if (this.props.sourceProps.dr){
+                                this.runtimeProps.sourceProps.dr = this.props.sourceProps.dr;
+                            }
                         }
+                        this.createOrUpdateClippingMask(source, this.props);
                     }
                     FrameSource.resize(source, this.sizing(), this.getContentRect(), this.runtimeProps.sourceProps);
                     Invalidate.request();
@@ -122,14 +138,42 @@ export default class Frame extends Container {
             this.runtimeProps.loaded = true;
         }
 
-        FrameSource.draw(source, context, w, h, this.props, this.runtimeProps.sourceProps);
+        if (this.runtimeProps.mask){
+            this.drawWithMask(context, this.runtimeProps.mask, 0, environment);
+        }
+        else{
+            FrameSource.draw(source, context, w, h, this.props, this.runtimeProps.sourceProps);
+        }
 
         context.restore();
+    }
+    renderAfterMask(context){
+        FrameSource.draw(this.source(), context, this.width(), this.height(), this.props, this.runtimeProps.sourceProps);
     }
     clip(context, l, t, w, h) {
         if (this.clipSelf()) {
             context.rectPath(l, t, w, h);
             context.clip();
+        }
+    }
+    clipSelf(){
+        return this.angle() % 360 === 0;
+    }
+    createOrUpdateClippingMask(source, newProps){
+        if (newProps.hasOwnProperty("angle") || newProps.hasOwnProperty("sourceProps")){
+            var shouldClip = FrameSource.shouldClip(source, this.width(), this.height(), this.runtimeProps.sourceProps);
+            if (this.angle() % 360 === 0 || !shouldClip){
+                delete this.runtimeProps.mask;
+            }
+            else if (!this.runtimeProps.mask){
+                this.runtimeProps.mask = new Rectangle();
+                this.runtimeProps.mask.setProps({width: this.width(), height: this.height(), stroke: Brush.Empty, fill: Brush.Empty}, ChangeMode.Self);
+                //parent needed for finding global context, not adding to children
+                this.runtimeProps.mask.parent(this);
+            }
+        }
+        if (this.runtimeProps.mask && (newProps.hasOwnProperty("width") || newProps.hasOwnProperty("height"))){
+            this.runtimeProps.mask.setProps({width: this.width(), height: this.height()}, ChangeMode.Self);
         }
     }
 

@@ -131,7 +131,7 @@ class Shape extends Container {
     }
 
     canAccept(element, autoInsert, allowMoveInOut){
-        return element instanceof Frame && allowMoveInOut;
+        return (element instanceof Frame || element instanceof Shape) && allowMoveInOut;
     }
 
     insert(frame){

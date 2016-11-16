@@ -126,7 +126,7 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
             modifyContextBeforeDrawChildren: function (context) {
 
             },
-            _renderMaskedElements: function (context, mask, i, items, environment) {
+            renderMaskedElements: function (context, mask, i, items, environment) {
 
                 if (environment.finalRender || !mask.drawPath) {
                     var clipingRect = mask.getBoundingBoxGlobal(false, true);
@@ -151,13 +151,7 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
 
 
                     //offContext.clearRect(clipingRect.x, clipingRect.y, clipingRect.width, clipingRect.height);
-                    for (; i < items.length; ++i) {
-                        var child = items[i];
-
-                        if (child.visible()) {
-                            this.drawChildSafe(child, offContext, environment);
-                        }
-                    }
+                    this.renderAfterMask(offContext, items, i, environment);
 
                     offContext.beginPath();
                     mask.viewMatrix().applyToContext(offContext);
@@ -182,12 +176,15 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                     context.clip("evenodd");
                     mask.viewMatrix().clone().invert().applyToContext(context);
 
-                    for (; i < items.length; ++i) {
-                        var child = items[i];
+                    this.renderAfterMask(context, items, i, environment);
+                }
+            },
+            renderAfterMask(context, items, i, environment){
+                for (; i < items.length; ++i) {
+                    var child = items[i];
 
-                        if (child.visible()) {
-                            this.drawChildSafe(child, context, environment);
-                        }
+                    if (child.visible()) {
+                        this.drawChildSafe(child, context, environment);
                     }
                 }
             },
@@ -229,21 +226,7 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                     for (var i = 0; i < items.length; ++i) {
                         var child = items[i];
                         if (child.clipMask()) {
-                            if (child.visible()) {
-                                var b = child.props.stroke;
-                                child.props.stroke = null;
-                                this.drawChildSafe(child, context, environment);
-                                child.props.stroke = b;
-                            }
-                            context.save();
-                            this._renderMaskedElements(context, child, i++, items, environment);
-                            context.restore();
-                            if (child.visible()) {
-                                var b = child.fill();
-                                child.setProps({fill: null}, ChangeMode.Self);
-                                this.drawChildSafe(child, context, environment);
-                                child.setProps({fill: b}, ChangeMode.Self);
-                            }
+                            this.drawWithMask(context, child, i, environment);
                             break;
                         }
                         if (child.visible()) {
@@ -252,6 +235,23 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                     }
                 }
                 context.restore();
+            },
+            drawWithMask: function(context, mask, i, environment){
+                if (mask.visible()) {
+                    let b = mask.props.stroke;
+                    mask.props.stroke = null;
+                    this.drawChildSafe(mask, context, environment);
+                    mask.props.stroke = b;
+                }
+                context.save();
+                this.renderMaskedElements(context, mask, i, this.children, environment);
+                context.restore();
+                if (mask.visible()) {
+                    let b = mask.fill();
+                    mask.setProps({fill: null}, ChangeMode.Self);
+                    this.drawChildSafe(mask, context, environment);
+                    mask.setProps({fill: b}, ChangeMode.Self);
+                }
             },
             drawChildSafe: function (child, context, environment) {
                 try {

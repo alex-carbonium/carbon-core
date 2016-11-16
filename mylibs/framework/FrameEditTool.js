@@ -35,7 +35,7 @@ export class FrameEditTool{
 
         var clone = this._frame.clone();
         clone.prepareAndSetProps({
-            x: 0, y: 0, sizing: ContentSizing.stretch
+            x: 0, y: 0, sizing: ContentSizing.stretch, angle: 0
         });
         var pos = this._frame.parent().local2global(fsr);
         var contentProps = {
@@ -47,6 +47,7 @@ export class FrameEditTool{
 
         //original frame is hidden, so it does not take part in snapping
         this._snapClone = this._frame.clone();
+        this._snapClone.prepareAndSetProps({angle: 0}, ChangeMode.Self);
         this._clipClone = clone;
         this._content = content;
         this._cropRect = this._frame.getBoundaryRectGlobal();
@@ -115,10 +116,10 @@ export class FrameEditTool{
         var sv = cr.height / fsr.height;
 
         this._frame.prepareAndSetProps({
-            sourceProps: {
+            sourceProps: Object.assign({}, this._frame.props.sourceProps, {
                 sr: {x: (ir.x - cr.x) / sh + .5|0, y: (ir.y - cr.y) / sv + .5|0, width: ir.width / sh + .5|0, height: ir.height / sv + .5|0},
                 dr: {x: ir.x - fr.x, y: ir.y - fr.y, width: ir.width, height: ir.height}
-            },
+            }),
             sizing: ContentSizing.manual
         });
     }
