@@ -119,6 +119,9 @@ export default class Frame extends Container {
             var promise = FrameSource.load(source, this.props.sourceProps);
             if (promise){
                 promise.then(data => {
+                    if (this.isDisposed()){
+                        return;
+                    }
                     if (data){
                         this.runtimeProps.sourceProps = data;
                         if (this.props.sourceProps){

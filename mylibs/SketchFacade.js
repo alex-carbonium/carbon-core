@@ -82,6 +82,7 @@ module.exports = {
     "PatchType": Defs.PatchType,
     "ChangeMode": Defs.ChangeMode,
     "TileSize": Defs.TileSize,
+    "ContentSizing": Defs.ContentSizing,
     "FontManager": require("./OpenTypeFontManager"),
     "Tiler": require("./ui/toolbox/tiler"),
     "Context": require("./framework/render/Context"),
