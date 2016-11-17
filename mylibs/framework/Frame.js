@@ -205,6 +205,23 @@ export default class Frame extends Container {
         return element instanceof Frame && allowMoveInOut;
     }
 
+    canConvertToPath(){
+        return !!this.props.sourceProps.svg;
+    }
+    convertToPath(){
+        return fetch(this.props.sourceProps.svg, {cors: true})
+            .then(response => {
+                if (!(response.status >= 200 && response.status < 300)){
+                    throw new Error("Could not download vector");
+                }
+                return response.text();
+            })
+            .then(svg => {
+                alert(svg);
+                return this;
+            });
+    }
+
     insert(frame){
         this.prepareAndSetProps({source: frame.props.source, sourceProps: frame.props.sourceProps});
         this.runtimeProps.sourceProps = frame.runtimeProps.sourceProps;

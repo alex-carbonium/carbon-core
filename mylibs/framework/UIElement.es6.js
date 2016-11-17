@@ -970,6 +970,9 @@ var UIElement = klass(DataNode, {
     canBeAccepted: function (element) {
         return true;
     },
+    canConvertToPath: function(){
+        return false;
+    },
     sizeProperties: function () {
         return {
             width: this.props.width,

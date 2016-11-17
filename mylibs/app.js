@@ -128,7 +128,7 @@ function canConvertToPath(selection) {
 
     for (var i = 0; i < selection.length; ++i) {
         var e = selection[i];
-        if (typeof e.convertToPath !== "function") {
+        if (!e.canConvertToPath()){
             return false;
         }
     }

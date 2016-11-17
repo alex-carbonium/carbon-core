@@ -151,6 +151,9 @@ class Star extends Shape {
         delete this._originalRatio;
     }
 
+    canConvertToPath(){
+        return true;
+    }
     convertToPath() {
         var path = UIElement.construct(Types.Path);
 

@@ -30,6 +30,7 @@ module.exports = {
     "app": app,
     "params": params,
     "logger": require("./logger"),
+    "ObjectFactory": require("./framework/ObjectFactory"),
     "DesignerView": require("./framework/DesignerView"),
     "ViewBase": require("./framework/ViewBase"),
     "DesignerController": require("./framework/DesignerController"),
@@ -100,6 +101,7 @@ module.exports = {
     "Devices": Defs.Devices,
 
     "createUUID": Util.createUUID,
+    "choosePasteLocation": require("./framework/PasteLocator").choosePasteLocation,
 
     "ToolboxConfiguration": require("./ui/toolbox/ToolboxConfiguration"),
 

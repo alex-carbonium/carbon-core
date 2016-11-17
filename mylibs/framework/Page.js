@@ -321,127 +321,130 @@ class Page extends Layer {
     }
 
     autoInsert(/*UIElement*/element) {
-        var container;
-        var position = element.autoPosition();
-        var elements = [];
-        var contentContainer = this.getContentContainer();
 
 
-        each(Selection.selectedElements(), function (el) {
-            if (el.canAccept(element, true)) {
-                container = el;
-                return false;
-            }
-        });
-
-        var selectedElement = Selection.selectedElement();
-        if (!container && selectedElement && selectedElement.t === element.t) {
-            container = selectedElement.parent();
-        }
-
-        if (!container) {
-            container = contentContainer;
-        }
-        if (!container.canAccept(element)) {
-            container = this;
-            position = "outside";
-        }
-
-        for (var i = 0; i < container.children.length; i++) {
-            var el = container.children[i];
-            if (el.autoPosition() == position) {
-                elements.push(el);
-            }
-        }
-
-        var pos = 0;
-        if (position === 'top') {
-            pos = sketch.util.max(elements, function (el) {
-                    return el.y() + el.height();
-                }) || 0;
-            element.resize({
-                x: 0,
-                y: pos,
-                width: container.width(),
-                height: element.height()
-            });
-        }
-        else if (position === 'bottom') {
-            pos = sketch.util.min(elements, function (el) {
-                    return el.y();
-                }) || container.height();
-
-            element.resize({
-                x: 0,
-                y: pos - element.height(),
-                width: container.width(),
-                height: element.height()
-            });
-        }
-        else if (position === 'middle') {
-            var top = element.y(~~((container.height() - element.height()) / 2));
-            element.resize({
-                x: 0,
-                y: top,
-                width: container.width(),
-                height: element.height()
-            });
-        }
-        else if (position === 'fill') {
-            var topelements = [];
-            for (var i = 0; i < container.children.length; i++) {
-                var el = container.children[i];
-                if (el.autoPosition() == 'top') {
-                    topelements.push(el);
-                }
-            }
-            var bottomelements = [];
-            for (var i = 0; i < container.children.length; i++) {
-                var el = container.children[i];
-                if (el.autoPosition() == 'bottom') {
-                    bottomelements.push(el);
-                }
-            }
-            var bottom = sketch.util.min(bottomelements, function (el) {
-                    return el.y();
-                }) || container.height();
-
-            var top = sketch.util.max(topelements, function (el) {
-                    return el.y() + el.height();
-                }) || 0;
-
-            element.resize({
-                x: 0,
-                y: top,
-                width: container.width(),
-                height: bottom - top
-            });
-        }
-        else if (position === 'center') {
-            element.x(~~((container.width() - element.width()) / 2));
-            element.y(~~((container.height() - element.height()) / 2));
-        } else if (position === 'parent') {
-            var parent;
-            for (var i = 0; i < container.children.length; i++) {
-                var el = container.children[i];
-                if (el.canAccept(element, true)) {
-                    parent = el;
-                }
-            }
-            if (parent) {
-                container = parent;
-            }
-        }
-        else if (position === "outside") {
-            element.x(contentContainer.right() + 5);
-            element.y(contentContainer.y());
-        }
-
-        if (typeof container.setChildAutoPosition === 'function') {
-            container.setChildAutoPosition(element);
-        }
-
-        return container;
+        //TODO: if this logic is needed, it should all go to paste locator
+        // var container;
+        // var position = element.autoPosition();
+        // var elements = [];
+        // var contentContainer = this.getContentContainer();
+        //
+        //
+        // each(Selection.selectedElements(), function (el) {
+        //     if (el.canAccept(element, true)) {
+        //         container = el;
+        //         return false;
+        //     }
+        // });
+        //
+        // var selectedElement = Selection.selectedElement();
+        // if (!container && selectedElement && selectedElement.t === element.t) {
+        //     container = selectedElement.parent();
+        // }
+        //
+        // if (!container) {
+        //     container = contentContainer;
+        // }
+        // if (!container.canAccept(element)) {
+        //     container = this;
+        //     position = "outside";
+        // }
+        //
+        // for (var i = 0; i < container.children.length; i++) {
+        //     var el = container.children[i];
+        //     if (el.autoPosition() == position) {
+        //         elements.push(el);
+        //     }
+        // }
+        //
+        // var pos = 0;
+        // if (position === 'top') {
+        //     pos = sketch.util.max(elements, function (el) {
+        //             return el.y() + el.height();
+        //         }) || 0;
+        //     element.resize({
+        //         x: 0,
+        //         y: pos,
+        //         width: container.width(),
+        //         height: element.height()
+        //     });
+        // }
+        // else if (position === 'bottom') {
+        //     pos = sketch.util.min(elements, function (el) {
+        //             return el.y();
+        //         }) || container.height();
+        //
+        //     element.resize({
+        //         x: 0,
+        //         y: pos - element.height(),
+        //         width: container.width(),
+        //         height: element.height()
+        //     });
+        // }
+        // else if (position === 'middle') {
+        //     var top = element.y(~~((container.height() - element.height()) / 2));
+        //     element.resize({
+        //         x: 0,
+        //         y: top,
+        //         width: container.width(),
+        //         height: element.height()
+        //     });
+        // }
+        // else if (position === 'fill') {
+        //     var topelements = [];
+        //     for (var i = 0; i < container.children.length; i++) {
+        //         var el = container.children[i];
+        //         if (el.autoPosition() == 'top') {
+        //             topelements.push(el);
+        //         }
+        //     }
+        //     var bottomelements = [];
+        //     for (var i = 0; i < container.children.length; i++) {
+        //         var el = container.children[i];
+        //         if (el.autoPosition() == 'bottom') {
+        //             bottomelements.push(el);
+        //         }
+        //     }
+        //     var bottom = sketch.util.min(bottomelements, function (el) {
+        //             return el.y();
+        //         }) || container.height();
+        //
+        //     var top = sketch.util.max(topelements, function (el) {
+        //             return el.y() + el.height();
+        //         }) || 0;
+        //
+        //     element.resize({
+        //         x: 0,
+        //         y: top,
+        //         width: container.width(),
+        //         height: bottom - top
+        //     });
+        // }
+        // else if (position === 'center') {
+        //     element.x(~~((container.width() - element.width()) / 2));
+        //     element.y(~~((container.height() - element.height()) / 2));
+        // } else if (position === 'parent') {
+        //     var parent;
+        //     for (var i = 0; i < container.children.length; i++) {
+        //         var el = container.children[i];
+        //         if (el.canAccept(element, true)) {
+        //             parent = el;
+        //         }
+        //     }
+        //     if (parent) {
+        //         container = parent;
+        //     }
+        // }
+        // else if (position === "outside") {
+        //     element.x(contentContainer.right() + 5);
+        //     element.y(contentContainer.y());
+        // }
+        //
+        // if (typeof container.setChildAutoPosition === 'function') {
+        //     container.setChildAutoPosition(element);
+        // }
+        //
+        // return container;
     }
 
     renderTile(canvas, options) {

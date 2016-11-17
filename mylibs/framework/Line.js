@@ -181,6 +181,9 @@ class Line extends Shape {
         return Math.abs(distance) < d;
     }
 
+    canConvertToPath(){
+        return true;
+    }
     convertToPath() {
         var path = new Path();
         var l = this.x(),

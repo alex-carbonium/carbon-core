@@ -1,16 +1,25 @@
 import Selection from "framework/SelectionModel";
+import Promise from "bluebird";
+import UIElement from "../framework/UIElement";
 
 export default {
     run: function(elements, containerType){
-        var newSelection = [];
         Selection.unselectAll();
-        each(elements, function(element){
-            var pathElement = element.convertToPath();
-            newSelection.push(pathElement);
-            var parent = element.parent();
-            parent.replace(element, pathElement);
+
+        var promises = elements.map(function(element){
+            var res = element.convertToPath();
+            if (res instanceof UIElement){
+                return Promise.resolve(res);
+            }
+            return res;
         });
 
-        Selection.makeSelection(newSelection);
+        Promise.all(promises)
+            .then(paths => elements.map((e, i) => {
+                var parent = e.parent();
+                parent.replace(e, paths[i]);
+                return paths[i];
+            }))
+            .then(paths => Selection.makeSelection(paths));
     }
 }

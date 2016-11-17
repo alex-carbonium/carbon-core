@@ -138,6 +138,9 @@ class Rectangle extends Shape {
         super();
     }
 
+    canConvertToPath(){
+        return true;
+    }
     convertToPath() {
         var path = new Path()
             , x1 = this.x()

@@ -53,7 +53,10 @@ class Circle extends Shape {
     iconType () {
         return 'circle';
     }
-    
+
+    canConvertToPath(){
+        return true;
+    }
     convertToPath () {
         var path = new Path()
             , x1 = this.x()

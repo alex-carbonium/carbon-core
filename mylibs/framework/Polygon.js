@@ -122,6 +122,9 @@ class Polygon extends Shape {
         context.closePath();
     }
 
+    canConvertToPath(){
+        return true;
+    }
     convertToPath() {
         var path = UIElement.construct(Types.Path);
 
