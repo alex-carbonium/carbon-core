@@ -131,6 +131,8 @@ module.exports = {
     "DebugUtil": require("./DebugUtil"),
     "FontsProxy": require("./server/FontsProxy"),
 
+    "SvgParser":require("svg/SvgParser"),
+
     "Story": require("./stories/Story"),
     "StoryAction": require("./stories/StoryAction"),
     "StoryType": Defs.StoryType,
