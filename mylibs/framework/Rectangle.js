@@ -341,7 +341,7 @@ Rectangle.prototype.t = Types.Rectangle;
 
 Rectangle.ATTRIBUTE_NAMES = 'x y width height rx ry transform fill stroke stroke-width'.split(' ');
 Rectangle.fromSvgElement = function (element, options) {
-    var parsedAttributes = sketch.svg.parseAttributes(element, Rectangle.ATTRIBUTE_NAMES);
+    var parsedAttributes = svgParser.parseAttributes(element, Rectangle.ATTRIBUTE_NAMES);
     var rect = new Rectangle();
     if (parsedAttributes.width) {
         rect.width(parsedAttributes.width);
@@ -351,15 +351,24 @@ Rectangle.fromSvgElement = function (element, options) {
     }
     if (parsedAttributes.fill) {
         rect.fill(Brush.createFromColor(parsedAttributes.fill));
+    } else {
+        rect.fill(Brush.Black);
     }
     if (parsedAttributes.stroke) {
         rect.stroke(Brush.createFromColor(parsedAttributes.stroke));
+    } else {
+        rect.stroke(Brush.Empty);
     }
-    if (parsedAttributes.left) {
-        rect.x(parsedAttributes.left);
+
+    if(parsedAttributes.opacity){
+        rect.opacity(parsedAttributes.opacity);
     }
-    if (parsedAttributes.top) {
-        rect.y(parsedAttributes.top);
+
+    if (parsedAttributes.x) {
+        rect.x(parsedAttributes.x);
+    }
+    if (parsedAttributes.y) {
+        rect.y(parsedAttributes.y);
     }
     return rect;
 };

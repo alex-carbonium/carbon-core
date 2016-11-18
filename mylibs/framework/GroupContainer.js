@@ -55,6 +55,8 @@ define(["framework/Container"], function (Container) {
 
     GroupContainer.prototype.t = Types.GroupContainer;
 
+    Container.GroupContainerType = GroupContainer;
+
     PropertyMetadata.registerForType(GroupContainer, {
         allowMoveOutChildren:{
             defaultValue: false

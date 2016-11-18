@@ -6,7 +6,6 @@ import ContextPool from "framework/render/ContextPool";
 import {Types, StrokePosition} from "./Defs";
 import Frame from "./Frame";
 import Anchor from "./Anchor";
-import GroupContainer from "./GroupContainer";
 
 class Shape extends Container {
 
@@ -143,7 +142,7 @@ class Shape extends Container {
         frame.prepareAndSetProps({x: 0, y: 0, width: rect.width, height: rect.height, anchor: Anchor.All});
         frame.runtimeProps.resized = true;
 
-        var group = new GroupContainer();
+        var group = new Container.GroupContainerType();
         group.add(this);
         group.setProps(rect);
         group.add(frame);

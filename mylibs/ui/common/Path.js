@@ -154,8 +154,14 @@ var setLinePoint = function (pt) {
     pt.cp1y = pt.cp2y = pt.y;
 };
 
-var drawSegment = function (context, pt, prevPt, sx, sy) {
-    if (isLinePoint(pt) && isLinePoint(prevPt)) { // line segment
+var drawSegment = function (context, pt, prevPt, sx, sy, closing) {
+    if(!this._firstPoint){
+        this._firstPoint = pt;
+    }
+    if ((pt.moveTo || this._firstPoint === pt) && !closing) {
+        context.moveTo(pt.x * sx, pt.y * sy);
+    }
+    else if (isLinePoint(pt) && (isLinePoint(prevPt))) { // line segment
         context.lineTo(pt.x * sx, pt.y * sy);
     } else { // cubic bezier segment
         var cp1x = prevPt.cp2x
@@ -172,6 +178,12 @@ var drawSegment = function (context, pt, prevPt, sx, sy) {
         }
 
         context.bezierCurveTo(cp1x * sx, cp1y * sy, cp2x * sx, cp2y * sy, pt.x * sx, pt.y * sy);
+    }
+
+    if(pt.closed){
+        drawSegment.call(this, context, this._firstPoint, pt, sx, sy, true);
+        context.closePath();
+        this._firstPoint = null;
     }
 };
 
@@ -301,14 +313,14 @@ function drawArc(path, x, y, coords) {
     var ex = coords[5];
     var ey = coords[6];
     var segs = arcToSegments(ex, ey, rx, ry, large, sweep, rot, x, y);
-    for (var i=0; i<segs.length; i++) {
+    for (var i = 0; i < segs.length; i++) {
         var bez = segmentToBezier.apply(this, segs[i]);
         path.bezierCurveToPoint.apply(path, bez);
     }
 }
 
-var arcToSegmentsCache = { },
-    segmentToBezierCache = { },
+var arcToSegmentsCache = {},
+    segmentToBezierCache = {},
     _join = Array.prototype.join,
     argsString;
 
@@ -319,14 +331,14 @@ function arcToSegments(x, y, rx, ry, large, sweep, rotateX, ox, oy) {
         return arcToSegmentsCache[argsString];
     }
 
-    var th = rotateX * (Math.PI/180);
+    var th = rotateX * (Math.PI / 180);
     var sin_th = Math.sin(th);
     var cos_th = Math.cos(th);
     rx = Math.abs(rx);
     ry = Math.abs(ry);
     var px = cos_th * (ox - x) * 0.5 + sin_th * (oy - y) * 0.5;
     var py = cos_th * (oy - y) * 0.5 - sin_th * (ox - x) * 0.5;
-    var pl = (px*px) / (rx*rx) + (py*py) / (ry*ry);
+    var pl = (px * px) / (rx * rx) + (py * py) / (ry * ry);
     if (pl > 1) {
         pl = Math.sqrt(pl);
         rx *= pl;
@@ -342,29 +354,29 @@ function arcToSegments(x, y, rx, ry, large, sweep, rotateX, ox, oy) {
     var x1 = a00 * x + a01 * y;
     var y1 = a10 * x + a11 * y;
 
-    var d = (x1-x0) * (x1-x0) + (y1-y0) * (y1-y0);
+    var d = (x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0);
     var sfactor_sq = 1 / d - 0.25;
     if (sfactor_sq < 0) sfactor_sq = 0;
     var sfactor = Math.sqrt(sfactor_sq);
     if (sweep === large) sfactor = -sfactor;
-    var xc = 0.5 * (x0 + x1) - sfactor * (y1-y0);
-    var yc = 0.5 * (y0 + y1) + sfactor * (x1-x0);
+    var xc = 0.5 * (x0 + x1) - sfactor * (y1 - y0);
+    var yc = 0.5 * (y0 + y1) + sfactor * (x1 - x0);
 
-    var th0 = Math.atan2(y0-yc, x0-xc);
-    var th1 = Math.atan2(y1-yc, x1-xc);
+    var th0 = Math.atan2(y0 - yc, x0 - xc);
+    var th1 = Math.atan2(y1 - yc, x1 - xc);
 
-    var th_arc = th1-th0;
-    if (th_arc < 0 && sweep === 1){
-        th_arc += 2*Math.PI;
+    var th_arc = th1 - th0;
+    if (th_arc < 0 && sweep === 1) {
+        th_arc += 2 * Math.PI;
     } else if (th_arc > 0 && sweep === 0) {
         th_arc -= 2 * Math.PI;
     }
 
     var segments = Math.ceil(Math.abs(th_arc / (Math.PI * 0.5 + 0.001)));
     var result = [];
-    for (var i=0; i<segments; i++) {
+    for (var i = 0; i < segments; i++) {
         var th2 = th0 + i * th_arc / segments;
-        var th3 = th0 + (i+1) * th_arc / segments;
+        var th3 = th0 + (i + 1) * th_arc / segments;
         result[i] = [xc, yc, th2, th3, rx, ry, sin_th, cos_th];
     }
 
@@ -383,7 +395,7 @@ function segmentToBezier(cx, cy, th0, th1, rx, ry, sin_th, cos_th) {
     var a11 = cos_th * ry;
 
     var th_half = 0.5 * (th1 - th0);
-    var t = (8/3) * Math.sin(th_half * 0.5) * Math.sin(th_half * 0.5) / Math.sin(th_half);
+    var t = (8 / 3) * Math.sin(th_half * 0.5) * Math.sin(th_half * 0.5) / Math.sin(th_half);
     var x1 = cx + Math.cos(th0) - t * Math.sin(th0);
     var y1 = cy + Math.sin(th0) + t * Math.cos(th0);
     var x3 = cx + Math.cos(th1);
@@ -392,9 +404,9 @@ function segmentToBezier(cx, cy, th0, th1, rx, ry, sin_th, cos_th) {
     var y2 = y3 - t * Math.cos(th1);
 
     return (segmentToBezierCache[argsString] = [
-        a00 * x1 + a01 * y1,      a10 * x1 + a11 * y1,
-        a00 * x2 + a01 * y2,      a10 * x2 + a11 * y2,
-        a00 * x3 + a01 * y3,      a10 * x3 + a11 * y3
+        a00 * x1 + a01 * y1, a10 * x1 + a11 * y1,
+        a00 * x2 + a01 * y2, a10 * x2 + a11 * y2,
+        a00 * x3 + a01 * y3, a10 * x3 + a11 * y3
     ]);
 }
 
@@ -1181,15 +1193,15 @@ class Path extends Shape {
 
         var pt;
         var points = this.points;
-        var prevPt = pt = points[0];
-        context.moveTo(pt.x * sx, pt.y * sy);
-        for (var i = 1, len = points.length; i < len; ++i) {
+        var prevPt = null;// = pt = points[0];
+       // context.moveTo(pt.x * sx, pt.y * sy);
+        for (var i = 0, len = points.length; i < len; ++i) {
             pt = points[i];
             drawSegment.call(this, context, pt, prevPt, sx, sy);
             prevPt = pt;
         }
-        if (this.closed()) {
-            drawSegment.call(this, context, points[0], prevPt, sx, sy);
+        if (this.closed() && !prevPt.closed) {
+            drawSegment.call(this, context, points[0], prevPt, sx, sy, true);
             context.closePath();
         }
     }
@@ -1603,18 +1615,24 @@ class Path extends Shape {
 
     moveToPoint(point) {
         this._lastPoint = this.addPoint(point);
+        this._lastPoint.moveTo = true;
     }
 
     moveTo(x, y) {
-        this._lastPoint = this.addPoint({x,y});
+        this._lastPoint = this.addPoint({x, y});
+        this._lastPoint.moveTo = true;
+    }
+
+    closeAtPoint() {
+        this._lastPoint.closed = true;
     }
 
     lineToPoint(point) {
         this._lastPoint = this.addPoint(point);
     }
 
-    lineTo(x,y) {
-        this._lastPoint = this.addPoint({x,y});
+    lineTo(x, y) {
+        this._lastPoint = this.addPoint({x, y});
     }
 
     curveToPoint(point, cp1, cp2) {
@@ -1627,17 +1645,17 @@ class Path extends Shape {
         this._lastPoint.type = PointType.Assymetric;
     }
 
-    bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x,y) {
+    bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y) {
         this._lastPoint.cp2x = cp1x;
         this._lastPoint.cp2y = cp1y;
         this._lastPoint.type = PointType.Assymetric;
-        this._lastPoint = this.addPoint({x,y});
+        this._lastPoint = this.addPoint({x, y});
         this._lastPoint.cp1x = cp2x;
         this._lastPoint.cp1y = cp2y;
         this._lastPoint.type = PointType.Assymetric;
     }
 
-    quadraticCurveTo( cx, cy, x,y) {
+    quadraticCurveTo(cx, cy, x, y) {
         this.bezierCurveTo(x, y, cx, cy, cx, cy);
     }
 
@@ -1956,7 +1974,7 @@ class Path extends Shape {
 
                 case 'z':
                 case 'Z':
-                    this.closed(true);
+                    this.closeAtPoint();
                     break;
             }
             previous = current;
@@ -2092,17 +2110,27 @@ Path.smoothPoint = function (p, p1, p2, eps) {
 var ATTRIBUTE_NAMES = 'd points x y width height rx ry fill fill-opacity opacity fill-rule stroke stroke-width transform'.split(' ');
 
 Path.fromSvgElement = function (element, options) {
-    var parsedAttributes = sketch.svg.parseAttributes(element, ATTRIBUTE_NAMES);
+    var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
     var path = new Path();
 
     if (parsedAttributes.fill) {
         path.fill(Brush.createFromColor(parsedAttributes.fill));
     }
+    else {
+        path.fill(Brush.Black);
+    }
+
     if (parsedAttributes.stroke) {
         path.stroke(Brush.createFromColor(parsedAttributes.stroke));
+        if (parsedAttributes.strokeWidth) {
+            path.stroke().lineWidth = parsedAttributes.strokeWidth;
+        }
+    } else {
+        path.stroke(Brush.Empty);
     }
-    if (parsedAttributes.strokeWidth) {
-        path.stroke().lineWidth = parsedAttributes.strokeWidth;
+
+    if(parsedAttributes.opacity){
+        path.opacity(parsedAttributes.opacity);
     }
 
     if (parsedAttributes.points) {

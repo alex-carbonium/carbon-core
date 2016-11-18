@@ -64,7 +64,6 @@ define(function(){
 //            add("ketch.ui.common.HandTool", "Hand tool");
         add("sketch.ui.pages.TemplateEditorPage", "Template editor page");
         add("SelectComposite", "Multiple elements");  // foundation
-        add("sketch.svg.Path", "Svg path");  // foundation
         add("Section", "Section");  // foundation
     }
 });

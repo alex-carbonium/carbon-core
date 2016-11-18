@@ -161,30 +161,41 @@ PropertyMetadata.registerForType(Circle, {
 
 var ATTRIBUTE_NAMES = 'x y width height r rx ry cx cy transform fill stroke stroke-width'.split(' ');
 Circle.fromSvgElement = function (element, options) {
-    var parsedAttributes = sketch.svg.parseAttributes(element, ATTRIBUTE_NAMES);
+    var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
     var circle = new Circle();
-    if (parsedAttributes.rx) {
-        circle.width(parsedAttributes.rx * 2);
-    }
-    if (parsedAttributes.ry) {
-        circle.height(parsedAttributes.ry * 2);
+    var rx = parsedAttributes.rx || parsedAttributes.r;
+    if (rx) {
+        circle.width(rx * 2);
     }
 
-    if (parsedAttributes.radius) {
-        circle.width(circle.height(parsedAttributes.radius * 2));
+    var ry = parsedAttributes.ry || parsedAttributes.r;
+    if (ry) {
+        circle.height(ry * 2);
+    }
+
+    if(parsedAttributes.opacity){
+        circle.opacity(parsedAttributes.opacity);
     }
 
     if (parsedAttributes.fill) {
-        circle.fillBrush(Brush.createFromColor(parsedAttributes.fill));
+        circle.fill(Brush.createFromColor(parsedAttributes.fill));
+    }else {
+        circle.fill(Brush.Black);
     }
     if (parsedAttributes.stroke) {
-        circle.strokeBrush(Brush.createFromColor(parsedAttributes.stroke));
+        circle.stroke(Brush.createFromColor(parsedAttributes.stroke));
+    } else {
+        circle.stroke(Brush.Empty);
     }
-    if (parsedAttributes.left) {
-        circle.x(parsedAttributes.left);
+    if (parsedAttributes.x !== undefined) {
+        circle.x(parsedAttributes.x);
+    } else if (parsedAttributes.cx !== undefined) {
+        circle.x(parsedAttributes.cx - rx );
     }
-    if (parsedAttributes.top) {
-        circle.y(parsedAttributes.top);
+    if (parsedAttributes.y !== undefined) {
+        circle.y(parsedAttributes.y);
+    } else if (parsedAttributes.cy !== undefined) {
+        circle.y(parsedAttributes.cy - ry );
     }
     return circle;
 };
