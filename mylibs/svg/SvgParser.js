@@ -10,16 +10,19 @@ define(function () {
     function element2Type(name) {
         switch (name) {
             case 'path':
-                return Path;
+            case 'polygon':
+                return Path.fromSvgPathElement;
+            case 'line':
+                return Path.fromSvgLineElement;
+            case 'polyline':
+                return Path.fromSvgPolylineElement;
             case 'circle':
             case 'ellipse':
-                return Circle;
+                return Circle.fromSvgElement;
             case 'rect':
-                return Rectangle;
+                return Rectangle.fromSvgElement;
             case 'text':
                 return sketch.ui.common.Label;
-            case 'polygon':
-                return Path;
         }
         return null;
     }
@@ -48,6 +51,10 @@ define(function () {
     var attributesMap = {
         'cx': 'cx',
         'x': 'x',
+        'x1': 'x1',
+        'y1': 'y1',
+        'x2': 'x2',
+        'y2': 'y2',
         'cy': 'cy',
         'y': 'y',
         'r': 'r',
@@ -382,11 +389,11 @@ define(function () {
 
         for (var index = 0, el, len = elements.length; index < len; index++) {
             el = elements[index];
-            var klass = element2Type(el.tagName);
-            if (klass && klass.fromSvgElement) {
+            var factoryMethod = element2Type(el.tagName);
+            if (factoryMethod) {
                 try {
-                    if (klass.async) {
-                        klass.fromSvgElement(el, (function (index, el) {
+                    if (factoryMethod.async) {
+                        factoryMethod(el, (function (index, el) {
                             return function (obj) {
                                 reviver && reviver(el, obj);
                                 instances.splice(index, 0, obj);
@@ -395,7 +402,7 @@ define(function () {
                         })(index), options);
                     }
                     else {
-                        var obj = klass.fromSvgElement(el, options);
+                        var obj = factoryMethod(el, options);
                         reviver && reviver(el, obj);
                         instances.splice(index, 0, obj);
                         checkIfDone();

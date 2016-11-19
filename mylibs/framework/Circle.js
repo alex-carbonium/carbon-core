@@ -163,6 +163,8 @@ var ATTRIBUTE_NAMES = 'x y width height r rx ry cx cy transform fill stroke stro
 Circle.fromSvgElement = function (element, options) {
     var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
     var circle = new Circle();
+    App.Current.activePage.nameProvider.assignNewName(circle);
+
     var rx = parsedAttributes.rx || parsedAttributes.r;
     if (rx) {
         circle.width(rx * 2);
@@ -177,11 +179,14 @@ Circle.fromSvgElement = function (element, options) {
         circle.opacity(parsedAttributes.opacity);
     }
 
-    if (parsedAttributes.fill) {
-        circle.fill(Brush.createFromColor(parsedAttributes.fill));
-    }else {
-        circle.fill(Brush.Black);
+    if (parsedAttributes.fill !== undefined) {
+        if(!parsedAttributes.fill  || parsedAttributes.fill == "none"){
+            circle.fill(Brush.Empty);
+        } else {
+            circle.fill(Brush.createFromColor(parsedAttributes.fill));
+        }
     }
+
     if (parsedAttributes.stroke) {
         circle.stroke(Brush.createFromColor(parsedAttributes.stroke));
     } else {

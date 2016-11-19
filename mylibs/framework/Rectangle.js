@@ -343,17 +343,23 @@ Rectangle.ATTRIBUTE_NAMES = 'x y width height rx ry transform fill stroke stroke
 Rectangle.fromSvgElement = function (element, options) {
     var parsedAttributes = svgParser.parseAttributes(element, Rectangle.ATTRIBUTE_NAMES);
     var rect = new Rectangle();
+
+    App.Current.activePage.nameProvider.assignNewName(rect);
     if (parsedAttributes.width) {
         rect.width(parsedAttributes.width);
     }
     if (parsedAttributes.height) {
         rect.height(parsedAttributes.height);
     }
-    if (parsedAttributes.fill) {
-        rect.fill(Brush.createFromColor(parsedAttributes.fill));
-    } else {
-        rect.fill(Brush.Black);
+
+    if (parsedAttributes.fill !== undefined) {
+        if(!parsedAttributes.fill || parsedAttributes.fill == "none"){
+            rect.fill(Brush.Empty);
+        } else {
+            rect.fill(Brush.createFromColor(parsedAttributes.fill));
+        }
     }
+
     if (parsedAttributes.stroke) {
         rect.stroke(Brush.createFromColor(parsedAttributes.stroke));
     } else {

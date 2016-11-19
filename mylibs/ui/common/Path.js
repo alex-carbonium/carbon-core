@@ -315,7 +315,7 @@ function drawArc(path, x, y, coords) {
     var segs = arcToSegments(ex, ey, rx, ry, large, sweep, rot, x, y);
     for (var i = 0; i < segs.length; i++) {
         var bez = segmentToBezier.apply(this, segs[i]);
-        path.bezierCurveToPoint.apply(path, bez);
+        path.bezierCurveTo.apply(path, bez);
     }
 }
 
@@ -2107,18 +2107,94 @@ Path.smoothPoint = function (p, p1, p2, eps) {
     return res;
 };
 
-var ATTRIBUTE_NAMES = 'd points x y width height rx ry fill fill-opacity opacity fill-rule stroke stroke-width transform'.split(' ');
+var ATTRIBUTE_NAMES = 'd points x y width height x1 y1 x2 y2 rx ry fill fill-opacity opacity fill-rule stroke stroke-width transform'.split(' ');
 
-Path.fromSvgElement = function (element, options) {
+Path.fromSvgPathElement = function (element, options) {
     var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
     var path = new Path();
 
-    if (parsedAttributes.fill) {
-        path.fill(Brush.createFromColor(parsedAttributes.fill));
+    App.Current.activePage.nameProvider.assignNewName(path);
+
+    if (parsedAttributes.fill !== undefined) {
+        if(!parsedAttributes.fill  || parsedAttributes.fill == "none"){
+            path.fill(Brush.Empty);
+        } else {
+            path.fill(Brush.createFromColor(parsedAttributes.fill));
+        }
     }
     else {
         path.fill(Brush.Black);
     }
+
+    if (parsedAttributes.stroke) {
+        path.stroke(Brush.createFromColor(parsedAttributes.stroke));
+        if (parsedAttributes.strokeWidth) {
+            path.stroke().lineWidth = parsedAttributes.strokeWidth;
+        }
+    } else {
+        path.stroke(Brush.Empty);
+    }
+
+    if(parsedAttributes.opacity){
+        path.opacity(parsedAttributes.opacity);
+    }
+
+
+    // polygon
+    if (parsedAttributes.points) {
+        var pairs = parsedAttributes.points.replace('\n', ' ').replace('\r', ' ').split(' ');
+        for (var i = 0; i < pairs.length; ++i) {
+            var pair = pairs[i];
+            if (pair) {
+                var xy = pair.split(',');
+                path.addPoint({x: parseFloat(xy[0]), y: parseFloat(xy[1])});
+            }
+        }
+        path.closed(true);
+    }
+
+    if (parsedAttributes.d) {
+        path.fromSvgString(parsedAttributes.d);
+    }
+
+
+    path.adjustBoundaries();
+
+    return path;
+};
+
+
+Path.fromSvgLineElement = function (element, options) {
+    var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
+    var path = new Path();
+
+    App.Current.activePage.nameProvider.assignNewName(path);
+
+    if (parsedAttributes.stroke) {
+        path.stroke(Brush.createFromColor(parsedAttributes.stroke));
+        if (parsedAttributes.strokeWidth) {
+            path.stroke().lineWidth = parsedAttributes.strokeWidth;
+        }
+    } else {
+        path.stroke(Brush.Empty);
+    }
+
+    if(parsedAttributes.opacity){
+        path.opacity(parsedAttributes.opacity);
+    }
+
+    path.addPoint({x:parsedAttributes.x1, y:parsedAttributes.y1});
+    path.addPoint({x:parsedAttributes.x2, y:parsedAttributes.y2});
+
+    path.adjustBoundaries();
+
+    return path;
+};
+
+Path.fromSvgPolylineElement = function (element, options) {
+    var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
+    var path = new Path();
+    App.Current.activePage.nameProvider.assignNewName(path);
 
     if (parsedAttributes.stroke) {
         path.stroke(Brush.createFromColor(parsedAttributes.stroke));
@@ -2144,16 +2220,12 @@ Path.fromSvgElement = function (element, options) {
         }
     }
 
-    if (parsedAttributes.d) {
-        path.fromSvgString(parsedAttributes.d);
-    }
-
-
-    path.closed(true);
     path.adjustBoundaries();
 
     return path;
 };
+
+
 
 
 function svgCommand(pt, prevPt) {
