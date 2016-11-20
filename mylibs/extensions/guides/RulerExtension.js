@@ -117,8 +117,8 @@ export default class RulerExtension extends RuntimeExtension {
 
         this._origin = artboard;
         this._origin.enablePropsTracking();
-        this._originX = artboard.x() * this._settings.scale + .5 | 0;
-        this._originY = artboard.y() * this._settings.scale + .5 | 0;
+        this._originX = Math.round(artboard.x() * this._settings.scale);
+        this._originY = Math.round(artboard.y() * this._settings.scale);
         this._originWidth = artboard.width() * this._settings.scale + .5 | 0;
         this._originHeight = artboard.height() * this._settings.scale + .5 | 0;
         this._artboardActive = artboard !== NullArtboard;
