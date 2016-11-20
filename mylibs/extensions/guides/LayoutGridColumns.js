@@ -25,7 +25,7 @@ class LayoutGridColumns extends Guide {
             props.lastColumnWidth = props.actualColumnWidth;
 
             var xs = [];
-            var snapPoints = {xs: [], ys: [], noLine: true};
+            var snapPoints = {xs: [], ys: []};
             for (let i = 0; i < props.settings.columnsCount; ++i){
                 var x = (i * props.actualColumnWidth) + (i > 0 ? i * props.settings.gutterWidth : 0);
                 if (x >= props.rect.width){

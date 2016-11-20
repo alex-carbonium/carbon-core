@@ -129,8 +129,6 @@ var UIElement = klass(DataNode, {
         return false;
     },
     propsUpdated: function (newProps, oldProps) {
-        DataNode.prototype.propsUpdated.apply(this, arguments);
-
         if (newProps.flipVertical !== undefined
             || newProps.flipHorizontal !== undefined
             || newProps.angle !== undefined
@@ -144,6 +142,12 @@ var UIElement = klass(DataNode, {
             this.resetGlobalViewCache();
         }
 
+        //raise events after all caches are updated
+        DataNode.prototype.propsUpdated.apply(this, arguments);
+        this.invalidate();
+    },
+    propsPatched: function(){
+        DataNode.prototype.propsPatched.apply(this, arguments);
         this.invalidate();
     },
     arrange: function () {

@@ -102,7 +102,6 @@ export default klass({
     ,
     propsPatched: function (patchType, propName, item) {
         if (this.runtimeProps && this.runtimeProps.trackPropsCounter) {
-            //not sure if this is needed
             PropertyTracker.changeProps(this, this.selectProps([propName]), {});
         }
     }

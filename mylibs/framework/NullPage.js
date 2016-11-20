@@ -12,6 +12,7 @@ define(function () {
         return {
             _constructor:function(){
                 this.children = [];
+                this.props = {};
             },
             parent:function(){
 

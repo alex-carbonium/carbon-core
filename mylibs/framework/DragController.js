@@ -24,6 +24,7 @@ export default class DragController{
         if (this.onStarting(e) !== false){
             this._startDragPoint = {x: e.x, y: e.y};
             this._dragRequested = true;
+            e.handled = true;
         }
     }
     mouseMove(e){
@@ -74,6 +75,12 @@ export default class DragController{
             this.isDragging = false;
 
             this.onStopped(e);
+
+            e.handled = true;
+        }
+        else{
+            //scenario: clicking on ruler should not activate another artboard under ruler
+            e.handled = this._dragRequested;
         }
     }
     click(e){
@@ -87,7 +94,7 @@ export default class DragController{
 
         this.onClicked(e);
     }
-    bindToView(controller){
+    bindToController(controller){
         var t = controller.mousedownEvent.bind(this, this.mouseDown);
         this._tokens.push(t);
 

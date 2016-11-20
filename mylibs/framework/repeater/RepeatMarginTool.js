@@ -30,7 +30,7 @@ export default {
 
         var view = Environment.view;
         view.registerForLayerDraw(2, this, 0);
-        this._dragController.bindToView(Environment.controller);
+        this._dragController.bindToController(Environment.controller);
     },
     detach: function(container){
         this._container.disablePropsTracking();

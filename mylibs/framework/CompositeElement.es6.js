@@ -480,9 +480,12 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
                 || newProps.angle !== undefined
                 || newProps.x !== undefined
                 || newProps.y !== undefined
-                || (newProps.stroke !== undefined)
+                || newProps.stroke !== undefined
             ) {
                 this.updateViewMatrix();
+            }
+            else if (newProps.width !== undefined || newProps.height !== undefined) {
+                this.resetGlobalViewCache();
             }
 
             if(!this.commonProps) {

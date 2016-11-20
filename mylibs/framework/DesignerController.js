@@ -319,12 +319,12 @@ export default class DesignerController {
 
 
     onmousedown(eventData) {
+        this._noActionsBeforeClick = true;
+
         this.mousedownEvent.raise(eventData);
         if (eventData.handled) {
             return;
         }
-
-        this._noActionsBeforeClick = true;
 
         if (this._captureElement != null) {
             this._captureElement.mousedown(eventData);

@@ -1429,7 +1429,7 @@ PropertyMetadata.registerForType(App, {
     },
     customGuides: {
         defaultValue: {
-            hsl: {h: 0, s: 1, l: .5},
+            hsl: CustomGuides.getDefaultStrokeHsl(),
             opacity: 1,
             show: true,
             lock: false

@@ -663,6 +663,12 @@ PropertyMetadata.registerForType(Artboard, {
     "layoutGridSettings": {
         defaultValue: null
     },
+    guidesX: {
+        defaultValue: []
+    },
+    guidesY: {
+        defaultValue: []
+    },
     showInToolbox: {
         displayName: "Show in toolbox",
         type: "checkbox",

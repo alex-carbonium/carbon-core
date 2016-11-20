@@ -54,7 +54,7 @@ export default class TextTool extends EditModeAction {
 
     attach(app, view, controller) {
         this._detaching = false;
-        this._dragController.bindToView(controller);
+        this._dragController.bindToController(controller);
         this._onElementSelectedToken = Selection.onElementSelected.bind(this, this.onElementSelected);
 
         this._defaultFormatter = new DefaultFormatter();
@@ -112,7 +112,7 @@ export default class TextTool extends EditModeAction {
         if (selection.count()){
             //handle events after active frame
             this._dragController.unbind();
-            this._dragController.bindToView(Environment.controller);
+            this._dragController.bindToController(Environment.controller);
         }
     }
     onEditTextAction = () => {

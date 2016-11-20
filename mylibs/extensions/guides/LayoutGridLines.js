@@ -36,7 +36,7 @@ class LayoutGridLines extends Guide{
     prepareProps(props){
         if (props.settings){
             var xs = [];
-            var snapPoints = {xs: [], ys: [], noLine: true};
+            var snapPoints = {xs: [], ys: []};
             var isColumn = false;
             var x = props.actualColumnWidth;
             for (let i = 1, l = props.settings.columnsCount * 2 - 1; i < l; i++){

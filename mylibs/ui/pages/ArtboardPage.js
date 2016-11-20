@@ -199,7 +199,8 @@ class ArtboardPage extends Page {
             }
         }
 
-        this.setActiveArtboard(NullArtboard);
+        //let's not deactivate artboard on clicking outside
+        //this.setActiveArtboard(NullArtboard);
     }
 
     get isToolboxConfigDirty(){
@@ -208,6 +209,9 @@ class ArtboardPage extends Page {
 
 
     _onMouseUp(event) {
+        if (event.handled){
+            return;
+        }
         this._activateArtboard(event);
     }
 
@@ -336,6 +340,12 @@ class ArtboardPage extends Page {
 ArtboardPage.prototype.t = Types.ArtboardPage;
 
 PropertyMetadata.registerForType(ArtboardPage, {
+    guidesX: {
+        defaultValue: []
+    },
+    guidesY: {
+        defaultValue: []
+    }
 });
 
 
