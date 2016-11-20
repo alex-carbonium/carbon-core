@@ -49,6 +49,9 @@ define(["framework/Container"], function (Container) {
                     delete this._selectionSubscription;
                 }
                 Container.prototype.dispose.apply(this, arguments);
+            },
+            resize(){
+                alert('afadsf')
             }
         }
     })());

@@ -1228,10 +1228,10 @@ class Path extends Shape {
         }
 
         var rect = this.getBoundaryRect();
-        var minx = rect.x;
-        var miny = rect.y;
-        var maxx = rect.x + rect.width;
-        var maxy = rect.y + rect.height;
+        var minx = rect.width;
+        var miny = rect.height;
+        var maxx = 0;
+        var maxy = 0;
 
         for (var i = 0; i < this.points.length; ++i) {
             var p = this.points[i];

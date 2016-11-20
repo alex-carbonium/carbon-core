@@ -614,7 +614,11 @@ define(function () {
             }
 
             parseSVGDocument(doc.documentElement, function (results, options) {
+                if(results.length === 1){
+                    resolve(results[0], options);
+                }
                 var group = new GroupContainer();
+                App.Current.activePage.nameProvider.assignNewName(group);
                 for (var i = 0; i < results.length; ++i) {
                     group.add(results[i]);
                 }
