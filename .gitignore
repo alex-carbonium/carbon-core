@@ -3,3 +3,7 @@
 *.log
 target/*
 node_modules/*
+*_LOCAL_*
+*_BASE_*
+*_REMOTE_*
+*_BACKUP_*
