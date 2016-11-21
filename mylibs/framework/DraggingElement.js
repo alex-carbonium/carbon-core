@@ -127,10 +127,14 @@ function dropElementOn(event, newParent, target) {
                 props.flipHorizontal = this.flipHorizontal();
             }
 
-            target.prepareAndSetProps(props);
-
             if (target.parent() !== newParent) {
                 newParent.insert(target, index);
+            }
+
+            //hack: shapes and frames resize children themselves, think how to do it better
+            if (!target.runtimeProps.resized){
+                //must set new coordinates after parent is changed so that global caches are updated properly
+                target.prepareAndSetProps(props);
             }
         }
     }
