@@ -307,9 +307,9 @@ export default class RulerGuides {
                     name: "Delete guide",
                     callback: this.deleteGuideY.bind(this, gy)
                 });
-            }
 
-            hit = true;
+                hit = true;
+            }
         }
 
         if (!hit){

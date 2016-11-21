@@ -16,8 +16,8 @@ var defaults = {
 
 function getEntry(settings){
     var entry = {
-        core: fullPath("../mylibs/SketchFacade"),
-        api: fullPath("../mylibs/CarbonApi")
+        core: [fullPath("../mylibs/SketchFacade")],
+        api: [fullPath("../mylibs/CarbonApi")]
     };
     return entry;
 }
@@ -49,7 +49,12 @@ function getPlugins(settings){
     var plugins = [
         new webpack.IgnorePlugin(/.*/g, /export\/html/g),
         new webpack.IgnorePlugin(/\.orig$/g),
-        new webpack.IgnorePlugin(/canvas/g)
+        new webpack.IgnorePlugin(/canvas/g),
+
+        // new webpack.DllPlugin({
+        //     path: fullPath("../target/[name]-manifest.json"),
+        //     name: "[name]"
+        // })
 
         // new webpack.ProvidePlugin({
         //     'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
