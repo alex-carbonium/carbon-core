@@ -205,6 +205,12 @@ export default class RulerExtension extends RuntimeExtension {
         var major = offset.major;
         context.translate(offset.translate, 0);
 
+        context.save();
+        context.fillStyle = config.overlay_fill;
+        context.globalAlpha = config.overlay_opacity;
+        context.fillRect(-offset.translate, 0, length, config.size);
+        context.restore();
+
         var minx = offset.major * this._settings.majorStep * this._settings.scale;
         var minDraw = -minx + .5 | 0;
         var maxDraw = width - minx + .5 | 0;
@@ -223,7 +229,7 @@ export default class RulerExtension extends RuntimeExtension {
                 //if (x >= minDraw && x <= maxDraw || width === 0) {
                     context.lineTo(x + .5, config.size);
                     context.fillStyle = x >= minDraw && x <= maxDraw ? "black" : "gray";
-                    context.fillText(text, x + LABEL_MARGIN_X, 15);
+                    context.fillText(text, x + LABEL_MARGIN_X, 11);
                 //}
                 // else {
                 //     context.lineTo(x + .5, config.tick_minor_size);
@@ -353,7 +359,7 @@ export default class RulerExtension extends RuntimeExtension {
             //simplified rotation
             let x = originX - labels[i] + originY;
             context.fillStyle = labels[i + 2] ? "black" : "gray";
-            context.fillText(labels[i + 1], x - 5, 7);
+            context.fillText(labels[i + 1], x - 5, 5);
         }
 
         context.restore();
