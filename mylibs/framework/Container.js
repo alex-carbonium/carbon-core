@@ -874,12 +874,7 @@ PropertyMetadata.registerForType(Container, {
             ];
 
             var baseGroups = PropertyMetadata.findAll(Types.Element).groups();
-            return ownGroups.concat(baseGroups).concat([
-                {
-                    label: "Settings",
-                    properties: ["allowMoveOutChildren"]
-                }
-            ]);
+            return ownGroups.concat(baseGroups);
         }
     });
 

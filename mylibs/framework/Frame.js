@@ -261,9 +261,6 @@ PropertyMetadata.registerForType(Frame, {
     overflow: {
         defaultValue: Overflow.Clip
     },
-    visibleWhenDrag: {
-        defaultValue: false
-    },
     prepareVisibility: function (props) {
         var base = PropertyMetadata.findForType(Container);
         return Object.assign({}, base, {

@@ -279,6 +279,15 @@ var UIElement = klass(DataNode, {
             }
         }
     },
+    removeAllDecorators: function(){
+        var decorators = this.decorators;
+        if (decorators){
+            decorators.forEach(x => x.detach());
+            this.decorators = [];
+            Invalidate.requestUpperOnly();
+        }
+        return decorators;
+    },
     removeDecoratorByType: function (type) {
         if (!this.decorators) {
             return;
@@ -1069,9 +1078,6 @@ var UIElement = klass(DataNode, {
         }
         return this.field("_resizeDimensions", value, ResizeDimension.Both);
     },
-    getVisualActions: function () {
-        return {fromCategories: ["Layering"]};
-    },
     init: function (values, isDefault, selector) {
         var props = {};
         var that = this;
@@ -1712,7 +1718,7 @@ PropertyMetadata.registerForType(UIElement, {
         defaultValue: VerticalAlignment.None
     },
     visibleWhenDrag: {
-        defaultValue: true
+        defaultValue: false
     },
     width: {
         displayName: "Width",

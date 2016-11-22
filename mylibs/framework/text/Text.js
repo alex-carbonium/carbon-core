@@ -203,9 +203,6 @@ PropertyMetadata.registerForType(Text, {
         displayName: "Text style",
         type: "textStyleName"
     },
-    visibleWhenDrag: {
-        defaultValue: false
-    },
     font: {
         displayName: "Font",
         type: "font",

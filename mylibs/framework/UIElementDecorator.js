@@ -3,6 +3,7 @@ define(function(){
  	return klass2("sketch.framework.UIElementDecorator", null, {
  		_constructor:function(){
  			this.element = null;
+ 			this._visible = true;
 		},
 		attach : function(element){
 	 		this.element = element;
@@ -16,8 +17,11 @@ define(function(){
         },
         parent:function(value){
         },
-        visible:function(){
-            return true;
+        visible:function(value){
+        	if (arguments.length === 1){
+        		this._visible = value;
+			}
+            return this._visible;
         }
  	});
 });

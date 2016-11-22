@@ -270,7 +270,8 @@ class ArtboardPage extends Page {
     getAllArtboards() {
         var items = this.children;
         var res = [];
-        for (var i = 0; i < items.length; ++i) {
+        //reversing for hit testing
+        for (var i = items.length - 1; i >= 0; --i) {
             if (items[i] instanceof Artboard /*&& !(items[i] instanceof StateBoard)*/) {
                 res.push(items[i]);
             }

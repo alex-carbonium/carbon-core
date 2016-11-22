@@ -678,7 +678,6 @@
 //                 this.properties.createProperty("rowsCount", 0).minMax(1, 1000).transparent(true);
 //                 this.properties.metadataType("sketch.ui.common.Table");
 //
-//                 this.visibleWhenDrag(false);
 //                 this.minWidth(MINCELLSIZE);
 //                 this.minHeight(MINCELLSIZE);
 //

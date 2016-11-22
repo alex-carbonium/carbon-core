@@ -158,9 +158,6 @@
 //         },
 //         resizeDimensions:function() {
 //             return 0;//fwk.ResizeDimension.None;
-//         },
-//         getVisualActions:function() {
-//             return {fromCategories: []};
 //         }
 //     };
 //

@@ -3,7 +3,8 @@ import UIElementDecorator from "framework/UIElementDecorator";
 import PropertyTracker from "framework/PropertyTracker";
 import Cursor from "framework/Cursor";
 import Invalidate from "framework/Invalidate";
-import Environment from "environment"; 
+import Environment from "environment";
+import UserSettings from "../UserSettings";
 
 //common code for identifying frame size during resize
 //this supports current behavior when selection frame does not move during resize
@@ -168,9 +169,21 @@ export default class ActiveFrame extends UIElementDecorator {
             matrix.scale(sw, sh, this._element.width() / 2, this._element.height() / 2);
         }
 
-        matrix.applyToContext(context);
 
-        this._frameType.draw(frame, context, this._originalPoint);
+
+        if (this.visible()){
+            matrix.applyToContext(context);
+            this._frameType.draw(frame, context, this._originalPoint);
+        }
+        else{
+            // var resizingElement = this._frame.resizingElement;
+            // if (resizingElement){
+            //     var clone = resizingElement._clone;
+            //     clone.globalViewMatrix().applyToContext(context);
+            //     context.strokeStyle = UserSettings.frame.stroke;
+            //     context.strokeRect(0, 0, clone.width(), clone.height())
+            // }
+        }
         context.restore();
     }
 }

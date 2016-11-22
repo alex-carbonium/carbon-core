@@ -2,6 +2,7 @@ import {Types, Overflow} from "./Defs";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
 import PropertyMetadata from "./PropertyMetadata";
+import UserSettings from "../UserSettings";
 
 define(["framework/Container"], function (Container) {
 
@@ -20,15 +21,11 @@ define(["framework/Container"], function (Container) {
                     this._selectionSubscription = Selection.onElementSelected.bind(this, selectionChanged);
                 }
             },
-            getVisualActions: function () {
-                return {fromCategories: ["Layering", "Ungroup"]};
-            },
             drawSelf: function (context, w, h, environment) {
                 if (!this.lockedGroup()) {
                     context.save();
-                    context.globalAlpha = 0.05;
-                    context.fillStyle = "black";
-                    context.fillRect(0, 0, w, h);
+                    context.strokeStyle = UserSettings.group.active_stroke;
+                    context.strokeRect(0, 0, w, h);
                     context.restore();
 
                 }
@@ -49,9 +46,6 @@ define(["framework/Container"], function (Container) {
                     delete this._selectionSubscription;
                 }
                 Container.prototype.dispose.apply(this, arguments);
-            },
-            resize(){
-                alert('afadsf')
             }
         }
     })());

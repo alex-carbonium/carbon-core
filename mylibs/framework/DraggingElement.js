@@ -10,6 +10,7 @@ import {ChangeMode, Types} from "./Defs";
 import Selection from "framework/SelectionModel";
 import Environment from "environment";
 import SnapController from "./SnapController";
+import UserSettings from "../UserSettings";
 
 var debug = require("DebugUtil")("carb:draggingElement");
 
@@ -194,8 +195,7 @@ class DraggingElement extends UIElement {
             flipVertical: element.flipVertical(),
             flipHorizontal: element.flipHorizontal(),
             x: pos.x,
-            y: pos.y,
-            opacity: 0.7
+            y: pos.y
         }, ChangeMode.Root);
 
         this.canDrag(false);
@@ -212,6 +212,13 @@ class DraggingElement extends UIElement {
         this._ownSnapPoints = SnapController.prepareOwnSnapPoints(element, holdPcnt);
 
         this._mouseMoveHandler = Environment.controller.mousemoveEvent.bind(this, onMouseMove);
+
+        this._decorators = element.decorators;
+        if (this._decorators){
+            this._decorators.forEach(x => x.visible(false));
+        }
+
+        this.strokeFrame = true;
     }
 
     canBeAccepted(element) {
@@ -229,12 +236,12 @@ class DraggingElement extends UIElement {
     drawSelf(context, w, h, environment) {
         var scaleX, scaleY, scale = environment.view.scale();
 
-        function fillBackground() {
-            context.save();
-            context.fillStyle = 'rgba(160, 180, 200, 0.1)';
-            context.fillRect(0, 0, w, h);
-            context.restore();
-        }
+        // function fillBackground() {
+        //     context.save();
+        //     context.fillStyle = 'rgba(160, 180, 200, 0.1)';
+        //     context.fillRect(0, 0, w, h);
+        //     context.restore();
+        // }
 
         var x = this.x();
         var y = this.y();
@@ -257,7 +264,7 @@ class DraggingElement extends UIElement {
 
         context.scale(1 / scaleX, 1 / scaleY);
 
-        context.globalAlpha = 0.6;
+        //context.globalAlpha = 0.8;
 
         var oldSize = this._clone.getBoundaryRect();
         var newPos = this._element.parent().global2local({x: x, y: y});
@@ -298,12 +305,16 @@ class DraggingElement extends UIElement {
         }
         globalViewMatrix.applyToContext(context);
 
+        if (this.strokeFrame){
+            this._drawFrame(context, scale, w, h);
+        }
+
         if (true || this._element.clipSelf() && this._element.clipDragClone()) {
             context.rectPath(0, 0, w, h);
             context.clip();
         }
 
-        fillBackground();
+        //fillBackground();
 
         if (isComposite) {
             context.translate(-this._clone.x(), -this._clone.y());
@@ -318,6 +329,14 @@ class DraggingElement extends UIElement {
             this.setProps(props);
         }
 
+        context.restore();
+    }
+
+    _drawFrame(context, scale, w, h){
+        context.save();
+        context.scale(1/scale, 1/scale);
+        context.strokeStyle = UserSettings.frame.stroke;
+        context.strokeRect(0, 0, w * scale + .5|0, h * scale + .5|0);
         context.restore();
     }
 
@@ -341,6 +360,11 @@ class DraggingElement extends UIElement {
         SnapController.clearActiveSnapLines();
         if (this._element.cloneWhenDragging()){
             this._element.setProps({visible: true}, ChangeMode.Self);
+        }
+
+        if (this._decorators){
+            this._decorators.forEach(x => x.visible(true));
+            delete this._decorators;
         }
         this.parent().remove(this, ChangeMode.Root);
     }

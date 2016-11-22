@@ -58,9 +58,6 @@ define(["./CommentPopup", "./CommentsModel", "./RemoveComment", "framework/comma
             resizeDimensions:function() {
                 return 0;
             },
-            getVisualActions: function() {
-                return {};
-            },
             removed:function(){
                 if(this._popup){
                     this._popup.hide();

@@ -73,6 +73,18 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
         this._types = [];
         this.resetGlobalViewCache();
     },
+
+    propsUpdated: function(newProps, oldProps, mode){
+        UIElement.prototype.propsUpdated.apply(this, arguments);
+
+        //not sure if it is safe to propagate other properties, so taking only what's needed for now
+        if (newProps.visible !== oldProps.visible){
+            for (var i = 0; i < this.elements.length; i++){
+                this.elements[i].setProps({visible: newProps.visible}, mode);
+            }
+        }
+    },
+
     hitTest: function(/*Point*/point, scale){
         var count = this.count();
         if (count <= 1){
@@ -226,33 +238,6 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
             }) - this.y();
     },
 
-    getVisualActions: function(){
-        var categories = [];
-        var canAlign = true;
-        var canGroup = true;
-        var canChangeOrder = true;
-        this.each(function(element){
-            canAlign = canAlign && element.canAlign();
-            canGroup = canGroup && element.canGroup();
-            canChangeOrder = canChangeOrder && element.canChangeOrder();
-        });
-
-        if (canAlign){
-            categories.push("Align");
-            if (this.count() > 2){
-                categories.push("Distribute");
-            }
-        }
-
-        if (canGroup){
-            categories.push("Group");
-        }
-
-        if (canChangeOrder){
-            categories.push("Layering");
-        }
-        return {fromCategories: categories};
-    },
     isDescendantOrSame: function(element){
         var res = false;              
 

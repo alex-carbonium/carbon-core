@@ -1,9 +1,10 @@
 import {PointDirection} from "framework/Defs";
 import CrazyScope from "framework/CrazyManager";
 import Environment from "environment";
+import UserSettings from "../UserSettings";
 
 export default {
-    strokeStyle: '#22c1ff',
+    strokeStyle: UserSettings.frame.stroke,
     hitPointIndex: function (frame, point) {
         var matrix = frame.element.globalViewMatrix().clone();
         var sw = 1, sh = 1;

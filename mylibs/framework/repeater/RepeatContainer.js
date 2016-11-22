@@ -295,9 +295,6 @@ PropertyMetadata.registerForType(RepeatContainer, {
     enableGroupLocking: {
         defaultValue: true
     },
-    visibleWhenDrag: {
-        defaultValue: false
-    },
     arrangeStrategy: {
         defaultValue: ArrangeStrategies.Repeat
     }

@@ -39,6 +39,7 @@ var LineDirectionPoint = {
     },
     capture (frame) {
         var resizingElement = UIElement.construct(Types.DraggingElement, frame.element);
+        resizingElement.strokeFrame = false;
         frame.resizingElement = resizingElement;
         resizingElement.forceDrawClone = true;
         frame.originalValue = frame.element.cornerRadius();
