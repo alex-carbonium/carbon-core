@@ -109,7 +109,7 @@ class SelectionModel {
         return this._selectionMode;
     }
 
-    _addToSelection(/*Array*/elements, refreshOnly) {
+    addToSelection(/*Array*/elements, refreshOnly) {
         var multiSelect = elements.length > 1;
         var selection = this._decomposeSelection(elements);
 
@@ -200,16 +200,16 @@ class SelectionModel {
                 return;
             }
 
-            this._addToSelection(selection, refreshOnly);
+            this.addToSelection(selection, refreshOnly);
         }
         else if (this._selectionMode === "new") {
             this.unselectAll(refreshOnly);
-            this._addToSelection(selection, refreshOnly);
+            this.addToSelection(selection, refreshOnly);
         }
         else if (this._selectionMode === "remove") {
             this.unselectAll(refreshOnly);
             sketch.util.removeGroupFromArray(currentSelection, newSelection);
-            this._addToSelection(currentSelection, refreshOnly);
+            this.addToSelection(currentSelection, refreshOnly);
         }
 
         if (!refreshOnly) {
@@ -238,7 +238,7 @@ class SelectionModel {
         this.unselectAll(refreshOnly);
         var currentSelection = this._selectCompositeElement.elements;
         sketch.util.removeGroupFromArray(currentSelection, elements);
-        this._addToSelection(currentSelection, refreshOnly);
+        this.addToSelection(currentSelection, refreshOnly);
     }
 
     clearSelection() {
@@ -269,6 +269,27 @@ class SelectionModel {
         return !!this._selectFrame;
     }
 
+    lock(){
+        var elements = this.selectedElements();
+        for (var i = 0; i < elements.length; i++){
+            var e = elements[i];
+            if (!e.locked()){
+                e.locked(true);
+            }
+        }
+        this._selectCompositeElement.selected(false);
+    }
+    unlock(){
+        var elements = this.selectedElements();
+        for (var i = 0; i < elements.length; i++){
+            var e = elements[i];
+            if (e.locked()){
+                e.locked(false);
+            }
+        }
+        this._selectCompositeElement.selected(false);
+        this._selectCompositeElement.selected(true);
+    }
 }
 
 var Selection = new SelectionModel();
