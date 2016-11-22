@@ -290,6 +290,27 @@ class SelectionModel {
         this._selectCompositeElement.selected(false);
         this._selectCompositeElement.selected(true);
     }
+    hide(){
+        var elements = this.selectedElements();
+        for (var i = 0; i < elements.length; i++){
+            var e = elements[i];
+            if (e.visible()){
+                e.visible(false);
+            }
+        }
+        this._selectCompositeElement.selected(false);
+    }
+    show(){
+        var elements = this.selectedElements();
+        for (var i = 0; i < elements.length; i++){
+            var e = elements[i];
+            if (!e.visible()){
+                e.visible(true);
+            }
+        }
+        this._selectCompositeElement.selected(false);
+        this._selectCompositeElement.selected(true);
+    }
 }
 
 var Selection = new SelectionModel();
