@@ -17,7 +17,15 @@ import ElementMove from "commands/ElementMove";
 import Matrix from "math/matrix";
 import stopwatch from "Stopwatch";
 import ResizeDimension from "framework/ResizeDimension";
-import {Types, DockStyle, ArrangeStrategies, Overflow, HorizontalAlignment, VerticalAlignment, PointDirection} from "./Defs";
+import {
+    Types,
+    DockStyle,
+    ArrangeStrategies,
+    Overflow,
+    HorizontalAlignment,
+    VerticalAlignment,
+    PointDirection
+} from "./Defs";
 import RotateFramePoint from "decorators/RotateFramePoint";
 import ResizeFramePoint from "decorators/ResizeFramePoint";
 import DefaultFrameType from "decorators/DefaultFrameType";
@@ -51,17 +59,17 @@ var UIElement = klass(DataNode, {
         //this._lockInvalidate = false;
         // this._seedNumber = new Date().getMilliseconds();
 
-        if (DEBUG){
+        if (DEBUG) {
             this.id(createUUID(this.t));
         }
-        else{
+        else {
             this.id(createUUID());
         }
         this.parent(NullContainer);
     },
-    invalidate : function () {
+    invalidate: function () {
         var parent = this.parent();
-        if(parent){
+        if (parent) {
             parent.invalidate();
         }
     },
@@ -73,8 +81,11 @@ var UIElement = klass(DataNode, {
             globalViewMatrixInverted: null,
             globalClippingBox: null,
             primitiveRoot: null,
-            snapPoints:null
-    }
+            snapPoints: null
+        }
+    },
+    _roundValue(value){
+        return Math.round(value);
     },
     prepareProps: function (changes) {
         if (changes.width !== undefined) {
@@ -87,7 +98,7 @@ var UIElement = klass(DataNode, {
                 changes.width = minWidth;
             }
 
-            changes.width = 0 | changes.width + .5;
+            changes.width =  this._roundValue(changes.width);
         }
         if (changes.height !== undefined) {
             var maxHeight = this.maxHeight();
@@ -99,15 +110,15 @@ var UIElement = klass(DataNode, {
                 changes.height = minHeight;
             }
 
-            changes.height = 0 | changes.height + .5;
+            changes.height = this._roundValue(changes.height);
         }
 
         if (changes.x !== undefined) {
-            changes.x = changes.x > 0 ? 0 | changes.x + .5 : 0 | changes.x - .5;
+            changes.x = this._roundValue(changes.x);
         }
 
         if (changes.y !== undefined) {
-            changes.y = changes.y > 0 ? 0 | changes.y + .5 : 0 | changes.y - .5;
+            changes.y = this._roundValue(changes.y);
         }
 
         if (changes.styleId !== undefined) {
@@ -115,13 +126,13 @@ var UIElement = klass(DataNode, {
         }
     },
 
-    hasPendingStyle: function(){
-        if (!this.props.styleId){
+    hasPendingStyle: function () {
+        if (!this.props.styleId) {
             return false;
         }
         var baseStyle = styleManager.getStyle(this.props.styleId, 1);
 
-        for (var p in baseStyle.props){
+        for (var p in baseStyle.props) {
             if (!deepEquals(this.props[p], baseStyle.props[p])) {
                 return true;
             }
@@ -146,7 +157,7 @@ var UIElement = klass(DataNode, {
         DataNode.prototype.propsUpdated.apply(this, arguments);
         this.invalidate();
     },
-    propsPatched: function(){
+    propsPatched: function () {
         DataNode.prototype.propsPatched.apply(this, arguments);
         this.invalidate();
     },
@@ -203,7 +214,7 @@ var UIElement = klass(DataNode, {
             return null;
         }
 
-        if(this.runtimeProps.snapPoints){
+        if (this.runtimeProps.snapPoints) {
             return this.runtimeProps.snapPoints;
         }
 
@@ -260,7 +271,7 @@ var UIElement = klass(DataNode, {
         if (!this.decorators) {
             this.decorators = [];
         }
-        if (this.decorators.indexOf(decorator) === -1){
+        if (this.decorators.indexOf(decorator) === -1) {
             this.decorators.push(decorator);
             decorator.attach(this);
             Invalidate.requestUpperOnly();
@@ -309,7 +320,7 @@ var UIElement = klass(DataNode, {
             y: this.y() - margin.top,
             width: this.width() + margin.left + margin.right,
             height: this.height() + margin.top + margin.bottom
-        }
+        };
     },
     size: function () {
         return {
@@ -512,7 +523,7 @@ var UIElement = klass(DataNode, {
         delete this.runtimeProps.globalClippingBox;
         delete this.runtimeProps.snapPoints;
         //primitive root should be changed only when changing parent, it is needed for repeater clones
-        if (resetPrimitiveRoot){
+        if (resetPrimitiveRoot) {
             delete this.runtimeProps.primitiveRoot;
         }
     },
@@ -589,7 +600,7 @@ var UIElement = klass(DataNode, {
         fwk.Brush.stroke(this.stroke(), context, 0, 0, w, h);
         context.restore();
     },
-    primitiveRoot:function() {
+    primitiveRoot: function () {
         if (this.runtimeProps.primitiveRoot) {
             return this.runtimeProps.primitiveRoot;
         }
@@ -598,12 +609,12 @@ var UIElement = klass(DataNode, {
         this.runtimeProps.primitiveRoot = root;
         return root;
     },
-    primitivePath: function(){
+    primitivePath: function () {
         var path = this.primitiveRoot().primitivePath().slice();
         path[path.length - 1] = this.id();
         return path;
     },
-    createDragClone: function(element){
+    createDragClone: function (element) {
         return element.clone();
     },
     globalViewMatrix: function () {
@@ -693,11 +704,11 @@ var UIElement = klass(DataNode, {
         return true;
     },
     zOrder: function () {
-        if(arguments.length > 0){
+        if (arguments.length > 0) {
             throw "zOrder is readonly";
         }
         var parent = this.parent();
-        if(!parent || parent === NullContainer) {
+        if (!parent || parent === NullContainer) {
             return null;
         }
 
@@ -913,16 +924,16 @@ var UIElement = klass(DataNode, {
     isDropSupported: function (value) {
         return true;
     },
-    showResizeHint: function(){
+    showResizeHint: function () {
         return true;
     },
-    showDropTarget: function(){
+    showDropTarget: function () {
         return true;
     },
     activeInPreview: function (value) {
         return this.field("_activeInPreview", value, false);
     },
-    cloneWhenDragging: function(){
+    cloneWhenDragging: function () {
         return true;
     },
     visibleWhenDrag: function (value) {
@@ -974,7 +985,7 @@ var UIElement = klass(DataNode, {
     canBeAccepted: function (element) {
         return true;
     },
-    canConvertToPath: function(){
+    canConvertToPath: function () {
         return false;
     },
     sizeProperties: function () {
@@ -1043,7 +1054,7 @@ var UIElement = klass(DataNode, {
     each: function (callback) {
         each([this], callback);
     },
-    cloneProps: function(){
+    cloneProps: function () {
         var newProps = extendOwnProperties(true, {}, this.props);
         ObjectFactory.updatePropsWithPrototype(newProps);
         return newProps;
@@ -1459,8 +1470,7 @@ var UIElement = klass(DataNode, {
                     ]
                 }
                 break;
-            default:
-            {
+            default: {
                 frame = {
                     element: this,
                     frame: true,
@@ -1518,10 +1528,10 @@ var UIElement = klass(DataNode, {
         var that = this;
         for (var propName in properties) {
             var newValue = properties[propName];
-            var accessor  = (function (name) {
+            var accessor = (function (name) {
                 return function prop_accessor(value) {
-                    if(arguments.length > 0){
-                        that.setProps({[name]:value});
+                    if (arguments.length > 0) {
+                        that.setProps({[name]: value});
                     }
                     return that.props[name];
                 }
@@ -1555,14 +1565,14 @@ var UIElement = klass(DataNode, {
         return res;
     },
 
-    beforeAddFromToolbox:function(){
+    beforeAddFromToolbox: function () {
 
     },
-    afterAddFromToolbox:function(){
+    afterAddFromToolbox: function () {
 
     },
 
-    propertyMetadata: function(){
+    propertyMetadata: function () {
         return PropertyMetadata.findAll(this.t);
     },
 
@@ -1764,7 +1774,7 @@ PropertyMetadata.registerForType(UIElement, {
         useInModel: true,
         editable: true,
         defaultValue: true,
-        customizable:true
+        customizable: true
     },
     hitTransparent: {
         defaultValue: false
@@ -1774,7 +1784,7 @@ PropertyMetadata.registerForType(UIElement, {
         type: "numeric",
         defaultValue: 1,
         style: 1,
-        customizable:true,
+        customizable: true,
         options: {
             step: .1,
             min: 0,
@@ -1790,12 +1800,18 @@ PropertyMetadata.registerForType(UIElement, {
             min: -360,
             max: 360
         },
-        customizable:true
+        customizable: true
     },
     shadow: {
         displayName: "Shadow",
         useInModel: true,
         defaultValue: Shadow.None
+    },
+    flipHorizontal: {
+        defaultValue: false
+    },
+    flipVertical: {
+        defaultValue: false
     },
     anchor: {
         displayName: "Pin to edge",
@@ -1823,7 +1839,7 @@ PropertyMetadata.registerForType(UIElement, {
         editable: true,
         defaultValue: fwk.Brush.Empty,
         style: 1,
-        customizable:true
+        customizable: true
     },
     stroke: {
         displayName: "Stroke",
@@ -1832,14 +1848,14 @@ PropertyMetadata.registerForType(UIElement, {
         editable: true,
         defaultValue: fwk.Brush.Empty,
         style: 1,
-        customizable:true
+        customizable: true
     },
     dashPattern: {
         displayName: "Dash pattern",
         type: "dashPattern",
         defaultValue: null,
         style: 1,
-        customizable:true
+        customizable: true
     },
     clipMask: {
         displayName: "Use as mask",
@@ -1889,7 +1905,7 @@ PropertyMetadata.registerForType(UIElement, {
             dockStyle: selection.parents().every(x => x.props.arrangeStrategy === ArrangeStrategies.Dock)
         };
     },
-    getNonRepeatableProps: function(){
+    getNonRepeatableProps: function () {
         return ["id", "name"];
     }
 });

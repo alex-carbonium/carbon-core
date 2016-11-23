@@ -12,6 +12,7 @@ import Selection from "framework/SelectionModel";
 import Cursor from "framework/Cursor";
 import Invalidate from "framework/Invalidate";
 import SnapController from "framework/SnapController";
+import actionManager from "ui/ActionManager";
 
 
 var closeCurrentPath = function (pt) {
@@ -80,14 +81,26 @@ export default class GraphicalpathCreator extends EditModeAction {
         }
     }
 
+    cancel(){
+        if(this._element){
+            this._element.adjustBoundaries();
+            this._element = null;
+        }
+    }
+
     detach() {
         completePath.call(this);
         EditModeAction.prototype.detach.apply(this, arguments);
+        if(this._cancelBinding){
+            this._cancelBinding.dispose();
+            delete this._cancelBinding;
+        }
     }
 
     _attach() {
         EditModeAction.prototype._attach.apply(this, arguments);
         Cursor.setGlobalCursor("crosshair");
+        this._cancelBinding = actionManager.subscribe('cancel', this.cancel.bind(this));
     }
 
     _detach() {

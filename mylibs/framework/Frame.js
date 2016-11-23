@@ -11,23 +11,23 @@ import Rectangle from "./Rectangle";
 const DefaultSizing = ContentSizing.fill;
 
 export default class Frame extends Container {
-    iconType(){
+    iconType() {
         return 'icon';
     }
 
-    prepareProps(changes){
+    prepareProps(changes) {
         super.prepareProps.apply(this, arguments);
         var source = changes.source || this.source();
-        if (FrameSource.isEditSupported(source)){
+        if (FrameSource.isEditSupported(source)) {
             var widthChanged = changes.hasOwnProperty("width");
             var heightChanged = changes.hasOwnProperty("height");
-            if (changes.hasOwnProperty("sizing") || widthChanged || heightChanged){
+            if (changes.hasOwnProperty("sizing") || widthChanged || heightChanged) {
                 var oldRect = this.getContentRect();
                 var newRect = this.getContentRect();
-                if (widthChanged){
+                if (widthChanged) {
                     newRect.width = changes.width;
                 }
-                if (heightChanged){
+                if (heightChanged) {
                     newRect.height = changes.height;
                 }
                 var sourcePropsChanged = changes.hasOwnProperty("sourceProps");
@@ -39,30 +39,30 @@ export default class Frame extends Container {
         }
     }
 
-    propsUpdated(newProps){
+    propsUpdated(newProps) {
         super.propsUpdated.apply(this, arguments);
-        if (newProps.source){
+        if (newProps.source) {
             delete this.runtimeProps.loaded;
             delete this.runtimeProps.sourceProps;
         }
-        if (newProps.sourceProps && this.runtimeProps.sourceProps){
-            if (newProps.sourceProps.sr){
+        if (newProps.sourceProps && this.runtimeProps.sourceProps) {
+            if (newProps.sourceProps.sr) {
                 this.runtimeProps.sourceProps.sr = newProps.sourceProps.sr;
             }
-            if (newProps.sourceProps.dr){
+            if (newProps.sourceProps.dr) {
                 this.runtimeProps.sourceProps.dr = newProps.sourceProps.dr;
             }
         }
         var source = this.source();
-        if (FrameSource.isEditSupported(source)){
-            if (newProps.hasOwnProperty("sizing") || newProps.hasOwnProperty("width") || newProps.hasOwnProperty("height")){
+        if (FrameSource.isEditSupported(source)) {
+            if (newProps.hasOwnProperty("sizing") || newProps.hasOwnProperty("width") || newProps.hasOwnProperty("height")) {
                 FrameSource.resize(source, this.sizing(), this.getContentRect(), this.runtimeProps.sourceProps);
             }
         }
         this.createOrUpdateClippingMask(source, newProps);
     }
 
-    clone(){
+    clone() {
         var clone = super.clone();
         //to avoid loading when dragging
         clone.resetRuntimeProps();
@@ -72,63 +72,65 @@ export default class Frame extends Container {
         return clone;
     }
 
-    getContentRect(){
+    getContentRect() {
         return {x: 0, y: 0, width: this.width(), height: this.height()};
     }
 
-    source(value){
-        if (value !== undefined){
+    source(value) {
+        if (value !== undefined) {
             this.setProps({source: value});
         }
         return this.props.source;
     }
 
-    sizing(value){
-        if (value !== undefined){
+    sizing(value) {
+        if (value !== undefined) {
             this.setProps({sizing: value});
         }
         return this.props.sizing;
     }
 
-    fillBackground(){
-        if (!FrameSource.isFillSupported(this.source())){
+    fillBackground() {
+        if (!FrameSource.isFillSupported(this.source())) {
             super.fillBackground.apply(this, arguments);
         }
     }
-    strokeBorder(){
-        if (!FrameSource.isFillSupported(this.source())){
+
+    strokeBorder() {
+        if (!FrameSource.isFillSupported(this.source())) {
             super.strokeBorder.apply(this, arguments);
         }
     }
 
-    drawSelf(){
-        if (!this.source()){
+    drawSelf() {
+        if (!this.source()) {
             return;
         }
         super.drawSelf.apply(this, arguments);
     }
-    drawChildren(context, w, h, environment){
+
+    drawChildren(context, w, h, environment) {
         var source = this.source();
-        if (!source){
+        if (!source) {
             return;
         }
 
         context.save();
 
-        if (!this.runtimeProps.loaded){
+        if (!this.runtimeProps.loaded) {
             var promise = FrameSource.load(source, this.props.sourceProps);
-            if (promise){
+            if (promise) {
                 promise.then(data => {
-                    if (this.isDisposed()){
+                    if (this.isDisposed()) {
                         return;
                     }
-                    if (data){
+                    if (data) {
                         this.runtimeProps.sourceProps = data;
-                        if (this.props.sourceProps){
-                            if (this.props.sourceProps.sr){
+                        if (this.props.sourceProps) {
+                            if (this.props.sourceProps.sr) {
                                 this.runtimeProps.sourceProps.sr = this.props.sourceProps.sr;
                             }
-                            if (this.props.sourceProps.dr){
+                            if (this.props.sourceProps.dr) {
                                 this.runtimeProps.sourceProps.dr = this.props.sourceProps.dr;
                             }
                         }
@@ -141,54 +143,63 @@ export default class Frame extends Container {
             this.runtimeProps.loaded = true;
         }
 
-        if (this.runtimeProps.mask){
+        if (this.runtimeProps.mask) {
             this.drawWithMask(context, this.runtimeProps.mask, 0, environment);
         }
-        else{
+        else {
             FrameSource.draw(source, context, w, h, this.props, this.runtimeProps.sourceProps);
         }
 
         context.restore();
     }
-    renderAfterMask(context){
+
+    renderAfterMask(context) {
         FrameSource.draw(this.source(), context, this.width(), this.height(), this.props, this.runtimeProps.sourceProps);
     }
+
     clip(context, l, t, w, h) {
         if (this.clipSelf()) {
             context.rectPath(l, t, w, h);
             context.clip();
         }
     }
-    clipSelf(){
+
+    clipSelf() {
         return this.angle() % 360 === 0;
     }
-    createOrUpdateClippingMask(source, newProps){
-        if (newProps.hasOwnProperty("angle") || newProps.hasOwnProperty("sourceProps")){
+
+    createOrUpdateClippingMask(source, newProps) {
+        if (newProps.hasOwnProperty("angle") || newProps.hasOwnProperty("sourceProps")) {
             var shouldClip = FrameSource.shouldClip(source, this.width(), this.height(), this.runtimeProps.sourceProps);
-            if (this.angle() % 360 === 0 || !shouldClip){
+            if (this.angle() % 360 === 0 || !shouldClip) {
                 delete this.runtimeProps.mask;
             }
-            else if (!this.runtimeProps.mask){
+            else if (!this.runtimeProps.mask) {
                 this.runtimeProps.mask = new Rectangle();
-                this.runtimeProps.mask.setProps({width: this.width(), height: this.height(), stroke: Brush.Empty, fill: Brush.Empty}, ChangeMode.Self);
+                this.runtimeProps.mask.setProps({
+                    width: this.width(),
+                    height: this.height(),
+                    stroke: Brush.Empty,
+                    fill: Brush.Empty
+                }, ChangeMode.Self);
                 //parent needed for finding global context, not adding to children
                 this.runtimeProps.mask.parent(this);
             }
         }
-        if (this.runtimeProps.mask && (newProps.hasOwnProperty("width") || newProps.hasOwnProperty("height"))){
+        if (this.runtimeProps.mask && (newProps.hasOwnProperty("width") || newProps.hasOwnProperty("height"))) {
             this.runtimeProps.mask.setProps({width: this.width(), height: this.height()}, ChangeMode.Self);
         }
     }
 
-    dblclick(){
+    dblclick() {
         var source = this.source();
-        if (FrameSource.isEditSupported(source)){
+        if (FrameSource.isEditSupported(source)) {
             FrameEditTool.attach(this);
         }
-        else if (!FrameSource.hasValue(source)){
+        else if (!FrameSource.hasValue(source)) {
             var e = {done: null};
             Frame.uploadRequested.raise(e);
-            if (e.done){
+            if (e.done) {
                 e.done.then(urls => this.prepareAndSetProps({
                     sizing: DefaultSizing,
                     sourceProps: null,
@@ -197,34 +208,37 @@ export default class Frame extends Container {
             }
         }
     }
-    clipDragClone(){
+
+    clipDragClone() {
         return true;
     }
 
-    canAccept(element, autoInsert, allowMoveInOut){
+    canAccept(element, autoInsert, allowMoveInOut) {
         return element instanceof Frame && allowMoveInOut;
     }
 
-    canConvertToPath(){
+    canConvertToPath() {
         return !!this.props.sourceProps.svg;
     }
-    convertToPath(){
+
+    convertToPath() {
         return fetch(this.props.sourceProps.svg, {cors: true})
             .then(response => {
-                if (!(response.status >= 200 && response.status < 300)){
+                if (!(response.status >= 200 && response.status < 300)) {
                     throw new Error("Could not download vector");
                 }
                 return response.text();
             })
             .then(svg => {
-                return svgParser.loadSVGFromString(svg).then((result)=>{
-                    result.setProps({x:this.x(), y: this.y()});
+                return svgParser.loadSVGFromString(svg).then((result)=> {
+                    result.setProps({x: this.x(), y: this.y()});
+                    result.updateViewMatrix();
                     return result;
                 });
             });
     }
 
-    insert(frame){
+    insert(frame) {
         this.prepareAndSetProps({source: frame.props.source, sourceProps: frame.props.sourceProps});
         this.runtimeProps.sourceProps = frame.runtimeProps.sourceProps;
         frame.parent().remove(frame);
@@ -270,7 +284,7 @@ PropertyMetadata.registerForType(Frame, {
             sizing: FrameSource.isEditSupported(props.source)
         });
     },
-    groups: function(element){
+    groups: function (element) {
         var ownGroups = [
             {
                 label: element ? element.displayType() : '',
@@ -281,7 +295,7 @@ PropertyMetadata.registerForType(Frame, {
         var baseGroups = PropertyMetadata.findForType(Container).groups();
         return ownGroups.concat(baseGroups);
     },
-    getNonRepeatableProps: function(element){
+    getNonRepeatableProps: function (element) {
         var base = PropertyMetadata.findForType(Container).getNonRepeatableProps(element);
         return base.concat(["source"]);
     }

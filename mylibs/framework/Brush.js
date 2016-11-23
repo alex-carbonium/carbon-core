@@ -197,8 +197,15 @@ Brush.extend = function(...brushes){
     return this.createFromObject(Object.assign({}, ...brushes));
 };
 
-Brush.createFromColor = function (color) {
-    return this.createFromObject({/*type = color by default*/ value: color});
+Brush.createFromColor = function (color, lineWidth, position) {
+    var brush = {/*type = color by default*/ value: color};
+    if(lineWidth !== undefined){
+        brush.lineWidth = lineWidth;
+    }
+    if(position !== undefined){
+        brush.position = position;
+    }
+    return this.createFromObject(brush);
 };
 
 Brush.createEmptyBrush = function () {

@@ -1,4 +1,4 @@
-import {Types, Overflow} from "./Defs";
+import {Types, Overflow, ChangeMode} from "./Defs";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
 import PropertyMetadata from "./PropertyMetadata";
@@ -34,11 +34,52 @@ define(["framework/Container"], function (Container) {
                 }
                 GroupContainer.prototype.SuperKlass.drawSelf.apply(this, arguments);
             },
-            allowMoveOutChildren: function(value, eventData){
+            _buildChildrenSizes(){
+                var rects = [];
+                this.children.forEach((e) => {
+                    var r = e.getBoundaryRect();
+                    rects.push(r);
+                });
+
+                return rects;
+            },
+            startResizing(){
+                GroupContainer.prototype.SuperKlass.startResizing.call(this);
+                this._rects = this._buildChildrenSizes();
+                this._originalWidth = this.width();
+                this._originalHeight = this.height();
+                this.applyVisitor(e=>{
+                    if(e instanceof GroupContainer && e !== this){
+                        e.startResizing();
+                    }
+                })
+            },
+            stopResizing(){
+                GroupContainer.prototype.SuperKlass.stopResizing.call(this);
+                delete this._rects;
+                delete this._originalWidth;
+                delete this._originalHeight;
+                this.applyVisitor(e=>{
+                    if(e instanceof GroupContainer && e !== this){
+                        e.stopResizing();
+                    }
+                })
+            },
+            _roundValue(value){
+                return value;
+            },
+
+            allowMoveOutChildren: function (value, eventData) {
                 return Container.prototype.allowMoveOutChildren.apply(this, arguments) || (eventData && (eventData.event.ctrlKey || eventData.event.metaKey))
             },
             canAccept: function (element, autoInsert, allowMoveInOut) {
                 return allowMoveInOut;//!autoInsert && Container.prototype.canAccept.call(this, element);
+            },
+            lockAutoresize: function() {
+                this._lockAutoresize = true;
+            },
+            unlockAutoresize: function() {
+                delete this._lockAutoresize;
             },
             iconType: function () {
                 return 'group';
@@ -49,9 +90,6 @@ define(["framework/Container"], function (Container) {
                     delete this._selectionSubscription;
                 }
                 Container.prototype.dispose.apply(this, arguments);
-            },
-            resize(){
-                alert('afadsf')
             }
         }
     })());
@@ -61,13 +99,16 @@ define(["framework/Container"], function (Container) {
     Container.GroupContainerType = GroupContainer;
 
     PropertyMetadata.registerForType(GroupContainer, {
-        allowMoveOutChildren:{
+        allowMoveOutChildren: {
             defaultValue: false
         },
         enableGroupLocking: {
             defaultValue: true
         },
-        overflow:{
+        scaleChildren: {
+            defaultValue: true
+        },
+        overflow: {
             defaultValue: Overflow.AdjustBoth
         }
     });

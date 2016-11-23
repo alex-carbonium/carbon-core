@@ -111,6 +111,10 @@ class Shape extends Container {
 
         context.save();
 
+        context.lineCap = this.props.lineCap;
+        context.lineJoin = this.props.lineJoin;
+        context.miterLimit = this.props.miterLimit;
+
         var dashPattern = this.dashPattern();
         if (dashPattern) {
             context.setLineDash(dashPattern);
@@ -132,6 +136,31 @@ class Shape extends Container {
     canAccept(element, autoInsert, allowMoveInOut){
         return (element instanceof Frame || element instanceof Shape) && allowMoveInOut;
     }
+
+    lineCap(value){
+        if(arguments.length > 0){
+            this.setProps({lineCap:value});
+        }
+
+        return this.props.lineCap;
+    }
+
+    lineJoin(value){
+        if(arguments.length > 0){
+            this.setProps({lineJoin:value});
+        }
+
+        return this.props.lineJoin;
+    }
+
+    miterLimit(value){
+        if(arguments.length > 0){
+            this.setProps({miterLimit:value});
+        }
+
+        return this.props.mitterLimit;
+    }
+
 
     insert(frame){
         var rect = this.getBoundaryRect();
@@ -159,6 +188,37 @@ PropertyMetadata.registerForType(Shape, {
         displayName: "Stroke",
         type: "stroke",
         defaultValue: Brush.Black
+    },
+    lineCap: {
+        defaultValue: 'butt',
+        type: "dropdown",
+        displayName: '@lineCap',
+        options: {
+            size: 1 / 2,
+            items: [
+                {name: "@butt", value: 'butt'},
+                {name: "@round", value: 'round'},
+                {name: "@square", value: 'square'}
+            ]
+        },
+    },
+    lineJoin: {
+        defaultValue: 'miter',
+        type: "dropdown",
+        displayName: '@lineJoin',
+        options: {
+            size: 1 / 2,
+            items: [
+                {name: "@miter", value: 'miter'},
+                {name: "@bevel", value: 'bevel'},
+                {name: "@round", value: 'round'}
+            ]
+        },
+    },
+    miterLimit: {
+        defaultValue: 10,
+        displayName: "@miterLimit",
+        type: "numeric"
     }
 });
 

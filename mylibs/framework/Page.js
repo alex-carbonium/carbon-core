@@ -687,32 +687,34 @@ class Page extends Layer {
     scaleToSize(size, options) {
         options = options || {};
         var contentSize = this.getContentOuterSize();
+        var contentWidth = contentSize.width;
+        var contentHeight = contentSize.height;
         if (options.addGutters !== false) {
             if (!this.isPhoneVisible()) {
                 //account for resizers + some gutter
-                contentSize.width += 30;
-                contentSize.height += 30;
+                contentWidth+= 30;
+                contentHeight += 30;
             }
             else {
                 //add some gutters so that image does not touch the borders
-                contentSize.width += 10;
-                contentSize.height += 10;
+                contentWidth += 10;
+                contentHeight += 10;
             }
         }
 
-        var scale = size.width / contentSize.width;
+        var scale = size.width / contentWidth;
         if (options.maxScale && scale > options.maxScale) {
             scale = options.maxScale;
         }
         if (options.widthOnly) {
             return scale;
         }
-        var newHeight = contentSize.height * scale;
+        var newHeight = contentHeight * scale;
         if (newHeight <= size.height) {
             return scale;
         }
 
-        scale = size.height / contentSize.height;
+        scale = size.height / contentHeight;
         if (options.maxScale && scale > options.maxScale) {
             scale = options.maxScale;
         }

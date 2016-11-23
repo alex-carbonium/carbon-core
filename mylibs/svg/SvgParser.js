@@ -3,9 +3,89 @@ import Circle from "framework/Circle";
 import Path from "ui/common/Path";
 import GroupContainer from "framework/GroupContainer";
 import Promise from "bluebird";
+import Matrix from "math/matrix";
+import {combineRects} from "math/math";
 
 define(function () {
     var svg = window.svgParser = {};
+
+    var reAllowedSVGTagNames = /^(path|circle|polygon|polyline|ellipse|rect|line|image|text|g)$/;
+
+    // http://www.w3.org/TR/SVG/coords.html#ViewBoxAttribute
+    // \d doesn't quite cut it (as we need to match an actual float number)
+
+    // matches, e.g.: +14.56e-12, etc.
+    var reNum = '(?:[-+]?\\d+(?:\\.\\d+)?(?:e[-+]?\\d+)?)';
+
+    var reViewBoxAttrValue = new RegExp(
+        '^' +
+        '\\s*(' + reNum + '+)\\s*,?' +
+        '\\s*(' + reNum + '+)\\s*,?' +
+        '\\s*(' + reNum + '+)\\s*,?' +
+        '\\s*(' + reNum + '+)\\s*' +
+        '$'
+    );
+
+    function hasAncestorWithNodeName(element, nodeName) {
+        while (element && (element = element.parentNode)) {
+            if (nodeName.test(element.nodeName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    var toArray = function (arrayLike) {
+        return Array.prototype.slice.call(arrayLike, 0);
+    };
+
+    function parseGroupElement(element, options, matrix) {
+        var group = new GroupContainer();
+
+        App.Current.activePage.nameProvider.assignNewName(group);
+        var parsedChildren = visitElements(element.children, options, matrix); // TODO: update matrix
+
+        if(parsedChildren.length == 0){
+            return null;
+        }
+        var rect = parsedChildren[0].getBoundaryRect();
+        for(var i = 1; i < parsedChildren.length; ++i){
+            var e = parsedChildren[i];
+            rect = combineRects(rect, e.getBoundaryRect());
+        }
+
+        group.setProps(rect);
+        for(var i = 0; i < parsedChildren.length; ++i){
+            var child = parsedChildren[i];
+            child.setProps({x:child.x() - rect.x, y:child.y() - rect.y});
+            group.add(child);
+        }
+
+        return group;
+    }
+
+    function visitElements(children, options, matrix) {
+        var res = [];
+        for(var i = 0; i < children.length; ++i) {
+            var parseMethod = element2Type(children[i].tagName);
+            if(parseMethod) {
+                var child = children[i];
+                var attrs = toArray(child.attributes).map(a=>a.name);
+                var parsedAttributes = svgParser.parseAttributes(child, attrs);
+
+                var m = matrix;
+                if(parsedAttributes.transformMatrix){
+                    m = m.clone().append(parsedAttributes.transformMatrix);
+                }
+                var e = parseMethod(child, parsedAttributes, m);
+                if(e) {
+                    res.push(e);
+                }
+            }
+        }
+
+        return res;
+    }
 
     function element2Type(name) {
         switch (name) {
@@ -16,6 +96,8 @@ define(function () {
                 return Path.fromSvgLineElement;
             case 'polyline':
                 return Path.fromSvgPolylineElement;
+            case 'g':
+                return parseGroupElement;
             case 'circle':
             case 'ellipse':
                 return Circle.fromSvgElement;
@@ -63,6 +145,9 @@ define(function () {
         'fill-opacity': 'opacity',
         'fill-rule': 'fillRule',
         'stroke-width': 'strokeWidth',
+        'stroke-linecap': 'lineCap',
+        'stroke-linejoin': 'lineJoin',
+        'stroke-miterlimit': 'miterLimit',
         'transform': 'transformMatrix',
         'text-decoration': 'textDecoration',
         'font-size': 'fontSize',
@@ -145,47 +230,31 @@ define(function () {
         function rotateMatrix(matrix, args) {
             var angle = args[0];
 
-            matrix[0] = Math.cos(angle);
-            matrix[1] = Math.sin(angle);
-            matrix[2] = -Math.sin(angle);
-            matrix[3] = Math.cos(angle);
+            matrix.rotate(angle);
         }
 
         function scaleMatrix(matrix, args) {
             var multiplierX = args[0],
                 multiplierY = (args.length === 2) ? args[1] : args[0];
 
-            matrix[0] = multiplierX;
-            matrix[3] = multiplierY;
+            matrix.scale(multiplierX, multiplierY);
         }
 
         function skewXMatrix(matrix, args) {
-            matrix[2] = args[0];
+            matrix.skew({x: args[0], y: 1});
         }
 
         function skewYMatrix(matrix, args) {
-            matrix[1] = args[0];
+            matrix.skew({y: args[0], x: 1});
         }
 
         function translateMatrix(matrix, args) {
-            matrix[4] = args[0];
-            if (args.length === 2) {
-                matrix[5] = args[1];
-            }
+            matrix.translate(args[0], args[1]);
         }
 
-        // identity matrix
-        var iMatrix = [
-                1, // a
-                0, // b
-                0, // c
-                1, // d
-                0, // e
-                0  // f
-            ],
 
-            // == begin transform regexp
-            number = '(?:[-+]?\\d+(?:\\.\\d+)?(?:e[-+]?\\d+)?)',
+        // == begin transform regexp
+        var number = '(?:[-+]?\\d+(?:\\.\\d+)?(?:e[-+]?\\d+)?)',
             comma_wsp = '(?:\\s+,?\\s*|,\\s*)',
 
             skewX = '(?:(skewX)\\s*\\(\\s*(' + number + ')\\s*\\))',
@@ -225,7 +294,7 @@ define(function () {
         return function (attributeValue) {
 
             // start with identity matrix
-            var matrix = iMatrix.concat();
+            var matrix = new Matrix();
 
             // return if no argument was given or
             // an argument does not match transform attribute regexp
@@ -375,47 +444,29 @@ define(function () {
      * @param {Function} [reviver] Method for further parsing of SVG elements, called after each fabric object created.
      */
     function parseElements(elements, callback, options, reviver) {
-        var instances = new Array(elements.length), i = elements.length;
-
-        function checkIfDone() {
-            if (--i === 0) {
-                instances = instances.filter(function (el) {
-                    return el != null;
-                });
-                resolveGradients(instances);
-                callback(instances);
-            }
-        }
+        var instances = new Array(elements.length);
 
         for (var index = 0, el, len = elements.length; index < len; index++) {
             el = elements[index];
             var factoryMethod = element2Type(el.tagName);
             if (factoryMethod) {
                 try {
-                    if (factoryMethod.async) {
-                        factoryMethod(el, (function (index, el) {
-                            return function (obj) {
-                                reviver && reviver(el, obj);
-                                instances.splice(index, 0, obj);
-                                checkIfDone();
-                            };
-                        })(index), options);
-                    }
-                    else {
-                        var obj = factoryMethod(el, options);
-                        reviver && reviver(el, obj);
-                        instances.splice(index, 0, obj);
-                        checkIfDone();
-                    }
+                    var obj = factoryMethod(el, options);
+                    reviver && reviver(el, obj);
+                    instances.splice(index, 0, obj);
                 }
                 catch (err) {
                     logger.error("Error parsing svg", err);
                 }
             }
-            else {
-                checkIfDone();
-            }
         }
+
+        instances = instances.filter(function (el) {
+            return el != null;
+        });
+
+        resolveGradients(instances);
+        callback(instances);
     }
 
     /**
@@ -503,52 +554,25 @@ define(function () {
      */
     parseSVGDocument = (function () {
 
-        var reAllowedSVGTagNames = /^(path|circle|polygon|polyline|ellipse|rect|line|image|text)$/;
-
-        // http://www.w3.org/TR/SVG/coords.html#ViewBoxAttribute
-        // \d doesn't quite cut it (as we need to match an actual float number)
-
-        // matches, e.g.: +14.56e-12, etc.
-        var reNum = '(?:[-+]?\\d+(?:\\.\\d+)?(?:e[-+]?\\d+)?)';
-
-        var reViewBoxAttrValue = new RegExp(
-            '^' +
-            '\\s*(' + reNum + '+)\\s*,?' +
-            '\\s*(' + reNum + '+)\\s*,?' +
-            '\\s*(' + reNum + '+)\\s*,?' +
-            '\\s*(' + reNum + '+)\\s*' +
-            '$'
-        );
-
-        function hasAncestorWithNodeName(element, nodeName) {
-            while (element && (element = element.parentNode)) {
-                if (nodeName.test(element.nodeName)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        var toArray = function (arrayLike) {
-            return Array.prototype.slice.call(arrayLike, 0);
-        };
-
         return function (doc, callback, reviver) {
             if (!doc) return;
 
             var startTime = new Date(),
                 descendants = toArray(doc.getElementsByTagName('*'));
 
-            if (descendants.length === 0) {
-                // we're likely in node, where "o3-xml" library fails to gEBTN("*")
-                // https://github.com/ajaxorg/node-o3-xml/issues/21
-                descendants = doc.selectNodes("//*[name(.)!='svg']");
-                var arr = [];
-                for (var i = 0, len = descendants.length; i < len; i++) {
-                    arr[i] = descendants[i];
-                }
-                descendants = arr;
-            }
+            var matrix = new Matrix();
+
+
+            // if (descendants.length === 0) {
+            //     // we're likely in node, where "o3-xml" library fails to gEBTN("*")
+            //     // https://github.com/ajaxorg/node-o3-xml/issues/21
+            //     descendants = doc.selectNodes("//*[name(.)!='svg']");
+            //     var arr = [];
+            //     for (var i = 0, len = descendants.length; i < len; i++) {
+            //         arr[i] = descendants[i];
+            //     }
+            //     descendants = arr;
+            // }
 
             var elements = descendants.filter(function (el) {
                 return reAllowedSVGTagNames.test(el.tagName) && !hasAncestorWithNodeName(el, /^(?:pattern|defs)$/); // http://www.w3.org/TR/SVG/struct.html#DefsElement
@@ -584,21 +608,20 @@ define(function () {
             cssRules = getCSSRules(doc);
 
             // Precedence of rules:   style > class > attribute
-
-            parseElements(elements, function (instances) {
-                documentParsingTime = new Date() - startTime;
-                if (callback) {
-                    callback(instances, options);
-                }
-            }, clone(options), reviver);
+            var res = visitElements(doc.children, options, matrix);
+            callback(res, options);
+            // parseElements(elements, function (instances) {
+            //     documentParsingTime = new Date() - startTime;
+            //     if (callback) {
+            //         callback(instances, options);
+            //     }
+            // }, clone(options), reviver);
         };
     })();
 
     function loadSVGFromString(string, r) {
         string = string.trim();
         return new Promise(function (resolve, reject) {
-
-
             var doc;
             if (typeof DOMParser !== 'undefined') {
                 var parser = new DOMParser();
@@ -614,15 +637,33 @@ define(function () {
             }
 
             parseSVGDocument(doc.documentElement, function (results, options) {
-                if(results.length === 1){
+                if (results.length === 1) {
                     resolve(results[0], options);
                 }
                 var group = new GroupContainer();
                 App.Current.activePage.nameProvider.assignNewName(group);
+
+                var right = 0;
+                var bottom = 0;
+                for (var i = 0; i < results.length; ++i) {
+                    var rect = results[i].getBoundaryRect();
+                    var r = rect.x + rect.width;
+                    if (r > right) {
+                        right = r;
+                    }
+                    var b = rect.y + rect.height;
+                    if (b > bottom) {
+                        bottom = b;
+                    }
+                }
+                group.lockAutoresize();
+                group.setProps({width: right, height: bottom});
+
                 for (var i = 0; i < results.length; ++i) {
                     group.add(results[i]);
                 }
-
+                group.unlockAutoresize();
+                group.updateViewMatrix();
                 resolve(group, options);
             }, r);
         });
