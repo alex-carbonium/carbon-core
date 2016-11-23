@@ -9,6 +9,9 @@ define(["framework/commands/Command", "framework/sync/Primitive"], function(Comm
             return sketch.commands.Duplicate.createWithMove(selection, "both", offset);
         },
         createWithMove:function(selection, direction, offset){
+            if (selection.length === 0){
+                return;
+            }
             offset = offset===undefined?5:offset;
             var xoffset = 0, yoffset = 0;
             switch (direction) {
@@ -38,7 +41,7 @@ define(["framework/commands/Command", "framework/sync/Primitive"], function(Comm
                 clone.x(element.x() + xoffset);
                 clone.y(element.y() + yoffset);
 
-                element.parent().add(clone);
+                element.parent().insert(clone, element.zOrder() + 1);
                 newSelection.push(clone);
             }
             Selection.makeSelection(newSelection);

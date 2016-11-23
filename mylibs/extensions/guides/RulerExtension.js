@@ -205,6 +205,12 @@ export default class RulerExtension extends RuntimeExtension {
         var major = offset.major;
         context.translate(offset.translate, 0);
 
+        context.save();
+        context.fillStyle = config.overlay_fill;
+        context.globalAlpha = config.overlay_opacity;
+        context.fillRect(-offset.translate, 0, length, config.size);
+        context.restore();
+
         var minx = offset.major * this._settings.majorStep * this._settings.scale;
         var minDraw = -minx + .5 | 0;
         var maxDraw = width - minx + .5 | 0;
@@ -212,7 +218,6 @@ export default class RulerExtension extends RuntimeExtension {
         this.drawHorizontalHighlight(context, minDraw, maxDraw, minx, length, offset);
 
         context.strokeStyle = "gray";
-        context.fillStyle = width === 0 ? "gray" : "black";
         context.lineWidth = 1;
         context.beginPath();
 
@@ -221,15 +226,16 @@ export default class RulerExtension extends RuntimeExtension {
             context.moveTo(x + .5, 0);
             if (i % 10 === 0) {
                 let text = major++ * this._settings.majorStep;
-                if (x >= minDraw && x <= maxDraw || width === 0) {
+                //if (x >= minDraw && x <= maxDraw || width === 0) {
                     context.lineTo(x + .5, config.size);
-                    context.fillText(text, x + LABEL_MARGIN_X, 15);
-                }
+                    context.fillStyle = x >= minDraw && x <= maxDraw ? "black" : "gray";
+                    context.fillText(text, x + LABEL_MARGIN_X, 11);
+                //}
                 // else {
                 //     context.lineTo(x + .5, config.tick_minor_size);
                 // }
             }
-            else if (x > minDraw && x < maxDraw || (i % 5 === 0 && width === 0)) {
+            else if (x > minDraw && x < maxDraw || (i % 5 === 0)) {
                 context.lineTo(x + .5, config.tick_minor_size);
             }
         }
@@ -246,56 +252,55 @@ export default class RulerExtension extends RuntimeExtension {
             if (maxDraw >= 0 && minDraw + offset.translate <= length) {
                 context.fillStyle = config.artboard_fill;
                 context.fillRect(minDraw, 0, Math.min(this._originWidth, length - minDraw - offset.translate), config.size);
+            }
 
-                if (this._highlight) {
-                    var highlightX = this._highlight.x - minx + .5 | 0;
-                    if (highlightX >= minDraw && highlightX + offset.translate <= length) {
-                        let y = config.size + selectionSize/2 + .5;
+            if (this._highlight) {
+                var highlightX = Math.round(this._highlight.x - minx);
+                var hx = highlightX + offset.translate;
+                var hw = this._highlight.width;
+                if (hx <= length && hx + hw >= 0){
+                    let y = config.size + selectionSize/2 + .5;
 
-                        context.beginPath();
-                        context.strokeStyle = config.selection_edge_fill;
-                        context.lineWidth = selectionSize;
-                        context.moveTo(highlightX, y);
-                        context.lineTo(highlightX+2, y);
+                    context.beginPath();
+                    context.strokeStyle = config.selection_edge_fill;
+                    context.lineWidth = selectionSize;
+                    context.moveTo(highlightX, y);
+                    context.lineTo(highlightX+2, y);
 
-                        var drawRightPoint = highlightX + this._highlight.width < length - offset.translate;
-                        if (drawRightPoint){
-                            context.moveTo(highlightX + this._highlight.width - 2, y);
-                            context.lineTo(highlightX + this._highlight.width, y);
-                        }
-                        context.stroke();
+                    context.moveTo(highlightX + this._highlight.width - 2, y);
+                    context.lineTo(highlightX + this._highlight.width, y);
+                    context.stroke();
 
-                        context.beginPath();
-                        context.lineWidth = selectionSize;
-                        context.strokeStyle = config.selection_fill;
-                        context.moveTo(highlightX + 2, y);
-                        context.lineTo(Math.min(highlightX + this._highlight.width - 2, length - offset.translate), y);
-                        context.stroke();
+                    context.beginPath();
+                    context.lineWidth = selectionSize;
+                    context.strokeStyle = config.selection_fill;
+                    context.moveTo(highlightX + 2, y);
+                    context.lineTo(Math.min(highlightX + this._highlight.width - 2, length - offset.translate), y);
+                    context.stroke();
 
-                        // if (this._highlight.width > 70){
-                        //     if (widthOfL === -1){
-                        //         widthOfL = context.measureText("L").width + 1;
-                        //     }
-                        //     if (widthOfW === -1){
-                        //         widthOfW = context.measureText("W").width + 1;
-                        //     }
-                        //
-                        //     var ty = y + 12;
-                        //     context.fillStyle = config.selection_label_fill;
-                        //     context.fillText("L", highlightX, ty);
-                        //     context.fillStyle = config.selection_value_fill;
-                        //     context.fillText(this._highlight.box.x + "", highlightX + widthOfL, ty);
-                        //
-                        //     if (drawRightPoint){
-                        //         var t = this._highlight.box.width + "";
-                        //         var w = context.measureText(t).width;
-                        //         context.fillStyle = config.selection_label_fill;
-                        //         context.fillText("W", highlightX + this._highlight.width - widthOfW - w, ty);
-                        //         context.fillStyle = config.selection_value_fill;
-                        //         context.fillText(t, highlightX + this._highlight.width - w, ty);
-                        //     }
-                        // }
-                    }
+                    // if (this._highlight.width > 70){
+                    //     if (widthOfL === -1){
+                    //         widthOfL = context.measureText("L").width + 1;
+                    //     }
+                    //     if (widthOfW === -1){
+                    //         widthOfW = context.measureText("W").width + 1;
+                    //     }
+                    //
+                    //     var ty = y + 12;
+                    //     context.fillStyle = config.selection_label_fill;
+                    //     context.fillText("L", highlightX, ty);
+                    //     context.fillStyle = config.selection_value_fill;
+                    //     context.fillText(this._highlight.box.x + "", highlightX + widthOfL, ty);
+                    //
+                    //     if (drawRightPoint){
+                    //         var t = this._highlight.box.width + "";
+                    //         var w = context.measureText(t).width;
+                    //         context.fillStyle = config.selection_label_fill;
+                    //         context.fillText("W", highlightX + this._highlight.width - widthOfW - w, ty);
+                    //         context.fillStyle = config.selection_value_fill;
+                    //         context.fillText(t, highlightX + this._highlight.width - w, ty);
+                    //     }
+                    // }
                 }
             }
         }
@@ -319,7 +324,6 @@ export default class RulerExtension extends RuntimeExtension {
         this.drawVerticalHighlight(context, minDraw, maxDraw, miny, length, offset);
 
         context.strokeStyle = "gray";
-        context.fillStyle = height === 0 ? "gray" : "black";
         context.lineWidth = 1;
         context.beginPath();
 
@@ -329,15 +333,15 @@ export default class RulerExtension extends RuntimeExtension {
             context.moveTo(0, y + .5);
             if (i % 10 === 0) {
                 let text = major++ * this._settings.majorStep;
-                if (y >= (minDraw - 5) && y <= (maxDraw + 5) || height === 0) {
+                //if (y >= (minDraw - 5) && y <= (maxDraw + 5) || height === 0) {
                     context.lineTo(config.size, y + .5);
-                    labels.push(y, text);
-                }
+                    labels.push(y, text, y >= minDraw && y <= maxDraw + 5);
+                //}
                 // else {
                 //     context.lineTo(config.tick_minor_size, y + .5);
                 // }
             }
-            else if (y > minDraw && y < maxDraw || (i % 5 === 0 && height === 0)) {
+            else if (y > minDraw && y < maxDraw || (i % 5 === 0)) {
                 context.lineTo(config.tick_minor_size, y + .5);
             }
         }
@@ -351,10 +355,11 @@ export default class RulerExtension extends RuntimeExtension {
         var originY = length / 2 + .5 | 0;
         context.translate(originX, originY);
         context.rotate(-Math.PI / 2);
-        for (let i = 0; i < labels.length; i += 2) {
+        for (let i = 0; i < labels.length; i += 3) {
             //simplified rotation
             let x = originX - labels[i] + originY;
-            context.fillText(labels[i + 1], x - 5, 7);
+            context.fillStyle = labels[i + 2] ? "black" : "gray";
+            context.fillText(labels[i + 1], x - 5, 5);
         }
 
         context.restore();
@@ -364,58 +369,57 @@ export default class RulerExtension extends RuntimeExtension {
             if (maxDraw >= 0 && minDraw + offset.translate <= length) {
                 context.fillStyle = config.artboard_fill;
                 context.fillRect(0, minDraw, config.size, Math.min(this._originHeight, length - minDraw - offset.translate));
+            }
 
-                if (this._highlight) {
-                    var highlightY = this._highlight.y - miny + .5 | 0;
-                    if (highlightY >= minDraw && highlightY + offset.translate <= length) {
-                        let x = config.size + selectionSize/2 + .5;
+            if (this._highlight) {
+                var highlightY = Math.round(this._highlight.y - miny);
+                var hy = highlightY + offset.translate;
+                var hh = this._highlight.width;
+                if (hy <= length && hy + hh >= 0){
+                    let x = config.size + selectionSize/2 + .5;
 
-                        context.beginPath();
-                        context.strokeStyle = config.selection_edge_fill;
-                        context.lineWidth = selectionSize;
-                        context.moveTo(x, highlightY);
-                        context.lineTo(x, highlightY+2);
+                    context.beginPath();
+                    context.strokeStyle = config.selection_edge_fill;
+                    context.lineWidth = selectionSize;
+                    context.moveTo(x, highlightY);
+                    context.lineTo(x, highlightY+2);
 
-                        var drawRightPoint = highlightY + this._highlight.height < length - offset.translate;
-                        if (drawRightPoint){
-                            context.moveTo(x, highlightY + this._highlight.height - 2);
-                            context.lineTo(x, highlightY + this._highlight.height);
-                        }
-                        context.stroke();
+                    context.moveTo(x, highlightY + this._highlight.height - 2);
+                    context.lineTo(x, highlightY + this._highlight.height);
+                    context.stroke();
 
-                        context.beginPath();
-                        context.lineWidth = selectionSize;
-                        context.strokeStyle = config.selection_fill;
-                        context.moveTo(x, highlightY + 2);
-                        context.lineTo(x, Math.min(highlightY + this._highlight.height - 2, length - offset.translate));
-                        context.stroke();
+                    context.beginPath();
+                    context.lineWidth = selectionSize;
+                    context.strokeStyle = config.selection_fill;
+                    context.moveTo(x, highlightY + 2);
+                    context.lineTo(x, Math.min(highlightY + this._highlight.height - 2, length - offset.translate));
+                    context.stroke();
 
-                        // if (this._highlight.height > 70){
-                        //     if (widthOfL === -1){
-                        //         widthOfL = context.measureText("L").width + 1;
-                        //     }
-                        //     if (widthOfW === -1){
-                        //         widthOfW = context.measureText("W").width + 1;
-                        //     }
-                        //
-                        //     context.save();
-                        //
-                        //     var tx = x + 2;
-                        //     context.fillStyle = config.selection_label_fill;
-                        //     context.fillText("L", tx, highlightY);
-                        //     context.fillStyle = config.selection_value_fill;
-                        //     context.fillText(this._highlight.box.y + "", tx + widthOfL, highlightY);
-                        //
-                        //     if (drawRightPoint){
-                        //         var t = this._highlight.box.height + "";
-                        //         context.fillStyle = config.selection_label_fill;
-                        //         context.fillText("W", tx, highlightY + this._highlight.height);
-                        //         context.fillStyle = config.selection_value_fill;
-                        //         context.fillText(t, tx + widthOfW, highlightY + this._highlight.height);
-                        //     }
-                        //     context.restore();
-                        // }
-                    }
+                    // if (this._highlight.height > 70){
+                    //     if (widthOfL === -1){
+                    //         widthOfL = context.measureText("L").width + 1;
+                    //     }
+                    //     if (widthOfW === -1){
+                    //         widthOfW = context.measureText("W").width + 1;
+                    //     }
+                    //
+                    //     context.save();
+                    //
+                    //     var tx = x + 2;
+                    //     context.fillStyle = config.selection_label_fill;
+                    //     context.fillText("L", tx, highlightY);
+                    //     context.fillStyle = config.selection_value_fill;
+                    //     context.fillText(this._highlight.box.y + "", tx + widthOfL, highlightY);
+                    //
+                    //     if (drawRightPoint){
+                    //         var t = this._highlight.box.height + "";
+                    //         context.fillStyle = config.selection_label_fill;
+                    //         context.fillText("W", tx, highlightY + this._highlight.height);
+                    //         context.fillStyle = config.selection_value_fill;
+                    //         context.fillText(t, tx + widthOfW, highlightY + this._highlight.height);
+                    //     }
+                    //     context.restore();
+                    // }
                 }
             }
         }

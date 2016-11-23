@@ -61,11 +61,18 @@ class Clipboard {
             this.buffer = [];
             this.globals = [];
             this.locals = [];
+            this.zOrder = -1;
+            this.originalParent = elements[0].parent();
+
             for (var i = 0; i < elements.length; i++){
                 var element = elements[i];
                 this.buffer.push(element.toJSON());
                 this.globals.push(element.getBoundaryRectGlobal());
                 this.locals.push(element.getBoundaryRect());
+                var zOrder = element.zOrder();
+                if (zOrder > this.zOrder){
+                    this.zOrder = zOrder;
+                }
             }
 
             if (e){
@@ -138,7 +145,12 @@ class Clipboard {
                         x: globals[i].x - bufferRect.x + location.x,
                         y: globals[i].y - bufferRect.y + location.y
                     });
-                    location.parent.add(element);
+                    if (location.parent === this.originalParent){
+                        location.parent.insert(element, this.zOrder + 1);
+                    }
+                    else{
+                        location.parent.add(element);
+                    }
                 }
 
                 var newSelection;

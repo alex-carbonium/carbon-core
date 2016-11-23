@@ -5,6 +5,10 @@ import UserManager from "oidc-client/src/UserManager";
 import Log from "oidc-client/src/Log";
 import globals from "./globals";
 
+var debug = require("DebugUtil")("carb:backend");
+
+var instanceId = 0;
+
 var contentTypes = {
     json: 0,
     urlEncoded: 1
@@ -39,6 +43,9 @@ var backend = globals.backend || {
             return;
         }
 
+        this._instanceId = ++instanceId;
+        debug("Initialize [%s]", this._instanceId);
+
         this.servicesEndpoint = endpoints.services;
         this.storageEndpoint = endpoints.storage;
         this.cdnEndpoint = endpoints.cdn;
@@ -72,7 +79,7 @@ var backend = globals.backend || {
     initOptions: function(options){
         this._globalOptions = Object.assign({}, this._globalOptions, options);
     },
-    setConnection: function(connection){
+    setConnection: function(connection){        
         this._connection = connection;
     },
     changeModel: function(app, primitives, returnModel){
@@ -102,6 +109,7 @@ var backend = globals.backend || {
         return this.loginAsGuest();
     },
     renewToken(){
+        debug("Renew token [%s]", this._instanceId);
         return this._userManager.signinSilent()
             .then(data => this.setAccessToken(data.access_token))
             .catch(e => {
@@ -110,6 +118,7 @@ var backend = globals.backend || {
             });
     },
     renewTokenCallback(){
+        debug("Renew token callback [%s]", this._instanceId);
         this._userManager.signinSilentCallback();
     },
     isLoggedIn: function(){

@@ -322,34 +322,23 @@ define(function (require) {
             }, "ui-group");
 
             this.registerAction("lock", "Lock", "Lock", function () {
-                var locks = [];
-                each(Selection.getSelection(), function (e) {
-                    if (!e.locked()) {
-                        locks.push(e.constructPropsChangedCommand({locked: true}, {locked: false}));
-                    }
-                })
-                return new CompositeCommand(locks);
+                Selection.lock();
             });
 
             this.registerAction("unlock", "Unlock", "Lock", function () {
-                var locks = [];
-                each(Selection.getSelection(), function (e) {
-                    if (e.locked()) {
-                        locks.push(e.constructPropsChangedCommand({locked: false}, {locked: true}));
-                    }
-                })
-                return CompositeCommand(locks);
+                Selection.unlock();
             });
 
-            this.registerAction("unlockAllPage", "Unlock all on page", "Lock", function () {
-                var locks = [];
-                var page = that.app.activePage;
-                page.applyVisitor(function (e) {
+            this.registerAction("unlockAllOnArtboard", "Unlock all on page", "Lock", function () {
+                var artboard = that.app.activePage.getActiveArtboard();
+                var selection = [];
+                artboard.applyVisitor(function (e) {
                     if (e.locked()) {
-                        locks.push(e.constructPropsChangedCommand({locked: false}, {locked: true}));
+                        e.locked(false);
+                        selection.push(e);
                     }
-                })
-                return new CompositeCommand(locks);
+                });
+                Selection.makeSelection(selection);
             });
 
             this.registerAction("fontIncreaseSize", "Font increase size", "Font", function () {

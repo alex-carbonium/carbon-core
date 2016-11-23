@@ -245,7 +245,7 @@ export default class RulerGuides {
             var w = context.measureText(text).width + 2;
             context.fillRect(x + 1, viewportHeight/2 - config.font_size/2  + .5|0, w, config.font_size);
             context.fillStyle = "black";
-            context.fillText(text, x + 2 + .5|0, viewportHeight/2 + 4 + .5|0);
+            context.fillText(text, x + 2 + .5|0, viewportHeight/2 + 3 + .5|0);
 
             context.globalAlpha = .3;
             context.beginPath();
@@ -270,7 +270,7 @@ export default class RulerGuides {
             var w = context.measureText(text).width + 2;
             context.fillRect(viewportWidth/2 - w/2  + .5|0, y - config.font_size - 1, w, config.font_size);
             context.fillStyle = "black";
-            context.fillText(text, viewportWidth/2 - w/2 + 1.5|0, y - config.font_size/2 + 3.5|0);
+            context.fillText(text, viewportWidth/2 - w/2 + 1.5|0, y - config.font_size/2 + 2.5|0);
 
             context.globalAlpha = .3;
             context.beginPath();
