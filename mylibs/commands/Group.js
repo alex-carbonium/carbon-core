@@ -6,6 +6,7 @@ export default {
         var element = elements[0];
         var parent = element.parent();
         var group = new containerType();
+        group.lockAutoresize();
 
         var globalRect = element.getBoundingBoxGlobal();
         var x1 = globalRect.x
@@ -40,6 +41,7 @@ export default {
         }
 
         Selection.makeSelection([group]);
+        group.unlockAutoresize();
         return group;
     }
 }

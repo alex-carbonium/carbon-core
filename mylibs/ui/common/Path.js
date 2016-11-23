@@ -155,7 +155,7 @@ var setLinePoint = function (pt) {
 };
 
 var drawSegment = function (context, pt, prevPt, sx, sy, closing) {
-    if(!this._firstPoint){
+    if (!this._firstPoint) {
         this._firstPoint = pt;
     }
     if ((pt.moveTo || this._firstPoint === pt) && !closing) {
@@ -180,7 +180,7 @@ var drawSegment = function (context, pt, prevPt, sx, sy, closing) {
         context.bezierCurveTo(cp1x * sx, cp1y * sy, cp2x * sx, cp2y * sy, pt.x * sx, pt.y * sy);
     }
 
-    if(pt.closed){
+    if (pt.closed) {
         drawSegment.call(this, context, this._firstPoint, pt, sx, sy, true);
         context.closePath();
         this._firstPoint = null;
@@ -250,7 +250,7 @@ function moveAllPoints(dx, dy) {
         pt.cp2x -= dx;
         pt.cp1y -= dy;
         pt.cp2y -= dy;
-        this._roundPoint(pt);
+       // this._roundPoint(pt);
     }
 }
 
@@ -304,7 +304,7 @@ class DeleteCurrentPoints extends Command {
     }
 }
 
-function drawArc(path, x, y, coords) {
+function drawArc(path, x, y, coords, matrix) {
     var rx = coords[0];
     var ry = coords[1];
     var rot = coords[2];
@@ -315,6 +315,9 @@ function drawArc(path, x, y, coords) {
     var segs = arcToSegments(ex, ey, rx, ry, large, sweep, rot, x, y);
     for (var i = 0; i < segs.length; i++) {
         var bez = segmentToBezier.apply(this, segs[i]);
+        for (var j = 0; j < bez.length; ++j) {
+            bez[j] = matrix.transformPoint(bez[j]);
+        }
         path.bezierCurveTo.apply(path, bez);
     }
 }
@@ -479,9 +482,9 @@ class Path extends Shape {
         return res * 4;
     }
 
-    _roundvalue(value) {
+    _roundValue(value) {
         if (this.props.pointRounding === 0) {
-            value = (0 | value * 100) / 100;
+            value = (0 | (value + 0.005) * 100) / 100;
         } else if (this.props.pointRounding === 1) {
             value = (0 | value * 2 + .5) / 2;
         } else {
@@ -494,8 +497,8 @@ class Path extends Shape {
     _roundPoint(pt) {
         var x, y;
         if (this.props.pointRounding === 0) {
-            x = (0 | pt.x * 100) / 100;
-            y = (0 | pt.y * 100) / 100;
+            x = (0 | (pt.x + 0.005) * 100) / 100;
+            y = (0 | (pt.y + 0.005) * 100) / 100;
         } else if (this.props.pointRounding === 1) {
             x = (0 | pt.x * 2 + .5) / 2;
             y = (0 | pt.y * 2 + .5) / 2;
@@ -503,6 +506,7 @@ class Path extends Shape {
             x = Math.round(pt.x);
             y = Math.round(pt.y);
         }
+        
         if (pt.type != PointType.Straight && pt.type !== undefined) {
             var dx = pt.x - x;
             var dy = pt.y - y;
@@ -561,6 +565,12 @@ class Path extends Shape {
         this._internalChange = false;
     }
 
+    enter() {
+        if (this.mode() !== "edit") {
+            this.edit();
+        }
+    }
+
     switchToEditMode(edit) {
         if (this._cancelBinding) {
             this._cancelBinding.dispose();
@@ -571,12 +581,10 @@ class Path extends Shape {
                 scalePointsToNewSize.call(this, this.getBoundaryRect(), this._sourceRect);
                 this.save();
             }
-            this.captureMouse(this);
             SnapController.calculateSnappingPointsForPath(this);
 
             this._cancelBinding = actionManager.subscribe('cancel', this.cancel.bind(this));
         } else {
-            this.releaseMouse(this);
             this._cancelBinding = null;
         }
     }
@@ -651,6 +659,7 @@ class Path extends Shape {
         this._selected = true;
         this.registerForLayerDraw(2, this);
         Invalidate.request();
+        this._enterBinding = actionManager.subscribe('enter', this.enter.bind(this));
     }
 
     unselect() {
@@ -660,6 +669,11 @@ class Path extends Shape {
             Invalidate.request();
             this.mode("resize");
             this.releaseMouse(this);
+        }
+
+        if(this._enterBinding){
+            this._enterBinding.dispose();
+            delete this._enterBinding;
         }
     }
 
@@ -688,7 +702,7 @@ class Path extends Shape {
 
     mouseup(event) {
         delete this._altPressed;
-
+        this.releaseMouse(this);
         if (this._bendingData) {
             this._bendingData = null;
             SnapController.clearActiveSnapLines();
@@ -883,7 +897,6 @@ class Path extends Shape {
 
         var pos = {x: event.x, y: event.y};
 
-
         if (this._bendingData) {
             event.handled = true;
 
@@ -974,6 +987,11 @@ class Path extends Shape {
             if (this._hoverPoint !== pt) {
                 this._hoverPoint = pt;
                 Invalidate.requestUpperOnly();
+                if(pt){
+                    this.captureMouse(this);
+                } else {
+                    this.releaseMouse(this);
+                }
             }
 
             return pt;
@@ -983,6 +1001,11 @@ class Path extends Shape {
             if (this._hoverHandlePoint !== pt) {
                 this._hoverHandlePoint = pt;
                 Invalidate.requestUpperOnly();
+                if(pt){
+                    this.captureMouse(this);
+                } else {
+                    this.releaseMouse(this);
+                }
             }
 
             return pt;
@@ -1005,24 +1028,25 @@ class Path extends Shape {
     }
 
     prepareProps(changes) {
-        if (changes.width !== undefined && changes.width < 1) {
-            changes.width = 1;
-        }
-
-        if (changes.height !== undefined && changes.height < 1) {
-            changes.height = 1;
-        }
+        super.prepareProps(changes);
+        // if (changes.width !== undefined && changes.width < 1) {
+        //     changes.width = 1;
+        // }
+        //
+        // if (changes.height !== undefined && changes.height < 1) {
+        //     changes.height = 1;
+        // }
 
         if (changes.currentPointX !== undefined && this._currentPoint) {
-            changes.currentPointX = this._roundvalue(changes.currentPointX);
+            changes.currentPointX = this._roundValue(changes.currentPointX);
         }
 
         if (changes.currentPointY !== undefined && this._currentPoint) {
-            changes.currentPointY = this._roundvalue(changes.currentPointY);
+            changes.currentPointY = this._roundValue(changes.currentPointY);
         }
 
         if (changes.pointRounding) {
-            moveAllPoints.call(this, 0, 0);
+          //  moveAllPoints.call(this, 0, 0);
         }
     }
 
@@ -1193,8 +1217,9 @@ class Path extends Shape {
 
         var pt;
         var points = this.points;
+        this._firstPoint = null;
         var prevPt = null;// = pt = points[0];
-       // context.moveTo(pt.x * sx, pt.y * sy);
+        // context.moveTo(pt.x * sx, pt.y * sy);
         for (var i = 0, len = points.length; i < len; ++i) {
             pt = points[i];
             drawSegment.call(this, context, pt, prevPt, sx, sy);
@@ -1233,6 +1258,12 @@ class Path extends Shape {
         var maxx = 0;
         var maxy = 0;
 
+        var sx = 1, sy = 1;
+        if (this._sourceRect) {
+            sx = this.width() / this._sourceRect.width;
+            sy = this.height() / this._sourceRect.height;
+        }
+
         for (var i = 0; i < this.points.length; ++i) {
             var p = this.points[i];
             minx = Math.min(minx, p.x);
@@ -1249,6 +1280,11 @@ class Path extends Shape {
             maxy = Math.max(maxy, p.cp1y);
             maxy = Math.max(maxy, p.cp2y);
         }
+
+        minx *= sx;
+        miny *= sy;
+        maxx *= sx;
+        maxy *= sy;
 
         var margin = includeMargin ? this.margin() : Box.Default;
         var border = includeBorder ? this.getMaxOuterBorder() : 0;
@@ -1336,8 +1372,8 @@ class Path extends Shape {
         var props = {
             x: x,
             y: y,
-            width: Math.round(width),
-            height: Math.round(height)
+            width: width || 1,
+            height: height || 1
         };
         this._roundPoint(props);
         this.prepareProps(props);
@@ -1655,15 +1691,15 @@ class Path extends Shape {
         this._lastPoint.type = PointType.Assymetric;
     }
 
-    quadraticCurveTo(cx, cy, x, y) {
-        this.bezierCurveTo(x, y, cx, cy, cx, cy);
+    quadraticCurveToPoint(c, p) {
+        this.curveToPoint(p, c, c);
     }
 
 
-    fromSvgString(d) {
+    fromSvgString(d, matrix) {
         var path = d.match(/[mzlhvcsqta][^mzlhvcsqta]*/gi);
         var svgCommands = this._parsePath(path);
-        this._renderSvgCommands(svgCommands);
+        this._renderSvgCommands(svgCommands, matrix);
         this.adjustBoundaries();
     }
 
@@ -1701,7 +1737,7 @@ class Path extends Shape {
         return result;
     }
 
-    _renderSvgCommands(commands) {
+    _renderSvgCommands(commands, matrix) {
         var current, // current instruction
             previous = null,
             x = 0, // current x
@@ -1726,47 +1762,47 @@ class Path extends Shape {
                 case 'l': // lineto, relative
                     x += current[1] * scaleX;
                     y += current[2] * scaleY;
-                    this.lineTo(x + l, y + t);
+                    this.lineToPoint(matrix.transformPoint2(x + l, y + t));
                     break;
 
                 case 'L': // lineto, absolute
                     x = current[1] * scaleX;
                     y = current[2] * scaleY;
-                    this.lineTo(x + l, y + t);
+                    this.lineToPoint(matrix.transformPoint2(x + l, y + t));
                     break;
 
                 case 'h': // horizontal lineto, relative
                     x += current[1] * scaleX;
-                    this.lineTo(x + l, y + t);
+                    this.lineToPoint(matrix.transformPoint2(x + l, y + t));
                     break;
 
                 case 'H': // horizontal lineto, absolute
                     x = current[1] * scaleX;
-                    this.lineTo(x + l, y + t);
+                    this.lineToPoint(matrix.transformPoint2(x + l, y + t));
                     break;
 
                 case 'v': // vertical lineto, relative
                     y += current[1] * scaleY;
-                    this.lineTo(x + l, y + t);
+                    this.lineToPoint(matrix.transformPoint2(x + l, y + t));
                     break;
 
                 case 'V': // verical lineto, absolute
                     y = current[1] * scaleY;
-                    this.lineTo(x + l, y + t);
+                    this.lineToPoint(matrix.transformPoint2(x + l, y + t));
                     break;
 
                 case 'm': // moveTo, relative
                     x += current[1] * scaleX;
                     y += current[2] * scaleY;
                     // draw a line if previous command was moveTo as well (otherwise, it will have no effect)
-                    this[(previous && (previous[0] === 'm' || previous[0] === 'M')) ? 'lineTo' : 'moveTo'](x + l, y + t);
+                    this[(previous && (previous[0] === 'm' || previous[0] === 'M')) ? 'lineToPoint' : 'moveToPoint'](matrix.transformPoint2(x + l, y + t));
                     break;
 
                 case 'M': // moveTo, absolute
                     x = current[1] * scaleX;
                     y = current[2] * scaleY;
                     // draw a line if previous command was moveTo as well (otherwise, it will have no effect)
-                    this[(previous && (previous[0] === 'm' || previous[0] === 'M')) ? 'lineTo' : 'moveTo'](x + l, y + t);
+                    this[(previous && (previous[0] === 'm' || previous[0] === 'M')) ? 'lineToPoint' : 'moveToPoint'](matrix.transformPoint2(x + l, y + t));
                     break;
 
                 case 'c': // bezierCurveTo, relative
@@ -1774,13 +1810,13 @@ class Path extends Shape {
                     tempY = y + current[6] * scaleY;
                     controlX = x + current[3] * scaleX;
                     controlY = y + current[4] * scaleY;
-                    this.bezierCurveTo(
-                        x + current[1] * scaleX + l, // x1
-                        y + current[2] * scaleY + t, // y1
-                        controlX + l, // x2
-                        controlY + t, // y2
-                        tempX + l,
-                        tempY + t
+                    this.curveToPoint(
+                        matrix.transformPoint2(tempX + l,
+                            tempY + t),
+                        matrix.transformPoint2(x + current[1] * scaleX + l, // x1
+                            y + current[2] * scaleY + t), // y1
+                        matrix.transformPoint2(controlX + l, // x2
+                            controlY + t)
                     );
                     x = tempX;
                     y = tempY;
@@ -1791,13 +1827,10 @@ class Path extends Shape {
                     y = current[6] * scaleY;
                     controlX = current[3] * scaleX;
                     controlY = current[4] * scaleY;
-                    this.bezierCurveTo(
-                        current[1] * scaleX + l,
-                        current[2] * scaleY + t,
-                        controlX + l,
-                        controlY + t,
-                        x + l,
-                        y + t
+                    this.curveToPoint(
+                        matrix.transformPoint2(x + l, y + t),
+                        matrix.transformPoint2(current[1] * scaleX + l, current[2] * scaleY + t),
+                        matrix.transformPoint2(controlX + l, controlY + t)
                     );
                     break;
 
@@ -1811,13 +1844,10 @@ class Path extends Shape {
                     controlX = controlX ? (2 * x - controlX) : x;
                     controlY = controlY ? (2 * y - controlY) : y;
 
-                    this.bezierCurveTo(
-                        controlX + l,
-                        controlY + t,
-                        x + current[1] * scaleX + l,
-                        y + current[2] * scaleY + t,
-                        tempX + l,
-                        tempY + t
+                    this.curveToPoint(
+                        matrix.transformPoint2(tempX + l, tempY + t),
+                        matrix.transformPoint2(controlX + l, controlY + t),
+                        matrix.transformPoint2(x + current[1] * scaleX + l, y + current[2] * scaleY + t)
                     );
                     // set control point to 2nd one of this command
                     // "... the first control point is assumed to be the reflection of the second control point on the previous command relative to the current point."
@@ -1834,13 +1864,10 @@ class Path extends Shape {
                     // calculate reflection of previous control points
                     controlX = 2 * x - controlX;
                     controlY = 2 * y - controlY;
-                    this.bezierCurveTo(
-                        controlX + l,
-                        controlY + t,
-                        current[1] * scaleX + l,
-                        current[2] * scaleY + t,
-                        tempX + l,
-                        tempY + t
+                    this.curveToPoint(
+                        matrix.transformPoint2(tempX + l, tempY + t),
+                        matrix.transformPoint2(controlX + l, controlY + t),
+                        matrix.transformPoint2(current[1] * scaleX + l, current[2] * scaleY + t)
                     );
                     x = tempX;
                     y = tempY;
@@ -1860,11 +1887,9 @@ class Path extends Shape {
                     controlX = x + current[1] * scaleX;
                     controlY = y + current[2] * scaleY;
 
-                    this.bezierCurveTo(
-                        controlX + l,
-                        controlY + t,
-                        tempX + l,
-                        tempY + t
+                    this.quadraticCurveToPoint(
+                        matrix.transformPoint2(controlX + l, controlY + t),
+                        matrix.transformPoint2(tempX + l, tempY + t)
                     );
                     x = tempX;
                     y = tempY;
@@ -1874,11 +1899,9 @@ class Path extends Shape {
                     tempX = current[3] * scaleX;
                     tempY = current[4] * scaleY;
 
-                    this.quadraticCurveTo(
-                        current[1] * scaleX + l,
-                        current[2] * scaleY + t,
-                        tempX + l,
-                        tempY + t
+                    this.quadraticCurveToPoint(
+                        matrix.transformPoint2(current[1] * scaleX + l, current[2] * scaleY + t),
+                        matrix.transformPoint2(tempX + l, tempY + t)
                     );
                     x = tempX;
                     y = tempY;
@@ -1913,11 +1936,9 @@ class Path extends Shape {
                     tempControlX = controlX;
                     tempControlY = controlY;
 
-                    this.quadraticCurveTo(
-                        controlX + l,
-                        controlY + t,
-                        tempX + l,
-                        tempY + t
+                    this.quadraticCurveToPoint(
+                        matrix.transformPoint2(controlX + l, controlY + t),
+                        matrix.transformPoint2(tempX + l, tempY + t)
                     );
                     x = tempX;
                     y = tempY;
@@ -1932,11 +1953,9 @@ class Path extends Shape {
                     // calculate reflection of previous control points
                     controlX = 2 * x - controlX;
                     controlY = 2 * y - controlY;
-                    this.quadraticCurveTo(
-                        controlX + l,
-                        controlY + t,
-                        tempX + l,
-                        tempY + t
+                    this.quadraticCurveToPoint(
+                        matrix.transformPoint2(controlX + l, controlY + t),
+                        matrix.transformPoint2(tempX + l, tempY + t)
                     );
                     x = tempX;
                     y = tempY;
@@ -1952,7 +1971,7 @@ class Path extends Shape {
                         current[5],
                         current[6] * scaleX + x + l,
                         current[7] * scaleY + y + t
-                    ]);
+                    ], matrix);
                     x += current[6] * scaleX;
                     y += current[7] * scaleY;
                     break;
@@ -1967,7 +1986,7 @@ class Path extends Shape {
                         current[5],
                         current[6] * scaleX + l,
                         current[7] * scaleY + t
-                    ]);
+                    ], matrix);
                     x = current[6] * scaleX;
                     y = current[7] * scaleY;
                     break;
@@ -2107,38 +2126,50 @@ Path.smoothPoint = function (p, p1, p2, eps) {
     return res;
 };
 
-var ATTRIBUTE_NAMES = 'd points x y width height x1 y1 x2 y2 rx ry fill fill-opacity opacity fill-rule stroke stroke-width transform'.split(' ');
+function setElementPropertiesFromAttributes(element, parsedAttributes) {
+    element.setProps({pointRounding:0});
 
-Path.fromSvgPathElement = function (element, options) {
-    var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
+    if (parsedAttributes.fill !== undefined) {
+        if (!parsedAttributes.fill || parsedAttributes.fill == "none") {
+            element.fill(Brush.Empty);
+        } else {
+            element.fill(Brush.createFromColor(parsedAttributes.fill));
+        }
+    }
+    else {
+        element.fill(Brush.Black);
+    }
+
+    if (parsedAttributes.stroke) {
+        element.stroke(Brush.createFromColor(parsedAttributes.stroke, parsedAttributes.strokeWidth, 0));
+    } else {
+        element.stroke(Brush.Empty);
+    }
+
+    if (parsedAttributes.opacity) {
+        element.opacity(parsedAttributes.opacity);
+    }
+
+    if(parsedAttributes.miterLimit != undefined) {
+        element.miterLimit(parsedAttributes.miterLimit);
+    }
+
+    if(parsedAttributes.lineJoin) {
+        element.lineJoin(parsedAttributes.lineJoin);
+    }
+
+    if(parsedAttributes.lineCap) {
+        element.lineCap(parsedAttributes.lineCap);
+    }
+}
+
+Path.fromSvgPathElement = function (element, parsedAttributes, matrix) {
+    // var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
     var path = new Path();
 
     App.Current.activePage.nameProvider.assignNewName(path);
 
-    if (parsedAttributes.fill !== undefined) {
-        if(!parsedAttributes.fill  || parsedAttributes.fill == "none"){
-            path.fill(Brush.Empty);
-        } else {
-            path.fill(Brush.createFromColor(parsedAttributes.fill));
-        }
-    }
-    else {
-        path.fill(Brush.Black);
-    }
-
-    if (parsedAttributes.stroke) {
-        path.stroke(Brush.createFromColor(parsedAttributes.stroke));
-        if (parsedAttributes.strokeWidth) {
-            path.stroke().lineWidth = parsedAttributes.strokeWidth;
-        }
-    } else {
-        path.stroke(Brush.Empty);
-    }
-
-    if(parsedAttributes.opacity){
-        path.opacity(parsedAttributes.opacity);
-    }
-
+    setElementPropertiesFromAttributes(path, parsedAttributes);
 
     // polygon
     if (parsedAttributes.points) {
@@ -2147,14 +2178,16 @@ Path.fromSvgPathElement = function (element, options) {
             var pair = pairs[i];
             if (pair) {
                 var xy = pair.split(',');
-                path.addPoint({x: parseFloat(xy[0]), y: parseFloat(xy[1])});
+                var point = {x: parseFloat(xy[0]), y: parseFloat(xy[1])};
+                point = matrix.transformPoint(point);
+                path.addPoint(point);
             }
         }
         path.closed(true);
     }
 
     if (parsedAttributes.d) {
-        path.fromSvgString(parsedAttributes.d);
+        path.fromSvgString(parsedAttributes.d, matrix);
     }
 
 
@@ -2163,51 +2196,28 @@ Path.fromSvgPathElement = function (element, options) {
     return path;
 };
 
-
-Path.fromSvgLineElement = function (element, options) {
-    var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
+Path.fromSvgLineElement = function (element, parsedAttributes, matrix) {
+    // var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
     var path = new Path();
 
     App.Current.activePage.nameProvider.assignNewName(path);
 
-    if (parsedAttributes.stroke) {
-        path.stroke(Brush.createFromColor(parsedAttributes.stroke));
-        if (parsedAttributes.strokeWidth) {
-            path.stroke().lineWidth = parsedAttributes.strokeWidth;
-        }
-    } else {
-        path.stroke(Brush.Empty);
-    }
+    setElementPropertiesFromAttributes(path, parsedAttributes);
 
-    if(parsedAttributes.opacity){
-        path.opacity(parsedAttributes.opacity);
-    }
-
-    path.addPoint({x:parsedAttributes.x1, y:parsedAttributes.y1});
-    path.addPoint({x:parsedAttributes.x2, y:parsedAttributes.y2});
+    path.addPoint(matrix.transformPoint({x: parsedAttributes.x1, y: parsedAttributes.y1}));
+    path.addPoint(matrix.transformPoint({x: parsedAttributes.x2, y: parsedAttributes.y2}));
 
     path.adjustBoundaries();
 
     return path;
 };
 
-Path.fromSvgPolylineElement = function (element, options) {
-    var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
+Path.fromSvgPolylineElement = function (element, parsedAttributes, matrix) {
+    // var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
     var path = new Path();
     App.Current.activePage.nameProvider.assignNewName(path);
 
-    if (parsedAttributes.stroke) {
-        path.stroke(Brush.createFromColor(parsedAttributes.stroke));
-        if (parsedAttributes.strokeWidth) {
-            path.stroke().lineWidth = parsedAttributes.strokeWidth;
-        }
-    } else {
-        path.stroke(Brush.Empty);
-    }
-
-    if(parsedAttributes.opacity){
-        path.opacity(parsedAttributes.opacity);
-    }
+    setElementPropertiesFromAttributes(path, parsedAttributes);
 
     if (parsedAttributes.points) {
         var pairs = parsedAttributes.points.replace('\n', ' ').replace('\r', ' ').split(' ');
@@ -2215,7 +2225,7 @@ Path.fromSvgPolylineElement = function (element, options) {
             var pair = pairs[i];
             if (pair) {
                 var xy = pair.split(',');
-                path.addPoint({x: parseFloat(xy[0]), y: parseFloat(xy[1])});
+                path.addPoint(matrix.transformPoint({x: parseFloat(xy[0]), y: parseFloat(xy[1])}));
             }
         }
     }
@@ -2224,8 +2234,6 @@ Path.fromSvgPolylineElement = function (element, options) {
 
     return path;
 };
-
-
 
 
 function svgCommand(pt, prevPt) {

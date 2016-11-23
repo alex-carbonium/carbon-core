@@ -315,6 +315,7 @@ class DraggingElement extends UIElement {
         }
 
         //fillBackground();
+        context.beginPath();
 
         if (isComposite) {
             context.translate(-this._clone.x(), -this._clone.y());
@@ -367,6 +368,7 @@ class DraggingElement extends UIElement {
             delete this._decorators;
         }
         this.parent().remove(this, ChangeMode.Root);
+        this._element && this._element.updateViewMatrix();
     }
 
     dropOn(event, newParent) {
@@ -408,6 +410,22 @@ class DraggingElement extends UIElement {
         return false;
     }
 
+    startResizing(){
+        if(this._clone){
+            this._clone.startResizing();
+        } else {
+            this._element.startResizing();
+        }
+    }
+
+    stopResizing(){
+        if(this._clone){
+            this._clone.stopResizing();
+        } else {
+            this._element.stopResizing();
+        }
+    }
+
     resize(/*Rect*/rect, /*bool*/ignoreSnapping) {
         var isComposite = this._element instanceof CompositeElement;
 
@@ -437,6 +455,12 @@ class DraggingElement extends UIElement {
         }
 
         UIElement.prototype.resize.call(this, rect);
+        if(this._clone){
+            this._clone.resize(rect);
+        }
+        this.updateViewMatrix();
+        this._clone && this._clone.updateViewMatrix();
+        this._element && this._element.updateViewMatrix();
     }
 }
 DraggingElement.prototype.t = Types.DraggingElement;

@@ -31,14 +31,14 @@ export default {
         debug("Captured global rect: x=%d y=%d w=%d h=%d", frame.originalRect.x, frame.originalRect.y, frame.originalRect.width, frame.originalRect.height);
 
         Environment.view.layer3.add(resizingElement);
-        frame.element.startResizing();
+        frame.resizingElement.startResizing();
     },
     release: function (frame) {
         if (frame.resizingElement) {
+            frame.resizingElement.stopResizing();
             frame.resizingElement.dropOn(null, frame.element.parent());
             frame.resizingElement.detach();
             delete frame.globalViewMatrix;
-            frame.element.stopResizing();
         }
     },
     rotateCursorPointer: function (index, angle) {
@@ -95,8 +95,6 @@ export default {
 
         if (event.event.altKey) {
             var newOrigin = origin;
-           // newWidth = newWidth + point.rv[0] * dx;
-            //newHeight = newHeight + point.rv[1] * dy;
         } else {
             newOrigin = sketch.math2d.rotatePoint({
                 x: origin.x + dx / 2,
@@ -124,6 +122,12 @@ export default {
 
         debug("Resizing rect: x=%d y=%d w=%d h=%d ow=%d dx=%d", rect.x, rect.y, rect.width, rect.height, original.width, dx);
         frame.resizingElement.resize(rect, event.event.altKey);
+
+        if(frame.resizingElement._clone) {
+            var dr = frame.resizingElement._clone.getBoundaryRect();
+            debug("Resizing  clone rect: x=%d y=%d w=%d h=%d", dr.x, dr.y, dr.width, dr.height);
+        }
+
         Environment.controller.resizingEvent.raise({
             element: frame.element,
             rect: rect,

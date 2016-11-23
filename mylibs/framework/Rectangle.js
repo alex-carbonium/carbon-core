@@ -341,8 +341,8 @@ class Rectangle extends Shape {
 Rectangle.prototype.t = Types.Rectangle;
 
 Rectangle.ATTRIBUTE_NAMES = 'x y width height rx ry transform fill stroke stroke-width'.split(' ');
-Rectangle.fromSvgElement = function (element, options) {
-    var parsedAttributes = svgParser.parseAttributes(element, Rectangle.ATTRIBUTE_NAMES);
+Rectangle.fromSvgElement = function (element, parsedAttributes) {
+    // var parsedAttributes = svgParser.parseAttributes(element, Rectangle.ATTRIBUTE_NAMES);
     var rect = new Rectangle();
 
     App.Current.activePage.nameProvider.assignNewName(rect);

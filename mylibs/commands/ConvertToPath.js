@@ -18,6 +18,7 @@ export default {
             .then(paths => elements.map((e, i) => {
                 var parent = e.parent();
                 parent.replace(e, paths[i]);
+                paths[i].setProps({width:e.width(), height:e.height()});
                 return paths[i];
             }))
             .then(paths => Selection.makeSelection(paths));

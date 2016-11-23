@@ -160,8 +160,8 @@ PropertyMetadata.registerForType(Circle, {
 
 
 var ATTRIBUTE_NAMES = 'x y width height r rx ry cx cy transform fill stroke stroke-width'.split(' ');
-Circle.fromSvgElement = function (element, options) {
-    var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
+Circle.fromSvgElement = function (element, parsedAttributes) {
+    // var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
     var circle = new Circle();
     App.Current.activePage.nameProvider.assignNewName(circle);
 
