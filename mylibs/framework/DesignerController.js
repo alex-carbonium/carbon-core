@@ -68,6 +68,9 @@ function stopDrag(event) {
     this.stopDraggingEvent.raise(eventData, this._draggingOverElement);
 
     Selection.directSelectionEnabled(false);
+
+    //could start dragging not selected object
+    Selection.makeSelection([draggingElement]);
 }
 
 function updateEvent(event) {
@@ -170,10 +173,14 @@ export default class DesignerController {
                     Cursor.setCursor(cursor);
                     return;
                 }
+                if (element.canSelect() && element.canDrag() && !element.locked() && Selection.isElementSelected(element)){
+                    Cursor.setCursor("move_cursor");
+                    return;
+                }
             }
         }
 
-        Cursor.setCursor("");
+        Cursor.setCursor("default_cursor");
     }
 
     _bubbleMouseEvent(eventData, method) {
@@ -400,20 +407,20 @@ export default class DesignerController {
             return;
         }
 
-        if (!eventData.handled) {
-            Selection.directSelectionEnabled(eventData.event.altKey);
-            var element = this.app.activePage.hitElement(eventData, this.view.scale());
-            Selection.directSelectionEnabled(false);
-            if (element != this._mouseOverElement) {
-                if (this._mouseOverElement) {
-                    this._mouseOverElement.mouseLeaveElement(eventData);
-                }
-                this._mouseOverElement = element;
-                if (element) {
-                    element.mouseEnterElement(eventData);
-                }
-            }
-        }
+        // if (!eventData.handled) {
+        //     Selection.directSelectionEnabled(eventData.event.altKey);
+        //     var element = this.app.activePage.hitElement(eventData, this.view.scale());
+        //     Selection.directSelectionEnabled(false);
+        //     if (element != this._mouseOverElement) {
+        //         if (this._mouseOverElement) {
+        //             this._mouseOverElement.mouseLeaveElement(eventData);
+        //         }
+        //         this._mouseOverElement = element;
+        //         if (element) {
+        //             element.mouseEnterElement(eventData);
+        //         }
+        //     }
+        // }
 
         this._noActionsBeforeClick = false;
 
@@ -563,6 +570,8 @@ export default class DesignerController {
                 if (addToSelection) {
                     Selection.selectionMode("new");
                 }
+
+                Cursor.setCursor("move_cursor");
             }
         }
 

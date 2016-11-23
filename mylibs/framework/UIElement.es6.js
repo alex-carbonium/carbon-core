@@ -660,10 +660,10 @@ var UIElement = klass(DataNode, {
     },
     click: function (event) {
     },
-    mouseLeaveElement: function (event) {
-    },
-    mouseEnterElement: function (event) {
-    },
+    // mouseLeaveElement: function (event) {
+    // },
+    // mouseEnterElement: function (event) {
+    // },
     // defaultAction: function (event) {
     //     if (this._defaultAction) {
     //         return this._defaultAction;
@@ -1067,10 +1067,7 @@ var UIElement = klass(DataNode, {
         return clone;
     },
     cursor: function () {
-        if (this.canSelect() && this.canDrag() && !this.locked())
-            return "move_cursor";
-
-        return "";
+        return null;
     },
     resizeDimensions: function (value) {
         if (value) {
