@@ -22,6 +22,7 @@ import Cursor from "framework/Cursor";
 import ExtensionBase from "./ExtensionBase";
 import Environment from "environment";
 import DesignerController from "framework/DesignerController";
+import Invalidate from "framework/Invalidate";
 
 var mousedown = function () {
     this.mousePressed = true;
@@ -68,7 +69,7 @@ var registerCommands = function () {
 
         Selection.makeSelection([that._defaultShapeSettings]);
         that.app.setCurrentTool(ViewTool.Rectangle);
-
+        Invalidate.request();
     }, "ui-rectangle");
 
     actionManager.registerAction("@addStar", "Star tool", "Drawing", function () {
@@ -164,7 +165,7 @@ var registerCommands = function () {
 
     actionManager.registerAction("@movePointer", "Pointer tool", "Drawing", function () {
         that.detachAll();
-        Cursor.setDefaultCursor("default_cursor", true);
+        Selection.directSelectionEnabled(false);
         that.app.allowSelection(true);
         that.app.setCurrentTool(ViewTool.Pointer);
         Selection.refreshSelection();
@@ -172,10 +173,11 @@ var registerCommands = function () {
 
     actionManager.registerAction("@movePointerDirect", "Direct selection tool", "Drawing", function () {
         that.detachAll();
-        Cursor.setDefaultCursor("direct_select_cursor", true);
-        Selection.forceDirectSelection(true);
+        Selection.directSelectionEnabled(true);
+        Selection.invertDirectSelection(true);
         that.app.allowSelection(true);
         that.app.setCurrentTool(ViewTool.PointerDirect);
+        Invalidate.requestUpperOnly();
     }, "ui-arrow-black");
 
 
@@ -258,14 +260,14 @@ export default class DrawActionSelector extends ExtensionBase {
 
         var that = this;
         this._startDraggingToken = sketch.framework.pubSub.subscribe("toolbox.startDragging", function () {
-            that.wasDirectSelectionForced = Selection.forceDirectSelection();
+            that.wasDirectSelectionInverted = Selection.invertDirectSelection();
             if (SystemConfiguration.ResetActiveToolToDefault) {
                 app.actionManager.invoke("movePointer");
             }
         });
 
         this._stopDraggingToken = sketch.framework.pubSub.subscribe("toolbox.stopDragging", function () {
-            if (that.wasDirectSelectionForced) {
+            if (that.wasDirectSelectionInverted) {
                 if (SystemConfiguration.ResetActiveToolToDefault) {
                     app.actionManager.invoke("movePointerDirect");
                 }
@@ -308,7 +310,7 @@ export default class DrawActionSelector extends ExtensionBase {
             Selection.makeSelection([]);
         }
 
-        Selection.forceDirectSelection(false);
+        Selection.invertDirectSelection(false);
         this.app.setCurrentTool(ViewTool.Pointer);
     }
 

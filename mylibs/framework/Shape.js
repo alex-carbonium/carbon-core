@@ -17,6 +17,11 @@ class Shape extends Container {
         return true;
     }
 
+    //for hit visibility
+    lockedGroup(){
+        return true;
+    }
+
     _renderDraft(context, w, h) {
         var stroke = this.stroke();
 

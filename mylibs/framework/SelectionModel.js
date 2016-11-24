@@ -1,6 +1,7 @@
 import EventHelper from "framework/EventHelper";
 import SelectComposite from "framework/SelectComposite";
 
+var debug = require("DebugUtil")("carb:selection");
 
 // public methods
 function unlockGroupForElementHierarchy(elements) {
@@ -29,30 +30,36 @@ class SelectionModel {
         this.startSelectionFrameEvent = EventHelper.createEvent();
         this.onSelectionFrameEvent = EventHelper.createEvent();
         this.stopSelectionFrameEvent = EventHelper.createEvent();
+        this.directSelectionChangedEvent = EventHelper.createEvent();
 
         this._selectCompositeElement = new SelectComposite();
 
         this._directSelectionEnabled = false;
-        this._forceDirectSelection = false;
+        this._invertDirectSelection = false;
     }
 
     get selectFrame() {
         return this._selectFrame;
     }
 
-    forceDirectSelection(value) {
-        if (value != undefined) {
-            this._forceDirectSelection = value;
+    invertDirectSelection(value) {
+        if (arguments.length === 1) {
+            this._invertDirectSelection = value;
         }
-        return this._forceDirectSelection;
+        return this._invertDirectSelection;
     }
 
 
     directSelectionEnabled(value) {
-        if (value != undefined) {
-            this._directSelectionEnabled = value;
+        if (arguments.length === 1) {
+            var enabled = this._invertDirectSelection ? !value : value;
+            if (enabled !== this._directSelectionEnabled){
+                this._directSelectionEnabled = enabled;
+                debug("Direct selection: %s", enabled);
+                this.directSelectionChangedEvent.raise(enabled);
+            }
         }
-        return this._directSelectionEnabled || this._forceDirectSelection;
+        return this._directSelectionEnabled;
     }
 
     setupSelectFrame(selectFrame, eventData) {

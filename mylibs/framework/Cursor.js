@@ -3,47 +3,34 @@ import EventHelper from "framework/EventHelper";
 class Cursor {
     constructor(){
         this.changed = EventHelper.createEvent();
-        this._globalCursor = null;
-        this._defaultCursor = null;
+        this._hasGlobalCursor = false;
+        this._lastGlobalCursor = null;
         this._cursor = null;
     }
 
     setCursor(value) {
+        var old = this._cursor;
         if (this._cursor !== value) {
-            this.changed.raise(value, this._cursor);
             this._cursor = value;
+            this.changed.raise(value, old);
         }
+        return old;
     }
 
-    setGlobalCursor(value, updateImmediately) {
-        this._globalCursor = value;
-        if (updateImmediately) {
-            this.setCursor(value);
-        }
+    setGlobalCursor(value) {
+        this._hasGlobalCursor = true;
+        this._lastGlobalCursor = this.setCursor(value);
     }
 
     hasGlobalCursor(){
-        return this._globalCursor !== null;
+        return this._hasGlobalCursor;
     }
 
-    removeGlobalCursor(updateImmediately) {
-        this._globalCursor = null;
-        if (updateImmediately)
-            this.setCursor(this._defaultCursor);
-    }
-
-    setDefaultCursor(value) {
-        var cursor = this._defaultCursor;
-        if (value !== cursor) {
-            if (cursor){
-                document.body.classList.remove("c-" + cursor);
-            }
-            if (value){
-                document.body.classList.add("c-" + value);
-            }
-            this._defaultCursor = value;
+    removeGlobalCursor() {
+        if (this._hasGlobalCursor){
+            this._hasGlobalCursor = false;
+            this.setCursor(this._lastGlobalCursor);
         }
-        return cursor;
     }
 }
 

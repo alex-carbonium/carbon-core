@@ -34,7 +34,6 @@ export default class TextTool extends EditModeAction {
         this._dragZone = null;
         this._next = null;
         this._detaching = false;
-        this._oldDefaultCursor = null;
         this._defaultFormatter = null;
         this._rangeFormatter = null;
         this._backgroundCache = null;
@@ -60,7 +59,7 @@ export default class TextTool extends EditModeAction {
         this._defaultFormatter = new DefaultFormatter();
         this._defaultFormatter.init(this._app);
         Selection.makeSelection([this._defaultFormatter]);
-        this._oldDefaultCursor = Cursor.setDefaultCursor("text");
+        Cursor.setGlobalCursor("text");
 
         if (this._onAttached){
             this._onAttached();
@@ -93,7 +92,7 @@ export default class TextTool extends EditModeAction {
 
         this._backgroundCache = null;
 
-        Cursor.setDefaultCursor(this._oldDefaultCursor);
+        Cursor.removeGlobalCursor();
     }
 
     dispose(){
@@ -144,12 +143,11 @@ export default class TextTool extends EditModeAction {
                 Invalidate.requestUpperOnly();
             }
             if (this._editor){
-                Cursor.removeGlobalCursor(true);
-                Cursor.setDefaultCursor(this._oldDefaultCursor);
+                Cursor.removeGlobalCursor();
             }
             else{
-                Cursor.setGlobalCursor("text", true);
-                Cursor.setDefaultCursor("text");
+                Cursor.setGlobalCursor("text");
+                Cursor.setGlobalCursor("text");
             }
         }
     };

@@ -105,58 +105,43 @@ export default class PreviewController {
 
 
     onscroll(eventData) {
-        Selection.directSelectionEnabled(true);
-        var element = this.previewProxy.activePage.hitElement(eventData, this.view.scale());
-        Selection.directSelectionEnabled(false);
+        var element = this.previewProxy.activePage.hitElementDirect(eventData, this.view.scale());
         var delta = {dx: eventData.event.deltaX, dy: eventData.event.deltaY};
         this._propagateScroll(delta, element);
     }
 
     onmousedown(eventData) {
-        Selection.directSelectionEnabled(true);
-        var element = this.previewProxy.activePage.hitElement(eventData, this.view.scale());
-        Selection.directSelectionEnabled(false);
+        var element = this.previewProxy.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(ActionEvents.mousedown, element);
     }
 
     onmousemove(eventData) {
-        Selection.directSelectionEnabled(true);
-        var element = this.previewProxy.activePage.hitElement(eventData, this.view.scale());
-        Selection.directSelectionEnabled(false);
+        var element = this.previewProxy.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(ActionEvents.mousemove, element);
     }
 
     onmouseenter(eventData) {
-        Selection.directSelectionEnabled(true);
-        var element = this.previewProxy.activePage.hitElement(eventData, this.view.scale());
+        var element = this.previewProxy.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(ActionEvents.mouseenter, element);
     }
 
     onmouseleave(eventData) {
-        Selection.directSelectionEnabled(true);
-        var element = this.previewProxy.activePage.hitElement(eventData, this.view.scale());
-        Selection.directSelectionEnabled(false);
+        var element = this.previewProxy.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(ActionEvents.mouseleave, element);
     }
 
     onmouseup(eventData) {
-        Selection.directSelectionEnabled(true);
-        var element = this.previewProxy.activePage.hitElement(eventData, this.view.scale());
-        Selection.directSelectionEnabled(false);
+        var element = this.previewProxy.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(ActionEvents.mouseup, element);
     }
 
     ondblclick(eventData) {
-        Selection.directSelectionEnabled(true);
-        var element = this.previewProxy.activePage.hitElement(eventData, this.view.scale());
-        Selection.directSelectionEnabled(false);
+        var element = this.previewProxy.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(ActionEvents.dblclick, element);
     }
 
     onclick(eventData) {
-        Selection.directSelectionEnabled(true);
-        var element = this.previewProxy.activePage.hitElement(eventData, this.view.scale());
-        Selection.directSelectionEnabled(false);
+        var element = this.previewProxy.activePage.hitElementDirect(eventData, this.view.scale());
         if(!this._propagateAction(ActionEvents.click, element)){
             this.view.displayClickSpots.raise();
         }

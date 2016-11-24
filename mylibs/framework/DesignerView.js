@@ -39,6 +39,7 @@ class DesignerView extends ViewBase {
 
     attachToDOM(context, upperContext, viewContainerElement, requestRedrawCallback, cancelRedrawCallback, renderingScheduledCallback) {
         this.viewContainerElement = viewContainerElement; // parent div element
+        this.viewContainerElement = document.body;
         this.upperContext = upperContext;
 
         this.setupRendering(context, requestRedrawCallback, cancelRedrawCallback, renderingScheduledCallback);

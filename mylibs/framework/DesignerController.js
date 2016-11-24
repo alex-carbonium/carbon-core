@@ -9,6 +9,7 @@ import RepeatViewListener from "framework/repeater/RepeatViewListener";
 import TouchHelper from "./TouchHelper";
 import Artboard from "framework/Artboard";
 import Page from "../framework/Page";
+import Keyboard from "../platform/Keyboard";
 
 function onselect(rect) {
     var selection = this.app.activePage.getElementsInRect(rect);
@@ -67,8 +68,6 @@ function stopDrag(event) {
 
     this.stopDraggingEvent.raise(eventData, this._draggingOverElement);
 
-    Selection.directSelectionEnabled(false);
-
     //could start dragging not selected object
     Selection.makeSelection([draggingElement]);
 }
@@ -84,9 +83,8 @@ function updateEvent(event) {
 function _handleDraggingOver(mousePoint, draggingElement, eventData) {
     var scale = this.view.scale();
     var dragOverElement = null;
-    Selection.directSelectionEnabled(true);
 
-    var element = this.app.activePage.hitElement(mousePoint, scale, function (position, scale) {
+    var element = this.app.activePage.hitElementDirect(mousePoint, scale, function (position, scale) {
         var descendantOrSelf = false;
         var that = this;
         draggingElement.each(function (e) {
@@ -101,8 +99,6 @@ function _handleDraggingOver(mousePoint, draggingElement, eventData) {
 
         return false;
     });
-
-    Selection.directSelectionEnabled(false);
 
     while (element !== null) {
         if (element.canAccept(draggingElement, undefined, eventData.event.ctrlKey)) {
@@ -159,28 +155,30 @@ export default class DesignerController {
             return;
         }
 
-        if (eventData.cursor){
-            Cursor.setCursor(eventData.cursor);
-            return;
-        }
+        if (eventData){
+            if (eventData.cursor){
+                Cursor.setCursor(eventData.cursor);
+                return;
+            }
 
-        for (var i = 0; i < this.view._layersReverse.length; i++) {
-            var layer = this.view._layersReverse[i];
-            var element = layer.hitElement(eventData, this.view.scale());
-            if (element !== null) {
-                var cursor = element.cursor(eventData);
-                if (cursor){
-                    Cursor.setCursor(cursor);
-                    return;
-                }
-                if (element.canSelect() && element.canDrag() && !element.locked() && Selection.isElementSelected(element)){
-                    Cursor.setCursor("move_cursor");
-                    return;
+            for (var i = 0; i < this.view._layersReverse.length; i++) {
+                var layer = this.view._layersReverse[i];
+                var element = layer.hitElement(eventData, this.view.scale());
+                if (element !== null) {
+                    var cursor = element.cursor(eventData);
+                    if (cursor){
+                        Cursor.setCursor(cursor);
+                        return;
+                    }
+                    if (element.canSelect() && element.canDrag() && !element.locked() && Selection.isElementSelected(element)){
+                        Cursor.setCursor("move_cursor");
+                        return;
+                    }
                 }
             }
         }
 
-        Cursor.setCursor("default_cursor");
+        Cursor.setCursor(Selection.directSelectionEnabled() ? "direct_select_cursor" : "default_cursor");
     }
 
     _bubbleMouseEvent(eventData, method) {
@@ -252,6 +250,9 @@ export default class DesignerController {
 
         this._cancelBinding = actionManager.subscribe('cancel', this.cancel.bind(this));
         RepeatViewListener.ensureSubscribed(this);
+
+        Keyboard.changed.bind(this, this._onKeyChanged);
+        Selection.directSelectionChangedEvent.bind(() => this._updateCursor());
 
         this.actionManager = actionManager;
     }
@@ -344,8 +345,6 @@ export default class DesignerController {
 
         // apply default behavior
         if (!eventData.handled) {
-            Selection.directSelectionEnabled(eventData.event.altKey);
-
             var selectedElement = Selection.selectedElement();
             // first check current selection
             if(selectedElement && selectedElement.hitTest(eventData, this.view.scale())) {
@@ -360,7 +359,7 @@ export default class DesignerController {
 
                 for (var i = 0; i < this.view._layersReverse.length; i++) {
                     var layer = this.view._layersReverse[i];
-                    var element = layer.hitElement(eventData, this.view.scale());
+                    var element = layer.hitElement(eventData, this.view.scale(), null, eventData.event.ctrlKey);
                     if (element !== null) {
                         eventData.element = element;
                         if (element.canDrag()) {
@@ -374,7 +373,6 @@ export default class DesignerController {
                     }
                 }
             }
-            Selection.directSelectionEnabled(false);
 
             this._bubbleMouseEvent(eventData, "mousedown");
 
@@ -408,7 +406,7 @@ export default class DesignerController {
         }
 
         // if (!eventData.handled) {
-        //     Selection.directSelectionEnabled(eventData.event.altKey);
+        //     Selection.directSelectionEnabled(eventData.event.ctrlKey);
         //     var element = this.app.activePage.hitElement(eventData, this.view.scale());
         //     Selection.directSelectionEnabled(false);
         //     if (element != this._mouseOverElement) {
@@ -549,10 +547,12 @@ export default class DesignerController {
         }
     }
 
+    _onKeyChanged(keys){
+        Selection.directSelectionEnabled(keys.ctrl);
+    }
+
     selectByClick(eventData) {
-        Selection.directSelectionEnabled(eventData.altKey);
-        var element = this.app.activePage.hitElement(eventData, this.view.scale());
-        Selection.directSelectionEnabled(false);
+        var element = this.app.activePage.hitElement(eventData, this.view.scale(), null, eventData.ctrlKey);
 
         if (element !== null) {
             eventData.element = element;
@@ -562,7 +562,7 @@ export default class DesignerController {
             }
 
             if (element.canSelect() && !element.locked()) {
-                var addToSelection = eventData.ctrlKey || eventData.shiftKey;
+                var addToSelection = eventData.shiftKey;
                 if (addToSelection) {
                     Selection.selectionMode("add");
                 }
@@ -610,9 +610,7 @@ export default class DesignerController {
     }
 
     showContextMenu(eventData) {
-        Selection.directSelectionEnabled(eventData.altKey);
-        var element = this.app.activePage.hitElement(eventData, this.view.scale());
-        Selection.directSelectionEnabled(false);
+        var element = this.app.activePage.hitElement(eventData, this.view.scale(), null, eventData.ctrlKey);
 
         if (element !== null && !Selection.isElementSelected(element)) {
             eventData.element = element;

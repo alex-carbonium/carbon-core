@@ -21,6 +21,10 @@ class ResizeHint extends Rectangle {
         this.opacity(0.7);
     }
 
+    hitVisible(){
+        return false;
+    }
+
     updateText(text, point) {
         this._lastPoint = point;
         this._text = text;
@@ -71,6 +75,18 @@ class ResizeHint extends Rectangle {
                 y += 14;
             }
         }
+    }
+}
+
+class DropLine extends Line {
+    hitVisible(){
+        return false;
+    }
+}
+
+class SelectionRect extends Rectangle{
+    hitVisible(){
+        return false;
     }
 }
 
@@ -127,9 +143,7 @@ var onMouseMove = function (event) {
         return;
     }
 
-    Selection.directSelectionEnabled(event.event.altKey);
-    var target = this.app.activePage.hitElement(event, this.view.scale());
-    Selection.directSelectionEnabled(false);
+    var target = this.app.activePage.hitElement(event, this.view.scale(), null, event.ctrlKey);
     if (this._target != target) {
         if (!Selection.isElementSelected(target)) {
             if (target.canSelect() && !target.locked() && (!target.lockedGroup || target.lockedGroup())) {
@@ -187,7 +201,7 @@ function updateSelectionRects() {
             controlData.iteration = this._selectionIteration;
             controlData.control.resize(selection.rect);
         } else {
-            var control = new Rectangle();
+            var control = new SelectionRect();
             control.setProps({
                 stroke: HighlightBrush,
                 fill: Brush.Empty,
@@ -199,7 +213,6 @@ function updateSelectionRects() {
             });
 
             control.crazySupported(false);
-            control.hitVisible(false);
             control.scalableX(false);
             control.scalableY(false);
             control.dashPattern([1, 1]);
@@ -340,16 +353,14 @@ export default class DropVisualization extends ExtensionBase {
         app.loaded.then(appLoaded.bind(this));
         this.registerForDispose(view.scaleChanged.bind(EventHandler(this, updateTargetRect)));
         app.addLoadRef();
-        this._dropLine = new Line();
+        this._dropLine = new DropLine();
         this._dropLine.setProps({
             stroke: fwk.Brush.createFromColor("red")
         });
         this._dropLine.crazySupported(false);
-        this._dropLine.hitVisible(false);
 
         this._hint = new ResizeHint();
         this._hint.crazySupported(false);
-        this._hint.hitVisible(false);
 
         view.registerForLayerDraw(2, this);
     }

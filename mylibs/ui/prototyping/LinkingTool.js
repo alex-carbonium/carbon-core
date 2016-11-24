@@ -242,9 +242,7 @@ export default class LinkingTool extends EditModeAction {
 
         var scale = this._view.scale();
 
-        Selection.directSelectionEnabled(event.altKey);
-        var target = this._app.activePage.hitElement(event, scale);
-        Selection.directSelectionEnabled(false);
+        var target = this._app.activePage.hitElement(event, scale, null, event.ctrlKey);
 
         if (this._target != target) {
             this._target = target;

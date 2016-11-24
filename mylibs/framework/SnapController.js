@@ -133,7 +133,7 @@ class SnapController {
         if(!parent){
             return;
         }
-        // Selection.directSelectionEnabled(true);
+        // Selection.directSelectionEnabled(true); - should not be used anymore
         parent.applyVisitor(collectPoints.bind(null, data), true);
         // Selection.directSelectionEnabled(false);
         data._snapX.sort(function (x1, x2) {

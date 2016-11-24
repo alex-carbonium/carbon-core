@@ -12,35 +12,14 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
 
     var Container = klass(UIElement, (function () {
         var isLockGroup = function () {
-            var selected = false;
-            var that = this;
-            //TODO: fails when generating PDF - think about removing usages of view
-
-
-            if (Selection) {
-                var selectedElement = Selection.selectedElement();
-
-                // TODO: cut dependency between select composite, and use instanceOf
-                if (selectedElement && selectedElement.t === 'SelectComposite') {
-                    var partOfSelection = false;
-                    selectedElement.each(function (e) {
-                        if (that == e) {
-                            partOfSelection = true;
-                            return true;
-                        }
-                    });
-
-                    if (partOfSelection) {
-                        return true;
-                    }
-                }
-
-                if (selectedElement
-                    && selectedElement.isDescendantOrSame(this)) {
-                    selected = true;
-                }
+            if (Selection.isElementSelected(this)){
+                return true;
             }
-            return this.enableGroupLocking() && (!this._activeGroup || !selected);
+            if (!this.enableGroupLocking()){
+                return false;
+            }
+
+            return !this._activeGroup || !Selection.selectComposite().isDescendantOrSame(this);
         };
 
 
@@ -426,9 +405,9 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
 
                 }
             },
-            hitElement: function (/*Point*/position, scale, predicate) {
+            hitElement: function (/*Point*/position, scale, predicate, directSelection) {
                 var hitTest = predicate || this.hitTest;
-                if (!(this.hitVisible() && hitTest.call(this, position, scale))) {
+                if (!(this.hitVisible(directSelection) && hitTest.call(this, position, scale))) {
                     return null;
                 }
                 var hitElement = this.hitTransparent() ? null : this;
@@ -460,17 +439,15 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                 return elements;
             },
             hitElementDirect: function (position, scale, predicate) {
-                Selection.directSelectionEnabled(true);
-                var result = this.hitElement(position, scale, predicate);
-                Selection.directSelectionEnabled(false);
+                var result = this.hitElement(position, scale, predicate, true);
                 return result;
             },
-            lockedGroup: function () {
+            lockedGroup: function (directSelection) {
+                var ds = directSelection === undefined ? Selection.directSelectionEnabled() : directSelection;
                 var parent = this.parent();
-                return parent && (isLockGroup.call(this) || parent.lockedGroup()) && !Selection.directSelectionEnabled();
+                return parent && (isLockGroup.call(this) || parent.lockedGroup(ds)) && !ds;
             },
             select: function () {
-                this.lockedGroup()
             },
             captureMouse: function (/*UIElement*/element) {
                 Environment.controller.captureMouse(element);
