@@ -504,7 +504,7 @@ export default class DesignerController {
         }
 
         if (this._captureElement != null) {
-            this._captureElement.dblclick(eventData);
+            this._captureElement.dblclick(eventData, this.view.scale());
             return;
         }
 

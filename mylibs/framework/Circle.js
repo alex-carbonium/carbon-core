@@ -179,6 +179,11 @@ Circle.fromSvgElement = function (element, parsedAttributes) {
         circle.opacity(parsedAttributes.opacity);
     }
 
+
+    if(parsedAttributes.id){
+        element.name(parsedAttributes.id);
+    }
+
     if (parsedAttributes.fill !== undefined) {
         if(!parsedAttributes.fill  || parsedAttributes.fill == "none"){
             circle.fill(Brush.Empty);

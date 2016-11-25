@@ -17,9 +17,10 @@ export default {
         Promise.all(promises)
             .then(paths => elements.map((e, i) => {
                 var parent = e.parent();
-                parent.replace(e, paths[i]);
-                paths[i].setProps({width:e.width(), height:e.height()});
-                return paths[i];
+                var p = paths[i];
+                parent.replace(e, p);
+                p.setProps({width:e.width(), height:e.height()});
+                return p;
             }))
             .then(paths => Selection.makeSelection(paths));
     }

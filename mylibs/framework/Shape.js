@@ -63,6 +63,8 @@ class Shape extends Container {
                 sh = 0 | clipingRect.height * environment.contextScale + .5;
                 p1 = {x:0, y:0};
             }
+            sw = Math.max(sw, 1);
+            sh = Math.max(sh, 1);
 
             var offContext = ContextPool.getContext(sw, sh, environment.contextScale);
             offContext.clearRect(0, 0, sw, sh);

@@ -339,7 +339,6 @@ class Rectangle extends Shape {
 }
 Rectangle.prototype.t = Types.Rectangle;
 
-Rectangle.ATTRIBUTE_NAMES = 'x y width height rx ry transform fill stroke stroke-width'.split(' ');
 Rectangle.fromSvgElement = function (element, parsedAttributes) {
     // var parsedAttributes = svgParser.parseAttributes(element, Rectangle.ATTRIBUTE_NAMES);
     var rect = new Rectangle();
@@ -348,8 +347,13 @@ Rectangle.fromSvgElement = function (element, parsedAttributes) {
     if (parsedAttributes.width) {
         rect.width(parsedAttributes.width);
     }
+
     if (parsedAttributes.height) {
         rect.height(parsedAttributes.height);
+    }
+
+    if(parsedAttributes.id){
+        element.name(parsedAttributes.id);
     }
 
     if (parsedAttributes.fill !== undefined) {
