@@ -1130,9 +1130,6 @@ var UIElement = klass(DataNode, {
         delete this.__state;
         return this;
     },
-    beforeDragTo: function (position) {
-        return position;
-    },
     getEditableProperties: function (recursive) {
         return PropertyMetadata.getEditableProperties(this.systemType(), recursive);
     },

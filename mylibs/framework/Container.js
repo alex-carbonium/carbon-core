@@ -515,6 +515,7 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                 return matrix.transformPoint(pos);
             },
             dropOn: function (event) {
+                //TODO:
                 var element = event.element;
 
                 if (Selection.isElementSelected(element)) {

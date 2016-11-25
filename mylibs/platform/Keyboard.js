@@ -18,8 +18,9 @@ class Keyboard{
         var ctrl = e.metaKey || e.ctrlKey;
         if (ctrl !== this.state.ctrl || e.altKey !== this.state.alt || e.shiftKey !== this.state.shift){
             var newState = {alt: e.altKey, ctrl, shift: e.shiftKey};
+            var oldState = this.state;
             this.state = newState;
-            this.changed.raise(newState);
+            this.changed.raise(newState, oldState);
         }
     };
 }

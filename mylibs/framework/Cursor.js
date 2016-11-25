@@ -17,6 +17,10 @@ class Cursor {
         return old;
     }
 
+    getCursor(){
+        return this._cursor;
+    }
+
     setGlobalCursor(value) {
         this._hasGlobalCursor = true;
         this._lastGlobalCursor = this.setCursor(value);

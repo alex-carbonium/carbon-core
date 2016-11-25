@@ -414,11 +414,11 @@ export function combineRects(rect) {
     var xmax = rect.x + rect.width;
     var ymax = rect.y + rect.height;
     for (var i = 1; i < arguments.length; i++) {
-        var rect = arguments[i];
-        xmin = Math.min(xmin, rect.x);
-        ymin = Math.min(ymin, rect.y);
-        xmax = Math.max(xmax, rect.x + rect.width);
-        ymax = Math.max(ymax, rect.y + rect.height);
+        var rect2 = arguments[i];
+        xmin = Math.min(xmin, rect2.x);
+        ymin = Math.min(ymin, rect2.y);
+        xmax = Math.max(xmax, rect2.x + rect2.width);
+        ymax = Math.max(ymax, rect2.y + rect2.height);
     }
     return {x: xmin, y: ymin, width: xmax - xmin, height: ymax - ymin};
 }

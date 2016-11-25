@@ -1,15 +1,18 @@
 import {areRectsIntersecting} from "math/math";
-import EventHelper from "framework/EventHelper";
-import Selection from "framework/SelectionModel"
+import EventHelper from "./EventHelper";
+import Selection from "./SelectionModel";
+import CompositeElement from "./CompositeElement";
 import domUtil from "utils/dom";
-import Cursor from "framework/Cursor";
-import Invalidate from "framework/Invalidate";
+import Cursor from "./Cursor";
+import Invalidate from "./Invalidate";
 import actionManager from "ui/ActionManager";
-import RepeatViewListener from "framework/repeater/RepeatViewListener";
+import RepeatViewListener from "./repeater/RepeatViewListener";
 import TouchHelper from "./TouchHelper";
-import Artboard from "framework/Artboard";
-import Page from "../framework/Page";
+import Artboard from "./Artboard";
+import Page from "./Page";
 import Keyboard from "../platform/Keyboard";
+import GroupContainer from "./GroupContainer";
+import Phantom from "./Phantom";
 
 function onselect(rect) {
     var selection = this.app.activePage.getElementsInRect(rect);
@@ -18,58 +21,29 @@ function onselect(rect) {
 }
 
 function stopDrag(event) {
-    var draggingElement = this._draggingElement.element();
-    var eventData = {
-        handled: false,
-        element: draggingElement,
-        x: event.x,
-        y: event.y,
-        ctrlKey: event.ctrlKey
-    };
-
+    var group = this._draggingElement.element();
     var that = this;
-    if (!draggingElement.isDropSupported()) {
+    if (!group.isDropSupported()) {
         that._draggingElement.detach();
-        this.stopDraggingEvent.raise(eventData, null);
+        this.stopDraggingEvent.raise(event, null);
         return false;
     }
 
-    var element = this._draggingOverElement;
-    if (element instanceof Page){
-        var parent = that._draggingElement._element.parent();
-        if (parent instanceof Artboard){
-            if(areRectsIntersecting(that._draggingElement.getBoundaryRectGlobal(), parent.getBoundaryRectGlobal())){
-                element = parent;
-            }
+
+    var elements = this._draggingElement.drop(event, this._draggingOverElement, this.app.activePage);
+    this._draggingElement.detach();
+
+    if (group !== null) {
+        //TODO
+        if(group.props._unwrapContent){
+            group.unwrapToParent();
         }
     }
 
-    if (element !== null) {
-        if (event.altKey) {
-            that._draggingElement.dropCopyOn(eventData, element);
-        } else {
-            that._draggingElement.dropOn(eventData, element);
-            element.dropOn(eventData);
-        }
-    }
-
-    that._draggingElement.detach();
-
-    if (draggingElement !== null) {
-        draggingElement.stopDrag({
-            mouseX: event.mouseX,
-            mouseY: event.mouseY
-        });
-
-        if(draggingElement.props._unwrapContent){
-            draggingElement.unwrapToParent();
-        }
-    }
-
-    this.stopDraggingEvent.raise(eventData, this._draggingOverElement);
+    this.stopDraggingEvent.raise(event, elements);
 
     //could start dragging not selected object
-    Selection.makeSelection([draggingElement]);
+    Selection.makeSelection(elements);
 }
 
 function updateEvent(event) {
@@ -171,7 +145,7 @@ export default class DesignerController {
                         return;
                     }
                     if (element.canSelect() && element.canDrag() && !element.locked() && Selection.isElementSelected(element)){
-                        Cursor.setCursor("move_cursor");
+                        Cursor.setCursor(Keyboard.state.alt ? "move_clone" : "move_cursor");
                         return;
                     }
                 }
@@ -283,46 +257,59 @@ export default class DesignerController {
 
 
     beginDrag(event) {
-        var element = event.element;
-        var elementStartPosition = element.position();
-        var globalPos = element.parent().local2global(elementStartPosition);
-        this._draggingOffset = {
-            x: event.x - elementStartPosition.x,
-            y: event.y - elementStartPosition.y
-        };
+        var elements = event.elements;
+        //var elementStartPosition = element.position();
+        //var globalPos = element.parent().local2global(elementStartPosition);
+        // this._draggingOffset = {
+        //     x: event.x - elementStartPosition.x,
+        //     y: event.y - elementStartPosition.y
+        // };
 
-        var holdOffset = {
-            x: event.x - globalPos.x,
-            y: event.y - globalPos.y
-        };
 
         var eventData = {
             mouseX: event.x,
             mouseY: event.y,
-            x: event.x - this._draggingOffset.x,
-            y: event.y - this._draggingOffset.y
+            x: event.x,
+            y: event.y
         };
 
-        if (element.startDrag(eventData) !== false) {
-            this._draggingElement = new this.deps.DraggingElement(element, holdOffset);
-            var parent = element.parent();
-            if (!parent.allowMoveOutChildren(undefined, event)) {
-                this._draggingElement.cantChangeParent = true;
-                this._draggingOverElement = parent;
-            } else {
-                delete this._draggingElement.cantChangeParent;
+        //if (element.startDrag(eventData) !== false) {
+            var group = new GroupContainer();
+            for (var i = 0; i < elements.length; i++){
+                group.add(new Phantom(elements[i]))
             }
+            group.performArrange();
+
+            var holdOffset = {
+                x: event.x - group.x(),
+                y: event.y - group.y()
+            };
+
+            // this._draggingOffset = {
+            //     x: event.x,
+            //     y: event.y
+            // };
+
+            this._draggingElement = new this.deps.DraggingElement(group, holdOffset);
+            this._draggingElement.showOriginal(event.altKey);
+            //var parent = element.parent();
+            // if (!parent.allowMoveOutChildren(undefined, event)) {
+            //     this._draggingElement.cantChangeParent = true;
+            //     this._draggingOverElement = parent;
+            // } else {
+            //     delete this._draggingElement.cantChangeParent;
+            // }
 
             this.view.layer3.add(this._draggingElement);
             this._draggingOffset = {
-                x: event.x - this._draggingElement.x(),
-                y: event.y - this._draggingElement.y()
+                x: event.x - group.x(),
+                y: event.y - group.y()
             };
 
             this.startDraggingEvent.raise(eventData);
-        } else {
-            this._draggingElement = null;
-        }
+        //} else {
+        //   this._draggingElement = null;
+        //}
     }
 
 
@@ -345,23 +332,23 @@ export default class DesignerController {
 
         // apply default behavior
         if (!eventData.handled) {
-            var selectedElement = Selection.selectedElement();
+            var composite = Selection.selectComposite();
             // first check current selection
-            if(selectedElement && selectedElement.hitTest(eventData, this.view.scale())) {
-                eventData.element = selectedElement;
-                if (selectedElement.canDrag()) {
+            if(composite && composite.hitTest(eventData, this.view.scale())) {
+                eventData.elements = composite.elements;
+                if (composite.canDrag()) {
                     this._startDraggingData = eventData;
                     eventData.handled = true;
-                } else if (selectedElement.canSelect() && !selectedElement.locked()) {
+                } else if (composite.canSelect() && !composite.locked()) {
                     eventData.handled = true;
                 }
-            } else {
-
-                for (var i = 0; i < this.view._layersReverse.length; i++) {
+            }
+            else {
+                for (var i = 0; i < this.view._layersReverse.length ; i++) {
                     var layer = this.view._layersReverse[i];
                     var element = layer.hitElement(eventData, this.view.scale(), null, eventData.event.ctrlKey);
                     if (element !== null) {
-                        eventData.element = element;
+                        eventData.elements = [element];
                         if (element.canDrag()) {
                             this._startDraggingData = eventData;
                             eventData.handled = true;
@@ -547,8 +534,23 @@ export default class DesignerController {
         }
     }
 
-    _onKeyChanged(keys){
-        Selection.directSelectionEnabled(keys.ctrl);
+    _onKeyChanged(newKeys, oldKeys){
+        Selection.directSelectionEnabled(newKeys.ctrl);
+
+        if (oldKeys.alt !== newKeys.alt){
+            var c = Cursor.getCursor();
+            if (newKeys.alt && c === "move_cursor"){
+                Cursor.setCursor("move_clone");
+            }
+            else if (!newKeys.alt && c === "move_clone"){
+                Cursor.setCursor("move_cursor");
+            }
+
+            if (this._draggingElement){
+                this._draggingElement.showOriginal(newKeys.alt);
+                Invalidate.request();
+            }
+        }
     }
 
     selectByClick(eventData) {

@@ -29,7 +29,7 @@ export default class GroupContainer extends Container {
             context.restore();
 
         }
-        GroupContainer.prototype.SuperKlass.drawSelf.apply(this, arguments);
+        super.drawSelf.apply(this, arguments);
     }
 
     _buildChildrenSizes(){
@@ -43,7 +43,7 @@ export default class GroupContainer extends Container {
     }
 
     startResizing(){
-        GroupContainer.prototype.SuperKlass.startResizing.call(this);
+        super.startResizing();
         this._rects = this._buildChildrenSizes();
         this._originalWidth = this.width();
         this._originalHeight = this.height();
@@ -55,7 +55,7 @@ export default class GroupContainer extends Container {
     }
 
     stopResizing(){
-        GroupContainer.prototype.SuperKlass.stopResizing.call(this);
+        super.stopResizing();
         delete this._rects;
         delete this._originalWidth;
         delete this._originalHeight;
