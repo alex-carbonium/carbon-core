@@ -164,6 +164,19 @@ class Shape extends Container {
     }
 
 
+    _roundValue(value) {
+        if (this.props.pointRounding === 0) {
+            value = (0 | (value + 0.005) * 100) / 100;
+        } else if (this.props.pointRounding === 1) {
+            value = (0 | value * 2 + .5) / 2;
+        } else {
+            value = Math.round(value);
+        }
+
+        return value;
+    }
+
+
     insert(frame){
         var rect = this.getBoundaryRect();
         var parent = this.parent();
@@ -221,7 +234,40 @@ PropertyMetadata.registerForType(Shape, {
         defaultValue: 10,
         displayName: "@miterLimit",
         type: "numeric"
-    }
+    },
+    pointRounding: {
+        displayName: "Point rounding",
+        type: "dropdown",
+        options: {
+            size: 1,
+            items: [{name: "Don't round", value: 0}, {name: "Round to half pixels", value: 1}, {
+                name: "Round to full pixels edges",
+                value: 2
+            }]
+        },
+        defaultValue: 1,
+        useInModel: true,
+        editable: true
+    },
+    groups () {
+        return [
+            {
+                label: "Appearance",
+                expanded: false,
+                properties: ["visible", "opacity", "fill", "stroke", "clipMask"]
+            },
+            {
+                label: "Layout",
+                properties: ["width", "height", "x", "y", "anchor", "angle"],
+                expanded: true
+            },
+            {
+                label: "Settings",
+                properties: ["pointRounding"],
+                expanded: true
+            }
+        ];
+    },
 });
 
 export default Shape;

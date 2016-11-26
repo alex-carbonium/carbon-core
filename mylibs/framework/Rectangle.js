@@ -148,6 +148,7 @@ class Rectangle extends Shape {
             , x2 = x1 + this.width()
             , y2 = y1 + this.height()
             , cr = this.cornerRadius();
+        path.setProps({pointRounding:0})
 
         var mr = Math.min(this.width()/2, this.height()/2);
 
@@ -356,6 +357,19 @@ Rectangle.fromSvgElement = function (element, parsedAttributes) {
         element.name(parsedAttributes.id);
     }
 
+    rect.setProps({pointRounding: 0});
+
+    if(parsedAttributes.rx !== undefined && parsedAttributes.rx == parsedAttributes.ry){
+        var r = parseFloat(parsedAttributes.rx);
+        rect.cornerRadius({
+            bottomLeft: r,
+            bottomRight: r,
+            upperLeft: r,
+            upperRight: r,
+            locked: true
+        });
+    }
+
     if (parsedAttributes.fill !== undefined) {
         if(!parsedAttributes.fill || parsedAttributes.fill == "none"){
             rect.fill(Brush.Empty);
@@ -380,7 +394,7 @@ Rectangle.fromSvgElement = function (element, parsedAttributes) {
     if (parsedAttributes.y) {
         rect.y(parsedAttributes.y);
     }
-    return rect;
+    return rect.convertToPath();
 };
 
 PropertyMetadata.registerForType(Rectangle, {

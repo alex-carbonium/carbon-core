@@ -485,18 +485,6 @@ class Path extends Shape {
         return res * 4;
     }
 
-    _roundValue(value) {
-        if (this.props.pointRounding === 0) {
-            value = (0 | (value + 0.005) * 100) / 100;
-        } else if (this.props.pointRounding === 1) {
-            value = (0 | value * 2 + .5) / 2;
-        } else {
-            value = Math.round(value);
-        }
-
-        return value;
-    }
-
     _roundPoint(pt) {
         var x, y;
         if (this.props.pointRounding === 0) {
@@ -510,14 +498,15 @@ class Path extends Shape {
             y = Math.round(pt.y);
         }
 
-        if (pt.type != PointType.Straight && pt.type !== undefined) {
-            var dx = pt.x - x;
-            var dy = pt.y - y;
-            pt.cp1x -= dx;
-            pt.cp2x -= dx;
-            pt.cp1y -= dy;
-            pt.cp2y -= dy;
+        if (pt.cp1x !== undefined) {
+            pt.cp1x = this._roundValue(pt.cp1x);
+            pt.cp1y = this._roundValue(pt.cp1y);
         }
+        if (pt.cp2x !== undefined) {
+            pt.cp2x = this._roundValue(pt.cp2x);
+            pt.cp2y = this._roundValue(pt.cp2y);
+        }
+
         pt.x = x;
         pt.y = y;
     }
@@ -1133,7 +1122,7 @@ class Path extends Shape {
 
             this.drawPath(context, w, h);
             if (this.nextPoint && this.points.length && !this.closed()) {
-                if(hoverPoint == this.points[0]){
+                if (hoverPoint == this.points[0]) {
                     var nextPt = hoverPoint;
                 } else {
                     nextPt = this.nextPoint;
@@ -1151,7 +1140,6 @@ class Path extends Shape {
                     needClearStyle = false;
                 }
             }
-
 
 
             for (var i = 0, len = this.points.length; i < len; ++i) {
@@ -1180,8 +1168,8 @@ class Path extends Shape {
                     context.beginPath();
                     context.moveTo(cp1.x - r, cp1.y);
                     context.lineTo(cp1.x, cp1.y - r);
-                    context.lineTo(cp1.x+r, cp1.y);
-                    context.lineTo(cp1.x, cp1.y+r);
+                    context.lineTo(cp1.x + r, cp1.y);
+                    context.lineTo(cp1.x, cp1.y + r);
                     context.closePath();
                     context.fill();
                     context.stroke();
@@ -1196,8 +1184,8 @@ class Path extends Shape {
                     //context.circle(cp2.x, cp2.y, CP_HANDLE_RADIUS / scale);
                     context.moveTo(cp2.x - r, cp2.y);
                     context.lineTo(cp2.x, cp2.y - r);
-                    context.lineTo(cp2.x+r, cp2.y);
-                    context.lineTo(cp2.x, cp2.y+r);
+                    context.lineTo(cp2.x + r, cp2.y);
+                    context.lineTo(cp2.x, cp2.y + r);
                     context.closePath();
                     context.fill();
                     context.stroke();
@@ -1207,7 +1195,7 @@ class Path extends Shape {
                 if (pt === hoverPoint || pt === this._selectedPoint || this._selectedPoints[pt.idx]) {
                     context.fillStyle = POINT_STROKE;
                     needClearStyle = true;
-                } else if(i === this.points.length - 1 && !this.closed() && !pt.closed){
+                } else if (i === this.points.length - 1 && !this.closed() && !pt.closed) {
                     context.fillStyle = POINT_FILL_FIRST_OPEN;
                     needClearStyle = true;
                 }
@@ -2151,20 +2139,6 @@ PropertyMetadata.registerForType(Path, {
             ],
             size: 3 / 4
         }
-    },
-    pointRounding: {
-        displayName: "Point rounding",
-        type: "dropdown",
-        options: {
-            size: 1,
-            items: [{name: "Don't round", value: 0}, {name: "Round to half pixels", value: 1}, {
-                name: "Round to full pixels edges",
-                value: 2
-            }]
-        },
-        defaultValue: 1,
-        useInModel: true,
-        editable: true
     },
     mode: {
         editable: false,
