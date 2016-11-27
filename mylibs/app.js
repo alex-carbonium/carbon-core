@@ -425,7 +425,6 @@ class App extends DataNode {
         this.loadedFromJson = fwk.EventHelper.createEvent();
         this.savedToJson = fwk.EventHelper.createEvent();
 
-
         this.loaded = new Promise(function (resolve, reject) {
             that.loadedResolve = resolve;
         });
@@ -480,6 +479,22 @@ class App extends DataNode {
         }
 
         return this._activeStory;
+    }
+
+    getAllFrames(){
+        var res = [];
+        for(var i = 0; i<this.pages.length; ++i){
+            var page = this.pages[i];
+            var artboards = page.getAllArtboards();
+            for(var j = 0; j<artboards.length; ++j){
+                var a = artboards[j];
+                if(a.name().startsWith("frame:")){
+                    res.push(a);
+                }
+            }
+        }
+
+        return res;
     }
 
     resetRuntimeProps() {

@@ -53,6 +53,45 @@ class Artboard extends Container {
         this.canDrag(value);
     }
 
+    get frame() {
+        if (!this.props.frame) {
+            return null;
+        }
+
+        if (!this._frame) {
+            var page = App.Current.getPageById(this.props.frame.pageId);
+            if (page) {
+                var frame = page.getArtboardById(this.props.frame.artboardId);
+
+                var screen = frame.findElementByName('screen');
+                if (!screen) {
+                    this.setProps({frame: null});
+                    return null;
+                }
+                var dw = this.width() / screen.width();
+                var dh = this.height() / screen.height();
+
+                var frameClone = frame.clone();
+                if (dw !== 1 || dh !== 1) {
+                    var oldRect = frame.getBoundaryRect();
+                    frameClone.prepareAndSetProps({width: oldRect.width * dw, height: oldRect.height * dh});
+                    frameClone.performArrange(oldRect);
+                }
+                frameClone.setProps({x: 0, y: 0});
+
+                var screenRect = screen.getBoundaryRectGlobal();
+                var frameRect = frame.getBoundaryRectGlobal();
+                this._frameX = frameRect.x - screenRect.x;
+                this._frameY = frameRect.y - screenRect.y;
+                this._frameVersion = frame.version;
+                this._originalFrame = frame;
+                this._frame = frameClone;
+            }
+        }
+
+        return this._frame;
+    }
+
     select() {
         this._dragable(true);
     }
@@ -132,14 +171,30 @@ class Artboard extends Container {
         context.save();
         context.beginPath();
         context.strokeStyle = "#999";
-        var scale =  environment.view.scale();
+        var scale = environment.view.scale();
         context.lineWidth = 1 / scale;
-        context.rect(this.x() - .5 / scale, this.y() - .5 / scale,  this.width() + 1 / scale, this.height() + 1 / scale);
+        context.rect(this.x() - .5 / scale, this.y() - .5 / scale, this.width() + 1 / scale, this.height() + 1 / scale);
         context.stroke();
         context.restore();
     }
 
+    drawCustomFrame(context, environment) {
+        var frame = this.frame;
+
+        context.save();
+        context.translate(this.x() + this._frameX, this.y() + this._frameY);
+        frame.draw(context, environment);
+        context.restore();
+
+    }
+
     draw(context, environment) {
+
+        var frame = this.frame;
+
+        if (frame) {
+            this.drawCustomFrame(context, environment);
+        }
 
         super.draw(context, environment);
 
@@ -147,7 +202,9 @@ class Artboard extends Container {
             return;
         }
 
-        this.drawFrameRect(context, environment);
+        if (!frame) {
+            this.drawFrameRect(context, environment);
+        }
 
         if (this._recorder && this._recorder.statesCount() > 1) {
             this._renderStatesFrame(context);
@@ -710,6 +767,11 @@ PropertyMetadata.registerForType(Artboard, {
         type: 'text',
         defaultValue: 'Custom'
     },
+    frame: {
+        displayName: "@frame",
+        type: "frame",
+        defaultValue: null
+    },
     prepareVisibility(props){
         return {
             tileSize: props.showInToolbox,
@@ -724,7 +786,7 @@ PropertyMetadata.registerForType(Artboard, {
             {
                 label: "Appearance",
                 expanded: false,
-                properties: ["visible", "fill"]
+                properties: ["visible", "fill", "frame"]
             },
             {
                 label: "Layout",
