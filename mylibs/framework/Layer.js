@@ -97,7 +97,7 @@ class Layer extends Container {
         return this._hitTransparent;
     }
 
-    canAccept(element) {
+    canAccept() {
         return true;
     }
 

@@ -1,13 +1,16 @@
 import UIElement from "./UIElement";
 
 export default class Phantom extends UIElement{
-    constructor(element){
+    constructor(element, props){
         super();
-        this.setProps(element.getBoundaryRectGlobal());
         this._element = element;
+
+        if (props){
+            this.prepareAndSetProps(props);
+        }
     }
 
-    get element(){
+    get original(){
         return this._element;
     }
 

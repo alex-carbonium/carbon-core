@@ -17,8 +17,6 @@ define(["decorators/ActiveFrame", "framework/ResizeDimension"], function (Active
         },
 
         movePoint: function (frame, point, event) {
-            event.x -= frame.element.x();
-            event.y -= frame.element.y();
             return DefaultFrameType.movePoint(frame, point, event);
         },
         draw: function (frame, context) {
@@ -55,7 +53,7 @@ define(["decorators/ActiveFrame", "framework/ResizeDimension"], function (Active
         _constructor: function () {
             this._activeFrame = new ActiveFrame();
 
-            this._angleEditable = false;
+            //this._angleEditable = false;
             this._initialized = true;
         },
         selected: function (value) {

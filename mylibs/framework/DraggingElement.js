@@ -1,45 +1,49 @@
-import UIElement from "framework/UIElement";
-import ResizeDimension from "framework/ResizeDimension";
-import Matrix from "math/matrix";
-import CompositeElement from "framework/CompositeElement";
-import SelectComposite from "framework/SelectComposite";
-import PropertyMetadata from "framework/PropertyMetadata";
-import Container from "framework/Container";
-import {createUUID} from "../util";
+import PropertyMetadata from "./PropertyMetadata";
+import GroupContainer from "./GroupContainer";
 import {ChangeMode, Types} from "./Defs";
-import Selection from "framework/SelectionModel";
-import Environment from "environment";
 import SnapController from "./SnapController";
 import UserSettings from "../UserSettings";
 import Artboard from "./Artboard";
-import {areRectsIntersecting} from "../math/math";
-import Page from "./Page";
+import {areRectsIntersecting, rotatePointByDegree} from "../math/math";
+import Phantom from "./Phantom";
+import Brush from "./Brush";
+import {toGlobalProps} from "./Transformations";
 
 var debug = require("DebugUtil")("carb:draggingElement");
 
 function applyOrthogonalMove(pos) {
-    var oldPos = this._element.position();
-    oldPos = this._element.parent().local2global(oldPos);
-
-    if (Math.abs(oldPos.x - pos.x) > Math.abs(oldPos.y - pos.y)) {
-        pos.y = oldPos.y;
+    if (Math.abs(this._startPosition.x - pos.x) > Math.abs(this._startPosition.y - pos.y)) {
+        pos.y = this._startPosition.y;
     } else {
-        pos.x = oldPos.x;
+        pos.x = this._startPosition.x;
     }
 
     return pos;
 }
 
-function onMouseMove(event) {
-    this._lastPoint = event;
-}
-
-class DraggingElement extends UIElement {
-    constructor(element, holdOffset, resize) {
+class DraggingElement extends GroupContainer {
+    constructor(event, activeArtboard) {
         super();
-        this._element = element;
+
+        this._decorators = [];
+        this._elements = [];
+
+        for (var i = 0; i < event.elements.length; i++){
+            var element = event.elements[i];
+            if (element.decorators){
+                element.decorators.forEach(x => {
+                    x.visible(false);
+                    this._decorators.push(x);
+                });
+            }
+            this.add(new Phantom(element, toGlobalProps(element)));
+            this._elements.push(element);
+        }
+        this.performArrange();
+
+        //this._element = element;
         //this._origProps = element.selectProps(["visible"]);
-        this._clone = null;
+        //this._clone = null;
         // if (element.cloneWhenDragging()){
         //     var primitiveRoot = element.primitiveRoot();
         //     if (primitiveRoot) {
@@ -57,7 +61,7 @@ class DraggingElement extends UIElement {
         // }
 
         //this._clone._canDraw = true;
-        this._resize = resize;
+        //this._resize = resize;
         // var parent = element.parent();
         // var pos = element.position();
         // if (!(element instanceof CompositeElement)) {
@@ -68,35 +72,21 @@ class DraggingElement extends UIElement {
         //     "x", "y", "width", "height", "angle", "flipVertical", "flipHorizontal"]),
         //     ChangeMode.Self);
 
-        this.canDrag(false);
-        this.isTemporary(true);
+        SnapController.calculateSnappingPoints(activeArtboard);
 
-        var root = element.children[0].element.primitiveRoot();
-        SnapController.calculateSnappingPoints(root);
+        var holdPcnt = Math.round((event.x - this.x()) * 100 / this.width());
+        this._ownSnapPoints = SnapController.prepareOwnSnapPoints(this, holdPcnt);
 
-        var holdPcnt = holdOffset ? (~~(holdOffset.x * 100 / element.width())) : 50;
-        this._ownSnapPoints = SnapController.prepareOwnSnapPoints(element, holdPcnt);
+        this._startPosition = this.position();
 
-        this._mouseMoveHandler = Environment.controller.mousemoveEvent.bind(this, onMouseMove);
-
-        this._decorators = element.decorators;
-        if (this._decorators){
-            this._decorators.forEach(x => x.visible(false));
-        }
-
-        this.strokeFrame = true;
+        this.props.stroke = Brush.createFromColor("blue");
     }
 
     showOriginal(value){
-        if (value){
-            //this._element.setProps({visible: true}, ChangeMode.Self);
-        }
-        else{
-            //this._element.setProps({visible: false}, ChangeMode.Self);
-        }
+        this._elements.forEach(x => x.setProps({visible: value}, ChangeMode.Self));
     }
 
-    canBeAccepted(element) {
+    canBeAccepted() {
         return false;
     }
 
@@ -104,122 +94,118 @@ class DraggingElement extends UIElement {
         return "DraggingElement";
     }
 
-    draw(context, environment) {
-        var scaleX, scaleY, scale = environment.view.scale();
+    // draw(context, environment) {
+    //     var scaleX, scaleY, scale = environment.view.scale();
+    //
+    //     // function fillBackground() {
+    //     //     context.save();
+    //     //     context.fillStyle = 'rgba(160, 180, 200, 0.1)';
+    //     //     context.fillRect(0, 0, w, h);
+    //     //     context.restore();
+    //     // }
+    //
+    //     var x = this.x();
+    //     var y = this.y();
+    //     //debug("Drawing at: x=%d y=%d", this._element.x(), this._element.y());
+    //
+    //     context.save();
+    //
+    //     // scaleX = scaleY = scale;
+    //     // if (this._element.scalableX()) {
+    //     //     scaleX = 1;
+    //     // }
+    //     // else {
+    //     //     x *= scale;
+    //     // }
+    //     // if (this._element.scalableY()) {
+    //     //     scaleY = 1;
+    //     // } else {
+    //     //     y *= scale;
+    //     // }
+    //     //
+    //     // context.scale(1 / scaleX, 1 / scaleY);
+    //
+    //     //context.globalAlpha = 0.8;
+    //
+    //     //var oldSize = this._clone.getBoundaryRect();
+    //     //var newPos = this._element.parent().global2local({x: x, y: y});
+    //     //var rect = {x: newPos.x, y: newPos.y, width: w, height: h, angle: this.angle()};
+    //     //this._clone.prepareProps(rect);
+    //     //this._clone.setProps(rect, ChangeMode.Root);
+    //
+    //     // if (this._clone instanceof Container) {
+    //     //     this._clone.arrange({oldValue: oldSize, newValue: rect});
+    //     // }
+    //
+    //     //rect.width = this._clone.width();
+    //     //rect.height = this._clone.height();
+    //
+    //     // var parent = this._element.parent();
+    //     //
+    //     // if (parent !== NullContainer) {
+    //     //     var globalViewMatrix = parent.globalViewMatrix().clone().append(this._clone.viewMatrix());
+    //     // } else {
+    //     //     globalViewMatrix = this._clone.viewMatrix();
+    //     // }
+    //
+    //     var sh = 1, sv = 1;
+    //     // if (this.flipHorizontal() !== this._clone.flipHorizontal()) {
+    //     //     sh = -1;
+    //     // }
+    //     // if (this.flipVertical() !== this._clone.flipVertical()) {
+    //     //     sv = -1;
+    //     // }
+    //     if (sh !== 1 || sv !== 1) {
+    //         //var origin = {x: this._clone.width() / 2, y: this._clone.height() / 2};
+    //         //globalViewMatrix.scale(sh, sv, origin.x, origin.y);
+    //     }
+    //     var isComposite = this._element instanceof SelectComposite;
+    //
+    //     if (isComposite) {
+    //         //globalViewMatrix.translate(this.x(), this.y());
+    //     }
+    //     //globalViewMatrix.applyToContext(context);
+    //
+    //     if (this.strokeFrame){
+    //         this._drawFrame(context, scale);
+    //     }
+    //
+    //     if (true || this._element.clipSelf() && this._element.clipDragClone()) {
+    //         //context.rectPath(0, 0, w, h);
+    //         //context.clip();
+    //     }
+    //
+    //     //fillBackground();
+    //     //context.beginPath();
+    //
+    //     // if (isComposite) {
+    //     //     context.translate(-this._clone.x(), -this._clone.y());
+    //     // }
+    //     super.draw(context, environment);
+    //     // if (rect.width !== w || rect.height !== h) {
+    //     //     var props = {
+    //     //         width: rect.width,
+    //     //         height: rect.height
+    //     //     };
+    //     //     this.prepareProps(props);
+    //     //     this.setProps(props);
+    //     // }
+    //
+    //     context.restore();
+    // }
 
-        // function fillBackground() {
-        //     context.save();
-        //     context.fillStyle = 'rgba(160, 180, 200, 0.1)';
-        //     context.fillRect(0, 0, w, h);
-        //     context.restore();
-        // }
-
-        var x = this.x();
-        var y = this.y();
-        debug("Drawing at: x=%d y=%d", this._element.x(), this._element.y());
-
-        context.save();
-
-        scaleX = scaleY = scale;
-        if (this._element.scalableX()) {
-            scaleX = 1;
-        }
-        else {
-            x *= scale;
-        }
-        if (this._element.scalableY()) {
-            scaleY = 1;
-        } else {
-            y *= scale;
-        }
-
-        context.scale(1 / scaleX, 1 / scaleY);
-
-        //context.globalAlpha = 0.8;
-
-        //var oldSize = this._clone.getBoundaryRect();
-        //var newPos = this._element.parent().global2local({x: x, y: y});
-        //var rect = {x: newPos.x, y: newPos.y, width: w, height: h, angle: this.angle()};
-        //this._clone.prepareProps(rect);
-        //this._clone.setProps(rect, ChangeMode.Root);
-
-        // if (this._clone instanceof Container) {
-        //     this._clone.arrange({oldValue: oldSize, newValue: rect});
-        // }
-
-        //rect.width = this._clone.width();
-        //rect.height = this._clone.height();
-
-        // var parent = this._element.parent();
-        //
-        // if (parent !== NullContainer) {
-        //     var globalViewMatrix = parent.globalViewMatrix().clone().append(this._clone.viewMatrix());
-        // } else {
-        //     globalViewMatrix = this._clone.viewMatrix();
-        // }
-
-        var sh = 1, sv = 1;
-        // if (this.flipHorizontal() !== this._clone.flipHorizontal()) {
-        //     sh = -1;
-        // }
-        // if (this.flipVertical() !== this._clone.flipVertical()) {
-        //     sv = -1;
-        // }
-        if (sh !== 1 || sv !== 1) {
-            //var origin = {x: this._clone.width() / 2, y: this._clone.height() / 2};
-            //globalViewMatrix.scale(sh, sv, origin.x, origin.y);
-        }
-        var isComposite = this._element instanceof SelectComposite;
-
-        if (isComposite) {
-            //globalViewMatrix.translate(this.x(), this.y());
-        }
-        //globalViewMatrix.applyToContext(context);
-
-        if (this.strokeFrame){
-            this._drawFrame(context, scale);
-        }
-
-        if (true || this._element.clipSelf() && this._element.clipDragClone()) {
-            //context.rectPath(0, 0, w, h);
-            //context.clip();
-        }
-
-        //fillBackground();
-        context.beginPath();
-
-        // if (isComposite) {
-        //     context.translate(-this._clone.x(), -this._clone.y());
-        // }
-        this._element.draw(context, environment);
-        // if (rect.width !== w || rect.height !== h) {
-        //     var props = {
-        //         width: rect.width,
-        //         height: rect.height
-        //     };
-        //     this.prepareProps(props);
-        //     this.setProps(props);
-        // }
-
-        context.restore();
-    }
-
-    _drawFrame(context, scale){
-        context.save();
-        context.scale(1/scale, 1/scale);
-        context.strokeStyle = UserSettings.frame.stroke;
-        context.strokeRect(
-            Math.round(this._element.x()/scale),
-            Math.round(this._element.y()/scale),
-            this._element.width() * scale + .5|0,
-            this._element.height() * scale + .5|0
-        );
-        context.restore();
-    }
-
-    element() {
-        return this._element;
-    }
+    // drawSelf(context, w, h, environment){
+    //     context.save();
+    //     context.scale(1/scale, 1/scale);
+    //     context.strokeStyle = UserSettings.frame.stroke;
+    //     context.strokeRect(
+    //         Math.round(this._element.x()/scale),
+    //         Math.round(this._element.y()/scale),
+    //         this._element.width() * scale + .5|0,
+    //         this._element.height() * scale + .5|0
+    //     );
+    //     context.restore();
+    // }
 
     detach() {
         debug("Detached");
@@ -230,34 +216,38 @@ class DraggingElement extends UIElement {
         //     delete this._clone;
         // }
 
-        if (this._mouseMoveHandler) {
-            this._mouseMoveHandler.dispose();
-            delete this._mouseMoveHandler;
-        }
         SnapController.clearActiveSnapLines();
 
         if (this._decorators){
             this._decorators.forEach(x => x.visible(true));
-            delete this._decorators;
+            this._decorators = null;
         }
         this.parent().remove(this, ChangeMode.Root);
-        //this._element && this._element.updateViewMatrix();
     }
 
     drop(event, draggingOverElement, page){
+        this.showOriginal(true);
+
         var artboards = page.getAllArtboards();
+        var elements = [];
 
-        for (var i = 0; i < this._element.children.length; ++i){
-            var phantom = this._element.children[i];
-            var element = phantom.element;
+        for (var i = 0; i < this.children.length; ++i){
+            var phantom = this.children[i];
+            var element = phantom.original;
 
-            var phantomTarget = artboards.find(a => areRectsIntersecting(phantom.getBoundaryRectGlobal(), a.getBoundaryRectGlobal()));
+            var phantomTarget = artboards.find(a => areRectsIntersecting(phantom.getBoundingBoxGlobal(), a.getBoundaryRectGlobal()));
             if (!phantomTarget){
                 phantomTarget = page;
             }
 
             var parent = null;
-            if (draggingOverElement.primitiveRoot() === phantomTarget.primitiveRoot()){
+            if (element instanceof Artboard){
+                parent = page;
+            }
+            else if (!draggingOverElement){
+                parent = element.parent();
+            }
+            else if (draggingOverElement.primitiveRoot() === phantomTarget.primitiveRoot()){
                 parent = draggingOverElement;
             }
             else{
@@ -265,14 +255,16 @@ class DraggingElement extends UIElement {
             }
 
             var index = parent.positionOf(element) + 1 || parent.count();
-            var source = event.altKey ? element.clone() : element;
-            this.dropElementOn(event, parent, source, phantom.getBoundaryRectGlobal(), index);
+            var target = event.altKey ? element.clone() : element;
+            this.dropElementOn(event, parent, target, phantom, index);
+
+            elements.push(target);
         }
 
-        return this._element.children;
+        return elements;
     }
 
-    dropElementOn(event, newParent, element, globalPos, index) {
+    dropElementOn(event, newParent, element, phantom, index) {
         debug("drop %s on %s[%d]", element.displayName(), newParent.displayName(), index);
         //var pos = newParents.global2localDropPosition(this.position());
         //var indexes = [];
@@ -295,7 +287,12 @@ class DraggingElement extends UIElement {
         //     props.flipHorizontal = this.flipHorizontal();
         // }
 
+        var globalPos = phantom.globalViewMatrix().transformPoint2(0, 0);
         var localPos = newParent.global2local(globalPos);
+        if (element.angle() % 360){
+            var localOrigin = newParent.global2local(phantom.rotationOrigin(true));
+            localPos = rotatePointByDegree(localPos, element.angle(), localOrigin);
+        }
 
         if (newParent !== element.parent()) {
             newParent.insert(element, index);
@@ -405,22 +402,6 @@ class DraggingElement extends UIElement {
         // }
     }
 
-    dropOn(event, oldParents, newParents) {
-        // debug("dropOn: %s", newParents.map(x => x.displayName() + " (" + x.id() + ")").join(", "));
-        // // if (this._element.cloneWhenDragging()){
-        // //     this._element.setProps(this._origProps, ChangeMode.Self);
-        // // }
-        // dropElementOn.call(this, event, oldParents, newParents, this._element.elements, this._element.elements);
-    }
-
-    dropCopyOn(event, oldParents, newParents) {
-        // if (this._element.cloneWhenDragging()){
-        //     this._element.setProps(this._origProps, ChangeMode.Self);
-        // }
-        //var clone = this._element.clone();
-        //dropElementOn.call(this, event, oldParents, newParents, this._element.elements, clone.elements);
-    }
-
     dragTo(event) {
         debug("Drag to x=%d y=%d", event.x, event.y);
         var position = {x: event.x, y: event.y};
@@ -435,70 +416,35 @@ class DraggingElement extends UIElement {
             SnapController.clearActiveSnapLines();
         }
 
-        //UIElement.prototype.dragTo.call(this, position);
-        this._element.setProps(position);
+        super.dragTo(position);
     }
 
     parentAllowSnapping(pos) {
-        var dragData = this._element.parent().getDropData(this._element, pos);
-        return dragData === null;
+        return !this._elements.some(x => x.parent().getDropData(x, pos) !== null);
+    }
+
+    isDropSupported(){
+        return !this._elements.some(x => !x.isDropSupported());
+    }
+
+    allowMoveOutChildren(event){
+        return !this._elements.some(x => !x.parent().allowMoveOutChildren(undefined, event));
+    }
+
+    get elements(){
+        return this._elements;
     }
 
     hitTest() {
         return false;
     }
 
-    startResizing(){
-        if(this._clone){
-            this._clone.startResizing();
-        } else {
-            this._element.startResizing();
-        }
+    canDrag(){
+        return false;
     }
 
-    stopResizing(){
-        if(this._clone){
-            this._clone.stopResizing();
-        } else {
-            this._element.stopResizing();
-        }
-    }
-
-    resize(/*Rect*/rect, /*bool*/ignoreSnapping) {
-        var isComposite = this._element instanceof CompositeElement;
-
-        if (isComposite) {
-            var originalRect = this._element.getBoundaryRect();
-            var sw = originalRect.width / rect.width;
-            var sh = originalRect.height / rect.height;
-            var rects = [];
-            this._element.each(function (e) {
-                var erect = e.getBoundaryRect();
-                erect.x = ~~(erect.x / sw + 0.5);
-                erect.y = ~~(erect.y / sh + 0.5);
-
-                erect.width = ~~(erect.width / sw + 0.5);
-                erect.height = ~~(erect.height / sh + 0.5);
-                rects.push(erect);
-            });
-
-            if (this._clone) {
-                this._clone.each(function (e, i) {
-                    e.prepareProps(rects[i]);
-                    e.setProps(rects[i], ChangeMode.Root);
-                })
-                this._clone.prepareProps(rect);
-                this._clone.setProps(rect, ChangeMode.Root);
-            }
-        }
-
-        UIElement.prototype.resize.call(this, rect);
-        if(this._clone){
-            this._clone.resize(rect);
-        }
-        this.updateViewMatrix();
-        this._clone && this._clone.updateViewMatrix();
-        this._element && this._element.updateViewMatrix();
+    isTemporary(){
+        return true;
     }
 }
 DraggingElement.prototype.t = Types.DraggingElement;

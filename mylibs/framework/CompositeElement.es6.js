@@ -15,7 +15,7 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
 
         this._initialized = true;
         this._types = [];
-        this._angleEditable = false;
+        //this._angleEditable = false;
 
         PropertyTracker.propertyChanged.bind(this, this._onPropsChanged);
     },
@@ -125,7 +125,7 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
     hitVisible: function(){
         return true;
     },
-    canAccept: function(element){
+    canAccept: function(){
         return false;
     },
     each: function(callback){

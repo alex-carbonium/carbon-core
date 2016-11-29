@@ -40,6 +40,9 @@ import OfflineModel from "./offline/OfflineModel";
 import Deferred from "framework/Deferred";
 import Story from "stories/Story";
 
+window.env = Environment;
+window.Selection = Selection;
+
 var debug = require("./DebugUtil")("carb:relayout");
 
 

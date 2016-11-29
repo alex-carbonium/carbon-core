@@ -89,7 +89,12 @@ class Artboard extends Container {
         return this.props.name;
     }
 
-    canAccept(element) {
+    canAccept(elements) {
+        if (elements.length !== 1){
+            return false;
+        }
+        var element = elements[0];
+
         if (element instanceof Artboard) {
             return false;
         }
@@ -104,7 +109,7 @@ class Artboard extends Container {
             }
         }
 
-        return super.canAccept(element);
+        return super.canAccept(elements);
     }
 
     displayName() {

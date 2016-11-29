@@ -8,6 +8,28 @@ import logger from "../logger";
 export default {
     objectCreationFailed: EventHelper.createEvent(),
 
+    construct: function(type){
+        var current;
+        if (typeof type === "string") {
+            var typeMetadata = PropertyMetadata.findAll(type);
+            if (typeMetadata && typeMetadata._class) {
+                current = typeMetadata._class;
+            }
+        } else {
+            current = type;
+        }
+
+        if (!current) {
+            throw "Type not found: " + type;
+        }
+
+        var args = Array.prototype.slice.call(arguments);
+        args.splice(0, 1);
+        var instance = Object.create(current.prototype);
+        current.apply(instance, args);
+        return instance;
+    },
+
     fromType: function (type, parameters) {
         var current = sketch;
         if (typeof type === "string") {

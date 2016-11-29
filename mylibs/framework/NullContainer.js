@@ -1,3 +1,5 @@
+import Matrix from "../math/matrix";
+
 class NullContainer {
 
     constructor(){
@@ -84,7 +86,7 @@ class NullContainer {
     }
 
     globalViewMatrix(){
-        return null;
+        return Matrix.Identity;
     }
 
     scale(){

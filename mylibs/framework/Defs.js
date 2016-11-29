@@ -287,7 +287,8 @@ export var Types = {
     'ClickSpot': 'Y',
     'QuadAndLock': 'q',
     'Box': 'B',
-    'Shadow': 'i'
+    'Shadow': 'i',
+    'ResizingElement': 're'
 };
 
 if (DEBUG){

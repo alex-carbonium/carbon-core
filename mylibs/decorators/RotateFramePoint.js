@@ -43,7 +43,7 @@ export default {
         return index;
     },
     capture: function (frame) {
-        var resizingElement = UIElement.construct(Types.DraggingElement, frame.element);
+        var resizingElement = UIElement.construct(Types.ResizingElement, frame.element);
         frame.resizingElement = resizingElement;
         frame.originalRect = frame.element.getBoundaryRectGlobal();
 
@@ -53,7 +53,7 @@ export default {
     release: function (frame) {
         if (frame.resizingElement) {
             frame.resizingElement.detach();
-            frame.resizingElement.dropOn(null, frame.element.parent());
+            frame.resizingElement.saveChanges();
             Environment.controller.stopRotatingEvent.raise();
         }
     },
@@ -62,8 +62,7 @@ export default {
             return;
         }
 
-        var origin = frame.element.rotationOrigin(true);
-
+        var origin = frame.resizingElement.rotationOrigin(true);
         var v = {x: event.x - origin.x, y: event.y - origin.y};
 
         var angle = ~~((180 - Math.atan2(v.x, v.y) / Math.PI * 180) % 360 + 0.5);

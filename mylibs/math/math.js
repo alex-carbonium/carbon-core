@@ -537,3 +537,13 @@ export function subVectors(p1, p2) {
 
     return p;
 }
+
+export function rotatePointByDegree(point, degree, origin){
+    var angle = degree * Math.PI / 180;
+    var cosa =Math.cos(-angle);
+    var sina = Math.sin(-angle);
+    var dx = point.x - origin.x;
+    var dy = point.y - origin.y;
+    return {x: origin.x + dx * cosa - dy * sina,
+        y: origin.y + dx * sina + dy * cosa};
+}

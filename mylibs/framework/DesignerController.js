@@ -13,6 +13,8 @@ import Page from "./Page";
 import Keyboard from "../platform/Keyboard";
 import GroupContainer from "./GroupContainer";
 import Phantom from "./Phantom";
+import ObjectFactory from "./ObjectFactory";
+import {Types} from "./Defs";
 
 function onselect(rect) {
     var selection = this.app.activePage.getElementsInRect(rect);
@@ -21,10 +23,8 @@ function onselect(rect) {
 }
 
 function stopDrag(event) {
-    var group = this._draggingElement.element();
-    var that = this;
-    if (!group.isDropSupported()) {
-        that._draggingElement.detach();
+    if (!this._draggingElement.isDropSupported()) {
+        this._draggingElement.detach();
         this.stopDraggingEvent.raise(event, null);
         return false;
     }
@@ -33,12 +33,12 @@ function stopDrag(event) {
     var elements = this._draggingElement.drop(event, this._draggingOverElement, this.app.activePage);
     this._draggingElement.detach();
 
-    if (group !== null) {
-        //TODO
-        if(group.props._unwrapContent){
-            group.unwrapToParent();
-        }
-    }
+    // if (group !== null) {
+    //     //TODO
+    //     if(group.props._unwrapContent){
+    //         group.unwrapToParent();
+    //     }
+    // }
 
     this.stopDraggingEvent.raise(event, elements);
 
@@ -61,7 +61,7 @@ function _handleDraggingOver(mousePoint, draggingElement, eventData) {
     var element = this.app.activePage.hitElementDirect(mousePoint, scale, function (position, scale) {
         var descendantOrSelf = false;
         var that = this;
-        draggingElement.each(function (e) {
+        draggingElement.elements.forEach(function (e) {
             descendantOrSelf = that.isDescendantOrSame(e);
             if (descendantOrSelf) {
                 return false;
@@ -75,7 +75,7 @@ function _handleDraggingOver(mousePoint, draggingElement, eventData) {
     });
 
     while (element !== null) {
-        if (element.canAccept(draggingElement, undefined, eventData.event.ctrlKey)) {
+        if (element.canAccept(draggingElement.elements, undefined, eventData.event.ctrlKey)) {
             dragOverElement = element;
             break;
         }
@@ -99,10 +99,9 @@ function _handleDraggingOver(mousePoint, draggingElement, eventData) {
 }
 
 function dragging(event) {
-    var draggingElement = this._draggingElement.element();
+    var draggingElement = this._draggingElement;
     var eventData = {
         handled: false,
-        element: draggingElement,
         draggingElement: this._draggingElement,
         x: event.x,
         y: event.y,
@@ -114,7 +113,7 @@ function dragging(event) {
 
     var mousePoint = {x: eventData.mouseX, y: eventData.mouseY};
 
-    if (!this._draggingElement.cantChangeParent) {
+    if (this._draggingElement.allowMoveOutChildren(event)) {
         _handleDraggingOver.call(this, mousePoint, draggingElement, eventData);
     }
 
@@ -257,15 +256,6 @@ export default class DesignerController {
 
 
     beginDrag(event) {
-        var elements = event.elements;
-        //var elementStartPosition = element.position();
-        //var globalPos = element.parent().local2global(elementStartPosition);
-        // this._draggingOffset = {
-        //     x: event.x - elementStartPosition.x,
-        //     y: event.y - elementStartPosition.y
-        // };
-
-
         var eventData = {
             mouseX: event.x,
             mouseY: event.y,
@@ -273,43 +263,17 @@ export default class DesignerController {
             y: event.y
         };
 
-        //if (element.startDrag(eventData) !== false) {
-            var group = new GroupContainer();
-            for (var i = 0; i < elements.length; i++){
-                group.add(new Phantom(elements[i]))
-            }
-            group.performArrange();
+        this._draggingElement = new ObjectFactory.construct(Types.DraggingElement, event);
+        this._draggingElement.showOriginal(event.altKey);
 
-            var holdOffset = {
-                x: event.x - group.x(),
-                y: event.y - group.y()
-            };
+        this.view.layer3.add(this._draggingElement);
+        this._draggingOffset = {
+            x: event.x - this._draggingElement.x(),
+            y: event.y - this._draggingElement.y()
+        };
 
-            // this._draggingOffset = {
-            //     x: event.x,
-            //     y: event.y
-            // };
-
-            this._draggingElement = new this.deps.DraggingElement(group, holdOffset);
-            this._draggingElement.showOriginal(event.altKey);
-            //var parent = element.parent();
-            // if (!parent.allowMoveOutChildren(undefined, event)) {
-            //     this._draggingElement.cantChangeParent = true;
-            //     this._draggingOverElement = parent;
-            // } else {
-            //     delete this._draggingElement.cantChangeParent;
-            // }
-
-            this.view.layer3.add(this._draggingElement);
-            this._draggingOffset = {
-                x: event.x - group.x(),
-                y: event.y - group.y()
-            };
-
-            this.startDraggingEvent.raise(eventData);
-        //} else {
-        //   this._draggingElement = null;
-        //}
+        this.startDraggingEvent.raise(eventData);
+        this._draggingOverElement = null;
     }
 
 

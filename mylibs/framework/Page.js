@@ -139,7 +139,7 @@ class Page extends Layer {
         var el = this.hitElement(eventData, this.scale());
 
 
-        while (!(el.canAccept(element) && element.canBeAccepted(el))) {
+        while (!(el.canAccept([element]) && element.canBeAccepted(el))) {
             el = el.parent();
         }
 

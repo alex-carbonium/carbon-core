@@ -138,8 +138,11 @@ class Shape extends Container {
         return (this.mode() === "resize" ? ResizeDimension.Both : ResizeDimension.None);
     }
 
-    canAccept(element, autoInsert, allowMoveInOut){
-        return (element instanceof Frame || element instanceof Shape) && allowMoveInOut;
+    canAccept(elements, autoInsert, allowMoveInOut){
+        if (elements.length !== 1){
+            return false;
+        }
+        return (elements[0] instanceof Frame || elements[0] instanceof Shape) && allowMoveInOut;
     }
 
     lineCap(value){

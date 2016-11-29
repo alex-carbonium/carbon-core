@@ -22,13 +22,13 @@ export default class GroupContainer extends Container {
     }
 
     drawSelf(context, w, h, environment){
-        if (!this.lockedGroup()){
-            context.save();
-            context.strokeStyle = UserSettings.group.active_stroke;
-            context.strokeRect(0, 0, w, h);
-            context.restore();
-
-        }
+        // if (!this.lockedGroup()){
+        //     context.save();
+        //     context.strokeStyle = UserSettings.group.active_stroke;
+        //     context.strokeRect(0, 0, w, h);
+        //     context.restore();
+        //
+        // }
         super.drawSelf.apply(this, arguments);
     }
 
@@ -70,12 +70,12 @@ export default class GroupContainer extends Container {
         return value;
     }
 
-    allowMoveOutChildren(value, eventData){
-        return Container.prototype.allowMoveOutChildren.apply(this, arguments) || (eventData && (eventData.event.ctrlKey || eventData.event.metaKey))
+    allowMoveOutChildren(value, event){
+        return super.allowMoveOutChildren.apply(this, arguments) || (event && event.ctrlKey);
     }
 
-    canAccept(element, autoInsert, allowMoveInOut){
-        return allowMoveInOut;//!autoInsert && Container.prototype.canAccept.call(this, element);
+    canAccept(elements, autoInsert, allowMoveInOut){
+        return allowMoveInOut;
     }
 
     lockAutoresize(){
@@ -106,6 +106,6 @@ PropertyMetadata.registerForType(GroupContainer, {
         defaultValue: true
     },
     overflow: {
-        defaultValue: Overflow.AdjustBoth
+        defaultValue: Overflow.ExpandBoth
     }
 });

@@ -121,6 +121,10 @@ var UIElement = klass(DataNode, {
             changes.y = this._roundValue(changes.y);
         }
 
+        if (changes.angle !== undefined) {
+            changes.angle = this._roundValue(changes.angle);
+        }
+
         if (changes.styleId !== undefined) {
             extend(changes, styleManager.getStyle(changes.styleId, 1).props);
         }
@@ -178,12 +182,6 @@ var UIElement = klass(DataNode, {
     //         }
     //     }
     // },
-    startDrag: function (event) {
-
-    },
-    stopDrag: function (event) {
-
-    },
     dragTo: function (event) {
         this.position(event);
     },
@@ -984,7 +982,7 @@ var UIElement = klass(DataNode, {
     applyVisitor: function (/*Visitor*/callback) {
         return callback(this);
     },
-    canAccept: function (element, autoInsert) {
+    canAccept: function (elements, autoInsert) {
         return false;
     },
     canBeAccepted: function (element) {
@@ -1179,11 +1177,7 @@ var UIElement = klass(DataNode, {
     },
     rotationOrigin: function (global) {
         if (global) {
-            var rect = this.getBoundaryRectGlobal();
-            return {
-                x: rect.x + rect.width / 2,
-                y: rect.y + rect.height / 2
-            }
+            return this.globalViewMatrix().transformPoint2(this.width()/2, this.height()/2);
         }
         return {
             x: this.x() + this.width() / 2,
@@ -1599,27 +1593,9 @@ fwk.UIElement.fromTypeString = function (type, parameters) {
     return current;
 }
 
-fwk.UIElement.construct = function (type) {
-    var current;
-    if (typeof type === "string") {
-        var typeMetadata = PropertyMetadata.findAll(type);
-        if (typeMetadata && typeMetadata._class) {
-            current = typeMetadata._class;
-        }
-    } else {
-        current = type;
-    }
-
-    if (!current) {
-        throw "Type not found: " + type;
-    }
-
-    var args = Array.prototype.slice.call(arguments);
-    args.splice(0, 1);
-    var instance = Object.create(current.prototype);
-    current.apply(instance, args);
-    return instance;
-}
+fwk.UIElement.construct = function () {
+    return ObjectFactory.construct.apply(ObjectFactory, arguments);
+};
 
 fwk.UIElement.fromType = function (type, parameters) {
     return ObjectFactory.fromType(type, parameters);

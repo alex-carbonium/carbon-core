@@ -283,6 +283,7 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                 return this.width() - padding.left - padding.right;
             },
             allowMoveOutChildren: function (value) {
+                //should not check on args length
                 if (value !== undefined) {
                     this.setProps({allowMoveOutChildren: value})
                 }
@@ -360,8 +361,8 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                 //child.onresize.unbind(this._childResizeHandler);
                 child.parent(NullContainer);
             },
-            canAccept: function (element) {
-                return element.canBeAccepted(this);
+            canAccept: function (elements) {
+                return !elements.some(x => !x.canBeAccepted(this));
             },
             mousedown: function (event) {
                 Container.Super.mousedown.call(this, event); //to hide inplace editor

@@ -1,4 +1,5 @@
 import UIElement from "framework/UIElement";
+import SelectComposite from "framework/SelectComposite";
 import Environment from "environment";
 import SnapController from "framework/SnapController";
 import {Types} from "../framework/Defs";
@@ -21,7 +22,7 @@ export default {
         context.stroke();
     },
     capture: function (frame) {
-        var resizingElement = UIElement.construct(Types.DraggingElement, frame.element, false, true);
+        var resizingElement = UIElement.construct(Types.ResizingElement, frame.element);
         frame.resizingElement = resizingElement;
         frame.originalRect = frame.element.getBoundaryRectGlobal();
         frame.rotationOrigin = frame.element.rotationOrigin(true);
@@ -36,7 +37,7 @@ export default {
     release: function (frame) {
         if (frame.resizingElement) {
             frame.resizingElement.stopResizing();
-            frame.resizingElement.dropOn(null, frame.element.parent());
+            frame.resizingElement.saveChanges();
             frame.resizingElement.detach();
             delete frame.globalViewMatrix;
         }
@@ -93,8 +94,9 @@ export default {
             dy = (mh - original.height) * point.rv[1];
         }
 
+        var newOrigin;
         if (event.event.altKey) {
-            var newOrigin = origin;
+            newOrigin = origin;
         } else {
             newOrigin = sketch.math2d.rotatePoint({
                 x: origin.x + dx / 2,
@@ -121,12 +123,9 @@ export default {
         rect.y = newOrigin.y - rect.height / 2;
 
         debug("Resizing rect: x=%d y=%d w=%d h=%d ow=%d dx=%d", rect.x, rect.y, rect.width, rect.height, original.width, dx);
+        var oldRect = frame.resizingElement.getBoundaryRect();
         frame.resizingElement.resize(rect, event.event.altKey);
-
-        if(frame.resizingElement._clone) {
-            var dr = frame.resizingElement._clone.getBoundaryRect();
-            debug("Resizing  clone rect: x=%d y=%d w=%d h=%d", dr.x, dr.y, dr.width, dr.height);
-        }
+        frame.resizingElement.performArrange(oldRect);
 
         Environment.controller.resizingEvent.raise({
             element: frame.element,

@@ -91,7 +91,9 @@ class SelectionRect extends Rectangle{
 }
 
 var onDraggingElement = function (event) {
-    if (event.element.isDropSupported() && event.target != null && event.target.canAccept(event.element) && !(event.target instanceof Layer), event) {
+    //TODO:
+    return;
+    if (event.draggingElement.isDropSupported() && event.target != null && event.target.canAccept(event.draggingElement.elements) && !(event.target instanceof Layer), event) {
         this._target = event.target !== event.element.parent() ? event.target : null;
         this._dropData = event.target.getDropData({x: event.mouseX, y: event.mouseY}, event.element);
     } else {

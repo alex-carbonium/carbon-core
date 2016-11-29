@@ -209,11 +209,14 @@ class CompoundPath extends Container {
         return this.props.joinMode;
     }
 
-    canAccept(element) {
+    canAccept(elements) {
+        if (elements.length !== 1){
+            return false;
+        }
         if (!this._itemIds) {
             return false;
         }
-        return this._itemIds[element.id()];
+        return this._itemIds[elements[0].id()];
     }
 
     hitTest(point, scale) {

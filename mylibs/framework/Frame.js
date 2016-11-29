@@ -213,8 +213,11 @@ export default class Frame extends Container {
         return true;
     }
 
-    canAccept(element, autoInsert, allowMoveInOut) {
-        return element instanceof Frame && allowMoveInOut;
+    canAccept(elements, autoInsert, allowMoveInOut) {
+        if (elements.length !== 1){
+            return false;
+        }
+        return elements[0] instanceof Frame && allowMoveInOut;
     }
 
     canConvertToPath() {

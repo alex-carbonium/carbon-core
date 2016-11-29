@@ -13,7 +13,8 @@ export default {
 }
 
 function updateLayer0(e){
-    if (e.element.runtimeProps.repeatNext){
-        Invalidate.request(0);
-    }
+    //TODO:
+    // if (e.draggingElement.elements.some(x => x.runtimeProps.repeatNext)){
+    //     Invalidate.request(0);
+    // }
 }

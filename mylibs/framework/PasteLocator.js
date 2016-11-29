@@ -19,7 +19,7 @@ export function choosePasteLocation(elements, bufferRect, bufferRectLocal, allow
     if (bufferRect && selection.length === 1){
         var current = selection[0];
         do{
-            if (current.canAccept(elements[0], false, allowMoveIn)){
+            if (current.canAccept(elements, false, allowMoveIn)){
                 candidates.push(current);
             }
             current = current.parent();
