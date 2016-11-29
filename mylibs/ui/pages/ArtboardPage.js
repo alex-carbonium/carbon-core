@@ -141,7 +141,19 @@ class ArtboardPage extends Page {
 
     drawChildSafe(child, context, environment) {
         if (areRectsIntersecting(this._viewport, child.getBoundaryRect())) {
+            if(child.frame){
+                var frame = child.frame;
+                if (frame) {
+                    child.drawCustomFrame(context, environment);
+                }
+            }
             super.drawChildSafe(child, context, environment);
+            if(child instanceof Artboard){
+                if(!frame) {
+                    child.drawFrameRect(context, environment);
+                }
+                child.drawExtras(context, environment);
+            }
         }
     }
 
@@ -149,13 +161,18 @@ class ArtboardPage extends Page {
         var commands = [];
         var pos = this.getNextAvailiablePosition(screens[0].w, screens[0].h);
         for (var screen of screens) {
-
-            var artboard = new Artboard();
+            var artboard;
+            if(screen.i){
+                artboard = screen.i.clone();
+            } else {
+                artboard = new Artboard();
+            }
             artboard.setProps({
                 x: pos.x,
                 y: pos.y,
                 width: screen.w,
-                height: screen.h
+                height: screen.h,
+                resource:null
             });
 
             this.nameProvider.assignNewName(artboard);

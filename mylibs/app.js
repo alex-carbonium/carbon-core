@@ -16,7 +16,7 @@ import PropertyTracker from "framework/PropertyTracker";
 import Page from "framework/Page";
 import StyleManager from "framework/style/StyleManager";
 import OpenTypeFontManager from "./OpenTypeFontManager";
-import {Types, FontWeight, FontStyle, PatchType, ChangeMode, StoryType, StyleType} from "./framework/Defs";
+import {Types, FontWeight, FontStyle, PatchType, ChangeMode, StoryType, StyleType, ArtboardResource} from "./framework/Defs";
 import Font from "./framework/Font";
 import GroupContainer from "./framework/GroupContainer";
 import CommandManager from "framework/commands/CommandManager";
@@ -488,9 +488,29 @@ class App extends DataNode {
             var artboards = page.getAllArtboards();
             for(var j = 0; j<artboards.length; ++j){
                 var a = artboards[j];
-                if(a.name().startsWith("frame:")){
+                if(a.props.resource === ArtboardResource.Frame){
                     res.push(a);
                 }
+            }
+        }
+
+        return res;
+    }
+
+    getAllTemplateResourceArtboards(){
+        var res = [];
+        for(var i = 0; i<this.pages.length; ++i){
+            var page = this.pages[i];
+            var children = [];
+            var artboards = page.getAllArtboards();
+            for(var j = 0; j<artboards.length; ++j){
+                var a = artboards[j];
+                if(a.props.resource === ArtboardResource.Template){
+                    children.push(a);
+                }
+            }
+            if(children.length > 0){
+                res.push({name:page.name(), id:page.id(), children:children})
             }
         }
 

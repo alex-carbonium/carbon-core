@@ -233,6 +233,12 @@ export var ElementState = {
     Edit: 1
 };
 
+export var ArtboardResource = {
+    Stencil:1,
+    Template: 2,
+    Frame: 3
+}
+
 export var Types = {
     'Path': 'p',
     'Text': 't',

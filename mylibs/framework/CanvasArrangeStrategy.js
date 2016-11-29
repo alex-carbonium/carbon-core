@@ -63,8 +63,13 @@ export default {
                         height: newHeight
                     };
 
-                    if (r.width != newWidth || r.height != newHeight || r.x != newX || r.y != newY) {
-                        child.setProps(newProps, changeMode);
+                    var sizeChanged = r.width != newWidth || r.height != newHeight;
+                    if (sizeChanged || r.x != newX || r.y != newY) {
+                        var oldRect = child.getBoundaryRect();
+                        child.prepareAndSetProps(newProps, changeMode);
+                        if(sizeChanged){
+                            child.performArrange(oldRect, changeMode);
+                        }
                     }
                 }
             }
