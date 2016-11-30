@@ -1200,7 +1200,15 @@ class Path extends Shape {
                     needClearStyle = true;
                 }
 
-                context.circle(tpt.x, tpt.y, CP_RADIUS / scale);
+                var r = CP_RADIUS;
+                if (i === 0 && !this.closed() && !pt.closed)
+                {
+                    r--;
+                    context.circle(tpt.x, tpt.y, (r + 2)/ scale);
+                    context.stroke();
+                }
+
+                context.circle(tpt.x, tpt.y, r / scale);
                 context.fill();
                 context.stroke();
             }

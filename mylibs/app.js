@@ -338,38 +338,6 @@ var onBuildDefaultMenu = function (context, menu) {
         ]
     });
 
-    items.push({
-        name: "Assets",
-        items: [
-            {
-                name: "Convert to asset",
-                image: "",
-                callback: function () {
-                    actionManager.invoke("createTemplate");
-                },
-                disabled: !selection || !selection.length || !selectComposite.allHaveSameParent()
-            },
-            {
-                name: "Edit asset",
-                image: "",
-                callback: function () {
-                    actionManager.invoke("editTemplate");
-                },
-                disabled: !selection || selection.length !== 1
-                //|| !(selection[0] instanceof fwk.TemplatedElement)
-                //|| (selection[0].system() && !DEBUG)
-            },
-            {
-                name: "Convert to elements",
-                image: "",
-                callback: function () {
-                    actionManager.invoke("decomposeTemplate");
-                },
-                disabled: !selection || selection.length !== 1 /*|| !(selection[0] instanceof fwk.TemplatedElement)*/
-            }
-        ]
-    });
-
 }
 
 function onDefaultFamilyChanged(event) {

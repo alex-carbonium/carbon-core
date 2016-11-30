@@ -8,35 +8,44 @@ define(function () {
     //     }
     // });
 
-    var NullPage = klass2("NullPage", null, (function(){
+    var NullPage = klass2("NullPage", null, (function () {
         return {
-            _constructor:function(){
+            _constructor: function () {
                 this.children = [];
                 this.props = {};
             },
-            parent:function(){
+            parent: function () {
 
             },
-
-            isInitialized:function(){
+            isInitialized: function () {
                 return true;
             },
-            init:function(view){
+            init: function (view) {
+
             },
             getAllArtboards: function () {
                 return [];
             },
-            initId: function(){
+            getArtboardAtPoint(){
+
             },
-            add:function(/*UIElement*/element){
+            getArtboardById(){
+
             },
-            remove:function(/*UIElement*/element){
+            getElementsInRect(){
+                return [];
             },
-            clear: function(){
+            initId: function () {
             },
-            renderTile:function(canvas, options){
+            add: function (/*UIElement*/element) {
             },
-            invalidate:function () {
+            remove: function (/*UIElement*/element) {
+            },
+            clear: function () {
+            },
+            renderTile: function (canvas, options) {
+            },
+            invalidate: function () {
 
             },
             homeScreen(){
@@ -51,63 +60,63 @@ define(function () {
             getActiveArtboard(){
 
             },
-            renderContentTile: function(context, x, y, zoom){
+            renderContentTile: function (context, x, y, zoom) {
             },
-            renderContentToDataURL:function(){
+            renderContentToDataURL: function () {
             },
-            resize: function(rect){
+            resize: function (rect) {
             },
-            id:function(){
+            id: function () {
                 return 0;
             },
-            toJSON:function(){
+            toJSON: function () {
             },
-            fromJSON:function(data){
+            fromJSON: function (data) {
             },
-            timeStamp:function(){
+            timeStamp: function () {
             },
-            name: function(value){
+            name: function (value) {
             },
             encodedName(){
             },
-            preview: function(){
+            preview: function () {
                 return false;
             },
-            isPhoneVisible:function(visible){
+            isPhoneVisible: function (visible) {
             },
-            activating: function(){
+            activating: function () {
             },
-            deactivating: function(){
+            deactivating: function () {
             },
-            activated:function(previousPage){
+            activated: function (previousPage) {
             },
-            deactivated:function(){
+            deactivated: function () {
             },
-            getContentContainer: function(){
+            getContentContainer: function () {
                 return this;
             },
-            scaleToSize:function(){
+            scaleToSize: function () {
                 return 1;
             },
-            getEditableProperties:function(){
+            getEditableProperties: function () {
                 return [];
             },
-            isInvalidateRequired:function () {
+            isInvalidateRequired: function () {
                 return false;
             },
-            displayName: function(){
+            displayName: function () {
                 return "Page";
             },
-            viewportRect:function(){
-                return {x:0, y:0, width:0, height:0};
+            viewportRect: function () {
+                return {x: 0, y: 0, width: 0, height: 0};
             },
-            scale:function(){
+            scale: function () {
                 return 1;
             },
-            autoInsert:function(){
+            autoInsert: function () {
 
             },
-            drawSelf:function(context, w, h) {
+            drawSelf: function (context, w, h) {
 
             },
 
@@ -131,15 +140,14 @@ define(function () {
                 return null;
             },
             pointToScroll(){
-                return {scrollX:0, scrollY:0};
+                return {scrollX: 0, scrollY: 0};
             }
         }
     })());
 
-NullPage.prototype.t = Types.NullPage;
+    NullPage.prototype.t = Types.NullPage;
 
-PropertyMetadata.registerForType(NullPage, {
-});
+    PropertyMetadata.registerForType(NullPage, {});
 
 
     return new NullPage();
