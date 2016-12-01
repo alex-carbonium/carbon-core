@@ -1,10 +1,11 @@
-import UIElement from "./GroupContainer";
+import GroupContainer from "./GroupContainer";
 import {ChangeMode, Types} from "./Defs";
 import PropertyMetadata from "./PropertyMetadata";
 import SelectComposite from "./SelectComposite";
 import Brush from "./Brush";
+import {toGlobalProps} from "./Transformations";
 
-export default class ResizingElement extends UIElement{
+export default class ResizingElement extends GroupContainer{
     constructor(element){
         super();
 
@@ -14,17 +15,15 @@ export default class ResizingElement extends UIElement{
         for (var i = 0; i < elements.length; i++){
             var e = elements[i];
             var clone = e.clone();
-            clone.setProps(e.getBoundaryRectGlobal());
+            clone.setProps(toGlobalProps(e));
             this.add(clone);
         }
 
         if (elements.length === 1){
-            var angle = elements[0].globalViewMatrix().getRotation();
-            this.setProps({angle: angle});
-            this.children[0].setProps({angle: 0});
+            this.setProps(this.children[0].selectProps(["x", "y", "width", "height", "angle"]));
+            this.children[0].setProps({angle: 0, x: 0, y: 0});
         }
 
-        this.performArrange();
         this._elements = elements;
 
         this.showOriginal(false);
@@ -49,16 +48,19 @@ export default class ResizingElement extends UIElement{
                 height: newHeight
             };
 
+            var origAngle = element.globalViewMatrix().getRotation();
+            var deltaAngle = newMatrixProps.rotation - origAngle;
+            props.angle  = element.angle() + deltaAngle;
+
             var oldPos = clone.globalViewMatrix().transformPoint2(0, 0);
             var oldOrigin = clone.rotationOrigin(true);
 
             var newPos = element.parent().globalViewMatrixInverted().transformPoint(oldPos);
             var newOrigin = element.parent().globalViewMatrixInverted().transformPoint(oldOrigin);
 
-            newPos = sketch.math2d.rotatePoint(newPos, newMatrixProps.rotation * Math.PI / 180, newOrigin);
+            newPos = sketch.math2d.rotatePoint(newPos, props.angle * Math.PI / 180, newOrigin);
 
             Object.assign(props, newPos);
-            props.angle = newMatrixProps.rotation;
 
             element.prepareAndSetProps(props);
         }

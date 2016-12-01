@@ -14,7 +14,8 @@ import AnimationGroup from "framework/animation/AnimationGroup";
 import ElementPropsChanged from "commands/ElementPropsChanged";
 import ElementDelete from "commands/ElementDelete";
 import ElementMove from "commands/ElementMove";
-import Matrix from "math/matrix";
+import Matrix from "../math/matrix";
+import {rotatePointByDegree} from "../math/math";
 import stopwatch from "Stopwatch";
 import ResizeDimension from "framework/ResizeDimension";
 import {
@@ -1501,11 +1502,10 @@ var UIElement = klass(DataNode, {
     },
     prepareMoveByDelta: function (changes, dx, dy, width, height) {
         var origin = this.rotationOrigin();
-        var angle = this.angle() * Math.PI / 180;
-        var newOrigin = sketch.math2d.rotatePoint({
+        var newOrigin = rotatePointByDegree({
             x: origin.x + dx / 2,
             y: origin.y + dy / 2
-        }, -angle, origin);
+        }, -this.angle(), origin);
 
         changes.x = newOrigin.x - width / 2;
         changes.y = newOrigin.y - height / 2;

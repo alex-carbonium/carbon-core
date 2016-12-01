@@ -1,5 +1,6 @@
 var debug = require("DebugUtil")("carb:canvasArrangeStrategy");
 import {ChangeMode} from "framework/Defs"
+import {rotatePointByDegree} from "../math/math";
 
 export default {
     arrange: function(container, event, changeMode){
@@ -161,6 +162,13 @@ export default {
                 }
             }
 
+
+            if (container.angle() % 360){
+                var newOrigin = container.viewMatrix().transformPoint2(xMin + rect.width/2, yMin + rect.height/2);
+                var newPos = container.viewMatrix().transformPoint2(xMin, yMin);
+                newPos = rotatePointByDegree(newPos, container.angle(), newOrigin);
+                Object.assign(rect, newPos);
+            }
             container.prepareProps(rect);
             container.unlockAutoresize();
             debug("Auto-resizing %s to x=%d y=%d w=%d h=%d", container.displayName(), rect.x, rect.y, rect.width, rect.height);

@@ -1,3 +1,5 @@
+import {rotatePointByDegree} from "../math/math";
+
 export function toGlobalProps(element){
     var globalParts = element.globalViewMatrix().decompose();
     var props = Object.assign({}, globalParts.translation);

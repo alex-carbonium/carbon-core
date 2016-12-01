@@ -33,13 +33,7 @@ export default class GroupContainer extends Container {
     }
 
     _buildChildrenSizes(){
-        var rects = [];
-        this.children.forEach((e) =>{
-            var r = e.getBoundaryRect();
-            rects.push(r);
-        });
-
-        return rects;
+        return this.children.map(e => e.getBoundaryRect());
     }
 
     startResizing(){
@@ -106,6 +100,6 @@ PropertyMetadata.registerForType(GroupContainer, {
         defaultValue: true
     },
     overflow: {
-        defaultValue: Overflow.ExpandBoth
+        defaultValue: Overflow.AdjustBoth
     }
 });
