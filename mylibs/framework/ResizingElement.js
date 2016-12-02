@@ -23,6 +23,9 @@ export default class ResizingElement extends GroupContainer{
             this.setProps(this.children[0].selectProps(["x", "y", "width", "height", "angle"]));
             this.children[0].setProps({angle: 0, x: 0, y: 0});
         }
+        else{
+            this.performArrange();
+        }
 
         this._elements = elements;
 

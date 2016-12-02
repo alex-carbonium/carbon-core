@@ -773,8 +773,17 @@ var UIElement = klass(DataNode, {
         return this.field("_isTemporary", value, false);
     },
     hitVisible: function (directSelection) {
+        if (this.locked() || !this.visible()){
+            return false;
+        }
         var parent = this.parent();
-        return parent != null && !parent.lockedGroup(directSelection) && !this.locked() && this.visible();
+        if (!parent){
+            return false;
+        }
+        if (directSelection){
+            return true;
+        }
+        return !parent.lockedGroup() || parent.activeGroup();
     },
     hitTransparent: function () {
         return false;

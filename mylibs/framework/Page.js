@@ -109,17 +109,10 @@ class Page extends Layer {
     }
 
     dropToPage(x, y, element) {
-        var eventData = {
-            handled: false,
-            element: element,
-            x: x,
-            y: y
-        };
         var data = this.findDropToPageData(x, y, element);
 
         element.position(data.position);
         data.target.add(element);
-        element.dropOn(eventData);
 
         return data.target;
     }

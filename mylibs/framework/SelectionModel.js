@@ -3,18 +3,43 @@ import SelectComposite from "framework/SelectComposite";
 
 var debug = require("DebugUtil")("carb:selection");
 
-// public methods
-function unlockGroupForElementHierarchy(elements) {
-    each(elements, function (el) {
-        el = el.parent();
-        while (el.unlockGroup) {
-            el.unlockGroup();
-            el = el.parent();
-            if (!el) {
-                return false;
+function lockUnlockGroups(newSelectedElements) {
+    var newUnlocked = [];
+
+    //unlock parents
+    for (let i = 0; i < newSelectedElements.length; i++){
+        var el = newSelectedElements[i].parent();
+        while (el && el.unlockGroup) {
+            let unlocked = this._unlockedContainers.indexOf(el) !== -1;
+            if (!unlocked){
+                unlocked = el.unlockGroup();
             }
+            if (unlocked){
+                newUnlocked.push(el);
+            }
+
+            el = el.parent();
         }
-    });
+    }
+
+    //activate self if single element is selected
+    if (this._activeGroup){
+        this._activeGroup.activeGroup(false);
+        this._activeGroup = null;
+    }
+    if (newSelectedElements.length === 1 && newSelectedElements[0].activeGroup){
+        newSelectedElements[0].activeGroup(true);
+        this._activeGroup = newSelectedElements[0];
+    }
+
+    //lock anything which is not selected anymore
+    for (let i = 0; i < this._unlockedContainers.length; i++){
+        var c = this._unlockedContainers[i];
+        if (c.lockGroup && newUnlocked.indexOf(c) === -1){
+            c.lockGroup();
+        }
+    }
+    this._unlockedContainers = newUnlocked;
 }
 function onselect(rect) {
     var selection = App.Current.activePage.getElementsInRect(rect);
@@ -26,6 +51,8 @@ class SelectionModel {
     constructor() {
         this._selectionMode = "new";
         this._selectFrame = null;
+        this._unlockedContainers = [];
+        this._activeGroup = null;
         this.onElementSelected = EventHelper.createEvent();
         this.startSelectionFrameEvent = EventHelper.createEvent();
         this.onSelectionFrameEvent = EventHelper.createEvent();
@@ -119,8 +146,6 @@ class SelectionModel {
     addToSelection(/*Array*/elements, refreshOnly) {
         var multiSelect = elements.length > 1;
         var selection = this._decomposeSelection(elements);
-
-        unlockGroupForElementHierarchy(elements);
 
         var canSelect = false;
         for (var i = 0, j = selection.length; i < j; ++i) {
@@ -231,6 +256,7 @@ class SelectionModel {
     }
 
     _fireOnElementSelected(oldSelection) {
+        lockUnlockGroups.call(this, this.selectedElements());
         this.onElementSelected.raise(this._selectCompositeElement, oldSelection);
     }
 

@@ -8,7 +8,6 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import PropertyTracker from "framework/PropertyTracker";
 import {Overflow, Types} from "framework/Defs";
 import Path from "ui/common/Path";
-import Selection from "framework/SelectionModel";
 
 function propertyChanged(element, newProps) {
     if (!this._internalChange && this._itemIds && this._itemIds[element.id()]) {
@@ -323,12 +322,6 @@ class CompoundPath extends Container {
 
     }
 
-    _onSelectionChanged(selection) {
-        if (!selection || !selection.isDescendantOrSame(this)) {
-            this.lockGroup();
-        }
-    }
-
     hitTransparent (value) {
         if (value !== undefined) {
             this._hitTransparent =  value;
@@ -339,7 +332,6 @@ class CompoundPath extends Container {
     lockGroup() {
         super.lockGroup();
         this.hitTransparent(false);
-        Selection.onElementSelected.unbind(this, this._onSelectionChanged);
         if (this._trackerSubscription) {
             this._trackerSubscription.dispose();
             delete this._trackerSubscription;
@@ -352,13 +344,13 @@ class CompoundPath extends Container {
     unlockGroup() {
         super.unlockGroup();
         this.hitTransparent(true);
-        Selection.onElementSelected.bind(this, this._onSelectionChanged);
         if(!this._trackerSubscription) {
             this._trackerSubscription = PropertyTracker.propertyChanged.bind(this, propertyChanged);
         }
         this.applyVisitor(e=>{
             e.enablePropsTracking();
-        })
+        });
+        return true;
     }
 
 

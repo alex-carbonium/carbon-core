@@ -1,25 +1,9 @@
 import {Types, Overflow} from "./Defs";
-import Selection from "framework/SelectionModel";
 import PropertyMetadata from "./PropertyMetadata";
 import UserSettings from "../UserSettings";
 import Container from "./Container";
 
 export default class GroupContainer extends Container {
-    unlockGroup(){
-        super.unlockGroup();
-        Selection.onElementSelected.bind(this, this._onSelectionChanged);
-    }
-
-    lockGroup() {
-        super.lockGroup();
-        Selection.onElementSelected.unbind(this, this._onSelectionChanged);
-    }
-
-    _onSelectionChanged(selection) {
-        if (!selection || !selection.isDescendantOrSame(this)) {
-            this.lockGroup();
-        }
-    }
 
     drawSelf(context, w, h, environment){
         // if (!this.lockedGroup()){

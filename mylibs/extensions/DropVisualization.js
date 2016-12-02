@@ -146,24 +146,32 @@ var onMouseMove = function (event) {
     }
 
     var target = this.app.activePage.hitElement(event, this.view.scale(), null, event.ctrlKey);
-    if (this._target != target) {
-        if (!Selection.isElementSelected(target)) {
-            if (target.canSelect() && !target.locked() && (!target.lockedGroup || target.lockedGroup())) {
-                this._target = target;
-                this._targetRect = target.getBoundaryRectGlobal();
-                updateTargetRect.call(this);
-            } else {
-                if (this._target != null) {
-                    this._target = null;
-                    delete this._targetRect;
-                    updateTargetRect.call(this);
-                }
-            }
+    if (this._target !== target) {
+        //special case - do not highlight children of active group even though they are hit visible
+        if (target && !event.ctrlKey && target.parent() instanceof Container && target.parent().activeGroup()){
+            target = target.parent();
+        }
 
-        } else if (this._target) {
-            this._target = null;
-            delete this._targetRect;
-            updateTargetRect.call(this);
+        if (target){
+            if (!Selection.isElementSelected(target)) {
+                if (target.canSelect() && !target.locked() && (!target.lockedGroup || target.lockedGroup())) {
+                    this._target = target;
+                    this._targetRect = target.getBoundaryRectGlobal();
+                    updateTargetRect.call(this);
+                } else {
+                    if (this._target != null) {
+                        this._target = null;
+                        delete this._targetRect;
+                        updateTargetRect.call(this);
+                    }
+                }
+
+            }
+            else if (this._target) {
+                this._target = null;
+                delete this._targetRect;
+                updateTargetRect.call(this);
+            }
         }
     }
 };

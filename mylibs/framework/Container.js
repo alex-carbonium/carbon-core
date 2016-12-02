@@ -3,7 +3,6 @@ import ArrangeStrategy from "./ArrangeStrategy";
 import ContextPool from "framework/render/ContextPool";
 import CorruptedElement from "framework/CorruptedElement";
 import {areRectsEqual} from "math/math";
-import Selection from "framework/SelectionModel"
 import Environment from "environment";
 import PropertyMetadata from "./PropertyMetadata";
 
@@ -11,34 +10,9 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
     var fwk = sketch.framework;
 
     var Container = klass(UIElement, (function () {
-        var isLockGroup = function () {
-            if (Selection.isElementSelected(this)){
-                return true;
-            }
-            if (!this.enableGroupLocking()){
-                return false;
-            }
-
-            return !this._activeGroup || !Selection.selectComposite().isDescendantOrSame(this);
-        };
-
-
         return {
             _constructor: function () {
                 this.children = [];
-
-                this._activeGroup = false;
-                this._allowGroupActivation = true;
-            },
-            lockArrange: function () {
-                this._arrangeLocked = this._arrangeLocked ? this._arrangeLocked + 1 : 1;
-            },
-            unlockArrange: function () {
-                this._arrangeLocked--;
-                if (!this._arrangeLocked && this._arrangeRequested) {
-                    this._arrangeRequested = false;
-                    // this.performArrange();
-                }
             },
             performArrange: function (oldRect, mode) {
                 var newRect = this.getBoundaryRect();
@@ -367,17 +341,6 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
             mousedown: function (event) {
                 Container.Super.mousedown.call(this, event); //to hide inplace editor
                 this.delegateToChildren("mousedown", event);
-
-                if (this.enableGroupLocking()) {
-                    if (Selection) {
-                        var selectedElement = Selection.selectedElement();
-                        if (selectedElement && selectedElement.isDescendantOrSame(this)) {
-                            this._allowGroupActivation = true;
-                        } else {
-                            this.lockGroup();
-                        }
-                    }
-                }
             },
             mousemove: function (event) {
                 this.delegateToChildren("mousemove", event);
@@ -389,8 +352,7 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                 this.delegateToChildren("dblclick", event);
             },
             click: function (event) {
-                if (this._allowGroupActivation) {
-                    this.unlockGroup();
+                if (!this.lockedGroup()) {
                     this.delegateToChildren("click", event);
                 }
             },
@@ -416,7 +378,7 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                 //position = sketch.math2d.rotatePoint(position, this.angle() * Math.PI / 180, this.rotationOrigin(true));
                 for (let i = this.children.length - 1; i >= 0; --i) {
                     var element = this.children[i];
-                    var newHit = element.hitElement(position, scale, predicate);
+                    var newHit = element.hitElement(position, scale, predicate, directSelection);
                     if (newHit) {
                         hitElement = newHit;
                         break;
@@ -443,10 +405,8 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                 var result = this.hitElement(position, scale, predicate, true);
                 return result;
             },
-            lockedGroup: function (directSelection) {
-                var ds = directSelection === undefined ? Selection.directSelectionEnabled() : directSelection;
-                var parent = this.parent();
-                return parent && (isLockGroup.call(this) || parent.lockedGroup(ds)) && !ds;
+            lockedGroup: function () {
+                return this.enableGroupLocking() && !this.runtimeProps.unlocked;
             },
             select: function () {
             },
@@ -515,15 +475,6 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                 var matrix = this.globalViewMatrix();
                 return matrix.transformPoint(pos);
             },
-            dropOn: function (event) {
-                //TODO:
-                var element = event.element;
-
-                if (Selection.isElementSelected(element)) {
-                    this.unlockGroup();
-                }
-                event.handled = true;
-            },
             registerForLayerDraw: function (layer, element) {
                 this.parent().registerForLayerDraw(layer, element);
             },
@@ -573,15 +524,23 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
             },
             unlockGroup: function () {
                 if (this.enableGroupLocking()) {
-                    this._allowGroupActivation = true;
-                    this._activeGroup = true;
+                    this.activeGroup(false);
+                    this.runtimeProps.unlocked = true;
+                    return true;
                 }
+                return false;
             },
             lockGroup: function () {
                 if (this.enableGroupLocking()) {
-                    this._allowGroupActivation = false;
-                    this._activeGroup = false;
+                    this.activeGroup(false);
+                    this.runtimeProps.unlocked = false;
                 }
+            },
+            activeGroup: function(value){
+                if (arguments.length === 1){
+                    this.runtimeProps.activeGroup = value;
+                }
+                return this.runtimeProps.activeGroup;
             },
             getDropData: function (pos, element) {
                 var width = this.width(),

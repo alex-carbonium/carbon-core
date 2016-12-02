@@ -92,6 +92,10 @@ class NullContainer {
     scale(){
         return 1;
     }
+
+    activeGroup(){
+        return false;
+    }
 }
 
 window.NullContainer = new NullContainer();

@@ -158,9 +158,9 @@ class Layer extends Container {
         return true;
     }
 
-    hitElement(/*Point*/position, scale, predicate) {
+    hitElement(/*Point*/position, scale, predicate, directSelection) {
         for (var i = 0; i < this._hitFirstElements.length; ++i) {
-            var element = this._hitFirstElements[i].hitElement(position, scale, predicate);
+            var element = this._hitFirstElements[i].hitElement(position, scale, predicate, directSelection);
             if (element) {
                 return element;
             }

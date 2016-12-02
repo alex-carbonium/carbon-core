@@ -57,7 +57,8 @@ var LineDirectionPoint = {
                 , {cornerRadius: frame.originalValue}));
 
             frame.resizingElement.detach();
-            frame.resizingElement.dropOn(null, frame.element.parent());
+            //TODO
+            //frame.resizingElement.dropOn(null, frame.element.parent());
             Environment.controller.stopRotatingEvent.raise();
         }
     },
