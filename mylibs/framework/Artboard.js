@@ -726,7 +726,7 @@ PropertyMetadata.registerForType(Artboard, {
         defaultValue: []
     },
     resource: {
-        displayName:" Resouce",
+        displayName:"@resource",
         type: "dropdown",
         defaultValue:null,
         options: {

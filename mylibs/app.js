@@ -605,6 +605,10 @@ class App extends DataNode {
         this.setActivePage(NullPage);
     }
 
+    isElectron(){
+        return window && window.process && window.process.type === 'renderer';
+    }
+
     applyVisitor(callback) {
         each(this.pages, function (page) {
             page.applyVisitor(element=> {
