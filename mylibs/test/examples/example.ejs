@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Carbon core examples</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        html, body{
+            width: 100%;
+            height: 100%;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        #header{
+            position: absolute;
+            width: 100%;
+            height: 32px;
+            line-height: 32px;
+            z-index: 5;
+            background: #444;
+            text-align: center;
+            color: #CFCFCF;
+        }
+
+        canvas, #htmlPanel, #htmllayer, #viewContainer, #viewport {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            margin-left: -300px;
+            width: 600px;
+            height: 600px;
+        }
+
+        #htmlPanel {
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+<div id="viewport" name="viewport">
+    <div id="header">Carbon core examples</div>
+    <canvas id="app_canvas"></canvas>
+    <canvas id="middle_canvas"></canvas>
+    <canvas id="app_upperCanvas"></canvas>
+
+    <div id="viewContainer" tabIndex="1">
+        <div id="htmlLayer"></div>
+        <div id="htmlPanel"></div>
+    </div>
+</div>
+</body>
+</html>

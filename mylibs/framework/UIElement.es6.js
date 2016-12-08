@@ -47,6 +47,8 @@ fwk.Stroke = Brush;
 
 fwk.DockValues = {left: "Left", top: "Top", bottom: "Bottom", right: "Right", fill: "Fill"};
 
+var identityMatrixDecomposed = new Matrix().decompose();
+
 // constructor
 var UIElement = klass(DataNode, {
     __version__: 1, // override version if element properties are changed
@@ -77,12 +79,13 @@ var UIElement = klass(DataNode, {
     resetRuntimeProps: function () {
         this.runtimeProps = {
             viewMatrix: new Matrix(),
+            decomposed: identityMatrixDecomposed,
             boundaryRectGlobal: null,
             globalViewMatrix: null,
             globalViewMatrixInverted: null,
             globalClippingBox: null,
             primitiveRoot: null,
-            snapPoints: null
+            snapPoints: null,
         }
     },
     _roundValue(value){
@@ -144,12 +147,36 @@ var UIElement = klass(DataNode, {
         }
         return false;
     },
+    setProps: function(props, mode){
+        var hasX = props.hasOwnProperty("x");
+        var hasY = props.hasOwnProperty("y");
+        var hasAngle = props.hasOwnProperty("angle");
+
+        var x = hasX ? props.x : this.props.x;
+        var y = hasY ? props.y : this.props.y;
+        var angle = hasAngle ? props.angle : this.props.angle;
+        //var m = null;
+
+        if (hasX || hasY || hasAngle){
+            //debugger;
+        }
+
+        // if (hasX || hasY){
+        //     m = m || this.props.m.clone();
+        //     m.translate(-this.props.x, -this.props.y);
+        //     m.translate(x, y);
+        // }
+
+        // if (m){
+        //     props.m = m;
+        // }
+
+        DataNode.prototype.setProps.call(this, props, mode);
+    },
     propsUpdated: function (newProps, oldProps) {
         if (newProps.flipVertical !== undefined
             || newProps.flipHorizontal !== undefined
-            || newProps.angle !== undefined
-            || newProps.x !== undefined
-            || newProps.y !== undefined
+            || newProps.m
             || (newProps.stroke !== undefined)
         ) {
             this.updateViewMatrix();
@@ -166,6 +193,29 @@ var UIElement = klass(DataNode, {
         DataNode.prototype.propsPatched.apply(this, arguments);
         this.invalidate();
     },
+
+    getRotation: function() {
+        var decomposed = this.runtimeProps.decomposed;
+        return decomposed && decomposed.rotation;
+    },
+    setRotation: function(rotation) {
+        var current = this.getRotation();
+        if (current && rotation) {
+            this.rotate(rotation - current);
+        }
+    },
+
+    getScaling: function() {
+        var decomposed = this.runtimeProps.decomposed;
+        return decomposed && decomposed.scaling;
+    },
+    setScaling: function(scaling) {
+        var current = this.getScaling();
+        if (current && scaling) {
+            this.scale(scaling.x / current.x, scaling.y / current.y);
+        }
+    },
+
     arrange: function () {
     },
     _init: function () {
@@ -499,30 +549,31 @@ var UIElement = klass(DataNode, {
     //     return null;
     // },
     updateViewMatrix: function () {
-        var matrix = new Matrix();
-        var sw = 1;
-        if (this.flipHorizontal()) {
-            sw = -1;
-        }
+        // var matrix = new Matrix();
+        // var sw = 1;
+        // if (this.flipHorizontal()) {
+        //     sw = -1;
+        // }
+        //
+        // var sh = 1;
+        // if (this.flipVertical()) {
+        //     sh = -1;
+        // }
+        // var x = this.x(),
+        //     y = this.y();
+        // var origin = this.rotationOrigin();
+        // matrix.rotate(this.angle(), origin.x, origin.y);
+        //
+        // matrix.scale(sw, sh, origin.x, origin.y);
+        //
+        // matrix.translate(x, y);
 
-        var sh = 1;
-        if (this.flipVertical()) {
-            sh = -1;
-        }
-        var x = this.x(),
-            y = this.y();
-        var origin = this.rotationOrigin();
-        matrix.rotate(this.angle(), origin.x, origin.y);
-
-        matrix.scale(sw, sh, origin.x, origin.y);
-
-        matrix.translate(x, y);
-
-        this.setViewMatrix(Object.freeze(matrix));
+        this.setViewMatrix(Object.freeze(this.props.m));
         this.resetGlobalViewCache();
     },
     setViewMatrix: function (matrix) {
         this.runtimeProps.viewMatrix = matrix;
+        this.runtimeProps.decomposed = matrix.decompose();
     },
     resetGlobalViewCache: function (resetPrimitiveRoot = false) {
         delete this.runtimeProps.boundaryRectGlobal;
@@ -536,7 +587,7 @@ var UIElement = klass(DataNode, {
         }
     },
     viewMatrix: function () {
-        return this.runtimeProps.viewMatrix;
+        return this.props.m;
     },
     draw: function (context, environment) {
         this.stopwatch.start();
@@ -1186,13 +1237,8 @@ var UIElement = klass(DataNode, {
         return this._isDisposed;
     },
     rotationOrigin: function (global) {
-        if (global) {
-            return this.globalViewMatrix().transformPoint2(this.width()/2, this.height()/2);
-        }
-        return {
-            x: this.x() + this.width() / 2,
-            y: this.y() + this.height() / 2
-        };
+        var m = global ? this.globalViewMatrix() : this.viewMatrix();
+        return m.transformPoint2(this.width()/2, this.height()/2);
     },
     hitElement: function (position, scale, predicate) {
         if (this.hitVisible()) {
@@ -1739,6 +1785,9 @@ PropertyMetadata.registerForType(UIElement, {
         useInModel: true,
         editable: true,
         defaultValue: 0
+    },
+    m: {
+        defaultValue: Matrix.Identity
     },
     locked: {
         displayName: "Locked",

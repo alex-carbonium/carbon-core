@@ -5,6 +5,13 @@ import Container from "./Container";
 
 export default class GroupContainer extends Container {
 
+    // draw(context, environment){
+    //     for (var i = 0; i < this.children.length; i++){
+    //         var element = this.children[i];
+    //         element.draw(context, environment);
+    //     }
+    // }
+
     drawSelf(context, w, h, environment){
         // if (!this.lockedGroup()){
         //     context.save();

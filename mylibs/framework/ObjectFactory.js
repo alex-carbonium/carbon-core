@@ -4,6 +4,7 @@ import PropertyMetadata from "./PropertyMetadata";
 import ObjectCache from "./ObjectCache";
 import EventHelper from "./EventHelper";
 import logger from "../logger";
+import Matrix from "../math/matrix";
 
 export default {
     objectCreationFailed: EventHelper.createEvent(),
@@ -116,14 +117,10 @@ export default {
             }
             value = Object.assign(defaults, value);
 
-            //if (type.startsWith("sketch.framework.ImageSource")) {
-            //    fwk.ImageSource.init(value).then(function (v) {
-            //        var obj = {};
-            //        obj[name] = v;
-            //        owner.setProps(obj);
-            //    });
-            //}
             props[name] = value;
+        }
+        else if (name === "m"){
+            props[name] = new Matrix(value._a, value._b, value._c, value._d, value._tx, value._ty);
         }
     },
     updatePropsWithPrototype: function(props){

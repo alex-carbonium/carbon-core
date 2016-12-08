@@ -90,7 +90,7 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
         this.each(x => x.disablePropsTracking());
         this.elements = [];
         this._types = [];
-        this.setProps({x: 0, y: 0, width: 0, height: 0});
+        //this.setProps({x: 0, y: 0, width: 0, height: 0});
         this.resetGlobalViewCache();
     },
 

@@ -26,7 +26,7 @@ export default class ClosePageDialog extends ExtensionBase {
     attach(app) {
         super.attach.apply(this, arguments);
         
-        if (app.platform.richUI()) {
+        if (app.platform.richUI() && !app.props.noConfirmOnClose) {
             bind.call(this);
         }
     }

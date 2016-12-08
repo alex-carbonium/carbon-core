@@ -864,13 +864,7 @@ class App extends DataNode {
         }
     }
 
-    //TODO: rethink the concept of run method for better testability
-    run() {
-        var that = this;
-        this.clear();
-
-        //this.setProps(defaultAppProps);
-
+    init(){
         Environment.detaching.bind(this, ()=> {
             this.detachExtensions();
         });
@@ -886,6 +880,16 @@ class App extends DataNode {
         this.setupView();
 
         this.actionManager.registerApp(this);
+    }
+
+    //TODO: rethink the concept of run method for better testability
+    run() {
+        var that = this;
+        this.clear();
+
+        //this.setProps(defaultAppProps);
+
+        this.init();
 
         var stopwatch = new Stopwatch("AppLoad", true);
         that.platform.setupConnection(that);

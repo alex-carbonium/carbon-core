@@ -30,7 +30,7 @@ class ArtboardPage extends Page {
         var artboard = this.getFirstArtboard();
         if (!artboard) {
             artboard = new Artboard();
-            artboard.setProps({width: 1000, height: 1000, y: 0, x: 0});
+            artboard.setProps({width: 1000, height: 1000});
             this.nameProvider.assignNewName(artboard);
             this.add(artboard);
         }
