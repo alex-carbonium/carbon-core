@@ -1876,8 +1876,13 @@ PropertyMetadata.registerForType(UIElement, {
     groups: function () {
         return [
             {
+                label: "Colors",
+                properties: ["fill", "stroke"],
+                hidden: true
+            },
+            {
                 label: "Style",
-                properties: ["styleId", "opacity", "fill", "stroke"]
+                properties: ["styleId", "opacity"]
             },
             {
                 label: "Appearance",
@@ -1886,11 +1891,12 @@ PropertyMetadata.registerForType(UIElement, {
             {
                 label: "Layout",
                 properties: ["width", "height", "x", "y", "anchor", "angle", "dockStyle", "horizontalAlignment", "verticalAlignment"]
-            },
-            {
-                label: "Margin",
-                properties: ["margin"]
             }
+            // ,
+            // {
+            //     label: "Margin",
+            //     properties: ["margin"]
+            // }
         ];
     },
     prepareVisibility: function (props, selection, view) {

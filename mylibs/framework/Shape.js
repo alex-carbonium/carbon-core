@@ -252,6 +252,11 @@ PropertyMetadata.registerForType(Shape, {
     groups () {
         return [
             {
+                label: "Colors",
+                properties: ["fill", "stroke"],
+                hidden: true
+            },
+            {
                 label: "Appearance",
                 expanded: false,
                 properties: ["visible", "opacity", "fill", "stroke", "clipMask"]
