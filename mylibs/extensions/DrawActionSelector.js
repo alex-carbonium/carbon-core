@@ -14,6 +14,7 @@ import DefaultLineSettings from "ui/DefaultLineSettings";
 import ArtboardToolSettings from "ui/ArtboardToolSettings";
 import ArtboardFrame from "framework/ArtboardFrame";
 import {ViewTool, Types} from "../framework/Defs";
+import Path from "ui/common/Path";
 import Star from "framework/Star";
 import Polygon from "framework/Polygon";
 import SystemConfiguration from 'SystemConfiguration';
@@ -56,7 +57,12 @@ var registerCommands = function () {
         that._polylineCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._polylineCreator;
         that.app.allowSelection(false);
-        Selection.makeSelection([that._defaultShapeSettings]);
+        var element = Selection.selectedElement();
+        if(element instanceof Path) {
+            element.edit();
+        } else {
+            Selection.makeSelection([that._defaultShapeSettings]);
+        }
         that.app.setCurrentTool(ViewTool.Path);
     }, "ui-pen");
 

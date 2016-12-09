@@ -2174,7 +2174,7 @@ PropertyMetadata.registerForType(Path, {
             },
             {
                 label: "Settings",
-                properties: ["pointRounding", "closed"],
+                properties: ["pointRounding"],
                 expanded: true
             }
         ];
