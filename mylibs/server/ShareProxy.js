@@ -30,5 +30,9 @@ export default {
         return backend.get(backend.servicesEndpoint + "/api/share/resources", {
             search: search || ''
         });
+    },
+    staticResources: function (search) {
+        return backend.get("/target/reslist.json", {
+        });
     }
 }
