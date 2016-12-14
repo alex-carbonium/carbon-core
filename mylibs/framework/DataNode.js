@@ -31,7 +31,6 @@ export default klass({
             }
             //if some props are the same, extract the ones which differ
             else if (newProps === props){
-                newProps = {};
                 for (let p in oldProps){
                     newProps[p] = props[p];
                 }

@@ -31,6 +31,9 @@ export function bezierCurveDataGetLength(me)
 {
     return bezierCurveDataGetLengthAtParameter(me, 1.0);
 }
+function clone(point){
+    return {x:point.x, y:point.y};
+}
 
 export function bezierCurveDataPointAtParameter( me,  parameter, leftBezierCurve, rightBezierCurve)
 {

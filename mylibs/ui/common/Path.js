@@ -1570,14 +1570,12 @@ class Path extends Shape {
 
     clone() {
         var c = super.clone();
-        c.points = this.points.slice();
         c._sourceRect = this._sourceRect;
         return c;
     }
 
     mirrorClone() {
         var c = super.mirrorClone();
-        c.points = this.points.slice();
         c._sourceRect = this._sourceRect;
         return c;
     }
@@ -1586,19 +1584,23 @@ class Path extends Shape {
         this.points.length = 0;
 
         var current = UIElement.prototype.fromJSON.call(this, data);
-        // for (var i = 0; i < data.points.length; ++i) {
-        //     this.addPoint(data.points[i]);
-        // }
 
         this._currentPoint = null;
         this._handlePoint = null;
         if (data.props.points && data.props.points.length) {
-            this._sourceRect = this.getGlobalBoundingBox();
+            this._sourceRect = data.sr || this.getGlobalBoundingBox();
             this._sourceRect.width = Math.max(this._sourceRect.width, 1);
             this._sourceRect.height = Math.max(this._sourceRect.height, 1);
         }
 
         return current;
+    }
+
+    toJSON(){
+        var data = super.toJSON();
+        data.sr = this._sourceRect;
+
+        return data;
     }
 
     elements(offset, angle, origin) {
