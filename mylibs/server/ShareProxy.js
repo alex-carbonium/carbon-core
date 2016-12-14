@@ -32,7 +32,7 @@ export default {
         });
     },
     staticResources: function (search) {
-        return backend.get("/target/reslist.json", {
+        return backend.get(backend.cdnEndpoint + "/target/reslist.json", {
         });
     }
 }
