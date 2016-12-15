@@ -1,6 +1,7 @@
 var debug = require("DebugUtil")("carb:canvasArrangeStrategy");
 import {ChangeMode} from "framework/Defs"
 import {rotatePointByDegree} from "../math/math";
+import Point from "../math/point";
 
 export default {
     arrange: function(container, event, changeMode){
@@ -76,11 +77,11 @@ export default {
                 var sw = 1;
                 var sh = 1;
                 if (event.newValue.width !== undefined) {
-                    sw = (container._originalWidth ||event.oldValue.width) / event.newValue.width;
+                    sw = (container.runtimeProps.originalWidth ||event.oldValue.width) / event.newValue.width;
                 }
 
                 if (event.newValue.height !== undefined) {
-                    sh = (container._originalHeight || event.oldValue.height) / event.newValue.height;
+                    sh = (container.runtimeProps.originalHeight || event.oldValue.height) / event.newValue.height;
                 }
                 if(sw === 0 || sh === 0){
                     return null;
@@ -93,22 +94,34 @@ export default {
                     if(rects) {
                         var erect = rects[i];
                     } else {
-                        erect = e.getBoundaryRect();
+                        erect = e.getBoundingBox();
                     }
 
-                    var x = e._roundValue(erect.x / sw);
-                    var y = e._roundValue(erect.y / sh);
-
-                    var width = e._roundValue(erect.width / sw);
-                    var height = e._roundValue(erect.height / sh);
-                    var props = {x, y, width, height};
-
-                    e.prepareAndSetProps(props, ChangeMode.Root);
-                    e.performArrange && e.performArrange(erect, ChangeMode.Root);
+                    // var x = e._roundValue(erect.x / sw);
+                    // var y = e._roundValue(erect.y / sh);
+                    //
+                    // var width = e._roundValue(erect.width / sw);
+                    // var height = e._roundValue(erect.height / sh);
+                    // var props = {x, y, width, height};
+                    //
+                    // e.prepareAndSetProps(props, ChangeMode.Root);
+                    // e.performArrange && e.performArrange(erect, ChangeMode.Root);
+                    if (e.setScaling({x: 1/sw, y: 1/sh}, event.origin)){
+                        e.performArrange && e.performArrange(erect);
+                    }
                 });
             }
         }
-        else if ((autoWidth || autoHeight) && container.children.length){
+        else if (autoWidth || autoHeight){
+            // if (items.length === 1){
+            //     container.setProps({
+            //         width: items[0].width(),
+            //         height: items[0].height(),
+            //         m: items[0].viewMatrix()
+            //     });
+            //     items[0].resetTransform();
+            //     return null;
+            // }
 
             for (let i = 0, l = items.length; i < l; ++i) {
                 let child = items[i];
@@ -131,49 +144,47 @@ export default {
             yMax += padding.bottom;
             var shiftChildren = false;
 
-            var rect = container.getBoundaryRect();
+            var size = container.size();
+            var translate = new Point(0, 0);
+
             if (container.autoExpandWidth()){
                 container.lockAutoresize();
-                rect.width = Math.max(rect.width, xMax);
+                size.width = Math.max(size.width, xMax);
             }
             else if (autoWidth){
-                rect.width = xMax - xMin;
-                rect.x += xMin;
+                size.width = xMax - xMin;
+                translate.x = -xMin;
                 shiftChildren = true;
             }
             if (container.autoExpandHeight()){
                 container.lockAutoresize();
-                rect.height = Math.max(rect.height, yMax);
+                size.height = Math.max(size.height, yMax);
             }
             else if (autoHeight){
-                rect.height = yMax - yMin;
-                rect.y += yMin;
+                size.height = yMax - yMin;
+                translate.y = -yMin;
                 shiftChildren = true;
             }
 
             if (shiftChildren){
                 for (let i = 0, l = items.length; i < l; ++i) {
-                    let e = items[i];
-                    let itemProps = {
-                        x: e.x() - xMin,
-                        y: e.y() - yMin
-                    };
-                    e.prepareAndSetProps(itemProps, changeMode);
+                    items[i].applyTranslation(translate);
                 }
             }
 
 
             if (container.angle() % 360){
-                var newOrigin = container.viewMatrix().transformPoint2(xMin + rect.width/2, yMin + rect.height/2);
+                var newOrigin = container.viewMatrix().transformPoint2(xMin + size.width/2, yMin + size.height/2);
                 var newPos = container.viewMatrix().transformPoint2(xMin, yMin);
                 newPos = rotatePointByDegree(newPos, container.angle(), newOrigin);
-                Object.assign(rect, newPos);
+                Object.assign(size, newPos);
             }
-            container.prepareProps(rect);
+            container.prepareAndSetProps(size);
+            container.applyTranslation(translate.negate());
             container.unlockAutoresize();
-            debug("Auto-resizing %s to x=%d y=%d w=%d h=%d", container.displayName(), rect.x, rect.y, rect.width, rect.height);
+            debug("Auto-resizing %s to x=%d y=%d w=%d h=%d", container.displayName(), size.x, size.y, size.width, size.height);
 
-            return rect;
+            return null;
         }
 
         return null;

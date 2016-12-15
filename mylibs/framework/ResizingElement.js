@@ -3,7 +3,6 @@ import {ChangeMode, Types} from "./Defs";
 import PropertyMetadata from "./PropertyMetadata";
 import SelectComposite from "./SelectComposite";
 import Brush from "./Brush";
-import {toGlobalProps} from "./Transformations";
 
 export default class ResizingElement extends GroupContainer{
     constructor(element){
@@ -15,17 +14,15 @@ export default class ResizingElement extends GroupContainer{
         for (var i = 0; i < elements.length; i++){
             var e = elements[i];
             var clone = e.clone();
-            clone.setProps(toGlobalProps(e));
+            clone.setProps({
+                width: e.width(),
+                height: e.height(),
+                m: e.globalViewMatrix()
+            });
             this.add(clone);
         }
 
-        if (elements.length === 1){
-            this.setProps(this.children[0].selectProps(["x", "y", "width", "height", "angle"]));
-            this.children[0].setProps({angle: 0, x: 0, y: 0});
-        }
-        else{
-            this.performArrange();
-        }
+        this.performArrange();
 
         this._elements = elements;
 
@@ -65,7 +62,12 @@ export default class ResizingElement extends GroupContainer{
 
             Object.assign(props, newPos);
 
-            element.prepareAndSetProps(props);
+            //element.prepareAndSetProps(props);
+            element.prepareAndSetProps({
+                m: element.parent().globalViewMatrixInverted().appended(clone.globalViewMatrix()),
+                width: newWidth,
+                height: newHeight
+            });
         }
     }
 

@@ -295,15 +295,17 @@ class Matrix{
             var center = new Point(arguments[1]);
         }
         if (center)
-            this.translate(center);
+            this.translate(center.x, center.y);
         var a = this._a,
             b = this._b;
         this._a += shear.y * this._c;
         this._b += shear.y * this._d;
         this._c += shear.x * a;
         this._d += shear.x * b;
-        if (center)
-            this.translate(center.negate());
+        if (center){
+            var nc = center.negate();
+            this.translate(nc.x, nc.y);
+        }
         return this;
     }
 

@@ -17,7 +17,7 @@ export default class RelayoutEngine {
     }
 
     static _visitElement2(element, propsHistoryMap, primitiveMap, filter) {
-        var oldRect;
+        //var oldRect;
         var primitives = null;
         var hasChildren = !!element.children;
         var canArrange = primitiveMap === null;
@@ -37,21 +37,21 @@ export default class RelayoutEngine {
                 }
             }
 
-            var entry = propsHistoryMap[element.id()];
-            if (entry) {
-                var oldProps = entry.props;
-                if (oldProps) {
-                    oldRect = {
-                        x: oldProps.x !== undefined ? oldProps.x : element.x(),
-                        y: oldProps.y !== undefined ? oldProps.y : element.y(),
-                        width: oldProps.width !== undefined ? oldProps.width : element.width(),
-                        height: oldProps.height !== undefined ? oldProps.height : element.height()
-                    };
-                }
-            }
-            if (!oldRect) {
-                oldRect = element.getBoundaryRect();
-            }
+            //var entry = propsHistoryMap[element.id()];
+            //if (entry) {
+                //var oldProps = entry.props;
+                //if (oldProps) {
+                    // oldRect = {
+                    //     x: oldProps.x !== undefined ? oldProps.x : element.x(),
+                    //     y: oldProps.y !== undefined ? oldProps.y : element.y(),
+                    //     width: oldProps.width !== undefined ? oldProps.width : element.width(),
+                    //     height: oldProps.height !== undefined ? oldProps.height : element.height()
+                    // };
+                //}
+            //}
+            // if (!oldRect) {
+            //     oldRect = element.getBoundaryRect();
+            // }
         }
 
         let res = RelayoutEngine.applyPrimitives(element, propsHistoryMap, primitiveMap, filter);
@@ -63,8 +63,8 @@ export default class RelayoutEngine {
         }
 
         if (hasChildren && canArrange){
-            debug("arrange %s (%s)", element.displayName(), element.id());
-            element.performArrange(oldRect, ChangeMode.Model);
+            //debug("arrange %s (%s)", element.displayName(), element.id());
+            //element.performArrange(oldRect, element.runtimeProps.lastTransformOrigin || element.getBoundingBox());
         }
         return primitives;
     }

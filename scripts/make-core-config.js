@@ -177,7 +177,7 @@ module.exports = function(settings){
             loaders: getLoaders(settings)
         },
         plugins: getPlugins(settings),
-        devtool: "source-map",
+        devtool: "eval",
         debug: !settings.minimize,
         devServer : {
             contentBase        : fullPath('../target/'),

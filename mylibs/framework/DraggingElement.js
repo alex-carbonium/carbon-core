@@ -36,7 +36,12 @@ class DraggingElement extends GroupContainer {
                     this._decorators.push(x);
                 });
             }
-            this.add(new Phantom(element, toGlobalProps(element)));
+            this.add(new Phantom(element, {
+                width: element.width(),
+                height: element.height(),
+                m: element.globalViewMatrix()
+            }));
+
             this._elements.push(element);
         }
         this.performArrange();
@@ -287,12 +292,12 @@ class DraggingElement extends GroupContainer {
         //     props.flipHorizontal = this.flipHorizontal();
         // }
 
-        var globalPos = phantom.globalViewMatrix().transformPoint2(0, 0);
-        var localPos = newParent.global2local(globalPos);
-        if (element.angle() % 360){
-            var localOrigin = newParent.global2local(phantom.rotationOrigin(true));
-            localPos = rotatePointByDegree(localPos, element.angle(), localOrigin);
-        }
+        //var globalPos = phantom.globalViewMatrix().transformPoint2(0, 0);
+        //var localPos = newParent.global2local(globalPos);
+        // if (element.angle() % 360){
+        //     var localOrigin = newParent.global2local(phantom.rotationOrigin(true));
+        //     localPos = rotatePointByDegree(localPos, element.angle(), localOrigin);
+        // }
 
         if (newParent !== element.parent()) {
             newParent.insert(element, index);
@@ -301,7 +306,7 @@ class DraggingElement extends GroupContainer {
         //hack: shapes and frames resize children themselves, think how to do it better
         if (!element.runtimeProps.resized){
             //must set new coordinates after parent is changed so that global caches are updated properly
-            element.prepareAndSetProps(localPos);
+            element.prepareAndSetProps({m: newParent.globalViewMatrixInverted().appended(phantom.globalViewMatrix())});
         }
 
         // if (target instanceof CompositeElement) {
@@ -416,7 +421,7 @@ class DraggingElement extends GroupContainer {
             SnapController.clearActiveSnapLines();
         }
 
-        super.dragTo(position);
+        this.setTranslation(position);
     }
 
     parentAllowSnapping(pos) {

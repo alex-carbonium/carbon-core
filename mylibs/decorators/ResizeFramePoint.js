@@ -29,6 +29,7 @@ export default {
         frame.flipVertical = frame.element.flipVertical();
         frame.flipHorizontal = frame.element.flipHorizontal();
         frame.globalViewMatrix = frame.element.globalViewMatrix();
+        frame.origin = frame.element.getBoundingBoxGlobal();
         debug("Captured global rect: x=%d y=%d w=%d h=%d", frame.originalRect.x, frame.originalRect.y, frame.originalRect.width, frame.originalRect.height);
 
         Environment.view.layer3.add(resizingElement);
@@ -124,8 +125,13 @@ export default {
 
         debug("Resizing rect: x=%d y=%d w=%d h=%d ow=%d dx=%d", rect.x, rect.y, rect.width, rect.height, original.width, dx);
         var oldRect = frame.resizingElement.getBoundaryRect();
-        frame.resizingElement.resize(rect, event.event.altKey);
-        frame.resizingElement.performArrange(oldRect);
+        //frame.resizingElement.resize(rect, event.event.altKey);
+        frame.resizingElement.setScaling({
+            x: (frame.origin.width + dx)/frame.origin.width,
+            y: 1
+        }, frame.origin, true);
+
+        frame.resizingElement.performArrange(oldRect, frame.origin);
 
         Environment.controller.resizingEvent.raise({
             element: frame.element,

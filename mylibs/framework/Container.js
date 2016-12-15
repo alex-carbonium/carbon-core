@@ -14,13 +14,10 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
             _constructor: function () {
                 this.children = [];
             },
-            performArrange: function (oldRect, mode) {
+            performArrange: function (oldRect, origin, mode) {
                 var newRect = this.getBoundaryRect();
                 oldRect = oldRect || newRect;
-                var newBoundary = this.arrange({oldValue: oldRect, newValue: newRect});
-                if (newBoundary && !areRectsEqual(newBoundary, newRect)) {
-                    this.setProps(newBoundary);
-                }
+                this.arrange({oldValue: oldRect, newValue: newRect, origin: origin || oldRect}, mode);
             },
             arrangeStrategy: function (value) {
                 if (value !== undefined) {
@@ -481,9 +478,9 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
             unregisterForLayerDraw: function (layer, element) {
                 this.parent().unregisterForLayerDraw(layer, element);
             },
-            arrange: function (resizeEvent, context) {
+            arrange: function (resizeEvent) {
                 UIElement.prototype.arrange.apply(this, arguments);
-                return ArrangeStrategy.arrange(this, resizeEvent, context);
+                return ArrangeStrategy.arrange(this, resizeEvent);
             },
             autoWidth: function () {
                 var overflow = this.overflow();

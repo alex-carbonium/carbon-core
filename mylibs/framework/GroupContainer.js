@@ -4,6 +4,9 @@ import UserSettings from "../UserSettings";
 import Container from "./Container";
 
 export default class GroupContainer extends Container {
+    adjust(){
+
+    }
 
     // draw(context, environment){
     //     for (var i = 0; i < this.children.length; i++){
@@ -24,16 +27,14 @@ export default class GroupContainer extends Container {
     }
 
     _buildChildrenSizes(){
-        return this.children.map(e => e.getBoundaryRect());
+        return this.children.map(e => e.getBoundingBox());
     }
 
     startResizing(){
         super.startResizing();
         this._rects = this._buildChildrenSizes();
-        this._originalWidth = this.width();
-        this._originalHeight = this.height();
         this.applyVisitor(e =>{
-            if (e instanceof GroupContainer && e !== this){
+            if (e !== this){
                 e.startResizing();
             }
         })
@@ -42,8 +43,6 @@ export default class GroupContainer extends Container {
     stopResizing(){
         super.stopResizing();
         delete this._rects;
-        delete this._originalWidth;
-        delete this._originalHeight;
         this.applyVisitor(e =>{
             if (e instanceof GroupContainer && e !== this){
                 e.stopResizing();

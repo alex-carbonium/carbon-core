@@ -267,9 +267,10 @@ export default class DesignerController {
         this._draggingElement.showOriginal(event.altKey);
 
         this.view.layer3.add(this._draggingElement);
+        var translation = this._draggingElement.getTranslation();
         this._draggingOffset = {
-            x: event.x - this._draggingElement.x(),
-            y: event.y - this._draggingElement.y()
+            x: event.x - translation.x,
+            y: event.y - translation.y
         };
 
         this.startDraggingEvent.raise(eventData);

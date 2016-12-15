@@ -23,7 +23,8 @@ var settings = {
     },
     frame: {
         stroke: '#22c1ff'
-    }
+    },
+    showBoundingBoxes: false
 };
 
 globals.userSettings = settings;

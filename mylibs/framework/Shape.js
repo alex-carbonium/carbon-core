@@ -22,6 +22,9 @@ class Shape extends Container {
         return true;
     }
 
+    performArrange(){
+    }
+
     _renderDraft(context, w, h) {
         var stroke = this.stroke();
 
