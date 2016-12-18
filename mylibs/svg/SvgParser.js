@@ -1,5 +1,6 @@
 import Rectangle from "framework/Rectangle";
 import Circle from "framework/Circle";
+import Text from "framework/text/Text";
 import Path from "ui/common/Path";
 import GroupContainer from "framework/GroupContainer";
 import Promise from "bluebird";
@@ -104,7 +105,7 @@ define(function () {
             case 'rect':
                 return Rectangle.fromSvgElement;
             case 'text':
-                return sketch.ui.common.Label;
+                return Text.fromSvgElement;
         }
         return null;
     }
@@ -151,6 +152,7 @@ define(function () {
         'transform': 'transformMatrix',
         'text-decoration': 'textDecoration',
         'font-size': 'fontSize',
+        'data-name': 'text',
         'font-weight': 'fontWeight',
         'font-style': 'fontStyle',
         'font-family': 'fontFamily'
@@ -203,7 +205,7 @@ define(function () {
                     value = (value === 'evenodd') ? 'destination-over' : value;
                 }
                 if (attr === 'transform') {
-                    value = parseTransformAttribute(value);
+                        value = parseTransformAttribute(value);
                 }
                 attr = normalizeAttr(attr);
                 memo[attr] = isNaN(parsed) ? value : parsed;
@@ -249,7 +251,11 @@ define(function () {
         }
 
         function translateMatrix(matrix, args) {
-            matrix.translate(args[0], args[1]);
+            if(args.length == 2) {
+                matrix.translate(args[0], args[1]);
+            } else if(args.length == 1){
+                matrix.translate(args[0], args[0]);
+            }
         }
 
 
@@ -327,7 +333,7 @@ define(function () {
                         skewYMatrix(matrix, args);
                         break;
                     case 'matrix':
-                        matrix = args;
+                        matrix = new Matrix(args);
                         break;
                 }
             });
@@ -534,7 +540,7 @@ define(function () {
 
             if (ruleMatchesElement) {
                 for (var property in cssRules[rule]) {
-                    styles[property] = cssRules[rule][property];
+                    styles[normalizeAttr(property)] = cssRules[rule][property];
                 }
             }
         }

@@ -1811,6 +1811,27 @@ class Path extends Shape {
         return result;
     }
 
+    transform(matrix){
+        var points = this.points;
+        for(var i = 0; i < points.length; ++i) {
+            var point = points[i];
+            var p = matrix.transformPoint2(point.x, point.y);
+            point.x = p.x;
+            point.y = p.y;
+            if(point.cp1x !== undefined) {
+                var cp1 = matrix.transformPoint2(point.cp1x, point.cp1y);
+                point.cp1x = cp1.x;
+                point.cp1y = cp1.y;
+            }
+            if(point.cp2x != undefined) {
+                var cp2 = matrix.transformPoint2(point.cp2x, point.cp2y);
+                point.cp2x = cp2.x;
+                point.cp2y = cp2.y;
+            }
+        }
+        this.adjustBoundaries();
+    }
+
     _renderSvgCommands(commands, matrix) {
         var current, // current instruction
             previous = null,
@@ -2291,8 +2312,8 @@ Path.fromSvgLineElement = function (element, parsedAttributes, matrix) {
 
     setElementPropertiesFromAttributes(path, parsedAttributes);
 
-    path.addPoint(matrix.transformPoint({x: parsedAttributes.x1, y: parsedAttributes.y1}));
-    path.addPoint(matrix.transformPoint({x: parsedAttributes.x2, y: parsedAttributes.y2}));
+    path.addPoint(matrix.transformPoint({x: parsedAttributes.x1 || 0, y: parsedAttributes.y1 || 0}));
+    path.addPoint(matrix.transformPoint({x: parsedAttributes.x2 || 0, y: parsedAttributes.y2 || 0}));
 
     path.adjustBoundaries();
 

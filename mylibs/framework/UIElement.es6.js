@@ -1912,7 +1912,7 @@ PropertyMetadata.registerForType(UIElement, {
         };
     },
     getNonRepeatableProps: function () {
-        return ["id", "name"];
+        return ["id", "name", "visible", "source"];
     }
 });
 

@@ -169,6 +169,9 @@ export default class Frame extends Container {
     }
 
     createOrUpdateClippingMask(source, newProps) {
+        if(!source){
+            return;
+        }
         if (newProps.hasOwnProperty("angle") || newProps.hasOwnProperty("sourceProps")) {
             var shouldClip = FrameSource.shouldClip(source, this.width(), this.height(), this.runtimeProps.sourceProps);
             if (this.angle() % 360 === 0 || !shouldClip) {

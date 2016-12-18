@@ -97,7 +97,7 @@ export default class ArtboardFrameControl extends UIElement {
     propsUpdated(props, oldProps) {
         super.propsUpdated(props, oldProps);
         if (props.source !== undefined) {
-            if (props.source.pageId !== oldProps.source.pageId && props.source.artboardId !== oldProps.source.artboardId) {
+            if (!this._artboard || (props.source.pageId !== oldProps.source.pageId && props.source.artboardId !== oldProps.source.artboardId)) {
                 var page = App.Current.getPageById(props.source.pageId);
                 if (page) {
                     this._artboard = page.getArtboardById(props.source.artboardId);

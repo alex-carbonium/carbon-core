@@ -340,7 +340,7 @@ class Rectangle extends Shape {
 }
 Rectangle.prototype.t = Types.Rectangle;
 
-Rectangle.fromSvgElement = function (element, parsedAttributes) {
+Rectangle.fromSvgElement = function (element, parsedAttributes, matrix) {
     // var parsedAttributes = svgParser.parseAttributes(element, Rectangle.ATTRIBUTE_NAMES);
     var rect = new Rectangle();
 
@@ -354,7 +354,7 @@ Rectangle.fromSvgElement = function (element, parsedAttributes) {
     }
 
     if(parsedAttributes.id){
-        element.name(parsedAttributes.id);
+        rect.name(parsedAttributes.id);
     }
 
     rect.setProps({pointRounding: 0});
@@ -394,7 +394,9 @@ Rectangle.fromSvgElement = function (element, parsedAttributes) {
     if (parsedAttributes.y) {
         rect.y(parsedAttributes.y);
     }
-    return rect.convertToPath();
+    var path =  rect.convertToPath();
+    path.transform(matrix);
+    return path;
 };
 
 PropertyMetadata.registerForType(Rectangle, {

@@ -177,8 +177,7 @@ Circle.prototype.t = Types.Circle;
 PropertyMetadata.registerForType(Circle, {});
 
 
-var ATTRIBUTE_NAMES = 'x y width height r rx ry cx cy transform fill stroke stroke-width'.split(' ');
-Circle.fromSvgElement = function (element, parsedAttributes) {
+Circle.fromSvgElement = function (element, parsedAttributes, matrix) {
     // var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
     var circle = new Circle();
     App.Current.activePage.nameProvider.assignNewName(circle);
@@ -200,7 +199,7 @@ Circle.fromSvgElement = function (element, parsedAttributes) {
     circle.setProps({pointRounding: 0});
 
     if (parsedAttributes.id) {
-        element.name(parsedAttributes.id);
+        circle.name(parsedAttributes.id);
     }
 
     if (parsedAttributes.fill !== undefined) {
@@ -216,6 +215,7 @@ Circle.fromSvgElement = function (element, parsedAttributes) {
     } else {
         circle.stroke(Brush.Empty);
     }
+
     if (parsedAttributes.x !== undefined) {
         circle.x(parsedAttributes.x);
     } else if (parsedAttributes.cx !== undefined) {
@@ -226,7 +226,9 @@ Circle.fromSvgElement = function (element, parsedAttributes) {
     } else if (parsedAttributes.cy !== undefined) {
         circle.y(parsedAttributes.cy - ry);
     }
-    return circle.convertToPath();
+    var path = circle.convertToPath();
+    path.transform(matrix);
+    return path;
 };
 
 export default Circle;
