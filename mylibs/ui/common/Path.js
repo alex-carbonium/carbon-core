@@ -1321,7 +1321,7 @@ class Path extends Shape {
     getGlobalBoundingBox() {
         var graph = new BezierGraph();
         var matrix = this.viewMatrix();
-        this.runtimeProps.viewMatrix = new Matrix();
+        this.runtimeProps.viewMatrix = Matrix.create();
         this.viewMatrix().translate(this.x(), this.y());
         graph.initWithBezierPath(this);//, null, -this.angle(), {x:this.width()/2, y:this.height()/2});
         var b = graph.bounds;

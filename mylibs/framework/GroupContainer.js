@@ -1,19 +1,18 @@
-import {Types, Overflow} from "./Defs";
+import {Types, Overflow, ArrangeStrategies} from "./Defs";
 import PropertyMetadata from "./PropertyMetadata";
 import UserSettings from "../UserSettings";
 import Container from "./Container";
+import UIElement from "./UIElement";
+import Point from "../math/point";
+
+require("./GroupArrangeStrategy");
 
 export default class GroupContainer extends Container {
-    adjust(){
-
+    applyScaling(s, o, sameDirection, withReset){
+        if (UIElement.prototype.applyScaling.apply(this, arguments)){
+            this.children.forEach(e => e.applyScaling(s, Point.Zero, false, withReset));
+        }
     }
-
-    // draw(context, environment){
-    //     for (var i = 0; i < this.children.length; i++){
-    //         var element = this.children[i];
-    //         element.draw(context, environment);
-    //     }
-    // }
 
     drawSelf(context, w, h, environment){
         // if (!this.lockedGroup()){
@@ -24,30 +23,6 @@ export default class GroupContainer extends Container {
         //
         // }
         super.drawSelf.apply(this, arguments);
-    }
-
-    _buildChildrenSizes(){
-        return this.children.map(e => e.getBoundingBox());
-    }
-
-    startResizing(){
-        super.startResizing();
-        this._rects = this._buildChildrenSizes();
-        this.applyVisitor(e =>{
-            if (e !== this){
-                e.startResizing();
-            }
-        })
-    }
-
-    stopResizing(){
-        super.stopResizing();
-        delete this._rects;
-        this.applyVisitor(e =>{
-            if (e instanceof GroupContainer && e !== this){
-                e.stopResizing();
-            }
-        })
     }
 
     _roundValue(value){
@@ -86,10 +61,7 @@ PropertyMetadata.registerForType(GroupContainer, {
     enableGroupLocking: {
         defaultValue: true
     },
-    scaleChildren: {
-        defaultValue: true
-    },
-    overflow: {
-        defaultValue: Overflow.AdjustBoth
+    arrangeStrategy: {
+        defaultValue: ArrangeStrategies.Group
     }
 });

@@ -129,7 +129,7 @@ export default class ViewBase {
         context.imageSmoothingEnabled = true;
         context.clearRect(0, 0, sw, sh);
 
-        var matrix = new Matrix();
+        var matrix = Matrix.create();
 
         var dx = this.scrollX() % scale;
         var dy = this.scrollY() % scale;
@@ -176,7 +176,7 @@ export default class ViewBase {
         this._width = 0;
         this._height = 0;
 
-        this.viewMatrix = new Matrix();
+        this.viewMatrix = Matrix.create();
 
         this.contextScale = 1;
         this._focused = true;

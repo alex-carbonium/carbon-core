@@ -40,6 +40,7 @@ export default {
             //element.setProps(globalRect);
         }
 
+        group.performArrange();
         Selection.makeSelection([group]);
         group.unlockAutoresize();
         return group;

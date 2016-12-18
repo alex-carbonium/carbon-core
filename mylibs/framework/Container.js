@@ -14,10 +14,10 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
             _constructor: function () {
                 this.children = [];
             },
-            performArrange: function (oldRect, origin, mode) {
+            performArrange: function (oldRect, mode) {
                 var newRect = this.getBoundaryRect();
                 oldRect = oldRect || newRect;
-                this.arrange({oldValue: oldRect, newValue: newRect, origin: origin || oldRect}, mode);
+                this.arrange({oldValue: oldRect, newValue: newRect}, mode);
             },
             arrangeStrategy: function (value) {
                 if (value !== undefined) {
@@ -27,6 +27,12 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
             },
             arrangeStrategyInstance: function () {
                 return ArrangeStrategy.findStrategy(this);
+            },
+            applyScaling: function(){
+                var rect = this.getBoundaryRect();
+                if (UIElement.prototype.applyScaling.apply(this, arguments)){
+                    this.performArrange(rect);
+                }
             },
 
             fillBackground: function (context, l, t, w, h) {

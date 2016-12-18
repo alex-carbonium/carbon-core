@@ -294,7 +294,7 @@ define(function () {
         return function (attributeValue) {
 
             // start with identity matrix
-            var matrix = new Matrix();
+            var matrix = Matrix.create();
 
             // return if no argument was given or
             // an argument does not match transform attribute regexp
@@ -560,7 +560,7 @@ define(function () {
             var startTime = new Date(),
                 descendants = toArray(doc.getElementsByTagName('*'));
 
-            var matrix = new Matrix();
+            var matrix = Matrix.create();
 
 
             // if (descendants.length === 0) {

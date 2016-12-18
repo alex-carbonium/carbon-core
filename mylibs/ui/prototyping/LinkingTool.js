@@ -549,7 +549,7 @@ export default class LinkingTool extends EditModeAction {
         var x = point.x;
         var y = point.y;
 
-        var matrix = new Matrix();
+        var matrix = Matrix.create();
 
         if (point.type === 0) {
             matrix.translate(x - size, y - s2);

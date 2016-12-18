@@ -172,13 +172,6 @@ export default {
                 }
             }
 
-
-            if (container.angle() % 360){
-                var newOrigin = container.viewMatrix().transformPoint2(xMin + size.width/2, yMin + size.height/2);
-                var newPos = container.viewMatrix().transformPoint2(xMin, yMin);
-                newPos = rotatePointByDegree(newPos, container.angle(), newOrigin);
-                Object.assign(size, newPos);
-            }
             container.prepareAndSetProps(size);
             container.applyTranslation(translate.negate());
             container.unlockAutoresize();

@@ -23,40 +23,20 @@ import Point from "./point";
  * knowledge of the underlying matrix (as opposed to say simply performing
  * matrix multiplication).
  */
-class Matrix{
+class Matrix {
 
 
     /**
      * Creates a 2D affine transform.
      *
-     * @param {Number} a the a property of the transform
-     * @param {Number} c the c property of the transform
-     * @param {Number} b the b property of the transform
-     * @param {Number} d the d property of the transform
-     * @param {Number} tx the tx property of the transform
-     * @param {Number} ty the ty property of the transform
      */
-    constructor(arg) {
-        var count = arguments.length,
-            ok = true;
-        if (count === 6) {
-            this.set.apply(this, arguments);
-        } else if (count === 1) {
-            if (arg instanceof Matrix) {
-                this.set(arg._a, arg._b, arg._c, arg._d, arg._tx, arg._ty);
-            } else if (Array.isArray(arg)) {
-                this.set.apply(this, arg);
-            } else {
-                ok = false;
-            }
-        } else if (count === 0) {
-            this.reset();
-        } else {
-            ok = false;
-        }
-        if (!ok) {
-            throw 'Unsupported matrix parameters';
-        }
+    constructor(a, b, c, d, tx, ty){
+        this._a = a;
+        this._b = b;
+        this._c = c;
+        this._d = d;
+        this._tx = tx;
+        this._ty = ty;
     }
 
     /**
@@ -70,7 +50,7 @@ class Matrix{
      * @param {Number} ty the ty property of the transform
      * @return {Matrix} this affine transform
      */
-    set(a, b, c, d, tx, ty) {
+    set(a, b, c, d, tx, ty){
         this._a = a;
         this._b = b;
         this._c = c;
@@ -83,7 +63,7 @@ class Matrix{
     /**
      * @return {Matrix} a copy of this transform
      */
-    clone() {
+    clone(){
         return new Matrix(this._a, this._b, this._c, this._d,
             this._tx, this._ty);
     }
@@ -94,7 +74,7 @@ class Matrix{
      * @param {Matrix} matrix the matrix to compare this matrix to
      * @return {Boolean} {@true if the matrices are equal}
      */
-    equals (mx) {
+    equals(mx){
         return mx === this || mx && this._a === mx._a && this._b === mx._b
             && this._c === mx._c && this._d === mx._d
             && this._tx === mx._tx && this._ty === mx._ty;
@@ -103,7 +83,7 @@ class Matrix{
     /**
      * @return {String} a string representation of this transform
      */
-    toString () {
+    toString(){
         return '[[' + [(this._a), (this._c),
                 (this._tx)].join(', ') + '], ['
             + [(this._b), (this._d),
@@ -114,7 +94,7 @@ class Matrix{
      * Resets the matrix by setting its values to the ones of the identity
      * matrix that results in no transformation.
      */
-    reset() {
+    reset(){
         this._a = this._d = 1;
         this._b = this._c = this._tx = this._ty = 0;
         return this;
@@ -138,65 +118,29 @@ class Matrix{
      * @param {Number} dy the distance to translate in the y direction
      * @return {Matrix} this affine transform
      */
-    translatePoint(/* point */) {
-        var point = new Point(arguments[0]),
-            x = point.x,
+    translatePoint(point){
+        var x = point.x,
             y = point.y;
-        this._tx += x * this._a + y * this._c;
-        this._ty += x * this._b + y * this._d;
+        this._tx += x*this._a + y*this._c;
+        this._ty += x*this._b + y*this._d;
         return this;
     }
 
-    translate(x, y) {
-        this._tx += x * this._a + y * this._c;
-        this._ty += x * this._b + y * this._d;
+    translate(x, y){
+        this._tx += x*this._a + y*this._c;
+        this._ty += x*this._b + y*this._d;
         return this;
     }
 
-    /**
-     * Concatenates this transform with a scaling transformation.
-     *
-     * @name Matrix#scale
-     * @function
-     * @param {Number} scale the scaling factor
-     * @param {Point} [center] the center for the scaling transformation
-     * @return {Matrix} this affine transform
-     */
-    /**
-     * Concatenates this transform with a scaling transformation.
-     *
-     * @name Matrix#scale
-     * @function
-     * @param {Number} hor the horizontal scaling factor
-     * @param {Number} ver the vertical scaling factor
-     * @param {Point} [center] the center for the scaling transformation
-     * @return {Matrix} this affine transform
-     */
-    scalePoint(/* scale, center */) {
-        var scale = new Point(arguments[0]);
-        if(arguments.length > 1) {
-            var center = new Point(arguments[1]);
-        }
-        if (center)
-            this.translate(center);
-        this._a *= scale.x;
-        this._b *= scale.x;
-        this._c *= scale.y;
-        this._d *= scale.y;
-        if (center)
-            this.translate(center.negate());
-        return this;
-    }
-
-    scale(sx, sy, cx, cy) {
-        if (cx || cy)
-            this.translate(cx, cy);
+    scale(sx, sy, ox, oy){
+        if (ox || oy)
+            this.translate(ox, oy);
         this._a *= sx;
         this._b *= sx;
         this._c *= sy;
         this._d *= sy;
-        if (cx || cy)
-            this.translate(-cx, -cy);
+        if (ox || oy)
+            this.translate(-ox, -oy);
         return this;
     }
 
@@ -218,52 +162,50 @@ class Matrix{
      * @name Matrix#rotate
      * @function
      * @param {Number} angle the angle of rotation measured in degrees
-     * @param {Number} x the x coordinate of the anchor point
-     * @param {Number} y the y coordinate of the anchor point
+     * @param {Point} center
      * @return {Matrix} this affine transform
      */
-    rotatePoint(angle, center) {
-        angle *= Math.PI / 180;
-        var center = center?new Point(center):{x:0, y:0};
+    rotatePoint(angle, center = Point.Zero){
+        angle *= Math.PI/180;
         // Concatenate rotation matrix into this one
         var x = center.x,
             y = center.y,
             cos = Math.cos(angle),
             sin = Math.sin(angle),
-            tx = x - x * cos + y * sin,
-            ty = y - x * sin - y * cos,
+            tx = x - x*cos + y*sin,
+            ty = y - x*sin - y*cos,
             a = this._a,
             b = this._b,
             c = this._c,
             d = this._d;
-        this._a = cos * a + sin * c;
-        this._b = cos * b + sin * d;
-        this._c = -sin * a + cos * c;
-        this._d = -sin * b + cos * d;
-        this._tx += tx * a + ty * c;
-        this._ty += tx * b + ty * d;
+        this._a = cos*a + sin*c;
+        this._b = cos*b + sin*d;
+        this._c = -sin*a + cos*c;
+        this._d = -sin*b + cos*d;
+        this._tx += tx*a + ty*c;
+        this._ty += tx*b + ty*d;
         return this;
     }
 
-    rotate(angle, cx, cy) {
-        angle *= Math.PI / 180;
+    rotate(angle, cx, cy){
+        angle *= Math.PI/180;
         // Concatenate rotation matrix into this one
         var x = cx || 0,
             y = cy || 0,
             cos = Math.cos(angle),
             sin = Math.sin(angle),
-            tx = x - x * cos + y * sin,
-            ty = y - x * sin - y * cos,
+            tx = x - x*cos + y*sin,
+            ty = y - x*sin - y*cos,
             a = this._a,
             b = this._b,
             c = this._c,
             d = this._d;
-        this._a = cos * a + sin * c;
-        this._b = cos * b + sin * d;
-        this._c = -sin * a + cos * c;
-        this._d = -sin * b + cos * d;
-        this._tx += tx * a + ty * c;
-        this._ty += tx * b + ty * d;
+        this._a = cos*a + sin*c;
+        this._b = cos*b + sin*d;
+        this._c = -sin*a + cos*c;
+        this._d = -sin*b + cos*d;
+        this._tx += tx*a + ty*c;
+        this._ty += tx*b + ty*d;
         return this;
     }
 
@@ -282,26 +224,19 @@ class Matrix{
      *
      * @name Matrix#shear
      * @function
-     * @param {Number} hor the horizontal shear factor
-     * @param {Number} ver the vertical shear factor
+     * @param {Point} shear factor
      * @param {Point} [center] the center for the shear transformation
      * @return {Matrix} this affine transform
      */
-    shear(/* shear, center */) {
-        // Do not modify point, center, since that would arguments of which
-        // we're reading from!
-        var shear = new Point(arguments[0]);
-        if(arguments.length > 1) {
-            var center = new Point(arguments[1]);
-        }
+    shear(shear, center){
         if (center)
             this.translate(center.x, center.y);
         var a = this._a,
             b = this._b;
-        this._a += shear.y * this._c;
-        this._b += shear.y * this._d;
-        this._c += shear.x * a;
-        this._d += shear.x * b;
+        this._a += shear.y*this._c;
+        this._b += shear.y*this._d;
+        this._c += shear.x*a;
+        this._d += shear.x*b;
         if (center){
             var nc = center.negate();
             this.translate(nc.x, nc.y);
@@ -328,14 +263,10 @@ class Matrix{
      * @param {Point} [center] the center for the skew transformation
      * @return {Matrix} this affine transform
      */
-    skew(/* skew, center */) {
-        var skew = new Point(arguments[0]);
-        if(arguments.length > 1) {
-            var center = new Point(arguments[1]);
-        }
-        var toRadians = Math.PI / 180,
-            shear = new Point(Math.tan(skew.x * toRadians),
-                Math.tan(skew.y * toRadians));
+    skew(skew, center){
+        var toRadians = Math.PI/180,
+            shear = new Point(Math.tan(skew.x*toRadians),
+                Math.tan(skew.y*toRadians));
         return this.shear(shear, center);
     }
 
@@ -346,7 +277,7 @@ class Matrix{
      * @param {Matrix} matrix the matrix to append
      * @return {Matrix} this matrix, modified
      */
-    append(mx) {
+    append(mx){
         var a1 = this._a,
             b1 = this._b,
             c1 = this._c,
@@ -357,12 +288,12 @@ class Matrix{
             d2 = mx._d,
             tx2 = mx._tx,
             ty2 = mx._ty;
-        this._a = a2 * a1 + c2 * c1;
-        this._c = b2 * a1 + d2 * c1;
-        this._b = a2 * b1 + c2 * d1;
-        this._d = b2 * b1 + d2 * d1;
-        this._tx += tx2 * a1 + ty2 * c1;
-        this._ty += tx2 * b1 + ty2 * d1;
+        this._a = a2*a1 + c2*c1;
+        this._c = b2*a1 + d2*c1;
+        this._b = a2*b1 + c2*d1;
+        this._d = b2*b1 + d2*d1;
+        this._tx += tx2*a1 + ty2*c1;
+        this._ty += tx2*b1 + ty2*d1;
         return this;
     }
 
@@ -374,7 +305,7 @@ class Matrix{
      * @param {Matrix} matrix the matrix to append
      * @return {Matrix} the newly created matrix
      */
-    appended(mx) {
+    appended(mx){
         return this.clone().append(mx);
     }
 
@@ -385,7 +316,7 @@ class Matrix{
      * @param {Matrix} matrix the matrix to prepend
      * @return {Matrix} this matrix, modified
      */
-    prepend(mx) {
+    prepend(mx){
         var a1 = this._a,
             b1 = this._b,
             c1 = this._c,
@@ -398,12 +329,12 @@ class Matrix{
             d2 = mx._d,
             tx2 = mx._tx,
             ty2 = mx._ty;
-        this._a = a2 * a1 + b2 * b1;
-        this._c = a2 * c1 + b2 * d1;
-        this._b = c2 * a1 + d2 * b1;
-        this._d = c2 * c1 + d2 * d1;
-        this._tx = a2 * tx1 + b2 * ty1 + tx2;
-        this._ty = c2 * tx1 + d2 * ty1 + ty2;
+        this._a = a2*a1 + b2*b1;
+        this._c = a2*c1 + b2*d1;
+        this._b = c2*a1 + d2*b1;
+        this._d = c2*c1 + d2*d1;
+        this._tx = a2*tx1 + b2*ty1 + tx2;
+        this._ty = c2*tx1 + d2*ty1 + ty2;
         return this;
     }
 
@@ -415,7 +346,7 @@ class Matrix{
      * @param {Matrix} matrix the matrix to prepend
      * @return {Matrix} the newly created matrix
      */
-    prepended(mx) {
+    prepended(mx){
         return this.clone().prepend(mx);
     }
 
@@ -426,22 +357,22 @@ class Matrix{
      *
      * @return {Matrix} this matrix, or `null`, if the matrix is singular.
      */
-    invert() {
+    invert(){
         var a = this._a,
             b = this._b,
             c = this._c,
             d = this._d,
             tx = this._tx,
             ty = this._ty,
-            det = a * d - b * c,
+            det = a*d - b*c,
             res = null;
-        if (det && !isNaN(det) && isFinite(tx) && isFinite(ty)) {
-            this._a = d / det;
-            this._b = -b / det;
-            this._c = -c / det;
-            this._d = a / det;
-            this._tx = (c * ty - d * tx) / det;
-            this._ty = (b * tx - a * ty) / det;
+        if (det && !isNaN(det) && isFinite(tx) && isFinite(ty)){
+            this._a = d/det;
+            this._b = -b/det;
+            this._c = -c/det;
+            this._d = a/det;
+            this._tx = (c*ty - d*tx)/det;
+            this._ty = (b*tx - a*ty)/det;
             res = this;
         }
         return res;
@@ -454,7 +385,7 @@ class Matrix{
      *
      * @return {Matrix} this matrix, or `null`, if the matrix is singular.
      */
-    inverted() {
+    inverted(){
         return this.clone().invert();
     }
 
@@ -466,18 +397,18 @@ class Matrix{
      * @return {Matrix} a clone of this matrix, with {@link #tx} and {@link #ty}
      * set to `0`.
      */
-    _shiftless() {
+    _shiftless(){
         return new Matrix(this._a, this._b, this._c, this._d, 0, 0);
     }
 
-    _orNullIfIdentity() {
+    _orNullIfIdentity(){
         return this.isIdentity() ? null : this;
     }
 
     /**
      * @return {Boolean} whether this transform is the identity transform
      */
-    isIdentity() {
+    isIdentity(){
         return this._a === 1 && this._b === 0 && this._c === 0 && this._d === 1
             && this._tx === 0 && this._ty === 0;
     }
@@ -488,8 +419,8 @@ class Matrix{
      *
      * @return {Boolean} whether the transform is invertible
      */
-    isInvertible() {
-        var det = this._a * this._d - this._c * this._b;
+    isInvertible(){
+        var det = this._a*this._d - this._c*this._b;
         return det && !isNaN(det) && isFinite(this._tx) && isFinite(this._ty);
     }
 
@@ -499,127 +430,29 @@ class Matrix{
      *
      * @return {Boolean} whether the matrix is singular
      */
-    isSingular() {
+    isSingular(){
         return !this.isInvertible();
-    }
-
-    /**
-     * Transforms a point and returns the result.
-     *
-     * @name Matrix#transform
-     * @function
-     * @param {Point} point the point to be transformed
-     * @return {Point} the transformed point
-     */
-    /**
-     * Transforms an array of coordinates by this matrix and stores the results
-     * into the destination array, which is also returned.
-     *
-     * @name Matrix#transform
-     * @function
-     * @param {Number[]} src the array containing the source points
-     * as x, y value pairs
-     * @param {Number[]} dst the array into which to store the transformed
-     * point pairs
-     * @param {Number} count the number of points to transform
-     * @return {Number[]} the dst array, containing the transformed coordinates
-     */
-    transform(/* point | */ src, dst, count) {
-        return arguments.length < 3
-            // TODO: Check for rectangle and use _tranformBounds?
-            ? this._transformPoint(new Point(arguments[0]))
-            : this._transformCoordinates(src, dst, count);
     }
 
     /**
      * A faster version of transform that only takes one point and does not
      * attempt to convert it.
      */
-    transformPoint(point) {
+    transformPoint(point){
         var x = point.x,
             y = point.y;
 
-        return {
-            x:x * this._a + y * this._c + this._tx,
-            y:x * this._b + y * this._d + this._ty};
+        return new Point(
+            x*this._a + y*this._c + this._tx,
+            x*this._b + y*this._d + this._ty
+        );
     }
 
-    transformPoint2(x, y) {
-        return {
-            x:x * this._a + y * this._c + this._tx,
-            y:x * this._b + y * this._d + this._ty};
-    }
-
-    _transformCoordinates(src, dst, count) {
-        for (var i = 0, max = 2 * count; i < max; i += 2) {
-            var x = src[i],
-                y = src[i + 1];
-            dst[i] = x * this._a + y * this._c + this._tx;
-            dst[i + 1] = x * this._b + y * this._d + this._ty;
-        }
-        return dst;
-    }
-
-    _transformCorners(rect) {
-        var x1 = rect.x,
-            y1 = rect.y,
-            x2 = x1 + rect.width,
-            y2 = y1 + rect.height,
-            coords = [ x1, y1, x2, y1, x2, y2, x1, y2 ];
-        return this._transformCoordinates(coords, coords, 4);
-    }
-
-    /**
-     * Returns the 'transformed' bounds rectangle by transforming each corner
-     * point and finding the new bounding box to these points. This is not
-     * really the transformed rectangle!
-     */
-    _transformBounds(bounds, dest) {
-        var coords = this._transformCorners(bounds),
-            min = coords.slice(0, 2),
-            max = min.slice();
-        for (var i = 2; i < 8; i++) {
-            var val = coords[i],
-                j = i & 1;
-            if (val < min[j]) {
-                min[j] = val;
-            } else if (val > max[j]) {
-                max[j] = val;
-            }
-        }
-        if (!dest)
-            dest = new Rectangle();
-        return dest.set(min[0], min[1], max[0] - min[0], max[1] - min[1]);
-    }
-
-    /**
-     * Inverse transforms a point and returns the result.
-     *
-     * @param {Point} point the point to be transformed
-     */
-    inverseTransform(/* point */) {
-        return this._inverseTransform(new Point(arguments[0]));
-    }
-
-    _inverseTransform(point, dest) {
-        var a = this._a,
-            b = this._b,
-            c = this._c,
-            d = this._d,
-            tx = this._tx,
-            ty = this._ty,
-            det = a * d - b * c,
-            res = null;
-        if (det && !isNaN(det) && isFinite(tx) && isFinite(ty)) {
-            var x = point.x - this._tx,
-                y = point.y - this._ty;
-            if (!dest)
-                dest = new Point();
-            res = dest.set(
-                (x * d - y * c) / det,
-                (y * a - x * b) / det);
-        }
-        return res;
+    transformPoint2(x, y){
+        return new Point(
+            x*this._a + y*this._c + this._tx,
+            x*this._b + y*this._d + this._ty
+        );
     }
 
     /**
@@ -630,7 +463,7 @@ class Matrix{
      * @return {Object} the decomposed matrix, or `null` if decomposition is not
      *     possible
      */
-    decompose() {
+    decompose(){
         // http://dev.w3.org/csswg/css3-2d-transforms/#matrix-decomposition
         // http://www.maths-informatique-jeux.com/blog/frederic/?post/2013/12/01/Decomposition-of-2D-transform-matrices
         // https://github.com/wisec/DOMinator/blob/master/layout/style/nsStyleAnimation.cpp#L946
@@ -638,33 +471,33 @@ class Matrix{
             b = this._b,
             c = this._c,
             d = this._d,
-            det = a * d - b * c,
+            det = a*d - b*c,
             sqrt = Math.sqrt,
             atan2 = Math.atan2,
-            degrees = 180 / Math.PI,
+            degrees = 180/Math.PI,
             rotate,
             scale,
             skew;
-        if (a !== 0 || b !== 0) {
-            var r = sqrt(a * a + b * b);
-            rotate = Math.acos(a / r) * (b > 0 ? 1 : -1);
-            scale = [r, det / r];
-            skew = [atan2(a * c + b * d, r * r), 0];
-        } else if (c !== 0 || d !== 0) {
-            var s = sqrt(c * c + d * d);
+        if (a !== 0 || b !== 0){
+            var r = sqrt(a*a + b*b);
+            rotate = Math.acos(a/r)*(b > 0 ? 1 : -1);
+            scale = [r, det/r];
+            skew = [atan2(a*c + b*d, r*r), 0];
+        } else if (c !== 0 || d !== 0){
+            var s = sqrt(c*c + d*d);
             // rotate = Math.PI/2 - (d > 0 ? Math.acos(-c/s) : -Math.acos(c/s));
-            rotate = Math.asin(c / s)  * (d > 0 ? 1 : -1);
-            scale = [det / s, s];
-            skew = [0, atan2(a * c + b * d, s * s)];
-        } else { // a = b = c = d = 0
+            rotate = Math.asin(c/s)*(d > 0 ? 1 : -1);
+            scale = [det/s, s];
+            skew = [0, atan2(a*c + b*d, s*s)];
+        } else{ // a = b = c = d = 0
             rotate = 0;
             skew = scale = [0, 0];
         }
         return {
             translation: this.getTranslation(),
-            rotation: rotate * degrees,
+            rotation: rotate*degrees,
             scaling: new Point(scale),
-            skewing: new Point(skew[0] * degrees, skew[1] * degrees)
+            skewing: new Point(skew[0]*degrees, skew[1]*degrees)
         };
     }
 
@@ -723,8 +556,8 @@ class Matrix{
      * @bean
      * @type Number[]
      */
-    getValues() {
-        return [ this._a, this._b, this._c, this._d, this._tx, this._ty ];
+    getValues(){
+        return [this._a, this._b, this._c, this._d, this._tx, this._ty];
     }
 
     /**
@@ -733,7 +566,7 @@ class Matrix{
      * @bean
      * @type Point
      */
-    getTranslation() {
+    getTranslation(){
         // No decomposition is required to extract translation.
         return new Point(this._tx, this._ty);
     }
@@ -745,7 +578,7 @@ class Matrix{
      * @type Point
      * @see #decompose()
      */
-    getScaling() {
+    getScaling(){
         return (this.decompose() || {}).scaling;
     }
 
@@ -756,7 +589,7 @@ class Matrix{
      * @type Number
      * @see #decompose()
      */
-    getRotation() {
+    getRotation(){
         return (this.decompose() || {}).rotation;
     }
 
@@ -765,84 +598,79 @@ class Matrix{
      *
      * @param {CanvasRenderingContext2D} ctx
      */
-    applyToContext(ctx) {
-        if (!this.isIdentity()) {
+    applyToContext(ctx){
+        if (!this.isIdentity()){
             ctx.transform(this._a, this._b, this._c, this._d,
                 this._tx, this._ty);
         }
     }
 
     /**
-         * Applies this matrix to the specified Canvas Context.
-         *
-         * @param {CanvasRenderingContext2D} ctx
-         */
-        setToContext(ctx) {
-            if (!this.isIdentity()) {
-                ctx.setTransform(this._a, this._b, this._c, this._d,
-                    this._tx, this._ty);
-            }
+     * Applies this matrix to the specified Canvas Context.
+     *
+     * @param {CanvasRenderingContext2D} ctx
+     */
+    setToContext(ctx){
+        if (!this.isIdentity()){
+            ctx.setTransform(this._a, this._b, this._c, this._d,
+                this._tx, this._ty);
         }
+    }
 
-    get a()
-    {
+    static create(){
+        return new Matrix(1, 0, 0, 1, 0, 0);
+    }
+
+    get a(){
         return this._a;
     }
 
-    set a(value)
-    {
+    set a(value){
         this._a = value
     }
-    get b()
-    {
+
+    get b(){
         return this._b;
     }
 
-    set b(value)
-    {
+    set b(value){
         this._b = value
     }
-    get c()
-    {
+
+    get c(){
         return this._c;
     }
 
-    set c(value)
-    {
+    set c(value){
         this._c = value
     }
 
 
-    get d()
-    {
+    get d(){
         return this._d;
     }
 
-    set d(value)
-    {
+    set d(value){
         this._d = value
     }
 
-    get tx()
-    {
+    get tx(){
         return this._tx;
     }
 
-    set tx(value)
-    {
+    set tx(value){
         this._tx = value
     }
-    get ty()
-    {
+
+    get ty(){
         return this._ty;
     }
 
-    set tx(value)
-    {
+    set tx(value){
         this._ty = value
     }
 }
 
-Matrix.Identity = Object.freeze(new Matrix());
+Matrix.Identity = Object.freeze(Matrix.create());
 
 export default Matrix;

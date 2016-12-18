@@ -15,6 +15,7 @@ import ElementPropsChanged from "commands/ElementPropsChanged";
 import ElementDelete from "commands/ElementDelete";
 import ElementMove from "commands/ElementMove";
 import Matrix from "../math/matrix";
+import Point from "../math/point";
 import {rotatePointByDegree} from "../math/math";
 import stopwatch from "Stopwatch";
 import ResizeDimension from "framework/ResizeDimension";
@@ -48,7 +49,7 @@ fwk.Stroke = Brush;
 
 fwk.DockValues = {left: "Left", top: "Top", bottom: "Bottom", right: "Right", fill: "Fill"};
 
-var identityMatrixdm = new Matrix().decompose();
+var identityMatrixdm = Matrix.create().decompose();
 
 // constructor
 var UIElement = klass(DataNode, {
@@ -79,7 +80,7 @@ var UIElement = klass(DataNode, {
     },
     resetRuntimeProps: function () {
         this.runtimeProps = {
-            viewMatrix: new Matrix(),
+            viewMatrix: Matrix.create(),
             dm: identityMatrixdm,
             boundaryRectGlobal: null,
             globalViewMatrix: null,
@@ -159,13 +160,13 @@ var UIElement = klass(DataNode, {
         var m = null;
 
         // if (hasAngle){
-        //     m = m || new Matrix();
+        //     m = m || Matrix.create();
         //     var current = this.getRotation();
         //     var o = this.rotationOrigin();
         //     m.rotate(angle - current, o.x, o.y);
         // }
         // if (hasX || hasY){
-        //     m = m || new Matrix();
+        //     m = m || Matrix.create();
         //     var t = this.getTranslation();
         //     m.translate(-t.x, -t.y);
         //     m.translate(x, y);
@@ -198,67 +199,69 @@ var UIElement = klass(DataNode, {
         this.invalidate();
     },
 
+    _saveOrResetLayoutProps: function(){
+        //this happens only for clones, so no need to clear origLayout
+        if (!this.runtimeProps.origLayout){
+            this.runtimeProps.origLayout = {
+                width: this.width(),
+                height: this.height(),
+                m: this.viewMatrix()
+            }
+        }
+        else{
+            this.setProps(this.runtimeProps.origLayout);
+        }
+    },
+
     getTranslation: function(){
         return this.runtimeProps.dm.translation;
     },
-    setTranslation: function(t) {
-        var translation = this.getTranslation();
-        this.applyTransform(new Matrix().translate(t.x - translation.x, t.y - translation.y));
+    applyTranslation: function(t, withReset) {
+        if (withReset){
+            this._saveOrResetLayoutProps();
+        }
+        this.applyTransform(Matrix.create().translate(t.x, t.y));
     },
-    applyTranslation: function(t) {
-        this.applyTransform(new Matrix().translate(t.x, t.y));
-    },
+
     getRotation: function() {
         var dm = this.runtimeProps.dm;
         return dm && dm.rotation;
     },
-    setRotation: function(rotation) {
-        var current = this.getRotation();
-        if (current && rotation) {
-            this.rotate(rotation - current);
-        }
+    applyRotation: function(angle){
+        var origin = this.rotationOrigin();
+        this.applyTransform(Matrix.create().rotate(angle, origin.x, origin.y));
     },
     isRotated: function(){
         return this.getRotation() % 360 !== 0;
-    },
-    rotate: function(angle){
-        var origin = this.rotationOrigin();
-        this.applyTransform(new Matrix().rotate(angle, origin.x, origin.y));
     },
 
     getScaling: function() {
         var dm = this.runtimeProps.dm;
         return dm && dm.scaling;
     },
-    setScaling: function(s, o, sameDirection) {
-        if (this.runtimeProps.originalMatrix){
-            this.setTransform(this.runtimeProps.originalMatrix);
+    applyScaling: function(s, o, sameDirection, withReset) {
+        if (withReset){
+            this._saveOrResetLayoutProps();
         }
-        var current = this.getScaling();
-        var scaleMatrix = new Matrix().scale(s.x / current.x, s.y / current.y, o.x, o.y);
+
+        var scaleMatrix = Matrix.create().scale(s.x, s.y, o.x, o.y);
 
         if (sameDirection || !this.isRotated()){
-            var w = this.runtimeProps.hasOwnProperty("originalWidth") ? this.runtimeProps.originalWidth : this.width();
-            var h = this.runtimeProps.hasOwnProperty("originalHeight") ? this.runtimeProps.originalHeight : this.height();
-            this.prepareAndSetProps({
-                width: w * s.x,
-                height: h * s.y,
-            });
-            return true;
-        }
-        this.applyTransform(scaleMatrix);
-        return false;
-    },
-    applyScaling: function(s, o, sameDirection) {
-        var scaleMatrix = new Matrix().scale(s.x, s.y, o.x, o.y);
+            var newMatrix = this.viewMatrix().clone().prepended(scaleMatrix);
+            var xyOld = this.viewMatrix().transformPoint2(0, 0);
+            var xyNew = newMatrix.transformPoint2(0, 0);
+            var offset = xyNew.subtract(xyOld);
+            if (!offset.equals(Point.Zero)){
+                this.applyTranslation(offset);
+            }
 
-        if (sameDirection || !this.isRotated()){
             this.prepareAndSetProps({
                 width: this.width() * s.x,
                 height: this.height() * s.y,
             });
             return true;
         }
+
         this.applyTransform(scaleMatrix);
         return false;
     },
@@ -316,16 +319,14 @@ var UIElement = klass(DataNode, {
     },
     startResizing: function () {
         Environment.controller.startResizingEvent.raise();
-
-        this.runtimeProps.originalWidth = this.width();
-        this.runtimeProps.originalHeight = this.height();
-        this.runtimeProps.originalMatrix = this.viewMatrix().clone();
     },
     stopResizing: function () {
         Environment.controller.stopResizingEvent.raise();
-
-        delete this.runtimeProps.originalWidth;
-        delete this.runtimeProps.originalHeight;
+    },
+    resetResize: function(){
+        if (this.runtimeProps.origLayout){
+            this.setProps(this.runtimeProps.origLayout);
+        }
     },
     getSnapPoints: function (local) {
         if (!this.allowSnapping()) {
@@ -618,7 +619,7 @@ var UIElement = klass(DataNode, {
     //     return null;
     // },
     updateViewMatrix: function () {
-        // var matrix = new Matrix();
+        // var matrix = Matrix.create();
         // var sw = 1;
         // if (this.flipHorizontal()) {
         //     sw = -1;
@@ -657,6 +658,12 @@ var UIElement = klass(DataNode, {
     },
     viewMatrix: function () {
         return this.props.m;
+    },
+    viewMatrixInverted: function () {
+        if (!this.runtimeProps.viewMatrixInverted){
+            this.runtimeProps.viewMatrixInverted = this.viewMatrix().clone().invert();
+        }
+        return this.runtimeProps.viewMatrixInverted;
     },
     draw: function (context, environment) {
         this.stopwatch.start();
@@ -1198,17 +1205,15 @@ var UIElement = klass(DataNode, {
         each([this], callback);
     },
     cloneProps: function () {
-        var newProps = extendOwnProperties(true, {}, this.props);
-        ObjectFactory.updatePropsWithPrototype(newProps);
-        return newProps;
+        return Object.assign({}, this.props);
     },
     clone: function () {
-        var clone = fwk.UIElement.fromType(this.t, this.cloneProps());
+        var clone = ObjectFactory.fromType(this.t, this.cloneProps());
         clone.id(createUUID());
         return clone;
     },
     mirrorClone: function () {
-        var clone = fwk.UIElement.fromType(this.t, this.cloneProps());
+        var clone = ObjectFactory.fromType(this.t, this.cloneProps());
         return clone;
     },
     cursor: function () {

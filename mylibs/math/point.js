@@ -119,32 +119,9 @@ export default class Point {
      * @param {Point} point
      * @name Point#initialize
      */
-    constructor(arg0, arg1) {
-        var type = typeof arg0;
-        if (type === 'number') {
-            var hasY = typeof arg1 === 'number';
-            this.x = arg0;
-            this.y = hasY ? arg1 : arg0;
-        } else if (type === 'undefined' || arg0 === null) {
-            this.x = this.y = 0;
-        } else {
-            if (Array.isArray(arg0)) {
-                this.x = arg0[0];
-                this.y = arg0.length > 1 ? arg0[1] : arg0[0];
-            } else if (arg0.x != null) {
-                this.x = arg0.x;
-                this.y = arg0.y;
-            } else if (arg0.width != null) {
-                this.x = arg0.width;
-                this.y = arg0.height;
-            } else if (arg0.angle != null) {
-                this.x = arg0.length;
-                this.y = 0;
-                this.setAngle(arg0.angle);
-            } else {
-                this.x = this.y = 0;
-            }
-        }
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
     }
 
     /**
@@ -517,8 +494,7 @@ export default class Point {
      * var result = firstPoint - secondPoint;
      * console.log(result); // {x: 5, y: 15}
      */
-    subtract(/* point */) {
-        var point = new Point(arguments[0]);
+    subtract(point) {
         return new Point(this.x - point.x, this.y - point.y);
     }
 
@@ -848,3 +824,5 @@ export default class Point {
         return new Point(Math.abs(this.x), Math.abs(this.y));
     }
 }
+
+Point.Zero = new Point(0, 0);

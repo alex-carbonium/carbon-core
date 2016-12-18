@@ -5,20 +5,19 @@ import Selection from "../../framework/SelectionModel";
 registerExample("skew", function(app){
     var rect1 = new Rectangle();
     rect1.setProps({width: 100, height: 100, name: 'rect 1'});
-    rect1.setTranslation({x: 200, y: 300});
+    rect1.applyTranslation({x: 200, y: 300});
     app.activePage.add(rect1);
 
     var rect2 = new Rectangle();
     rect2.setProps({width: 100, height: 100, name: 'rect 2'});
-    rect2.setTranslation({x: 400, y: 300});
-    rect2.rotate(20);
+    rect2.applyTranslation({x: 400, y: 300});
+    rect2.applyRotation(20);
     app.activePage.add(rect2);
 
     var rect3 = new Rectangle();
     rect3.setProps({width: 100, height: 100, name: 'rect 3'});
-    rect3.setTranslation({x: 200, y: 500});
-    rect3.rotate(25);
-    window.bb = rect3.getBoundingBox();
+    rect3.applyTranslation({x: 200, y: 500});
+    rect3.applyRotation(25);
     app.activePage.add(rect3);
 
     Selection.makeSelection([rect1, rect2]);

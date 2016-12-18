@@ -2,6 +2,7 @@ import GroupContainer from "./GroupContainer";
 import {ChangeMode, Types} from "./Defs";
 import PropertyMetadata from "./PropertyMetadata";
 import SelectComposite from "./SelectComposite";
+import UIElement from "./UIElement";
 import Brush from "./Brush";
 
 export default class ResizingElement extends GroupContainer{
@@ -27,6 +28,13 @@ export default class ResizingElement extends GroupContainer{
         this._elements = elements;
 
         this.showOriginal(false);
+    }
+
+    applyScaling(s, o, sameDirection, withReset){
+        if (UIElement.prototype.applyScaling.apply(this, arguments)){
+            var localOrigin = this.viewMatrixInverted().transformPoint(o);
+            this.children.forEach(e => e.applyScaling(s, localOrigin, false, withReset));
+        }
     }
 
     showOriginal(value){

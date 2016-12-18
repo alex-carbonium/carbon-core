@@ -124,14 +124,15 @@ export default {
         rect.y = newOrigin.y - rect.height / 2;
 
         debug("Resizing rect: x=%d y=%d w=%d h=%d ow=%d dx=%d", rect.x, rect.y, rect.width, rect.height, original.width, dx);
-        var oldRect = frame.resizingElement.getBoundaryRect();
+        //var oldRect = frame.resizingElement.getBoundaryRect();
         //frame.resizingElement.resize(rect, event.event.altKey);
-        frame.resizingElement.setScaling({
+        //frame.resizingElement.performArrange(oldRect, frame.origin);
+
+        var origin = event.event.altKey ? {x: frame.origin.x + frame.origin.width/2, y: frame.origin.y} : frame.origin;
+        frame.resizingElement.applyScaling({
             x: (frame.origin.width + dx)/frame.origin.width,
             y: 1
-        }, frame.origin, true);
-
-        frame.resizingElement.performArrange(oldRect, frame.origin);
+        }, origin, true, true);
 
         Environment.controller.resizingEvent.raise({
             element: frame.element,

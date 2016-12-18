@@ -107,6 +107,10 @@ export default klass({
     }
     ,
 
+    cloneProps: function () {
+        return Object.assign({}, this.props);
+    },
+
     selectProps: function (namesOrChanges) {
         var result = {};
         if (Array.isArray(namesOrChanges)) {
@@ -351,7 +355,7 @@ export default klass({
     },
 
     toJSON(){
-        var json = {t: this.t, props: Object.assign({}, this.props)};
+        var json = {t: this.t, props: this.cloneProps()};
         if (this.children){
             json.children = this.children.map(x => x.toJSON());
         }

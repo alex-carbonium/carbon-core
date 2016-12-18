@@ -171,7 +171,7 @@ export default class RulerExtension extends RuntimeExtension {
             height: viewportRect.height - rulerWidth
         };
 
-        this._baseMatrix = new Matrix();
+        this._baseMatrix = Matrix.create();
         this._baseMatrix.scale(1 / scale, 1 / scale);
         this._baseMatrix.translate(viewportRect.x * scale + xRounder | 0, (viewportRect.y * scale + yRounder | 0) + PADDING_TOP);
 

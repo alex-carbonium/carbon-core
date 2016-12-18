@@ -8,6 +8,7 @@ import {areRectsIntersecting, rotatePointByDegree} from "../math/math";
 import Phantom from "./Phantom";
 import Brush from "./Brush";
 import {toGlobalProps} from "./Transformations";
+import Point from "../math/point";
 
 var debug = require("DebugUtil")("carb:draggingElement");
 
@@ -45,6 +46,8 @@ class DraggingElement extends GroupContainer {
             this._elements.push(element);
         }
         this.performArrange();
+
+        this._initialPosition = this.getTranslation();
 
         //this._element = element;
         //this._origProps = element.selectProps(["visible"]);
@@ -409,7 +412,7 @@ class DraggingElement extends GroupContainer {
 
     dragTo(event) {
         debug("Drag to x=%d y=%d", event.x, event.y);
-        var position = {x: event.x, y: event.y};
+        var position = new Point(event.x, event.y);
 
         if (event.event.shiftKey) {
             position = applyOrthogonalMove.call(this, position);
@@ -421,7 +424,7 @@ class DraggingElement extends GroupContainer {
             SnapController.clearActiveSnapLines();
         }
 
-        this.setTranslation(position);
+        this.applyTranslation(position.subtract(this._initialPosition), true);
     }
 
     parentAllowSnapping(pos) {

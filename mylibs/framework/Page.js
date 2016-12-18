@@ -211,7 +211,7 @@ class Page extends Layer {
     }
 
     updatePageMatrix() {
-        var viewMatrix = this.pageMatrix = new Matrix();
+        var viewMatrix = this.pageMatrix = Matrix.create();
         var scale = this.scale();
         viewMatrix.translate(-(0 | this.scrollX()), -(0 | this.scrollY()));
         viewMatrix.scale(scale, scale);
@@ -507,7 +507,7 @@ class Page extends Layer {
 
         context.save();
         context.scale(contextScale, contextScale);
-        var matrix = new Matrix();
+        var matrix = Matrix.create();
         matrix.scale(zoom, zoom);
         matrix.translate(x - rect.x, y - rect.y);
         matrix.applyToContext(context)

@@ -66,7 +66,8 @@ export var ArrangeStrategies = {
     Stack: 1,
     Dock: 3,
     Align: 4,
-    Repeat: 5
+    Repeat: 5,
+    Group: 6
 };
 
 export var Overflow = {
