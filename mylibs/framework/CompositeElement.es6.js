@@ -5,6 +5,7 @@ import util from "util";
 import Matrix from "math/matrix";
 import {leaveCommonProps} from "../util";
 import {Types} from "./Defs";
+import Brush from "framework/Brush";
 
 var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
     _constructor: function(){
@@ -322,6 +323,11 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
         for (var i = 0; i < this.elements.length; i++){
             var element = this.elements[i];
             var elementChanges = Object.assign({}, changes);
+            for(var p in elementChanges){
+                if(p === 'fill' || p === 'stroke'){
+                    elementChanges[p] = Brush.extend(element.props[p], elementChanges[p])
+                }
+            }
             element.prepareProps(elementChanges);
             result.push(elementChanges);
         }
