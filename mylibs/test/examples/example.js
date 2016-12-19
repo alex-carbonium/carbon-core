@@ -2,6 +2,7 @@ import {app, Intl, Environment, ActionManager} from "../../SketchFacade";
 import RenderLoop from "../../RenderLoop";
 import ArtboardPage from "../../ui/pages/ArtboardPage";
 import Matrix from "../../math/matrix";
+import Point from "../../math/point";
 import UserSettings from "../../UserSettings";
 
 var viewContainer = document.getElementById("viewContainer");
@@ -44,3 +45,4 @@ export function registerExample(name, fn){
 UserSettings.showBoundingBoxes = true;
 
 window.Matrix = Matrix;
+window.Point = Point;

@@ -30,11 +30,11 @@ export default class ResizingElement extends GroupContainer{
         this.showOriginal(false);
     }
 
-    applyScaling(s, o, sameDirection, withReset){
-        if (UIElement.prototype.applyScaling.apply(this, arguments)){
-            var localOrigin = this.viewMatrixInverted().transformPoint(o);
-            this.children.forEach(e => e.applyScaling(s, localOrigin, false, withReset));
-        }
+    applySizeScaling(s, o, sameDirection, withReset){
+        var localOrigin = this.viewMatrixInverted().transformPoint(o);
+        this.children.forEach(e => e.applyScaling(s, localOrigin, false, withReset));
+
+        this._lastScaling = {s, o, sameDirection};
     }
 
     showOriginal(value){
@@ -45,37 +45,12 @@ export default class ResizingElement extends GroupContainer{
         this.showOriginal(true);
 
         for (var i = 0; i < this.children.length; i++){
-            var clone = this.children[i];
             var element = this._elements[i];
-            var newWidth = clone.width();
-            var newHeight = clone.height();
 
-            var newMatrixProps = clone.globalViewMatrix().decompose();
-            var props = {
-                width: newWidth,
-                height: newHeight
-            };
-
-            var origAngle = element.globalViewMatrix().getRotation();
-            var deltaAngle = newMatrixProps.rotation - origAngle;
-            props.angle  = element.angle() + deltaAngle;
-
-            var oldPos = clone.globalViewMatrix().transformPoint2(0, 0);
-            var oldOrigin = clone.rotationOrigin(true);
-
-            var newPos = element.parent().globalViewMatrixInverted().transformPoint(oldPos);
-            var newOrigin = element.parent().globalViewMatrixInverted().transformPoint(oldOrigin);
-
-            newPos = sketch.math2d.rotatePoint(newPos, props.angle * Math.PI / 180, newOrigin);
-
-            Object.assign(props, newPos);
-
-            //element.prepareAndSetProps(props);
-            element.prepareAndSetProps({
-                m: element.parent().globalViewMatrixInverted().appended(clone.globalViewMatrix()),
-                width: newWidth,
-                height: newHeight
-            });
+            if (this._lastScaling){
+                var localOrigin = element.parent().globalViewMatrixInverted().transformPoint(this._lastScaling.o);
+                element.applyScaling(this._lastScaling.s, localOrigin, this._lastScaling.sameDirection);
+            }
         }
     }
 

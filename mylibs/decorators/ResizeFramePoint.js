@@ -3,6 +3,7 @@ import SelectComposite from "framework/SelectComposite";
 import Environment from "environment";
 import SnapController from "framework/SnapController";
 import {Types} from "../framework/Defs";
+import Point from "../math/point";
 
 var debug = require("DebugUtil")("carb:resizeFramePoint");
 
@@ -21,7 +22,7 @@ export default {
         context.fill();
         context.stroke();
     },
-    capture: function (frame) {
+    capture: function (frame, point) {
         var resizingElement = UIElement.construct(Types.ResizingElement, frame.element);
         frame.resizingElement = resizingElement;
         frame.originalRect = frame.element.getBoundaryRectGlobal();
@@ -29,7 +30,12 @@ export default {
         frame.flipVertical = frame.element.flipVertical();
         frame.flipHorizontal = frame.element.flipHorizontal();
         frame.globalViewMatrix = frame.element.globalViewMatrix();
-        frame.origin = frame.element.getBoundingBoxGlobal();
+
+        var c = new Point(frame.element.width()/2, frame.element.height()/2);
+        var pointOrigin = c.subtract(new Point(frame.element.width()/2 * point.rv[0], frame.element.height()/2 * point.rv[1]));
+        frame.centerOrigin = frame.element.globalViewMatrix().transformPoint(c);
+        frame.pointOrigin = frame.element.globalViewMatrix().transformPoint(pointOrigin);
+
         debug("Captured global rect: x=%d y=%d w=%d h=%d", frame.originalRect.x, frame.originalRect.y, frame.originalRect.width, frame.originalRect.height);
 
         Environment.view.layer3.add(resizingElement);
@@ -128,10 +134,21 @@ export default {
         //frame.resizingElement.resize(rect, event.event.altKey);
         //frame.resizingElement.performArrange(oldRect, frame.origin);
 
-        var origin = event.event.altKey ? {x: frame.origin.x + frame.origin.width/2, y: frame.origin.y} : frame.origin;
+        dx *= point.rv[0];
+        dy *= point.rv[1];
+
+        var origin;
+        if (event.event.altKey){
+            origin = frame.centerOrigin;
+            dx *= 2;
+            dy *= 2;
+        }
+        else{
+            origin = frame.pointOrigin;
+        }
         frame.resizingElement.applyScaling({
-            x: (frame.origin.width + dx)/frame.origin.width,
-            y: 1
+            x: (frame.originalRect.width + dx)/frame.originalRect.width,
+            y: (frame.originalRect.height + dy)/frame.originalRect.height
         }, origin, true, true);
 
         Environment.controller.resizingEvent.raise({

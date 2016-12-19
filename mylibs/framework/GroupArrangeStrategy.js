@@ -8,6 +8,15 @@ var GroupArrangeStrategy = {
         if (items.length === 0){
             return;
         }
+        if (items.length === 1){
+            container.setProps({
+                width: items[0].width(),
+                height: items[0].height(),
+                m: items[0].globalViewMatrix()
+            });
+            items[0].resetTransform();
+            return;
+        }
 
         var xMax = Number.NEGATIVE_INFINITY;
         var yMax = Number.NEGATIVE_INFINITY;

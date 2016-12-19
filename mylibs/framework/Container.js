@@ -28,11 +28,10 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
             arrangeStrategyInstance: function () {
                 return ArrangeStrategy.findStrategy(this);
             },
-            applyScaling: function(){
+            applySizeScaling: function(){
                 var rect = this.getBoundaryRect();
-                if (UIElement.prototype.applyScaling.apply(this, arguments)){
-                    this.performArrange(rect);
-                }
+                UIElement.prototype.applySizeScaling.apply(this, arguments);
+                this.performArrange(rect);
             },
 
             fillBackground: function (context, l, t, w, h) {

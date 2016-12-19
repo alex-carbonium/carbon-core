@@ -8,10 +8,9 @@ import Point from "../math/point";
 require("./GroupArrangeStrategy");
 
 export default class GroupContainer extends Container {
-    applyScaling(s, o, sameDirection, withReset){
-        if (UIElement.prototype.applyScaling.apply(this, arguments)){
-            this.children.forEach(e => e.applyScaling(s, Point.Zero, false, withReset));
-        }
+    applySizeScaling(s, o, sameDirection, withReset){
+        UIElement.prototype.applySizeScaling.apply(this, arguments);
+        this.children.forEach(e => e.applyScaling(s, Point.Zero, false, withReset));
     }
 
     drawSelf(context, w, h, environment){

@@ -244,26 +244,33 @@ var UIElement = klass(DataNode, {
             this._saveOrResetLayoutProps();
         }
 
-        var scaleMatrix = Matrix.create().scale(s.x, s.y, o.x, o.y);
-
         if (sameDirection || !this.isRotated()){
-            var newMatrix = this.viewMatrix().clone().prepended(scaleMatrix);
-            var xyOld = this.viewMatrix().transformPoint2(0, 0);
-            var xyNew = newMatrix.transformPoint2(0, 0);
-            var offset = xyNew.subtract(xyOld);
-            if (!offset.equals(Point.Zero)){
-                this.applyTranslation(offset);
-            }
-
-            this.prepareAndSetProps({
-                width: this.width() * s.x,
-                height: this.height() * s.y,
-            });
+            this.applySizeScaling(s, o, sameDirection, withReset);
             return true;
         }
 
-        this.applyTransform(scaleMatrix);
+        this.applyTransform(Matrix.create().scale(s.x, s.y, o.x, o.y));
         return false;
+    },
+    applySizeScaling: function(s, o, sameDirection, withReset){
+        var w = this.width();
+        var h = this.height();
+        var newProps = {
+            width: w * s.x,
+            height: h * s.y,
+        };
+
+        var localOrigin = this.viewMatrixInverted().transformPoint(o);
+        var wx = localOrigin.x === 0 ? 0 : w/localOrigin.x;
+        var hy = localOrigin.y === 0 ? 0 : h/localOrigin.y;
+        var newLocalOrigin = new Point(wx === 0 ? 0 : newProps.width/wx, hy === 0 ? 0 : newProps.height/hy);
+        var newOrigin = this.viewMatrix().transformPoint(newLocalOrigin);
+        var offset = o.subtract(newOrigin);
+        if (!offset.equals(Point.Zero)){
+            newProps.m = this.props.m.prepended(Matrix.create().translate(offset.x, offset.y));
+        }
+
+        this.prepareAndSetProps(newProps);
     },
 
     applyTransform: function(matrix) {
