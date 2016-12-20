@@ -146,10 +146,9 @@ export default {
         else{
             origin = frame.pointOrigin;
         }
-        frame.resizingElement.applyScaling({
-            x: (frame.originalRect.width + dx)/frame.originalRect.width,
-            y: (frame.originalRect.height + dy)/frame.originalRect.height
-        }, origin, true, true);
+
+        var s = new Point(1 + dx/frame.originalRect.width, 1 + dy/frame.originalRect.height);
+        frame.resizingElement.applyScaling(s, origin, true, true);
 
         Environment.controller.resizingEvent.raise({
             element: frame.element,

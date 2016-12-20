@@ -4,6 +4,8 @@ import ArtboardPage from "../../ui/pages/ArtboardPage";
 import Matrix from "../../math/matrix";
 import Point from "../../math/point";
 import UserSettings from "../../UserSettings";
+import backend from "../../backend";
+import logger from "../../logger";
 
 var viewContainer = document.getElementById("viewContainer");
 var viewport = document.getElementById("viewport");
@@ -41,6 +43,8 @@ export function registerExample(name, fn){
 
     fn(app);
 }
+
+backend.init(logger, {services: '', storage: '', file: '', cdn: ''});
 
 UserSettings.showBoundingBoxes = true;
 

@@ -31,8 +31,9 @@ export default class ResizingElement extends GroupContainer{
     }
 
     applySizeScaling(s, o, sameDirection, withReset){
-        var localOrigin = this.viewMatrixInverted().transformPoint(o);
-        this.children.forEach(e => e.applyScaling(s, localOrigin, false, withReset));
+        // var localOrigin = this.viewMatrixInverted().transformPoint(o);
+        // this.children.forEach(e => e.applyScaling(s, localOrigin, false, withReset));
+        super.applySizeScaling(s, o, sameDirection, withReset);
 
         this._lastScaling = {s, o, sameDirection};
     }

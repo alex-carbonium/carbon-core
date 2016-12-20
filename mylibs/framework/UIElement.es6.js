@@ -257,19 +257,29 @@ var UIElement = klass(DataNode, {
         var h = this.height();
         var newProps = {
             width: w * s.x,
-            height: h * s.y,
+            height: h * s.y
         };
 
         var localOrigin = this.viewMatrixInverted().transformPoint(o);
         var wx = localOrigin.x === 0 ? 0 : w/localOrigin.x;
         var hy = localOrigin.y === 0 ? 0 : h/localOrigin.y;
         var newLocalOrigin = new Point(wx === 0 ? 0 : newProps.width/wx, hy === 0 ? 0 : newProps.height/hy);
+
         var newOrigin = this.viewMatrix().transformPoint(newLocalOrigin);
         var offset = o.subtract(newOrigin);
-        if (!offset.equals(Point.Zero)){
-            newProps.m = this.props.m.prepended(Matrix.create().translate(offset.x, offset.y));
+        var fx = s.x < 0 ? -1 : 1;
+        var fy = s.y < 0 ? -1 : 1;
+
+        if (fx === -1 || fy === -1 || !offset.equals(Point.Zero)){
+            var matrix = this.viewMatrix();
+            if (fx === -1 || fy === -1){
+                matrix = matrix.appended(Matrix.create().scale(fx, fy));
+            }
+            newProps.m = matrix.prepended(Matrix.create().translate(offset.x, offset.y));
         }
 
+        newProps.width = Math.abs(newProps.width);
+        newProps.height = Math.abs(newProps.height);
         this.prepareAndSetProps(newProps);
     },
 
@@ -656,6 +666,7 @@ var UIElement = klass(DataNode, {
         delete this.runtimeProps.boundaryRectGlobal;
         delete this.runtimeProps.globalViewMatrix;
         delete this.runtimeProps.globalViewMatrixInverted;
+        delete this.runtimeProps.viewMatrixInverted;
         delete this.runtimeProps.globalClippingBox;
         delete this.runtimeProps.snapPoints;
         //primitive root should be changed only when changing parent, it is needed for repeater clones

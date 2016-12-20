@@ -10,7 +10,10 @@ require("./GroupArrangeStrategy");
 export default class GroupContainer extends Container {
     applySizeScaling(s, o, sameDirection, withReset){
         UIElement.prototype.applySizeScaling.apply(this, arguments);
-        this.children.forEach(e => e.applyScaling(s, Point.Zero, false, withReset));
+
+        //if group is flipped, scale children normally
+        var absScale = s.abs();
+        this.children.forEach(e => e.applyScaling(absScale, Point.Zero, false, withReset));
     }
 
     drawSelf(context, w, h, environment){
