@@ -1,11 +1,11 @@
 import PropertyMetadata from "../PropertyMetadata";
 import {Types} from "../Defs";
 import SnapController from "../SnapController";
-import UserSettings from "../../UserSettings";
 import Artboard from "../Artboard";
 import {areRectsIntersecting} from "../../math/math";
 import Point from "../../math/point";
 import InteractiveElement from "./InteractiveElement";
+import ArrangeStrategy from "../ArrangeStrategy";
 
 var debug = require("DebugUtil")("carb:draggingElement");
 
@@ -49,6 +49,7 @@ class DraggingElement extends InteractiveElement {
 
         var artboards = page.getAllArtboards();
         var elements = [];
+        var oldParents = [];
 
         for (var i = 0; i < this.children.length; ++i){
             var phantom = this.children[i];
@@ -73,12 +74,18 @@ class DraggingElement extends InteractiveElement {
                 parent = phantomTarget;
             }
 
+            if (parent !== element.parent()){
+                oldParents.push(element.parent());
+            }
+
             var index = parent.positionOf(element) + 1 || parent.count();
             var target = event.altKey ? element.clone() : element;
             this.dropElementOn(event, parent, target, phantom, index);
 
             elements.push(target);
         }
+
+        ArrangeStrategy.arrangeRoots(this.elements.concat(oldParents));
 
         return elements;
     }
@@ -114,18 +121,9 @@ class DraggingElement extends InteractiveElement {
         this.applyTranslation(position.subtract(this._initialPosition), true);
     }
 
-    // drawSelf(context, w, h, environment){
-    //     context.save();
-    //     context.scale(1/scale, 1/scale);
-    //     context.strokeStyle = UserSettings.frame.stroke;
-    //     context.strokeRect(
-    //         Math.round(this._element.x()/scale),
-    //         Math.round(this._element.y()/scale),
-    //         this._element.width() * scale + .5|0,
-    //         this._element.height() * scale + .5|0
-    //     );
-    //     context.restore();
-    // }
+    drawSelf(){
+        super.drawSelf.apply(this, arguments);
+    }
 
     parentAllowSnapping(pos) {
         return !this._elements.some(x => x.parent().getDropData(x, pos) !== null);

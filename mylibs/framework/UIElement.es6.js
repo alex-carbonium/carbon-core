@@ -178,6 +178,14 @@ var UIElement = klass(DataNode, {
 
         DataNode.prototype.setProps.call(this, props, mode);
     },
+    selectLayoutProps: function(global){
+        var m = global ? this.globalViewMatrix() : this.viewMatrix();
+        return {
+            width: this.width(),
+            height: this.height(),
+            m
+        };
+    },
     propsUpdated: function (newProps, oldProps) {
         if (newProps.flipVertical !== undefined
             || newProps.flipHorizontal !== undefined

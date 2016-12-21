@@ -19,6 +19,9 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                 oldRect = oldRect || newRect;
                 this.arrange({oldValue: oldRect, newValue: newRect}, mode);
             },
+            arrangeRootDepthFirst: function(){
+                this.applyVisitorDepthFirst(x => x.performArrange());
+            },
             arrangeStrategy: function (value) {
                 if (value !== undefined) {
                     this.setProps({arrangeStrategy: value})

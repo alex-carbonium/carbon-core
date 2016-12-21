@@ -1,6 +1,7 @@
 import {Types} from "../Defs";
 import PropertyMetadata from "../PropertyMetadata";
 import InteractiveElement from "./InteractiveElement";
+import ArrangeStrategy from "../ArrangeStrategy";
 
 export default class TransformationElement extends InteractiveElement{
     constructor(elements){
@@ -8,6 +9,12 @@ export default class TransformationElement extends InteractiveElement{
 
         this._lastScaling = null;
         this._lastRotation = null;
+    }
+
+    createClone(element){
+        var clone = element.clone();
+        clone.setProps(element.selectLayoutProps(true));
+        return clone;
     }
 
     applySizeScaling(s, o, sameDirection, withReset){
@@ -24,7 +31,7 @@ export default class TransformationElement extends InteractiveElement{
         super.saveChanges();
 
         for (var i = 0; i < this.children.length; i++){
-            var element = this._elements[i];
+            var element = this.elements[i];
             var clone = this.children[i];
 
             if (this._lastScaling){
@@ -35,6 +42,8 @@ export default class TransformationElement extends InteractiveElement{
                 element.setTransform(element.parent().globalViewMatrixInverted().appended(clone.globalViewMatrix()));
             }
         }
+
+        ArrangeStrategy.arrangeRoots(this.elements);
     }
 }
 

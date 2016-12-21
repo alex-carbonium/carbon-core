@@ -1,6 +1,9 @@
 import GroupContainer from "../GroupContainer";
+import {ChangeMode, Types} from "../Defs";
 import Phantom from "../Phantom";
-import {ChangeMode} from "../Defs";
+import Brush from "../Brush";
+import PropertyMetadata from "../PropertyMetadata";
+import UserSettings from "../../UserSettings";
 
 export default class InteractiveElement extends GroupContainer{
     constructor(elements) {
@@ -17,18 +20,17 @@ export default class InteractiveElement extends GroupContainer{
                     this._decorators.push(x);
                 });
             }
-            this.add(new Phantom(element, {
-                width: element.width(),
-                height: element.height(),
-                m: element.globalViewMatrix()
-            }));
+            this.add(this.createClone(element));
 
             this._elements.push(element);
         }
         this.performArrange();
 
         this.showOriginal(false);
+    }
 
+    createClone(element){
+        return new Phantom(element, element.selectLayoutProps(true));
     }
 
     showOriginal(value){
@@ -64,3 +66,11 @@ export default class InteractiveElement extends GroupContainer{
         return this._elements;
     }
 }
+
+InteractiveElement.prototype.t = Types.InteractiveElement;
+
+PropertyMetadata.registerForType(InteractiveElement, {
+    stroke: {
+        defaultValue: Brush.createFromColor(UserSettings.frame.stroke)
+    }
+});

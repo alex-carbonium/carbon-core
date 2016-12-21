@@ -333,6 +333,15 @@ class ArtboardPage extends Page {
         return primitives;
     }
 
+    arrangeRootDepthFirst(){
+        for (var i = 0; i < this.children.length; i++){
+            var element = this.children[i];
+            if (!(element instanceof Artboard)){
+                element.applyVisitorDepthFirst(x => x.performArrange());
+            }
+        }
+    }
+
     makeToolboxConfigDirty(){
         this.setProps({toolboxConfigId:null});
         this.toolboxConfigIsDirty.raise();

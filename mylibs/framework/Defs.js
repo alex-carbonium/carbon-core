@@ -289,7 +289,8 @@ export var Types = {
     'QuadAndLock': 'q',
     'Box': 'B',
     'Shadow': 'i',
-    'TransformationElement': 'te'
+    'TransformationElement': 'te',
+    'InteractiveElement': 'in'
 };
 
 if (DEBUG){

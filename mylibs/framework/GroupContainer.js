@@ -17,13 +17,13 @@ export default class GroupContainer extends Container {
     }
 
     drawSelf(context, w, h, environment){
-        // if (!this.lockedGroup()){
-        //     context.save();
-        //     context.strokeStyle = UserSettings.group.active_stroke;
-        //     context.strokeRect(0, 0, w, h);
-        //     context.restore();
-        //
-        // }
+        if (!this.lockedGroup()){
+            context.save();
+            context.strokeStyle = UserSettings.group.active_stroke;
+            context.strokeRect(0, 0, w, h);
+            context.restore();
+
+        }
         super.drawSelf.apply(this, arguments);
     }
 
