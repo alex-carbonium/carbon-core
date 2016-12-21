@@ -6,6 +6,8 @@ import Matrix from "math/matrix";
 import {leaveCommonProps} from "../util";
 import {Types} from "./Defs";
 import {combineRects} from "../math/math";
+import Brush from "framework/Brush";
+import Font from "framework/Font";
 
 var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
     _constructor: function(){
@@ -328,6 +330,13 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
         for (var i = 0; i < this.elements.length; i++){
             var element = this.elements[i];
             var elementChanges = Object.assign({}, changes);
+            for(var p in elementChanges){
+                if(p === 'fill' || p === 'stroke'){
+                    elementChanges[p] = Brush.extend(element.props[p], elementChanges[p])
+                } else if (p === 'font'){
+                    elementChanges[p] = Font.extend(element.props[p], elementChanges[p])
+                }
+            }
             element.prepareProps(elementChanges);
             result.push(elementChanges);
         }

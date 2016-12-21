@@ -38,7 +38,9 @@ export default class RulerExtension extends RuntimeExtension {
         super.detach();
         this.view && this.view.unregisterForLayerDraw(2, this);
 
-        this._rulerGuides.dispose();
+        if(this._rulerGuides) {
+            this._rulerGuides.dispose();
+        }
     }
 
     _onScaleChange(scale) {

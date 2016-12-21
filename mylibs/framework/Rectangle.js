@@ -150,6 +150,7 @@ class Rectangle extends Shape {
             , x2 = x1 + this.width()
             , y2 = y1 + this.height()
             , cr = this.cornerRadius();
+        path.setProps({pointRounding:0})
 
         var mr = Math.min(this.width()/2, this.height()/2);
 
@@ -341,8 +342,7 @@ class Rectangle extends Shape {
 }
 Rectangle.prototype.t = Types.Rectangle;
 
-Rectangle.ATTRIBUTE_NAMES = 'x y width height rx ry transform fill stroke stroke-width'.split(' ');
-Rectangle.fromSvgElement = function (element, parsedAttributes) {
+Rectangle.fromSvgElement = function (element, parsedAttributes, matrix) {
     // var parsedAttributes = svgParser.parseAttributes(element, Rectangle.ATTRIBUTE_NAMES);
     var rect = new Rectangle();
 
@@ -350,8 +350,26 @@ Rectangle.fromSvgElement = function (element, parsedAttributes) {
     if (parsedAttributes.width) {
         rect.width(parsedAttributes.width);
     }
+
     if (parsedAttributes.height) {
         rect.height(parsedAttributes.height);
+    }
+
+    if(parsedAttributes.id){
+        rect.name(parsedAttributes.id);
+    }
+
+    rect.setProps({pointRounding: 0});
+
+    if(parsedAttributes.rx !== undefined && parsedAttributes.rx == parsedAttributes.ry){
+        var r = parseFloat(parsedAttributes.rx);
+        rect.cornerRadius({
+            bottomLeft: r,
+            bottomRight: r,
+            upperLeft: r,
+            upperRight: r,
+            locked: true
+        });
     }
 
     if (parsedAttributes.fill !== undefined) {
@@ -378,7 +396,9 @@ Rectangle.fromSvgElement = function (element, parsedAttributes) {
     if (parsedAttributes.y) {
         rect.y(parsedAttributes.y);
     }
-    return rect;
+    var path =  rect.convertToPath();
+    path.transform(matrix);
+    return path;
 };
 
 PropertyMetadata.registerForType(Rectangle, {

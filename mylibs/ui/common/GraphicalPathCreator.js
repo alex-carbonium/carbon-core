@@ -64,13 +64,16 @@ export default class GraphicalpathCreator extends EditModeAction {
         this._element = null;
         this._attachMode = "edit";
         this._detachMode = "resize";
-        this._editTextToken = this._app.actionManager.subscribe("editText", this.onEditAction);
+        this._editTextToken = this._app.actionManager.subscribe("enter", this.onEditAction.bind(this));
     }
 
     onEditAction() {
         var element = Selection.selectedElement();
         if (element instanceof Path) {
             element.edit();
+            if(!element.closed()){
+                this._element = element;
+            }
         }
     }
 
@@ -101,6 +104,10 @@ export default class GraphicalpathCreator extends EditModeAction {
         EditModeAction.prototype._attach.apply(this, arguments);
         Cursor.setGlobalCursor("crosshair");
         this._cancelBinding = actionManager.subscribe('cancel', this.cancel.bind(this));
+        var element = Selection.selectedElement();
+        if(element instanceof Path && !element.closed()){
+            this._element = element;
+        }
     }
 
     _detach() {
@@ -153,7 +160,6 @@ export default class GraphicalpathCreator extends EditModeAction {
 
             this._element.x(x);
             this._element.y(y);
-            var id = this._element.id();
             App.Current.activePage.dropToPage(x, y, this._element);
             that._element.mode("edit");
             Selection.makeSelection([that._element]);

@@ -520,7 +520,15 @@ class Page extends Layer {
             view: {
                 scale: () =>1,
                 focused:()=>false,
-                contextScale: contextScale
+                contextScale: contextScale,
+                viewportRect: ()=>{
+                    return {
+                        x:-Number.MAX_VALUE/2,
+                        y:-Number.MAX_VALUE/2,
+                        width:Number.MAX_VALUE,
+                        height:Number.MAX_VALUE
+                    }
+                }
             }
         });
         context.restore();

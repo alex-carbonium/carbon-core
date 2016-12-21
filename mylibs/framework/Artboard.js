@@ -4,7 +4,7 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import Page from "framework/Page";
 import {isPointInRect} from "math/math";
 import SharedColors from "ui/SharedColors";
-import {ChangeMode, TileSize, Types} from "./Defs";
+import {ChangeMode, TileSize, Types, ArtboardResource} from "./Defs";
 import RelayoutEngine from "./relayout/RelayoutEngine";
 import PropertyStateRecorder from "framework/PropertyStateRecorder";
 import ModelStateListener from "framework/sync/ModelStateListener";
@@ -51,6 +51,45 @@ class Artboard extends Container {
         this.multiselectTransparent = !value;
         this.canSelect(value);
         this.canDrag(value);
+    }
+
+    get frame() {
+        if (!this.props.frame) {
+            return null;
+        }
+
+        if (!this._frame || this._frame.version !== this._frame.runtimeProps.cloneVersion) {
+            var page = App.Current.getPageById(this.props.frame.pageId);
+            if (page) {
+                var frame = page.getArtboardById(this.props.frame.artboardId);
+
+                if(frame.runtimeProps.clone && frame.runtimeProps.cloneVersion === frame.version){
+                    return frame.runtimeProps.clone;
+                }
+
+                var screen = frame.findElementByName('screen');
+                if (!screen) {
+                    this.setProps({frame: null});
+                    return null;
+                }
+
+                var frameClone = frame.clone();
+                frame.runtimeProps.cloneVersion = frame.version;
+                frame.runtimeProps.clone = frameClone;
+
+                frameClone.setProps({x: 0, y: 0, fill:Brush.Empty, stroke:Brush.Empty});
+
+                var screenRect = screen.getBoundaryRectGlobal();
+                var frameRect = frame.getBoundaryRectGlobal();
+                frameClone.runtimeProps.frameX = frameRect.x - screenRect.x;
+                frameClone.runtimeProps.frameY = frameRect.y - screenRect.y;
+                frameClone.runtimeProps.cloneScreenWidth = screen.width();
+                frameClone.runtimeProps.cloneScreenHeight = screen.height();
+                this._frame = frame;
+            }
+        }
+
+        return this._frame.runtimeProps.clone;
     }
 
     select() {
@@ -137,22 +176,27 @@ class Artboard extends Container {
         context.save();
         context.beginPath();
         context.strokeStyle = "#999";
-        var scale =  environment.view.scale();
+        var scale = environment.view.scale();
         context.lineWidth = 1 / scale;
-        context.rect(this.x() - .5 / scale, this.y() - .5 / scale,  this.width() + 1 / scale, this.height() + 1 / scale);
+        context.rect(this.x() - .5 / scale, this.y() - .5 / scale, this.width() + 1 / scale, this.height() + 1 / scale);
         context.stroke();
         context.restore();
     }
 
-    draw(context, environment) {
+    drawCustomFrame(context, environment) {
+        var frame = this.frame;
 
-        super.draw(context, environment);
+        context.save();
+        context.translate(this.x() + this.frame.runtimeProps.frameX, this.y() + this.frame.runtimeProps.frameY);
+        frame.draw(context, environment);
+        context.restore();
 
+    }
+
+    drawExtras(context, environment){
         if (environment.offscreen) {
             return;
         }
-
-        this.drawFrameRect(context, environment);
 
         if (this._recorder && this._recorder.statesCount() > 1) {
             this._renderStatesFrame(context);
@@ -249,8 +293,16 @@ class Artboard extends Container {
     }
 
     drawSelf(context, w, h, environment) {
+        context.save();
+        var frame = this.frame;
+        if(frame){
+            context.beginPath();
+            context.rect(0,0, frame.runtimeProps.cloneScreenWidth, frame.runtimeProps.cloneScreenHeight);
+            context.clip();
+        }
         super.drawSelf(context, w, h, environment);
         this.onContentDrawn && this.onContentDrawn(this, context);
+        context.restore();
     }
 
     buildMetadata(properties) {
@@ -317,9 +369,13 @@ class Artboard extends Container {
             this._refreshMetadata();
         }
 
-        if (props.showInToolbox !== undefined && Selection.isOnlyElementSelected(this)) {
+        if (props.resource !== undefined && Selection.isOnlyElementSelected(this)) {
 
             Selection.refreshSelection();
+        }
+
+        if(props.frame === null){
+            delete this._frame;
         }
     }
 
@@ -393,7 +449,7 @@ class Artboard extends Container {
         var parent = this.parent();
         if (parent) {
             parent.incrementVersion();
-            if (this.props.showInToolbox) {
+            if (this.props.resource === ArtboardResource.Stencil) {
                 parent.makeToolboxConfigDirty();
             }
         }
@@ -477,7 +533,7 @@ class Artboard extends Container {
                 if (element === this && (propName === 'x' || propName == 'y' )) {
                     continue;
                 }
-                if (propName === 'customProperties' || propName === 'state' || propName === "states" || propName === "actions" || propName === "showInToolbox" || propName === "tileSize" || propName === "insertAsContent") {
+                if (propName === 'customProperties' || propName === 'state' || propName === "states" || propName === "actions" || propName === "resource" || propName === "tileSize" || propName === "insertAsContent") {
                     continue;
                 }
                 if (!this._recorder.hasStatePropValue(stateBoard.stateId, element.id(), propName)) {
@@ -674,10 +730,18 @@ PropertyMetadata.registerForType(Artboard, {
     guidesY: {
         defaultValue: []
     },
-    showInToolbox: {
-        displayName: "Show in toolbox",
-        type: "checkbox",
-        useInModel: true
+    resource: {
+        displayName:"@resource",
+        type: "dropdown",
+        defaultValue:null,
+        options: {
+            items: [
+                {name: "None", value: null},
+                {name: "Stencil", value: ArtboardResource.Stencil},
+                {name: "Template", value: ArtboardResource.Template},
+                {name: "Frame", value: ArtboardResource.Frame}
+            ]
+        }
     },
     allowHorizontalResize: {
         displayName: "Allow horizontal resize",
@@ -715,13 +779,19 @@ PropertyMetadata.registerForType(Artboard, {
         type: 'text',
         defaultValue: 'Custom'
     },
+    frame: {
+        displayName: "@frame",
+        type: "frame",
+        defaultValue: null
+    },
     prepareVisibility(props){
+        var showAsStencil = props.resource === ArtboardResource.Stencil;
         return {
-            tileSize: props.showInToolbox,
-            insertAsContent: props.showInToolbox,
-            toolboxGroup: props.showInToolbox,
-            allowVerticalResize: props.showInToolbox,
-            allowHorizontalResize: props.showInToolbox
+            tileSize: showAsStencil,
+            insertAsContent: showAsStencil,
+            toolboxGroup: showAsStencil,
+            allowVerticalResize: showAsStencil,
+            allowHorizontalResize: showAsStencil
         }
     },
     groups: function () {
@@ -729,7 +799,7 @@ PropertyMetadata.registerForType(Artboard, {
             {
                 label: "Appearance",
                 expanded: false,
-                properties: ["visible", "fill"]
+                properties: ["visible", "fill", "frame"]
             },
             {
                 label: "Layout",
@@ -743,7 +813,7 @@ PropertyMetadata.registerForType(Artboard, {
             },
             {
                 label: "User stencils",
-                properties: ["showInToolbox", "allowHorizontalResize", "allowVerticalResize", "tileSize", "insertAsContent", "toolboxGroup"],
+                properties: ["resource", "allowHorizontalResize", "allowVerticalResize", "tileSize", "insertAsContent", "toolboxGroup"],
                 expanded: true
             },
             {

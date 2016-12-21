@@ -7,7 +7,7 @@ import PropertyMetadata from "../PropertyMetadata";
 import TextEngine from "./textengine";
 import styleManager from "../style/StyleManager";
 
-export default class Text extends UIElement {
+class Text extends UIElement {
     displayType(){
         return "Text";
     }
@@ -248,3 +248,54 @@ PropertyMetadata.registerForType(Text, {
         return base.concat(["content", "height"]);
     }
 });
+
+
+Text.fromSvgElement = function(element, parsedAttributes, matrix){
+    //
+    // :
+    // "cls-5"
+    // clip-path
+    // :
+    // "url(#clip-_3D_Touch)"
+    // data-name
+    // :
+    // "New Message"
+    // font-family
+    // :
+    // "Helvetica"
+    // font-size
+    // :
+    // "18px"
+    // id
+    //     :
+    //     "New_Message"
+    // transformMatrix
+    //     :
+    //     Matri
+    var text = new Text();
+    var font = {};
+    if(parsedAttributes.fontSize){
+        font.size = parsedAttributes.fontSize.replace('px','');
+    }
+
+    if(parsedAttributes.fontFamily){
+        font.family = 'Open Sans';//TODO: parsedAttributes.fontFamily;
+    }
+
+    var md = matrix.decompose();
+
+    var props = {
+        content:parsedAttributes.text,
+        font:Font.createFromObject(font),
+        x: md.translation.x,
+        y: md.translation.y
+    }
+
+
+
+    text.prepareAndSetProps(props);
+
+    return text;
+}
+
+export default Text;

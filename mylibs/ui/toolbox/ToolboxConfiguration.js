@@ -1,4 +1,4 @@
-import {TileSize} from "framework/Defs";
+import {TileSize, ArtboardResource} from "framework/Defs";
 import tiler from "ui/toolbox/tiler";
 import ContextPool from "framework/render/ContextPool";
 import Environment from "environment";
@@ -144,7 +144,7 @@ export default class ToolboxConfiguration {
     }
 
     static buildToolboxConfig(page){
-        var elements = page.getAllArtboards().filter(x=>x.props.showInToolbox);
+        var elements = page.getAllArtboards().filter(x=>x.props.resource === ArtboardResource.Stencil);
 
         if(!elements.length) {
             page.setProps({toolboxConfigUrl:null});
@@ -175,6 +175,13 @@ export default class ToolboxConfiguration {
             var d1 = Deferred.create();
             var d2 = Deferred.create();
 
+            if(App.Current.serverless()){
+                group.spriteUrl = spriteUrl;
+                group.spriteUrl2x = spriteUrl2x;
+                group.size = size;
+                return Deferred.createResolvedPromise();
+            }
+
             FileProxy.uploadPublicImage(spriteUrl)
                 .then((data)=>{
                     group.spriteUrl = data.url;
@@ -197,7 +204,12 @@ export default class ToolboxConfiguration {
 
         var config = {groups:groups, id:configId};
         return Deferred.when(promises)
-            .then(()=>FileProxy.uploadPublicFile(JSON.stringify(config)))
+            .then(()=>{
+                if(App.Current.serverless()){
+                    return {url:'#', configId:createUUID()};
+                }
+                return FileProxy.uploadPublicFile(JSON.stringify(config))
+            })
             .then((data)=>{
                 page.setProps({toolboxConfigUrl:data.url, toolboxConfigId:configId});
                 return config;

@@ -6,7 +6,7 @@ import * as math from "math/math";
 import {Types, StrokePosition} from "./Defs";
 
 class Circle extends Shape {
-    hitTest (/*Point*/point, scale) {
+    hitTest(/*Point*/point, scale) {
         if (!this.visible()) {
             return false;
         }
@@ -38,7 +38,7 @@ class Circle extends Shape {
         return math.isPointInEllipse(outerRect, point) && !math.isPointInEllipse(innerRect, point);
     }
 
-    resize (/*Rect*/rect, ignoreSnapping, options) {
+    resize(/*Rect*/rect, ignoreSnapping, options) {
         options = options || {};
         if (options.shiftPressed) {
             var startX = rect.x - rect.width;
@@ -49,15 +49,16 @@ class Circle extends Shape {
         }
         Shape.prototype.resize.call(this, rect, ignoreSnapping, options.shiftPressed);
     }
-    
-    iconType () {
+
+    iconType() {
         return 'circle';
     }
 
-    canConvertToPath(){
+    canConvertToPath() {
         return true;
     }
-    convertToPath () {
+
+    convertToPath() {
         var path = new Path()
             , x1 = this.x()
             , y1 = this.y()
@@ -67,8 +68,17 @@ class Circle extends Shape {
             , h2 = h / 2;
         var dx = 0.55 * w / 2;
         var dy = 0.55 * h / 2;
+        path.setProps({pointRounding: 0});
 
-        path.addPoint({x: x1 + w2, y: y1, type: 2, cp1x: (x1 + w2 - dx), cp1y: y1, cp2x: (x1 + w2 + dx), cp2y: y1});
+        path.addPoint({
+            x: x1 + w2,
+            y: y1,
+            type: 2,
+            cp1x: (x1 + w2 - dx),
+            cp1y: y1,
+            cp2x: (x1 + w2 + dx),
+            cp2y: y1
+        });
         path.addPoint({
             x: x1 + w,
             y: y1 + h2,
@@ -87,7 +97,15 @@ class Circle extends Shape {
             cp1x: (x1 + w2 + dx),
             cp1y: y1 + h
         });
-        path.addPoint({x: x1, y: y1 + h2, type: 2, cp2x: x1, cp2y: y1 + h2 - dy, cp1x: x1, cp1y: y1 + h2 + dy});
+        path.addPoint({
+            x: x1,
+            y: y1 + h2,
+            type: 2,
+            cp2x: x1,
+            cp2y: y1 + h2 - dy,
+            cp1x: x1,
+            cp1y: y1 + h2 + dy
+        });
         path.closed(true);
         // path.strokeWidth(this.strokeWidth());
         path.fill(this.fill());
@@ -100,15 +118,16 @@ class Circle extends Shape {
         path.y(this.y());
         path.angle(this.angle());
 
+
         return path;
     }
 
 
-    drawPath (context, w, h) {
+    drawPath(context, w, h) {
         context.ellipse(0, 0, w, h);
     }
 
-    drawSelf (context, w, h, environment) {
+    drawSelf(context, w, h, environment) {
 //                var that = this;
 //                var shadow = this.shadow();
 //
@@ -122,10 +141,10 @@ class Circle extends Shape {
         if (dashPattern) {
             context.setLineDash(dashPattern);
         }
-        
+
 
         this.drawPath(context, w, h);
-        
+
         var stroke = this.stroke();
 
         if (w < 2 || h < 2) {
@@ -155,12 +174,10 @@ class Circle extends Shape {
 }
 Circle.prototype.t = Types.Circle;
 
-PropertyMetadata.registerForType(Circle, {
-});
+PropertyMetadata.registerForType(Circle, {});
 
 
-var ATTRIBUTE_NAMES = 'x y width height r rx ry cx cy transform fill stroke stroke-width'.split(' ');
-Circle.fromSvgElement = function (element, parsedAttributes) {
+Circle.fromSvgElement = function (element, parsedAttributes, matrix) {
     // var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
     var circle = new Circle();
     App.Current.activePage.nameProvider.assignNewName(circle);
@@ -175,12 +192,18 @@ Circle.fromSvgElement = function (element, parsedAttributes) {
         circle.height(ry * 2);
     }
 
-    if(parsedAttributes.opacity){
+    if (parsedAttributes.opacity) {
         circle.opacity(parsedAttributes.opacity);
     }
 
+    circle.setProps({pointRounding: 0});
+
+    if (parsedAttributes.id) {
+        circle.name(parsedAttributes.id);
+    }
+
     if (parsedAttributes.fill !== undefined) {
-        if(!parsedAttributes.fill  || parsedAttributes.fill == "none"){
+        if (!parsedAttributes.fill || parsedAttributes.fill == "none") {
             circle.fill(Brush.Empty);
         } else {
             circle.fill(Brush.createFromColor(parsedAttributes.fill));
@@ -192,17 +215,20 @@ Circle.fromSvgElement = function (element, parsedAttributes) {
     } else {
         circle.stroke(Brush.Empty);
     }
+
     if (parsedAttributes.x !== undefined) {
         circle.x(parsedAttributes.x);
     } else if (parsedAttributes.cx !== undefined) {
-        circle.x(parsedAttributes.cx - rx );
+        circle.x(parsedAttributes.cx - rx);
     }
     if (parsedAttributes.y !== undefined) {
         circle.y(parsedAttributes.y);
     } else if (parsedAttributes.cy !== undefined) {
-        circle.y(parsedAttributes.cy - ry );
+        circle.y(parsedAttributes.cy - ry);
     }
-    return circle;
+    var path = circle.convertToPath();
+    path.transform(matrix);
+    return path;
 };
 
 export default Circle;
