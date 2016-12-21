@@ -52,7 +52,6 @@ var DependencyContainer = require("DependencyContainer");
 var NullContainer = require("framework/NullContainer");
 var Primitive = require("framework/sync/Primitive");
 var Layer = require("framework/Layer");
-var DraggingElement = require("framework/DraggingElement");
 var SelectComposite = require("framework/SelectComposite");
 var SelectFrame = require("framework/SelectFrame");
 var extensions = require("extensions/All");

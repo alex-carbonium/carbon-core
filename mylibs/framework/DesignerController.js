@@ -30,7 +30,7 @@ function stopDrag(event) {
     }
 
 
-    var elements = this._draggingElement.drop(event, this._draggingOverElement, this.app.activePage);
+    var elements = this._draggingElement.saveChanges(event, this._draggingOverElement, this.app.activePage);
     this._draggingElement.detach();
 
     // if (group !== null) {

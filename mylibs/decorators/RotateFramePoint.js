@@ -3,49 +3,31 @@ import UIElement from "framework/UIElement";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import {Types} from "../framework/Defs";
+import Point from "../math/point";
 
-const PointSize = 5
-    , PointSize2 = 2;
+const PointSize = 16
+    , PointSize2 = 8;
 
 export default {
     hitTest: function (frame, point, hitPoint, scale) {
-        var dh = -20;
-        var height = frame.element.height();
-        if (height < 0) {
-            dh = -dh;
-        }
-        return Math.abs(point.x - hitPoint.x) < PointSize / scale && Math.abs(point.y - hitPoint.y - dh / scale) < PointSize / scale;
+        return Math.abs(point.x - hitPoint.x) < PointSize / scale && Math.abs(point.y - hitPoint.y) < PointSize / scale;
     },
-    draw: function (p, frame, scale, context) {
-        CrazyScope.push(false);
-        context.strokeStyle = '#22c1ff';
-        context.lineWidth = 1;
-        context.setLineDash([2, 2]);
-        var xs = ~~(p.x * scale);
-        var dh = -20;
-        var height = frame.element.height();
-        if (height < 0) {
-            dh = -dh;
-        }
-        var ys = ~~(p.y * scale + dh);
-        context.linePath(xs, ys, xs, 0);
-        context.stroke();
-        CrazyScope.pop();
-
-        context.fillStyle = '#fff';
-
-        context.beginPath();
-        context.arc(xs, ys, PointSize2, 0, 2 * Math.PI);
-        context.fill();
-        context.stroke();
+    draw: function (p, frame, scale, context, matrix) {
+        // var pt = matrix.transformPoint2(p.x, p.y, true);
+        // context.beginPath();
+        // context.rect(pt.x - PointSize2, pt.y - PointSize2, PointSize, PointSize);
+        // context.fillStyle = 'red';
+        // context.fill();
     },
     rotateCursorPointer: function (index, angle) {
         return index;
     },
-    capture: function (frame) {
-        var resizingElement = UIElement.construct(Types.ResizingElement, frame.element);
+    capture: function (frame, point, event) {
+        var resizingElement = UIElement.construct(Types.TransformationElement, frame.transformElements || [frame.element]);
         frame.resizingElement = resizingElement;
         frame.originalRect = frame.element.getBoundaryRectGlobal();
+        frame.origin = frame.element.center(true);
+        frame.captureVector = new Point(event.x - frame.origin.x, event.y - frame.origin.y);
 
         Environment.view.layer3.add(resizingElement);
         Environment.controller.startRotatingEvent.raise();
@@ -62,21 +44,14 @@ export default {
             return;
         }
 
-        var origin = frame.resizingElement.rotationOrigin(true);
-        var v = {x: event.x - origin.x, y: event.y - origin.y};
-
-        var angle = ~~((180 - Math.atan2(v.x, v.y) / Math.PI * 180) % 360 + 0.5);
-
-        if (frame.element.height() < 0) {
-            angle -= 180;
-        }
+        var v = new Point(event.x - frame.origin.x, event.y - frame.origin.y);
+        var angle = v.getDirectedAngle(frame.captureVector);
 
         if (event.event.shiftKey) {
             angle = ~~(angle / 15) * 15;
         }
 
-
-        frame.resizingElement.angle(angle);
+        frame.resizingElement.applyRotation(angle, frame.origin, true);
         Invalidate.requestUpperOnly();
         Environment.controller.rotatingEvent.raise({element: frame.element, angle: angle, mouseX: event.x, mouseY: event.y});
     }

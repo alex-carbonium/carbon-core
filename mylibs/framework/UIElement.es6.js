@@ -227,9 +227,11 @@ var UIElement = klass(DataNode, {
         var dm = this.runtimeProps.dm;
         return dm && dm.rotation;
     },
-    applyRotation: function(angle){
-        var origin = this.rotationOrigin();
-        this.applyTransform(Matrix.create().rotate(angle, origin.x, origin.y));
+    applyRotation: function(angle, o, withReset){
+        if (withReset){
+            this._saveOrResetLayoutProps();
+        }
+        this.applyTransform(Matrix.create().rotate(-angle, o.x, o.y));
     },
     isRotated: function(){
         return this.getRotation() % 360 !== 0;
@@ -1339,8 +1341,11 @@ var UIElement = klass(DataNode, {
         return this._isDisposed;
     },
     rotationOrigin: function (global) {
+        return this.center(global);
+    },
+    center: function (global) {
         var m = global ? this.globalViewMatrix() : this.viewMatrix();
-        return m.transformPoint2(this.defaultSize.width/2, this.defaultSize.height/2);
+        return m.transformPoint2(this.width()/2, this.height()/2);
     },
     hitElement: function (position, scale, predicate) {
         if (this.hitVisible()) {
@@ -1431,7 +1436,6 @@ var UIElement = klass(DataNode, {
         return this.props.iconType || 'rectangle';
     },
     createSelectionFrame: function (view) {
-        var frame;
         if (!this.selectFrameVisible()) {
             return {
                 element: this,
@@ -1448,201 +1452,222 @@ var UIElement = klass(DataNode, {
             }
         }
 
-        switch (this.resizeDimensions()) {
-            case ResizeDimension.Both:
-                frame = {
-                    element: this,
-                    frame: true,
-                    points: [
-                        {
-                            type: ResizeFramePoint,
-                            moveDirection: PointDirection.Any,
-                            x: 0,
-                            y: 0,
-                            cursor: 3,
-                            rv: [1, 1],
-                            update: function (p, x, y, w, h) {
-                                p.x = x + w;
-                                p.y = y + h;
-                            }
-                        },
-                        {
-                            type: ResizeFramePoint,
-                            moveDirection: PointDirection.Any,
-                            x: 0,
-                            y: 0,
-                            cursor: 7,
-                            rv: [-1, -1],
-                            update: function (p, x, y, w, h) {
-                                p.x = x;
-                                p.y = y;
-                            }
-                        },
-                        {
-                            type: ResizeFramePoint,
-                            moveDirection: PointDirection.Any,
-                            x: 0,
-                            y: 0,
-                            cursor: 1,
-                            rv: [1, -1],
-                            update: function (p, x, y, w, h) {
-                                p.x = x + w;
-                                p.y = y;
-                            }
-                        },
-
-                        {
-                            type: ResizeFramePoint,
-                            moveDirection: PointDirection.Any,
-                            x: 0,
-                            y: 0,
-                            cursor: 5,
-                            rv: [-1, 1],
-                            update: function (p, x, y, w, h) {
-                                p.x = x;
-                                p.y = y + h;
-                            }
-                        },
-                        {
-                            type: ResizeFramePoint,
-                            moveDirection: PointDirection.Vertical,
-                            x: 0,
-                            y: 0,
-                            cursor: 0,
-                            rv: [0, -1],
-                            update: function (p, x, y, w, h) {
-                                p.x = x + w / 2;
-                                p.y = y;
-                            }
-                        },
-                        {
-                            type: ResizeFramePoint,
-                            moveDirection: PointDirection.Horizontal,
-                            x: 0,
-                            y: 0,
-                            cursor: 2,
-                            rv: [1, 0],
-                            update: function (p, x, y, w, h) {
-                                p.x = x + w;
-                                p.y = y + h / 2;
-                            }
-                        },
-                        {
-                            type: ResizeFramePoint,
-                            moveDirection: PointDirection.Vertical,
-                            x: 0,
-                            y: 0,
-                            cursor: 4,
-                            rv: [0, 1],
-                            update: function (p, x, y, w, h) {
-                                p.x = x + w / 2;
-                                p.y = y + h;
-                            }
-                        },
-                        {
-                            type: ResizeFramePoint,
-                            moveDirection: PointDirection.Horizontal,
-                            x: 0,
-                            y: 0,
-                            cursor: 6,
-                            rv: [-1, 0],
-                            update: function (p, x, y, w, h) {
-                                p.x = x;
-                                p.y = y + h / 2;
-                            }
-                        }
-                    ]
-                }
-                break;
-            case ResizeDimension.Vertical:
-                frame = {
-                    element: this,
-                    frame: true,
-                    points: [
-                        {
-                            type: ResizeFramePoint,
-                            moveDirection: PointDirection.Vertical,
-                            x: 0,
-                            y: 0,
-                            cursor: 0,
-                            rv: [0, -1],
-                            update: function (p, x, y, w, h) {
-                                p.x = x + w / 2;
-                                p.y = y;
-                            }
-                        },
-                        {
-                            type: ResizeFramePoint,
-                            moveDirection: PointDirection.Vertical,
-                            x: 0,
-                            y: 0,
-                            cursor: 4,
-                            rv: [0, 1],
-                            update: function (p, x, y, w, h) {
-                                p.x = x + w / 2;
-                                p.y = y + h;
-                            }
-                        }
-                    ]
-                }
-                break;
-            case ResizeDimension.Horizontal:
-                frame = {
-                    element: this,
-                    frame: true,
-                    points: [
-                        {
-                            type: ResizeFramePoint,
-                            moveDirection: PointDirection.Horizontal,
-                            x: 0,
-                            y: 0,
-                            cursor: 2,
-                            rv: [1, 0],
-                            update: function (p, x, y, w, h) {
-                                p.x = x + w;
-                                p.y = y + h / 2;
-                            }
-                        },
-                        {
-                            type: ResizeFramePoint,
-                            moveDirection: PointDirection.Horizontal,
-                            x: 0,
-                            y: 0,
-                            cursor: 6,
-                            rv: [-1, 0],
-                            update: function (p, x, y, w, h) {
-                                p.x = x;
-                                p.y = y + h / 2;
-                            }
-                        }
-                    ]
-                }
-                break;
-            default: {
-                frame = {
-                    element: this,
-                    frame: true,
-                    points: []
-                };
-                break;
-            }
-        }
+        var points = [];
 
         if (this._angleEditable !== false /*properties.angle.getIsEditable()*/) {
-            frame.points.splice(0, 0, {
-                type: RotateFramePoint,
-                moveDirection: PointDirection.Any,
-                x: 0,
-                y: 0,
-                cursor: 8,
-                update: function (p, x, y, w, h) {
-                    p.x = x + w / 2;
-                    p.y = y;
+            points.push(
+                {
+                    type: RotateFramePoint,
+                    moveDirection: PointDirection.Any,
+                    x: 0,
+                    y: 0,
+                    cursor: 8,
+                    update: function (p, x, y, w, h) {
+                        p.x = x;
+                        p.y = y;
+                    }
+                },
+                {
+                    type: RotateFramePoint,
+                    moveDirection: PointDirection.Any,
+                    x: 0,
+                    y: 0,
+                    cursor: 8,
+                    update: function (p, x, y, w, h) {
+                        p.x = x + w;
+                        p.y = y;
+                    }
+                },
+                {
+                    type: RotateFramePoint,
+                    moveDirection: PointDirection.Any,
+                    x: 0,
+                    y: 0,
+                    cursor: 8,
+                    update: function (p, x, y, w, h) {
+                        p.x = x + w;
+                        p.y = y + h;
+                    }
+                },
+                {
+                    type: RotateFramePoint,
+                    moveDirection: PointDirection.Any,
+                    x: 0,
+                    y: 0,
+                    cursor: 8,
+                    update: function (p, x, y, w, h) {
+                        p.x = x;
+                        p.y = y + h;
+                    }
                 }
-            });
+            );
         }
 
-        return frame;
+        switch (this.resizeDimensions()) {
+            case ResizeDimension.Both:
+                points.push(
+                    {
+                        type: ResizeFramePoint,
+                        moveDirection: PointDirection.Any,
+                        x: 0,
+                        y: 0,
+                        cursor: 3,
+                        rv: [1, 1],
+                        update: function (p, x, y, w, h) {
+                            p.x = x + w;
+                            p.y = y + h;
+                        }
+                    },
+                    {
+                        type: ResizeFramePoint,
+                        moveDirection: PointDirection.Any,
+                        x: 0,
+                        y: 0,
+                        cursor: 7,
+                        rv: [-1, -1],
+                        update: function (p, x, y, w, h) {
+                            p.x = x;
+                            p.y = y;
+                        }
+                    },
+                    {
+                        type: ResizeFramePoint,
+                        moveDirection: PointDirection.Any,
+                        x: 0,
+                        y: 0,
+                        cursor: 1,
+                        rv: [1, -1],
+                        update: function (p, x, y, w, h) {
+                            p.x = x + w;
+                            p.y = y;
+                        }
+                    },
+
+                    {
+                        type: ResizeFramePoint,
+                        moveDirection: PointDirection.Any,
+                        x: 0,
+                        y: 0,
+                        cursor: 5,
+                        rv: [-1, 1],
+                        update: function (p, x, y, w, h) {
+                            p.x = x;
+                            p.y = y + h;
+                        }
+                    },
+                    {
+                        type: ResizeFramePoint,
+                        moveDirection: PointDirection.Vertical,
+                        x: 0,
+                        y: 0,
+                        cursor: 0,
+                        rv: [0, -1],
+                        update: function (p, x, y, w, h) {
+                            p.x = x + w / 2;
+                            p.y = y;
+                        }
+                    },
+                    {
+                        type: ResizeFramePoint,
+                        moveDirection: PointDirection.Horizontal,
+                        x: 0,
+                        y: 0,
+                        cursor: 2,
+                        rv: [1, 0],
+                        update: function (p, x, y, w, h) {
+                            p.x = x + w;
+                            p.y = y + h / 2;
+                        }
+                    },
+                    {
+                        type: ResizeFramePoint,
+                        moveDirection: PointDirection.Vertical,
+                        x: 0,
+                        y: 0,
+                        cursor: 4,
+                        rv: [0, 1],
+                        update: function (p, x, y, w, h) {
+                            p.x = x + w / 2;
+                            p.y = y + h;
+                        }
+                    },
+                    {
+                        type: ResizeFramePoint,
+                        moveDirection: PointDirection.Horizontal,
+                        x: 0,
+                        y: 0,
+                        cursor: 6,
+                        rv: [-1, 0],
+                        update: function (p, x, y, w, h) {
+                            p.x = x;
+                            p.y = y + h / 2;
+                        }
+                    }
+                );
+                break;
+            case ResizeDimension.Vertical:
+                points.push(
+                    {
+                        type: ResizeFramePoint,
+                        moveDirection: PointDirection.Vertical,
+                        x: 0,
+                        y: 0,
+                        cursor: 0,
+                        rv: [0, -1],
+                        update: function (p, x, y, w, h) {
+                            p.x = x + w / 2;
+                            p.y = y;
+                        }
+                    },
+                    {
+                        type: ResizeFramePoint,
+                        moveDirection: PointDirection.Vertical,
+                        x: 0,
+                        y: 0,
+                        cursor: 4,
+                        rv: [0, 1],
+                        update: function (p, x, y, w, h) {
+                            p.x = x + w / 2;
+                            p.y = y + h;
+                        }
+                    }
+                );
+                break;
+            case ResizeDimension.Horizontal:
+                points.push(
+                    {
+                        type: ResizeFramePoint,
+                        moveDirection: PointDirection.Horizontal,
+                        x: 0,
+                        y: 0,
+                        cursor: 2,
+                        rv: [1, 0],
+                        update: function (p, x, y, w, h) {
+                            p.x = x + w;
+                            p.y = y + h / 2;
+                        }
+                    },
+                    {
+                        type: ResizeFramePoint,
+                        moveDirection: PointDirection.Horizontal,
+                        x: 0,
+                        y: 0,
+                        cursor: 6,
+                        rv: [-1, 0],
+                        update: function (p, x, y, w, h) {
+                            p.x = x;
+                            p.y = y + h / 2;
+                        }
+                    }
+                );
+                break;
+        }
+
+        return {
+            element: this,
+            frame: true,
+            points: points
+        };
     },
     getPropsDiff: function (other, oldProps) {
         var res = {};
@@ -2042,5 +2067,23 @@ PropertyMetadata.registerForType(UIElement, {
         return ["id", "name"];
     }
 });
+
+fwk.UIElement.drawBoundaryPath = function(context, matrix, w, h){
+    context.beginPath();
+
+    var p = matrix.transformPoint2(0, 0, true);
+    context.moveTo(p.x, p.y);
+
+    p = matrix.transformPoint2(w, 0, true);
+    context.lineTo(p.x, p.y);
+
+    p = matrix.transformPoint2(w, h, true);
+    context.lineTo(p.x, p.y);
+
+    p = matrix.transformPoint2(0, h, true);
+    context.lineTo(p.x, p.y);
+
+    context.closePath();
+};
 
 export default fwk.UIElement;

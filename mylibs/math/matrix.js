@@ -350,6 +350,10 @@ class Matrix {
         return this.clone().prepend(mx);
     }
 
+    prependedWithScale(sx, sy){
+        return this.prepended(Matrix.create().scale(sx, sy));
+    }
+
     /**
      * Inverts the matrix, causing it to perform the opposite transformation.
      * If the matrix is not invertible (in which case {@link #isSingular()}
@@ -434,6 +438,10 @@ class Matrix {
         return !this.isInvertible();
     }
 
+    isTranslatedOnly(){
+        return this._a === 1 && this._b === 0 && this._c === 0 && this._d === 1;
+    }
+
     /**
      * A faster version of transform that only takes one point and does not
      * attempt to convert it.
@@ -448,11 +456,15 @@ class Matrix {
         );
     }
 
-    transformPoint2(x, y){
-        return new Point(
-            x*this._a + y*this._c + this._tx,
-            x*this._b + y*this._d + this._ty
-        );
+    transformPoint2(x, y, round){
+        var px = x*this._a + y*this._c + this._tx;
+        var py = x*this._b + y*this._d + this._ty;
+
+        if (round){
+            px = Math.round(px);
+            py = Math.round(py);
+        }
+        return new Point(px, py);
     }
 
     /**

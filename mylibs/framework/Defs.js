@@ -289,7 +289,7 @@ export var Types = {
     'QuadAndLock': 'q',
     'Box': 'B',
     'Shadow': 'i',
-    'ResizingElement': 're'
+    'TransformationElement': 'te'
 };
 
 if (DEBUG){

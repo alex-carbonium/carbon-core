@@ -2,7 +2,7 @@ import DesignerView from "./framework/DesignerView";
 import Layer from "./framework/Layer";
 import SelectComposite from "./framework/SelectComposite";
 import NullPage from "./framework/NullPage";
-import DraggingElement from "./framework/DraggingElement";
+import DraggingElement from "./framework/interactions/DraggingElement";
 import SelectFrame from "./framework/SelectFrame";
 import DesignerController from "./framework/DesignerController";
 import Environment from "./environment";

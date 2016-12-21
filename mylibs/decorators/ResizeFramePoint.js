@@ -7,23 +7,24 @@ import Point from "../math/point";
 
 var debug = require("DebugUtil")("carb:resizeFramePoint");
 
-const PointSize = 5
-    , PointSize2 = 2;
+const PointSize = 6
+    , PointSize2 = 3;
 
 export default {
     hitTest: function (frame, point, hitPoint, scale) {
         return Math.abs(point.x - hitPoint.x) < PointSize / scale && Math.abs(point.y - hitPoint.y) < PointSize / scale;
     },
-    draw: function (p, frame, scale, context) {
+    draw: function (p, frame, scale, context, matrix) {
         context.fillStyle = '#fff';
         context.strokeStyle = '#22c1ff';
         context.beginPath();
-        context.rect(~~(p.x * scale - PointSize2), ~~(p.y * scale - PointSize2), PointSize, PointSize);
+        var pt = matrix.transformPoint2(p.x, p.y, true);
+        context.rect(pt.x - PointSize2, pt.y - PointSize2, PointSize, PointSize);
         context.fill();
         context.stroke();
     },
     capture: function (frame, point) {
-        var resizingElement = UIElement.construct(Types.ResizingElement, frame.element);
+        var resizingElement = UIElement.construct(Types.TransformationElement, frame.transformElements || [frame.element]);
         frame.resizingElement = resizingElement;
         frame.originalRect = frame.element.getBoundaryRectGlobal();
         frame.rotationOrigin = frame.element.rotationOrigin(true);

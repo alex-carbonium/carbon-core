@@ -240,8 +240,8 @@ export default class Point {
      * @name Point#getAngle
      * @type Number
      */
-    getAngle(/* point */) {
-        return this.getAngleInRadians.apply(this, arguments) * 180 / Math.PI;
+    getAngle(point) {
+        return this.getAngleInRadians(point) * 180 / Math.PI;
     }
 
     setAngle(angle) {
@@ -264,7 +264,7 @@ export default class Point {
      * @name Point#getAngleInRadians
      * @type Number
      */
-    getAngleInRadians(/* point */) {
+    getAngleInRadians(point) {
         if (!arguments.length) {
             return this.isZero()
                 // Return the preserved angle in case the vector has no
@@ -274,8 +274,7 @@ export default class Point {
                 ? this._angle || 0
                 : this._angle = Math.atan2(this.y, this.x);
         } else {
-            var point = new Point(arguments[0]),
-                div = this.getLength() * point.getLength();
+            var div = this.getLength() * point.getLength();
             if (isZero(div)) {
                 return NaN;
             } else {
@@ -343,8 +342,7 @@ export default class Point {
      * @param {Point} point
      * @return {Number} the angle between the two vectors
      */
-    getDirectedAngle(/* point */) {
-        var point = new Point(arguments[0]);
+    getDirectedAngle(point) {
         return Math.atan2(this.cross(point), this.dot(point)) * 180 / Math.PI;
     }
 
@@ -678,8 +676,7 @@ export default class Point {
      * @param {Point} point
      * @return {Number} the dot product of the two points
      */
-    dot(/* point */) {
-        var point = new Point(arguments[0]);
+    dot(point) {
         return this.x * point.x + this.y * point.y;
     }
 
@@ -689,8 +686,7 @@ export default class Point {
      * @param {Point} point
      * @return {Number} the cross product of the two points
      */
-    cross(/* point */) {
-        var point = new Point(arguments[0]);
+    cross(point) {
         return this.x * point.y - this.y * point.x;
     }
 

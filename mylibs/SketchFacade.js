@@ -110,7 +110,7 @@ module.exports = {
     "AllCommands": AllCommands,
 
     "SelectComposite": require("./framework/SelectComposite"),
-    "DraggingElement": require("./framework/DraggingElement"),
+    "DraggingElement": require("./framework/interactions/DraggingElement"),
     "SelectFrame": require("./framework/SelectFrame"),
     "Layer": require("./framework/Layer"),
 

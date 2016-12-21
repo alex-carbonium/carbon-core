@@ -2,29 +2,17 @@ import {PointDirection} from "framework/Defs";
 import CrazyScope from "framework/CrazyManager";
 import Environment from "environment";
 import UserSettings from "../UserSettings";
+import UIElement from "../framework/UIElement";
 
 export default {
     strokeStyle: UserSettings.frame.stroke,
     hitPointIndex: function (frame, point) {
-        var matrix = frame.element.globalViewMatrix().clone();
-        var sw = 1, sh = 1;
-        if (frame.element.flipHorizontal()) {
-            sw = -1;
-        }
-        if (frame.element.flipVertical()) {
-            sh = -1;
-        }
-
-        if (sw !== 1 || sh !== 1) {
-            matrix.scale(sw, sh, frame.element.width() / 2, frame.element.height() / 2);
-        }
-        matrix.invert();
-
+        var matrix = frame.element.globalViewMatrixInverted();
         point = matrix.transformPoint(point);
 
         var scale = Environment.view.scale();
 
-        for (var i = 0; i < frame.points.length; ++i) {
+        for (var i = frame.points.length - 1; i >= 0; --i) {
             var p = frame.points[i];
             if (p.type.hitTest(frame, point, p, scale)) {
                 return i;
@@ -48,19 +36,7 @@ export default {
     },
 
     movePoint: function (frame, point, event) {
-        var matrix = (frame.globalViewMatrix || frame.element.globalViewMatrix()).clone();
-        var sw = 1, sh = 1;
-        if (frame.element.flipHorizontal()) {
-            sw = -1;
-        }
-        if (frame.element.flipVertical()) {
-            sh = -1;
-        }
-
-        if (sw !== 1 || sh !== 1) {
-            matrix.scale(sw, sh, frame.element.width() / 2, frame.element.height() / 2);
-        }
-        matrix.invert();
+        var matrix = frame.element.globalViewMatrixInverted();
 
         var pt = matrix.transformPoint(event);
 
@@ -76,22 +52,14 @@ export default {
         point.type.change(frame, dx, dy, point, event);
     },
     draw: function (frame, context, currentPoint) {
-        var x = 0;
-        var y = 0;
         var w = frame.getWidth();
         var h = frame.getHeight();
         var scale = Environment.view.scale();
 
         context.save();
-        context.scale(1 / scale, 1 / scale);
-        var scaleX = 1, scaleY = 1;
-        if (!frame.element.scalableX()) {
-            scaleX = scale;
-        }
+        context.scale(1/scale, 1/scale);
 
-        if (!frame.element.scalableY()) {
-            scaleY = scale;
-        }
+        var matrix = frame.element.globalViewMatrix().prependedWithScale(scale, scale);
 
         if (frame.onlyCurrentVisible) {
             if (currentPoint) {
@@ -102,19 +70,17 @@ export default {
             if (frame.frame) {
                 if (this.strokeStyle){
                     context.save();
-                    CrazyScope.push(false);
                     context.strokeStyle = this.strokeStyle;
                     context.lineWidth = 1;
-                    context.rectPath(~~(x * scale), ~~(y * scale), ~~(w * scale / scaleX), ~~(h * scale / scaleY));
+                    UIElement.drawBoundaryPath(context, matrix, w, h);
                     context.stroke();
-                    CrazyScope.pop();
                     context.restore();
                 }
             }
 
             for (var i = frame.points.length - 1; i >= 0; --i) {
                 var p = frame.points[i];
-                p.type.draw(p, frame, scale, context);
+                p.type.draw(p, frame, scale, context, matrix);
             }
         }
 

@@ -54,7 +54,7 @@ function onMouseDown(event) {
 
     if (pointId >= 0 && !this._originalPoint) {
         this._originalPoint = this._frame.points[pointId];
-        this._originalPoint.type.capture(this._frame, this._originalPoint);
+        this._originalPoint.type.capture(this._frame, this._originalPoint, event);
         event.handled = true;
         this._frame.captured = true;
         return false;
@@ -153,38 +153,11 @@ export default class ActiveFrame extends UIElementDecorator {
     }
 
     layerdraw(context) {
-        var frame = this._frame;
-        context.save();
-        var matrix = frame.globalViewMatrix || this._element.globalViewMatrix();
-        var sw = 1, sh = 1;
-        if (this._element.flipHorizontal()) {
-            sw = -1;
-        }
-        if (this._element.flipVertical()) {
-            sh = -1;
-        }
-
-        if (sw !== 1 || sh !== 1) {
-            matrix = matrix.clone();
-            matrix.scale(sw, sh, this._element.width() / 2, this._element.height() / 2);
-        }
-
-
-
         if (this.visible()){
-            matrix.applyToContext(context);
-            this._frameType.draw(frame, context, this._originalPoint);
+            context.save();
+            this._frameType.draw(this._frame, context, this._originalPoint);
+            context.restore();
         }
-        else{
-            // var resizingElement = this._frame.resizingElement;
-            // if (resizingElement){
-            //     var clone = resizingElement._clone;
-            //     clone.globalViewMatrix().applyToContext(context);
-            //     context.strokeStyle = UserSettings.frame.stroke;
-            //     context.strokeRect(0, 0, clone.width(), clone.height())
-            // }
-        }
-        context.restore();
     }
 }
 

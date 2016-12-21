@@ -86,6 +86,11 @@ define(["decorators/ActiveFrame", "framework/ResizeDimension"], function (Active
 
             return this._selected;
         },
+        createSelectionFrame: function(){
+            var frame = CompositeElement.prototype.createSelectionFrame.apply(this, arguments);
+            frame.transformElements = this.elements;
+            return frame;
+        },
         selectionFrameType: function () {
             return SelectCompositeFrame;
         },
