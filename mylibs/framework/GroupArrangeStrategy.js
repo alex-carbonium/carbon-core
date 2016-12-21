@@ -46,7 +46,7 @@ var GroupArrangeStrategy = {
             for (let i = 0, l = items.length; i < l; ++i) {
                 items[i].applyTranslation(translate);
             }
-            container.applyTranslation(translate.negate());
+            container.applyDirectedTranslation(translate.negate());
         }
     }
 };

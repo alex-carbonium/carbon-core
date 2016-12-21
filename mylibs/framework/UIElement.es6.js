@@ -230,6 +230,9 @@ var UIElement = klass(DataNode, {
         }
         this.applyTransform(Matrix.create().translate(t.x, t.y));
     },
+    applyDirectedTranslation: function(t) {
+        this.applyTransform(Matrix.create().translate(t.x, t.y), true);
+    },
 
     getRotation: function() {
         var dm = this.runtimeProps.dm;
@@ -293,8 +296,8 @@ var UIElement = klass(DataNode, {
         this.prepareAndSetProps(newProps);
     },
 
-    applyTransform: function(matrix) {
-        this.setProps({m: this.props.m.prepended(matrix)});
+    applyTransform: function(matrix, append) {
+        this.setProps({m: append ? this.props.m.appended(matrix) : this.props.m.prepended(matrix)});
         return this;
     },
     setTransform: function(matrix) {
