@@ -99,9 +99,9 @@ export default class ArtboardTemplateControl extends UIElement {
         this.setProps(res);
     }
 
-    updateViewMatrix() {
-        super.updateViewMatrix();
-        this._container && this._container.updateViewMatrix();
+    resetGlobalViewCache() {
+        super.resetGlobalViewCache();
+        this._container && this._container.resetGlobalViewCache();
     }
 
     displayType(){

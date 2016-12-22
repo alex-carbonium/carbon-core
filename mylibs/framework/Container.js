@@ -446,12 +446,6 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
 
                 return realParrent;
             },
-            lockAutoresize: function(){
-
-            },
-            unlockAutoresize: function(){
-
-            },
 
             resetGlobalViewCache: function (resetPrimitiveRoot) {
                 UIElement.prototype.resetGlobalViewCache.apply(this, arguments);

@@ -66,7 +66,6 @@ export default class Frame extends Container {
         var clone = super.clone();
         //to avoid loading when dragging
         clone.resetRuntimeProps();
-        clone.updateViewMatrix();
         clone.runtimeProps.sourceProps = Object.assign({}, this.runtimeProps.sourceProps);
         clone.runtimeProps.loaded = this.runtimeProps.loaded;
         return clone;
@@ -238,7 +237,6 @@ export default class Frame extends Container {
             .then(svg => {
                 return svgParser.loadSVGFromString(svg).then((result)=> {
                     result.setProps({x: this.x(), y: this.y()});
-                    result.updateViewMatrix();
                     return result;
                 });
             });

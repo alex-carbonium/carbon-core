@@ -1,10 +1,12 @@
-import EventHelper from "framework/EventHelper";
-import SelectComposite from "framework/SelectComposite";
+import EventHelper from "./EventHelper";
+import SelectComposite from "./SelectComposite";
+import Invalidate from "./Invalidate";
 
 var debug = require("DebugUtil")("carb:selection");
 
 function lockUnlockGroups(newSelectedElements) {
     var newUnlocked = [];
+    var invalidate = false;
 
     //unlock parents
     for (let i = 0; i < newSelectedElements.length; i++){
@@ -13,6 +15,7 @@ function lockUnlockGroups(newSelectedElements) {
             let unlocked = this._unlockedContainers.indexOf(el) !== -1;
             if (!unlocked){
                 unlocked = el.unlockGroup();
+                invalidate = true;
             }
             if (unlocked){
                 newUnlocked.push(el);
@@ -27,19 +30,25 @@ function lockUnlockGroups(newSelectedElements) {
         this._activeGroup.activeGroup(false);
         this._activeGroup = null;
     }
-    if (newSelectedElements.length === 1 && newSelectedElements[0].activeGroup){
-        newSelectedElements[0].activeGroup(true);
-        this._activeGroup = newSelectedElements[0];
-    }
 
     //lock anything which is not selected anymore
     for (let i = 0; i < this._unlockedContainers.length; i++){
         var c = this._unlockedContainers[i];
         if (c.lockGroup && newUnlocked.indexOf(c) === -1){
             c.lockGroup();
+            invalidate = true;
         }
     }
     this._unlockedContainers = newUnlocked;
+
+    if (newSelectedElements.length === 1 && newSelectedElements[0].activeGroup){
+        newSelectedElements[0].activeGroup(true);
+        this._activeGroup = newSelectedElements[0];
+    }
+
+    if (invalidate){
+        Invalidate.request();
+    }
 }
 function onselect(rect) {
     var selection = App.Current.activePage.getElementsInRect(rect);

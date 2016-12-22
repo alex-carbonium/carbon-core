@@ -482,24 +482,16 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
         }
         this.commonProps = props;
     },
-    updateViewMatrix:function() {
-        this.resetGlobalViewCache();
-    },
     globalViewMatrix:function() {
         return Matrix.Identity;
     },
     _onPropsChanged: function(element, newProps){
         if (this.has(element)){
-            if (newProps.flipVertical !== undefined
-                || newProps.flipHorizontal !== undefined
-                || newProps.angle !== undefined
-                || newProps.x !== undefined
-                || newProps.y !== undefined
-                || newProps.stroke !== undefined
+            if (newProps.hasOwnProperty("m")
+                || newProps.hasOwnProperty("stroke")
+                || newProps.hasOwnProperty("width")
+                || newProps.hasOwnProperty("height")
             ) {
-                this.updateViewMatrix();
-            }
-            else if (newProps.width !== undefined || newProps.height !== undefined) {
                 this.resetGlobalViewCache();
             }
 

@@ -66,7 +66,7 @@ class CompoundPath extends Container {
             for (var p of this.children) {
                 p.setProps({width: p.width() * sw, height: p.height() * sh, x: p.x() * sw, y: p.y() * sh});
             }
-            this.updateViewMatrix();
+            this.resetGlobalViewCache();
             this.recalculate();
         }
     }
@@ -85,7 +85,7 @@ class CompoundPath extends Container {
 
         var items = this.children;
         for(var i = 0; i < items.length; ++i){
-            items[i].updateViewMatrix();
+            items[i].resetGlobalViewCache();
         }
         var result = BezierGraph.fromPath(items[0]);
         this._itemIds[items[0].id()] = true;

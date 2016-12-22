@@ -662,14 +662,13 @@ define(function () {
                         bottom = b;
                     }
                 }
-                group.lockAutoresize();
+
                 group.setProps({width: right, height: bottom});
 
                 for (var i = 0; i < results.length; ++i) {
                     group.add(results[i]);
                 }
-                group.unlockAutoresize();
-                group.updateViewMatrix();
+
                 resolve(group, options);
             }, r);
         });

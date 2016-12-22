@@ -85,9 +85,9 @@ export default class ArtboardFrameControl extends UIElement {
         this.runtimeProps.artboardVersion = artboard.runtimeProps.version;
     }
 
-    updateViewMatrix() {
-        super.updateViewMatrix();
-        this._container && this._container.updateViewMatrix();
+    resetGlobalViewCache() {
+        super.resetGlobalViewCache();
+        this._container && this._container.resetGlobalViewCache();
     }
 
     onArtboardChanged() {

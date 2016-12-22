@@ -39,14 +39,6 @@ export default class GroupContainer extends Container {
         return allowMoveInOut;
     }
 
-    lockAutoresize(){
-        this._lockAutoresize = true;
-    }
-
-    unlockAutoresize(){
-        delete this._lockAutoresize;
-    }
-
     iconType(){
         return 'group';
     }
