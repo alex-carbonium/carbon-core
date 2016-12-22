@@ -89,6 +89,10 @@ class NullContainer {
         return Matrix.Identity;
     }
 
+    globalViewMatrixInverted(){
+        return Matrix.Identity;
+    }
+
     scale(){
         return 1;
     }

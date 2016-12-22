@@ -1,9 +1,9 @@
 import {app, Intl, Environment, ActionManager} from "../../SketchFacade";
 import RenderLoop from "../../RenderLoop";
 import ArtboardPage from "../../ui/pages/ArtboardPage";
+import Selection from "../../framework/SelectionModel";
 import Matrix from "../../math/matrix";
 import Point from "../../math/point";
-import UserSettings from "../../UserSettings";
 import backend from "../../backend";
 import logger from "../../logger";
 
@@ -18,12 +18,29 @@ var htmlLayer = document.getElementById("htmlLayer");
 RenderLoop.init(app, viewContainer, viewport, canvas, middleCanvas, upperCanvas, htmlPanel, htmlLayer);
 
 Intl.instance = {
-    formatMessage(msg){
-        return msg.defaultMessage;
+    formatMessage(msg, data){
+        var result = msg.defaultMessage;
+        if (data && data.index){
+            result += " " + data.index;
+        }
+        return result;
     }
 };
 
+var examples = {};
+
+var selector = document.getElementById("selector");
+selector.addEventListener("change", e => runExample(e.target.value));
+
 export function registerExample(name, fn){
+    var option = document.createElement("option");
+    option.text = name;
+    selector.add(option);
+    examples[name] = fn;
+}
+
+function runExample(name){
+    Selection.makeSelection([]);
     app.unload();
 
     app.init();
@@ -41,12 +58,22 @@ export function registerExample(name, fn){
     app.addPage(page);
     app.raiseLoaded();
 
+    var fn = examples[name];
     fn(app);
+
+    history.replaceState({}, document.title, location.pathname + "?" + encodeURIComponent(name));
 }
 
 backend.init(logger, {services: '', storage: '', file: '', cdn: ''});
 
-UserSettings.showBoundingBoxes = true;
-
 window.Matrix = Matrix;
 window.Point = Point;
+
+window.onload = function(){
+    var q = location.search.substr(1);
+    if (q){
+        var example = decodeURIComponent(q);
+        selector.value = example;
+        runExample(example);
+    }
+};

@@ -9,11 +9,9 @@ var GroupArrangeStrategy = {
             return;
         }
         if (items.length === 1){
-            container.setProps({
-                width: items[0].width(),
-                height: items[0].height(),
-                m: items[0].globalViewMatrix()
-            });
+            var props = items[0].selectLayoutProps(true);
+            props.m = container.parent().globalViewMatrixInverted().appended(props.m);
+            container.setProps(props);
             items[0].resetTransform();
             return;
         }
