@@ -194,6 +194,7 @@ class CompoundPath extends Container {
     offsetGraph() {
         var graph = new BezierGraph();
         for (var p of this.result) {
+            //TODO
             graph.initWithBezierPath(p, {x: this.x(), y: this.y()}, this.angle(), this.rotationOrigin());
         }
 

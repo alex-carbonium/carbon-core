@@ -145,12 +145,12 @@ class Rectangle extends Shape {
     }
     convertToPath() {
         var path = new Path()
-            , x1 = this.x()
-            , y1 = this.y()
-            , x2 = x1 + this.width()
-            , y2 = y1 + this.height()
+            , x1 = 0
+            , y1 = 0
+            , x2 = this.width()
+            , y2 = this.height()
             , cr = this.cornerRadius();
-        path.setProps({pointRounding:0})
+        path.setProps({pointRounding:0});
 
         var mr = Math.min(this.width()/2, this.height()/2);
 
@@ -189,7 +189,7 @@ class Rectangle extends Shape {
         path.name(this.name());
 
         path.adjustBoundaries();
-        path.setProps({x:this.x(), y:this.y(), angle:this.angle()});
+        path.setProps(this.selectLayoutProps());
 
         return path;
     }

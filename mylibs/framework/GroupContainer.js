@@ -1,4 +1,4 @@
-import {Types, Overflow, ArrangeStrategies} from "./Defs";
+import {Types, ArrangeStrategies} from "./Defs";
 import PropertyMetadata from "./PropertyMetadata";
 import UserSettings from "../UserSettings";
 import Container from "./Container";
@@ -16,15 +16,13 @@ export default class GroupContainer extends Container {
         this.children.forEach(e => e.applyScaling(absScale, Point.Zero, false, withReset));
     }
 
-    drawSelf(context, w, h, environment){
+    strokeBorder(context, x, y, w, h){
         if (!this.lockedGroup()){
             context.save();
             context.strokeStyle = UserSettings.group.active_stroke;
             context.strokeRect(0, 0, w, h);
             context.restore();
-
         }
-        super.drawSelf.apply(this, arguments);
     }
 
     _roundValue(value){

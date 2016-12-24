@@ -2,6 +2,7 @@ import PropertyMetadata from "../PropertyMetadata";
 import {Types} from "../Defs";
 import SnapController from "../SnapController";
 import Artboard from "../Artboard";
+import Invalidate from "../Invalidate";
 import {areRectsIntersecting} from "../../math/math";
 import Point from "../../math/point";
 import InteractiveElement from "./InteractiveElement";
@@ -10,10 +11,10 @@ import ArrangeStrategy from "../ArrangeStrategy";
 var debug = require("DebugUtil")("carb:draggingElement");
 
 function applyOrthogonalMove(pos) {
-    if (Math.abs(this._startPosition.x - pos.x) > Math.abs(this._startPosition.y - pos.y)) {
-        pos.y = this._startPosition.y;
+    if (Math.abs(this._initialPosition.x - pos.x) > Math.abs(this._initialPosition.y - pos.y)) {
+        pos.y = this._initialPosition.y;
     } else {
-        pos.x = this._startPosition.x;
+        pos.x = this._initialPosition.x;
     }
 
     return pos;
@@ -24,13 +25,12 @@ class DraggingElement extends InteractiveElement {
         super(event.elements);
 
         this._initialPosition = this.getTranslation();
+        this._currentPosition = this._initialPosition;
 
         SnapController.calculateSnappingPoints(activeArtboard);
 
         var holdPcnt = Math.round((event.x - this.x()) * 100 / this.width());
         this._ownSnapPoints = SnapController.prepareOwnSnapPoints(this, holdPcnt);
-
-        this._startPosition = this.position();
     }
 
     displayName() {
@@ -44,8 +44,16 @@ class DraggingElement extends InteractiveElement {
         SnapController.clearActiveSnapLines();
     }
 
+    drawSelf(context){
+        context.save();
+        context.translate(this._currentPosition.x, this._currentPosition.y);
+        super.drawSelf.apply(this, arguments);
+        context.restore();
+    }
+
     saveChanges(event, draggingOverElement, page){
         super.saveChanges();
+        this.applyTranslation(this._currentPosition);
 
         var artboards = page.getAllArtboards();
         var elements = [];
@@ -118,11 +126,8 @@ class DraggingElement extends InteractiveElement {
             SnapController.clearActiveSnapLines();
         }
 
-        this.applyTranslation(position.subtract(this._initialPosition), true);
-    }
-
-    drawSelf(){
-        super.drawSelf.apply(this, arguments);
+        this._currentPosition = position.subtract(this._initialPosition);
+        Invalidate.requestUpperOnly();
     }
 
     parentAllowSnapping(pos) {

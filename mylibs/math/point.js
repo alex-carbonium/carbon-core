@@ -817,6 +817,9 @@ export default class Point {
     }
 
     abs() {
+        if (this.x >= 0 && this.y >= 0){
+            return this;
+        }
         return new Point(Math.abs(this.x), Math.abs(this.y));
     }
 }

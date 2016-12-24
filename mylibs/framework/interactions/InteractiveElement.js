@@ -1,4 +1,5 @@
 import GroupContainer from "../GroupContainer";
+import Container from "../Container";
 import {ChangeMode, Types} from "../Defs";
 import Phantom from "../Phantom";
 import Brush from "../Brush";
@@ -27,6 +28,10 @@ export default class InteractiveElement extends GroupContainer{
         this.performArrange();
 
         this.showOriginal(false);
+    }
+
+    strokeBorder(context, x, y, w, h){
+        Container.prototype.strokeBorder.apply(this, arguments);
     }
 
     createClone(element){

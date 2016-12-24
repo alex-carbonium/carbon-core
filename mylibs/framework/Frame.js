@@ -101,14 +101,14 @@ export default class Frame extends Container {
         }
     }
 
-    drawSelf() {
+    shouldApplyViewMatrix(){
+        return true;
+    }
+
+    drawSelf(context, w, h, environment) {
         if (!this.source()) {
             return;
         }
-        super.drawSelf.apply(this, arguments);
-    }
-
-    drawChildren(context, w, h, environment) {
         var source = this.source();
         if (!source) {
             return;

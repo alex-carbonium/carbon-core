@@ -76,10 +76,23 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                     context.restore();
                 }
             },
+            shouldApplyViewMatrix: function(){
+                return false;
+            },
             drawSelf: function (context, w, h, environment) {
+                context.save();
+                this.globalViewMatrix().applyToContext(context);
                 this.fillBackground(context, 0, 0, w, h);
+                context.restore();
+
                 this.drawChildren(context, w, h, environment);
+
+                context.save();
+                this.globalViewMatrix().applyToContext(context);
                 this.strokeBorder(context, 0, 0, w, h);
+                context.restore();
+
+                this.drawDecorators(context, w, h, environment);
             },
             modifyContextBeforeDrawChildren: function (context) {
 
@@ -167,15 +180,7 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                 return clone;
             },
             drawChildren: function (context, w, h, environment) {
-                w = w === undefined ? this.width() : w;
-                h = h === undefined ? this.height() : h;
-
                 context.save();
-
-                if (this.clipSelf()) {
-                    context.rectPath(0, 0, w, h);
-                    context.clip();
-                }
 
                 this.modifyContextBeforeDrawChildren(context);
 
@@ -244,8 +249,6 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                     }
                     newChild.draw(context, environment);
                 }
-            },
-            clip: function () {
             },
             padding: function (value) {
                 if (value !== undefined) {

@@ -155,15 +155,17 @@ var setLinePoint = function (pt) {
     pt.cp1y = pt.cp2y = pt.y;
 };
 
-var drawSegment = function (context, pt, prevPt, sx, sy, closing) {
+var drawSegment = function (context, pt, prevPt, closing) {
+    var xy = this.globalViewMatrix().transformPoint(pt);
+
     if (!this._firstPoint) {
         this._firstPoint = pt;
     }
     if ((pt.moveTo || this._firstPoint === pt) && !closing) {
-        context.moveTo(pt.x * sx, pt.y * sy);
+        context.moveTo(xy.x, xy.y);
     }
     else if (isLinePoint(pt) && (isLinePoint(prevPt))) { // line segment
-        context.lineTo(pt.x * sx, pt.y * sy);
+        context.lineTo(xy.x, xy.y);
     } else { // cubic bezier segment
         var cp1x = prevPt.cp2x
             , cp1y = prevPt.cp2y
@@ -178,11 +180,11 @@ var drawSegment = function (context, pt, prevPt, sx, sy, closing) {
             cp2y = pt.y;//cp1y;
         }
 
-        context.bezierCurveTo(cp1x * sx, cp1y * sy, cp2x * sx, cp2y * sy, pt.x * sx, pt.y * sy);
+        context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, xy.x, xy.y);
     }
 
     if (pt.closed) {
-        drawSegment.call(this, context, this._firstPoint, pt, sx, sy, true);
+        drawSegment.call(this, context, this._firstPoint, pt, true);
         context.closePath();
         this._firstPoint = null;
     }
@@ -1222,15 +1224,19 @@ class Path extends Shape {
         }
     }
 
+    applySizeScaling(s, o) {
+        var localOrigin = this.viewMatrixInverted().transformPoint(o);
+        this.applyTransform(Matrix.create().scale(s.x, s.y, localOrigin.x, localOrigin.y), true);
+        return false;
+    }
+
+    shouldApplyViewMatrix(){
+        return false;
+    }
+
     drawPath(context, w, h) {
         if (this.points.length == 0) {
             return;
-        }
-
-        var sx = 1, sy = 1;
-        if (this._sourceRect) {
-            sx = w / this._sourceRect.width;
-            sy = h / this._sourceRect.height;
         }
 
         var pt;
@@ -1240,11 +1246,11 @@ class Path extends Shape {
         // context.moveTo(pt.x * sx, pt.y * sy);
         for (var i = 0, len = points.length; i < len; ++i) {
             pt = points[i];
-            drawSegment.call(this, context, pt, prevPt, sx, sy);
+            drawSegment.call(this, context, pt, prevPt);
             prevPt = pt;
         }
         if (this.closed() && !prevPt.closed) {
-            drawSegment.call(this, context, points[0], prevPt, sx, sy, true);
+            drawSegment.call(this, context, points[0], prevPt, true);
             context.closePath();
         }
     }
@@ -1338,12 +1344,12 @@ class Path extends Shape {
 
     getGlobalBoundingBox() {
         var graph = new BezierGraph();
-        var matrix = this.viewMatrix();
-        this.runtimeProps.viewMatrix = Matrix.create();
-        this.viewMatrix().translate(this.x(), this.y());
+        //var matrix = this.viewMatrix();
+        //this.runtimeProps.viewMatrix = Matrix.create();
+        //this.viewMatrix().translate(this.x(), this.y());
         graph.initWithBezierPath(this);//, null, -this.angle(), {x:this.width()/2, y:this.height()/2});
         var b = graph.bounds;
-        this.runtimeProps.viewMatrix = matrix;
+        //this.runtimeProps.viewMatrix = matrix;
 
         return {x: b.x, y: b.y, width: b.width, height: b.height};
     }
@@ -1614,16 +1620,16 @@ class Path extends Shape {
         offset = offset || {x: 0, y: 0};
 
 
-        var matrix = this.viewMatrix().clone();
+        var matrix = this.viewMatrix();
 
-        if (this._sourceRect) {
-            matrix.scale(this.width() / this._sourceRect.width, this.height() / this._sourceRect.height);
-        }
+        // if (this._sourceRect) {
+        //     matrix.scale(this.width() / this._sourceRect.width, this.height() / this._sourceRect.height);
+        // }
 
-        if (angle && origin) {
-            matrix.rotate(angle, origin.x, origin.y);
-        }
-        matrix.translate(offset.x, offset.y);
+        // if (angle && origin) {
+        //     matrix.rotate(angle, origin.x, origin.y);
+        // }
+        // matrix.translate(offset.x, offset.y);
 
         var pt;
         var prevPt = pt = points[0];

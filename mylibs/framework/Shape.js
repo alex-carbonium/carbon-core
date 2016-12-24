@@ -111,6 +111,10 @@ class Shape extends Container {
         }
     }
 
+    shouldApplyViewMatrix(){
+        return true;
+    }
+
     drawSelf(context, w, h, environment) {
 //                var that = this;
 //                var shadow = this.shadow();

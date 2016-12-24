@@ -200,14 +200,10 @@ var UIElement = klass(DataNode, {
         this.invalidate();
     },
 
-    _saveOrResetLayoutProps: function(){
+    saveOrResetLayoutProps: function(){
         //this happens only for clones, so no need to clear origLayout
         if (!this.runtimeProps.origLayout){
-            this.runtimeProps.origLayout = {
-                width: this.width(),
-                height: this.height(),
-                m: this.viewMatrix()
-            }
+            this.runtimeProps.origLayout = this.selectLayoutProps();
         }
         else{
             this.setProps(this.runtimeProps.origLayout);
@@ -219,7 +215,7 @@ var UIElement = klass(DataNode, {
     },
     applyTranslation: function(t, withReset) {
         if (withReset){
-            this._saveOrResetLayoutProps();
+            this.saveOrResetLayoutProps();
         }
         this.applyTransform(Matrix.create().translate(t.x, t.y));
     },
@@ -232,7 +228,7 @@ var UIElement = klass(DataNode, {
     },
     applyRotation: function(angle, o, withReset){
         if (withReset){
-            this._saveOrResetLayoutProps();
+            this.saveOrResetLayoutProps();
         }
         this.applyTransform(Matrix.create().rotate(-angle, o.x, o.y));
     },
@@ -242,7 +238,7 @@ var UIElement = klass(DataNode, {
 
     applyScaling: function(s, o, sameDirection, withReset) {
         if (withReset){
-            this._saveOrResetLayoutProps();
+            this.saveOrResetLayoutProps();
         }
 
         if (sameDirection || !this.isRotated()){
@@ -667,12 +663,18 @@ var UIElement = klass(DataNode, {
         }
         return this.runtimeProps.viewMatrixInverted;
     },
+    shouldApplyViewMatrix: function(){
+        return true;
+    },
+    applyViewMatrix: function(context){
+        if (this.shouldApplyViewMatrix()){
+            this.globalViewMatrix().applyToContext(context);
+        }
+    },
     draw: function (context, environment) {
         this.stopwatch.start();
 
-        var x = this.x(),
-            y = this.y(),
-            w = this.width(),
+        var w = this.width(),
             h = this.height();
 
         context.save();
@@ -683,52 +685,35 @@ var UIElement = klass(DataNode, {
         //     fwk.CrazyScope.push(false);
         // }
 
-        var customScale = this.customScale();
+        // var customScale = this.customScale();
+        //
+        // var scaleX, scaleY;
+        // scaleX = scaleY = environment.view.scale();
+        // if (customScale) {
+        //     scaleX = 1 / customScale.x;
+        // }
+        // else if (this.scalableX()) {
+        //     scaleX = 1;
+        // }
+        // if (customScale) {
+        //     scaleY = 1 / customScale.y;
+        // }
+        // else if (this.scalableY()) {
+        //     scaleY = 1;
+        // }
+        //
+        // if (scaleX !== 1 || scaleY !== 1) {
+        //     context.scale(1 / scaleX, 1 / scaleY);
+        //     context.translate((scaleX - 1), (scaleY - 1));
+        // }
 
-        var scaleX, scaleY;
-        scaleX = scaleY = environment.view.scale();
-        if (customScale) {
-            scaleX = 1 / customScale.x;
-        }
-        else if (this.scalableX()) {
-            scaleX = 1;
-        }
-        if (customScale) {
-            scaleY = 1 / customScale.y;
-        }
-        else if (this.scalableY()) {
-            scaleY = 1;
-        }
-
-        if (scaleX !== 1 || scaleY !== 1) {
-            context.scale(1 / scaleX, 1 / scaleY);
-            context.translate(x * (scaleX - 1), y * (scaleY - 1));
-        }
-
-        this.viewMatrix().applyToContext(context);
-
-        this.clip(context, 0, 0, w, h);
+        this.applyViewMatrix(context, environment);
 
         this.drawSelf(context, w, h, environment);
 
         context.restore();
 
-        // if (DEBUG && UserSettings.showBoundingBoxes){
-        //     var bb = this.getBoundingBox();
-        //     context.save();
-        //     context.setLineDash([2, 2]);
-        //     context.strokeStyle = 'red';
-        //     context.strokeRect(bb.x, bb.y, bb.width, bb.height);
-        //     context.restore();
-        // }
-
-        if (this.decorators) {
-            context.save();
-            for (var i = 0, j = this.decorators.length; i < j; ++i) {
-                this.decorators[i].draw(context, w, h, environment);
-            }
-            context.restore();
-        }
+        this.drawDecorators(context, w, h, environment);
 
         // if (!this.crazySupported()) {
         //     fwk.CrazyScope.pop();
@@ -736,7 +721,7 @@ var UIElement = klass(DataNode, {
 
         //console.log(this.displayName() + " : " + this.stopwatch.getElapsedTime());
     },
-    drawSelf: function (context, w, h, environment) {
+    drawSelf: function (context, w, h) {
         context.save();
         context.rectPath(0, 0, w, h, true);
         fwk.Brush.fill(this.fill(), context, 0, 0, w, h);
@@ -746,6 +731,15 @@ var UIElement = klass(DataNode, {
         }
         fwk.Brush.stroke(this.stroke(), context, 0, 0, w, h);
         context.restore();
+    },
+    drawDecorators: function(context, w, h, environment){
+        if (this.decorators) {
+            context.save();
+            for (var i = 0, j = this.decorators.length; i < j; ++i) {
+                this.decorators[i].draw(context, w, h, environment);
+            }
+            context.restore();
+        }
     },
     primitiveRoot: function () {
         if (this.runtimeProps.primitiveRoot) {
