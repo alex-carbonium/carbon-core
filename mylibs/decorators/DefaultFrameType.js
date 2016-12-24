@@ -63,7 +63,7 @@ export default {
 
         if (frame.onlyCurrentVisible) {
             if (currentPoint) {
-                currentPoint.type.draw(currentPoint, frame, scale, context);
+                currentPoint.type.draw(currentPoint, frame, scale, context, matrix);
             }
         }
         else {
@@ -72,7 +72,7 @@ export default {
                     context.save();
                     context.strokeStyle = this.strokeStyle;
                     context.lineWidth = 1;
-                    UIElement.drawBoundaryPath(context, matrix, w, h);
+                    frame.element.drawBoundaryPath(context, matrix, w, h);
                     context.stroke();
                     context.restore();
                 }

@@ -3,9 +3,6 @@ import nearestPoint from  "math/NearestPoint";
 import BezierGraph from "math/bezierGraph";
 import BezierCurve from "math/bezierCurve";
 import ResizeDimension from "framework/ResizeDimension";
-import InsertPathPointCommand from "commands/path/InsertPathPointCommand";
-import ChangePathPointCommand from "commands/path/ChangePathPointCommand";
-import commandManager from "framework/commands/CommandManager";
 import actionManager from "ui/ActionManager";
 import Brush from "framework/Brush";
 import PropertyMetadata from "framework/PropertyMetadata";
@@ -190,58 +187,24 @@ var drawSegment = function (context, pt, prevPt, closing) {
     }
 };
 
-var scalePointsToNewSize = function (rect, oldRect) {
-    oldRect.height = oldRect.height || 0.01;
-    oldRect.width = oldRect.width || 0.01;
-    rect.height = rect.height || 0.01;
-    rect.width = rect.width || 0.01;
-
-    if (rect.x == oldRect.x || rect.width != oldRect.width) {
-        var scale = rect.width / oldRect.width;
-        for (var i = 0; i < this.points.length; ++i) {
-            var pt = this.points[i];
-            pt.x *= scale;
-            pt.cp1x *= scale;
-            pt.cp2x *= scale;
-            this._roundPoint(pt);
-        }
+var scalePointsToNewSize = function () {
+    var bb = this.getGlobalBoundingBox();
+    var m = this.globalViewMatrix();
+    for (var i = 0; i < this.points.length; ++i) {
+        var pt = this.points[i];
+        var xy = m.transformPoint2(pt.x, pt.y);
+        var cp1 = m.transformPoint2(pt.cp1x, pt.cp1y);
+        var cp2 = m.transformPoint2(pt.cp2x, pt.cp2y);
+        pt.x = xy.x - bb.x;
+        pt.y = xy.y - bb.y;
+        pt.cp1x = cp1.x - bb.x;
+        pt.cp1y = cp1.y - bb.y;
+        pt.cp2x = cp2.x - bb.x;
+        pt.cp2y = cp2.y - bb.y;
+        this._roundPoint(pt);
     }
-
-    if (this.flipHorizontal()) {
-        for (var i = 0; i < this.points.length; ++i) {
-            var pt = this.points[i];
-            pt.x = rect.width - pt.x;
-            pt.cp1x = rect.width - pt.cp1x;
-            pt.cp2x = rect.width - pt.cp2x;
-            this._roundPoint(pt)
-        }
-        this.flipHorizontal(false);
-    }
-
-    if (rect.y == oldRect.y || rect.height != oldRect.height) {
-        scale = rect.height / oldRect.height;
-
-        for (i = 0; i < this.points.length; ++i) {
-            pt = this.points[i];
-            pt.y *= scale;
-            pt.cp1y *= scale;
-            pt.cp2y *= scale;
-            this._roundPoint(pt);
-        }
-    }
-
-    if (this.flipVertical()) {
-        for (var i = 0; i < this.points.length; ++i) {
-            var pt = this.points[i];
-            pt.y = rect.height - pt.y;
-            pt.cp1y = rect.height - pt.cp1y;
-            pt.cp2y = rect.height - pt.cp2y;
-        }
-        this.flipVertical(false);
-    }
-
-    this._sourceRect.width = rect.width;
-    this._sourceRect.height = rect.height;
+    var t = this.parent().globalViewMatrixInverted().transformPoint2(bb.x, bb.y);
+    this.setTransform(Matrix.create().translate(t.x, t.y));
 };
 
 function moveAllPoints(dx, dy) {
@@ -571,10 +534,8 @@ class Path extends Shape {
         }
         if (edit) {
             this._currentPoint = null;
-            if (this._sourceRect) {
-                scalePointsToNewSize.call(this, this.getBoundaryRect(), this._sourceRect);
-                this.save();
-            }
+            scalePointsToNewSize.call(this);
+            this.save();
             SnapController.calculateSnappingPointsForPath(this);
 
             this._cancelBinding = actionManager.subscribe('cancel', this.cancel.bind(this));
@@ -584,6 +545,7 @@ class Path extends Shape {
             SnapController.clearActiveSnapLines();
             this.nextPoint = null;
             this.releaseMouse(this);
+            this.resetGlobalViewCache();
         }
     }
 
@@ -1089,6 +1051,21 @@ class Path extends Shape {
         }
         return res;
     }
+    getHitTestBox(scale){
+        var bb = this.getBoundingBox();
+        var r = null;
+        if (bb.width * scale < 10) {
+            r = r || Object.assign({}, bb);
+            r.x = -5;
+            r.width += 10;
+        }
+        if (bb.height * scale < 10) {
+            r = r || Object.assign({}, bb);
+            r.y = -5;
+            r.height += 10;
+        }
+        return r || bb;
+    }
 
     selectFrameVisible() {
         return this.mode() !== "edit";
@@ -1109,15 +1086,8 @@ class Path extends Shape {
             context.beginPath();
 
             var matrix = this.globalViewMatrix();
-            matrix.applyToContext(context);
             var w = this.props.width,
                 h = this.props.height;
-            var sx = 1,
-                sy = 1;
-            if (this._sourceRect) {
-                sx = w / this._sourceRect.width;
-                sy = h / this._sourceRect.height;
-            }
 
             var handlePoint = this._handlePoint || this._hoverHandlePoint;
             var hoverPoint = this._currentPoint || this._hoverPoint;
@@ -1129,7 +1099,7 @@ class Path extends Shape {
                 } else {
                     nextPt = this.nextPoint;
                 }
-                drawSegment.call(this, context, nextPt, this.points[this.points.length - 1], sx, sy, true);
+                drawSegment.call(this, context, nextPt, this.points[this.points.length - 1], true);
             }
             context.stroke();
 
@@ -1146,14 +1116,14 @@ class Path extends Shape {
 
             for (var i = 0, len = this.points.length; i < len; ++i) {
                 var pt = this.points[i];
-                var tpt = {x: pt.x * sx, y: pt.y * sy};
+                var tpt = matrix.transformPoint(pt);
 
                 clearStyle();
 
                 if (!isLinePoint(pt)) {
 
-                    var cp1 = {x: pt.cp1x * sx, y: pt.cp1y * sy};
-                    var cp2 = {x: pt.cp2x * sx, y: pt.cp2y * sy};
+                    var cp1 = matrix.transformPoint2(pt.cp1x, pt.cp1y);
+                    var cp2 = matrix.transformPoint2(pt.cp2x, pt.cp2y);
                     context.beginPath();
                     context.moveTo(cp1.x, cp1.y);
                     context.lineTo(pt.x, pt.y);
@@ -1255,6 +1225,25 @@ class Path extends Shape {
         }
     }
 
+    drawBoundaryPath(context, matrix){
+        var bb = this.getBoundingBox();
+        context.beginPath();
+
+        var p = matrix.transformPoint2(bb.x, bb.y, true);
+        context.moveTo(p.x, p.y);
+
+        p = matrix.transformPoint2(bb.x + bb.width, bb.y, true);
+        context.lineTo(p.x, p.y);
+
+        p = matrix.transformPoint2(bb.x + bb.width, bb.y + bb.height, true);
+        context.lineTo(p.x, p.y);
+
+        p = matrix.transformPoint2(bb.x, bb.y + bb.height, true);
+        context.lineTo(p.x, p.y);
+
+        context.closePath();
+    }
+
     // drawSelf (context, w, h, environment) {
     //     if (this._points.length == 0) {
     //         return;
@@ -1342,16 +1331,20 @@ class Path extends Shape {
         return rect;
     }
 
+    getBoundingBox(){
+        if (!this.runtimeProps.boundingBox){
+            var graph = new BezierGraph();
+            graph.initWithBezierPath(this, Matrix.Identity);
+            this.runtimeProps.boundingBox = graph.bounds;
+        }
+
+        return this.runtimeProps.boundingBox;
+    }
+
     getGlobalBoundingBox() {
         var graph = new BezierGraph();
-        //var matrix = this.viewMatrix();
-        //this.runtimeProps.viewMatrix = Matrix.create();
-        //this.viewMatrix().translate(this.x(), this.y());
-        graph.initWithBezierPath(this);//, null, -this.angle(), {x:this.width()/2, y:this.height()/2});
-        var b = graph.bounds;
-        //this.runtimeProps.viewMatrix = matrix;
-
-        return {x: b.x, y: b.y, width: b.width, height: b.height};
+        graph.initWithBezierPath(this, this.globalViewMatrix());
+        return graph.bounds;
     }
 
 
@@ -1363,50 +1356,7 @@ class Path extends Shape {
 
         delete this._graph;
 
-        var l = this.x() || 0;
-        var t = this.y() || 0;
-
-        var box = this.getGlobalBoundingBox();
-        var x = box.x,
-            y = box.y,
-            width = box.width,
-            height = box.height;
-
-        moveAllPoints.call(this, x - l, y - t);
-
-
-        if (this.angle()) {
-            var origin = this.rotationOrigin();
-
-            var angle = this.angle() * Math.PI / 180;
-            var newOrigin = sketch.math2d.rotatePoint({
-                x: x + width / 2,
-                y: y + height / 2
-            }, -angle, origin);
-
-
-            var newLeft = newOrigin.x - width / 2;
-            var newTop = newOrigin.y - height / 2;
-
-            x = newLeft;
-            y = newTop;
-        }
-
-        this._internalChange = true;
-        var props = {
-            x: x,
-            y: y,
-            width: width || 1,
-            height: height || 1
-        };
-        this._roundPoint(props);
-        this.prepareProps(props);
-        this.setProps(props);
-
-        this._sourceRect = this.getBoundaryRect();
-        this._internalChange = false;
-
-        this.save();
+        delete this.runtimeProps.boundingBox;
     }
 
     getInsertPointData(pointInfo) {
@@ -1479,15 +1429,7 @@ class Path extends Shape {
 
     getPointIfClose(pos, dist) {
         var matrix = this.globalViewMatrixInverted();
-        var sx = 1, sy = 1;
-        if (this._sourceRect) {
-            sx = this.width() / this._sourceRect.width;
-            sy = this.height() / this._sourceRect.height;
-        }
-
         pos = matrix.transformPoint(pos);
-        pos.x /= sx;
-        pos.y /= sy;
         var resPt = null;
         var prevPt = this.points[0];
         dist = (dist || 4) / Environment.view.scale() * Environment.view.contextScale;
@@ -1574,18 +1516,6 @@ class Path extends Shape {
         return UIElement.prototype.cursor.apply(this, arguments);
     }
 
-    clone() {
-        var c = super.clone();
-        c._sourceRect = this._sourceRect;
-        return c;
-    }
-
-    mirrorClone() {
-        var c = super.mirrorClone();
-        c._sourceRect = this._sourceRect;
-        return c;
-    }
-
     fromJSON(data) {
         this.points.length = 0;
 
@@ -1593,23 +1523,11 @@ class Path extends Shape {
 
         this._currentPoint = null;
         this._handlePoint = null;
-        if (data.props.points && data.props.points.length) {
-            this._sourceRect = data.sr || this.getGlobalBoundingBox();
-            this._sourceRect.width = Math.max(this._sourceRect.width, 1);
-            this._sourceRect.height = Math.max(this._sourceRect.height, 1);
-        }
 
         return current;
     }
 
-    toJSON(){
-        var data = super.toJSON();
-        data.sr = this._sourceRect;
-
-        return data;
-    }
-
-    elements(offset, angle, origin) {
+    elements(matrix, offset, angle, origin) {
         var points = this.points;
         var res = [];
         if (!points.length) {
@@ -1618,9 +1536,6 @@ class Path extends Shape {
 
 
         offset = offset || {x: 0, y: 0};
-
-
-        var matrix = this.viewMatrix();
 
         // if (this._sourceRect) {
         //     matrix.scale(this.width() / this._sourceRect.width, this.height() / this._sourceRect.height);

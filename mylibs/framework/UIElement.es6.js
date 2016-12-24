@@ -153,7 +153,6 @@ var UIElement = klass(DataNode, {
         var x = hasX ? props.x : this.props.x;
         var y = hasY ? props.y : this.props.y;
         var angle = hasAngle ? props.angle : this.props.angle;
-        var m = null;
 
         // if (hasAngle){
         //     m = m || Matrix.create();
@@ -167,10 +166,6 @@ var UIElement = klass(DataNode, {
         //     m.translate(-t.x, -t.y);
         //     m.translate(x, y);
         // }
-
-        if (m){
-            props = Object.assign({}, props, {m: this.props.m.prepended(m)});
-        }
 
         DataNode.prototype.setProps.call(this, props, mode);
     },
@@ -291,16 +286,13 @@ var UIElement = klass(DataNode, {
     },
 
     applyTransform: function(matrix, append) {
-        this.setProps({m: append ? this.props.m.appended(matrix) : this.props.m.prepended(matrix)});
-        return this;
+        this.prepareAndSetProps({m: append ? this.props.m.appended(matrix) : this.props.m.prepended(matrix)});
     },
     setTransform: function(matrix) {
         this.setProps({m: matrix});
-        return this;
     },
     resetTransform: function() {
         this.setProps({m: Matrix.Identity});
-        return this;
     },
 
     arrange: function () {
@@ -576,8 +568,6 @@ var UIElement = klass(DataNode, {
     getHitTestBox: function (scale, includeMargin = false, includeBorder = true) {
         var width = this.width(),
             height = this.height();
-        var x = 0,
-            y = 0;
 
         var border = includeBorder ? this.getMaxOuterBorder() : 0;
         var l = border;
@@ -595,8 +585,8 @@ var UIElement = klass(DataNode, {
 
         width += l + r;
         height += t + b;
-        x = -l;
-        y = -t;
+        var x = -l;
+        var y = -t;
 
         if (width < 0) {
             width = -width;
@@ -740,6 +730,26 @@ var UIElement = klass(DataNode, {
             }
             context.restore();
         }
+    },
+    /**
+     * Draws a boundary path which could be skewed.
+    */
+    drawBoundaryPath: function(context, matrix, w, h){
+        context.beginPath();
+
+        var p = matrix.transformPoint2(0, 0, true);
+        context.moveTo(p.x, p.y);
+
+        p = matrix.transformPoint2(w, 0, true);
+        context.lineTo(p.x, p.y);
+
+        p = matrix.transformPoint2(w, h, true);
+        context.lineTo(p.x, p.y);
+
+        p = matrix.transformPoint2(0, h, true);
+        context.lineTo(p.x, p.y);
+
+        context.closePath();
     },
     primitiveRoot: function () {
         if (this.runtimeProps.primitiveRoot) {
@@ -2049,23 +2059,5 @@ PropertyMetadata.registerForType(UIElement, {
         return ["id", "name", "visible", "source"];
     }
 });
-
-fwk.UIElement.drawBoundaryPath = function(context, matrix, w, h){
-    context.beginPath();
-
-    var p = matrix.transformPoint2(0, 0, true);
-    context.moveTo(p.x, p.y);
-
-    p = matrix.transformPoint2(w, 0, true);
-    context.lineTo(p.x, p.y);
-
-    p = matrix.transformPoint2(w, h, true);
-    context.lineTo(p.x, p.y);
-
-    p = matrix.transformPoint2(0, h, true);
-    context.lineTo(p.x, p.y);
-
-    context.closePath();
-};
 
 export default fwk.UIElement;
