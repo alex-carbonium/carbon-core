@@ -17,6 +17,7 @@ import Box from "framework/Box";
 import {debounce} from "../../util";
 import Command from "framework/commands/Command";
 import {Types} from "../../framework/Defs";
+import ArrangeStrategy from "../../framework/ArrangeStrategy";
 
 var CP_HANDLE_RADIUS = 3;
 var CP_HANDLE_RADIUS2 = 6;
@@ -188,8 +189,8 @@ var drawSegment = function (context, pt, prevPt, closing) {
 };
 
 var scalePointsToNewSize = function () {
-    var bb = this.getGlobalBoundingBox();
-    var m = this.globalViewMatrix();
+    var bb = this.getBoundingBox();
+    var m = this.viewMatrix();
     for (var i = 0; i < this.points.length; ++i) {
         var pt = this.points[i];
         var xy = m.transformPoint2(pt.x, pt.y);
@@ -203,8 +204,7 @@ var scalePointsToNewSize = function () {
         pt.cp2y = cp2.y - bb.y;
         this._roundPoint(pt);
     }
-    var t = this.parent().globalViewMatrixInverted().transformPoint2(bb.x, bb.y);
-    this.setTransform(Matrix.create().translate(t.x, t.y));
+    this.setTransform(Matrix.create().translate(bb.x, bb.y));
 };
 
 function moveAllPoints(dx, dy) {
@@ -546,6 +546,7 @@ class Path extends Shape {
             this.nextPoint = null;
             this.releaseMouse(this);
             this.resetGlobalViewCache();
+            ArrangeStrategy.arrangeRoots([this]);
         }
     }
 
@@ -688,8 +689,9 @@ class Path extends Shape {
             this._currentPoint = null;
             this._handlePoint = null;
             if (!pointsEqual(pt, this._originalPoint)) {
-                this.adjustBoundaries();
                 this.changePointAtIndex(pt, pt.idx);
+                this.adjustBoundaries(this.runtimeProps.originalBoundingBox);
+                delete this.runtimeProps.originalBoundingBox;
                 //  commandManager.execute(new ChangePathPointCommand(this, pt, this._originalPoint));
             }
         }
@@ -849,6 +851,10 @@ class Path extends Shape {
                 this._pointOnPath = null;
                 Invalidate.request();
             }
+        }
+
+        if (this._currentPoint || this._handlePoint){
+            this.runtimeProps.originalBoundingBox = this.getBoundingBox();
         }
     }
 
@@ -1035,7 +1041,7 @@ class Path extends Shape {
                 var matrix = this.parent().globalViewMatrixInverted();
                 point = matrix.transformPoint(point);
 
-                var graph = BezierGraph.fromPath(this);
+                var graph = BezierGraph.fromPath(this, this.viewMatrix());
 
                 var count = 0;
                 var ray = BezierCurve.bezierCurveWithLine(point, {x: point.x + 100000, y: point.y})
@@ -1050,21 +1056,6 @@ class Path extends Shape {
             }
         }
         return res;
-    }
-    getHitTestBox(scale){
-        var bb = this.getBoundingBox();
-        var r = null;
-        if (bb.width * scale < 10) {
-            r = r || Object.assign({}, bb);
-            r.x = -5;
-            r.width += 10;
-        }
-        if (bb.height * scale < 10) {
-            r = r || Object.assign({}, bb);
-            r.y = -5;
-            r.height += 10;
-        }
-        return r || bb;
     }
 
     selectFrameVisible() {
@@ -1225,25 +1216,6 @@ class Path extends Shape {
         }
     }
 
-    drawBoundaryPath(context, matrix){
-        var bb = this.getBoundingBox();
-        context.beginPath();
-
-        var p = matrix.transformPoint2(bb.x, bb.y, true);
-        context.moveTo(p.x, p.y);
-
-        p = matrix.transformPoint2(bb.x + bb.width, bb.y, true);
-        context.lineTo(p.x, p.y);
-
-        p = matrix.transformPoint2(bb.x + bb.width, bb.y + bb.height, true);
-        context.lineTo(p.x, p.y);
-
-        p = matrix.transformPoint2(bb.x, bb.y + bb.height, true);
-        context.lineTo(p.x, p.y);
-
-        context.closePath();
-    }
-
     // drawSelf (context, w, h, environment) {
     //     if (this._points.length == 0) {
     //         return;
@@ -1334,7 +1306,7 @@ class Path extends Shape {
     getBoundingBox(){
         if (!this.runtimeProps.boundingBox){
             var graph = new BezierGraph();
-            graph.initWithBezierPath(this, Matrix.Identity);
+            graph.initWithBezierPath(this, this.viewMatrix());
             this.runtimeProps.boundingBox = graph.bounds;
         }
 
@@ -1348,15 +1320,39 @@ class Path extends Shape {
     }
 
 
-    adjustBoundaries() {
+    adjustBoundaries(oldBoundingBox) {
         //happens when all add-point commands are rolled back
         if (this.points.length <= 1) {
             return;
         }
 
         delete this._graph;
+        if (oldBoundingBox){
+            delete this.runtimeProps.boundingBox;
+        }
+        var box = this.getBoundingBox();
 
-        delete this.runtimeProps.boundingBox;
+        var props = {
+            width: box.width || 1,
+            height: box.height || 1
+        };
+
+        if (oldBoundingBox){
+            var dx = box.x - oldBoundingBox.x;
+            var dy = box.y - oldBoundingBox.y;
+            if (dx !== 0 || dy !== 0){
+                moveAllPoints.call(this, dx, dy);
+                props.m = this.props.m.prepended(Matrix.create().translate(dx, dy));
+            }
+        }
+
+        this._internalChange = true;
+        this._roundPoint(props);
+        this.prepareAndSetProps(props);
+
+        this._internalChange = false;
+
+        this.save();
     }
 
     getInsertPointData(pointInfo) {
@@ -1751,6 +1747,11 @@ class Path extends Shape {
             }
         }
         this.adjustBoundaries();
+    }
+
+    resetGlobalViewCache(){
+        super.resetGlobalViewCache();
+        delete this.runtimeProps.boundingBox;
     }
 
     _renderSvgCommands(commands, matrix) {

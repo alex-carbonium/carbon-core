@@ -421,9 +421,9 @@ export default class BezierGraph {
         return allParts.differenceWithBezierGraph(intersectingParts);
     }
 
-    static fromPath(path) {
+    static fromPath(path, matrix) {
         var r = new BezierGraph();
-        r.initWithBezierPath(path, path.globalViewMatrix());
+        r.initWithBezierPath(path, matrix);
         return r;
     }
 
