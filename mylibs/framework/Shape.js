@@ -251,20 +251,15 @@ PropertyMetadata.registerForType(Shape, {
     },
     groups () {
         return [
-            {
-                label: "Colors",
-                properties: ["fill", "stroke"],
-                hidden: true
+           {
+                label: "Layout",
+                properties: ["x", "y", "width", "height",  "anchor", "angle"],
+                expanded: true
             },
             {
                 label: "Appearance",
                 expanded: false,
-                properties: ["visible", "opacity", "fill", "stroke", "clipMask"]
-            },
-            {
-                label: "Layout",
-                properties: ["width", "height", "x", "y", "anchor", "angle"],
-                expanded: true
+                properties: ["visible", "opacity", "fill", "stroke", "cornerRadius", "clipMask"]
             },
             {
                 label: "Settings",

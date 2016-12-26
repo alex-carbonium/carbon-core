@@ -1729,14 +1729,16 @@ PropertyMetadata.registerForType(UIElement, {
         type: "numeric",
         useInModel: true,
         editable: true,
-        defaultValue: 0
+        defaultValue: 0,
+        size: 1 / 4
     },
     height: {
         displayName: "Height",
         type: "numeric",
         useInModel: true,
         editable: true,
-        defaultValue: 0
+        defaultValue: 0,
+        size: 1 / 4
     },
     name: {
         displayName: "Name",
@@ -1750,14 +1752,16 @@ PropertyMetadata.registerForType(UIElement, {
         type: "numeric",
         useInModel: true,
         editable: true,
-        defaultValue: 0
+        defaultValue: 0,
+        size: 1 / 4
     },
     y: {
         displayName: "Top",
         type: "numeric",
         useInModel: true,
         editable: true,
-        defaultValue: 0
+        defaultValue: 0,
+        size: 1 / 4
     },
     locked: {
         displayName: "Locked",
@@ -1885,12 +1889,12 @@ PropertyMetadata.registerForType(UIElement, {
                 properties: ["styleId", "opacity"]
             },
             {
-                label: "Appearance",
-                properties: ["visible", "cornerRadius", "clipMask"]
+                label: "Layout",
+                properties: ["x", "y", "width", "height", "anchor", "angle", "dockStyle", "horizontalAlignment", "verticalAlignment"]
             },
             {
-                label: "Layout",
-                properties: ["width", "height", "x", "y", "anchor", "angle", "dockStyle", "horizontalAlignment", "verticalAlignment"]
+                label: "Appearance",
+                properties: ["visible", "cornerRadius", "clipMask"]
             }
             // ,
             // {
