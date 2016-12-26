@@ -16,7 +16,16 @@ import PropertyTracker from "framework/PropertyTracker";
 import Page from "framework/Page";
 import StyleManager from "framework/style/StyleManager";
 import OpenTypeFontManager from "./OpenTypeFontManager";
-import {Types, FontWeight, FontStyle, PatchType, ChangeMode, StoryType, StyleType, ArtboardResource} from "./framework/Defs";
+import {
+    Types,
+    FontWeight,
+    FontStyle,
+    PatchType,
+    ChangeMode,
+    StoryType,
+    StyleType,
+    ArtboardResource
+} from "./framework/Defs";
 import Font from "./framework/Font";
 import GroupContainer from "./framework/GroupContainer";
 import CommandManager from "framework/commands/CommandManager";
@@ -128,7 +137,7 @@ function canConvertToPath(selection) {
 
     for (var i = 0; i < selection.length; ++i) {
         var e = selection[i];
-        if (!e.canConvertToPath()){
+        if (!e.canConvertToPath()) {
             return false;
         }
     }
@@ -449,14 +458,14 @@ class App extends DataNode {
         return this._activeStory;
     }
 
-    getAllFrames(){
+    getAllFrames() {
         var res = [];
-        for(var i = 0; i<this.pages.length; ++i){
+        for (var i = 0; i < this.pages.length; ++i) {
             var page = this.pages[i];
             var artboards = page.getAllArtboards();
-            for(var j = 0; j<artboards.length; ++j){
+            for (var j = 0; j < artboards.length; ++j) {
                 var a = artboards[j];
-                if(a.props.resource === ArtboardResource.Frame){
+                if (a.props.resource === ArtboardResource.Frame) {
                     res.push(a);
                 }
             }
@@ -465,20 +474,20 @@ class App extends DataNode {
         return res;
     }
 
-    getAllTemplateResourceArtboards(){
+    getAllTemplateResourceArtboards() {
         var res = [];
-        for(var i = 0; i<this.pages.length; ++i){
+        for (var i = 0; i < this.pages.length; ++i) {
             var page = this.pages[i];
             var children = [];
             var artboards = page.getAllArtboards();
-            for(var j = 0; j<artboards.length; ++j){
+            for (var j = 0; j < artboards.length; ++j) {
                 var a = artboards[j];
-                if(a.props.resource === ArtboardResource.Template){
+                if (a.props.resource === ArtboardResource.Template) {
                     children.push(a);
                 }
             }
-            if(children.length > 0){
-                res.push({name:page.name(), id:page.id(), children:children})
+            if (children.length > 0) {
+                res.push({name: page.name(), id: page.id(), children: children})
             }
         }
 
@@ -580,7 +589,7 @@ class App extends DataNode {
     }
 
     loadRef(value) {
-        if (arguments.length === 1){
+        if (arguments.length === 1) {
             this.runtimeProps.loadRef = value;
         }
         return this.runtimeProps.loadRef || 0;
@@ -605,7 +614,7 @@ class App extends DataNode {
         this.setActivePage(NullPage);
     }
 
-    isElectron(){
+    isElectron() {
         return window && window.process && window.process.type === 'renderer';
     }
 
@@ -790,6 +799,25 @@ class App extends DataNode {
             this.setProps({defaultShapeSettings: value});
         }
         return this.props.defaultShapeSettings;
+    }
+
+    recentColors() {
+        return this.props.recentColors;
+    }
+
+    useRecentColor(color) {
+        var colors = this.props.recentColors.slice();
+        for (var i = 0; i < colors.length; ++i) {
+            if (colors[i] == color) {
+                colors.splice(i, 1);
+            }
+        }
+        colors.splice(0, 0, color);
+        if (colors.length > 10) {
+            colors.splice(colors.length - 1, 1);
+        }
+
+        this.setProps({recentColors: colors});
     }
 
     defaultLineSettings(value) {
@@ -1316,17 +1344,17 @@ class App extends DataNode {
         return deferred.promise();
     }
 
-    importPage(data){
+    importPage(data) {
         var pageJson = data.page;
-        var name = ' ('+pageJson.name+')';
-        if(data.styles) {
+        var name = ' (' + pageJson.name + ')';
+        if (data.styles) {
             for (var style of data.styles) {
                 style.name += name;
                 StyleManager.registerStyle(style, StyleType.Visual)
             }
         }
 
-        if(data.textStyles) {
+        if (data.textStyles) {
             for (var style of data.textStyles) {
                 style.name += name;
                 StyleManager.registerStyle(style, StyleType.Text)
@@ -1366,7 +1394,7 @@ class App extends DataNode {
         this.loaded.cancel();
 
         ModelStateListener.clear();
-        if (this.persistentConnection){
+        if (this.persistentConnection) {
             this.persistentConnection.stop();
         }
 
@@ -1441,6 +1469,9 @@ PropertyMetadata.registerForType(App, {
             show: true,
             lock: false
         }
+    },
+    recentColors: {
+        defaultValue: []
     },
     styles: {
         defaultValue: []

@@ -66,6 +66,8 @@ define(["platform/Desktop"], function(Desktop) {
             this.mapShortcut("meta+z", "undo");
             this.mapShortcut("meta+shift+z", "redo");
 
+            this.mapShortcut("shift+x", "swapColors");
+
             this.mapShortcut("f2", "editText");
 
             this.mapShortcut("meta+shift+d", "debugMode");
