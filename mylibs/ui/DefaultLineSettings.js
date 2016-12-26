@@ -17,6 +17,12 @@ class DefaultLineSettings extends UIElement {
         return new AppPropsChanged(this._app, {defaultLineSettings: changes});
     }
 
+    updateColors(){
+        this.setProps({
+            stroke:Brush.extend(this.props.stroke, this._app.defaultStroke())
+        });
+    }
+
     createSelectionFrame(){
         return {
             element: this,

@@ -16,7 +16,9 @@ export default class NoSelectionElement extends UIElement {
         this._contentContainer = page;//.getContentContainer();
 
         this.setProps({
-            name: page.name()
+            name: page.name(),
+            fill: app.defaultFill(),
+            stroke: app.defaultStroke()
             //screenType: page.screenType(),
             //orientation: page.orientation(),
             // status: page.status(),
@@ -44,7 +46,13 @@ export default class NoSelectionElement extends UIElement {
         PropertyTracker.propertyChanged.unbind(this, this._onPropertyChanged);
     }
 
-    setProps(){
+    setProps(props){
+        if(props.fill)
+        {
+            this._app.defaultFill(props.fill);
+        } else if(props.stroke){
+            this._app.defaultStroke(props.stroke);
+        }
         super.setProps.apply(this, arguments);
         if (this._contentContainer){
             this._contentContainer.setProps.apply(this._contentContainer, arguments);
@@ -86,6 +94,12 @@ PropertyMetadata.registerForType(NoSelectionElement, {
             noPreview: true
         }
     },
+    fill: {
+
+    },
+    stroke: {
+
+    },
     // width: {
     //     displayName: "Width",
     //     type: "numeric",
@@ -123,11 +137,14 @@ PropertyMetadata.registerForType(NoSelectionElement, {
     //         items: pageStatusItems
     //     }
     // },
+    prepareVisibility: function (props, selection, view) {
+        return {fill:false, stroke:false} // fill and stroke are used only for default values in swatches panel, so should not be visible in props
+    },
     groups: function(){
         return [
             {
                 label: "Page",
-                properties: ["name"]
+                properties: ["name", "fill", "stroke"]
             }
         ];
     }

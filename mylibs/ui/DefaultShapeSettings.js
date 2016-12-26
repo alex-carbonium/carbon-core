@@ -12,6 +12,13 @@ class DefaultShapeSettings extends UIElement {
         this.props = app.defaultShapeSettings() || PropertyMetadata.getDefaultProps(DefaultShapeSettings.prototype.t);
     }
 
+    updateColors(){
+        this.setProps({
+            fill:Brush.extend(this.props.fill, this._app.defaultFill()),
+            stroke:Brush.extend(this.props.stroke, this._app.defaultStroke())
+        });
+    }
+
     constructPropsChangedCommand(changes){
         var changes = extend(this.props, changes);
 

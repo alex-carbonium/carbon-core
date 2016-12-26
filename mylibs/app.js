@@ -800,6 +800,22 @@ class App extends DataNode {
         }
         return this.props.defaultShapeSettings;
     }
+    
+    defaultFill(value) {
+        if(arguments.length === 1){
+            this.setProps({defaultFill:value});
+        }
+        
+        return this.props.defaultFill;
+    }
+   
+    defaultStroke(value) {
+        if(arguments.length === 1){
+            this.setProps({defaultStroke:value});
+        }
+        
+        return this.props.defaultStroke;
+    }
 
     recentColors() {
         return this.props.recentColors;
@@ -1453,6 +1469,12 @@ PropertyMetadata.registerForType(App, {
             show: false,
             type: "stroke"
         }
+    },
+    defaultFill: {
+        defaultValue: Brush.createFromColor("#B6B6B6")
+    },
+    defaultStroke: {
+        defaultValue: Brush.Empty
     },
     defaultLayoutGridSettings: {
         defaultValue: {

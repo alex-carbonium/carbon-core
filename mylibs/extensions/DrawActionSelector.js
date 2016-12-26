@@ -61,6 +61,7 @@ var registerCommands = function () {
         if(element instanceof Path) {
             element.edit();
         } else {
+            that._defaultShapeSettings.updateColors();
             Selection.makeSelection([that._defaultShapeSettings]);
         }
         that.app.setCurrentTool(ViewTool.Path);
@@ -71,7 +72,7 @@ var registerCommands = function () {
         that._rectCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._rectCreator;
         that.app.allowSelection(false);
-
+        that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings]);
         that.app.setCurrentTool(ViewTool.Rectangle);
 
@@ -82,7 +83,7 @@ var registerCommands = function () {
         that._starCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._starCreator;
         that.app.allowSelection(false);
-
+        that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings]);
         that.app.setCurrentTool(ViewTool.Star);
 
@@ -93,7 +94,7 @@ var registerCommands = function () {
         that._triangleCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._triangleCreator;
         that.app.allowSelection(false);
-
+        that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings]);
         that.app.setCurrentTool(ViewTool.Triangle);
 
@@ -104,7 +105,7 @@ var registerCommands = function () {
         that._polygonCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._polygonCreator;
         that.app.allowSelection(false);
-
+        that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings]);
         that.app.setCurrentTool(ViewTool.Polygon);
 
@@ -146,6 +147,7 @@ var registerCommands = function () {
         that._circleCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._circleCreator;
         that.app.allowSelection(false);
+        that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings]);
         that.app.setCurrentTool(ViewTool.Circle);
     }, "ui-circle");
@@ -155,6 +157,7 @@ var registerCommands = function () {
         that._lineCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._lineCreator;
         that.app.allowSelection(false);
+        that._defaultLineSettings.updateColors();
         Selection.makeSelection([that._defaultLineSettings]);
         that.app.setCurrentTool(ViewTool.Line);
     }, "ui-line");
