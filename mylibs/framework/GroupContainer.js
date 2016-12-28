@@ -13,14 +13,15 @@ export default class GroupContainer extends Container {
 
         //if group is flipped, scale children normally
         var absScale = s.abs();
-        this.children.forEach(e => e.applyScaling(absScale, Point.Zero, false, withReset));
+        this.children.forEach(e => e.applyScaling(absScale, this.position(), false, withReset));
     }
 
-    strokeBorder(context, x, y, w, h){
+    strokeBorder(context, w, h){
         if (!this.lockedGroup()){
             context.save();
             context.strokeStyle = UserSettings.group.active_stroke;
-            context.strokeRect(0, 0, w, h);
+            this.drawBoundaryPath(context, this.globalViewMatrix(), w, h);
+            context.stroke();
             context.restore();
         }
     }

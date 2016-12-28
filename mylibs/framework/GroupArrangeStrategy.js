@@ -1,5 +1,6 @@
 import ArrangeStrategy from "./ArrangeStrategy";
 import {ArrangeStrategies} from "./Defs";
+import Matrix from "../math/matrix";
 import Point from "../math/point";
 
 var GroupArrangeStrategy = {
@@ -12,7 +13,7 @@ var GroupArrangeStrategy = {
             var props = items[0].selectLayoutProps(true);
             props.m = container.parent().globalViewMatrixInverted().appended(props.m);
             container.setProps(props);
-            items[0].resetTransform();
+            items[0].setProps({m: Matrix.Identity, x: 0, y: 0});
             return;
         }
 
@@ -37,15 +38,7 @@ var GroupArrangeStrategy = {
         xMax += padding.right;
         yMax += padding.bottom;
 
-        container.prepareAndSetProps({width: xMax - xMin, height: yMax - yMin});
-
-        if (xMin !== 0 || yMin !== 0){
-            var translate = new Point(-xMin, -yMin);
-            for (let i = 0, l = items.length; i < l; ++i) {
-                items[i].applyTranslation(translate);
-            }
-            container.applyDirectedTranslation(translate.negate());
-        }
+        container.prepareAndSetProps({x: xMin, y: yMin, width: xMax - xMin, height: yMax - yMin});
     }
 };
 

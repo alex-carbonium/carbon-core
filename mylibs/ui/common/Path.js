@@ -94,18 +94,11 @@ var getClickedPoint = function (x, y) {
     var pos = this.globalViewMatrixInverted().transformPoint2(x, y);
 
     var zoom = Environment.view.scale();
-    var sx = 1,
-        sy = 1;
-    if (this._sourceRect) {
-        sx = this.width() / this._sourceRect.width;
-        sy = this.height() / this._sourceRect.height;
-    }
-
     for (var i = 0, len = this.points.length; i < len; ++i) {
         var pt = this.points[i];
         pt.idx = i;
-        var x2 = pos.x - pt.x * sx
-            , y2 = pos.y - pt.y * sy;
+        var x2 = pos.x - pt.x
+            , y2 = pos.y - pt.y
         if (x2 * x2 + y2 * y2 < CP_RADIUS2 * Environment.view.contextScale / (zoom * zoom)) {
             return pt;
         }
@@ -117,13 +110,6 @@ var getClickedHandlePoint = function (x, y) {
     var pos = this.globalViewMatrixInverted().transformPoint2(x, y);
 
     var zoom = Environment.view.scale();
-    var sx = 1,
-        sy = 1;
-    if (this._sourceRect) {
-        sx = this.width() / this._sourceRect.width;
-        sy = this.height() / this._sourceRect.height;
-    }
-
 
     for (var i = 0, len = this.points.length; i < len; ++i) {
         var pt = this.points[i];
@@ -131,15 +117,15 @@ var getClickedHandlePoint = function (x, y) {
         if (isLinePoint(pt)) {
             continue;
         }
-        var x2 = pos.x - pt.cp1x * sx
-            , y2 = pos.y - pt.cp1y * sy;
+        var x2 = pos.x - pt.cp1x
+            , y2 = pos.y - pt.cp1y
         if (x2 * x2 + y2 * y2 < CP_HANDLE_RADIUS2 * Environment.view.contextScale / (zoom * zoom)) {
             pt._selectedPoint = 1;
             return pt;
         }
 
-        x2 = pos.x - pt.cp2x * sx;
-        y2 = pos.y - pt.cp2y * sy;
+        x2 = pos.x - pt.cp2x
+        y2 = pos.y - pt.cp2y
         if (x2 * x2 + y2 * y2 < CP_HANDLE_RADIUS2 * Environment.view.contextScale / (zoom * zoom)) {
             pt._selectedPoint = 2;
             return pt;
@@ -154,7 +140,8 @@ var setLinePoint = function (pt) {
 };
 
 var drawSegment = function (context, pt, prevPt, closing) {
-    var xy = this.globalViewMatrix().transformPoint(pt);
+    var m = this.globalViewMatrix();
+    var xy = m.transformPoint(pt);
 
     if (!this._firstPoint) {
         this._firstPoint = pt;
@@ -178,7 +165,9 @@ var drawSegment = function (context, pt, prevPt, closing) {
             cp2y = pt.y;//cp1y;
         }
 
-        context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, xy.x, xy.y);
+        var cp1 = m.transformPoint2(cp1x, cp1y);
+        var cp2 = m.transformPoint2(cp2x, cp2y);
+        context.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, xy.x, xy.y);
     }
 
     if (pt.closed) {
@@ -1117,7 +1106,7 @@ class Path extends Shape {
                     var cp2 = matrix.transformPoint2(pt.cp2x, pt.cp2y);
                     context.beginPath();
                     context.moveTo(cp1.x, cp1.y);
-                    context.lineTo(pt.x, pt.y);
+                    context.lineTo(tpt.x, tpt.y);
                     context.lineTo(cp2.x, cp2.y);
                     context.stroke();
 
@@ -1178,7 +1167,8 @@ class Path extends Shape {
 
             if (this._pointOnPath) {
                 context.fillStyle = POINT_STROKE;
-                context.circle(this._pointOnPath.x, this._pointOnPath.y, CP_RADIUS / scale);
+                var pp = this.globalViewMatrix().transformPoint(this._pointOnPath);
+                context.circle(pp.x, pp.y, CP_RADIUS / scale);
                 context.fill2();
             }
             context.restore();
@@ -1204,7 +1194,6 @@ class Path extends Shape {
         var points = this.points;
         this._firstPoint = null;
         var prevPt = null;// = pt = points[0];
-        // context.moveTo(pt.x * sx, pt.y * sy);
         for (var i = 0, len = points.length; i < len; ++i) {
             pt = points[i];
             drawSegment.call(this, context, pt, prevPt);
@@ -1232,75 +1221,12 @@ class Path extends Shape {
     //     context.restore();
     // },
 
-    getBoundingBoxGlobal(includeMargin = false, includeBorder = false) {
-        if (this.runtimeProps.globalClippingBox) {
-            return this.runtimeProps.globalClippingBox;
+    getBoundingBoxGlobal() {
+        if (!this.runtimeProps.globalClippingBox) {
+            this.runtimeProps.globalClippingBox = this.getGlobalBoundingBox();
         }
 
-        var rect = this.getBoundaryRect();
-        var minx = rect.width;
-        var miny = rect.height;
-        var maxx = 0;
-        var maxy = 0;
-
-        var sx = 1, sy = 1;
-        if (this._sourceRect) {
-            sx = this.width() / this._sourceRect.width;
-            sy = this.height() / this._sourceRect.height;
-        }
-
-        for (var i = 0; i < this.points.length; ++i) {
-            var p = this.points[i];
-            minx = Math.min(minx, p.x);
-            minx = Math.min(minx, p.cp1x);
-            minx = Math.min(minx, p.cp2x);
-            miny = Math.min(miny, p.y);
-            miny = Math.min(miny, p.cp1y);
-            miny = Math.min(miny, p.cp2y);
-
-            maxx = Math.max(maxx, p.x);
-            maxx = Math.max(maxx, p.cp1x);
-            maxx = Math.max(maxx, p.cp2x);
-            maxy = Math.max(maxy, p.y);
-            maxy = Math.max(maxy, p.cp1y);
-            maxy = Math.max(maxy, p.cp2y);
-        }
-
-        minx *= sx;
-        miny *= sy;
-        maxx *= sx;
-        maxy *= sy;
-
-        var margin = includeMargin ? this.margin() : Box.Default;
-        var border = includeBorder ? this.getMaxOuterBorder() : 0;
-        var l = 0;
-        var r = 0;
-        var t = 0;
-        var b = 0;
-        if (includeMargin || includeBorder) {
-            l = Math.max(margin.left, border);
-            t = Math.max(margin.top, border);
-            r = Math.max(margin.right, border);
-            b = Math.max(margin.bottom, border);
-        }
-
-        var matrix = this.globalViewMatrix();
-
-        var p1 = matrix.transformPoint2(minx - l, miny - t);
-        var p2 = matrix.transformPoint2(maxx + r, miny - t);
-        var p3 = matrix.transformPoint2(maxx + r, maxy + b);
-        var p4 = matrix.transformPoint2(minx - l, maxy + b);
-
-        var xs = [p1.x, p2.x, p3.x, p4.x];
-        var ys = [p1.y, p2.y, p3.y, p4.y];
-        l = sketch.util.min(xs);
-        r = sketch.util.max(xs);
-        t = sketch.util.min(ys);
-        b = sketch.util.max(ys);
-
-        var rect = {x: l, y: t, width: r - l, height: b - t};
-        this.runtimeProps.globalClippingBox = rect;
-        return rect;
+        return this.runtimeProps.globalClippingBox;
     }
 
     getBoundingBox(){
@@ -1319,38 +1245,17 @@ class Path extends Shape {
         return graph.bounds;
     }
 
-
-    adjustBoundaries(oldBoundingBox) {
+    adjustBoundaries() {
         //happens when all add-point commands are rolled back
         if (this.points.length <= 1) {
             return;
         }
 
-        delete this._graph;
-        if (oldBoundingBox){
-            delete this.runtimeProps.boundingBox;
-        }
-        var box = this.getBoundingBox();
+        var graph = new BezierGraph();
+        graph.initWithBezierPath(this, Matrix.Identity);
+        var rect = graph.bounds;
 
-        var props = {
-            width: box.width || 1,
-            height: box.height || 1
-        };
-
-        if (oldBoundingBox){
-            var dx = box.x - oldBoundingBox.x;
-            var dy = box.y - oldBoundingBox.y;
-            if (dx !== 0 || dy !== 0){
-                moveAllPoints.call(this, dx, dy);
-                props.m = this.props.m.prepended(Matrix.create().translate(dx, dy));
-            }
-        }
-
-        this._internalChange = true;
-        this._roundPoint(props);
-        this.prepareAndSetProps(props);
-
-        this._internalChange = false;
+        this.prepareAndSetProps(rect);
 
         this.save();
     }

@@ -123,10 +123,6 @@ var UIElement = klass(DataNode, {
             changes.y = this._roundValue(changes.y);
         }
 
-        if (changes.angle !== undefined) {
-            changes.angle = this._roundValue(changes.angle);
-        }
-
         if (changes.styleId !== undefined) {
             extend(changes, styleManager.getStyle(changes.styleId, 1).props);
         }
@@ -144,38 +140,6 @@ var UIElement = klass(DataNode, {
             }
         }
         return false;
-    },
-    setProps: function(props, mode){
-        var hasX = props.hasOwnProperty("x");
-        var hasY = props.hasOwnProperty("y");
-        var hasAngle = props.hasOwnProperty("angle");
-
-        var x = hasX ? props.x : this.props.x;
-        var y = hasY ? props.y : this.props.y;
-        var angle = hasAngle ? props.angle : this.props.angle;
-
-        // if (hasAngle){
-        //     m = m || Matrix.create();
-        //     var current = this.getRotation();
-        //     var o = this.rotationOrigin();
-        //     m.rotate(angle - current, o.x, o.y);
-        // }
-        // if (hasX || hasY){
-        //     m = m || Matrix.create();
-        //     var t = this.getTranslation();
-        //     m.translate(-t.x, -t.y);
-        //     m.translate(x, y);
-        // }
-
-        DataNode.prototype.setProps.call(this, props, mode);
-    },
-    selectLayoutProps: function(global){
-        var m = global ? this.globalViewMatrix() : this.viewMatrix();
-        return {
-            width: this.width(),
-            height: this.height(),
-            m
-        };
     },
     propsUpdated: function (newProps, oldProps) {
         if (newProps.hasOwnProperty("m")
@@ -195,6 +159,16 @@ var UIElement = klass(DataNode, {
         this.invalidate();
     },
 
+    selectLayoutProps: function(global){
+        var m = global ? this.globalViewMatrix() : this.viewMatrix();
+        return {
+            x: this.x(),
+            y: this.y(),
+            width: this.width(),
+            height: this.height(),
+            m
+        };
+    },
     saveOrResetLayoutProps: function(){
         //this happens only for clones, so no need to clear origLayout
         if (!this.runtimeProps.origLayout){
@@ -386,10 +360,9 @@ var UIElement = klass(DataNode, {
     },
     position: function (pos) {
         if (arguments.length === 0) {
-            return {x: this.x(), y: this.y()};
+            return new Point(this.x(), this.y());
         }
-        this.prepareProps(pos);
-        this.setProps(pos);
+        this.prepareAndSetProps(pos);
     },
     centerPositionGlobal: function () {
         var rect = this.getBoundaryRectGlobal();
@@ -449,7 +422,7 @@ var UIElement = klass(DataNode, {
     autoSelectOnPaste: function () {
         return true;
     },
-    //TODO: fix non-scalable elements, they do not work properly anyway
+
     getBoundaryRect: function (includeMargin = false) {
         var margin = includeMargin ? this.margin() : Box.Default;
         return {
@@ -466,23 +439,7 @@ var UIElement = klass(DataNode, {
         }
     },
     getBoundaryRectGlobal: function (includeMargin = false) {
-        if (this.runtimeProps.boundaryRectGlobal) {
-            return this.runtimeProps.boundaryRectGlobal;
-        }
-        var rect = this.getBoundaryRect(includeMargin);
-        var parent = this.parent();
-        if (parent == null) {
-            return rect;
-        }
-
-        var globalPos = parent.local2global(rect);
-
-        rect.x = globalPos.x;
-        rect.y = globalPos.y;
-
-        this.runtimeProps.boundaryRectGlobal = Object.freeze(rect);
-
-        return rect;
+        return this.getBoundingBoxGlobal(includeMargin);
     },
 
     getBoundingBox: function (includeMargin = false) {
@@ -566,45 +523,23 @@ var UIElement = klass(DataNode, {
         return stroke.lineWidth;
     },
     getHitTestBox: function (scale, includeMargin = false, includeBorder = true) {
-        var width = this.width(),
-            height = this.height();
+        var rect = this.getBoundaryRect(includeMargin);
 
         var border = includeBorder ? this.getMaxOuterBorder() : 0;
-        var l = border;
-        var t = border;
-        var r = border;
-        var b = border;
-
-        if (includeMargin) {
-            var margin = this.margin();
-            l = Math.max(margin.left, border);
-            t = Math.max(margin.top, border);
-            r = Math.max(margin.right, border);
-            b = Math.max(margin.bottom, border);
-        }
-
-        width += l + r;
-        height += t + b;
-        var x = -l;
-        var y = -t;
-
-        if (width < 0) {
-            width = -width;
-        }
-
-        if (height < 0) {
-            height = -height;
-        }
+        var x = rect.x - border;
+        var y = rect.y - border;
+        var width = rect.width + border;
+        var height = rect.height + border;
 
         if (width * scale < 10) {
-            x = -5;
+            x -= 5;
             width += 10;
         }
         if (height * scale < 10) {
-            y = -5;
+            y -= 5;
             height += 10;
         }
-        return {x: x, y: y, width: width, height: height};
+        return {x, y, width, height};
     },
 
     hitTest: function (/*Point*/point, scale, includeMargin = false) {
@@ -731,22 +666,22 @@ var UIElement = klass(DataNode, {
             context.restore();
         }
     },
-    /**
-     * Draws a boundary path which could be skewed.
-    */
     drawBoundaryPath: function(context, matrix, w, h){
+        var x = this.x();
+        var y = this.y();
+
         context.beginPath();
 
-        var p = matrix.transformPoint2(0, 0, true);
+        var p = matrix.transformPoint2(x, y, true);
         context.moveTo(p.x, p.y);
 
-        p = matrix.transformPoint2(w, 0, true);
+        p = matrix.transformPoint2(x + w, y, true);
         context.lineTo(p.x, p.y);
 
-        p = matrix.transformPoint2(w, h, true);
+        p = matrix.transformPoint2(x + w, y + h, true);
         context.lineTo(p.x, p.y);
 
-        p = matrix.transformPoint2(0, h, true);
+        p = matrix.transformPoint2(x, y + h, true);
         context.lineTo(p.x, p.y);
 
         context.closePath();

@@ -87,7 +87,7 @@ class CompoundPath extends Container {
         for(var i = 0; i < items.length; ++i){
             items[i].resetGlobalViewCache();
         }
-        var result = BezierGraph.fromPath(items[0], items[0].globalViewMatrix());
+        var result = BezierGraph.fromPath(items[0], items[0].viewMatrix());
         this._itemIds[items[0].id()] = true;
         for (var i = 1; i < items.length; ++i) {
             var path = items[i];
@@ -96,7 +96,7 @@ class CompoundPath extends Container {
             if (path instanceof CompoundPath) {
                 otherGraph = path.offsetGraph();
             } else {
-                otherGraph = BezierGraph.fromPath(path, path.globalViewMatrix());
+                otherGraph = BezierGraph.fromPath(path, path.viewMatrix());
             }
             switch (path.joinMode()) {
                 case "union":
@@ -187,7 +187,7 @@ class CompoundPath extends Container {
     _updateGraph() {
         this._graph = new BezierGraph();
         for (var p of this.result) {
-            this._graph.initWithBezierPath(p);
+            this._graph.initWithBezierPath(p, p.viewMatrix());
         }
     }
 
@@ -195,7 +195,7 @@ class CompoundPath extends Container {
         var graph = new BezierGraph();
         for (var p of this.result) {
             //TODO
-            graph.initWithBezierPath(p, {x: this.x(), y: this.y()}, this.angle(), this.rotationOrigin());
+            graph.initWithBezierPath(p, this.viewMatrix());
         }
 
         return graph;

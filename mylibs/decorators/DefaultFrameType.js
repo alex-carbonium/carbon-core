@@ -23,10 +23,10 @@ export default {
     },
     updateFromElement: function (frame) {
         var e = frame.element;
-        var x = 0,
-            y = 0,
-            w = e.width(),
-            h = e.height();
+        var x = frame.element.x();
+        var y = frame.element.y();
+        var w = frame.element.width();
+        var h = frame.element.height();
         var points = frame.points;
         var scale = Environment.view.scale();
         for (var i = 0; i < points.length; ++i) {
@@ -52,8 +52,6 @@ export default {
         point.type.change(frame, dx, dy, point, event);
     },
     draw: function (frame, context, currentPoint) {
-        var w = frame.getWidth();
-        var h = frame.getHeight();
         var scale = Environment.view.scale();
 
         context.save();
@@ -72,7 +70,7 @@ export default {
                     context.save();
                     context.strokeStyle = this.strokeStyle;
                     context.lineWidth = 1;
-                    frame.element.drawBoundaryPath(context, matrix, w, h);
+                    frame.element.drawBoundaryPath(context, matrix, frame.element.width(), frame.element.height());
                     context.stroke();
                     context.restore();
                 }

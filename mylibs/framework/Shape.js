@@ -143,6 +143,9 @@ class Shape extends Container {
         context.restore();
     }
 
+    drawPath(context, w, h){
+    }
+
     resizeDimensions() {
         return (this.mode() === "resize" ? ResizeDimension.Both : ResizeDimension.None);
     }

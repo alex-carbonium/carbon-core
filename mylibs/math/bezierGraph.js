@@ -20,7 +20,7 @@ export default class BezierGraph {
         this._contours = value;
     }
 
-    initWithBezierPath(path, matrix, offset, angle, origin) {
+    initWithBezierPath(path, matrix) {
         // A bezier graph is made up of contours, which are closed paths of curves. Anytime we
         //  see a move to in the NSBezierPath, that's a new contour.
 
@@ -28,7 +28,7 @@ export default class BezierGraph {
         var wasClosed = false;
 
         var contour = null;
-        var elements = path.elements(matrix, offset, angle, origin);
+        var elements = path.elements(matrix);
         for (var i = 0; i < elements.length; i++) {
             var element = elements[i];
 

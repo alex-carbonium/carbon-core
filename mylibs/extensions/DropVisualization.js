@@ -390,16 +390,16 @@ export default class DropVisualization extends ExtensionBase {
     static highlightElement(view, context, element) {
         context.save();
 
-        var matrix = element.globalViewMatrix();
-        matrix.applyToContext(context);
-
         context.beginPath();
         if (element.drawPath) {
-            element.drawPath(context, element.width(), element.height(), {});
+            if (element.shouldApplyViewMatrix()){
+                element.globalViewMatrix().applyToContext(context);
+            }
+            element.drawPath(context, element.width(), element.height());
         } else {
-            var rect = element.getBoundaryRect();
-            context.rectPath(0, 0, rect.width, rect.height, false);
+            element.drawBoundaryPath(context, element.globalViewMatrix(), element.width(), element.height());
         }
+
         var mutltiplier = 3 / view.scale();
         fwk.Brush.stroke(HighlightBrush, context, 0, 0, 0, 0, mutltiplier);
         context.restore();

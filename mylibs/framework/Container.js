@@ -54,25 +54,25 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                     context.restore();
                 }
             },
-            strokeBorder: function (context, l, t, w, h) {
+            strokeBorder: function (context, w, h) {
                 //not supported for iphone
                 if (this.stroke() && fwk.Brush.canApply(this.stroke()) && this.standardBackground()) {
                     context.save();
                     var cornerRadius = this.cornerRadius();
                     if (cornerRadius !== fwk.QuadAndLock.Default) {
-                        context.roundedRectDifferentRadiusesPath(l, t, w, h,
+                        context.roundedRectDifferentRadiusesPath(0, 0, w, h,
                             cornerRadius.upperLeft,
                             cornerRadius.upperRight,
                             cornerRadius.bottomLeft,
                             cornerRadius.bottomRight);
                     } else {
-                        context.rectPath(l, t, w, h, true);
+                        context.rectPath(0, 0, w, h, true);
                     }
                     var dash = this.dashPattern();
                     if (dash) {
                         context.setLineDash(dash);
                     }
-                    fwk.Brush.stroke(this.stroke(), context, l, t, w, h);
+                    fwk.Brush.stroke(this.stroke(), context, 0, 0, w, h);
                     context.restore();
                 }
             },
@@ -87,10 +87,7 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
 
                 this.drawChildren(context, w, h, environment);
 
-                context.save();
-                this.globalViewMatrix().applyToContext(context);
-                this.strokeBorder(context, 0, 0, w, h);
-                context.restore();
+                this.strokeBorder(context, w, h);
 
                 this.drawDecorators(context, w, h, environment);
             },
