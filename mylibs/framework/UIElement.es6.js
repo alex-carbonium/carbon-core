@@ -162,8 +162,6 @@ var UIElement = klass(DataNode, {
     selectLayoutProps: function(global){
         var m = global ? this.globalViewMatrix() : this.viewMatrix();
         return {
-            x: this.x(),
-            y: this.y(),
             width: this.width(),
             height: this.height(),
             m
@@ -451,11 +449,13 @@ var UIElement = klass(DataNode, {
         var height = this.height() || 0;
         var matrix = this.viewMatrix();
         var margin = includeMargin ? this.margin() : Box.Default;
+        var x = this.x();
+        var y = this.y();
 
-        var p1 = matrix.transformPoint2(0 - margin.left, 0 - margin.top);
-        var p2 = matrix.transformPoint2(width + margin.right, 0 - margin.top);
-        var p3 = matrix.transformPoint2(width + margin.right, height + margin.bottom);
-        var p4 = matrix.transformPoint2(0 - margin.left, height + margin.bottom);
+        var p1 = matrix.transformPoint2(x - margin.left, y - margin.top);
+        var p2 = matrix.transformPoint2(x + width + margin.right, y - margin.top);
+        var p3 = matrix.transformPoint2(x + width + margin.right, y + height + margin.bottom);
+        var p4 = matrix.transformPoint2(x - margin.left, y + height + margin.bottom);
 
         var xs = [p1.x, p2.x, p3.x, p4.x];
         var ys = [p1.y, p2.y, p3.y, p4.y];
@@ -485,15 +485,16 @@ var UIElement = klass(DataNode, {
             b = Math.max(margin.bottom, border);
         }
 
+        var x = this.x();
+        var y = this.y();
         var width = this.width() || 0;
         var height = this.height() || 0;
         var matrix = this.globalViewMatrix();
 
-
-        var p1 = matrix.transformPoint2(-l, -t);
-        var p2 = matrix.transformPoint2(width + r, -t);
-        var p3 = matrix.transformPoint2(width + r, height + b);
-        var p4 = matrix.transformPoint2(-l, height + b);
+        var p1 = matrix.transformPoint2(x - l, y - t);
+        var p2 = matrix.transformPoint2(x + width + r, y - t);
+        var p3 = matrix.transformPoint2(x + width + r, y + height + b);
+        var p4 = matrix.transformPoint2(x - l, y + height + b);
 
         var xs = [p1.x, p2.x, p3.x, p4.x];
         var ys = [p1.y, p2.y, p3.y, p4.y];
@@ -1266,7 +1267,7 @@ var UIElement = klass(DataNode, {
     },
     center: function (global) {
         var m = global ? this.globalViewMatrix() : this.viewMatrix();
-        return m.transformPoint2(this.width()/2, this.height()/2);
+        return m.transformPoint2(this.x() + this.width()/2, this.y() + this.height()/2);
     },
     hitElement: function (position, scale, predicate) {
         if (this.hitVisible()) {

@@ -13,7 +13,7 @@ export default class GroupContainer extends Container {
 
         //if group is flipped, scale children normally
         var absScale = s.abs();
-        this.children.forEach(e => e.applyScaling(absScale, this.position(), false, withReset));
+        this.children.forEach(e => e.applyScaling(absScale, Point.Zero, false, withReset));
     }
 
     strokeBorder(context, w, h){

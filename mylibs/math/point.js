@@ -350,17 +350,28 @@ export default class Point {
      * Returns the distance between the point and another point.
      *
      * @param {Point} point
-     * @param {Boolean} [squared=false] Controls whether the distance should
-     * remain squared, or its square root should be calculated
      * @return {Number}
      */
-    getDistance(/* point, squared */) {
-        var point = new Point(arguments[0]),
-            x = point.x - this.x,
+    getDistance(point) {
+        return Math.sqrt(this.getDistanceSquared(point));
+    }
+
+    getDistanceSquared(point) {
+        var x = point.x - this.x,
             y = point.y - this.y,
-            d = x * x + y * y,
-            squared = arguments[1];
-        return squared ? d : Math.sqrt(d);
+            d = x * x + y * y;
+        return d;
+    }
+
+    getDistance2(x, y) {
+        return Math.sqrt(this.getDistanceSquared2(x, y));
+    }
+
+    getDistanceSquared2(x, y) {
+        var dx = x - this.x,
+            dy = y - this.y,
+            d = dx * dx + dy * dy;
+        return d;
     }
 
     /**
@@ -697,9 +708,8 @@ export default class Point {
      * @param {Point} point
      * @return {Point} the projection of the point onto another point
      */
-    project(/* point */) {
-        var point = new Point(arguments[0]),
-            scale = point.isZero() ? 0 : this.dot(point) / point.dot(point);
+    project(point) {
+        var scale = point.isZero() ? 0 : this.dot(point) / point.dot(point);
         return new Point(
             point.x * scale,
             point.y * scale

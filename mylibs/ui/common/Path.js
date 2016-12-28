@@ -1245,17 +1245,35 @@ class Path extends Shape {
         return graph.bounds;
     }
 
-    adjustBoundaries() {
+    adjustBoundaries(oldBoundingBox) {
         //happens when all add-point commands are rolled back
         if (this.points.length <= 1) {
             return;
         }
 
-        var graph = new BezierGraph();
-        graph.initWithBezierPath(this, Matrix.Identity);
-        var rect = graph.bounds;
+        delete this._graph;
+        if (oldBoundingBox){
+            delete this.runtimeProps.boundingBox;
+        }
+        var box = this.getBoundingBox();
 
-        this.prepareAndSetProps(rect);
+        var props = {
+            width: box.width || 1,
+            height: box.height || 1
+        };
+
+        if (oldBoundingBox){
+            var dx = box.x - oldBoundingBox.x;
+            var dy = box.y - oldBoundingBox.y;
+            if (dx !== 0 || dy !== 0){
+                moveAllPoints.call(this, dx, dy);
+                props.m = this.props.m.prepended(Matrix.create().translate(dx, dy));
+            }
+        }
+
+        this._internalChange = true;
+        this._roundPoint(props);
+        this.prepareAndSetProps(props);
 
         this.save();
     }

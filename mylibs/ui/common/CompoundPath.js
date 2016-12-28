@@ -194,7 +194,6 @@ class CompoundPath extends Container {
     offsetGraph() {
         var graph = new BezierGraph();
         for (var p of this.result) {
-            //TODO
             graph.initWithBezierPath(p, this.viewMatrix());
         }
 
@@ -273,7 +272,6 @@ class CompoundPath extends Container {
             for (var i = 0; i < items.length; ++i) {
                 var child = items[i];
                 context.save();
-                child.viewMatrix().applyToContext(context);
                 child.drawPath(context, child.width(), child.height());
                 context.restore();
             }

@@ -392,9 +392,7 @@ export default class DropVisualization extends ExtensionBase {
 
         context.beginPath();
         if (element.drawPath) {
-            if (element.shouldApplyViewMatrix()){
-                element.globalViewMatrix().applyToContext(context);
-            }
+            element.applyViewMatrix(context);
             element.drawPath(context, element.width(), element.height());
         } else {
             element.drawBoundaryPath(context, element.globalViewMatrix(), element.width(), element.height());
