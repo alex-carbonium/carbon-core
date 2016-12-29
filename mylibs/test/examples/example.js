@@ -32,6 +32,14 @@ var examples = {};
 var selector = document.getElementById("selector");
 selector.addEventListener("change", e => runExample(e.target.value));
 
+var rerun = document.getElementById("rerun");
+rerun.addEventListener("click", e => runExample(selector.value));
+document.body.addEventListener("keyup", e => {
+    if (e.code === "F3"){
+        runExample(selector.value)
+    }
+});
+
 export function registerExample(name, fn){
     var option = document.createElement("option");
     option.text = name;

@@ -2,6 +2,7 @@ import UIElement from "framework/UIElement";
 import nearestPoint from  "math/NearestPoint";
 import BezierGraph from "math/bezierGraph";
 import BezierCurve from "math/bezierCurve";
+import Rect from "math/rect";
 import ResizeDimension from "framework/ResizeDimension";
 import actionManager from "ui/ActionManager";
 import Brush from "framework/Brush";
@@ -1233,7 +1234,7 @@ class Path extends Shape {
         if (!this.runtimeProps.boundingBox){
             var graph = new BezierGraph();
             graph.initWithBezierPath(this, this.viewMatrix());
-            this.runtimeProps.boundingBox = graph.bounds;
+            this.runtimeProps.boundingBox = Rect.fromObject(graph.bounds);
         }
 
         return this.runtimeProps.boundingBox;
@@ -1242,7 +1243,7 @@ class Path extends Shape {
     getGlobalBoundingBox() {
         var graph = new BezierGraph();
         graph.initWithBezierPath(this, this.globalViewMatrix());
-        return graph.bounds;
+        return Rect.fromObject(graph.bounds);
     }
 
     adjustBoundaries(oldBoundingBox) {
@@ -1673,7 +1674,7 @@ class Path extends Shape {
     }
 
     resetGlobalViewCache(){
-        super.resetGlobalViewCache();
+        super.resetGlobalViewCache.apply(this, arguments);
         delete this.runtimeProps.boundingBox;
     }
 

@@ -23,15 +23,12 @@ export default {
     },
     updateFromElement: function (frame) {
         var e = frame.element;
-        var x = frame.element.x();
-        var y = frame.element.y();
-        var w = frame.element.width();
-        var h = frame.element.height();
+        var rect = frame.element.getBoundaryRect();
         var points = frame.points;
         var scale = Environment.view.scale();
         for (var i = 0; i < points.length; ++i) {
             var update = points[i].update || points[i].type.update;
-            update(points[i], x, y, w, h, e, scale);
+            update(points[i], rect.x, rect.y, rect.width, rect.height, e, scale);
         }
     },
 

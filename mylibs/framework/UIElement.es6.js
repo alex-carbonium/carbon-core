@@ -40,6 +40,7 @@ import DataNode from "./DataNode";
 import {createUUID, deepEquals} from "../util";
 import Intl from "../Intl";
 import UserSettings from "../UserSettings";
+import Rect from "../math/rect";
 
 require("migrations/All");
 
@@ -141,6 +142,25 @@ var UIElement = klass(DataNode, {
         }
         return false;
     },
+    setProps: function(props){
+        var hasBr = props.hasOwnProperty("br");
+        //TODO
+        if (hasBr && !(props.br instanceof Rect)){
+            debugger;
+        }
+
+        if (!hasBr){
+            var hasW = props.hasOwnProperty("width");
+            var hasH = props.hasOwnProperty("height");
+            if (hasW || hasH){
+                var br = this.getBoundaryRect();
+                var w = hasW ? props.width : br.w;
+                var h = hasH ? props.height : br.h;
+                props.br = br.withSize(w, h);
+            }
+        }
+        DataNode.prototype.setProps.apply(this, arguments);
+    },
     propsUpdated: function (newProps, oldProps) {
         if (newProps.hasOwnProperty("m")
             || newProps.hasOwnProperty("stroke")
@@ -162,8 +182,7 @@ var UIElement = klass(DataNode, {
     selectLayoutProps: function(global){
         var m = global ? this.globalViewMatrix() : this.viewMatrix();
         return {
-            width: this.width(),
-            height: this.height(),
+            br: this.br(),
             m
         };
     },
@@ -227,22 +246,23 @@ var UIElement = klass(DataNode, {
      * Flip is detected by negative width/height, in which case the matrix is reflected relative to origin.
      */
     applySizeScaling: function(s, o, sameDirection, withReset){
-        var w = this.width();
-        var h = this.height();
-        var newProps = {
-            width: w * s.x,
-            height: h * s.y
-        };
+        var br = this.getBoundaryRect();
+        var newWidth = br.width * s.x;
+        var newHeight = br.height * s.y;
 
         var localOrigin = this.viewMatrixInverted().transformPoint(o);
-        var wx = localOrigin.x === 0 ? 0 : w/localOrigin.x;
-        var hy = localOrigin.y === 0 ? 0 : h/localOrigin.y;
-        var newLocalOrigin = new Point(wx === 0 ? 0 : newProps.width/wx, hy === 0 ? 0 : newProps.height/hy);
+        var wx = localOrigin.x === 0 ? 0 : br.width/localOrigin.x;
+        var hy = localOrigin.y === 0 ? 0 : br.height/localOrigin.y;
+        var newLocalOrigin = new Point(wx === 0 ? 0 : newWidth/wx, hy === 0 ? 0 : newHeight/hy);
 
         var newOrigin = this.viewMatrix().transformPoint(newLocalOrigin);
         var offset = o.subtract(newOrigin);
         var fx = s.x < 0 ? -1 : 1;
         var fy = s.y < 0 ? -1 : 1;
+
+        var newProps = {
+            br: new Rect(br.x * s.x, br.y * s.y, Math.abs(newWidth), Math.abs(newHeight))
+        };
 
         if (fx === -1 || fy === -1 || !offset.equals(Point.Zero)){
             var matrix = this.viewMatrix();
@@ -252,8 +272,6 @@ var UIElement = klass(DataNode, {
             newProps.m = matrix.prepended(Matrix.create().translate(offset.x, offset.y));
         }
 
-        newProps.width = Math.abs(newProps.width);
-        newProps.height = Math.abs(newProps.height);
         this.prepareAndSetProps(newProps);
     },
 
@@ -422,13 +440,12 @@ var UIElement = klass(DataNode, {
     },
 
     getBoundaryRect: function (includeMargin = false) {
-        var margin = includeMargin ? this.margin() : Box.Default;
-        return {
-            x: this.x() - margin.left,
-            y: this.y() - margin.top,
-            width: this.width() + margin.left + margin.right,
-            height: this.height() + margin.top + margin.bottom
-        };
+        var br = this.props.br;
+        if (!includeMargin || this.margin() === Box.Default){
+            return br;
+        }
+        var margin = this.margin();
+        return new Rect(br.x - margin.left, br.y - margin.top, br.width + margin.left + margin.right, br.height + margin.top + margin.bottom);
     },
     size: function () {
         return {
@@ -441,16 +458,13 @@ var UIElement = klass(DataNode, {
     },
 
     getBoundingBox: function (includeMargin = false) {
-        // if (!this.angle()) {
-        //     return this.getBoundaryRect(includeMargin);
-        // }
-
-        var width = this.width() || 0;
-        var height = this.height() || 0;
+        var rect = this.getBoundaryRect(includeMargin);
+        var width = rect.width || 0;
+        var height = rect.height || 0;
         var matrix = this.viewMatrix();
         var margin = includeMargin ? this.margin() : Box.Default;
-        var x = this.x();
-        var y = this.y();
+        var x = rect.x;
+        var y = rect.y;
 
         var p1 = matrix.transformPoint2(x - margin.left, y - margin.top);
         var p2 = matrix.transformPoint2(x + width + margin.right, y - margin.top);
@@ -464,8 +478,7 @@ var UIElement = klass(DataNode, {
         var t = sketch.util.min(ys);
         var b = sketch.util.max(ys);
 
-        var rect = {x: l, y: t, width: r - l, height: b - t};
-        return rect;
+        return new Rect(l, t, r - l, b - t);
     },
     getBoundingBoxGlobal: function (includeMargin = false, includeBorder = false) {
         if (this.runtimeProps.globalClippingBox) {
@@ -485,10 +498,11 @@ var UIElement = klass(DataNode, {
             b = Math.max(margin.bottom, border);
         }
 
-        var x = this.x();
-        var y = this.y();
-        var width = this.width() || 0;
-        var height = this.height() || 0;
+        var rect = this.getBoundaryRect(includeMargin);
+        var x = rect.x;
+        var y = rect.y;
+        var width = rect.width || 0;
+        var height = rect.height || 0;
         var matrix = this.globalViewMatrix();
 
         var p1 = matrix.transformPoint2(x - l, y - t);
@@ -503,9 +517,9 @@ var UIElement = klass(DataNode, {
         t = sketch.util.min(ys);
         b = sketch.util.max(ys);
 
-        var rect = {x: l, y: t, width: r - l, height: b - t};
-        this.runtimeProps.globalClippingBox = rect;
-        return rect;
+        var bb = new Rect(l, t, r - l, b - t);
+        this.runtimeProps.globalClippingBox = bb;
+        return bb;
     },
     getMaxOuterBorder: function () {
         if (!this.stroke()) {
@@ -540,7 +554,7 @@ var UIElement = klass(DataNode, {
             y -= 5;
             height += 10;
         }
-        return {x, y, width, height};
+        return new Rect(x, y, width, height);
     },
 
     hitTest: function (/*Point*/point, scale, includeMargin = false) {
@@ -668,21 +682,20 @@ var UIElement = klass(DataNode, {
         }
     },
     drawBoundaryPath: function(context, matrix, w, h){
-        var x = this.x();
-        var y = this.y();
+        var r = this.getBoundaryRect();
 
         context.beginPath();
 
-        var p = matrix.transformPoint2(x, y, true);
+        var p = matrix.transformPoint2(r.x, r.y, true);
         context.moveTo(p.x, p.y);
 
-        p = matrix.transformPoint2(x + w, y, true);
+        p = matrix.transformPoint2(r.x + r.width, r.y, true);
         context.lineTo(p.x, p.y);
 
-        p = matrix.transformPoint2(x + w, y + h, true);
+        p = matrix.transformPoint2(r.x + r.width, r.y + r.height, true);
         context.lineTo(p.x, p.y);
 
-        p = matrix.transformPoint2(x, y + h, true);
+        p = matrix.transformPoint2(r.x, r.y + r.height, true);
         context.lineTo(p.x, p.y);
 
         context.closePath();
@@ -717,8 +730,12 @@ var UIElement = klass(DataNode, {
         var matrix = parent.globalViewMatrix().clone();
         matrix.append(this.viewMatrix());
         this.runtimeProps.globalViewMatrix = Object.freeze(matrix);
+        this.onGlobalViewMatrixUpdated(this.runtimeProps.globalViewMatrix);
 
-        return matrix;
+        return this.runtimeProps.globalViewMatrix;
+    },
+    onGlobalViewMatrixUpdated: function(matrix){
+
     },
     globalViewMatrixInverted: function () {
         if (!this.runtimeProps.globalViewMatrixInverted) {
@@ -817,13 +834,19 @@ var UIElement = klass(DataNode, {
         if (value !== undefined) {
             this.setProps({width: value});
         }
-        return this.props.width;
+        return this.br().width;
     },
     height: function (value) {
         if (value !== undefined) {
             this.setProps({height: value});
         }
-        return this.props.height;
+        return this.br().height;
+    },
+    br: function (value) {
+        if (value !== undefined) {
+            this.setProps({br: value});
+        }
+        return this.props.br;
     },
     right: function () {
         return this.x() + this.width();
@@ -1267,7 +1290,7 @@ var UIElement = klass(DataNode, {
     },
     center: function (global) {
         var m = global ? this.globalViewMatrix() : this.viewMatrix();
-        return m.transformPoint2(this.x() + this.width()/2, this.y() + this.height()/2);
+        return m.transformPoint(this.br().center());
     },
     hitElement: function (position, scale, predicate) {
         if (this.hitVisible()) {
@@ -1838,6 +1861,9 @@ PropertyMetadata.registerForType(UIElement, {
     },
     m: {
         defaultValue: Matrix.Identity
+    },
+    br: {
+        defaultValue: new Rect(0, 0, 0, 0)
     },
     locked: {
         displayName: "Locked",

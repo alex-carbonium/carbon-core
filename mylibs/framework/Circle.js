@@ -114,10 +114,7 @@ class Circle extends Shape {
         path.name(this.name());
 
         path.adjustBoundaries();
-        path.x(this.x());
-        path.y(this.y());
-        path.angle(this.angle());
-
+        path.setProps(this.selectLayoutProps());
 
         return path;
     }

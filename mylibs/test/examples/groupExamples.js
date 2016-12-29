@@ -33,6 +33,7 @@ registerExample("group: nested, multilevel", function(app){
     var group2 = Selection.selectedElements()[0];
 
     var group3 = group2.clone();
+    group3.name("group 3");
     group3.applyTranslation({x: 0, y: group3.getBoundingBox().height + 10});
     app.activePage.add(group3);
 

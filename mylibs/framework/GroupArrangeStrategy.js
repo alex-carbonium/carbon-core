@@ -2,6 +2,7 @@ import ArrangeStrategy from "./ArrangeStrategy";
 import {ArrangeStrategies} from "./Defs";
 import Matrix from "../math/matrix";
 import Point from "../math/point";
+import Rect from "../math/rect";
 
 var GroupArrangeStrategy = {
     arrange: function(container){
@@ -38,15 +39,16 @@ var GroupArrangeStrategy = {
         xMax += padding.right;
         yMax += padding.bottom;
 
-        container.prepareAndSetProps({width: xMax - xMin, height: yMax - yMin});
-
-        if (xMin !== 0 || yMin !== 0){
-            var translate = new Point(-xMin, -yMin);
-            for (let i = 0, l = items.length; i < l; ++i) {
-                items[i].applyTranslation(translate);
-            }
-            container.applyDirectedTranslation(translate.negate());
-        }
+        container.prepareAndSetProps({br: new Rect(xMin, yMin, xMax - xMin, yMax - yMin)});
+        // container.prepareAndSetProps({width: xMax - xMin, height: yMax - yMin});
+        //
+        // if (xMin !== 0 || yMin !== 0){
+        //     var translate = new Point(-xMin, -yMin);
+        //     for (let i = 0, l = items.length; i < l; ++i) {
+        //         items[i].applyTranslation(translate);
+        //     }
+        //     container.applyDirectedTranslation(translate.negate());
+        // }
     }
 };
 

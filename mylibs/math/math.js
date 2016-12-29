@@ -1,4 +1,5 @@
 import {distanceBetweenPoints, areValuesClose} from "./geometry";
+import Rect from "./rect";
 
 // Legendre-Gauss abscissae (xi values, defined at i=n as the roots of the nth order Legendre polynomial Pn(x))
 var legendreGaussAbscissaeValues = [[], [],
@@ -420,7 +421,7 @@ export function combineRects(rect) {
         xmax = Math.max(xmax, rect2.x + rect2.width);
         ymax = Math.max(ymax, rect2.y + rect2.height);
     }
-    return {x: xmin, y: ymin, width: xmax - xmin, height: ymax - ymin};
+    return new Rect(xmin, ymin, xmax - xmin, ymax - ymin);
 }
 export function adjustRectSize(rect, delta) {
     var d2 = delta * 2;

@@ -35,7 +35,8 @@ export default class TransformationElement extends InteractiveElement{
             var clone = this.children[i];
 
             if (this._lastScaling){
-                var localOrigin = element.parent().globalViewMatrixInverted().transformPoint(this._lastScaling.o);
+                var globalOrigin = this._lastScaling.o;
+                var localOrigin = element.parent().globalViewMatrixInverted().transformPoint(globalOrigin);
                 element.applyScaling(this._lastScaling.s, localOrigin, this._lastScaling.sameDirection);
             }
             if (this._lastRotation){

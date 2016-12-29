@@ -25,7 +25,7 @@ export default {
     capture: function (frame, point, event) {
         var resizingElement = UIElement.construct(Types.TransformationElement, frame.transformElements || [frame.element]);
         frame.resizingElement = resizingElement;
-        frame.originalRect = frame.element.getBoundaryRectGlobal();
+        frame.originalRect = frame.element.getBoundaryRect();
         frame.origin = frame.element.center(true);
         frame.captureVector = new Point(event.x - frame.origin.x, event.y - frame.origin.y);
 

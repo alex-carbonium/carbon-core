@@ -25,12 +25,13 @@ export default {
     },
     capture: function (frame, point) {
         var resizingElement = UIElement.construct(Types.TransformationElement, frame.transformElements || [frame.element]);
+        var br = frame.element.br();
         frame.resizingElement = resizingElement;
-        frame.originalRect = frame.element.getBoundaryRect();
+        frame.originalRect = br;
         frame.globalViewMatrix = frame.element.globalViewMatrix();
 
-        var c = new Point(frame.element.width()/2, frame.element.height()/2);
-        var pointOrigin = c.subtract(new Point(frame.element.width()/2 * point.rv[0], frame.element.height()/2 * point.rv[1]));
+        var c = br.center();
+        var pointOrigin = c.subtract(new Point(br.width/2 * point.rv[0], br.height/2 * point.rv[1]));
         frame.centerOrigin = frame.element.globalViewMatrix().transformPoint(c);
         frame.pointOrigin = frame.element.globalViewMatrix().transformPoint(pointOrigin);
 

@@ -3,7 +3,8 @@ import Primitive from "../framework/sync/Primitive";
 import CompoundPath from "../ui/common/CompoundPath";
 import {unionRect} from "../math/geometry";
 import Path from "ui/common/Path";
-
+import GroupArrangeStrategy from "../framework/GroupArrangeStrategy";
+import Selection from "../framework/SelectionModel";
 
 export default klass(Command, {
     _constructor: function(joinMode, elements){
@@ -22,7 +23,7 @@ export default klass(Command, {
     },
 
     execute:function(){
-        var elements = this._elements;
+        var elements = this._elements.slice().sort((a, b) => a.zOrder() - b.zOrder());
         var path, rect;
         var e0 = elements[0];
         var positions = [];
@@ -47,36 +48,40 @@ export default klass(Command, {
             path.name(e0.displayName());
             path.styleId(e0.styleId());
 
-            rect = e0.getBoundaryRectGlobal();
-            var index;
+            parent.insert(path, parent.positionOf(e0));
+
+            //rect = e0.getBoundaryRectGlobal();
+            //var index;
             for(var i = 0; i < elements.length; ++i) {
                 var e = elements[i];
                 e.joinMode(this._joinMode);
-                var pos = parent.local2global(e.position());
-                positions.push(pos);
-                rect = unionRect(rect, e.getBoundaryRectGlobal());
-                if(i === 0){
-                    index = e.parent().positionOf(e);
-                }
-                e.parent().remove(e)
+                //var pos = parent.local2global(e.position());
+                //positions.push(pos);
+                //rect = unionRect(rect, e.getBoundaryRectGlobal());
+                //if(i === 0){
+                    //index = e.parent().positionOf(e);
+                //}
+                //e.parent().remove(e)
                 path.add(e);
             }
 
-            path.resize(rect);
-            var pos = path.position();
-            pos = parent.global2local(pos);
-            path.setProps({x:pos.x, y:pos.y});
+            //path.resize(rect);
+            //var pos = path.position();
+            //pos = parent.global2local(pos);
+            //path.setProps({x:pos.x, y:pos.y});
 
-            parent.insert(path, index);
 
-            for(var i = 0; i < elements.length; ++i) {
-                var e = elements[i];
-                var pos = path.global2local(positions[i]);
-                e.setProps({x:pos.x, y:pos.y});
-            }
+            // for(var i = 0; i < elements.length; ++i) {
+            //     var e = elements[i];
+            //     var pos = path.global2local(positions[i]);
+            //     e.setProps({x:pos.x, y:pos.y});
+            // }
         }
 
+        //GroupArrangeStrategy.arrange(path);
+
         path.recalculate();
+        Selection.makeSelection([path]);
 
     },
     toPrimitiveList:function(){

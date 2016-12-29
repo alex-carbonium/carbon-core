@@ -4,16 +4,17 @@ import BezierGraph from "math/bezierGraph";
 import {unionRect} from "math/geometry";
 import UIElement from "framework/UIElement";
 import BezierCurve from "math/bezierCurve";
+import Point from "../../math/point";
 import PropertyMetadata from "framework/PropertyMetadata";
 import PropertyTracker from "framework/PropertyTracker";
 import {Overflow, Types} from "framework/Defs";
 import Path from "ui/common/Path";
+import GroupArrangeStrategy from "../../framework/GroupArrangeStrategy";
+import {combineRects} from "../../math/math";
 
 function propertyChanged(element, newProps) {
     if (!this._internalChange && this._itemIds && this._itemIds[element.id()]) {
-        if (newProps.width !== undefined || newProps.height !== undefined
-            || newProps.x !== undefined || newProps.y !== undefined
-            || newProps.angle !== undefined) {
+        if (newProps.width !== undefined || newProps.height !== undefined || newProps.m !== undefined) {
             this.recalculate();
         }
     }
@@ -30,7 +31,8 @@ class CompoundPath extends Container {
         //path.setWindingRule(NSEvenOddWindingRule);
         var res = [];
 
-        for (var contour of graph._contours) {
+        for (var i = 0, l = graph._contours.length; i < l; ++i) {
+            var contour = graph._contours[i];
             var firstPoint = true;
             for (var edge of contour.edges) {
                 if (firstPoint) {
@@ -55,24 +57,24 @@ class CompoundPath extends Container {
 
 
     propsUpdated(newProps, oldProps) {
-        Container.prototype.propsUpdated.apply(this, arguments);
+        super.propsUpdated.apply(this, arguments);
         if (this._internalChange || !this.result) {
             return;
         }
-        if (newProps.width !== undefined || newProps.height !== undefined) {
-            var sw = (newProps.width || 1) / (oldProps.width || 1);
-            var sh = (newProps.height || 1) / (oldProps.height || 1);
-
-            for (var p of this.children) {
-                p.setProps({width: p.width() * sw, height: p.height() * sh, x: p.x() * sw, y: p.y() * sh});
-            }
-            this.resetGlobalViewCache();
-            this.recalculate();
-        }
+        // if (newProps.width !== undefined || newProps.height !== undefined) {
+        //     var sw = (newProps.width || 1) / (oldProps.width || 1);
+        //     var sh = (newProps.height || 1) / (oldProps.height || 1);
+        //
+        //     for (var p of this.children) {
+        //         p.setProps({width: p.width() * sw, height: p.height() * sh, x: p.x() * sw, y: p.y() * sh});
+        //     }
+        //     this.resetGlobalViewCache();
+        //     this.recalculate();
+        // }
     }
 
     dispose() {
-        Container.prototype.dispose.apply(this, arguments);
+        super.dispose.apply(this, arguments);
         if (this._trackerSubscription) {
             this._trackerSubscription.dispose();
             delete this._trackerSubscription;
@@ -80,16 +82,18 @@ class CompoundPath extends Container {
     }
 
     recalculate() {
+        GroupArrangeStrategy.arrange(this);
+
         this._itemIds = {};
 
-
         var items = this.children;
-        for(var i = 0; i < items.length; ++i){
-            items[i].resetGlobalViewCache();
-        }
+        // for (let i = 0; i < items.length; ++i){
+        //     items[i].resetGlobalViewCache();
+        // }
+
         var result = BezierGraph.fromPath(items[0], items[0].viewMatrix());
         this._itemIds[items[0].id()] = true;
-        for (var i = 1; i < items.length; ++i) {
+        for (let i = 1; i < items.length; ++i) {
             var path = items[i];
             this._itemIds[path.id()] = true;
             var otherGraph;
@@ -118,33 +122,25 @@ class CompoundPath extends Container {
         if (!this.result || !this.result.length) {
             return;
         }
-        var rect = this.result[0].getBoundaryRect();
-        for (var p of this.result) {
-            rect = unionRect(rect, p.getBoundaryRect());
-        }
 
-        var dx = rect.x;
-        var dy = rect.y;
-        var newRect = this.getBoundaryRect();
-        newRect.width = rect.width;
-        newRect.height = rect.height;
-        newRect.x += dx;
-        newRect.y += dy;
+        var boxes = this.result.map(x => x.getBoundingBox());
+        var rect = combineRects.apply(null, boxes);
 
         this._internalChange = true;
-
-        for (var p of this.result) {
-            var pos = p.position();
-            p.setProps({x: pos.x - (dx), y: pos.y - (dy)});
-        }
-
-        for (var p of items) {
-            var pos = p.position();
-            p.setProps({x: pos.x - (dx), y: pos.y - (dy)});
-        }
-
-        this.resize(newRect);
-
+        // var t = new Point(-rect.x, -rect.y);
+        //
+        // if (!t.equals(Point.Zero)){
+        //     for (let i = 0; i < items.length; i++){
+        //         let p = items[i];
+        //         p.applyTranslation(t)
+        //
+        //     }
+        //
+        //     this.applyDirectedTranslation(t.negate());
+        // }
+        //
+        // this.setProps({width: rect.width, height: rect.height});
+        this.br(rect);
         this._updateGraph();
 
         if (this.parent() instanceof CompoundPath) {
@@ -152,6 +148,11 @@ class CompoundPath extends Container {
         }
 
         delete this._internalChange;
+    }
+
+    applySizeScaling(s, o) {
+        var localOrigin = this.viewMatrixInverted().transformPoint(o);
+        this.applyTransform(Matrix.create().scale(s.x, s.y, localOrigin.x, localOrigin.y), true);
     }
 
     flatten(){
@@ -186,14 +187,16 @@ class CompoundPath extends Container {
 
     _updateGraph() {
         this._graph = new BezierGraph();
-        for (var p of this.result) {
+        for (var i = 0; i < this.result.length; i++){
+            var p = this.result[i];
             this._graph.initWithBezierPath(p, p.viewMatrix());
         }
     }
 
     offsetGraph() {
         var graph = new BezierGraph();
-        for (var p of this.result) {
+        for (var i = 0; i < this.result.length; i++){
+            var p = this.result[i];
             graph.initWithBezierPath(p, this.viewMatrix());
         }
 
@@ -226,13 +229,16 @@ class CompoundPath extends Container {
         var res = UIElement.prototype.hitTest.apply(this, arguments);
 
         if (res) {
+            return true;
+
             if (this.parent() != null) {
                 point = this.global2local(point);
             }
 
             var brush = this.fill();
             if (this.lockedGroup() && (!brush || !brush.type)) {
-                for (var path of this.result) {
+                for (var i = 0; i < this.result.length; i++){
+                    var path = this.result[i];
                     var p = path.getPointIfClose(point, 8);
                     if (p) {
                         return true;
@@ -248,9 +254,11 @@ class CompoundPath extends Container {
                     return false;
                 }
                 var count = 0;
-                var ray = BezierCurve.bezierCurveWithLine(point, {x: point.x + 100000, y: point.y})
-                for (var curve of graph.contours) {
-                    for (var edge of curve.edges) {
+                var ray = BezierCurve.bezierCurveWithLine(point, {x: point.x + 100000, y: point.y});
+                for (let i = 0, l = graph.contours.length; i < l; ++i) {
+                    var curve = graph.contours[i];
+                    for (var j = 0, k = curve.edges.length; j < k; ++j) {
+                        var edge = curve.edges[j];
                         edge.intersectionsWithBezierCurve(ray, {}, () => {
                                 count++;
                             }
@@ -267,11 +275,13 @@ class CompoundPath extends Container {
         if (this.result) {
             var items = this.result;
             context.lineCap = "round";
+            var matrix = this.globalViewMatrix();
 
             context.beginPath();
             for (var i = 0; i < items.length; ++i) {
                 var child = items[i];
                 context.save();
+                child.setTransform(matrix);
                 child.drawPath(context, child.width(), child.height());
                 context.restore();
             }
@@ -299,7 +309,6 @@ class CompoundPath extends Container {
                 var child = items[i];
                 context.save();
                 context.beginPath();
-                child.viewMatrix().applyToContext(context);
                 child.drawPath(context, child.width(), child.height());
                 context.stroke();
                 context.restore();

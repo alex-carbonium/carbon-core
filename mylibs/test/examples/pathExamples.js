@@ -39,27 +39,30 @@ registerExample("path: in a group", function(app){
     group.applyRotation(20, group.center());
 
     window.path1 = path1;
+    window.rect2 = rect2;
     window.group = group;
 });
 
 registerExample("path: compound", function(app){
     var rect1 = new Rectangle();
-    rect1.setProps({width: 100, height: 100, name: 'path1 1', fill: Brush.createFromColor("red")});
+    rect1.setProps({width: 100, height: 100, name: 'rect', fill: Brush.createFromColor("red")});
     rect1.applyTranslation({x: 200, y: 300});
     var path1 = rect1.convertToPath();
     app.activePage.add(path1);
 
     var circle1 = new Circle();
     circle1.setProps({width: 80, height: 80});
-    circle1.applyTranslation({x: 210, y: 310});
-    circle1.setProps({name: 'circle1 2', stroke: Brush.createFromColor("black", 1, StrokePosition.Center)});
+    circle1.applyTranslation({x: 210, y: 350});
+    circle1.setProps({name: 'circle', stroke: Brush.createFromColor("black", 1, StrokePosition.Center)});
     app.activePage.add(circle1);
 
     Selection.makeSelection([path1, circle1]);
-    app.actionManager.invoke("pathSubtract");
-    // var group = Selection.selectedElements()[0];
+    app.actionManager.invoke("pathIntersect");
+    var compound = Selection.selectedElements()[0];
+    //app.actionManager.invoke("groupElements");
+    //window.group = Selection.selectedElements()[0];
     // group.applyRotation(20, group.center());
 
     // window.path1 = path1;
-    // window.group = group;
+    window.compound = compound;
 });

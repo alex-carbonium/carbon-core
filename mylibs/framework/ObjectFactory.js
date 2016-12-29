@@ -5,6 +5,7 @@ import ObjectCache from "./ObjectCache";
 import EventHelper from "./EventHelper";
 import logger from "../logger";
 import Matrix from "../math/matrix";
+import Rect from "../math/rect";
 
 export default {
     objectCreationFailed: EventHelper.createEvent(),
@@ -121,6 +122,9 @@ export default {
         }
         else if (name === "m"){
             props[name] = new Matrix(value._a, value._b, value._c, value._d, value._tx, value._ty);
+        }
+        else if (name === "br"){
+            props[name] = new Rect(value.x, value.y, value.w, value.h);
         }
     },
     updatePropsWithPrototype: function(props){
