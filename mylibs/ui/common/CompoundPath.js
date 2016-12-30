@@ -1,7 +1,6 @@
 import Container from "framework/Container";
 import Brush from "framework/Brush";
 import BezierGraph from "math/bezierGraph";
-import {unionRect} from "math/geometry";
 import UIElement from "framework/UIElement";
 import BezierCurve from "math/bezierCurve";
 import Point from "../../math/point";
@@ -10,7 +9,8 @@ import PropertyTracker from "framework/PropertyTracker";
 import {Overflow, Types} from "framework/Defs";
 import Path from "ui/common/Path";
 import GroupArrangeStrategy from "../../framework/GroupArrangeStrategy";
-import {combineRects} from "../../math/math";
+import {combineRectArray} from "../../math/math";
+import Rect from "../../math/rect";
 
 function propertyChanged(element, newProps) {
     if (!this._internalChange && this._itemIds && this._itemIds[element.id()]) {
@@ -124,7 +124,7 @@ class CompoundPath extends Container {
         }
 
         var boxes = this.result.map(x => x.getBoundingBox());
-        var rect = combineRects.apply(null, boxes);
+        var rect = combineRectArray(boxes);
 
         this._internalChange = true;
         // var t = new Point(-rect.x, -rect.y);
@@ -150,9 +150,8 @@ class CompoundPath extends Container {
         delete this._internalChange;
     }
 
-    applySizeScaling(s, o) {
-        var localOrigin = this.viewMatrixInverted().transformPoint(o);
-        this.applyTransform(Matrix.create().scale(s.x, s.y, localOrigin.x, localOrigin.y), true);
+    applySizeScaling(s, o, sameDirection) {
+        this.applyMatrixScaling(s, o, sameDirection);
     }
 
     flatten(){
@@ -175,7 +174,7 @@ class CompoundPath extends Container {
         path.stroke(this.stroke());
         path.name(this.displayName());
         path.styleId(this.styleId());
-        path.setProps({x:this.x(), y:this.y(), width:this.width(), height:this.height()});
+        path.setProps(this.selectLayoutProps());
         if(this.result.length>1){
             path.recalculate();
         }
@@ -221,16 +220,20 @@ class CompoundPath extends Container {
         return this._itemIds[elements[0].id()];
     }
 
+    getHitTestBox(){
+        if (this.lockedGroup()){
+            return this.getBoundaryRect();
+        }
+        return this.runtimeProps.fullBoundaryRect;
+    }
     hitTest(point, scale) {
         if (this._activeGroup) {
             return true;
         }
 
-        var res = UIElement.prototype.hitTest.apply(this, arguments);
+        var res = super.hitTest.apply(this, arguments);
 
         if (res) {
-            return true;
-
             if (this.parent() != null) {
                 point = this.global2local(point);
             }
@@ -281,15 +284,12 @@ class CompoundPath extends Container {
             for (var i = 0; i < items.length; ++i) {
                 var child = items[i];
                 context.save();
-                child.setTransform(matrix);
+                //quick assignment
+                child.props.m = matrix;
                 child.drawPath(context, child.width(), child.height());
                 context.restore();
             }
         }
-    }
-
-    unselect() {
-        this.lockGroup();
     }
 
     drawSelf(context, w, h, environment) {
@@ -346,7 +346,8 @@ class CompoundPath extends Container {
         }
         this.applyVisitor(e=>{
             e.disablePropsTracking();
-        })
+        });
+        delete this.runtimeProps.fullBoundaryRect;
     }
 
     unlockGroup() {
@@ -358,6 +359,12 @@ class CompoundPath extends Container {
         this.applyVisitor(e=>{
             e.enablePropsTracking();
         });
+
+        var boxes = this.children.map(x => x.getBoundingBox());
+        var r = combineRectArray(boxes);
+        //this.runtimeProps.fullBoundaryRect = new Rect(0, 0, r.width, r.height);
+        this.runtimeProps.fullBoundaryRect = r;
+
         return true;
     }
 

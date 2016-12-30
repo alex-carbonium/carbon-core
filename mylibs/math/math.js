@@ -409,13 +409,23 @@ export function isRectInRect(child, parent) {
         && child.y >= parent.y && child.y + child.height <= parent.y + parent.height;
 }
 
-export function combineRects(rect) {
+export function combineRects() {
+    return combineRectArray(arguments);
+}
+export function combineRectArray(rects) {
+    if (rects.length === 0){
+        return Rect.Zero;
+    }
+    if (rects.length === 1){
+        return rects[0];
+    }
+    var rect = rects[0];
     var xmin = rect.x;
     var ymin = rect.y;
     var xmax = rect.x + rect.width;
     var ymax = rect.y + rect.height;
-    for (var i = 1; i < arguments.length; i++) {
-        var rect2 = arguments[i];
+    for (var i = 1; i < rects.length; i++) {
+        var rect2 = rects[i];
         xmin = Math.min(xmin, rect2.x);
         ymin = Math.min(ymin, rect2.y);
         xmax = Math.max(xmax, rect2.x + rect2.width);

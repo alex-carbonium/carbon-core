@@ -38,7 +38,8 @@ class Shape extends Container {
             Brush.stroke(stroke, context, 0, 0, w, h, 2);
         } else if (stroke.position === StrokePosition.Outside) {
             context.beginPath();
-            context.rect(2 * w, -h, -3 * w, 3 * h);
+            var bb = this.getBoundingBoxGlobal();
+            context.rect(bb.x + 2 * bb.width, bb.y - bb.height, -3 * bb.width, 3 * bb.height);
             this.drawPath(context, w, h);
             context.clip();
             context.beginPath();
@@ -56,10 +57,11 @@ class Shape extends Container {
         if (!stroke || !stroke.type || !stroke.position || !this.closed()) {
             Brush.stroke(stroke, context, 0, 0, w, h);
         } else {
-            var clipingRect = this.getBoundingBoxGlobal(false, true);
+            var clippingRect = this.getBoundingBoxGlobal();
+            clippingRect = this.expandRectWithBorder(clippingRect);
             if(true || !environment.offscreen) {
-                var p1 = environment.pageMatrix.transformPoint2(clipingRect.x, clipingRect.y);
-                var p2 = environment.pageMatrix.transformPoint2(clipingRect.x + clipingRect.width, clipingRect.y + clipingRect.height);
+                var p1 = environment.pageMatrix.transformPoint2(clippingRect.x, clippingRect.y);
+                var p2 = environment.pageMatrix.transformPoint2(clippingRect.x + clippingRect.width, clippingRect.y + clippingRect.height);
                 p1.x = Math.max(0, 0 | p1.x * environment.contextScale);
                 p1.y = Math.max(0, 0 | p1.y * environment.contextScale);
                 p2.x = 0 | p2.x * environment.contextScale + .5;
@@ -67,8 +69,8 @@ class Shape extends Container {
                 var sw = (p2.x - p1.x);
                 var sh = (p2.y - p1.y);
             } else {
-                sw = 0 | clipingRect.width * environment.contextScale + .5;
-                sh = 0 | clipingRect.height * environment.contextScale + .5;
+                sw = 0 | clippingRect.width * environment.contextScale + .5;
+                sh = 0 | clippingRect.height * environment.contextScale + .5;
                 p1 = {x:0, y:0};
             }
             sw = Math.max(sw, 1);
@@ -84,7 +86,7 @@ class Shape extends Container {
             environment.setupContext(offContext);
 
             // if(!environment.offscreen) {
-                this.globalViewMatrix().applyToContext(offContext);
+                this.applyViewMatrix(offContext);
             // }
 
             offContext.beginPath();

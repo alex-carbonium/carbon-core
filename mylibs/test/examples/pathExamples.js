@@ -43,7 +43,7 @@ registerExample("path: in a group", function(app){
     window.group = group;
 });
 
-registerExample("path: compound", function(app){
+registerExample("path: compound intersect", function(app){
     var rect1 = new Rectangle();
     rect1.setProps({width: 100, height: 100, name: 'rect', fill: Brush.createFromColor("red")});
     rect1.applyTranslation({x: 200, y: 300});
@@ -58,11 +58,44 @@ registerExample("path: compound", function(app){
 
     Selection.makeSelection([path1, circle1]);
     app.actionManager.invoke("pathIntersect");
-    var compound = Selection.selectedElements()[0];
-    //app.actionManager.invoke("groupElements");
-    //window.group = Selection.selectedElements()[0];
-    // group.applyRotation(20, group.center());
+    window.compound = Selection.selectedElements()[0];
+});
 
-    // window.path1 = path1;
-    window.compound = compound;
+registerExample("path: compound difference", function(app){
+    var rect1 = new Rectangle();
+    rect1.setProps({width: 100, height: 100, name: 'rect', fill: Brush.createFromColor("red")});
+    rect1.applyTranslation({x: 200, y: 300});
+    var path1 = rect1.convertToPath();
+    app.activePage.add(path1);
+
+    var circle1 = new Circle();
+    circle1.setProps({width: 60, height: 160});
+    circle1.applyTranslation({x: 220, y: 270});
+    circle1.setProps({name: 'circle'});
+    app.activePage.add(circle1);
+
+    Selection.makeSelection([path1, circle1]);
+    app.actionManager.invoke("pathDifference");
+    window.compound = Selection.selectedElements()[0];
+});
+
+registerExample("path: stroke position", function(app){
+    var rect1 = new Rectangle();
+    rect1.setProps({width: 100, height: 100, name: 'rect 1'});
+    rect1.applyTranslation({x: 200, y: 300});
+    var path1 = rect1.convertToPath();
+    path1.setProps({stroke: Brush.createFromColor("red", 8, StrokePosition.Outside)});
+    app.activePage.add(path1);
+
+    var rect2 = new Rectangle();
+    rect2.setProps({width: 100, height: 100, name: 'rect 1'});
+    rect2.applyTranslation({x: 400, y: 300});
+    var path2 = rect2.convertToPath();
+    path2.setProps({stroke: Brush.createFromColor("blue", 8, StrokePosition.Inside)});
+    app.activePage.add(path2);
+
+    Selection.makeSelection([path1]);
+
+    window.path1 = path1;
+    window.path2 = path2;
 });

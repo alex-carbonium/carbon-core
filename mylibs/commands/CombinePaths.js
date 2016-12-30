@@ -1,9 +1,6 @@
 import Command from "../framework/commands/Command";
-import Primitive from "../framework/sync/Primitive";
 import CompoundPath from "../ui/common/CompoundPath";
-import {unionRect} from "../math/geometry";
 import Path from "ui/common/Path";
-import GroupArrangeStrategy from "../framework/GroupArrangeStrategy";
 import Selection from "../framework/SelectionModel";
 
 export default klass(Command, {
@@ -24,19 +21,16 @@ export default klass(Command, {
 
     execute:function(){
         var elements = this._elements.slice().sort((a, b) => a.zOrder() - b.zOrder());
-        var path, rect;
+        var path;
         var e0 = elements[0];
-        var positions = [];
         var parent = e0.parent();
         if(e0 instanceof CompoundPath){
+            //TODO: (m) check if this is correct
             path = e0;
             for(var i = 1; i < elements.length; ++i) {
                 var e = elements[i];
                 e.joinMode(this._joinMode);
-                var pos = e.parent().local2global(e.position());
-                pos = path.global2local(pos);
                 path.add(e);
-                e.setProps({x:pos.x, y:pos.y});
             }
 
         } else {
@@ -50,35 +44,12 @@ export default klass(Command, {
 
             parent.insert(path, parent.positionOf(e0));
 
-            //rect = e0.getBoundaryRectGlobal();
-            //var index;
             for(var i = 0; i < elements.length; ++i) {
                 var e = elements[i];
                 e.joinMode(this._joinMode);
-                //var pos = parent.local2global(e.position());
-                //positions.push(pos);
-                //rect = unionRect(rect, e.getBoundaryRectGlobal());
-                //if(i === 0){
-                    //index = e.parent().positionOf(e);
-                //}
-                //e.parent().remove(e)
                 path.add(e);
             }
-
-            //path.resize(rect);
-            //var pos = path.position();
-            //pos = parent.global2local(pos);
-            //path.setProps({x:pos.x, y:pos.y});
-
-
-            // for(var i = 0; i < elements.length; ++i) {
-            //     var e = elements[i];
-            //     var pos = path.global2local(positions[i]);
-            //     e.setProps({x:pos.x, y:pos.y});
-            // }
         }
-
-        //GroupArrangeStrategy.arrange(path);
 
         path.recalculate();
         Selection.makeSelection([path]);

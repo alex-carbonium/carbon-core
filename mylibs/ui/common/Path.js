@@ -1176,10 +1176,8 @@ class Path extends Shape {
         }
     }
 
-    applySizeScaling(s, o) {
-        var localOrigin = this.viewMatrixInverted().transformPoint(o);
-        this.applyTransform(Matrix.create().scale(s.x, s.y, localOrigin.x, localOrigin.y), true);
-        return false;
+    applySizeScaling(s, o, sameDirection) {
+        this.applyMatrixScaling(s, o, sameDirection);
     }
 
     shouldApplyViewMatrix(){
@@ -1222,7 +1220,7 @@ class Path extends Shape {
     //     context.restore();
     // },
 
-    getBoundingBoxGlobal() {
+    getBoundingBoxGlobal(includeMargin) {
         if (!this.runtimeProps.globalClippingBox) {
             this.runtimeProps.globalClippingBox = this.getGlobalBoundingBox();
         }

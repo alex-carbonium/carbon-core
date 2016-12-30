@@ -232,8 +232,17 @@ var UIElement = klass(DataNode, {
             return true;
         }
 
-        this.applyTransform(Matrix.create().scale(s.x, s.y, o.x, o.y));
+        this.applyMatrixScaling(s, o, sameDirection);
         return false;
+    },
+    applyMatrixScaling(s, o, sameDirection){
+        if (sameDirection){
+            var localOrigin = this.viewMatrixInverted().transformPoint(o);
+            this.applyTransform(Matrix.create().scale(s.x, s.y, localOrigin.x, localOrigin.y), true);
+        }
+        else{
+            this.applyTransform(Matrix.create().scale(s.x, s.y, o.x, o.y));
+        }
     },
     /**
      * This function must produce exactly the same visual result as
@@ -261,7 +270,7 @@ var UIElement = klass(DataNode, {
         var fy = s.y < 0 ? -1 : 1;
 
         var newProps = {
-            br: new Rect(br.x * s.x, br.y * s.y, Math.abs(newWidth), Math.abs(newHeight))
+            br: new Rect(Math.abs(br.x * s.x), Math.abs(br.y * s.y), Math.abs(newWidth), Math.abs(newHeight))
         };
 
         if (fx === -1 || fy === -1 || !offset.equals(Point.Zero)){
@@ -480,18 +489,17 @@ var UIElement = klass(DataNode, {
 
         return new Rect(l, t, r - l, b - t);
     },
-    getBoundingBoxGlobal: function (includeMargin = false, includeBorder = false) {
+    getBoundingBoxGlobal: function (includeMargin = false) {
         if (this.runtimeProps.globalClippingBox) {
             return this.runtimeProps.globalClippingBox;
         }
 
         var margin = includeMargin ? this.margin() : Box.Default;
-        var border = includeBorder ? this.getMaxOuterBorder() : 0;
         var l = 0;
         var r = 0;
         var t = 0;
         var b = 0;
-        if (includeMargin || includeBorder) {
+        if (includeMargin) {
             l = Math.max(margin.left, border);
             t = Math.max(margin.top, border);
             r = Math.max(margin.right, border);
@@ -537,20 +545,36 @@ var UIElement = klass(DataNode, {
         }
         return stroke.lineWidth;
     },
+    expandRectWithBorder: function(rect){
+        var border = this.getMaxOuterBorder();
+        if (border !== 0){
+            return rect.expand(border);
+        }
+        return rect;
+    },
     getHitTestBox: function (scale, includeMargin = false, includeBorder = true) {
         var rect = this.getBoundaryRect(includeMargin);
+        var goodScaleW = width * scale > 10;
+        var goodScaleH = height * scale > 10;
+        if (!includeBorder && goodScaleW && goodScaleW){
+            return rect;
+        }
 
-        var border = includeBorder ? this.getMaxOuterBorder() : 0;
+        var border = this.getMaxOuterBorder();
+        if (border === 0 && goodScaleW && goodScaleH){
+            return rect;
+        }
+
         var x = rect.x - border;
         var y = rect.y - border;
         var width = rect.width + border;
         var height = rect.height + border;
 
-        if (width * scale < 10) {
+        if (!goodScaleW) {
             x -= 5;
             width += 10;
         }
-        if (height * scale < 10) {
+        if (goodScaleH) {
             y -= 5;
             height += 10;
         }
@@ -1863,7 +1887,7 @@ PropertyMetadata.registerForType(UIElement, {
         defaultValue: Matrix.Identity
     },
     br: {
-        defaultValue: new Rect(0, 0, 0, 0)
+        defaultValue: Rect.Zero
     },
     locked: {
         displayName: "Locked",

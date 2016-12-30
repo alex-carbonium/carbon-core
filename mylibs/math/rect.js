@@ -9,7 +9,11 @@ export default class Rect{
     }
 
     clone(){
-        return new Rect(this.x, this.y, this.w, this.h);
+        return new Rect(this.x, this.y, this.width, this.height);
+    }
+
+    expand(d){
+        return new Rect(this.x - d, this.y - d, this.width + 2*d, this.height + 2*d);
     }
 
     center(){
@@ -30,3 +34,5 @@ export default class Rect{
         return new Rect(obj.x, obj.y, obj.width, obj.height);
     }
 }
+
+Rect.Zero = new Rect(0, 0, 0, 0);
