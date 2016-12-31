@@ -6,7 +6,7 @@ import {ContentSizing, Overflow, Types, ChangeMode} from "./Defs";
 import Invalidate from "./Invalidate";
 import FrameEditTool from "./FrameEditTool";
 import EventHelper from "./EventHelper";
-import Rectangle from "./Rectangle";
+import RectMask from "./RectMask";
 
 const DefaultSizing = ContentSizing.fill;
 
@@ -177,13 +177,8 @@ export default class Frame extends Container {
                 delete this.runtimeProps.mask;
             }
             else if (!this.runtimeProps.mask) {
-                this.runtimeProps.mask = new Rectangle();
-                this.runtimeProps.mask.setProps({
-                    width: this.width(),
-                    height: this.height(),
-                    stroke: Brush.Empty,
-                    fill: Brush.Empty
-                }, ChangeMode.Self);
+                this.runtimeProps.mask = new RectMask();
+                this.runtimeProps.mask.setProps(this.selectLayoutProps(), ChangeMode.Self);
                 //parent needed for finding global context, not adding to children
                 this.runtimeProps.mask.parent(this);
             }

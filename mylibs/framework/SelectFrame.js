@@ -44,12 +44,6 @@ class SelectFrame extends Rectangle {
         };
     }
 
-    drawSelf(context, w, h, environment) {
-        fwk.CrazyScope.push(false);
-        Rectangle.prototype.drawSelf.apply(this, arguments);
-        fwk.CrazyScope.pop();
-    }
-
     hitTest() {
         return false;
     }

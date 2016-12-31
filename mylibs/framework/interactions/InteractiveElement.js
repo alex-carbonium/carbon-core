@@ -1,5 +1,5 @@
 import GroupContainer from "../GroupContainer";
-import Container from "../Container";
+import CompositeElement from "../CompositeElement";
 import {ChangeMode, Types} from "../Defs";
 import Phantom from "../Phantom";
 import Brush from "../Brush";
@@ -7,27 +7,35 @@ import PropertyMetadata from "../PropertyMetadata";
 import UserSettings from "../../UserSettings";
 
 export default class InteractiveElement extends GroupContainer{
-    constructor(elements) {
+    constructor(element) {
         super();
 
         this._decorators = [];
         this._elements = [];
 
-        for (var i = 0; i < elements.length; i++){
-            var element = elements[i];
-            if (element.decorators){
-                element.decorators.forEach(x => {
-                    x.visible(false);
-                    this._decorators.push(x);
-                });
-            }
-            this.add(this.createClone(element));
+        var elements = element instanceof CompositeElement ? element.children : [element];
 
-            this._elements.push(element);
+        for (var i = 0; i < elements.length; i++){
+            var e = elements[i];
+            this._hideDecorators(e);
+            this.add(this.createClone(e));
+
+            this._elements.push(e);
         }
+        this._hideDecorators(element);
+
         this.performArrange();
 
         this.showOriginal(false);
+    }
+
+    _hideDecorators(e){
+        if (e.decorators){
+            e.decorators.forEach(x => {
+                x.visible(false);
+                this._decorators.push(x);
+            });
+        }
     }
 
     strokeBorder(context, w, h){

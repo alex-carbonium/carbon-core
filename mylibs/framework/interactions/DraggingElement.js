@@ -22,7 +22,7 @@ function applyOrthogonalMove(pos) {
 
 class DraggingElement extends InteractiveElement {
     constructor(event, activeArtboard) {
-        super(event.elements);
+        super(event.element);
 
         this._initialPosition = this.getTranslation();
         this._currentPosition = this._initialPosition;

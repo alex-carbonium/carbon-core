@@ -24,7 +24,7 @@ export default {
         context.stroke();
     },
     capture: function (frame, point) {
-        var resizingElement = UIElement.construct(Types.TransformationElement, frame.transformElements || [frame.element]);
+        var resizingElement = UIElement.construct(Types.TransformationElement, frame.element);
         var br = frame.element.br();
         frame.resizingElement = resizingElement;
         frame.originalRect = br;

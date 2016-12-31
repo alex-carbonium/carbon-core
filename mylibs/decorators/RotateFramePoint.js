@@ -23,7 +23,7 @@ export default {
         return index;
     },
     capture: function (frame, point, event) {
-        var resizingElement = UIElement.construct(Types.TransformationElement, frame.transformElements || [frame.element]);
+        var resizingElement = UIElement.construct(Types.TransformationElement, frame.element);
         frame.resizingElement = resizingElement;
         frame.originalRect = frame.element.getBoundaryRect();
         frame.origin = frame.element.center(true);

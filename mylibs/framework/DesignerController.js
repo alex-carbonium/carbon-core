@@ -263,7 +263,7 @@ export default class DesignerController {
             y: event.y
         };
 
-        this._draggingElement = new ObjectFactory.construct(Types.DraggingElement, event);
+        this._draggingElement = new ObjectFactory.construct(Types.DraggingElement, event, this.view.page.getActiveArtboard());
         this._draggingElement.showOriginal(event.altKey);
 
         this.view.layer3.add(this._draggingElement);
@@ -300,7 +300,7 @@ export default class DesignerController {
             var composite = Selection.selectComposite();
             // first check current selection
             if(composite && composite.hitTest(eventData, this.view.scale())) {
-                eventData.elements = composite.elements;
+                eventData.element = composite;
                 if (composite.canDrag()) {
                     this._startDraggingData = eventData;
                     eventData.handled = true;
@@ -313,7 +313,7 @@ export default class DesignerController {
                     var layer = this.view._layersReverse[i];
                     var element = layer.hitElement(eventData, this.view.scale(), null, eventData.event.ctrlKey);
                     if (element !== null) {
-                        eventData.elements = [element];
+                        eventData.element = element;
                         if (element.canDrag()) {
                             this._startDraggingData = eventData;
                             eventData.handled = true;

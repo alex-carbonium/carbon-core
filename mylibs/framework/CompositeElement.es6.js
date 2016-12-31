@@ -1,162 +1,150 @@
-import UIElement from "framework/UIElement";
 import PropertyMetadata from "framework/PropertyMetadata";
 import PropertyTracker from "framework/PropertyTracker";
-import util from "util";
-import Matrix from "math/matrix";
 import {leaveCommonProps} from "../util";
 import {Types} from "./Defs";
-import {combineRects} from "../math/math";
 import Brush from "framework/Brush";
 import Font from "framework/Font";
+import UIElement from "./UIElement";
+import GroupArrangeStrategy from "./GroupArrangeStrategy";
+import Box from "./Box";
+import Rect from "../math/rect";
 
-var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
-    _constructor: function(){
-        this.elements = [];
-        this._selected = false;
-        this._canDraw = false;
+export default class CompositeElement extends UIElement{
+    constructor(){
+        super();
 
-        this._initialized = true;
         this._types = [];
-        //this._angleEditable = false;
+        this.children = [];
 
         PropertyTracker.propertyChanged.bind(this, this._onPropsChanged);
-    },
-    add: function(element){
-        //var length = this.elements.push(element);
-        // if (length > 1 && this.elements[length - 1].zOrder() < this.elements[length - 2].zOrder()){
-        //     this.elements.sort(function(a, b){ return a.zOrder() - b.zOrder(); })
-        // }
+    }
+    add(element){
         var systemType = element.systemType();
         if (this._types.indexOf(systemType) === -1){
             this._types.push(systemType);
         }
         element.enablePropsTracking();
-        var gr = element.getBoundaryRectGlobal();
-        if (this.elements.length === 0){
-            this.setProps(gr);
-        }
-        else{
-            var props = this.selectProps(["x", "y", "width", "height"]);
-            this.setProps(combineRects(props, gr));
-        }
-        this.elements.push(element);
-        this.resetGlobalViewCache();
-    },
-    remove: function(element){
-        this.elements.splice(this.elements.indexOf(element), 1);
+        this.children.push(element);
+
+        this.performArrange();
+    }
+    remove(element){
         element.disablePropsTracking();
 
         var systemType = element.systemType();
         var canRemoveType = true;
-        var props = null;
 
-        for (var i = 0; i < this.elements.length; i++){
-            var e = this.elements[i];
+        var elementIndex = -1;
+        for (var i = 0; i < this.children.length; i++){
+            var e = this.children[i];
             if (canRemoveType && e !== element && e.systemType() === systemType){
                 canRemoveType = false;
             }
-            var gr = e.getBoundaryRectGlobal();
-            if (props === null){
-                props = gr;
-            }
-            else{
-                props = combineRects(props, gr);
+            if (e === element){
+                elementIndex = i;
             }
         }
-        this.setProps(props);
+        this.children.splice(i, 1);
 
         if (canRemoveType){
             this._types.splice(this._types.indexOf(systemType), 1);
         }
-        this.resetGlobalViewCache();
-    },
-    elementAt: function(index){
-        return this.elements[index];
-    },
-    singleOrDefault: function(){
-        return this.count() === 1 ? this.elements[0] : null;
-    },
-    singleOrSelf: function(){
-        return this.count() === 1 ? this.elements[0] : this;
-    },
-    has: function(element){
-        for (var i = 0, j = this.elements.length; i < j; ++i){
-            if (this.elements[i] === element){
+
+        this.performArrange();
+    }
+
+    performArrange(){
+        if (this.children.length > 1){
+            var xMax = Number.NEGATIVE_INFINITY;
+            var yMax = Number.NEGATIVE_INFINITY;
+            var xMin = Number.POSITIVE_INFINITY;
+            var yMin = Number.POSITIVE_INFINITY;
+
+            var items = this.children;
+            for (let i = 0, l = items.length; i < l; ++i) {
+                let child = items[i];
+
+                var bb = child.getBoundingBoxGlobal();
+                xMax = Math.max(xMax, bb.x + bb.width);
+                xMin = Math.min(xMin, bb.x);
+                yMax = Math.max(yMax, bb.y + bb.height);
+                yMin = Math.min(yMin, bb.y);
+            }
+            this.prepareAndSetProps({br: new Rect(xMin, yMin, xMax - xMin, yMax - yMin)});
+        }
+    }
+
+    elementAt(index){
+        return this.children[index];
+    }
+    singleOrDefault(){
+        return this.count() === 1 ? this.children[0] : null;
+    }
+    singleOrSelf(){
+        return this.count() === 1 ? this.children[0] : this;
+    }
+    has(element){
+        for (var i = 0, j = this.children.length; i < j; ++i){
+            if (this.children[i] === element){
                 return true;
             }
         }
         return false;
-    },
-    clear: function(){
-        this._canDraw = false;
+    }
+    clear(){
         this.each(x => x.disablePropsTracking());
-        this.elements = [];
         this._types = [];
-        //this.setProps({x: 0, y: 0, width: 0, height: 0});
-        this.resetGlobalViewCache();
-    },
+        //do not clear, selection model stores this by reference
+        this.children = [];
+    }
+    count(){
+        return this.children.length;
+    }
 
-    propsUpdated: function(newProps, oldProps, mode){
-        UIElement.prototype.propsUpdated.apply(this, arguments);
+    propsUpdated(newProps, oldProps, mode){
+        super.propsUpdated.apply(this, arguments);
 
         //not sure if it is safe to propagate other properties, so taking only what's needed for now
         if (newProps.visible !== oldProps.visible){
-            for (var i = 0; i < this.elements.length; i++){
-                this.elements[i].setProps({visible: newProps.visible}, mode);
+            for (var i = 0; i < this.children.length; i++){
+                this.children[i].setProps({visible: newProps.visible}, mode);
             }
         }
-    },
+    }
 
-    hitTest: function(/*Point*/point, scale){
+    hitTest(/*Point*/point, scale){
         var count = this.count();
         if (count === 0){
             return false;
         }
 
         for (var i = count - 1; i >= 0; i--){
-            var el = this.elements[i];
+            var el = this.children[i];
             if (el.hitTest(point, scale)){
                 return true;
             }
         }
         return false;
-    },
-    count: function(){
-        return this.elements.length;
-    },
-    hitVisible: function(){
+    }
+    hitVisible(){
         return true;
-    },
-    canAccept: function(){
+    }
+    canAccept(){
         return false;
-    },
-    each: function(callback){
-        this.elements.forEach(callback);
-    },
-    map: function(callback){
-        return this.elements.map(callback);    
-    },
-    first: function(callback){
-        return this.elements[0];
-    },
-    resizeDimensions: function(){
+    }
+    each(callback){
+        this.children.forEach(callback);
+    }
+    map(callback){
+        return this.children.map(callback);
+    }
+    first(callback){
+        return this.children[0];
+    }
+    resizeDimensions(){
         return 0;
-    },
-    drawSelf: function(context,w,h, environment){
-        if (this._canDraw){
-            var x = this.x();
-            var y = this.y();
-            for (let i = 0, l = this.elements.length; i < l; ++i) {
-                let element = this.elements[i];
-                context.save();
-                var gr = element.getBoundaryRectGlobal();
-                context.translate(gr.x - x, gr.y - y);
-                element.drawSelf(context, element.width(), element.height(), environment);
-                context.restore();
-            }
-        }
-    },
-    canDrag: function(){
+    }
+    canDrag(){
         var canDrag = true;
         this.each(function(element){
             if (!element.canDrag()){
@@ -165,104 +153,10 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
             }
         })
         return canDrag;
-    },
-    // min: function(accessor){
-    //     var result = null;
-    //
-    //     this.each(function(element){
-    //         var value = accessor(element);
-    //         if (result === null || value < result){
-    //             result = value;
-    //         }
-    //     });
-    //
-    //     return result;
-    // },
-    // max: function(accessor){
-    //     var result = null;
-    //
-    //     this.each(function(element){
-    //         var value = accessor(element);
-    //         if (result === null || value > result){
-    //             result = value;
-    //         }
-    //     });
-    //
-    //     return result;
-    // },
-    // x: function(value){
-    //     if (!this._initialized){
-    //         return 0;
-    //     }
-    //
-    //     if (arguments.length === 0){
-    //         return this.min(function(element){
-    //             var gr = element.getBoundingBoxGlobal();
-    //             return gr.x;
-    //         });
-    //     }
-    //
-    //     var oldValue = this.x();
-    //     var diff = value - oldValue;
-    //
-    //     this.each(function(element){
-    //         if (element.canDrag()){
-    //             element.x(element.x() + diff);
-    //         }
-    //     });
-    //
-    //     //this.properties.raisePropertyChanged();
-    //
-    //     return 0;
-    // },
-    // y: function(value){
-    //     if (!this._initialized){
-    //         return 0;
-    //     }
-    //
-    //     if (arguments.length === 0){
-    //         return this.min(function(element){
-    //             var gr = element.getBoundingBoxGlobal();
-    //             return gr.y;
-    //         });
-    //     }
-    //
-    //     var oldValue = this.y();
-    //     var diff = value - oldValue;
-    //
-    //     this.each(function(element){
-    //         if (element.canDrag()){
-    //             element.y(element.y() + diff);
-    //         }
-    //     });
-    //
-    //     //this.properties.raisePropertyChanged();
-    //
-    //     return 0;
-    // },
-    // width: function(value){
-    //     if (!this._initialized){
-    //         return 0;
-    //     }
-    //
-    //     return this.max(function(element){
-    //             var gr = element.getBoundingBoxGlobal();
-    //             return gr.x + gr.width;
-    //         }) - this.x();
-    // },
-    // height: function(value){
-    //     if (!this._initialized){
-    //         return 0;
-    //     }
-    //
-    //     return this.max(function(element){
-    //             var gr = element.getBoundingBoxGlobal();
-    //             return gr.y + gr.height;
-    //         }) - this.y();
-    // },
+    }
 
-    isDescendantOrSame: function(element){
-        var res = false;              
+    isDescendantOrSame(element){
+        var res = false;
 
         this.each(function(e){
             res |= e.isDescendantOrSame(element);
@@ -272,36 +166,27 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
         });
 
         return res;
-    },
-    clone: function(){
-        var clone = UIElement.prototype.clone.apply(this, arguments);
-        this.each(function(element){
-            clone.add(element.clone());
-        });
+    }
+    clone(){
+        var clone = super.clone.apply(this, arguments);
         if (this.commonProps){
             clone.setCommonProps(this.commonProps);
         }
         return clone;
-    },
-    startDrag: function(){
-        this._canDraw = true;
-    },
-    stopDrag: function(){
-        this._canDraw = false;
-    },
-    displayName: function(){
+    }
+    displayName(){
         if (this.allHaveSameType()){
-            return this.elements[0].displayName();
+            return this.children[0].displayName();
         }
         return "";
-    },
-    findPropertyMetadata: function(propName){
+    }
+    findPropertyMetadata(propName){
         return PropertyMetadata.find(this._types[0], propName);
-    },
-    allHaveSameType: function(){
+    }
+    allHaveSameType(){
         return this._types.length === 1;
-    },
-    allHaveSameParent: function(){
+    }
+    allHaveSameParent(){
         var result = true;
         var parent;
 
@@ -314,21 +199,21 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
         });
 
         return result;
-    },
-    parents: function(){
+    }
+    parents(){
         var parents = [];
-        for (var i = 0; i < this.elements.length; i++){
-            var parent = this.elements[i].parent();
+        for (var i = 0; i < this.children.length; i++){
+            var parent = this.children[i].parent();
             if (parents.indexOf(parent) === -1){
                 parents.push(parent);
             }
         }
         return parents;
-    },
-    prepareCommonProps: function(changes){
+    }
+    prepareCommonProps(changes){
         var result = [];
-        for (var i = 0; i < this.elements.length; i++){
-            var element = this.elements[i];
+        for (var i = 0; i < this.children.length; i++){
+            var element = this.children[i];
             var elementChanges = Object.assign({}, changes);
             for(var p in elementChanges){
                 if(p === 'fill' || p === 'stroke'){
@@ -341,19 +226,19 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
             result.push(elementChanges);
         }
         return result;
-    },
-    selectCommonProps: function(names){
+    }
+    selectCommonProps(names){
         var result = [];
-        for (var i = 0; i < this.elements.length; i++){
-            var element = this.elements[i];
+        for (var i = 0; i < this.children.length; i++){
+            var element = this.children[i];
             result.push(element.selectProps(names));
         }
         return result;
-    },
+    }
     // rules:
     // - find groups with matching label for all types, these groups are assumed to have same props
     // - in remaining groups, find props with same name+type and put them into a default group
-    createPropertyGroups: function(){
+    createPropertyGroups(){
         if (this.count() === 0){
             return [];
         }
@@ -361,8 +246,8 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
         if (this.count() === 1){
             var type = this._types[0];
             var metadata = PropertyMetadata.findAll(type);
-            this.commonProps = this.elements[0].props;
-            return metadata ? metadata.groups(this.elements[0]) : [];
+            this.commonProps = this.children[0].props;
+            return metadata ? metadata.groups(this.children[0]) : [];
         }
 
         var commonGroups = [];
@@ -450,7 +335,7 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
 
         if (commonProps.length){
             commonGroups.splice(0, 0, {
-                label: this.allHaveSameType() ? this.elements[0].displayType() : "Common",
+                label: this.allHaveSameType() ? this.children[0].displayType() : "Common",
                 properties: commonProps
             });
         }
@@ -458,10 +343,10 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
         this.setCommonProps(commonGroups);
 
         return commonGroups;
-    },
-    setCommonProps: function(groups){
+    }
+    setCommonProps(groups){
         var propNames = ["name", "locked"];
-        var sample = this.elements[0];
+        var sample = this.children[0];
         var props = {
             name: sample.props.name,
             locked: sample.props.locked
@@ -475,17 +360,14 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
                 propNames.push(propertyName);
             }
         }
-        for (var i = 1; i < this.elements.length; i++){
-            var element = this.elements[i];
+        for (var i = 1; i < this.children.length; i++){
+            var element = this.children[i];
             var changes = element.selectProps(propNames);
             leaveCommonProps(props, changes);
         }
         this.commonProps = props;
-    },
-    globalViewMatrix:function() {
-        return Matrix.Identity;
-    },
-    _onPropsChanged: function(element, newProps){
+    }
+    _onPropsChanged(element, newProps){
         if (this.has(element)){
             if (newProps.hasOwnProperty("m")
                 || newProps.hasOwnProperty("stroke")
@@ -521,8 +403,8 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
             var that = this;
             this._propsChangedTimer = setTimeout(function(){ that._onPropsChangedNextTick(); }, 1);
         }
-    },
-    _onPropsChangedNextTick: function(){
+    }
+    _onPropsChangedNextTick(){
         if (this.isDisposed()){
             return;
         }
@@ -535,19 +417,25 @@ var CompositeElement =  klass2("sketch.framework.CompositeElement", UIElement, {
         }
 
         PropertyTracker.changeProps(this, newProps, oldProps);
-    },
-    dispose: function(){
-        UIElement.prototype.dispose.apply(this, arguments);
+    }
+    dispose(){
+        super.dispose.apply(this, arguments);
         PropertyTracker.propertyChanged.unbind(this, this._onPropsChanged);
     }
-});
+
+    get elements(){
+        return this.children;
+    }
+
+    padding(){
+        return Box.Default;
+    }
+}
 
 CompositeElement.prototype.t = Types.CompositeElement;
 
 PropertyMetadata.registerForType(CompositeElement, {
-    groups: function(element){
+    groups(element){
         return element.getCommonProperties();
     }
 });
-
-export default CompositeElement;

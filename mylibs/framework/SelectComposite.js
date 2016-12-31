@@ -3,137 +3,116 @@ import CompositeElement from "./CompositeElement";
 import Environment from "environment";
 import PropertyMetadata from "./PropertyMetadata";
 import {Types} from "./Defs";
+import ResizeDimension from "./ResizeDimension";
+import ActiveFrame from "../decorators/ActiveFrame";
 
-define(["decorators/ActiveFrame", "framework/ResizeDimension"], function (ActiveFrame, ResizeDimension) {
-    var fwk = sketch.framework;
+var SelectCompositeFrame = {
+    hitPointIndex: function(frame, point){
+        return DefaultFrameType.hitPointIndex(frame, point);
+    },
+    updateFromElement: function(frame){
+        return DefaultFrameType.updateFromElement(frame);
+    },
 
-    var SelectCompositeFrame = {
-        hitPointIndex: function (frame, point) {
-            point = {x: point.x - frame.element.x(), y: point.y - frame.element.y()};
-            return DefaultFrameType.hitPointIndex(frame, point);
-        },
-        updateFromElement: function (frame) {
-            return DefaultFrameType.updateFromElement(frame);
-        },
+    movePoint: function(frame, point, event){
+        return DefaultFrameType.movePoint(frame, point, event);
+    },
+    draw: function(frame, context){
+        DefaultFrameType.draw(frame, context);
 
-        movePoint: function (frame, point, event) {
-            return DefaultFrameType.movePoint(frame, point, event);
-        },
-        draw: function (frame, context) {
+        var scale = Environment.view.scale();
+        context.save();
+        context.scale(1/scale, 1/scale);
+        context.strokeStyle = '#22c1ff';
+        context.lineWidth = 1;
+        context.setLineDash([1, 1]);
+        frame.element.each(function(e){
             context.save();
-            var rect = frame.element.getBoundaryRectGlobal();
-            context.translate(rect.x, rect.y);
-            DefaultFrameType.draw(frame, context);
+            var matrix = e.globalViewMatrix().prependedWithScale(scale, scale);
+            e.drawBoundaryPath(context, matrix, e.width(), e.height());
+            context.stroke();
             context.restore();
-
-            var scale = Environment.view.scale();
-            fwk.CrazyScope.push(false);
-            context.save();
-            context.strokeStyle = '#22c1ff';
-            context.lineWidth = 1;
-            context.setLineDash([1, 1]);
-            frame.element.each(function (e) {
-                context.save();
-                var r = e.getBoundaryRectGlobal();
-                var origin = e.rotationOrigin(true);
-                context.translate(origin.x, origin.y);
-                context.rotate(e.angle() * Math.PI / 180);
-                context.translate(-origin.x, -origin.y);
-                context.scale(1 / scale, 1 / scale);
-                context.rectPath(~~(r.x * scale), ~~(r.y * scale), ~~(e.width() * scale), ~~(e.height() * scale));
-                context.stroke();
-                context.restore();
-            })
-            fwk.CrazyScope.pop();
-            context.restore();
-        }
+        });
+        context.restore();
     }
+};
 
-    var SelectComposite = klass2("SelectComposite", CompositeElement, {
-        _constructor: function () {
-            this._activeFrame = new ActiveFrame();
+export default class SelectComposite extends CompositeElement{
+    constructor(){
+        super();
+        this._selected = false;
+        this._activeFrame = new ActiveFrame();
+    }
+    selected(value){
+        if (arguments.length === 1){
+            if (value === this._selected){
+                return;
+            }
 
-            //this._angleEditable = false;
-            this._initialized = true;
-        },
-        selected: function (value) {
-            if (arguments.length === 1) {
-                if (value === this._selected) {
-                    return;
-                }
+            this._selected = value;
+            var multiselect = this.count() > 1;
 
-                this._selected = value;
-                var multiselect = this.count() > 1;
-
-                if (value) {
-                    if (!multiselect) {
-                        this.each(element => {
-                            element.addDecorator(this._activeFrame);
-                            element.select(multiselect);
-                        });
-                    } else {
-                        this.addDecorator(this._activeFrame);
-                        this.each(element => element.select(multiselect));
-                    }
-                } else {
-                    this.removeDecorator(this._activeFrame);
-                    this.each(element => {
-                        element.unselect();
-                        element.removeDecorator(this._activeFrame);
+            if (value){
+                if (!multiselect){
+                    this.each(element =>{
+                        element.addDecorator(this._activeFrame);
+                        element.select(multiselect);
                     });
+                } else{
+                    this.addDecorator(this._activeFrame);
+                    this.each(element => element.select(multiselect));
                 }
+            } else{
+                this.removeDecorator(this._activeFrame);
+                this.each(element =>{
+                    element.unselect();
+                    element.removeDecorator(this._activeFrame);
+                });
             }
-
-            return this._selected;
-        },
-        createSelectionFrame: function(){
-            var frame = CompositeElement.prototype.createSelectionFrame.apply(this, arguments);
-            frame.transformElements = this.elements;
-            return frame;
-        },
-        selectionFrameType: function () {
-            return SelectCompositeFrame;
-        },
-        resizeDimensions: function () {
-            var parent = this.first().parent();
-            var canResize = true;
-            this.each(function (e) {
-                if (e.parent() !== parent) {
-                    canResize = false;
-                    return false;
-                }
-            });
-            return canResize ? ResizeDimension.Both : ResizeDimension.None;
-        },
-        add: function (element, multiSelect, refreshOnly) {
-            for (var i = this.elements.length - 1; i >= 0; --i) {
-                var e = this.elements[i];
-                if (e.isDescendantOrSame(element) || element.isDescendantOrSame(e)) {
-                    this.remove(e);
-                }
-            }
-            if(!refreshOnly && this._selected) {
-                element.select(multiSelect);
-            }
-            CompositeElement.prototype.add.apply(this, arguments);
-        },
-        remove: function(element, refreshOnly){
-            if(!refreshOnly && this._selected) {
-                element.unselect();
-            }
-            CompositeElement.prototype.remove.apply(this, arguments);
-        },
-        clear: function(refreshOnly){
-            if(!refreshOnly && this._selected) {
-                this.each(x => x.unselect());
-            }
-            CompositeElement.prototype.clear.apply(this, arguments);
         }
-    });
 
-    SelectComposite.prototype.t = Types.SelectComposite;
+        return this._selected;
+    }
+    selectionFrameType(){
+        return SelectCompositeFrame;
+    }
+    resizeDimensions(){
+        var parent = this.first().parent();
+        var canResize = true;
+        this.each(function(e){
+            if (e.parent() !== parent){
+                canResize = false;
+                return false;
+            }
+        });
+        return canResize ? ResizeDimension.Both : ResizeDimension.None;
+    }
+    add(element, multiSelect, refreshOnly){
+        for (var i = this.elements.length - 1; i >= 0; --i){
+            var e = this.elements[i];
+            if (e.isDescendantOrSame(element) || element.isDescendantOrSame(e)){
+                this.remove(e);
+            }
+        }
+        if (!refreshOnly && this._selected){
+            element.select(multiSelect);
+        }
+        super.add.apply(this, arguments);
+    }
+    remove(element, refreshOnly){
+        if (!refreshOnly && this._selected){
+            element.unselect();
+        }
+        super.remove.apply(this, arguments);
+    }
+    clear(refreshOnly){
+        if (!refreshOnly && this._selected){
+            this.each(x => x.unselect());
+        }
+        super.clear.apply(this, arguments);
+    }
+}
 
-    PropertyMetadata.registerForType(SelectComposite, {});
+SelectComposite.prototype.t = Types.SelectComposite;
 
-    return SelectComposite;
-});
+PropertyMetadata.registerForType(SelectComposite, {});

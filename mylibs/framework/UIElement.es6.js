@@ -607,6 +607,7 @@ var UIElement = klass(DataNode, {
         delete this.runtimeProps.viewMatrixInverted;
         delete this.runtimeProps.globalClippingBox;
         delete this.runtimeProps.snapPoints;
+        delete this.runtimeProps.dm;
         //primitive root should be changed only when changing parent, it is needed for repeater clones
         if (resetPrimitiveRoot) {
             delete this.runtimeProps.primitiveRoot;

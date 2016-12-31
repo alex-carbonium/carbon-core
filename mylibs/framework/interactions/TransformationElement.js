@@ -2,10 +2,11 @@ import {Types} from "../Defs";
 import PropertyMetadata from "../PropertyMetadata";
 import InteractiveElement from "./InteractiveElement";
 import ArrangeStrategy from "../ArrangeStrategy";
+import Selection from "../SelectionModel";
 
 export default class TransformationElement extends InteractiveElement{
-    constructor(elements){
-        super(elements);
+    constructor(element){
+        super(element);
 
         this._lastScaling = null;
         this._lastRotation = null;
@@ -37,7 +38,8 @@ export default class TransformationElement extends InteractiveElement{
             if (this._lastScaling){
                 var globalOrigin = this._lastScaling.o;
                 var localOrigin = element.parent().globalViewMatrixInverted().transformPoint(globalOrigin);
-                element.applyScaling(this._lastScaling.s, localOrigin, this._lastScaling.sameDirection);
+                var sameDirection = this.children.length === 1;
+                element.applyScaling(this._lastScaling.s, localOrigin, sameDirection);
             }
             if (this._lastRotation){
                 element.setTransform(element.parent().globalViewMatrixInverted().appended(clone.globalViewMatrix()));
@@ -45,6 +47,7 @@ export default class TransformationElement extends InteractiveElement{
         }
 
         ArrangeStrategy.arrangeRoots(this.elements);
+        Selection.refreshSelection();
     }
 }
 
