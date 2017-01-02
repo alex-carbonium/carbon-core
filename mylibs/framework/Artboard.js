@@ -334,7 +334,7 @@ class Artboard extends Container {
                 },
                 {
                     label: "Layout",
-                    properties: ["width", "height", "x", "y", "anchor", "angle", "dockStyle", "horizontalAlignment", "verticalAlignment"]
+                    properties: ["width", "height", "x", "y", "constraints", "angle", "dockStyle", "horizontalAlignment", "verticalAlignment"]
                 },
                 {
                     label: "Margin",

@@ -10,7 +10,6 @@ import ArtboardsTool from "ui/common/ArtboardsTool";
 import TextTool from "ui/common/text/TextTool";
 import Artboard from "framework/Artboard";
 import DefaultShapeSettings from "ui/DefaultShapeSettings";
-import DefaultLineSettings from "ui/DefaultLineSettings";
 import ArtboardToolSettings from "ui/ArtboardToolSettings";
 import ArtboardFrame from "framework/ArtboardFrame";
 import {ViewTool, Types} from "../framework/Defs";
@@ -157,8 +156,8 @@ var registerCommands = function () {
         that._lineCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._lineCreator;
         that.app.allowSelection(false);
-        that._defaultLineSettings.updateColors();
-        Selection.makeSelection([that._defaultLineSettings]);
+        that._defaultShapeSettings.updateColors();
+        Selection.makeSelection([that._defaultShapeSettings]);
         that.app.setCurrentTool(ViewTool.Line);
     }, "ui-line");
 
@@ -262,7 +261,6 @@ export default class DrawActionSelector extends ExtensionBase {
         this._imageCreator = new ElementDragCreator(app, Types.Frame);
 
         this._defaultShapeSettings = new DefaultShapeSettings(app);
-        this._defaultLineSettings = new DefaultLineSettings(app);
         this._artboardToolSettings = new ArtboardToolSettings(app);
 
         var that = this;

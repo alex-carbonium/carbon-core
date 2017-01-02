@@ -7,7 +7,6 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import Box from "framework/Box";
 import Brush from "framework/Brush";
 import Shadow from "framework/Shadow";
-import Anchor from "framework/Anchor";
 import QuadAndLock from "framework/QuadAndLock";
 import Font from "framework/Font";
 import AnimationGroup from "framework/animation/AnimationGroup";
@@ -17,6 +16,7 @@ import ElementMove from "commands/ElementMove";
 import Matrix from "math/matrix";
 import stopwatch from "Stopwatch";
 import ResizeDimension from "framework/ResizeDimension";
+import Constraints from "framework/Constraints";
 import {
     Types,
     DockStyle,
@@ -820,6 +820,16 @@ var UIElement = klass(DataNode, {
         if (value !== undefined) {
             this.setProps({dashPattern: value});
         }
+        if(typeof this.props.dashPattern === 'string'){
+            switch(this.props.dashPattern){
+                case 'solid':
+                    return null;
+                case 'dotted':
+                    return [1,1];
+                case 'dashed':
+                    return [4, 2];
+            }
+        }
         return this.props.dashPattern;
     },
     selectFrameVisible: function () {
@@ -951,11 +961,11 @@ var UIElement = klass(DataNode, {
         }
         return this.props.name;
     },
-    anchor: function (value) {
+    constraints: function (value) {
         if (value !== undefined) {
-            this.setProps({anchor: value});
+            this.setProps({constraints: value});
         }
-        return this.props.anchor;
+        return this.props.constraints;
     },
     resize: function (props) {
         this.prepareAndSetProps(props);
@@ -1817,21 +1827,21 @@ PropertyMetadata.registerForType(UIElement, {
     flipVertical: {
         defaultValue: false
     },
-    anchor: {
-        displayName: "Pin to edge",
-        type: "multiToggle",
+    constraints: {
+        displayName: "Constraints",
+        type: "constraints",
         useInModel: true,
         editable: false,
-        defaultValue: fwk.Anchor.Default,
-        options: {
-            items: [
-                {field: "left", icon: "ico-prop_pin-left"},
-                {field: "top", icon: "ico-prop_pin-top"},
-                {field: "right", icon: "ico-prop_pin-right"},
-                {field: "bottom", icon: "ico-prop_pin-bottom"}
-            ],
-            size: 3 / 4
-        }
+        defaultValue: Constraints.Default
+        // options: {
+        //     items: [
+        //         {field: "left", icon: "ico-prop_pin-left"},
+        //         {field: "top", icon: "ico-prop_pin-top"},
+        //         {field: "right", icon: "ico-prop_pin-right"},
+        //         {field: "bottom", icon: "ico-prop_pin-bottom"}
+        //     ],
+        //     size: 3 / 4
+        // }
     },
     overflow: {
         defaultValue: Overflow.Visible
@@ -1855,11 +1865,15 @@ PropertyMetadata.registerForType(UIElement, {
         customizable: true
     },
     dashPattern: {
-        displayName: "Dash pattern",
-        type: "dashPattern",
-        defaultValue: null,
-        style: 1,
-        customizable: true
+        displayName: "@strokePattern",
+        type: "strokePattern",
+        defaultValue: 'solid',
+        options: {},
+        items: [
+            {value: 'solid'},
+            {value: 'dashed'},
+            {value: 'dotted'}
+        ],
     },
     clipMask: {
         displayName: "Use as mask",
@@ -1890,7 +1904,7 @@ PropertyMetadata.registerForType(UIElement, {
             },
             {
                 label: "Layout",
-                properties: ["x", "y", "width", "height", "anchor", "angle", "dockStyle", "horizontalAlignment", "verticalAlignment"]
+                properties: ["x", "y", "width", "height", "constraints", "angle", "dockStyle", "horizontalAlignment", "verticalAlignment"]
             },
             {
                 label: "Appearance",

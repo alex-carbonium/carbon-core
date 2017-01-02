@@ -137,11 +137,10 @@ class Circle extends Shape {
 
         context.save();
 
-        var dashPattern = this.props.dashPattern;
+        var dashPattern = this.dashPattern();
         if (dashPattern) {
             context.setLineDash(dashPattern);
         }
-
 
         this.drawPath(context, w, h);
 

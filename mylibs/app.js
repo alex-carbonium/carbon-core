@@ -1474,7 +1474,7 @@ PropertyMetadata.registerForType(App, {
         defaultValue: Brush.createFromColor("#B6B6B6")
     },
     defaultStroke: {
-        defaultValue: Brush.Empty
+        defaultValue: Brush.Black
     },
     defaultLayoutGridSettings: {
         defaultValue: {

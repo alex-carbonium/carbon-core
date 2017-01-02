@@ -44,7 +44,7 @@ PropertyMetadata.extend({[Types.DefaultShapeSettings]: {
     stroke: {
         displayName: "Stroke",
         type: "stroke",
-        defaultValue: Brush.Empty
+        defaultValue: Brush.Black
     },
 
     opacity: {
