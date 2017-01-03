@@ -5,6 +5,7 @@ import Phantom from "../Phantom";
 import Brush from "../Brush";
 import PropertyMetadata from "../PropertyMetadata";
 import UserSettings from "../../UserSettings";
+import Selection from "../SelectionModel";
 
 export default class InteractiveElement extends GroupContainer{
     constructor(element) {
@@ -13,7 +14,7 @@ export default class InteractiveElement extends GroupContainer{
         this._decorators = [];
         this._elements = [];
 
-        var elements = element instanceof CompositeElement ? element.children : [element];
+        var elements = element instanceof CompositeElement ? element.elements : [element];
 
         for (var i = 0; i < elements.length; i++){
             var e = elements[i];
@@ -55,6 +56,10 @@ export default class InteractiveElement extends GroupContainer{
 
     saveChanges(){
         this.showOriginal(true);
+    }
+
+    refreshSelection(){
+        Selection.refreshSelection();
     }
 
     detach(){

@@ -8,6 +8,7 @@ import UIElement from "./UIElement";
 import GroupArrangeStrategy from "./GroupArrangeStrategy";
 import Box from "./Box";
 import Rect from "../math/rect";
+import Phantom from "./Phantom";
 
 export default class CompositeElement extends UIElement{
     constructor(){
@@ -15,6 +16,7 @@ export default class CompositeElement extends UIElement{
 
         this._types = [];
         this.children = [];
+        this.elements = [];
 
         PropertyTracker.propertyChanged.bind(this, this._onPropsChanged);
     }
@@ -24,9 +26,8 @@ export default class CompositeElement extends UIElement{
             this._types.push(systemType);
         }
         element.enablePropsTracking();
-        this.children.push(element);
-
-        this.performArrange();
+        this.elements.push(element);
+        this.children.push(new Phantom(element, element.selectLayoutProps(true)));
     }
     remove(element){
         element.disablePropsTracking();
@@ -44,48 +45,33 @@ export default class CompositeElement extends UIElement{
                 elementIndex = i;
             }
         }
+        this.elements.splice(i, 1);
         this.children.splice(i, 1);
 
         if (canRemoveType){
             this._types.splice(this._types.indexOf(systemType), 1);
         }
-
-        this.performArrange();
     }
 
     performArrange(){
-        if (this.children.length > 1){
-            var xMax = Number.NEGATIVE_INFINITY;
-            var yMax = Number.NEGATIVE_INFINITY;
-            var xMin = Number.POSITIVE_INFINITY;
-            var yMin = Number.POSITIVE_INFINITY;
-
-            var items = this.children;
-            for (let i = 0, l = items.length; i < l; ++i) {
-                let child = items[i];
-
-                var bb = child.getBoundingBoxGlobal();
-                xMax = Math.max(xMax, bb.x + bb.width);
-                xMin = Math.min(xMin, bb.x);
-                yMax = Math.max(yMax, bb.y + bb.height);
-                yMin = Math.min(yMin, bb.y);
-            }
-            this.prepareAndSetProps({br: new Rect(xMin, yMin, xMax - xMin, yMax - yMin)});
+        if (this.elements.length > 1){
+            this.resetTransform();
+            GroupArrangeStrategy.arrange(this);
         }
     }
 
     elementAt(index){
-        return this.children[index];
+        return this.elements[index];
     }
     singleOrDefault(){
-        return this.count() === 1 ? this.children[0] : null;
+        return this.count() === 1 ? this.elements[0] : null;
     }
     singleOrSelf(){
-        return this.count() === 1 ? this.children[0] : this;
+        return this.count() === 1 ? this.elements[0] : this;
     }
     has(element){
-        for (var i = 0, j = this.children.length; i < j; ++i){
-            if (this.children[i] === element){
+        for (var i = 0, j = this.elements.length; i < j; ++i){
+            if (this.elements[i] === element){
                 return true;
             }
         }
@@ -95,10 +81,11 @@ export default class CompositeElement extends UIElement{
         this.each(x => x.disablePropsTracking());
         this._types = [];
         //do not clear, selection model stores this by reference
+        this.elements = [];
         this.children = [];
     }
     count(){
-        return this.children.length;
+        return this.elements.length;
     }
 
     propsUpdated(newProps, oldProps, mode){
@@ -106,8 +93,8 @@ export default class CompositeElement extends UIElement{
 
         //not sure if it is safe to propagate other properties, so taking only what's needed for now
         if (newProps.visible !== oldProps.visible){
-            for (var i = 0; i < this.children.length; i++){
-                this.children[i].setProps({visible: newProps.visible}, mode);
+            for (var i = 0; i < this.elements.length; i++){
+                this.elements[i].setProps({visible: newProps.visible}, mode);
             }
         }
     }
@@ -119,7 +106,7 @@ export default class CompositeElement extends UIElement{
         }
 
         for (var i = count - 1; i >= 0; i--){
-            var el = this.children[i];
+            var el = this.elements[i];
             if (el.hitTest(point, scale)){
                 return true;
             }
@@ -133,13 +120,13 @@ export default class CompositeElement extends UIElement{
         return false;
     }
     each(callback){
-        this.children.forEach(callback);
+        this.elements.forEach(callback);
     }
     map(callback){
-        return this.children.map(callback);
+        return this.elements.map(callback);
     }
     first(callback){
-        return this.children[0];
+        return this.elements[0];
     }
     resizeDimensions(){
         return 0;
@@ -176,7 +163,7 @@ export default class CompositeElement extends UIElement{
     }
     displayName(){
         if (this.allHaveSameType()){
-            return this.children[0].displayName();
+            return this.elements[0].displayName();
         }
         return "";
     }
@@ -202,8 +189,8 @@ export default class CompositeElement extends UIElement{
     }
     parents(){
         var parents = [];
-        for (var i = 0; i < this.children.length; i++){
-            var parent = this.children[i].parent();
+        for (var i = 0; i < this.elements.length; i++){
+            var parent = this.elements[i].parent();
             if (parents.indexOf(parent) === -1){
                 parents.push(parent);
             }
@@ -212,8 +199,8 @@ export default class CompositeElement extends UIElement{
     }
     prepareCommonProps(changes){
         var result = [];
-        for (var i = 0; i < this.children.length; i++){
-            var element = this.children[i];
+        for (var i = 0; i < this.elements.length; i++){
+            var element = this.elements[i];
             var elementChanges = Object.assign({}, changes);
             for(var p in elementChanges){
                 if(p === 'fill' || p === 'stroke'){
@@ -229,8 +216,8 @@ export default class CompositeElement extends UIElement{
     }
     selectCommonProps(names){
         var result = [];
-        for (var i = 0; i < this.children.length; i++){
-            var element = this.children[i];
+        for (var i = 0; i < this.elements.length; i++){
+            var element = this.elements[i];
             result.push(element.selectProps(names));
         }
         return result;
@@ -246,8 +233,8 @@ export default class CompositeElement extends UIElement{
         if (this.count() === 1){
             var type = this._types[0];
             var metadata = PropertyMetadata.findAll(type);
-            this.commonProps = this.children[0].props;
-            return metadata ? metadata.groups(this.children[0]) : [];
+            this.commonProps = this.elements[0].props;
+            return metadata ? metadata.groups(this.elements[0]) : [];
         }
 
         var commonGroups = [];
@@ -335,7 +322,7 @@ export default class CompositeElement extends UIElement{
 
         if (commonProps.length){
             commonGroups.splice(0, 0, {
-                label: this.allHaveSameType() ? this.children[0].displayType() : "Common",
+                label: this.allHaveSameType() ? this.elements[0].displayType() : "Common",
                 properties: commonProps
             });
         }
@@ -346,7 +333,7 @@ export default class CompositeElement extends UIElement{
     }
     setCommonProps(groups){
         var propNames = ["name", "locked"];
-        var sample = this.children[0];
+        var sample = this.elements[0];
         var props = {
             name: sample.props.name,
             locked: sample.props.locked
@@ -360,8 +347,8 @@ export default class CompositeElement extends UIElement{
                 propNames.push(propertyName);
             }
         }
-        for (var i = 1; i < this.children.length; i++){
-            var element = this.children[i];
+        for (var i = 1; i < this.elements.length; i++){
+            var element = this.elements[i];
             var changes = element.selectProps(propNames);
             leaveCommonProps(props, changes);
         }
@@ -421,10 +408,6 @@ export default class CompositeElement extends UIElement{
     dispose(){
         super.dispose.apply(this, arguments);
         PropertyTracker.propertyChanged.unbind(this, this._onPropsChanged);
-    }
-
-    get elements(){
-        return this.children;
     }
 
     padding(){

@@ -95,6 +95,8 @@ class DraggingElement extends InteractiveElement {
 
         ArrangeStrategy.arrangeRoots(this.elements.concat(oldParents));
 
+        this.refreshSelection();
+
         return elements;
     }
 

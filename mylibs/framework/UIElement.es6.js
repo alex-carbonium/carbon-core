@@ -211,7 +211,7 @@ var UIElement = klass(DataNode, {
     },
 
     getRotation: function() {
-        return this.dm().rotation;
+        return -this.dm().rotation;
     },
     applyRotation: function(angle, o, withReset){
         if (withReset){
@@ -555,8 +555,8 @@ var UIElement = klass(DataNode, {
     },
     getHitTestBox: function (scale, includeMargin = false, includeBorder = true) {
         var rect = this.getBoundaryRect(includeMargin);
-        var goodScaleW = width * scale > 10;
-        var goodScaleH = height * scale > 10;
+        var goodScaleW = rect.width * scale > 10;
+        var goodScaleH = rect.height * scale > 10;
         if (!includeBorder && goodScaleW && goodScaleW){
             return rect;
         }
@@ -680,33 +680,6 @@ var UIElement = klass(DataNode, {
         context.save();
         context.globalAlpha = context.globalAlpha * this.opacity();
 
-        // Math.seedrandom(this._seedNumber);
-        // if (!this.crazySupported()) {
-        //     fwk.CrazyScope.push(false);
-        // }
-
-        // var customScale = this.customScale();
-        //
-        // var scaleX, scaleY;
-        // scaleX = scaleY = environment.view.scale();
-        // if (customScale) {
-        //     scaleX = 1 / customScale.x;
-        // }
-        // else if (this.scalableX()) {
-        //     scaleX = 1;
-        // }
-        // if (customScale) {
-        //     scaleY = 1 / customScale.y;
-        // }
-        // else if (this.scalableY()) {
-        //     scaleY = 1;
-        // }
-        //
-        // if (scaleX !== 1 || scaleY !== 1) {
-        //     context.scale(1 / scaleX, 1 / scaleY);
-        //     context.translate((scaleX - 1), (scaleY - 1));
-        // }
-
         this.applyViewMatrix(context, environment);
 
         this.drawSelf(context, w, h, environment);
@@ -715,22 +688,10 @@ var UIElement = klass(DataNode, {
 
         this.drawDecorators(context, w, h, environment);
 
-        // if (!this.crazySupported()) {
-        //     fwk.CrazyScope.pop();
-        // }
-
         //console.log(this.displayName() + " : " + this.stopwatch.getElapsedTime());
     },
     drawSelf: function (context, w, h) {
-        context.save();
-        context.rectPath(0, 0, w, h, true);
-        fwk.Brush.fill(this.fill(), context, 0, 0, w, h);
-        var dash = this.dashPattern();
-        if (dash) {
-            context.setLineDash(dash);
-        }
-        fwk.Brush.stroke(this.stroke(), context, 0, 0, w, h);
-        context.restore();
+
     },
     drawDecorators: function(context, w, h, environment){
         if (this.decorators) {

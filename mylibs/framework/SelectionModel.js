@@ -165,10 +165,16 @@ class SelectionModel {
             }
         }
 
+        this.performArrange();
+
         this._selectCompositeElement.selected(false);
         if (canSelect) {
             this._selectCompositeElement.selected(true);
         }
+    }
+
+    performArrange(){
+        this._selectCompositeElement.performArrange();
     }
 
     getSelection() {
