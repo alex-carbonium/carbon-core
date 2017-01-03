@@ -2,6 +2,7 @@
 import PropertyMetadata from "framework/PropertyMetadata";
 import Invalidate from "framework/Invalidate";
 import {Types} from "./Defs";
+import Rect from "../math/rect";
 
 var fwk = sketch.framework;
 
@@ -9,39 +10,37 @@ class SelectFrame extends Rectangle {
     constructor(onselect) {
         super();
 
-        var startX, startY;
-        var that = this;
+        this._startX = 0;
+        this._startY = 0;
 
         this.stroke(fwk.Brush.Empty);
         this.fill(fwk.Brush.createFromColor('rgba(150,180, 250, 0.3)'));
 
         this.onselect = onselect;
+    }
 
-        this.init = function (event) {
-            startX = event.x;
-            startY = event.y;
-            this.resize({x: event.x, y: event.y, width: 0, height: 0});
-            event.handled = true;
-        };
-        this.update = function (event) {
-            var rect = {
-                x: Math.min(startX, event.x), y: Math.min(startY, event.y),
-                width: Math.abs(startX - event.x), height: Math.abs(startY - event.y)
-            };
-            this.resize(rect);
-            event.handled = true;
-            Invalidate.requestUpperOnly();
+    init(event){
+        this._startX = event.x;
+        this._startY = event.y;
+    }
 
-            return rect;
-        };
-        this.complete = function (event) {
-            event.handled = true;
-            var rect = this.getBoundaryRect();
-            if (!rect.width && !rect.height) {
-                return;
-            }
-            this.onselect.raise(rect);
-        };
+    update(event){
+        var br = new Rect(
+            0, 0,
+            Math.abs(this._startX - event.x), Math.abs(this._startY - event.y)
+        );
+        var t = {x: Math.min(this._startX, event.x), y: Math.min(this._startY, event.y)};
+        this.applyTranslation(t, true);
+        this.prepareAndSetProps({br});
+        return this.getBoundingBox();
+    }
+    complete(event){
+        event.handled = true;
+        var rect = this.getBoundingBox();
+        if (!rect.width && !rect.height) {
+            return;
+        }
+        this.onselect.raise(rect);
     }
 
     hitTest() {

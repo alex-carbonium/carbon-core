@@ -234,6 +234,13 @@ export function isValueGreaterThanEqual( value,  minimum)
     return value >= minimum;
 }
 
+export function isValueGreaterThanEqualWithOptions( value,  minimum, threshold)
+{
+    if ( areValuesCloseWithOptions(value, minimum, threshold) )
+        return true;
+    return value >= minimum;
+}
+
 export function isValueLessThanEqualWithOptions( value,  maximum,  threshold)
 {
     if ( areValuesCloseWithOptions(value, maximum, threshold) )

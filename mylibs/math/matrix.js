@@ -1,4 +1,5 @@
 import Point from "./point";
+import LineSegment from "./lineSegment";
 
 /**
  * @name Matrix
@@ -465,6 +466,20 @@ class Matrix {
             py = Math.round(py);
         }
         return new Point(px, py);
+    }
+
+    transformRect(rect){
+        var p1 = this.transformPoint2(rect.x, rect.y);
+        var p2 = this.transformPoint2(rect.x + rect.width, rect.y);
+        var p3 = this.transformPoint2(rect.x + rect.width, rect.y + rect.height);
+        var p4 = this.transformPoint2(rect.x, rect.y + rect.height);
+
+        return [
+            new LineSegment(p1, p2),
+            new LineSegment(p2, p3),
+            new LineSegment(p3, p4),
+            new LineSegment(p4, p1)
+        ];
     }
 
     /**

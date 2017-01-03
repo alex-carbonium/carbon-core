@@ -1,4 +1,5 @@
 import Point from "./point";
+import LineSegment from "./lineSegment";
 
 export default class Rect{
     constructor(x, y, w, h){
@@ -24,6 +25,29 @@ export default class Rect{
             return Point.Zero;
         }
         return new Point(this.x, this.y);
+    }
+    topRight(){
+        return new Point(this.x + this.width, this.y);
+    }
+    bottomRight(){
+        return new Point(this.x + this.width, this.y + this.height);
+    }
+    bottomLeft(){
+        return new Point(this.x, this.y + this.height);
+    }
+
+    segments(){
+        var p1 = this.topLeft();
+        var p2 = this.topRight();
+        var p3 = this.bottomRight();
+        var p4 = this.bottomLeft();
+
+        return [
+            new LineSegment(p1, p2),
+            new LineSegment(p2, p3),
+            new LineSegment(p3, p4),
+            new LineSegment(p4, p1)
+        ]
     }
 
     withSize(w, h){

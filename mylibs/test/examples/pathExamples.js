@@ -5,14 +5,14 @@ import Brush from "../../framework/Brush";
 import Selection from "../../framework/SelectionModel";
 import {StrokePosition} from "../../framework/Defs";
 
-registerExample("path: simple", function(app){
+registerExample("path: simple", function(app, artboard){
     var rect1 = new Rectangle();
     rect1.setProps({width: 100, height: 100, name: 'rect 1'});
     rect1.applyRotation(20, rect1.center());
     rect1.applyTranslation({x: 200, y: 300});
     var path1 = rect1.convertToPath();
     path1.setProps({stroke: Brush.createFromColor("red", 1, StrokePosition.Center)});
-    app.activePage.add(path1);
+    artboard.add(path1);
 
     Selection.makeSelection([path1]);
 

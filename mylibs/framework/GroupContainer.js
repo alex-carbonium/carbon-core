@@ -20,7 +20,7 @@ export default class GroupContainer extends Container {
         if (!this.lockedGroup()){
             context.save();
             context.strokeStyle = UserSettings.group.active_stroke;
-            this.drawBoundaryPath(context, this.globalViewMatrix(), w, h);
+            this.drawBoundaryPath(context, this.globalViewMatrix());
             context.stroke();
             context.restore();
         }

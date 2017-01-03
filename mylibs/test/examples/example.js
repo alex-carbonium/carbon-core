@@ -67,7 +67,7 @@ function runExample(name){
     app.raiseLoaded();
 
     var fn = examples[name];
-    fn(app);
+    fn(app, page.getActiveArtboard());
 
     history.replaceState({}, document.title, location.pathname + "?" + encodeURIComponent(name));
 }

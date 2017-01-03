@@ -29,7 +29,7 @@ var SelectCompositeFrame = {
         frame.element.each(function(e){
             context.save();
             var matrix = e.globalViewMatrix().prependedWithScale(scale, scale);
-            e.drawBoundaryPath(context, matrix, e.width(), e.height());
+            e.drawBoundaryPath(context, matrix);
             context.stroke();
             context.restore();
         });

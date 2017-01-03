@@ -1,5 +1,6 @@
 import Line from "framework/Line";
 import Rectangle from "framework/Rectangle";
+import UIElement from "framework/UIElement";
 import Brush from "framework/Brush";
 import SharedColors from "../ui/SharedColors";
 import Selection from "framework/SelectionModel"
@@ -9,6 +10,7 @@ import ExtensionBase from "./ExtensionBase";
 import DesignerView from "framework/DesignerView";
 import Layer from "framework/Layer";
 import Container from "../framework/Container";
+import Environment from "../environment";
 
 var fwk = sketch.framework;
 var HighlightBrush = Brush.createFromColor(SharedColors.Highlight);
@@ -84,7 +86,26 @@ class DropLine extends Line {
     }
 }
 
-class SelectionRect extends Rectangle{
+class SelectionRect extends UIElement{
+    constructor(element){
+        super();
+        this._element = element;
+    }
+
+    drawSelf(context){
+        var scale = Environment.view.scale();
+
+        context.save();
+        context.scale(1/scale, 1/scale);
+        context.setLineDash([1, 1]);
+
+        var matrix = this._element.globalViewMatrix().prependedWithScale(scale, scale);
+        this._element.drawBoundaryPath(context, matrix);
+        Brush.stroke(HighlightBrush, context);
+
+        context.restore();
+    }
+
     hitVisible(){
         return false;
     }
@@ -185,15 +206,7 @@ var onElementSelected = function () {
 };
 
 function onSelectionFrame(rect) {
-    var scale = this.view.scale();
-    this._selection = map(this.app.activePage.getElementsInRect(rect), function (element) {
-        var rect = element.getBoundaryRectGlobal();
-        return {
-            id: element.id(),
-            rect: {x: rect.x, y: rect.y, width: ~~(rect.width * scale), height: ~~(rect.height * scale)},
-            angle: element.angle()
-        };
-    });
+    this._selection = this.app.activePage.getElementsInRect(rect);
 
     updateSelectionRects.call(this);
 }
@@ -205,32 +218,17 @@ function updateSelectionRects() {
     }
 
     for (var i = 0; i < this._selection.length; ++i) {
-        var selection = this._selection[i];
-        var controlData = this._selectionControls[selection.id];
+        var element = this._selection[i];
+        var controlData = this._selectionControls[element.id()];
         if (controlData) {
             controlData.iteration = this._selectionIteration;
-            controlData.control.resize(selection.rect);
         } else {
-            var control = new SelectionRect();
-            control.setProps({
-                stroke: HighlightBrush,
-                fill: Brush.Empty,
-                width: selection.rect.width,
-                height: selection.rect.height,
-                x: selection.rect.x,
-                y: selection.rect.y,
-                angle: selection.angle
-            });
+            var control = new SelectionRect(element);
 
-            control.crazySupported(false);
-            control.scalableX(false);
-            control.scalableY(false);
-            control.dashPattern([1, 1]);
-
-            this._selectionControls[selection.id] = {
+            this._selectionControls[element.id()] = {
                 iteration: this._selectionIteration,
                 control: control
-            }
+            };
 
             this.view.layer3.add(control);
         }
@@ -395,7 +393,7 @@ export default class DropVisualization extends ExtensionBase {
             element.applyViewMatrix(context);
             element.drawPath(context, element.width(), element.height());
         } else {
-            element.drawBoundaryPath(context, element.globalViewMatrix(), element.width(), element.height());
+            element.drawBoundaryPath(context, element.globalViewMatrix());
         }
 
         var mutltiplier = 3 / view.scale();

@@ -16,7 +16,7 @@ import ElementDelete from "commands/ElementDelete";
 import ElementMove from "commands/ElementMove";
 import Matrix from "../math/matrix";
 import Point from "../math/point";
-import {rotatePointByDegree} from "../math/math";
+import {rotatePointByDegree, isRectInRect, areRectsIntersecting} from "../math/math";
 import stopwatch from "Stopwatch";
 import ResizeDimension from "framework/ResizeDimension";
 import {
@@ -41,6 +41,7 @@ import {createUUID, deepEquals} from "../util";
 import Intl from "../Intl";
 import UserSettings from "../UserSettings";
 import Rect from "../math/rect";
+import LineSegment from "../math/lineSegment";
 
 require("migrations/All");
 
@@ -592,6 +593,40 @@ var UIElement = klass(DataNode, {
 
         return point.x >= rect.x && point.x < rect.x + rect.width && point.y >= rect.y && point.y < rect.y + rect.height;
     },
+    hitTestGlobalRect: function(rect){
+        if (!this.hitVisible()) {
+            return false;
+        }
+
+        var bb = this.getBoundingBoxGlobal();
+        if (!areRectsIntersecting(bb, rect)){
+            return false;
+        }
+
+        var m = this.globalViewMatrix();
+        if (m.isTranslatedOnly()){
+            return true;
+        }
+
+        if (isRectInRect(bb, rect)){
+            return true;
+        }
+
+        var br = this.getBoundaryRect();
+        var segments1 = m.transformRect(br);
+        var segments2 = rect.segments();
+
+        for (var i = 0; i < segments1.length; i++){
+            var s1 = segments1[i];
+            for (var j = 0; j < segments2.length; j++){
+                var s2 = segments2[j];
+                if (s1.intersects(s2)){
+                    return true;
+                }
+            }
+        }
+        return false;
+    },
     // pageLink: function (value) {
     //     var action = this.action();
     //     if (action.type === 0/*PageLink*/) {
@@ -706,7 +741,7 @@ var UIElement = klass(DataNode, {
             context.restore();
         }
     },
-    drawBoundaryPath: function(context, matrix, w, h){
+    drawBoundaryPath: function(context, matrix){
         var r = this.getBoundaryRect();
 
         context.beginPath();

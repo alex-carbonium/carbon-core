@@ -9,25 +9,6 @@ import EventHelper from "./EventHelper";
 import Brush from "./Brush";
 import NameProvider from "ui/NameProvider";
 
-function getElementsInFrameHit(element, rect, scale) {
-    if (!element.canSelect() || element.locked()) {
-        return false;
-    }
-
-    var parent = element.parent();
-
-    var boundingRect = element.getBoundaryRect();
-    if (parent.canMultiselectChildren) {
-        boundingRect = element.getBoundaryRectGlobal();
-    }
-
-    if (!element.hitVisible()) {
-        return false;
-    }
-
-    return areRectsIntersecting(rect, boundingRect);
-}
-
 function findNextPageName() {
     var maxId = 0;
     each(App.Current.pages, function (page) {
@@ -80,32 +61,23 @@ class Page extends Layer {
 
     getElementsInRect(rect) {
         var selection = [];
-        var scale = this.scale();
-        this.getChildren().forEach(function (element) {
-            if (element.multiselectTransparent === true) {
-                element.applyVisitor(child => {
-                    var found = false;
-                    if (child.multiselectTransparent) {
-                        child.getChildren && child.getChildren().forEach((e) => {
-                            if (
-                                !e.multiselectTransparent && getElementsInFrameHit(e, rect, scale)
-                            ) {
-                                selection.push(e);
-                                found = true;
-                            }
-                        })
-                        ;
-                        return !found && child.multiselectTransparent === true;
-                    }
-                })
-                ;
-            }
-            else if (getElementsInFrameHit(element, rect, scale)) {
-                selection.push(element);
-            }
-        });
+
+        this._collectDescendantsInRect(this, rect, selection);
 
         return selection;
+    }
+    _collectDescendantsInRect(container, rect, selection){
+        for (var i = 0; i < container.children.length; i++){
+            var element = container.children[i];
+            if (element.hitTestGlobalRect(rect)){
+                if (!element.multiselectTransparent){
+                    selection.push(element);
+                }
+                else{
+                    this._collectDescendantsInRect(element, rect, selection);
+                }
+            }
+        }
     }
 
     dropToPage(x, y, element) {

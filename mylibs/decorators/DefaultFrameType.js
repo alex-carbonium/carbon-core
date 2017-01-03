@@ -67,7 +67,7 @@ export default {
                     context.save();
                     context.strokeStyle = this.strokeStyle;
                     context.lineWidth = 1;
-                    frame.element.drawBoundaryPath(context, matrix, frame.element.width(), frame.element.height());
+                    frame.element.drawBoundaryPath(context, matrix);
                     context.stroke();
                     context.restore();
                 }
