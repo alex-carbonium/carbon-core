@@ -402,6 +402,9 @@ class App extends DataNode {
         this.loadedFromJson = fwk.EventHelper.createEvent();
         this.savedToJson = fwk.EventHelper.createEvent();
 
+
+        this.changeToolboxPage = fwk.EventHelper.createEvent();
+
         this.loaded = new Promise(function (resolve, reject) {
             that.loadedResolve = resolve;
         });

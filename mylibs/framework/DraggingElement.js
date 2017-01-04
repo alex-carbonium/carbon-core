@@ -112,7 +112,11 @@ function dropElementOn(event, newParent, target) {
             //         newParent.add(target, ChangeMode.Root);
             //     }
             // } else {
+            if(index !== undefined) {
                 newParent.insert(target, index);
+            } else {
+                newParent.add(target);
+            }
             // }
         } else {
             var props = {x: pos.x, y: pos.y, width: this.width(), height: this.height()};
@@ -128,7 +132,11 @@ function dropElementOn(event, newParent, target) {
             }
 
             if (target.parent() !== newParent) {
-                newParent.insert(target, index);
+                if(index !== undefined) {
+                    newParent.insert(target, index);
+                } else {
+                    newParent.add(target);
+                }
             }
 
             //hack: shapes and frames resize children themselves, think how to do it better

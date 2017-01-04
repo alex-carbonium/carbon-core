@@ -129,7 +129,7 @@ export default class ToolboxConfiguration {
     }
 
     static getConfigForPage(page){
-        if(page.props.toolboxConfigUrl){
+        if(page.props.toolboxConfigUrl && page.props.toolboxConfigUrl !== '#'){
             var config = _configCache[page.props.toolboxConfigUrl];
             if(config){
                 return Deferred.createResolvedPromise(config);

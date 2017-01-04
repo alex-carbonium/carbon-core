@@ -10,13 +10,13 @@ export default class ArtboardTemplateControl extends UIElement {
         super();
     }
 
-    unwrapToParent(){
+    unwrapToParent() {
         var parent = this.parent();
         var children = this._container.children;
         var x = this.x();
         var y = this.y();
         var selection = [];
-        for(var i = 0; i < children.length; ++i){
+        for (var i = 0; i < children.length; ++i) {
             var child = children[i].clone();
             parent.add(child);
             child.initId();
@@ -48,7 +48,7 @@ export default class ArtboardTemplateControl extends UIElement {
             props.height = artboard.height();
         }
         this.setProps(props);
-        this.setProps({_unwrapContent:artboard.props.insertAsContent});
+        this.setProps({_unwrapContent: artboard.props.insertAsContent});
 
         this._cloneFromArtboard(artboard);
 
@@ -62,8 +62,8 @@ export default class ArtboardTemplateControl extends UIElement {
 
         this.runtimeProps.artboardVersion = artboard.runtimeProps.version;
 
-        if(!this.props.width || !this.props.height){
-            this.setProps({width:this._artboard.width(), height:this._artboard.height()});
+        if (!this.props.width || !this.props.height) {
+            this.setProps({width: this._artboard.width(), height: this._artboard.height()});
         }
 
         if (this._container && (this._allowHResize || this._allowVResize)) {
@@ -71,7 +71,10 @@ export default class ArtboardTemplateControl extends UIElement {
                 width: this._allowHResize ? this.width() : artboard.width(),
                 height: this._allowVResize ? this.height() : artboard.height()
             }, ChangeMode.Self);
-            this._container.arrange({oldValue: artboard.getBoundaryRect(), newValue: this.getBoundaryRect()}, null, ChangeMode.Self);
+            this._container.arrange({
+                oldValue: artboard.getBoundaryRect(),
+                newValue: this.getBoundaryRect()
+            }, null, ChangeMode.Self);
         }
     }
 
@@ -104,8 +107,8 @@ export default class ArtboardTemplateControl extends UIElement {
         this._container && this._container.updateViewMatrix();
     }
 
-    displayType(){
-        if(this._artboard){
+    displayType() {
+        if (this._artboard) {
             return this._artboard.name() + ' {index}';
         }
 
@@ -188,8 +191,9 @@ export default class ArtboardTemplateControl extends UIElement {
         var defaultState = this._artboard._recorder.getStateById('default');
 
         this._container.setProps({
-            width: this._artboard.width(),
-            height: this._artboard.height()}
+                width: this._artboard.width(),
+                height: this._artboard.height()
+            }
             , ChangeMode.Self);
 
         PropertyStateRecorder.applyState(this._container, defaultState);
@@ -203,7 +207,10 @@ export default class ArtboardTemplateControl extends UIElement {
             height: this.height()
         }, ChangeMode.Self);
 
-        this._container.arrange({oldValue: this._artboard.getBoundaryRect(), newValue: this.getBoundaryRect()}, null, ChangeMode.Self);
+        this._container.arrange({
+            oldValue: this._artboard.getBoundaryRect(),
+            newValue: this.getBoundaryRect()
+        }, null, ChangeMode.Self);
     }
 
     _updateCustomProperties() {
@@ -220,6 +227,10 @@ export default class ArtboardTemplateControl extends UIElement {
                 element.setProps({[prop.propertyName]: props[propName]}, ChangeMode.Self);
             }
         }
+    }
+
+    canBeAccepted(element) {
+        return element.primitiveRoot().id() !== this.source().artboardId;
     }
 
     prepareProps(props) {
@@ -243,11 +254,26 @@ export default class ArtboardTemplateControl extends UIElement {
         return this.props.source;
     }
 
-    draw() {
+    draw(context) {
         if (this._artboard && this.runtimeProps.artboardVersion !== this._artboard.runtimeProps.version) {
             this._initFromArtboard();
         }
         super.draw.apply(this, arguments);
+    }
+
+    drawSelf(context, w, h) {
+        try {
+            super.drawSelf.apply(this, arguments);
+        } catch (e) {
+            context.save();
+            context.strokeStyle='red';
+            context.linePath(0, 0, 0 + w, 0 + h);
+            context.stroke();
+            context.linePath(0, 0 + h, 0 + w, 0);
+            context.stroke();
+            context.restore();
+
+        }
     }
 
     innerChildren() {
