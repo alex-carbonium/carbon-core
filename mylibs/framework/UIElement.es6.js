@@ -165,8 +165,7 @@ var UIElement = klass(DataNode, {
     propsUpdated: function (newProps, oldProps) {
         if (newProps.hasOwnProperty("m")
             || newProps.hasOwnProperty("stroke")
-            || newProps.hasOwnProperty("width")
-            || newProps.hasOwnProperty("height")
+            || newProps.hasOwnProperty("br")
         ) {
             this.resetGlobalViewCache();
         }
@@ -213,11 +212,11 @@ var UIElement = klass(DataNode, {
     getRotation: function() {
         return -this.dm().rotation;
     },
-    applyRotation: function(angle, o, withReset){
+    applyRotation: function(angle, o, withReset, mode){
         if (withReset){
             this.saveOrResetLayoutProps();
         }
-        this.applyTransform(Matrix.create().rotate(-angle, o.x, o.y));
+        this.applyTransform(Matrix.create().rotate(-angle, o.x, o.y), false, mode);
     },
     isRotated: function(){
         return this.getRotation() % 360 !== 0;
@@ -285,11 +284,11 @@ var UIElement = klass(DataNode, {
         this.prepareAndSetProps(newProps);
     },
 
-    applyTransform: function(matrix, append) {
-        this.prepareAndSetProps({m: append ? this.props.m.appended(matrix) : this.props.m.prepended(matrix)});
+    applyTransform: function(matrix, append, mode) {
+        this.prepareAndSetProps({m: append ? this.props.m.appended(matrix) : this.props.m.prepended(matrix)}, mode);
     },
-    setTransform: function(matrix) {
-        this.setProps({m: matrix});
+    setTransform: function(matrix, mode) {
+        this.setProps({m: matrix}, mode);
     },
     resetTransform: function() {
         this.setProps({m: Matrix.Identity});
@@ -469,67 +468,36 @@ var UIElement = klass(DataNode, {
 
     getBoundingBox: function (includeMargin = false) {
         var rect = this.getBoundaryRect(includeMargin);
-        var width = rect.width || 0;
-        var height = rect.height || 0;
-        var matrix = this.viewMatrix();
-        var margin = includeMargin ? this.margin() : Box.Default;
-        var x = rect.x;
-        var y = rect.y;
-
-        var p1 = matrix.transformPoint2(x - margin.left, y - margin.top);
-        var p2 = matrix.transformPoint2(x + width + margin.right, y - margin.top);
-        var p3 = matrix.transformPoint2(x + width + margin.right, y + height + margin.bottom);
-        var p4 = matrix.transformPoint2(x - margin.left, y + height + margin.bottom);
-
-        var xs = [p1.x, p2.x, p3.x, p4.x];
-        var ys = [p1.y, p2.y, p3.y, p4.y];
-        var l = sketch.util.min(xs);
-        var r = sketch.util.max(xs);
-        var t = sketch.util.min(ys);
-        var b = sketch.util.max(ys);
-
-        return new Rect(l, t, r - l, b - t);
+        return this.transformRect(rect, this.viewMatrix());
     },
     getBoundingBoxGlobal: function (includeMargin = false) {
         if (this.runtimeProps.globalClippingBox) {
             return this.runtimeProps.globalClippingBox;
         }
 
-        var margin = includeMargin ? this.margin() : Box.Default;
-        var l = 0;
-        var r = 0;
-        var t = 0;
-        var b = 0;
-        if (includeMargin) {
-            l = Math.max(margin.left, border);
-            t = Math.max(margin.top, border);
-            r = Math.max(margin.right, border);
-            b = Math.max(margin.bottom, border);
-        }
-
         var rect = this.getBoundaryRect(includeMargin);
-        var x = rect.x;
-        var y = rect.y;
-        var width = rect.width || 0;
-        var height = rect.height || 0;
-        var matrix = this.globalViewMatrix();
-
-        var p1 = matrix.transformPoint2(x - l, y - t);
-        var p2 = matrix.transformPoint2(x + width + r, y - t);
-        var p3 = matrix.transformPoint2(x + width + r, y + height + b);
-        var p4 = matrix.transformPoint2(x - l, y + height + b);
-
-        var xs = [p1.x, p2.x, p3.x, p4.x];
-        var ys = [p1.y, p2.y, p3.y, p4.y];
-        l = sketch.util.min(xs);
-        r = sketch.util.max(xs);
-        t = sketch.util.min(ys);
-        b = sketch.util.max(ys);
-
-        var bb = new Rect(l, t, r - l, b - t);
+        var bb = this.transformRect(rect, this.globalViewMatrix());
         this.runtimeProps.globalClippingBox = bb;
         return bb;
     },
+    transformRect: function(rect, matrix){
+        if (matrix.isTranslatedOnly()){
+            return rect.translate(matrix.tx, matrix.ty);
+        }
+
+        var p1 = matrix.transformPoint2(rect.x, rect.y);
+        var p2 = matrix.transformPoint2(rect.x + rect.width, rect.y);
+        var p3 = matrix.transformPoint2(rect.x + rect.width, rect.y + rect.height);
+        var p4 = matrix.transformPoint2(rect.x, rect.y + rect.height);
+
+        var l = Math.min(p1.x, p2.x, p3.x, p4.x);
+        var r = Math.max(p1.x, p2.x, p3.x, p4.x);
+        var t = Math.min(p1.y, p2.y, p3.y, p4.y);
+        var b = Math.max(p1.y, p2.y, p3.y, p4.y);
+
+        return new Rect(l, t, r - l, b - t);
+    },
+
     getMaxOuterBorder: function () {
         if (!this.stroke()) {
             return 0;

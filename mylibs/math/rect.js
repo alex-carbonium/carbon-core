@@ -16,6 +16,25 @@ export default class Rect{
     expand(d){
         return new Rect(this.x - d, this.y - d, this.width + 2*d, this.height + 2*d);
     }
+    translate(dx, dy){
+        if (dx === 0 && dy === 0){
+            return this;
+        }
+        return new Rect(this.x + dx, this.y + dy, this.width, this.height);
+    }
+
+    combineMutable(rect){
+        var r = this.x + this.width;
+        var b = this.y + this.height;
+        this.x = Math.min(this.x, rect.x);
+        this.y = Math.min(this.y, rect.y);
+        this.width = Math.max(r, rect.x + rect.width) - this.x;
+        this.height = Math.max(b, rect.y + rect.height) - this.y;
+    }
+    setPositionMutable(pos){
+        this.x = pos.x;
+        this.y = pos.y;
+    }
 
     center(){
         return new Point(this.x + this.width/2, this.y + this.height/2);
@@ -52,6 +71,12 @@ export default class Rect{
 
     withSize(w, h){
         return new Rect(this.x, this.y, w, h);
+    }
+    withPosition(x, y){
+        if (x === this.x && y === this.y){
+            return this;
+        }
+        return new Rect(x, y, this.width, this.height);
     }
 
     static fromObject(obj){

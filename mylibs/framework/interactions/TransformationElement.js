@@ -22,8 +22,8 @@ export default class TransformationElement extends InteractiveElement{
         this._lastScaling = {s, o, sameDirection};
     }
 
-    applyRotation(angle, o, withReset){
-        super.applyRotation(angle, o, withReset);
+    applyRotation(angle, o, withReset, mode){
+        super.applyRotation(angle, o, withReset, mode);
         this._lastRotation = {angle, o};
     }
 

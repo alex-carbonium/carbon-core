@@ -1229,13 +1229,13 @@ class Path extends Shape {
     }
 
     getBoundingBox(){
-        if (!this.runtimeProps.boundingBox){
+        if (!this.runtimeProps.bb){
             var graph = new BezierGraph();
             graph.initWithBezierPath(this, this.viewMatrix());
-            this.runtimeProps.boundingBox = Rect.fromObject(graph.bounds);
+            this.runtimeProps.bb = Rect.fromObject(graph.bounds);
         }
 
-        return this.runtimeProps.boundingBox;
+        return this.runtimeProps.bb;
     }
 
     getGlobalBoundingBox() {
@@ -1250,29 +1250,10 @@ class Path extends Shape {
             return;
         }
 
-        delete this._graph;
-        if (oldBoundingBox){
-            delete this.runtimeProps.boundingBox;
-        }
-        var box = this.getBoundingBox();
+        var graph = new BezierGraph();
+        graph.initWithBezierPath(this, Matrix.Identity);
 
-        var props = {
-            width: box.width || 1,
-            height: box.height || 1
-        };
-
-        if (oldBoundingBox){
-            var dx = box.x - oldBoundingBox.x;
-            var dy = box.y - oldBoundingBox.y;
-            if (dx !== 0 || dy !== 0){
-                moveAllPoints.call(this, dx, dy);
-                props.m = this.props.m.prepended(Matrix.create().translate(dx, dy));
-            }
-        }
-
-        this._internalChange = true;
-        this._roundPoint(props);
-        this.prepareAndSetProps(props);
+        this.prepareAndSetProps({br: Rect.fromObject(graph.bounds)});
 
         this.save();
     }
@@ -1673,7 +1654,7 @@ class Path extends Shape {
 
     resetGlobalViewCache(){
         super.resetGlobalViewCache.apply(this, arguments);
-        delete this.runtimeProps.boundingBox;
+        delete this.runtimeProps.bb;
     }
 
     _renderSvgCommands(commands, matrix) {
