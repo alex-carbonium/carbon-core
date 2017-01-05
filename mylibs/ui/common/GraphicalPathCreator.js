@@ -11,6 +11,7 @@ import SystemConfiguration from "SystemConfiguration";
 import Selection from "framework/SelectionModel";
 import Cursor from "framework/Cursor";
 import Invalidate from "framework/Invalidate";
+import Point from "math/point";
 import SnapController from "framework/SnapController";
 import actionManager from "ui/ActionManager";
 
@@ -158,8 +159,6 @@ export default class GraphicalpathCreator extends EditModeAction {
                 this._element.setProps(defaultSettings);
             }
 
-            this._element.x(x);
-            this._element.y(y);
             App.Current.activePage.dropToPage(x, y, this._element);
             that._element.mode("edit");
             Selection.makeSelection([that._element]);

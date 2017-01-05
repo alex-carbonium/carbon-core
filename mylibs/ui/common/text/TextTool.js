@@ -244,7 +244,7 @@ export default class TextTool extends EditModeAction {
 
         var dropData = this._app.activePage.findDropToPageData(e.x, e.y, text);
         if (dropData){
-            Object.assign(props, dropData.position);
+            text.applyTranslation(dropData.position);
             text.prepareAndSetProps(props);
             dropData.target.add(text);
         }
@@ -258,7 +258,7 @@ export default class TextTool extends EditModeAction {
         }
 
         var clone = text.clone();
-        clone.setProps(text.getBoundaryRectGlobal(), ChangeMode.Self);
+        clone.setProps(text.selectLayoutProps(true), ChangeMode.Self);
         clone.runtimeProps.drawSelection = true;
         clone.runtimeProps.originalHeight = text.height();
 
@@ -343,21 +343,11 @@ export default class TextTool extends EditModeAction {
         Environment.controller.inlineEditModeChanged.raise(false, null);
     }
     _updateOriginal(){
-        var rect = this._editClone.getBoundaryRectGlobal();
-        var pos = this._editedElement.parent().global2local(rect);
-        var props = Object.assign({}, rect, pos);
+        var props = Object.assign({}, this._editClone.selectLayoutProps(true));
+        props.m = this._editedElement.parent().globalViewMatrixInverted().appended(props.m);
         props.content = this._editor.engine.save();
-
-        var dx = props.width - this._editedElement.width();
-        var dy = props.height - this._editedElement.height();
-        this._editedElement.prepareMoveByDelta(props, dx, dy, props.width, props.height);
-
-        props.x = props.x + .5|0;
-        props.y = props.y + .5|0;
-        props.width = props.width + .5|0;
-        props.height = props.height + .5|0;
-
         props.font = this._rangeFormatter.getFirstFont();
+
         if (this._editClone.props.font.valign !== this._editedElement.props.font.valign){
             props.font = Font.extend(props.font, {valign: this._editClone.props.font.valign});
         }

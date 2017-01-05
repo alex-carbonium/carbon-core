@@ -8,7 +8,7 @@ class DefaultLineSettings extends UIElement {
     constructor(app){
         super();
         this._app = app;
-        this.props = app.defaultLineSettings() || PropertyMetadata.getDefaultProps(DefaultLineSettings.prototype.t);
+        this.setProps(app.defaultLineSettings() || PropertyMetadata.getDefaultProps(DefaultLineSettings.prototype.t));
     }
 
     constructPropsChangedCommand(changes){
@@ -27,7 +27,7 @@ class DefaultLineSettings extends UIElement {
 }
 DefaultLineSettings.prototype.t = Types.DefaultLineSettings;
 
-PropertyMetadata.extend({[Types.DefaultLineSettings]: {
+PropertyMetadata.registerForType(DefaultLineSettings, {
     stroke: {
         displayName: "Stroke",
         type: "stroke",
@@ -53,7 +53,7 @@ PropertyMetadata.extend({[Types.DefaultLineSettings]: {
             }
         ];
     }
-}});
+});
 
 
 export default DefaultLineSettings;

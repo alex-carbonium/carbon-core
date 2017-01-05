@@ -4,6 +4,8 @@ import Invalidate from "framework/Invalidate";
 import SnapController from "framework/SnapController";
 import Environment from "environment";
 import Cursor from "../../framework/Cursor";
+import Rect from "../../math/rect";
+import Point from "../../math/point";
 
 define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Matrix) {
     var fwk = sketch.framework;
@@ -46,7 +48,9 @@ define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Ma
                     this._element.setProps(defaultSettings);
                 }
 
-                this._element.setProps(this._parameters);
+                if (this._parameters){
+                    this._element.setProps(this._parameters);
+                }
 
                 if (typeof this._element.mode === "function") {
                     this._element.mode("edit");
@@ -140,14 +144,15 @@ define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Ma
                     context.save();
 
                     var props = {x: x, y: y, width: w, height: h};
-                    this._element.prepareProps(props);
-                    this._element.setProps(props);
+                    this._element.resetTransform();
+                    this._element.applyTranslation(new Point(x, y), true);
+                    this._element.prepareAndSetProps({br: new Rect(0, 0, w, h)});
 
-                    this._element.viewMatrix().applyToContext(context);
-                    if (this._element.clipSelf()) {
-                        context.rectPath(0, 0, props.width, props.height);
-                        context.clip();
-                    }
+                    this._element.applyViewMatrix(context);
+                    // if (this._element.clipSelf()) {
+                    //     context.rectPath(0, 0, props.width, props.height);
+                    //     context.clip();
+                    // }
 
                     this._element.drawSelf(context, props.width, props.height, environment);
 

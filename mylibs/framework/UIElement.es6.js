@@ -383,11 +383,11 @@ var UIElement = klass(DataNode, {
             };
         }
     },
-    position: function (pos) {
-        if (arguments.length === 0) {
-            return new Point(this.x(), this.y());
+    position: function () {
+        if (arguments.length === 1) {
+            debugger; //fix me
         }
-        this.prepareAndSetProps(pos);
+        return this.getBoundingBox().topLeft();
     },
     centerPositionGlobal: function () {
         var rect = this.getBoundaryRectGlobal();

@@ -165,8 +165,9 @@ class Artboard extends Container {
 
         var scale = environment.view.scale() * environment.view.contextScale;
         var s4 = 4 / scale;
-        context.rect(this.x() + this.width(), this.y() + s4, s4, this.height());
-        context.rect(this.x() + s4, this.y() + this.height(), this.width(), s4);
+        var bb = this.getBoundingBoxGlobal();
+        context.rect(bb.x + bb.width, bb.y + s4, s4, bb.height);
+        context.rect(bb.x + s4, bb.y + bb.height, bb.width, s4);
     }
 
     drawFrameRect(context, environment) {
@@ -178,7 +179,9 @@ class Artboard extends Container {
         context.strokeStyle = "#999";
         var scale = environment.view.scale();
         context.lineWidth = 1 / scale;
-        context.rect(this.x() - .5 / scale, this.y() - .5 / scale, this.width() + 1 / scale, this.height() + 1 / scale);
+
+        var bb = this.getBoundingBoxGlobal();
+        context.rect(bb.x - .5 / scale, bb.y - .5 / scale, bb.width + 1 / scale, bb.height + 1 / scale);
         context.stroke();
         context.restore();
     }

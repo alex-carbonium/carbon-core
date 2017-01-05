@@ -1229,6 +1229,9 @@ class Path extends Shape {
     }
 
     getBoundingBox(){
+        if (this.points.length <= 1){
+            return Rect.Zero;
+        }
         if (!this.runtimeProps.bb){
             var graph = new BezierGraph();
             graph.initWithBezierPath(this, this.viewMatrix());
@@ -1239,6 +1242,9 @@ class Path extends Shape {
     }
 
     getGlobalBoundingBox() {
+        if (this.points.length <= 1){
+            return Rect.Zero;
+        }
         var graph = new BezierGraph();
         graph.initWithBezierPath(this, this.globalViewMatrix());
         return Rect.fromObject(graph.bounds);

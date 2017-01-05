@@ -35,7 +35,7 @@ export default class DefaultFormatter extends UIElement {
 }
 DefaultFormatter.prototype.t = Types.DefaultFormatter;
 
-PropertyMetadata.extend({[Types.DefaultFormatter]: {
+PropertyMetadata.registerForType(DefaultFormatter, {
     textStyleId: {
         displayName: "Text style",
         type: "textStyleName"
@@ -57,4 +57,4 @@ PropertyMetadata.extend({[Types.DefaultFormatter]: {
             }
         ];
     }
-}});
+});

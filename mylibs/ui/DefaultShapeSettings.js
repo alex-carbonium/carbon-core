@@ -9,7 +9,7 @@ class DefaultShapeSettings extends UIElement {
     constructor(app){
         super();
         this._app = app;
-        this.props = app.defaultShapeSettings() || PropertyMetadata.getDefaultProps(DefaultShapeSettings.prototype.t);
+        this.setProps(app.defaultShapeSettings() || PropertyMetadata.getDefaultProps(DefaultShapeSettings.prototype.t));
     }
 
     constructPropsChangedCommand(changes){
@@ -28,7 +28,7 @@ class DefaultShapeSettings extends UIElement {
 }
 DefaultShapeSettings.prototype.t = Types.DefaultShapeSettings;
 
-PropertyMetadata.extend({[Types.DefaultShapeSettings]: {
+PropertyMetadata.registerForType(DefaultShapeSettings, {
     fill: {
         displayName: "Fill",
         type: "fill",
@@ -64,7 +64,7 @@ PropertyMetadata.extend({[Types.DefaultShapeSettings]: {
             }
         ];
     }
-}});
+});
 
 
 export default DefaultShapeSettings;

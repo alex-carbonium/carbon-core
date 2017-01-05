@@ -6,6 +6,8 @@ import Environment from "environment";
 import EditModeAction from "ui/common/EditModeAction";
 import Promise from "bluebird";
 import Artboard from "framework/Artboard";
+import Rect from "../../math/rect";
+import Point from "../../math/point";
 
 var fwk = sketch.framework;
 export default class ArtboardsTool extends EditModeAction {
@@ -62,7 +64,9 @@ export default class ArtboardsTool extends EditModeAction {
             this._element.setProps(defaultSettings);
         }
 
-        this._element.setProps(this._parameters);
+        if (this._parameters){
+            this._element.setProps(this._parameters);
+        }
 
         if (typeof this._element.mode === "function") {
             this._element.mode("edit");
@@ -203,14 +207,15 @@ export default class ArtboardsTool extends EditModeAction {
             context.save();
 
             var props = {x: x, y: y, width: w, height: h};
-            this._element.prepareProps(props);
-            this._element.setProps(props);
+            this._element.resetTransform();
+            this._element.applyTranslation(new Point(x, y), true);
+            this._element.prepareAndSetProps({br: new Rect(0, 0, w, h)});
 
-            this._element.viewMatrix().applyToContext(context);
-            if (this._element.clipSelf()) {
-                context.rectPath(0, 0, props.width, props.height);
-                context.clip();
-            }
+            this._element.applyViewMatrix(context);
+            // if (this._element.clipSelf()) {
+            //     context.rectPath(0, 0, props.width, props.height);
+            //     context.clip();
+            // }
 
             this._element.drawSelf(context, props.width, props.height, environment);
 
