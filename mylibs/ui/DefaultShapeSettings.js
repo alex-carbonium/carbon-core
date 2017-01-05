@@ -12,6 +12,13 @@ class DefaultShapeSettings extends UIElement {
         this.setProps(app.defaultShapeSettings() || PropertyMetadata.getDefaultProps(DefaultShapeSettings.prototype.t));
     }
 
+    updateColors(){
+        this.setProps({
+            fill:Brush.extend(this.props.fill, this._app.defaultFill()),
+            stroke:Brush.extend(this.props.stroke, this._app.defaultStroke())
+        });
+    }
+
     constructPropsChangedCommand(changes){
         var changes = extend(this.props, changes);
 
@@ -37,7 +44,7 @@ PropertyMetadata.registerForType(DefaultShapeSettings, {
     stroke: {
         displayName: "Stroke",
         type: "stroke",
-        defaultValue: Brush.Empty
+        defaultValue: Brush.Black
     },
 
     opacity: {

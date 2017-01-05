@@ -2019,11 +2019,11 @@ PropertyMetadata.registerForType(Path, {
             {
                 label: "Appearance",
                 expanded: false,
-                properties: ["visible", "opacity", "fill", "stroke", "clipMask"]
+                properties: ["visible", "opacity", "fill", "stroke", "dashPattern", "clipMask"]
             },
             {
                 label: "Layout",
-                properties: ["width", "height", "x", "y", "anchor", "angle"],
+                properties: ["width", "height", "x", "y", "constraints", "angle"],
                 expanded: true
             },
             {

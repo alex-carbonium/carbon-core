@@ -5,7 +5,7 @@ import Brush from "framework/Brush";
 import ContextPool from "framework/render/ContextPool";
 import {Types, StrokePosition} from "./Defs";
 import Frame from "./Frame";
-import Anchor from "./Anchor";
+import Constraints from "./Constraints";
 
 class Shape extends Container {
 
@@ -28,7 +28,12 @@ class Shape extends Container {
     _renderDraft(context, w, h) {
         var stroke = this.stroke();
 
+        context.beginPath();
         this.drawPath(context, w, h);
+        var dashPattern = this.dashPattern();
+        if (dashPattern) {
+            context.setLineDash(dashPattern);
+        }
         Brush.fill(this.fill(), context, 0, 0, w, h);
         if (!stroke || !stroke.type || !stroke.position) {
 
@@ -85,6 +90,11 @@ class Shape extends Container {
             offContext.translate(-p1.x, -p1.y);
             environment.setupContext(offContext);
 
+            var dashPattern = this.dashPattern();
+            if (dashPattern) {
+                offContext.setLineDash(dashPattern);
+            }
+
             // if(!environment.offscreen) {
                 this.applyViewMatrix(offContext);
             // }
@@ -102,7 +112,7 @@ class Shape extends Container {
             offContext.fill();
 
             // if(!environment.offscreen) {
-                context.resetTransform();
+            context.resetTransform();
             // }
 
             context.drawImage(offContext.canvas, p1.x, p1.y);
@@ -159,25 +169,25 @@ class Shape extends Container {
         return (elements[0] instanceof Frame || elements[0] instanceof Shape) && allowMoveInOut;
     }
 
-    lineCap(value){
-        if(arguments.length > 0){
-            this.setProps({lineCap:value});
+    lineCap(value) {
+        if (arguments.length > 0) {
+            this.setProps({lineCap: value});
         }
 
         return this.props.lineCap;
     }
 
-    lineJoin(value){
-        if(arguments.length > 0){
-            this.setProps({lineJoin:value});
+    lineJoin(value) {
+        if (arguments.length > 0) {
+            this.setProps({lineJoin: value});
         }
 
         return this.props.lineJoin;
     }
 
-    miterLimit(value){
-        if(arguments.length > 0){
-            this.setProps({miterLimit:value});
+    miterLimit(value) {
+        if (arguments.length > 0) {
+            this.setProps({miterLimit: value});
         }
 
         return this.props.mitterLimit;
@@ -197,13 +207,13 @@ class Shape extends Container {
     }
 
 
-    insert(frame){
+    insert(frame) {
         var rect = this.getBoundaryRect();
         var parent = this.parent();
         var idx = parent.remove(this);
-        this.setProps({clipMask: true, x: 0, y: 0, anchor: Anchor.All});
+        this.setProps({clipMask: true, x: 0, y: 0, constraints: Constraints.All});
 
-        frame.prepareAndSetProps({x: 0, y: 0, width: rect.width, height: rect.height, anchor: Anchor.All});
+        frame.prepareAndSetProps({x: 0, y: 0, width: rect.width, height: rect.height, constraints: Constraints.All});
         frame.runtimeProps.resized = true;
 
         var group = new Container.GroupContainerType();
@@ -272,19 +282,14 @@ PropertyMetadata.registerForType(Shape, {
     groups () {
         return [
             {
-                label: "Colors",
-                properties: ["fill", "stroke"],
-                hidden: true
+                label: "Layout",
+                properties: ["x", "y", "width", "height", "constraints", "angle"],
+                expanded: true
             },
             {
                 label: "Appearance",
                 expanded: false,
-                properties: ["visible", "opacity", "fill", "stroke", "clipMask"]
-            },
-            {
-                label: "Layout",
-                properties: ["width", "height", "x", "y", "anchor", "angle"],
-                expanded: true
+                properties: ["visible", "opacity", "fill", "stroke", 'dashPattern', "cornerRadius", "clipMask"]
             },
             {
                 label: "Settings",

@@ -249,7 +249,7 @@ export var Types = {
     'Font': 'f',
     'Artboard': 'a',
     'ArtboardFrame': 'af',
-    'Anchor': 'n',
+    'Constraints': 'n',
     'CorruptedElement': 'x',
     'DraggingElement': 'd',
     'Frame': 'F',
@@ -314,4 +314,20 @@ export var StrokePosition = {
     Center:0,
     Inside:1,
     Outside:2
+};
+
+export var HorizontalConstraint  = {
+    Left:1,
+    Right:2,
+    LeftRight:3,
+    Center:4,
+    Stretch:8
+};
+
+export var VerticalConstraint  = {
+    Top:1,
+    Bottom:2,
+    TopBottom:3,
+    Center:4,
+    Stretch:8
 };

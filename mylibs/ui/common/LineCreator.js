@@ -7,6 +7,7 @@ import SystemConfiguration from "SystemConfiguration";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
 import SnapController from "framework/SnapController";
+import Brush from "framework/Brush";
 
 
 export default klass(EditModeAction, (function () {
@@ -66,7 +67,11 @@ export default klass(EditModeAction, (function () {
             App.Current.activePage.nameProvider.assignNewName(this._element);
             var defaultSettings = App.Current.defaultLineSettings();
             if (defaultSettings) {
-                this._element.setProps(defaultSettings);
+                var settings = Object.assign({}, defaultSettings, {
+                    stroke:Brush.extend(defaultSettings.stroke, App.Current.defaultStroke()),
+                    fill:Brush.extend(defaultSettings.fill, App.Current.defaultFill())
+                });
+                this._element.setProps(settings);
             }
             this._element.stopTrackingResize();
             update.call(this, this._startPoint.x, this._startPoint.y, this._startPoint.x, this._startPoint.y);

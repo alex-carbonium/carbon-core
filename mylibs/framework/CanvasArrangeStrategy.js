@@ -1,3 +1,6 @@
+var debug = require("DebugUtil")("carb:canvasArrangeStrategy");
+import {ChangeMode, HorizontalConstraint, VerticalConstraint} from "framework/Defs"
+
 export default {
     arrange: function(container, event, changeMode){
         var npr = event.newValue;
@@ -11,16 +14,16 @@ export default {
         for (let i = 0, l = items.length; i < l; ++i) {
             let child = items[i];
             var r = child.getBoundaryRect();
-            var anchor = child.anchor();
+            var constraints = child.constraints();
             var newWidth = r.width, newHeight = r.height, newX = r.x, newY = r.y;
             var needUpdate = false;
-            if (anchor.left && anchor.right) { // stretch element horizontally
+            if (constraints.h == HorizontalConstraint.LeftRight) { // stretch element horizontally
                 newWidth = r.width + npr.width - pr.width;
                 needUpdate = true;
-            } else if (anchor.right) {
+            } else if (constraints.h == HorizontalConstraint.Right) {
                 newX = r.x + npr.width - pr.width;
                 needUpdate = true;
-            } else if (!(anchor.left || anchor.right)) {
+            } else if (constraints.h == HorizontalConstraint.Center) {
                 var scale = npr.width / pr.width;
                 var center = r.x + r.width / 2;
                 center *= scale;
@@ -28,13 +31,13 @@ export default {
                 needUpdate = true;
             }
 
-            if (anchor.top && anchor.bottom) { // stretch element vertically
+            if (constraints.v == VerticalConstraint.TopBottom) { // stretch element vertically
                 newHeight = r.height + npr.height - pr.height;
                 needUpdate = true;
-            } else if (anchor.bottom) {
+            } else if (constraints.v == VerticalConstraint.Bottom) {
                 newY = r.y + npr.height - pr.height;
                 needUpdate = true;
-            } else if (!(anchor.top || anchor.bottom)) {
+            } else if (constraints.v == VerticalConstraint.Center) {
                 scale = npr.height / pr.height;
                 center = r.y + r.height / 2;
                 center *= scale;

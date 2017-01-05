@@ -342,7 +342,7 @@ class Artboard extends Container {
                 },
                 {
                     label: "Layout",
-                    properties: ["width", "height", "x", "y", "anchor", "angle", "dockStyle", "horizontalAlignment", "verticalAlignment"]
+                    properties: ["width", "height", "x", "y", "constraints", "angle", "dockStyle", "horizontalAlignment", "verticalAlignment"]
                 },
                 {
                     label: "Margin",
@@ -373,8 +373,16 @@ class Artboard extends Container {
         }
 
         if (props.resource !== undefined && Selection.isOnlyElementSelected(this)) {
-
             Selection.refreshSelection();
+            if(props.resource === ArtboardResource.Stencil ){
+                this.runtimeProps.refreshToolbox = true;
+            } else if(oldProps.resource === ArtboardResource.Stencil){
+                var parent = this.parent();
+                if(parent) {
+                    parent.makeToolboxConfigDirty(true);
+                }
+            }
+
         }
 
         if(props.frame === null){
@@ -453,7 +461,8 @@ class Artboard extends Container {
         if (parent) {
             parent.incrementVersion();
             if (this.props.resource === ArtboardResource.Stencil) {
-                parent.makeToolboxConfigDirty();
+                parent.makeToolboxConfigDirty(this.runtimeProps.refreshToolbox);
+                delete this.runtimeProps.refreshToolbox;
             }
         }
     }

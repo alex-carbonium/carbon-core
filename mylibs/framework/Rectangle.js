@@ -403,11 +403,9 @@ Rectangle.fromSvgElement = function (element, parsedAttributes, matrix) {
 
 PropertyMetadata.registerForType(Rectangle, {
     cornerRadius: {
-        displayName: "Corner radius",
+        displayName: "@cornerRadius",
         defaultValue: QuadAndLock.Default,
-        type: "quadAndLock",
-        useInModel: true,
-        editable: true
+        type: "corners"
     }
 });
 

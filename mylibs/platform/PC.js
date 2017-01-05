@@ -61,6 +61,8 @@ define(["platform/Desktop"], function(Desktop) {
           this.mapShortcut("ctrl+z", "undo");
           this.mapShortcut("ctrl+y", "redo");
 
+          this.mapShortcut("shift+x", "swapColors");
+
           this.mapShortcut("f2", "editText");
 
           this.mapShortcut("alt+ctrl+u", "pathUnion");

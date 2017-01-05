@@ -386,11 +386,11 @@ PropertyMetadata.registerForType(Line, {
             {
                 label: "Appearance",
                 expanded: false,
-                properties: ["visible", "opacity", "fill", "stroke"]
+                properties: ["visible", "opacity", "fill", "stroke", "dashPattern"]
             },
             {
                 label: "Layout",
-                properties: ["x", "y", "width", "height", "anchor"],
+                properties: ["x", "y", "width", "height", "constraints"],
                 expanded: true
             }
         ];

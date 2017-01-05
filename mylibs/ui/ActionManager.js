@@ -4,6 +4,7 @@ import ChangeZOrder from "../commands/ChangeZOrder";
 import Environment from "environment";
 import Invalidate from "framework/Invalidate";
 import FontHelper from "../framework/FontHelper";
+import Brush from "framework/Brush";
 
 define(function (require) {
     var clipboard = require("framework/Clipboard");
@@ -329,6 +330,7 @@ define(function (require) {
                 Selection.unlock();
             });
 
+
             this.registerAction("unlockAllOnArtboard", "Unlock all on page", "Lock", function () {
                 var artboard = that.app.activePage.getActiveArtboard();
                 var selection = [];
@@ -340,6 +342,22 @@ define(function (require) {
                 });
                 Selection.makeSelection(selection);
             });
+
+            this.registerAction("swapColors", "Swap Colors", "Colors", function () {
+                var selection = Selection.selectedElement();
+                if (!selection) {
+                    return null;
+                }
+
+                selection.each(e=>{
+                    var fill = e.fill();
+                    var stroke = e.stroke();
+                    e.fill(Brush.extend(fill, {value:stroke.value, type:stroke.type}));
+                    e.stroke(Brush.extend(stroke, {value:fill.value, type:fill.type}));
+
+                })
+            });
+
 
             this.registerAction("fontIncreaseSize", "Font increase size", "Font", function () {
                 var selection = Selection.selectedElement();

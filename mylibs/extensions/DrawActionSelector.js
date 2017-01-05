@@ -10,7 +10,6 @@ import ArtboardsTool from "ui/common/ArtboardsTool";
 import TextTool from "ui/common/text/TextTool";
 import Artboard from "framework/Artboard";
 import DefaultShapeSettings from "ui/DefaultShapeSettings";
-import DefaultLineSettings from "ui/DefaultLineSettings";
 import ArtboardToolSettings from "ui/ArtboardToolSettings";
 import ArtboardFrame from "framework/ArtboardFrame";
 import {ViewTool, Types} from "../framework/Defs";
@@ -62,6 +61,7 @@ var registerCommands = function () {
         if(element instanceof Path) {
             element.edit();
         } else {
+            that._defaultShapeSettings.updateColors();
             Selection.makeSelection([that._defaultShapeSettings]);
         }
         that.app.setCurrentTool(ViewTool.Path);
@@ -72,7 +72,7 @@ var registerCommands = function () {
         that._rectCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._rectCreator;
         that.app.allowSelection(false);
-
+        that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings]);
         that.app.setCurrentTool(ViewTool.Rectangle);
         Invalidate.request();
@@ -83,7 +83,7 @@ var registerCommands = function () {
         that._starCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._starCreator;
         that.app.allowSelection(false);
-
+        that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings]);
         that.app.setCurrentTool(ViewTool.Star);
 
@@ -94,7 +94,7 @@ var registerCommands = function () {
         that._triangleCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._triangleCreator;
         that.app.allowSelection(false);
-
+        that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings]);
         that.app.setCurrentTool(ViewTool.Triangle);
 
@@ -105,7 +105,7 @@ var registerCommands = function () {
         that._polygonCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._polygonCreator;
         that.app.allowSelection(false);
-
+        that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings]);
         that.app.setCurrentTool(ViewTool.Polygon);
 
@@ -147,6 +147,7 @@ var registerCommands = function () {
         that._circleCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._circleCreator;
         that.app.allowSelection(false);
+        that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings]);
         that.app.setCurrentTool(ViewTool.Circle);
     }, "ui-circle");
@@ -156,7 +157,8 @@ var registerCommands = function () {
         that._lineCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._lineCreator;
         that.app.allowSelection(false);
-        Selection.makeSelection([that._defaultLineSettings]);
+        that._defaultShapeSettings.updateColors();
+        Selection.makeSelection([that._defaultShapeSettings]);
         that.app.setCurrentTool(ViewTool.Line);
     }, "ui-line");
 
@@ -261,7 +263,6 @@ export default class DrawActionSelector extends ExtensionBase {
         this._imageCreator = new ElementDragCreator(app, Types.Frame);
 
         this._defaultShapeSettings = new DefaultShapeSettings(app);
-        this._defaultLineSettings = new DefaultLineSettings(app);
         this._artboardToolSettings = new ArtboardToolSettings(app);
 
         var that = this;

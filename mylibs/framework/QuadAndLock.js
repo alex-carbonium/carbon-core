@@ -23,7 +23,11 @@ define(["framework/ObjectCache", "framework/TypeDefaults"], function(ObjectCache
         return Object.assign(quadAndLockTypeDefault(), obj);
     };
 
-    Quad.hasAnyValue =function(q){
+    Quad.extend = function(...quads){
+        return Quad.createFromObject(Object.assign({}, ...quads));
+    };
+
+    Quad.hasAnyValue = function(q){
         return q.bottomLeft || q.bottomRight || q.upperLeft || q.upperRight;
     };
 

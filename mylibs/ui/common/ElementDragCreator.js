@@ -4,6 +4,7 @@ import Invalidate from "framework/Invalidate";
 import SnapController from "framework/SnapController";
 import Environment from "environment";
 import Cursor from "../../framework/Cursor";
+import Brush from "framework/Brush";
 import Rect from "../../math/rect";
 import Point from "../../math/point";
 
@@ -45,7 +46,11 @@ define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Ma
 
                 var defaultSettings = App.Current.defaultShapeSettings();
                 if (defaultSettings && !this._element.noDefaultSettings) {
-                    this._element.setProps(defaultSettings);
+                    var settings = Object.assign({}, defaultSettings, {
+                        fill:Brush.extend(defaultSettings.fill, App.Current.defaultFill()),
+                        stroke:Brush.extend(defaultSettings.stroke, App.Current.defaultStroke())
+                    });
+                    this._element.setProps(settings);
                 }
 
                 if (this._parameters){
