@@ -4,13 +4,20 @@ import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import {Types} from "../framework/Defs";
 import Point from "../math/point";
+import {isPointInRect} from "../math/math";
 
-const PointSize = 16
-    , PointSize2 = 8;
+const PointSize = 20
+    , PointSize2 = PointSize/2;
 
 export default {
     hitTest: function (frame, point, hitPoint, scale) {
-        return Math.abs(point.x - hitPoint.x) < PointSize / scale && Math.abs(point.y - hitPoint.y) < PointSize / scale;
+        var br = frame.element.getBoundaryRect();
+        if (isPointInRect(br, point)){
+            return false;
+        }
+        var size = PointSize2/scale;
+        return point.x >= hitPoint.x - size && point.x <= hitPoint.x + size
+            && point.y >= hitPoint.y - size && point.y <= hitPoint.y + size;
     },
     draw: function (p, frame, scale, context, matrix) {
         // var pt = matrix.transformPoint2(p.x, p.y, true);

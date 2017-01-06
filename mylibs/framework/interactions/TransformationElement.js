@@ -45,7 +45,9 @@ export default class TransformationElement extends InteractiveElement{
             }
         }
 
-        ArrangeStrategy.arrangeRoots(this.elements);
+        if (this._lastScaling || this._lastRotation){
+            ArrangeStrategy.arrangeRoots(this.elements);
+        }
         this.refreshSelection();
     }
 }

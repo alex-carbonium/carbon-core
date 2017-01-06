@@ -359,29 +359,11 @@ var UIElement = klass(DataNode, {
             origin.y -= rect.y;
         }
 
-        var angle = this.angle();
-
-        if (angle) {
-            var p1 = sketch.math2d.rotatePoint({x: x, y: y}, angle * Math.PI / 180, origin);
-            var p2 = sketch.math2d.rotatePoint({x: x + width, y: y}, angle * Math.PI / 180, origin);
-            var p3 = sketch.math2d.rotatePoint({
-                x: x + width,
-                y: y + height
-            }, angle * Math.PI / 180, origin);
-            var p4 = sketch.math2d.rotatePoint({x: x, y: y + height}, angle * Math.PI / 180, origin);
-
-            return this.runtimeProps.snapPoints = {
-                xs: [~~p1.x, ~~p2.x, ~~p3.x, ~~p4.x],
-                ys: [~~p1.y, ~~p2.y, ~~p3.y, ~~p4.y],
-                center: {x: ~~(origin.x), y: ~~(origin.y)}
-            };
-        } else {
-            return this.runtimeProps.snapPoints = {
-                xs: [x, x + width],
-                ys: [y, y + height],
-                center: {x: ~~(origin.x), y: ~~(origin.y)}
-            };
-        }
+        return this.runtimeProps.snapPoints = {
+            xs: [x, x + width],
+            ys: [y, y + height],
+            center: {x: ~~(origin.x), y: ~~(origin.y)}
+        };
     },
     position: function () {
         if (arguments.length === 1) {
@@ -1625,16 +1607,6 @@ var UIElement = klass(DataNode, {
         }
 
         return res;
-    },
-    prepareMoveByDelta: function (changes, dx, dy, width, height) {
-        var origin = this.rotationOrigin();
-        var newOrigin = rotatePointByDegree({
-            x: origin.x + dx / 2,
-            y: origin.y + dy / 2
-        }, -this.angle(), origin);
-
-        changes.x = newOrigin.x - width / 2;
-        changes.y = newOrigin.y - height / 2;
     },
     // returns deffered object
     animate: function (properties, duration, options, progressCallback) {

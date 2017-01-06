@@ -124,7 +124,7 @@ export default {
             props[name] = new Matrix(value._a, value._b, value._c, value._d, value._tx, value._ty);
         }
         else if (name === "br"){
-            props[name] = new Rect(value.x, value.y, value.w, value.h);
+            props[name] = new Rect(value.x, value.y, value.width, value.height);
         }
     },
     updatePropsWithPrototype: function(props){

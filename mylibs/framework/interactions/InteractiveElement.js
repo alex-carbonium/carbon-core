@@ -40,10 +40,12 @@ export default class InteractiveElement extends GroupContainer{
     }
 
     strokeBorder(context, w, h){
-        context.save();
-        this.drawBoundaryPath(context, this.globalViewMatrix());
-        Brush.stroke(this.stroke(), context);
-        context.restore();
+        if (Brush.canApply(this.stroke())){
+            context.save();
+            this.drawBoundaryPath(context, this.globalViewMatrix());
+            Brush.stroke(this.stroke(), context);
+            context.restore();
+        }
     }
 
     createClone(element){

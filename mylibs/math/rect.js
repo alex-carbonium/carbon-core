@@ -70,6 +70,9 @@ export default class Rect{
     }
 
     withSize(w, h){
+        if (w === this.width && h === this.height){
+            return this;
+        }
         return new Rect(this.x, this.y, w, h);
     }
     withPosition(x, y){

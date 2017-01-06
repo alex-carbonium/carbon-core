@@ -29,16 +29,18 @@ var LineDirectionPoint = {
         return Math.abs(point.x - hitPoint.x) < PointSize / scale && Math.abs(point.y - hitPoint.y) < PointSize / scale;
     },
 
-    draw (p, frame, scale, context) {
+    draw (p, frame, scale, context, matrix) {
         context.fillStyle = '#fff';
         context.strokeStyle = '#22c1ff';
         context.beginPath();
-        context.circle(~~(p.x * scale ), ~~(p.y * scale), PointSize);
+        var pt = matrix.transformPoint2(p.x, p.y, true);
+        context.circle(pt.x, pt.y, PointSize);
         context.fill();
         context.stroke();
     },
     capture (frame) {
-        var resizingElement = UIElement.construct(Types.DraggingElement, frame.element);
+        var resizingElement = UIElement.construct(Types.TransformationElement, frame.element);
+        resizingElement.stroke(Brush.None);
         resizingElement.strokeFrame = false;
         frame.resizingElement = resizingElement;
         resizingElement.forceDrawClone = true;
@@ -50,16 +52,10 @@ var LineDirectionPoint = {
     release (frame) {
         if (frame.resizingElement) {
             delete frame.onlyCurrentVisible;
-            var newRadius = frame.resizingElement._clone.cornerRadius();
+            var newRadius = frame.resizingElement.children[0].cornerRadius();
             frame.element.cornerRadius(newRadius);
-            commandManager.execute(frame.element.constructPropsChangedCommand(
-                {cornerRadius: newRadius}
-                , {cornerRadius: frame.originalValue}));
-
+            frame.resizingElement.saveChanges();
             frame.resizingElement.detach();
-            //TODO
-            //frame.resizingElement.dropOn(null, frame.element.parent());
-            Environment.controller.stopRotatingEvent.raise();
         }
     },
     rotateCursorPointer (index, angle) {
@@ -119,7 +115,7 @@ var LineDirectionPoint = {
         var maxRadius = Math.min(w2, h2);
         var newRadius = 0|parameter * maxRadius;
 
-        var r = clone(frame.resizingElement._clone.cornerRadius());
+        var r = clone(frame.resizingElement.children[0].cornerRadius());
         r.locked = !event.event.altKey;
 
         if(!r.locked) {
@@ -130,7 +126,7 @@ var LineDirectionPoint = {
             r.bottomLeft = newRadius;
             r.bottomRight = newRadius;
         }
-        frame.resizingElement._clone.cornerRadius(r);
+        frame.resizingElement.children[0].cornerRadius(r);
         Invalidate.requestUpperOnly();
     }
 }

@@ -15,15 +15,14 @@ class Text extends UIElement {
     prepareProps(changes){
         super.prepareProps(changes);
         var contentChanged = changes.content !== undefined;
-        var widthChanged = changes.width !== undefined && changes.width !== this.width();
+        var brChanged = changes.br !== undefined;
         var autoWidthChanged = changes.autoWidth !== undefined;
-        var heightChanged = changes.height !== undefined && changes.height !== this.height();
         var fontChanged = changes.font !== undefined;
 
-        var dimensionsAffected = contentChanged || widthChanged || autoWidthChanged || heightChanged || fontChanged;
+        var dimensionsAffected = contentChanged || brChanged || autoWidthChanged || fontChanged;
         var textAlignChanged = fontChanged && changes.font.align !== TextAlign.left;
 
-        if ((widthChanged && !autoWidthChanged) || textAlignChanged){
+        if ((brChanged && !autoWidthChanged) || textAlignChanged){
             changes.autoWidth = false;
         }
         if (autoWidthChanged && changes.autoWidth){
@@ -64,8 +63,7 @@ class Text extends UIElement {
     }
     propsUpdated(newProps, oldProps){
         if (!this.runtimeProps.keepEngine //to avoid disposal when editing inline
-            && (newProps.width !== undefined
-            || newProps.height !== undefined
+            && (newProps.br !== undefined
             || newProps.autoWidth !== undefined
             || newProps.font !== undefined
             || newProps.content !== undefined)){
@@ -75,20 +73,8 @@ class Text extends UIElement {
     }
 
     _ensureBoundaryBox(changes, forceWidth){
-        var width;
-        if (changes.width !== undefined){
-            width = changes.width;
-        }
-        else{
-            width = changes.width = this.width();
-        }
-        var height;
-        if (changes.height !== undefined){
-            height = changes.height;
-        }
-        else{
-            height = changes.height = this.height();
-        }
+        var br = changes.br || this.getBoundaryRect();
+
         if (changes.autoWidth === undefined){
             changes.autoWidth = this.props.autoWidth;
         }
@@ -98,12 +84,16 @@ class Text extends UIElement {
         var engine = this.createEngine(changes);
         var actualWidth = engine.getActualWidth();
         var actualHeight = engine.getActualHeight();
-        if (width < actualWidth || forceWidth){
-            changes.width = actualWidth + .5|0;
+
+        var newWidth = br.width;
+        if (br.width < actualWidth || forceWidth){
+            newWidth = actualWidth + .5|0;
         }
-        if (height < actualHeight){
-            changes.height = actualHeight + .5|0;
+        var newHeight = br.height;
+        if (br.height < actualHeight){
+            newHeight = actualHeight + .5|0;
         }
+        changes.br = br.withSize(newWidth, newHeight);
     }
 
     drawSelf(context, w, h, environment){
@@ -151,7 +141,7 @@ class Text extends UIElement {
         TextEngine.setDefaultFormatting(props.font);
 
         var engine = new TextEngine();
-        engine.updateSize(props.autoWidth ? 10000 : props.width, 10000);
+        engine.updateSize(props.autoWidth ? 10000 : props.br.width, 10000);
         engine.setText(props.content);
         this.runtimeProps.engine = engine;
         return engine;
