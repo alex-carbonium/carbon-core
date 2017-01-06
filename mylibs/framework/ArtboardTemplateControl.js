@@ -1,18 +1,17 @@
 import PropertyMetadata from "framework/PropertyMetadata";
 import PropertyStateRecorder from "framework/PropertyStateRecorder";
 import Container from "framework/Container";
-import UIElement from "framework/UIElement";
 import {Overflow, ChangeMode, Types} from "./Defs";
 import Selection from "framework/SelectionModel";
 
-export default class ArtboardTemplateControl extends UIElement {
+export default class ArtboardTemplateControl extends Container {
     constructor() {
         super();
     }
 
     unwrapToParent() {
         var parent = this.parent();
-        var children = this._container.children;
+        var children = this.children;
         var x = this.x();
         var y = this.y();
         var selection = [];
@@ -39,15 +38,13 @@ export default class ArtboardTemplateControl extends UIElement {
         this._allowHResize = this._artboard.props.allowHorizontalResize;
         this._allowVResize = this._artboard.props.allowVerticalResize;
 
-        var props = {};
-        if (!this._allowHResize) {
-            props.width = artboard.width();
-        }
+        var currentSize = this.getBoundaryRect();
 
-        if (!this._allowVResize) {
-            props.height = artboard.height();
-        }
-        this.setProps(props);
+        this.setProps({
+            width: artboard.width(),
+            height: artboard.height()
+        });
+
         this.setProps({_unwrapContent: artboard.props.insertAsContent});
 
         this._cloneFromArtboard(artboard);
@@ -62,18 +59,24 @@ export default class ArtboardTemplateControl extends UIElement {
 
         this.runtimeProps.artboardVersion = artboard.runtimeProps.version;
 
-        if (!this.props.width || !this.props.height) {
-            this.setProps({width: this._artboard.width(), height: this._artboard.height()});
-        }
+        // if (!this.props.width || !this.props.height) {
+        //     this.setProps({width: this._artboard.width(), height: this._artboard.height()});
+        // }
 
-        if (this._container && (this._allowHResize || this._allowVResize)) {
-            this._container.setProps({
-                width: this._allowHResize ? this.width() : artboard.width(),
-                height: this._allowVResize ? this.height() : artboard.height()
-            }, ChangeMode.Self);
-            this._container.arrange({
+        if (this._allowHResize || this._allowVResize) {
+
+            var props = {};
+            if(this._allowHResize) {
+                props.width = currentSize.width || artboard.width();
+            }
+            if(this._allowVResize) {
+                props.height = currentSize.height || artboard.height();
+            }
+
+            this.setProps(props, ChangeMode.Self);
+            this.arrange({
                 oldValue: artboard.getBoundaryRect(),
-                newValue: this.getBoundaryRect()
+                newValue: props
             }, null, ChangeMode.Self);
         }
     }
@@ -104,7 +107,6 @@ export default class ArtboardTemplateControl extends UIElement {
 
     updateViewMatrix() {
         super.updateViewMatrix();
-        this._container && this._container.updateViewMatrix();
     }
 
     displayType() {
@@ -116,21 +118,14 @@ export default class ArtboardTemplateControl extends UIElement {
     }
 
     _cloneFromArtboard(artboard) {
-        var container = this._container = new Container();
-        container.parent(this);
-        container.setProps({
-            width: artboard.width(),
-            height: artboard.height(),
-            id: artboard.id(),
-            arrangeStrategy: artboard.props.arrangeStrategy
-        }, ChangeMode.Self);
-
+        this.clear();
 
         for (var i = 0; i < artboard.children.length; i++) {
             var child = artboard.children[i];
             var clone = child.clone();
-            clone.id(child.id())
-            container.add(clone, ChangeMode.Self);
+            clone.id(this.id() + child.id())
+            clone.sourceId(child.id());
+            this.add(clone, ChangeMode.Self);
         }
     };
 
@@ -172,65 +167,59 @@ export default class ArtboardTemplateControl extends UIElement {
             this._initFromArtboard();
         }
         else {
-            if (this._container && (props.width !== undefined || props.height !== undefined)) {
-                var oldSize = this._container.size();
+            if ((props.width !== undefined || props.height !== undefined)) {
+                var oldSize = {width: oldProps.width || this.width(), height: oldProps.height || this.height()};
                 var newSize = this.size();
-                this._container.setProps(newSize, ChangeMode.Self);
-                this._container.arrange({oldValue: oldSize, newValue: newSize}, null, ChangeMode.Self);
+                //this.setProps(newSize, ChangeMode.Self);
+                this.arrange({oldValue: oldSize, newValue: newSize}, null, ChangeMode.Self);
             }
 
             if (props.stateId !== undefined) {
-                this._changeState(props.stateId);
+                this._initFromArtboard();
+            } else {
+                this._updateCustomProperties();
             }
-
-            this._updateCustomProperties();
         }
     }
 
     _changeState(stateId) {
         var defaultState = this._artboard._recorder.getStateById('default');
 
-        this._container.setProps({
-                width: this._artboard.width(),
-                height: this._artboard.height()
-            }
-            , ChangeMode.Self);
+        // var oldSize = this.getBoundaryRect();
+        //
+        // this.setProps({
+        //         width: this._artboard.width(),
+        //         height: this._artboard.height()
+        //     }
+        //     , ChangeMode.Self);
 
-        PropertyStateRecorder.applyState(this._container, defaultState);
+        PropertyStateRecorder.applyState(this, defaultState, this.id());
         if (stateId !== 'default') {
             var newState = this._artboard._recorder.getStateById(stateId);
-            PropertyStateRecorder.applyState(this._container, newState);
+            PropertyStateRecorder.applyState(this, newState, this.id());
         }
 
-        this._container.setProps({
-            width: this.width(),
-            height: this.height()
-        }, ChangeMode.Self);
-
-        this._container.arrange({
-            oldValue: this._artboard.getBoundaryRect(),
-            newValue: this.getBoundaryRect()
-        }, null, ChangeMode.Self);
+        // this.setProps({
+        //     width: oldSize.width,
+        //     height: oldSize.height
+        // }, ChangeMode.Self);
+        //
+        // this.arrange({
+        //     oldValue: this._artboard.getBoundaryRect(),
+        //     newValue: oldSize
+        // }, null, ChangeMode.Self);
     }
 
     _updateCustomProperties() {
-        if (!this._container) {
-            return;
-        }
-
         var props = this.props;
         for (var propName in props) {
             if (propName.startsWith('custom:')) {
                 var prop = this._propertyMapping[propName];
                 var elementId = prop.controlId;
-                var element = this._container.getElementById(elementId);
+                var element = this.getElementById(this.id() + elementId);
                 element.setProps({[prop.propertyName]: props[propName]}, ChangeMode.Self);
             }
         }
-    }
-
-    canBeAccepted(element) {
-        return element.primitiveRoot().id() !== this.source().artboardId;
     }
 
     prepareProps(props) {
@@ -246,6 +235,10 @@ export default class ArtboardTemplateControl extends UIElement {
         return this._artboard != null ? this._artboard.getStates() : [];
     }
 
+    canAccept() {
+        return false;
+    }
+
     source(value) {
         if (arguments.length > 0) {
             this.setProps({source: value});
@@ -254,42 +247,58 @@ export default class ArtboardTemplateControl extends UIElement {
         return this.props.source;
     }
 
+    isAtomicInModel() {
+        return true;
+    }
+
+    primitiveRoot() {
+        if (!this.parent() || !this.parent().primitiveRoot()) {
+            return null;
+        }
+        return this;
+    }
+
+    primitivePath() {
+        var parent = this.parent();
+        if (!parent || !parent.primitiveRoot()) {
+            return null;
+        }
+        var path = this.runtimeProps.primitivePath;
+        if (!path) {
+            path = parent.primitivePath().slice();
+            path[path.length - 1] = this.id();
+            path.push(this.id());
+            this.runtimeProps.primitivePath = path;
+        }
+        return path;
+    }
+
+    primitiveRootKey() {
+        var parent = this.parent();
+        if (!parent || !parent.primitiveRoot()) {
+            return null;
+        }
+        var s = this.runtimeProps.primitiveRootKey;
+        if (!s) {
+            s = parent.id() + this.id();
+            this.runtimeProps.primitiveRootKey = s;
+        }
+        return s;
+    }
+
+    relayout() {
+
+    }
+
+    relayoutCompleted() {
+
+    }
+
     draw(context) {
         if (this._artboard && this.runtimeProps.artboardVersion !== this._artboard.runtimeProps.version) {
             this._initFromArtboard();
         }
         super.draw.apply(this, arguments);
-    }
-
-    drawSelf(context, w, h) {
-        try {
-            super.drawSelf.apply(this, arguments);
-        } catch (e) {
-            context.save();
-            context.strokeStyle='red';
-            context.linePath(0, 0, 0 + w, 0 + h);
-            context.stroke();
-            context.linePath(0, 0 + h, 0 + w, 0);
-            context.stroke();
-            context.restore();
-
-        }
-    }
-
-    innerChildren() {
-        if (this._container) {
-            return this._container.getChildren();
-        }
-
-        return null;
-    }
-
-    drawSelf() {
-        if (this._container) {
-            this._container.drawSelf.apply(this._container, arguments);
-        } else {
-            super.drawSelf.apply(this, arguments);
-        }
     }
 
     canAccept() {
@@ -311,6 +320,9 @@ PropertyMetadata.registerForType(ArtboardTemplateControl, {
     },
     overflow: {
         defaultValue: Overflow.Clip
+    },
+    allowMoveOutChildren: {
+        defaultValue: false
     },
     prepareVisibility: function (props, selection, view) {
         if (selection.elements) {

@@ -133,6 +133,21 @@ class Artboard extends Container {
             return false;
         }
 
+        if(this.props.resource === ArtboardResource.Stencil && element.children !== undefined) {
+            var can = true;
+            var id = this.id();
+            element.applyVisitor(e=>{
+                if(e.props.source && e.props.source.artboardId === id){
+                    can = false;
+                    return false;
+                }
+            })
+
+            if(!can){
+                return false;
+            }
+        }
+
         if (element.props.masterId) {
             var root = element.primitiveRoot();
             var stateboards = this.runtimeProps.stateBoards;
@@ -453,7 +468,7 @@ class Artboard extends Container {
         if (parent) {
             parent.incrementVersion();
             if (this.props.resource === ArtboardResource.Stencil) {
-                parent.makeToolboxConfigDirty(this.runtimeProps.refreshToolbox);
+                parent.makeToolboxConfigDirty(this.runtimeProps.refreshToolbox, this.id());
                 delete this.runtimeProps.refreshToolbox;
             }
         }

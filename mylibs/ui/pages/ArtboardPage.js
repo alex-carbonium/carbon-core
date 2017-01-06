@@ -349,12 +349,12 @@ class ArtboardPage extends Page {
         return primitives;
     }
 
-    makeToolboxConfigDirty(forceUpdate){
+    makeToolboxConfigDirty(forceUpdate, changedId){
         this.setProps({toolboxConfigId:null});
         if(forceUpdate){
             App.Current.changeToolboxPage.raise(this);
         }
-        this.toolboxConfigIsDirty.raise(forceUpdate);
+        this.toolboxConfigIsDirty.raise(forceUpdate, changedId);
     }
 }
 ArtboardPage.prototype.t = Types.ArtboardPage;

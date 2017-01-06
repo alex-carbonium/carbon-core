@@ -209,6 +209,9 @@ var UIElement = klass(DataNode, {
     stopResizing: function () {
         Environment.controller.stopResizingEvent.raise();
     },
+    canHandleCorruption: function() {
+        return false;
+    },
     getSnapPoints: function (local) {
         if (!this.allowSnapping()) {
             return null;
@@ -1073,6 +1076,13 @@ var UIElement = klass(DataNode, {
         var clone = fwk.UIElement.fromType(this.t, this.cloneProps());
         clone.id(createUUID());
         return clone;
+    },
+    sourceId:function(id){
+      if(arguments.length > 0) {
+          this.setProps({sourceId:id});
+      }
+
+      return this.props.sourceId || this.props.id;
     },
     mirrorClone: function () {
         var clone = fwk.UIElement.fromType(this.t, this.cloneProps());

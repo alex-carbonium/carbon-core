@@ -21,7 +21,7 @@ function eachElementAndProp(state, callback) {
 }
 function apply(state, element) {
     element.applyVisitor(e=> {
-        var elementData = state.data[e.id()];
+        var elementData = state.data[e.sourceId()];
         if (elementData) {
             e.setProps(elementData.props, ChangeMode.Root);
         }
@@ -62,7 +62,7 @@ function cleanUpStates() {
 function cleanUpDeadControls() {
     var elementsMap = {};
     this._element.applyVisitor(e=> {
-        elementsMap[e.id()] = e;
+        elementsMap[e.sourceId()] = e;
     });
     for (var state of this.states) {
         var toRemove = [];
