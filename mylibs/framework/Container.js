@@ -79,6 +79,10 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
             shouldApplyViewMatrix: function(){
                 return false;
             },
+            saveOrResetLayoutProps: function(){
+                UIElement.prototype.saveOrResetLayoutProps.apply(this, arguments);
+                this.children.forEach(e=>e.saveOrResetLayoutProps());
+            },
             drawSelf: function (context, w, h, environment) {
                 context.save();
                 this.globalViewMatrix().applyToContext(context);

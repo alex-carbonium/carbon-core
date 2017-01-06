@@ -6,6 +6,8 @@ export default {
         var npr = event.newValue;
         var pr = event.oldValue;
 
+        debug("old: [%s, %s] new: [%s, %s]", pr.width, pr.height, npr.width, npr.height);
+
         var items = container.children;
         if (items.length === 0){
             return null;

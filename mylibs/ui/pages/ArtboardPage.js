@@ -113,7 +113,7 @@ class ArtboardPage extends Page {
         for(var i = 0; i < artboards.length; ++i){
             var artboard =  artboards[i];
 
-            if(artboard.drawShadowPath && areRectsIntersecting(this._viewport, artboard.getBoundaryRect()) && !artboard.frame) {
+            if(artboard.visible() && artboard.drawShadowPath && areRectsIntersecting(this._viewport, artboard.getBoundaryRect()) && !artboard.frame) {
                 artboard.drawShadowPath(context, environment);
             }
         }
