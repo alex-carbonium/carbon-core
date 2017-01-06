@@ -97,6 +97,10 @@ export default class ArtboardsTool extends EditModeAction {
         }
     }
 
+    click(event){
+        event.handled = true;
+    }
+
     mouseup(event) {
         this._mousepressed = false;
         this._startDraggingData = null;
