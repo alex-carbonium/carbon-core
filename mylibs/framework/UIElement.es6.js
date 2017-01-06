@@ -155,8 +155,8 @@ var UIElement = klass(DataNode, {
             var hasH = props.hasOwnProperty("height");
             if (hasW || hasH){
                 var br = this.getBoundaryRect();
-                var w = hasW ? props.width : br.w;
-                var h = hasH ? props.height : br.h;
+                var w = hasW ? props.width : br.width;
+                var h = hasH ? props.height : br.height;
                 props.br = br.withSize(w, h);
             }
         }

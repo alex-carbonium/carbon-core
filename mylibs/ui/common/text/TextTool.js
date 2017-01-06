@@ -19,6 +19,7 @@ import Cursor from "../../../framework/Cursor";
 import Invalidate from "framework/Invalidate";
 import Environment from "../../../environment";
 import {getAverageLuminance} from "../../../math/color";
+import Rect from "../../../math/rect";
 
 const CursorInvertThreshold = .4;
 
@@ -187,9 +188,10 @@ export default class TextTool extends EditModeAction {
             this._editor.mouseUp(e);
         }
         else if (this._dragZone){
-            var props = this._getDrawRect(this._dragZone);
+            var rect = this._getDrawRect(this._dragZone);
+            var props = {br: rect.withPosition(0, 0)};
             props.autoWidth = false;
-            this.insertText({x: props.x, y: props.y}, props);
+            this.insertText({x: rect.x, y: rect.y}, props);
             this._dragZone = null;
         }
         Invalidate.requestUpperOnly();
@@ -453,7 +455,7 @@ export default class TextTool extends EditModeAction {
     }
     _getDrawRect(zone){
         if (!zone.flipX && !zone.flipY){
-            return zone;
+            return Rect.fromObject(zone);
         }
 
         var x = zone.x;
@@ -464,6 +466,6 @@ export default class TextTool extends EditModeAction {
         if (this._dragZone.flipY){
             y -= this._dragZone.height;
         }
-        return {x, y, width: zone.width, height: zone.height};
+        return new Rect(x, y, width, height);
     }
 }

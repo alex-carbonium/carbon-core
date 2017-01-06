@@ -141,7 +141,7 @@ class Text extends UIElement {
         TextEngine.setDefaultFormatting(props.font);
 
         var engine = new TextEngine();
-        engine.updateSize(props.autoWidth ? 10000 : props.br.width, 10000);
+        engine.updateSize(props.autoWidth ? 10000 : (props.br || this.getBoundaryRect()).width, 10000);
         engine.setText(props.content);
         this.runtimeProps.engine = engine;
         return engine;
