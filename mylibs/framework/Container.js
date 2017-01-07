@@ -161,13 +161,17 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                 }
             },
             clone: function () {
+                if(this._cloning) {
+                    throw "Can't clone, chain contains recursive references";
+                }
+                this._cloning = true;
                 var clone = UIElement.prototype.clone.apply(this, arguments);
 
                 for (var i = 0; i < this.children.length; i++) {
                     var e = this.children[i];
                     clone.add(e.clone(), ChangeMode.Self);
                 }
-
+                delete this._cloning;
                 return clone;
             },
             mirrorClone: function () {
@@ -222,6 +226,10 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                     child.draw(context, environment);
                 } catch (e) {
                     logger.error("Draw error", e);
+                    if(child.canHandleCorruption()){
+                        child.makeCorrupted();
+                        return;
+                    }
                     var data;
                     try {
                         data = child.toJSON(true);

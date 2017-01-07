@@ -62,9 +62,9 @@ class ArtboardPage extends Page {
         if (!items.length) {
             return {x: 0, y: 0, width: 0, height: 0};
         }
-        var rect = items[0].getBoundaryRect();
+        var rect = items[0].getBoundaryRectGlobal();
         for (var i = 1; i < items.length; ++i) {
-            rect = unionRect(rect, items[i].getBoundaryRect());
+            rect = unionRect(rect, items[i].getBoundaryRectGlobal());
         }
 
         return rect;
@@ -113,7 +113,7 @@ class ArtboardPage extends Page {
         for(var i = 0; i < artboards.length; ++i){
             var artboard =  artboards[i];
 
-            if(artboard.visible() && artboard.drawShadowPath && areRectsIntersecting(this._viewport, artboard.getBoundaryRect()) && !artboard.frame) {
+            if(artboard.visible() && artboard.drawShadowPath && areRectsIntersecting(this._viewport, artboard.getBoundaryRectGlobal()) && !artboard.frame) {
                 artboard.drawShadowPath(context, environment);
             }
         }
@@ -140,7 +140,7 @@ class ArtboardPage extends Page {
     }
 
     drawChildSafe(child, context, environment) {
-        if (areRectsIntersecting(this._viewport, child.getBoundaryRect())) {
+        if (areRectsIntersecting(this._viewport, child.getBoundaryRectGlobal())) {
             if(child.frame){
                 var frame = child.frame;
                 if (frame) {
@@ -349,7 +349,7 @@ class ArtboardPage extends Page {
         }
         return primitives;
     }
-
+    
     arrangeRootDepthFirst(){
         for (var i = 0; i < this.children.length; i++){
             var element = this.children[i];
@@ -359,12 +359,14 @@ class ArtboardPage extends Page {
         }
     }
 
-    makeToolboxConfigDirty(forceUpdate){
+    
+
+    makeToolboxConfigDirty(forceUpdate, changedId){
         this.setProps({toolboxConfigId:null});
         if(forceUpdate){
             App.Current.changeToolboxPage.raise(this);
-        }
-        this.toolboxConfigIsDirty.raise(forceUpdate);
+        }        
+        this.toolboxConfigIsDirty.raise(forceUpdate, changedId);
     }
 }
 ArtboardPage.prototype.t = Types.ArtboardPage;

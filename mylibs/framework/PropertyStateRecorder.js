@@ -2,6 +2,7 @@
 import PropertyTracker from "framework/PropertyTracker";
 import {createUUID, deepEquals} from "../util";
 import {PatchType, ChangeMode} from "./Defs";
+import ObjectFactory from "framework/ObjectFactory";
 
 function removeElement(state, elementId) {
     delete state.data[elementId];
@@ -21,8 +22,9 @@ function eachElementAndProp(state, callback) {
 }
 function apply(state, element) {
     element.applyVisitor(e=> {
-        var elementData = state.data[e.id()];
+        var elementData = state.data[e.sourceId()];
         if (elementData) {
+            ObjectFactory.updatePropsWithPrototype(elementData.props);
             e.setProps(elementData.props, ChangeMode.Root);
         }
     });
@@ -62,7 +64,7 @@ function cleanUpStates() {
 function cleanUpDeadControls() {
     var elementsMap = {};
     this._element.applyVisitor(e=> {
-        elementsMap[e.id()] = e;
+        elementsMap[e.sourceId()] = e;
     });
     for (var state of this.states) {
         var toRemove = [];

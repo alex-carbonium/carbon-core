@@ -199,11 +199,11 @@ var UIElement = klass(DataNode, {
     getTranslation: function(){
         return this.dm().translation;
     },
-    applyTranslation: function(t, withReset) {
+    applyTranslation: function(t, withReset, mode) {
         if (withReset){
             this.saveOrResetLayoutProps();
         }
-        this.applyTransform(Matrix.create().translate(t.x, t.y));
+        this.applyTransform(Matrix.create().translate(t.x, t.y), false, mode);
     },
     applyDirectedTranslation: function(t) {
         this.applyTransform(Matrix.create().translate(t.x, t.y), true);
@@ -335,6 +335,9 @@ var UIElement = klass(DataNode, {
     },
     stopResizing: function () {
         Environment.controller.stopResizingEvent.raise();
+    },
+    canHandleCorruption: function() {
+        return false;
     },
     getSnapPoints: function (local) {
         if (!this.allowSnapping()) {
@@ -1157,6 +1160,13 @@ var UIElement = klass(DataNode, {
         var clone = ObjectFactory.fromType(this.t, this.cloneProps());
         clone.id(createUUID());
         return clone;
+    },
+    sourceId:function(id){
+      if(arguments.length > 0) {
+          this.setProps({sourceId:id});
+      }
+
+      return this.props.sourceId || this.props.id;
     },
     mirrorClone: function () {
         var clone = ObjectFactory.fromType(this.t, this.cloneProps());

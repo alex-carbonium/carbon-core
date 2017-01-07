@@ -9,6 +9,7 @@ import RelayoutEngine from "./relayout/RelayoutEngine";
 import PropertyStateRecorder from "framework/PropertyStateRecorder";
 import ModelStateListener from "framework/sync/ModelStateListener";
 import * as math from "math/math";
+import Point from "math/point";
 import Selection from "framework/SelectionModel";
 import ActionHelper from "ui/prototyping/ActionHelper";
 import Environment from "environment";
@@ -136,6 +137,21 @@ class Artboard extends Container {
 
         if (element instanceof Artboard) {
             return false;
+        }
+
+        if(this.props.resource === ArtboardResource.Stencil && element.children !== undefined) {
+            var can = true;
+            var id = this.id();
+            element.applyVisitor(e=>{
+                if(e.props.source && e.props.source.artboardId === id){
+                    can = false;
+                    return false;
+                }
+            })
+
+            if(!can){
+                return false;
+            }
         }
 
         if (element.props.masterId) {
@@ -395,7 +411,8 @@ class Artboard extends Container {
         if (res) {
             return res;
         }
-        return isPointInRect({x: this.x(), y: this.y() - 20 / scale, width: this.width(), height: 20 / scale}, point);
+        var pos = this.position();
+        return isPointInRect({x: pos.x, y: pos.y - 20 / scale, width: this.width(), height: 20 / scale}, point);
     }
 
     primitiveRoot() {
@@ -461,7 +478,7 @@ class Artboard extends Container {
         if (parent) {
             parent.incrementVersion();
             if (this.props.resource === ArtboardResource.Stencil) {
-                parent.makeToolboxConfigDirty(this.runtimeProps.refreshToolbox);
+                parent.makeToolboxConfigDirty(this.runtimeProps.refreshToolbox, this.id());
                 delete this.runtimeProps.refreshToolbox;
             }
         }
@@ -473,7 +490,8 @@ class Artboard extends Container {
 
     click(event) {
         var scale = Environment.view.scale();
-        if (isPointInRect({x: this.x(), y: this.y() - 20 / scale, width: this.width(), height: 20 / scale}, {
+        var pos = this.position();
+        if (isPointInRect({x: pos.x, y: pos.y - 20 / scale, width: this.width(), height: 20 / scale}, {
                 x: event.x,
                 y: event.y
             })) {
@@ -663,18 +681,18 @@ class Artboard extends Container {
 
     linkNewStateBoard(stateBoard) {
         var margin = 40;
-        var width = this.width();
-        var height = this.height();
+        var box = this.getBoundingBox();
+        var width = box.width;
+        var height = box.height;
         var statesCount = this._recorder.statesCount();
 
         stateBoard.setProps({
             masterId: this.id(),
             width: width,
-            height: this.height(),
-            y: this.y() + (statesCount - 1) * (height + margin),
-            x: this.x(),
+            height: height,
             name: this.props.name
-        }, true);
+        }, ChangeMode.Self);
+        stateBoard.applyTranslation(new Point(box.x, box.y + (statesCount - 1) * (height + margin)), false, ChangeMode.Self);
 
         for (var i = 0; i < this.children.length; i++) {
             var e = this.children[i];
