@@ -337,7 +337,7 @@ class Artboard extends Container {
                 childrenMap[prop.controlId] = child;
             }
             var propMetadata = PropertyMetadata.find(child.t, prop.propertyName);
-            res['custom:' + prop.propertyName] = propMetadata;
+            res['custom:' + prop.controlId + ':' + prop.propertyName] = propMetadata;
         }
 
         res['groups'] = function () {
@@ -345,7 +345,7 @@ class Artboard extends Container {
                 {
                     label: element.name(),
                     properties: ['stateId'].concat(properties.map(p=> {
-                        return 'custom:' + p.propertyName
+                        return 'custom:'+ p.controlId + ':' + p.propertyName
                     }))
                 },
                 {

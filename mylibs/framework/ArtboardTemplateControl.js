@@ -68,10 +68,10 @@ export default class ArtboardTemplateControl extends Container {
         if (this._allowHResize || this._allowVResize) {
 
             var props = {};
-            if(this._allowHResize) {
+            if (this._allowHResize) {
                 props.width = currentSize.width || artboard.width();
             }
-            if(this._allowVResize) {
+            if (this._allowVResize) {
                 props.height = currentSize.height || artboard.height();
             }
 
@@ -93,8 +93,8 @@ export default class ArtboardTemplateControl extends Container {
                 childrenMap[prop.controlId] = child;
             }
 
-            var newName = 'custom:' + prop.propertyName;
-            if (this.props['owt:' + prop.propertyName] !== true) {
+            var newName = 'custom:' + prop.controlId + ':' + prop.propertyName;
+            if (this.props['owt:' + prop.controlId + ':' + prop.propertyName] !== true) {
                 res[newName] = child.props[prop.propertyName];
             }
             propertyMapping[newName] = prop;
@@ -204,11 +204,27 @@ export default class ArtboardTemplateControl extends Container {
         // }, null, ChangeMode.Self);
     }
 
+    _getCustomPropertyDefinition(propName) {
+        var fromCache = this._propertyMapping[propName];
+        if (fromCache) {
+            return fromCache;
+        }
+        var splits = propName.split(':');
+        var data = {
+            controlId: splits[1],
+            propertyName: splits[2]
+        }
+
+        this._propertyMapping[propName] = data;
+
+        return data;
+    }
+
     _updateCustomProperties() {
         var props = this.props;
         for (var propName in props) {
             if (propName.startsWith('custom:')) {
-                var prop = this._propertyMapping[propName];
+                var prop = this._getCustomPropertyDefinition(propName);
                 var elementId = prop.controlId;
                 var element = this.getElementById(this.id() + elementId);
                 element.setProps({[prop.propertyName]: props[propName]}, ChangeMode.Self);
@@ -219,8 +235,8 @@ export default class ArtboardTemplateControl extends Container {
     prepareProps(props) {
         for (var propName in props) {
             if (propName.startsWith('custom:')) {
-                var prop = this._propertyMapping[propName];
-                props['owt:' + prop.propertyName] = true;
+                var prop = this._getCustomPropertyDefinition(propName);
+                props['owt:' + prop.controlId + ':' + prop.propertyName] = true;
             }
         }
     }
@@ -286,6 +302,29 @@ export default class ArtboardTemplateControl extends Container {
 
     relayoutCompleted() {
 
+    }
+
+    registerSetProps(element, props, oldProps, mode) {
+        if(this._registerSetProps){
+            return;
+        }
+        
+        if (element.id() === element.sourceId()) {
+            return super.registerSetProps(element, props, oldProps, mode);
+        }
+
+        var propNames = Object.keys(props);
+        var newProps = {};
+        for (var i = 0; i < propNames.length; ++i) {
+            var propName = propNames[i];
+            var newName = element.sourceId() + ":" + propName;
+            newProps["custom:" + newName] = props[propName];
+            newProps["owt:" + newName] = true;
+        }
+
+        this._registerSetProps = true;
+        this.setProps(newProps);
+        this._registerSetProps = false;
     }
 
     draw(context) {
