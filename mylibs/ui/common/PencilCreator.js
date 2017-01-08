@@ -99,7 +99,8 @@ define(["ui/common/EditModeAction", "ui/common/Path"], function(EditModeAction, 
                 Invalidate.requestUpperOnly();
 
                 if(points.length > 1){
-                    App.Current.activePage.dropToPage(element.x(), element.y(), element);
+                    var pos = element.position();
+                    App.Current.activePage.dropToPage(pos.x, pos.y, element);
                 }
                 Selection.makeSelection([element]);
                 this.points=[];

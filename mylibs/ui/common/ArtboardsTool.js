@@ -128,7 +128,8 @@ export default class ArtboardsTool extends EditModeAction {
                 return;
             }
 
-            App.Current.activePage.dropToPage(element.x(), element.y(), element);
+            var pos = element.position();
+            App.Current.activePage.dropToPage(pos.x, pos.y, element);
             Selection.makeSelection([element]);
             this._hoverArtboard = null;// need to rebuild snapping data TODO: consider to just add data for a new element
         } else {

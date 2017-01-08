@@ -94,7 +94,8 @@ export default klass(EditModeAction, (function () {
 
                 this._element.trackResize();
 
-                App.Current.activePage.dropToPage(this._element.x(), this._element.y(), this._element);
+                var pos = this._element.position();
+                App.Current.activePage.dropToPage(pos.x, pos.y, this._element);
                 var element = this._element;
                 Invalidate.request();
                 Selection.makeSelection([element]);

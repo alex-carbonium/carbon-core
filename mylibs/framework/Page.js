@@ -83,7 +83,9 @@ class Page extends Layer {
     dropToPage(x, y, element) {
         var data = this.findDropToPageData(x, y, element);
 
-        element.applyTranslation(data.position);
+        var size = element.size();
+        element.applyTranslation(data.position, true);
+        element.setProps(size);
         data.target.add(element);
 
         return data.target;

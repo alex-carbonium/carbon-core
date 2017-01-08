@@ -84,7 +84,9 @@ define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Ma
                         return;
                     }
 
-                    App.Current.activePage.dropToPage(this._element.x(), this._element.y(), this._element);
+                    var pos = this._element.position();
+
+                    App.Current.activePage.dropToPage(pos.x, pos.y, this._element);
                     this._element.afterAddFromToolbox();
                     var element = this._element;
                     Selection.makeSelection([element]);
