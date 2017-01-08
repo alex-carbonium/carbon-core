@@ -37,6 +37,8 @@ export default class ArtboardTemplateControl extends Container {
             return;
         }
 
+        this._initializing = true;
+
         this._allowHResize = this._artboard.props.allowHorizontalResize;
         this._allowVResize = this._artboard.props.allowVerticalResize;
 
@@ -77,6 +79,8 @@ export default class ArtboardTemplateControl extends Container {
 
             this.setProps(props, ChangeMode.Self);
         }
+
+        this._initializing = false;
     }
 
     _setupCustomProperties(artboard) {
@@ -179,29 +183,13 @@ export default class ArtboardTemplateControl extends Container {
     _changeState(stateId) {
         var defaultState = this._artboard._recorder.getStateById('default');
 
-        // var oldSize = this.getBoundaryRect();
-        //
-        // this.setProps({
-        //         width: this._artboard.width(),
-        //         height: this._artboard.height()
-        //     }
-        //     , ChangeMode.Self);
-
         PropertyStateRecorder.applyState(this, defaultState, this.id());
         if (stateId !== 'default') {
             var newState = this._artboard._recorder.getStateById(stateId);
-            PropertyStateRecorder.applyState(this, newState, this.id());
+            if(newState) {
+                PropertyStateRecorder.applyState(this, newState, this.id());
+            }
         }
-
-        // this.setProps({
-        //     width: oldSize.width,
-        //     height: oldSize.height
-        // }, ChangeMode.Self);
-        //
-        // this.arrange({
-        //     oldValue: this._artboard.getBoundaryRect(),
-        //     newValue: oldSize
-        // }, null, ChangeMode.Self);
     }
 
     _getCustomPropertyDefinition(propName) {
@@ -305,10 +293,10 @@ export default class ArtboardTemplateControl extends Container {
     }
 
     registerSetProps(element, props, oldProps, mode) {
-        if(this._registerSetProps){
+        if(this._registerSetProps || this._initializing){
             return;
         }
-        
+
         if (element.id() === element.sourceId()) {
             return super.registerSetProps(element, props, oldProps, mode);
         }
@@ -356,6 +344,9 @@ PropertyMetadata.registerForType(ArtboardTemplateControl, {
     },
     allowMoveOutChildren: {
         defaultValue: false
+    },
+    enableGroupLocking: {
+        defaultValue: true
     },
     prepareVisibility: function (props, selection, view) {
         if (selection.elements) {

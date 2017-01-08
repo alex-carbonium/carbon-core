@@ -26,7 +26,9 @@ export function choosePasteLocation(elements, bufferRect, bufferRectLocal, allow
         } while (current && !(current instanceof Page));
     }
     else{
-        candidates.push(artboard);
+        if (artboard.canAccept(elements, false, allowMoveIn)) {
+            candidates.push(artboard);
+        }
     }
 
     for (var i = 0; i < candidates.length; i++){
