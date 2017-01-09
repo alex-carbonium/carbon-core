@@ -8,15 +8,14 @@ import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
 import SnapController from "framework/SnapController";
 import Brush from "framework/Brush";
+import Point from "math/point";
 
 
 export default klass(EditModeAction, (function () {
-    var angleStep = 15;
-
     function update(x1, y1, x2, y2) {
         var props = {
             x1, x2, y1, y2
-        }
+        };
         this._element.prepareProps(props);
         this._element.setProps(props);
     }
@@ -24,21 +23,18 @@ export default klass(EditModeAction, (function () {
     function resize(x1, y1, x2, y2) {
         var minx = Math.min(x1, x2);
         var miny = Math.min(y1, y2);
-        var width = Math.abs(x1 - x2);
-        var height = Math.abs(y1 - y2);
+        var pos = new Point(minx, miny);
 
         var props = {
             x1: x1 - minx,
             y1: y1 - miny,
             x2: x2 - minx,
-            y2: y2 - miny,
-            x: minx,
-            y: miny,
-            width: width,
-            height: height
+            y2: y2 - miny
         };
         this._element.prepareProps(props);
         this._element.setProps(props);
+
+        return pos;
     }
 
     return {
@@ -73,7 +69,7 @@ export default klass(EditModeAction, (function () {
                 });
                 this._element.setProps(settings);
             }
-            this._element.stopTrackingResize();
+
             update.call(this, this._startPoint.x, this._startPoint.y, this._startPoint.x, this._startPoint.y);
             event.handled = true;
             return false;
@@ -84,7 +80,7 @@ export default klass(EditModeAction, (function () {
 
             if (this._element) {
                 Invalidate.requestUpperOnly();
-                resize.call(this, this._element.x1(), this._element.y1(), this._element.x2(), this._element.y2());
+                var pos = resize.call(this, this._element.x1(), this._element.y1(), this._element.x2(), this._element.y2());
 
                 var w = this._element.width()
                     , h = this._element.height();
@@ -92,9 +88,6 @@ export default klass(EditModeAction, (function () {
                     return;
                 }
 
-                this._element.trackResize();
-
-                var pos = this._element.position();
                 App.Current.activePage.dropToPage(pos.x, pos.y, this._element);
                 var element = this._element;
                 Invalidate.request();
@@ -137,7 +130,7 @@ export default klass(EditModeAction, (function () {
             if (this._mousepressed) {
                 context.save();
                 var e = this._element;
-                e.viewMatrix().applyToContext(context);
+                e.applyViewMatrix(context);
                 e.drawSelf(context, e.width(), e.height(), environment);
                 context.restore();
             }

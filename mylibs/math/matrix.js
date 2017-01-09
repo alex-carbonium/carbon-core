@@ -447,14 +447,8 @@ class Matrix {
      * A faster version of transform that only takes one point and does not
      * attempt to convert it.
      */
-    transformPoint(point){
-        var x = point.x,
-            y = point.y;
-
-        return new Point(
-            x*this._a + y*this._c + this._tx,
-            x*this._b + y*this._d + this._ty
-        );
+    transformPoint(point, round){
+        return this.transformPoint2(point.x, point.y, round);
     }
 
     transformPoint2(x, y, round){
