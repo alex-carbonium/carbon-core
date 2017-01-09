@@ -169,7 +169,7 @@ export default class ArtboardTemplateControl extends Container {
                 var newSize = this.size();
                 var oldSize = {width: oldProps.width || newSize.width, height: oldProps.height || newSize.height};
 
-                this.arrange({oldValue: oldSize, newValue: newSize}, null, ChangeMode.Self);
+                this.arrange({oldRect: oldSize, newRect: newSize}, null, ChangeMode.Self);
             }
 
             if (props.stateId !== undefined) {

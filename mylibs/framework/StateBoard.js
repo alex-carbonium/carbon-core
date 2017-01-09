@@ -36,7 +36,8 @@ class StateBoard extends Artboard {
         if(!this.artboard){
             return;
         }
-        return this.artboard._recorder.getStateById(this.stateId).name;
+        var state = this.artboard._recorder.getStateById(this.stateId);
+        return state?state.name:'';
     }
 
     displayName(){
