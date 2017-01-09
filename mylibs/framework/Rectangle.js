@@ -386,12 +386,16 @@ Rectangle.fromSvgElement = function (element, parsedAttributes, matrix) {
         rect.opacity(parsedAttributes.opacity);
     }
 
+    var pos = {x:0, y:0}
     if (parsedAttributes.x) {
-        rect.x(parsedAttributes.x);
+        pos.x = parsedAttributes.x;
     }
     if (parsedAttributes.y) {
-        rect.y(parsedAttributes.y);
+        pos.y = parsedAttributes.y;
     }
+
+    rect.applyTranslation(pos);
+
     var path =  rect.convertToPath();
     path.transform(matrix);
     return path;

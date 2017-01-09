@@ -2,17 +2,17 @@ import Container from "framework/Container";
 import Brush from "framework/Brush";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Page from "framework/Page";
+import * as math from "math/math";
 import {isPointInRect} from "math/math";
 import SharedColors from "ui/SharedColors";
 import {ChangeMode, TileSize, Types, ArtboardResource} from "./Defs";
 import RelayoutEngine from "./relayout/RelayoutEngine";
 import PropertyStateRecorder from "framework/PropertyStateRecorder";
 import ModelStateListener from "framework/sync/ModelStateListener";
-import * as math from "math/math";
 import Point from "math/point";
 import Selection from "framework/SelectionModel";
-import ActionHelper from "ui/prototyping/ActionHelper";
 import Environment from "environment";
+import Matrix from "math/matrix";
 
 
 //TODO: fix name of artboard on zoom
@@ -64,7 +64,7 @@ class Artboard extends Container {
             if (page) {
                 var frame = page.getArtboardById(this.props.frame.artboardId);
 
-                if(frame.runtimeProps.clone && frame.runtimeProps.cloneVersion === frame.version){
+                if (frame.runtimeProps.clone && frame.runtimeProps.cloneVersion === frame.version) {
                     return frame.runtimeProps.clone;
                 }
 
@@ -78,14 +78,16 @@ class Artboard extends Container {
                 frame.runtimeProps.cloneVersion = frame.version;
                 frame.runtimeProps.clone = frameClone;
 
-                frameClone.setProps({x: 0, y: 0, fill:Brush.Empty, stroke:Brush.Empty});
+                frameClone.setProps({fill: Brush.Empty, stroke: Brush.Empty, m: Matrix.Identity});
+                frameClone.applyTranslation({x: 0, y: 0}, true);
 
                 var screenRect = screen.getBoundaryRectGlobal();
                 var frameRect = frame.getBoundaryRectGlobal();
                 frameClone.runtimeProps.frameX = frameRect.x - screenRect.x;
                 frameClone.runtimeProps.frameY = frameRect.y - screenRect.y;
-                frameClone.runtimeProps.cloneScreenWidth = screen.width();
-                frameClone.runtimeProps.cloneScreenHeight = screen.height();
+                var screenBox = screen.getBoundingBox();
+                frameClone.runtimeProps.cloneScreenWidth = screenBox.width;
+                frameClone.runtimeProps.cloneScreenHeight = screenBox.height;
                 this._frame = frame;
             }
         }
@@ -130,7 +132,7 @@ class Artboard extends Container {
     }
 
     canAccept(elements) {
-        if (elements.length !== 1){
+        if (elements.length !== 1) {
             return false;
         }
         var element = elements[0];
@@ -139,17 +141,17 @@ class Artboard extends Container {
             return false;
         }
 
-        if(this.props.resource === ArtboardResource.Stencil && element.children !== undefined) {
+        if (this.props.resource === ArtboardResource.Stencil && element.children !== undefined) {
             var can = true;
             var id = this.id();
-            element.applyVisitor(e=>{
-                if(e.props.source && e.props.source.artboardId === id){
+            element.applyVisitor(e=> {
+                if (e.props.source && e.props.source.artboardId === id) {
                     can = false;
                     return false;
                 }
             })
 
-            if(!can){
+            if (!can) {
                 return false;
             }
         }
@@ -206,13 +208,13 @@ class Artboard extends Container {
         var frame = this.frame;
 
         context.save();
-        context.translate(this.x() + this.frame.runtimeProps.frameX, this.y() + this.frame.runtimeProps.frameY);
+        var pos = this.position();
+        context.translate(pos.x + this.frame.runtimeProps.frameX, pos.y + this.frame.runtimeProps.frameY);
         frame.draw(context, environment);
         context.restore();
-
     }
 
-    drawExtras(context, environment){
+    drawExtras(context, environment) {
         if (environment.offscreen) {
             return;
         }
@@ -314,9 +316,10 @@ class Artboard extends Container {
     drawSelf(context, w, h, environment) {
         context.save();
         var frame = this.frame;
-        if(frame){
+        if (frame) {
             context.beginPath();
-            context.rect(0,0, frame.runtimeProps.cloneScreenWidth, frame.runtimeProps.cloneScreenHeight);
+            var pos = this.position();
+            context.rect(pos.x, pos.y, frame.runtimeProps.cloneScreenWidth, frame.runtimeProps.cloneScreenHeight);
             context.clip();
         }
         super.drawSelf(context, w, h, environment);
@@ -345,7 +348,7 @@ class Artboard extends Container {
                 {
                     label: element.name(),
                     properties: ['stateId'].concat(properties.map(p=> {
-                        return 'custom:'+ p.controlId + ':' + p.propertyName
+                        return 'custom:' + p.controlId + ':' + p.propertyName
                     }))
                 },
                 {
@@ -390,18 +393,18 @@ class Artboard extends Container {
 
         if (props.resource !== undefined && Selection.isOnlyElementSelected(this)) {
             Selection.refreshSelection();
-            if(props.resource === ArtboardResource.Stencil ){
+            if (props.resource === ArtboardResource.Stencil) {
                 this.runtimeProps.refreshToolbox = true;
-            } else if(oldProps.resource === ArtboardResource.Stencil){
+            } else if (oldProps.resource === ArtboardResource.Stencil) {
                 var parent = this.parent();
-                if(parent) {
+                if (parent) {
                     parent.makeToolboxConfigDirty(true);
                 }
             }
 
         }
 
-        if(props.frame === null){
+        if (props.frame === null) {
             delete this._frame;
         }
     }
@@ -761,9 +764,9 @@ PropertyMetadata.registerForType(Artboard, {
         defaultValue: []
     },
     resource: {
-        displayName:"@resource",
+        displayName: "@resource",
         type: "dropdown",
-        defaultValue:null,
+        defaultValue: null,
         options: {
             items: [
                 {name: "None", value: null},
