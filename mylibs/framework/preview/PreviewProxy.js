@@ -18,7 +18,7 @@ export default class PreviewProxy {
                 width: artboard.props.allowHorizontalResize ? screenSize.width : artboard.width(),
                 height: artboard.props.allowVerticalResize ? screenSize.height : artboard.height()
             });
-            previewClone.performArrange(oldRect);
+            previewClone.performArrange({oldRect});
         } else {
             previewClone.setProps({x: 0, y: 0});
         }
@@ -81,7 +81,7 @@ export default class PreviewProxy {
             var width = artboard.props.allowHorizontalResize ? screenSize.width : this.activePage.originalSize.width;
             var height = artboard.props.allowVerticalResize ? screenSize.height : this.activePage.originalSize.height;
             artboard.setProps({x: 0, y: 0, width: width, height: height});
-            artboard.performArrange(oldRect);
+            artboard.performArrange({oldRect});
         }
 
 
