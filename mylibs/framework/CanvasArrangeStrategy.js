@@ -1,10 +1,11 @@
 var debug = require("DebugUtil")("carb:canvasArrangeStrategy");
-import {ChangeMode, HorizontalConstraint, VerticalConstraint} from "framework/Defs"
+import {HorizontalConstraint, VerticalConstraint} from "./Defs"
+import Point from "../math/point";
 
 export default {
     arrange: function(container, event, changeMode){
-        var npr = event.newValue;
-        var pr = event.oldValue;
+        var npr = event.newRect;
+        var pr = event.oldRect;
 
         debug("old: [%s, %s] new: [%s, %s]", pr.width, pr.height, npr.width, npr.height);
 
@@ -13,51 +14,61 @@ export default {
             return null;
         }
 
+        var v = null;
+
         for (let i = 0, l = items.length; i < l; ++i) {
             let child = items[i];
-            var r = child.getBoundaryRect();
             var constraints = child.constraints();
-            var newWidth = r.width, newHeight = r.height, newX = r.x, newY = r.y;
-            var needUpdate = false;
+
+            var scaleX = false;
+            var scaleY = false;
+            var translateX = false;
+            var translateY = false;
+            var translateX2 = false;
+            var translateY2 = false;
+
             if (constraints.h == HorizontalConstraint.LeftRight) { // stretch element horizontally
-                newWidth = r.width + npr.width - pr.width;
-                needUpdate = true;
+                scaleX = true;
             } else if (constraints.h == HorizontalConstraint.Right) {
-                newX = r.x + npr.width - pr.width;
-                needUpdate = true;
+                translateX = true;
             } else if (constraints.h == HorizontalConstraint.Center) {
-                var scale = npr.width / pr.width;
-                var center = r.x + r.width / 2;
-                center *= scale;
-                newX = (center - r.width / 2);
-                needUpdate = true;
+                translateX = true;
+                translateX2 = true;
             }
 
             if (constraints.v == VerticalConstraint.TopBottom) { // stretch element vertically
-                newHeight = r.height + npr.height - pr.height;
-                needUpdate = true;
+                scaleY = true;
             } else if (constraints.v == VerticalConstraint.Bottom) {
-                newY = r.y + npr.height - pr.height;
-                needUpdate = true;
+                translateY = true;
             } else if (constraints.v == VerticalConstraint.Center) {
-                scale = npr.height / pr.height;
-                center = r.y + r.height / 2;
-                center *= scale;
-                newY = (center - r.height / 2);
-                needUpdate = true;
+                translateY = true;
+                translateY2 = true;
             }
 
-            if (needUpdate) {
-                var newProps = {
-                    x: newX,
-                    y: newY,
-                    width: newWidth,
-                    height: newHeight
-                };
+            if (scaleX || scaleY) {
+                v = v || new Point(0, 0);
+                var dw = scaleX ? npr.width - pr.width : 0;
+                var dh = scaleY ? npr.height - pr.height : 0;
+                var bb = child.getBoundingBox();
+                var origin = bb.topLeft();
 
-                if (r.width != newWidth || r.height != newHeight || r.x != newX || r.y != newY) {
-                    child.setProps(newProps, changeMode);
+                //for constraint = scale, use same scale and set origin to Point.Zero
+                v.set(1 + dw/bb.width, 1 + dh/bb.height);
+                child.applyScaling(v, origin, false, event.withReset);
+            }
+            if (translateX || translateY){
+                v = v || new Point(0, 0);
+                var dx = translateX2 ? .5 : translateX ? 1 : 0;
+                var dy = translateY2 ? .5 : translateX ? 1 : 0;
+
+                v.set((npr.width - pr.width) * dx, (npr.height - pr.height) * dy);
+
+                var reset = event.withReset;
+                var alreadyReset = scaleX || scaleY;
+                if (alreadyReset){
+                    reset = false;
                 }
+                child.applyTranslation(v, reset);
             }
         }
     }

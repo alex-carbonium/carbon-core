@@ -139,6 +139,9 @@ define(function () {
             hitElement(){
                 return null;
             },
+            hitElementDirect(){
+                return null;
+            },
             pointToScroll(){
                 return {scrollX: 0, scrollY: 0};
             }

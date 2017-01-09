@@ -14,10 +14,11 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
             _constructor: function () {
                 this.children = [];
             },
-            performArrange: function (oldRect, mode) {
-                var newRect = this.getBoundaryRect();
-                oldRect = oldRect || newRect;
-                this.arrange({oldValue: oldRect, newValue: newRect}, mode);
+            performArrange: function (event, mode) {
+                var e = event || {};
+                e.newRect = this.getBoundaryRect();
+                e.oldRect = e.oldRect || e.newRect;
+                this.arrange(e, mode);
             },
             arrangeRootDepthFirst: function(){
                 this.applyVisitorDepthFirst(x => x.performArrange());
@@ -31,10 +32,10 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
             arrangeStrategyInstance: function () {
                 return ArrangeStrategy.findStrategy(this);
             },
-            applySizeScaling: function(){
-                var rect = this.getBoundaryRect();
-                UIElement.prototype.applySizeScaling.apply(this, arguments);
-                this.performArrange(rect);
+            applySizeScaling: function(s, o, sameDirection, withReset){
+                var oldRect = this.getBoundaryRect();
+                UIElement.prototype.applySizeScaling.call(this, s, o, sameDirection, withReset);
+                this.performArrange({oldRect, withReset});
             },
 
             fillBackground: function (context, l, t, w, h) {
