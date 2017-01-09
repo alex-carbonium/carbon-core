@@ -47,9 +47,9 @@ export default class ArtboardTemplateControl extends Container {
         this.setProps({
             width: artboard.width(),
             height: artboard.height()
-        });
+        }, ChangeMode.Self);
 
-        this.setProps({_unwrapContent: artboard.props.insertAsContent});
+        this.setProps({_unwrapContent: artboard.props.insertAsContent}, ChangeMode.Self);
 
         this._cloneFromArtboard(artboard);
 
@@ -166,9 +166,9 @@ export default class ArtboardTemplateControl extends Container {
         }
         else {
             if ((props.width !== undefined || props.height !== undefined)) {
-                var oldSize = {width: oldProps.width || this.width(), height: oldProps.height || this.height()};
                 var newSize = this.size();
-                //this.setProps(newSize, ChangeMode.Self);
+                var oldSize = {width: oldProps.width || newSize.width, height: oldProps.height || newSize.height};
+
                 this.arrange({oldValue: oldSize, newValue: newSize}, null, ChangeMode.Self);
             }
 
@@ -178,6 +178,12 @@ export default class ArtboardTemplateControl extends Container {
                 this._updateCustomProperties();
             }
         }
+    }
+
+    arrange(resizeEvent){
+        this._arranging = true;
+        super.arrange(resizeEvent);
+        this._arranging = false;
     }
 
     _changeState(stateId) {
@@ -193,7 +199,12 @@ export default class ArtboardTemplateControl extends Container {
     }
 
     _getCustomPropertyDefinition(propName) {
+        if(!this._propertyMapping) {
+            this._propertyMapping = {};
+        }
+
         var fromCache = this._propertyMapping[propName];
+
         if (fromCache) {
             return fromCache;
         }
@@ -215,7 +226,9 @@ export default class ArtboardTemplateControl extends Container {
                 var prop = this._getCustomPropertyDefinition(propName);
                 var elementId = prop.controlId;
                 var element = this.getElementById(this.id() + elementId);
-                element.setProps({[prop.propertyName]: props[propName]}, ChangeMode.Self);
+                if(element) {
+                    element.setProps({[prop.propertyName]: props[propName]}, ChangeMode.Self);
+                }
             }
         }
     }
@@ -293,18 +306,21 @@ export default class ArtboardTemplateControl extends Container {
     }
 
     registerSetProps(element, props, oldProps, mode) {
-        if(this._registerSetProps || this._initializing){
-            return;
+        if (element.id() === this.id()) {
+            return super.registerSetProps(element, props, oldProps, mode);
         }
 
-        if (element.id() === element.sourceId()) {
-            return super.registerSetProps(element, props, oldProps, mode);
+        if(this._registerSetProps || this._initializing || this._arranging){
+            return;
         }
 
         var propNames = Object.keys(props);
         var newProps = {};
         for (var i = 0; i < propNames.length; ++i) {
             var propName = propNames[i];
+            if(propName.startsWith("custom:")){
+                continue;
+            }
             var newName = element.sourceId() + ":" + propName;
             newProps["custom:" + newName] = props[propName];
             newProps["owt:" + newName] = true;
