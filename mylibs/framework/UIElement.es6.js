@@ -1905,7 +1905,7 @@ PropertyMetadata.registerForType(UIElement, {
         defaultValue: false
     },
     constraints: {
-        displayName: "Constraints",
+        displayName: "@constraints",
         type: "constraints",
         useInModel: true,
         editable: false,
@@ -1982,6 +1982,10 @@ PropertyMetadata.registerForType(UIElement, {
             {
                 label: "Layout",
                 properties: ["x", "y", "width", "height", "constraints", "angle", "dockStyle", "horizontalAlignment", "verticalAlignment"]
+            },
+            {
+                label: "@constraints",
+                properties: [ "constraints"]
             },
             {
                 label: "Appearance",

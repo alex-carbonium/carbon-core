@@ -2,6 +2,7 @@ import Container from "./Container";
 import ResizeDimension from "framework/ResizeDimension";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Brush from "framework/Brush";
+import Shadow from "framework/Shadow";
 import ContextPool from "framework/render/ContextPool";
 import {Types, StrokePosition} from "./Defs";
 import Frame from "./Frame";
@@ -260,6 +261,11 @@ PropertyMetadata.registerForType(Shape, {
             ]
         },
     },
+    shadows: {
+        defaultValue: [],
+        type: 'shadow',
+        displayName: '@shadow'
+    },
     miterLimit: {
         defaultValue: 10,
         displayName: "@miterLimit",
@@ -283,13 +289,23 @@ PropertyMetadata.registerForType(Shape, {
         return [
             {
                 label: "Layout",
-                properties: ["x", "y", "width", "height", "constraints", "angle"],
+                properties: ["x", "y", "width", "height", "angle"],
                 expanded: true
             },
             {
                 label: "Appearance",
                 expanded: false,
                 properties: ["visible", "opacity", "fill", "stroke", 'dashPattern', "cornerRadius", "clipMask"]
+            },
+            {
+                label: "Shadow",
+                expanded: false,
+                properties: ["shadows"]
+            },
+            {
+                label: "@constraints",
+                expanded: false,
+                properties: ["constraints"]
             },
             {
                 label: "Settings",
