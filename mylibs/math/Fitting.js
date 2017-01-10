@@ -20,11 +20,11 @@ function fitOrFill(source, target, noScaleUp, fit){
     if (p > 1 && noScaleUp)
         return {width: source.width, height: source.height};
 
-    var w2 = source.width * p + .5|0;
-    var h2 = source.height * p + .5|0;
+    var w2 = source.width * p;
+    var h2 = source.height * p;
     return {
-        x: target.x + (target.width - w2)/2 + .5|0,
-        y: target.y + (target.height - h2)/2 + .5|0,
+        x: target.x + (target.width - w2)/2,
+        y: target.y + (target.height - h2)/2,
         width: w2,
         height: h2
     };

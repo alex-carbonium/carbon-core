@@ -465,9 +465,12 @@ export default class Point {
      * var result = point1 + point2;
      * console.log(result); // {x: 15, y: 30}
      */
-    add(/* point */) {
-        var point = new Point(arguments[0]);
+    add(point) {
         return new Point(this.x + point.x, this.y + point.y);
+    }
+
+    add2(x, y) {
+        return new Point(this.x + x, this.y + y);
     }
 
     /**
@@ -831,6 +834,13 @@ export default class Point {
             return this;
         }
         return new Point(Math.abs(this.x), Math.abs(this.y));
+    }
+
+    static create(x, y){
+        if (x === 0 && y === 0){
+            return Point.Zero;
+        }
+        return new Point(x, y);
     }
 }
 

@@ -262,7 +262,7 @@ var UIElement = klass(DataNode, {
         var localOrigin = this.viewMatrixInverted().transformPoint(o);
         var wx = localOrigin.x === 0 ? 0 : br.width/localOrigin.x;
         var hy = localOrigin.y === 0 ? 0 : br.height/localOrigin.y;
-        var newLocalOrigin = new Point(wx === 0 ? 0 : newWidth/wx, hy === 0 ? 0 : newHeight/hy);
+        var newLocalOrigin = Point.create(wx === 0 ? 0 : newWidth/wx, hy === 0 ? 0 : newHeight/hy);
 
         var newOrigin = this.viewMatrix().transformPoint(newLocalOrigin);
         var offset = o.subtract(newOrigin);

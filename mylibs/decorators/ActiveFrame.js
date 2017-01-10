@@ -54,7 +54,7 @@ function onMouseDown(event) {
 
     if (pointId >= 0 && !this._originalPoint) {
         this._originalPoint = this._frame.points[pointId];
-        this._originalPoint.type.capture(this._frame, this._originalPoint, event);
+        this._frameType.capturePoint(this._frame, this._originalPoint, event);
         event.handled = true;
         this._frame.captured = true;
         return false;
@@ -63,7 +63,7 @@ function onMouseDown(event) {
 
 function onMouseUp(event) {
     if (this._originalPoint) {
-        this._originalPoint.type.release(this._frame, this._originalPoint);
+        this._frameType.releasePoint(this._frame, this._originalPoint);
         this._frame.captured = false;
         updatePosition(this);
         delete this._originalPoint;

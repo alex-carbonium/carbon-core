@@ -71,7 +71,7 @@ var LineDirectionPoint = {
         p.x = x + w * rv[0] + rv[1] * offset.x;
         p.y = y + h * rv[2] + rv[3] * offset.y;
     },
-    change (frame, dx, dy, point, event) {
+    change (frame, dx, dy, point, mousePoint, keys) {
         if (!frame.resizingElement) {
             return;
         }
@@ -80,7 +80,7 @@ var LineDirectionPoint = {
         var w2 = rect.width / 2;
         var h2 = rect.height / 2;
 
-        var mousePosition = frame.element.globalViewMatrixInverted().transformPoint(event);
+        var mousePosition = frame.element.globalViewMatrixInverted().transformPoint(mousePoint);
 
         // p1, p2, gives us line equation
         var p1 = {x: rect.width * rv[0], y: rect.height * rv[2]};
@@ -116,7 +116,7 @@ var LineDirectionPoint = {
         var newRadius = 0|parameter * maxRadius;
 
         var r = clone(frame.resizingElement.children[0].cornerRadius());
-        r.locked = !event.event.altKey;
+        r.locked = !keys.alt;
 
         if(!r.locked) {
             r[point.prop] = newRadius;

@@ -4,6 +4,8 @@ import Environment from "environment";
 import SnapController from "framework/SnapController";
 import {Types} from "../framework/Defs";
 import Point from "../math/point";
+import Rect from "../math/rect";
+import {fitRect} from "../math/Fitting";
 
 var debug = require("DebugUtil")("carb:resizeFramePoint");
 
@@ -31,9 +33,10 @@ export default {
         frame.globalViewMatrix = frame.element.globalViewMatrix();
 
         var c = br.center();
-        var pointOrigin = c.subtract(new Point(br.width/2 * point.rv[0], br.height/2 * point.rv[1]));
+        frame.localOrigin = c.subtract(new Point(br.width/2 * point.rv[0], br.height/2 * point.rv[1]));
         frame.centerOrigin = frame.element.globalViewMatrix().transformPoint(c);
-        frame.pointOrigin = frame.element.globalViewMatrix().transformPoint(pointOrigin);
+        frame.pointOrigin = frame.element.globalViewMatrix().transformPoint(frame.localOrigin);
+        frame.capturedPoint = Point.create(point.x, point.y);
 
         debug("Captured rect: x=%d y=%d w=%d h=%d", frame.originalRect.x, frame.originalRect.y, frame.originalRect.width, frame.originalRect.height);
 
@@ -52,17 +55,41 @@ export default {
         var dc = ~~(((angle + 23) % 360) / 45);
         return (index + dc) % 8;
     },
-    change: function (frame, dx, dy, point, event) {
+    change: function (frame, dx, dy, point, mousePoint, keys) {
         if (!frame.resizingElement) {
             return;
         }
 
+        var rv = point.rv;
 
-        dx *= point.rv[0];
-        dy *= point.rv[1];
+        if (keys.shift && frame.originalRect.width && frame.originalRect.height) {
+            var p1 = frame.localOrigin;
+            var p2 = frame.capturedPoint.add2(dx, dy);
+
+            if (rv[0] === 0){
+                let scale = (p2.y - frame.capturedPoint.y)/frame.originalRect.height;
+                dx = scale * frame.originalRect.width * rv[1];
+            }
+            else if (rv[1] === 0){
+                let scale = (p2.x - frame.capturedPoint.x)/frame.originalRect.width;
+                dy = scale * frame.originalRect.height * rv[0];
+            }
+            else{
+                var boundary = Rect.fromPoints(p1, p2);
+                var fit = fitRect(frame.originalRect, boundary);
+
+                dx = (fit.width - frame.originalRect.width) * rv[0];
+                dy = (fit.height - frame.originalRect.height) * rv[1];
+            }
+
+            rv = [rv[0] || 1, rv[1] || 1];
+        }
+
+        dx *= rv[0];
+        dy *= rv[1];
 
         var origin;
-        if (event.event.altKey){
+        if (keys.alt){
             origin = frame.centerOrigin;
             dx *= 2;
             dy *= 2;

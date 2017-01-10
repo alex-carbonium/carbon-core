@@ -239,7 +239,7 @@ AsyncEventHandler.prototype.raise = function(){
     var that = this;
     this._timerId = setTimeout(function() {
         that.__method.apply(that.__target, args);
-    }, 50);
+    }, 1);
 };
 AsyncEventHandler.prototype.clear = function(){
     if (this._timerId){

@@ -43,8 +43,8 @@ export default {
     rotateCursorPointer: function (index, angle) {
         return index;
     },
-    change: function (frame, dx, dy, point, event) {
-        point.change(frame, dx, dy, point, event);
+    change: function (frame, dx, dy, point, mousePoint, keys) {
+        point.change(frame, dx, dy, point, mousePoint, keys);
         Invalidate.requestUpperOnly();
     }
 }

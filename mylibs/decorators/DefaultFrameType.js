@@ -3,6 +3,8 @@ import CrazyScope from "framework/CrazyManager";
 import Environment from "environment";
 import UserSettings from "../UserSettings";
 import UIElement from "../framework/UIElement";
+import Keyboard from "../platform/Keyboard";
+import Point from "../math/point";
 
 export default {
     strokeStyle: UserSettings.frame.stroke,
@@ -32,9 +34,18 @@ export default {
         }
     },
 
-    movePoint: function (frame, point, event) {
-        var matrix = frame.element.globalViewMatrixInverted();
+    capturePoint: function(frame, point, event){
+        frame._lastChange = {frame, point, dx: 0, dy: 0};
+        frame._mousePoint = new Point(event.x, event.y);
 
+        point.type.capture(frame, point, frame._mousePoint);
+
+        frame.keyboardToken = Keyboard.changed.bind(this, state => this.movePoint(frame, point, frame._mousePoint, state));
+    },
+    movePoint: function (frame, point, event, keys = Keyboard.state) {
+        frame._mousePoint.set(event.x, event.y);
+
+        var matrix = frame.element.globalViewMatrixInverted();
         var pt = matrix.transformPoint(event);
 
         var dx = 0;
@@ -46,8 +57,17 @@ export default {
             dx = -point.x + pt.x;
         }
 
-        point.type.change(frame, dx, dy, point, event);
+        frame._lastChange.dx = dx;
+        frame._lastChange.dy = dy;
+
+        point.type.change(frame, dx, dy, point, frame._mousePoint, keys);
     },
+    releasePoint: function(frame, point){
+        point.type.release(frame, point);
+
+        frame.keyboardToken.dispose();
+    },
+
     draw: function (frame, context, currentPoint) {
         var scale = Environment.view.scale();
 

@@ -1,5 +1,6 @@
 import Point from "./point";
 import LineSegment from "./lineSegment";
+import {isRectInRect} from "./math";
 
 export default class Rect{
     constructor(x, y, w, h){
@@ -21,6 +22,23 @@ export default class Rect{
             return this;
         }
         return new Rect(this.x + dx, this.y + dy, this.width, this.height);
+    }
+    scale(s, o){
+        var newWidth = this.width * s.x;
+        var newHeight = this.height * s.y;
+
+        var wx = o.x === 0 ? 0 : this.width/o.x;
+        var hy = o.y === 0 ? 0 : this.height/o.y;
+        var newOrigin = Point.create(wx === 0 ? 0 : newWidth/wx, hy === 0 ? 0 : newHeight/hy);
+        var offset = o.subtract(newOrigin);
+
+        var newX = this.x + offset.x;
+        var newY = this.y + offset.y;
+        return new Rect(newX, newY, newWidth, newHeight);
+    }
+
+    containsRect(other){
+        return isRectInRect(other, this);
     }
 
     combineMutable(rect){
@@ -84,6 +102,14 @@ export default class Rect{
 
     static fromObject(obj){
         return new Rect(obj.x, obj.y, obj.width, obj.height);
+    }
+
+    static fromPoints(p1, p2){
+        var x = Math.min(p1.x, p2.x);
+        var y = Math.min(p1.y, p2.y);
+        var w = Math.max(p1.x, p2.x) - x;
+        var h = Math.max(p1.y, p2.y) - y;
+        return new Rect(x, y, w, h);
     }
 }
 
