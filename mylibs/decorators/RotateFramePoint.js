@@ -29,12 +29,12 @@ export default {
     rotateCursorPointer: function (index, angle) {
         return index;
     },
-    capture: function (frame, point, event) {
+    capture: function (frame, point, mousePoint) {
         var resizingElement = UIElement.construct(Types.TransformationElement, frame.element);
         frame.resizingElement = resizingElement;
         frame.originalRect = frame.element.getBoundaryRect();
         frame.origin = frame.element.center(true);
-        frame.captureVector = new Point(event.x - frame.origin.x, event.y - frame.origin.y);
+        frame.captureVector = new Point(mousePoint.x - frame.origin.x, mousePoint.y - frame.origin.y);
 
         Environment.view.layer3.add(resizingElement);
         Environment.controller.startRotatingEvent.raise();
@@ -46,20 +46,20 @@ export default {
             Environment.controller.stopRotatingEvent.raise();
         }
     },
-    change: function (frame, dx, dy, point, event) {
+    change: function (frame, dx, dy, point, mousePoint, keys) {
         if (!frame.resizingElement) {
             return;
         }
 
-        var v = new Point(event.x - frame.origin.x, event.y - frame.origin.y);
+        var v = new Point(mousePoint.x - frame.origin.x, mousePoint.y - frame.origin.y);
         var angle = v.getDirectedAngle(frame.captureVector);
 
-        if (event.event.shiftKey) {
+        if (keys.shift) {
             angle = ~~(angle / 15) * 15;
         }
 
         frame.resizingElement.applyRotation(angle, frame.origin, true);
         Invalidate.requestUpperOnly();
-        Environment.controller.rotatingEvent.raise({element: frame.element, angle: angle, mouseX: event.x, mouseY: event.y});
+        Environment.controller.rotatingEvent.raise({element: frame.element, angle: angle, mouseX: mousePoint.x, mouseY: mousePoint.y});
     }
 }

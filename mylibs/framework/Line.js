@@ -67,19 +67,19 @@ var LinePoint = {
     rotateCursorPointer (index, angle) {
         return index;
     },
-    change (frame, dx, dy, point, event) {
+    change (frame, dx, dy, point, mousePoint, keys) {
         if (!frame.resizingElement) {
             return;
         }
 
-        var oldx = Math.round(event.x);
-        var oldy = Math.round(event.y);
-        if ((event.event.ctrlKey || event.event.metaKey)) {
+        var oldx = Math.round(mousePoint.x);
+        var oldy = Math.round(mousePoint.y);
+        if (keys.ctrl) {
             var newPoint = {x: oldx, y: oldy};
         }
-        else if (event.event.shiftKey) {
+        else if (keys.shift) {
             var p;
-            var oldPointLocal = frame.element.globalViewMatrixInverted().transformPoint2(event.x, event.y);
+            var oldPointLocal = frame.element.globalViewMatrixInverted().transformPoint2(mousePoint.x, mousePoint.y);
             if (point.p === 1) {
                 p = new Point(frame.element.x2(), frame.element.y2());
             } else {
@@ -148,6 +148,7 @@ class Line extends Shape {
         path.stroke(this.stroke());
         path.adjustBoundaries();
         path.name(this.name());
+        path.setProps(this.selectLayoutProps());
 
         return path;
     }

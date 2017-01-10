@@ -49,12 +49,12 @@ export default  {
         p.x = w / 2 + value;
         p.y = h / 2;
     },
-    change (frame, dx, dy, point, event) {
+    change (frame, dx, dy, point, mousePoint) {
         if (!frame.resizingElement) {
             return;
         }
         var rect = frame.element.getBoundaryRect();
-        var mousePosition = frame.element.globalViewMatrixInverted().transformPoint(event);
+        var mousePosition = frame.element.globalViewMatrixInverted().transformPoint(mousePoint);
 
         // p1, p2, gives us line equation
         var pr = {};

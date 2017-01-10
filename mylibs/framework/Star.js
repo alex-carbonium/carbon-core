@@ -253,8 +253,8 @@ class Star extends Shape {
                         p.from = {x: w / 2, y: h / 2};
                         p.to = {x: w / 2 + ext, y: h / 2};
                     },
-                    change: function (frame, dx, dy, point, event) {
-                        LineDirectionPoint.change(frame, dx, dy, point, event);
+                    change: function (frame, dx, dy, point, mousePoint, keys) {
+                        LineDirectionPoint.change(frame, dx, dy, point, mousePoint, keys);
                     }
                 }
             ]
