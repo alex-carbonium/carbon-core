@@ -145,7 +145,9 @@ export default class ArtboardFrameControl extends UIElement {
             var scaleY = this.height() / this._artboard.height();
             context.scale(scaleX, scaleY);
         }
+        this._artboard.globalViewMatrixInverted().applyToContext(context);
         context.translate(this.props.offsetX, this.props.offsetY);
+
         this._artboard.drawSelf.call(this._artboard, context, this._artboard.width(), this._artboard.height(), environment);
         context.restore();
 

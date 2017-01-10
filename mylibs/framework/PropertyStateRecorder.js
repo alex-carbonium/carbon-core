@@ -221,7 +221,7 @@ export default class PropertyStateRecorder {
     removeState(stateName) {
         for (var i = this.states.length - 1; i >= 0; --i) {
             var state = this.states[i];
-            if (state.name === stateName) {
+            if (state && state.name === stateName) {
                 this._element.patchProps(PatchType.Remove, "states", state);
                 break;
             }
@@ -234,7 +234,9 @@ export default class PropertyStateRecorder {
         }
 
         var state = this.states.find(x => x.id === stateId);
-        this._element.patchProps(PatchType.Remove, "states", state);
+        if(state) {
+            this._element.patchProps(PatchType.Remove, "states", state);
+        }
     }
 
     renameState(id, newName) {
@@ -258,6 +260,9 @@ export default class PropertyStateRecorder {
 
     hasStatePropValue(stateId, elementId, propName){
         var state = this.getStateById(stateId);
+        if(!state){
+            return false;
+        }
         return hasValue(state, elementId, propName);
     }
 
@@ -273,6 +278,9 @@ export default class PropertyStateRecorder {
 
     duplicateState(stateName, newStateName) {
         var state = this.getState(stateName);
+        if(!state){
+            return;
+        }
         var newState = clone(state, true);
         newState.name = newStateName;
         this._element.patchProps(PatchType.Insert, "states", newState);
