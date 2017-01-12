@@ -5,7 +5,7 @@ import Page from "framework/Page";
 import * as math from "math/math";
 import {isPointInRect} from "math/math";
 import SharedColors from "ui/SharedColors";
-import {ChangeMode, TileSize, Types, ArtboardResource} from "./Defs";
+import {ChangeMode, TileSize, Types, ArtboardResource, PatchType} from "./Defs";
 import RelayoutEngine from "./relayout/RelayoutEngine";
 import PropertyStateRecorder from "framework/PropertyStateRecorder";
 import ModelStateListener from "framework/sync/ModelStateListener";
@@ -563,12 +563,10 @@ class Artboard extends Container {
             var transferProps = {};
             var hasAnyProps = false;
             for (var propName in props) {
-                if (element === this && (propName === 'x' || propName == 'y' )) {
+                if (element === this && (propName=='m' || propName === 'customProperties' || propName === 'state' || propName === "states" || propName === "actions" || propName === "resource" || propName === "tileSize" || propName === "insertAsContent") ) {
                     continue;
                 }
-                if (propName === 'customProperties' || propName === 'state' || propName === "states" || propName === "actions" || propName === "resource" || propName === "tileSize" || propName === "insertAsContent") {
-                    continue;
-                }
+
                 if (!this._recorder.hasStatePropValue(stateBoard.stateId, element.id(), propName)) {
                     transferProps[propName] = props[propName];
                     hasAnyProps = true;
@@ -576,6 +574,21 @@ class Artboard extends Container {
             }
             if (hasAnyProps) {
                 stateBoard.transferProps(element.id(), transferProps);
+            }
+        }
+    }
+
+    propsPatched (patchType, propName, item) {
+        super.propsPatched(patchType, propName, item);
+
+        if(propName === 'states' && patchType === PatchType.Remove){
+            var stateBoards = this.runtimeProps.stateBoards;
+            for(var i = 0; i < stateBoards.length; ++i){
+                var stateBoard = stateBoards[i];
+                if(stateBoard.stateId == item.id){
+                    stateBoard.parent().remove(stateBoard);
+                    break;
+                }
             }
         }
     }

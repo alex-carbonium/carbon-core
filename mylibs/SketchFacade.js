@@ -57,6 +57,7 @@ module.exports = {
     "CommandManager": require("./framework/commands/CommandManager"),
     "Brush": require("./framework/Brush"),
     "Font": require("./framework/Font"),
+    "Shadow": require("./framework/Shadow"),
     "Constraints": require("./framework/Constraints"),
     "NullContainer": require("./framework/NullContainer"),
     "NullPage": require("./framework/NullPage"),
