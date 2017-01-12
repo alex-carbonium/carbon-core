@@ -33,8 +33,10 @@ export default class InteractiveElement extends GroupContainer{
     _hideDecorators(e){
         if (e.decorators){
             e.decorators.forEach(x => {
-                x.visible(false);
-                this._decorators.push(x);
+                if (x.visible()){
+                    x.visible(false);
+                    this._decorators.push(x);
+                }
             });
         }
     }
@@ -57,7 +59,6 @@ export default class InteractiveElement extends GroupContainer{
     }
 
     saveChanges(){
-        this.showOriginal(true);
     }
 
     refreshSelection(){
@@ -65,6 +66,8 @@ export default class InteractiveElement extends GroupContainer{
     }
 
     detach(){
+        this.showOriginal(true);
+
         if (this._decorators){
             this._decorators.forEach(x => x.visible(true));
             this._decorators = null;

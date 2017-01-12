@@ -41,6 +41,10 @@ export default class Rect{
         return isRectInRect(other, this);
     }
 
+    equals(other){
+        return other === this || this.x === other.x && this.y === other.y && this.width === other.width && this.height === other.height;
+    }
+
     combineMutable(rect){
         var r = this.x + this.width;
         var b = this.y + this.height;

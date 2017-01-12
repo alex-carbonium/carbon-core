@@ -5,6 +5,7 @@ import {ContentSizing, Types} from "./Defs";
 import {fitRect, fillRect} from "../math/Fitting";
 import IconsInfo from "../ui/IconsInfo";
 import Promise from "bluebird";
+import Rect from "../math/rect";
 
 const FrameSource = {};
 
@@ -181,7 +182,7 @@ FrameSource.size = function(source){
 FrameSource.boundaryRect = function(source, runtimeProps) {
     switch (source.type){
         case FrameSource.types.url:
-            if (!runtimeProps){
+            if (!runtimeProps || !runtimeProps.image){
                 return null;
             }
             return getUrlImageRect(runtimeProps);
@@ -312,10 +313,10 @@ function resizeUrlImage(sizing, newRect, runtimeProps){
     }
 }
 function getUrlImageRect(runtimeProps){
-    return {x: 0, y: 0, width: runtimeProps.image.width, height: runtimeProps.image.height};
+    return new Rect(0, 0, runtimeProps.image.width, runtimeProps.image.height);
 }
 
-FrameSource.prepareProps = function(source, sizing, oldRect, newRect, props, runtimeProps, changes){
+FrameSource.prepareProps = function(source, sizing, oldRect, newRect, props, runtimeProps, changes, fitUrl){
     if (runtimeProps){
         switch (sizing){
             case ContentSizing.manual:
@@ -330,7 +331,7 @@ FrameSource.prepareProps = function(source, sizing, oldRect, newRect, props, run
         }
     }
 
-    if (props && props.urls){
+    if (props && props.urls && fitUrl){
         const ar = props.width/props.height;
         let bestLink = null;
         for (let i = 0; i < props.urls.links.length; i++){
@@ -349,8 +350,8 @@ FrameSource.prepareProps = function(source, sizing, oldRect, newRect, props, run
             if (changes.sourceProps && changes.sourceProps.sr){
                 const scale = bestLink.w/props.cw;
                 changes.sourceProps.sr = {
-                    x: changes.sourceProps.sr.x * scale + .5|0,
-                    y: changes.sourceProps.sr.y * scale + .5|0,
+                    x: Math.round(changes.sourceProps.sr.x * scale),
+                    y: Math.round(changes.sourceProps.sr.y * scale),
                     width: changes.sourceProps.sr.width * scale + .5|0,
                     height: changes.sourceProps.sr.height * scale + .5|0
                 };

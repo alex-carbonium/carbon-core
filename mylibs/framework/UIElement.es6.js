@@ -205,8 +205,8 @@ var UIElement = klass(DataNode, {
         }
         this.applyTransform(Matrix.create().translate(t.x, t.y), false, mode);
     },
-    applyDirectedTranslation: function(t) {
-        this.applyTransform(Matrix.create().translate(t.x, t.y), true);
+    applyDirectedTranslation: function(t, mode) {
+        this.applyTransform(Matrix.create().translate(t.x, t.y), true, mode);
     },
 
     getRotation: function() {
@@ -330,11 +330,11 @@ var UIElement = klass(DataNode, {
     getDropData: function (event) {
         return null;
     },
-    startResizing: function () {
-        Environment.controller.startResizingEvent.raise();
+    startResizing: function (eventData) {
+        Environment.controller.startResizingEvent.raise(eventData);
     },
-    stopResizing: function () {
-        Environment.controller.stopResizingEvent.raise();
+    stopResizing: function (eventData) {
+        Environment.controller.stopResizingEvent.raise(eventData);
     },
     canHandleCorruption: function() {
         return false;
@@ -635,6 +635,7 @@ var UIElement = klass(DataNode, {
 
         this.applyViewMatrix(context, environment);
 
+        this.clip(context, 0, 0, w, h);
         this.drawSelf(context, w, h, environment);
 
         context.restore();
@@ -1033,7 +1034,7 @@ var UIElement = klass(DataNode, {
         return this.field("_activeInPreview", value, false);
     },
     cloneWhenDragging: function () {
-        return true;
+        return false;
     },
     visibleWhenDrag: function (value) {
         if (value !== undefined) {
@@ -1152,9 +1153,6 @@ var UIElement = klass(DataNode, {
     },
     each: function (callback) {
         each([this], callback);
-    },
-    cloneProps: function () {
-        return Object.assign({}, this.props);
     },
     clone: function () {
         var clone = ObjectFactory.fromType(this.t, this.cloneProps());

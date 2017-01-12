@@ -25,12 +25,18 @@ class DraggingElement extends InteractiveElement {
         super(event.element);
 
         this._initialPosition = this.getTranslation();
-        this._currentPosition = this._initialPosition;
 
         SnapController.calculateSnappingPoints(activeArtboard);
 
         var holdPcnt = Math.round((event.x - this.x()) * 100 / this.width());
         this._ownSnapPoints = SnapController.prepareOwnSnapPoints(this, holdPcnt);
+    }
+
+    createClone(element){
+        if (element.cloneWhenDragging()){
+            return element.clone();
+        }
+        return super.createClone(element);
     }
 
     displayName() {
@@ -44,16 +50,8 @@ class DraggingElement extends InteractiveElement {
         SnapController.clearActiveSnapLines();
     }
 
-    drawSelf(context){
-        context.save();
-        context.translate(this._currentPosition.x, this._currentPosition.y);
-        super.drawSelf.apply(this, arguments);
-        context.restore();
-    }
-
     saveChanges(event, draggingOverElement, page){
         super.saveChanges();
-        this.applyTranslation(this._currentPosition);
 
         var artboards = page.getAllArtboards();
         var elements = [];
@@ -128,12 +126,12 @@ class DraggingElement extends InteractiveElement {
             SnapController.clearActiveSnapLines();
         }
 
-        this._currentPosition = position.subtract(this._initialPosition);
+        this.applyTranslation(position.subtract(this._initialPosition), true);
         Invalidate.requestUpperOnly();
     }
 
     parentAllowSnapping(pos) {
-        return !this._elements.some(x => x.parent().getDropData(x, pos) !== null);
+        return !this._elements.some(x => x.parent() !== this && x.parent().getDropData(x, pos) !== null);
     }
 
     isDropSupported(){
@@ -141,7 +139,7 @@ class DraggingElement extends InteractiveElement {
     }
 
     allowMoveOutChildren(event){
-        return !this._elements.some(x => !x.parent().allowMoveOutChildren(undefined, event));
+        return !this._elements.some(x => x.parent() !== this && !x.parent().allowMoveOutChildren(undefined, event));
     }
 }
 DraggingElement.prototype.t = Types.DraggingElement;

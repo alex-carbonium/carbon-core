@@ -19,22 +19,15 @@ export default class Frame extends Container {
         super.prepareProps.apply(this, arguments);
         var source = changes.source || this.source();
         if (FrameSource.isEditSupported(source)) {
-            var widthChanged = changes.hasOwnProperty("width");
-            var heightChanged = changes.hasOwnProperty("height");
-            if (changes.hasOwnProperty("sizing") || widthChanged || heightChanged) {
-                var oldRect = this.getContentRect();
-                var newRect = this.getContentRect();
-                if (widthChanged) {
-                    newRect.width = changes.width;
-                }
-                if (heightChanged) {
-                    newRect.height = changes.height;
-                }
+            var brChanged = changes.hasOwnProperty("br");
+            if (changes.hasOwnProperty("sizing") || brChanged) {
+                var oldRect = this.getBoundaryRect();
+                var newRect = changes.br || oldRect;
                 var sourcePropsChanged = changes.hasOwnProperty("sourceProps");
                 var sourceProps = sourcePropsChanged ? changes.sourceProps : this.props.sourceProps;
                 var runtimeSourceProps = sourcePropsChanged ? changes.sourceProps : this.runtimeProps.sourceProps;
                 FrameSource.prepareProps(source, changes.sizing || this.sizing(), oldRect, newRect,
-                    sourceProps, runtimeSourceProps, changes);
+                    sourceProps, runtimeSourceProps, changes, !this.runtimeProps.isTransformationClone);
             }
         }
     }
@@ -55,11 +48,21 @@ export default class Frame extends Container {
         }
         var source = this.source();
         if (FrameSource.isEditSupported(source)) {
-            if (newProps.hasOwnProperty("sizing") || newProps.hasOwnProperty("width") || newProps.hasOwnProperty("height")) {
-                FrameSource.resize(source, this.sizing(), this.getContentRect(), this.runtimeProps.sourceProps);
+            if (newProps.hasOwnProperty("sizing") || newProps.hasOwnProperty("br")) {
+                FrameSource.resize(source, this.sizing(), this.getBoundaryRect(), this.runtimeProps.sourceProps);
             }
         }
         this.createOrUpdateClippingMask(source, newProps);
+    }
+
+    saveOrResetLayoutProps(){
+        if (!this.runtimeProps.origSource){
+            this.runtimeProps.origSource = this.selectProps(["source", "sourceProps"]);
+        }
+        else{
+            this.setProps(this.runtimeProps.origSource);
+        }
+        super.saveOrResetLayoutProps();
     }
 
     clone() {
@@ -69,10 +72,6 @@ export default class Frame extends Container {
         clone.runtimeProps.sourceProps = Object.assign({}, this.runtimeProps.sourceProps);
         clone.runtimeProps.loaded = this.runtimeProps.loaded;
         return clone;
-    }
-
-    getContentRect() {
-        return {x: 0, y: 0, width: this.width(), height: this.height()};
     }
 
     source(value) {
@@ -106,9 +105,6 @@ export default class Frame extends Container {
     }
 
     drawSelf(context, w, h, environment) {
-        if (!this.source()) {
-            return;
-        }
         var source = this.source();
         if (!source) {
             return;
@@ -135,7 +131,7 @@ export default class Frame extends Container {
                         }
                         this.createOrUpdateClippingMask(source, this.props);
                     }
-                    FrameSource.resize(source, this.sizing(), this.getContentRect(), this.runtimeProps.sourceProps);
+                    FrameSource.resize(source, this.sizing(), this.getBoundaryRect(), this.runtimeProps.sourceProps);
                     Invalidate.request();
                 });
             }
@@ -156,17 +152,13 @@ export default class Frame extends Container {
         FrameSource.draw(this.source(), context, this.width(), this.height(), this.props, this.runtimeProps.sourceProps);
     }
 
-    clip(context, l, t, w, h) {
-        if (this.clipSelf()) {
-            context.rectPath(l, t, w, h);
-            context.clip();
-        }
-    }
-
     clipSelf() {
-        return this.angle() % 360 === 0;
+        return true;
+        //TODO: add back if necessary
+        //return this.globalViewMatrix().isTranslatedOnly();
     }
 
+    //TODO: add back if necessary
     createOrUpdateClippingMask(source, newProps) {
         if(!source){
             return;

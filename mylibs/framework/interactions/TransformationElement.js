@@ -14,6 +14,7 @@ export default class TransformationElement extends InteractiveElement{
     createClone(element){
         var clone = element.clone();
         clone.setProps(element.selectLayoutProps(true));
+        clone.runtimeProps.isTransformationClone = true;
         return clone;
     }
 

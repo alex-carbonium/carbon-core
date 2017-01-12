@@ -1,58 +1,75 @@
+import Environment from "../environment";
 import UIElement from "./UIElement";
 import DefaultFrameType from "../decorators/DefaultFrameType";
 import ActiveFrame from "../decorators/ActiveFrame";
+import PropertyMetadata from "../framework/PropertyMetadata";
+import {Types} from "../framework/Defs";
+import {ContentSizing} from "./Defs";
 
 var ContentFrameType = Object.create(DefaultFrameType);
 ContentFrameType.strokeStyle = null;
 
 export default class FrameContent extends UIElement{
-    constructor(frame, cropRect){
+    constructor(frame){
         super();
+        var clone = frame.clone();
+        clone.prepareAndSetProps({
+            sizing: ContentSizing.stretch
+        });
+
         this._frame = frame;
-        this._cropRect = cropRect;
-        this._activeFrame = null;
+        this._clone = clone;
+        this._tokens = [];
+    }
+
+    clone(){
+        var clone = new FrameContent(this._frame);
+        clone.setProps(this.cloneProps());
+        return clone;
     }
 
     activate(){
-        this._activeFrame = new ActiveFrame();
-        this.addDecorator(this._activeFrame);
+        this._tokens.push(Environment.controller.stopDraggingEvent.bind(this, this._onStopDragging));
     }
     deactivate(){
-        if (this._activeFrame){
-            this.removeDecorator(this._activeFrame);
-            this._activeFrame = null;
-        }
+        this._tokens.forEach(x => x.dispose());
+        this._tokens.length = 0;
     }
 
     propsUpdated(newProps, oldProps){
         super.propsUpdated.apply(this, arguments);
 
-        var props = null;
-        if (newProps.hasOwnProperty("width")){
-            props = props || {};
-            props.width = newProps.width;
-        }
-        if (newProps.hasOwnProperty("height")){
-            props = props || {};
-            props.height = newProps.height;
-        }
-        if (props){
-            this._frame.setProps(props);
+        if (newProps.hasOwnProperty("br") && this._clone){
+            this._clone.setProps({br: newProps.br});
         }
     }
 
     drawSelf(context, w, h, environment){
         context.save();
         context.globalAlpha *= .2;
-        this._frame.draw(context, environment);
+        this._clone.drawSelf(context, w, h, environment);
         context.restore();
+
+        context.save();
+        context.resetTransform();
+        context.scale(Environment.view.contextScale, Environment.view.contextScale);
+        environment.pageMatrix.applyToContext(context);
+        this._frame.drawBoundaryPath(context, this._frame.globalViewMatrix());
+        context.clip();
+        this.applyViewMatrix(context);
+        this._clone.drawSelf(context, w, h, environment);
+        context.restore();
+    }
+
+    _onStopDragging(event){
+        if (event.interactiveElement.elements.length === 1 && event.interactiveElement.elements[0] === this){
+            var child = event.interactiveElement.children[0];
+            this.setProps(child.selectLayoutProps(true));
+        }
     }
 
     selectionFrameType(){
         return ContentFrameType;
-    }
-    cloneWhenDragging(){
-        return false;
     }
     isDropSupported(){
         return false;
@@ -63,6 +80,16 @@ export default class FrameContent extends UIElement{
     showResizeHint(){
         return false;
     }
+    cloneWhenDragging(){
+        return true;
+    }
 }
 
 FrameContent.prototype._angleEditable = false;
+FrameContent.prototype.t = Types.FrameContent;
+
+PropertyMetadata.registerForType(FrameContent, {
+    groups: function(){
+        return [];
+    }
+});

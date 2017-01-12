@@ -254,6 +254,7 @@ export var Types = {
     'DraggingElement': 'd',
     'Frame': 'F',
     'FrameSource': 'I',
+    'FrameContent': 'FC',
     'GroupContainer': 'g',
     'App': 'A',
     'Guide': 'H',

@@ -1,17 +1,19 @@
 import Environment from "../environment";
 import {ChangeMode, ContentSizing} from "./Defs";
-import {intersectRects, areRectsEqual} from "../math/math";
+import {intersectRects} from "../math/math";
 import FrameSource from "./FrameSource";
 import FrameContent from "./FrameContent";
 import SnapController from "./SnapController";
+import Rect from "../math/rect";
+import Selection from "./SelectionModel";
 
 export class FrameEditTool{
     constructor(){
         this._frame = null;
-        this._clone = null;
         this._tokens = null;
-        this._cropRect = null;
-        this._origContentRect = null;
+        this._origLayoutProps = null;
+        this._snapClone = null;
+        this._content = null;
     }
     attach(frame){
         this._tokens = [];
@@ -30,29 +32,23 @@ export class FrameEditTool{
             fsr.height = fsr.height*sv + .5|0;
         }
 
-        fsr.x += this._frame.x();
-        fsr.y += this._frame.y();
-
-        var clone = this._frame.clone();
-        clone.prepareAndSetProps({
-            x: 0, y: 0, sizing: ContentSizing.stretch, angle: 0
-        });
-        var pos = this._frame.parent().local2global(fsr);
         var contentProps = {
-            x: pos.x, y: pos.y, width: fsr.width, height: fsr.height
+            br: Rect.Zero.withSize(fsr.width, fsr.height),
+            m: this._frame.globalViewMatrix()
         };
-        var content = new FrameContent(clone, this._frame.getBoundaryRectGlobal());
+        var content = new FrameContent(frame);
         content.prepareAndSetProps(contentProps, ChangeMode.Self);
+        content.applyDirectedTranslation(fsr.topLeft(), ChangeMode.Self);
         content.activate();
+        this._content = content;
+
+        //TODO: add snapping inside rotated containers
+        if (this._frame.globalViewMatrix().isTranslatedOnly()){
+            this._snapClone = this._frame.clone();
+        }
+        this._origLayoutProps = this._content.selectLayoutProps(true);
 
         //original frame is hidden, so it does not take part in snapping
-        this._snapClone = this._frame.clone();
-        this._snapClone.prepareAndSetProps({angle: 0}, ChangeMode.Self);
-        this._clipClone = clone;
-        this._content = content;
-        this._cropRect = this._frame.getBoundaryRectGlobal();
-        this._origContentRect = this._content.getBoundaryRectGlobal();
-
         this._frame.setProps({visible: false}, ChangeMode.Self);
         //leave the selection, but remove action frame
         this._frame.decorators.forEach(x => this._frame.removeDecorator(x));
@@ -60,7 +56,9 @@ export class FrameEditTool{
         this._tokens.push(Environment.view.layer3.ondraw.bindHighPriority(this, this.layerdraw));
 
         Environment.view.layer3.add(this._content);
-        SnapController.snapGuides.push(this._content, this._snapClone);
+        if (this._snapClone){
+            SnapController.snapGuides.push(this._content, this._snapClone);
+        }
 
         this._tokens.push(Environment.controller.actionManager.subscribe("cancel", () => {
             this.detach();
@@ -73,13 +71,17 @@ export class FrameEditTool{
             this._frame.setProps({source: FrameSource.Empty});
             e.handled = true;
         }));
+
+        Selection.makeSelection([this._content]);
     }
     detach(saveChanges = true){
         if (saveChanges){
             this._saveChanges();
         }
 
-        SnapController.removeGuides(this._content, this._snapClone);
+        if (this._snapClone){
+            SnapController.removeGuides(this._content, this._snapClone);
+        }
 
         if (this._tokens){
             this._tokens.forEach(x => x.dispose());
@@ -101,14 +103,21 @@ export class FrameEditTool{
         }
 
         this._frame.setProps({visible: true}, ChangeMode.Self);
+
+        Selection.makeSelection([this._frame]);
     }
 
     _saveChanges(){
-        var cr = this._content.getBoundaryRectGlobal();
-        if (areRectsEqual(cr, this._origContentRect)){
+        var layoutProps = this._content.selectLayoutProps(true);
+        if (this._areSameLayoutProps(layoutProps, this._origLayoutProps)){
             return;
         }
-        var fr = this._frame.getBoundaryRectGlobal();
+
+        var cr = this._content.getBoundaryRect();
+        var globalCorner = this._content.globalViewMatrix().transformPoint(cr.topLeft());
+        var localCorner = this._frame.globalViewMatrixInverted().transformPoint(globalCorner, true);
+        cr = cr.withPosition(localCorner.x, localCorner.y);
+        var fr = this._frame.getBoundaryRect();
         var ir = intersectRects(fr, cr);
 
         var fsr = FrameSource.boundaryRect(this._frame.source(), this._frame.runtimeProps.sourceProps);
@@ -132,19 +141,16 @@ export class FrameEditTool{
     };
 
     layerdraw(context, environment){
-        var cr = this._cropRect;
-        context.save();
-        context.rectPath(cr.x, cr.y, cr.width, cr.height);
-        context.clip();
-        this._content.globalViewMatrix().applyToContext(context);
-        this._clipClone.draw(context, environment);
-        context.restore();
-
         context.save();
         context.setLineDash([20, 10]);
         context.strokeStyle = "#444";
-        context.strokeRect(cr.x + .5, cr.y + .5, cr.width - 1, cr.height - 1);
+        this._frame.drawBoundaryPath(context, this._frame.globalViewMatrix());
+        context.stroke();
         context.restore();
+    }
+
+    _areSameLayoutProps(props1, props2){
+        return props1.m.equals(props2.m) && props1.br.equals(props2.br);
     }
 }
 

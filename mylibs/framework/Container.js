@@ -186,8 +186,6 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                 return clone;
             },
             drawChildren: function (context, w, h, environment) {
-                context.save();
-
                 this.modifyContextBeforeDrawChildren(context);
 
                 if (this.children) {
@@ -203,7 +201,6 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                         }
                     }
                 }
-                context.restore();
             },
             drawWithMask: function(context, mask, i, environment){
                 if (mask.visible()) {

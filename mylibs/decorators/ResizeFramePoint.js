@@ -41,13 +41,14 @@ export default {
         debug("Captured rect: x=%d y=%d w=%d h=%d", frame.originalRect.x, frame.originalRect.y, frame.originalRect.width, frame.originalRect.height);
 
         Environment.view.layer3.add(resizingElement);
-        frame.resizingElement.startResizing();
+        frame.resizingElement.startResizing({interactiveElement: frame.resizingElement});
     },
     release: function (frame) {
         if (frame.resizingElement) {
-            frame.resizingElement.stopResizing();
             frame.resizingElement.saveChanges();
             frame.resizingElement.detach();
+            //FrameContent depends on event fired in the end
+            frame.resizingElement.stopResizing({interactiveElement: frame.resizingElement});
             delete frame.globalViewMatrix;
         }
     },
@@ -103,6 +104,7 @@ export default {
 
         Environment.controller.resizingEvent.raise({
             element: frame.element,
+            interactiveElement: frame.resizingElement,
             rect: frame.resizingElement.getBoundaryRect()
         });
     }

@@ -103,6 +103,7 @@ function dragging(event) {
     var eventData = {
         handled: false,
         draggingElement: this._draggingElement,
+        interactiveElement: this._draggingElement,
         x: event.x,
         y: event.y,
         mouseX: event.mouseX,
@@ -419,6 +420,7 @@ export default class DesignerController {
 
     onmouseup(eventData) {
         eventData.element = this._draggingElement;
+        eventData.interactiveElement = this._draggingElement;
 
         this.mouseupEvent.raise(eventData);
         if (eventData.handled) {
