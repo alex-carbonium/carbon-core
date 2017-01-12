@@ -12,13 +12,13 @@ var onAngleDistanceChanged = function(angle){
 var Shadow = {};
 
 Shadow.apply = function(shadowObject, context, callback){
-    if (!shadowObject.visible || (shadowObject.blur == 0 && shadowObject.distance == 0) || shadowObject.color == null){
+    if (!shadowObject.visible || (shadowObject.blur == 0 && shadowObject.spread == 0) || shadowObject.color == null){
         return;
     }
 
     context.save();
-    context.shadowOffsetX = shadowObject.offsetX;
-    context.shadowOffsetY = shadowObject.offsetY;
+    context.shadowOffsetX = shadowObject.x;
+    context.shadowOffsetY = shadowObject.y;
     context.shadowBlur = shadowObject.blur;
     context.shadowColor = shadowObject.color;
     callback(context);
@@ -27,13 +27,13 @@ Shadow.apply = function(shadowObject, context, callback){
 
 Shadow.defaults = {
     t: Types.Shadow,
-    offsetX: 0,
-    offsetY: 0,
+    x   : 0,
+    y   : 0,
     blur: 0,
-    visible: true,
-    color: 0,
-    angle: 0,
-    distance: 0
+    spread: 0,
+    enabled: true,
+    inset: true,
+    color: 0
 };
 
 Shadow.createFromObject = function(obj){
@@ -41,7 +41,7 @@ Shadow.createFromObject = function(obj){
 };
 
 Shadow.create = function(offsetX, offsetY, color, blur){
-    return Shadow.createFromObject({offsetX: offsetX, offsetY: offsetY, color: color, blur: blur});
+    return Shadow.createFromObject({x: offsetX, y: offsetY, color: color, blur: blur});
 };
 
 Shadow.None = Shadow.create(0, 0, 'black', 0);
