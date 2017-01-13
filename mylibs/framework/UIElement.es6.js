@@ -92,39 +92,6 @@ var UIElement = klass(DataNode, {
         return Math.round(value);
     },
     prepareProps: function (changes) {
-        if (changes.width !== undefined) {
-            var maxWidth = this.maxWidth();
-            if (maxWidth !== undefined && changes.width > maxWidth) {
-                changes.width = maxWidth;
-            }
-            var minWidth = this.minWidth();
-            if (minWidth !== undefined && changes.width < minWidth) {
-                changes.width = minWidth;
-            }
-
-            changes.width =  this._roundValue(changes.width);
-        }
-        if (changes.height !== undefined) {
-            var maxHeight = this.maxHeight();
-            if (maxHeight !== undefined && changes.height > maxHeight) {
-                changes.height = maxHeight;
-            }
-            var minHeight = this.minHeight();
-            if (minHeight !== undefined && changes.height < minHeight) {
-                changes.height = minHeight;
-            }
-
-            changes.height = this._roundValue(changes.height);
-        }
-
-        if (changes.x !== undefined) {
-            changes.x = this._roundValue(changes.x);
-        }
-
-        if (changes.y !== undefined) {
-            changes.y = this._roundValue(changes.y);
-        }
-
         if (changes.styleId !== undefined) {
             extend(changes, styleManager.getStyle(changes.styleId, 1).props);
         }
@@ -724,7 +691,8 @@ var UIElement = klass(DataNode, {
     },
     clip: function (context) {
         if (this.clipSelf()) {
-            this.drawBoundaryPath(context, this.globalViewMatrix());
+            var m = this.shouldApplyViewMatrix() ? Matrix.Identity : this.globalViewMatrix();
+            this.drawBoundaryPath(context, m);
             context.clip();
         }
     },

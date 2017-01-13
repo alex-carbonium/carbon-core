@@ -1,7 +1,6 @@
 import EditModeAction from "ui/common/EditModeAction";
 import angleAdjuster from "math/AngleAdjuster";
 import RemovePathPointCommand from "commands/path/RemovePathPointCommand";
-import InsertPathPointCommand from "commands/path/InsertPathPointCommand";
 import AddPathPointCommand from "commands/path/AddPathPointCommand";
 import commandManager from "framework/commands/CommandManager";
 import UIElement from "framework/UIElement";
@@ -10,7 +9,6 @@ import SystemConfiguration from "SystemConfiguration";
 import Selection from "framework/SelectionModel";
 import Cursor from "framework/Cursor";
 import Invalidate from "framework/Invalidate";
-import Point from "math/point";
 import SnapController from "framework/SnapController";
 import actionManager from "ui/ActionManager";
 

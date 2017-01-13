@@ -1460,10 +1460,10 @@ App.prototype.t = Types.App;
 
 PropertyMetadata.registerForType(App, {
     defaultShapeSettings: {
-        defaultValue: Object.getPrototypeOf(PropertyMetadata.getDefaultProps(Types.DefaultShapeSettings))
+        defaultValue: PropertyMetadata.getDefaultProps(Types.DefaultShapeSettings)
     },
     defaultLineSettings: {
-        defaultValue: Object.getPrototypeOf(PropertyMetadata.getDefaultProps(Types.DefaultLineSettings))
+        defaultValue: PropertyMetadata.getDefaultProps(Types.DefaultLineSettings)
     },
     defaultTextSettings: {
         defaultValue: {

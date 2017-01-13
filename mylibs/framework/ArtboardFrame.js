@@ -165,8 +165,6 @@ export default class ArtboardFrameControl extends UIElement {
     canAccept() {
         return false;
     }
-
-    static t = Types.ArtboardViewer;
 }
 ArtboardFrameControl.prototype.t = Types.ArtboardFrame;
 
