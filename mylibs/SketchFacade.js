@@ -21,8 +21,6 @@ if(ext){
     app.setProps({extraParameters:ext});
 }
 
-var AllCommands = require("./commands/AllCommands");
-
 //export * from crashes in babel for some reason...
 module.exports = {
     "jquery": require("jquery/jquery.min"),
@@ -111,7 +109,6 @@ module.exports = {
 
     "AppPropsChanged": require("./commands/AppPropsChanged"),
     "CompositeCommand": require("./framework/commands/CompositeCommand"),
-    "AllCommands": AllCommands,
 
     "SelectComposite": require("./framework/SelectComposite"),
     "DraggingElement": require("./framework/interactions/DraggingElement"),

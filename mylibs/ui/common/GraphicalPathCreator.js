@@ -3,7 +3,6 @@ import angleAdjuster from "math/AngleAdjuster";
 import RemovePathPointCommand from "commands/path/RemovePathPointCommand";
 import InsertPathPointCommand from "commands/path/InsertPathPointCommand";
 import AddPathPointCommand from "commands/path/AddPathPointCommand";
-import AllCommands from "commands/AllCommands";
 import commandManager from "framework/commands/CommandManager";
 import UIElement from "framework/UIElement";
 import Path from  "ui/common/Path";

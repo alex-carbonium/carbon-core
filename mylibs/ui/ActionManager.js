@@ -1,6 +1,7 @@
 import Command from "../framework/commands/Command";
 import CompositeCommand from "../framework/commands/CompositeCommand";
 import ChangeZOrder from "../commands/ChangeZOrder";
+import Move from "../commands/Move";
 import Environment from "environment";
 import Invalidate from "framework/Invalidate";
 import FontHelper from "../framework/FontHelper";
@@ -21,7 +22,6 @@ define(function (require) {
     var ResizeRow = require("commands/ResizeRow");
     var platform = require("platform/Platform");
     var CombinePaths = require("commands/CombinePaths");
-    var AllCommands = require("commands/AllCommands");
     var debug = require("DebugUtil")("carb:actionManager");
     var GroupContainer = require("framework/GroupContainer");
     var GroupInRepeater = require("framework/repeater/GroupInRepeater");
@@ -122,7 +122,7 @@ define(function (require) {
                 var selection = Selection.getSelection();
                 return selection && selection.length > 0;
             };
-            var currentMove = null;
+            var moving = null;
 
             this.registerAction("copy", "Copy", "Editing", function () {
                 return new AllCommands.Copy(Selection.getSelection());
@@ -206,67 +206,67 @@ define(function (require) {
             }, "ui-send-backward");
 
             this.registerAction("moveLeft", "Left", "Positioning", function () {
-                if (!currentMove){
-                    startRepeatableAction(x => x.position());
+                if (!moving){
+                    startRepeatableAction(x => x.viewMatrix());
                 }
-                currentMove = currentMove || new AllCommands.Move(Selection.selectComposite());
-                return currentMove.init("left");
+                moving = true;
+                Move.run(Selection.selectedElements(), "l");
             });
             this.registerAction("moveRight", "Right", "Positioning", function () {
-                if (!currentMove){
-                    startRepeatableAction(x => x.position());
+                if (!moving){
+                    startRepeatableAction(x => x.viewMatrix());
                 }
-                currentMove = currentMove || new AllCommands.Move(Selection.selectComposite());
-                return currentMove.init("right");
+                moving = true;
+                Move.run(Selection.selectedElements(), "r");
             });
             this.registerAction("moveUp", "Up", "Positioning", function () {
-                if (!currentMove){
-                    startRepeatableAction(x => x.position());
+                if (!moving){
+                    startRepeatableAction(x => x.viewMatrix());
                 }
-                currentMove = currentMove || new AllCommands.Move(Selection.selectComposite());
-                return currentMove.init("up");
+                moving = true;
+                Move.run(Selection.selectedElements(), "u");
             });
             this.registerAction("moveDown", "Down", "Positioning", function () {
-                if (!currentMove){
-                    startRepeatableAction(x => x.position());
+                if (!moving){
+                    startRepeatableAction(x => x.viewMatrix());
                 }
-                currentMove = currentMove || new AllCommands.Move(Selection.selectComposite());
-                return currentMove.init("down");
+                moving = true;
+                Move.run(Selection.selectedElements(), "d");
             });
             this.registerAction("moveLeft10", "Left 10 pixels", "Positioning", function () {
-                if (!currentMove){
-                    startRepeatableAction(x => x.position());
+                if (!moving){
+                    startRepeatableAction(x => x.viewMatrix());
                 }
-                currentMove = currentMove || new AllCommands.Move(Selection.selectComposite());
-                return currentMove.init("left", 10);
+                moving = true;
+                Move.run(Selection.selectedElements(), "l", 10);
             });
             this.registerAction("moveRight10", "Right 10 pixels", "Positioning", function () {
-                if (!currentMove){
-                    startRepeatableAction(x => x.position());
+                if (!moving){
+                    startRepeatableAction(x => x.viewMatrix());
                 }
-                currentMove = currentMove || new AllCommands.Move(Selection.selectComposite());
-                return currentMove.init("right", 10)
+                moving = true;
+                Move.run(Selection.selectedElements(), "r", 10);
             });
             this.registerAction("moveUp10", "Up 10 pixels", "Positioning", function () {
-                if (!currentMove){
-                    startRepeatableAction(x => x.position());
+                if (!moving){
+                    startRepeatableAction(x => x.viewMatrix());
                 }
-                currentMove = currentMove || new AllCommands.Move(Selection.selectComposite());
-                return currentMove.init("up", 10);
+                moving = true;
+                Move.run(Selection.selectedElements(), "u", 10);
             });
             this.registerAction("moveDown10", "Down 10 pixels", "Positioning", function () {
-                if (!currentMove){
-                    startRepeatableAction(x => x.position());
+                if (!moving){
+                    startRepeatableAction(x => x.viewMatrix());
                 }
-                currentMove = currentMove || new AllCommands.Move(Selection.selectComposite());
-                return currentMove.init("down", 10);
+                moving = true;
+                Move.run(Selection.selectedElements(), "d", 10);
             });
 
             this.registerAction("moveFinished", "Move finished", "Positioning", function () {
-                currentMove = null;
+                moving = false;
                 var oldProps = endRepeatableAction();
-                var commands = Selection.selectComposite().map((x, i) => x.constructPropsChangedCommand(x.position(), oldProps[i]));
-                return new CompositeCommand(commands);
+                Selection.selectedElements().forEach((x, i) =>
+                    x.trackSetProps(x.selectProps(["m"]), {m: oldProps[i]}));
             });
 
             this.registerAction("pathUnion", "Union", "Combine Paths", function () {

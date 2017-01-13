@@ -10,6 +10,9 @@ if (!sketch.ui){
 if (!sketch.ui.common){
     sketch.ui.common = {};
 }
+if (!sketch.commands){
+    sketch.commands = {};
+}
 window.debug = require("debug");
 
 require("webExtensions");
@@ -34,7 +37,7 @@ require("ui/BasicIcons");
 require("ui/Basic2Icons");
 require("ui/AndroidIcons");
 
-require("commands/AllCommands");
+require("commands/Move");
 require("framework/Deferred");
 require("framework/Pubsub");
 require("framework/notifier");

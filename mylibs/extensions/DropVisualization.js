@@ -148,6 +148,8 @@ var onDraggingElement = function (event) {
 
 var onStartDragging = function () {
     this._dragging = true;
+    this._target = null;
+    delete this._targetRect;
 };
 
 var onStopDragging = function (event) {
