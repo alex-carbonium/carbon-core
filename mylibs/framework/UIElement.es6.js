@@ -635,7 +635,7 @@ var UIElement = klass(DataNode, {
 
         this.applyViewMatrix(context, environment);
 
-        this.clip(context, 0, 0, w, h);
+        this.clip(context);
         this.drawSelf(context, w, h, environment);
 
         context.restore();
@@ -722,9 +722,9 @@ var UIElement = klass(DataNode, {
     trackPropertyState: function (name) {
         return null;
     },
-    clip: function (context, l, t, w, h) {
+    clip: function (context) {
         if (this.clipSelf()) {
-            context.rectPath(l, t, w, h);
+            this.drawBoundaryPath(context, this.globalViewMatrix());
             context.clip();
         }
     },

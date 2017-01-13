@@ -31,8 +31,6 @@ import Matrix from "math/matrix";
 class Artboard extends Container {
     constructor(props) {
         super(props);
-        this.clipSelf(true);
-        this.fill(Brush.White);
         this._dragable(true);
         this.selectFromLayersPanel = true;
 
@@ -325,6 +323,10 @@ class Artboard extends Container {
         super.drawSelf(context, w, h, environment);
         this.onContentDrawn && this.onContentDrawn(this, context);
         context.restore();
+    }
+
+    clipSelf(){
+        return true;
     }
 
     buildMetadata(properties) {
