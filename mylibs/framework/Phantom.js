@@ -15,11 +15,14 @@ export default class Phantom extends UIElement{
     }
 
     shouldApplyViewMatrix(){
-        return true;
+        return false;
     }
 
     drawSelf(context, w, h, environment){
-        this._element.clip(context, 0, 0, w, h);
-        this._element.drawSelf(context, w, h, environment);
+        this._element.draw(context, environment);
+    }
+
+    drawBoundaryPath(context, matrix){
+        this._element.drawBoundaryPath(context, matrix);
     }
 }

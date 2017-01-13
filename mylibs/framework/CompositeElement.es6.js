@@ -60,6 +60,10 @@ export default class CompositeElement extends UIElement{
         }
     }
 
+    wrapSingleChild(){
+        return true;
+    }
+
     elementAt(index){
         return this.elements[index];
     }

@@ -38,6 +38,10 @@ export default class GroupContainer extends Container {
         return allowMoveInOut;
     }
 
+    wrapSingleChild(){
+        return true;
+    }
+
     iconType(){
         return 'group';
     }

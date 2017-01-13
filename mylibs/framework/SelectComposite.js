@@ -14,8 +14,14 @@ var SelectCompositeFrame = {
         return DefaultFrameType.updateFromElement(frame);
     },
 
+    capturePoint: function(frame, point, event){
+        DefaultFrameType.capturePoint(frame, point, event);
+    },
     movePoint: function(frame, point, event){
         return DefaultFrameType.movePoint(frame, point, event);
+    },
+    releasePoint: function(frame, point){
+        DefaultFrameType.releasePoint(frame, point);
     },
     draw: function(frame, context){
         DefaultFrameType.draw(frame, context);

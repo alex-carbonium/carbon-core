@@ -7,6 +7,7 @@ import {areRectsIntersecting} from "../../math/math";
 import Point from "../../math/point";
 import InteractiveElement from "./InteractiveElement";
 import ArrangeStrategy from "../ArrangeStrategy";
+import Brush from "../Brush";
 
 var debug = require("DebugUtil")("carb:draggingElement");
 
@@ -30,6 +31,14 @@ class DraggingElement extends InteractiveElement {
 
         var holdPcnt = Math.round((event.x - this.x()) * 100 / this.width());
         this._ownSnapPoints = SnapController.prepareOwnSnapPoints(this, holdPcnt);
+    }
+
+    wrapSingleChild(){
+        return false;
+    }
+
+    shouldApplyViewMatrix(){
+        return true;
     }
 
     createClone(element){
@@ -128,6 +137,22 @@ class DraggingElement extends InteractiveElement {
 
         this.applyTranslation(position.subtract(this._initialPosition), true);
         Invalidate.requestUpperOnly();
+    }
+
+    strokeBorder(context, w, h){
+        if (Brush.canApply(this.stroke())){
+            context.save();
+
+            var gm = this.globalViewMatrixInverted();
+
+            for (var i = 0; i < this.children.length; i++){
+                var child = this.children[i];
+                child.drawBoundaryPath(context, child.globalViewMatrix().prepended(gm));
+            }
+
+            Brush.stroke(this.stroke(), context);
+            context.restore();
+        }
     }
 
     parentAllowSnapping(pos) {

@@ -11,7 +11,8 @@ var GroupArrangeStrategy = {
         if (items.length === 0){
             return;
         }
-        if (items.length === 1){
+
+        if (items.length === 1 && container.wrapSingleChild()){
             var props = items[0].selectLayoutProps(true);
             props.m = container.parent().globalViewMatrixInverted().appended(props.m);
             container.setProps(props);

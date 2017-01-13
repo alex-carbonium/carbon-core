@@ -12,11 +12,10 @@ export default{
 
             for (let i = group.children.length - 1; i >= 0; --i) {
                 var e = group.children[i];
-                var globalRect = e.getBoundaryRectGlobal();
-                var position = parent.global2local(globalRect);
+                var gm = e.globalViewMatrix();
                 group.remove(e);
                 parent.insert(e, index);
-                e.setProps(position);
+                e.setTransform(parent.globalViewMatrixInverted().appended(gm));
                 allChildren.push(e);
             }
 
