@@ -12,7 +12,7 @@ var onAngleDistanceChanged = function(angle){
 var Shadow = {};
 
 Shadow.apply = function(shadowObject, context, callback){
-    if (!shadowObject.visible || (shadowObject.blur == 0 && shadowObject.spread == 0) || shadowObject.color == null){
+    if (!shadowObject.enabled || (shadowObject.blur == 0 && shadowObject.spread == 0) || shadowObject.color == null){
         return;
     }
 
@@ -45,5 +45,6 @@ Shadow.create = function(offsetX, offsetY, color, blur){
 };
 
 Shadow.None = Shadow.create(0, 0, 'black', 0);
+Shadow.Default = Shadow.create(4, 4, 'black', 4);
 
 export default Shadow;

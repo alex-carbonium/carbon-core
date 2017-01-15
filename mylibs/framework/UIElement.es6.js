@@ -6,7 +6,6 @@ import ObjectFactory from "./ObjectFactory";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Box from "framework/Box";
 import Brush from "framework/Brush";
-import Shadow from "framework/Shadow";
 import QuadAndLock from "framework/QuadAndLock";
 import Font from "framework/Font";
 import AnimationGroup from "framework/animation/AnimationGroup";
@@ -931,12 +930,6 @@ var UIElement = klass(DataNode, {
         }
         return this.props.angle;
     },
-    shadow: function (/*double*/value) {
-        if (value !== undefined) {
-            this.setProps({shadow: value});
-        }
-        return this.props.shadow;
-    },
     minWidth: function (/*Number*/value) {
         if (value !== undefined) {
             this.setProps({minWidth: value});
@@ -1858,11 +1851,6 @@ PropertyMetadata.registerForType(UIElement, {
             max: 360
         },
         customizable: true
-    },
-    shadow: {
-        displayName: "Shadow",
-        useInModel: true,
-        defaultValue: Shadow.None
     },
     flipHorizontal: {
         defaultValue: false

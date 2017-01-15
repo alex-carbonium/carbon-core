@@ -3,6 +3,7 @@ import * as rectmath from "math/math";
 import QuadAndLock from "framework/QuadAndLock";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Brush from "framework/Brush";
+import Shadow from "framework/Shadow";
 import {PointDirection, Types, StrokePosition} from "framework/Defs";
 import nearestPoint from "math/NearestPoint";
 import commandManager from "framework/commands/CommandManager";
@@ -229,12 +230,17 @@ class Rectangle extends Shape {
     }
 
     drawSelf(context, w, h, environment) {
-//                var that = this;
-//                var shadow = this.shadow();
-//
-//                shadow.apply(context, function(context){
-//                    that.drawShape(context, x, y, w, h);
-//                });
+        var shadows = this.props.shadows;
+        if(shadows && shadows.length){
+            for(var i = 0; i < shadows.length; ++i) {
+                var shadow = shadows[i];
+                Shadow.apply(shadow, context, (context)=>{
+                    this.drawPath(context, w, h);
+                    context.fillStyle="black";
+                    context.fill();
+                });
+            }
+        }
 
         context.save();
 
@@ -246,7 +252,7 @@ class Rectangle extends Shape {
 
         this.drawPath(context, w, h);
         if (w < 2 || h < 2) {
-            // if the shape is too small we should not use fill brush, since borders are overlap anyway
+            // if the shape is too sall we should not use fill brush, since borders are overlap anyway
             Brush.fill(stroke, context, 0, 0, w, h);
         } else {
             Brush.fill(this.fill(), context, 0, 0, w, h);

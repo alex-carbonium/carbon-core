@@ -129,12 +129,15 @@ class Shape extends Container {
     }
 
     drawSelf(context, w, h, environment) {
-//                var that = this;
-//                var shadow = this.shadow();
-//
-//                shadow.apply(context, function(context){
-//                    that.drawShape(context, x, y, w, h);
-//                });
+       var shadows = this.props.shadows;
+        if(shadows && shadows.length){
+            for(var i = 0; i < shadows.length; ++i) {
+                var shadow = shadows[i];
+                Shadow.apply(shadow, context, (context)=>{
+                    this._renderDraft(context, w, h);
+                });
+            }
+        }
 
         context.save();
 
