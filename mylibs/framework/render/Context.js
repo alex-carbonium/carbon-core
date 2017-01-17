@@ -205,8 +205,6 @@ export default class Context {
     }
 
     roundedRectDifferentRadiusesPath(x, y, width, height, upperLeft, upperRight, bottomLeft, bottomRight) {
-        this.beginPath();
-
         const MagicNumber = 0.55228475;
 
         var crazy = CrazyScope.isCrazy;
@@ -295,7 +293,7 @@ export default class Context {
     }
 
     rectPath(x, y, width, height, crazySupported, reverse) {
-        this.beginPath();
+        // this.beginPath();
 
         var crazy = CrazyScope.isCrazy;
         if (crazy && crazySupported && !reverse) {

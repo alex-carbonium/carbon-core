@@ -152,6 +152,7 @@ export default class Section extends Container {
     }
 
     modifyContextBeforeDrawChildren(context) {
+        context.beginPath();
         context.rectPath(0, 0, this.width(), this.height());
         context.clip();
     }

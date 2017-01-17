@@ -585,6 +585,7 @@ export default class LinkingTool extends EditModeAction {
         var x = handle.x;
         var y = handle.y;
 
+        context.beginPath();
         context.rectPath(x, y, size, size);
         context.fillStyle = DefaultLinkColor;
         context.fill();
@@ -606,6 +607,7 @@ export default class LinkingTool extends EditModeAction {
         var x = rect.x + rect.width;
         var y = 0 | rect.y + (rect.height - size) / 2;
 
+        context.beginPath();
         context.rectPath(x, y, size, size);
         context.fillStyle = DefaultLinkColor;
         context.fill();

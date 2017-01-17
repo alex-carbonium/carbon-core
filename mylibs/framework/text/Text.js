@@ -106,6 +106,7 @@ class Text extends UIElement {
             TextEngine.setDefaultFormatting(this.props.font);
         }
 
+        context.beginPath();
         context.rectPath(0, 0, w, h);
         Brush.fill(this.fill(), context, 0, 0, w, h);
         if (this.runtimeProps.drawText === false){

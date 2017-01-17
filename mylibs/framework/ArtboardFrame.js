@@ -153,6 +153,7 @@ export default class ArtboardFrameControl extends UIElement {
 
         if (this.mode() === ElementState.Edit) {
             context.save();
+            context.beginPath();
             context.rectPath(0, 0, w, h);
             context.lineWidth = 4 * environment.view.contextScale;
             context.setLineDash([10 * environment.view.contextScale, 5 * environment.view.contextScale]);

@@ -230,17 +230,7 @@ class Rectangle extends Shape {
     }
 
     drawSelf(context, w, h, environment) {
-        var shadows = this.props.shadows;
-        if(shadows && shadows.length){
-            for(var i = 0; i < shadows.length; ++i) {
-                var shadow = shadows[i];
-                Shadow.apply(shadow, context, (context)=>{
-                    this.drawPath(context, w, h);
-                    context.fillStyle="black";
-                    context.fill();
-                });
-            }
-        }
+        this.drawOutsetShadows(context, w, h, environment);
 
         context.save();
 
@@ -249,7 +239,7 @@ class Rectangle extends Shape {
             context.setLineDash(dashPattern);
         }
         var stroke = this.stroke();
-
+        context.beginPath();
         this.drawPath(context, w, h);
         if (w < 2 || h < 2) {
             // if the shape is too sall we should not use fill brush, since borders are overlap anyway
@@ -257,6 +247,8 @@ class Rectangle extends Shape {
         } else {
             Brush.fill(this.fill(), context, 0, 0, w, h);
         }
+
+        this.drawInsetShadows(context, w, h, environment);
 
         if (!stroke || !stroke.type || !stroke.position) {
             Brush.stroke(stroke, context, 0, 0, w, h);

@@ -49,6 +49,7 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
                             cornerRadius.bottomLeft,
                             cornerRadius.bottomRight);
                     } else {
+                        context.beginPath();
                         context.rectPath(l, t, w, h, true);
                     }
                     fwk.Brush.fill(this.fill(), context, l, t, w, h);

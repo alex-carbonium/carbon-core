@@ -276,6 +276,7 @@ class Artboard extends Container {
         context.stroke();
 
         context.font = (0 | (12 / scale)) + "px Lato, LatoLight, Arial, Helvetica, sans-serif";
+        context.beginPath();
         context.rectPath(x, y - 20 / scale, this.width(), 20 / scale);
         context.clip();
 

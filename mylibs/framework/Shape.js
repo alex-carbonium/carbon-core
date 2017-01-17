@@ -129,15 +129,7 @@ class Shape extends Container {
     }
 
     drawSelf(context, w, h, environment) {
-       var shadows = this.props.shadows;
-        if(shadows && shadows.length){
-            for(var i = 0; i < shadows.length; ++i) {
-                var shadow = shadows[i];
-                Shadow.apply(shadow, context, (context)=>{
-                    this._renderDraft(context, w, h);
-                });
-            }
-        }
+       this.drawOutsetShadows(context, w, h, environment);
 
         context.save();
 
@@ -157,6 +149,29 @@ class Shape extends Container {
         }
 
         context.restore();
+    }
+
+    drawOutsetShadows(context, w, h, environment){
+        var shadows = this.props.shadows;
+        if(shadows && shadows.length){
+            for(var i = 0; i < shadows.length; ++i) {
+                var shadow = shadows[i];
+                if(!shadow.inset) {
+                    Shadow.apply(this, shadow, context, w, h,environment);
+                }
+            }
+        }
+    }
+    drawInsetShadows(context, w, h, environment){
+        var shadows = this.props.shadows;
+        if(shadows && shadows.length){
+            for(var i = 0; i < shadows.length; ++i) {
+                var shadow = shadows[i];
+                if(shadow.inset) {
+                    Shadow.apply(this, shadow, context, w, h, environment);
+                }
+            }
+        }
     }
 
     drawPath(context, w, h){

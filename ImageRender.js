@@ -68,6 +68,7 @@ define("bootloader", ["logger", "App"], function(logger){
             each(comments, function(comment){
                 if (comment.pageX && comment.pageY){
                     var m = context.measureText(comment.number);
+                    context.beginPath();
                     context.rectPath(comment.pageX - 2, comment.pageY - 2, m.width + 4, 16, false);
                     context.fillStyle = "white";
 
