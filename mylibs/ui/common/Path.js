@@ -3,6 +3,7 @@ import nearestPoint from  "math/NearestPoint";
 import BezierGraph from "math/bezierGraph";
 import BezierCurve from "math/bezierCurve";
 import Rect from "math/rect";
+import Point from "math/point";
 import ResizeDimension from "framework/ResizeDimension";
 import actionManager from "ui/ActionManager";
 import Brush from "framework/Brush";
@@ -19,6 +20,7 @@ import {debounce} from "../../util";
 import Command from "framework/commands/Command";
 import {Types} from "../../framework/Defs";
 import ArrangeStrategy from "../../framework/ArrangeStrategy";
+import ResizeOptions from "../../decorators/ResizeOptions";
 
 var CP_HANDLE_RADIUS = 3;
 var CP_HANDLE_RADIUS2 = 6;
@@ -1176,8 +1178,8 @@ class Path extends Shape {
         }
     }
 
-    applySizeScaling(s, o, sameDirection) {
-        this.applyMatrixScaling(s, o, sameDirection);
+    applySizeScaling(s, o, options) {
+        this.applyMatrixScaling(s, o, options);
     }
 
     shouldApplyViewMatrix(){
@@ -1250,7 +1252,7 @@ class Path extends Shape {
         return Rect.fromObject(graph.bounds);
     }
 
-    adjustBoundaries(oldBoundingBox) {
+    adjustBoundaries() {
         //happens when all add-point commands are rolled back
         if (this.points.length <= 1) {
             return;

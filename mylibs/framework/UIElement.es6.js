@@ -1,20 +1,15 @@
 import TypeDefaults from "framework/TypeDefaults";
-import Migrations from "migrations/MigrationRegistrar";
-import PropertyTracker from "framework/PropertyTracker";
-import ObjectCache from "framework/ObjectCache";
 import ObjectFactory from "./ObjectFactory";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Box from "framework/Box";
 import Brush from "framework/Brush";
-import QuadAndLock from "framework/QuadAndLock";
-import Font from "framework/Font";
 import AnimationGroup from "framework/animation/AnimationGroup";
 import ElementPropsChanged from "commands/ElementPropsChanged";
 import ElementDelete from "commands/ElementDelete";
 import ElementMove from "commands/ElementMove";
 import Matrix from "../math/matrix";
 import Point from "../math/point";
-import {rotatePointByDegree, isRectInRect, areRectsIntersecting} from "../math/math";
+import {isRectInRect, areRectsIntersecting} from "../math/math";
 import stopwatch from "Stopwatch";
 import ResizeDimension from "framework/ResizeDimension";
 import Constraints from "framework/Constraints";
@@ -31,16 +26,13 @@ import RotateFramePoint from "decorators/RotateFramePoint";
 import ResizeFramePoint from "decorators/ResizeFramePoint";
 import DefaultFrameType from "decorators/DefaultFrameType";
 import styleManager from "framework/style/StyleManager";
-import ModelStateListener from "framework/sync/ModelStateListener";
 import NullContainer from "framework/NullContainer";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import DataNode from "./DataNode";
 import {createUUID, deepEquals} from "../util";
-import Intl from "../Intl";
-import UserSettings from "../UserSettings";
 import Rect from "../math/rect";
-import LineSegment from "../math/lineSegment";
+import ResizeOptions from "../decorators/ResizeOptions";
 
 require("migrations/All");
 
@@ -188,21 +180,21 @@ var UIElement = klass(DataNode, {
         return this.getRotation() % 360 !== 0;
     },
 
-    applyScaling: function(s, o, sameDirection, withReset) {
-        if (withReset){
+    applyScaling: function(s, o, options) {
+        if (options && options.reset){
             this.saveOrResetLayoutProps();
         }
 
-        if (sameDirection || !this.isRotated()){
-            this.applySizeScaling(s, o, sameDirection, withReset);
+        if ((options && options.sameDirection) || !this.isRotated()){
+            this.applySizeScaling(s, o, options);
             return true;
         }
 
-        this.applyMatrixScaling(s, o, sameDirection);
+        this.applyMatrixScaling(s, o, options);
         return false;
     },
-    applyMatrixScaling(s, o, sameDirection){
-        if (sameDirection){
+    applyMatrixScaling(s, o, options){
+        if (options && options.sameDirection){
             var localOrigin = this.viewMatrixInverted().transformPoint(o);
             this.applyTransform(Matrix.create().scale(s.x, s.y, localOrigin.x, localOrigin.y), true);
         }
@@ -220,10 +212,15 @@ var UIElement = klass(DataNode, {
      *
      * Flip is detected by negative width/height, in which case the matrix is reflected relative to origin.
      */
-    applySizeScaling: function(s, o, sameDirection, withReset){
+    applySizeScaling: function(s, o, options){
         var br = this.getBoundaryRect();
         var newWidth = br.width * s.x;
         var newHeight = br.height * s.y;
+
+        if (options && options.round){
+            newWidth = Math.round(newWidth);
+            newHeight = Math.round(newHeight);
+        }
 
         var localOrigin = this.viewMatrixInverted().transformPoint(o);
         var wx = localOrigin.x === 0 ? 0 : br.width/localOrigin.x;
@@ -235,8 +232,14 @@ var UIElement = klass(DataNode, {
         var fx = s.x < 0 ? -1 : 1;
         var fy = s.y < 0 ? -1 : 1;
 
+        var newX = s.x * br.x;
+        var newY = s.y * br.y;
+        if (options && options.round){
+            newX = Math.round(newX);
+            newY = Math.round(newY);
+        }
         var newProps = {
-            br: new Rect(Math.abs(br.x * s.x), Math.abs(br.y * s.y), Math.abs(newWidth), Math.abs(newHeight))
+            br: new Rect(Math.abs(newX), Math.abs(newY), Math.abs(newWidth), Math.abs(newHeight))
         };
 
         if (fx === -1 || fy === -1 || !offset.equals(Point.Zero)){
@@ -245,6 +248,12 @@ var UIElement = klass(DataNode, {
                 matrix = matrix.appended(Matrix.create().scale(fx, fy));
             }
             newProps.m = matrix.prepended(Matrix.create().translate(offset.x, offset.y));
+        }
+        if (options && options.round){
+            newProps.m = newProps.m || this.viewMatrix().clone();
+            //set directly to avoid floating point results
+            newProps.m.tx = Math.round(newProps.m.tx);
+            newProps.m.ty = Math.round(newProps.m.ty);
         }
 
         this.prepareAndSetProps(newProps);
@@ -258,6 +267,23 @@ var UIElement = klass(DataNode, {
     },
     resetTransform: function() {
         this.setProps({m: Matrix.Identity});
+    },
+
+
+    roundBoundingBoxToPixelEdge: function(){
+        var bb = this.getBoundingBox();
+        var bb1 = bb.roundPosition();
+        if (bb1 !== bb){
+            var t = bb1.topLeft().subtract(bb.topLeft());
+            this.applyTranslation(t);
+            bb1 = bb1.translate(t.x, t.y);
+        }
+        var bb2 = bb1.roundSize();
+        if (bb2 !== bb1){
+            var s = new Point(bb2.width/bb1.width, bb2.height/bb1.height);
+            var canRound = this.shouldApplyViewMatrix();
+            this.applyScaling(s, bb1.topLeft(), ResizeOptions.Default.withRounding(canRound).withReset(false));
+        }
     },
 
     arrange: function () {
@@ -331,7 +357,7 @@ var UIElement = klass(DataNode, {
         return this.runtimeProps.snapPoints = {
             xs: [x, x + width],
             ys: [y, y + height],
-            center: {x: ~~(origin.x), y: ~~(origin.y)}
+            center: {x: origin.x, y: origin.y}
         };
     },
     position: function () {

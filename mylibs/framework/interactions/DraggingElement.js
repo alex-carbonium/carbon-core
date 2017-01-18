@@ -8,29 +8,32 @@ import Point from "../../math/point";
 import InteractiveElement from "./InteractiveElement";
 import ArrangeStrategy from "../ArrangeStrategy";
 import Brush from "../Brush";
+import Environment from "../../environment";
+import DefaultSettings from "../../DefaultSettings";
 
 var debug = require("DebugUtil")("carb:draggingElement");
 
 function applyOrthogonalMove(pos) {
-    if (Math.abs(this._initialPosition.x - pos.x) > Math.abs(this._initialPosition.y - pos.y)) {
-        pos.y = this._initialPosition.y;
+    if (Math.abs(pos.x) > Math.abs(pos.y)) {
+        pos.y = 0;
     } else {
-        pos.x = this._initialPosition.x;
+        pos.x = 0;
     }
-
-    return pos;
 }
 
 class DraggingElement extends InteractiveElement {
     constructor(event, activeArtboard) {
         super(event.element);
 
-        this._initialPosition = this.getTranslation();
+        this._initialPosition = this.getBoundingBoxGlobal().topLeft();
 
         SnapController.calculateSnappingPoints(activeArtboard);
 
         var holdPcnt = Math.round((event.x - this.x()) * 100 / this.width());
         this._ownSnapPoints = SnapController.prepareOwnSnapPoints(this, holdPcnt);
+
+        this._translation = new Point(0, 0);
+        this._currentPosition = new Point(0, 0);
     }
 
     wrapSingleChild(){
@@ -123,19 +126,35 @@ class DraggingElement extends InteractiveElement {
 
     dragTo(event) {
         debug("Drag to x=%d y=%d", event.x, event.y);
-        var position = new Point(event.x, event.y);
+        this._translation.set(event.x, event.y);
 
         if (event.event.shiftKey) {
-            position = applyOrthogonalMove.call(this, position);
+            applyOrthogonalMove.call(this, this._translation);
+        }
+
+        this._currentPosition.set(this._initialPosition.x + this._translation.x, this._initialPosition.y + this._translation.y);
+
+        var roundToPixels = DefaultSettings.snapTo.enabled && DefaultSettings.snapTo.pixels;
+        if (roundToPixels){
+            this._currentPosition.roundMutable();
         }
 
         if (this.parentAllowSnapping(event) && !(event.event.ctrlKey || event.event.metaKey)) {
-            position = SnapController.applySnapping(position, this._ownSnapPoints);
-        } else {
+            var snapped = SnapController.applySnapping(this._currentPosition, this._ownSnapPoints);
+            if (this._currentPosition !== snapped){
+                this._currentPosition.set(snapped.x, snapped.y);
+                if (roundToPixels){
+                    this._currentPosition.roundMutable();
+                }
+            }
+        }
+        else {
             SnapController.clearActiveSnapLines();
         }
 
-        this.applyTranslation(position.subtract(this._initialPosition), true);
+        this._translation.set(this._currentPosition.x - this._initialPosition.x, this._currentPosition.y - this._initialPosition.y);
+
+        this.applyTranslation(this._translation, true);
         Invalidate.requestUpperOnly();
     }
 
@@ -143,7 +162,10 @@ class DraggingElement extends InteractiveElement {
         if (Brush.canApply(this.stroke())){
             context.save();
 
-            var gm = this.globalViewMatrixInverted();
+            var scale = Environment.view.scale();
+            context.scale(1/scale, 1/scale);
+
+            var gm = this.globalViewMatrixInverted().prependedWithScale(scale, scale);
 
             for (var i = 0; i < this.children.length; i++){
                 var child = this.children[i];

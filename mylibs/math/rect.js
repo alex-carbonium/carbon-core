@@ -24,17 +24,56 @@ export default class Rect{
         return new Rect(this.x + dx, this.y + dy, this.width, this.height);
     }
     scale(s, o){
-        var newWidth = this.width * s.x;
-        var newHeight = this.height * s.y;
+        return new Rect(s.x * (this.x - o.x) + o.x, s.y * (this.y - o.y) + o.y, this.width * s.x, this.height * s.y);
+    }
 
-        var wx = o.x === 0 ? 0 : this.width/o.x;
-        var hy = o.y === 0 ? 0 : this.height/o.y;
-        var newOrigin = Point.create(wx === 0 ? 0 : newWidth/wx, hy === 0 ? 0 : newHeight/hy);
-        var offset = o.subtract(newOrigin);
+    round(){
+        var l = Math.round(this.x);
+        var r = Math.round(this.x + this.width);
+        var t = Math.round(this.y);
+        var b = Math.round(this.y + this.height);
 
-        var newX = this.x + offset.x;
-        var newY = this.y + offset.y;
-        return new Rect(newX, newY, newWidth, newHeight);
+        if (l === this.x && r === this.x + this.width && t === this.y && b === this.y + this.height){
+            return this;
+        }
+        return new Rect(l, t, r - l, b - t);
+    }
+
+    roundPosition(){
+        var l = Math.round(this.x);
+        var t = Math.round(this.y);
+
+        if (l === this.x && t === this.y){
+            return this;
+        }
+        return new Rect(l, t, this.width, this.height);
+    }
+
+    roundMutable(){
+        var l = Math.round(this.x);
+        var r = Math.round(this.x + this.width);
+        var t = Math.round(this.y);
+        var b = Math.round(this.y + this.height);
+        this.x = l;
+        this.y = t;
+        this.width = r - l;
+        this.height = b - t;
+        return this;
+    }
+
+    roundSize(){
+        var w = Math.round(this.width);
+        var h = Math.round(this.height);
+
+        if (w === this.width && h === this.height){
+            return this;
+        }
+        return new Rect(this.x, this.y, w, h);
+    }
+
+    roundSizeMutable(){
+        this.width = Math.round(this.width);
+        this.height = Math.round(this.height);
     }
 
     containsRect(other){

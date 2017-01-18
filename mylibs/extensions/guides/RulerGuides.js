@@ -4,13 +4,13 @@ import DragController from "../../framework/DragController";
 import SnapController from "../../framework/SnapController";
 import Cursor from "../../framework/Cursor";
 import CustomGuides from "./CustomGuides";
-import UserSettings from "../../UserSettings";
+import DefaultSettings from "../../DefaultSettings";
 import {isPointInRect} from "../../math/math";
 import {PatchType, ViewTool} from "../../framework/Defs";
 import {createUUID} from "../../util";
 import NullArtboard from "../../framework/NullArtboard";
 
-const config = UserSettings.ruler;
+const config = DefaultSettings.ruler;
 
 export default class RulerGuides {
     constructor(app, view, controller){

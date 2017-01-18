@@ -54,7 +54,7 @@ export default {
 
                 //for constraint = scale, use same scale and set origin to Point.Zero
                 v.set(1 + dw/bb.width, 1 + dh/bb.height);
-                child.applyScaling(v, origin, false, event.withReset);
+                child.applyScaling(v, origin, false, event.reset);
             }
             if (translateX || translateY){
                 v = v || new Point(0, 0);
@@ -63,7 +63,7 @@ export default {
 
                 v.set((npr.width - pr.width) * dx, (npr.height - pr.height) * dy);
 
-                var reset = event.withReset;
+                var reset = event.reset;
                 var alreadyReset = scaleX || scaleY;
                 if (alreadyReset){
                     reset = false;

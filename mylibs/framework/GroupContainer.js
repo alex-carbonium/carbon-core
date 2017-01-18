@@ -1,6 +1,6 @@
 import {Types, ArrangeStrategies} from "./Defs";
 import PropertyMetadata from "./PropertyMetadata";
-import UserSettings from "../UserSettings";
+import DefaultSettings from "../DefaultSettings";
 import Container from "./Container";
 import UIElement from "./UIElement";
 import Point from "../math/point";
@@ -8,18 +8,20 @@ import Point from "../math/point";
 require("./GroupArrangeStrategy");
 
 export default class GroupContainer extends Container {
-    applySizeScaling(s, o, sameDirection, withReset){
+    applySizeScaling(s, o, options){
         UIElement.prototype.applySizeScaling.apply(this, arguments);
 
         //if group is flipped, scale children normally
         var absScale = s.abs();
-        this.children.forEach(e => e.applyScaling(absScale, Point.Zero, false, withReset));
+        var round = this.children.length === 1;
+        var resizeOptions = options && options.forChildResize(round && options.round);
+        this.children.forEach(e => e.applyScaling(absScale, Point.Zero, resizeOptions));
     }
 
     strokeBorder(context, w, h){
         if (!this.lockedGroup()){
             context.save();
-            context.strokeStyle = UserSettings.group.active_stroke;
+            context.strokeStyle = DefaultSettings.group.active_stroke;
             this.drawBoundaryPath(context, this.globalViewMatrix());
             context.stroke();
             context.restore();

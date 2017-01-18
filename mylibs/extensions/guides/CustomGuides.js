@@ -3,7 +3,7 @@ import Brush from "framework/Brush";
 import tinycolor from "tinycolor2/tinycolor";
 import Guide from "./Guide";
 import {Types} from "../../framework/Defs";
-import UserSettings from "../../UserSettings";
+import DefaultSettings from "../../DefaultSettings";
 
 class CustomGuides extends Guide{
     constructor(view){
@@ -139,7 +139,7 @@ CustomGuides.getDefaultStrokeHsl = function(){
 
 PropertyMetadata.registerForType(CustomGuides, {
     stroke: {
-        defaultValue: Brush.createFromColor(UserSettings.guides.stroke)
+        defaultValue: Brush.createFromColor(DefaultSettings.guides.stroke)
     },
     opacity: {
         defaultValue: 1

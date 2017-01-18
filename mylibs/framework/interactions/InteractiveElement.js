@@ -4,8 +4,9 @@ import {ChangeMode, Types} from "../Defs";
 import Phantom from "../Phantom";
 import Brush from "../Brush";
 import PropertyMetadata from "../PropertyMetadata";
-import UserSettings from "../../UserSettings";
+import DefaultSettings from "../../DefaultSettings";
 import Selection from "../SelectionModel";
+import Environment from "../../environment";
 
 export default class InteractiveElement extends GroupContainer{
     constructor(element) {
@@ -44,7 +45,9 @@ export default class InteractiveElement extends GroupContainer{
     strokeBorder(context, w, h){
         if (Brush.canApply(this.stroke())){
             context.save();
-            this.drawBoundaryPath(context, this.globalViewMatrix());
+            var scale = Environment.view.scale();
+            context.scale(1/scale, 1/scale);
+            this.drawBoundaryPath(context, this.globalViewMatrix().prependedWithScale(scale, scale));
             Brush.stroke(this.stroke(), context);
             context.restore();
         }
@@ -97,6 +100,6 @@ InteractiveElement.prototype.t = Types.InteractiveElement;
 
 PropertyMetadata.registerForType(InteractiveElement, {
     stroke: {
-        defaultValue: Brush.createFromColor(UserSettings.frame.stroke)
+        defaultValue: Brush.createFromColor(DefaultSettings.frame.stroke)
     }
 });

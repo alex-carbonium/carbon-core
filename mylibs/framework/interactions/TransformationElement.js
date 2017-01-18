@@ -18,9 +18,9 @@ export default class TransformationElement extends InteractiveElement{
         return clone;
     }
 
-    applySizeScaling(s, o, sameDirection, withReset){
-        super.applySizeScaling(s, o, sameDirection, withReset);
-        this._lastScaling = {s, o, sameDirection};
+    applySizeScaling(s, o, options){
+        super.applySizeScaling(s, o, options);
+        this._lastScaling = {s, o, options};
     }
 
     applyRotation(angle, o, withReset, mode){
@@ -39,7 +39,9 @@ export default class TransformationElement extends InteractiveElement{
                 var globalOrigin = this._lastScaling.o;
                 var localOrigin = element.parent().globalViewMatrixInverted().transformPoint(globalOrigin);
                 var sameDirection = this.children.length === 1 || this.isRotated();
-                element.applyScaling(this._lastScaling.s, localOrigin, sameDirection);
+                var resizeOptions = this._lastScaling.options.withSameDirection(sameDirection);
+                resizeOptions = resizeOptions.withReset(false);
+                element.applyScaling(this._lastScaling.s, localOrigin, resizeOptions);
             }
             if (this._lastRotation){
                 element.setTransform(element.parent().globalViewMatrixInverted().appended(clone.globalViewMatrix()));

@@ -48,6 +48,7 @@ import AppState from "./AppState";
 import OfflineModel from "./offline/OfflineModel";
 import Deferred from "framework/Deferred";
 import Story from "stories/Story";
+import DefaultSettings from "./DefaultSettings";
 
 window.env = Environment;
 window.Selection = Selection;
@@ -848,6 +849,31 @@ class App extends DataNode {
         return this.props.defaultLineSettings;
     }
 
+    snapSettings(value){
+        if (arguments.length === 1){
+            this._setUserSetting("snapTo", value);
+            return value;
+        }
+        return this._getUserSetting("snapTo", DefaultSettings.snapTo);
+    }
+
+    _getUserSetting(name, defaultValue){
+        var userId = backend.getUserId();
+
+        for (var i = 0; i < this.props.userSettings.length; i++){
+            var s = this.props.userSettings[i];
+            if (s.id.startsWith(userId) && s.id.split(":")[1] === name){
+                return s.value;
+            }
+        }
+
+        return defaultValue;
+    }
+    _setUserSetting(name, value){
+        var fullName = backend.getUserId() + ":" + name;
+        this.patchProps(PatchType.Change, "userSettings", {id: fullName, value});
+    }
+
     nextPageId() {
         return createUUID();
     }
@@ -1511,6 +1537,9 @@ PropertyMetadata.registerForType(App, {
         defaultValue: []
     },
     dataProviders: {
+        defaultValue: []
+    },
+    userSettings: {
         defaultValue: []
     }
 });

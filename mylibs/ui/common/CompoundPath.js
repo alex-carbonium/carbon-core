@@ -150,8 +150,8 @@ class CompoundPath extends Container {
         delete this._internalChange;
     }
 
-    applySizeScaling(s, o, sameDirection) {
-        this.applyMatrixScaling(s, o, sameDirection);
+    applySizeScaling(s, o, options) {
+        this.applyMatrixScaling(s, o, options);
     }
 
     flatten(){

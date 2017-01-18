@@ -1,13 +1,13 @@
 import {PointDirection} from "framework/Defs";
 import CrazyScope from "framework/CrazyManager";
 import Environment from "environment";
-import UserSettings from "../UserSettings";
+import DefaultSettings from "../DefaultSettings";
 import UIElement from "../framework/UIElement";
 import Keyboard from "../platform/Keyboard";
 import Point from "../math/point";
 
 export default {
-    strokeStyle: UserSettings.frame.stroke,
+    strokeStyle: DefaultSettings.frame.stroke,
     hitPointIndex: function (frame, point) {
         var matrix = frame.element.globalViewMatrixInverted();
         point = matrix.transformPoint(point);

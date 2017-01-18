@@ -2,10 +2,12 @@ import UIElement from "framework/UIElement";
 import SelectComposite from "framework/SelectComposite";
 import Environment from "environment";
 import SnapController from "framework/SnapController";
+import ResizeOptions from "./ResizeOptions";
 import {Types} from "../framework/Defs";
 import Point from "../math/point";
 import Rect from "../math/rect";
 import {fitRect} from "../math/Fitting";
+import DefaultSettings from "../DefaultSettings";
 
 var debug = require("DebugUtil")("carb:resizeFramePoint");
 
@@ -26,17 +28,26 @@ export default {
         context.stroke();
     },
     capture: function (frame, point) {
+        frame.globalViewMatrix = frame.element.globalViewMatrix();
+        frame.isRotated = frame.globalViewMatrix.decompose().rotation % 360 !== 0;
+
+        if (!frame.isRotated && DefaultSettings.snapTo.enabled && DefaultSettings.snapTo.pixels){
+            frame.element.roundBoundingBoxToPixelEdge();
+        }
+
         var resizingElement = UIElement.construct(Types.TransformationElement, frame.element);
+
         var br = frame.element.br();
         frame.resizingElement = resizingElement;
         frame.originalRect = br;
-        frame.globalViewMatrix = frame.element.globalViewMatrix();
+        frame.originalBoundingBox = frame.element.getBoundingBoxGlobal();
 
         var c = br.center();
         frame.localOrigin = c.subtract(new Point(br.width/2 * point.rv[0], br.height/2 * point.rv[1]));
         frame.centerOrigin = frame.element.globalViewMatrix().transformPoint(c);
         frame.pointOrigin = frame.element.globalViewMatrix().transformPoint(frame.localOrigin);
         frame.capturedPoint = Point.create(point.x, point.y);
+        frame.resizeOptions = ResizeOptions.Default;
 
         debug("Captured rect: x=%d y=%d w=%d h=%d", frame.originalRect.x, frame.originalRect.y, frame.originalRect.width, frame.originalRect.height);
 
@@ -100,7 +111,16 @@ export default {
         }
 
         var s = new Point(1 + dx/frame.originalRect.width, 1 + dy/frame.originalRect.height);
-        frame.resizingElement.applyScaling(s, origin, true, true);
+
+        var round = !frame.isRotated && DefaultSettings.snapTo.enabled && DefaultSettings.snapTo.pixels;
+        if (round){
+            var oldRect = frame.originalBoundingBox;
+            var newRect = oldRect.scale(s, origin).roundMutable();
+            s.set(newRect.width/oldRect.width, newRect.height/oldRect.height);
+        }
+
+        var resizeOptions = frame.resizeOptions.withRounding(round && frame.element.viewMatrix().isTranslatedOnly());
+        frame.resizingElement.applyScaling(s, origin, resizeOptions);
 
         Environment.controller.resizingEvent.raise({
             element: frame.element,

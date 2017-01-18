@@ -111,8 +111,8 @@ class Line extends Shape {
         return false;
     }
 
-    applySizeScaling(s, o, sameDirection) {
-        this.applyMatrixScaling(s, o, sameDirection);
+    applySizeScaling(s, o, options) {
+        this.applyMatrixScaling(s, o, options);
     }
 
     hitTest(/*Point*/point, scale) {
