@@ -125,12 +125,7 @@ class Circle extends Shape {
     }
 
     drawSelf(context, w, h, environment) {
-//                var that = this;
-//                var shadow = this.shadow();
-//
-//                shadow.apply(context, function(context){
-//                    that.drawShape(context, x, y, w, h);
-//                });
+        this.drawOutsetShadows(context, w, h, environment);
 
         context.save();
 
@@ -140,7 +135,6 @@ class Circle extends Shape {
         }
 
         this.drawPath(context, w, h);
-
         var stroke = this.stroke();
 
         if (w < 2 || h < 2) {
@@ -149,6 +143,7 @@ class Circle extends Shape {
         } else {
             Brush.fill(this.fill(), context, 0, 0, w, h);
         }
+        this.drawInsetShadows(context, w, h, environment);
 
         if (!stroke || !stroke.type || !stroke.position) {
             Brush.stroke(stroke, context, 0, 0, w, h);

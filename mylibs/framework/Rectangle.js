@@ -238,6 +238,7 @@ class Rectangle extends Shape {
         if (dashPattern) {
             context.setLineDash(dashPattern);
         }
+
         var stroke = this.stroke();
         context.beginPath();
         this.drawPath(context, w, h);

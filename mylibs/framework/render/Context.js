@@ -674,6 +674,14 @@ export default class Context {
         this._context.textBaseline = value;
     }
 
+    get filter() {
+        return this._context.filter;
+    }
+
+    set filter(value) {
+        this._context.filter = value;
+    }
+
     save() {
         this._context.save.apply(this._context, arguments);
     }
