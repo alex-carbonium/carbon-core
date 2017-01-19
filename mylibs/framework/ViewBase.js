@@ -182,6 +182,7 @@ export default class ViewBase {
         this._focused = true;
 
         this.scaleChanged = EventHelper.createEvent();
+        this.scaleMatrix = Matrix.create();
 
         this._layers = [];
         this._layersReverse = [];
@@ -305,6 +306,9 @@ export default class ViewBase {
 
         var newValue = page.scale(value);
         if (value) {
+            this.scaleMatrix.reset();
+            this.scaleMatrix.scale(newValue, newValue);
+
             this.scaleChanged.raise(newValue);
         }
         return newValue;

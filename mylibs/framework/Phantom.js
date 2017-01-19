@@ -1,5 +1,5 @@
 import UIElement from "./UIElement";
-import Matrix from "../math/matrix";
+import Environment from "../environment";
 
 /**
  * Works only with DraggingElement as a parent.
@@ -26,9 +26,8 @@ export default class Phantom extends UIElement{
         this._element.draw(context, environment);
     }
 
-    /** Assumes that matrix is scaled only */
-    drawBoundaryPath(context, matrix){
-        var m = matrix
+    drawBoundaryPath(context){
+        var m = Environment.view.scaleMatrix
             .appended(this.parent().translationMatrix)
             .appended(this._element.globalViewMatrix());
 
