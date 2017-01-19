@@ -10,6 +10,7 @@ import ArrangeStrategy from "../ArrangeStrategy";
 import Brush from "../Brush";
 import Environment from "../../environment";
 import DefaultSettings from "../../DefaultSettings";
+import Matrix from "../../math/matrix";
 
 var debug = require("DebugUtil")("carb:draggingElement");
 
@@ -34,14 +35,12 @@ class DraggingElement extends InteractiveElement {
 
         this._translation = new Point(0, 0);
         this._currentPosition = new Point(0, 0);
+
+        this.translationMatrix = Matrix.create();
     }
 
     wrapSingleChild(){
         return false;
-    }
-
-    shouldApplyViewMatrix(){
-        return true;
     }
 
     createClone(element){
@@ -132,7 +131,7 @@ class DraggingElement extends InteractiveElement {
             applyOrthogonalMove.call(this, this._translation);
         }
 
-        this._currentPosition.set(this._initialPosition.x + this._translation.x, this._initialPosition.y + this._translation.y);
+        this._currentPosition.set(this._translation.x, this._translation.y);
 
         var roundToPixels = DefaultSettings.snapTo.enabled && DefaultSettings.snapTo.pixels;
         if (roundToPixels){
@@ -153,6 +152,8 @@ class DraggingElement extends InteractiveElement {
         }
 
         this._translation.set(this._currentPosition.x - this._initialPosition.x, this._currentPosition.y - this._initialPosition.y);
+        this.translationMatrix.tx = this._translation.x;
+        this.translationMatrix.ty = this._translation.y;
 
         this.applyTranslation(this._translation, true);
         Invalidate.requestUpperOnly();
@@ -164,12 +165,11 @@ class DraggingElement extends InteractiveElement {
 
             var scale = Environment.view.scale();
             context.scale(1/scale, 1/scale);
-
-            var gm = this.globalViewMatrixInverted().prependedWithScale(scale, scale);
+            var scaleMatrix = Matrix.create().scale(scale, scale);
 
             for (var i = 0; i < this.children.length; i++){
                 var child = this.children[i];
-                child.drawBoundaryPath(context, child.globalViewMatrix().prepended(gm));
+                child.drawBoundaryPath(context, scaleMatrix);
             }
 
             Brush.stroke(this.stroke(), context);

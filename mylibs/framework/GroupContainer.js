@@ -4,6 +4,7 @@ import DefaultSettings from "../DefaultSettings";
 import Container from "./Container";
 import UIElement from "./UIElement";
 import Point from "../math/point";
+import Environment from "../environment";
 
 require("./GroupArrangeStrategy");
 
@@ -22,7 +23,11 @@ export default class GroupContainer extends Container {
         if (!this.lockedGroup()){
             context.save();
             context.strokeStyle = DefaultSettings.group.active_stroke;
-            this.drawBoundaryPath(context, this.globalViewMatrix());
+
+            var scale = Environment.view.scale();
+            context.scale(1/scale, 1/scale);
+
+            this.drawBoundaryPath(context, this.globalViewMatrix().prependedWithScale(scale, scale));
             context.stroke();
             context.restore();
         }

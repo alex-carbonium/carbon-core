@@ -223,15 +223,6 @@ var UIElement = klass(DataNode, {
         }
 
         var localOrigin = this.viewMatrixInverted().transformPoint(o);
-        var wx = localOrigin.x === 0 ? 0 : br.width/localOrigin.x;
-        var hy = localOrigin.y === 0 ? 0 : br.height/localOrigin.y;
-        var newLocalOrigin = Point.create(wx === 0 ? 0 : newWidth/wx, hy === 0 ? 0 : newHeight/hy);
-
-        var newOrigin = this.viewMatrix().transformPoint(newLocalOrigin);
-        var offset = o.subtract(newOrigin);
-        var fx = s.x < 0 ? -1 : 1;
-        var fy = s.y < 0 ? -1 : 1;
-
         var newX = s.x * br.x;
         var newY = s.y * br.y;
         if (options && options.round){
@@ -242,12 +233,27 @@ var UIElement = klass(DataNode, {
             br: new Rect(Math.abs(newX), Math.abs(newY), Math.abs(newWidth), Math.abs(newHeight))
         };
 
-        if (fx === -1 || fy === -1 || !offset.equals(Point.Zero)){
+        var fx = s.x < 0 ? -1 : 1;
+        var fy = s.y < 0 ? -1 : 1;
+        var dx = s.x * (br.x - localOrigin.x) + localOrigin.x - newX;
+        var dy = s.y * (br.y - localOrigin.y) + localOrigin.y - newY;
+        if (options && options.round){
+            dx = Math.round(dx);
+            dy = Math.round(dy);
+        }
+
+        if (fx === -1 || fy === -1 || dx !== 0 || dy !== 0){
             var matrix = this.viewMatrix();
             if (fx === -1 || fy === -1){
+                if (fx === -1){
+                    dx = -dx;
+                }
+                if (fy === -1){
+                    dy = -dy;
+                }
                 matrix = matrix.appended(Matrix.create().scale(fx, fy));
             }
-            newProps.m = matrix.prepended(Matrix.create().translate(offset.x, offset.y));
+            newProps.m = matrix.appended(Matrix.create().translate(dx, dy));
         }
         if (options && options.round){
             newProps.m = newProps.m || this.viewMatrix().clone();
@@ -268,7 +274,6 @@ var UIElement = klass(DataNode, {
     resetTransform: function() {
         this.setProps({m: Matrix.Identity});
     },
-
 
     roundBoundingBoxToPixelEdge: function(){
         var bb = this.getBoundingBox();
@@ -648,21 +653,21 @@ var UIElement = klass(DataNode, {
             context.restore();
         }
     },
-    drawBoundaryPath: function(context, matrix){
+    drawBoundaryPath: function(context, matrix, round = true){
         var r = this.getBoundaryRect();
 
         context.beginPath();
 
-        var p = matrix.transformPoint2(r.x, r.y, true);
+        var p = matrix.transformPoint2(r.x, r.y, round);
         context.moveTo(p.x, p.y);
 
-        p = matrix.transformPoint2(r.x + r.width, r.y, true);
+        p = matrix.transformPoint2(r.x + r.width, r.y, round);
         context.lineTo(p.x, p.y);
 
-        p = matrix.transformPoint2(r.x + r.width, r.y + r.height, true);
+        p = matrix.transformPoint2(r.x + r.width, r.y + r.height, round);
         context.lineTo(p.x, p.y);
 
-        p = matrix.transformPoint2(r.x, r.y + r.height, true);
+        p = matrix.transformPoint2(r.x, r.y + r.height, round);
         context.lineTo(p.x, p.y);
 
         context.closePath();

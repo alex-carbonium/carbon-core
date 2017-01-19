@@ -36,3 +36,23 @@ registerExample("zoom in: path", function(app, artboard){
 
     window.path = path;
 });
+
+registerExample("zoom in: group", function(app, artboard){
+    app.activePage._placeBeforeRender = false;
+
+    var rect1 = new Rectangle();
+    rect1.prepareAndSetProps({br: new Rect(0, 0, 10, 10), name: 'rect1 1'});
+    rect1.applyTranslation({x: 100, y: 100});
+    artboard.add(rect1);
+
+    var rect2 = rect1.clone();
+    rect2.applyTranslation({x: 12, y: 0});
+    artboard.add(rect2);
+
+    Environment.view.scale(13);
+    Environment.view.scrollX(1182);
+    Environment.view.scrollY(1098);
+
+    Selection.makeSelection([rect1, rect2]);
+    app.actionManager.invoke("groupElements");
+});

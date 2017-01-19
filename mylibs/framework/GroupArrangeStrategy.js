@@ -3,7 +3,8 @@ import {ArrangeStrategies} from "./Defs";
 import Rect from "../math/rect";
 import Point from "../math/point";
 
-const translateChildren = false;
+//this solves rounding problems
+const translateChildren = true;
 
 var GroupArrangeStrategy = {
     arrange: function(container){
@@ -47,7 +48,6 @@ var GroupArrangeStrategy = {
         }
 
         if (translateChildren){
-            //this block is for testing purposes only
             container.br(container.br().withSize(xMax - xMin, yMax - yMin));
 
             if (xMin !== 0 || yMin !== 0){
