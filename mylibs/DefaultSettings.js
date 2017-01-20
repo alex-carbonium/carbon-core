@@ -24,7 +24,16 @@ var settings = {
     frame: {
         stroke: '#22c1ff'
     },
-    showBoundingBoxes: false
+    showBoundingBoxes: false,
+    snapTo: {
+        enabled: true,
+        pixels: true,
+        columns: true,
+        guides: true,
+        objectCorners: true,
+        objectCenters: true,
+        lockedObjects: false
+    }
 };
 
 globals.userSettings = settings;

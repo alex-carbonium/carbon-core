@@ -4,7 +4,7 @@ import PropertyTracker from "framework/PropertyTracker";
 import Cursor from "framework/Cursor";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
-import UserSettings from "../UserSettings";
+import DefaultSettings from "../DefaultSettings";
 
 //common code for identifying frame size during resize
 //this supports current behavior when selection frame does not move during resize

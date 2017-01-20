@@ -4,13 +4,13 @@ import DragController from "../../framework/DragController";
 import SnapController from "../../framework/SnapController";
 import Cursor from "../../framework/Cursor";
 import CustomGuides from "./CustomGuides";
-import UserSettings from "../../UserSettings";
+import DefaultSettings from "../../DefaultSettings";
 import {isPointInRect} from "../../math/math";
 import {PatchType, ViewTool} from "../../framework/Defs";
 import {createUUID} from "../../util";
 import NullArtboard from "../../framework/NullArtboard";
 
-const config = UserSettings.ruler;
+const config = DefaultSettings.ruler;
 
 export default class RulerGuides {
     constructor(app, view, controller){
@@ -162,7 +162,7 @@ export default class RulerGuides {
                 this._removingGuide = true;
             }
             else{
-                let pos = e.ctrlKey ? e : SnapController.applySnappingForPoint(e, null, false, true);
+                let pos = e.ctrlKey ? e : SnapController.applySnappingForPoint(e, false, true);
                 this._guideX.pos = Math.round(pos.x) - this._origin.x();
                 this._removingGuide = false;
             }
@@ -173,7 +173,7 @@ export default class RulerGuides {
                 this._removingGuide = true;
             }
             else{
-                let pos = e.ctrlKey ? e : SnapController.applySnappingForPoint(e, null, true, false);
+                let pos = e.ctrlKey ? e : SnapController.applySnappingForPoint(e, true, false);
                 this._guideY.pos = Math.round(pos.y) - this._origin.y();
                 this._removingGuide = false;
             }

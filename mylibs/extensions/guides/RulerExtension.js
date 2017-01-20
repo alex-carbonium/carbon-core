@@ -8,10 +8,10 @@ import Matrix from "math/matrix";
 import {areRectsEqual} from "math/math";
 import Environment from "environment";
 import DesignerView from "framework/DesignerView";
-import UserSettings from "../../UserSettings";
+import DefaultSettings from "../../DefaultSettings";
 import RulerGuides from "./RulerGuides";
 
-const config = UserSettings.ruler;
+const config = DefaultSettings.ruler;
 const selectionSize = 3;
 const PADDING_TOP = 32; //to match css for top bar
 const LABEL_MARGIN_X = 2;

@@ -4,6 +4,7 @@ import ArtboardPage from "../../ui/pages/ArtboardPage";
 import Selection from "../../framework/SelectionModel";
 import Matrix from "../../math/matrix";
 import Point from "../../math/point";
+import ResizeOptions from "../../decorators/ResizeOptions";
 import backend from "../../backend";
 import logger from "../../logger";
 
@@ -76,6 +77,7 @@ backend.init(logger, {services: '', storage: '', file: '', cdn: ''});
 
 window.Matrix = Matrix;
 window.Point = Point;
+window.ResizeOptions = ResizeOptions;
 
 window.onload = function(){
     var q = location.search.substr(1);

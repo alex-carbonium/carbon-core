@@ -91,7 +91,7 @@ var LinePoint = {
             dy += newPoint.y - oldPointLocal.y;
         }
         else {
-            newPoint = SnapController.applySnappingForPoint({x: oldx, y: oldy}, frame.element.getSnapPoints());
+            newPoint = SnapController.applySnappingForPoint({x: oldx, y: oldy});
             dx += newPoint.x - oldx;
             dy += newPoint.y - oldy;
         }
@@ -111,8 +111,8 @@ class Line extends Shape {
         return false;
     }
 
-    applySizeScaling(s, o, sameDirection) {
-        this.applyMatrixScaling(s, o, sameDirection);
+    applySizeScaling(s, o, options) {
+        this.applyMatrixScaling(s, o, options);
     }
 
     hitTest(/*Point*/point, scale) {

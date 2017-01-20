@@ -18,6 +18,7 @@ define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Ma
                 this._parameters = parameters;
                 this._attachMode = "select";
                 this._detachMode = "resize";
+                this._point = new Point(0, 0);
             },
             attach: function(){
                 EditModeAction.prototype.attach.apply(this, arguments);
@@ -30,14 +31,10 @@ define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Ma
             },
             mousedown: function (event) {
                 this._mousepressed = true;
-                if (event.event.ctrlKey || event.event.metaKey) {
-                    var pos = event;
-                }
-                else {
-                    pos = SnapController.applySnappingForPoint(event);
-                }
-                this._startPoint = {x: pos.x, y: pos.y};
-                this._nextPoint = {x: pos.x, y: pos.y};
+                this._prepareMousePoint(event);
+
+                this._startPoint = {x: this._point.x, y: this._point.y};
+                this._nextPoint = {x: this._point.x, y: this._point.y};
                 event.handled = true;
                 this._element = fwk.UIElement.fromType(this._type);
                 this._element.beforeAddFromToolbox();
@@ -69,8 +66,6 @@ define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Ma
                 }
                 this._mousepressed = false;
 
-                var view = this.view();
-
                 if (this._element) {
                     Invalidate.requestUpperOnly();
                     var w = this._element.width()
@@ -95,10 +90,11 @@ define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Ma
                 if (SystemConfiguration.ResetActiveToolToDefault) {
                     App.Current.actionManager.invoke("movePointer");
                 }
-                this._ratioResizeInfo = null;
                 event.handled = true;
             },
             mousemove: function (event) {
+                this._prepareMousePoint(event);
+
                 var artboard = App.Current.activePage.getArtboardAtPoint(event);
                 if (artboard != this._hoverArtboard) {
                     this._hoverArtboard = artboard;
@@ -107,21 +103,14 @@ define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Ma
                     }
                 }
 
-                if (event.event.ctrlKey || event.event.metaKey) {
-                    var pos = event;
-                }
-                else {
-                    pos = SnapController.applySnappingForPoint(event);
-                }
-
                 if (this._mousepressed) {
                     if(this._cursorNotMoved) {
-                        this._cursorNotMoved = (pos.y === this._startPoint.y) && (pos.x === this._startPoint.x);
+                        this._cursorNotMoved = (this._point.y === this._startPoint.y) && (this._point.x === this._startPoint.x);
                     }
                     //if use holds shift, we must fit shape into square
                     if (event.event.shiftKey) {
-                        var height = Math.abs(pos.y - this._startPoint.y);
-                        var width = Math.abs(pos.x - this._startPoint.x);
+                        var height = Math.abs(this._point.y - this._startPoint.y);
+                        var width = Math.abs(this._point.x - this._startPoint.x);
                         var ration = Math.min(height, width);
 
                         var x = this._startPoint.x + ration;
@@ -129,12 +118,29 @@ define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Ma
 
                         this._nextPoint = {x: x, y: y};
                     } else {
-                        this._nextPoint = {x: pos.x, y: pos.y};
+                        this._nextPoint = {x: this._point.x, y: this._point.y};
                     }
 
                     Invalidate.requestUpperOnly();
                     event.handled = true;
                     return false;
+                }
+            },
+            _prepareMousePoint: function(event){
+                this._point.set(event.x, event.y);
+                var round = true;
+                if (!(event.event.ctrlKey || event.event.metaKey)) {
+                    var snapped = SnapController.applySnappingForPoint(this._point);
+                    if (snapped === this._point){
+                        round = true;
+                    }
+                    else{
+                        this._point.set(snapped.x, snapped.y);
+                        round = false;
+                    }
+                }
+                if (round){
+                    this._point.roundMutable();
                 }
             },
             layerdraw: function (context, environment) {
@@ -150,7 +156,6 @@ define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Ma
 
                     context.save();
 
-                    var props = {x: x, y: y, width: w, height: h};
                     this._element.resetTransform();
                     this._element.applyTranslation(new Point(x, y), true);
                     this._element.prepareAndSetProps({br: new Rect(0, 0, w, h)});
@@ -161,7 +166,7 @@ define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Ma
                     //     context.clip();
                     // }
 
-                    this._element.drawSelf(context, props.width, props.height, environment);
+                    this._element.drawSelf(context, w, h, environment);
 
                     context.restore();
                 }

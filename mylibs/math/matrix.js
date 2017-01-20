@@ -687,7 +687,7 @@ class Matrix {
         return this._ty;
     }
 
-    set tx(value){
+    set ty(value){
         this._ty = value
     }
 }

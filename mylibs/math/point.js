@@ -473,6 +473,16 @@ export default class Point {
         return new Point(this.x + x, this.y + y);
     }
 
+    addMutable(point) {
+        return this.addMutable2(point.x, point.y);
+    }
+
+    addMutable2(x, y) {
+        this.x += x;
+        this.y += y;
+        return this;
+    }
+
     /**
      * Returns the subtraction of the supplied value to both coordinates of
      * the point as a new point.
@@ -508,6 +518,12 @@ export default class Point {
      */
     subtract(point) {
         return new Point(this.x - point.x, this.y - point.y);
+    }
+
+    subtractMutable(point) {
+        this.x -= point.x;
+        this.y -= point.y;
+        return this;
     }
 
     /**
@@ -819,6 +835,10 @@ export default class Point {
 
     round() {
         return new Point(Math.round(this.x), Math.round(this.y));
+    }
+    roundMutable() {
+        this.x = Math.round(this.x);
+        this.y = Math.round(this.y);
     }
 
     ceil() {
