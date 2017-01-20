@@ -57,6 +57,7 @@ export default {
         if (keys.shift) {
             angle = ~~(angle / 15) * 15;
         }
+        angle = Math.round(angle);
 
         frame.resizingElement.applyRotation(angle, frame.origin, true);
         Invalidate.requestUpperOnly();

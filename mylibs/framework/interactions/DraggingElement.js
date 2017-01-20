@@ -15,10 +15,10 @@ import Matrix from "../../math/matrix";
 var debug = require("DebugUtil")("carb:draggingElement");
 
 function applyOrthogonalMove(pos) {
-    if (Math.abs(pos.x) > Math.abs(pos.y)) {
-        pos.y = 0;
+    if (Math.abs(this._initialPosition.x - pos.x) > Math.abs(this._initialPosition.y - pos.y)) {
+        pos.y = this._initialPosition.y;
     } else {
-        pos.x = 0;
+        pos.x = this._initialPosition.x;
     }
 }
 
@@ -133,7 +133,7 @@ class DraggingElement extends InteractiveElement {
 
         this._currentPosition.set(this._translation.x, this._translation.y);
 
-        var roundToPixels = DefaultSettings.snapTo.enabled && DefaultSettings.snapTo.pixels;
+        var roundToPixels = !event.event.ctrlKey && DefaultSettings.snapTo.enabled && DefaultSettings.snapTo.pixels;
         if (roundToPixels){
             this._currentPosition.roundMutable();
         }

@@ -252,18 +252,13 @@ class SnapController {
         return snappedPoint || pos;
     }
 
-    applySnappingForPoint(pos, target, disableVertical, disableHorizontal){
+    applySnappingForPoint(pos, disableVertical, disableHorizontal){
         var data = this.currentSnappingData;
         if(!data){
             return pos;
         }
-        if (target) {
-            var xs = target.xs,
-                ys = target.ys;
-        } else {
-            xs = [pos.x];
-            ys = [pos.y];
-        }
+        var xs = [pos.x];
+        var ys = [pos.y];
         var snapX = data._snapX,
             snapY = data._snapY;
 

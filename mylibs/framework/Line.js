@@ -91,7 +91,7 @@ var LinePoint = {
             dy += newPoint.y - oldPointLocal.y;
         }
         else {
-            newPoint = SnapController.applySnappingForPoint({x: oldx, y: oldy}, frame.element.getSnapPoints());
+            newPoint = SnapController.applySnappingForPoint({x: oldx, y: oldy});
             dx += newPoint.x - oldx;
             dy += newPoint.y - oldy;
         }

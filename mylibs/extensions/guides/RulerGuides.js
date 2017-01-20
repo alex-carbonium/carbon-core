@@ -162,7 +162,7 @@ export default class RulerGuides {
                 this._removingGuide = true;
             }
             else{
-                let pos = e.ctrlKey ? e : SnapController.applySnappingForPoint(e, null, false, true);
+                let pos = e.ctrlKey ? e : SnapController.applySnappingForPoint(e, false, true);
                 this._guideX.pos = Math.round(pos.x) - this._origin.x();
                 this._removingGuide = false;
             }
@@ -173,7 +173,7 @@ export default class RulerGuides {
                 this._removingGuide = true;
             }
             else{
-                let pos = e.ctrlKey ? e : SnapController.applySnappingForPoint(e, null, true, false);
+                let pos = e.ctrlKey ? e : SnapController.applySnappingForPoint(e, true, false);
                 this._guideY.pos = Math.round(pos.y) - this._origin.y();
                 this._removingGuide = false;
             }

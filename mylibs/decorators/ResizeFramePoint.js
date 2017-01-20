@@ -1,5 +1,4 @@
 import UIElement from "framework/UIElement";
-import SelectComposite from "framework/SelectComposite";
 import Environment from "environment";
 import SnapController from "framework/SnapController";
 import ResizeOptions from "./ResizeOptions";
@@ -48,8 +47,11 @@ export default {
         frame.pointOrigin = frame.element.globalViewMatrix().transformPoint(frame.localOrigin);
         frame.capturedPoint = Point.create(point.x, point.y);
         frame.resizeOptions = ResizeOptions.Default;
+        frame.allowSnapping = true;
 
         debug("Captured rect: x=%d y=%d w=%d h=%d", frame.originalRect.x, frame.originalRect.y, frame.originalRect.width, frame.originalRect.height);
+
+        SnapController.calculateSnappingPoints(Environment.view.page.getActiveArtboard());
 
         Environment.view.layer3.add(resizingElement);
         frame.resizingElement.startResizing({interactiveElement: frame.resizingElement});
@@ -68,10 +70,6 @@ export default {
         return (index + dc) % 8;
     },
     change: function (frame, dx, dy, point, mousePoint, keys) {
-        if (!frame.resizingElement) {
-            return;
-        }
-
         var rv = point.rv;
 
         if (keys.shift && frame.originalRect.width && frame.originalRect.height) {
@@ -112,14 +110,14 @@ export default {
 
         var s = new Point(1 + dx/frame.originalRect.width, 1 + dy/frame.originalRect.height);
 
-        var round = !frame.isRotated && DefaultSettings.snapTo.enabled && DefaultSettings.snapTo.pixels;
+        var round = !keys.ctrl && !frame.isRotated && DefaultSettings.snapTo.enabled && DefaultSettings.snapTo.pixels;
         if (round){
             var oldRect = frame.originalBoundingBox;
             var newRect = oldRect.scale(s, origin).roundMutable();
             s.set(newRect.width/oldRect.width, newRect.height/oldRect.height);
         }
 
-        var resizeOptions = frame.resizeOptions.withRounding(round && frame.element.viewMatrix().isTranslatedOnly());
+        var resizeOptions = frame.resizeOptions.withRounding(round && frame.globalViewMatrix.isTranslatedOnly());
         frame.resizingElement.applyScaling(s, origin, resizeOptions);
 
         Environment.controller.resizingEvent.raise({

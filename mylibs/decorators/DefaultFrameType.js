@@ -1,10 +1,9 @@
-import {PointDirection} from "framework/Defs";
-import CrazyScope from "framework/CrazyManager";
 import Environment from "environment";
 import DefaultSettings from "../DefaultSettings";
-import UIElement from "../framework/UIElement";
 import Keyboard from "../platform/Keyboard";
 import Point from "../math/point";
+import SnapController from "../framework/SnapController";
+import {PointDirection} from "../framework/Defs";
 
 export default {
     strokeStyle: DefaultSettings.frame.stroke,
@@ -35,7 +34,6 @@ export default {
     },
 
     capturePoint: function(frame, point, event){
-        frame._lastChange = {frame, point, dx: 0, dy: 0};
         frame._mousePoint = new Point(event.x, event.y);
 
         point.type.capture(frame, point, frame._mousePoint);
@@ -45,8 +43,16 @@ export default {
     movePoint: function (frame, point, event, keys = Keyboard.state) {
         frame._mousePoint.set(event.x, event.y);
 
+        var pos = frame._mousePoint;
+        if (frame.allowSnapping && !keys.ctrl) {
+            pos = SnapController.applySnappingForPoint(frame._mousePoint);
+        }
+        else {
+            SnapController.clearActiveSnapLines();
+        }
+
         var matrix = frame.element.globalViewMatrixInverted();
-        var pt = matrix.transformPoint(event);
+        var pt = matrix.transformPoint(pos);
 
         var dx = 0;
         var dy = 0;
@@ -57,15 +63,13 @@ export default {
             dx = -point.x + pt.x;
         }
 
-        frame._lastChange.dx = dx;
-        frame._lastChange.dy = dy;
-
         point.type.change(frame, dx, dy, point, frame._mousePoint, keys);
     },
     releasePoint: function(frame, point){
         point.type.release(frame, point);
 
         frame.keyboardToken.dispose();
+        SnapController.clearActiveSnapLines();
     },
 
     draw: function (frame, context, currentPoint) {
