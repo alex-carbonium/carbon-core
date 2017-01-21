@@ -320,7 +320,7 @@ PropertyMetadata.registerForType(Shape, {
                 properties: ["visible", "opacity", "fill", "stroke", 'dashPattern', "cornerRadius", "clipMask"]
             },
             {
-                label: "Shadow",
+                label: "@shadow",
                 expanded: false,
                 properties: ["shadows"]
             },

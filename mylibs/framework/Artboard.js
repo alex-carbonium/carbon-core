@@ -239,6 +239,7 @@ class Artboard extends Container {
         context.rect(0, -16 / scale, this.width(), 16 / scale);
         context.clip();
 
+        context.beginPath();
         context.fillText(this.headerText(), 0, -5 / scale);
 
         context.restore();
