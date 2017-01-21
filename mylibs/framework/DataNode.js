@@ -15,38 +15,37 @@ export default klass({
         }
     },
 
+    prepareProps: function(changes){
+        for (let p in changes){
+            let oldValue = this.props[p];
+            let newValue = changes[p];   
+            if (newValue === oldValue){
+                delete changes[p];
+            }
+        }
+    },
+
     setProps: function (props, mode = ChangeMode.Model) {
-        var oldProps = {};
-        var newProps = props; //first assume all new props are different
+        var oldProps = {};        
         var propsChanged = false;
         for (var p in props) {
             var oldValue = this.props[p];
             var newValue = props[p];
             if (newValue !== oldValue) {
                 propsChanged = true;
-                oldProps[p] = oldValue;
-                if (newProps !== props){
-                    newProps[p] = newValue;
-                }
-            }
-            //if some props are the same, extract the ones which differ
-            else if (newProps === props){
-                newProps = {}; //TODO
-                for (let p in oldProps){
-                    newProps[p] = props[p];
-                }
-            }
-        }
-
-        if (mode !== ChangeMode.Self) {
-            this.trackSetProps(newProps, oldProps, mode);
-        }
+                oldProps[p] = oldValue;                
+            }            
+        }        
 
         if (propsChanged) {
-            Object.assign(this.props, newProps);
-            this.propsUpdated(newProps, oldProps, mode);
+            if (mode !== ChangeMode.Self){
+                this.trackSetProps(props, oldProps, mode);
+            }
+
+            Object.assign(this.props, props);
+            this.propsUpdated(props, oldProps, mode);
         }
-    },
+    },    
 
     prepareAndSetProps: function (props, mode) {
         this.prepareProps(props);

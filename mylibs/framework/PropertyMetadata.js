@@ -1,3 +1,4 @@
+// @flow
 var PropertyMetadata = {};
 PropertyMetadata._store = {};
 PropertyMetadata._defaults = {};
@@ -5,7 +6,7 @@ PropertyMetadata._cache = {
     stylePropertyNamesMap: {}
 };
 
-PropertyMetadata.find = function(type, propertyName){
+PropertyMetadata.find = function(type: string, propertyName: string): PropertyDescriptor{
     var typeData = PropertyMetadata._store[type];
     if (!typeData){
         return null;
@@ -17,7 +18,7 @@ PropertyMetadata.find = function(type, propertyName){
     propertyData.name = propertyName;
     return propertyData;
 };
-PropertyMetadata.findAll = function(type){
+PropertyMetadata.findAll = function(type: string){
     return PropertyMetadata._store[type];
 };
 PropertyMetadata.findForType = function(Type){
@@ -42,7 +43,7 @@ PropertyMetadata.extend = function(){
     for (var i in data){
         var props = data[i];
         var desc = {};
-        var funcs = {}; //TODO: pass functions as a separate arg
+        var funcs = {}; //TODO: pass functions as a separate arg        
         for (var p in props){
             var prop = props[p];
             if (typeof prop === "function"){
@@ -54,9 +55,10 @@ PropertyMetadata.extend = function(){
                 if (parentProp){
                     prop = Object.assign({}, parentProp, prop);
                 }
-            }
+            }            
             desc[p] = {value: prop, enumerable: true};
-        }
+        }        
+
         var entry = Object.create(parent, desc);
         Object.assign(entry, funcs);
         PropertyMetadata._store[i] = entry;
@@ -175,3 +177,13 @@ PropertyMetadata.getStylePropertyNamesMap = function(type, styleType){
 }
 
 export default PropertyMetadata;
+
+/** @flow */
+export interface PropertyDescriptor{
+    displayName: string,
+    type: string,
+    defaultValue: any,
+    size?: number,
+    computed?: boolean,
+    options?: any    
+}

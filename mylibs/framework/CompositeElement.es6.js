@@ -1,33 +1,40 @@
-import PropertyMetadata from "framework/PropertyMetadata";
-import PropertyTracker from "framework/PropertyTracker";
+// @flow
+
+import PropertyMetadata, {PropertyDescriptor} from "./PropertyMetadata";
+import PropertyTracker from "./PropertyTracker";
 import {leaveCommonProps} from "../util";
 import {Types} from "./Defs";
-import Brush from "framework/Brush";
-import Font from "framework/Font";
+import Brush from "./Brush";
+import Font from "./Font";
 import UIElement from "./UIElement";
 import GroupArrangeStrategy from "./GroupArrangeStrategy";
+import {IGroupContainer} from "./CoreModel";
 import Box from "./Box";
 import Rect from "../math/rect";
 import Phantom from "./Phantom";
+import Environment from "../environment";
 
-export default class CompositeElement extends UIElement{
+export default class CompositeElement extends UIElement implements IGroupContainer{
     constructor(){
         super();
 
         this._types = [];
-        this.children = [];
-        this.elements = [];
+        this.children = [];                
 
         PropertyTracker.propertyChanged.bind(this, this._onPropsChanged);
     }
+
+    get elements(){
+        return this.children;
+    }
+
     add(element){
         var systemType = element.systemType();
         if (this._types.indexOf(systemType) === -1){
             this._types.push(systemType);
         }
-        element.enablePropsTracking();
-        this.elements.push(element);
-        this.children.push(new Phantom(element, element.selectLayoutProps(true)));
+        element.enablePropsTracking();                        
+        this.children.push(element);
     }
     remove(element){
         element.disablePropsTracking();
@@ -45,7 +52,7 @@ export default class CompositeElement extends UIElement{
                 elementIndex = i;
             }
         }
-        this.elements.splice(i, 1);
+        
         this.children.splice(i, 1);
 
         if (canRemoveType){
@@ -62,6 +69,10 @@ export default class CompositeElement extends UIElement{
 
     wrapSingleChild(){
         return true;
+    }
+
+    translateChildren(){
+        return false;
     }
 
     elementAt(index){
@@ -85,8 +96,8 @@ export default class CompositeElement extends UIElement{
         this.each(x => x.disablePropsTracking());
         this._types = [];
         //do not clear, selection model stores this by reference
-        this.elements = [];
         this.children = [];
+        this.resetTransform();
     }
     count(){
         return this.elements.length;
@@ -158,20 +169,13 @@ export default class CompositeElement extends UIElement{
 
         return res;
     }
-    clone(){
-        var clone = super.clone.apply(this, arguments);
-        if (this.commonProps){
-            clone.setCommonProps(this.commonProps);
-        }
-        return clone;
-    }
     displayName(){
         if (this.allHaveSameType()){
             return this.elements[0].displayName();
         }
         return "";
     }
-    findPropertyMetadata(propName){
+    findPropertyDescriptor(propName){
         return PropertyMetadata.find(this._types[0], propName);
     }
     allHaveSameType(){
@@ -235,10 +239,10 @@ export default class CompositeElement extends UIElement{
         }
 
         if (this.count() === 1){
-            var type = this._types[0];
-            var metadata = PropertyMetadata.findAll(type);
-            this.commonProps = this.elements[0].props;
-            return metadata ? metadata.groups(this.elements[0]) : [];
+            let type = this._types[0];
+            let metadata = PropertyMetadata.findAll(type);            
+            let groups = metadata ? metadata.groups(this.elements[0]) : [];                        
+            return groups;
         }
 
         var commonGroups = [];
@@ -331,68 +335,79 @@ export default class CompositeElement extends UIElement{
             });
         }
 
-        this.setCommonProps(commonGroups);
-
         return commonGroups;
     }
-    setCommonProps(groups){
-        var propNames = ["name", "locked"];
-        var sample = this.elements[0];
-        var props = {
-            name: sample.props.name,
-            locked: sample.props.locked
-        };
-        for (var i = 0; i < groups.length; i++){
-            var group = groups[i];
-            for (var j = 0; j < group.properties.length; j++){
-                var propertyName = group.properties[j];
-                var value = sample.props[propertyName];
-                props[propertyName] = value;
-                propNames.push(propertyName);
+
+    getDisplayPropValue(propertyName: string, descriptor: PropertyDescriptor){
+        if (this.count() === 1){
+            return this.elements[0].getDisplayPropValue(propertyName, descriptor);
+        }
+
+        var values = this.elements.map(x => x.getDisplayPropValue(propertyName, descriptor));
+        var base = values[0];
+        for (let i = 1; i < values.length; ++i){
+            let next = values[i];
+            let isComplex = typeof next === "object" || Array.isArray(next);
+            if (isComplex){
+                leaveCommonProps(base, next);
+            }            
+            else if (next !== base){
+                base = undefined;
+                break;
             }
         }
-        for (var i = 1; i < this.elements.length; i++){
-            var element = this.elements[i];
-            var changes = element.selectProps(propNames);
-            leaveCommonProps(props, changes);
-        }
-        this.commonProps = props;
+        
+        return base;
     }
+    prepareDisplayPropsVisibility(){
+        var type = this.allHaveSameType() ?
+            this.elements[0].systemType() :
+            this.systemType();
+        
+        var metadata = PropertyMetadata.findAll(type);
+        if (!metadata || !metadata.prepareVisibility){
+            return {};
+        }
+        
+        var base = metadata.prepareVisibility(this.elements[0], this, Environment.view);
+        for (let i = 1; i < this.elements.length; ++i){
+            let element = this.elements[i];
+            let next = metadata.prepareVisibility(element, this, Environment.view);
+            if (next){
+                for (let p in next){
+                    let visible = next[p];
+                    if (!visible){
+                        base[p] = false;
+                    }
+                }
+            }            
+        }
+        return base;
+    }
+
     _onPropsChanged(element, newProps){
         if (this.has(element)){
-            if (newProps.hasOwnProperty("m")
-                || newProps.hasOwnProperty("stroke")
-                || newProps.hasOwnProperty("width")
-                || newProps.hasOwnProperty("height")
+            if (newProps.hasOwnProperty("m") || newProps.hasOwnProperty("br")
             ) {
-                this.resetGlobalViewCache();
+                this.resetGlobalViewCache();                
             }
-
-            if(!this.commonProps) {
-                this.createPropertyGroups();
-            }
+            
             if (this.count() === 1){
-                var oldProps = {};
-                for (var i in newProps){
-                    oldProps[i] = this.commonProps[i];
-                }
-
-                PropertyTracker.changeProps(this, newProps, oldProps);
+                PropertyTracker.changeProps(this, newProps, {});
                 return;
             }
             //for multiselection, capture all changes within the current tick and fire a single update on next tick
             if (!this._newPropsForNextTick){
-                this._newPropsForNextTick = extend(true, {}, newProps);
-            }
-            else{
-                leaveCommonProps(this._newPropsForNextTick, newProps);
-            }
+                this._newPropsForNextTick = {};
+            }            
+            
+            this._newPropsForNextTick = Object.assign(this._newPropsForNextTick, newProps);
+            
             if (this._propsChangedTimer){
                 clearTimeout(this._propsChangedTimer);
                 this._propsChangedTimer = 0;
             }
-            var that = this;
-            this._propsChangedTimer = setTimeout(function(){ that._onPropsChangedNextTick(); }, 1);
+            this._propsChangedTimer = setTimeout(() => this._onPropsChangedNextTick(), 1);
         }
     }
     _onPropsChangedNextTick(){
@@ -402,13 +417,10 @@ export default class CompositeElement extends UIElement{
         var newProps = this._newPropsForNextTick;
         this._newPropsForNextTick = null;
 
-        var oldProps = {};
-        for (var i in newProps){
-            oldProps[i] = this.commonProps[i];
-        }
+        this.performArrange();
+        PropertyTracker.changeProps(this, newProps, {});
+    }    
 
-        PropertyTracker.changeProps(this, newProps, oldProps);
-    }
     dispose(){
         super.dispose.apply(this, arguments);
         PropertyTracker.propertyChanged.unbind(this, this._onPropsChanged);

@@ -2,12 +2,10 @@ import ArrangeStrategy from "./ArrangeStrategy";
 import {ArrangeStrategies} from "./Defs";
 import Rect from "../math/rect";
 import Point from "../math/point";
-
-//this solves rounding problems
-const translateChildren = true;
+import {IGroupContainer} from "./CoreModel";
 
 var GroupArrangeStrategy = {
-    arrange: function(container){
+    arrange: function(container: IGroupContainer){                
         var items = container.children;
         if (items.length === 0){
             return;
@@ -47,7 +45,7 @@ var GroupArrangeStrategy = {
             yMin = Math.min(yMin, outerBox.y);
         }
 
-        if (translateChildren){
+        if (container.translateChildren()){
             container.br(container.br().withSize(xMax - xMin, yMax - yMin));
 
             if (xMin !== 0 || yMin !== 0){

@@ -1,18 +1,20 @@
-import TypeDefaults from "framework/TypeDefaults";
+// @flow
+
+import TypeDefaults from "./TypeDefaults";
 import ObjectFactory from "./ObjectFactory";
-import PropertyMetadata from "framework/PropertyMetadata";
-import Box from "framework/Box";
-import Brush from "framework/Brush";
-import AnimationGroup from "framework/animation/AnimationGroup";
-import ElementPropsChanged from "commands/ElementPropsChanged";
-import ElementDelete from "commands/ElementDelete";
-import ElementMove from "commands/ElementMove";
+import PropertyMetadata from "./PropertyMetadata";
+import Box from "./Box";
+import Brush from "./Brush";
+import AnimationGroup from "./animation/AnimationGroup";
+import ElementPropsChanged from "../commands/ElementPropsChanged";
+import ElementDelete from "../commands/ElementDelete";
+import ElementMove from "../commands/ElementMove";
 import Matrix from "../math/matrix";
 import Point from "../math/point";
 import {isRectInRect, areRectsIntersecting} from "../math/math";
-import stopwatch from "Stopwatch";
-import ResizeDimension from "framework/ResizeDimension";
-import Constraints from "framework/Constraints";
+import stopwatch from "../Stopwatch";
+import ResizeDimension from "./ResizeDimension";
+import Constraints from "./Constraints";
 import {
     Types,
     DockStyle,
@@ -22,19 +24,20 @@ import {
     VerticalAlignment,
     PointDirection
 } from "./Defs";
-import RotateFramePoint from "decorators/RotateFramePoint";
-import ResizeFramePoint from "decorators/ResizeFramePoint";
-import DefaultFrameType from "decorators/DefaultFrameType";
-import styleManager from "framework/style/StyleManager";
-import NullContainer from "framework/NullContainer";
-import Invalidate from "framework/Invalidate";
-import Environment from "environment";
+import RotateFramePoint from "../decorators/RotateFramePoint";
+import ResizeFramePoint from "../decorators/ResizeFramePoint";
+import DefaultFrameType from "../decorators/DefaultFrameType";
+import styleManager from "./style/StyleManager";
+import NullContainer from "./NullContainer";
+import Invalidate from "./Invalidate";
+import Environment from "../environment";
 import DataNode from "./DataNode";
 import {createUUID, deepEquals} from "../util";
 import Rect from "../math/rect";
 import ResizeOptions from "../decorators/ResizeOptions";
+import {DisplayProperty, PropertyDescriptor} from './PropertyMetadata';
 
-require("migrations/All");
+require("../migrations/All");
 
 var fwk = sketch.framework;
 
@@ -83,6 +86,7 @@ var UIElement = klass(DataNode, {
         return Math.round(value);
     },
     prepareProps: function (changes) {
+        DataNode.prototype.prepareProps.apply(this, arguments);
         if (changes.styleId !== undefined) {
             extend(changes, styleManager.getStyle(changes.styleId, 1).props);
         }
@@ -101,6 +105,7 @@ var UIElement = klass(DataNode, {
         }
         return false;
     },
+
     setProps: function(props){
         var hasBr = props.hasOwnProperty("br");
         //TODO
@@ -152,6 +157,70 @@ var UIElement = klass(DataNode, {
         else{
             this.setProps(this.runtimeProps.origLayout);
         }
+    },
+
+    selectDisplayProps: function(names, metadata = this.findMetadata()): any{
+        var values = {};
+        for (var i = 0; i < names.length; i++){
+            var propertyName = names[i];
+            var descriptor: PropertyDescriptor = metadata[names[i]];
+            if (descriptor.computed){
+                values[propertyName] = this[propertyName]();
+            }
+            else{
+                values[propertyName] = this.props[propertyName];
+            }            
+        }
+        return values;
+    },
+    getDisplayPropValue: function(propertyName: string, descriptor: PropertyDescriptor = null): any{
+        if (!descriptor){
+            descriptor = this.findMetadata()[propertyName];
+        }
+        if (descriptor.computed){
+            return this[propertyName]();
+        }
+        return this.props[propertyName];
+    },
+    setDisplayProps: function(changes, changeMode, metadata = this.findMetadata()){
+        var names = Object.keys(changes);
+        for (var i = 0; i < names.length; i++){
+            var propertyName = names[i];
+            var descriptor: PropertyDescriptor = metadata[propertyName];
+            if (descriptor.computed){
+                this[propertyName](changes[propertyName], changeMode);
+                delete changes[propertyName];
+            }            
+        }
+
+        this.prepareAndSetProps(changes, changeMode);
+    },
+    getAffectedDisplayProperties: function(changes): string[]{
+        var properties = Object.keys(changes);
+        if (changes.hasOwnProperty("br") || changes.hasOwnProperty("m")){
+            if (properties.indexOf("x") === -1){
+                properties.push("x");
+            }
+            if (properties.indexOf("y") === -1){
+                properties.push("y");
+            }
+            if (properties.indexOf("width") === -1){
+                properties.push("width");
+            }
+            if (properties.indexOf("height") === -1){
+                properties.push("height");
+            }
+
+            var i = properties.indexOf("br");
+            if (i !== -1){
+                properties.splice(i, 1);
+            }
+            i = properties.indexOf("m");
+            if (i !== -1){
+                properties.splice(i, 1);
+            }
+        }   
+        return properties;     
     },
 
     getTranslation: function(){
@@ -791,27 +860,29 @@ var UIElement = klass(DataNode, {
 
         return parent.children.indexOf(this);
     },
-    x: function (/*int*/value) {
-        if (value !== undefined) {
-            this.setProps({x: value});
+    x: function (value, changeMode) {
+        if (arguments.length !== 0) {
+            this.applyTranslation(new Point(value - this.x(), 0), false, changeMode);
         }
-        return this.props.x;
+        return this.getBoundingBox().x;
     },
-    y: function (/*set*/value) {
-        if (value !== undefined) {
-            this.setProps({y: value});
+    y: function (value, changeMode) {
+        if (arguments.length !== 0) {
+            this.applyTranslation(new Point(0, value - this.y()), false, changeMode);
         }
-        return this.props.y;
+        return this.getBoundingBox().y;
     },
-    width: function (value) {
-        if (value !== undefined) {
-            this.setProps({width: value});
+    width: function (value, changeMode) {
+        if (arguments.length !== 0) {
+            var br = this.br();
+            this.setProps({br: br.withSize(value, br.height)}, changeMode);
         }
         return this.br().width;
     },
-    height: function (value) {
-        if (value !== undefined) {
-            this.setProps({height: value});
+    height: function (value, changeMode) {
+        if (arguments.length !== 0) {
+            var br = this.br();
+            this.setProps({br: br.withSize(br.width, value)}, changeMode);
         }
         return this.br().height;
     },
@@ -1231,7 +1302,10 @@ var UIElement = klass(DataNode, {
     systemType: function () {
         return this.t;
     },
-    findPropertyMetadata: function (propName) {
+    findMetadata: function () {
+        return PropertyMetadata.findAll(this.systemType());
+    },
+    findPropertyDescriptor: function (propName): PropertyDescriptor {
         return PropertyMetadata.find(this.systemType(), propName);
     },
     quickEditProperty: function (value) {
@@ -1798,18 +1872,24 @@ PropertyMetadata.registerForType(UIElement, {
     width: {
         displayName: "Width",
         type: "numeric",
-        useInModel: true,
-        editable: true,
         defaultValue: 0,
-        size: 1 / 4
+        size: 1 / 4,
+        computed: true,
+        options: {
+            step: 1,
+            miniStep: .1
+        }
     },
     height: {
         displayName: "Height",
         type: "numeric",
-        useInModel: true,
-        editable: true,
         defaultValue: 0,
-        size: 1 / 4
+        size: 1 / 4,
+        computed: true,
+        options: {
+            step: 1,
+            miniStep: .1
+        }
     },
     name: {
         displayName: "Name",
@@ -1821,18 +1901,24 @@ PropertyMetadata.registerForType(UIElement, {
     x: {
         displayName: "Left",
         type: "numeric",
-        useInModel: true,
-        editable: true,
         defaultValue: 0,
-        size: 1 / 4
+        size: 1 / 4,
+        computed: true,
+        options: {
+            step: 1,
+            miniStep: .1
+        }
     },
     y: {
         displayName: "Top",
         type: "numeric",
-        useInModel: true,
-        editable: true,
         defaultValue: 0,
-        size: 1 / 4
+        size: 1 / 4,
+        computed: true,
+        options: {
+            step: 1,
+            miniStep: .1
+        }
     },
     m: {
         defaultValue: Matrix.Identity
@@ -1956,6 +2042,10 @@ PropertyMetadata.registerForType(UIElement, {
     groups: function () {
         return [
             {
+                label: "Layout",
+                properties: ["x", "y", "width", "height", "angle"]
+            },
+            {
                 label: "Colors",
                 properties: ["fill", "stroke"],
                 hidden: true
@@ -1963,10 +2053,6 @@ PropertyMetadata.registerForType(UIElement, {
             {
                 label: "Style",
                 properties: ["styleId", "opacity"]
-            },
-            {
-                label: "Layout",
-                properties: ["x", "y", "width", "height", "constraints", "angle", "dockStyle", "horizontalAlignment", "verticalAlignment"]
             },
             {
                 label: "@constraints",

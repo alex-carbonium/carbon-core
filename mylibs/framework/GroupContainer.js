@@ -5,10 +5,11 @@ import Container from "./Container";
 import UIElement from "./UIElement";
 import Point from "../math/point";
 import Environment from "../environment";
+import {IGroupContainer} from "./CoreModel";
 
 require("./GroupArrangeStrategy");
 
-export default class GroupContainer extends Container {
+export default class GroupContainer extends Container implements IGroupContainer{
     applySizeScaling(s, o, options){
         UIElement.prototype.applySizeScaling.apply(this, arguments);
 
@@ -46,6 +47,10 @@ export default class GroupContainer extends Container {
     }
 
     wrapSingleChild(){
+        return true;
+    }
+
+    translateChildren(){
         return true;
     }
 

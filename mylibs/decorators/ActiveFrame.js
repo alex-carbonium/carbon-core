@@ -39,12 +39,10 @@ function propertyChanged(element, newProps, oldProps) {
         return;
     }
     //TODO: add support for changing parent
-    if (newProps.x !== oldProps.x || newProps.y !== oldProps.y
-        || newProps.width !== oldProps.width || newProps.height !== oldProps.height
+    if (newProps.m !== oldProps.m || newProps.br !== oldProps.br
         || newProps.x1 !== oldProps.x1 || newProps.y1 !== oldProps.y1
         || newProps.x2 !== oldProps.x2 || newProps.y2 !== oldProps.y2) {
-        var that = this;
-        updatePosition(that);
+        updatePosition(this);
     }
 }
 

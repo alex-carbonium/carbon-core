@@ -17,7 +17,7 @@ function watch(options) {
             if (err) throw err;
 
             if (options.example){
-                open('http://localhost:8081/target/example.html')
+                open(`http://${devServer.host}:${devServer.port}/target/example.html`);
             }
         });
 }
