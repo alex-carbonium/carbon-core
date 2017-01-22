@@ -16,23 +16,20 @@ Shadow.apply = function (element, shadowObject, context, w, h, environment) {
         return;
     }
 
-    var scale = environment.view.scale();
     context.save();
-    context.shadowOffsetX = shadowObject.x * scale;
-    context.shadowOffsetY = shadowObject.y * scale;
-    context.shadowBlur = shadowObject.blur * scale;
-    context.shadowColor = shadowObject.color;
+
+    var box = element.getBoundingBox(true);
+
     context.fillStyle = shadowObject.color;
+    context.filter = "blur("+ shadowObject.blur + "px)";
 
-
-    // element.parent().globalViewMatrix().applyToContext(context);
-
-    context.beginPath();
-    element.drawPath(context, w, h);
     if (shadowObject.inset) {
+        context.beginPath();
+        element.drawPath(context, w, h);
         context.clip();
 
-        var box = element.getBoundingBox(true);
+        context.translate(shadowObject.x, shadowObject.y);
+
         context.beginPath()
         var x = (element.props.x || 0) - 2 * Math.abs(shadowObject.x) - box.width;
         var y = (element.props.y || 0) - 2 * Math.abs(shadowObject.y) - box.height;
@@ -40,10 +37,14 @@ Shadow.apply = function (element, shadowObject, context, w, h, environment) {
         var h2 = box.height * 3 + 4 * Math.abs(shadowObject.y);
         context.rect(x + w2, y + h2, -w2, -h2);
         element.drawPath(context, w, h);
+    } else {
+        context.translate(shadowObject.x, shadowObject.y);
 
+        context.beginPath();
+        element.drawPath(context, w, h);
     }
+
     context.fill2();
-   // context.fill();
     context.restore();
 }
 
@@ -67,6 +68,6 @@ Shadow.create = function (offsetX, offsetY, color, blur) {
 };
 
 Shadow.None = Shadow.create(0, 0, 'black', 0);
-Shadow.Default = Shadow.create(4, 4, 'black', 4);
+Shadow.Default = Shadow.create(4, 4, 'rgba(0,0,0,.25)', 4);
 
 export default Shadow;

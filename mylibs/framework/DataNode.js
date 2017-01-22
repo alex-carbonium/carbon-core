@@ -64,13 +64,13 @@ export default klass({
             this.trackPatchProps(patchType, propName, item, mode);
         }
         let array;
-        if(!this.props.hasOwnProperty(propName)){
-            // the property exists only in prototype, need to create new one
-            array = this.props[propName].splice();
-            this.props[propName] = array;
+        var current = this.props[propName];
+        if(current instanceof Array){
+            array = current.slice();
         } else {
-            array = this.props[propName];
+            array = [];
         }
+        this.props[propName] = array;
 
         switch (patchType) {
             case PatchType.Insert:

@@ -153,14 +153,18 @@ class Shape extends Container {
 
     drawOutsetShadows(context, w, h, environment){
         var shadows = this.props.shadows;
+        var hasShadow = false;
         if(shadows && shadows.length){
             for(var i = 0; i < shadows.length; ++i) {
                 var shadow = shadows[i];
                 if(!shadow.inset) {
                     Shadow.apply(this, shadow, context, w, h,environment);
+                    hasShadow = true;
                 }
             }
         }
+
+        return hasShadow;
     }
     drawInsetShadows(context, w, h, environment){
         var shadows = this.props.shadows;
@@ -316,7 +320,7 @@ PropertyMetadata.registerForType(Shape, {
                 properties: ["visible", "opacity", "fill", "stroke", 'dashPattern', "cornerRadius", "clipMask"]
             },
             {
-                label: "Shadow",
+                label: "@shadow",
                 expanded: false,
                 properties: ["shadows"]
             },
