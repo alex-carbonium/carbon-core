@@ -6,6 +6,10 @@ export default {
     run: function(elements, containerType){
         Selection.unselectAll();
 
+        if(!elements || !elements.length){
+            return;
+        }
+
         var promises = elements.map(function(element){
             var res = element.convertToPath();
             if (res instanceof UIElement){
