@@ -1,4 +1,5 @@
 import {Types} from "./Defs";
+import Matrix from "math/matrix";
 
 var onAngleDistanceChanged = function (angle) {
     var angle = this._angle.value() * (Math.PI / 180);
@@ -10,7 +11,7 @@ var onAngleDistanceChanged = function (angle) {
 };
 
 var Shadow = {};
-
+var matrix = new Matrix();
 Shadow.apply = function (element, shadowObject, context, w, h, environment) {
     if (!shadowObject.enabled || shadowObject.color == null) {
         return;
@@ -21,7 +22,7 @@ Shadow.apply = function (element, shadowObject, context, w, h, environment) {
     var box = element.getBoundingBox(true);
 
     context.fillStyle = shadowObject.color;
-    context.filter = "blur("+ shadowObject.blur + "px)";
+    context.filter = "blur("+ (shadowObject.blur/2) + "px)";
 
     if (shadowObject.inset) {
         context.beginPath();
@@ -30,6 +31,11 @@ Shadow.apply = function (element, shadowObject, context, w, h, environment) {
 
         context.translate(shadowObject.x, shadowObject.y);
 
+        if(shadowObject.spread !== 0) {
+            matrix.reset();
+            matrix.scale((w - shadowObject.spread / 2) / w, (h - shadowObject.spread / 2) / h, w / 2 + shadowObject.x, h / 2 + shadowObject.y);
+            matrix.applyToContext(context);
+        }
         context.beginPath()
         var x = (element.props.x || 0) - 2 * Math.abs(shadowObject.x) - box.width;
         var y = (element.props.y || 0) - 2 * Math.abs(shadowObject.y) - box.height;
@@ -39,6 +45,12 @@ Shadow.apply = function (element, shadowObject, context, w, h, environment) {
         element.drawPath(context, w, h);
     } else {
         context.translate(shadowObject.x, shadowObject.y);
+
+        if(shadowObject.spread !== 0) {
+            matrix.reset();
+            matrix.scale((w + shadowObject.spread / 2) / w, (h + shadowObject.spread / 2) / h, w / 2 + shadowObject.x, h / 2 + shadowObject.y);
+            matrix.applyToContext(context);
+        }
 
         context.beginPath();
         element.drawPath(context, w, h);
@@ -63,11 +75,11 @@ Shadow.createFromObject = function (obj) {
     return Object.assign({}, Shadow.defaults, obj);
 };
 
-Shadow.create = function (offsetX, offsetY, color, blur) {
-    return Shadow.createFromObject({x: offsetX, y: offsetY, color: color, blur: blur});
+Shadow.create = function (offsetX, offsetY, blur, color, inset, spread) {
+    return Shadow.createFromObject({x: offsetX, y: offsetY, color: color, blur: blur, inset:inset, spread: spread || 0});
 };
 
-Shadow.None = Shadow.create(0, 0, 'black', 0);
-Shadow.Default = Shadow.create(4, 4, 'rgba(0,0,0,.25)', 4);
+Shadow.None = Shadow.create(0, 0, 0, 'black', false, 0);
+Shadow.Default = Shadow.create(4, 4, 4, 'rgba(0,0,0,.25)', false, 0);
 
 export default Shadow;
