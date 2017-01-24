@@ -28,6 +28,7 @@ export default class RulerGuides {
         SnapController.snapGuides.push(this._customGuides);
 
         this._origin = null;
+        this._originRect = null;
         this._guideX = null;
         this._guideY = null;
         this._rectHorizontal = null;
@@ -43,6 +44,7 @@ export default class RulerGuides {
 
     setOrigin(origin){
         this._origin = origin;
+        this._originRect = origin.getBoundingBox();
     }
     setGuides(artboard) {
         var guidesX = artboard.props.guidesX;
@@ -98,7 +100,7 @@ export default class RulerGuides {
             return;
         }
 
-        let x = Math.round(e.x) - this._origin.x();
+        let x = Math.round(e.x) - this._originRect.x;
         if (this._customGuides.tryCaptureX(x)) {
             this.changeCursor("ew-resize");
             this._customGuides.releaseCaptured();
@@ -106,7 +108,7 @@ export default class RulerGuides {
             return;
         }
 
-        let y = Math.round(e.y) - this._origin.y();
+        let y = Math.round(e.y) - this._originRect.y;
         if (this._customGuides.tryCaptureY(y)) {
             this.changeCursor("ns-resize");
             this._customGuides.releaseCaptured();

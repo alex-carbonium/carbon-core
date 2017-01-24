@@ -841,6 +841,11 @@ export default class Point {
         this.y = Math.round(this.y);
     }
 
+    roundMutableBy(m) {
+        this.x = Math.round(this.x * m) / m;        
+        this.y = Math.round(this.y * m) / m;        
+    }
+
     ceil() {
         return new Point(Math.ceil(this.x), Math.ceil(this.y));
     }

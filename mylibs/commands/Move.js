@@ -19,6 +19,6 @@ export default {
                 break;
         }
 
-        elements.forEach(x => x.applyTranslation(t, false, ChangeMode.Self));
+        elements.forEach(x => x.applyGlobalTranslation(t, ChangeMode.Self));
     }
 }

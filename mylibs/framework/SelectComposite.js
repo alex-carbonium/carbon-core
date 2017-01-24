@@ -117,6 +117,12 @@ export default class SelectComposite extends CompositeElement{
         }
         super.clear.apply(this, arguments);
     }
+
+    mousemove(){
+        if (!this._selected){
+            this.selected(true);
+        }
+    }
 }
 
 SelectComposite.prototype.t = Types.SelectComposite;

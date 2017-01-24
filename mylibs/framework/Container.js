@@ -80,7 +80,7 @@ define(["framework/UIElement", "framework/QuadAndLock", "logger", "math/matrix"]
             },
             shouldApplyViewMatrix: function(){
                 return false;
-            },
+            },            
             saveOrResetLayoutProps: function(){
                 UIElement.prototype.saveOrResetLayoutProps.apply(this, arguments);
                 this.children.forEach(e=>e.saveOrResetLayoutProps());

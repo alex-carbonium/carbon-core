@@ -210,6 +210,9 @@ var UIElement = klass(DataNode, {
             if (properties.indexOf("height") === -1){
                 properties.push("height");
             }
+            if (properties.indexOf("angle") === -1){
+                properties.push("angle");
+            }
 
             var i = properties.indexOf("br");
             if (i !== -1){
@@ -221,6 +224,31 @@ var UIElement = klass(DataNode, {
             }
         }   
         return properties;     
+    },
+    isChangeAffectingLayout: function(displayChanges){
+        return displayChanges.hasOwnProperty("x") || displayChanges.hasOwnProperty("y") || displayChanges.hasOwnProperty("width") || displayChanges.hasOwnProperty("height")            
+            || displayChanges.hasOwnProperty("angle")
+            || displayChanges.hasOwnProperty("br")
+            || displayChanges.hasOwnProperty("m");
+    },
+    getAffectedProperties: function(displayChanges): string[]{
+        var properties = Object.keys(displayChanges);
+        var result = [];
+        var layoutPropsAdded = false;
+        for (let i = 0; i < properties.length; ++i){
+            let p = properties[i];
+            if (p === 'x' || p === 'y' || p === 'width' || p === 'height' || p === 'angle'){
+                if (!layoutPropsAdded){
+                    result.push('br');
+                    result.push('m');
+                    layoutPropsAdded = true;
+                }                
+            }
+            else {
+                result.push(p);
+            }
+        }
+        return result;
     },
 
     getTranslation: function(){
@@ -234,6 +262,11 @@ var UIElement = klass(DataNode, {
     },
     applyDirectedTranslation: function(t, mode) {
         this.applyTransform(Matrix.create().translate(t.x, t.y), true, mode);
+    },
+    applyGlobalTranslation: function(t, changeMode){
+        let m = this.globalViewMatrix().prependedWithTranslation(t.x, t.y);
+        m = this.parent().globalViewMatrixInverted().appended(m);
+        this.setTransform(m, changeMode);
     },
 
     getRotation: function() {
@@ -298,9 +331,8 @@ var UIElement = klass(DataNode, {
             newX = Math.round(newX);
             newY = Math.round(newY);
         }
-        var newProps = {
-            br: new Rect(Math.abs(newX), Math.abs(newY), Math.abs(newWidth), Math.abs(newHeight))
-        };
+        var newProps = {};
+        newProps.br = new Rect(Math.abs(newX), Math.abs(newY), Math.abs(newWidth), Math.abs(newHeight));
 
         var fx = s.x < 0 ? -1 : 1;
         var fy = s.y < 0 ? -1 : 1;
@@ -724,19 +756,32 @@ var UIElement = klass(DataNode, {
     },
     drawBoundaryPath: function(context, matrix, round = true){
         var r = this.getBoundaryRect();
+        const roundFactor = 2;
 
         context.beginPath();
 
-        var p = matrix.transformPoint2(r.x, r.y, round);
+        var p = matrix.transformPoint2(r.x, r.y);
+        if (round){
+            p.roundMutableBy(roundFactor);
+        }
         context.moveTo(p.x, p.y);
 
-        p = matrix.transformPoint2(r.x + r.width, r.y, round);
+        p = matrix.transformPoint2(r.x + r.width, r.y);
+        if (round){
+            p.roundMutableBy(roundFactor);
+        }
         context.lineTo(p.x, p.y);
 
-        p = matrix.transformPoint2(r.x + r.width, r.y + r.height, round);
+        p = matrix.transformPoint2(r.x + r.width, r.y + r.height);
+        if (round){
+            p.roundMutableBy(roundFactor);
+        }
         context.lineTo(p.x, p.y);
 
-        p = matrix.transformPoint2(r.x, r.y + r.height, round);
+        p = matrix.transformPoint2(r.x, r.y + r.height);
+        if (round){
+            p.roundMutableBy(roundFactor);
+        }
         context.lineTo(p.x, p.y);
 
         context.closePath();
@@ -771,12 +816,8 @@ var UIElement = klass(DataNode, {
         var matrix = parent.globalViewMatrix().clone();
         matrix.append(this.viewMatrix());
         this.runtimeProps.globalViewMatrix = Object.freeze(matrix);
-        this.onGlobalViewMatrixUpdated(this.runtimeProps.globalViewMatrix);
 
         return this.runtimeProps.globalViewMatrix;
-    },
-    onGlobalViewMatrixUpdated: function(matrix){
-
     },
     globalViewMatrixInverted: function () {
         if (!this.runtimeProps.globalViewMatrixInverted) {
@@ -860,17 +901,35 @@ var UIElement = klass(DataNode, {
 
         return parent.children.indexOf(this);
     },
-    x: function (value, changeMode) {
+    x: function (value, changeMode) {        
         if (arguments.length !== 0) {
-            this.applyTranslation(new Point(value - this.x(), 0), false, changeMode);
+            var t = Point.create(value - this.x(), 0);
+            this.applyGlobalTranslation(t, changeMode);
+
+            return;
         }
-        return this.getBoundingBox().x;
+
+        var root = this.primitiveRoot();
+        if (!root){
+            return this.getBoundingBox().x;
+        }
+        let m = root.globalViewMatrixInverted().appended(this.globalViewMatrix());
+        return this.transformRect(this.getBoundaryRect(), m).x;
     },
     y: function (value, changeMode) {
         if (arguments.length !== 0) {
-            this.applyTranslation(new Point(0, value - this.y()), false, changeMode);
+            var t = Point.create(0, value - this.y());
+            this.applyGlobalTranslation(t, changeMode);
+
+            return;
         }
-        return this.getBoundingBox().y;
+
+        var root = this.primitiveRoot();
+        if (!root){
+            return this.getBoundingBox().y;
+        }
+        let m = root.globalViewMatrixInverted().appended(this.globalViewMatrix());
+        return this.transformRect(this.getBoundaryRect(), m).y;
     },
     width: function (value, changeMode) {
         if (arguments.length !== 0) {
@@ -885,6 +944,12 @@ var UIElement = klass(DataNode, {
             this.setProps({br: br.withSize(br.width, value)}, changeMode);
         }
         return this.br().height;
+    },
+    angle: function (value, changeMode) {
+        if (arguments.length !== 0) {
+            this.applyRotation(value - this.angle(), this.center(), false, changeMode);
+        }
+        return -this.globalViewMatrix().decompose().rotation;
     },
     br: function (value) {
         if (value !== undefined) {
@@ -1025,13 +1090,7 @@ var UIElement = klass(DataNode, {
             this.setProps({opacity: value});
         }
         return this.props.opacity;
-    },
-    angle: function (/*double*/value) {
-        if (value !== undefined) {
-            this.setProps({angle: value});
-        }
-        return this.props.angle;
-    },
+    },    
     minWidth: function (/*Number*/value) {
         if (value !== undefined) {
             this.setProps({minWidth: value});
@@ -1871,11 +1930,9 @@ PropertyMetadata.registerForType(UIElement, {
     },
     width: {
         displayName: "Width",
-        type: "numeric",
-        defaultValue: 0,
-        size: 1 / 4,
+        type: "numeric",        
         computed: true,
-        options: {
+        options: {            
             step: 1,
             miniStep: .1
         }
@@ -1883,10 +1940,8 @@ PropertyMetadata.registerForType(UIElement, {
     height: {
         displayName: "Height",
         type: "numeric",
-        defaultValue: 0,
-        size: 1 / 4,
         computed: true,
-        options: {
+        options: {            
             step: 1,
             miniStep: .1
         }
@@ -1901,10 +1956,8 @@ PropertyMetadata.registerForType(UIElement, {
     x: {
         displayName: "Left",
         type: "numeric",
-        defaultValue: 0,
-        size: 1 / 4,
         computed: true,
-        options: {
+        options: {            
             step: 1,
             miniStep: .1
         }
@@ -1912,10 +1965,8 @@ PropertyMetadata.registerForType(UIElement, {
     y: {
         displayName: "Top",
         type: "numeric",
-        defaultValue: 0,
-        size: 1 / 4,
         computed: true,
-        options: {
+        options: {            
             step: 1,
             miniStep: .1
         }
@@ -1961,13 +2012,14 @@ PropertyMetadata.registerForType(UIElement, {
     angle: {
         displayName: "Angle",
         type: "numeric",
-        defaultValue: 0,
-        options: {
-            size: 1 / 4,
+        options: {            
             min: -360,
-            max: 360
+            max: 360,
+            step: 1,
+            miniStep: .1
         },
-        customizable: true
+        customizable: true,
+        computed: true
     },
     flipHorizontal: {
         defaultValue: false

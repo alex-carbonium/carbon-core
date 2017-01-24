@@ -359,6 +359,10 @@ class SelectionModel {
         this._selectCompositeElement.selected(false);
         this._selectCompositeElement.selected(true);
     }
+
+    hideFrame(){
+        this._selectCompositeElement.selected(false);
+    }
 }
 
 var Selection = new SelectionModel();

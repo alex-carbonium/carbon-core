@@ -6,6 +6,7 @@ import Environment from "environment";
 import Invalidate from "framework/Invalidate";
 import FontHelper from "../framework/FontHelper";
 import Brush from "framework/Brush";
+import ArrangeStrategy from "../framework/ArrangeStrategy";
 
 define(function (require) {
     var clipboard = require("framework/Clipboard");
@@ -61,11 +62,15 @@ define(function (require) {
     function startRepeatableAction(oldPropsSelector){
         PropertyTracker.suspend();
         actionStartProps = Selection.selectComposite().map(x => oldPropsSelector(x));
+        Selection.hideFrame();
     }
     function endRepeatableAction(){
         var flushNeeded = PropertyTracker.resume();
         if (flushNeeded){
-            setTimeout(() => PropertyTracker.flush(), 0);
+            setTimeout(() => {
+                ArrangeStrategy.arrangeRoots(Selection.selectedElements());
+                PropertyTracker.flush();
+            }, 0);
         }
         return actionStartProps;
     }
@@ -162,30 +167,6 @@ define(function (require) {
                 return selectionMade();
             });
 
-            this.registerAction("duplicateAndMoveRight", "duplicateAndMoveRight", "", function () {
-                return Duplicate.createWithMove(Selection.getSelection(), "right");
-            }, "ui-duplicate").setCondition(function () {
-                return selectionMade();
-            });
-
-            this.registerAction("duplicateAndMoveLeft", "duplicateAndMoveLeft", "", function () {
-                return Duplicate.createWithMove(Selection.getSelection(), "left");
-            }, "ui-duplicate").setCondition(function () {
-                return selectionMade();
-            });
-
-            this.registerAction("duplicateAndMoveUp", "duplicateAndMoveUp", "", function () {
-                return Duplicate.createWithMove(Selection.getSelection(), "up");
-            }, "ui-duplicate").setCondition(function () {
-                return selectionMade();
-            });
-
-            this.registerAction("duplicateAndMoveDown", "duplicateAndMoveDown", "", function () {
-                return Duplicate.createWithMove(Selection.getSelection(), "down");
-            }, "ui-duplicate").setCondition(function () {
-                return selectionMade();
-            });
-
             this.registerAction("duplicate", "Duplicate", "Editing", function () {
                 return Duplicate.create(Selection.getSelection(), true);
             }, "ui-duplicate").setCondition(function () {
@@ -262,11 +243,40 @@ define(function (require) {
                 Move.run(Selection.selectedElements(), "d", 10);
             });
 
+            this.registerAction("moveLeft.1", "Left .1 pixels", "Positioning", function () {
+                if (!moving){
+                    startRepeatableAction(x => x.viewMatrix());
+                }
+                moving = true;
+                Move.run(Selection.selectedElements(), "l", .1);
+            });
+            this.registerAction("moveRight.1", "Right .1 pixels", "Positioning", function () {
+                if (!moving){
+                    startRepeatableAction(x => x.viewMatrix());
+                }
+                moving = true;
+                Move.run(Selection.selectedElements(), "r", .1);
+            });
+            this.registerAction("moveUp.1", "Up .1 pixels", "Positioning", function () {
+                if (!moving){
+                    startRepeatableAction(x => x.viewMatrix());                    
+                }
+                moving = true;
+                Move.run(Selection.selectedElements(), "u", .1);
+            });
+            this.registerAction("moveDown.1", "Down .1 pixels", "Positioning", function () {
+                if (!moving){
+                    startRepeatableAction(x => x.viewMatrix());
+                }
+                moving = true;
+                Move.run(Selection.selectedElements(), "d", .1);
+            });
+
             this.registerAction("moveFinished", "Move finished", "Positioning", function () {
                 moving = false;
                 var oldProps = endRepeatableAction();
                 Selection.selectedElements().forEach((x, i) =>
-                    x.trackSetProps(x.selectProps(["m"]), {m: oldProps[i]}));
+                    x.trackSetProps(x.selectProps(["m"]), {m: oldProps[i]}));             
             });
 
             this.registerAction("pathUnion", "Union", "Combine Paths", function () {
