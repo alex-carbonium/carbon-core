@@ -402,8 +402,6 @@ export default class CompositeElement extends UIElement implements IGroupContain
 
         if (this._affectingLayout){
             ArrangeStrategy.arrangeRoots(this.elements);
-            //arranging may change matrices again, therefore event is raised to update properties
-            //PropertyTracker.changeProps(this, changes, {});
         }
 
         if (this._inPreview){

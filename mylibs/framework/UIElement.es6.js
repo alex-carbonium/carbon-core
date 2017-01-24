@@ -263,6 +263,11 @@ var UIElement = klass(DataNode, {
     applyDirectedTranslation: function(t, mode) {
         this.applyTransform(Matrix.create().translate(t.x, t.y), true, mode);
     },
+    applyGlobalTranslation: function(t, changeMode){
+        let m = this.globalViewMatrix().prependedWithTranslation(t.x, t.y);
+        m = this.parent().globalViewMatrixInverted().appended(m);
+        this.setTransform(m, changeMode);
+    },
 
     getRotation: function() {
         return -this.dm().rotation;
@@ -326,9 +331,8 @@ var UIElement = klass(DataNode, {
             newX = Math.round(newX);
             newY = Math.round(newY);
         }
-        var newProps = {
-            br: new Rect(Math.abs(newX), Math.abs(newY), Math.abs(newWidth), Math.abs(newHeight))
-        };
+        var newProps = {};
+        newProps.br = new Rect(Math.abs(newX), Math.abs(newY), Math.abs(newWidth), Math.abs(newHeight));
 
         var fx = s.x < 0 ? -1 : 1;
         var fy = s.y < 0 ? -1 : 1;
@@ -899,9 +903,8 @@ var UIElement = klass(DataNode, {
     },
     x: function (value, changeMode) {        
         if (arguments.length !== 0) {
-            let m = this.globalViewMatrix().prependedWithTranslation(value - this.x(), 0);
-            m = this.parent().globalViewMatrixInverted().appended(m);
-            this.setTransform(m, changeMode);
+            var t = Point.create(value - this.x(), 0);
+            this.applyGlobalTranslation(t, changeMode);
 
             return;
         }
@@ -915,9 +918,8 @@ var UIElement = klass(DataNode, {
     },
     y: function (value, changeMode) {
         if (arguments.length !== 0) {
-            let m = this.globalViewMatrix().prependedWithTranslation(0, value - this.y());
-            m = this.parent().globalViewMatrixInverted().appended(m);
-            this.setTransform(m, changeMode);
+            var t = Point.create(0, value - this.y());
+            this.applyGlobalTranslation(t, changeMode);
 
             return;
         }

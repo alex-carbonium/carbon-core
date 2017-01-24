@@ -67,7 +67,10 @@ define(function (require) {
     function endRepeatableAction(){
         var flushNeeded = PropertyTracker.resume();
         if (flushNeeded){
-            setTimeout(() => PropertyTracker.flush(), 0);
+            setTimeout(() => {
+                ArrangeStrategy.arrangeRoots(Selection.selectedElements());
+                PropertyTracker.flush();
+            }, 0);
         }
         return actionStartProps;
     }
@@ -273,9 +276,7 @@ define(function (require) {
                 moving = false;
                 var oldProps = endRepeatableAction();
                 Selection.selectedElements().forEach((x, i) =>
-                    x.trackSetProps(x.selectProps(["m"]), {m: oldProps[i]}));
-
-                ArrangeStrategy.arrangeRoots(Selection.selectedElements());
+                    x.trackSetProps(x.selectProps(["m"]), {m: oldProps[i]}));             
             });
 
             this.registerAction("pathUnion", "Union", "Combine Paths", function () {
