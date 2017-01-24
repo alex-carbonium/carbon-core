@@ -53,13 +53,13 @@ export default {
                 var origin = bb.topLeft();
 
                 //for constraint = scale, use same scale and set origin to Point.Zero
-                v.set(1 + dw/bb.width, 1 + dh/bb.height);
+                v.set(1 + dw/(bb.width || 1), 1 + dh/(bb.height || 1));
                 child.applyScaling(v, origin, false, event.reset);
             }
             if (translateX || translateY){
                 v = v || new Point(0, 0);
                 var dx = translateX2 ? .5 : translateX ? 1 : 0;
-                var dy = translateY2 ? .5 : translateX ? 1 : 0;
+                var dy = translateY2 ? .5 : translateY ? 1 : 0;
 
                 v.set((npr.width - pr.width) * dx, (npr.height - pr.height) * dy);
 
@@ -72,4 +72,4 @@ export default {
             }
         }
     }
-}
+} 
