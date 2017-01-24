@@ -3,10 +3,11 @@
 import PropertyMetadata, {PropertyDescriptor} from "./PropertyMetadata";
 import PropertyTracker from "./PropertyTracker";
 import {leaveCommonProps} from "../util";
-import {Types} from "./Defs";
+import {Types, ChangeMode} from "./Defs";
 import Brush from "./Brush";
 import Font from "./Font";
 import UIElement from "./UIElement";
+import ArrangeStrategy from "./ArrangeStrategy";
 import GroupArrangeStrategy from "./GroupArrangeStrategy";
 import {IGroupContainer} from "./CoreModel";
 import Box from "./Box";
@@ -20,15 +21,18 @@ export default class CompositeElement extends UIElement implements IGroupContain
 
         this._types = [];
         this.children = [];                
+        this._origPropValues = [];
+        this._affectingLayout = false;
+        this._inPreview = false;
 
         PropertyTracker.propertyChanged.bind(this, this._onPropsChanged);
     }
 
-    get elements(){
+    get elements(): UIElement[]{
         return this.children;
     }
 
-    add(element){
+    add(element: UIElement){        
         var systemType = element.systemType();
         if (this._types.indexOf(systemType) === -1){
             this._types.push(systemType);
@@ -205,31 +209,7 @@ export default class CompositeElement extends UIElement implements IGroupContain
         }
         return parents;
     }
-    prepareCommonProps(changes){
-        var result = [];
-        for (var i = 0; i < this.elements.length; i++){
-            var element = this.elements[i];
-            var elementChanges = Object.assign({}, changes);
-            for(var p in elementChanges){
-                if(p === 'fill' || p === 'stroke'){
-                    elementChanges[p] = Brush.extend(element.props[p], elementChanges[p])
-                } else if (p === 'font'){
-                    elementChanges[p] = Font.extend(element.props[p], elementChanges[p])
-                }
-            }
-            element.prepareProps(elementChanges);
-            result.push(elementChanges);
-        }
-        return result;
-    }
-    selectCommonProps(names){
-        var result = [];
-        for (var i = 0; i < this.elements.length; i++){
-            var element = this.elements[i];
-            result.push(element.selectProps(names));
-        }
-        return result;
-    }
+
     // rules:
     // - find groups with matching label for all types, these groups are assumed to have same props
     // - in remaining groups, find props with same name+type and put them into a default group
@@ -358,7 +338,7 @@ export default class CompositeElement extends UIElement implements IGroupContain
         }
         
         return base;
-    }
+    }    
     prepareDisplayPropsVisibility(){
         var type = this.allHaveSameType() ?
             this.elements[0].systemType() :
@@ -385,10 +365,74 @@ export default class CompositeElement extends UIElement implements IGroupContain
         return base;
     }
 
+    previewDisplayProps(changes: any){
+        if (!this._inPreview){
+            if (!this._affectingLayout && this.isChangeAffectingLayout(changes)){
+                Selection.hideFrame();
+                this._affectingLayout = true;
+            }            
+
+            PropertyTracker.suspend();
+        }
+        this._inPreview = true;
+        
+        for (var i = 0; i < this.elements.length; i++){            
+            var element = this.elements[i];
+            var elementChanges = this._prepareElementChanges(element, changes);
+            if (!this._origPropValues[i]){
+                var properties = element.getAffectedProperties(changes);                
+                this._origPropValues[i] = element.selectProps(properties);
+            }
+            element.setDisplayProps(elementChanges, ChangeMode.Root);
+        }        
+    }
+
+    updateDisplayProps(changes: any){        
+        for (var i = 0; i < this.elements.length; i++){
+            var element = this.elements[i];  
+
+            var elementChanges = this._prepareElementChanges(element, changes);
+
+            if (this._origPropValues.length) {
+                var origProps = this._origPropValues[i];
+                element.setProps(origProps, ChangeMode.Root);
+            }
+            element.setDisplayProps(elementChanges, ChangeMode.Model);
+        }
+
+        if (this._affectingLayout){
+            ArrangeStrategy.arrangeRoots(this.elements);
+            //arranging may change matrices again, therefore event is raised to update properties
+            //PropertyTracker.changeProps(this, changes, {});
+        }
+
+        if (this._inPreview){
+            if (PropertyTracker.resume()){
+                PropertyTracker.flush();
+            }
+        }
+
+        this._origPropValues.length = 0;
+        this._affectingLayout = false;
+        this._inPreview = false;
+    }
+
+    _prepareElementChanges(element: UIElement, changes: any){
+        var elementChanges = Object.assign({}, changes);   
+        for (var p in elementChanges){
+            if (p === 'fill' || p === 'stroke'){
+                elementChanges[p] = Brush.extend(element.props[p], elementChanges[p])
+            } 
+            else if (p === 'font'){
+                elementChanges[p] = Font.extend(element.props[p], elementChanges[p])
+            }
+        }
+        return elementChanges;
+    }
+
     _onPropsChanged(element, newProps){
         if (this.has(element)){
-            if (newProps.hasOwnProperty("m") || newProps.hasOwnProperty("br")
-            ) {
+            if (newProps.hasOwnProperty("m") || newProps.hasOwnProperty("br")){
                 this.resetGlobalViewCache();                
             }
             

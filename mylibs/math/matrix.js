@@ -355,6 +355,10 @@ class Matrix {
         return this.prepended(Matrix.create().scale(sx, sy));
     }
 
+    prependedWithTranslation(tx, ty){
+        return this.prepended(Matrix.create().translate(tx, ty));
+    }
+
     /**
      * Inverts the matrix, causing it to perform the opposite transformation.
      * If the matrix is not invertible (in which case {@link #isSingular()}

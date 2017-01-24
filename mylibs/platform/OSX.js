@@ -7,12 +7,7 @@ define(["platform/Desktop"], function(Desktop) {
             this.mapShortcut("4", "library4");
 
             this.mapShortcut("meta+shift+>", "fontIncreaseSize");
-            this.mapShortcut("meta+shift+<", "fontDecreaseSize");
-
-            this.mapShortcut("alt+right", "duplicateAndMoveRight");
-            this.mapShortcut("alt+left", "duplicateAndMoveLeft");
-            this.mapShortcut("alt+up", "duplicateAndMoveUp");
-            this.mapShortcut("alt+down", "duplicateAndMoveDown");
+            this.mapShortcut("meta+shift+<", "fontDecreaseSize");            
 
             this.mapShortcut("meta+d", "duplicate");
             this.mapShortcut("meta+g", "groupElements");
@@ -54,6 +49,11 @@ define(["platform/Desktop"], function(Desktop) {
             this.mapShortcut("shift+up", "moveUp10");
             this.mapShortcut("shift+down", "moveDown10");
 
+            this.mapShortcut("alt+left", "moveLeft.1");
+            this.mapShortcut("alt+right", "moveRight.1");
+            this.mapShortcut("alt+up", "moveUp.1");
+            this.mapShortcut("alt+down", "moveDown.1");
+
             this.mapShortcut("left", "moveFinished", {type: "keyup"});
             this.mapShortcut("right", "moveFinished", {type: "keyup"});
             this.mapShortcut("up", "moveFinished", {type: "keyup"});
@@ -62,6 +62,10 @@ define(["platform/Desktop"], function(Desktop) {
             this.mapShortcut("shift+right", "moveFinished", {type: "keyup"});
             this.mapShortcut("shift+up", "moveFinished", {type: "keyup"});
             this.mapShortcut("shift+down", "moveFinished", {type: "keyup"});
+            this.mapShortcut("alt+left", "moveFinished", {type: "keyup"});
+            this.mapShortcut("alt+right", "moveFinished", {type: "keyup"});
+            this.mapShortcut("alt+up", "moveFinished", {type: "keyup"});
+            this.mapShortcut("alt+down", "moveFinished", {type: "keyup"});
 
             this.mapShortcut("meta+z", "undo");
             this.mapShortcut("meta+shift+z", "redo");
