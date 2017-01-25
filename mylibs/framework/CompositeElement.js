@@ -276,6 +276,11 @@ export default class CompositeElement extends UIElement implements IGroupContain
             }
             for (var j = 0; j < sample.groups[i].properties.length; j++){
                 var candidateName = sample.groups[i].properties[j];
+                if(!sample.metadata[candidateName]){
+                    candidateName = null;
+                    break;
+                }
+
                 var candidateType = sample.metadata[candidateName].type;
 
                 for (var k = 1; k < entries.length; k++){

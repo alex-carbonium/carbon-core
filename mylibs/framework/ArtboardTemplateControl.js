@@ -31,6 +31,10 @@ export default class ArtboardTemplateControl extends Container {
         Selection.makeSelection(selection);
     }
 
+    allowNameTranslation(){
+        return false;
+    }
+
     _initFromArtboard() {
         var artboard = this._artboard;
         if (!artboard) {
@@ -107,12 +111,12 @@ export default class ArtboardTemplateControl extends Container {
         this.setProps(res);
     }
 
-    displayType() {
-        if (this._artboard) {
-            return this._artboard.name() + ' {index}';
+    displayType(noIndex) {
+        if (this._artboard) {            
+            return this._artboard.name() + (noIndex?'':' {index}');
         }
 
-        return "Element {index}"
+        return "Element" + (noIndex? '' : ' {index}');
     }
 
     _cloneFromArtboard(artboard) {

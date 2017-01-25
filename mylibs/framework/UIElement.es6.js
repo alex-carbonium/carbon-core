@@ -125,6 +125,9 @@ var UIElement = klass(DataNode, {
         }
         DataNode.prototype.setProps.apply(this, arguments);
     },
+    allowNameTranslation: function(){
+        return true;
+    },
     propsUpdated: function (newProps, oldProps) {
         if (newProps.hasOwnProperty("m")
             || newProps.hasOwnProperty("stroke")
