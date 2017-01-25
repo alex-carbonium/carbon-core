@@ -85,6 +85,7 @@ module.exports = {
     "ContentSizing": Defs.ContentSizing,
     "HorizontalConstraint": Defs.HorizontalConstraint,
     "VerticalConstraint": Defs.VerticalConstraint,
+    "ArtboardResource": Defs.ArtboardResource,
     "FontManager": require("./OpenTypeFontManager"),
     "Tiler": require("./ui/toolbox/tiler"),
     "Context": require("./framework/render/Context"),

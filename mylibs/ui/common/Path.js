@@ -2019,14 +2019,24 @@ PropertyMetadata.registerForType(Path, {
                 properties: ["currentPointX", "currentPointY", "currentPointType"]
             },
             {
+                label: "Layout",
+                properties: ["width", "height", "x", "y", "angle"],
+                expanded: true
+            },
+            {
                 label: "Appearance",
                 expanded: false,
                 properties: ["visible", "opacity", "fill", "stroke", "dashPattern", "clipMask"]
+            },                      
+            {
+                label: "@shadow",
+                expanded: false,
+                properties: ["shadows"]
             },
             {
-                label: "Layout",
-                properties: ["width", "height", "x", "y", "constraints", "angle"],
-                expanded: true
+                label: "@constraints",
+                expanded: false,
+                properties: ["constraints"]
             },
             {
                 label: "Settings",

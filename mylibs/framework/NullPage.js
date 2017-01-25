@@ -23,6 +23,9 @@ define(function () {
             init: function (view) {
 
             },
+            getAllPalettes: function() {
+                return [];
+            },
             getAllArtboards: function () {
                 return [];
             },

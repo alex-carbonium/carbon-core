@@ -423,6 +423,8 @@ class App extends DataNode {
 
         this.modeChanged = fwk.EventHelper.createEvent();
 
+        this.resourceChanged = fwk.EventHelper.createEvent();
+
         //deprecate
         this.logEvent = fwk.EventHelper.createEvent();
 
@@ -472,6 +474,23 @@ class App extends DataNode {
             for (var j = 0; j < artboards.length; ++j) {
                 var a = artboards[j];
                 if (a.props.resource === ArtboardResource.Frame) {
+                    res.push(a);
+                }
+            }
+        }
+
+        return res;
+    }
+
+    
+    getAllPalettes() {
+        var res = [];
+        for (var i = 0; i < this.pages.length; ++i) {
+            var page = this.pages[i];
+            var artboards = page.getAllArtboards();
+            for (var j = 0; j < artboards.length; ++j) {
+                var a = artboards[j];
+                if (a.props.resource === ArtboardResource.Palette) {
                     res.push(a);
                 }
             }

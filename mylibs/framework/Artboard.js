@@ -488,6 +488,10 @@ class Artboard extends Container {
                 parent.makeToolboxConfigDirty(this.runtimeProps.refreshToolbox, this.id());
                 delete this.runtimeProps.refreshToolbox;
             }
+
+            if(this.props.resource != undefined) {
+                App.Current.resourceChanged.raise(this.props.resource, this);
+            }
         }
     }
 
@@ -789,7 +793,8 @@ PropertyMetadata.registerForType(Artboard, {
                 {name: "None", value: null},
                 {name: "Stencil", value: ArtboardResource.Stencil},
                 {name: "Template", value: ArtboardResource.Template},
-                {name: "Frame", value: ArtboardResource.Frame}
+                {name: "Frame", value: ArtboardResource.Frame},
+                {name: "Palette", value: ArtboardResource.Palette},
             ]
         }
     },

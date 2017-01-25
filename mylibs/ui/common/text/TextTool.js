@@ -466,6 +466,6 @@ export default class TextTool extends EditModeAction {
         if (this._dragZone.flipY){
             y -= this._dragZone.height;
         }
-        return new Rect(x, y, width, height);
+        return new Rect(x, y, zone.width, zone.height);
     }
 }

@@ -13,7 +13,7 @@ import RelayoutEngine from "framework/relayout/RelayoutEngine";
 import SystemConfiguration from "SystemConfiguration";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
-import {Types} from "../../framework/Defs";
+import {Types, ArtboardResource} from "../../framework/Defs";
 
 const ARTBOARD_SPACE = 100;
 
@@ -293,6 +293,19 @@ class ArtboardPage extends Page {
                 res.push(items[i]);
             }
         }
+        return res;
+    }
+
+    getAllPalettes() {
+        var res = [];
+        var artboards = this.getAllArtboards();
+        for (var j = 0; j < artboards.length; ++j) {
+            var a = artboards[j];
+            if (a.props.resource === ArtboardResource.Palette) {
+                res.push(a);
+            }
+        }
+
         return res;
     }
 

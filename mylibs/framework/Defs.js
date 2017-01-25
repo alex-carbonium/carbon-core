@@ -237,7 +237,8 @@ export var ElementState = {
 export var ArtboardResource = {
     Stencil:1,
     Template: 2,
-    Frame: 3
+    Frame: 3,
+    Palette: 4
 }
 
 export var Types = {

@@ -327,13 +327,14 @@ export default class CompositeElement extends UIElement implements IGroupContain
         if (this.count() === 1){
             return this.elements[0].getDisplayPropValue(propertyName, descriptor);
         }
-
+        
         var values = this.elements.map(x => x.getDisplayPropValue(propertyName, descriptor));
         var base = values[0];
         for (let i = 1; i < values.length; ++i){
             let next = values[i];
             let isComplex = typeof next === "object" || Array.isArray(next);
             if (isComplex){
+                base = clone(base);
                 leaveCommonProps(base, next);
             }            
             else if (next !== base){
@@ -344,6 +345,7 @@ export default class CompositeElement extends UIElement implements IGroupContain
         
         return base;
     }    
+
     prepareDisplayPropsVisibility(){
         var type = this.allHaveSameType() ?
             this.elements[0].systemType() :

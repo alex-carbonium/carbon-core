@@ -190,7 +190,7 @@ Brush.create = function (type, value) {
 };
 
 Brush.createFromObject = function (parameters) {
-    return Object.assign(brushDefault(), parameters);
+    return Object.freeze(Object.assign(brushDefault(), parameters));
 };
 
 Brush.extend = function(...brushes){
