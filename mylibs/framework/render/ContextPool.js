@@ -1,9 +1,10 @@
+// @flow
 import Context from "./Context";
 
-var contextPool = [];
+var contextPool : Array<Context> = [];
 
 export default {
-    getContext(width, height, scale){
+    getContext(width: number, height: number, scale: number, forceExactSize:bool) : Context{
         var size = App.Current.viewportSize();
         width = Math.min(size.width * scale, width * scale);
         height = Math.min(size.height * scale, height * scale);
@@ -13,7 +14,7 @@ export default {
             context.height = height;
             context.relativeOffsetX = 0;
             context.relativeOffsetY = 0;
-
+            context.resetTransform();
             return context;
         } else {
             for (var i = 0; i < contextPool.length; ++i) {
@@ -22,6 +23,13 @@ export default {
                     contextPool.splice(i, 1);
                     context.relativeOffsetX = 0;
                     context.relativeOffsetY = 0;
+
+                    if(forceExactSize){
+                        context.width = width;
+                        context.height = height;
+                    }
+
+                    context.resetTransform();
                     return context;
                 }
             }
@@ -31,11 +39,12 @@ export default {
             context.height = height;
             context.relativeOffsetX = 0;
             context.relativeOffsetY = 0;
+            context.resetTransform();
             return context;
         }
     },
 
-    releaseContext(contextMetadata){
+    releaseContext(contextMetadata : Context){
         contextPool.push(contextMetadata);
     }
 }

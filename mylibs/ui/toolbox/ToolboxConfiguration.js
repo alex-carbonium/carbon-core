@@ -16,7 +16,7 @@ export default class ToolboxConfiguration {
         if (!elements.length) {
             return "";
         }
-        var elementWithTiles = elements.map(e=> {
+        let elementWithTiles : Array<any> = elements.map(e=> {
             if (e.props.tileSize === TileSize.Auto) {
                 var tileSize = tiler.chooseTileType(e.width(), e.height());
             } else {
@@ -27,12 +27,13 @@ export default class ToolboxConfiguration {
         elementWithTiles.sort((a, b)=> {
             return b.tileSize - a.tileSize;
         });
-        var x = 0;
-        var y = 0;
-        var height = 0;
-        var i = 0;
-        var countOnLine = 1;
-        var renderTasks = [];
+        let x : number = 0;
+        let y: number = 0;
+        let height: number = 0;
+        let i: number = 0;
+        let countOnLine: number = 1;
+        let renderTasks = [];
+        let prevTileSize: number = -1;
 
         while (i < elementWithTiles.length && elementWithTiles[i].tileSize === TileSize.XLarge) {
             var element = elementWithTiles[i].element;
@@ -43,14 +44,15 @@ export default class ToolboxConfiguration {
             height = Math.max(height, data.height);
             ++i;
             countOnLine = 2;
+            prevTileSize = tileSize;
         }
 
         var counter = 0;
         var lastX = x;
-        while (i < elementWithTiles.length) {
-            var prevTileSize = elementWithTiles[i].tileSize;
-            var element = elementWithTiles[i].element;
-            var tileSize = elementWithTiles[i].tileSize;
+        
+        while (i < elementWithTiles.length) {            
+            let element = elementWithTiles[i].element;
+            let tileSize = elementWithTiles[i].tileSize;
 
             if (prevTileSize !== tileSize) {
                 counter = 0;
@@ -71,16 +73,17 @@ export default class ToolboxConfiguration {
             }
             ++i;
             ++counter;
+            prevTileSize = tileSize;
         }
 
-        var width = lastX;
+        var width: number = lastX;
         size.width = width;
         size.height = height;
-        var context = ContextPool.getContext(width, height, contextScale);
+        var context  = ContextPool.getContext(width, height, contextScale, true);
         context.clearRect(0,0, context.width, context.height);
         var env = {finalRender: true,  setupContext:()=>{},contextScale:contextScale, offscreen:true, view:{scale:()=>1, contextScale, focused:()=>false}};
         var elementsMap = {};
-        for (var i = 0; i < renderTasks.length; ++i) {
+        for (i = 0; i < renderTasks.length; ++i) {
             var t = renderTasks[i];
             var element = elementWithTiles[i].element;
             var w = element.width();
@@ -118,7 +121,7 @@ export default class ToolboxConfiguration {
         }
 
         if(outConfig) {
-            for (var i = elements.length - 1; i >= 0; --i) {
+            for (i = elements.length - 1; i >= 0; --i) {
                 outConfig.push(elementsMap[elements[i].id()]);
             }
         }

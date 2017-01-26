@@ -356,10 +356,10 @@ export default class CompositeElement extends UIElement implements IGroupContain
             return {};
         }
         
-        var base = metadata.prepareVisibility(this.elements[0], this, Environment.view);
+        var base = metadata.prepareVisibility(this.elements[0].props, this, Environment.view);
         for (let i = 1; i < this.elements.length; ++i){
             let element = this.elements[i];
-            let next = metadata.prepareVisibility(element, this, Environment.view);
+            let next = metadata.prepareVisibility(element.props, this, Environment.view);
             if (next){
                 for (let p in next){
                     let visible = next[p];
