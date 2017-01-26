@@ -1,13 +1,15 @@
-import RuntimeExtension from "./../RuntimeExtension";
-import PropertyTracker from "framework/PropertyTracker";
-import Artboard from "framework/Artboard";
-import NullArtboard from "../../framework/NullArtboard";
-import Selection from "framework/SelectionModel";
+// @flow
 
-import Matrix from "math/matrix";
-import {areRectsEqual} from "math/math";
-import Environment from "environment";
-import DesignerView from "framework/DesignerView";
+import RuntimeExtension from "../RuntimeExtension";
+import PropertyTracker from "../../framework/PropertyTracker";
+import Artboard from "../../framework/Artboard";
+import NullArtboard from "../../framework/NullArtboard";
+import Selection from "../../framework/SelectionModel";
+
+import Matrix from "../../math/matrix";
+import {areRectsEqual} from "../../math/math";
+import Environment from "../../environment";
+import DesignerView from "../../framework/DesignerView";
 import DefaultSettings from "../../DefaultSettings";
 import RulerGuides from "./RulerGuides";
 
@@ -73,7 +75,7 @@ export default class RulerExtension extends RuntimeExtension {
 
     onPropertyChanged(e, props) {
         if (e === this._origin) {
-            if (props.x !== undefined || props.y !== undefined || props.width !== undefined || props.height !== undefined) {
+            if (e.isChangeAffectingLayout(props)) {
                 this.setOrigin(e);
             }
             else if (props.guidesX !== undefined || props.guidesY !== undefined) {
@@ -117,12 +119,14 @@ export default class RulerExtension extends RuntimeExtension {
             this._origin.disablePropsTracking();
         }
 
+        var bb = artboard.getBoundingBox();
+
         this._origin = artboard;
         this._origin.enablePropsTracking();
-        this._originX = Math.round(artboard.x() * this._settings.scale);
-        this._originY = Math.round(artboard.y() * this._settings.scale);
-        this._originWidth = artboard.width() * this._settings.scale + .5 | 0;
-        this._originHeight = artboard.height() * this._settings.scale + .5 | 0;
+        this._originX = Math.round(bb.x * this._settings.scale);
+        this._originY = Math.round(bb.y * this._settings.scale);
+        this._originWidth = bb.width * this._settings.scale + .5 | 0;
+        this._originHeight = bb.height * this._settings.scale + .5 | 0;
         this._artboardActive = artboard !== NullArtboard;
 
         this._rulerGuides.setOrigin(artboard);
@@ -133,17 +137,25 @@ export default class RulerExtension extends RuntimeExtension {
             this._highlight = null;
             return;
         }
-        if (selection.count() === 1 && selection.elementAt(0) instanceof Artboard){
-            this._highlight = null;
-            return;
+
+        var box = null;
+
+        if (selection.count() === 1){
+            if (selection.elementAt(0) instanceof Artboard){
+                this._highlight = null;
+                return;
+            }            
+
+            box = selection.elements[0].getBoundingBoxGlobal();
         }
-        var box = selection.getBoundingBoxGlobal();
+        else{
+            box = selection.getBoundingBoxGlobal();
+        }        
         this._highlight = {
-            x: (selection.x() + box.x) * this._settings.scale - this._originX + .5 | 0,
-            y: (selection.y() + box.y) * this._settings.scale - this._originY + .5 | 0,
+            x: Math.round(box.x) * this._settings.scale - this._originX,
+            y: Math.round(box.y) * this._settings.scale - this._originY,
             width: box.width * this._settings.scale + .5|0,
-            height: box.height * this._settings.scale + .5|0,
-            box: selection.getBoundaryRect()
+            height: box.height * this._settings.scale + .5|0
         };
     }
 

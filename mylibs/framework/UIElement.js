@@ -11,7 +11,7 @@ import ElementDelete from "../commands/ElementDelete";
 import ElementMove from "../commands/ElementMove";
 import Matrix from "../math/matrix";
 import Point from "../math/point";
-import {isRectInRect, areRectsIntersecting} from "../math/math";
+import { isRectInRect, areRectsIntersecting } from "../math/math";
 import stopwatch from "../Stopwatch";
 import ResizeDimension from "./ResizeDimension";
 import Constraints from "./Constraints";
@@ -32,23 +32,24 @@ import NullContainer from "./NullContainer";
 import Invalidate from "./Invalidate";
 import Environment from "../environment";
 import DataNode from "./DataNode";
-import {createUUID, deepEquals} from "../util";
+import { createUUID, deepEquals } from "../util";
 import Rect from "../math/rect";
 import ResizeOptions from "../decorators/ResizeOptions";
-import {DisplayProperty, PropertyDescriptor} from './PropertyMetadata';
+import { DisplayProperty, PropertyDescriptor } from './PropertyMetadata';
 
 require("../migrations/All");
 
-var fwk = sketch.framework;
+var fwk = window.sketch.framework;
 
 fwk.Stroke = Brush;
 
-fwk.DockValues = {left: "Left", top: "Top", bottom: "Bottom", right: "Right", fill: "Fill"};
+fwk.DockValues = { left: "Left", top: "Top", bottom: "Bottom", right: "Right", fill: "Fill" };
 
 // constructor
-var UIElement = klass(DataNode, {
-    __version__: 1, // override version if element properties are changed
-    _constructor: function () {
+export default class UIElement extends DataNode {
+    constructor() {        
+        super();
+
         // public variables
         //this.onresize = fwk.EventHelper.createEvent();
         this.stopwatch = new stopwatch();
@@ -65,14 +66,14 @@ var UIElement = klass(DataNode, {
             this.id(createUUID());
         }
         this.parent(NullContainer);
-    },
-    invalidate: function () {
+    }
+    invalidate() {
         var parent = this.parent();
         if (parent) {
             parent.invalidate();
         }
-    },
-    resetRuntimeProps: function () {
+    }
+    resetRuntimeProps() {
         this.runtimeProps = {
             boundaryRectGlobal: null,
             globalViewMatrix: null,
@@ -81,18 +82,18 @@ var UIElement = klass(DataNode, {
             primitiveRoot: null,
             snapPoints: null,
         }
-    },
-    _roundValue(value){
+    }
+    _roundValue(value) {
         return Math.round(value);
-    },
-    prepareProps: function (changes) {
-        DataNode.prototype.prepareProps.apply(this, arguments);
+    }
+    prepareProps(changes) {
+        super.prepareProps.apply(this, arguments);
         if (changes.styleId !== undefined) {
             extend(changes, styleManager.getStyle(changes.styleId, 1).props);
         }
-    },
+    }
 
-    hasPendingStyle: function () {
+    hasPendingStyle() {
         if (!this.props.styleId) {
             return false;
         }
@@ -104,31 +105,32 @@ var UIElement = klass(DataNode, {
             }
         }
         return false;
-    },
+    }
 
-    setProps: function(props){
+    allowNameTranslation(){
+        return true;
+    }
+
+    setProps(props) {
         var hasBr = props.hasOwnProperty("br");
         //TODO
-        if (hasBr && !(props.br instanceof Rect)){
+        if (hasBr && !(props.br instanceof Rect)) {
             debugger;
         }
 
-        if (!hasBr){
+        if (!hasBr) {
             var hasW = props.hasOwnProperty("width");
             var hasH = props.hasOwnProperty("height");
-            if (hasW || hasH){
+            if (hasW || hasH) {
                 var br = this.getBoundaryRect();
                 var w = hasW ? props.width : br.width;
                 var h = hasH ? props.height : br.height;
                 props.br = br.withSize(w, h);
             }
         }
-        DataNode.prototype.setProps.apply(this, arguments);
-    },
-    allowNameTranslation: function(){
-        return true;
-    },
-    propsUpdated: function (newProps, oldProps) {
+        super.setProps.apply(this, arguments);
+    }
+    propsUpdated(newProps, oldProps) {
         if (newProps.hasOwnProperty("m")
             || newProps.hasOwnProperty("stroke")
             || newProps.hasOwnProperty("br")
@@ -137,176 +139,176 @@ var UIElement = klass(DataNode, {
         }
 
         //raise events after all caches are updated
-        DataNode.prototype.propsUpdated.apply(this, arguments);
+        super.propsUpdated.apply(this, arguments);
         this.invalidate();
-    },
-    propsPatched: function () {
-        DataNode.prototype.propsPatched.apply(this, arguments);
+    }
+    propsPatched() {
+        super.propsPatched.apply(this, arguments);
         this.invalidate();
-    },
+    }
 
-    selectLayoutProps: function(global){
+    selectLayoutProps(global) {
         var m = global ? this.globalViewMatrix() : this.viewMatrix();
         return {
             br: this.br(),
             m
         };
-    },
-    saveOrResetLayoutProps: function(){
+    }
+    saveOrResetLayoutProps() {
         //this happens only for clones, so no need to clear origLayout
-        if (!this.runtimeProps.origLayout){
+        if (!this.runtimeProps.origLayout) {
             this.runtimeProps.origLayout = this.selectLayoutProps();
         }
-        else{
+        else {
             this.setProps(this.runtimeProps.origLayout);
         }
-    },
+    }
 
-    selectDisplayProps: function(names, metadata = this.findMetadata()): any{
+    selectDisplayProps(names, metadata = this.findMetadata()): any {
         var values = {};
-        for (var i = 0; i < names.length; i++){
+        for (var i = 0; i < names.length; i++) {
             var propertyName = names[i];
             var descriptor: PropertyDescriptor = metadata[names[i]];
-            if (descriptor.computed){
+            if (descriptor.computed) {
                 values[propertyName] = this[propertyName]();
             }
-            else{
+            else {
                 values[propertyName] = this.props[propertyName];
-            }            
+            }
         }
         return values;
-    },
-    getDisplayPropValue: function(propertyName: string, descriptor: PropertyDescriptor = null): any{
-        if (!descriptor){
+    }
+    getDisplayPropValue(propertyName: string, descriptor: PropertyDescriptor = null): any {
+        if (!descriptor) {
             descriptor = this.findMetadata()[propertyName];
         }
-        if (descriptor.computed){
+        if (descriptor.computed) {
             return this[propertyName]();
         }
         return this.props[propertyName];
-    },
-    setDisplayProps: function(changes, changeMode, metadata = this.findMetadata()){
+    }
+    setDisplayProps(changes, changeMode, metadata = this.findMetadata()) {
         var names = Object.keys(changes);
-        for (var i = 0; i < names.length; i++){
+        for (var i = 0; i < names.length; i++) {
             var propertyName = names[i];
             var descriptor: PropertyDescriptor = metadata[propertyName];
-            if (descriptor.computed){
+            if (descriptor.computed) {
                 this[propertyName](changes[propertyName], changeMode);
                 delete changes[propertyName];
-            }            
+            }
         }
 
         this.prepareAndSetProps(changes, changeMode);
-    },
-    getAffectedDisplayProperties: function(changes): string[]{
+    }
+    getAffectedDisplayProperties(changes): string[] {
         var properties = Object.keys(changes);
-        if (changes.hasOwnProperty("br") || changes.hasOwnProperty("m")){
-            if (properties.indexOf("x") === -1){
+        if (changes.hasOwnProperty("br") || changes.hasOwnProperty("m")) {
+            if (properties.indexOf("x") === -1) {
                 properties.push("x");
             }
-            if (properties.indexOf("y") === -1){
+            if (properties.indexOf("y") === -1) {
                 properties.push("y");
             }
-            if (properties.indexOf("width") === -1){
+            if (properties.indexOf("width") === -1) {
                 properties.push("width");
             }
-            if (properties.indexOf("height") === -1){
+            if (properties.indexOf("height") === -1) {
                 properties.push("height");
             }
-            if (properties.indexOf("angle") === -1){
+            if (properties.indexOf("angle") === -1) {
                 properties.push("angle");
             }
 
             var i = properties.indexOf("br");
-            if (i !== -1){
+            if (i !== -1) {
                 properties.splice(i, 1);
             }
             i = properties.indexOf("m");
-            if (i !== -1){
+            if (i !== -1) {
                 properties.splice(i, 1);
             }
-        }   
-        return properties;     
-    },
-    isChangeAffectingLayout: function(displayChanges){
-        return displayChanges.hasOwnProperty("x") || displayChanges.hasOwnProperty("y") || displayChanges.hasOwnProperty("width") || displayChanges.hasOwnProperty("height")            
+        }
+        return properties;
+    }
+    isChangeAffectingLayout(displayChanges) {
+        return displayChanges.hasOwnProperty("x") || displayChanges.hasOwnProperty("y") || displayChanges.hasOwnProperty("width") || displayChanges.hasOwnProperty("height")
             || displayChanges.hasOwnProperty("angle")
             || displayChanges.hasOwnProperty("br")
             || displayChanges.hasOwnProperty("m");
-    },
-    getAffectedProperties: function(displayChanges): string[]{
+    }
+    getAffectedProperties(displayChanges): string[] {
         var properties = Object.keys(displayChanges);
         var result = [];
         var layoutPropsAdded = false;
-        for (let i = 0; i < properties.length; ++i){
+        for (let i = 0; i < properties.length; ++i) {
             let p = properties[i];
-            if (p === 'x' || p === 'y' || p === 'width' || p === 'height' || p === 'angle'){
-                if (!layoutPropsAdded){
+            if (p === 'x' || p === 'y' || p === 'width' || p === 'height' || p === 'angle') {
+                if (!layoutPropsAdded) {
                     result.push('br');
                     result.push('m');
                     layoutPropsAdded = true;
-                }                
+                }
             }
             else {
                 result.push(p);
             }
         }
         return result;
-    },
+    }
 
-    getTranslation: function(){
+    getTranslation() {
         return this.dm().translation;
-    },
-    applyTranslation: function(t, withReset, mode) {
-        if (withReset){
+    }
+    applyTranslation(t, withReset, mode) {
+        if (withReset) {
             this.saveOrResetLayoutProps();
         }
         this.applyTransform(Matrix.create().translate(t.x, t.y), false, mode);
-    },
-    applyDirectedTranslation: function(t, mode) {
+    }
+    applyDirectedTranslation(t, mode) {
         this.applyTransform(Matrix.create().translate(t.x, t.y), true, mode);
-    },
-    applyGlobalTranslation: function(t, changeMode){
+    }
+    applyGlobalTranslation(t, changeMode) {
         let m = this.globalViewMatrix().prependedWithTranslation(t.x, t.y);
         m = this.parent().globalViewMatrixInverted().appended(m);
         this.setTransform(m, changeMode);
-    },
+    }
 
-    getRotation: function() {
+    getRotation() {
         return -this.dm().rotation;
-    },
-    applyRotation: function(angle, o, withReset, mode){
-        if (withReset){
+    }
+    applyRotation(angle, o, withReset, mode) {
+        if (withReset) {
             this.saveOrResetLayoutProps();
         }
         this.applyTransform(Matrix.create().rotate(-angle, o.x, o.y), false, mode);
-    },
-    isRotated: function(){
+    }
+    isRotated() {
         return this.getRotation() % 360 !== 0;
-    },
+    }
 
-    applyScaling: function(s, o, options) {
-        if (options && options.reset){
+    applyScaling(s, o, options) {
+        if (options && options.reset) {
             this.saveOrResetLayoutProps();
         }
 
-        if ((options && options.sameDirection) || !this.isRotated()){
+        if ((options && options.sameDirection) || !this.isRotated()) {
             this.applySizeScaling(s, o, options);
             return true;
         }
 
         this.applyMatrixScaling(s, o, options);
         return false;
-    },
-    applyMatrixScaling(s, o, options){
-        if (options && options.sameDirection){
+    }
+    applyMatrixScaling(s, o, options) {
+        if (options && options.sameDirection) {
             var localOrigin = this.viewMatrixInverted().transformPoint(o);
             this.applyTransform(Matrix.create().scale(s.x, s.y, localOrigin.x, localOrigin.y), true);
         }
-        else{
+        else {
             this.applyTransform(Matrix.create().scale(s.x, s.y, o.x, o.y));
         }
-    },
+    }
     /**
      * This function must produce exactly the same visual result as
      * calling UIElement.applyTransform(Matrix.create().scale(s.x, s.y, o.x, oy)),
@@ -317,12 +319,12 @@ var UIElement = klass(DataNode, {
      *
      * Flip is detected by negative width/height, in which case the matrix is reflected relative to origin.
      */
-    applySizeScaling: function(s, o, options){
+    applySizeScaling(s, o, options) {
         var br = this.getBoundaryRect();
         var newWidth = br.width * s.x;
         var newHeight = br.height * s.y;
 
-        if (options && options.round){
+        if (options && options.round) {
             newWidth = Math.round(newWidth);
             newHeight = Math.round(newHeight);
         }
@@ -330,7 +332,7 @@ var UIElement = klass(DataNode, {
         var localOrigin = this.viewMatrixInverted().transformPoint(o);
         var newX = s.x * br.x;
         var newY = s.y * br.y;
-        if (options && options.round){
+        if (options && options.round) {
             newX = Math.round(newX);
             newY = Math.round(newY);
         }
@@ -341,25 +343,25 @@ var UIElement = klass(DataNode, {
         var fy = s.y < 0 ? -1 : 1;
         var dx = s.x * (br.x - localOrigin.x) + localOrigin.x - newX;
         var dy = s.y * (br.y - localOrigin.y) + localOrigin.y - newY;
-        if (options && options.round){
+        if (options && options.round) {
             dx = Math.round(dx);
             dy = Math.round(dy);
         }
 
-        if (fx === -1 || fy === -1 || dx !== 0 || dy !== 0){
+        if (fx === -1 || fy === -1 || dx !== 0 || dy !== 0) {
             var matrix = this.viewMatrix();
-            if (fx === -1 || fy === -1){
-                if (fx === -1){
+            if (fx === -1 || fy === -1) {
+                if (fx === -1) {
                     dx = -dx;
                 }
-                if (fy === -1){
+                if (fy === -1) {
                     dy = -dy;
                 }
                 matrix = matrix.appended(Matrix.create().scale(fx, fy));
             }
             newProps.m = matrix.appended(Matrix.create().translate(dx, dy));
         }
-        if (options && options.round){
+        if (options && options.round) {
             newProps.m = newProps.m || this.viewMatrix().clone();
             //set directly to avoid floating point results
             newProps.m.tx = Math.round(newProps.m.tx);
@@ -367,42 +369,42 @@ var UIElement = klass(DataNode, {
         }
 
         this.prepareAndSetProps(newProps);
-    },
+    }
 
-    applyTransform: function(matrix, append, mode) {
-        this.prepareAndSetProps({m: append ? this.props.m.appended(matrix) : this.props.m.prepended(matrix)}, mode);
-    },
-    setTransform: function(matrix, mode) {
-        this.setProps({m: matrix}, mode);
-    },
-    resetTransform: function() {
-        this.setProps({m: Matrix.Identity});
-    },
+    applyTransform(matrix, append, mode) {
+        this.prepareAndSetProps({ m: append ? this.props.m.appended(matrix) : this.props.m.prepended(matrix) }, mode);
+    }
+    setTransform(matrix, mode) {
+        this.setProps({ m: matrix }, mode);
+    }
+    resetTransform() {
+        this.setProps({ m: Matrix.Identity });
+    }
 
-    roundBoundingBoxToPixelEdge: function(){
+    roundBoundingBoxToPixelEdge() {
         var bb = this.getBoundingBox();
         var bb1 = bb.roundPosition();
-        if (bb1 !== bb){
+        if (bb1 !== bb) {
             var t = bb1.topLeft().subtract(bb.topLeft());
             this.applyTranslation(t);
             bb1 = bb1.translate(t.x, t.y);
         }
         var bb2 = bb1.roundSize();
-        if (bb2 !== bb1){
-            var s = new Point(bb2.width/bb1.width, bb2.height/bb1.height);
+        if (bb2 !== bb1) {
+            var s = new Point(bb2.width / bb1.width, bb2.height / bb1.height);
             var canRound = this.shouldApplyViewMatrix();
             this.applyScaling(s, bb1.topLeft(), ResizeOptions.Default.withRounding(canRound).withReset(false));
         }
-    },
+    }
 
-    arrange: function () {
-    },
-    performArrange: function (oldRect) {
-    },
-    _init: function () {
+    arrange() {
+    }
+    performArrange(oldRect) {
+    }
+    _init() {
 
-    },
-    // updateStyle: function () {
+    }
+    // updateStyle() {
     //     if (fwk.Font.familyOverride) {
     //         if (this.props.font) {
     //             var oldFont = this.props.font;
@@ -414,33 +416,33 @@ var UIElement = klass(DataNode, {
     //         }
     //     }
     // },
-    dragTo: function (event) {
+    dragTo(event) {
         this.position(event);
-    },
-    // lastDrawnRect: function (value) {
+    }
+    // lastDrawnRect(value) {
     //     if (arguments.length !== 0) {
     //         this._lastDrawnRect = value;
     //     }
     //
     //     return this._lastDrawnRect;
     // },
-    draggingEnter: function (event) {
-    },
-    draggingLeft: function (event) {
-    },
-    getDropData: function (event) {
+    draggingEnter(event) {
+    }
+    draggingLeft(event) {
+    }
+    getDropData(event) {
         return null;
-    },
-    startResizing: function (eventData) {
+    }
+    startResizing(eventData) {
         Environment.controller.startResizingEvent.raise(eventData);
-    },
-    stopResizing: function (eventData) {
+    }
+    stopResizing(eventData) {
         Environment.controller.stopResizingEvent.raise(eventData);
-    },
-    canHandleCorruption: function() {
+    }
+    canHandleCorruption() {
         return false;
-    },
-    getSnapPoints: function (local) {
+    }
+    getSnapPoints(local) {
         if (!this.allowSnapping()) {
             return null;
         }
@@ -466,20 +468,20 @@ var UIElement = klass(DataNode, {
         return this.runtimeProps.snapPoints = {
             xs: [x, x + width],
             ys: [y, y + height],
-            center: {x: origin.x, y: origin.y}
+            center: { x: origin.x, y: origin.y }
         };
-    },
-    position: function () {
+    }
+    position() {
         if (arguments.length === 1) {
             debugger; //fix me
         }
         return this.getBoundingBox().topLeft();
-    },
-    centerPositionGlobal: function () {
+    }
+    centerPositionGlobal() {
         var rect = this.getBoundaryRectGlobal();
-        return {x: rect.x + rect.width / 2, y: rect.y + rect.height / 2};
-    },
-    addDecorator: function (decorator) {
+        return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+    }
+    addDecorator(decorator) {
         if (!this.decorators) {
             this.decorators = [];
         }
@@ -488,8 +490,8 @@ var UIElement = klass(DataNode, {
             decorator.attach(this);
             Invalidate.requestUpperOnly();
         }
-    },
-    removeDecorator: function (decorator) {
+    }
+    removeDecorator(decorator) {
         if (!this.decorators) {
             return;
         }
@@ -501,17 +503,17 @@ var UIElement = klass(DataNode, {
                 break;
             }
         }
-    },
-    removeAllDecorators: function(){
+    }
+    removeAllDecorators() {
         var decorators = this.decorators;
-        if (decorators){
+        if (decorators) {
             decorators.forEach(x => x.detach());
             this.decorators = [];
             Invalidate.requestUpperOnly();
         }
         return decorators;
-    },
-    removeDecoratorByType: function (type) {
+    }
+    removeDecoratorByType(type) {
         if (!this.decorators) {
             return;
         }
@@ -523,40 +525,40 @@ var UIElement = klass(DataNode, {
                 break;
             }
         }
-    },
-    removed: function () {
+    }
+    removed() {
 
-    },
-    removing: function () {
+    }
+    removing() {
 
-    },
-    autoSelectOnPaste: function () {
+    }
+    autoSelectOnPaste() {
         return true;
-    },
+    }
 
-    getBoundaryRect: function (includeMargin = false) {
+    getBoundaryRect(includeMargin = false) {
         var br = this.props.br;
-        if (!includeMargin || this.margin() === Box.Default){
+        if (!includeMargin || this.margin() === Box.Default) {
             return br;
         }
         var margin = this.margin();
         return new Rect(br.x - margin.left, br.y - margin.top, br.width + margin.left + margin.right, br.height + margin.top + margin.bottom);
-    },
-    size: function () {
+    }
+    size() {
         return {
             width: this.width(),
             height: this.height()
         }
-    },
-    getBoundaryRectGlobal: function (includeMargin = false) {
+    }
+    getBoundaryRectGlobal(includeMargin = false) {
         return this.getBoundingBoxGlobal(includeMargin);
-    },
+    }
 
-    getBoundingBox: function (includeMargin = false) {
+    getBoundingBox(includeMargin = false) {
         var rect = this.getBoundaryRect(includeMargin);
         return this.transformRect(rect, this.viewMatrix());
-    },
-    getBoundingBoxGlobal: function (includeMargin = false) {
+    }
+    getBoundingBoxGlobal(includeMargin = false) {
         if (this.runtimeProps.globalClippingBox) {
             return this.runtimeProps.globalClippingBox;
         }
@@ -565,9 +567,9 @@ var UIElement = klass(DataNode, {
         var bb = this.transformRect(rect, this.globalViewMatrix());
         this.runtimeProps.globalClippingBox = bb;
         return bb;
-    },
-    transformRect: function(rect, matrix){
-        if (matrix.isTranslatedOnly()){
+    }
+    transformRect(rect, matrix) {
+        if (matrix.isTranslatedOnly()) {
             return rect.translate(matrix.tx, matrix.ty);
         }
 
@@ -582,9 +584,9 @@ var UIElement = klass(DataNode, {
         var b = Math.max(p1.y, p2.y, p3.y, p4.y);
 
         return new Rect(l, t, r - l, b - t);
-    },
+    }
 
-    getMaxOuterBorder: function () {
+    getMaxOuterBorder() {
         if (!this.stroke()) {
             return 0;
         }
@@ -599,24 +601,24 @@ var UIElement = klass(DataNode, {
             return 0;
         }
         return stroke.lineWidth;
-    },
-    expandRectWithBorder: function(rect){
+    }
+    expandRectWithBorder(rect) {
         var border = this.getMaxOuterBorder();
-        if (border !== 0){
+        if (border !== 0) {
             return rect.expand(border);
         }
         return rect;
-    },
-    getHitTestBox: function (scale, includeMargin = false, includeBorder = true) {
+    }
+    getHitTestBox(scale, includeMargin = false, includeBorder = true) {
         var rect = this.getBoundaryRect(includeMargin);
         var goodScaleW = rect.width * scale > 10;
         var goodScaleH = rect.height * scale > 10;
-        if (!includeBorder && goodScaleW && goodScaleW){
+        if (!includeBorder && goodScaleW && goodScaleW) {
             return rect;
         }
 
         var border = this.getMaxOuterBorder();
-        if (border === 0 && goodScaleW && goodScaleH){
+        if (border === 0 && goodScaleW && goodScaleH) {
             return rect;
         }
 
@@ -634,9 +636,9 @@ var UIElement = klass(DataNode, {
             height += 10;
         }
         return new Rect(x, y, width, height);
-    },
+    }
 
-    hitTest: function (/*Point*/point, scale, includeMargin = false) {
+    hitTest(/*Point*/point, scale, includeMargin = false) {
         if (!this.visible()) {
             return false;
         }
@@ -646,23 +648,23 @@ var UIElement = klass(DataNode, {
         point = matrix.transformPoint(point);
 
         return point.x >= rect.x && point.x < rect.x + rect.width && point.y >= rect.y && point.y < rect.y + rect.height;
-    },
-    hitTestGlobalRect: function(rect){
+    }
+    hitTestGlobalRect(rect) {
         if (!this.hitVisible()) {
             return false;
         }
 
         var bb = this.getBoundingBoxGlobal();
-        if (!areRectsIntersecting(bb, rect)){
+        if (!areRectsIntersecting(bb, rect)) {
             return false;
         }
 
         var m = this.globalViewMatrix();
-        if (m.isTranslatedOnly()){
+        if (m.isTranslatedOnly()) {
             return true;
         }
 
-        if (isRectInRect(bb, rect)){
+        if (isRectInRect(bb, rect)) {
             return true;
         }
 
@@ -670,18 +672,18 @@ var UIElement = klass(DataNode, {
         var segments1 = m.transformRect(br);
         var segments2 = rect.segments();
 
-        for (var i = 0; i < segments1.length; i++){
+        for (var i = 0; i < segments1.length; i++) {
             var s1 = segments1[i];
-            for (var j = 0; j < segments2.length; j++){
+            for (var j = 0; j < segments2.length; j++) {
                 var s2 = segments2[j];
-                if (s1.intersects(s2)){
+                if (s1.intersects(s2)) {
                     return true;
                 }
             }
         }
         return false;
-    },
-    // pageLink: function (value) {
+    }
+    // pageLink(value) {
     //     var action = this.action();
     //     if (action.type === 0/*PageLink*/) {
     //         return action.pageId;
@@ -689,7 +691,7 @@ var UIElement = klass(DataNode, {
     //     return null;
     // },
 
-    resetGlobalViewCache: function (resetPrimitiveRoot = false) {
+    resetGlobalViewCache(resetPrimitiveRoot = false) {
         delete this.runtimeProps.boundaryRectGlobal;
         delete this.runtimeProps.globalViewMatrix;
         delete this.runtimeProps.globalViewMatrixInverted;
@@ -701,31 +703,31 @@ var UIElement = klass(DataNode, {
         if (resetPrimitiveRoot) {
             delete this.runtimeProps.primitiveRoot;
         }
-    },
-    viewMatrix: function () {
+    }
+    viewMatrix() {
         return this.props.m;
-    },
-    dm: function () {
-        if (!this.runtimeProps.dm){
+    }
+    dm() {
+        if (!this.runtimeProps.dm) {
             this.runtimeProps.dm = this.props.m.decompose();
         }
         return this.runtimeProps.dm;
-    },
-    viewMatrixInverted: function () {
-        if (!this.runtimeProps.viewMatrixInverted){
+    }
+    viewMatrixInverted() {
+        if (!this.runtimeProps.viewMatrixInverted) {
             this.runtimeProps.viewMatrixInverted = this.viewMatrix().clone().invert();
         }
         return this.runtimeProps.viewMatrixInverted;
-    },
-    shouldApplyViewMatrix: function(){
+    }
+    shouldApplyViewMatrix() {
         return true;
-    },
-    applyViewMatrix: function(context){
-        if (this.shouldApplyViewMatrix()){
+    }
+    applyViewMatrix(context) {
+        if (this.shouldApplyViewMatrix()) {
             this.globalViewMatrix().applyToContext(context);
         }
-    },
-    draw: function (context, environment) {
+    }
+    draw(context, environment) {
         this.stopwatch.start();
 
         var w = this.width(),
@@ -744,11 +746,11 @@ var UIElement = klass(DataNode, {
         this.drawDecorators(context, w, h, environment);
 
         //console.log(this.displayName() + " : " + this.stopwatch.getElapsedTime());
-    },
-    drawSelf: function (context, w, h) {
+    }
+    drawSelf(context, w, h) {
 
-    },
-    drawDecorators: function(context, w, h, environment){
+    }
+    drawDecorators(context, w, h, environment) {
         if (this.decorators) {
             context.save();
             for (var i = 0, j = this.decorators.length; i < j; ++i) {
@@ -756,40 +758,40 @@ var UIElement = klass(DataNode, {
             }
             context.restore();
         }
-    },
-    drawBoundaryPath: function(context, matrix, round = true){
+    }
+    drawBoundaryPath(context, matrix, round = true) {
         var r = this.getBoundaryRect();
         const roundFactor = 2;
 
         context.beginPath();
 
         var p = matrix.transformPoint2(r.x, r.y);
-        if (round){
+        if (round) {
             p.roundMutableBy(roundFactor);
         }
         context.moveTo(p.x, p.y);
 
         p = matrix.transformPoint2(r.x + r.width, r.y);
-        if (round){
+        if (round) {
             p.roundMutableBy(roundFactor);
         }
         context.lineTo(p.x, p.y);
 
         p = matrix.transformPoint2(r.x + r.width, r.y + r.height);
-        if (round){
+        if (round) {
             p.roundMutableBy(roundFactor);
         }
         context.lineTo(p.x, p.y);
 
         p = matrix.transformPoint2(r.x, r.y + r.height);
-        if (round){
+        if (round) {
             p.roundMutableBy(roundFactor);
         }
         context.lineTo(p.x, p.y);
 
         context.closePath();
-    },
-    primitiveRoot: function () {
+    }
+    primitiveRoot() {
         if (this.runtimeProps.primitiveRoot) {
             return this.runtimeProps.primitiveRoot;
         }
@@ -797,16 +799,16 @@ var UIElement = klass(DataNode, {
         var root = parent ? parent.primitiveRoot() : null;
         this.runtimeProps.primitiveRoot = root;
         return root;
-    },
-    primitivePath: function () {
+    }
+    primitivePath() {
         var path = this.primitiveRoot().primitivePath().slice();
         path[path.length - 1] = this.id();
         return path;
-    },
-    createDragClone: function (element) {
+    }
+    createDragClone(element) {
         return element.clone();
-    },
-    globalViewMatrix: function () {
+    }
+    globalViewMatrix() {
         if (this.runtimeProps.globalViewMatrix) {
             return this.runtimeProps.globalViewMatrix;
         }
@@ -821,42 +823,42 @@ var UIElement = klass(DataNode, {
         this.runtimeProps.globalViewMatrix = Object.freeze(matrix);
 
         return this.runtimeProps.globalViewMatrix;
-    },
-    globalViewMatrixInverted: function () {
+    }
+    globalViewMatrixInverted() {
         if (!this.runtimeProps.globalViewMatrixInverted) {
             this.runtimeProps.globalViewMatrixInverted = this.globalViewMatrix().clone().invert()
         }
 
         return this.runtimeProps.globalViewMatrixInverted;
-    },
-    trackPropertyState: function (name) {
+    }
+    trackPropertyState(name) {
         return null;
-    },
-    clip: function (context) {
+    }
+    clip(context) {
         if (this.clipSelf()) {
             var m = this.shouldApplyViewMatrix() ? Matrix.Identity : this.globalViewMatrix();
             this.drawBoundaryPath(context, m);
             context.clip();
         }
-    },
-    mousemove: function (event) {
+    }
+    mousemove(event) {
         if (this.editor != null) {
             event.handled = true;
         }
-    },
-    mouseup: function (event) {
-    },
-    mousedown: function (event) {
-    },
-    dblclick: function (event) {
-    },
-    click: function (event) {
-    },
-    // mouseLeaveElement: function (event) {
+    }
+    mouseup(event) {
+    }
+    mousedown(event) {
+    }
+    dblclick(event) {
+    }
+    click(event) {
+    }
+    // mouseLeaveElement(event) {
     // },
-    // mouseEnterElement: function (event) {
+    // mouseEnterElement(event) {
     // },
-    // defaultAction: function (event) {
+    // defaultAction(event) {
     //     if (this._defaultAction) {
     //         return this._defaultAction;
     //     }
@@ -867,33 +869,33 @@ var UIElement = klass(DataNode, {
     //     }
     //     return null;
     // },
-    setDefaultAction: function (defaultAction) {
+    setDefaultAction(defaultAction) {
         this._defaultAction = defaultAction;
-    },
-    select: function (multiSelect, view) {
+    }
+    select(multiSelect, view) {
 
-    },
-    unselect: function () {
-    },
-    captureMouse: function () {
+    }
+    unselect() {
+    }
+    captureMouse() {
         Environment.controller.captureMouse(this);
-    },
-    releaseMouse: function () {
+    }
+    releaseMouse() {
         Environment.controller.releaseMouse(this);
-    },
-    canMultiSelect: function () {
+    }
+    canMultiSelect() {
         return true;
-    },
-    canAlign: function () {
+    }
+    canAlign() {
         return true;
-    },
-    canGroup: function () {
+    }
+    canGroup() {
         return true;
-    },
-    canChangeOrder: function () {
+    }
+    canChangeOrder() {
         return true;
-    },
-    zOrder: function () {
+    }
+    zOrder() {
         if (arguments.length > 0) {
             throw "zOrder is readonly";
         }
@@ -903,8 +905,8 @@ var UIElement = klass(DataNode, {
         }
 
         return parent.children.indexOf(this);
-    },
-    x: function (value, changeMode) {        
+    }
+    x(value, changeMode) {
         if (arguments.length !== 0) {
             var t = Point.create(value - this.x(), 0);
             this.applyGlobalTranslation(t, changeMode);
@@ -913,13 +915,13 @@ var UIElement = klass(DataNode, {
         }
 
         var root = this.primitiveRoot();
-        if (!root){
+        if (!root) {
             return this.getBoundingBox().x;
         }
         let m = root.globalViewMatrixInverted().appended(this.globalViewMatrix());
         return this.transformRect(this.getBoundaryRect(), m).x;
-    },
-    y: function (value, changeMode) {
+    }
+    y(value, changeMode) {
         if (arguments.length !== 0) {
             var t = Point.create(0, value - this.y());
             this.applyGlobalTranslation(t, changeMode);
@@ -928,264 +930,264 @@ var UIElement = klass(DataNode, {
         }
 
         var root = this.primitiveRoot();
-        if (!root){
+        if (!root) {
             return this.getBoundingBox().y;
         }
         let m = root.globalViewMatrixInverted().appended(this.globalViewMatrix());
         return this.transformRect(this.getBoundaryRect(), m).y;
-    },
-    width: function (value, changeMode) {
+    }
+    width(value, changeMode) {
         if (arguments.length !== 0) {
             var br = this.br();
-            this.setProps({br: br.withSize(value, br.height)}, changeMode);
+            this.setProps({ br: br.withSize(value, br.height) }, changeMode);
         }
         return this.br().width;
-    },
-    height: function (value, changeMode) {
+    }
+    height(value, changeMode) {
         if (arguments.length !== 0) {
             var br = this.br();
-            this.setProps({br: br.withSize(br.width, value)}, changeMode);
+            this.setProps({ br: br.withSize(br.width, value) }, changeMode);
         }
         return this.br().height;
-    },
-    angle: function (value, changeMode) {
+    }
+    angle(value, changeMode) {
         if (arguments.length !== 0) {
             this.applyRotation(value - this.angle(), this.center(), false, changeMode);
         }
         return -this.globalViewMatrix().decompose().rotation;
-    },
-    br: function (value) {
+    }
+    br(value) {
         if (value !== undefined) {
-            this.setProps({br: value});
+            this.setProps({ br: value });
         }
         return this.props.br;
-    },
-    right: function () {
+    }
+    right() {
         return this.x() + this.width();
-    },
-    bottom: function () {
+    }
+    bottom() {
         return this.y() + this.height();
-    },
-    outerHeight: function () {
+    }
+    outerHeight() {
         var margin = this.margin();
         return this.height() + margin.top + margin.bottom;
-    },
-    outerWidth: function () {
+    }
+    outerWidth() {
         var margin = this.margin();
         return this.width() + margin.left + margin.right;
-    },
-    locked: function (value) {
+    }
+    locked(value) {
         if (value !== undefined) {
-            this.setProps({locked: value});
+            this.setProps({ locked: value });
         }
         return this.props.locked;
-    },
-    clipDragClone: function (value) {
+    }
+    clipDragClone(value) {
         return this.field("_clipDragClone", value, false);
-    },
-    isTemporary: function (value) {
+    }
+    isTemporary(value) {
         return this.field("_isTemporary", value, false);
-    },
-    hitVisible: function (directSelection) {
-        if (this.locked() || !this.visible()){
+    }
+    hitVisible(directSelection) {
+        if (this.locked() || !this.visible()) {
             return false;
         }
         var parent = this.parent();
-        if (!parent){
+        if (!parent) {
             return false;
         }
-        if (directSelection){
+        if (directSelection) {
             return true;
         }
         return !parent.lockedGroup() || parent.activeGroup();
-    },
-    hitTransparent: function () {
+    }
+    hitTransparent() {
         return false;
-    },
-    canSelect: function (value) {
+    }
+    canSelect(value) {
         return this.field("_canSelect", value, true);
-    },
-    visible: function (value) {
+    }
+    visible(value) {
         if (value !== undefined) {
-            this.setProps({visible: value});
+            this.setProps({ visible: value });
         }
         return this.props.visible;
-    },
-    autoPosition: function (value) {
-        return this.field("_autoPosition", value, fwk.UIElement.FieldMetadata.autoPosition.defaultValue);
-    },
-    allowSnapping: function (value) {
+    }
+    autoPosition(value) {
+        return this.field("_autoPosition", value, "center");
+    }
+    allowSnapping(value) {
         return this.field("_allowSnapping", value, true);
-    },
-    tags: function (value) {
-        return this.field("_tags", value, fwk.UIElement.FieldMetadata["tags"].defaultValue);
-    },
-    crazySupported: function (value) {
+    }
+    tags(value) {
+        return this.field("_tags", value, '');
+    }
+    crazySupported(value) {
         return this.field("_crazySupported", value, true);
-    },
-    customScale: function (value) {
+    }
+    customScale(value) {
         var res = this.field("_customScale", value, false);
         if (value !== undefined) {
             this.resetGlobalViewCache();
         }
 
         return res;
-    },
-    fill: function (value) {
+    }
+    fill(value) {
         if (value !== undefined) {
-            this.setProps({fill: value});
+            this.setProps({ fill: value });
         }
         return this.props.fill;
-    },
-    stroke: function (value) {
+    }
+    stroke(value) {
         if (value !== undefined) {
-            this.setProps({stroke: value});
+            this.setProps({ stroke: value });
         }
         return this.props.stroke;
-    },
-    dashPattern: function (value) {
+    }
+    dashPattern(value) {
         if (value !== undefined) {
-            this.setProps({dashPattern: value});
+            this.setProps({ dashPattern: value });
         }
-        if(typeof this.props.dashPattern === 'string'){
-            switch(this.props.dashPattern){
+        if (typeof this.props.dashPattern === 'string') {
+            switch (this.props.dashPattern) {
                 case 'solid':
                     return null;
                 case 'dotted':
-                    return [1,1];
+                    return [1, 1];
                 case 'dashed':
                     return [4, 2];
             }
         }
         return this.props.dashPattern;
-    },
-    selectFrameVisible: function () {
+    }
+    selectFrameVisible() {
         return true;
-    },
-    field: function (name, value, defaultValue) {
+    }
+    field(name, value, defaultValue) {
         if (value !== undefined) {
             this[name] = value;
         }
         var res = this[name];
         return res !== undefined ? res : defaultValue;
-    },
-    clipSelf: function (/*bool*/value) {
+    }
+    clipSelf(/*bool*/value) {
         if (value !== undefined) {
-            this.setProps({overflow: Overflow.Clip});
+            this.setProps({ overflow: Overflow.Clip });
         }
         return this.props.overflow === Overflow.Clip;
-    },
-    overflow: function (value) {
+    }
+    overflow(value) {
         if (value !== undefined) {
-            this.setProps({overflow: value});
+            this.setProps({ overflow: value });
         }
         return this.props.overflow;
-    },
-    parent: function (/*UIElement*/value) {
+    }
+    parent(/*UIElement*/value) {
         if (value !== undefined) {
             this._parent = value;
             this.resetGlobalViewCache(true);
         }
         return this._parent;
-    },
-    opacity: function (/*double*/value) {
+    }
+    opacity(/*double*/value) {
         if (value !== undefined) {
-            this.setProps({opacity: value});
+            this.setProps({ opacity: value });
         }
         return this.props.opacity;
-    },    
-    minWidth: function (/*Number*/value) {
+    }
+    minWidth(/*Number*/value) {
         if (value !== undefined) {
-            this.setProps({minWidth: value});
+            this.setProps({ minWidth: value });
         }
         return this.props.minWidth;
-    },
-    minHeight: function (/*Number*/value) {
+    }
+    minHeight(/*Number*/value) {
         if (value !== undefined) {
-            this.setProps({minHeight: value});
+            this.setProps({ minHeight: value });
         }
         return this.props.minHeight;
-    },
-    maxWidth: function (/*Number*/value) {
+    }
+    maxWidth(/*Number*/value) {
         if (value !== undefined) {
-            this.setProps({maxWidth: value});
+            this.setProps({ maxWidth: value });
         }
         return this.props.maxWidth;
-    },
-    maxHeight: function (/*Number*/value) {
+    }
+    maxHeight(/*Number*/value) {
         if (value !== undefined) {
-            this.setProps({maxHeight: value});
+            this.setProps({ maxHeight: value });
         }
         return this.props.maxHeight;
-    },
-    canDrag: function (value) {
+    }
+    canDrag(value) {
         return this.field("_canDrag", value, true);
-    },
-    flipVertical: function (value) {
+    }
+    flipVertical(value) {
         if (value !== undefined) {
-            this.setProps({flipVertical: value});
+            this.setProps({ flipVertical: value });
         }
         return this.props.flipVertical;
-    },
-    flipHorizontal: function (value) {
+    }
+    flipHorizontal(value) {
         if (value !== undefined) {
-            this.setProps({flipHorizontal: value});
+            this.setProps({ flipHorizontal: value });
         }
         return this.props.flipHorizontal;
-    },
-    clipMask: function (/*bool*/value) {
+    }
+    clipMask(/*bool*/value) {
         if (value !== undefined) {
-            this.setProps({clipMask: value});
+            this.setProps({ clipMask: value });
         }
         return this.props.clipMask;
-    },
+    }
 
-    scalableX: function (value) {
+    scalableX(value) {
         return this.field("_scalableX", value, true);
-    },
-    scalableY: function (value) {
+    }
+    scalableY(value) {
         return this.field("_scalableY", value, true);
-    },
-    isDropSupported: function (value) {
+    }
+    isDropSupported(value) {
         return true;
-    },
-    showResizeHint: function () {
+    }
+    showResizeHint() {
         return true;
-    },
-    showDropTarget: function () {
+    }
+    showDropTarget() {
         return true;
-    },
-    activeInPreview: function (value) {
+    }
+    activeInPreview(value) {
         return this.field("_activeInPreview", value, false);
-    },
-    cloneWhenDragging: function () {
+    }
+    cloneWhenDragging() {
         return false;
-    },
-    visibleWhenDrag: function (value) {
+    }
+    visibleWhenDrag(value) {
         if (value !== undefined) {
-            this.setProps({visibleWhenDrag: value});
+            this.setProps({ visibleWhenDrag: value });
         }
         return this.props.visibleWhenDrag;
-    },
-    standardBackground: function (value) {
+    }
+    standardBackground(value) {
         return this.field("_standardBackground", value, true);
-    },
-    name: function (value) {
+    }
+    name(value) {
         if (value !== undefined) {
-            this.setProps({name: value});
+            this.setProps({ name: value });
         }
         return this.props.name;
-    },
-    constraints: function (value) {
+    }
+    constraints(value) {
         if (value !== undefined) {
-            this.setProps({constraints: value});
+            this.setProps({ constraints: value });
         }
         return this.props.constraints;
-    },
-    resize: function (props) {
+    }
+    resize(props) {
         this.prepareAndSetProps(props);
-    },
-    initialResize: function (parent) {
+    }
+    initialResize(parent) {
         switch (this.autoPosition()) {
             case "top":
             case "bottom":
@@ -1194,54 +1196,54 @@ var UIElement = klass(DataNode, {
                 this.width(parent.width());
                 break;
         }
-    },
-    getType: function () {
+    }
+    getType() {
         return "UIElement";
-    },
-    getDescription: function () {
+    }
+    getDescription() {
         return _(this.t);
-    },
-    applyVisitor: function (/*Visitor*/callback) {
+    }
+    applyVisitor(/*Visitor*/callback) {
         return callback(this);
-    },
-    canAccept: function (elements, autoInsert) {
+    }
+    canAccept(elements, autoInsert) {
         return false;
-    },
-    canBeAccepted: function (element) {
+    }
+    canBeAccepted(element) {
         return true;
-    },
-    canConvertToPath: function () {
+    }
+    canConvertToPath() {
         return false;
-    },
-    sizeProperties: function () {
+    }
+    sizeProperties() {
         return {
             width: this.props.width,
             height: this.props.height
         };
-    },
-    onLayerDraw: function (layer, context) {
+    }
+    onLayerDraw(layer, context) {
 
-    },
-    registerForLayerDraw: function (layerNum) {
+    }
+    registerForLayerDraw(layerNum) {
         var parent = this.parent();
         if (parent) {
             parent.registerForLayerDraw(layerNum, this);
         }
-    },
-    unregisterForLayerDraw: function (layerNum) {
+    }
+    unregisterForLayerDraw(layerNum) {
         var parent = this.parent();
         if (parent) {
             parent.unregisterForLayerDraw(layerNum, this);
         }
-    },
-    margin: function (value) {
+    }
+    margin(value) {
         if (value !== undefined) {
-            this.setProps({margin: value});
+            this.setProps({ margin: value });
         }
         return this.props.margin;
-    },
+    }
 
-    isDescendantOrSame: function (element) {
+    isDescendantOrSame(element) {
         var current = this;
         do {
             if (current.isSameAs(element)) {
@@ -1251,60 +1253,60 @@ var UIElement = klass(DataNode, {
         } while (current && current !== NullContainer);
 
         return false;
-    },
-    isSameAs: function (element) {
+    }
+    isSameAs(element) {
         return element === this;
-    },
-    horizontalAlignment: function (value) {
+    }
+    horizontalAlignment(value) {
         if (value !== undefined) {
-            this.setProps({horizontalAlignment: value});
+            this.setProps({ horizontalAlignment: value });
         }
         return this.props.horizontalAlignment;
-    },
-    verticalAlignment: function (value) {
+    }
+    verticalAlignment(value) {
         if (value !== undefined) {
-            this.setProps({verticalAlignment: value});
+            this.setProps({ verticalAlignment: value });
         }
         return this.props.verticalAlignment;
-    },
-    dockStyle: function (value) {
+    }
+    dockStyle(value) {
         if (value !== undefined) {
-            this.setProps({dockStyle: value});
+            this.setProps({ dockStyle: value });
         }
         return this.props.dockStyle;
-    },
-    index: function () {
+    }
+    index() {
         return this.parent().children.indexOf(this);
-    },
-    each: function (callback) {
+    }
+    each(callback) {
         each([this], callback);
-    },
-    clone: function () {
+    }
+    clone() {
         var clone = ObjectFactory.fromType(this.t, this.cloneProps());
         clone.id(createUUID());
         return clone;
-    },
-    sourceId:function(id){
-      if(arguments.length > 0) {
-          this.setProps({sourceId:id});
-      }
+    }
+    sourceId(id) {
+        if (arguments.length > 0) {
+            this.setProps({ sourceId: id });
+        }
 
-      return this.props.sourceId || this.props.id;
-    },
-    mirrorClone: function () {
+        return this.props.sourceId || this.props.id;
+    }
+    mirrorClone() {
         var clone = ObjectFactory.fromType(this.t, this.cloneProps());
         return clone;
-    },
-    cursor: function () {
+    }
+    cursor() {
         return null;
-    },
-    resizeDimensions: function (value) {
+    }
+    resizeDimensions(value) {
         if (value) {
             value = +value; // convert from string, to make it work with property editor
         }
         return this.field("_resizeDimensions", value, ResizeDimension.Both);
-    },
-    init: function (values, isDefault, selector) {
+    }
+    init(values, isDefault, selector) {
         var props = {};
         var that = this;
         for (var name in values) {
@@ -1336,8 +1338,8 @@ var UIElement = klass(DataNode, {
         }
         this.setProps(props);
         return this;
-    },
-    fromJSON: function (data) {
+    }
+    fromJSON(data) {
         //TODO: bring back migrations when necessary
         // if (data.props.version !== this.__version__) {
         //     if (!Migrations.runMigrations(this.t, data, this.__version__)) {
@@ -1347,36 +1349,36 @@ var UIElement = klass(DataNode, {
         // }
         this.__state = 1;
 
-        DataNode.prototype.fromJSON.apply(this, arguments);
+        super.fromJSON.apply(this, arguments);
 
         delete this.__state;
         return this;
-    },
-    getEditableProperties: function (recursive) {
+    }
+    getEditableProperties(recursive) {
         return PropertyMetadata.getEditableProperties(this.systemType(), recursive);
-    },
-    displayName: function () {
+    }
+    displayName() {
         return this.name() || this.displayType();
-    },
-    displayType: function () {
+    }
+    displayType() {
         return "type." + this.t;
-    },
-    systemType: function () {
+    }
+    systemType() {
         return this.t;
-    },
-    findMetadata: function () {
+    }
+    findMetadata() {
         return PropertyMetadata.findAll(this.systemType());
-    },
-    findPropertyDescriptor: function (propName): PropertyDescriptor {
+    }
+    findPropertyDescriptor(propName): PropertyDescriptor {
         return PropertyMetadata.find(this.systemType(), propName);
-    },
-    quickEditProperty: function (value) {
+    }
+    quickEditProperty(value) {
         return this.field("_quickEditProperty", value, "");
-    },
-    toString: function () {
+    }
+    toString() {
         return this.t;
-    },
-    getPath: function () {
+    }
+    getPath() {
         var path = [this];
         var e = this;
         while (typeof e.parent === "function" && e.parent()) {
@@ -1384,11 +1386,11 @@ var UIElement = klass(DataNode, {
             e = e.parent();
         }
         return this.id() + ': ' + map(path.reverse(), function (x) {
-                return x.t;
-            }).join("->");
-    },
+            return x.t;
+        }).join("->");
+    }
 
-    dispose: function () {
+    dispose() {
         if (this._isDisposed) {
             return;
         }
@@ -1398,18 +1400,18 @@ var UIElement = klass(DataNode, {
         delete this.props;
 
         this._isDisposed = true;
-    },
-    isDisposed: function () {
+    }
+    isDisposed() {
         return this._isDisposed;
-    },
-    rotationOrigin: function (global) {
+    }
+    rotationOrigin(global) {
         return this.center(global);
-    },
-    center: function (global) {
+    }
+    center(global) {
         var m = global ? this.globalViewMatrix() : this.viewMatrix();
         return m.transformPoint(this.br().center());
-    },
-    hitElement: function (position, scale, predicate) {
+    }
+    hitElement(position, scale, predicate) {
         if (this.hitVisible()) {
 
             predicate = predicate || this.hitTest;
@@ -1419,8 +1421,8 @@ var UIElement = klass(DataNode, {
         }
 
         return null;
-    },
-    isAncestor: function (element) {
+    }
+    isAncestor(element) {
         var parent = this.parent();
         while (parent) {
             if (parent === element) {
@@ -1431,15 +1433,15 @@ var UIElement = klass(DataNode, {
         }
 
         return false;
-    },
-    isOrphaned: function () {
+    }
+    isOrphaned() {
         return this.parent() === NullContainer;
-    },
-    canBeRemoved: function () {
+    }
+    canBeRemoved() {
         return true;
-    },
+    }
 
-    page: function () {
+    page() {
         var element;
         var nextParent = this;
         do {
@@ -1451,53 +1453,53 @@ var UIElement = klass(DataNode, {
             return element;
         }
         return null;
-    },
+    }
 
-    getTags: function () {
+    getTags() {
         var tags = this.tags();
         if (tags) {
             return tags.split(",");
         }
         return [];
-    },
-    hasTag: function (tag) {
+    }
+    hasTag(tag) {
         var tags = this.getTags();
         return sketch.util.contains(tags, tag);
-    },
-    addTag: function (tag) {
+    }
+    addTag(tag) {
         var tags = this.getTags();
         if (!sketch.util.contains(tags, tag)) {
             tags.push(tag);
             this.tags(tags.join(","));
         }
         return this;
-    },
-    contextMenu: function (context, menu) {
+    }
+    contextMenu(context, menu) {
 
-    },
-    constructMoveCommand: function (newParent, newIndex) {
+    }
+    constructMoveCommand(newParent, newIndex) {
         return new ElementMove(this, newParent, newIndex);
-    },
-    constructPropsChangedCommand: function (newProps, oldProps) {
+    }
+    constructPropsChangedCommand(newProps, oldProps) {
         return new ElementPropsChanged(this, newProps, oldProps);
-    },
-    constructDeleteCommand: function () {
+    }
+    constructDeleteCommand() {
         return new ElementDelete(this);
-    },
-    move: function (rect) {
+    }
+    move(rect) {
         this.resize(rect);
-    },
-    exportPatch: function () {
-    },
-    applyPatch: function (data) {
-    },
-    selectionFrameType: function () {
+    }
+    exportPatch() {
+    }
+    applyPatch(data) {
+    }
+    selectionFrameType() {
         return DefaultFrameType;
-    },
-    iconType: function () {
+    }
+    iconType() {
         return this.props.iconType || 'rectangle';
-    },
-    createSelectionFrame: function (view) {
+    }
+    createSelectionFrame(view) {
         if (!this.selectFrameVisible()) {
             return {
                 element: this,
@@ -1730,8 +1732,8 @@ var UIElement = klass(DataNode, {
             frame: true,
             points: points
         };
-    },
-    getPropsDiff: function (other, oldProps) {
+    }
+    getPropsDiff(other, oldProps) {
         var res = {};
         for (var p in other) {
             if (this.props[p] !== other[p]) {
@@ -1743,9 +1745,9 @@ var UIElement = klass(DataNode, {
         }
 
         return res;
-    },
+    }
     // returns deffered object
-    animate: function (properties, duration, options, progressCallback) {
+    animate(properties, duration, options, progressCallback) {
         var animationValues = [];
         options = extend({}, options);
         options.duration = duration || 0;
@@ -1755,7 +1757,7 @@ var UIElement = klass(DataNode, {
             var accessor = (function (name) {
                 return function prop_accessor(value) {
                     if (arguments.length > 0) {
-                        that.setProps({[name]: value});
+                        that.setProps({ [name]: value });
                     }
                     return that.props[name];
                 }
@@ -1763,118 +1765,84 @@ var UIElement = klass(DataNode, {
 
             var currentValue = accessor();
 
-            animationValues.push({from: currentValue, to: newValue, accessor: accessor});
+            animationValues.push({ from: currentValue, to: newValue, accessor: accessor });
         }
 
         var group = new AnimationGroup(animationValues, options, progressCallback);
         Environment.view.animationController.registerAnimationGroup(group);
 
         return group.promise();
-    },
+    }
 
-    styleId: function (value) {
+    styleId(value) {
         if (arguments.length > 0) {
-            this.setProps({styleId: value});
+            this.setProps({ styleId: value });
         }
 
         return this.props.styleId;
-    },
+    }
 
-    getStyleProps: function () {
+    getStyleProps() {
         var stylePropNames = PropertyMetadata.getStylePropertyNamesMap(this.systemType(), 1);
         var res = {};
         for (var name in stylePropNames) {
             res[name] = sketch.util.flattenObject(this.props[name]);
         }
         return res;
-    },
+    }
 
-    beforeAddFromToolbox: function () {
+    beforeAddFromToolbox() {
 
-    },
-    afterAddFromToolbox: function () {
+    }
+    afterAddFromToolbox() {
 
-    },
+    }
 
-    propertyMetadata: function () {
+    propertyMetadata() {
         return PropertyMetadata.findAll(this.t);
-    },
+    }
 
-    toSVG: function () {
+    toSVG() {
         var ctx = new C2S(this.width(), this.height());
         this.draw(ctx);
         return ctx.getSerializedSvg();
     }
-});
+
+    static fromTypeString(type, parameters) {
+        var components = type.split('.');
+        var current = sketch;
+        for (var i = 1; i < components.length; i++) {
+            var component = components[i];
+            current = current[component];
+            if (!current) {
+                var newType = fwk.UIElement.upgradeTypeName(type);
+                if (newType !== type) {
+                    return fwk.UIElement.fromType(newType, parameters);
+                }
+                throw 'Type not found: ' + type;
+            }
+        }
+
+        return current;
+    }
+
+    static construct() {
+        return ObjectFactory.construct.apply(ObjectFactory, arguments);
+    }
+
+    static fromType(type, parameters) {
+        return ObjectFactory.fromType(type, parameters);
+    }
+
+    static fromJSON(data) {
+        return ObjectFactory.fromJSON(data);
+    }
+}
 
 fwk.UIElement = UIElement;
 
-fwk.UIElement.fromTypeString = function (type, parameters) {
-    var components = type.split('.');
-    var current = sketch;
-    for (var i = 1; i < components.length; i++) {
-        var component = components[i];
-        current = current[component];
-        if (!current) {
-            var newType = fwk.UIElement.upgradeTypeName(type);
-            if (newType !== type) {
-                return fwk.UIElement.fromType(newType, parameters);
-            }
-            throw 'Type not found: ' + type;
-        }
-    }
-
-    return current;
-}
-
-fwk.UIElement.construct = function () {
-    return ObjectFactory.construct.apply(ObjectFactory, arguments);
-};
-
-fwk.UIElement.fromType = function (type, parameters) {
-    return ObjectFactory.fromType(type, parameters);
-};
-
-fwk.UIElement.fromJSON = function (data) {
-    return ObjectFactory.fromJSON(data);
-};
-
-fwk.UIElement.prototype.t = Types.Element;
-fwk.UIElement.prototype.defaultSize = {width: 100, height: 100};
-
-
-fwk.UIElement.FieldMetadata = {
-    autoPosition: {
-        defaultValue: "center",
-        possibleValues: {
-            center: "Center",
-            top: "Top",
-            bottom: "Bottom",
-            parent: "Parent",
-            fill: "Fill",
-            middle: "Middle"
-        },
-        displayName: "Auto position"
-    },
-    resizeDimensions: {
-        defaultValue: ResizeDimension.Both,
-        possibleValues: {
-            "0": "None",
-            "1": "Vertical",
-            "2": "Horizontal",
-            "3": "Both"
-        },
-        displayName: "Resize dimensions"
-    },
-    allowSnapping: {
-        defaultValue: true,
-        displayName: "Allow snapping"
-    },
-    tags: {
-        defaultValue: "Primitive",
-        displayName: "Tags"
-    }
-};
+UIElement.prototype.t = Types.Element;
+UIElement.prototype.__version__ = 1;
 
 PropertyMetadata.registerForType(UIElement, {
     margin: {
@@ -1888,12 +1856,12 @@ PropertyMetadata.registerForType(UIElement, {
         options: {
             size: 1 / 2,
             items: [
-                {name: "Left", value: DockStyle.Left},
-                {name: "Top", value: DockStyle.Top},
-                {name: "Right", value: DockStyle.Right},
-                {name: "Bottom", value: DockStyle.Bottom},
-                {name: "Fill", value: DockStyle.Fill},
-                {name: "None", value: DockStyle.None}
+                { name: "Left", value: DockStyle.Left },
+                { name: "Top", value: DockStyle.Top },
+                { name: "Right", value: DockStyle.Right },
+                { name: "Bottom", value: DockStyle.Bottom },
+                { name: "Fill", value: DockStyle.Fill },
+                { name: "None", value: DockStyle.None }
             ]
         },
         defaultValue: DockStyle.None
@@ -1904,11 +1872,11 @@ PropertyMetadata.registerForType(UIElement, {
         options: {
             size: 1,
             items: [
-                {name: "Left", value: HorizontalAlignment.Left},
-                {name: "Right", value: HorizontalAlignment.Right},
-                {name: "Stretch", value: HorizontalAlignment.Stretch},
-                {name: "Center", value: HorizontalAlignment.Center},
-                {name: "None", value: HorizontalAlignment.None}
+                { name: "Left", value: HorizontalAlignment.Left },
+                { name: "Right", value: HorizontalAlignment.Right },
+                { name: "Stretch", value: HorizontalAlignment.Stretch },
+                { name: "Center", value: HorizontalAlignment.Center },
+                { name: "None", value: HorizontalAlignment.None }
             ]
         },
         defaultValue: HorizontalAlignment.None
@@ -1919,11 +1887,11 @@ PropertyMetadata.registerForType(UIElement, {
         options: {
             size: 1,
             items: [
-                {name: "Top", value: VerticalAlignment.Top},
-                {name: "Bottom", value: VerticalAlignment.Bottom},
-                {name: "Stretch", value: VerticalAlignment.Stretch},
-                {name: "Middle", value: VerticalAlignment.Middle},
-                {name: "None", value: VerticalAlignment.None}
+                { name: "Top", value: VerticalAlignment.Top },
+                { name: "Bottom", value: VerticalAlignment.Bottom },
+                { name: "Stretch", value: VerticalAlignment.Stretch },
+                { name: "Middle", value: VerticalAlignment.Middle },
+                { name: "None", value: VerticalAlignment.None }
             ]
         },
         defaultValue: VerticalAlignment.None
@@ -1933,9 +1901,9 @@ PropertyMetadata.registerForType(UIElement, {
     },
     width: {
         displayName: "Width",
-        type: "numeric",        
+        type: "numeric",
         computed: true,
-        options: {            
+        options: {
             step: 1,
             miniStep: .1
         }
@@ -1944,7 +1912,7 @@ PropertyMetadata.registerForType(UIElement, {
         displayName: "Height",
         type: "numeric",
         computed: true,
-        options: {            
+        options: {
             step: 1,
             miniStep: .1
         }
@@ -1960,7 +1928,7 @@ PropertyMetadata.registerForType(UIElement, {
         displayName: "Left",
         type: "numeric",
         computed: true,
-        options: {            
+        options: {
             step: 1,
             miniStep: .1
         }
@@ -1969,7 +1937,7 @@ PropertyMetadata.registerForType(UIElement, {
         displayName: "Top",
         type: "numeric",
         computed: true,
-        options: {            
+        options: {
             step: 1,
             miniStep: .1
         }
@@ -2015,7 +1983,7 @@ PropertyMetadata.registerForType(UIElement, {
     angle: {
         displayName: "Angle",
         type: "numeric",
-        options: {            
+        options: {
             min: -360,
             max: 360,
             step: 1,
@@ -2073,9 +2041,9 @@ PropertyMetadata.registerForType(UIElement, {
         defaultValue: 'solid',
         options: {},
         items: [
-            {value: 'solid'},
-            {value: 'dashed'},
-            {value: 'dotted'}
+            { value: 'solid' },
+            { value: 'dashed' },
+            { value: 'dotted' }
         ],
     },
     clipMask: {
@@ -2111,7 +2079,7 @@ PropertyMetadata.registerForType(UIElement, {
             },
             {
                 label: "@constraints",
-                properties: [ "constraints"]
+                properties: ["constraints"]
             },
             {
                 label: "Appearance",
@@ -2140,5 +2108,3 @@ PropertyMetadata.registerForType(UIElement, {
         return ["id", "name", "visible", "source"];
     }
 });
-
-export default fwk.UIElement;

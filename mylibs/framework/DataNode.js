@@ -1,21 +1,26 @@
+// @flow
 import PropertyMetadata from "./PropertyMetadata";
 import PropertyTracker from "./PropertyTracker";
 import ModelStateListener from "./sync/ModelStateListener";
 import {PatchType, ChangeMode} from "./Defs";
 import ObjectFactory from "./ObjectFactory";
 import {createUUID} from "../util";
+import {IDataNodeProps} from './CoreModel';
 
-//not es6 class while uielement and container are old klasses
-export default klass({
-    _constructor: function (hasChildren) {
+export default class DataNode{
+    t: string;
+    props: IDataNodeProps;
+    children: DataNode[];
+
+    constructor(hasChildren: boolean) {
         this.props = PropertyMetadata.getDefaultProps(this.t);
         this.resetRuntimeProps();
         if (hasChildren) {
             this.children = [];
         }
-    },
+    }
 
-    prepareProps: function(changes){
+    prepareProps(changes: IDataNodeProps){        
         for (let p in changes){
             let oldValue = this.props[p];
             let newValue = changes[p];   
@@ -23,9 +28,9 @@ export default klass({
                 delete changes[p];
             }
         }
-    },
+    }
 
-    setProps: function (props, mode = ChangeMode.Model) {
+    setProps(props, mode = ChangeMode.Model) {
         var oldProps = {};        
         var propsChanged = false;
         for (var p in props) {
@@ -45,20 +50,20 @@ export default klass({
             Object.assign(this.props, props);
             this.propsUpdated(props, oldProps, mode);
         }
-    },    
+    }    
 
-    prepareAndSetProps: function (props, mode) {
+    prepareAndSetProps(props, mode) {
         this.prepareProps(props);
         this.setProps(props, mode);
-    },
+    }
 
-    propsUpdated: function (newProps, oldProps) {
+    propsUpdated(newProps, oldProps) {
         if (this.runtimeProps && this.runtimeProps.trackPropsCounter) {
             PropertyTracker.changeProps(this, newProps, oldProps);
         }
-    },
+    }
 
-    patchProps: function (patchType, propName, item, mode = ChangeMode.Model) {
+    patchProps(patchType, propName, item, mode = ChangeMode.Model) {
         //first track to capture old item for PatchType.Change
         if (mode !== ChangeMode.Self) {
             this.trackPatchProps(patchType, propName, item, mode);
@@ -98,19 +103,18 @@ export default klass({
 
         this.propsPatched(patchType, propName, item);
     }
-    ,
-    propsPatched: function (patchType, propName, item) {
+
+    propsPatched(patchType, propName, item) {
         if (this.runtimeProps && this.runtimeProps.trackPropsCounter) {
             PropertyTracker.changeProps(this, this.selectProps([propName]), {});
         }
     }
-    ,
 
-    cloneProps: function () {
+    cloneProps() {
         return Object.assign({}, this.props);
-    },
+    }
 
-    selectProps: function (namesOrChanges) {
+    selectProps(namesOrChanges) {
         var result = {};
         if (Array.isArray(namesOrChanges)) {
             for (var i = 0; i < namesOrChanges.length; i++) {
@@ -125,33 +129,33 @@ export default klass({
         }
         return result;
     }
-    ,
 
-    insertChild: function (child, index, mode = ChangeMode.Model) {
+
+    insertChild(child, index, mode = ChangeMode.Model) {
         this.children.splice(index, 0, child);
 
         if (mode !== ChangeMode.Self) {
             child.trackInserted(this, index, mode);
         }
     }
-    ,
-    removeChild: function (child, mode = ChangeMode.Model) {
+
+    removeChild(child, mode = ChangeMode.Model) {
         var idx = this.children.indexOf(child);
         if (idx !== -1) {
             this.removeChildByIndex(idx, mode);
         }
         return idx;
     }
-    ,
-    removeChildByIndex: function (index, mode = ChangeMode.Model) {
+
+    removeChildByIndex(index, mode = ChangeMode.Model) {
         var child = this.children.splice(index, 1)[0];
         if (mode !== ChangeMode.Self) {
             child.trackDeleted(this, index, mode);
         }
 
     }
-    ,
-    changeChildPosition: function (child, index, mode = ChangeMode.Model) {
+
+    changeChildPosition(child, index, mode = ChangeMode.Model) {
         var oldIndex;
         var items = this.children;
         for (var i = items.length - 1; i >= 0; i--) {
@@ -171,97 +175,97 @@ export default klass({
             child.trackChangePosition(this, index, oldIndex, mode);
         }
     }
-    ,
 
-    resetRuntimeProps: function () {
+
+    resetRuntimeProps() {
     }
-    ,
 
-    id: function (value) {
+
+    id(value) {
         if (value !== undefined) {
             this.setProps({id: value}, ChangeMode.Self);
         }
         return this.props.id;
     }
-    ,
-    initId: function(){
-        this.id(createUUID());
-    },
 
-    primitiveRoot: function () {
+    initId(){
+        this.id(createUUID());
+    }
+
+    primitiveRoot() {
         return null;
     }
-    ,
-    primitivePath: function () {
+
+    primitivePath() {
         return [];
     }
-    ,
-    primitiveRootKey: function () {
+
+    primitiveRootKey() {
         return '';
     }
-    ,
 
-    enablePropsTracking: function () {
+
+    enablePropsTracking() {
         if (this.runtimeProps.trackPropsCounter === undefined) {
             this.runtimeProps.trackPropsCounter = 0;
         }
         ++this.runtimeProps.trackPropsCounter;
     }
-    ,
-    disablePropsTracking: function () {
+
+    disablePropsTracking() {
         if (this.runtimeProps.trackPropsCounter && --this.runtimeProps.trackPropsCounter === 0) {
             delete this.runtimeProps.trackPropsCounter;
         }
     }
-    ,
 
-    trackSetProps: function (props, oldProps, mode = ChangeMode.Model) {
+
+    trackSetProps(props, oldProps, mode = ChangeMode.Model) {
         var primitiveRoot = this.primitiveRoot();
         if (primitiveRoot) {
             primitiveRoot.registerSetProps(this, props, oldProps, mode);
         }
     }
-    ,
-    trackPatchProps: function (patchType, propName, item, mode = ChangeMode.Model) {
+
+    trackPatchProps(patchType, propName, item, mode = ChangeMode.Model) {
         let root = this.primitiveRoot();
         if (root) {
             root.registerPatchProps(this, patchType, propName, item, mode);
         }
-    },
-    trackDeleted: function (parent, index, mode = ChangeMode.Model) {
+    }
+    trackDeleted(parent, index, mode = ChangeMode.Model) {
         var primitiveRoot = parent.primitiveRoot();
         if (primitiveRoot) {
             primitiveRoot.registerDelete(parent, this, index, mode);
         }
     }
-    ,
-    trackInserted: function (parent, index, mode = ChangeMode.Model) {
+
+    trackInserted(parent, index, mode = ChangeMode.Model) {
         var primitiveRoot = parent.primitiveRoot();
         if (primitiveRoot) {
             primitiveRoot.registerInsert(parent, this, index, mode);
         }
     }
-    ,
-    trackChangePosition: function (parent, index, oldIndex, mode = ChangeMode.Model) {
+
+    trackChangePosition(parent, index, oldIndex, mode = ChangeMode.Model) {
         var primitiveRoot = parent.primitiveRoot();
         if (primitiveRoot) {
             primitiveRoot.registerChangePosition(parent, this, index, oldIndex, mode);
         }
     }
-    ,
-    registerSetProps: function (element, props, oldProps, mode = ChangeMode.Model) {
+
+    registerSetProps(element, props, oldProps, mode = ChangeMode.Model) {
         if (mode === ChangeMode.Model) {
             ModelStateListener.trackSetProps(this, element, props, oldProps);
         }
     }
-    ,
-    registerPatchProps: function (element, patchType, propName, item, mode = ChangeMode.Model) {
+
+    registerPatchProps(element, patchType, propName, item, mode = ChangeMode.Model) {
         if (mode === ChangeMode.Model) {
             ModelStateListener.trackPatchProps(this, element, patchType, propName, item);
         }
-    },
+    }
 
-    registerDelete: function (parent, element, index, mode = ChangeMode.Model) {
+    registerDelete(parent, element, index, mode = ChangeMode.Model) {
         if (mode === ChangeMode.Model) {
             ModelStateListener.trackDelete(this, parent, element, index);
         }
@@ -269,9 +273,9 @@ export default klass({
             PropertyTracker.registerDelete(parent, element);
         }
     }
-    ,
 
-    registerInsert: function (parent, element, index, mode = ChangeMode.Model) {
+
+    registerInsert(parent, element, index, mode = ChangeMode.Model) {
         if (mode === ChangeMode.Model) {
             ModelStateListener.trackInsert(this, parent, element, index);
         }
@@ -279,16 +283,16 @@ export default klass({
             PropertyTracker.registerInsert(parent, element);
         }
     }
-    ,
 
-    registerChangePosition: function (parent, element, index, oldIndex, mode = ChangeMode.Model) {
+
+    registerChangePosition(parent, element, index, oldIndex, mode = ChangeMode.Model) {
         if (mode === ChangeMode.Model) {
             ModelStateListener.trackChangePosition(this, parent, element, index, oldIndex);
         }
     }
-    ,
 
-    getImmediateChildById: function (id) {
+
+    getImmediateChildById(id) {
         var items = this.children;
         for (let i = 0, l = items.length; i < l; ++i) {
             let element = items[i];
@@ -297,8 +301,8 @@ export default klass({
             }
         }
         return null;
-    },
-    applyVisitorDepthFirst: function (callback) {
+    }
+    applyVisitorDepthFirst(callback) {
         if (this.children) {
             for (var i = 0; i < this.children.length; i++) {
                 var child = this.children[i];
@@ -309,8 +313,8 @@ export default klass({
         }
         return callback(this) !== false;
     }
-    ,
-    applyVisitorBreadthFirst: function (visitor) {
+
+    applyVisitorBreadthFirst(visitor) {
         var queue = [this];
         var i = -1;
         while (++i !== queue.length) {
@@ -327,8 +331,8 @@ export default klass({
             }
         }
     }
-    ,
-    findNodeBreadthFirst: function (func) {
+
+    findNodeBreadthFirst(func) {
         var node = null;
         this.applyVisitorBreadthFirst(x => {
             if (func(x)) {
@@ -339,11 +343,11 @@ export default klass({
         });
         return node;
     }
-    ,
-    findNodeByIdBreadthFirst: function (id) {
+
+    findNodeByIdBreadthFirst(id) {
         return this.findNodeBreadthFirst(x => x.id() === id);
-    },
-    findAllNodesDepthFirst: function (func) {
+    }
+    findAllNodesDepthFirst(func) {
         var nodes = [];
         this.applyVisitorDepthFirst(x => {
             if (func(x)) {
@@ -351,7 +355,7 @@ export default klass({
             }
         });
         return nodes;
-    },
+    }
 
     toJSON(){
         var json = {t: this.t, props: this.cloneProps()};
@@ -359,7 +363,7 @@ export default klass({
             json.children = this.children.map(x => x.toJSON());
         }
         return json;
-    },
+    }
     fromJSON(data){
         // TODO: consider to do server migration
         ObjectFactory.updatePropsWithPrototype(data.props);
@@ -371,4 +375,4 @@ export default klass({
         }
         return this;
     }
-})
+}

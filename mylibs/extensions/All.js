@@ -19,8 +19,7 @@ define(
         "./StartupInfo",
         //"./TouchSupport",
         "./UserVoice",
-        //"./WatermarkController",
-        //"./QuickEditor",
+        //"./WatermarkController",        
         "./guides/LayoutGridExtension",
         "./guides/RulerExtension"
     ],

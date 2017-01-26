@@ -21,9 +21,6 @@ export default class ElementMove extends Command{
         this.newIndex = index !== undefined ? index : this.oldIndex;
 
         this.oldParent = this.element.parent();
-        // if(this.oldParent && this.oldParent.t  === 'PlaceholderElement') {
-        //     this.oldParent = this.newParent;
-        // }
     }
 
     canExecute(){
