@@ -1,6 +1,7 @@
 import CrazyScope from "framework/CrazyManager";
+import {IContext} from "../CoreModel";
 
-export default class Context {
+export default class Context implements IContext{
 
     constructor(canvas) {
         if (!canvas) {
