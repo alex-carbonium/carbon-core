@@ -1,4 +1,3 @@
-// @flow
 var PropertyMetadata = {};
 PropertyMetadata._store = {};
 PropertyMetadata._defaults = {};
@@ -178,7 +177,6 @@ PropertyMetadata.getStylePropertyNamesMap = function(type, styleType){
 
 export default PropertyMetadata;
 
-/** @flow */
 export interface PropertyDescriptor{
     displayName: string,
     type: string,

@@ -1,5 +1,3 @@
-// @flow
-
 import TypeDefaults from "./TypeDefaults";
 import ObjectFactory from "./ObjectFactory";
 import PropertyMetadata from "./PropertyMetadata";
@@ -36,6 +34,7 @@ import { createUUID, deepEquals } from "../util";
 import Rect from "../math/rect";
 import ResizeOptions from "../decorators/ResizeOptions";
 import { DisplayProperty, PropertyDescriptor } from './PropertyMetadata';
+import { IRect } from './CoreModel';
 
 require("../migrations/All");
 
@@ -563,7 +562,7 @@ export default class UIElement extends DataNode {
         var rect = this.getBoundaryRect(includeMargin);
         return this.transformRect(rect, this.viewMatrix());
     }
-    getBoundingBoxGlobal(includeMargin = false) {
+    getBoundingBoxGlobal(includeMargin: boolean = false): IRect {
         if (this.runtimeProps.globalClippingBox) {
             return this.runtimeProps.globalClippingBox;
         }
@@ -920,7 +919,7 @@ export default class UIElement extends DataNode {
         }
 
         var root = this.primitiveRoot();
-        if (!root) {
+        if (!root || root === this) {
             return this.getBoundingBox().x;
         }
         let m = root.globalViewMatrixInverted().appended(this.globalViewMatrix());
@@ -935,7 +934,7 @@ export default class UIElement extends DataNode {
         }
 
         var root = this.primitiveRoot();
-        if (!root) {
+        if (!root || root === this) {
             return this.getBoundingBox().y;
         }
         let m = root.globalViewMatrixInverted().appended(this.globalViewMatrix());
@@ -1248,7 +1247,7 @@ export default class UIElement extends DataNode {
         return this.props.margin;
     }
 
-    isDescendantOrSame(element) {
+    isDescendantOrSame(element: UIElement): boolean {
         var current = this;
         do {
             if (current.isSameAs(element)) {

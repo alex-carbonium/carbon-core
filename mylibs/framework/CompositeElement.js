@@ -1,5 +1,3 @@
-// @flow
-
 import PropertyMetadata, {PropertyDescriptor} from "./PropertyMetadata";
 import PropertyTracker from "./PropertyTracker";
 import {leaveCommonProps} from "../util";
@@ -14,6 +12,8 @@ import Box from "./Box";
 import Rect from "../math/rect";
 import Phantom from "./Phantom";
 import Environment from "../environment";
+import Selection from "./SelectionModel";
+import {IUIElementProps, IPoint, IRect} from "../framework/CoreModel";
 
 export default class CompositeElement extends UIElement implements IGroupContainer{
     constructor(){
@@ -40,7 +40,7 @@ export default class CompositeElement extends UIElement implements IGroupContain
         element.enablePropsTracking();                        
         this.children.push(element);
     }
-    remove(element){
+    remove(element: UIElement){        
         element.disablePropsTracking();
 
         var systemType = element.systemType();
@@ -71,6 +71,13 @@ export default class CompositeElement extends UIElement implements IGroupContain
         }
     }
 
+    getBoundingBoxGlobal(includeMargin: ?boolean): IRect{
+        if (this.count() === 1){
+            return this.elements[0].getBoundingBoxGlobal(includeMargin);
+        }
+        return super.getBoundingBoxGlobal(includeMargin);
+    }    
+
     wrapSingleChild(){
         return true;
     }
@@ -79,7 +86,7 @@ export default class CompositeElement extends UIElement implements IGroupContain
         return false;
     }
 
-    elementAt(index){
+    elementAt(index: number){
         return this.elements[index];
     }
     singleOrDefault(){
@@ -88,7 +95,7 @@ export default class CompositeElement extends UIElement implements IGroupContain
     singleOrSelf(){
         return this.count() === 1 ? this.elements[0] : this;
     }
-    has(element){
+    has(element: UIElement){
         for (var i = 0, j = this.elements.length; i < j; ++i){
             if (this.elements[i] === element){
                 return true;
@@ -107,7 +114,7 @@ export default class CompositeElement extends UIElement implements IGroupContain
         return this.elements.length;
     }
 
-    propsUpdated(newProps, oldProps, mode){
+    propsUpdated(newProps: IUIElementProps, oldProps: IUIElementProps, mode: ChangeMode){
         super.propsUpdated.apply(this, arguments);
 
         //not sure if it is safe to propagate other properties, so taking only what's needed for now
@@ -118,7 +125,7 @@ export default class CompositeElement extends UIElement implements IGroupContain
         }
     }
 
-    hitTest(/*Point*/point, scale){
+    hitTest(point: IPoint, scale: number){
         var count = this.count();
         if (count === 0){
             return false;
@@ -138,19 +145,19 @@ export default class CompositeElement extends UIElement implements IGroupContain
     canAccept(){
         return false;
     }
-    each(callback){
+    each(callback: (e: UIElement) => boolean | void){
         this.elements.forEach(callback);
     }
-    map(callback){
+    map(callback: (e: UIElement) => any){
         return this.elements.map(callback);
     }
-    first(callback){
+    first(){
         return this.elements[0];
     }
     resizeDimensions(){
         return 0;
     }
-    canDrag(){
+    canDrag(): boolean{
         var canDrag = true;
         this.each(function(element){
             if (!element.canDrag()){
@@ -161,15 +168,16 @@ export default class CompositeElement extends UIElement implements IGroupContain
         return canDrag;
     }
 
-    isDescendantOrSame(element){
+    isDescendantOrSame(element: UIElement): boolean{
         var res = false;
 
-        this.each(function(e){
-            res |= e.isDescendantOrSame(element);
+        for (let i = 0; i < this.elements.length; ++i){
+            let e = this.elements[i];
+            res = res || e.isDescendantOrSame(element);
             if (res){
-                return false;// break;
+                break;
             }
-        });
+        }        
 
         return res;
     }
@@ -179,7 +187,7 @@ export default class CompositeElement extends UIElement implements IGroupContain
         }
         return "";
     }
-    findPropertyDescriptor(propName){
+    findPropertyDescriptor(propName: string){
         return PropertyMetadata.find(this._types[0], propName);
     }
     allHaveSameType(){
@@ -435,7 +443,7 @@ export default class CompositeElement extends UIElement implements IGroupContain
         return elementChanges;
     }
 
-    _onPropsChanged(element, newProps){
+    _onPropsChanged(element: UIElement, newProps: IUIElementProps){
         if (this.has(element)){
             if (newProps.hasOwnProperty("m") || newProps.hasOwnProperty("br")){
                 this.resetGlobalViewCache();                

@@ -1,20 +1,21 @@
-import PropertyMetadata from "framework/PropertyMetadata";
-import Brush from "framework/Brush";
+import PropertyMetadata from "../../framework/PropertyMetadata";
+import Brush from "../../framework/Brush";
 import tinycolor from "tinycolor2/tinycolor";
 import Guide from "./Guide";
 import {Types} from "../../framework/Defs";
 import DefaultSettings from "../../DefaultSettings";
+import {IView, IContext, IArtboardProps, IRect, IGuide} from "../../framework/CoreModel";
 
 class CustomGuides extends Guide{
-    constructor(view){
+    constructor(view: IView){
         super();
         this._view = view;
         this.capturedIndexX = -1;
-        this.capturedIndexY = -1;
+        this.capturedIndexY = -1;        
     }
 
-    drawX(context, minx, height){
-        context.save();
+    drawX(context: IContext, minx: number, height: number){
+        context.save();        
 
         var scale = this._view.scale();
         context.globalAlpha *= this.opacity();
@@ -33,7 +34,7 @@ class CustomGuides extends Guide{
         context.restore();
     }
 
-    drawY(context, miny, width){
+    drawY(context: IContext, miny: number, width: number){
         context.save();
 
         var scale = this._view.scale();
@@ -53,7 +54,7 @@ class CustomGuides extends Guide{
         context.restore();
     }
 
-    prepareProps(props){
+    prepareProps(props: ICustomGuidesProps){
         if (props.guidesX && props.guidesY){
             var xs = [];
             var ys = [];
@@ -81,14 +82,14 @@ class CustomGuides extends Guide{
         }
     }
 
-    tryCaptureX(x){
+    tryCaptureX(x: number){
         this.capturedIndexX = this.findClosest(this.props.xs, x);
         if (this.capturedIndexX === -1){
             return null;
         }
         return this.props.guidesX[this.capturedIndexX];
     }
-    tryCaptureY(y){
+    tryCaptureY(y: number){
         this.capturedIndexY = this.findClosest(this.props.ys, y);
         if (this.capturedIndexY === -1){
             return null;
@@ -99,7 +100,7 @@ class CustomGuides extends Guide{
         this.capturedIndexX = -1;
         this.capturedIndexY = -1;
     }
-    findClosest(values, pos){
+    findClosest(values: any[], pos: number){
         var scale = this._view.scale();
         var minDiff = Number.POSITIVE_INFINITY;
         var minIndex = -1;
@@ -156,3 +157,10 @@ PropertyMetadata.registerForType(CustomGuides, {
 });
 
 export default CustomGuides;
+
+interface ICustomGuidesProps extends IArtboardProps{
+    xs: IGuide[];
+    ys: IGuide[];
+    origin: IRect;
+    snapPoints: {xs: number[], ys: number[]};
+}

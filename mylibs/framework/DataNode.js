@@ -1,4 +1,3 @@
-// @flow
 import PropertyMetadata from "./PropertyMetadata";
 import PropertyTracker from "./PropertyTracker";
 import ModelStateListener from "./sync/ModelStateListener";

@@ -9,11 +9,16 @@ import {isPointInRect} from "../../math/math";
 import {PatchType, ViewTool} from "../../framework/Defs";
 import {createUUID} from "../../util";
 import NullArtboard from "../../framework/NullArtboard";
+import Artboard from "../../framework/Artboard";
+import {IApp, IView, IController, IDisposable} from "../../framework/CoreModel";
 
 const config = DefaultSettings.ruler;
 
 export default class RulerGuides {
-    constructor(app, view, controller){
+    _dragController: DragController;
+    _menuToken: IDisposable;
+
+    constructor(app: IApp, view: IView, controller: IController){
         this._dragController = new DragController();
         this._dragController.onSearching = this.onDragSearching;
         this._dragController.onStarting = this.onDragStarting;
@@ -46,7 +51,7 @@ export default class RulerGuides {
         this._origin = origin;
         this._originRect = origin.getBoundingBox();
     }
-    setGuides(artboard) {
+    setGuides(artboard: Artboard) {
         var guidesX = artboard.props.guidesX;
         var guidesY = artboard.props.guidesY;
         if (guidesX && guidesY) {

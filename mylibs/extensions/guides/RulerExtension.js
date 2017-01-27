@@ -1,8 +1,8 @@
-// @flow
-
 import RuntimeExtension from "../RuntimeExtension";
 import PropertyTracker from "../../framework/PropertyTracker";
+import UIElement from "../../framework/UIElement";
 import Artboard from "../../framework/Artboard";
+import SelectComposite from "../../framework/SelectComposite";
 import NullArtboard from "../../framework/NullArtboard";
 import Selection from "../../framework/SelectionModel";
 
@@ -12,6 +12,7 @@ import Environment from "../../environment";
 import DesignerView from "../../framework/DesignerView";
 import DefaultSettings from "../../DefaultSettings";
 import RulerGuides from "./RulerGuides";
+import {IArtboardProps, IApp, IView, IController, ILayer, IContext} from "../../framework/CoreModel";
 
 const config = DefaultSettings.ruler;
 const selectionSize = 3;
@@ -22,11 +23,11 @@ var widthOfL = -1;
 var widthOfW = -1;
 
 export default class RulerExtension extends RuntimeExtension {
-    constructor(app, view, controller) {
-        super(app, view, controller);
+    constructor(app: IApp, view: IView, controller: IController) {
+        super(app, view, controller);        
     }
 
-    attach(app, view, controller) {
+    attach(app: IApp, view: IView, controller: IController) {
         if (!(view instanceof DesignerView)) {
             return;
         }
@@ -45,7 +46,7 @@ export default class RulerExtension extends RuntimeExtension {
         }
     }
 
-    _onScaleChange(scale) {
+    _onScaleChange(scale: number) {
         calculateSettings.call(this, scale);
         this.setOrigin(this.app.activePage.getActiveArtboard());
         this.setHighlight(this._selectComposite);
@@ -73,7 +74,7 @@ export default class RulerExtension extends RuntimeExtension {
         this.checkRefreshCache();
     }
 
-    onPropertyChanged(e, props) {
+    onPropertyChanged(e: UIElement, props: IArtboardProps) {        
         if (e === this._origin) {
             if (e.isChangeAffectingLayout(props)) {
                 this.setOrigin(e);
@@ -87,7 +88,7 @@ export default class RulerExtension extends RuntimeExtension {
         }
     }
 
-    onSelection(selection) {
+    onSelection(selection: SelectComposite) {
         if (selection.count() === 1) {
             var element = selection.elementAt(0);
             if (element instanceof Artboard) {
@@ -98,7 +99,7 @@ export default class RulerExtension extends RuntimeExtension {
         this.setHighlight(selection);
     }
 
-    onArtboardChanged(artboard) {
+    onArtboardChanged(artboard: Artboard) {
         if (!artboard) {
             return;
         }
@@ -111,7 +112,7 @@ export default class RulerExtension extends RuntimeExtension {
         this.onArtboardChanged(this.app.activePage.getActiveArtboard());
     }
 
-    setOrigin(artboard) {
+    setOrigin(artboard: Artboard) {
         if (!artboard) {
             return;
         }
@@ -132,25 +133,18 @@ export default class RulerExtension extends RuntimeExtension {
         this._rulerGuides.setOrigin(artboard);
     }
 
-    setHighlight(selection) {
+    setHighlight(selection: SelectComposite) {
         if (selection.count() === 0) {
             this._highlight = null;
             return;
         }
 
-        var box = null;
-
-        if (selection.count() === 1){
-            if (selection.elementAt(0) instanceof Artboard){
-                this._highlight = null;
-                return;
-            }            
-
-            box = selection.elements[0].getBoundingBoxGlobal();
+        if (selection.count() === 1 && selection.elementAt(0) instanceof Artboard){
+            this._highlight = null;
+            return;                     
         }
-        else{
-            box = selection.getBoundingBoxGlobal();
-        }        
+
+        var box = selection.getBoundingBoxGlobal();        
         this._highlight = {
             x: Math.round(box.x) * this._settings.scale - this._originX,
             y: Math.round(box.y) * this._settings.scale - this._originY,
@@ -192,7 +186,7 @@ export default class RulerExtension extends RuntimeExtension {
         this._rulerGuides.setRulerBounds(this._rectHorizontal, this._rectVertical);
     }
 
-    onLayerDraw(layer, context) {
+    onLayerDraw(layer: ILayer, context: IContext) {
         this.checkRefreshCache();
 
         context.save();
@@ -209,7 +203,7 @@ export default class RulerExtension extends RuntimeExtension {
         context.restore();
     }
 
-    drawHorizontal(context, length, viewportHeight, origin, width) {
+    drawHorizontal(context: IContext, length: number, viewportHeight: number, origin: Artboard, width: number) {
         context.save();
 
         // context.fillStyle = "white";
@@ -243,7 +237,7 @@ export default class RulerExtension extends RuntimeExtension {
                 //if (x >= minDraw && x <= maxDraw || width === 0) {
                     context.lineTo(x + .5, config.size);
                     context.fillStyle = x >= minDraw && x <= maxDraw ? "black" : "gray";
-                    context.fillText(text, x + LABEL_MARGIN_X, 11);
+                    context.fillText(text + "", x + LABEL_MARGIN_X, 11);
                 //}
                 // else {
                 //     context.lineTo(x + .5, config.tick_minor_size);
@@ -261,7 +255,7 @@ export default class RulerExtension extends RuntimeExtension {
 
         context.restore();
     }
-    drawHorizontalHighlight(context, minDraw, maxDraw, minx, length, offset){
+    drawHorizontalHighlight(context: IContext, minDraw: number, maxDraw: number, minx: number, length: number, offset: IOffset){
         if (this._artboardActive){
             if (maxDraw >= 0 && minDraw + offset.translate <= length) {
                 context.fillStyle = config.artboard_fill;
@@ -321,7 +315,7 @@ export default class RulerExtension extends RuntimeExtension {
     }
     
 
-    drawVertical(context, length, viewportWidth, origin, height) {
+    drawVertical(context: IContext, length: number, viewportWidth: number, origin: Artboard, height: number) {
         context.save();
 
         // context.fillStyle = "white";
@@ -349,7 +343,7 @@ export default class RulerExtension extends RuntimeExtension {
                 let text = major++ * this._settings.majorStep;
                 //if (y >= (minDraw - 5) && y <= (maxDraw + 5) || height === 0) {
                     context.lineTo(config.size, y + .5);
-                    labels.push(y, text, y >= minDraw && y <= maxDraw + 5);
+                    labels.push(y, text, y >= minDraw && y <= maxDraw + 5 ? 1 : 0);
                 //}
                 // else {
                 //     context.lineTo(config.tick_minor_size, y + .5);
@@ -373,12 +367,12 @@ export default class RulerExtension extends RuntimeExtension {
             //simplified rotation
             let x = originX - labels[i] + originY;
             context.fillStyle = labels[i + 2] ? "black" : "gray";
-            context.fillText(labels[i + 1], x - 5, 5);
+            context.fillText(labels[i + 1] + "", x - 5, 5);
         }
 
         context.restore();
     }
-    drawVerticalHighlight(context, minDraw, maxDraw, miny, length, offset){
+    drawVerticalHighlight(context: IContext, minDraw: number, maxDraw: number, miny: number, length: number, offset: IOffset){
         if (this._artboardActive){
             if (maxDraw >= 0 && minDraw + offset.translate <= length) {
                 context.fillStyle = config.artboard_fill;
@@ -463,7 +457,7 @@ function calculateSettings(scale) {
     }
 }
 
-function calculateOffset(origin, length, settings) {
+function calculateOffset(origin, length, settings): IOffset {
     //find first visible major
     var major = origin / settings.minorStepPixels / 10;
     var rounder = major > 0 ? 1 : major < 0 ? -1 : 0;
@@ -476,4 +470,10 @@ function calculateOffset(origin, length, settings) {
     var minorCount = length / settings.minorStepPixels + 10.5;
 
     return {major, translate, minorCount};
+}
+
+interface IOffset{
+    major: number;
+    translate: number;
+    minorCount: number;
 }

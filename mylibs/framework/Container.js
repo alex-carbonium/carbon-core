@@ -1,4 +1,3 @@
-// @flow
 import { Types, ArrangeStrategies, Overflow, StackAlign, StackOrientation, ChangeMode } from "./Defs";
 import ArrangeStrategy from "./ArrangeStrategy";
 import ContextPool from "./render/ContextPool";
@@ -10,7 +9,6 @@ import UIElement from './UIElement';
 import QuadAndLock from './QuadAndLock';
 import logger from '../logger';
 import Matrix from '../math/matrix';
-import {IProps} from './CoreModel';
 
 var fwk = window.sketch.framework;
 
