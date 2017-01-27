@@ -557,6 +557,7 @@ export default class DesignerController {
     beginDragElement(event, element, stopDragPromise) {
         var eventData = this.createEventData(event);
         eventData.element = element;
+        element.resetTransform();
         element.applyTranslation({x: ~~(eventData.x - element.width() / 2), y: ~~(eventData.y - element.height() / 2)});
         this.beginDrag(eventData);
         stopDragPromise

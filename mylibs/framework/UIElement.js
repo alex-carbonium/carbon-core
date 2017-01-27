@@ -180,11 +180,16 @@ export default class UIElement extends DataNode {
     }
     getDisplayPropValue(propertyName: string, descriptor: PropertyDescriptor = null): any {
         if (!descriptor) {
-            descriptor = this.findMetadata()[propertyName];
+            var metadata = this.findMetadata();
+            if(metadata)
+            {
+                descriptor = metadata[propertyName];
+            }
         }
-        if (descriptor.computed) {
+        if (descriptor && descriptor.computed) {
             return this[propertyName]();
         }
+        
         return this.props[propertyName];
     }
     setDisplayProps(changes, changeMode, metadata = this.findMetadata()) {
