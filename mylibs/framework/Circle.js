@@ -60,8 +60,8 @@ class Circle extends Shape {
 
     convertToPath() {
         var path = new Path()
-            , x1 = this.x()
-            , y1 = this.y()
+            , x1 = 0
+            , y1 = 0
             , w = this.width()
             , h = this.height()
             , w2 = w / 2
