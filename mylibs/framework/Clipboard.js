@@ -141,10 +141,15 @@ class Clipboard {
                 Selection.makeSelection([]);
                 for (var i = 0; i < bufferElements.length; i++){
                     var element = bufferElements[i];
-                    element.prepareAndSetProps({
+                    // element.prepareAndSetProps({
+                    //     x: globals[i].x - bufferRect.x + location.x,
+                    //     y: globals[i].y - bufferRect.y + location.y
+                    // });
+                    element.applyTranslation({
                         x: globals[i].x - bufferRect.x + location.x,
                         y: globals[i].y - bufferRect.y + location.y
                     });
+
                     if (location.parent === this.originalParent){
                         location.parent.insert(element, this.zOrder + 1);
                     }
