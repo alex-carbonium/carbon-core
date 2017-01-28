@@ -30,7 +30,7 @@ define(["ui/common/EditModeAction", "math/matrix"], function (EditModeAction, Ma
                 Cursor.removeGlobalCursor(true);
             },
             mousedown: function (event) {
-                var eventData = {handled: false};
+                var eventData = {handled: false, x: event.x, y: event.y};
                 Environment.controller.startDrawingEvent.raise(eventData);
                 if (eventData.handled){
                     return true;

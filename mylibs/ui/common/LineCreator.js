@@ -7,7 +7,7 @@ import Invalidate from "framework/Invalidate";
 import SnapController from "framework/SnapController";
 import Brush from "framework/Brush";
 import Point from "math/point";
-
+import Environment from "environment";
 
 export default klass(EditModeAction, (function () {
     function update(x1, y1, x2, y2) {
@@ -46,6 +46,12 @@ export default klass(EditModeAction, (function () {
             SnapController.clearActiveSnapLines();
         },
         mousedown: function (event) {
+            var eventData = {handled: false, x: event.x, y: event.y};
+            Environment.controller.startDrawingEvent.raise(eventData);
+            if (eventData.handled){
+                return true;
+            }
+
             this._mousepressed = true;
 
             if (event.event.ctrlKey || event.event.metaKey) {

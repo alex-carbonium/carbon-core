@@ -76,7 +76,7 @@ export default class DragController {
         this._lastDragPoint = { x: e.x, y: e.y };
     }
     mouseUp(e) {
-        if (e.handled) {
+        if (!this.isDragging && e.handled) {
             return;
         }
         if (this.isDragging) {

@@ -5,13 +5,13 @@ import SnapController from "../../framework/SnapController";
 import Cursor from "../../framework/Cursor";
 import CustomGuides from "./CustomGuides";
 import DefaultSettings from "../../DefaultSettings";
-import {isPointInRect} from "../../math/math";
-import {PatchType, ViewTool} from "../../framework/Defs";
-import {createUUID} from "../../util";
+import { isPointInRect } from "../../math/math";
+import { PatchType, ViewTool } from "../../framework/Defs";
+import { createUUID } from "../../util";
 import NullArtboard from "../../framework/NullArtboard";
 import Artboard from "../../framework/Artboard";
 import Keyboard from "../../platform/Keyboard";
-import {IApp, IView, IController, IDisposable, IRect, IEventData} from "../../framework/CoreModel";
+import { IApp, IView, IController, IDisposable, IRect, IMouseEventData } from "../../framework/CoreModel";
 
 const config = DefaultSettings.ruler;
 
@@ -20,15 +20,15 @@ export default class RulerGuides {
     _menuToken: IDisposable;
     _rectHorizontal: IRect;
     _rectVertical: IRect;
-    _lastGlobalCursor: string = null;    
+    _lastGlobalCursor: string = null;
 
-    constructor(app: IApp, view: IView, controller: IController){
+    constructor(app: IApp, view: IView, controller: IController) {
         this._dragController = new DragController();
         this._dragController.onSearching = this.onDragSearching;
         this._dragController.onStarting = this.onDragStarting;
         this._dragController.onDragging = this.onDragging;
         this._dragController.onStopped = this.onDragStopped;
-        this._dragController.onClicked = this.onClicked;        
+        this._dragController.onClicked = this.onClicked;
         this._dragController.bindToController(controller);
 
         controller.startDrawingEvent.bind(this, this.onStartDrawing);
@@ -53,7 +53,7 @@ export default class RulerGuides {
         this._removingGuide = false;
     }
 
-    setOrigin(origin){
+    setOrigin(origin) {
         this._origin = origin;
         this._originRect = origin.getBoundingBox();
     }
@@ -74,54 +74,54 @@ export default class RulerGuides {
             });
         }
     }
-    setRulerBounds(horizontal, vertical){
+    setRulerBounds(horizontal, vertical) {
         this._rectHorizontal = horizontal;
         this._rectVertical = vertical;
     }
-    active(){
+    active() {
         if (this.guidesEnabled() && this._origin !== null && this._rectHorizontal !== null
             && this._origin !== NullArtboard) {
             return true;
         }
         return false;
     }
-    canCapture(): boolean{
+    canCapture(): boolean {
         return Keyboard.state.ctrl || this._app.currentTool === ViewTool.Pointer || this._app.currentTool === ViewTool.PointerDirect;
     }
-    changeCursor(cursor){
+    changeCursor(cursor) {
         this.resetCursor();
 
         this._lastGlobalCursor = Cursor.getGlobalCursor();
         Cursor.setGlobalCursor(cursor);
         this._cursorChanged = true;
     }
-    resetCursor(){        
-        if (this._cursorChanged){
-            if (this._lastGlobalCursor){
+    resetCursor() {
+        if (this._cursorChanged) {
+            if (this._lastGlobalCursor) {
                 Cursor.setGlobalCursor(this._lastGlobalCursor);
             }
-            else{
+            else {
                 Cursor.removeGlobalCursor();
-            }            
+            }
             this._cursorChanged = false;
         }
     }
 
-    onDragSearching = e =>{
+    onDragSearching = e => {
         if (!this.active()) {
             return;
         }
 
-        if (isPointInRect(this._rectVertical, e)){
+        if (isPointInRect(this._rectVertical, e)) {
             this.changeCursor("ew-resize");
             return;
         }
-        if (isPointInRect(this._rectHorizontal, e)){
+        if (isPointInRect(this._rectHorizontal, e)) {
             this.changeCursor("ns-resize");
             return;
         }
 
-        let canCapture = this.canCapture();        
+        let canCapture = this.canCapture();
         let x = Math.round(e.x) - this._originRect.x;
         if (canCapture && this._customGuides.tryCaptureX(x)) {
             this.changeCursor("ew-resize");
@@ -143,35 +143,35 @@ export default class RulerGuides {
         this.resetCursor();
     };
     onDragStarting = (e) => {
-        if (!this.active()){
+        if (!this.active()) {
             return false;
         }
 
-        let x = Math.round(e.x) - this._origin.x();
-        let y = Math.round(e.y) - this._origin.y();
+        let x = Math.round(e.x - this._origin.x());
+        let y = Math.round(e.y - this._origin.y());
 
-        if (isPointInRect(this._rectVertical, e)){
-            this._guideX = {id: "", pos: x};
+        if (isPointInRect(this._rectVertical, e)) {
+            this._guideX = { id: "", pos: x };
         }
-        else if (isPointInRect(this._rectHorizontal, e)){
-            this._guideY = {id: "", pos: y};
+        else if (isPointInRect(this._rectHorizontal, e)) {
+            this._guideY = { id: "", pos: y };
         }
-        else if (this.canCapture() && this._customGuides.tryCaptureX(x)){
+        else if (this.canCapture() && this._customGuides.tryCaptureX(x)) {
             this._guideX = Object.assign({}, this._customGuides.props.guidesX[this._customGuides.capturedIndexX]);
         }
-        else if (this.canCapture() && this._customGuides.tryCaptureY(y)){
+        else if (this.canCapture() && this._customGuides.tryCaptureY(y)) {
             this._guideY = Object.assign({}, this._customGuides.props.guidesY[this._customGuides.capturedIndexY]);
         }
 
         var canStart = this._guideX !== null || this._guideY !== null;
-        if (canStart){
+        if (canStart) {
             Invalidate.requestUpperOnly();
             SnapController.removeGuides(this._customGuides);
         }
         return canStart;
     };
     onDragging = e => {
-        if (this._guideX !== null || this._guideY !== null){
+        if (this._guideX !== null || this._guideY !== null) {
             var artboard = this._app.activePage.getArtboardAtPoint(e);
             if (artboard !== this._hoverArtboard) {
                 this._hoverArtboard = artboard;
@@ -185,7 +185,7 @@ export default class RulerGuides {
             if (this._guideX.id && isPointInRect(this._rectVertical, e)) {
                 this._removingGuide = true;
             }
-            else{
+            else {
                 let pos = e.ctrlKey ? e : SnapController.applySnappingForPoint(e, false, true);
                 this._guideX.pos = Math.round(pos.x) - this._origin.x();
                 this._removingGuide = false;
@@ -196,7 +196,7 @@ export default class RulerGuides {
             if (this._guideY.id && e.y < this._rectHorizontal.y + this._rectHorizontal.height) {
                 this._removingGuide = true;
             }
-            else{
+            else {
                 let pos = e.ctrlKey ? e : SnapController.applySnappingForPoint(e, true, false);
                 this._guideY.pos = Math.round(pos.y) - this._origin.y();
                 this._removingGuide = false;
@@ -205,11 +205,14 @@ export default class RulerGuides {
         }
     };
     onDragStopped = e => {
+        SnapController.snapGuides.push(this._customGuides);
+        SnapController.clearActiveSnapLines();
+
         if (this._guideX !== null) {
             if (this._guideX.id && isPointInRect(this._rectVertical, e)) {
                 this.deleteGuideX(this._guideX);
             }
-            else if (!this._guideX.id){
+            else if (!this._guideX.id) {
                 this._guideX.id = createUUID();
                 this._origin.patchProps(PatchType.Insert, "guidesX", this._guideX)
             }
@@ -221,7 +224,7 @@ export default class RulerGuides {
             if (this._guideY.id && e.y < this._rectHorizontal.y + this._rectHorizontal.height) {
                 this.deleteGuideY(this._guideY);
             }
-            else if (!this._guideY.id){
+            else if (!this._guideY.id) {
                 this._guideY.id = createUUID();
                 this._origin.patchProps(PatchType.Insert, "guidesY", this._guideY)
             }
@@ -236,13 +239,11 @@ export default class RulerGuides {
         this._hoverArtboard = null;
         this._removingGuide = false;
 
-        this._customGuides.releaseCaptured();
-        SnapController.snapGuides.push(this._customGuides);
-        SnapController.clearActiveSnapLines();
+        this._customGuides.releaseCaptured();                
         Invalidate.requestUpperOnly();
     };
     onClicked = e => {
-        if (this._guideX || this._guideY){
+        if (this._guideX || this._guideY) {
             this._guideX = null;
             this._guideY = null;
             this._customGuides.releaseCaptured();
@@ -250,15 +251,28 @@ export default class RulerGuides {
             e.handled = true;
         }
     };
-    onStartDrawing(e: IEventData){
-        e.handled = Keyboard.state.ctrl;
+    onStartDrawing(e: IMouseEventData) {
+        if (!this.active()) {
+            return;
+        }
+
+        var react = Keyboard.state.ctrl;
+
+        if (!react) {
+            let x = Math.round(e.x - this._origin.x());
+            let y = Math.round(e.y - this._origin.y());
+
+            react = isPointInRect(this._rectVertical, e) || isPointInRect(this._rectHorizontal, e);            
+        }
+
+        e.handled = react;
     }
 
     guidesEnabled() {
         return this._app.props.customGuides.show;
     }
 
-    drawX(context, minx, viewportHeight){
+    drawX(context, minx, viewportHeight) {
         if (this.guidesEnabled()) {
             this._customGuides.drawX(context, minx, viewportHeight);
         }
@@ -270,9 +284,9 @@ export default class RulerGuides {
             let text = "" + (this._guideX.pos + .5 | 0);
             context.fillStyle = "white";
             var w = context.measureText(text).width + 2;
-            context.fillRect(x + 1, viewportHeight/2 - config.font_size/2  + .5|0, w, config.font_size);
+            context.fillRect(x + 1, viewportHeight / 2 - config.font_size / 2 + .5 | 0, w, config.font_size);
             context.fillStyle = "black";
-            context.fillText(text, x + 2 + .5|0, viewportHeight/2 + 3 + .5|0);
+            context.fillText(text, x + 2 + .5 | 0, viewportHeight / 2 + 3 + .5 | 0);
 
             context.globalAlpha = .3;
             context.beginPath();
@@ -283,7 +297,7 @@ export default class RulerGuides {
         }
     }
 
-    drawY(context, miny, viewportWidth){
+    drawY(context, miny, viewportWidth) {
         if (this.guidesEnabled()) {
             this._customGuides.drawY(context, miny, viewportWidth);
         }
@@ -295,9 +309,9 @@ export default class RulerGuides {
             let text = "" + (this._guideY.pos + .5 | 0);
             context.fillStyle = "white";
             var w = context.measureText(text).width + 2;
-            context.fillRect(viewportWidth/2 - w/2  + .5|0, y - config.font_size - 1, w, config.font_size);
+            context.fillRect(viewportWidth / 2 - w / 2 + .5 | 0, y - config.font_size - 1, w, config.font_size);
             context.fillStyle = "black";
-            context.fillText(text, viewportWidth/2 - w/2 + 1.5|0, y - config.font_size/2 + 2.5|0);
+            context.fillText(text, viewportWidth / 2 - w / 2 + 1.5 | 0, y - config.font_size / 2 + 2.5 | 0);
 
             context.globalAlpha = .3;
             context.beginPath();
@@ -309,7 +323,7 @@ export default class RulerGuides {
     }
 
     onBuildMenu(context, menu) {
-        if (!this.active()){
+        if (!this.active()) {
             return;
         }
 
@@ -326,10 +340,10 @@ export default class RulerGuides {
 
             hit = true;
         }
-        else{
+        else {
             var y = Math.round(context.eventData.y) - this._origin.y();
             var gy = this._customGuides.tryCaptureY(y);
-            if (gy !== null){
+            if (gy !== null) {
                 items.push({
                     name: "Delete guide",
                     callback: this.deleteGuideY.bind(this, gy)
@@ -339,13 +353,13 @@ export default class RulerGuides {
             }
         }
 
-        if (!hit){
+        if (!hit) {
             hit = isPointInRect(this._rectHorizontal, context.eventData) || isPointInRect(this._rectVertical, context.eventData);
         }
 
         if (hit) {
             menu.items = items;
-            
+
             menu.items.push({
                 name: "Delete all guides",
                 items: [
@@ -367,31 +381,31 @@ export default class RulerGuides {
         }
     }
 
-    deleteGuideX(gx){
+    deleteGuideX(gx) {
         this._origin.patchProps(PatchType.Remove, "guidesX", gx);
         Invalidate.requestUpperOnly();
     }
-    deleteGuideY(gy){
+    deleteGuideY(gy) {
         this._origin.patchProps(PatchType.Remove, "guidesY", gy);
         Invalidate.requestUpperOnly();
     }
     deleteGuidesOnArtboard() {
-        this._origin.setProps({guidesX: [], guidesY: []});
+        this._origin.setProps({ guidesX: [], guidesY: [] });
         Invalidate.requestUpperOnly();
     }
     deleteGuidesOnPage() {
         var artboards = this._view.page.getAllArtboards();
         for (var i = 0; i < artboards.length; i++) {
-            artboards[i].setProps({guidesX: [], guidesY: []});
+            artboards[i].setProps({ guidesX: [], guidesY: [] });
         }
         Invalidate.requestUpperOnly();
     }
 
-    dispose(){
+    dispose() {
         this._dragController.unbind();
         SnapController.removeGuides(this._customGuides);
 
-        if (this._menuToken){
+        if (this._menuToken) {
             this._menuToken.dispose();
             this._menuToken = null;
         }

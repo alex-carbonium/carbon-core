@@ -11,7 +11,7 @@ import Cursor from "framework/Cursor";
 import Invalidate from "framework/Invalidate";
 import SnapController from "framework/SnapController";
 import actionManager from "ui/ActionManager";
-
+import Environment from "environment";
 
 var closeCurrentPath = function (pt) {
     commandManager.execute(this._element.constructPropsChangedCommand({closed: true}, {closed: false}));
@@ -114,6 +114,12 @@ export default class GraphicalpathCreator extends EditModeAction {
     }
 
     mousedown(event) {
+        var eventData = {handled: false, x: event.x, y: event.y};
+        Environment.controller.startDrawingEvent.raise(eventData);
+        if (eventData.handled){
+            return true;
+        }
+
         this._mousepressed = true;
         var x = event.x
             , y = event.y;

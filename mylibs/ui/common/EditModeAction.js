@@ -66,9 +66,9 @@ define(function () {
                 var controller = this._controller;
                 if(controller) {
                     this._mouseDownBinding = controller.mousedownEvent.bindHighPriority(this, this.mousedown);
-                    this._mouseUpBinding = controller.mouseupEvent.bind(this, this.mouseup);
-                    this._mouseMoveBinding = controller.mousemoveEvent.bind(this, this.mousemove);
-                    this._clickBinding = controller.clickEvent.bind(this, this.click);
+                    this._mouseUpBinding = controller.mouseupEvent.bindHighPriority(this, this.mouseup);
+                    this._mouseMoveBinding = controller.mousemoveEvent.bindHighPriority(this, this.mousemove);
+                    this._clickBinding = controller.clickEvent.bindHighPriority(this, this.click);
                 }
                 if(this._view.layer3) {
                     this._drawBinding = this._view.layer3.ondraw.bind(this, this.layerdraw);
