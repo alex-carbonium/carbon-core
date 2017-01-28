@@ -65,7 +65,7 @@ define(function () {
             _attach: function(){
                 var controller = this._controller;
                 if(controller) {
-                    this._mouseDownBinding = controller.mousedownEvent.bind(this, this.mousedown);
+                    this._mouseDownBinding = controller.mousedownEvent.bindHighPriority(this, this.mousedown);
                     this._mouseUpBinding = controller.mouseupEvent.bind(this, this.mouseup);
                     this._mouseMoveBinding = controller.mousemoveEvent.bind(this, this.mousemove);
                     this._clickBinding = controller.clickEvent.bind(this, this.click);

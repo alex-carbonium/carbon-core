@@ -147,8 +147,7 @@ export default class TextTool extends EditModeAction {
                 Cursor.removeGlobalCursor();
             }
             else{
-                Cursor.setGlobalCursor("text");
-                Cursor.setGlobalCursor("text");
+                Cursor.setGlobalCursor("text");                
             }
         }
     };

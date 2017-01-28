@@ -35,10 +35,14 @@ export interface IContext{
     restore() :void;
 }
 
-export interface IEventData{
+export interface IEventData{    
+    handled: boolean;
+}
+
+export interface IMouseEventData extends IEventData{
     x: number;
     y: number;
-    handled: boolean;
+    isDragging: boolean;
 }
 
 export interface IEvent<T>{
@@ -72,6 +76,7 @@ export interface ILayer extends IContainer{
 }
 
 export interface IApp extends IDataNode{
+    currentTool: number;
     onBuildMenu: IEvent<{a: number}>;
 }
 
@@ -79,7 +84,9 @@ export interface IView{
     scale(): number;
 }
 
-export interface IController{}
+export interface IController{
+    startDrawingEvent: IEvent<IEventData>;
+}
 
 // -------------------- props
 

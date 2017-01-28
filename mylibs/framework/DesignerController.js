@@ -15,6 +15,7 @@ import GroupContainer from "./GroupContainer";
 import Phantom from "./Phantom";
 import ObjectFactory from "./ObjectFactory";
 import {Types} from "./Defs";
+import {IController, IEvent} from "./CoreModel";
 
 function onselect(rect) {
     var selection = this.app.activePage.getElementsInRect(rect);
@@ -123,7 +124,9 @@ function dragging(event) {
     this.draggingEvent.raise(eventData);
 }
 
-export default class DesignerController {
+export default class DesignerController implements IController {
+    startDrawingEvent: IEvent;
+
     _updateCursor(eventData) {
         if (Cursor.hasGlobalCursor()){
             return;
@@ -219,8 +222,10 @@ export default class DesignerController {
         this.onElementDblClicked = EventHelper.createEvent();
         this.onArtboardChanged = EventHelper.createEvent();
         this.inlineEditModeChanged = EventHelper.createEvent();
-        this.inlineEditModeChanged.bind(this, this.onInlineEditModeChanged);
+        this.inlineEditModeChanged.bind(this, this.onInlineEditModeChanged);        
         //TODO: dispose?
+
+        this.startDrawingEvent = EventHelper.createEvent();
 
         this._cancelBinding = actionManager.subscribe('cancel', this.cancel.bind(this));
         RepeatViewListener.ensureSubscribed(this);

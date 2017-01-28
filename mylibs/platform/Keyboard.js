@@ -1,6 +1,8 @@
 import EventHelper from "../framework/EventHelper";
 
 class Keyboard{
+    state: {ctrl: boolean, shift: boolean, alt: boolean};
+
     constructor(){
         this.state = {ctrl: false, shift: false, alt: false};
         this.changed = EventHelper.createEvent();

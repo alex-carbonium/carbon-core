@@ -3,27 +3,34 @@ import EventHelper from "framework/EventHelper";
 class Cursor {
     constructor(){
         this.changed = EventHelper.createEvent();
-        this._hasGlobalCursor = false;
-        this._lastGlobalCursor = null;
-        this._cursor = null;
+        this._hasGlobalCursor = false;        
+        this._cursor = null;    
     }
 
-    setCursor(value) {
-        var old = this._cursor;
+    setCursor(value: string): boolean {        
         if (this._cursor !== value) {
+            var old = this._cursor;
             this._cursor = value;
             this.changed.raise(value, old);
-        }
-        return old;
+            return true;
+        }               
+        return false; 
     }
 
     getCursor(){
         return this._cursor;
     }
 
-    setGlobalCursor(value) {
-        this._hasGlobalCursor = true;
-        this._lastGlobalCursor = this.setCursor(value);
+    setGlobalCursor(value: string) {
+        this._hasGlobalCursor = true;        
+        this.setCursor(value)        
+    }
+
+    getGlobalCursor(): string{
+        if (this._hasGlobalCursor){
+            return this._cursor;
+        }
+        return null;
     }
 
     hasGlobalCursor(){
@@ -32,9 +39,8 @@ class Cursor {
 
     removeGlobalCursor() {
         if (this._hasGlobalCursor){
-            this._hasGlobalCursor = false;
-            this.setCursor(this._lastGlobalCursor);
-        }
+            this._hasGlobalCursor = false;            
+        }        
     }
 }
 

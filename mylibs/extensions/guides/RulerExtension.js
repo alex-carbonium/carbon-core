@@ -23,6 +23,8 @@ var widthOfL = -1;
 var widthOfW = -1;
 
 export default class RulerExtension extends RuntimeExtension {
+    _rulerGuides: RulerGuides;
+
     constructor(app: IApp, view: IView, controller: IController) {
         super(app, view, controller);        
     }

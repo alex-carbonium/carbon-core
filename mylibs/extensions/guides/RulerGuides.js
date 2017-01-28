@@ -10,13 +10,17 @@ import {PatchType, ViewTool} from "../../framework/Defs";
 import {createUUID} from "../../util";
 import NullArtboard from "../../framework/NullArtboard";
 import Artboard from "../../framework/Artboard";
-import {IApp, IView, IController, IDisposable} from "../../framework/CoreModel";
+import Keyboard from "../../platform/Keyboard";
+import {IApp, IView, IController, IDisposable, IRect, IEventData} from "../../framework/CoreModel";
 
 const config = DefaultSettings.ruler;
 
 export default class RulerGuides {
     _dragController: DragController;
     _menuToken: IDisposable;
+    _rectHorizontal: IRect;
+    _rectVertical: IRect;
+    _lastGlobalCursor: string = null;    
 
     constructor(app: IApp, view: IView, controller: IController){
         this._dragController = new DragController();
@@ -24,8 +28,10 @@ export default class RulerGuides {
         this._dragController.onStarting = this.onDragStarting;
         this._dragController.onDragging = this.onDragging;
         this._dragController.onStopped = this.onDragStopped;
-        this._dragController.onClicked = this.onClicked;
+        this._dragController.onClicked = this.onClicked;        
         this._dragController.bindToController(controller);
+
+        controller.startDrawingEvent.bind(this, this.onStartDrawing);
 
         this._menuToken = app.onBuildMenu.bind(this, this.onBuildMenu);
 
@@ -74,19 +80,29 @@ export default class RulerGuides {
     }
     active(){
         if (this.guidesEnabled() && this._origin !== null && this._rectHorizontal !== null
-            && this._origin !== NullArtboard
-            && (this._app.currentTool === ViewTool.Pointer || this._app.currentTool === ViewTool.PointerDirect)) {
+            && this._origin !== NullArtboard) {
             return true;
         }
         return false;
     }
+    canCapture(): boolean{
+        return Keyboard.state.ctrl || this._app.currentTool === ViewTool.Pointer || this._app.currentTool === ViewTool.PointerDirect;
+    }
     changeCursor(cursor){
-        Cursor.setGlobalCursor(cursor, true);
+        this.resetCursor();
+
+        this._lastGlobalCursor = Cursor.getGlobalCursor();
+        Cursor.setGlobalCursor(cursor);
         this._cursorChanged = true;
     }
-    resetCursor(){
+    resetCursor(){        
         if (this._cursorChanged){
-            Cursor.removeGlobalCursor(true);
+            if (this._lastGlobalCursor){
+                Cursor.setGlobalCursor(this._lastGlobalCursor);
+            }
+            else{
+                Cursor.removeGlobalCursor();
+            }            
             this._cursorChanged = false;
         }
     }
@@ -105,8 +121,9 @@ export default class RulerGuides {
             return;
         }
 
+        let canCapture = this.canCapture();        
         let x = Math.round(e.x) - this._originRect.x;
-        if (this._customGuides.tryCaptureX(x)) {
+        if (canCapture && this._customGuides.tryCaptureX(x)) {
             this.changeCursor("ew-resize");
             this._customGuides.releaseCaptured();
             Invalidate.requestUpperOnly();
@@ -114,7 +131,7 @@ export default class RulerGuides {
         }
 
         let y = Math.round(e.y) - this._originRect.y;
-        if (this._customGuides.tryCaptureY(y)) {
+        if (canCapture && this._customGuides.tryCaptureY(y)) {
             this.changeCursor("ns-resize");
             this._customGuides.releaseCaptured();
             Invalidate.requestUpperOnly();
@@ -139,10 +156,10 @@ export default class RulerGuides {
         else if (isPointInRect(this._rectHorizontal, e)){
             this._guideY = {id: "", pos: y};
         }
-        else if (this._customGuides.tryCaptureX(x)){
+        else if (this.canCapture() && this._customGuides.tryCaptureX(x)){
             this._guideX = Object.assign({}, this._customGuides.props.guidesX[this._customGuides.capturedIndexX]);
         }
-        else if (this._customGuides.tryCaptureY(y)){
+        else if (this.canCapture() && this._customGuides.tryCaptureY(y)){
             this._guideY = Object.assign({}, this._customGuides.props.guidesY[this._customGuides.capturedIndexY]);
         }
 
@@ -176,7 +193,7 @@ export default class RulerGuides {
             Invalidate.requestUpperOnly();
         }
         else if (this._guideY !== null) {
-            if (this._guideY.id && isPointInRect(this._rectHorizontal, e)) {
+            if (this._guideY.id && e.y < this._rectHorizontal.y + this._rectHorizontal.height) {
                 this._removingGuide = true;
             }
             else{
@@ -201,7 +218,7 @@ export default class RulerGuides {
             }
         }
         else if (this._guideY !== null) {
-            if (this._guideY.id && isPointInRect(this._rectHorizontal, e)) {
+            if (this._guideY.id && e.y < this._rectHorizontal.y + this._rectHorizontal.height) {
                 this.deleteGuideY(this._guideY);
             }
             else if (!this._guideY.id){
@@ -233,6 +250,9 @@ export default class RulerGuides {
             e.handled = true;
         }
     };
+    onStartDrawing(e: IEventData){
+        e.handled = Keyboard.state.ctrl;
+    }
 
     guidesEnabled() {
         return this._app.props.customGuides.show;
