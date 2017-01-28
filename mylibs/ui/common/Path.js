@@ -197,6 +197,7 @@ var scalePointsToNewSize = function () {
         this._roundPoint(pt);
     }
     this.setTransform(Matrix.create().translate(bb.x, bb.y));
+    this.setProps({br: bb.withPosition(0, 0)});
 };
 
 function moveAllPoints(dx, dy) {

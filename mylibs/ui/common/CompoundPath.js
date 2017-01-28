@@ -11,6 +11,7 @@ import Path from "ui/common/Path";
 import GroupArrangeStrategy from "../../framework/GroupArrangeStrategy";
 import {combineRectArray} from "../../math/math";
 import Rect from "../../math/rect";
+import {IGroupContainer} from "../../framework/CoreModel";
 
 function propertyChanged(element, newProps) {
     if (!this._internalChange && this._itemIds && this._itemIds[element.id()]) {
@@ -19,7 +20,7 @@ function propertyChanged(element, newProps) {
         }
     }
 }
-class CompoundPath extends Container {
+class CompoundPath extends Container implements IGroupContainer{
 
     static bezierPathsFromGraph(graph) {
         // Convert this graph into a bezier path. This is straightforward, each contour
@@ -127,19 +128,6 @@ class CompoundPath extends Container {
         var rect = combineRectArray(boxes);
 
         this._internalChange = true;
-        // var t = new Point(-rect.x, -rect.y);
-        //
-        // if (!t.equals(Point.Zero)){
-        //     for (let i = 0; i < items.length; i++){
-        //         let p = items[i];
-        //         p.applyTranslation(t)
-        //
-        //     }
-        //
-        //     this.applyDirectedTranslation(t.negate());
-        // }
-        //
-        // this.setProps({width: rect.width, height: rect.height});
         this.br(rect);
         this._updateGraph();
 
@@ -368,7 +356,12 @@ class CompoundPath extends Container {
         return true;
     }
 
-
+    wrapSingleChild(){
+        return true;
+    }
+    translateChildren(){
+        return false;
+    }
 }
 CompoundPath.prototype.t = Types.CompoundPath;
 

@@ -47,7 +47,12 @@ export default class InteractiveElement extends GroupContainer{
             context.save();
             var scale = Environment.view.scale();
             context.scale(1/scale, 1/scale);
-            this.drawBoundaryPath(context, this.globalViewMatrix().prependedWithScale(scale, scale), false);
+            if (this.children.length === 1){
+                this.children[0].drawBoundaryPath(context, this.children[0].globalViewMatrix().prependedWithScale(scale, scale), false);
+            }
+            else{
+                this.drawBoundaryPath(context, this.globalViewMatrix().prependedWithScale(scale, scale), false);
+            }            
             Brush.stroke(this.stroke(), context);
             context.restore();
         }
