@@ -100,9 +100,11 @@ export default class Container extends UIElement {
 
         this.drawDecorators(context, w, h, environment);
     }
+    
     modifyContextBeforeDrawChildren(context) {
 
     }
+
     renderMaskedElements(context, mask, i, items, environment) {
 
         if (environment.finalRender || !mask.drawPath) {

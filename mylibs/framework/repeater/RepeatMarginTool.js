@@ -56,7 +56,7 @@ export default {
         var containerHeight = container.height();
         var numX = this._strategy.getNumX(container);
         var numY = this._strategy.getNumY(container);
-        var itemBox = container.children[0].getBoundaryRect();
+        var itemBox = container.children[0].getBoundingBox();
         var marginX = this._strategy.getActualMarginX(container);
         var marginY = this._strategy.getActualMarginY(container);
 

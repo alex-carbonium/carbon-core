@@ -34,11 +34,14 @@ var Strategy = {
             for (let x = 0; x < numX; ++x){
                 let element = items[y * numX + x];
                 let props = {
-                    x: x * (masterWidth + container.props.innerMarginX) + offsetX,
-                    y: y * (masterHeight + container.props.innerMarginY) + offsetY,
                     name: "Cell [" + y + "," + x + "]"
                 };
                 element.setProps(props, changeMode);
+                let t = {
+                    x: x * (masterWidth + container.props.innerMarginX) + offsetX - element.x(),
+                    y: y * (masterHeight + container.props.innerMarginY) + offsetY - element.y()
+                };
+                element.applyTranslation(t, false, changeMode);
             }
         }
     },
