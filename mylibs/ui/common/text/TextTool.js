@@ -2,30 +2,30 @@
 //TODO: auto-font-height feature for auto-width texts
 //TODO: strikethrough is too high due to too high ascent, why?
 
-import EditModeAction from "./../EditModeAction";
-import DropVisualization from "extensions/DropVisualization";
-import DragController from "framework/DragController";
-import Text from "framework/text/Text";
-import Font from "framework/Font";
-import Brush from "framework/Brush";
+import TOol from "../Tool";
+import DropVisualization from "../../../extensions/DropVisualization";
+import DragController from "../../../framework/DragController";
+import Text from "../../../framework/text/Text";
+import Font from "../../../framework/Font";
+import Brush from "../../../framework/Brush";
 import OpenTypeFontManager from "../../../OpenTypeFontManager";
 import InlineTextEditor from "../../../framework/text/inlinetexteditor";
 import SharedColors from "../../SharedColors";
 import DefaultFormatter from "./DefaultFormatter";
 import RangeFormatter from "./RangeFormatter";
 import {ViewTool, ChangeMode} from "../../../framework/Defs";
-import Selection from "framework/SelectionModel";
+import Selection from "../../../framework/SelectionModel";
 import Cursor from "../../../framework/Cursor";
-import Invalidate from "framework/Invalidate";
+import Invalidate from "../../../framework/Invalidate";
 import Environment from "../../../environment";
 import {getAverageLuminance} from "../../../math/color";
 import Rect from "../../../math/rect";
 
 const CursorInvertThreshold = .4;
 
-export default class TextTool extends EditModeAction {
+export default class TextTool extends TOol {
     constructor(app) {
-        super();
+        super(ViewTool.Text);
         this._app = app;
         this._view = Environment.view;
         this._controller = Environment.controller;

@@ -1,18 +1,22 @@
-import EditModeAction from "./../EditModeAction";
+import Tool from "../Tool";
 import SectionDecorator from "./SectionDecorator";
-import Section from "framework/Section";
-import Artboard from "framework/Artboard";
-import NullArtboard from "framework/NullArtboard";
-import {ViewTool} from "framework/Defs";
-import CommandManager from "framework/commands/CommandManager";
+import Section from "../../../framework/Section";
+import Artboard from "../../../framework/Artboard";
+import NullArtboard from "../../../framework/NullArtboard";
+import {ViewTool} from "../../../framework/Defs";
+import CommandManager from "../../../framework/commands/CommandManager";
 import CompositeCommand from "../../../framework/commands/CompositeCommand";
-import Selection from "framework/SelectionModel"
-import Cursor from "framework/Cursor";
-import Invalidate from "framework/Invalidate";
+import Selection from "../../../framework/SelectionModel"
+import Cursor from "../../../framework/Cursor";
+import Invalidate from "../../../framework/Invalidate";
 
 var decorator = null;
 
-export default class SectionCreator extends EditModeAction {
+export default class SectionCreator extends Tool {
+    constructor(){
+        super(ViewTool.Section);
+    }
+
     attach(app, view, controller) {
         this._app = app;
         this._view = view;

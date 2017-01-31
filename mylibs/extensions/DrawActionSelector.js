@@ -3,7 +3,6 @@ import GraphicalPathCreator from "ui/common/GraphicalPathCreator";
 import SectionCreator from "ui/common/sections/SectionCreator";
 import LineCreator from "ui/common/LineCreator";
 import PencilCreator from "ui/common/PencilCreator";
-import EditModeAction from "ui/common/EditModeAction";
 import LinkingTool from "ui/prototyping/LinkingTool";
 import HandTool from "ui/common/HandTool";
 import ArtboardsTool from "ui/common/ArtboardsTool";
@@ -41,7 +40,6 @@ var registerCommands = function () {
         that._textTool.attach(that.app, that.view, that.controller);
         that._currentAction = that._textTool;
         that.app.allowSelection(false);
-        that.app.setCurrentTool(ViewTool.Text);
     }, "ui-text");
 
     actionManager.registerAction("@imageTool", "Image tool", "Drawing", function () {
@@ -49,7 +47,6 @@ var registerCommands = function () {
         that._imageCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._imageCreator;
         that.app.allowSelection(false);
-        that.app.setCurrentTool(ViewTool.Text);
     }, "ui-text");
 
     actionManager.registerAction("@addPath", "Pen tool", "Drawing", function () {
@@ -64,7 +61,6 @@ var registerCommands = function () {
             that._defaultShapeSettings.updateColors();
             Selection.makeSelection([that._defaultShapeSettings]);
         }
-        that.app.setCurrentTool(ViewTool.Path);
     }, "ui-pen");
 
     actionManager.registerAction("@addRectangle", "Rectangle tool", "Drawing", function () {
@@ -74,7 +70,6 @@ var registerCommands = function () {
         that.app.allowSelection(false);
         that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings]);
-        that.app.setCurrentTool(ViewTool.Rectangle);
         Invalidate.request();
     }, "ui-rectangle");
 
@@ -85,7 +80,6 @@ var registerCommands = function () {
         that.app.allowSelection(false);
         that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings]);
-        that.app.setCurrentTool(ViewTool.Star);
 
     }, "ui-star");
 
@@ -96,7 +90,6 @@ var registerCommands = function () {
         that.app.allowSelection(false);
         that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings]);
-        that.app.setCurrentTool(ViewTool.Triangle);
 
     }, "ui-ploygon");
 
@@ -107,7 +100,6 @@ var registerCommands = function () {
         that.app.allowSelection(false);
         that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings]);
-        that.app.setCurrentTool(ViewTool.Polygon);
 
     }, "ui-ploygon");
 
@@ -118,7 +110,6 @@ var registerCommands = function () {
         that._currentAction = that._artboardCreator;
         that.app.allowSelection(false);
         Selection.makeSelection([that._artboardToolSettings]);
-        that.app.setCurrentTool(ViewTool.Artboard);
 
     }, "ui-rectangle");
 
@@ -127,7 +118,6 @@ var registerCommands = function () {
         that._artboardViewer.attach(that.app, that.view, that.controller);
         that._currentAction = that._artboardViewer;
         that.app.allowSelection(false);
-        that.app.setCurrentTool(ViewTool.ArtboardViewer);
 
     }, "");
 
@@ -138,7 +128,6 @@ var registerCommands = function () {
         //re-fire event if artboard is already selected
         Selection.makeSelection([]);
         Selection.makeSelection([that.app.activePage.getActiveArtboard()]);
-        that.app.setCurrentTool(ViewTool.Section);
 
     }, "ui-rectangle");
 
@@ -149,7 +138,6 @@ var registerCommands = function () {
         that.app.allowSelection(false);
         that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings]);
-        that.app.setCurrentTool(ViewTool.Circle);
     }, "ui-circle");
 
     actionManager.registerAction("@addLine", "Line tool", "Drawing", function () {
@@ -159,7 +147,6 @@ var registerCommands = function () {
         that.app.allowSelection(false);
         that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings]);
-        that.app.setCurrentTool(ViewTool.Line);
     }, "ui-line");
 
     actionManager.registerAction("@protoTool", "Prototyping tool", "Prototyping", function () {
@@ -167,7 +154,6 @@ var registerCommands = function () {
         that._prototypingTool.attach(that.app, that.view, that.controller);
         that._currentAction = that._prototypingTool;
         that.app.allowSelection(false);
-        that.app.setCurrentTool(ViewTool.Proto);
         Selection.refreshSelection();
     }, "ui-line");
 
@@ -175,7 +161,6 @@ var registerCommands = function () {
         that.detachAll();
         Selection.directSelectionEnabled(false);
         that.app.allowSelection(true);
-        that.app.setCurrentTool(ViewTool.Pointer);
         Selection.refreshSelection();
     }, "ui-arrow");
 
@@ -184,7 +169,6 @@ var registerCommands = function () {
         Selection.directSelectionEnabled(true);
         Selection.invertDirectSelection(true);
         that.app.allowSelection(true);
-        that.app.setCurrentTool(ViewTool.PointerDirect);
         Invalidate.requestUpperOnly();
     }, "ui-arrow-black");
 
@@ -195,7 +179,6 @@ var registerCommands = function () {
         that._currentAction = that._pencilCreator;
         that.app.allowSelection(false);
         Selection.makeSelection([that._defaultShapeSettings]);
-        that.app.setCurrentTool(ViewTool.Pencil);
     }, "ui-pencil");
 
     actionManager.registerAction("handToolRelease", "Hand tool release", "Drawing utils", function () {
@@ -230,8 +213,6 @@ var registerCommands = function () {
         that._previousAction = that._currentAction; // should remember previous action
         that._handTool.attach(that.app, that.view, that.controller, that.mousePressed);
         that._currentAction = that._handTool;
-        that.app.setCurrentTool(ViewTool.Hand);
-
     }
 };
 
@@ -246,21 +227,21 @@ export default class DrawActionSelector extends ExtensionBase {
         this.app.drawActionSelector = this;
         this._currentAction = null;
         registerCommands.call(this);
-        this._rectCreator = new ElementDragCreator(app, Types.Rectangle);
-        this._artboardCreator = new ArtboardsTool(app, Artboard);
-        this._sectionCreator = new SectionCreator(app);
-        this._circleCreator = new ElementDragCreator(app, Types.Circle);
+        this._rectCreator = new ElementDragCreator(ViewTool.Rectangle, Types.Rectangle);
+        this._artboardCreator = new ArtboardsTool(Artboard);
+        this._sectionCreator = new SectionCreator();
+        this._circleCreator = new ElementDragCreator(ViewTool.Circle, Types.Circle);
         this._polylineCreator = new GraphicalPathCreator(app, Types.Path);
-        this._starCreator = new ElementDragCreator(app, Types.Star);
-        this._polygonCreator = new ElementDragCreator(app, Types.Polygon);
-        this._artboardViewer = new ElementDragCreator(app, Types.ArtboardFrame);
-        this._triangleCreator = new ElementDragCreator(app, Types.Polygon, {pointsCount: 3});
-        this._lineCreator = new LineCreator(app);
-        this._prototypingTool = new LinkingTool(app);
-        this._pencilCreator = new PencilCreator(app);
-        this._handTool = new HandTool(app);
+        this._starCreator = new ElementDragCreator(ViewTool.Star, Types.Star);
+        this._polygonCreator = new ElementDragCreator(ViewTool.Polygon, Types.Polygon);
+        this._artboardViewer = new ElementDragCreator(ViewTool.ArtboardViewer, Types.ArtboardFrame);
+        this._triangleCreator = new ElementDragCreator(ViewTool.Triangle, Types.Polygon, {pointsCount: 3});
+        this._lineCreator = new LineCreator();
+        this._prototypingTool = new LinkingTool();
+        this._pencilCreator = new PencilCreator();
+        this._handTool = new HandTool();
         this._textTool = new TextTool(app);
-        this._imageCreator = new ElementDragCreator(app, Types.Frame);
+        this._imageCreator = new ElementDragCreator(ViewTool.Image, Types.Frame);
 
         this._defaultShapeSettings = new DefaultShapeSettings(app);
         this._artboardToolSettings = new ArtboardToolSettings(app);
@@ -318,7 +299,6 @@ export default class DrawActionSelector extends ExtensionBase {
         }
 
         Selection.invertDirectSelection(false);
-        this.app.setCurrentTool(ViewTool.Pointer);
     }
 
     dispose() {

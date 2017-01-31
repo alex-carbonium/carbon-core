@@ -1,17 +1,18 @@
-import EditModeAction from "ui/common/EditModeAction";
-import angleAdjuster from "math/AngleAdjuster";
-import RemovePathPointCommand from "commands/path/RemovePathPointCommand";
-import AddPathPointCommand from "commands/path/AddPathPointCommand";
-import commandManager from "framework/commands/CommandManager";
-import UIElement from "framework/UIElement";
-import Path from  "ui/common/Path";
-import SystemConfiguration from "SystemConfiguration";
-import Selection from "framework/SelectionModel";
-import Cursor from "framework/Cursor";
-import Invalidate from "framework/Invalidate";
-import SnapController from "framework/SnapController";
-import actionManager from "ui/ActionManager";
-import Environment from "environment";
+import Tool from "./Tool";
+import angleAdjuster from "../../math/AngleAdjuster";
+import RemovePathPointCommand from "../../commands/path/RemovePathPointCommand";
+import AddPathPointCommand from "../../commands/path/AddPathPointCommand";
+import commandManager from "../../framework/commands/CommandManager";
+import UIElement from "../../framework/UIElement";
+import Path from  "./Path";
+import SystemConfiguration from "../../SystemConfiguration";
+import Selection from "../../framework/SelectionModel";
+import Cursor from "../../framework/Cursor";
+import Invalidate from "../../framework/Invalidate";
+import {ViewTool} from "../../framework/Defs";
+import SnapController from "../../framework/SnapController";
+import actionManager from "../ActionManager";
+import Environment from "../../environment";
 
 var closeCurrentPath = function (pt) {
     commandManager.execute(this._element.constructPropsChangedCommand({closed: true}, {closed: false}));
@@ -38,7 +39,7 @@ var completePath = function () {
     this._currentPoint = null;
     setTimeout(function () {
         if (SystemConfiguration.ResetActiveToolToDefault) {
-            App.Current.actionManager.invoke("movePointer");
+            this._app.actionManager.invoke("movePointer");
         }
     }, 0);
 };
@@ -51,18 +52,18 @@ var checkIfElementAvailable = function () {
 };
 
 
-export default class GraphicalpathCreator extends EditModeAction {
+export default class GraphicalpathCreator extends Tool {
 
     constructor(app, type, parameters) {
-        super(app, type, parameters);
-        this._type = type;
-        this._app = app;
+        super(ViewTool.Path);
+
+        this._type = type;        
         this._parameters = parameters;
         this.points = [];
         this._element = null;
         this._attachMode = "edit";
         this._detachMode = "resize";
-        this._editTextToken = this._app.actionManager.subscribe("enter", this.onEditAction.bind(this));
+        this._editTextToken = app.actionManager.subscribe("enter", this.onEditAction.bind(this));
     }
 
     onEditAction() {
@@ -91,7 +92,7 @@ export default class GraphicalpathCreator extends EditModeAction {
 
     detach() {
         completePath.call(this);
-        EditModeAction.prototype.detach.apply(this, arguments);
+        super.detach.apply(this, arguments);
         if(this._cancelBinding){
             this._cancelBinding.dispose();
             delete this._cancelBinding;
@@ -99,7 +100,7 @@ export default class GraphicalpathCreator extends EditModeAction {
     }
 
     _attach() {
-        EditModeAction.prototype._attach.apply(this, arguments);
+        super._attach.apply(this, arguments);
         Cursor.setGlobalCursor("crosshair");
         this._cancelBinding = actionManager.subscribe('cancel', this.cancel.bind(this));
         var element = Selection.selectedElement();
@@ -109,7 +110,7 @@ export default class GraphicalpathCreator extends EditModeAction {
     }
 
     _detach() {
-        EditModeAction.prototype._detach.apply(this, arguments);
+        super._detach.apply(this, arguments);
         Cursor.removeGlobalCursor();
     }
 
@@ -156,13 +157,13 @@ export default class GraphicalpathCreator extends EditModeAction {
             Selection.unselectAll();
             var that = this;
             this._element = UIElement.fromType(this._type, this._parameters);
-            App.Current.activePage.nameProvider.assignNewName(this._element);
-            var defaultSettings = App.Current.defaultShapeSettings();
+            this._app.activePage.nameProvider.assignNewName(this._element);
+            var defaultSettings = this._app.defaultShapeSettings();
             if (defaultSettings) {
                 this._element.setProps(defaultSettings);
             }
 
-            App.Current.activePage.dropToPage(x, y, this._element);
+            this._app.activePage.dropToPage(x, y, this._element);
             that._element.mode("edit");
             Selection.makeSelection([that._element]);
 

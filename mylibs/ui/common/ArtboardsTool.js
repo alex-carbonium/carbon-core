@@ -1,27 +1,27 @@
-import SystemConfiguration from "SystemConfiguration";
-import Selection from "framework/SelectionModel";
-import Invalidate from "framework/Invalidate";
-import SnapController from "framework/SnapController";
-import Environment from "environment";
-import EditModeAction from "ui/common/EditModeAction";
+import SystemConfiguration from "../../SystemConfiguration";
+import Selection from "../../framework/SelectionModel";
+import Invalidate from "../../framework/Invalidate";
+import SnapController from "../../framework/SnapController";
+import Environment from "../../environment";
+import Tool from "./Tool";
 import Promise from "bluebird";
-import Artboard from "framework/Artboard";
+import Artboard from "../../framework/Artboard";
+import ObjectFactory from "../../framework/ObjectFactory";
+import {ViewTool} from "../../framework/Defs";
 import Rect from "../../math/rect";
 import Point from "../../math/point";
 
-var fwk = sketch.framework;
-export default class ArtboardsTool extends EditModeAction {
-    constructor(app, type, parameters) {
-        super(app, type, parameters);
-        this._type = type;
-        this._app = app;
+export default class ArtboardsTool extends Tool {
+    constructor(type, parameters) {
+        super(ViewTool.Artboard);
+        this._type = type;        
         this._parameters = parameters;
         this._attachMode = "select";
         this._detachMode = "resize";
     }
 
     detach() {
-        EditModeAction.prototype.detach.apply(this, arguments);
+        super.detach.apply(this, arguments);
         SnapController.clearActiveSnapLines();
     }
 
@@ -55,7 +55,7 @@ export default class ArtboardsTool extends EditModeAction {
         this._startPoint = {x: pos.x, y: pos.y};
         this._nextPoint = {x: pos.x, y: pos.y};
         event.handled = true;
-        this._element = fwk.UIElement.fromType(this._type);
+        this._element = ObjectFactory.fromType(this._type);
         App.Current.activePage.nameProvider.assignNewName(this._element);
         this._cursorNotMoved = true;
 

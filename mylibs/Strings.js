@@ -60,7 +60,6 @@ define(function(){
 //            add("sketch.ui.common.ElementPointCreator", "Point creator");
 //            add("sketch.ui.common.LineCreator", "Line creator");
 //            add("sketch.ui.common.PencilCreator", "Pencil creator");
-//            add("sketch.ui.common.EditModeAction", "Edit mode action");
 //            add("ketch.ui.common.HandTool", "Hand tool");        
         add("SelectComposite", "Multiple elements");  // foundation
         add("Section", "Section");  // foundation

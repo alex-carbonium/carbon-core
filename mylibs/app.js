@@ -895,11 +895,7 @@ class App extends DataNode {
 
     nextPageId() {
         return createUUID();
-    }
-
-    setCurrentTool(tool) {
-        this.currentTool = tool;
-    }
+    }    
 
     allowSelection(value) {
         if (value != undefined) {

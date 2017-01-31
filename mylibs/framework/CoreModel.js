@@ -76,7 +76,7 @@ export interface ILayer extends IContainer{
 }
 
 export interface IApp extends IDataNode{
-    currentTool: number;
+    currentTool: number;    
     onBuildMenu: IEvent<{a: number}>;
 }
 

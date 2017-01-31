@@ -100,7 +100,8 @@ export var ViewTool = {
     Hand: 14,
     PointerDirect: 15,
     Image: 16,
-    ArtboardViewer: 17
+    ArtboardViewer: 17,
+    Linker: 18
 };
 
 export var PointDirection = {

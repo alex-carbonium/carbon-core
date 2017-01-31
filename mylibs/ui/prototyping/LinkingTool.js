@@ -1,16 +1,16 @@
-import EditModeAction from "../common/EditModeAction";
-import DropVisualization from "extensions/DropVisualization";
-import {createUUID} from "util";
-import {ActionType, AnimationType, EasingType, ActionEvents, StoryType} from "framework/Defs";
+import Tool from "../common/Tool";
+import DropVisualization from "../../extensions/DropVisualization";
+import {createUUID} from "../../util";
+import {ActionType, AnimationType, EasingType, ActionEvents, StoryType, ViewTool} from "../../framework/Defs";
 import * as ActionHelper from "./ActionHelper";
-import Matrix from "math/matrix";
-import {areRectsIntersecting, adjustRectSize, isPointInRect} from "math/math";
-import PropertyTracker from "framework/PropertyTracker";
-import Selection from "framework/SelectionModel"
-import Invalidate from "framework/Invalidate";
+import Matrix from "../../math/matrix";
+import {areRectsIntersecting, adjustRectSize, isPointInRect} from "../../math/math";
+import PropertyTracker from "../../framework/PropertyTracker";
+import Selection from "../../framework/SelectionModel"
+import Invalidate from "../../framework/Invalidate";
 import RequestAnimationSettings from "./RequestAnimationSettings";
-import Environment from "environment";
-import StoryAction from "stories/StoryAction";
+import Environment from "../../environment";
+import StoryAction from "../../stories/StoryAction";
 
 const HandleSize = 16;
 const HomeButtonWidth = 12;
@@ -22,9 +22,9 @@ const DefaultLinkColor = "#1592E6";
 // - show button only on hover like visio
 // - cache all artboards rects
 
-export default class LinkingTool extends EditModeAction {
+export default class LinkingTool extends Tool {
     constructor() {
-        super();
+        super(ViewTool.Linker);
         this._attachMode = "select";
         this._detachMode = "resize";
     }
