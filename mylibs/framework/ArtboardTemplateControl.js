@@ -27,8 +27,8 @@ export default class ArtboardTemplateControl extends Container {
             selection.push(child);
         }
         parent.remove(this);
-
-        Selection.makeSelection(selection);
+       
+        return selection;
     }
 
     allowNameTranslation(){

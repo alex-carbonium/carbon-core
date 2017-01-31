@@ -34,12 +34,11 @@ function stopDrag(event) {
     var elements = this._draggingElement.saveChanges(event, this._draggingOverElement, this.app.activePage);
     this._draggingElement.detach();
 
-    // if (group !== null) {
-    //     //TODO
-    //     if(group.props._unwrapContent){
-    //         group.unwrapToParent();
-    //     }
-    // }
+    if (elements.length === 1) {        
+        if(elements[0].props._unwrapContent){
+            elements = elements[0].unwrapToParent();
+        }
+    }
 
     this.stopDraggingEvent.raise(event, elements);
 
