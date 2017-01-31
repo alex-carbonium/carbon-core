@@ -1,6 +1,7 @@
 import PropertyMetadata from "framework/PropertyMetadata";
 import PropertyStateRecorder from "framework/PropertyStateRecorder";
 import Container from "framework/Container";
+import UIElement from "framework/UIElement";
 import {Overflow, ChangeMode, Types} from "./Defs";
 import Selection from "framework/SelectionModel";
 
@@ -87,6 +88,10 @@ export default class ArtboardTemplateControl extends Container {
         this._initializing = false;
     }
 
+    toJSON() {
+        return UIElement.prototype.toJSON.apply(this, arguments);
+    }
+
     _setupCustomProperties(artboard) {
         var res = {};
         var properties = artboard.props.customProperties;
@@ -158,7 +163,7 @@ export default class ArtboardTemplateControl extends Container {
     propsUpdated(props, oldProps) {
         super.propsUpdated(props, oldProps);
         if (props.source !== undefined) {
-            if (props.source.pageId !== oldProps.source.pageId && props.source.artboardId !== oldProps.source.artboardId) {
+            if (!this._artboard || (props.source.pageId !== oldProps.source.pageId && props.source.artboardId !== oldProps.source.artboardId)) {
                 var page = App.Current.getPageById(props.source.pageId);
                 if (page) {
                     this._artboard = page.getArtboardById(props.source.artboardId);

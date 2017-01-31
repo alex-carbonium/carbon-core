@@ -658,19 +658,7 @@ export default class Container extends UIElement {
     isAtomicInModel(value) {
         return this.field("_isAtomicInModel", value, false);
     }
-    toJSON(includeDefaults) {
-        var current = super.toJSON.apply(this, arguments);
-        if (!this.isAtomicInModel()) {
-            var children = current.children = [];
-            for (var i = 0; i < this.children.length; i++) {
-                var element = this.children[i];
-                if (!element.isTemporary()) {
-                    children.push(element.toJSON(includeDefaults));
-                }
-            }
-        }
-        return current;
-    }
+   
     getElementById(id) {
         var res = null;
         if (this.id() === id) {
@@ -685,38 +673,7 @@ export default class Container extends UIElement {
 
         return res;
     }
-    fromJSON(data) {
-        //this.lockArrange();
-        super.fromJSON.apply(this, arguments)
-        this.childrenFromJSON(data.children);
-        //this.unlockArrange();
-        return this;
-    }
-    childrenFromJSON(children) {
-        if (!this.isAtomicInModel() && children) {
-            this.clear();
-            for (var i = 0, length = children.length; i < length; i++) {
-                var childData = children[i];
-                //var newId = childData.id;
-                // var duplicate = this.getElementById(newId);
-                // if (duplicate) {
-                //     setTimeout(function () {
-                //         try {
-                //             logger.error("Duplicate element with the same id", {
-                //                 projectId: App.Current.id(),
-                //                 data: childData
-                //             })
-                //         } catch (e) {
-                //
-                //         }
-                //     }, 1);
-
-                //} else {
-                this.add(fwk.UIElement.fromJSON(childData));
-                //}
-            }
-        }
-    }
+ 
     findSingleChildOrDefault(predicate) {
         var result = null;
         this.applyVisitor(function (el) {

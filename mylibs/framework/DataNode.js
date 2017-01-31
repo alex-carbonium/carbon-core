@@ -113,6 +113,10 @@ export default class DataNode{
         return Object.assign({}, this.props);
     }
 
+    isAtomicInModel() {
+        return false;
+    }
+
     selectProps(namesOrChanges) {
         var result = {};
         if (Array.isArray(namesOrChanges)) {
@@ -358,7 +362,7 @@ export default class DataNode{
 
     toJSON(){
         var json = {t: this.t, props: this.cloneProps()};
-        if (this.children){
+        if (!this.isAtomicInModel() && this.children){
             json.children = this.children.map(x => x.toJSON());
         }
         return json;
@@ -370,7 +374,15 @@ export default class DataNode{
         this.setProps(data.props, ChangeMode.Self);
 
         if (data.children){
-            this.children = data.children.map(x => ObjectFactory.fromJSON(x));
+            if(typeof this.add === 'function') {
+                this.children = [];
+                for(var i = 0; i < data.children.length; ++i) {
+                    this.add(ObjectFactory.fromJSON(data.children[i]));
+                }
+            }
+            else {
+                this.children = data.children.map(x => ObjectFactory.fromJSON(x));
+            }            
         }
         return this;
     }
