@@ -1,26 +1,25 @@
-import PropertyMetadata, {PropertyDescriptor} from "./PropertyMetadata";
+import PropertyMetadata, { PropertyDescriptor } from "./PropertyMetadata";
 import PropertyTracker from "./PropertyTracker";
-import {leaveCommonProps} from "../util";
-import {Types, ChangeMode} from "./Defs";
+import { leaveCommonProps } from "../util";
+import { Types, ChangeMode } from "./Defs";
 import Brush from "./Brush";
 import Font from "./Font";
 import UIElement from "./UIElement";
 import ArrangeStrategy from "./ArrangeStrategy";
-import GroupArrangeStrategy from "./GroupArrangeStrategy";
-import {IGroupContainer} from "./CoreModel";
+import { IGroupContainer } from "./CoreModel";
 import Box from "./Box";
 import Rect from "../math/rect";
 import Phantom from "./Phantom";
 import Environment from "../environment";
 import Selection from "./SelectionModel";
-import {IUIElementProps, IPoint, IRect, IComposite} from "../framework/CoreModel";
+import { IUIElementProps, IPoint, IRect, IComposite } from "../framework/CoreModel";
 
-export default class CompositeElement extends UIElement implements IGroupContainer, IComposite{
-    constructor(){
+export default class CompositeElement extends UIElement implements IComposite {
+    constructor() {
         super();
 
         this._types = [];
-        this.children = [];                
+        this.children = [];
         this._origPropValues = [];
         this._affectingLayout = false;
         this._inPreview = false;
@@ -28,139 +27,149 @@ export default class CompositeElement extends UIElement implements IGroupContain
         PropertyTracker.propertyChanged.bind(this, this._onPropsChanged);
     }
 
-    get elements(): UIElement[]{
+    get elements(): UIElement[] {
         return this.children;
     }
 
-    add(element: UIElement){        
+    add(element: UIElement) {
         var systemType = element.systemType();
-        if (this._types.indexOf(systemType) === -1){
+        if (this._types.indexOf(systemType) === -1) {
             this._types.push(systemType);
         }
-        element.enablePropsTracking();                        
+        element.enablePropsTracking();
         this.children.push(element);
     }
-    remove(element: UIElement){        
+    remove(element: UIElement) {
         element.disablePropsTracking();
 
         var systemType = element.systemType();
         var canRemoveType = true;
 
         var elementIndex = -1;
-        for (var i = 0; i < this.children.length; i++){
+        for (var i = 0; i < this.children.length; i++) {
             var e = this.children[i];
-            if (canRemoveType && e !== element && e.systemType() === systemType){
+            if (canRemoveType && e !== element && e.systemType() === systemType) {
                 canRemoveType = false;
             }
-            if (e === element){
+            if (e === element) {
                 elementIndex = i;
             }
         }
-        
+
         this.children.splice(i, 1);
 
-        if (canRemoveType){
+        if (canRemoveType) {
             this._types.splice(this._types.indexOf(systemType), 1);
         }
     }
 
-    performArrange(){
-        if (this.elements.length > 1){
+    performArrange() {
+        if (this.elements.length > 1) {
             this.resetTransform();
-            GroupArrangeStrategy.arrange(this);
+
+            var items = this.children;
+            var xMax = Number.NEGATIVE_INFINITY;
+            var yMax = Number.NEGATIVE_INFINITY;
+            var xMin = Number.POSITIVE_INFINITY;
+            var yMin = Number.POSITIVE_INFINITY;
+
+            for (let i = 0, l = items.length; i < l; ++i) {
+                let child = items[i];
+                let bb = child.getBoundingBoxGlobal();
+                xMax = Math.max(xMax, bb.x + bb.width);
+                xMin = Math.min(xMin, bb.x);
+                yMax = Math.max(yMax, bb.y + bb.height);
+                yMin = Math.min(yMin, bb.y);
+            }
+
+            var w = xMax - xMin;
+            var h = yMax - yMin;            
+            this.prepareAndSetProps({br: new Rect(xMin, yMin, w, h)});
         }
     }
 
-    getBoundingBoxGlobal(includeMargin: ?boolean): IRect{
-        if (this.count() === 1){
+    getBoundingBoxGlobal(includeMargin: ?boolean): IRect {
+        if (this.count() === 1) {
             return this.elements[0].getBoundingBoxGlobal(includeMargin);
         }
         return super.getBoundingBoxGlobal(includeMargin);
-    }    
-
-    wrapSingleChild(){
-        return true;
     }
 
-    translateChildren(){
-        return false;
-    }
-
-    elementAt(index: number){
+    elementAt(index: number) {
         return this.elements[index];
     }
-    singleOrDefault(){
+    singleOrDefault() {
         return this.count() === 1 ? this.elements[0] : null;
     }
-    singleOrSelf(){
+    singleOrSelf() {
         return this.count() === 1 ? this.elements[0] : this;
     }
-    has(element: UIElement){
-        for (var i = 0, j = this.elements.length; i < j; ++i){
-            if (this.elements[i] === element){
+    has(element: UIElement) {
+        for (var i = 0, j = this.elements.length; i < j; ++i) {
+            if (this.elements[i] === element) {
                 return true;
             }
         }
         return false;
     }
-    clear(){
+    clear() {
         this.each(x => x.disablePropsTracking());
         this._types = [];
         //do not clear, selection model stores this by reference
         this.children = [];
         this.resetTransform();
     }
-    count(){
+    count() {
         return this.elements.length;
     }
 
-    propsUpdated(newProps: IUIElementProps, oldProps: IUIElementProps, mode: ChangeMode){
+    propsUpdated(newProps: IUIElementProps, oldProps: IUIElementProps, mode: ChangeMode) {
         super.propsUpdated.apply(this, arguments);
 
         //not sure if it is safe to propagate other properties, so taking only what's needed for now
-        if (newProps.visible !== oldProps.visible){
-            for (var i = 0; i < this.elements.length; i++){
-                this.elements[i].setProps({visible: newProps.visible}, mode);
+        if (newProps.visible !== oldProps.visible) {
+            for (var i = 0; i < this.elements.length; i++) {
+                this.elements[i].setProps({ visible: newProps.visible }, mode);
             }
         }
     }
 
-    hitTest(point: IPoint, scale: number){
+    hitTest(point: IPoint, scale: number) {
         var count = this.count();
-        if (count === 0){
+        if (count === 0) {
             return false;
         }
 
-        for (var i = count - 1; i >= 0; i--){
+        for (var i = count - 1; i >= 0; i--) {
             var el = this.elements[i];
-            if (el.hitTest(point, scale)){
+            if (el.hitTest(point, scale)) {
                 return true;
             }
         }
         return false;
     }
-    hitVisible(){
+    hitVisible() {
         return true;
     }
-    canAccept(){
+    canAccept() {
         return false;
     }
-    each(callback: (e: UIElement) => boolean | void){
+    each(callback: (e: UIElement) => boolean | void) {
         this.elements.forEach(callback);
     }
-    map(callback: (e: UIElement) => any){
+    map(callback: (e: UIElement) => any) {
         return this.elements.map(callback);
     }
-    first(){
+    first() {
         return this.elements[0];
     }
-    resizeDimensions(){
+    resizeDimensions() {
         return 0;
     }
-    canDrag(): boolean{
+    canDrag(): boolean {
         var canDrag = true;
-        this.each(function(element){
-            if (!element.canDrag()){
+        this.each(function (element) {
+            if (!element.canDrag()) {
                 canDrag = false;
                 return false;
             }
@@ -168,37 +177,37 @@ export default class CompositeElement extends UIElement implements IGroupContain
         return canDrag;
     }
 
-    isDescendantOrSame(element: UIElement): boolean{
+    isDescendantOrSame(element: UIElement): boolean {
         var res = false;
 
-        for (let i = 0; i < this.elements.length; ++i){
+        for (let i = 0; i < this.elements.length; ++i) {
             let e = this.elements[i];
             res = res || e.isDescendantOrSame(element);
-            if (res){
+            if (res) {
                 break;
             }
-        }        
+        }
 
         return res;
     }
-    displayName(){
-        if (this.allHaveSameType()){
+    displayName() {
+        if (this.allHaveSameType()) {
             return this.elements[0].displayName();
         }
         return "";
     }
-    findPropertyDescriptor(propName: string){
+    findPropertyDescriptor(propName: string) {
         return PropertyMetadata.find(this._types[0], propName);
     }
-    allHaveSameType(){
+    allHaveSameType() {
         return this._types.length === 1;
     }
-    allHaveSameParent(){
+    allHaveSameParent() {
         var result = true;
         var parent;
 
-        this.each(function(e){
-            if (parent && e.parent() !== parent){
+        this.each(function (e) {
+            if (parent && e.parent() !== parent) {
                 result = false;
                 return false;
             }
@@ -207,11 +216,11 @@ export default class CompositeElement extends UIElement implements IGroupContain
 
         return result;
     }
-    parents(){
+    parents() {
         var parents = [];
-        for (var i = 0; i < this.elements.length; i++){
+        for (var i = 0; i < this.elements.length; i++) {
             var parent = this.elements[i].parent();
-            if (parents.indexOf(parent) === -1){
+            if (parents.indexOf(parent) === -1) {
                 parents.push(parent);
             }
         }
@@ -221,25 +230,25 @@ export default class CompositeElement extends UIElement implements IGroupContain
     // rules:
     // - find groups with matching label for all types, these groups are assumed to have same props
     // - in remaining groups, find props with same name+type and put them into a default group
-    createPropertyGroups(){
-        if (this.count() === 0){
+    createPropertyGroups() {
+        if (this.count() === 0) {
             return [];
         }
 
-        if (this.count() === 1){
+        if (this.count() === 1) {
             let type = this._types[0];
-            let metadata = PropertyMetadata.findAll(type);            
-            let groups = metadata ? metadata.groups(this.elements[0]) : [];                        
+            let metadata = PropertyMetadata.findAll(type);
+            let groups = metadata ? metadata.groups(this.elements[0]) : [];
             return groups;
         }
 
         var commonGroups = [];
         var entries = [];
 
-        for (var i = 0; i < this._types.length; i++){
+        for (var i = 0; i < this._types.length; i++) {
             var type = this._types[i];
             var metadata = PropertyMetadata.findAll(type);
-            if (metadata){
+            if (metadata) {
                 entries.push({
                     metadata: metadata,
                     groups: metadata.groups()
@@ -249,79 +258,79 @@ export default class CompositeElement extends UIElement implements IGroupContain
 
         var sample = entries[0];
         var used = {};
-        for (var i = 0; i < sample.groups.length; i++){
+        for (var i = 0; i < sample.groups.length; i++) {
             var candidate = sample.groups[i];
-            if (!candidate.label){
+            if (!candidate.label) {
                 continue;
             }
 
-            for (var j = 1; j < entries.length; j++){
+            for (var j = 1; j < entries.length; j++) {
                 var entry = entries[j];
                 var found = false;
-                for (var k = 0; k < entry.groups.length; k++){
+                for (var k = 0; k < entry.groups.length; k++) {
                     var group = entry.groups[k];
-                    if (group.label === candidate.label){
+                    if (group.label === candidate.label) {
                         found = true;
                         break;
                     }
                 }
-                if (!found){
+                if (!found) {
                     candidate = null;
                     break;
                 }
             }
 
-            if (candidate){
+            if (candidate) {
                 commonGroups.push(candidate);
                 used[candidate.label] = true;
             }
         }
 
         var commonProps = [];
-        for (var i = 0; i < sample.groups.length; i++){
-            if (used[sample.groups[i].label]){
+        for (var i = 0; i < sample.groups.length; i++) {
+            if (used[sample.groups[i].label]) {
                 continue;
             }
-            for (var j = 0; j < sample.groups[i].properties.length; j++){
+            for (var j = 0; j < sample.groups[i].properties.length; j++) {
                 var candidateName = sample.groups[i].properties[j];
-                if(!sample.metadata[candidateName]){
+                if (!sample.metadata[candidateName]) {
                     candidateName = null;
                     break;
                 }
 
                 var candidateType = sample.metadata[candidateName].type;
 
-                for (var k = 1; k < entries.length; k++){
+                for (var k = 1; k < entries.length; k++) {
                     var entry = entries[k];
                     var found = false;
-                    for (var l = 0; l < entry.groups.length; l++){
+                    for (var l = 0; l < entry.groups.length; l++) {
                         var group = entry.groups[l];
-                        for (var m = 0; m < group.properties.length; m++){
+                        for (var m = 0; m < group.properties.length; m++) {
                             var propertyName = group.properties[m];
                             var propertyMetadata = entry.metadata[propertyName];
                             var propertyType = propertyMetadata ? propertyMetadata.type : null;
-                            if (propertyName === candidateName && propertyType === candidateType){
+                            if (propertyName === candidateName && propertyType === candidateType) {
                                 found = true;
                                 break;
                             }
                         }
-                        if (found){
+                        if (found) {
                             break;
                         }
                     }
-                    if (!found){
+                    if (!found) {
                         candidateName = null;
                         break;
                     }
                 }
 
-                if (candidateName){
+                if (candidateName) {
                     commonProps.push(candidateName);
                 }
             }
         }
 
-        if (commonProps.length){
+        if (commonProps.length) {
             commonGroups.splice(0, 0, {
                 label: this.allHaveSameType() ? this.elements[0].displayType() : "Common",
                 properties: commonProps
@@ -331,80 +340,80 @@ export default class CompositeElement extends UIElement implements IGroupContain
         return commonGroups;
     }
 
-    getDisplayPropValue(propertyName: string, descriptor: PropertyDescriptor){
-        if (this.count() === 1){
+    getDisplayPropValue(propertyName: string, descriptor: PropertyDescriptor) {
+        if (this.count() === 1) {
             return this.elements[0].getDisplayPropValue(propertyName, descriptor);
         }
-        
+
         var values = this.elements.map(x => x.getDisplayPropValue(propertyName, descriptor));
         var base = values[0];
-        for (let i = 1; i < values.length; ++i){
+        for (let i = 1; i < values.length; ++i) {
             let next = values[i];
             let isComplex = typeof next === "object" || Array.isArray(next);
-            if (isComplex){
+            if (isComplex) {
                 base = clone(base);
                 leaveCommonProps(base, next);
-            }            
-            else if (next !== base){
+            }
+            else if (next !== base) {
                 base = undefined;
                 break;
             }
         }
-        
-        return base;
-    }    
 
-    prepareDisplayPropsVisibility(){
+        return base;
+    }
+
+    prepareDisplayPropsVisibility() {
         var type = this.allHaveSameType() ?
             this.elements[0].systemType() :
             this.systemType();
-        
+
         var metadata = PropertyMetadata.findAll(type);
-        if (!metadata || !metadata.prepareVisibility){
+        if (!metadata || !metadata.prepareVisibility) {
             return {};
         }
-        
+
         var base = metadata.prepareVisibility(this.elements[0].props, this, Environment.view);
-        for (let i = 1; i < this.elements.length; ++i){
+        for (let i = 1; i < this.elements.length; ++i) {
             let element = this.elements[i];
             let next = metadata.prepareVisibility(element.props, this, Environment.view);
-            if (next){
-                for (let p in next){
+            if (next) {
+                for (let p in next) {
                     let visible = next[p];
-                    if (!visible){
+                    if (!visible) {
                         base[p] = false;
                     }
                 }
-            }            
+            }
         }
         return base;
     }
 
-    previewDisplayProps(changes: any){
-        if (!this._inPreview){
-            if (!this._affectingLayout && this.isChangeAffectingLayout(changes)){
+    previewDisplayProps(changes: any) {
+        if (!this._inPreview) {
+            if (!this._affectingLayout && this.isChangeAffectingLayout(changes)) {
                 Selection.hideFrame();
                 this._affectingLayout = true;
-            }            
+            }
 
             PropertyTracker.suspend();
         }
         this._inPreview = true;
-        
-        for (var i = 0; i < this.elements.length; i++){            
+
+        for (var i = 0; i < this.elements.length; i++) {
             var element = this.elements[i];
             var elementChanges = this._prepareElementChanges(element, changes);
-            if (!this._origPropValues[i]){
-                var properties = element.getAffectedProperties(changes);                
+            if (!this._origPropValues[i]) {
+                var properties = element.getAffectedProperties(changes);
                 this._origPropValues[i] = element.selectProps(properties);
             }
             element.setDisplayProps(elementChanges, ChangeMode.Root);
-        }        
+        }
     }
 
-    updateDisplayProps(changes: any){        
-        for (var i = 0; i < this.elements.length; i++){
-            var element = this.elements[i];  
+    updateDisplayProps(changes: any) {
+        for (var i = 0; i < this.elements.length; i++) {
+            var element = this.elements[i];
 
             var elementChanges = this._prepareElementChanges(element, changes);
 
@@ -415,12 +424,12 @@ export default class CompositeElement extends UIElement implements IGroupContain
             element.setDisplayProps(elementChanges, ChangeMode.Model);
         }
 
-        if (this._affectingLayout){
+        if (this._affectingLayout) {
             ArrangeStrategy.arrangeRoots(this.elements);
         }
 
-        if (this._inPreview){
-            if (PropertyTracker.resume()){
+        if (this._inPreview) {
+            if (PropertyTracker.resume()) {
                 PropertyTracker.flush();
             }
         }
@@ -430,45 +439,45 @@ export default class CompositeElement extends UIElement implements IGroupContain
         this._inPreview = false;
     }
 
-    _prepareElementChanges(element: UIElement, changes: any){
-        var elementChanges = Object.assign({}, changes);   
-        for (var p in elementChanges){
-            if (p === 'fill' || p === 'stroke'){
+    _prepareElementChanges(element: UIElement, changes: any) {
+        var elementChanges = Object.assign({}, changes);
+        for (var p in elementChanges) {
+            if (p === 'fill' || p === 'stroke') {
                 elementChanges[p] = Brush.extend(element.props[p], elementChanges[p])
-            } 
-            else if (p === 'font'){
+            }
+            else if (p === 'font') {
                 elementChanges[p] = Font.extend(element.props[p], elementChanges[p])
             }
         }
         return elementChanges;
     }
 
-    _onPropsChanged(element: UIElement, newProps: IUIElementProps){
-        if (this.has(element)){
-            if (newProps.hasOwnProperty("m") || newProps.hasOwnProperty("br")){
-                this.resetGlobalViewCache();                
+    _onPropsChanged(element: UIElement, newProps: IUIElementProps) {
+        if (this.has(element)) {
+            if (newProps.hasOwnProperty("m") || newProps.hasOwnProperty("br")) {
+                this.resetGlobalViewCache();
             }
-            
-            if (this.count() === 1){
+
+            if (this.count() === 1) {
                 PropertyTracker.changeProps(this, newProps, {});
                 return;
             }
             //for multiselection, capture all changes within the current tick and fire a single update on next tick
-            if (!this._newPropsForNextTick){
+            if (!this._newPropsForNextTick) {
                 this._newPropsForNextTick = {};
-            }            
-            
+            }
+
             this._newPropsForNextTick = Object.assign(this._newPropsForNextTick, newProps);
-            
-            if (this._propsChangedTimer){
+
+            if (this._propsChangedTimer) {
                 clearTimeout(this._propsChangedTimer);
                 this._propsChangedTimer = 0;
             }
             this._propsChangedTimer = setTimeout(() => this._onPropsChangedNextTick(), 1);
         }
     }
-    _onPropsChangedNextTick(){
-        if (this.isDisposed()){
+    _onPropsChangedNextTick() {
+        if (this.isDisposed()) {
             return;
         }
         var newProps = this._newPropsForNextTick;
@@ -476,14 +485,14 @@ export default class CompositeElement extends UIElement implements IGroupContain
 
         this.performArrange();
         PropertyTracker.changeProps(this, newProps, {});
-    }    
+    }
 
-    dispose(){
+    dispose() {
         super.dispose.apply(this, arguments);
         PropertyTracker.propertyChanged.unbind(this, this._onPropsChanged);
     }
 
-    padding(){
+    padding() {
         return Box.Default;
     }
 }
@@ -491,7 +500,7 @@ export default class CompositeElement extends UIElement implements IGroupContain
 CompositeElement.prototype.t = Types.CompositeElement;
 
 PropertyMetadata.registerForType(CompositeElement, {
-    groups(element){
+    groups(element) {
         return element.getCommonProperties();
     }
 });
