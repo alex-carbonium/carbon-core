@@ -45,6 +45,10 @@ export interface IMouseEventData extends IEventData{
     isDragging: boolean;
 }
 
+export interface IInteractionEventData extends IEventData{
+    interactiveElement: IComposite;
+}
+
 export interface IEvent<T>{
     raise(data: T): void;
     bind(callback: (data: T) => void): IDisposable;
@@ -61,6 +65,8 @@ export interface IDataNode{
 }
 
 export interface IUIElement extends IDataNode{        
+    getBoundingBox(): IRect;
+    getBoundingBoxGlobal(): IRect;
 }
 
 export interface IContainer extends IUIElement{
@@ -70,6 +76,10 @@ export interface IContainer extends IUIElement{
 export interface IGroupContainer extends IUIElement{    
     wrapSingleChild(): boolean;
     translateChildren(): boolean;
+}
+
+export interface IComposite extends IUIElement{
+    elements: IUIElement[];
 }
 
 export interface ILayer extends IContainer{    
@@ -85,6 +95,9 @@ export interface IView{
 }
 
 export interface IController{
+    draggingEvent: IEvent<IInteractionEventData>;
+    resizingEvent: IEvent<IInteractionEventData>;
+    rotatingEvent: IEvent<IInteractionEventData>;
     startDrawingEvent: IEvent<IEventData>;
 }
 

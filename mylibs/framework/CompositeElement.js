@@ -13,9 +13,9 @@ import Rect from "../math/rect";
 import Phantom from "./Phantom";
 import Environment from "../environment";
 import Selection from "./SelectionModel";
-import {IUIElementProps, IPoint, IRect} from "../framework/CoreModel";
+import {IUIElementProps, IPoint, IRect, IComposite} from "../framework/CoreModel";
 
-export default class CompositeElement extends UIElement implements IGroupContainer{
+export default class CompositeElement extends UIElement implements IGroupContainer, IComposite{
     constructor(){
         super();
 

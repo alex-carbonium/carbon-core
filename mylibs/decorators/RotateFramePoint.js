@@ -61,6 +61,6 @@ export default {
 
         frame.resizingElement.applyRotation(angle, frame.origin, true);
         Invalidate.requestUpperOnly();
-        Environment.controller.rotatingEvent.raise({element: frame.element, angle: angle, mouseX: mousePoint.x, mouseY: mousePoint.y});
+        Environment.controller.rotatingEvent.raise({element: frame.element, angle: angle, mouseX: mousePoint.x, mouseY: mousePoint.y, interactiveElement: frame.resizingElement});
     }
 }

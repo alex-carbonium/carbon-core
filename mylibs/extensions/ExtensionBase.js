@@ -1,6 +1,11 @@
 import Environment from "environment";
+import {IApp, IView, IController} from "../framework/CoreModel";
 
 export default class ExtensionBase {
+    app: IApp;
+    view: IView;
+    controller: IController;
+
     constructor(app, view, controller){
         this._subscriptions = [];
         this.attach(app, view, controller);

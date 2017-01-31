@@ -7,8 +7,9 @@ import PropertyMetadata from "../PropertyMetadata";
 import DefaultSettings from "../../DefaultSettings";
 import Selection from "../SelectionModel";
 import Environment from "../../environment";
+import {IComposite} from "../CoreModel";
 
-export default class InteractiveElement extends GroupContainer{
+export default class InteractiveElement extends GroupContainer implements IComposite{
     constructor(element) {
         super();
 
