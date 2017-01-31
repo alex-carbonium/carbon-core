@@ -8,7 +8,7 @@ export default {
         var group = new containerType();
 
         App.Current.activePage.nameProvider.assignNewName(group);
-        parent.insert(group, parent.children.indexOf(element));
+        parent.insert(group, parent.children.indexOf(sorted[sorted.length - 1]));
 
         for (let i = 0, l = sorted.length; i < l; ++i) {
             let element = sorted[i];
