@@ -33,7 +33,9 @@ export default {
         this._dragController.bindToController(Environment.controller);
     },
     detach: function(container){
-        this._container.disablePropsTracking();
+        if(this._container) {
+            this._container.disablePropsTracking();
+        }
         this._container = null;
         this._margins = null;
         this._activeMargin = null;

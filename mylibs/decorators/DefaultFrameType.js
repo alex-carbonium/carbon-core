@@ -68,7 +68,10 @@ export default {
     releasePoint: function(frame, point){
         point.type.release(frame, point);
 
-        frame.keyboardToken.dispose();
+        if(frame.keyboardToken){
+            frame.keyboardToken.dispose();
+            frame.keyboardToken = null;
+        }
         SnapController.clearActiveSnapLines();
     },
 
