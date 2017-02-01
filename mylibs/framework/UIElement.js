@@ -475,6 +475,11 @@ export default class UIElement extends DataNode {
             center: { x: origin.x, y: origin.y }
         };
     }
+
+    hasPath() {
+        return this.drawPath !== undefined;
+    }
+
     position() {
         if (arguments.length === 1) {
             debugger; //fix me
@@ -540,7 +545,7 @@ export default class UIElement extends DataNode {
         return true;
     }
 
-    getBoundaryRect(includeMargin = false) {
+    getBoundaryRect(includeMargin: boolean = false) : IRect {
         var br = this.props.br;
         if (!includeMargin || this.margin() === Box.Default) {
             return br;
@@ -558,10 +563,11 @@ export default class UIElement extends DataNode {
         return this.getBoundingBoxGlobal(includeMargin);
     }
 
-    getBoundingBox(includeMargin = false) {
+    getBoundingBox(includeMargin: boolean = false) : IRect {
         var rect = this.getBoundaryRect(includeMargin);
         return this.transformRect(rect, this.viewMatrix());
     }
+
     getBoundingBoxGlobal(includeMargin: boolean = false): IRect {
         if (this.runtimeProps.globalClippingBox) {
             return this.runtimeProps.globalClippingBox;
@@ -606,6 +612,7 @@ export default class UIElement extends DataNode {
         }
         return stroke.lineWidth;
     }
+    
     expandRectWithBorder(rect) {
         var border = this.getMaxOuterBorder();
         if (border !== 0) {
@@ -613,7 +620,8 @@ export default class UIElement extends DataNode {
         }
         return rect;
     }
-    getHitTestBox(scale, includeMargin = false, includeBorder = true) {
+
+    getHitTestBox(scale: number, includeMargin: boolean = false, includeBorder: boolean = true) : IRect {
         var rect = this.getBoundaryRect(includeMargin);
         var goodScaleW = rect.width * scale > 10;
         var goodScaleH = rect.height * scale > 10;

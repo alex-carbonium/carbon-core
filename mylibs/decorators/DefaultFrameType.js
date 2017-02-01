@@ -22,6 +22,7 @@ export default {
 
         return -1;
     },
+    
     updateFromElement: function (frame) {
         var e = frame.element;
         var rect = frame.element.getBoundaryRect();
@@ -40,6 +41,7 @@ export default {
 
         frame.keyboardToken = Keyboard.changed.bind(this, state => this.movePoint(frame, point, frame._mousePoint, state));
     },
+
     movePoint: function (frame, point, event, keys = Keyboard.state) {
         frame._mousePoint.set(event.x, event.y);
 

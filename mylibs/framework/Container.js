@@ -9,6 +9,7 @@ import UIElement from './UIElement';
 import QuadAndLock from './QuadAndLock';
 import logger from '../logger';
 import Matrix from '../math/matrix';
+import Rect from '../math/rect';
 
 var fwk = window.sketch.framework;
 
@@ -106,57 +107,64 @@ export default class Container extends UIElement {
     }
 
     renderMaskedElements(context, mask, i, items, environment) {
-
-        if (environment.finalRender || !mask.drawPath) {
-            var clipingRect = mask.getBoundingBoxGlobal(false, true);
-            var p1 = environment.pageMatrix.transformPoint2(clipingRect.x, clipingRect.y);
-            var p2 = environment.pageMatrix.transformPoint2(clipingRect.x + clipingRect.width, clipingRect.y + clipingRect.height);
-            p1.x = Math.max(0, 0 | p1.x * environment.contextScale);
-            p1.y = Math.max(0, 0 | p1.y * environment.contextScale);
-            p2.x = 0 | p2.x * environment.contextScale + .5;
-            p2.y = 0 | p2.y * environment.contextScale + .5;
-
-            var sw = p2.x - p1.x;
-            var sh = p2.y - p1.y;
-
-            var offContext = ContextPool.getContext(sw, sh, environment.contextScale);
-            offContext.relativeOffsetX = -p1.x;
-            offContext.relativeOffsetY = -p1.y;
-
-            offContext.save();
-            offContext.translate(-p1.x, -p1.y);
-            environment.setupContext(offContext);
-            this.globalViewMatrix().applyToContext(offContext);
-
-
-            //offContext.clearRect(clipingRect.x, clipingRect.y, clipingRect.width, clipingRect.height);
-            this.renderAfterMask(offContext, items, i, environment);
-
-            offContext.beginPath();
-            mask.viewMatrix().applyToContext(offContext);
-            offContext.globalCompositeOperation = "destination-in";
-            if (mask.drawPath) {
-                mask.drawPath(offContext, mask.width(), mask.height());
-                offContext.fillStyle = "black";
-                offContext.fill2();
-            } else {
-                mask.drawSelf(offContext, mask.width(), mask.height(), environment);
+        if (!environment.finalRender && mask.drawPath) {
+            context.beginPath();
+            if(mask.shouldApplyViewMatrix())
+            {
+                mask.globalViewMatrix().applyToContext(context);
             }
 
-            offContext.restore();
-
-            context.resetTransform();
-            context.drawImage(offContext.canvas, 0, 0, sw, sh, p1.x, p1.y, sw, sh);
-            ContextPool.releaseContext(offContext)
-        } else {
-            context.beginPath();
-            mask.viewMatrix().applyToContext(context);
             mask.drawPath(context, mask.width(), mask.height());
             context.clip("evenodd");
-            mask.viewMatrix().clone().invert().applyToContext(context);
+            if(mask.shouldApplyViewMatrix())
+            {
+                mask.globalViewMatrixInverted().applyToContext(context);
+            }
 
             this.renderAfterMask(context, items, i, environment);
+            return;
         }
+
+        var clipingRect = mask.getBoundingBoxGlobal(false, true);
+        var p1 = environment.pageMatrix.transformPoint2(clipingRect.x, clipingRect.y);
+        var p2 = environment.pageMatrix.transformPoint2(clipingRect.x + clipingRect.width, clipingRect.y + clipingRect.height);
+        p1.x = Math.max(0, 0 | p1.x * environment.contextScale);
+        p1.y = Math.max(0, 0 | p1.y * environment.contextScale);
+        p2.x = 0 | p2.x * environment.contextScale + .5;
+        p2.y = 0 | p2.y * environment.contextScale + .5;
+
+        var sw = p2.x - p1.x;
+        var sh = p2.y - p1.y;
+
+        var offContext = ContextPool.getContext(sw, sh, environment.contextScale, true);
+        offContext.relativeOffsetX = -p1.x;
+        offContext.relativeOffsetY = -p1.y;
+
+        offContext.save();
+        offContext.translate(-p1.x, -p1.y);
+        environment.setupContext(offContext);
+        
+        this.renderAfterMask(offContext, items, i, environment);
+
+        offContext.beginPath();
+        if(mask.shouldApplyViewMatrix())
+        {
+            mask.globalViewMatrix().applyToContext(offContext);
+        }
+        offContext.globalCompositeOperation = "destination-in";
+        if (mask.drawPath) {
+            mask.drawPath(offContext, mask.width(), mask.height());
+            offContext.fillStyle = "black";
+            offContext.fill2();
+        } else {
+            mask.drawSelf(offContext, mask.width(), mask.height(), environment);
+        }
+
+        offContext.restore();
+
+        context.resetTransform();
+        context.drawImage(offContext.canvas, 0, 0, sw, sh, p1.x, p1.y, sw, sh);
+        ContextPool.releaseContext(offContext)
     }
     renderAfterMask(context, items, i, environment) {
         for (; i < items.length; ++i) {
@@ -167,6 +175,7 @@ export default class Container extends UIElement {
             }
         }
     }
+
     clone() {
         if (this._cloning) {
             throw "Can't clone, chain contains recursive references";
@@ -181,6 +190,7 @@ export default class Container extends UIElement {
         delete this._cloning;
         return clone;
     }
+
     mirrorClone() {
         var clone = UIElement.prototype.mirrorClone.apply(this, arguments);
 
@@ -191,15 +201,17 @@ export default class Container extends UIElement {
 
         return clone;
     }
+
     drawChildren(context, w, h, environment) {
         this.modifyContextBeforeDrawChildren(context);
-
+        this.runtimeProps.mask = null;
         if (this.children) {
             var items = this.children;
             for (var i = 0; i < items.length; ++i) {
                 var child = items[i];
                 if (child.clipMask()) {
                     this.drawWithMask(context, child, i, environment);
+                    this.runtimeProps.mask = child;
                     break;
                 }
                 if (child.visible()) {
@@ -208,6 +220,42 @@ export default class Container extends UIElement {
             }
         }
     }
+
+    getBoundingBoxGlobal(includeMargin: boolean = false): IRect {
+        if(this.runtimeProps.mask && this.lockedGroup()) {
+            return this.runtimeProps.mask.getBoundingBoxGlobal(includeMargin);
+        }
+
+        return super.getBoundingBoxGlobal(includeMargin);
+    }
+
+    getBoundingBox(includeMargin: boolean = false) : IRect {
+        if(this.runtimeProps.mask && this.lockedGroup()) {
+            return this.runtimeProps.mask.getBoundingBox(includeMargin);
+        }
+
+        return super.getBoundingBox(includeMargin);
+    }
+
+    hitTest(/*Point*/point, scale, includeMargin = false) {        
+         if(this.runtimeProps.mask && this.lockedGroup()) {
+            return this.runtimeProps.mask.hitTest(point, scale, includeMargin );
+        }
+
+        return super.hitTest(point, scale, includeMargin);
+    }
+   
+    getBoundaryRect(includeMargin: boolean = false) : IRect {
+        var mask = this.runtimeProps.mask;
+        if(mask && this.lockedGroup()) {
+            var rect = mask.getBoundaryRect(includeMargin);
+            var pos = mask.position();
+            return new Rect(pos.x, pos.y, rect.width, rect.height);            
+        }
+
+        return super.getBoundaryRect(includeMargin);
+    }
+
     drawWithMask(context, mask, i, environment) {
         if (mask.visible()) {
             let b = mask.props.stroke;
@@ -225,6 +273,8 @@ export default class Container extends UIElement {
             mask.setProps({ fill: b }, ChangeMode.Self);
         }
     }
+
+
     drawChildSafe(child, context, environment) {
         try {
             child.draw(context, environment);
