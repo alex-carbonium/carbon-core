@@ -2,7 +2,7 @@ import Shape from "framework/Shape";
 import PropertyMetadata from "framework/PropertyMetadata";
 import DefaultFrameType from "decorators/DefaultFrameType";
 import UIElement from "framework/UIElement";
-import {PointDirection, Types} from "framework/Defs";
+import {PointDirection, Types, FrameCursors} from "framework/Defs";
 import LineDirectionPoint from "decorators/LineDirectionPoint";
 import RotateFramePoint from "decorators/RotateFramePoint";
 import Environment from "environment";
@@ -18,6 +18,7 @@ var radiusChanged = function (changes) {
 };
 
 var PolygonFrameType = {
+    cursorSet: FrameCursors,
     hitPointIndex: DefaultFrameType.hitPointIndex,
     updateFromElement: DefaultFrameType.updateFromElement,
     movePoint: DefaultFrameType.movePoint,

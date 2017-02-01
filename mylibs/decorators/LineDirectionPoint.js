@@ -2,12 +2,13 @@ import UIElement from "framework/UIElement";
 import nearestPoint from "math/NearestPoint";
 import commandManager from "framework/commands/CommandManager";
 import Invalidate from "framework/Invalidate";
-import {Types} from "../framework/Defs";
+import {Types, FrameCursors} from "../framework/Defs";
 import Environment from "environment";
 
 const PointSize = 4;
 
 export default  {
+    cursors: FrameCursors,
     hitTest (frame, point, hitPoint, scale) {
         return Math.abs(point.x - hitPoint.x) < PointSize / scale && Math.abs(point.y - hitPoint.y) < PointSize / scale;
     },

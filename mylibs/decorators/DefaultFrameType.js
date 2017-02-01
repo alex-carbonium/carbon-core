@@ -67,8 +67,8 @@ export default {
 
         point.type.change(frame, dx, dy, point, frame._mousePoint, keys);
     },
-    releasePoint: function(frame, point){
-        point.type.release(frame, point);
+    releasePoint: function(frame, point, event){
+        point.type.release(frame, point, event);
 
         if(frame.keyboardToken){
             frame.keyboardToken.dispose();

@@ -126,7 +126,7 @@ function dragging(event) {
 export default class DesignerController implements IController {
     startDrawingEvent: IEvent;
 
-    _updateCursor(eventData) {
+    updateCursor(eventData) {
         if (Cursor.hasGlobalCursor()){
             return;
         }
@@ -230,7 +230,7 @@ export default class DesignerController implements IController {
         RepeatViewListener.ensureSubscribed(this);
 
         Keyboard.changed.bind(this, this._onKeyChanged);
-        Selection.directSelectionChangedEvent.bind(() => this._updateCursor());
+        Selection.directSelectionChangedEvent.bind(() => this.updateCursor());        
 
         this.actionManager = actionManager;
     }
@@ -406,7 +406,7 @@ export default class DesignerController implements IController {
             return;
         }
 
-        this._updateCursor(eventData);
+        this.updateCursor(eventData);
         this._bubbleMouseEvent(eventData, "mousemove");
     }
 

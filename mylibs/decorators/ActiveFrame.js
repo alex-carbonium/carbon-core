@@ -1,9 +1,9 @@
-import {PointDirection, FrameCursors} from "framework/Defs";
-import UIElementDecorator from "framework/UIElementDecorator";
-import PropertyTracker from "framework/PropertyTracker";
-import Cursor from "framework/Cursor";
-import Invalidate from "framework/Invalidate";
-import Environment from "environment";
+import {PointDirection} from "../framework/Defs";
+import UIElementDecorator from "../framework/UIElementDecorator";
+import PropertyTracker from "../framework/PropertyTracker";
+import Cursor from "../framework/Cursor";
+import Invalidate from "../framework/Invalidate";
+import Environment from "../environment";
 import DefaultSettings from "../DefaultSettings";
 
 //common code for identifying frame size during resize
@@ -24,7 +24,6 @@ var SelectionFramePrototype = {
 };
 
 
-var cursors = FrameCursors;
 function updatePosition(that) {
     that._frameType.updateFromElement(that._frame);
     Invalidate.requestUpperOnly();
@@ -52,6 +51,7 @@ function onMouseDown(event) {
 
     if (pointId >= 0 && !this._originalPoint) {
         this._originalPoint = this._frame.points[pointId];
+        this._originalCursor = Cursor.getCursor();
         this._frameType.capturePoint(this._frame, this._originalPoint, event);
         event.handled = true;
         this._frame.captured = true;
@@ -61,10 +61,15 @@ function onMouseDown(event) {
 
 function onMouseUp(event) {
     if (this._originalPoint) {
-        this._frameType.releasePoint(this._frame, this._originalPoint);
+        this._frameType.releasePoint(this._frame, this._originalPoint, event);
         this._frame.captured = false;
         updatePosition(this);
-        delete this._originalPoint;
+        delete this._originalPoint;        
+
+        //specific to rotation, but generalized - when releasing mouse, cursor could be over another point, so update it
+        onMouseMove.call(this, event);
+        Environment.controller.updateCursor(event);        
+
         event.handled = true;
         return false;
     }
@@ -80,7 +85,7 @@ function onMouseMove(event) {
         if (pointIndex !== -1) {
             var p = this._frame.points[pointIndex];
             var cursorIndex = p.type.rotateCursorPointer(p.cursor, this._frame.element.angle());
-            event.cursor = cursors[cursorIndex];
+            event.cursor = p.type.cursorSet[cursorIndex];
         }
     }
 }

@@ -119,10 +119,15 @@ export var FrameCursors = [
     'sw-resize',
     'w-resize',
     'nw-resize',
-    'rotate_cursor',
+    '', //removed
     'move',
     'move_point'
 ];
+
+export var RotationCursors = [];
+for (let i = 0; i < 8; ++i){
+    RotationCursors.push("rotate" + i);
+}
 
 export var TextAlign = {
     left: 1,
