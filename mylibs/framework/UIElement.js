@@ -278,8 +278,13 @@ export default class UIElement extends DataNode {
         this.setTransform(m, changeMode);
     }
 
-    getRotation() {
-        return -this.dm().rotation;
+    getRotation(global: boolean = false) {
+        var decomposed = global ? this.gdm() : this.dm();
+        var angle = -decomposed.rotation;
+        if (angle < 0){
+            angle = 360 + angle;
+        }
+        return angle;
     }
     applyRotation(angle, o, withReset, mode) {
         if (withReset) {
@@ -287,8 +292,8 @@ export default class UIElement extends DataNode {
         }
         this.applyTransform(Matrix.create().rotate(-angle, o.x, o.y), false, mode);
     }
-    isRotated() {
-        return this.getRotation() % 360 !== 0;
+    isRotated(global: boolean = false) {
+        return this.getRotation(global) % 360 !== 0;
     }
 
     applyScaling(s, o, options) {
@@ -703,6 +708,7 @@ export default class UIElement extends DataNode {
         delete this.runtimeProps.globalClippingBox;
         delete this.runtimeProps.snapPoints;
         delete this.runtimeProps.dm;
+        delete this.runtimeProps.gdm;
         //primitive root should be changed only when changing parent, it is needed for repeater clones
         if (resetPrimitiveRoot) {
             delete this.runtimeProps.primitiveRoot;
@@ -716,6 +722,12 @@ export default class UIElement extends DataNode {
             this.runtimeProps.dm = this.props.m.decompose();
         }
         return this.runtimeProps.dm;
+    }
+    gdm() {
+        if (!this.runtimeProps.gdm) {
+            this.runtimeProps.gdm = this.globalViewMatrix().decompose();
+        }
+        return this.runtimeProps.gdm;
     }
     viewMatrixInverted() {
         if (!this.runtimeProps.viewMatrixInverted) {
@@ -958,7 +970,7 @@ export default class UIElement extends DataNode {
         if (arguments.length !== 0) {
             this.applyRotation(value - this.angle(), this.center(), false, changeMode);
         }
-        return -this.globalViewMatrix().decompose().rotation;
+        return this.getRotation(true);
     }
     br(value) {
         if (value !== undefined) {
@@ -1529,7 +1541,7 @@ export default class UIElement extends DataNode {
                     moveDirection: PointDirection.Any,
                     x: 0,
                     y: 0,
-                    cursor: 8,
+                    cursor: 0,
                     update: function (p, x, y, w, h) {
                         p.x = x;
                         p.y = y;
@@ -1540,7 +1552,7 @@ export default class UIElement extends DataNode {
                     moveDirection: PointDirection.Any,
                     x: 0,
                     y: 0,
-                    cursor: 8,
+                    cursor: 2,
                     update: function (p, x, y, w, h) {
                         p.x = x + w;
                         p.y = y;
@@ -1551,7 +1563,7 @@ export default class UIElement extends DataNode {
                     moveDirection: PointDirection.Any,
                     x: 0,
                     y: 0,
-                    cursor: 8,
+                    cursor: 4,
                     update: function (p, x, y, w, h) {
                         p.x = x + w;
                         p.y = y + h;
@@ -1562,7 +1574,7 @@ export default class UIElement extends DataNode {
                     moveDirection: PointDirection.Any,
                     x: 0,
                     y: 0,
-                    cursor: 8,
+                    cursor: 6,
                     update: function (p, x, y, w, h) {
                         p.x = x;
                         p.y = y + h;

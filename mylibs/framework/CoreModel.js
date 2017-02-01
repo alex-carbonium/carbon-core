@@ -43,6 +43,7 @@ export interface IMouseEventData extends IEventData{
     x: number;
     y: number;
     isDragging: boolean;
+    cursor: string;
 }
 
 export interface IInteractionEventData extends IEventData{
@@ -99,6 +100,8 @@ export interface IController{
     resizingEvent: IEvent<IInteractionEventData>;
     rotatingEvent: IEvent<IInteractionEventData>;
     startDrawingEvent: IEvent<IEventData>;
+
+    updateCursor(eventData: IMouseEventData): void;
 }
 
 // -------------------- props

@@ -1,7 +1,7 @@
 import Shape from "framework/Shape";
 import Brush from "framework/Brush";
 import Path from "ui/common/Path";
-import {PointDirection, Types} from "./Defs";
+import {PointDirection, Types, FrameCursors} from "./Defs";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import Selection from "framework/SelectionModel";
@@ -21,6 +21,7 @@ var PointSize = 6
     , PointSize2 = 3;
 
 var LinePoint = {
+    cursorSet: FrameCursors,
     hitTest (frame, point, hitPoint, scale) {
         return Math.abs(point.x - hitPoint.x) < PointSize / scale && Math.abs(point.y - hitPoint.y) < PointSize / scale;
     },

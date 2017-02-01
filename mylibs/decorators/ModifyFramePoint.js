@@ -1,12 +1,13 @@
 import UIElement from "framework/UIElement";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
-import {Types} from "../framework/Defs";
+import {Types, FrameCursors} from "../framework/Defs";
 
 const PointSize = 5
     , PointSize2 = 2;
 
 export default {
+    cursorSet: FrameCursors, 
     hitTest: function (frame, point, hitPoint, scale) {
         return Math.abs(point.x - hitPoint.x) < PointSize / scale && Math.abs(point.y - hitPoint.y) < PointSize / scale;
     },

@@ -4,7 +4,7 @@ import QuadAndLock from "framework/QuadAndLock";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Brush from "framework/Brush";
 import Shadow from "framework/Shadow";
-import {PointDirection, Types, StrokePosition} from "framework/Defs";
+import {PointDirection, Types, StrokePosition, FrameCursors} from "framework/Defs";
 import nearestPoint from "math/NearestPoint";
 import commandManager from "framework/commands/CommandManager";
 import Path from "ui/common/Path";
@@ -26,6 +26,7 @@ function getOffsetForPoint(w, h, scale, value) {
 }
 
 var LineDirectionPoint = {
+    cursorSet: FrameCursors,
     hitTest (frame, point, hitPoint, scale) {
         return Math.abs(point.x - hitPoint.x) < PointSize / scale && Math.abs(point.y - hitPoint.y) < PointSize / scale;
     },
@@ -60,7 +61,7 @@ var LineDirectionPoint = {
         }
     },
     rotateCursorPointer (index, angle) {
-        var dc = ~~(((angle + 23) % 360) / 45);
+        var dc = ~~(((360 - angle + 23) % 360) / 45);
         return (index + dc) % 8;
     },
     update: function (p, x, y, w, h, element, scale) {

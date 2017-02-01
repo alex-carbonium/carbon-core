@@ -2,7 +2,7 @@ import UIElement from "framework/UIElement";
 import Environment from "environment";
 import SnapController from "framework/SnapController";
 import ResizeOptions from "./ResizeOptions";
-import {Types} from "../framework/Defs";
+import {Types, FrameCursors} from "../framework/Defs";
 import Point from "../math/point";
 import Rect from "../math/rect";
 import {fitRect} from "../math/Fitting";
@@ -14,6 +14,7 @@ const PointSize = 6
     , PointSize2 = 3;
 
 export default {
+    cursorSet: FrameCursors,
     hitTest: function (frame, point, hitPoint, scale) {
         return Math.abs(point.x - hitPoint.x) < PointSize / scale && Math.abs(point.y - hitPoint.y) < PointSize / scale;
     },
@@ -28,7 +29,7 @@ export default {
     },
     capture: function (frame, point) {
         frame.globalViewMatrix = frame.element.globalViewMatrix();
-        frame.isRotated = frame.globalViewMatrix.decompose().rotation % 360 !== 0;
+        frame.isRotated = frame.element.isRotated(true);
 
         if (!frame.isRotated && DefaultSettings.snapTo.enabled && DefaultSettings.snapTo.pixels){
             frame.element.roundBoundingBoxToPixelEdge();
@@ -66,7 +67,7 @@ export default {
         }
     },
     rotateCursorPointer: function (index, angle) {
-        var dc = ~~(((angle + 23) % 360) / 45);
+        var dc = ~~(((360 - angle + 23) % 360) / 45);
         return (index + dc) % 8;
     },
     change: function (frame, dx, dy, point, mousePoint, keys) {

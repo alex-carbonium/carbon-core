@@ -17,7 +17,7 @@ class Cursor {
         return false; 
     }
 
-    getCursor(){
+    getCursor(): string{
         return this._cursor;
     }
 
