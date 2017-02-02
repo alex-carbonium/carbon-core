@@ -413,7 +413,7 @@ export default class DropVisualization extends ExtensionBase {
             element.drawBoundaryPath(context);
         }
 
-        var mutltiplier = 3 / view.scale();
+        var mutltiplier = 2 / view.scale();
         Brush.stroke(HighlightBrush, context, 0, 0, 0, 0, mutltiplier);
         context.restore();
     }

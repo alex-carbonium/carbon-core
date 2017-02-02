@@ -9,7 +9,7 @@ define(["framework/commands/Command", "framework/sync/Primitive"], function(Comm
             return sketch.commands.Duplicate.createWithMove(selection, "both", offset);
         },
         createWithMove:function(selection, direction, offset){
-            if (selection.length === 0){
+            if (!selection || selection.length === 0){
                 return;
             }
             offset = offset===undefined?5:offset;

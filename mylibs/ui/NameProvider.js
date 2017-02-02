@@ -24,7 +24,8 @@ export default class NameProvider {
     }
 
     assignNewName(element){
-        var namesMap = this._namesMap;
+        let namesMap = this._namesMap;
+        let lastLabel = null;
         while(true) {
             var displayType = element.displayType();
             var index = this.getNextIndex(element, displayType);
@@ -32,7 +33,8 @@ export default class NameProvider {
                 id: displayType,
                 defaultMessage: displayType
             }, {index: index});
-            if(!namesMap[label]) break;
+            if(!namesMap[label] || lastLabel === label) break;
+            lastLabel = label;
         }
         namesMap[label] = true;
 

@@ -7,11 +7,7 @@ import PropertyMetadata from "../PropertyMetadata";
 import TextEngine from "./textengine";
 import styleManager from "../style/StyleManager";
 
-class Text extends UIElement {
-    displayType(){
-        return "Text";
-    }
-
+class Text extends UIElement {    
     prepareProps(changes){
         super.prepareProps(changes);
         var contentChanged = changes.content !== undefined;
