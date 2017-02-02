@@ -14,6 +14,8 @@ import Rect from '../math/rect';
 var fwk = window.sketch.framework;
 
 export default class Container extends UIElement {        
+    children: UIElement[];
+
     constructor() {
         super();
         this.children = [];

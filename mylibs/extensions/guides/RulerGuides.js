@@ -209,27 +209,33 @@ export default class RulerGuides {
         SnapController.clearActiveSnapLines();
 
         if (this._guideX !== null) {
-            if (this._guideX.id && isPointInRect(this._rectVertical, e)) {
+            let shouldDelete = isPointInRect(this._rectVertical, e);
+            if (this._guideX.id && shouldDelete) {
                 this.deleteGuideX(this._guideX);
             }
-            else if (!this._guideX.id) {
-                this._guideX.id = createUUID();
-                this._origin.patchProps(PatchType.Insert, "guidesX", this._guideX)
-            }
-            else {
-                this._origin.patchProps(PatchType.Change, "guidesX", this._guideX)
+            else if (!shouldDelete) {
+                if (!this._guideX.id) {
+                    this._guideX.id = createUUID();
+                    this._origin.patchProps(PatchType.Insert, "guidesX", this._guideX)
+                }
+                else {
+                    this._origin.patchProps(PatchType.Change, "guidesX", this._guideX)
+                }
             }
         }
         else if (this._guideY !== null) {
-            if (this._guideY.id && e.y < this._rectHorizontal.y + this._rectHorizontal.height) {
+            let shouldDelete = e.y < this._rectHorizontal.y + this._rectHorizontal.height;
+            if (this._guideY.id && shouldDelete) {
                 this.deleteGuideY(this._guideY);
             }
-            else if (!this._guideY.id) {
-                this._guideY.id = createUUID();
-                this._origin.patchProps(PatchType.Insert, "guidesY", this._guideY)
-            }
-            else {
-                this._origin.patchProps(PatchType.Change, "guidesY", this._guideY)
+            else if (!shouldDelete) {
+                if (!this._guideY.id) {
+                    this._guideY.id = createUUID();
+                    this._origin.patchProps(PatchType.Insert, "guidesY", this._guideY)
+                }
+                else {
+                    this._origin.patchProps(PatchType.Change, "guidesY", this._guideY)
+                }
             }
         }
 
@@ -239,7 +245,7 @@ export default class RulerGuides {
         this._hoverArtboard = null;
         this._removingGuide = false;
 
-        this._customGuides.releaseCaptured();                
+        this._customGuides.releaseCaptured();
         Invalidate.requestUpperOnly();
     };
     onClicked = e => {
@@ -262,7 +268,7 @@ export default class RulerGuides {
             let x = Math.round(e.x - this._origin.x());
             let y = Math.round(e.y - this._origin.y());
 
-            react = isPointInRect(this._rectVertical, e) || isPointInRect(this._rectHorizontal, e);            
+            react = isPointInRect(this._rectVertical, e) || isPointInRect(this._rectHorizontal, e);
         }
 
         e.handled = react;

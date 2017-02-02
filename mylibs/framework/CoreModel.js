@@ -66,8 +66,13 @@ export interface IDataNode{
 }
 
 export interface IUIElement extends IDataNode{        
+    shouldApplyViewMatrix(): boolean;
+
     getBoundingBox(): IRect;
     getBoundingBoxGlobal(): IRect;
+
+    hitTest(point: IPoint, scale: number, includeMargin: boolean): boolean;
+    hitTestGlobalRect(rect: IRect, directSelection: boolean): boolean;
 }
 
 export interface IContainer extends IUIElement{

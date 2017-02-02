@@ -4,6 +4,7 @@ import Keyboard from "../platform/Keyboard";
 import Point from "../math/point";
 import SnapController from "../framework/SnapController";
 import {PointDirection} from "../framework/Defs";
+import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
 
 export default {
     strokeStyle: DefaultSettings.frame.stroke,
@@ -96,7 +97,14 @@ export default {
                     context.save();
                     context.strokeStyle = this.strokeStyle;
                     context.lineWidth = 1;
-                    frame.element.drawBoundaryPath(context, matrix);
+                    context.beginPath();
+                    try{
+                        GlobalMatrixModifier.push(m => matrix);
+                        frame.element.drawBoundaryPath(context);
+                    }   
+                    finally{
+                        GlobalMatrixModifier.pop();
+                    }                 
                     context.stroke();
                     context.restore();
                 }

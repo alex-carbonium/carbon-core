@@ -68,7 +68,7 @@ export default class RulerExtension extends RuntimeExtension {
 
         this.registerForDispose(controller.onArtboardChanged.bind(this, this.onArtboardChanged));
         this.registerForDispose(Selection.onElementSelected.bind(this, this.onSelection));
-        
+
         this.registerForDispose(this.controller.draggingEvent.bind(this, this.onDragOrTransform));
         this.registerForDispose(this.controller.resizingEvent.bind(this, this.onDragOrTransform));
         this.registerForDispose(this.controller.rotatingEvent.bind(this, this.onDragOrTransform));
@@ -107,7 +107,7 @@ export default class RulerExtension extends RuntimeExtension {
         this.setHighlight(selection);
     }
 
-    onDragOrTransform(eventData: IInteractionEventData){
+    onDragOrTransform(eventData: IInteractionEventData) {
         this.setHighlight(eventData.interactiveElement);
     }
 
@@ -157,12 +157,15 @@ export default class RulerExtension extends RuntimeExtension {
         }
 
         var box = selection.getBoundingBoxGlobal();
-        this._highlight = {
-            x: Math.round(box.x) * this._settings.scale - this._originX,
-            y: Math.round(box.y) * this._settings.scale - this._originY,
-            width: box.width * this._settings.scale + .5 | 0,
-            height: box.height * this._settings.scale + .5 | 0
-        };
+
+        if (box.width !== 0 || box.height !== 0) {
+            this._highlight = {
+                x: Math.round(box.x) * this._settings.scale - this._originX,
+                y: Math.round(box.y) * this._settings.scale - this._originY,
+                width: box.width * this._settings.scale + .5 | 0,
+                height: box.height * this._settings.scale + .5 | 0
+            };
+        }
     }
 
     checkRefreshCache() {

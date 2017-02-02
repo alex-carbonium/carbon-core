@@ -144,7 +144,8 @@ export class FrameEditTool{
         context.save();
         context.setLineDash([20, 10]);
         context.strokeStyle = "#444";
-        this._frame.drawBoundaryPath(context, this._frame.globalViewMatrix());
+        context.beginPath();
+        this._frame.drawBoundaryPath(context);
         context.stroke();
         context.restore();
     }

@@ -166,9 +166,10 @@ class DraggingElement extends InteractiveElement {
             var scale = Environment.view.scale();
             context.scale(1/scale, 1/scale);
 
+            context.beginPath();
             for (var i = 0; i < this.children.length; i++){
                 var child = this.children[i];
-                child.drawBoundaryPath(context, child.globalViewMatrix().prependedWithScale(scale, scale));
+                child.drawBoundaryPath(context);
             }
 
             Brush.stroke(this.stroke(), context);

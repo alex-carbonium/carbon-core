@@ -54,7 +54,8 @@ export default class FrameContent extends UIElement{
         context.resetTransform();
         context.scale(Environment.view.contextScale, Environment.view.contextScale);
         environment.pageMatrix.applyToContext(context);
-        this._frame.drawBoundaryPath(context, this._frame.globalViewMatrix());
+        context.beginPath();
+        this._frame.drawBoundaryPath(context);
         context.clip();
         this.applyViewMatrix(context);
         this._clone.drawSelf(context, w, h, environment);

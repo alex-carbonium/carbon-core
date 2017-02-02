@@ -13,6 +13,7 @@ import { isRectInRect, areRectsIntersecting } from "../math/math";
 import stopwatch from "../Stopwatch";
 import ResizeDimension from "./ResizeDimension";
 import Constraints from "./Constraints";
+import GlobalMatrixModifier from "./GlobalMatrixModifier";
 import {
     Types,
     DockStyle,
@@ -46,7 +47,7 @@ fwk.DockValues = { left: "Left", top: "Top", bottom: "Bottom", right: "Right", f
 
 // constructor
 export default class UIElement extends DataNode {
-    constructor() {        
+    constructor() {
         super();
 
         // public variables
@@ -106,7 +107,7 @@ export default class UIElement extends DataNode {
         return false;
     }
 
-    allowNameTranslation(){
+    allowNameTranslation() {
         return true;
     }
 
@@ -180,15 +181,14 @@ export default class UIElement extends DataNode {
     getDisplayPropValue(propertyName: string, descriptor: PropertyDescriptor = null): any {
         if (!descriptor) {
             var metadata = this.findMetadata();
-            if(metadata)
-            {
+            if (metadata) {
                 descriptor = metadata[propertyName];
             }
         }
         if (descriptor && descriptor.computed) {
             return this[propertyName]();
         }
-        
+
         return this.props[propertyName];
     }
     setDisplayProps(changes, changeMode, metadata = this.findMetadata()) {
@@ -281,7 +281,7 @@ export default class UIElement extends DataNode {
     getRotation(global: boolean = false) {
         var decomposed = global ? this.gdm() : this.dm();
         var angle = -decomposed.rotation;
-        if (angle < 0){
+        if (angle < 0) {
             angle = 360 + angle;
         }
         return angle;
@@ -666,8 +666,8 @@ export default class UIElement extends DataNode {
 
         return point.x >= rect.x && point.x < rect.x + rect.width && point.y >= rect.y && point.y < rect.y + rect.height;
     }
-    hitTestGlobalRect(rect) {
-        if (!this.hitVisible()) {
+    hitTestGlobalRect(rect: IRect, directSelection: boolean) {
+        if (!this.hitVisible(directSelection)) {
             return false;
         }
 
@@ -783,11 +783,10 @@ export default class UIElement extends DataNode {
             context.restore();
         }
     }
-    drawBoundaryPath(context, matrix, round = true) {
+    drawBoundaryPath(context, round = true) {
+        var matrix = this.globalViewMatrix();
         var r = this.getBoundaryRect();
         const roundFactor = 2;
-
-        context.beginPath();
 
         var p = matrix.transformPoint2(r.x, r.y);
         if (round) {
@@ -815,6 +814,7 @@ export default class UIElement extends DataNode {
 
         context.closePath();
     }
+
     primitiveRoot() {
         if (this.runtimeProps.primitiveRoot) {
             return this.runtimeProps.primitiveRoot;
@@ -833,20 +833,18 @@ export default class UIElement extends DataNode {
         return element.clone();
     }
     globalViewMatrix() {
-        if (this.runtimeProps.globalViewMatrix) {
-            return this.runtimeProps.globalViewMatrix;
+        if (!this.runtimeProps.globalViewMatrix) {
+            var parent = this.parent();
+            if (!parent || parent === NullContainer) {
+                return this.viewMatrix();
+            }
+
+            var matrix = parent.globalViewMatrix().clone();
+            matrix.append(this.viewMatrix());
+            this.runtimeProps.globalViewMatrix = Object.freeze(matrix);
         }
 
-        var parent = this.parent();
-        if (!parent || parent === NullContainer) {
-            return this.viewMatrix();
-        }
-
-        var matrix = parent.globalViewMatrix().clone();
-        matrix.append(this.viewMatrix());
-        this.runtimeProps.globalViewMatrix = Object.freeze(matrix);
-
-        return this.runtimeProps.globalViewMatrix;
+        return GlobalMatrixModifier.applyToMatrix(this.runtimeProps.globalViewMatrix);
     }
     globalViewMatrixInverted() {
         if (!this.runtimeProps.globalViewMatrixInverted) {
@@ -855,14 +853,21 @@ export default class UIElement extends DataNode {
 
         return this.runtimeProps.globalViewMatrixInverted;
     }
+
     trackPropertyState(name) {
         return null;
     }
     clip(context) {
         if (this.clipSelf()) {
-            var m = this.shouldApplyViewMatrix() ? Matrix.Identity : this.globalViewMatrix();
-            this.drawBoundaryPath(context, m);
-            context.clip();
+            GlobalMatrixModifier.push(m => this.shouldApplyViewMatrix() ? Matrix.Identity : m);
+            try {
+                context.beginPath();
+                this.drawBoundaryPath(context);
+                context.clip();
+            }
+            finally {
+                GlobalMatrixModifier.pop();
+            }
         }
     }
     mousemove(event) {
@@ -1012,7 +1017,7 @@ export default class UIElement extends DataNode {
     isTemporary(value) {
         return this.field("_isTemporary", value, false);
     }
-    hitVisible(directSelection) {
+    hitVisible(directSelection: boolean) {
         if (this.locked() || !this.visible()) {
             return false;
         }

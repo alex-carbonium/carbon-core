@@ -63,16 +63,19 @@ export default {
 
         var v = new Point(mousePoint.x - frame.origin.x, mousePoint.y - frame.origin.y);
         var angle = v.getDirectedAngle(frame.captureVector);
+        var fullAngle = Math.round(frame.initialAngle + angle);
 
         if (keys.shift) {
-            angle = ~~(angle / 15) * 15;
+            fullAngle = Math.round(fullAngle / 15) * 15;
+            angle = fullAngle - frame.initialAngle;
         }
-        angle = Math.round(angle);
+        else{
+            angle = Math.round(angle);
+        }        
 
         frame.resizingElement.applyRotation(angle, frame.origin, true);
         Invalidate.requestUpperOnly();
-
-        var fullAngle = Math.round(frame.initialAngle + angle);
+        
         Environment.controller.rotatingEvent.raise({element: frame.element, angle: fullAngle, mouseX: mousePoint.x, mouseY: mousePoint.y, interactiveElement: frame.resizingElement});
 
         Cursor.setCursor(this._getCursor(point, fullAngle));

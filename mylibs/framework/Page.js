@@ -8,6 +8,7 @@ import ContextPool from "framework/render/ContextPool";
 import EventHelper from "./EventHelper";
 import Brush from "./Brush";
 import NameProvider from "ui/NameProvider";
+import {IContainer, IRect} from "./CoreModel";
 
 function findNextPageName() {
     var maxId = 0;
@@ -66,7 +67,7 @@ class Page extends Layer {
 
         return selection;
     }
-    _collectDescendantsInRect(container, rect, selection){
+    _collectDescendantsInRect(container: IContainer, rect: IRect, selection){
         for (var i = 0; i < container.children.length; i++){
             var element = container.children[i];
             if (element.hitTestGlobalRect(rect)){

@@ -11,19 +11,18 @@ import DesignerView from "framework/DesignerView";
 import Layer from "framework/Layer";
 import Container from "../framework/Container";
 import Environment from "../environment";
+import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
 
-var fwk = sketch.framework;
 var HighlightBrush = Brush.createFromColor(SharedColors.Highlight);
-
 
 class ResizeHint extends Rectangle {
     constructor() {
         super();
-        this.fill(fwk.Brush.Black);
+        this.fill(Brush.Black);
         this.opacity(0.7);
     }
 
-    hitVisible(){
+    hitVisible() {
         return false;
     }
 
@@ -81,32 +80,48 @@ class ResizeHint extends Rectangle {
 }
 
 class DropLine extends Line {
-    hitVisible(){
+    hitVisible() {
         return false;
     }
 }
 
-class SelectionRect extends UIElement{
-    constructor(element){
+class SelectionRect extends UIElement {
+    _element: UIElement;
+
+    constructor(element) {
         super();
         this._element = element;
     }
 
-    drawSelf(context){
+    drawSelf(context) {
         var scale = Environment.view.scale();
 
         context.save();
-        context.scale(1/scale, 1/scale);
+        context.scale(1 / scale, 1 / scale);
         context.setLineDash([1, 1]);
+        context.beginPath();
+        
+        try {
+            GlobalMatrixModifier.pushPrependScale();
 
-        var matrix = this._element.globalViewMatrix().prependedWithScale(scale, scale);
-        this._element.drawBoundaryPath(context, matrix);
+            if (this._element.drawPath) {
+                this._element.applyViewMatrix(context);
+                this._element.drawPath(context, this._element.width(), this._element.height());
+            } 
+            else {
+                this._element.drawBoundaryPath(context);
+            }
+        }
+        finally {
+            GlobalMatrixModifier.pop();
+        }
+
         Brush.stroke(HighlightBrush, context);
 
         context.restore();
     }
 
-    hitVisible(){
+    hitVisible() {
         return false;
     }
 }
@@ -116,14 +131,14 @@ var onDraggingElement = function (event) {
     return;
     if (event.draggingElement.isDropSupported() && event.target != null && event.target.canAccept(event.draggingElement.elements) && !(event.target instanceof Layer), event) {
         this._target = event.target !== event.element.parent() ? event.target : null;
-        this._dropData = event.target.getDropData({x: event.mouseX, y: event.mouseY}, event.element);
+        this._dropData = event.target.getDropData({ x: event.mouseX, y: event.mouseY }, event.element);
     } else {
         this._target = null;
         this._dropData = null;
     }
     var p = event.draggingElement.position();
     if (event.element.showDropTarget() && this._target) {
-        if (this._target instanceof Container){
+        if (this._target instanceof Container) {
             p = this._target.global2local(p);
         }
         this._targetRect = this._target.getBoundaryRectGlobal();
@@ -133,13 +148,13 @@ var onDraggingElement = function (event) {
     }
 
     if (!this._resizing && !this._rotating) {
-        if (event.element.showResizeHint()){
+        if (event.element.showResizeHint()) {
             this._hint.updateText("Left: " + ~~(p.x + 0.5) + "px\nTop: " + ~~(p.y + 0.5) + "px", {
                 x: event.mouseX,
                 y: event.mouseY
             });
         }
-        else{
+        else {
             this._hint.updateText(null, null);
         }
     }
@@ -171,11 +186,11 @@ var onMouseMove = function (event) {
     var target = this.app.activePage.hitElement(event, this.view.scale(), null, event.ctrlKey);
     if (this._target !== target) {
         //special case - do not highlight children of active group even though they are hit visible
-        if (target && !event.ctrlKey && target.parent() instanceof Container && target.parent().activeGroup()){
+        if (target && !event.ctrlKey && target.parent() instanceof Container && target.parent().activeGroup()) {
             target = target.parent();
         }
 
-        if (target){
+        if (target) {
             if (!Selection.isElementSelected(target)) {
                 if (target.canSelect() && !target.locked() && (!target.lockedGroup || target.lockedGroup())) {
                     this._target = target;
@@ -271,7 +286,7 @@ function onStopResizing() {
 
 function onResizing(event) {
     var rect = event.rect;
-    if (event.element.showResizeHint()){
+    if (event.element.showResizeHint()) {
         this._hint.updateText("Width: " + ~~(rect.width + 0.5) + "px\nHeight: " + ~~(rect.height + 0.5) + "px", {
             x: event.mouseX,
             y: event.mouseY
@@ -290,14 +305,14 @@ function onStopRotating() {
 }
 
 function onRotating(event) {
-    if (event.element.showResizeHint()){
-        this._hint.updateText("Angle: " + event.angle + "°", {x: event.mouseX, y: event.mouseY});
+    if (event.element.showResizeHint()) {
+        this._hint.updateText("Angle: " + event.angle + "°", { x: event.mouseX, y: event.mouseY });
     }
 }
 
 var appLoaded = function () {
     var controller = this.controller;
-    if(!controller){
+    if (!controller) {
         return;
     }
     this.registerForDispose(controller.draggingEvent.bind(this, onDraggingElement));
@@ -356,7 +371,7 @@ function updateTargetRect() {
 
 export default class DropVisualization extends ExtensionBase {
     attach(app, view, controller) {
-        if(!(view instanceof DesignerView)){
+        if (!(view instanceof DesignerView)) {
             return;
         }
         super.attach.apply(this, arguments);
@@ -365,7 +380,7 @@ export default class DropVisualization extends ExtensionBase {
         app.addLoadRef();
         this._dropLine = new DropLine();
         this._dropLine.setProps({
-            stroke: fwk.Brush.createFromColor("red")
+            stroke: Brush.createFromColor("red")
         });
         this._dropLine.crazySupported(false);
 
@@ -395,11 +410,11 @@ export default class DropVisualization extends ExtensionBase {
             element.applyViewMatrix(context);
             element.drawPath(context, element.width(), element.height());
         } else {
-            element.drawBoundaryPath(context, element.globalViewMatrix());
+            element.drawBoundaryPath(context);
         }
 
         var mutltiplier = 3 / view.scale();
-        fwk.Brush.stroke(HighlightBrush, context, 0, 0, 0, 0, mutltiplier);
+        Brush.stroke(HighlightBrush, context, 0, 0, 0, 0, mutltiplier);
         context.restore();
     }
 }

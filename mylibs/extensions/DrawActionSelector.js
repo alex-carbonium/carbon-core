@@ -161,6 +161,7 @@ var registerCommands = function () {
         that.detachAll();
         Selection.directSelectionEnabled(false);
         that.app.allowSelection(true);
+        that.app.currentTool = ViewTool.Pointer;
         Selection.refreshSelection();
     }, "ui-arrow");
 
@@ -169,6 +170,7 @@ var registerCommands = function () {
         Selection.directSelectionEnabled(true);
         Selection.invertDirectSelection(true);
         that.app.allowSelection(true);
+        that.app.currentTool = ViewTool.PointerDirect;
         Invalidate.requestUpperOnly();
     }, "ui-arrow-black");
 
