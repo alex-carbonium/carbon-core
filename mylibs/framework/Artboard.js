@@ -3,9 +3,9 @@ import Brush from "framework/Brush";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Page from "framework/Page";
 import * as math from "math/math";
-import {isPointInRect} from "math/math";
+import { isPointInRect } from "math/math";
 import SharedColors from "ui/SharedColors";
-import {ChangeMode, TileSize, Types, ArtboardResource, PatchType} from "./Defs";
+import { ChangeMode, TileSize, Types, ArtboardResource, PatchType } from "./Defs";
 import RelayoutEngine from "./relayout/RelayoutEngine";
 import PropertyStateRecorder from "framework/PropertyStateRecorder";
 import ModelStateListener from "framework/sync/ModelStateListener";
@@ -68,7 +68,7 @@ class Artboard extends Container {
 
                 var screen = frame.findElementByName('screen');
                 if (!screen) {
-                    this.setProps({frame: null});
+                    this.setProps({ frame: null });
                     return null;
                 }
 
@@ -76,8 +76,8 @@ class Artboard extends Container {
                 frame.runtimeProps.cloneVersion = frame.version;
                 frame.runtimeProps.clone = frameClone;
 
-                frameClone.setProps({fill: Brush.Empty, stroke: Brush.Empty, m: Matrix.Identity});
-                frameClone.applyTranslation({x: 0, y: 0}, true);
+                frameClone.setProps({ fill: Brush.Empty, stroke: Brush.Empty, m: Matrix.Identity });
+                frameClone.applyTranslation({ x: 0, y: 0 }, true);
 
                 var screenRect = screen.getBoundaryRectGlobal();
                 var frameRect = frame.getBoundaryRectGlobal();
@@ -117,7 +117,7 @@ class Artboard extends Container {
 
     layoutGridSettings(value) {
         if (value !== undefined) {
-            this.setProps({layoutGridSettings: value});
+            this.setProps({ layoutGridSettings: value });
         }
         return this.props.layoutGridSettings;
     }
@@ -127,6 +127,14 @@ class Artboard extends Container {
             return this._recorder.getStateById("default").name;
         }
         return this.props.name;
+    }
+
+    minWidth() {
+        return 1;
+    }
+
+    minHeight() {
+        return 1;
     }
 
     canAccept(elements) {
@@ -142,7 +150,7 @@ class Artboard extends Container {
         if (this.props.resource === ArtboardResource.Stencil && element.children !== undefined) {
             var can = true;
             var id = this.id();
-            element.applyVisitor(e=> {
+            element.applyVisitor(e => {
                 if (e.props.source && e.props.source.artboardId === id) {
                     can = false;
                     return false;
@@ -327,7 +335,7 @@ class Artboard extends Container {
         context.restore();
     }
 
-    clipSelf(){
+    clipSelf() {
         return true;
     }
 
@@ -351,7 +359,7 @@ class Artboard extends Container {
             return [
                 {
                     label: element.name(),
-                    properties: ['stateId'].concat(properties.map(p=> {
+                    properties: ['stateId'].concat(properties.map(p => {
                         return 'custom:' + p.controlId + ':' + p.propertyName
                     }))
                 },
@@ -419,7 +427,7 @@ class Artboard extends Container {
             return res;
         }
         var pos = this.position();
-        return isPointInRect({x: pos.x, y: pos.y - 20 / scale, width: this.width(), height: 20 / scale}, point);
+        return isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width(), height: 20 / scale }, point);
     }
 
     primitiveRoot() {
@@ -459,20 +467,20 @@ class Artboard extends Container {
 
     getCustomProperties(value) {
         if (arguments.length > 0) {
-            this.setProps({customProperties: value});
+            this.setProps({ customProperties: value });
         }
         return this.props.customProperties;
     }
 
     getChildControlList() {
         var res = [];
-        this.applyVisitor(e=> {
+        this.applyVisitor(e => {
             if (e !== this) {
                 res.push(e);
             }
         })
 
-        res.sort((e1, e2)=> {
+        res.sort((e1, e2) => {
             return e1.displayName() > e2.displayName();
         })
 
@@ -489,7 +497,7 @@ class Artboard extends Container {
                 delete this.runtimeProps.refreshToolbox;
             }
 
-            if(this.props.resource != undefined) {
+            if (this.props.resource != undefined) {
                 App.Current.resourceChanged.raise(this.props.resource, this);
             }
         }
@@ -502,10 +510,10 @@ class Artboard extends Container {
     click(event) {
         var scale = Environment.view.scale();
         var pos = this.position();
-        if (isPointInRect({x: pos.x, y: pos.y - 20 / scale, width: this.width(), height: 20 / scale}, {
-                x: event.x,
-                y: event.y
-            })) {
+        if (isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width(), height: 20 / scale }, {
+            x: event.x,
+            y: event.y
+        })) {
             Selection.makeSelection([this]);
             event.handled = true;
         }
@@ -533,7 +541,7 @@ class Artboard extends Container {
 
     state(value) {
         if (value !== undefined) {
-            this.setProps({state: value});
+            this.setProps({ state: value });
         }
         return this.props.state;
     }
@@ -571,7 +579,7 @@ class Artboard extends Container {
             var transferProps = {};
             var hasAnyProps = false;
             for (var propName in props) {
-                if (element === this && (propName=='m' || propName === 'customProperties' || propName === 'state' || propName === "states" || propName === "actions" || propName === "resource" || propName === "tileSize" || propName === "insertAsContent") ) {
+                if (element === this && (propName == 'm' || propName === 'customProperties' || propName === 'state' || propName === "states" || propName === "actions" || propName === "resource" || propName === "tileSize" || propName === "insertAsContent")) {
                     continue;
                 }
 
@@ -586,14 +594,14 @@ class Artboard extends Container {
         }
     }
 
-    propsPatched (patchType, propName, item) {
+    propsPatched(patchType, propName, item) {
         super.propsPatched(patchType, propName, item);
 
-        if(propName === 'states' && patchType === PatchType.Remove){
+        if (propName === 'states' && patchType === PatchType.Remove) {
             var stateBoards = this.runtimeProps.stateBoards;
-            for(var i = 0; i < stateBoards.length; ++i){
+            for (var i = 0; i < stateBoards.length; ++i) {
                 var stateBoard = stateBoards[i];
-                if(stateBoard.stateId == item.id){
+                if (stateBoard.stateId == item.id) {
                     stateBoard.parent().remove(stateBoard);
                     break;
                 }
@@ -721,7 +729,7 @@ class Artboard extends Container {
         for (var i = 0; i < this.children.length; i++) {
             var e = this.children[i];
             var clone = e.clone();
-            clone.setProps({masterId: e.id()}, ChangeMode.Self);
+            clone.setProps({ masterId: e.id() }, ChangeMode.Self);
             stateBoard.add(clone, ChangeMode.Root);
         }
 
@@ -750,11 +758,11 @@ class Artboard extends Container {
     }
 
     replaceAction(oldAction, newAction) {
-        var index = this.props.actions.findIndex(a=>a === oldAction);
+        var index = this.props.actions.findIndex(a => a === oldAction);
         if (index >= 0) {
             var newActions = this.props.actions.slice();
             newActions.splice(index, 1, newAction);
-            this.setProps({actions: newActions});
+            this.setProps({ actions: newActions });
         }
     }
 }
@@ -790,11 +798,11 @@ PropertyMetadata.registerForType(Artboard, {
         defaultValue: null,
         options: {
             items: [
-                {name: "None", value: null},
-                {name: "Stencil", value: ArtboardResource.Stencil},
-                {name: "Template", value: ArtboardResource.Template},
-                {name: "Frame", value: ArtboardResource.Frame},
-                {name: "Palette", value: ArtboardResource.Palette},
+                { name: "None", value: null },
+                { name: "Stencil", value: ArtboardResource.Stencil },
+                { name: "Template", value: ArtboardResource.Template },
+                { name: "Frame", value: ArtboardResource.Frame },
+                { name: "Palette", value: ArtboardResource.Palette },
             ]
         }
     },
@@ -839,7 +847,7 @@ PropertyMetadata.registerForType(Artboard, {
         type: "frame",
         defaultValue: null
     },
-    prepareVisibility(props){
+    prepareVisibility(props) {
         var showAsStencil = props.resource === ArtboardResource.Stencil;
         return {
             tileSize: showAsStencil,

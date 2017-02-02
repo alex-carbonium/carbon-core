@@ -115,6 +115,16 @@ export default {
         if (round){
             var oldRect = frame.originalBoundingBox;
             var newRect = oldRect.scale(s, origin).roundMutable();
+            var minWidth = frame.element.minWidth();
+            var minHeight = frame.element.minHeight();
+            
+            if(minWidth && newRect.width < minWidth) {
+                newRect.width = minWidth;
+            }
+
+            if(minHeight && newRect.height < minHeight) {
+                newRect.height = minHeight;
+            }
             s.set(newRect.width/oldRect.width, newRect.height/oldRect.height);
         }
 

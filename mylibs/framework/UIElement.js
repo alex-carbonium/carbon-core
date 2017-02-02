@@ -1125,19 +1125,19 @@ export default class UIElement extends DataNode {
         }
         return this.props.opacity;
     }
-    minWidth(/*Number*/value) {
+    minWidth(/*Number*/value: number) {
         if (value !== undefined) {
             this.setProps({ minWidth: value });
         }
         return this.props.minWidth;
     }
-    minHeight(/*Number*/value) {
+    minHeight(/*Number*/value: number) {
         if (value !== undefined) {
             this.setProps({ minHeight: value });
         }
         return this.props.minHeight;
     }
-    maxWidth(/*Number*/value) {
+    maxWidth(/*Number*/value: number) {
         if (value !== undefined) {
             this.setProps({ maxWidth: value });
         }

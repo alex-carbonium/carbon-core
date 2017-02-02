@@ -3,7 +3,7 @@ import DefaultSettings from "../DefaultSettings";
 import Keyboard from "../platform/Keyboard";
 import Point from "../math/point";
 import SnapController from "../framework/SnapController";
-import {PointDirection} from "../framework/Defs";
+import { PointDirection } from "../framework/Defs";
 import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
 
 export default {
@@ -23,7 +23,7 @@ export default {
 
         return -1;
     },
-    
+
     updateFromElement: function (frame) {
         var e = frame.element;
         var rect = frame.element.getBoundaryRect();
@@ -35,7 +35,7 @@ export default {
         }
     },
 
-    capturePoint: function(frame, point, event){
+    capturePoint: function (frame, point, event) {
         frame._mousePoint = new Point(event.x, event.y);
 
         point.type.capture(frame, point, frame._mousePoint);
@@ -68,10 +68,10 @@ export default {
 
         point.type.change(frame, dx, dy, point, frame._mousePoint, keys);
     },
-    releasePoint: function(frame, point, event){
+    releasePoint: function (frame, point, event) {
         point.type.release(frame, point, event);
 
-        if(frame.keyboardToken){
+        if (frame.keyboardToken) {
             frame.keyboardToken.dispose();
             frame.keyboardToken = null;
         }
@@ -82,7 +82,7 @@ export default {
         var scale = Environment.view.scale();
 
         context.save();
-        context.scale(1/scale, 1/scale);
+        context.scale(1 / scale, 1 / scale);
 
         var matrix = frame.element.globalViewMatrix().prependedWithScale(scale, scale);
 
@@ -93,18 +93,18 @@ export default {
         }
         else {
             if (frame.frame) {
-                if (this.strokeStyle){
+                if (this.strokeStyle) {
                     context.save();
                     context.strokeStyle = this.strokeStyle;
                     context.lineWidth = 1;
                     context.beginPath();
-                    try{
+                    try {
                         GlobalMatrixModifier.push(m => matrix);
                         frame.element.drawBoundaryPath(context);
-                    }   
-                    finally{
+                    }
+                    finally {
                         GlobalMatrixModifier.pop();
-                    }                 
+                    }
                     context.stroke();
                     context.restore();
                 }
