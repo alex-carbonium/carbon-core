@@ -136,6 +136,17 @@ export default class ArtboardTemplateControl extends Container {
         }
     };
 
+    clone() {
+        if (this._cloning) {
+            throw "Can't clone, chain contains recursive references";
+        }
+        this._cloning = true;
+        var clone = UIElement.prototype.clone.apply(this, arguments);
+        
+        delete this._cloning;
+        return clone;
+    }
+
     systemType() {
         return this._artboard != null ? 'user:' + this._artboard.name() : super.systemType();
     }

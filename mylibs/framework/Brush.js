@@ -179,6 +179,9 @@ Brush.toCss = function (brush) {
                 break;
             case BrushType.resource:
                 var r = Resources.getSystemResource(brush.value);
+                if(!r) {
+                    debugger;
+                }
                 return Brush.toCss(r.value);
         }
     }
