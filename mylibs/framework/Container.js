@@ -831,17 +831,6 @@ PropertyMetadata.registerForType(Container, {
         useInModel: true,
         editable: true,
         defaultValue: true,
-    },
-    groups: function (element) {
-        var ownGroups = [
-            {
-                label: element ? element.displayType() : '',
-                properties: ["overflow"]
-            }
-        ];
-
-        var baseGroups = PropertyMetadata.findAll(Types.Element).groups();
-        return ownGroups.concat(baseGroups);
     }
 });
 

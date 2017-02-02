@@ -52,12 +52,12 @@ export default class Frame extends Container {
                 FrameSource.resize(source, this.sizing(), this.getBoundaryRect(), this.runtimeProps.sourceProps);
             }
         }
-        this.createOrUpdateClippingMask(source, newProps);
+        //this.createOrUpdateClippingMask(source, newProps);
     }
 
     saveOrResetLayoutProps(){
         if (!this.runtimeProps.origSource){
-            this.runtimeProps.origSource = this.selectProps(["source", "sourceProps"]);
+            this.runtimeProps.origSource = this.selectProps(["sourceProps"]);
         }
         else{
             this.setProps(this.runtimeProps.origSource);
