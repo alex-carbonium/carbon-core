@@ -1,3 +1,5 @@
+import Environment from "../environment";
+
 var transitionEvents = ["transitionend", "webkitTransitionEnd", "oTransitionEnd", "otransitionend", "MSTransitionEnd"];
 
 export default {
@@ -48,10 +50,8 @@ export default {
                 else if (original.layerX !== undefined) {
                     event.__layerX = original.layerX;
                 }
-                //TODO: replace with a less heave calculation
-                else {
-                    var offset = $('#htmlPanel').offset();
-                    event.__layerX = original.pageX - offset.left;
+                else {                    
+                    event.__layerX = original.clientX - Environment.view.viewContainerElement.getBoundingClientRect().left;
                 }
             }
             return event.__layerX;
@@ -83,10 +83,8 @@ export default {
                 else if (original.layerY !== undefined) {
                     event.__layerY = original.layerY;
                 }
-                //TODO: replace with a less heave calculation
-                else {
-                    var offset = $('#htmlPanel').offset();
-                    event.__layerY = original.pageY - offset.top;
+                else {                    
+                    event.__layerY = original.clientY - Environment.view.viewContainerElement.getBoundingClientRect().top;
                 }
                 return event.__layerY;
             }

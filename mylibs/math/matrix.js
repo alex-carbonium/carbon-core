@@ -624,7 +624,7 @@ class Matrix {
      * @param {CanvasRenderingContext2D} ctx
      */
     applyToContext(ctx){
-        if (!this.isIdentity()){
+        if (!this.isIdentity()){            
             ctx.transform(this._a, this._b, this._c, this._d,
                 this._tx, this._ty);
         }

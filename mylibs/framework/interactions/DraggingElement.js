@@ -63,6 +63,7 @@ class DraggingElement extends InteractiveElement {
 
     saveChanges(event, draggingOverElement, page){
         super.saveChanges();
+        this.showOriginal(true);
 
         var artboards = page.getAllArtboards();
         var elements = [];

@@ -836,7 +836,7 @@ export default class UIElement extends DataNode {
         if (!this.runtimeProps.globalViewMatrix) {
             var parent = this.parent();
             if (!parent || parent === NullContainer) {
-                return this.viewMatrix();
+                return GlobalMatrixModifier.applyToMatrix(this.viewMatrix());
             }
 
             var matrix = parent.globalViewMatrix().clone();

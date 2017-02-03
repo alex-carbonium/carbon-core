@@ -129,7 +129,7 @@ export default class Frame extends Container {
                                 this.runtimeProps.sourceProps.dr = this.props.sourceProps.dr;
                             }
                         }
-                        this.createOrUpdateClippingMask(source, this.props);
+                        //this.createOrUpdateClippingMask(source, this.props);
                     }
                     FrameSource.resize(source, this.sizing(), this.getBoundaryRect(), this.runtimeProps.sourceProps);
                     Invalidate.request();

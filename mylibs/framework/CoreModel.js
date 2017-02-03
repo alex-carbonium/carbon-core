@@ -97,6 +97,8 @@ export interface IApp extends IDataNode{
 }
 
 export interface IView{
+    viewContainerElement: HTMLElement;
+
     scale(): number;
 }
 
