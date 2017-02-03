@@ -66,6 +66,7 @@ export default class Container extends UIElement {
         //not supported for iphone
         if (this.stroke() && fwk.Brush.canApply(this.stroke()) && this.standardBackground()) {
             context.save();
+            context.beginPath();
             var cornerRadius = this.cornerRadius();
             if (cornerRadius !== fwk.QuadAndLock.Default) {
                 context.roundedRectDifferentRadiusesPath(0, 0, w, h,

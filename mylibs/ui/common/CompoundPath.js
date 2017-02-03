@@ -265,7 +265,9 @@ class CompoundPath extends Container implements IGroupContainer{
     drawPath(context) {
         if (this.result) {
             var items = this.result;
-            context.lineCap = "round";
+            context.lineCap = this.lineCap();
+            context.lineJoin = this.lineJoin();
+            context.mitterLimit = this.props.mitterLimit;
             var matrix = this.globalViewMatrix();
 
             context.beginPath();

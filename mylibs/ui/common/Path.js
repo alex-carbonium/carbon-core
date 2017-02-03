@@ -2027,7 +2027,7 @@ PropertyMetadata.registerForType(Path, {
             {
                 label: "Appearance",
                 expanded: false,
-                properties: ["visible", "opacity", "fill", "stroke", "dashPattern", "clipMask"]
+                properties: ["visible", "opacity", "fill", "stroke", "dashPattern", "miterLimit", "lineCap", "lineJoin", "clipMask"]
             },                      
             {
                 label: "@shadow",

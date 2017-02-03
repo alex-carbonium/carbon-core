@@ -183,6 +183,7 @@ class Line extends Shape {
             p2.y += vy;
         }
 
+        context.beginPath();
         context.linePath(p1.x, p1.y, p2.x, p2.y);
     }
 
@@ -193,6 +194,10 @@ class Line extends Shape {
         if (dashPattern) {
             context.setLineDash(dashPattern);
         }
+
+        context.lineCap = this.lineCap();
+        context.lineJoin = this.lineJoin();
+        context.miterLimit = this.props.miterLimit;
 
         this.drawPath(context, w, h);
         
@@ -333,7 +338,7 @@ PropertyMetadata.registerForType(Line, {
             {
                 label: "Appearance",
                 expanded: false,
-                properties: ["visible", "opacity", "fill", "stroke", "dashPattern"]
+                properties: ["visible", "opacity", "fill", "stroke", "dashPattern", "miterLimit", "lineCap", "lineJoin"]
             }
         ];
     }

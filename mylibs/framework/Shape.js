@@ -4,7 +4,7 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import Brush from "framework/Brush";
 import Shadow from "framework/Shadow";
 import ContextPool from "framework/render/ContextPool";
-import {Types, StrokePosition} from "./Defs";
+import {Types, StrokePosition, LineCap, LineJoin} from "./Defs";
 import Frame from "./Frame";
 import Constraints from "./Constraints";
 
@@ -133,8 +133,8 @@ class Shape extends Container {
 
         context.save();
 
-        context.lineCap = this.props.lineCap;
-        context.lineJoin = this.props.lineJoin;
+        context.lineCap = this.lineCap();
+        context.lineJoin = this.lineJoin();
         context.miterLimit = this.props.miterLimit;
 
         var dashPattern = this.dashPattern();
@@ -194,18 +194,46 @@ class Shape extends Container {
 
     lineCap(value) {
         if (arguments.length > 0) {
+            if(value === 'round' || value === LineCap.Round){
+                value = LineCap.Round;
+            } else if (value === 'square'  || value === LineCap.Square) {
+                value = LineCap.Square;
+            } else {
+                value = LineCap.Butt;
+            }
             this.setProps({lineCap: value});
         }
 
-        return this.props.lineCap;
+        switch(this.props.lineCap){
+            case LineCap.Round:
+                return 'round';
+            case LineCap.Square:
+                return 'square';
+            default:
+                return 'butt';
+        }
     }
 
     lineJoin(value) {
         if (arguments.length > 0) {
+            if(value === 'round' || value === LineJoin.Round){
+                value = LineJoin.Round;
+            } else if (value === 'bevel'  || value === LineJoin.Bevel) {
+                value = LineJoin.Bevel;
+            } else {
+                value = LineJoin.Miter;
+            }
             this.setProps({lineJoin: value});
         }
 
-        return this.props.lineJoin;
+        switch(this.props.lineJoin){
+            case LineJoin.Round:
+                return 'round';
+            case LineJoin.Bevel:
+                return 'bevel';
+            default:
+                return 'miter';
+        }
     }
 
     miterLimit(value) {
@@ -258,28 +286,28 @@ PropertyMetadata.registerForType(Shape, {
         defaultValue: Brush.Black
     },
     lineCap: {
-        defaultValue: 'butt',
-        type: "dropdown",
+        defaultValue: LineCap.Butt ,
+        type: "multiSwitch",
         displayName: '@lineCap',
         options: {
             size: 1 / 2,
             items: [
-                {name: "@butt", value: 'butt'},
-                {name: "@round", value: 'round'},
-                {name: "@square", value: 'square'}
+                {icon: "ico-prop_cap-cut", value:    LineCap.Butt },//'butt'
+                {icon: "ico-prop_cap-round", value:  LineCap.Round },//'round'
+                {icon: "ico-prop_cap-corner", value: LineCap.Square }//'square'
             ]
         },
     },
     lineJoin: {
-        defaultValue: 'miter',
-        type: "dropdown",
+        defaultValue: LineJoin.Miter,
+        type: "multiSwitch",
         displayName: '@lineJoin',
         options: {
             size: 1 / 2,
             items: [
-                {name: "@miter", value: 'miter'},
-                {name: "@bevel", value: 'bevel'},
-                {name: "@round", value: 'round'}
+                {icon: "ico-prop_join-corner", value: LineJoin.Miter},
+                {icon: "ico-prop_join-bevel", value: LineJoin.Bevel},
+                {icon: "ico-prop_join-round", value: LineJoin.Round}
             ]
         },
     },
@@ -317,7 +345,7 @@ PropertyMetadata.registerForType(Shape, {
             {
                 label: "Appearance",
                 expanded: false,
-                properties: ["visible", "opacity", "fill", "stroke", 'dashPattern', "cornerRadius", "clipMask"]
+                properties: ["visible", "opacity", "fill", "stroke", 'dashPattern', "cornerRadius", "miterLimit", "lineCap", "lineJoin", "clipMask"]
             },
             {
                 label: "@shadow",

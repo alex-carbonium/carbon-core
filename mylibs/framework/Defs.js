@@ -339,3 +339,15 @@ export var VerticalConstraint  = {
     Center:4,
     Stretch:8
 };
+
+export var LineCap = {
+    Butt: 0,
+    Round: 1,
+    Square: 2
+};
+
+export var LineJoin = {
+    Miter: 0,
+    Bevel: 1,
+    Round: 2
+};
