@@ -247,7 +247,7 @@ export default class ArtboardTemplateControl extends Container {
                 var elementId = prop.controlId;
                 var element = this.getElementById(this.id() + elementId);
                 if(element) {
-                    element.setProps({[prop.propertyName]: props[propName]}, ChangeMode.Self);
+                    element.prepareAndSetProps({[prop.propertyName]: props[propName]}, ChangeMode.Self);
                 }
             }
         }

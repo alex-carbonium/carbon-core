@@ -91,6 +91,11 @@ export default class UIElement extends DataNode {
         if (changes.styleId !== undefined) {
             extend(changes, styleManager.getStyle(changes.styleId, 1).props);
         }
+
+        var hasBr = changes.hasOwnProperty("br");
+        if (hasBr && !(changes.br instanceof Rect)) {            
+            changes.br = Rect.fromObject(changes.br);
+        }
     }
 
     hasPendingStyle() {
@@ -113,9 +118,9 @@ export default class UIElement extends DataNode {
 
     setProps(props) {
         var hasBr = props.hasOwnProperty("br");
-        //TODO
+        
         if (hasBr && !(props.br instanceof Rect)) {
-            debugger;
+            debugger;            
         }
 
         if (!hasBr) {

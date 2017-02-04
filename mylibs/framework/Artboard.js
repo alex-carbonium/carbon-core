@@ -875,7 +875,7 @@ PropertyMetadata.registerForType(Artboard, {
                 expanded: true
             },
             {
-                label: "User stencils",
+                label: "@advanced",
                 properties: ["resource", "allowHorizontalResize", "allowVerticalResize", "tileSize", "insertAsContent", "toolboxGroup"],
                 expanded: true
             },

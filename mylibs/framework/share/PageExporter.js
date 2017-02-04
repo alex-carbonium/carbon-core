@@ -10,7 +10,7 @@ export default class PageExporter {
         var clone = page.clone();
 
         var promise;
-        if(!page.props.toolboxConfigId || this.page.isToolboxConfigDirty){
+        if(!page.props.toolboxConfigId || page.isToolboxConfigDirty){
             promise = ToolboxConfiguration.buildToolboxConfig(page);
         } else {
             promise = Deferred.createResolvedPromise();
