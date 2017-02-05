@@ -1,6 +1,7 @@
 import Command from "../framework/commands/Command";
 import CompositeCommand from "../framework/commands/CompositeCommand";
 import ChangeZOrder from "../commands/ChangeZOrder";
+import Delete from "../commands/Delete";
 import Move from "../commands/Move";
 import Environment from "environment";
 import Invalidate from "framework/Invalidate";
@@ -154,21 +155,13 @@ define(function (require) {
                 return selectionMade();
             });
             this.registerAction("delete", "Delete", "Editing", function () {
-                var selection = Selection.getSelection();
-                if (selection[0].deleteCommandOverride) {
-                    var ctor = selection[0].deleteCommandOverride();
-                    return new ctor(that.app, that.app.activePage, selection);
-                }
-                if (selection.length === 1) {
-                    return selection[0].constructDeleteCommand();
-                }
-                return new CompositeCommand(selection.map(x => x.constructDeleteCommand()));
+                Delete.run(Selection.getSelection());
             }, "ui-delete").setCondition(function () {
                 return selectionMade();
             });
 
             this.registerAction("duplicate", "Duplicate", "Editing", function () {
-                return Duplicate.create(Selection.getSelection(), true);
+                return Duplicate.run(Selection.getSelection());
             }, "ui-duplicate").setCondition(function () {
                 return selectionMade();
             });

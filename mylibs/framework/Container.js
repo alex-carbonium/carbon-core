@@ -543,6 +543,9 @@ export default class Container extends UIElement {
         var matrix = this.globalViewMatrix();
         return matrix.transformPoint(pos);
     }
+    globalMatrixToLocal(m: Matrix): Matrix{
+        return this.globalViewMatrixInverted().appended(m);
+    }
     registerForLayerDraw(layer, element) {
         this.parent().registerForLayerDraw(layer, element);
     }

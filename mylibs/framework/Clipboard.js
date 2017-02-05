@@ -2,17 +2,25 @@ import UIElement from "./UIElement";
 import Selection from "./SelectionModel";
 import Text from "./text/Text";
 import Environment from "../environment";
-import {combineRects} from "../math/math";
+import {combineRectArray} from "../math/math";
+import Rect from "../math/rect";
+import Matrix from "../math/matrix";
 import {choosePasteLocation} from "./PasteLocator";
+import ArrangeStrategy from "./ArrangeStrategy";
 import {setClipboardContent, tryGetClipboardContent} from "../utils/dom";
 
 class Clipboard {
+    globalBoundingBoxes: Rect[];
+    rootBoundingBoxes: Rect[];
+    globalMatrices: Matrix[];
+
     constructor(){
         this._htmlElement = null;
         this._app = null;
         this.buffer = null;
-        this.globals = null;
-        this.locals = null;
+        this.globalBoundingBoxes = null;
+        this.globalMatrices = null;
+        this.rootBoundingBoxes = null;        
 
         this.pastingContent = false;
     }
@@ -59,16 +67,18 @@ class Clipboard {
         var elements = Selection.selectedElements();
         if (elements.length){
             this.buffer = [];
-            this.globals = [];
-            this.locals = [];
+            this.globalBoundingBoxes = [];
+            this.globalMatrices = [];
+            this.rootBoundingBoxes = [];
             this.zOrder = -1;
             this.originalParent = elements[0].parent();
 
             for (var i = 0; i < elements.length; i++){
                 var element = elements[i];
                 this.buffer.push(element.toJSON());
-                this.globals.push(element.getBoundaryRectGlobal());
-                this.locals.push(element.getBoundaryRect());
+                this.globalBoundingBoxes.push(element.getBoundingBoxGlobal());
+                this.globalMatrices.push(element.globalViewMatrix());
+                this.rootBoundingBoxes.push(element.getBoundingBoxRelativeToRoot());
                 var zOrder = element.zOrder();
                 if (zOrder > this.zOrder){
                     this.zOrder = zOrder;
@@ -110,9 +120,10 @@ class Clipboard {
             }
         }
 
-        var bufferElements = null;
-        var globals = null;
-        var locals = null;
+        var bufferElements: UIElement[] = null;
+        var globalBoundingBoxes = null;
+        var globalMatrices = null;
+        var rootBoundingBoxes = null;
         if (textData){
             var text = new Text();
             text.prepareAndSetProps({
@@ -121,7 +132,8 @@ class Clipboard {
                 textStyleId: this._app.props.defaultTextSettings.textStyleId
             });
             bufferElements = [text];
-            globals = [{x: 0, y: 0, width: text.width(), height: text.height()}];
+            globalBoundingBoxes = [{x: 0, y: 0, width: text.width(), height: text.height()}];
+            globalMatrices = [text.viewMatrix()];
         }
         else if (this.buffer){
             bufferElements = this.buffer.map(x =>{
@@ -129,26 +141,19 @@ class Clipboard {
                 e.initId();
                 return e;
             });
-            globals = this.globals;
-            locals = this.locals;
+            globalBoundingBoxes = this.globalBoundingBoxes;
+            rootBoundingBoxes = this.rootBoundingBoxes;
+            globalMatrices = this.globalMatrices;
         }
 
-        if (bufferElements){
-            var bufferRect = combineRects.apply(null, globals);
-            var bufferRectLocal = locals ? combineRects.apply(null, locals) : null;
-            var location = choosePasteLocation(bufferElements, bufferRect, bufferRectLocal, this.pastingContent);
+        if (bufferElements){            
+            var rootRelativeBoundingBox = rootBoundingBoxes ? combineRectArray(rootBoundingBoxes) : null;
+            var globalBoundingBox = combineRectArray(globalBoundingBoxes);
+            var location = choosePasteLocation(bufferElements, rootRelativeBoundingBox, this.pastingContent);
             if (location){
                 Selection.makeSelection([]);
                 for (var i = 0; i < bufferElements.length; i++){
-                    var element = bufferElements[i];
-                    // element.prepareAndSetProps({
-                    //     x: globals[i].x - bufferRect.x + location.x,
-                    //     y: globals[i].y - bufferRect.y + location.y
-                    // });
-                    element.applyTranslation({
-                        x: globals[i].x - bufferRect.x + location.x,
-                        y: globals[i].y - bufferRect.y + location.y
-                    });
+                    var element = bufferElements[i];                    
 
                     if (location.parent === this.originalParent){
                         location.parent.insert(element, this.zOrder + 1);
@@ -156,6 +161,13 @@ class Clipboard {
                     else{
                         location.parent.add(element);
                     }
+
+                    var gm = globalMatrices[i];
+                    var bb = globalBoundingBoxes[i];
+                    var offsetX = bb.x - globalBoundingBox.x;
+                    var offsetY = bb.y - globalBoundingBox.y;
+                    var newMatrix = gm.prependedWithTranslation(location.x - bb.x + offsetX, location.y - bb.y + offsetY);
+                    element.setTransform(location.parent.globalMatrixToLocal(newMatrix));
                 }
 
                 var newSelection;
@@ -167,6 +179,8 @@ class Clipboard {
                 }
                 //cause a little blink if new element was added into the same position
                 setTimeout(() => Selection.makeSelection(newSelection), 50);
+
+                ArrangeStrategy.arrangeRoots(bufferElements);
             }
         }
 

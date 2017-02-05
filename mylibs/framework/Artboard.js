@@ -1,3 +1,4 @@
+import UIElement from "./UIElement";
 import Container from "framework/Container";
 import Brush from "framework/Brush";
 import PropertyMetadata from "framework/PropertyMetadata";
@@ -137,40 +138,38 @@ class Artboard extends Container {
         return 1;
     }
 
-    canAccept(elements) {
-        if (elements.length !== 1) {
-            return false;
-        }
-        var element = elements[0];
-
-        if (element instanceof Artboard) {
-            return false;
-        }
-
-        if (this.props.resource === ArtboardResource.Stencil && element.children !== undefined) {
-            var can = true;
-            var id = this.id();
-            element.applyVisitor(e => {
-                if (e.props.source && e.props.source.artboardId === id) {
-                    can = false;
-                    return false;
-                }
-            })
-
-            if (!can) {
+    canAccept(elements: UIElement[]) {        
+        for (let i = 0; i < elements.length; ++i){
+            let element = elements[i];
+            if (element instanceof Artboard) {
                 return false;
             }
-        }
 
-        if (element.props.masterId) {
-            var root = element.primitiveRoot();
-            var stateboards = this.runtimeProps.stateBoards;
-            for (var i = 0; i < stateboards.length; ++i) {
-                if (stateboards[i] === root) {
+            if (this.props.resource === ArtboardResource.Stencil && element.children !== undefined) {
+                var can = true;
+                var id = this.id();
+                element.applyVisitor(e => {
+                    if (e.props.source && e.props.source.artboardId === id) {
+                        can = false;
+                        return false;
+                    }
+                })
+
+                if (!can) {
                     return false;
                 }
             }
-        }
+
+            if (element.props.masterId) {
+                var root = element.primitiveRoot();
+                var stateboards = this.runtimeProps.stateBoards;
+                for (var i = 0; i < stateboards.length; ++i) {
+                    if (stateboards[i] === root) {
+                        return false;
+                    }
+                }
+            }
+        }        
 
         return super.canAccept(elements);
     }

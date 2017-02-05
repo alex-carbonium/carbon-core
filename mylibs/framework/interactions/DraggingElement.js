@@ -120,7 +120,7 @@ class DraggingElement extends InteractiveElement {
         //hack: shapes and frames resize children themselves, think how to do it better
         if (!element.runtimeProps.resized){
             //must set new coordinates after parent is changed so that global caches are updated properly
-            element.setTransform(newParent.globalViewMatrixInverted().appended(phantom.globalViewMatrix()));
+            element.setTransform(newParent.globalMatrixToLocal(phantom.globalViewMatrix()));
         }
     }
 

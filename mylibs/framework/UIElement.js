@@ -588,6 +588,12 @@ export default class UIElement extends DataNode {
         this.runtimeProps.globalClippingBox = bb;
         return bb;
     }
+    getBoundingBoxRelativeToRoot(): IRect{
+        var m = this.rootViewMatrix();
+        var rect = this.getBoundaryRect();
+        return this.transformRect(rect, m);
+    }
+
     transformRect(rect, matrix) {
         if (matrix.isTranslatedOnly()) {
             return rect.translate(matrix.tx, matrix.ty);
@@ -837,7 +843,7 @@ export default class UIElement extends DataNode {
     createDragClone(element) {
         return element.clone();
     }
-    globalViewMatrix() {
+    globalViewMatrix(): Matrix {
         if (!this.runtimeProps.globalViewMatrix) {
             var parent = this.parent();
             if (!parent || parent === NullContainer) {
@@ -851,12 +857,30 @@ export default class UIElement extends DataNode {
 
         return GlobalMatrixModifier.applyToMatrix(this.runtimeProps.globalViewMatrix);
     }
-    globalViewMatrixInverted() {
+    globalViewMatrixInverted(): Matrix {
         if (!this.runtimeProps.globalViewMatrixInverted) {
-            this.runtimeProps.globalViewMatrixInverted = this.globalViewMatrix().clone().invert()
+            this.runtimeProps.globalViewMatrixInverted = this.globalViewMatrix().clone().invert();
         }
 
         return this.runtimeProps.globalViewMatrixInverted;
+    }
+    rootViewMatrix(): Matrix{                
+        var root = this.primitiveRoot();
+        if (!root || root === this){
+            return this.viewMatrix();
+        }
+        var current = this;
+        var matrices = [];
+        while (current !== root){
+            matrices.push(current.viewMatrix());
+            current = current.parent();            
+        }   
+
+        var m = matrices[matrices.length - 1];
+        for (let i = matrices.length - 2; i >= 0 ; --i){
+            m = m.appended(matrices[i]);
+        }     
+        return m;
     }
 
     trackPropertyState(name) {
