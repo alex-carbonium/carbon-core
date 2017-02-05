@@ -1541,8 +1541,8 @@ export default class UIElement extends DataNode {
     constructPropsChangedCommand(newProps, oldProps) {
         return new ElementPropsChanged(this, newProps, oldProps);
     }
-    constructDeleteCommand() {
-        return new ElementDelete(this);
+    tryDelete(): boolean {
+        return true;
     }
     move(rect) {
         this.resize(rect);

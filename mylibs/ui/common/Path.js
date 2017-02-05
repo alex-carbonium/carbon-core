@@ -238,31 +238,6 @@ function moveCurrentPoint(dx, dy) {
     }
 }
 
-class DeleteCurrentPoints extends Command {
-    constructor(path) {
-        super();
-        this.path = path;
-    }
-
-    transparent() {
-        return true;
-    }
-
-    execute() {
-        var keys = Object.keys(this.path._selectedPoints).map(k=>k - 0).sort((a, b)=>b - a);
-        if (keys.length) {
-            for (var i = 0; i < keys.length; ++i) {
-                this.path.removePointAtIndex(keys[i]);
-            }
-            clearSelectedPoints.call(this.path);
-        } else {
-            this.path.removePointAtIndex(this.path._selectedPoint.idx);
-        }
-
-        updateSelectedPoint.call(this.path, null);
-    }
-}
-
 function drawArc(path, x, y, coords, matrix) {
     var rx = coords[0];
     var ry = coords[1];
@@ -384,11 +359,22 @@ class Path extends Shape {
         this.save = debounce(this._save.bind(this), 500);
     }
 
-    constructDeleteCommand() {
+    tryDelete(): boolean {
         if (this._selectedPoint && this.points.length > 2) {
-            return new DeleteCurrentPoints(this);
+            var keys = Object.keys(this._selectedPoints).map(k=>k - 0).sort((a, b)=>b - a);
+            if (keys.length) {
+                for (var i = 0; i < keys.length; ++i) {
+                    this.removePointAtIndex(keys[i]);
+                }
+                clearSelectedPoints.call(this);
+            } else {
+                this.removePointAtIndex(this._selectedPoint.idx);
+            }
+
+            updateSelectedPoint.call(this, null);
+            return false;
         }
-        return super.constructDeleteCommand();
+        return true;
     }
 
     _save() {
