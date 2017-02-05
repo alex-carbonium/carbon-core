@@ -104,8 +104,8 @@ class Artboard extends Container {
         }
     }
 
-    acquiringChild(child) {
-        super.acquiringChild(child);
+    acquiredChild(child, mode) {
+        super.acquiredChild(child, mode);
         this._dragable(false);
     }
 

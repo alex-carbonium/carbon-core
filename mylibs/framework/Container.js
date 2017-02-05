@@ -330,6 +330,7 @@ export default class Container extends UIElement {
         var padding = this.padding();
         return this.width() - padding.left - padding.right;
     }
+    
     allowMoveOutChildren(value) {
         //should not check on args length
         if (value !== undefined) {
@@ -337,25 +338,30 @@ export default class Container extends UIElement {
         }
         return this.props.allowMoveOutChildren;
     }
+    
     add(/*UIElement*/element, mode) {
         return this.insert(element, this.children.length, mode);
     }
+
     insert(/*UIElement*/element, /*int*/index, mode) {
-        this.acquiringChild(element, index);
-
-        var oldParent = element.parent();
-        if (oldParent && !(oldParent === NullContainer)) {
-            oldParent.remove(element, mode);
-        }
-
-        element.parent(this);
-
         this.insertChild(element, index, mode);
 
-        this.invalidate();
-
+        this.acquiredChild(element, mode);
+        
         return element;
     }
+
+    acquiredChild(child, mode) {
+        var oldParent = child.parent();
+        if (oldParent && !(oldParent === NullContainer)) {
+            oldParent.remove(child, mode);
+        }
+
+        child.parent(this);
+
+        this.invalidate();
+    }
+
     contains(element) {
         return this.positionOf(element) !== -1;
     }
@@ -403,12 +409,13 @@ export default class Container extends UIElement {
     canInsert(element, index) {
         return true;
     }
-    acquiringChild(child, index) {
-    }
+   
+
     releasingChild(child) {
         //child.onresize.unbind(this._childResizeHandler);
         child.parent(NullContainer);
     }
+
     canAccept(elements) {
         return !elements.some(x => !x.canBeAccepted(this));
     }

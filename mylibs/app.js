@@ -49,12 +49,12 @@ import OfflineModel from "./offline/OfflineModel";
 import Deferred from "framework/Deferred";
 import Story from "stories/Story";
 import DefaultSettings from "./DefaultSettings";
+import ObjectFactory from "framework/ObjectFactory";
 
 window.env = Environment;
 window.Selection = Selection;
 
 var debug = require("./DebugUtil")("carb:relayout");
-
 
 var backend = require("backend");
 var platform = require("platform/Platform");
@@ -655,7 +655,10 @@ class App extends DataNode {
 
     addPage(page) {
         this.insertChild(page, this.children.length);
+        this.initPage(page);
+    }
 
+    initPage(page) {
         if (!page.isInitialized()) {
             if (page.screenType && !page.screenType()) {
                 page.screenType(this.project.defaultScreenType)
@@ -803,12 +806,27 @@ class App extends DataNode {
             }
         }
 
-        for (let i = 0; i < data.children.length; i++) {
-            var pageData = data.children[i];
-            var page = fwk.UIElement.fromJSON(pageData);
-            this.addPage(page);
-
+        this.children = data.children;
+        // for (let i = 0; i < data.children.length; i++) {
+        //     var pageData = data.children[i];
+        //     var item = fwk.UIElement.fromJSON(pageData);
+        //     if(item instanceof Page){
+        //         this.addPage(item);
+        //     } else if(item instance of Story) {
+        //         this.addStory(item);
+        //     }
+        // }
+        for (let i = 0; i < this.children.length; i++) {
+            var rawData = data.children[i];
+            var item = ObjectFactory.getObject(rawData);
+            data.children[i] = item;
+            if(item instanceof Page){
+                this.initPage(item);
+            } else if(item instanceof Story) {
+                this.initStory(item);
+            }
         }
+
         ModelStateListener.start();
     }
 
@@ -1148,7 +1166,7 @@ class App extends DataNode {
     }
 
     getPageById(id) {
-        return this.children.find(x => x.props.id === id);
+        return this.getImmediateChildById(id);
     }
 
     findPrimitiveRoot(key) {
@@ -1426,9 +1444,14 @@ class App extends DataNode {
                 StyleManager.registerStyle(style, StyleType.Text)
             }
         }
+        
+        var i = this.children.length;
+        this.children.push(pageJson);
 
-        var page = fwk.UIElement.fromJSON(pageJson);
-        this.addPage(page);
+        var page = ObjectFactory.getObject(pageJson);
+
+        this.children[i] = page;
+        this.initPage(page);
         this.setActivePage(page);
     }
 
@@ -1483,7 +1506,10 @@ class App extends DataNode {
         var story = new Story();
         story.setProps(props);
         this.insertChild(story, this.children.length);
+        this.initStory(story);
+    }
 
+    initStory(story) {
         this.storyInserted.raise(story);
 
         if (!this.activeStory()) {

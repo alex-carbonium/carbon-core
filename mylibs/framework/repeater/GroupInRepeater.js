@@ -12,7 +12,7 @@ export default {
         var parent = element.parent();
         var repeater = new RepeatContainer();
 
-        var globalRect = element.getBoundingBoxGlobal();
+        var globalRect = element.getBoundingBox();
         var x1 = globalRect.x
             , y1 = globalRect.y
             , x2 = globalRect.width + x1
@@ -20,7 +20,7 @@ export default {
 
         for (let i = 1, l = elements.length; i < l; ++i) {
             let element = elements[i];
-            let globalRect = element.getBoundingBoxGlobal();
+            let globalRect = element.getBoundingBox();
 
             if (globalRect.x < x1) x1 = globalRect.x;
             if (globalRect.y < y1) y1 = globalRect.y;
@@ -41,7 +41,7 @@ export default {
         }
         cell.arrange({newRect:Rect.Zero, oldRect:Rect.Zero});
 
-        var pos = parent.global2local({x: x1, y: y1});
+        var pos = {x: x1, y: y1};
         repeater.setProps({width: x2 - x1, height: y2 - y1, masterWidth: x2 - x1, masterHeight: y2 - y1});
         repeater.applyTranslation({x: pos.x, y: pos.y})
         parent.insert(repeater, parent.getChildren().length);

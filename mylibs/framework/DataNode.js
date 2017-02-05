@@ -294,17 +294,18 @@ export default class DataNode{
         }
     }
 
-
     getImmediateChildById(id) {
-        var items = this.children;
-        for (let i = 0, l = items.length; i < l; ++i) {
-            let element = items[i];
-            if (element.id() === id) {
-                return element;
-            }
-        }
-        return null;
+        return this.children.find(x => x.props.id === id);       
     }
+
+    static getImmediateChildById(item, id) {
+        if(!item.children) {
+            return null;
+        }
+        
+        return item.children.find(x => x.props.id === id);       
+    }
+
     applyVisitorDepthFirst(callback) {
         if (this.children) {
             for (var i = 0; i < this.children.length; i++) {
@@ -367,22 +368,26 @@ export default class DataNode{
         }
         return json;
     }
-    fromJSON(data){
+
+     
+    acquiringChild(child) {
+    }
+
+    acquiredChild(child, mode){
+    }
+
+    fromJSON(data) {
         // TODO: consider to do server migration
         ObjectFactory.updatePropsWithPrototype(data.props);
 
         this.setProps(data.props, ChangeMode.Self);
 
-        if (data.children){
-            if(typeof this.add === 'function') {
-                this.children = [];
-                for(var i = 0; i < data.children.length; ++i) {
-                    this.add(ObjectFactory.fromJSON(data.children[i]));
-                }
+        if (data.children) {            
+            this.children = data.children;
+            for(var i = 0; i < this.children.length; ++i) {
+                var child = this.children[i] = ObjectFactory.getObject(this.children[i]);
+                this.acquiredChild(child, ChangeMode.Self);
             }
-            else {
-                this.children = data.children.map(x => ObjectFactory.fromJSON(x));
-            }            
         }
         return this;
     }

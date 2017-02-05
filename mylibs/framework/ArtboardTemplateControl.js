@@ -4,6 +4,8 @@ import Container from "framework/Container";
 import UIElement from "framework/UIElement";
 import {Overflow, ChangeMode, Types} from "./Defs";
 import Selection from "framework/SelectionModel";
+import DataNode from "framework/DataNode";
+import ObjectFactory from "framework/ObjectFactory";
 
 export default class ArtboardTemplateControl extends Container {
     constructor() {
@@ -132,6 +134,8 @@ export default class ArtboardTemplateControl extends Container {
             var clone = child.clone();
             clone.id(this.id() + child.id())
             clone.sourceId(child.id());
+            clone.canDrag(false);
+            clone.resizeDimensions(0);
             this.add(clone, ChangeMode.Self);
         }
     };
@@ -175,9 +179,11 @@ export default class ArtboardTemplateControl extends Container {
         super.propsUpdated(props, oldProps);
         if (props.source !== undefined) {
             if (!this._artboard || (props.source.pageId !== oldProps.source.pageId && props.source.artboardId !== oldProps.source.artboardId)) {
-                var page = App.Current.getPageById(props.source.pageId);
+                var page = DataNode.getImmediateChildById(App.Current, props.source.pageId);
                 if (page) {
-                    this._artboard = page.getArtboardById(props.source.artboardId);
+                    this._artboard = ObjectFactory.getObject(
+                        DataNode.getImmediateChildById(page, props.source.artboardId)
+                        );
                 }
                 delete this.runtimeProps.artboardVersion;
             }

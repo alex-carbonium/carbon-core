@@ -319,13 +319,7 @@ class ArtboardPage extends Page {
     }
 
     getArtboardById(id) {
-        for (var artboard of this.getAllArtboards()) {
-            if (artboard.id() === id) {
-                return artboard;
-            }
-        }
-
-        return null;
+        return this.getImmediateChildById(id);       
     }
 
 

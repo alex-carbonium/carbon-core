@@ -7,7 +7,7 @@ import logger from "../logger";
 import Matrix from "../math/matrix";
 import Rect from "../math/rect";
 
-export default {
+var ObjectFactory = {
     objectCreationFailed: EventHelper.createEvent(),
 
     construct: function(type){
@@ -107,6 +107,20 @@ export default {
 
         return element;
     },
+    isMaterialized(object) {
+        return (object.prototype !== undefined && Object.getPrototypeOf(object) !== Object.prototype);
+    },
+    getObject: function(data) {
+        if(!data) {
+            return data;
+        }
+
+        if(!ObjectFactory.isMaterialized(data)) {
+            return ObjectFactory.fromJSON(data);
+        }
+
+        return data;
+    },
     tryUpdateWithPrototype: function (props, name) {
         var value = props[name];
         if (value && value.t) {
@@ -120,10 +134,10 @@ export default {
 
             props[name] = value;
         }
-        else if (name === "m"){
+        else if (name === "m" || name.endsWith(':m')){
             props[name] = new Matrix(value._a, value._b, value._c, value._d, value._tx, value._ty);
         }
-        else if (name === "br"){
+        else if (name === "br" || name.endsWith(':br')){
             props[name] = new Rect(value.x, value.y, value.width, value.height);
         }
     },
@@ -135,3 +149,5 @@ export default {
         }
     }
 }
+
+export default ObjectFactory;
