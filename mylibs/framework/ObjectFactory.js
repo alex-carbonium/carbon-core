@@ -108,7 +108,7 @@ var ObjectFactory = {
         return element;
     },
     isMaterialized(object) {
-        return (object.prototype !== undefined && Object.getPrototypeOf(object) !== Object.prototype);
+        return (Object.getPrototypeOf(object) !== Object.prototype);
     },
     getObject: function(data) {
         if(!data) {

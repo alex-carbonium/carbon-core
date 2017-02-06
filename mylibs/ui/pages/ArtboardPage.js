@@ -318,11 +318,6 @@ class ArtboardPage extends Page {
         }
     }
 
-    getArtboardById(id) {
-        return this.getImmediateChildById(id);       
-    }
-
-
     getArtboardAtPoint(point) {
         for (var artboard of this.getAllArtboards()) {
             if (artboard.hitTest(point)) {

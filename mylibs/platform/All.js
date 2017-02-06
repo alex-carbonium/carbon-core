@@ -1,5 +1,6 @@
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
+import DataNode from "framework/DataNode";
 
 define([ "math/matrix", "framework/Deferred"], function (Matrix, Deferred) {
     var fwk = sketch.framework, platform = sketch.platform;
@@ -143,7 +144,7 @@ define([ "math/matrix", "framework/Deferred"], function (Matrix, Deferred) {
                 if (sketch.params.shareMode){
                     var pageId = app.viewModel.shareStartupPage.value();
                     if (pageId){
-                        page = app.getPageById(pageId + "");
+                        page = DataNode.getImmediateChildById(app, pageId + "");
                     }
                 }
                 else if (sketch.params.startupPage){

@@ -2,6 +2,7 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import UIElement from "framework/UIElement";
 import {Overflow, Types, ElementState, ContentBehavior} from "./Defs";
 import Selection from "framework/SelectionModel";
+import DataNode from "framework/DataNode";
 
 export default class ArtboardFrameControl extends UIElement {
     constructor() {
@@ -98,9 +99,9 @@ export default class ArtboardFrameControl extends UIElement {
         super.propsUpdated(props, oldProps);
         if (props.source !== undefined) {
             if (!this._artboard || (props.source.pageId !== oldProps.source.pageId && props.source.artboardId !== oldProps.source.artboardId)) {
-                var page = App.Current.getPageById(props.source.pageId);
+                var page = DataNode.getImmediateChildById(App.Current, props.source.pageId);
                 if (page) {
-                    this._artboard = page.getArtboardById(props.source.artboardId);
+                    this._artboard = DataNode.getImmediateChildById(page, props.source.artboardId, true);
                 }
                 delete this.runtimeProps.artboardVersion;
             }

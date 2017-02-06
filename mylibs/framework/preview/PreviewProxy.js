@@ -1,6 +1,7 @@
 import Page from "framework/Page";
 import NullPage from "framework/NullPage";
 import EventHelper from "framework/EventHelper";
+import DataNode from "framework/DataNode";
 
 export default class PreviewProxy {
     constructor(app) {
@@ -36,14 +37,14 @@ export default class PreviewProxy {
             // TODO: return special page with instruction that you need to create at least on artboard
             return NullPage;
         }
-        var page = this.app.getPageById(activeStory.props.homeScreen[0]);
-        var artboard = page.getArtboardById(activeStory.props.homeScreen[1]);
+        var page = DataNode.getImmediateChildById(this.app, activeStory.props.homeScreen[0]);
+        var artboard = DataNode.getImmediateChildById(page, activeStory.props.homeScreen[1], true);
 
         return this._makePageFromArtboard(artboard, screenSize);
     }
 
     getScreenById(artboardId, screenSize) {
-        var artboard = this.app.activePage.getArtboardById(artboardId);
+        var artboard = DataNode.getImmediateChildById(this.app.activePage, artboardId, true);
 
         return this._makePageFromArtboard(artboard, screenSize);
     }

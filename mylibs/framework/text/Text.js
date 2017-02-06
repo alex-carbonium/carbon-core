@@ -32,10 +32,13 @@ class Text extends UIElement {
             if (changes.autoWidth !== undefined){
                 syncWidth = changes.autoWidth === true;
             }
-            if (changes.font === undefined){
+            if (!fontChanged){
                 changes.font = this.props.font;
             }
             this._ensureBoundaryBox(changes, syncWidth);
+            if (!fontChanged){
+                delete changes.font;
+            }
         }
 
         if (fontChanged){

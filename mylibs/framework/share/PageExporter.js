@@ -49,8 +49,8 @@ export default class PageExporter {
                 var source = e.source();
                 if(source.pageId != pageId){
                     // clone referenced artboard and insert it to the current page
-                    var refPage = App.Current.getPageById(source.pageId);
-                    var refArtboard = refPage.getArtboardById(source.artboardId);
+                    var refPage = DataNode.getImmediateChildById(App.Current, source.pageId);
+                    var refArtboard = DataNode.getImmediateChildById(refPage, source.artboardId, true);
                     var clone = refArtboard.clone();
                     clone.setProps({id:createUUID(), x:rect.y, y:posY});
                     page.add(clone);

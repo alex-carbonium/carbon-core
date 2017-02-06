@@ -181,9 +181,7 @@ export default class ArtboardTemplateControl extends Container {
             if (!this._artboard || (props.source.pageId !== oldProps.source.pageId && props.source.artboardId !== oldProps.source.artboardId)) {
                 var page = DataNode.getImmediateChildById(App.Current, props.source.pageId);
                 if (page) {
-                    this._artboard = ObjectFactory.getObject(
-                        DataNode.getImmediateChildById(page, props.source.artboardId)
-                        );
+                    this._artboard = DataNode.getImmediateChildById(page, props.source.artboardId, true);
                 }
                 delete this.runtimeProps.artboardVersion;
             }

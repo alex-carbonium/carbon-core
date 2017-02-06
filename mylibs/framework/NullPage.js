@@ -31,10 +31,7 @@ define(function () {
             },
             getArtboardAtPoint(){
 
-            },
-            getArtboardById(){
-
-            },
+            },            
             getElementsInRect(){
                 return [];
             },

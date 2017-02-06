@@ -14,6 +14,7 @@ import Point from "math/point";
 import Selection from "framework/SelectionModel";
 import Environment from "environment";
 import Matrix from "math/matrix";
+import DataNode from "framework/DataNode";
 
 
 //TODO: fix name of artboard on zoom
@@ -24,8 +25,6 @@ import Matrix from "math/matrix";
 // 9. Duplicate artboard should duplicate all state boards
 // 8. disable duplicate and copy/paste for stateboard
 // 12. property override on viewer
-// delete state
-// rename state
 // cleanup empty states
 
 
@@ -59,9 +58,9 @@ class Artboard extends Container {
         }
 
         if (!this._frame || this._frame.version !== this._frame.runtimeProps.cloneVersion) {
-            var page = App.Current.getPageById(this.props.frame.pageId);
+            var page = DataNode.getImmediateChildById(App.Current, this.props.frame.pageId);
             if (page) {
-                var frame = page.getArtboardById(this.props.frame.artboardId);
+                var frame = DataNode.getImmediateChildById(page, this.props.frame.artboardId, true);
 
                 if (frame.runtimeProps.clone && frame.runtimeProps.cloneVersion === frame.version) {
                     return frame.runtimeProps.clone;

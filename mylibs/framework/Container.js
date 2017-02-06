@@ -344,9 +344,9 @@ export default class Container extends UIElement {
     }
 
     insert(/*UIElement*/element, /*int*/index, mode) {
-        this.insertChild(element, index, mode);
-
         this.acquiredChild(element, mode);
+
+        this.insertChild(element, index, mode);        
         
         return element;
     }
@@ -365,6 +365,7 @@ export default class Container extends UIElement {
     contains(element) {
         return this.positionOf(element) !== -1;
     }
+    
     positionOf(element) {
         return this.children.indexOf(element);
     }

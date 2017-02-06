@@ -353,7 +353,7 @@ export default class TextTool extends TOol {
             props.font = Font.extend(props.font, {valign: this._editClone.props.font.valign});
         }
 
-        this._editedElement.setProps(props); //no validation, save from clone as is
+        this._editedElement.prepareAndSetProps(props); //no validation, save from clone as is
     }
     
     _createEditor(engine, element){

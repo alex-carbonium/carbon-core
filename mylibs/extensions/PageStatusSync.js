@@ -13,7 +13,7 @@ define(["framework/sync/Primitive"], function (Primitive) {
         }
 
         function pageStatusChangedExternally(message, data) {
-            var page = this._app.getPageById(data.pageId);
+            var page = DataNode.getImmediateChildById(this._app, data.pageId, true);
             if (page && page.status() !== data.statusId) {
                 this._changingStatus = true;
                 page.status(data.statusId);

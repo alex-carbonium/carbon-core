@@ -294,16 +294,33 @@ export default class DataNode{
         }
     }
 
-    getImmediateChildById(id) {
-        return this.children.find(x => x.props.id === id);       
-    }
+    getImmediateChildById(id:string, materialize:boolean) {
+        return ObjectFactory.getImmediateChildById(this, id, materialize);
+    }   
 
-    static getImmediateChildById(item, id) {
-        if(!item.children) {
+    static getImmediateChildById(container: any, id:string, materialize:boolean = false) {
+        if(!container.children) {
             return null;
         }
         
-        return item.children.find(x => x.props.id === id);       
+        let i = 0;
+        let child = null;
+        for(; i < container.children.length; ++i){
+            child = container.children[i];
+            if(child.props.id === id) {
+                break;
+            }
+            child = null;
+        }
+        
+        if(child && materialize){
+            var materializedItem = ObjectFactory.getObject(child);
+            if(child !== materializedItem){
+                child = container.children[i] = materializedItem;
+            }            
+        }
+
+        return child;   
     }
 
     applyVisitorDepthFirst(callback) {

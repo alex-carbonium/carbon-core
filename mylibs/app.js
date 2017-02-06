@@ -735,7 +735,8 @@ class App extends DataNode implements IApp {
     }
 
     duplicatePageById(pageId) {
-        var page = this.getPageById(pageId);
+        // TODO: do not materialize, to clone
+        var page = DataNode.getImmediateChildById(this, pageId, true);
         var newPage = page.clone();
         newPage.initId();
         newPage.name("Copy of " + page.name());
@@ -816,15 +817,7 @@ class App extends DataNode implements IApp {
         }
 
         this.children = data.children;
-        // for (let i = 0; i < data.children.length; i++) {
-        //     var pageData = data.children[i];
-        //     var item = fwk.UIElement.fromJSON(pageData);
-        //     if(item instanceof Page){
-        //         this.addPage(item);
-        //     } else if(item instance of Story) {
-        //         this.addStory(item);
-        //     }
-        // }
+        
         for (let i = 0; i < this.children.length; i++) {
             var rawData = data.children[i];
             var item = ObjectFactory.getObject(rawData);
@@ -1169,11 +1162,7 @@ class App extends DataNode implements IApp {
     isEmpty() {
         return this.children.length === 0;
     }
-
-    getPageById(id) {
-        return this.getImmediateChildById(id);
-    }
-
+  
     findPrimitiveRoot(key) {
         var primitiveRootElementEntry = this.primitiveRootCache[key];
         var primitiveRootElement;
@@ -1303,7 +1292,7 @@ class App extends DataNode implements IApp {
     }
 
     setActivePageById(pageId) {
-        var page = this.getPageById(pageId);
+        var page = DataNode.getImmediateChildById(this, pageId, true);
         this.setActivePage(page);
     }
 
@@ -1313,25 +1302,6 @@ class App extends DataNode implements IApp {
         // this.view.resize({x: 0, y: 0, width: 3000, height: 2000});
         // this.container.view = this.view;
         // Environment.setView(view)
-    }
-
-    _elementById(id) {
-        var res = null;
-        each(this.pages, function (container) {
-            if (container.id() === id) {
-                res = container;
-                return false;
-            }
-            container.applyVisitor(function (el) {
-                if (el.id() === id) {
-                    res = el;
-                    return true;
-                }
-            })
-
-        });
-
-        return res;
     }
 
     viewportSize() {
@@ -1376,13 +1346,13 @@ class App extends DataNode implements IApp {
         }
     }
 
-    setPageStatus(pageId, statusId) {
-        var page = this.getPageById(pageId);
-        if (page.status() !== statusId) {
-            page.status(statusId);
-            this.raiseLogEvent(Primitive.page_status_change(pageId, statusId, fwk.Page.Statuses[statusId]));
-        }
-    }
+    // setPageStatus(pageId, statusId) {
+    //     var page = this.getPageById(pageId);
+    //     if (page.status() !== statusId) {
+    //         page.status(statusId);
+    //         this.raiseLogEvent(Primitive.page_status_change(pageId, statusId, fwk.Page.Statuses[statusId]));
+    //     }
+    // }
 
     //these should be in platform, but ImageRenderer does not have any platform
     generateWebFontConfig(deferred, projectName) {
@@ -1458,18 +1428,7 @@ class App extends DataNode implements IApp {
         this.children[i] = page;
         this.initPage(page);
         this.setActivePage(page);
-    }
-
-    getArtboardById(artboardId) {
-        for (var i = this.pages.length - 1; i >= 0; --i) {
-            var artboard = this.pages[i].getArtboardById(artboardId);
-            if (artboard) {
-                return artboard;
-            }
-        }
-
-        return null;
-    }
+    }    
 
     shortcutsEnabled(value) {
         if (shortcut) {

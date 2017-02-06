@@ -597,8 +597,8 @@ Primitive.element_patch = function (element, data) {
 };
 
 function getPageName(pageId) {
-    var page = App.Current.getPageById(pageId);
-    return page ? page.name() : "";
+    var page = DataNode.getImmediateChildById(App.Current, pageId);
+    return page ? page.props.name : "";
 }
 
 Primitive.comment_add = function (text, id, parentId, pageId, time, x, y, number) {

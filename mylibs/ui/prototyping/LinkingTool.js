@@ -331,7 +331,7 @@ export default class LinkingTool extends Tool {
         var action = this._activeStory.children.find(a=>a.props.sourceElementId === e.id());
 
         if (action) {
-            var artboard = page.getArtboardById(action.targetArtboardId);
+            var artboard = DataNode.getImmediateChildById(page, action.targetArtboardId, true);
             return artboard;
         }
     }
@@ -359,7 +359,7 @@ export default class LinkingTool extends Tool {
         var page = this._app.activePage;
 
         activeStory.children.forEach(action=> {
-            var targetArtboard = page.getArtboardById(action.props.targetArtboardId);
+            var targetArtboard = DataNode.getImmediateChildById(page, action.props.targetArtboardId, true);
             var root = this._app.findNodeByIdBreadthFirst(action.props.sourceRootId);
             if (root) {
                 var sourceElement = root.getElementById(action.props.sourceElementId);
