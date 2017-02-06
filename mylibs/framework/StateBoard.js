@@ -2,6 +2,7 @@ import Artboard from "./Artboard";
 import PropertyMetadata from "framework/PropertyMetadata";
 import ModelStateListener from "framework/sync/ModelStateListener";
 import {Types} from "./Defs";
+import DataNode from "framework/DataNode";
 
 class StateBoard extends Artboard {
 
@@ -16,7 +17,7 @@ class StateBoard extends Artboard {
                 return null;
             }
 
-            this._artboard = this.parent().findNodeByIdBreadthFirst(this.props.masterId);
+            this._artboard = DataNode.getImmediateChildById(this.parent(), this.props.masterId, true);
             if(this._artboard) {
                 this._artboard.linkStateBoard(this);
             }

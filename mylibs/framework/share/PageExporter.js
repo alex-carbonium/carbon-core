@@ -4,10 +4,11 @@ import {createUUID} from "../../util";
 import ArtboardTemplateControl from "framework/ArtboardTemplateControl";
 import ToolboxConfiguration from "ui/toolbox/ToolboxConfiguration";
 import Deferred from "framework/Deferred";
+import DataNode from "framework/DataNode";
 
 export default class PageExporter {
     prepareShareData(page) {
-        var clone = page.clone();
+        var clone = page.mirrorClone();        
 
         var promise;
         if(!page.props.toolboxConfigId || page.isToolboxConfigDirty){
@@ -54,6 +55,7 @@ export default class PageExporter {
                     var clone = refArtboard.clone();
                     clone.setProps({id:createUUID(), x:rect.y, y:posY});
                     page.add(clone);
+                    // TODO: add all states if needed
 
                     // calculate position for the next element
                     posY += clone.height() + delta;

@@ -107,19 +107,19 @@ class ArtboardPage extends Page {
     draw(context, environment) {
         this._viewport = environment.view.viewportRect();
         var artboards = this.getAllArtboards();
-        context.save();
-        context.beginPath();
-        context.fillStyle = "#9EA2a6";
-        for(var i = 0; i < artboards.length; ++i){
-            var artboard =  artboards[i];
+        // context.save();
+        // context.beginPath();
+        // context.fillStyle = "#9EA2a6";
+        // for(var i = 0; i < artboards.length; ++i){
+        //     var artboard =  artboards[i];
 
-            if(artboard.visible() && artboard.drawShadowPath && areRectsIntersecting(this._viewport, artboard.getBoundaryRectGlobal()) && !artboard.frame) {
-                artboard.drawShadowPath(context, environment);
-            }
-        }
+        //     if(artboard.visible() && artboard.drawShadowPath && areRectsIntersecting(this._viewport, artboard.getBoundaryRectGlobal()) && !artboard.frame) {
+        //         artboard.drawShadowPath(context, environment);
+        //     }
+        // }
 
-        context.fill();
-        context.restore();
+        // context.fill();
+        // context.restore();
 
         super.draw.apply(this, arguments);
 

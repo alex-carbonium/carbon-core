@@ -295,7 +295,7 @@ export default class DataNode{
     }
 
     getImmediateChildById(id:string, materialize:boolean) {
-        return ObjectFactory.getImmediateChildById(this, id, materialize);
+        return DataNode.getImmediateChildById(this, id, materialize);
     }   
 
     static getImmediateChildById(container: any, id:string, materialize:boolean = false) {
