@@ -160,26 +160,7 @@ define([ "math/matrix", "framework/Deferred"], function (Matrix, Deferred) {
             },
             platformSpecificRunCode: function(){
             },
-            getActionShortcut: function(actionName){
-                return "";
-            },
-            getActionShortcutDisplayLabel:function(actionName) {
-              var shortcut = this.getActionShortcut(actionName);
-              if(shortcut){
-                shortcut = shortcut
-                    .replace(/Down/i, "↓")
-                    .replace(/Up/i, "↑")
-                    .replace(/Left/i, "←")
-                    .replace(/Right/i, "→")
-                    .replace(/Delete/i, "Del")
-                    .replace(/Insert/i, "Ins");
-                  }
-              return shortcut;
-            },
 
-            disableShortcut:function(){
-
-            },
             setupFullScreenApi: function(){
                 var fullScreenApi = {
                     supportsFullScreen: false,

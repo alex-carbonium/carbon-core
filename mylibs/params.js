@@ -1,3 +1,7 @@
+import {UAParser} from "ua-parser-js";
+
+var parser = new UAParser(navigator.userAgent);
+
 if (!window.sketch){
     window.sketch = {};
 }
@@ -7,8 +11,9 @@ window.sketch.params = {
 };
 
 module.exports = {
-    deviceType: "Computer",
-    deviceOS: navigator.userAgent.indexOf("Mac") != -1 ? "MacOS" : "Generic",
+    deviceType: parser.getDevice().type || "Computer",
+    deviceOS: parser.getOS().name,
+    browser: parser.getBrowser(),
     transport: "auto",
     init: function(q){
         Object.assign(this, q);

@@ -5,7 +5,6 @@ import BezierCurve from "math/bezierCurve";
 import Rect from "math/rect";
 import Point from "math/point";
 import ResizeDimension from "framework/ResizeDimension";
-import actionManager from "ui/ActionManager";
 import Brush from "framework/Brush";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Matrix from "math/matrix";
@@ -517,7 +516,7 @@ class Path extends Shape {
             this.save();
             SnapController.calculateSnappingPointsForPath(this);
 
-            this._cancelBinding = actionManager.subscribe('cancel', this.cancel.bind(this));
+            this._cancelBinding = Environment.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
             this.captureMouse(this);
         } else {
             this._cancelBinding = null;
@@ -599,7 +598,7 @@ class Path extends Shape {
         this._selected = true;
         this.registerForLayerDraw(2, this);
         Invalidate.request();
-        this._enterBinding = actionManager.subscribe('enter', this.enter.bind(this));
+        this._enterBinding = Environment.controller.actionManager.subscribe('enter', this.enter.bind(this));
     }
 
     unselect() {

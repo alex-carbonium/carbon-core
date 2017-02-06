@@ -406,7 +406,6 @@ var setupFiledrop = function (app) {
 
 export default klass(All, {
     _constructor: function () {
-        this.shortcuts = {};
         this._mouseButtonPressed = false;
     },
     attachEvents: function (parentElement) {
@@ -488,20 +487,5 @@ export default klass(All, {
         }
         app.consistencyMonitor = new ConsistencyMonitor(app);
         app.consistencyMonitor.start();
-    },
-    mapShortcut: function (shortcut, actionName, options) {
-        var shortcuts = this.shortcuts[actionName];
-        if (!shortcuts) {
-            shortcuts = [];
-            this.shortcuts[actionName] = shortcuts;
-        }
-        shortcuts.push({hotkey: shortcut, options: options});
-    },
-    getActionShortcut: function (actionName) {
-        var shortcuts = this.shortcuts[actionName];
-        if (shortcuts) {
-            return shortcuts[0].hotkey;
-        }
-        return "";
     }
 });

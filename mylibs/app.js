@@ -49,7 +49,10 @@ import OfflineModel from "./offline/OfflineModel";
 import Deferred from "framework/Deferred";
 import Story from "stories/Story";
 import DefaultSettings from "./DefaultSettings";
-import ObjectFactory from "framework/ObjectFactory";
+import ObjectFactory from "./framework/ObjectFactory";
+import ActionManager from "./ui/ActionManager";
+import ShortcutManager from "./ui/ShortcutManager";
+import {IApp} from "./framework/CoreModel";
 
 window.env = Environment;
 window.Selection = Selection;
@@ -65,7 +68,6 @@ var Layer = require("framework/Layer");
 var SelectComposite = require("framework/SelectComposite");
 var SelectFrame = require("framework/SelectFrame");
 var extensions = require("extensions/All");
-var actionManager = require("ui/ActionManager");
 var ProjectsMetadata = require("projects/Metadata");
 var domUtil = require("utils/dom");
 var Stopwatch = require("./Stopwatch");
@@ -205,8 +207,8 @@ var onBuildDefaultMenu = function (context, menu) {
     items.push({
         name: "Duplicate",
         icon: "duplicate",
-        callback: function () {
-            actionManager.invoke("duplicate");
+        callback: () => {
+            this.actionManager.invoke("duplicate");
         },
         disabled: !(selection && selection.length > 0)
     });
@@ -215,8 +217,8 @@ var onBuildDefaultMenu = function (context, menu) {
     items.push({
         name: "Delete",
         icon: "delete",
-        callback: function () {
-            actionManager.invoke("delete");
+        callback: () => {
+            this.actionManager.invoke("delete");
         },
         disabled: !(selection && selection.length > 0)
     });
@@ -230,24 +232,24 @@ var onBuildDefaultMenu = function (context, menu) {
                 {
                     name: "Group",
                     icon: "group",
-                    callback: function () {
-                        actionManager.invoke("groupElements");
+                    callback: () => {
+                        this.actionManager.invoke("groupElements");
                     },
                     disabled: !selection || selection.length <= 1
                 },
                 {
                     name: "Ungroup",
                     icon: "ungroup",
-                    callback: function () {
-                        actionManager.invoke("ungroupElements");
+                    callback: () => {
+                        this.actionManager.invoke("ungroupElements");
                     },
                     disabled: !selection || selection.length !== 1 || !(selection[0] instanceof GroupContainer)
                 },
                 {
                     name: "Mask",
                     icon: "mask",
-                    callback: function () {
-                        actionManager.invoke("groupWithMask");
+                    callback: () => {
+                        this.actionManager.invoke("groupWithMask");
                     },
                     disabled: !selection || selection.length < 2 || (typeof selection[0].drawPath !== 'function')
                 }
@@ -262,48 +264,48 @@ var onBuildDefaultMenu = function (context, menu) {
                 {
                     name: "Union",
                     icon: "pathUnion",
-                    callback: function () {
-                        actionManager.invoke("pathUnion");
+                    callback: () => {
+                        this.actionManager.invoke("pathUnion");
                     },
                     disabled: !canDoPathOperations(selection)
                 },
                 {
                     name: "Intersect",
                     icon: "pathIntersect",
-                    callback: function () {
-                        actionManager.invoke("pathIntersect");
+                    callback: () => {
+                        this.actionManager.invoke("pathIntersect");
                     },
                     disabled: !canDoPathOperations(selection)
                 },
                 {
                     name: "Difference",
                     icon: "pathDifference",
-                    callback: function () {
-                        actionManager.invoke("pathDifference");
+                    callback: () => {
+                        this.actionManager.invoke("pathDifference");
                     },
                     disabled: !canDoPathOperations(selection)
                 },
                 {
                     name: "Subtract",
                     icon: "pathSubtract",
-                    callback: function () {
-                        actionManager.invoke("pathSubtract");
+                    callback: () => {
+                        this.actionManager.invoke("pathSubtract");
                     },
                     disabled: !canDoPathOperations(selection)
                 },
                 {
                     name: "Flatten",
                     icon: "pathFlatten",
-                    callback: function () {
-                        actionManager.invoke("pathFlatten");
+                    callback: () => {
+                        this.actionManager.invoke("pathFlatten");
                     },
                     disabled: !canFlattenPath(selection)
                 },
                 {
                     name: "Convert to path",
                     icon: "convertToPath",
-                    callback: function () {
-                        actionManager.invoke("convertToPath");
+                    callback: () => {
+                        this.actionManager.invoke("convertToPath");
                     },
                     disabled: !canConvertToPath(selection)
                 }
@@ -318,32 +320,32 @@ var onBuildDefaultMenu = function (context, menu) {
             {
                 name: "Bring to Front",
                 icon: "bring-to-front",
-                callback: function () {
-                    actionManager.invoke("bringToFront");
+                callback: () => {
+                    this.actionManager.invoke("bringToFront");
                 },
                 disabled: !selection || !selection.length
             },
             {
                 name: "Send to Back",
                 icon: "send-to-back",
-                callback: function () {
-                    actionManager.invoke("sendToBack");
+                callback: () => {
+                    this.actionManager.invoke("sendToBack");
                 },
                 disabled: !selection || !selection.length
             },
             {
                 name: "Bring Forward",
                 icon: "bring-forward",
-                callback: function () {
-                    actionManager.invoke("bringForward");
+                callback: () => {
+                    this.actionManager.invoke("bringForward");
                 },
                 disabled: !selection || !selection.length
             },
             {
                 name: "Send Backward",
                 icon: "send-backward",
-                callback: function () {
-                    actionManager.invoke("sendBackward");
+                callback: () => {
+                    this.actionManager.invoke("sendBackward");
                 },
                 disabled: !selection || !selection.length
             }
@@ -381,7 +383,9 @@ function onDefaultFamilyChanged(event) {
 }
 
 
-class App extends DataNode {
+class App extends DataNode implements IApp {
+    shortcutManager: ShortcutManager;
+
     constructor() {
         super(true);
         this.viewMode = "view"; //?
@@ -454,6 +458,11 @@ class App extends DataNode {
         this.state = new AppState(this);
         this.offlineModel = new OfflineModel();
 
+        this.actionManager = new ActionManager(this);
+        this.actionManager.registerActions();
+
+        this.shortcutManager = new ShortcutManager();        
+        this.shortcutManager.mapDefaultScheme();        
     }
 
     activeStory(value) {
@@ -985,13 +994,9 @@ class App extends DataNode {
             this.initExtensions();
         });
 
-        this.platform.run(this);
+        this.platform.run(this);        
 
-        this.actionManager = actionManager;
-
-        this.setupView();
-
-        this.actionManager.registerApp(this);
+        this.setupView();        
     }
 
     //TODO: rethink the concept of run method for better testability
@@ -1015,7 +1020,7 @@ class App extends DataNode {
             stopwatch.checkpoint("DataProjectFonts");
             that.initExtensions();
             if (that.platform.richUI()) {
-                actionManager.invoke("movePointer");
+                that.actionManager.invoke("movePointer");
             }
 
             var fontPromises = that.loadFonts(data);

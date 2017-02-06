@@ -11,7 +11,6 @@ import Cursor from "../../framework/Cursor";
 import Invalidate from "../../framework/Invalidate";
 import {ViewTool} from "../../framework/Defs";
 import SnapController from "../../framework/SnapController";
-import actionManager from "../ActionManager";
 import Environment from "../../environment";
 
 var closeCurrentPath = function (pt) {
@@ -102,7 +101,7 @@ export default class GraphicalpathCreator extends Tool {
     _attach() {
         super._attach.apply(this, arguments);
         Cursor.setGlobalCursor("crosshair");
-        this._cancelBinding = actionManager.subscribe('cancel', this.cancel.bind(this));
+        this._cancelBinding = this._app.actionManager.subscribe('cancel', this.cancel.bind(this));
         var element = Selection.selectedElement();
         if(element instanceof Path && !element.closed()){
             this._element = element;

@@ -1,26 +1,27 @@
-import {isBrowser} from "../util";
+import { isBrowser } from "../util";
+import Desktop from "./Desktop";
+import Node from "./Node";
+import Basic from "./Basic";
+import params from "../params";
 
-define(["./PC", "./OSX", "./FullScreen", "./Node", "./Basic", "../params"], function(PC, OSX, FullScreen, Node, Basic, params){
-    if (!isBrowser){
-        return new Node();
+var platform = null;
+
+if (!isBrowser) {
+    platform = new Node();
+}
+else if (params.basicPlatform) {
+    platform = new Basic();
+}
+else {    
+    if (params.deviceType === "Computer" || params.deviceType === "Tablet") {
+        platform = new Desktop();
     }
+}
 
-    if (sketch.params.basicPlatform){
-        return new Basic();
-    }
-
-    var deviceOS = params.deviceOS;
-    var deviceType = params.deviceType;
-
-    if (sketch.params.fullScreenView){
-        return new FullScreen();
-    }
-    if (deviceType === "Computer" || deviceType === "Tablet"){
-        return deviceOS === "MacOS" ? new OSX() : new PC();
-    }
-
+if (!platform) {
     throw "Could not initialize app for "
-        + " DeviceType=" + deviceType
-        + " DeviceOS=" + deviceOS
-        + " FullScreen=" + sketch.params.fullScreenView;
-});
+        + " DeviceType=" + params.deviceType
+        + " DeviceOS=" + params.deviceOS;
+}
+
+export default platform;

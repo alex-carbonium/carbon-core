@@ -68,7 +68,7 @@ module.exports = {
     "MirroringController": require("./framework/MirroringController"),
     "MirroringView": require("./framework/MirroringView"),
 
-    "ActionManager": require("./ui/ActionManager"),
+    "ActionManager": app.actionManager,
     "IconsInfo": require("./ui/IconsInfo"),
     "Text": require("./framework/text/Text"),
     //expose specific defs for easier conversion to consts

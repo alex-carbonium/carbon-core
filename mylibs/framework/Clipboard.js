@@ -8,8 +8,12 @@ import Matrix from "../math/matrix";
 import {choosePasteLocation} from "./PasteLocator";
 import ArrangeStrategy from "./ArrangeStrategy";
 import {setClipboardContent, tryGetClipboardContent} from "../utils/dom";
+import Delete from "../commands/Delete";
+import params from "../params";
+import {IApp} from "./CoreModel";
 
 class Clipboard {
+    _app: IApp;
     globalBoundingBoxes: Rect[];
     rootBoundingBoxes: Rect[];
     globalMatrices: Matrix[];
@@ -31,10 +35,8 @@ class Clipboard {
             this._htmlElement = document;
             this._htmlElement.addEventListener("copy", this.onCopy);
             this._htmlElement.addEventListener("paste", this.onPaste);
-        }
-        else{
-            //app.platform.registerClipboardShortcuts();
-        }
+            this._htmlElement.addEventListener("cut", this.onCut);
+        }        
     }
     hasValue(){
         return this.buffer !== null;
@@ -43,6 +45,7 @@ class Clipboard {
         if (this._htmlElement){
             this._htmlElement.removeEventListener("copy", this.onCopy);
             this._htmlElement.removeEventListener("paste", this.onPaste);
+            this._htmlElement.removeEventListener("cut", this.onCut);
             this._htmlElement = null;
         }
     }
@@ -187,8 +190,19 @@ class Clipboard {
         this.pastingContent = false;
     };
 
+    onCut = e => {
+        if (e && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")){
+            return;
+        }
+
+        this.onCopy(e);
+        Delete.run(Selection.selectedElements());
+    };
+
+    /** The only reliable check is to use known browser versions. This is github does it. */
     testNativeSupport(){
-        return true;
+        return (params.browser.name === "Chrome" && parseInt(params.browser.major) > 43)
+            || (params.browser.name === "Firefox" && parseInt(params.browser.major) > 41);        
     }
 }
 

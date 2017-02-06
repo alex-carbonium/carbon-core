@@ -94,6 +94,8 @@ export interface ILayer extends IContainer{
 export interface IApp extends IDataNode{
     currentTool: number;    
     onBuildMenu: IEvent<{a: number}>;
+
+    shortcutManager: IShortcutManager;
 }
 
 export interface IView{
@@ -107,10 +109,23 @@ export interface IController{
     resizingEvent: IEvent<IInteractionEventData>;
     rotatingEvent: IEvent<IInteractionEventData>;
     startDrawingEvent: IEvent<IEventData>;
+    
+    actionManager: IActionManager;
 
     updateCursor(eventData: IMouseEventData): void;
 }
 
+export interface IActionManager{
+    invoke(action: string): void;
+}
+
+export interface IShortcutManager{
+    mapDefaultScheme(): void;
+    mapScheme(scheme: IShortcut[]): void;
+
+    getActionHotkey(actionName: string): string;
+    getActionHotkeyDisplayLabel(actionName: string): string;
+}
 // -------------------- props
 
 export interface IDataNodeProps{
@@ -130,4 +145,15 @@ export interface IGuide{
 export interface IArtboardProps extends IUIElementProps{
     guidesX: IGuide[];
     guidesY: IGuide[];
+}
+
+// -------------------- shortcuts
+
+export interface IShortcut{
+    key: string;
+    action: string;
+    options?: {
+        type?: string,
+        repeatable?: boolean
+    };
 }

@@ -5,7 +5,6 @@ import CompositeElement from "./CompositeElement";
 import domUtil from "utils/dom";
 import Cursor from "./Cursor";
 import Invalidate from "./Invalidate";
-import actionManager from "ui/ActionManager";
 import RepeatViewListener from "./repeater/RepeatViewListener";
 import TouchHelper from "./TouchHelper";
 import Artboard from "./Artboard";
@@ -226,13 +225,13 @@ export default class DesignerController implements IController {
 
         this.startDrawingEvent = EventHelper.createEvent();
 
-        this._cancelBinding = actionManager.subscribe('cancel', this.cancel.bind(this));
+        this._cancelBinding = this.app.actionManager.subscribe('cancel', this.cancel.bind(this));
         RepeatViewListener.ensureSubscribed(this);
 
         Keyboard.changed.bind(this, this._onKeyChanged);
         Selection.directSelectionChangedEvent.bind(() => this.updateCursor());        
 
-        this.actionManager = actionManager;
+        this.actionManager = this.app.actionManager;
     }
 
     onpanstart(event) {
