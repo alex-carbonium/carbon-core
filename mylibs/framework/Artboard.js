@@ -224,23 +224,28 @@ class Artboard extends Container {
         }
 
         if (this._recorder && this._recorder.statesCount() > 1) {
-            this._renderStatesFrame(context);
+            this._renderStatesFrame(context, environment);
         }
 
         this._renderHeader(context);
     }
 
     _renderHeader(context) {
+        var scale = Environment.view.scale();
+        if(scale < .3) {
+            return; // do not render name if artboard is too small
+        }
+
         context.save();
         context.beginPath();
-
-        var scale = Environment.view.scale();
+        
         this.viewMatrix().applyToContext(context);
         if (this._active) {
             context.fillStyle = SharedColors.ArtboardActiveText;
         } else {
             context.fillStyle = SharedColors.ArtboardText;
         }
+        scale = Math.max(1, scale);
         context.font = (0 | (10 / scale)) + "px Lato, LatoLight, Arial, Helvetica, sans-serif";
         context.rect(0, -16 / scale, this.width(), 16 / scale);
         context.clip();
@@ -251,7 +256,7 @@ class Artboard extends Container {
         context.restore();
     };
 
-    _renderStatesFrame(context) {
+    _renderStatesFrame(context, environment) {
         var stateboards = this.runtimeProps.stateBoards;
         if (!stateboards || !stateboards.length) {
             return;
@@ -272,24 +277,40 @@ class Artboard extends Container {
             rect = math.combineRects(rect, stateboards[i].getBoundaryRectGlobal());
         }
 
-        var scale = Environment.view.scale();
-        var x = rect.x - 20 / scale;
-        rect.width += 40 / scale;
-        var y = rect.y - 30 / scale;
-        rect.height += 50 / scale;
+        var scale = environment.view.scale();
+        var d = Math.max(1, scale);
+        var x = rect.x - 20 / d;
+        rect.width += 40 / d;
+        var y = rect.y - 30 / d;
+        rect.height += 50 / d;
 
-        context.rect(x, y, rect.width, rect.height);
+        var dw = 20 / d;
+
+        context.beginPath();
+        context.moveTo(x + dw, y);
+        context.lineTo(x, y);
+        context.lineTo(x, y + rect.height);
+        context.lineTo(x+dw, y + rect.height)
+
+        context.moveTo(x + rect.width - dw, y);
+        context.lineTo(x + rect.width, y);
+        context.lineTo(x + rect.width, y + rect.height);
+        context.lineTo(x + rect.width - dw, y + rect.height)
+       // context.rect(x, y, rect.width, rect.height);
         context.strokeStyle = SharedColors.ArtboardText;
+        context.lineWidth = 1 / scale;
         context.stroke();
 
-        context.font = (0 | (12 / scale)) + "px Lato, LatoLight, Arial, Helvetica, sans-serif";
-        context.beginPath();
-        context.rectPath(x, y - 20 / scale, this.width(), 20 / scale);
-        context.clip();
+        if(scale >= 0.5) {
+            context.font = (0 | (10 / scale)) + "px Lato, LatoLight, Arial, Helvetica, sans-serif";
+            context.beginPath();
+            context.rectPath(x, y - 20 / scale, this.width(), 20 / scale);
+            context.clip();
 
-        context.fillStyle = SharedColors.ArtboardText;
+            context.fillStyle = SharedColors.ArtboardText;
 
-        context.fillText(this.props.name, x, y - 5 / scale);
+            context.fillText(this.props.name, x, y - 5 / scale);
+        }
 
         context.restore();
     };

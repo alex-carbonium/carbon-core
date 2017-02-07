@@ -81,7 +81,7 @@ export default class ToolboxConfiguration {
         size.height = height;
         var context  = ContextPool.getContext(width, height, contextScale, true);
         context.clearRect(0,0, context.width, context.height);
-        var env = {finalRender: true,  setupContext:()=>{},contextScale:contextScale, offscreen:true, view:{scale:()=>1, contextScale, focused:()=>false}};
+        var env = {finalRender: true,  setupContext:()=>{}, contextScale:contextScale, offscreen:true, view:{scale:()=>1, contextScale, focused:()=>false}};
         var elementsMap = {};
         for (i = 0; i < renderTasks.length; ++i) {
             var t = renderTasks[i];
@@ -107,7 +107,13 @@ export default class ToolboxConfiguration {
             env.pageMatrix = matrix;
             matrix.applyToContext(context);
 
-            element.draw(context, env);
+            try {
+                element.standardBackground(false);
+                element.draw(context, env);
+            } finally {
+                element.standardBackground(true);
+            }
+            
             context.restore();
 
             elementsMap[element.id()] = {
