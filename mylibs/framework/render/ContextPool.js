@@ -5,9 +5,14 @@ var contextPool : Array<Context> = [];
 
 export default {
     getContext(width: number, height: number, scale: number, forceExactSize:bool) : Context{
-        var size = App.Current.viewportSize();
-        width = Math.min(size.width * scale, width * scale);
-        height = Math.min(size.height * scale, height * scale);
+        if(forceExactSize) {
+            width = width * scale;
+            height = height * scale;
+        } else {
+            var size = App.Current.viewportSize();
+            width = Math.min(size.width * scale, width * scale);
+            height = Math.min(size.height * scale, height * scale);
+        }
         if (contextPool.length === 0) {
             var context = new Context();
             context.width = width;
