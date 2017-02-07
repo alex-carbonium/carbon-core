@@ -17,7 +17,12 @@ export default class ArtboardsTool extends Tool {
         this._type = type;        
         this._parameters = parameters;
         this._attachMode = "select";
-        this._detachMode = "resize";
+        this._detachMode = "resize";        
+    }
+
+    attach(app, view, controller) {
+        super.attach(app, view, controller);
+        SnapController.calculateSnappingPoints(app.activePage);
     }
 
     detach() {
@@ -131,7 +136,7 @@ export default class ArtboardsTool extends Tool {
             var pos = element.position();
             App.Current.activePage.dropToPage(pos.x, pos.y, element);
             Selection.makeSelection([element]);
-            this._hoverArtboard = null;// need to rebuild snapping data TODO: consider to just add data for a new element
+            SnapController.calculateSnappingPoints(App.Current.activePage);
         } else {
             if (this._cursorNotMoved) {
                 this.selectByClick(event);
@@ -157,15 +162,7 @@ export default class ArtboardsTool extends Tool {
 
         if (this._dragging) {
             return;
-        }
-
-        var artboard = App.Current.activePage.getArtboardAtPoint(event);
-        if (artboard != this._hoverArtboard) {
-            this._hoverArtboard = artboard;
-            if (artboard) {
-                SnapController.calculateSnappingPoints(artboard);
-            }
-        }
+        }                
 
         if (event.event.ctrlKey || event.event.metaKey) {
             var pos = event;

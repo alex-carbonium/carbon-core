@@ -323,6 +323,11 @@ export default class UIElement extends DataNode {
             this.applyTransform(Matrix.create().scale(s.x, s.y, o.x, o.y));
         }
     }
+
+    first() {
+        return this;
+    }
+
     /**
      * This function must produce exactly the same visual result as
      * calling UIElement.applyTransform(Matrix.create().scale(s.x, s.y, o.x, oy)),

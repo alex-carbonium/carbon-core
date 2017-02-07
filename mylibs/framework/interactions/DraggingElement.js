@@ -28,7 +28,9 @@ class DraggingElement extends InteractiveElement {
 
         this._initialPosition = this.getBoundingBoxGlobal().topLeft();
 
-        SnapController.calculateSnappingPoints(activeArtboard);
+        let snappingTarget = event.element.first().parent().primitiveRoot();
+        
+        SnapController.calculateSnappingPoints(snappingTarget);
 
         var holdPcnt = Math.round((event.x - this.x()) * 100 / this.width());
         this._ownSnapPoints = SnapController.prepareOwnSnapPoints(this, holdPcnt);
