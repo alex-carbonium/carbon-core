@@ -234,6 +234,7 @@ export default class TextTool extends TOol {
 
     insertText(e, p = {}){
         var text = new Text();
+        App.Current.activePage.nameProvider.assignNewName(text);
 
         var props = {
             content: "Your text here",
