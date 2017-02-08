@@ -284,7 +284,7 @@ class Artboard extends Container {
         var y = rect.y - 30 / d;
         rect.height += 50 / d;
 
-        var dw = 20 / d;
+        var dw = 10 / d;
 
         context.beginPath();
         context.moveTo(x + dw, y);
