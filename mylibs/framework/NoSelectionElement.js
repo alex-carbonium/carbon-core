@@ -13,7 +13,7 @@ export default class NoSelectionElement extends UIElement {
         super();
         this._app = app;
         this._page = page;
-        this._contentContainer = page;//.getContentContainer();
+        this._contentContainer = null;//page.getContentContainer();
 
         this.setProps({
             name: page.name(),
@@ -29,20 +29,20 @@ export default class NoSelectionElement extends UIElement {
 
     prepareProps(changes){
         this._page.prepareProps(changes);
-        this._contentContainer.prepareProps(changes);
+        // this._contentContainer.prepareProps(changes);
     }
 
     enablePropsTracking(){
         super.enablePropsTracking.apply(this, arguments);
         this._page.enablePropsTracking();
-        this._contentContainer.enablePropsTracking();
+        //this._contentContainer.enablePropsTracking();
         PropertyTracker.propertyChanged.bind(this, this._onPropertyChanged);
     }
 
     disablePropsTracking(){
         super.disablePropsTracking.apply(this, arguments);
         this._page.disablePropsTracking();
-        this._contentContainer.disablePropsTracking();
+        //this._contentContainer.disablePropsTracking();
         PropertyTracker.propertyChanged.unbind(this, this._onPropertyChanged);
     }
 
@@ -52,14 +52,16 @@ export default class NoSelectionElement extends UIElement {
             this._app.defaultFill(props.fill);
         } else if(props.stroke){
             this._app.defaultStroke(props.stroke);
+        } else if(props.name) {
+            this._page.name(props.name);
         }
         super.setProps.apply(this, arguments);
-        if (this._contentContainer){
-            this._contentContainer.setProps.apply(this._contentContainer, arguments);
-        }
+        // if (this._contentContainer){
+            // this._contentContainer.setProps.apply(this._contentContainer, arguments);
+        // }
     }
 
-    _onPropertyChanged(element, changes){
+    _onPropertyChanged=(element, changes)=>{
         var propNames = element === this._contentContainer ? contentContainerProperties :
             element === this._page ? pageProperties :
                 null;
