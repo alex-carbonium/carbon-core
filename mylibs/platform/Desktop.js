@@ -250,6 +250,10 @@ var onViewBlurred = function () {
     Invalidate.requestUpperOnly();
 };
 
+var onWindowBlur = function () {
+    App.Current.actionManager.invoke("cancel");
+}
+
 var setupFiledrop = function (app) {
     var that = this;
     that._uploadNotices = {};
@@ -430,6 +434,9 @@ export default klass(All, {
         parentElement.addEventListener('focus', onViewFocused);
         parentElement.addEventListener('blur', onViewBlurred);
         document.body.addEventListener('mouseup', this._onmouseupHandler);
+
+        window.addEventListener('blur', onWindowBlur);
+
 
         var hammertime = this.hammertime = new Hammer(parentElement, { drag_min_distance: 1 });
         hammertime.get('pan').set({ direction: Hammer.DIRECTION_ALL });

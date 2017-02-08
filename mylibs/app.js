@@ -1428,6 +1428,8 @@ class App extends DataNode implements IApp {
         this.children[i] = page;
         this.initPage(page);
         this.setActivePage(page);
+
+        return page;
     }    
 
     shortcutsEnabled(value) {

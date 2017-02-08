@@ -304,7 +304,7 @@ class Artboard extends Container {
         if(scale >= 0.5) {
             context.font = (0 | (10 / scale)) + "px Lato, LatoLight, Arial, Helvetica, sans-serif";
             context.beginPath();
-            context.rectPath(x, y - 20 / scale, this.width(), 20 / scale);
+            context.rectPath(x, y - 20 / scale, Math.max(150, this.width()), 20 / scale);
             context.clip();
 
             context.fillStyle = SharedColors.ArtboardText;
