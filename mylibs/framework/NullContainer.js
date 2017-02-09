@@ -18,6 +18,10 @@ class NullContainer {
         return null;
     }
 
+    hitElements() {
+        return [];
+    }
+
     allowMoveOutChildren(){
         return true;
     }

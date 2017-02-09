@@ -1,157 +1,149 @@
 import PropertyMetadata from "framework/PropertyMetadata";
-import {Types} from "./Defs";
+import { Types } from "./Defs";
 
-define(function () {
-    // fwk.PropertyMetadata.extend("sketch.framework.Page", {
-    //     "sketch.framework.NullPage": {
-    //
-    //     }
-    // });
+class NullPage {
+    constructor() {
+        this.children = [];
+        this.props = {};
+    }
+    parent() {
 
-    var NullPage = klass2("NullPage", null, (function () {
-        return {
-            _constructor: function () {
-                this.children = [];
-                this.props = {};
-            },
-            parent: function () {
+    }
+    isInitialized() {
+        return true;
+    }
+    init(view) {
 
-            },
-            isInitialized: function () {
-                return true;
-            },
-            init: function (view) {
+    }
+    getAllPalettes() {
+        return [];
+    }
+    getAllArtboards() {
+        return [];
+    }
+    getArtboardAtPoint() {
 
-            },
-            getAllPalettes: function() {
-                return [];
-            },
-            getAllArtboards: function () {
-                return [];
-            },
-            getArtboardAtPoint(){
+    }
+    getElementsInRect() {
+        return [];
+    }
+    initId() {
+    }
+    add(/*UIElement*/element) {
+    }
+    remove(/*UIElement*/element) {
+    }
+    clear() {
+    }
+    renderTile(canvas, options) {
+    }
+    invalidate() {
 
-            },            
-            getElementsInRect(){
-                return [];
-            },
-            initId: function () {
-            },
-            add: function (/*UIElement*/element) {
-            },
-            remove: function (/*UIElement*/element) {
-            },
-            clear: function () {
-            },
-            renderTile: function (canvas, options) {
-            },
-            invalidate: function () {
+    }
+    homeScreen() {
 
-            },
-            homeScreen(){
+    }
+    enablePropsTracking() {
 
-            },
-            enablePropsTracking(){
+    }
+    disablePropsTracking() {
 
-            },
-            disablePropsTracking(){
+    }
+    getActiveArtboard() {
 
-            },
-            getActiveArtboard(){
+    }
+    renderContentTile(context, x, y, zoom) {
+    }
+    renderContentToDataURL() {
+    }
+    resize(rect) {
+    }
+    id() {
+        return 0;
+    }
+    toJSON() {
+    }
+    fromJSON(data) {
+    }
+    timeStamp() {
+    }
+    name(value) {
+    }
+    encodedName() {
+    }
+    preview() {
+        return false;
+    }
+    isPhoneVisible(visible) {
+    }
+    activating() {
+    }
+    deactivating() {
+    }
+    activated(previousPage) {
+    }
+    deactivated() {
+    }
+    getContentContainer() {
+        return this;
+    }
+    scaleToSize() {
+        return 1;
+    }
+    getEditableProperties() {
+        return [];
+    }
+    isInvalidateRequired() {
+        return false;
+    }
+    displayName() {
+        return "Page";
+    }
+    viewportRect() {
+        return { x: 0, y: 0, width: 0, height: 0 };
+    }
+    scale() {
+        return 1;
+    }
+    autoInsert() {
 
-            },
-            renderContentTile: function (context, x, y, zoom) {
-            },
-            renderContentToDataURL: function () {
-            },
-            resize: function (rect) {
-            },
-            id: function () {
-                return 0;
-            },
-            toJSON: function () {
-            },
-            fromJSON: function (data) {
-            },
-            timeStamp: function () {
-            },
-            name: function (value) {
-            },
-            encodedName(){
-            },
-            preview: function () {
-                return false;
-            },
-            isPhoneVisible: function (visible) {
-            },
-            activating: function () {
-            },
-            deactivating: function () {
-            },
-            activated: function (previousPage) {
-            },
-            deactivated: function () {
-            },
-            getContentContainer: function () {
-                return this;
-            },
-            scaleToSize: function () {
-                return 1;
-            },
-            getEditableProperties: function () {
-                return [];
-            },
-            isInvalidateRequired: function () {
-                return false;
-            },
-            displayName: function () {
-                return "Page";
-            },
-            viewportRect: function () {
-                return {x: 0, y: 0, width: 0, height: 0};
-            },
-            scale: function () {
-                return 1;
-            },
-            autoInsert: function () {
+    }
+    drawSelf(context, w, h) {
 
-            },
-            drawSelf: function (context, w, h) {
+    }
 
-            },
+    setProps() {
 
-            setProps(){
+    }
 
-            },
+    initPage() {
 
-            initPage(){
+    }
+    getHomeArtboard() {
 
-            },
-            getHomeArtboard(){
+    }
+    hitElements() {
+        return [];
+    }
+    scrollX() {
 
-            },
-            scrollX(){
+    }
+    scrollY() {
 
-            },
-            scrollY(){
+    }
+    hitElement() {
+        return null;
+    }
+    hitElementDirect() {
+        return null;
+    }
+    pointToScroll() {
+        return { scrollX: 0, scrollY: 0 };
+    }
+}
 
-            },
-            hitElement(){
-                return null;
-            },
-            hitElementDirect(){
-                return null;
-            },
-            pointToScroll(){
-                return {scrollX: 0, scrollY: 0};
-            }
-        }
-    })());
+NullPage.prototype.t = Types.NullPage;
 
-    NullPage.prototype.t = Types.NullPage;
+PropertyMetadata.registerForType(NullPage, {});
 
-    PropertyMetadata.registerForType(NullPage, {});
-
-
-    return new NullPage();
-});
+export default new NullPage();
