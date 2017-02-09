@@ -1,9 +1,9 @@
 import Container from "./Container";
-import ResizeDimension from "framework/ResizeDimension";
-import PropertyMetadata from "framework/PropertyMetadata";
-import Brush from "framework/Brush";
-import Shadow from "framework/Shadow";
-import ContextPool from "framework/render/ContextPool";
+import ResizeDimension from "./ResizeDimension";
+import PropertyMetadata from "./PropertyMetadata";
+import Brush from "./Brush";
+import Shadow from "./Shadow";
+import ContextPool from "./render/ContextPool";
 import {Types, StrokePosition, LineCap, LineJoin} from "./Defs";
 import Frame from "./Frame";
 import Constraints from "./Constraints";
@@ -336,31 +336,22 @@ PropertyMetadata.registerForType(Shape, {
         editable: true
     },
     groups () {
+        var baseGroups = PropertyMetadata.findAll(Types.Element).groups();
+
         return [
-            {
-                label: "Layout",
-                properties: ["x", "y", "width", "height", "angle"],
-                expanded: true
-            },
+            baseGroups.find(x => x.label === "Layout"),
             {
                 label: "Appearance",
-                expanded: false,
-                properties: ["visible", "opacity", "fill", "stroke", 'dashPattern', "cornerRadius", "miterLimit", "lineCap", "lineJoin", "clipMask"]
+                properties: ["fill", "stroke", 'dashPattern', "miterLimit", "lineCap", "lineJoin", "cornerRadius", "opacity"]
             },
             {
                 label: "@shadow",
-                expanded: false,
                 properties: ["shadows"]
             },
+            baseGroups.find(x => x.label === "@constraints"),
             {
-                label: "@constraints",
-                expanded: false,
-                properties: ["constraints"]
-            },
-            {
-                label: "Settings",
-                properties: ["pointRounding"],
-                expanded: true
+                label: "@advanced",
+                properties: ["pointRounding", "clipMask"]
             }
         ];
     },

@@ -282,7 +282,7 @@ export default class RulerExtension extends RuntimeExtension {
                 var hx = highlightX + offset.translate;
                 var hw = this._highlight.width;
                 if (hx <= length && hx + hw >= 0) {
-                    let y = config.size + selectionSize / 2 + .5;
+                    let y = config.size + selectionSize / 2;
 
                     context.beginPath();
                     context.strokeStyle = config.selection_edge_fill;
@@ -399,7 +399,7 @@ export default class RulerExtension extends RuntimeExtension {
                 var hy = highlightY + offset.translate;
                 var hh = this._highlight.width;
                 if (hy <= length && hy + hh >= 0) {
-                    let x = config.size + selectionSize / 2 + .5;
+                    let x = config.size + selectionSize / 2;
 
                     context.beginPath();
                     context.strokeStyle = config.selection_edge_fill;

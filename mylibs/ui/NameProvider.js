@@ -2,15 +2,15 @@ import Intl from "Intl";
 
 export default class NameProvider {
 
-    constructor(page){
-        this._nextIndexes  = {};
+    constructor(page) {
+        this._nextIndexes = {};
         this._namesMap = {};
         this.initForPage(page);
     }
 
-    initForPage(page){
+    initForPage(page) {
         var namesMap = this._namesMap;
-        page.applyVisitor(e=>{
+        page.applyVisitor(e => {
             namesMap[e.name()] = true;
         })
     }
@@ -23,21 +23,22 @@ export default class NameProvider {
         return idx;
     }
 
-    assignNewName(element){
+    assignNewName(element) {
         let namesMap = this._namesMap;
         let lastLabel = null;
-        while(true) {
+        while (true) {
             var displayType = element.displayType();
-            var index = this.getNextIndex(element, displayType);
+            var index = this.getNextIndex(element, displayType);            
             var label = Intl.instance.formatMessage({
                 id: displayType,
                 defaultMessage: displayType
-            }, {index: index});
-            if(!namesMap[label] || lastLabel === label) break;
+            }) + " " + index;
+
+            if (!namesMap[label] || lastLabel === label) break;
             lastLabel = label;
         }
         namesMap[label] = true;
 
-        element.setProps({name:label});
+        element.setProps({ name: label });
     }
 }

@@ -116,11 +116,6 @@ class Page extends Layer {
         return {target: el, position: pos};
     }
 
-
-    iconType() {
-        return 'page';
-    }
-
     scrollX() {
         if (arguments.length === 1) {
             this._scrollX = arguments[0];

@@ -93,7 +93,7 @@ export default class UIElement extends DataNode {
         }
 
         var hasBr = changes.hasOwnProperty("br");
-        if (hasBr && !(changes.br instanceof Rect)) {            
+        if (hasBr && !(changes.br instanceof Rect)) {
             changes.br = Rect.fromObject(changes.br);
         }
     }
@@ -118,9 +118,9 @@ export default class UIElement extends DataNode {
 
     setProps(props) {
         var hasBr = props.hasOwnProperty("br");
-        
+
         if (hasBr && !(props.br instanceof Rect)) {
-            debugger;            
+            debugger;
         }
 
         if (!hasBr) {
@@ -560,7 +560,7 @@ export default class UIElement extends DataNode {
         return true;
     }
 
-    getBoundaryRect(includeMargin: boolean = false) : IRect {
+    getBoundaryRect(includeMargin: boolean = false): IRect {
         var br = this.props.br;
         if (!includeMargin || this.margin() === Box.Default) {
             return br;
@@ -578,7 +578,7 @@ export default class UIElement extends DataNode {
         return this.getBoundingBoxGlobal(includeMargin);
     }
 
-    getBoundingBox(includeMargin: boolean = false) : IRect {
+    getBoundingBox(includeMargin: boolean = false): IRect {
         var rect = this.getBoundaryRect(includeMargin);
         return this.transformRect(rect, this.viewMatrix());
     }
@@ -593,7 +593,7 @@ export default class UIElement extends DataNode {
         this.runtimeProps.globalClippingBox = bb;
         return bb;
     }
-    getBoundingBoxRelativeToRoot(): IRect{
+    getBoundingBoxRelativeToRoot(): IRect {
         var m = this.rootViewMatrix();
         var rect = this.getBoundaryRect();
         return this.transformRect(rect, m);
@@ -633,7 +633,7 @@ export default class UIElement extends DataNode {
         }
         return stroke.lineWidth;
     }
-    
+
     expandRectWithBorder(rect) {
         var border = this.getMaxOuterBorder();
         if (border !== 0) {
@@ -642,7 +642,7 @@ export default class UIElement extends DataNode {
         return rect;
     }
 
-    getHitTestBox(scale: number, includeMargin: boolean = false, includeBorder: boolean = true) : IRect {
+    getHitTestBox(scale: number, includeMargin: boolean = false, includeBorder: boolean = true): IRect {
         var rect = this.getBoundaryRect(includeMargin);
         var goodScaleW = rect.width * scale > 10;
         var goodScaleH = rect.height * scale > 10;
@@ -869,22 +869,22 @@ export default class UIElement extends DataNode {
 
         return this.runtimeProps.globalViewMatrixInverted;
     }
-    rootViewMatrix(): Matrix{                
+    rootViewMatrix(): Matrix {
         var root = this.primitiveRoot();
-        if (!root || root === this){
+        if (!root || root === this) {
             return this.viewMatrix();
         }
         var current = this;
         var matrices = [];
-        while (current !== root){
+        while (current !== root) {
             matrices.push(current.viewMatrix());
-            current = current.parent();            
-        }   
+            current = current.parent();
+        }
 
         var m = matrices[matrices.length - 1];
-        for (let i = matrices.length - 2; i >= 0 ; --i){
+        for (let i = matrices.length - 2; i >= 0; --i) {
             m = m.appended(matrices[i]);
-        }     
+        }
         return m;
     }
 
@@ -1423,8 +1423,11 @@ export default class UIElement extends DataNode {
     displayName() {
         return this.name() || this.displayType();
     }
-    displayType() {
-        return "type." + this.t;
+    displayType(): string {
+        return UIElement.displayType(this.t);
+    }
+    static displayType(t: string): string {
+        return "type." + t;
     }
     systemType() {
         return this.t;
@@ -1558,9 +1561,6 @@ export default class UIElement extends DataNode {
     }
     selectionFrameType() {
         return DefaultFrameType;
-    }
-    iconType() {
-        return this.props.iconType || 'rectangle';
     }
     createSelectionFrame(view) {
         if (!this.selectFrameVisible()) {
@@ -2021,10 +2021,6 @@ PropertyMetadata.registerForType(UIElement, {
         defaultValue: false
     },
     visible: {
-        displayName: "Visible",
-        type: "trueFalse",
-        useInModel: true,
-        editable: true,
         defaultValue: true,
         customizable: true
     },
@@ -2131,22 +2127,21 @@ PropertyMetadata.registerForType(UIElement, {
                 label: "Layout",
                 properties: ["x", "y", "width", "height", "angle"]
             },
+            // {
+            //     label: "Style",
+            //     properties: ["styleId"]
+            // },
             {
-                label: "Colors",
-                properties: ["fill", "stroke"],
-                hidden: true
-            },
-            {
-                label: "Style",
-                properties: ["styleId", "opacity"]
-            },
+                label: "Appearance",
+                properties: ["fill", "stroke", "opacity"]
+            },                        
             {
                 label: "@constraints",
                 properties: ["constraints"]
             },
             {
-                label: "Appearance",
-                properties: ["visible", "cornerRadius", "clipMask"]
+                label: "@advanced",
+                properties: ["clipMask"]
             }
             // ,
             // {

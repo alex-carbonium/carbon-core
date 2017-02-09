@@ -215,19 +215,19 @@ PropertyMetadata.registerForType(Text, {
         defaultValue: true
     },
     groups: function(element){
-        var ownGroups = [
-            {
-                label: element ? element.displayType() : '',
-                properties: ["autoWidth"]
-            },
-            {
-                label: "Font",
-                properties: ["textStyleId", "font"]
-            }
-        ];
-
         var baseGroups = PropertyMetadata.findForType(UIElement).groups();
-        return ownGroups.concat(baseGroups);
+
+        var ownGroups = [
+            baseGroups.find(x => x.label === "Layout"),
+            {
+                label: UIElement.displayType(Types.Text),
+                properties: [/*"textStyleId",*/ "autoWidth", "font"]
+            },
+            baseGroups.find(x => x.label === "Appearance"),
+            baseGroups.find(x => x.label === "@constraints")
+        ];
+        
+        return ownGroups;
     },
     getNonRepeatableProps: function(element, newProps){
         var base = PropertyMetadata.findForType(UIElement).getNonRepeatableProps(element);

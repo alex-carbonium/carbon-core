@@ -400,9 +400,10 @@ export default class DataNode{
         this.setProps(data.props, ChangeMode.Self);
 
         if (data.children) {            
-            this.children = data.children;
-            for(var i = 0; i < this.children.length; ++i) {
-                var child = this.children[i] = ObjectFactory.getObject(this.children[i]);
+            this.children = [];
+            for(var i = 0; i < data.children.length; ++i) {
+                var child = ObjectFactory.getObject(data.children[i]);
+                this.children.push(child);
                 this.acquiredChild(child, ChangeMode.Self);
             }
         }

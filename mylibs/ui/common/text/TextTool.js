@@ -8,6 +8,7 @@ import DragController from "../../../framework/DragController";
 import Text from "../../../framework/text/Text";
 import Font from "../../../framework/Font";
 import Brush from "../../../framework/Brush";
+import NameProvider from "../../NameProvider";
 import OpenTypeFontManager from "../../../OpenTypeFontManager";
 import InlineTextEditor from "../../../framework/text/inlinetexteditor";
 import SharedColors from "../../SharedColors";
@@ -250,6 +251,8 @@ export default class TextTool extends TOol {
             text.prepareAndSetProps(props);
             dropData.target.add(text);
         }
+
+        this._app.activePage.nameProvider.assignNewName(text);
 
         this.beginEdit(text);
     }

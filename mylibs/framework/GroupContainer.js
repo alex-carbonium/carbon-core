@@ -95,10 +95,6 @@ export default class GroupContainer extends Container implements IGroupContainer
     translateChildren() {
         return true;
     }
-
-    iconType() {
-        return 'group';
-    }
 }
 
 GroupContainer.prototype.t = Types.GroupContainer;
