@@ -250,9 +250,19 @@ export default class ArtboardTemplateControl extends Container {
                 var prop = this._getCustomPropertyDefinition(propName);
                 var elementId = prop.controlId;
                 var element = this.getElementById(this.id() + elementId);
-                if(element) {
-                    element.prepareAndSetProps({[prop.propertyName]: props[propName]}, ChangeMode.Self);
+
+                var value = props[propName];
+                if(value === undefined) { // custom property was deleted, i.e by undo or reset property action 
+                    var sourceElement = this._artboard.getElementById(element.sourceId());
+                    delete props[propName];
+                    value = sourceElement.props[prop.propertyName];
+                } 
+                
+                if(value && element) {
+                    element.prepareAndSetProps({[prop.propertyName]: value}, ChangeMode.Self);
                 }
+            } else if(props[propName] === undefined) {
+                delete props[propName];
             }
         }
     }

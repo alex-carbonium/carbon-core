@@ -17,7 +17,7 @@ export default {
         else if (path.length === 2){
             key = path[0];
         }
-        else if (path.length === 3){
+        else if (path.length <= 4){
             key = path[0] + path[1];
         }
         else{
