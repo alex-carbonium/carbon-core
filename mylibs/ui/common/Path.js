@@ -479,15 +479,17 @@ class Path extends Shape {
 
     mode(value) {
         if (arguments.length > 0) {
+            var oldMode = this.mode();
+
+            this.setProps({mode: value});
+
             if (value === "edit") {
-                if (this.mode() !== "edit") {
+                if (oldMode !== "edit") {
                     this.switchToEditMode(true);
                 }
             } else {
                 this.switchToEditMode(false);
-            }
-
-            this.setProps({mode: value});
+            }            
         }
 
         return this.props.mode;
@@ -495,9 +497,6 @@ class Path extends Shape {
 
     cancel() {
         this.mode("resize");
-        this._internalChange = true;
-        Selection.refreshSelection();
-        this._internalChange = false;
     }
 
     enter() {
@@ -511,6 +510,9 @@ class Path extends Shape {
             this._cancelBinding.dispose();
         }
         if (edit) {
+            this.registerForLayerDraw(2, this);
+            Invalidate.request();
+
             this._currentPoint = null;
             scalePointsToNewSize.call(this);
             this.save();
@@ -518,7 +520,12 @@ class Path extends Shape {
 
             this._cancelBinding = Environment.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
             this.captureMouse(this);
+
+            updateSelectedPoint.call(this, this.points[0]);
         } else {
+            this.unregisterForLayerDraw(2, this);
+            Invalidate.request();
+            
             this._cancelBinding = null;
             SnapController.clearActiveSnapLines();
             this.nextPoint = null;
@@ -526,6 +533,10 @@ class Path extends Shape {
             this.resetGlobalViewCache();
             ArrangeStrategy.arrangeRoots([this]);
         }
+
+        this._internalChange = true;
+        Selection.reselect();
+        this._internalChange = false;
     }
 
     _initPoint(point) {
@@ -595,19 +606,14 @@ class Path extends Shape {
     }
 
     select() {
-        this._selected = true;
-        this.registerForLayerDraw(2, this);
-        Invalidate.request();
+        this._selected = true;        
         this._enterBinding = Environment.controller.actionManager.subscribe('enter', this.enter.bind(this));
     }
 
     unselect() {
-        this._selected = false;
-        this.unregisterForLayerDraw(2, this);
-        if (!this._internalChange) {
-            Invalidate.request();
-            this.mode("resize");
-            this.releaseMouse(this);
+        this._selected = false;        
+        if (!this._internalChange && this.mode() === "edit") {            
+            this.mode("resize");            
         }
 
         if (this._enterBinding) {
@@ -616,11 +622,12 @@ class Path extends Shape {
         }
     }
 
+    selectFrameVisible(){
+        return this.mode() !== "edit";
+    }
+
     edit() {
-        this.mode("edit");
-        this._internalChange = true;
-        Selection.refreshSelection();
-        this._internalChange = false;
+        this.mode("edit");        
     }
 
     dblclick(event, scale) {
@@ -668,8 +675,7 @@ class Path extends Shape {
             this._handlePoint = null;
             if (!pointsEqual(pt, this._originalPoint)) {
                 this.changePointAtIndex(pt, pt.idx);
-                this.adjustBoundaries(this.runtimeProps.originalBoundingBox);
-                delete this.runtimeProps.originalBoundingBox;
+                this.adjustBoundaries();
                 //  commandManager.execute(new ChangePathPointCommand(this, pt, this._originalPoint));
             }
         }
@@ -829,10 +835,6 @@ class Path extends Shape {
                 this._pointOnPath = null;
                 Invalidate.request();
             }
-        }
-
-        if (this._currentPoint || this._handlePoint){
-            this.runtimeProps.originalBoundingBox = this.getBoundingBox();
         }
     }
 
@@ -1947,19 +1949,6 @@ PropertyMetadata.registerForType(Path, {
         editable: true,
         displayName: "Closed"
     },
-    stroke: {
-        defaultValue: Brush.Black,
-        displayName: "Stroke brush",
-        type: "stroke",
-        useInModel: true,
-        editable: true
-    },
-    fill: {
-        type: "fill",
-        useInModel: true,
-        editable: true,
-        displayName: "Fill brush"
-    },
     currentPointX: {
         displayName: "X",
         type: "numeric",
@@ -1998,38 +1987,21 @@ PropertyMetadata.registerForType(Path, {
     points: {
         defaultValue: []
     },
-    groups () {
-        return [
-            {
-                label: "@selectedPoint",
-                properties: ["currentPointX", "currentPointY", "currentPointType"]
-            },
-            {
-                label: "Layout",
-                properties: ["width", "height", "x", "y", "angle"],
-                expanded: true
-            },
-            {
-                label: "Appearance",
-                expanded: false,
-                properties: ["visible", "opacity", "fill", "stroke", "dashPattern", "miterLimit", "lineCap", "lineJoin", "clipMask"]
-            },                      
-            {
-                label: "@shadow",
-                expanded: false,
-                properties: ["shadows"]
-            },
-            {
-                label: "@constraints",
-                expanded: false,
-                properties: ["constraints"]
-            },
-            {
-                label: "Settings",
-                properties: ["pointRounding"],
-                expanded: true
-            }
-        ];
+    groups (path) {
+        if (path && path.mode() === "edit"){
+            return [
+                {
+                    label: path.displayType(),
+                    properties: ["pointRounding"]
+                },
+                {
+                    label: "@selectedPoint",
+                    properties: ["currentPointX", "currentPointY", "currentPointType"]
+                }                
+            ];
+        }        
+
+        return PropertyMetadata.findAll(Types.Shape).groups();
     },
     prepareVisibility(props){
         var editMode = props.mode === "edit";

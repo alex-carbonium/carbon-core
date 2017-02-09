@@ -406,6 +406,20 @@ PropertyMetadata.registerForType(Rectangle, {
         displayName: "@cornerRadius",
         defaultValue: QuadAndLock.Default,
         type: "corners"
+    },
+    groups: function(){
+        var baseGroups = PropertyMetadata.findAll(Types.Shape).groups();
+
+        return [
+            baseGroups.find(x => x.label === "Layout"),
+            {
+                label: "Appearance",
+                properties: ["fill", "stroke", 'dashPattern', "miterLimit", "lineCap", "lineJoin", "cornerRadius", "opacity"]
+            },
+            baseGroups.find(x => x.label === "@shadow"),
+            baseGroups.find(x => x.label === "@constraints"),
+            baseGroups.find(x => x.label === "@advanced")
+        ];
     }
 });
 

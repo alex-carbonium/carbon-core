@@ -1,8 +1,9 @@
+import UIElement from "./UIElement";
 import Container from "./Container";
 import FrameSource from "./FrameSource";
 import PropertyMetadata from "./PropertyMetadata";
 import Brush from "./Brush";
-import {ContentSizing, Overflow, Types, ChangeMode} from "./Defs";
+import { ContentSizing, Overflow, Types, ChangeMode } from "./Defs";
 import Invalidate from "./Invalidate";
 import FrameEditTool from "./FrameEditTool";
 import EventHelper from "./EventHelper";
@@ -11,10 +12,6 @@ import RectMask from "./RectMask";
 const DefaultSizing = ContentSizing.fill;
 
 export default class Frame extends Container {
-    iconType() {
-        return 'icon';
-    }
-
     prepareProps(changes) {
         super.prepareProps.apply(this, arguments);
         var source = changes.source || this.source();
@@ -55,11 +52,11 @@ export default class Frame extends Container {
         //this.createOrUpdateClippingMask(source, newProps);
     }
 
-    saveOrResetLayoutProps(){
-        if (!this.runtimeProps.origSource){
+    saveOrResetLayoutProps() {
+        if (!this.runtimeProps.origSource) {
             this.runtimeProps.origSource = this.selectProps(["sourceProps"]);
         }
-        else{
+        else {
             this.setProps(this.runtimeProps.origSource);
         }
         super.saveOrResetLayoutProps();
@@ -76,14 +73,14 @@ export default class Frame extends Container {
 
     source(value) {
         if (value !== undefined) {
-            this.setProps({source: value});
+            this.setProps({ source: value });
         }
         return this.props.source;
     }
 
     sizing(value) {
         if (value !== undefined) {
-            this.setProps({sizing: value});
+            this.setProps({ sizing: value });
         }
         return this.props.sizing;
     }
@@ -100,7 +97,7 @@ export default class Frame extends Container {
         }
     }
 
-    shouldApplyViewMatrix(){
+    shouldApplyViewMatrix() {
         return true;
     }
 
@@ -160,7 +157,7 @@ export default class Frame extends Container {
 
     //TODO: add back if necessary
     createOrUpdateClippingMask(source, newProps) {
-        if(!source){
+        if (!source) {
             return;
         }
         if (newProps.hasOwnProperty("angle") || newProps.hasOwnProperty("sourceProps")) {
@@ -176,7 +173,7 @@ export default class Frame extends Container {
             }
         }
         if (this.runtimeProps.mask && (newProps.hasOwnProperty("width") || newProps.hasOwnProperty("height"))) {
-            this.runtimeProps.mask.setProps({width: this.width(), height: this.height()}, ChangeMode.Self);
+            this.runtimeProps.mask.setProps({ width: this.width(), height: this.height() }, ChangeMode.Self);
         }
     }
 
@@ -186,7 +183,7 @@ export default class Frame extends Container {
             FrameEditTool.attach(this);
         }
         else if (!FrameSource.hasValue(source)) {
-            var e = {done: null};
+            var e = { done: null };
             Frame.uploadRequested.raise(e);
             if (e.done) {
                 e.done.then(urls => this.prepareAndSetProps({
@@ -203,7 +200,7 @@ export default class Frame extends Container {
     }
 
     canAccept(elements, autoInsert, allowMoveInOut) {
-        if (elements.length !== 1){
+        if (elements.length !== 1) {
             return false;
         }
         return elements[0] instanceof Frame && allowMoveInOut;
@@ -214,7 +211,7 @@ export default class Frame extends Container {
     }
 
     convertToPath() {
-        return fetch(this.props.sourceProps.svg, {cors: true})
+        return fetch(this.props.sourceProps.svg, { cors: true })
             .then(response => {
                 if (!(response.status >= 200 && response.status < 300)) {
                     throw new Error("Could not download vector");
@@ -222,15 +219,15 @@ export default class Frame extends Container {
                 return response.text();
             })
             .then(svg => {
-                return svgParser.loadSVGFromString(svg).then((result)=> {
-                    result.setProps({x: this.x(), y: this.y()});
+                return svgParser.loadSVGFromString(svg).then((result) => {
+                    result.setProps({ x: this.x(), y: this.y() });
                     return result;
                 });
             });
     }
 
     insert(frame) {
-        this.prepareAndSetProps({source: frame.props.source, sourceProps: frame.props.sourceProps});
+        this.prepareAndSetProps({ source: frame.props.source, sourceProps: frame.props.sourceProps });
         this.runtimeProps.sourceProps = frame.runtimeProps.sourceProps;
         frame.parent().remove(frame);
         frame.runtimeProps.resized = true;
@@ -253,12 +250,12 @@ PropertyMetadata.registerForType(Frame, {
         type: "dropdown",
         options: {
             items: [
-                {name: "Fill proportionally", value: ContentSizing.fill},
-                {name: "Fit proportionally", value: ContentSizing.fit},
-                {name: "Center", value: ContentSizing.center},
-                {name: "Original", value: ContentSizing.original},
-                {name: "Fit frame", value: ContentSizing.stretch},
-                {name: "Manual", value: ContentSizing.manual}
+                { name: "Fill proportionally", value: ContentSizing.fill },
+                { name: "Fit proportionally", value: ContentSizing.fit },
+                { name: "Center", value: ContentSizing.center },
+                { name: "Original", value: ContentSizing.original },
+                { name: "Fit frame", value: ContentSizing.stretch },
+                { name: "Manual", value: ContentSizing.manual }
             ]
         },
         defaultValue: DefaultSizing
@@ -272,16 +269,14 @@ PropertyMetadata.registerForType(Frame, {
             sizing: FrameSource.isEditSupported(props.source)
         });
     },
-    groups: function (element) {
-        var ownGroups = [
-            {
-                label: element ? element.displayType() : '',
-                properties: ["sizing"]
-            }
-        ];
-
+    groups: function () {
         var baseGroups = PropertyMetadata.findForType(Container).groups();
-        return ownGroups.concat(baseGroups);
+        baseGroups.splice(1, 0, {
+            label: UIElement.displayType(Types.Frame),
+            properties: ["sizing"]
+        });
+
+        return baseGroups;
     },
     getNonRepeatableProps: function (element) {
         var base = PropertyMetadata.findForType(Container).getNonRepeatableProps(element);

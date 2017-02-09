@@ -270,6 +270,12 @@ class SelectionModel {
         this.makeSelection(selection, true);
     }
 
+    reselect(){
+        var selection = this.selectedElements();
+        this.makeSelection([], true);
+        this.makeSelection(selection);
+    }
+
     _fireOnElementSelected(oldSelection) {
         lockUnlockGroups.call(this, this.selectedElements());
         this.onElementSelected.raise(this._selectCompositeElement, oldSelection);

@@ -50,10 +50,6 @@ class Circle extends Shape {
         Shape.prototype.resize.call(this, rect, ignoreSnapping, options.shiftPressed);
     }
 
-    iconType() {
-        return 'circle';
-    }
-
     canConvertToPath() {
         return true;
     }

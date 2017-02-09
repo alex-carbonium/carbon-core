@@ -83,8 +83,8 @@ export default class CompositeElement extends UIElement implements IComposite {
             }
 
             var w = xMax - xMin;
-            var h = yMax - yMin;            
-            this.prepareAndSetProps({br: new Rect(xMin, yMin, w, h)});
+            var h = yMax - yMin;
+            this.prepareAndSetProps({ br: new Rect(xMin, yMin, w, h) });
         }
     }
 
@@ -227,117 +227,50 @@ export default class CompositeElement extends UIElement implements IComposite {
         return parents;
     }
 
-    // rules:
-    // - find groups with matching label for all types, these groups are assumed to have same props
-    // - in remaining groups, find props with same name+type and put them into a default group
     createPropertyGroups() {
         if (this.count() === 0) {
             return [];
         }
 
-        if (this.count() === 1) {
+        if (this._types.length === 1) {
             let type = this._types[0];
             let metadata = PropertyMetadata.findAll(type);
-            let groups = metadata ? metadata.groups(this.elements[0]) : [];
+            let element = this.count() === 1 ? this.elements[0] : null;
+            let groups = metadata ? metadata.groups(element) : [];
             return groups;
         }
 
-        var commonGroups = [];
-        var entries = [];
-
-        for (var i = 0; i < this._types.length; i++) {
+        let baseMetadata = PropertyMetadata.findAll(this._types[0]);
+        let baseGroups = baseMetadata.groups();
+        for (var i = 1; i < this._types.length; i++) {
             var type = this._types[i];
-            var metadata = PropertyMetadata.findAll(type);
-            if (metadata) {
-                entries.push({
-                    metadata: metadata,
-                    groups: metadata.groups()
-                });
-            }
-        }
+            var otherMetadata = PropertyMetadata.findAll(type);
 
-        var sample = entries[0];
-        var used = {};
-        for (var i = 0; i < sample.groups.length; i++) {
-            var candidate = sample.groups[i];
-            if (!candidate.label) {
-                continue;
-            }
-
-            for (var j = 1; j < entries.length; j++) {
-                var entry = entries[j];
-                var found = false;
-                for (var k = 0; k < entry.groups.length; k++) {
-                    var group = entry.groups[k];
-                    if (group.label === candidate.label) {
-                        found = true;
-                        break;
+            for (var i = 0; i < baseGroups.length; i++) {
+                var group = baseGroups[i];
+                for (var j = group.properties.length - 1; j >= 0; --j) {
+                    var propertyName = group.properties[j];
+                    if (!this._matchingPropertyExists(baseMetadata, otherMetadata, propertyName)){
+                        group.properties.splice(j, 1);
                     }
                 }
-                if (!found) {
-                    candidate = null;
-                    break;
-                }
-            }
-
-            if (candidate) {
-                commonGroups.push(candidate);
-                used[candidate.label] = true;
             }
         }
+    
+        return baseGroups;
+    }
 
-        var commonProps = [];
-        for (var i = 0; i < sample.groups.length; i++) {
-            if (used[sample.groups[i].label]) {
-                continue;
-            }
-            for (var j = 0; j < sample.groups[i].properties.length; j++) {
-                var candidateName = sample.groups[i].properties[j];
-                if (!sample.metadata[candidateName]) {
-                    candidateName = null;
-                    break;
-                }
-
-                var candidateType = sample.metadata[candidateName].type;
-
-                for (var k = 1; k < entries.length; k++) {
-                    var entry = entries[k];
-                    var found = false;
-                    for (var l = 0; l < entry.groups.length; l++) {
-                        var group = entry.groups[l];
-                        for (var m = 0; m < group.properties.length; m++) {
-                            var propertyName = group.properties[m];
-                            var propertyMetadata = entry.metadata[propertyName];
-                            var propertyType = propertyMetadata ? propertyMetadata.type : null;
-                            if (propertyName === candidateName && propertyType === candidateType) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (found) {
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        candidateName = null;
-                        break;
-                    }
-                }
-
-                if (candidateName) {
-                    commonProps.push(candidateName);
-                }
-            }
+    _matchingPropertyExists(metadata1, metadata2, propertyName): boolean {
+        var propertyMetadata1 = metadata1[propertyName];
+        if (!propertyMetadata1){
+            return false;
+        }
+        var propertyMetadata2 = metadata2[propertyName];
+        if (!propertyMetadata2){
+            return false;
         }
 
-        if (commonProps.length) {
-            commonGroups.splice(0, 0, {
-                label: this.allHaveSameType() ? this.elements[0].displayType() : "Common",
-                properties: commonProps
-            });
-        }
-
-        return commonGroups;
+        return propertyMetadata1.type === propertyMetadata2.type;
     }
 
     getDisplayPropValue(propertyName: string, descriptor: PropertyDescriptor) {

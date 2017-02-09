@@ -2139,10 +2139,10 @@ PropertyMetadata.registerForType(UIElement, {
                 label: "@constraints",
                 properties: ["constraints"]
             },
-            {
-                label: "@advanced",
-                properties: ["clipMask"]
-            }
+            // {
+            //     label: "@advanced",
+            //     properties: ["clipMask"]
+            // }
             // ,
             // {
             //     label: "Margin",
