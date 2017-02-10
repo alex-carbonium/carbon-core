@@ -13,8 +13,8 @@ var Strategy = {
         }
 
         var master = items[0];
-        var masterWidth = container.props.masterWidth;
-        var masterHeight = container.props.masterHeight;
+        var masterWidth = master.width();//container.props.masterWidth;
+        var masterHeight = master.height();//container.props.masterHeight;
         var numX = this.getNumX(container);
         var numY = this.getNumY(container);
         var numTotal = numX * numY;
