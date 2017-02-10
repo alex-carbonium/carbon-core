@@ -370,6 +370,19 @@ class ArtboardPage extends Page {
         }        
         this.toolboxConfigIsDirty.raise(forceUpdate, changedId);
     }
+
+    saveWorkspaceState(): any{
+        var artboard = this.getActiveArtboard();
+        return {artboardId: artboard ? artboard.id() : null};        
+    }
+    restoreWorkspaceState(data: any): void{
+        if (data.artboardId){
+            var artboard = this.getAllArtboards().find(x => x.id() === data.artboardId);
+            if (artboard){
+                this.setActiveArtboard(artboard);
+            }
+        }
+    }
 }
 ArtboardPage.prototype.t = Types.ArtboardPage;
 

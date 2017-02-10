@@ -298,7 +298,7 @@ export default class ViewBase {
         return this._showPixels;
     }
 
-    scale(/*int*/value) {
+    scale(value) {
         var page = this.page;
         if (!page) {
             return 1;

@@ -1028,12 +1028,15 @@ class App extends DataNode implements IApp {
 
                 logger.trackEvent("AppLoaded", null, stopwatch.getMetrics());
 
-                that.platform.initViewManager();
+                if (that.serverless()){
+                    that.id("serverless");
+                }
 
                 that.raiseLoaded();
                 //this method depends on extensions (comments) being initialized
-                that.platform.postLoad(that);
+                that.platform.postLoad(that);                
 
+                that.restoreWorkspaceState();
                 that.releaseLoadRef();
 
                 //that.platform.ensureCanvasSize();
@@ -1486,6 +1489,46 @@ class App extends DataNode implements IApp {
     removeStory(story) {
         this.removeChild(story);
         this.storyRemoved.raise(story);
+    }
+
+    saveWorkspaceState(): void{
+        var state = {
+            scale: Environment.view.scale(),
+            scrollX: Environment.view.scrollX(),
+            scrollY: Environment.view.scrollY(),
+            pageId: this.activePage.id(),
+            pageState: this.activePage.saveWorkspaceState(),                        
+            selection: Selection.selectedElements().map(x => x.id())            
+        };
+        localStorage.setItem("workspace:" + this.id(), JSON.stringify(state));
+    }
+    restoreWorkspaceState(): void{                
+        try{
+            var data = localStorage.getItem("workspace:" + this.id());
+            var state = JSON.parse(data);
+            var page = this.pages.find(x => x.id() === state.pageId);
+            if (page){
+                this.setActivePage(page);
+            }
+
+            Environment.view.scale(state.scale);
+            Environment.view.scrollX(state.scrollX);
+            Environment.view.scrollY(state.scrollY);
+
+            if (page && state.pageState){
+                page.restoreWorkspaceState(state.pageState);
+            }
+
+            if (state.selection.length){                    
+                var elements = this.activePage.findAllNodesDepthFirst(x => state.selection.indexOf(x.id()) !== -1);
+                if (elements.length){
+                    Selection.makeSelection(elements);
+                }
+            }
+        }
+        catch(e){
+            //ignore                
+        }        
     }
 }
 

@@ -8,7 +8,7 @@ import ContextPool from "framework/render/ContextPool";
 import EventHelper from "./EventHelper";
 import Brush from "./Brush";
 import NameProvider from "ui/NameProvider";
-import {IContainer, IRect} from "./CoreModel";
+import {IContainer, IRect, IPage} from "./CoreModel";
 
 function findNextPageName() {
     var maxId = 0;
@@ -29,7 +29,7 @@ function findNextPageName() {
 
 var pageNameSlugRegex = /[^\wа-яА-Я]/g;
 
-class Page extends Layer {
+class Page extends Layer implements IPage{
 
     constructor() {
         super();
@@ -752,7 +752,11 @@ class Page extends Layer {
      ModelStateListener.trackChangePosition(this, parent, element, index, oldIndex, oldParent);
      }*/
 
-
+     saveWorkspaceState(){
+        return null;        
+     }
+     restoreWorkspaceState(data){
+     }
 }
 Page.prototype.t = Types.Page;
 

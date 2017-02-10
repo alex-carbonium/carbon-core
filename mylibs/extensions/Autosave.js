@@ -66,11 +66,7 @@ define(["windows/Dialog", "framework/sync/Primitive"], function(Dialog, Primitiv
             }
         }
 
-        var checkBackups = function() {
-            if(this._app.serverless()){
-                this._app.id("serverless");
-            }
-
+        var checkBackups = function() {            
             if (!this._app.id()){
                 initIfEmptyProject.call(this);
                 return Promise.resolve();
@@ -83,6 +79,7 @@ define(["windows/Dialog", "framework/sync/Primitive"], function(Dialog, Primitiv
 
                 if (this._app.serverless()) {
                     restoreUnsaved.call(this, backups[backups.length - 1]);
+                    this._app.restoreWorkspaceState();
                 }
                 else {
                     // var dialog = new Dialog(new LoadUnsavedChangesDialog(), {
