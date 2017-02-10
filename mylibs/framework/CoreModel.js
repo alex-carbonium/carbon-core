@@ -96,12 +96,22 @@ export interface IApp extends IDataNode{
     onBuildMenu: IEvent<{a: number}>;
 
     shortcutManager: IShortcutManager;
+
+    saveWorkspaceState(): void;
+    restoreWorkspaceState(): void;
 }
 
 export interface IView{
     viewContainerElement: HTMLElement;
 
-    scale(): number;
+    scale(value?: number): number;
+    scrollX(value?: number): number;
+    scrollY(value?: number): number;
+}
+
+export interface IPage{
+    saveWorkspaceState(): any;
+    restoreWorkspaceState(data: any): void;
 }
 
 export interface IController{

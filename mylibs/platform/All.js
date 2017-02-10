@@ -241,9 +241,6 @@ define([ "math/matrix", "framework/Deferred"], function (Matrix, Deferred) {
                 }
             },
             /* view manager*/
-            initViewManager: function() {
-
-            },
             setViewMode:function(value){
                 this.viewMode = value;
                 var toView = value === "view";
