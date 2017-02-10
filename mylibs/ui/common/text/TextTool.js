@@ -93,6 +93,7 @@ export default class TextTool extends TOol {
         }
 
         this._backgroundCache = null;
+        this._dragZone = null;
 
         Cursor.removeGlobalCursor();
     }

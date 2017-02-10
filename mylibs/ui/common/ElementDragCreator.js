@@ -28,6 +28,7 @@ export default class ElementDragCreator extends Tool {
     }
     detach() {
         super.detach.apply(this, arguments);
+        this._mousepressed = false;
         SnapController.clearActiveSnapLines();
         Cursor.removeGlobalCursor(true);
     }

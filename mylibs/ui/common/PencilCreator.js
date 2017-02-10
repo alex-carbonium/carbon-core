@@ -87,6 +87,9 @@ export default class PencilCreator extends Tool {
         var scale = view.scale();
 
         var element = this._element;
+        if (!element){
+            return;
+        }
         var defaultSettings = App.Current.defaultShapeSettings();
         if (defaultSettings) {
             element.setProps(defaultSettings);
@@ -131,6 +134,11 @@ export default class PencilCreator extends Tool {
             Invalidate.requestUpperOnly();
             event.handled = true;
         }
+    }
+    detach(){
+        super.detach();
+        this._mousepressed = false;
+        this.points = [];
     }
     layerdraw(context) {
         if (this._mousepressed) {
