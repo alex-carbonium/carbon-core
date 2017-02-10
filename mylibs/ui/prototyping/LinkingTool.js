@@ -53,7 +53,7 @@ export default class LinkingTool extends Tool {
         }
 
         var scale = this._view.scale();
-        if (this._activeStory.props.type === StoryType.prototype) {
+        if (this._activeStory.props.type === StoryType.Prototype) {
             this._handlePrototypeMouseDownEvent(scale, event);
         } else {
             this._handleFlowMouseDownEvent(scale, event);
@@ -249,7 +249,7 @@ export default class LinkingTool extends Tool {
             Invalidate.requestUpperOnly();
         }
 
-        if(this._activeStory && this._activeStory.props.type === StoryType.flow){
+        if(this._activeStory && this._activeStory.props.type === StoryType.Flow){
             var page = this._app.activePage;
             var artboards = page.getAllArtboards();
 
@@ -410,7 +410,7 @@ export default class LinkingTool extends Tool {
     }
 
     _elementSelected(selection) {
-        if (this._activeStory && this._activeStory.props.type !== StoryType.prototype) {
+        if (this._activeStory && this._activeStory.props.type !== StoryType.Prototype) {
             return;
         }
 
@@ -476,7 +476,7 @@ export default class LinkingTool extends Tool {
         context.save();
 
         var connection = connectionInfo.connection;
-        if (connectionInfo.element == this._selection || this._activeStory.props.type === StoryType.flow) {
+        if (connectionInfo.element == this._selection || this._activeStory.props.type === StoryType.Flow) {
             context.strokeStyle = DefaultLinkColor;
             context.fillStyle = DefaultLinkColor;
         } else {

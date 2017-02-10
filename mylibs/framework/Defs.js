@@ -222,8 +222,8 @@ export var Devices = [
 ];
 
 export var StoryType = {
-    flow:0,
-    prototype:1
+    Flow:0,
+    Prototype:1
 };
 
 export var ContentSizing = {
