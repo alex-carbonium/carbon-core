@@ -71,6 +71,8 @@ export default class TextTool extends TOol {
         if (view.layer3) {
             this._drawBinding = view.layer3.ondraw.bindHighPriority(this, this.layerdraw);
         }
+
+        app.currentTool = ViewTool.Text;
     }
 
     detach() {
@@ -344,7 +346,7 @@ export default class TextTool extends TOol {
         }
         else{
             this._detaching = true;
-            setTimeout(() => this._app.actionManager.invoke("movePointer"));
+            setTimeout(() => this._app.resetCurrentTool());
         }
         Environment.controller.inlineEditModeChanged.raise(false, null);
     }

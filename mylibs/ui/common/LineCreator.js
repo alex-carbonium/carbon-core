@@ -98,7 +98,7 @@ export default class LineCreator extends Tool {
             Selection.makeSelection([element]);
         }
         if (SystemConfiguration.ResetActiveToolToDefault) {
-            App.Current.actionManager.invoke("movePointer");
+            App.Current.resetCurrentTool();
         }
     }
     mousemove(event) {

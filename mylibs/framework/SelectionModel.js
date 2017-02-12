@@ -66,7 +66,7 @@ class SelectionModel {
         this.startSelectionFrameEvent = EventHelper.createEvent();
         this.onSelectionFrameEvent = EventHelper.createEvent();
         this.stopSelectionFrameEvent = EventHelper.createEvent();
-        this.directSelectionChangedEvent = EventHelper.createEvent();
+        this.modeChangedEvent = EventHelper.createEvent();
 
         this._selectCompositeElement = new SelectComposite();
 
@@ -92,7 +92,7 @@ class SelectionModel {
             if (enabled !== this._directSelectionEnabled){
                 this._directSelectionEnabled = enabled;
                 debug("Direct selection: %s", enabled);
-                this.directSelectionChangedEvent.raise(enabled);
+                this.modeChangedEvent.raise(enabled);
             }
         }
         return this._directSelectionEnabled;

@@ -92,7 +92,9 @@ export interface ILayer extends IContainer{
 }
 
 export interface IApp extends IDataNode{
-    currentTool: number;    
+    currentTool: string;    
+    currentToolChanged: IEvent<string>;
+    
     onBuildMenu: IEvent<{a: number}>;
 
     shortcutManager: IShortcutManager;
@@ -119,6 +121,8 @@ export interface IController{
     resizingEvent: IEvent<IInteractionEventData>;
     rotatingEvent: IEvent<IInteractionEventData>;
     startDrawingEvent: IEvent<IEventData>;
+
+    interactionActive: boolean;
     
     actionManager: IActionManager;
 

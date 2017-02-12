@@ -1,3 +1,4 @@
+import { ViewTool } from "../framework/Defs";
 import { IShortcut, IApp } from "../framework/CoreModel";
 import params from "../params";
 
@@ -129,21 +130,21 @@ export default class ShortcutManager {
         { key: "alt+ctrl+x", action: "pathDifference" },
 
         { key: "ctrl+shift+d", action: "debugMode" },
-        { key: "p", action: "addPath" },
-        { key: "r", action: "addRectangle" },
-        { key: "o", action: "addCircle" },
-        { key: "v", action: "movePointer" },
-        { key: "d", action: "movePointerDirect" },
-        { key: "l", action: "addLine" },
-        { key: "y", action: "addPencil" },
+        { key: "p", action: "pathTool" },
+        { key: "r", action: "rectangleTool" },
+        { key: "o", action: "circleTool" },
+        { key: "v", action: "pointerTool" },
+        { key: "d", action: "pointerDirectTool" },
+        { key: "l", action: "lineTool" },
+        { key: "y", action: "pencilTool" },
         { key: "a", action: "artboardTool" },
         { key: "shift+a", action: "artboardViewerTool" },
         { key: "t", action: "textTool" },
         { key: "i", action: "imageTool" },
 
+        { key: "h", action: "handTool" },
         { key: "space", action: "handTool", options: { repeatable: false } },
         { key: "space", action: "handToolRelease", options: { type: "keyup" } },
-        { key: "h", action: "handToolH" },
 
         { key: "ctrl+s", action: "save" },
 
@@ -240,21 +241,21 @@ export default class ShortcutManager {
         { key: "f2", action: "editText" },
 
         { key: "meta+shift+d", action: "debugMode" },
-        { key: "p", action: "addPath" },
-        { key: "r", action: "addRectangle" },
-        { key: "o", action: "addCircle" },
-        { key: "v", action: "movePointer" },
-        { key: "d", action: "movePointerDirect" },
-        { key: "l", action: "addLine" },
-        { key: "y", action: "addPencil" },
+        { key: "p", action: "pathTool" },
+        { key: "r", action: "rectangleTool" },
+        { key: "o", action: "circleTool" },
+        { key: "v", action: "pointerTool" },
+        { key: "d", action: "pointerDirectTool" },
+        { key: "l", action: "lineTool" },
+        { key: "y", action: "pencilTool" },
         { key: "a", action: "artboardTool" },
         { key: "shift+a", action: "artboardViewerTool" },
         { key: "t", action: "textTool" },
         { key: "i", action: "imageTool" },
 
+        { key: "h", action: "handTool" },
         { key: "space", action: "handTool", options: { repeatable: false } },
-        { key: "space", action: "handToolRelease", options: { type: "keyup" } },
-        { key: "h", action: "handToolH" },
+        { key: "space", action: "handToolRelease", options: { type: "keyup" } },        
 
         { key: "meta+s", action: "save" },
         { key: "meta+alt+s", action: "forceSave" },

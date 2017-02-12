@@ -65,9 +65,8 @@ PropertyMetadata.registerForType(DefaultShapeSettings, {
     groups: function(){
         return [
             {
-                label: "Default Appearance",
-                expanded: true,
-                properties: ["fill", "opacity", "stroke", "cornerRadius"]
+                label: "Default Appearance",                
+                properties: ["fill", "stroke", "cornerRadius", "opacity"]
             }
         ];
     }

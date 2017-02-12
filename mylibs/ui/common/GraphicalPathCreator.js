@@ -38,7 +38,7 @@ var completePath = function () {
     this._currentPoint = null;
     setTimeout(function () {
         if (SystemConfiguration.ResetActiveToolToDefault) {
-            this._app.actionManager.invoke("movePointer");
+            this._app.resetCurrentTool();
         }
     }, 0);
 };

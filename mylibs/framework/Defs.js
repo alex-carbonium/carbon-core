@@ -84,24 +84,23 @@ export var Overflow = {
 };
 
 export var ViewTool = {
-    Pointer: 1,
-    Section: 2,
-    Text: 3,
-    Path: 4,
-    Rectangle: 5,
-    Star: 6,
-    Triangle: 7,
-    Polygon: 8,
-    Artboard: 9,
-    Circle: 10,
-    Line: 11,
-    Proto: 12,
-    Pencil: 13,
-    Hand: 14,
-    PointerDirect: 15,
-    Image: 16,
-    ArtboardViewer: 17,
-    Linker: 18
+    Pointer: "pointerTool",
+    Section: "sectionTool",
+    Text: "textTool",
+    Path: "pathTool",
+    Rectangle: "rectangleTool",
+    Star: "starTool",
+    Triangle: "triangleTool",
+    Polygon: "polygonTool",
+    Artboard: "artboardTool",
+    Circle: "circleTool",
+    Line: "lineTool",
+    Proto: "protoTool",
+    Pencil: "pencilTool",
+    Hand: "handTool",
+    PointerDirect: "pointerDirectTool",
+    Image: "imageTool",
+    ArtboardViewer: "artboardViewerTool"    
 };
 
 export var PointDirection = {

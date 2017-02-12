@@ -82,7 +82,7 @@ export default class ElementDragCreator extends Tool {
             if (w === 0 && h === 0) {
                 if (this._cursorNotMoved) {
                     Environment.controller.selectByClick(event);
-                    App.Current.actionManager.invoke("movePointer");
+                    App.Current.resetCurrentTool();
                     event.handled = true;
                 }
                 return;
@@ -97,7 +97,7 @@ export default class ElementDragCreator extends Tool {
             this._hoverArtboard = null;// need to rebuild snapping data TODO: consider to just add data for a new element
         }
         if (SystemConfiguration.ResetActiveToolToDefault) {
-            App.Current.actionManager.invoke("movePointer");
+            App.Current.resetCurrentTool();
         }
         event.handled = true;
     }

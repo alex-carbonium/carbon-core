@@ -123,7 +123,7 @@ export default class PencilCreator extends Tool {
         }
         this.points = [];
         if (SystemConfiguration.ResetActiveToolToDefault) {
-            App.Current.actionManager.invoke("movePointer");
+            App.Current.resetCurrentTool();
         }
     }
     mousemove(event) {

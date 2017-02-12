@@ -35,21 +35,21 @@ var registerCommands = function () {
     var actionManager = this.app.actionManager;
     var that = this;
 
-    actionManager.registerAction("@textTool", "Text tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Text, "Text tool", "Drawing", function () {
         that.detachAll();
         that._textTool.attach(that.app, that.view, that.controller);
         that._currentAction = that._textTool;
         that.app.allowSelection(false);
     }, "ui-text");
 
-    actionManager.registerAction("@imageTool", "Image tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Image, "Image tool", "Drawing", function () {
         that.detachAll();
         that._imageCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._imageCreator;
         that.app.allowSelection(false);
     }, "ui-text");
 
-    actionManager.registerAction("@addPath", "Pen tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Path, "Pen tool", "Drawing", function () {
         that.detachAll();
         that._polylineCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._polylineCreator;
@@ -63,7 +63,7 @@ var registerCommands = function () {
         }
     }, "ui-pen");
 
-    actionManager.registerAction("@addRectangle", "Rectangle tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Rectangle, "Rectangle tool", "Drawing", function () {
         that.detachAll();
         that._rectCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._rectCreator;
@@ -73,7 +73,7 @@ var registerCommands = function () {
         Invalidate.request();
     }, "ui-rectangle");
 
-    actionManager.registerAction("@addStar", "Star tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Star, "Star tool", "Drawing", function () {
         that.detachAll();
         that._starCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._starCreator;
@@ -83,7 +83,7 @@ var registerCommands = function () {
 
     }, "ui-star");
 
-    actionManager.registerAction("@addTriangle", "Triangle tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Triangle, "Triangle tool", "Drawing", function () {
         that.detachAll();
         that._triangleCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._triangleCreator;
@@ -93,7 +93,7 @@ var registerCommands = function () {
 
     }, "ui-ploygon");
 
-    actionManager.registerAction("@addPolygon", "Polygon tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Polygon, "Polygon tool", "Drawing", function () {
         that.detachAll();
         that._polygonCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._polygonCreator;
@@ -104,7 +104,7 @@ var registerCommands = function () {
     }, "ui-ploygon");
 
 
-    actionManager.registerAction("@artboardTool", "Artboard tool", "Artboard", function () {
+    actionManager.registerAction(ViewTool.Artboard, "Artboard tool", "Artboard", function () {
         that.detachAll();
         that._artboardCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._artboardCreator;
@@ -113,7 +113,7 @@ var registerCommands = function () {
 
     }, "ui-rectangle");
 
-    actionManager.registerAction("@artboardViewerTool", "@artboardFrameTool", "Artboard", function () {
+    actionManager.registerAction(ViewTool.ArtboardViewer, "@artboardFrameTool", "Artboard", function () {
         that.detachAll();
         that._artboardViewer.attach(that.app, that.view, that.controller);
         that._currentAction = that._artboardViewer;
@@ -121,7 +121,7 @@ var registerCommands = function () {
 
     }, "");
 
-    actionManager.registerAction("@sectionTool", "Section tool", "Section", function () {
+    actionManager.registerAction(ViewTool.Section, "Section tool", "Section", function () {
         that.detachAll();
         that._sectionCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._sectionCreator;
@@ -131,7 +131,7 @@ var registerCommands = function () {
 
     }, "ui-rectangle");
 
-    actionManager.registerAction("@addCircle", "Ellipse tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Circle, "Ellipse tool", "Drawing", function () {
         that.detachAll();
         that._circleCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._circleCreator;
@@ -140,7 +140,7 @@ var registerCommands = function () {
         Selection.makeSelection([that._defaultShapeSettings]);
     }, "ui-circle");
 
-    actionManager.registerAction("@addLine", "Line tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Line, "Line tool", "Drawing", function () {
         that.detachAll();
         that._lineCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._lineCreator;
@@ -149,7 +149,7 @@ var registerCommands = function () {
         Selection.makeSelection([that._defaultShapeSettings]);
     }, "ui-line");
 
-    actionManager.registerAction("@protoTool", "Prototyping tool", "Prototyping", function () {
+    actionManager.registerAction(ViewTool.Proto, "Prototyping tool", "Prototyping", function () {
         that.detachAll();
         that._prototypingTool.attach(that.app, that.view, that.controller);
         that._currentAction = that._prototypingTool;
@@ -157,7 +157,7 @@ var registerCommands = function () {
         Selection.refreshSelection();
     }, "ui-line");
 
-    actionManager.registerAction("@movePointer", "Pointer tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Pointer, "Selection tool", "Drawing", function () {
         that.detachAll();
         Selection.directSelectionEnabled(false);
         that.app.allowSelection(true);
@@ -165,7 +165,7 @@ var registerCommands = function () {
         Selection.refreshSelection();
     }, "ui-arrow");
 
-    actionManager.registerAction("@movePointerDirect", "Direct selection tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.PointerDirect, "Direct selection tool", "Drawing", function () {
         that.detachAll();
         Selection.directSelectionEnabled(true);
         Selection.invertDirectSelection(true);
@@ -175,7 +175,7 @@ var registerCommands = function () {
     }, "ui-arrow-black");
 
 
-    actionManager.registerAction("@addPencil", "Pencil tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Pencil, "Pencil tool", "Drawing", function () {
         that.detachAll();
         that._pencilCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._pencilCreator;
@@ -189,20 +189,21 @@ var registerCommands = function () {
             //deattach hand tool
             that._currentAction.detach();
             //if it is possible to resume
-            if (that._previousAction && that._previousAction.resume)
+            if (that._previousAction && that._previousAction.resume){
                 that._previousAction.resume();
+            }
+            else{
+                actionManager.invoke(Selection.directSelectionEnabled() ? ViewTool.PointerDirect : ViewTool.Pointer);
+            }
             //restore action
             that._currentAction = that._previousAction;
             that._previousAction = null;
         }
     });
 
-    actionManager.registerAction("handTool", "Hand Tool", "Drawing utils", function () {
-        attachHandTool(); // action activated by spacebar
+    actionManager.registerAction(ViewTool.Hand, "Hand Tool", "Drawing utils", function () {
+        attachHandTool();
     });
-    actionManager.registerAction("@handToolH", "Hand Tool", "Drawing", function () {
-        attachHandTool(); //action activated by pressing H or icon
-    }, "ui-handTool");
 
     var attachHandTool = function () {
         if (that.mousePressed || that._currentAction == that._handTool) {
@@ -252,7 +253,7 @@ export default class DrawActionSelector extends ExtensionBase {
         this._startDraggingToken = sketch.framework.pubSub.subscribe("toolbox.startDragging", function () {
             that.wasDirectSelectionInverted = Selection.invertDirectSelection();
             if (SystemConfiguration.ResetActiveToolToDefault) {
-                app.actionManager.invoke("movePointer");
+                app.resetCurrentTool();
             }
         });
 
@@ -266,7 +267,7 @@ export default class DrawActionSelector extends ExtensionBase {
         this._pageChangedToken = app.pageChanged.bind(function () {
             if (that._currentAction) {
                 if (SystemConfiguration.ResetActiveToolToDefault) {
-                    app.actionManager.invoke("movePointer");
+                    app.resetCurrentTool();
                 }
             }
         });
@@ -288,6 +289,7 @@ export default class DrawActionSelector extends ExtensionBase {
     }
 
     detachAll() {
+        console.log("detaching", this._currentAction);
         Cursor.removeGlobalCursor(true);
         if (this._currentAction) {
             this._currentAction.detach();
@@ -304,7 +306,6 @@ export default class DrawActionSelector extends ExtensionBase {
     }
 
     dispose() {
-       // this.app.actionManager.invoke("movePointer");
         this.detachAll();
 
         sketch.framework.pubSub.unsubscribe(this._startDraggingToken);

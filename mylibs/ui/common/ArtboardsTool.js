@@ -146,7 +146,7 @@ export default class ArtboardsTool extends Tool {
 
         }
         if (SystemConfiguration.ResetActiveToolToDefault) {
-            App.Current.actionManager.invoke("movePointer");
+            App.Current.resetCurrentTool();
         }
         this._ratioResizeInfo = null;
         event.handled = true;

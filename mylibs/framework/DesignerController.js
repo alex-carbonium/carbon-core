@@ -13,8 +13,8 @@ import Keyboard from "../platform/Keyboard";
 import GroupContainer from "./GroupContainer";
 import Phantom from "./Phantom";
 import ObjectFactory from "./ObjectFactory";
-import {Types} from "./Defs";
-import {IController, IEvent} from "./CoreModel";
+import {Types, ViewTool} from "./Defs";
+import {IApp, IController, IEvent} from "./CoreModel";
 
 function onselect(rect) {
     var selection = this.app.activePage.getElementsInRect(rect);
@@ -123,7 +123,10 @@ function dragging(event) {
 }
 
 export default class DesignerController implements IController {
+    app: IApp;
+
     startDrawingEvent: IEvent;
+    interactionActive: boolean;
 
     updateCursor(eventData) {
         if (Cursor.hasGlobalCursor()){
@@ -229,9 +232,18 @@ export default class DesignerController implements IController {
         RepeatViewListener.ensureSubscribed(this);
 
         Keyboard.changed.bind(this, this._onKeyChanged);
-        Selection.directSelectionChangedEvent.bind(() => this.updateCursor());        
+        Selection.modeChangedEvent.bind(() => this.updateCursor());        
 
         this.actionManager = this.app.actionManager;
+        
+        this.interactionActive = false;
+        this.startDraggingEvent.bind(this, this.onInteractionStarted);
+        this.startRotatingEvent.bind(this, this.onInteractionStarted);
+        this.startResizingEvent.bind(this, this.onInteractionStarted);
+
+        this.stopDraggingEvent.bind(this, this.onInteractionStopped);
+        this.stopRotatingEvent.bind(this, this.onInteractionStopped);
+        this.stopResizingEvent.bind(this, this.onInteractionStopped);
     }
 
     onpanstart(event) {
@@ -505,7 +517,9 @@ export default class DesignerController implements IController {
     }
 
     _onKeyChanged(newKeys, oldKeys){
-        Selection.directSelectionEnabled(newKeys.ctrl);
+        if ((this.app.currentTool === ViewTool.Pointer || this.app.currentTool === ViewTool.PointerDirect) && !this.interactionActive){
+            Selection.directSelectionEnabled(newKeys.ctrl);
+        }        
 
         if (oldKeys.alt !== newKeys.alt){
             var c = Cursor.getCursor();
@@ -611,4 +625,10 @@ export default class DesignerController implements IController {
         }
     }
 
+    onInteractionStarted(){
+        this.interactionActive = true;
+    }
+    onInteractionStopped(){        
+        this.interactionActive = false;
+    }
 }

@@ -11,7 +11,8 @@
 import LayoutGridLines from "extensions/guides/LayoutGridLines";
 import LayoutGridColumns from "extensions/guides/LayoutGridColumns";
 import CustomGuides from "extensions/guides/CustomGuides";
-import Brush from "framework/Brush";
+import Brush from "./framework/Brush";
+import EventHelper from "./framework/EventHelper";
 import PropertyTracker from "framework/PropertyTracker";
 import Page from "framework/Page";
 import StyleManager from "framework/style/StyleManager";
@@ -24,7 +25,8 @@ import {
     ChangeMode,
     StoryType,
     StyleType,
-    ArtboardResource
+    ArtboardResource,
+    ViewTool
 } from "./framework/Defs";
 import Font from "./framework/Font";
 import GroupContainer from "./framework/GroupContainer";
@@ -52,7 +54,7 @@ import DefaultSettings from "./DefaultSettings";
 import ObjectFactory from "./framework/ObjectFactory";
 import ActionManager from "./ui/ActionManager";
 import ShortcutManager from "./ui/ShortcutManager";
-import {IApp} from "./framework/CoreModel";
+import {IApp, IEvent} from "./framework/CoreModel";
 
 window.env = Environment;
 window.Selection = Selection;
@@ -385,6 +387,9 @@ function onDefaultFamilyChanged(event) {
 
 class App extends DataNode implements IApp {
     shortcutManager: ShortcutManager;
+    
+    currentToolChanged: IEvent<string>;
+    _currentTool: string;
 
     constructor() {
         super(true);
@@ -402,15 +407,15 @@ class App extends DataNode implements IApp {
         var that = this;
 
         //events
-        this.pageAdded = fwk.EventHelper.createEvent();
-        this.pageRemoved = fwk.EventHelper.createEvent();
-        this.pageChanged = fwk.EventHelper.createEvent();
-        this.pageChanging = fwk.EventHelper.createEvent();
-        this.loadedFromJson = fwk.EventHelper.createEvent();
-        this.savedToJson = fwk.EventHelper.createEvent();
+        this.pageAdded = EventHelper.createEvent();
+        this.pageRemoved = EventHelper.createEvent();
+        this.pageChanged = EventHelper.createEvent();
+        this.pageChanging = EventHelper.createEvent();
+        this.loadedFromJson = EventHelper.createEvent();
+        this.savedToJson = EventHelper.createEvent();
 
 
-        this.changeToolboxPage = fwk.EventHelper.createEvent();
+        this.changeToolboxPage = EventHelper.createEvent();
 
         this.loaded = new Promise(function (resolve, reject) {
             that.loadedResolve = resolve;
@@ -419,27 +424,27 @@ class App extends DataNode implements IApp {
             that.loadedLevel1Resolve = resolve;
         });
 
-        this.reloaded = fwk.EventHelper.createEvent();
-        this.restoredLocally = fwk.EventHelper.createEvent();
-        this.selectionMade = fwk.EventHelper.createEvent();
-        this.onBuildMenu = fwk.EventHelper.createEvent();
-        this.offlineModeChanged = fwk.EventHelper.createEvent();
+        this.reloaded = EventHelper.createEvent();
+        this.restoredLocally = EventHelper.createEvent();
+        this.selectionMade = EventHelper.createEvent();
+        this.onBuildMenu = EventHelper.createEvent();
+        this.offlineModeChanged = EventHelper.createEvent();
 
-        this.modeChanged = fwk.EventHelper.createEvent();
+        this.modeChanged = EventHelper.createEvent();
 
-        this.resourceChanged = fwk.EventHelper.createEvent();
+        this.resourceChanged = EventHelper.createEvent();
 
         //deprecate
-        this.logEvent = fwk.EventHelper.createEvent();
+        this.logEvent = EventHelper.createEvent();
 
 
-        this.changed = fwk.EventHelper.createEvent();
-        this.changedLocally = fwk.EventHelper.createEvent();
-        this.changedExternally = fwk.EventHelper.createEvent();
+        this.changed = EventHelper.createEvent();
+        this.changedLocally = EventHelper.createEvent();
+        this.changedExternally = EventHelper.createEvent();
 
-        this.storyInserted = fwk.EventHelper.createEvent();
-        this.storyRemoved = fwk.EventHelper.createEvent();
-        this.activeStoryChanged = fwk.EventHelper.createEvent();
+        this.storyInserted = EventHelper.createEvent();
+        this.storyRemoved = EventHelper.createEvent();
+        this.activeStoryChanged = EventHelper.createEvent();
 
         this.onBuildMenu.bind(this, onBuildDefaultMenu);
 
@@ -463,6 +468,9 @@ class App extends DataNode implements IApp {
 
         this.shortcutManager = new ShortcutManager();        
         this.shortcutManager.mapDefaultScheme();        
+
+        this._currentTool = ViewTool.Pointer;
+        this.currentToolChanged = EventHelper.createEvent();
     }
 
     activeStory(value) {
@@ -1013,7 +1021,7 @@ class App extends DataNode implements IApp {
             stopwatch.checkpoint("DataProjectFonts");
             that.initExtensions();
             if (that.platform.richUI()) {
-                that.actionManager.invoke("movePointer");
+                that.resetCurrentTool();
             }
 
             var fontPromises = that.loadFonts(data);
@@ -1529,6 +1537,22 @@ class App extends DataNode implements IApp {
         catch(e){
             //ignore                
         }        
+    }
+
+    get currentTool(): string{
+        return this._currentTool;
+    }
+
+    set currentTool(tool: string){
+        var old = this._currentTool;
+        this._currentTool = tool;
+        if (old !== tool){
+            this.currentToolChanged.raise(tool);
+        }        
+    }
+
+    resetCurrentTool(){
+        this.actionManager.invoke(ViewTool.Pointer);
     }
 }
 

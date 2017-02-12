@@ -13,7 +13,7 @@ import RelayoutEngine from "framework/relayout/RelayoutEngine";
 import SystemConfiguration from "SystemConfiguration";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
-import {Types, ArtboardResource} from "../../framework/Defs";
+import {Types, ArtboardResource, ViewTool} from "../../framework/Defs";
 
 const ARTBOARD_SPACE = 100;
 
@@ -185,7 +185,7 @@ class ArtboardPage extends Page {
         commandManager.execute(new CompositeCommand(commands));
 
         if(SystemConfiguration.ResetActiveToolToDefault) {
-            App.Current.actionManager.invoke("movePointer");
+            App.Current.resetCurrentTool();
         }
     }
 

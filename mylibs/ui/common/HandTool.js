@@ -34,8 +34,10 @@ export default class HandTool extends Tool {
         this._attach();
         this._mousepressed = mousePressed;
         setCursor.call(this, true);
+
+        app.currentTool = ViewTool.Hand;
     }
-    detach() {
+    detach() {        
         this._detach();
         this.scrollPoint = null;
         this.scrollX = null;
@@ -50,6 +52,7 @@ export default class HandTool extends Tool {
         Cursor.removeGlobalCursor();
         setCursor.call(this);
         debug("Captured mouse down");
+        return false; //do not let resize frame to fire
     }
     mouseup(event) {
         event.handled = true;

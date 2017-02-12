@@ -37,21 +37,23 @@ export default class Tool {
     _app: IApp;
     _view: IView;
     _controller: IController;
-    _toolId: number;
+    _toolId: string;
 
-    constructor(toolId: number) {
+    constructor(toolId: string) {
         this._attachMode = "edit";
         this._detachMode = "resize";
         this._toolId = toolId;
     }
 
     attach(app, view, controller) {
+        console.log("attaching", this);
         this._app = app;
         this._view = view;
         this._controller = controller;
         refreshSelection(this._attachMode);
         Selection.onElementSelected.bind(this, elementSelected);
         this._attach();        
+        this._app.currentTool = this._toolId;
     }
     detach() {
         Selection.onElementSelected.unbind(this, elementSelected);
@@ -65,6 +67,7 @@ export default class Tool {
     resume() {
         Selection.onElementSelected.bind(this, elementSelected);
         this._attach();
+        this._app.currentTool = this._toolId;
     }
     _attach() {
         var controller = this._controller;
@@ -75,9 +78,8 @@ export default class Tool {
             this._clickBinding = controller.clickEvent.bindHighPriority(this, this.click);
         }
         if (this._view.layer3) {
-            this._drawBinding = this._view.layer3.ondraw.bind(this, this.layerdraw);
-        }
-        this._app.currentTool = this._toolId;
+            this._drawBinding = this._view.layer3.ondraw.bind(this, this.layerdraw);            
+        }                
     }
     _detach() {
         if (this._mouseDownBinding) {
