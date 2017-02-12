@@ -2,6 +2,7 @@ import SystemConfiguration from "../../SystemConfiguration";
 import Selection from "../../framework/SelectionModel";
 import Invalidate from "../../framework/Invalidate";
 import {ViewTool} from "../../framework/Defs";
+import Point from "../../math/point";
 import Path from "./Path";
 import Environment from "../../environment";
 import Tool from "./Tool";
@@ -61,6 +62,7 @@ export default class PencilCreator extends Tool {
         this._attachMode = "select";
         this._detachMode = "resize";
         this._element = null;
+        this._position = null;
     }
     mousedown(event) {
         var eventData = { handled: false, x: event.x, y: event.y };
@@ -77,6 +79,7 @@ export default class PencilCreator extends Tool {
         this._app.activePage.nameProvider.assignNewName(element);
         this._app.activePage.dropToPage(event.x, event.y, element);
         this._element = element;
+        this._position = new Point(event.x, event.y);
 
         return false;
     }
@@ -97,9 +100,9 @@ export default class PencilCreator extends Tool {
 
         var points = DouglasPeucker(this.points, 1.5 / scale);
 
-        if (points.length > 1) {
-            var elementX = element.x();
-            var elementY = element.y();
+        if (points.length > 1) {            
+            var elementX = this._position.x;
+            var elementY = this._position.y;
 
             element.addPoint({ x: points[0].x - elementX, y: points[0].y - elementY });
 
