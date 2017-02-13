@@ -25,8 +25,6 @@ const DefaultLinkColor = "#1592E6";
 export default class LinkingTool extends Tool {
     constructor() {
         super(ViewTool.Proto);
-        this._attachMode = "select";
-        this._detachMode = "resize";
     }
 
     _handleClickToHomeScreen(event, scale) {

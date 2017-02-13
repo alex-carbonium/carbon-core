@@ -24,10 +24,10 @@ var closeCurrentPath = function (pt) {
     }
 };
 
-var completePath = function () {
+var completePath = function (finishEditing = false) {
     if (this._element) {
         if (this._element.length() > 1) {
-            this._element.adjustBoundaries();
+            this._element.adjustBoundaries();                        
         }
         else {
             commandManager.execute(new RemovePathPointCommand(this._element, this._element.pointAtIndex(0)));
@@ -60,8 +60,6 @@ export default class GraphicalpathCreator extends Tool {
         this._parameters = parameters;
         this.points = [];
         this._element = null;
-        this._attachMode = "edit";
-        this._detachMode = "resize";
         this._editTextToken = app.actionManager.subscribe("enter", this.onEditAction.bind(this));
     }
 
@@ -92,6 +90,10 @@ export default class GraphicalpathCreator extends Tool {
     detach() {
         completePath.call(this);
         super.detach.apply(this, arguments);
+        var selection = Selection.selectedElements();
+        if (selection.length === 1 && selection[0] instanceof Path && selection[0].mode() === "edit"){
+            selection[0].mode("resize");
+        }
         if(this._cancelBinding){
             this._cancelBinding.dispose();
             delete this._cancelBinding;
@@ -150,6 +152,10 @@ export default class GraphicalpathCreator extends Tool {
                     Invalidate.request();
                     SnapController.calculateSnappingPointsForPath(element);
                     return;
+                }
+
+                if (element.mode() === "edit"){
+                    element.mode("resize");
                 }
             }
 

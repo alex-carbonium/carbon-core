@@ -16,8 +16,6 @@ export default class ArtboardsTool extends Tool {
         super(ViewTool.Artboard);
         this._type = type;        
         this._parameters = parameters;
-        this._attachMode = "select";
-        this._detachMode = "resize";        
     }
 
     attach(app, view, controller) {

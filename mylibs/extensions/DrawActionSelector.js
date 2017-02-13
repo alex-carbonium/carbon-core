@@ -289,7 +289,6 @@ export default class DrawActionSelector extends ExtensionBase {
     }
 
     detachAll() {
-        console.log("detaching", this._currentAction);
         Cursor.removeGlobalCursor(true);
         if (this._currentAction) {
             this._currentAction.detach();

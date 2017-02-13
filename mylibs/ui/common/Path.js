@@ -1,5 +1,6 @@
 import UIElement from "framework/UIElement";
 import nearestPoint from  "math/NearestPoint";
+import PropertyTracker from  "../../framework/PropertyTracker";
 import BezierGraph from "math/bezierGraph";
 import BezierCurve from "math/bezierCurve";
 import Rect from "math/rect";
@@ -17,7 +18,7 @@ import SnapController from "framework/SnapController";
 import Box from "framework/Box";
 import {debounce} from "../../util";
 import Command from "framework/commands/Command";
-import {Types} from "../../framework/Defs";
+import {Types, ChangeMode} from "../../framework/Defs";
 import ArrangeStrategy from "../../framework/ArrangeStrategy";
 import ResizeOptions from "../../decorators/ResizeOptions";
 
@@ -66,9 +67,7 @@ function updateSelectedPoint(pt) {
         } else {
             this.setProps({currentPointType: null, currentPointX: 0, currentPointY: 0});
         }
-        this._internalChange = true;
         Selection.refreshSelection();
-        this._internalChange = false;
     }
 }
 
@@ -233,7 +232,7 @@ function moveCurrentPoint(dx, dy) {
         this._currentPoint.cp1y -= dy;
         this._currentPoint.cp2x -= dx;
         this._currentPoint.cp2y -= dy;
-        this.setProps({currentPointX: this._currentPoint.x, currentPointY: this._currentPoint.y});
+        this.setProps({currentPointX: this._currentPoint.x, currentPointY: this._currentPoint.y}, ChangeMode.Root);
     }
 }
 
@@ -534,9 +533,7 @@ class Path extends Shape {
             ArrangeStrategy.arrangeRoots([this]);
         }
 
-        this._internalChange = true;
         Selection.reselect();
-        this._internalChange = false;
     }
 
     _initPoint(point) {
@@ -612,9 +609,6 @@ class Path extends Shape {
 
     unselect() {
         this._selected = false;        
-        if (!this._internalChange && this.mode() === "edit") {            
-            this.mode("resize");            
-        }
 
         if (this._enterBinding) {
             this._enterBinding.dispose();
@@ -661,6 +655,8 @@ class Path extends Shape {
             this._handlePoint = null;
             this.adjustBoundaries();
             this.invalidate();
+
+            PropertyTracker.resumeAndFlush();
             return;
         }
 
@@ -678,6 +674,7 @@ class Path extends Shape {
                 this.adjustBoundaries();
                 //  commandManager.execute(new ChangePathPointCommand(this, pt, this._originalPoint));
             }
+            PropertyTracker.resumeAndFlush();
         }
     }
 
@@ -835,6 +832,10 @@ class Path extends Shape {
                 this._pointOnPath = null;
                 Invalidate.request();
             }
+        }
+
+        if (event.handled){
+            PropertyTracker.suspend();
         }
     }
 

@@ -59,8 +59,6 @@ export default class PencilCreator extends Tool {
         super(ViewTool.Pencil);
         
         this.points = [];
-        this._attachMode = "select";
-        this._detachMode = "resize";
         this._element = null;
         this._position = null;
     }

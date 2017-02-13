@@ -38,8 +38,6 @@ function resize(x1, y1, x2, y2) {
 export default class LineCreator extends Tool {
     constructor() {        
         super(ViewTool.Line);
-        this._attachMode = "select";
-        this._detachMode = "resize";
     }
     detach() {
         super.detach.apply(this, arguments);

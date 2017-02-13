@@ -18,8 +18,6 @@ export default class ElementDragCreator extends Tool {
 
         this._type = type;
         this._parameters = parameters;
-        this._attachMode = "select";
-        this._detachMode = "resize";
         this._point = new Point(0, 0);
     }
     attach() {

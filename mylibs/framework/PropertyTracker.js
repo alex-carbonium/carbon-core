@@ -56,6 +56,11 @@ var tracker = {
         this._flushNeeded = false;
         return flushNeeded;
     },
+    resumeAndFlush: function(){
+        if (this.resume()){
+            this.flush();
+        }
+    },
     flush: function(){
         if (this._propsTrackingData){
             for (var elementId in this._propsTrackingData){

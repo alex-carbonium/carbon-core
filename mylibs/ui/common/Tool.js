@@ -2,37 +2,6 @@ import Selection from "../../framework/SelectionModel"
 import Invalidate from "../../framework/Invalidate";
 import {IApp, IView, IController} from "../../framework/CoreModel";
 
-function changeSelectionMode(elements, mode) {
-    if (elements) {
-        for (var i = 0, l = elements.length; i < l; ++i) {
-            var el = elements[i];
-            if (typeof el.mode === 'function') {
-                el.mode(mode);
-            }
-        }
-        Invalidate.request();
-    }
-}
-
-function refreshSelection(mode) {
-    var selection = Selection.selectedElements();
-    if (selection) {
-        changeSelectionMode(selection, mode);
-        // Selection.refreshSelection();
-        Invalidate.requestUpperOnly();
-    }
-};
-
-var insideElementSelected = false;
-var elementSelected = function (selection, oldSelection) {
-    if (!insideElementSelected) {
-        insideElementSelected = true;
-        changeSelectionMode(oldSelection, this._detachMode);
-        refreshSelection(this._attachMode);
-        insideElementSelected = false;
-    }
-};
-
 export default class Tool {
     _app: IApp;
     _view: IView;
@@ -40,32 +9,23 @@ export default class Tool {
     _toolId: string;
 
     constructor(toolId: string) {
-        this._attachMode = "edit";
-        this._detachMode = "resize";
         this._toolId = toolId;
     }
 
     attach(app, view, controller) {
-        console.log("attaching", this);
         this._app = app;
         this._view = view;
         this._controller = controller;
-        refreshSelection(this._attachMode);
-        Selection.onElementSelected.bind(this, elementSelected);
         this._attach();        
         this._app.currentTool = this._toolId;
     }
-    detach() {
-        Selection.onElementSelected.unbind(this, elementSelected);
-        refreshSelection(this._detachMode);
+    detach() {                
         this._detach();
     }
-    pause() {
-        Selection.onElementSelected.unbind(this, elementSelected);
+    pause() {        
         this._detach();
     }
-    resume() {
-        Selection.onElementSelected.bind(this, elementSelected);
+    resume() {        
         this._attach();
         this._app.currentTool = this._toolId;
     }
