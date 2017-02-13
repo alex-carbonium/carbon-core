@@ -181,10 +181,6 @@ class Shape extends Container {
     drawPath(context, w, h){
     }
 
-    resizeDimensions() {
-        return (this.mode() === "resize" ? ResizeDimension.Both : ResizeDimension.None);
-    }
-
     canAccept(elements, autoInsert, allowMoveInOut){
         if (elements.length !== 1){
             return false;
