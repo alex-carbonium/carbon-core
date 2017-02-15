@@ -203,7 +203,7 @@ class Polygon extends Shape {
             ]
         }
 
-        if (this._angleEditable !== false) {
+        if (this.canRotate()) {
             frame.points.splice(0, 0, {
                 type: RotateFramePoint,
                 moveDirection: PointDirection.Any,

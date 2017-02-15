@@ -16,6 +16,10 @@ export default class RepeatCell extends Container implements IGroupContainer {
     canSelect(){
         return false;
     }
+
+    canRotate(){
+        return false;
+    }
     
     getSnapPoints(){
         return null;
@@ -30,8 +34,6 @@ export default class RepeatCell extends Container implements IGroupContainer {
     }
 }
 RepeatCell.prototype.t = Types.RepeatCell;
-
-RepeatCell.prototype._angleEditable = false;
 
 PropertyMetadata.registerForType(RepeatCell, {
     // fill: {

@@ -29,12 +29,18 @@ export default class ElementDragCreator extends Tool {
         this._mousepressed = false;
         SnapController.clearActiveSnapLines();
         Cursor.removeGlobalCursor(true);
+
+        this._changeMode("resize");
     }
     mousedown(event) {
         var eventData = { handled: false, x: event.x, y: event.y };
         Environment.controller.startDrawingEvent.raise(eventData);
         if (eventData.handled) {
             return true;
+        }
+
+        if (this._element){
+            this._changeMode("resize");
         }
 
         this._mousepressed = true;
@@ -61,9 +67,7 @@ export default class ElementDragCreator extends Tool {
             this._element.setProps(this._parameters);
         }
 
-        if (typeof this._element.mode === "function") {
-            this._element.mode("edit");
-        }
+        this._changeMode("edit");
         return false;
     }
     mouseup(event) {
@@ -150,6 +154,11 @@ export default class ElementDragCreator extends Tool {
             this._point.roundMutable();
         }
     }
+    _changeMode(mode: string): void{
+        if (typeof this._element.mode === "function") {
+            this._element.mode(mode);
+        }
+    }
     layerdraw(context, environment) {
         if (this._mousepressed) {
             var x1 = this._startPoint.x
@@ -177,5 +186,5 @@ export default class ElementDragCreator extends Tool {
 
             context.restore();
         }
-    }
+    }    
 }

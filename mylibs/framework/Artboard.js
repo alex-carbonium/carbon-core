@@ -33,8 +33,7 @@ class Artboard extends Container {
         super(props);
         this._dragable(true);
         this.selectFromLayersPanel = true;
-
-        this._angleEditable = false;
+        
         this.noDefaultSettings = true;
         this._recorder = new PropertyStateRecorder(this);
         this._recorder.initFromJSON(this.props.states);
@@ -50,6 +49,10 @@ class Artboard extends Container {
         this.multiselectTransparent = !value;
         this.canSelect(value);
         this.canDrag(value);
+    }
+
+    canRotate(): boolean{
+        return false;
     }
 
     get frame() {

@@ -181,6 +181,18 @@ class Shape extends Container {
     drawPath(context, w, h){
     }
 
+    resizeDimensions() {
+        return this.isInEditMode() ? ResizeDimension.None : ResizeDimension.Both;
+    }
+
+    isInEditMode(): boolean{
+        return this.mode() === "edit";
+    }
+
+    canRotate(){
+        return !this.isInEditMode();
+    }
+
     canAccept(elements, autoInsert, allowMoveInOut){
         if (elements.length !== 1){
             return false;

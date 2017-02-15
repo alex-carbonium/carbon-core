@@ -297,8 +297,11 @@ export default class UIElement extends DataNode {
         }
         this.applyTransform(Matrix.create().rotate(-angle, o.x, o.y), false, mode);
     }
-    isRotated(global: boolean = false) {
+    isRotated(global: boolean = false): boolean {
         return this.getRotation(global) % 360 !== 0;
+    }
+    canRotate(): boolean{
+        return true;
     }
 
     applyScaling(s, o, options) {
@@ -1581,7 +1584,7 @@ export default class UIElement extends DataNode {
 
         var points = [];
 
-        if (this._angleEditable !== false /*properties.angle.getIsEditable()*/) {
+        if (this.canRotate()) {
             points.push(
                 {
                     type: RotateFramePoint,

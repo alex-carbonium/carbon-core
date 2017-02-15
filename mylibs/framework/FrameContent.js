@@ -72,6 +72,9 @@ export default class FrameContent extends UIElement{
     selectionFrameType(){
         return ContentFrameType;
     }
+    canRotate(){
+        return false;
+    }
     isDropSupported(){
         return false;
     }
@@ -86,7 +89,6 @@ export default class FrameContent extends UIElement{
     }
 }
 
-FrameContent.prototype._angleEditable = false;
 FrameContent.prototype.t = Types.FrameContent;
 
 PropertyMetadata.registerForType(FrameContent, {

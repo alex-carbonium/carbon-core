@@ -32,9 +32,11 @@ define(["./CommentPopup", "./CommentsModel", "./RemoveComment", "framework/comma
                 this.activeInPreview(true);
                 this.scalableX(false);
                 this.scalableY(false);
-                this.allowSnapping(false);
-                this._angleEditable = false;//properties.angle.editable(false);
+                this.allowSnapping(false);                
             },
+            canRotate: function(){
+                return false;
+            }
             commentNumber:function(value){
                 if(value !== undefined){
                     this._number = value;
