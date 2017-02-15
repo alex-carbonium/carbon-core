@@ -39,8 +39,9 @@ export default class TransformationElement extends InteractiveElement{
                 var globalOrigin = this._lastScaling.o;
                 var localOrigin = element.parent().globalViewMatrixInverted().transformPoint(globalOrigin);
                 var sameDirection = this.children.length === 1 || this.isRotated();
+                var round = this._lastScaling.options.round && this.children.length === 1;                
                 var resizeOptions = this._lastScaling.options.withSameDirection(sameDirection);
-                resizeOptions = resizeOptions.withReset(false);
+                resizeOptions = resizeOptions.withReset(false).withRounding(round);
                 element.applyScaling(this._lastScaling.s, localOrigin, resizeOptions);
             }
             if (this._lastRotation){

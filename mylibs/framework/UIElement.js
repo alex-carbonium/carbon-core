@@ -403,20 +403,24 @@ export default class UIElement extends DataNode {
         this.setProps({ m: Matrix.Identity });
     }
 
-    roundBoundingBoxToPixelEdge() {
+    roundBoundingBoxToPixelEdge(): boolean {
+        var rounded = false;
         var bb = this.getBoundingBox();
         var bb1 = bb.roundPosition();
         if (bb1 !== bb) {
             var t = bb1.topLeft().subtract(bb.topLeft());
             this.applyTranslation(t);
             bb1 = bb1.translate(t.x, t.y);
+            rounded = true;
         }
         var bb2 = bb1.roundSize();
         if (bb2 !== bb1) {
             var s = new Point(bb2.width / bb1.width, bb2.height / bb1.height);
             var canRound = this.shouldApplyViewMatrix();
             this.applyScaling(s, bb1.topLeft(), ResizeOptions.Default.withRounding(canRound).withReset(false));
+            rounded = true;
         }
+        return rounded;
     }
 
     arrange() {
