@@ -1,26 +1,51 @@
 import Tool from "../common/Tool";
 import DropVisualization from "../../extensions/DropVisualization";
 import {createUUID} from "../../util";
-import {ActionType, AnimationType, EasingType, ActionEvents, StoryType, ViewTool} from "../../framework/Defs";
+import {ActionType, 
+    AnimationType, 
+    EasingType,
+    ActionEvents, 
+    StoryType, 
+    ViewTool,
+    PrimitiveType} from "framework/Defs";
 import * as ActionHelper from "./ActionHelper";
 import Matrix from "../../math/matrix";
 import {areRectsIntersecting, adjustRectSize, isPointInRect} from "../../math/math";
-import PropertyTracker from "../../framework/PropertyTracker";
-import Selection from "../../framework/SelectionModel"
-import Invalidate from "../../framework/Invalidate";
+import Selection from "framework/SelectionModel"
+import Invalidate from "framework/Invalidate";
 import RequestAnimationSettings from "./RequestAnimationSettings";
 import Environment from "../../environment";
 import StoryAction from "../../stories/StoryAction";
+import Link from "./Link";
+import DataNode from "framework/DataNode";
+import {IUIElement} from "framework/CoreModel";
 
 const HandleSize = 16;
 const HomeButtonWidth = 12;
 const HomeButtonHeight = 24;
 
 const DefaultLinkColor = "#1592E6";
+const InactiveLinkColor = 'gray';
 
-// TODO:
-// - show button only on hover like visio
-// - cache all artboards rects
+function hasLocationProperty(props) {
+    return props.x !== undefined
+        || props.y !== undefined
+        || props.width !== undefined
+        || props.height !== undefined 
+        || props.m !== undefined 
+        || props.br !== undefined;
+}
+
+var PointType = {
+    Left:0,
+    Top:1,
+    Right:2,
+    Bottom:3
+}
+
+function isVerticalPoint(point) {
+    return point.type & 1; // PointType.Top | PointType.Bottom
+}
 
 export default class LinkingTool extends Tool {
     constructor() {
@@ -66,11 +91,12 @@ export default class LinkingTool extends Tool {
                 var index = i;
                 if (isPointInRect(this._getCupRectForPoint(from, scale), event)
                     || isPointInRect(this._getCupRectForPoint(to, scale), event)) {
-                    this._onMove = ()=> {
+                    this._onFirstMove = ()=> {
                         this._mousepressed = true;
-                        this._startPoint = {x: from.x, y: from.y};
-                        this._currentPoint = {x: event.x, y: event.y};
+                        this._startPoint = {_x: from.x, _y: from.y, x:from.x, y:from.y};
+                        this._currentPoint = {_x: event.x, _y: event.y, x:event.x, y:event.y};
                         this._modifyingConnection = c;
+                        this._sourceElement = c.element;
                         this._removeConnection(c.element);
                         Selection.makeSelection([c.element]);
                     }
@@ -89,36 +115,35 @@ export default class LinkingTool extends Tool {
     }
 
     _handlePrototypeMouseDownEvent(scale, event) {
-        if (this._selection) {
-            var size = HandleSize / scale;
-            var rect = this._selection.getBoundaryRectGlobal();
-            var x = rect.x + rect.width;
-            var y = 0 | rect.y + (rect.height - size) / 2;
-
-            if (isPointInRect({x: x, y: y, width: size, height: size}, event)) {
+        if (this._selection) {           
+            if (this._hitStartArrowRect(this._selection, event, scale)) {
                 this._mousepressed = true;
-                this._startPoint = {x: event.x, y: event.y};
+                this._startPoint = {x: event.x, y: event.y, _x:event.x, _y:event.y};
                 this._sourceElement = this._selection;
                 event.handled = true;
             }
         }
     }
 
+    _hitStartArrowRect(element:IUIElement, event:any, scale:number) {
+        var size = HandleSize / scale;
+        var rect = element.getBoundaryRectGlobal();
+        var x = rect.x + rect.width;
+        var y = 0 | rect.y + (rect.height - size) / 2;
 
-    _handleFlowMouseDownEvent(scale, event) {
+        return (isPointInRect({x: x, y: y, width: size, height: size}, event));           
+    }
+
+    _handleFlowMouseDownEvent(scale:number, event:any) {
         var size = HandleSize / scale;
         var page = this._app.activePage;
         var artboards = page.getAllArtboards();
         for (var i = 0; i < artboards.length; ++i) {
             let artboard = artboards[i];
-
-            var rect = artboard.getBoundaryRectGlobal();
-            var x = rect.x + rect.width;
-            var y = 0 | rect.y + (rect.height - size) / 2;
-
-            if (isPointInRect({x: x, y: y, width: size, height: size}, event)) {
+            
+            if (this._hitStartArrowRect(artboard, event, scale)) {
                 this._mousepressed = true;
-                this._startPoint = {x: event.x, y: event.y};
+                this._startPoint = {x: event.x, y: event.y, _x:event.x, _y:event.y};
                 this._sourceElement = artboard;
                 event.handled = true;
                 break;
@@ -127,7 +152,7 @@ export default class LinkingTool extends Tool {
     }
 
     onclick(event) {
-        delete this._onMove;
+        delete this._onFirstMove;
         var scale = this._view.scale();
         for (var i = this.connections.length - 1; i >= 0; --i) {
             var connection = this.connections[i];
@@ -146,8 +171,8 @@ export default class LinkingTool extends Tool {
     }
 
     mouseup(event) {
-        if (this._onMove) {
-            delete this._onMove;
+        if (this._onFirstMove) {
+            delete this._onFirstMove;
             return this.onclick(event);
         }
         if (this._mousepressed) {
@@ -179,6 +204,11 @@ export default class LinkingTool extends Tool {
             && !this._sourceElement.isAncestor(targetArgtboard)
             && targetArgtboard !== this._sourceElement) {
 
+            if (this._modifyingConnection && this._modifyingConnection.artboard === targetArgtboard) {
+                this.connections.push(this._modifyingConnection); // no need to rebalance since nothing actually changed.
+                delete this._modifyingConnection;
+            }
+
             var sourceId = this._sourceElement.id();
             activeStory.removeFirst(s=>s.props.sourceElementId === sourceId);
             this._removeConnection(this._sourceElement);
@@ -200,8 +230,6 @@ export default class LinkingTool extends Tool {
             var storyAction = new StoryAction();
             storyAction.setProps(props);
             activeStory.add(storyAction);
-            this._sourceElement.enablePropsTracking();
-            targetArgtboard.enablePropsTracking();
 
             RequestAnimationSettings.onRequest.raise(point.event, targetArgtboard, storyAction);
 
@@ -219,21 +247,19 @@ export default class LinkingTool extends Tool {
             if (e) {
                 var sourceId = e.id();
                 activeStory.removeFirst(s=>s.props.sourceElementId === sourceId)
-                e.disablePropsTracking();
-                this._modifyingConnection.artboard.disablePropsTracking();
             }
             delete this._modifyingConnection;
         }
     };
 
     mousemove(event) {
-        this._onMove && this._onMove();
-        delete this._onMove;
+        this._onFirstMove && this._onFirstMove();
+        delete this._onFirstMove;
 
         if (this._mousepressed) {
             var x = event.x,
                 y = event.y;
-            this._currentPoint = {x: x, y: y};
+            this._currentPoint = {_x: x, _y: y, x:x, y:y};
             Invalidate.requestUpperOnly();
             event.handled = true;
         }
@@ -247,32 +273,55 @@ export default class LinkingTool extends Tool {
             Invalidate.requestUpperOnly();
         }
 
-        if(this._activeStory && this._activeStory.props.type === StoryType.Flow){
-            var page = this._app.activePage;
-            var artboards = page.getAllArtboards();
+        if(this._isCurrentFlowStory()){
+            var handles = this._findNearByHandles(event, scale);            
+            this._replaceHandles(handles);
+        }
+    }
 
-            var handles = [];
-            for (var i = 0; i < artboards.length; ++i) {
-                let artboard = artboards[i];
-                var rect = artboard.getBoundaryRectGlobal();
-                rect = adjustRectSize(rect, 40 / scale);
-                if(isPointInRect(rect, event)) {
+    _isCurrentFlowStory(){
+        return this._activeStory && this._activeStory.props.type === StoryType.Flow;
+    }
+
+    _isCurrentPrototypeStory() {
+        return this._activeStory && this._activeStory.props.type === StoryType.Prototype;
+    }
+
+    _findNearByHandles(event: any, scale:number) {
+        var page = this._app.activePage;
+        var artboards = page.getAllArtboards();
+        var handles = [];
+
+        for (var i = 0; i < artboards.length; ++i) {
+            let artboard = artboards[i];
+            var rect = artboard.getBoundaryRectGlobal();
+            rect = adjustRectSize(rect, 40 / scale);
+            if(isPointInRect(rect, event)) {
+                if(!this._hasOutboundConnections(artboard)){
                     this._addHandleOnElement(artboard, scale, handles);
                 }
             }
+        }
 
-            if(handles.length !== this._handles.length){
+        return handles;
+    }
+
+    _hasOutboundConnections(element) {
+        return !!this.connections.find(c=>c.element === element);
+    }
+
+    _replaceHandles(handles: Array<any>) {
+        if(handles.length !== this._handles.length){
+            this._handles = handles;
+            Invalidate.requestUpperOnly();
+            return;
+        }
+
+        for(var i = 0; i < handles.length; ++i){
+            if(handles[i].id !== this._handles[i].id){
                 this._handles = handles;
                 Invalidate.requestUpperOnly();
                 return;
-            }
-
-            for(var i = 0; i < handles.length; ++i){
-                if(handles[i].id !== this._handles[i].id){
-                    this._handles = handles;
-                    Invalidate.requestUpperOnly();
-                    return;
-                }
             }
         }
     }
@@ -302,7 +351,8 @@ export default class LinkingTool extends Tool {
         if (selectedElement) {
             this._currentArtboard = selectedElement.primitiveRoot();
         }
-        PropertyTracker.propertyChanged.bind(this, this._onPropertyChanged);
+
+        this._changedToken = this._app.changed.bind(this, this._onAppChanged)
         Selection.refreshSelection();
         this._elementSelected(Selection.selectComposite());
         this._elementSelectedToken = Selection.onElementSelected.bind(this, this._elementSelected);
@@ -314,7 +364,11 @@ export default class LinkingTool extends Tool {
     detach() {
         super.detach();
         this._view.prototyping(false);
-        PropertyTracker.propertyChanged.unbind(this, this._onPropertyChanged);
+        if(this._changedToken) {
+            this._changedToken.dispose();       
+            this._changedToken = null;     
+        }
+ 
         if (this._elementSelectedToken) {
             this._elementSelectedToken.dispose();
             this._elementSelectedToken = null;
@@ -335,14 +389,6 @@ export default class LinkingTool extends Tool {
     }
 
     _releaseConnections() {
-        if (this.connections) {
-            for (var i = 0; i < this.connections.length; ++i) {
-                var c = this.connections[i];
-                c.element.disablePropsTracking();
-                c.artboard.disablePropsTracking();
-            }
-        }
-
         this.connections = [];
     }
 
@@ -365,35 +411,77 @@ export default class LinkingTool extends Tool {
                     this._addConnection(sourceElement, targetArtboard);
                 }
             }
-        });
-        // adding incoming connections
-        // page.applyVisitor(e=> {
-        //     var artboard = this._getConnectedArtboard(e, page);
-        //     if (artboard === activeArtboard) {
-        //         that._addConnection(e, artboard);
-        //     }
-        // });
-        // activeArtboard.applyVisitor((e)=> {
-        //     var artboard = this._getConnectedArtboard(e, page);
-        //     if (artboard) {
-        //         that._addConnection(e, artboard);
-        //     }
-        // });
-    }
-
-    _createConnection(element, artboard) {
-        return {
-            element: element,
-            artboardId: artboard.id(),
-            artboard: artboard,
-            connection: ActionHelper.getConnectionPoints(element.getBoundaryRectGlobal(), artboard.getBoundaryRectGlobal())
-        }
+        });        
     }
 
     _addConnection(element, artboard) {
-        element.enablePropsTracking();
-        artboard.enablePropsTracking();
-        this.connections.push(this._createConnection(element, artboard));
+        this.connections.push(new Link(
+            element,
+            artboard,
+            ActionHelper.getConnectionPoints(element, artboard)
+        ));
+
+        this._rebalanceConnections();
+    }
+
+    _pointToId(p) {
+        return p.x + '_' + p.y + + '_' + (p.type & 1)
+    }
+
+    _addBalancingConnection(pointsMap, source, target) {
+        var pointId = this._pointToId(source);
+        var list = pointsMap[pointId] || [];
+        pointsMap[pointId] = list;
+        source._x = source.x;
+        source._y = source.y;
+
+        list.push({
+            target:target,
+            source:source
+        });
+    }
+
+    _rebalanceConnections() {
+        var pointsMap = {};
+        let BalanceMargin = 20;
+        for(var c of this.connections) {
+            var from = c.connection.from;            
+            var to = c.connection.to;
+            this._addBalancingConnection(pointsMap, from, to);
+            this._addBalancingConnection(pointsMap, to, from);
+        }
+
+        for(var id in pointsMap){
+            var list = pointsMap[id];
+            var count = list.length;
+            if(count < 2) {
+                continue;
+            }
+
+            if(list[0].target.type & 1)
+            {
+                list.sort((a,b)=>{
+                    return a.target.x - b.target.x;
+                })
+                
+                var startX = 0 | list[0].source.x - BalanceMargin * (count - 1) / 2;
+
+                for(var i = 0; i < count; ++i) {
+                    list[i].source._x = startX + i * BalanceMargin;
+                }
+            } else {
+                
+                list.sort((a,b)=>{
+                    return a.target.y - b.target.y;
+                })
+                
+                var startY = 0 | list[0].source.y - BalanceMargin * (count - 1) / 2;
+
+                for(var i = 0; i < count; ++i) {
+                    list[i].source._y = startY + i * BalanceMargin;
+                }
+            }
+        }
     }
 
     _removeConnection(element) {
@@ -401,14 +489,11 @@ export default class LinkingTool extends Tool {
         if(i === -1){
             return;
         }
-        var c = this.connections[i];
-        c.artboard.disablePropsTracking();
-        c.element.disablePropsTracking();
         this.connections.splice(i, 1);
     }
 
     _elementSelected(selection) {
-        if (this._activeStory && this._activeStory.props.type !== StoryType.Prototype) {
+        if (!this._isCurrentPrototypeStory()) {
             return;
         }
 
@@ -430,37 +515,53 @@ export default class LinkingTool extends Tool {
             var action = this._activeStory.children.find(a=>a.props.sourceElementId === selectionId);
             if (!action || !action.props.targetArtboardId) {
                 this._addHandleOnElement(this._selection, scale);
-                Invalidate.requestUpperOnly();
             }
         }
 
         Invalidate.requestUpperOnly();
     }
 
-    _onPropertyChanged(element, props) {
-        if (props.x !== undefined
-            || props.y !== undefined
-            || props.width !== undefined
-            || props.height !== undefined) {
-            for (var i = 0; i < this.connections.length; ++i) {
-                var c = this.connections[i];
-                if (c.element.id() === element.id()) {
-                    c.connection = ActionHelper.getConnectionPoints(props, c.artboard.getBoundaryRectGlobal())
-                } else if (c.artboardId === element.id()) {
-                    c.connection = ActionHelper.getConnectionPoints(c.element.getBoundaryRectGlobal(), props)
+    dragElementStarted(){
+        this._draggingElement = true;
+        Invalidate.requestUpperOnly();    
+    }
+    dragElementEnded() {
+        this._draggingElement = false;
+        this._handles = [];
+        Invalidate.requestUpperOnly();    
+    }
+
+    _onAppChanged(primitives){
+        var activePageId = this._app.activePage.id();
+        var refreshState = false;
+
+        var propChanges = primitives.filter(p=>p.path[0] === activePageId && p.type === PrimitiveType.DataNodeSetProps);
+
+        for (let i = 0; i < propChanges.length; i++){
+            var p = propChanges[i];
+            var elementId = p.path[p.path.length - 1];
+            var props = p.props;
+            
+            if (hasLocationProperty(props)) {
+                for (let j = 0; j < this.connections.length; ++j) {
+                    var c = this.connections[j];
+                    if (c.element.id() === elementId || c.artboardId === elementId)  {
+                        c.connection = ActionHelper.getConnectionPoints(c.element, c.artboard);
+                    }
                 }
             }
         }
+        this._rebalanceConnections();
     }
 
     _renderArrow(context, from, to) {
-        var x1 = from.x;
-        var y1 = from.y;
-        var x2 = to.x;
-        var y2 = to.y;
+        var x1 = from._x;
+        var y1 = from._y;
+        var x2 = to._x;
+        var y2 = to._y;
         context.moveTo(x1, y1);
 
-        if (from.type & 1/*vertical*/) {
+        if (isVerticalPoint(from)) {
             var dy = y2 - y1;
             context.bezierCurveTo(x1, y1 + 2 * dy / 3, x2, y1 + dy / 3, x2, y2);
         } else {
@@ -468,7 +569,6 @@ export default class LinkingTool extends Tool {
             context.bezierCurveTo(x1 + 2 * dx / 3, y1, x1 + dx / 3, y2, x2, y2);
         }
     }
-
 
     _renderConnection(context, connectionInfo, scale) {
         context.save();
@@ -478,9 +578,10 @@ export default class LinkingTool extends Tool {
             context.strokeStyle = DefaultLinkColor;
             context.fillStyle = DefaultLinkColor;
         } else {
-            context.strokeStyle = "gray";
-            context.fillStyle = "gray";
+            context.strokeStyle = InactiveLinkColor;
+            context.fillStyle = InactiveLinkColor;
         }
+
         context.beginPath();
         this._renderArrow(context, connection.from, connection.to)
         context.lineWidth = 2 / this._view.scale();
@@ -503,18 +604,21 @@ export default class LinkingTool extends Tool {
     }
 
     _getCupRectForPoint(point, scale) {
+        if(scale < 1) {
+            scale = 1;
+        }
         var size = HandleSize / scale;
-        if (point.type === 0) {
-            return {x: point.x - size, y: point.y - size / 2, width: size, height: size};
+        if (point.type === PointType.Left) {
+            return {x: point._x - size, y: point._y - size / 2, width: size, height: size};
         }
-        else if (point.type === 2) {
-            return {x: point.x, y: point.y - size / 2, width: size, height: size};
+        else if (point.type === PointType.Right) {
+            return {x: point._x, y: point._y - size / 2, width: size, height: size};
         }
-        else if (point.type === 1) {
-            return {x: point.x - size / 2, y: point.y - size, width: size, height: size};
+        else if (point.type === PointType.Top) {
+            return {x: point._x - size / 2, y: point._y - size, width: size, height: size};
         }
-        else if (point.type === 3) {
-            return {x: point.x - size / 2, y: point.y, width: size, height: size};
+        else if (point.type === PointType.Bottom) {
+            return {x: point._x - size / 2, y: point._y, width: size, height: size};
         }
     }
 
@@ -525,39 +629,42 @@ export default class LinkingTool extends Tool {
 
     _renderCupForConnection(context, point, scale) {
         var rect = this._getCupRectForPoint(point, scale);
-        var r = rect.width /2 |0;
+        var r = rect.width / 2 | 0;
         context.roundedRectPath(rect.x, rect.y, rect.width, rect.height, r, r);
     }
 
     _renderOutArrow(context, point, size) {
         var dx = size / 3;
         var dy = size / 4;
-        var x = point.x;
-        var y = point.y;
+        var x = point._x;
+        var y = point._y;
         context.moveTo(x + dx, y + dy);
         context.lineTo(x + size - dx, y + size / 2);
         context.lineTo(x + dx, y + size - dy);
     }
 
     _renderInArrow(context, point, scale) {
+        if(scale < 1) {
+            scale = 1;
+        }
         var size = HandleSize / scale;
         var dx = size / 3;
         var dy = size / 4;
         var s2 = size / 2;
-        var x = point.x;
-        var y = point.y;
+        var x = point._x;
+        var y = point._y;
 
         var matrix = Matrix.create();
 
-        if (point.type === 0) {
+        if (point.type === PointType.Left) {
             matrix.translate(x - size, y - s2);
-        } else if (point.type === 2) {
+        } else if (point.type === PointType.Right) {
             matrix.translate(x, y - s2);
             matrix.rotate(180, s2, s2);
-        } else if (point.type === 1) {
+        } else if (point.type === PointType.Top) {
             matrix.translate(x - s2, y - size);
             matrix.rotate(90, s2, s2);
-        } else if (point.type === 3) {
+        } else if (point.type === PointType.Bottom) {
             matrix.translate(x - s2, y);
             matrix.rotate(270, s2, s2);
         }
@@ -635,7 +742,6 @@ export default class LinkingTool extends Tool {
     }
 
     _drawButtonForArtboard(artboard, scale, context, page) {
-
         var x = artboard.x();
         var y = artboard.y();
         var w = 0 | HomeButtonWidth / scale;
@@ -657,9 +763,10 @@ export default class LinkingTool extends Tool {
     };
 
     layerdraw(context, environment) {
-        if (!this._activeStory) {
+        if (!this._activeStory || this._draggingElement) {
             return;
         }
+
         context.save();
         var scale = this._view.scale();
         var view = this._view;

@@ -155,7 +155,7 @@ export default class ElementDragCreator extends Tool {
         }
     }
     _changeMode(mode: string): void{
-        if (typeof this._element.mode === "function") {
+        if (this._element && typeof this._element.mode === "function") {
             this._element.mode(mode);
         }
     }

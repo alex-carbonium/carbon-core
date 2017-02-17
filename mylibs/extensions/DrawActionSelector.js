@@ -131,7 +131,7 @@ var registerCommands = function () {
 
     }, "ui-rectangle");
 
-    actionManager.registerAction(ViewTool.Circle, "Ellipse tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Circle, "@tool.ellipse", "Drawing", function () {
         that.detachAll();
         that._circleCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._circleCreator;
@@ -140,7 +140,7 @@ var registerCommands = function () {
         Selection.makeSelection([that._defaultShapeSettings]);
     }, "ui-circle");
 
-    actionManager.registerAction(ViewTool.Line, "Line tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Line, "@tool.line", "Drawing", function () {
         that.detachAll();
         that._lineCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._lineCreator;
@@ -149,7 +149,7 @@ var registerCommands = function () {
         Selection.makeSelection([that._defaultShapeSettings]);
     }, "ui-line");
 
-    actionManager.registerAction(ViewTool.Proto, "Prototyping tool", "Prototyping", function () {
+    actionManager.registerAction(ViewTool.Proto, "@tool.prototyping", "Prototyping", function () {
         that.detachAll();
         that._prototypingTool.attach(that.app, that.view, that.controller);
         that._currentAction = that._prototypingTool;

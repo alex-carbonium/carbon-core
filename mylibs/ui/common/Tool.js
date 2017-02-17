@@ -36,6 +36,8 @@ export default class Tool {
             this._mouseUpBinding = controller.mouseupEvent.bindHighPriority(this, this.mouseup);
             this._mouseMoveBinding = controller.mousemoveEvent.bindHighPriority(this, this.mousemove);
             this._clickBinding = controller.clickEvent.bindHighPriority(this, this.click);
+            this._dragElementStartedBinding = controller.startDraggingEvent.bindHighPriority(this, this.dragElementStarted);
+            this._dragElementEndedBinding = controller.stopDraggingEvent.bindHighPriority(this, this.dragElementEnded);
         }
         if (this._view.layer3) {
             this._drawBinding = this._view.layer3.ondraw.bind(this, this.layerdraw);            
@@ -56,6 +58,12 @@ export default class Tool {
         }
         if (this._clickBinding) {
             this._clickBinding.dispose();
+        }        
+        if (this._dragElementStartedBinding) {
+            this._dragElementStartedBinding.dispose();
+        }
+        if (this._dragElementEndedBinding) {
+            this._dragElementEndedBinding.dispose();
         }
     }
     view() {
@@ -66,6 +74,10 @@ export default class Tool {
     mouseup(event) {
     }
     mousemove(event) {
+    }
+    dragElementStarted(){
+    }
+    dragElementEnded() {
     }
     click(event) {
     }
