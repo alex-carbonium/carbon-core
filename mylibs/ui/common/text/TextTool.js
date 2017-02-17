@@ -61,7 +61,7 @@ export default class TextTool extends TOol {
         this._defaultFormatter = new DefaultFormatter();
         this._defaultFormatter.init(this._app);
         Selection.makeSelection([this._defaultFormatter]);
-        Cursor.setGlobalCursor("text");
+        Cursor.setGlobalCursor("text_tool");
 
         if (this._onAttached){
             this._onAttached();
@@ -139,7 +139,7 @@ export default class TextTool extends TOol {
         var hit = this._hitNewElement(e);
         if (hit instanceof Text && hit !== this._editedElement){
             this._next = {element: hit, event: e};
-            Cursor.setGlobalCursor("text", true);
+            Cursor.setGlobalCursor("text");
             Invalidate.requestUpperOnly();
         }
         else {
@@ -151,7 +151,7 @@ export default class TextTool extends TOol {
                 Cursor.removeGlobalCursor();
             }
             else{
-                Cursor.setGlobalCursor("text");                
+                Cursor.setGlobalCursor("text_tool");
             }
         }
     };

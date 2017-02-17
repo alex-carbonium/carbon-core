@@ -9,6 +9,7 @@ import domUtil from "utils/dom";
 import AnimationGroup from "framework/animation/AnimationGroup";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
+import Keyboard from "./Keyboard";
 import Environment from "environment";
 import backend from "../backend";
 import Hammer from "hammerjs";
@@ -251,6 +252,7 @@ var onViewBlurred = function () {
 };
 
 var onWindowBlur = function () {
+    Keyboard.reset();
     App.Current.actionManager.invoke("cancel");
 }
 

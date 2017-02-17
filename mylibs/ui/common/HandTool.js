@@ -13,7 +13,7 @@ var setStartingScroll = function (event) {
 };
 
 var setCursor = function (open) {
-    var cursor = open ? "openhand" : "closedhand";
+    var cursor = open ? "hand_opened" : "hand_closed";
     Cursor.setGlobalCursor(cursor, true);
 };
 

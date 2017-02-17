@@ -23,12 +23,12 @@ function applyOrthogonalMove(pos) {
 }
 
 class DraggingElement extends InteractiveElement {
-    constructor(event, activeArtboard) {
-        super(event.element);
+    constructor(elementOrComposite, event) {
+        super(elementOrComposite);
 
         this._initialPosition = this.getBoundingBoxGlobal().topLeft();
 
-        let snappingTarget = event.element.first().parent().primitiveRoot();
+        let snappingTarget = elementOrComposite.first().parent().primitiveRoot();
         
         SnapController.calculateSnappingPoints(snappingTarget);
 
@@ -38,7 +38,7 @@ class DraggingElement extends InteractiveElement {
         this._translation = new Point(0, 0);
         this._currentPosition = new Point(0, 0);
 
-        this.translationMatrix = Matrix.create();
+        this.translationMatrix = Matrix.create();        
     }
 
     wrapSingleChild(){

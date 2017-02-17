@@ -398,6 +398,13 @@ class Path extends Shape {
         return this.points[idx];
     }
 
+    get firstPoint(){
+        return this.points[0];
+    }
+    get lastPoint(){
+        return this.points[this.points.length - 1];
+    }
+
     set nextPoint(value) {
         if (value != this._nextPoint) {
             Invalidate.requestUpperOnly();
@@ -1396,16 +1403,16 @@ class Path extends Shape {
 
         var pt = getClickedPoint.call(this, event.x, event.y);
         if (pt != null) {
-            return 'move_point';
+            return 'pen_move_point';
         }
 
         pt = getClickedHandlePoint.call(this, event.x, event.y);
         if (pt != null) {
-            return 'move_handle';
+            return 'pen_move_handle';
         }
 
         if (this._pointOnPath && event.event.altKey) {
-            return "add_point";
+            return "pen_add_point";
         }
 
 
