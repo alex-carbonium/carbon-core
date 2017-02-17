@@ -30,6 +30,7 @@ var completePath = function (finishEditing = false) {
             this._element.adjustBoundaries();                        
         }
         else {
+            this._changeMode(this._element, "resize");
             commandManager.execute(new RemovePathPointCommand(this._element, this._element.pointAtIndex(0)));
         }
         this._element.nextPoint = null;
@@ -51,7 +52,7 @@ var checkIfElementAvailable = function () {
 };
 
 
-export default class GraphicalpathCreator extends Tool {
+export default class GraphicalPathCreator extends Tool {
 
     constructor(app, type, parameters) {
         super(ViewTool.Path);
@@ -91,8 +92,8 @@ export default class GraphicalpathCreator extends Tool {
         completePath.call(this);
         super.detach.apply(this, arguments);
         var selection = Selection.selectedElements();
-        if (selection.length === 1 && selection[0] instanceof Path && selection[0].mode() === "edit"){
-            selection[0].mode("resize");
+        if (selection.length === 1 && selection[0] instanceof Path){
+            this._changeMode(selection[0], "resize");
         }
         if(this._cancelBinding){
             this._cancelBinding.dispose();
@@ -102,7 +103,7 @@ export default class GraphicalpathCreator extends Tool {
 
     _attach() {
         super._attach.apply(this, arguments);
-        Cursor.setGlobalCursor("crosshair");
+        Cursor.setGlobalCursor("pen_point");
         this._cancelBinding = this._app.actionManager.subscribe('cancel', this.cancel.bind(this));
         var element = Selection.selectedElement();
         if(element instanceof Path && !element.closed()){
@@ -154,9 +155,7 @@ export default class GraphicalpathCreator extends Tool {
                     return;
                 }
 
-                if (element.mode() === "edit"){
-                    element.mode("resize");
-                }
+                this._changeMode(element, "resize");
             }
 
             Selection.unselectAll();
@@ -169,7 +168,7 @@ export default class GraphicalpathCreator extends Tool {
             }
 
             this._app.activePage.dropToPage(x, y, this._element);
-            that._element.mode("edit");
+            this._changeMode(this._element, "edit");
             Selection.makeSelection([that._element]);
 
             if (!(event.event.ctlKey || event.event.metaKey)) {
@@ -235,7 +234,7 @@ export default class GraphicalpathCreator extends Tool {
         var x = event.x
             , y = event.y;
         var view = this.view();
-        Cursor.setGlobalCursor("crosshair");
+        Cursor.setGlobalCursor("pen_point");
         if (checkIfElementAvailable.call(this)) {
             var pos = this._element.parent().global2local(event);
 
@@ -268,11 +267,11 @@ export default class GraphicalpathCreator extends Tool {
             } else {
                 var cp = this._element.controlPointForPosition(event);
                 if (cp) {
-                    if (cp === this._element.pointAtIndex(0)) {
-                        Cursor.setGlobalCursor("close_path");
+                    if (cp === this._element.firstPoint || cp === this._element.lastPoint) {
+                        Cursor.setGlobalCursor("pen_close_path");
                     } else {
                         this._element.nextPoint = null;
-                        Cursor.setGlobalCursor("remove_point");
+                        Cursor.setGlobalCursor("pen_remove_point");
                     }
                 }
             }
@@ -283,25 +282,26 @@ export default class GraphicalpathCreator extends Tool {
                 var cp = element.controlPointForPosition(event);
                 if (cp) {
                     element.nextPoint = null;
-                    Cursor.setGlobalCursor("remove_point");
+                    Cursor.setGlobalCursor("pen_remove_point");
                 } else {
                     var pt = this._pointOnPath = element.getPointIfClose({x: x, y: y});
                     var matrix = element.globalViewMatrix();
                     this._view = view;
                     if (pt) {
-                        element.nextPoint = null;
-                        var sx = 1, sy = 1;
-                        if (element._sourceRect) {
-                            sx = element.width() / element._sourceRect.width;
-                            sy = element.height() / element._sourceRect.height;
-                        }
-                        this._pointOnPath = matrix.transformPoint2(pt.x * sx, pt.y * sy);
-                        Cursor.setGlobalCursor("add_point");
+                        element.nextPoint = null;                        
+                        this._pointOnPath = matrix.transformPoint2(pt.x, pt.y);
+                        Cursor.setGlobalCursor("pen_add_point");
                     }
 
                     Invalidate.request();
                 }
             }
+        }
+    }
+
+    _changeMode(element, mode){
+        if (element.mode() !== mode){
+            element.mode(mode);
         }
     }
 }

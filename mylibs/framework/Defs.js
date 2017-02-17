@@ -120,12 +120,12 @@ export var FrameCursors = [
     'nw-resize',
     '', //removed
     'move',
-    'move_point'
+    'pen_move_point'
 ];
 
 export var RotationCursors = [];
-for (let i = 0; i < 8; ++i){
-    RotationCursors.push("rotate" + i);
+for (let i = 1; i <= 8; ++i){
+    RotationCursors.push("rotate-" + i);
 }
 
 export var TextAlign = {

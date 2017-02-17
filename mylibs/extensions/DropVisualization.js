@@ -96,27 +96,19 @@ class SelectionRect extends UIElement {
     drawSelf(context) {
         var scale = Environment.view.scale();
 
-        context.save();
-        context.scale(1 / scale, 1 / scale);
-        context.setLineDash([1, 1]);
+        context.save();                
+        context.setLineDash([1/scale, 1/scale]);
         context.beginPath();
         
-        try {
-            GlobalMatrixModifier.pushPrependScale();
-
-            if (this._element.drawPath) {
-                this._element.applyViewMatrix(context);
-                this._element.drawPath(context, this._element.width(), this._element.height());
-            } 
-            else {
-                this._element.drawBoundaryPath(context);
-            }
-        }
-        finally {
-            GlobalMatrixModifier.pop();
+        if (this._element.hasPath()) {
+            this._element.applyViewMatrix(context);
+            this._element.drawPath(context, this._element.width(), this._element.height());
+        } 
+        else {
+            this._element.drawBoundaryPath(context);
         }
 
-        Brush.stroke(HighlightBrush, context);
+        Brush.stroke(HighlightBrush, context, 0, 0, 0, 0, 1/scale);
 
         context.restore();
     }

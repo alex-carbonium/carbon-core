@@ -63,9 +63,9 @@ export default class CompositeElement extends UIElement implements IComposite {
         }
     }
 
-    applySizeScaling(s, o, options) {                        
+    applyScaling(s, o, options) {                        
         var resizeOptions = options && options.forChildResize(false);
-        this.elements.forEach(e => e.applyScaling(s, o, options));
+        this.elements.forEach(e => e.applyScaling(s, o, resizeOptions));
         this.performArrange();
     }
 
