@@ -26,10 +26,12 @@ import {
     StoryType,
     StyleType,
     ArtboardResource,
-    ViewTool
+    ViewTool,
+    ContextBarPosition
 } from "./framework/Defs";
 import Font from "./framework/Font";
 import GroupContainer from "./framework/GroupContainer";
+import RepeatContainer from "./framework/repeater/RepeatContainer";
 import CommandManager from "framework/commands/CommandManager";
 import NullPage from "framework/NullPage";
 import ModelStateListener from "framework/sync/ModelStateListener";
@@ -171,18 +173,46 @@ var onBuildDefaultMenu = function (context, menu) {
 
     var items = menu.items = [];
 
-    var itemsToSelect = findItemsToSelect.call(this, context.eventData);
-    if (itemsToSelect.length) {
-        items.push({
-            name: "Select",
-            items: itemsToSelect
-        });
+    if(selection.length) {     
+        if(selection.length === 1 && selection[0] instanceof RepeatContainer) {
+            items.push({
+                name: "@repeater.ungroup",
+                icon: "ungroup-grid",
+                contextBar: ContextBarPosition.Left,
+                callback: () => {
+                    this.actionManager.invoke("ungroupRepeater");
+                }
+            });
+        } else {
+            items.push({
+                name: "@repeater.group",
+                icon: "ico--repeater",
+                contextBar: ContextBarPosition.Left,
+                callback: () => {
+                    this.actionManager.invoke("groupInRepeater");
+                }
+            });
+        }
         items.push('-');
+    } 
+
+
+    if(context.eventData){
+        var itemsToSelect = findItemsToSelect.call(this, context.eventData);
+        if (itemsToSelect.length) {
+            items.push({
+                name: "Select",
+                contextBar: ContextBarPosition.None,
+                items: itemsToSelect
+            });
+            items.push('-');
+        }
     }
 
     items.push({
         name: "Copy",
         icon: "copy",
+        contextBar: ContextBarPosition.None,
         callback: function () {
             showClipboardDialog();
         },
@@ -192,6 +222,7 @@ var onBuildDefaultMenu = function (context, menu) {
     items.push({
         name: "Cut",
         icon: "cut",
+        contextBar: ContextBarPosition.None,
         callback: function () {
             showClipboardDialog();
         },
@@ -201,6 +232,7 @@ var onBuildDefaultMenu = function (context, menu) {
     items.push({
         name: "Paste",
         icon: "paste",
+        contextBar: ContextBarPosition.None,
         callback: function () {
             showClipboardDialog();
         }
@@ -209,6 +241,7 @@ var onBuildDefaultMenu = function (context, menu) {
     items.push({
         name: "Duplicate",
         icon: "duplicate",
+        contextBar: ContextBarPosition.None,
         callback: () => {
             this.actionManager.invoke("duplicate");
         },
@@ -219,6 +252,7 @@ var onBuildDefaultMenu = function (context, menu) {
     items.push({
         name: "Delete",
         icon: "delete",
+        contextBar: ContextBarPosition.None,
         callback: () => {
             this.actionManager.invoke("delete");
         },
@@ -230,6 +264,7 @@ var onBuildDefaultMenu = function (context, menu) {
 
         items.push({
             name: "Grouping",
+            contextBar: ContextBarPosition.Right,
             items: [
                 {
                     name: "Group",
@@ -259,9 +294,9 @@ var onBuildDefaultMenu = function (context, menu) {
         });
         items.push('-');
 
-
         items.push({
             name: "Path",
+            contextBar: (canDoPathOperations(selection) || canFlattenPath(selection) || canConvertToPath(selection))? ContextBarPosition.Right : ContextBarPosition.None, 
             items: [
                 {
                     name: "Union",
@@ -318,6 +353,7 @@ var onBuildDefaultMenu = function (context, menu) {
 
     items.push({
         name: "Arrange",
+        contextBar: ContextBarPosition.Right,
         items: [
             {
                 name: "Bring to Front",

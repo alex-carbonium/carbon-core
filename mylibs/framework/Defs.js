@@ -331,6 +331,13 @@ export var HorizontalConstraint  = {
     Stretch:8
 };
 
+export var ContextBarPosition = {
+    None: 0,
+    Left: 1, 
+    Right: 2,
+    Only: 4
+}
+
 export var VerticalConstraint  = {
     Top:1,
     Bottom:2,

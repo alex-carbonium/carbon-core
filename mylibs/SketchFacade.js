@@ -78,6 +78,7 @@ module.exports = {
     "FontWeight": Defs.FontWeight,
     "UnderlineStyle": Defs.UnderlineStyle,
     "PrimitiveType": Defs.PrimitiveType,
+    "ContextBarPosition": Defs.ContextBarPosition,
     "PatchType": Defs.PatchType,
     "ChangeMode": Defs.ChangeMode,
     "TileSize": Defs.TileSize,

@@ -329,7 +329,7 @@ export default class RulerGuides {
     }
 
     onBuildMenu(context, menu) {
-        if (!this.active()) {
+        if (!this.active() || !context.eventData) {
             return;
         }
 
