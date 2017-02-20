@@ -25,6 +25,13 @@ class DefaultShapeSettings extends UIElement {
         return new AppPropsChanged(this._app, {defaultShapeSettings: changes});
     }
 
+    findPropertyDescriptor(name) {
+        if(name === "name" || name === "locked") {
+            return null;
+        }
+        return super.findPropertyDescriptor(name);
+    }
+
     createSelectionFrame(){
         return {
             element: this,

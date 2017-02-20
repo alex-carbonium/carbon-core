@@ -203,6 +203,10 @@ export default class CompositeElement extends UIElement implements IComposite {
         return "";
     }
     findPropertyDescriptor(propName: string) {
+        if(this.elements.length === 1){
+            return this.elements[0].findPropertyDescriptor(propName);
+        }
+        
         return PropertyMetadata.find(this._types[0], propName);
     }
     allHaveSameType() {

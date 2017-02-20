@@ -15,6 +15,13 @@ class ArtboardToolSettings extends UIElement {
             points: []
         }
     }
+    
+    findPropertyDescriptor(name) {
+        if(name === "name" || name === "locked") {
+            return null;
+        }
+        return super.findPropertyDescriptor(name);
+    }
 }
 ArtboardToolSettings.prototype.t = Types.ArtboardToolSettings;
 

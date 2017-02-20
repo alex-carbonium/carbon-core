@@ -32,6 +32,13 @@ export default class DefaultFormatter extends UIElement {
     displayName(){
         return "Default text settings";
     }
+
+    findPropertyDescriptor(name) {
+        if(name === "name" || name === "locked") {
+            return null;
+        }
+        return super.findPropertyDescriptor(name);
+    }
 }
 DefaultFormatter.prototype.t = Types.DefaultFormatter;
 

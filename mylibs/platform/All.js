@@ -20,45 +20,7 @@ define([ "math/matrix", "framework/Deferred"], function (Matrix, Deferred) {
         /**
          * Handles
          */
-        var toggleFullscreenApi = function(){
-            var that = this;
-            if(!window) {
-                return;
-            }
-            //in preview mode.
-            var fApi = window.fullScreenApi;
-            if (!fApi.supportsFullScreen) {
-                return;
-            }
-            if(this.viewMode == "view") {
-                //In view mode. Remove button and detect if in fullscreen
-                $("#right_bottom_corner div.fullscreenButton").remove();
-
-                if(fApi.isFullScreen()){ //if we clicked link which turns off preview move and we are in fullscreen, exit it
-                    fApi.cancelFullScreen();
-                }
-                return;
-            }
-
-
-            var button = $("#right_bottom_corner").find(".fullscreenButton");
-            if(button.length == 0)
-                button = $("#right_bottom_corner").prepend('<div class="switch_group button fullscreenButton" ></div>').find(".fullscreenButton");
-
-            document.addEventListener(fApi.fullScreenEventName, function(e) {
-                button.toggleClass("checked");
-                that.fullscreen = !that.fullscreen;
-            }, true);
-
-            button.bind("click", function(){
-                if(!that.fullscreen){ //we are going to show fullscreen
-                    var el = $("#container")[0];
-                    fApi.requestFullScreen(el);
-                } else {
-                    fApi.cancelFullScreen();
-                }
-            });
-        };
+        
         var saveViewState = function(){
             this._viewState = {
                 phoneVisible: App.Current.activePage.isPhoneVisible()
@@ -249,7 +211,6 @@ define([ "math/matrix", "framework/Deferred"], function (Matrix, Deferred) {
                     saveViewState.call(this);
                 }
 
-                toggleFullscreenApi.call(this);
 
                 if (toView){
                     switchToView.call(this);
@@ -271,9 +232,7 @@ define([ "math/matrix", "framework/Deferred"], function (Matrix, Deferred) {
 
                 this.setViewMode(this.viewMode);
             },
-            toggleFullscreenApi: function(){
-                toggleFullscreenApi.call(this);
-            },
+            
             switchToPreview: function(){
                 switchToPreview.call(this);
             },

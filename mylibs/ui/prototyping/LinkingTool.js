@@ -551,6 +551,7 @@ export default class LinkingTool extends Tool {
                 }
             }
         }
+         
         this._rebalanceConnections();
     }
 
@@ -584,7 +585,16 @@ export default class LinkingTool extends Tool {
 
         context.beginPath();
         this._renderArrow(context, connection.from, connection.to)
-        context.lineWidth = 2 / this._view.scale();
+
+        var scale = this._view.scale();
+
+        if(scale > 1) {
+            context.lineWidth = 2 / this._view.scale();
+        } else if(scale > 0.5) {
+            context.lineJoin = 2;
+        } else {
+            context.lineWidth = 1 / this._view.scale();
+        }
 
         context.stroke();
 
