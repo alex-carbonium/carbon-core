@@ -25,7 +25,8 @@ import platform from "../platform/Platform";
 import CombinePaths from "../commands/CombinePaths";
 import GroupContainer from "../framework/GroupContainer";
 import GroupInRepeater from "../framework/repeater/GroupInRepeater";
-import Align from "../commands/Align";
+import UngroupRepeater from "../framework/repeater/UngroupRepeater";
+import aligner from "../framework/Aligner";
 import Selection from "../framework/SelectionModel";
 import EventHelper from "../framework/EventHelper";
 import {IActionManager} from "../framework/CoreModel";
@@ -294,28 +295,28 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("alignLeft", "Align left", "Align", function () {
-            return new Align("left", Selection.getSelection());
+            aligner.align("left", Selection.getSelection());
         }, "ui-align-left");
         this.registerAction("alignRight", "Align right", "Align", function () {
-            return new Align("right", Selection.getSelection());
+            aligner.align("right", Selection.getSelection());
         }, "ui-align-right");
         this.registerAction("alignTop", "Align top", "Align", function () {
-            return new Align("top", Selection.getSelection());
+            aligner.align("top", Selection.getSelection());
         }, "ui-align-top");
         this.registerAction("alignBottom", "Align bottom", "Align", function () {
-            return new Align("bottom", Selection.getSelection());
+            aligner.align("bottom", Selection.getSelection());
         }, "ui-align-bottom");
         this.registerAction("alignMiddle", "Align middle", "Align", function () {
-            return new Align("middle", Selection.getSelection());
+            aligner.align("middle", Selection.getSelection());
         }, "ui-align-middle");
         this.registerAction("alignCenter", "Align center", "Align", function () {
-            return new Align("center", Selection.getSelection());
+            aligner.align("center", Selection.getSelection());
         }, "ui-align-center");
         this.registerAction("distributeHorizontally", "Distribute horizontally", "Distribute", function () {
-            return new Align("distributeHorizontally", Selection.getSelection());
+            aligner.align("distributeHorizontally", Selection.getSelection());
         }, "ui-distribute_horiz");
         this.registerAction("distributeVertically", "Distribute vertically", "Distribute", function () {
-            return new Align("distributeVertically", Selection.getSelection());
+            aligner.align("distributeVertically", Selection.getSelection());
         }, "ui-distribute_vertic");
 
         this.registerAction("groupElements", "Group elements", "Group", function () {
@@ -326,8 +327,12 @@ export default class ActionManager implements IActionManager {
             Ungroup.run(Selection.getSelection());
         }, "ui-ungroup");
 
-        this.registerAction("groupInRepeater", "Group elements", "Group", function () {
+        this.registerAction("groupInRepeater", "Repeate grid", "Repeater", function () {
             return GroupInRepeater.run(Selection.getSelection());
+        }, "ui-group");
+
+        this.registerAction("ungroupRepeater", "Ungroup grid", "Repeater", function () {
+            return UngroupRepeater.run(Selection.getSelection());
         }, "ui-group");
 
         this.registerAction("lock", "Lock", "Lock", function () {

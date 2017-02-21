@@ -1033,10 +1033,10 @@ export default class UIElement extends DataNode {
         return this.props.br;
     }
     right() {
-        return this.x() + this.width();
+        return this.position().x + this.width();
     }
     bottom() {
-        return this.y() + this.height();
+        return this.position().y + this.height();
     }
     outerHeight() {
         var margin = this.margin();

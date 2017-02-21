@@ -56,8 +56,8 @@ export default {
         var baseMatrix = container.globalViewMatrix().clone();
         var containerWidth = container.width();
         var containerHeight = container.height();
-        var numX = this._strategy.getNumX(container);
-        var numY = this._strategy.getNumY(container);
+        var numX = container.getNumX();
+        var numY = container.getNumY();
         var itemBox = container.children[0].getBoundingBox();
         var marginX = this._strategy.getActualMarginX(container);
         var marginY = this._strategy.getActualMarginY(container);

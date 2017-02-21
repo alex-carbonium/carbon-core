@@ -38,7 +38,7 @@ import ModelStateListener from "framework/sync/ModelStateListener";
 import DeferredPrimitives from "framework/sync/DeferredPrimitives";
 import PrimitiveHandler from "framework/sync/Primitive_Handlers";
 import PrimitiveSetCommand from "commands/PrimitiveSetCommand";
-import {createUUID, formatPrimitive} from "./util";
+import { createUUID, formatPrimitive } from "./util";
 import DesignerController from "framework/DesignerController";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
@@ -56,7 +56,7 @@ import DefaultSettings from "./DefaultSettings";
 import ObjectFactory from "./framework/ObjectFactory";
 import ActionManager from "./ui/ActionManager";
 import ShortcutManager from "./ui/ShortcutManager";
-import {IApp, IEvent} from "./framework/CoreModel";
+import { IApp, IEvent } from "./framework/CoreModel";
 
 window.env = Environment;
 window.Selection = Selection;
@@ -113,7 +113,7 @@ var addComment = function (event) {
 };
 
 function showClipboardDialog() {
-    new sketch.windows.Dialog("viewmodels/ClipboardUsageDialog", {modal: true}).show();
+    new sketch.windows.Dialog("viewmodels/ClipboardUsageDialog", { modal: true }).show();
 }
 
 function canDoPathOperations(selection) {
@@ -173,15 +173,15 @@ var onBuildDefaultMenu = function (context, menu) {
 
     var items = menu.items = [];
 
-    if(selection.length) {     
-        if(selection.length === 1 && selection[0] instanceof RepeatContainer) {
+    if (selection.length) {
+        if (selection.length === 1 && selection[0] instanceof RepeatContainer) {
             items.push({
                 name: "@repeater.ungroup",
                 icon: "ungroup-grid",
                 contextBar: ContextBarPosition.Left,
                 callback: () => {
                     this.actionManager.invoke("ungroupRepeater");
-                }
+                }                
             });
         } else {
             items.push({
@@ -194,10 +194,10 @@ var onBuildDefaultMenu = function (context, menu) {
             });
         }
         items.push('-');
-    } 
+    }
 
 
-    if(context.eventData){
+    if (context.eventData) {
         var itemsToSelect = findItemsToSelect.call(this, context.eventData);
         if (itemsToSelect.length) {
             items.push({
@@ -259,96 +259,179 @@ var onBuildDefaultMenu = function (context, menu) {
         disabled: !(selection && selection.length > 0)
     });
 
-    if (selection) {
-        items.push('-');
 
-        items.push({
-            name: "Grouping",
-            contextBar: ContextBarPosition.Right,
-            items: [
-                {
-                    name: "Group",
-                    icon: "group",
-                    callback: () => {
-                        this.actionManager.invoke("groupElements");
-                    },
-                    disabled: !selection || selection.length <= 1
+    items.push('-');
+    items.push({
+        name: "@menu.align",
+        contextBar: ContextBarPosition.Right,
+        rows: [
+            "@menurow.align", "@menurow.distribute"/*, "@menu.spacing" */
+        ],
+        items: [
+            {
+                name: "@align.top",
+                row:0,
+                icon: "ico-small-align-tops",
+                callback: () => {
+                    this.actionManager.invoke("alignTop");
                 },
-                {
-                    name: "Ungroup",
-                    icon: "ungroup",
-                    callback: () => {
-                        this.actionManager.invoke("ungroupElements");
-                    },
-                    disabled: !selection || selection.length !== 1 || !(selection[0] instanceof GroupContainer)
+                disabled: !selection || selection.length <= 1
+            },
+            {
+                name: "@align.middle",
+                row:0,
+                icon: "ico-small-align-middles",
+                callback: () => {
+                    this.actionManager.invoke("alignMiddle");
                 },
-                {
-                    name: "Mask",
-                    icon: "mask",
-                    callback: () => {
-                        this.actionManager.invoke("groupWithMask");
-                    },
-                    disabled: !selection || selection.length < 2 || (typeof selection[0].drawPath !== 'function')
-                }
-            ]
-        });
-        items.push('-');
+                disabled: !selection || selection.length <= 1
+            },
+            {
+                name: "@align.bottom",
+                row:0,
+                icon: "ico-small-align-bottoms",
+                callback: () => {
+                    this.actionManager.invoke("alignBottom");
+                },
+                disabled: !selection || selection.length <= 1
+            },
+            {
+                name: "@align.left",
+                row:0,
+                icon: "ico-small-align-lefts",
+                callback: () => {
+                    this.actionManager.invoke("alignLeft");
+                },
+                disabled: !selection || selection.length <= 1
+            },
+            {
+                name: "@align.center",
+                row:0,
+                icon: "ico-small-align-centers",
+                callback: () => {
+                    this.actionManager.invoke("alignCenter");
+                },
+                disabled: !selection || selection.length <= 1
+            },
+            {
+                name: "@align.right",
+                row:0,
+                icon: "ico-small-align-rights",
+                callback: () => {
+                    this.actionManager.invoke("alignRight");
+                },
+                disabled: !selection || selection.length <= 1
+            },
+            {
+                name: "@distribute.vertically",
+                row:1,
+                icon: "ico-small-distribute-middles",
+                callback: () => {
+                    this.actionManager.invoke("distributeVertically");
+                },
+                disabled: !selection || selection.length <= 1
+            },
+            {
+                name: "@distribute.horizontally",
+                row:1,
+                icon: "ico-small-distribute-centers",
+                callback: () => {
+                    this.actionManager.invoke("distributeHorizontally");
+                },
+                disabled: !selection || selection.length <= 1
+            }
+        ]
+    });
 
-        items.push({
-            name: "Path",
-            contextBar: (canDoPathOperations(selection) || canFlattenPath(selection) || canConvertToPath(selection))? ContextBarPosition.Right : ContextBarPosition.None, 
-            items: [
-                {
-                    name: "Union",
-                    icon: "pathUnion",
-                    callback: () => {
-                        this.actionManager.invoke("pathUnion");
-                    },
-                    disabled: !canDoPathOperations(selection)
+    items.push('-');
+
+    items.push({
+        name: "Grouping",
+        contextBar: ContextBarPosition.Right,
+        items: [
+            {
+                name: "Group",
+                icon: "group",
+                callback: () => {
+                    this.actionManager.invoke("groupElements");
                 },
-                {
-                    name: "Intersect",
-                    icon: "pathIntersect",
-                    callback: () => {
-                        this.actionManager.invoke("pathIntersect");
-                    },
-                    disabled: !canDoPathOperations(selection)
+                disabled: !selection || selection.length <= 1
+            },
+            {
+                name: "Ungroup",
+                icon: "ungroup",
+                callback: () => {
+                    this.actionManager.invoke("ungroupElements");
                 },
-                {
-                    name: "Difference",
-                    icon: "pathDifference",
-                    callback: () => {
-                        this.actionManager.invoke("pathDifference");
-                    },
-                    disabled: !canDoPathOperations(selection)
+                disabled: !selection || selection.length !== 1 || !(selection[0] instanceof GroupContainer)
+            },
+            {
+                name: "Mask",
+                icon: "mask",
+                callback: () => {
+                    this.actionManager.invoke("groupWithMask");
                 },
-                {
-                    name: "Subtract",
-                    icon: "pathSubtract",
-                    callback: () => {
-                        this.actionManager.invoke("pathSubtract");
-                    },
-                    disabled: !canDoPathOperations(selection)
+                disabled: !selection || selection.length < 2 || (typeof selection[0].drawPath !== 'function')
+            }
+        ]
+    });
+    items.push('-');
+
+    items.push({
+        name: "Path",
+        contextBar: (canDoPathOperations(selection) || canFlattenPath(selection) || canConvertToPath(selection)) ? ContextBarPosition.Right : ContextBarPosition.None,
+        items: [
+            {
+                name: "Union",
+                icon: "pathUnion",
+                callback: () => {
+                    this.actionManager.invoke("pathUnion");
                 },
-                {
-                    name: "Flatten",
-                    icon: "pathFlatten",
-                    callback: () => {
-                        this.actionManager.invoke("pathFlatten");
-                    },
-                    disabled: !canFlattenPath(selection)
+                disabled: !canDoPathOperations(selection)
+            },
+            {
+                name: "Intersect",
+                icon: "pathIntersect",
+                callback: () => {
+                    this.actionManager.invoke("pathIntersect");
                 },
-                {
-                    name: "Convert to path",
-                    icon: "convertToPath",
-                    callback: () => {
-                        this.actionManager.invoke("convertToPath");
-                    },
-                    disabled: !canConvertToPath(selection)
-                }
-            ]
-        });
-    }
+                disabled: !canDoPathOperations(selection)
+            },
+            {
+                name: "Difference",
+                icon: "pathDifference",
+                callback: () => {
+                    this.actionManager.invoke("pathDifference");
+                },
+                disabled: !canDoPathOperations(selection)
+            },
+            {
+                name: "Subtract",
+                icon: "pathSubtract",
+                callback: () => {
+                    this.actionManager.invoke("pathSubtract");
+                },
+                disabled: !canDoPathOperations(selection)
+            },
+            {
+                name: "Flatten",
+                icon: "pathFlatten",
+                callback: () => {
+                    this.actionManager.invoke("pathFlatten");
+                },
+                disabled: !canFlattenPath(selection)
+            },
+            {
+                name: "Convert to path",
+                icon: "convertToPath",
+                callback: () => {
+                    this.actionManager.invoke("convertToPath");
+                },
+                disabled: !canConvertToPath(selection)
+            }
+        ]
+    });
+
 
 
     items.push({
@@ -357,7 +440,7 @@ var onBuildDefaultMenu = function (context, menu) {
         items: [
             {
                 name: "Bring to Front",
-                icon: "bring-to-front",
+                icon: "ico-small-send-to-foreground",
                 callback: () => {
                     this.actionManager.invoke("bringToFront");
                 },
@@ -365,7 +448,7 @@ var onBuildDefaultMenu = function (context, menu) {
             },
             {
                 name: "Send to Back",
-                icon: "send-to-back",
+                icon: "ico-small-send-to-background",
                 callback: () => {
                     this.actionManager.invoke("sendToBack");
                 },
@@ -373,7 +456,7 @@ var onBuildDefaultMenu = function (context, menu) {
             },
             {
                 name: "Bring Forward",
-                icon: "bring-forward",
+                icon: "ico-small-move-upper",
                 callback: () => {
                     this.actionManager.invoke("bringForward");
                 },
@@ -381,7 +464,7 @@ var onBuildDefaultMenu = function (context, menu) {
             },
             {
                 name: "Send Backward",
-                icon: "send-backward",
+                icon: "ico-small-move-lower",
                 callback: () => {
                     this.actionManager.invoke("sendBackward");
                 },
@@ -389,7 +472,6 @@ var onBuildDefaultMenu = function (context, menu) {
             }
         ]
     });
-
 }
 
 function onDefaultFamilyChanged(event) {
@@ -407,8 +489,8 @@ function onDefaultFamilyChanged(event) {
                 page.applyVisitor(function (element) {
                     if (element.props.font) {
                         var oldFont = element.props.font;
-                        var newFont = fwk.Font.extend(oldFont, {family: event.newValue});
-                        element.setProps({font: newFont});
+                        var newFont = fwk.Font.extend(oldFont, { family: event.newValue });
+                        element.setProps({ font: newFont });
                         app.raiseLogEvent(Primitive.element_props_change(element, newFont, oldFont));
                     }
                 }, false);
@@ -423,7 +505,7 @@ function onDefaultFamilyChanged(event) {
 
 class App extends DataNode implements IApp {
     shortcutManager: ShortcutManager;
-    
+
     currentToolChanged: IEvent<string>;
     _currentTool: string;
 
@@ -502,8 +584,8 @@ class App extends DataNode implements IApp {
         this.actionManager = new ActionManager(this);
         this.actionManager.registerActions();
 
-        this.shortcutManager = new ShortcutManager();        
-        this.shortcutManager.mapDefaultScheme();        
+        this.shortcutManager = new ShortcutManager();
+        this.shortcutManager.mapDefaultScheme();
 
         this._currentTool = ViewTool.Pointer;
         this.currentToolChanged = EventHelper.createEvent();
@@ -535,7 +617,7 @@ class App extends DataNode implements IApp {
         return res;
     }
 
-    
+
     getAllPalettes() {
         var res = [];
         for (var i = 0; i < this.pages.length; ++i) {
@@ -565,7 +647,7 @@ class App extends DataNode implements IApp {
                 }
             }
             if (children.length > 0) {
-                res.push({name: page.name(), id: page.id(), children: children})
+                res.push({ name: page.name(), id: page.id(), children: children })
             }
         }
 
@@ -698,7 +780,7 @@ class App extends DataNode implements IApp {
 
     applyVisitor(callback) {
         each(this.pages, function (page) {
-            page.applyVisitor(element=> {
+            page.applyVisitor(element => {
                 if (callback(element, page) === false) {
                     return false;
                 }
@@ -861,14 +943,14 @@ class App extends DataNode implements IApp {
         }
 
         this.children = data.children;
-        
+
         for (let i = 0; i < this.children.length; i++) {
             var rawData = data.children[i];
             var item = ObjectFactory.getObject(rawData);
             data.children[i] = item;
-            if(item instanceof Page){
+            if (item instanceof Page) {
                 this.initPage(item);
-            } else if(item instanceof Story) {
+            } else if (item instanceof Story) {
                 this.initStory(item);
             }
         }
@@ -878,31 +960,31 @@ class App extends DataNode implements IApp {
 
     serverless(value) {
         if (arguments.length === 1) {
-            this.setProps({serverless: value}, ChangeMode.Self);
+            this.setProps({ serverless: value }, ChangeMode.Self);
         }
         return this.props.serverless;
     }
 
     defaultShapeSettings(value) {
         if (arguments.length === 1) {
-            this.setProps({defaultShapeSettings: value});
+            this.setProps({ defaultShapeSettings: value });
         }
         return this.props.defaultShapeSettings;
     }
-    
+
     defaultFill(value) {
-        if(arguments.length === 1){
-            this.setProps({defaultFill:value});
+        if (arguments.length === 1) {
+            this.setProps({ defaultFill: value });
         }
-        
+
         return this.props.defaultFill;
     }
-   
+
     defaultStroke(value) {
-        if(arguments.length === 1){
-            this.setProps({defaultStroke:value});
+        if (arguments.length === 1) {
+            this.setProps({ defaultStroke: value });
         }
-        
+
         return this.props.defaultStroke;
     }
 
@@ -922,44 +1004,44 @@ class App extends DataNode implements IApp {
             colors.splice(colors.length - 1, 1);
         }
 
-        this.setProps({recentColors: colors});
+        this.setProps({ recentColors: colors });
     }
 
     defaultLineSettings(value) {
         if (arguments.length === 1) {
-            this.setProps({defaultLineSettings: value});
+            this.setProps({ defaultLineSettings: value });
         }
         return this.props.defaultLineSettings;
     }
 
-    snapSettings(value){
-        if (arguments.length === 1){
+    snapSettings(value) {
+        if (arguments.length === 1) {
             this._setUserSetting("snapTo", value);
             return value;
         }
         return this._getUserSetting("snapTo", DefaultSettings.snapTo);
     }
 
-    _getUserSetting(name, defaultValue){
+    _getUserSetting(name, defaultValue) {
         var userId = backend.getUserId();
 
-        for (var i = 0; i < this.props.userSettings.length; i++){
+        for (var i = 0; i < this.props.userSettings.length; i++) {
             var s = this.props.userSettings[i];
-            if (s.id.startsWith(userId) && s.id.split(":")[1] === name){
+            if (s.id.startsWith(userId) && s.id.split(":")[1] === name) {
                 return s.value;
             }
         }
 
         return defaultValue;
     }
-    _setUserSetting(name, value){
+    _setUserSetting(name, value) {
         var fullName = backend.getUserId() + ":" + name;
-        this.patchProps(PatchType.Change, "userSettings", {id: fullName, value});
+        this.patchProps(PatchType.Change, "userSettings", { id: fullName, value });
     }
 
     nextPageId() {
         return createUUID();
-    }    
+    }
 
     allowSelection(value) {
         if (value != undefined) {
@@ -970,7 +1052,7 @@ class App extends DataNode implements IApp {
 
     version(value) {
         if (arguments.length === 1) {
-            this.setProps({editVersion: value}, ChangeMode.Self);
+            this.setProps({ editVersion: value }, ChangeMode.Self);
         }
         return this.props.editVersion;
     }
@@ -984,7 +1066,7 @@ class App extends DataNode implements IApp {
 
     name(value) {
         if (arguments.length === 1) {
-            this.setProps({name: value});
+            this.setProps({ name: value });
         }
         return this.props.name;
     }
@@ -1022,18 +1104,18 @@ class App extends DataNode implements IApp {
         }
     }
 
-    init(){
-        Environment.detaching.bind(this, ()=> {
+    init() {
+        Environment.detaching.bind(this, () => {
             this.detachExtensions();
         });
 
-        Environment.attached.bind(this, ()=> {
+        Environment.attached.bind(this, () => {
             this.initExtensions();
         });
 
-        this.platform.run(this);        
+        this.platform.run(this);
 
-        this.setupView();        
+        this.setupView();
     }
 
     //TODO: rethink the concept of run method for better testability
@@ -1072,13 +1154,13 @@ class App extends DataNode implements IApp {
 
                 logger.trackEvent("AppLoaded", null, stopwatch.getMetrics());
 
-                if (that.serverless()){
+                if (that.serverless()) {
                     that.id("serverless");
                 }
 
                 that.raiseLoaded();
                 //this method depends on extensions (comments) being initialized
-                that.platform.postLoad(that);                
+                that.platform.postLoad(that);
 
                 that.restoreWorkspaceState();
                 that.releaseLoadRef();
@@ -1088,7 +1170,7 @@ class App extends DataNode implements IApp {
                 backend.enableLoginTimer();
             });
         }).catch(function (e) {
-            logger.trackEvent("App not loaded", {logLevel: "fatal", error: e});
+            logger.trackEvent("App not loaded", { logLevel: "fatal", error: e });
             throw e;
         });
     }
@@ -1199,23 +1281,23 @@ class App extends DataNode implements IApp {
     }
 
     get pages() {
-        return this.children.filter(p=>p instanceof Page);
+        return this.children.filter(p => p instanceof Page);
     }
 
     get stories() {
-        return this.children.filter(p=>p instanceof Story);
+        return this.children.filter(p => p instanceof Story);
     }
 
     isEmpty() {
         return this.children.length === 0;
     }
-  
+
     findPrimitiveRoot(key) {
         var primitiveRootElementEntry = this.primitiveRootCache[key];
         var primitiveRootElement;
         if (!primitiveRootElementEntry) {
             primitiveRootElement = this.findNodeBreadthFirst(x => x.primitiveRootKey() === key);
-            this.primitiveRootCache[key] = {element: primitiveRootElement, hitCount: 1}
+            this.primitiveRootCache[key] = { element: primitiveRootElement, hitCount: 1 }
         } else {
             primitiveRootElement = primitiveRootElementEntry.element;
             primitiveRootElementEntry.hitCount++;
@@ -1408,17 +1490,17 @@ class App extends DataNode implements IApp {
                 families: []
             },
             timeout: 60 * 1000,
-            active () {
+            active() {
                 deferred.resolve();
             },
-            inactive () {
+            inactive() {
                 var failedFonts = this._inactiveFonts;
                 if (!failedFonts) {
                     failedFonts = this.custom.families;
                 }
                 deferred.reject("Could not load fonts: " + failedFonts.join(", "));
             },
-            fontinactive (familyName, fvd) {
+            fontinactive(familyName, fvd) {
                 if (!this._inactiveFonts) {
                     this._inactiveFonts = [];
                 }
@@ -1466,7 +1548,7 @@ class App extends DataNode implements IApp {
                 StyleManager.registerStyle(style, StyleType.Text)
             }
         }
-        
+
         var i = this.children.length;
         this.children.push(pageJson);
 
@@ -1477,7 +1559,7 @@ class App extends DataNode implements IApp {
         this.setActivePage(page);
 
         return page;
-    }    
+    }
 
     shortcutsEnabled(value) {
         if (shortcut) {
@@ -1535,23 +1617,23 @@ class App extends DataNode implements IApp {
         this.storyRemoved.raise(story);
     }
 
-    saveWorkspaceState(): void{
+    saveWorkspaceState(): void {
         var state = {
             scale: Environment.view.scale(),
             scrollX: Environment.view.scrollX(),
             scrollY: Environment.view.scrollY(),
             pageId: this.activePage.id(),
-            pageState: this.activePage.saveWorkspaceState(),                        
-            selection: Selection.selectedElements().map(x => x.id())            
+            pageState: this.activePage.saveWorkspaceState(),
+            selection: Selection.selectedElements().map(x => x.id())
         };
         localStorage.setItem("workspace:" + this.id(), JSON.stringify(state));
     }
-    restoreWorkspaceState(): void{                
-        try{
+    restoreWorkspaceState(): void {
+        try {
             var data = localStorage.getItem("workspace:" + this.id());
             var state = JSON.parse(data);
             var page = this.pages.find(x => x.id() === state.pageId);
-            if (page){
+            if (page) {
                 this.setActivePage(page);
             }
 
@@ -1559,35 +1641,35 @@ class App extends DataNode implements IApp {
             Environment.view.scrollX(state.scrollX);
             Environment.view.scrollY(state.scrollY);
 
-            if (page && state.pageState){
+            if (page && state.pageState) {
                 page.restoreWorkspaceState(state.pageState);
             }
 
-            if (state.selection.length){                    
+            if (state.selection.length) {
                 var elements = this.activePage.findAllNodesDepthFirst(x => state.selection.indexOf(x.id()) !== -1);
-                if (elements.length){
+                if (elements.length) {
                     Selection.makeSelection(elements);
                 }
             }
         }
-        catch(e){
+        catch (e) {
             //ignore                
-        }        
+        }
     }
 
-    get currentTool(): string{
+    get currentTool(): string {
         return this._currentTool;
     }
 
-    set currentTool(tool: string){
+    set currentTool(tool: string) {
         var old = this._currentTool;
         this._currentTool = tool;
-        if (old !== tool){
+        if (old !== tool) {
             this.currentToolChanged.raise(tool);
-        }        
+        }
     }
 
-    resetCurrentTool(){
+    resetCurrentTool() {
         this.actionManager.invoke(ViewTool.Pointer);
     }
 }
@@ -1609,7 +1691,7 @@ PropertyMetadata.registerForType(App, {
     },
     layoutGridStyle: {
         defaultValue: {
-            hsl: {h: 240, s: 1, l: .5},
+            hsl: { h: 240, s: 1, l: .5 },
             opacity: .2,
             show: false,
             type: "stroke"

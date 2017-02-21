@@ -15,8 +15,8 @@ var Strategy = {
         var master = items[0];
         var masterWidth = master.width();//container.props.masterWidth;
         var masterHeight = master.height();//container.props.masterHeight;
-        var numX = this.getNumX(container);
-        var numY = this.getNumY(container);
+        var numX = container.getNumX();
+        var numY = container.getNumY();
         var numTotal = numX * numY;
         while (items.length < numTotal){
             var clone = master.clone();
@@ -45,14 +45,14 @@ var Strategy = {
             }
         }
     },
-    getNumX: function(container){
-        var masterWidth = container.props.masterWidth;
-        return masterWidth === 0 ? 1 : Math.ceil(container.width()/masterWidth);
-    },
-    getNumY: function(container){
-        var masterHeight = container.props.masterHeight;
-        return masterHeight === 0 ? 1 : Math.ceil(container.height()/masterHeight);
-    },
+    // getNumX: function(container){
+    //     var masterWidth = container.props.masterWidth;
+    //     return masterWidth === 0 ? 1 : Math.ceil(container.width()/masterWidth);
+    // },
+    // getNumY: function(container){
+    //     var masterHeight = container.props.masterHeight;
+    //     return masterHeight === 0 ? 1 : Math.ceil(container.height()/masterHeight);
+    // },
     getActualMarginX: function(container){
         var items = container.children;
         if (items.length < 2){

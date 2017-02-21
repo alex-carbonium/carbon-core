@@ -3,10 +3,8 @@ define(function() {
 
     return {
         align: function(mode, elements) {
-            var commands = [];
-
             if (elements.length === 0){
-                return commands;
+                return;
             }
 
             var center, space, leftmost, rightmost, topMost, bottomMost, sum, last;
@@ -14,38 +12,38 @@ define(function() {
 
             switch (mode){
                 case "left":
-                    baseElement = sketch.util.elementWithMin(elements, function(e){ return e.x(); });
-                    commands = elements.map(e => e.constructPropsChangedCommand({x: baseElement.x()}));
+                    baseElement = sketch.util.elementWithMin(elements, function(e){ return e.position().x; });
+                    elements.forEach(e => e.applyTranslation({x: baseElement.position().x - e.position().x, y:0}));
                     break;
                 case "top":
-                    baseElement = sketch.util.elementWithMin(elements, function(e){ return e.y(); });
-                    commands = elements.map(e => e.constructPropsChangedCommand({y: baseElement.y()}));
+                    baseElement = sketch.util.elementWithMin(elements, function(e){ return e.position().y; });
+                    elements.forEach(e => e.applyTranslation({y: baseElement.position().y - e.position().y, x:0}));
                     break;
                 case "right":
                     baseElement = sketch.util.elementWithMax(elements, function(e){ return e.right(); });
-                    commands = elements.map(e => e.constructPropsChangedCommand({x: baseElement.right() - e.width()}));
+                    elements.forEach(e => e.applyTranslation({x: baseElement.right() - e.width()- e.position().x, y:0}));
                     break;
                 case "bottom":
                     baseElement = sketch.util.elementWithMax(elements, function(e){ return e.bottom(); });
-                    commands = elements.map(e => e.constructPropsChangedCommand({y: baseElement.bottom() - e.height()}));
+                    elements.forEach(e => e.applyTranslation({y: baseElement.bottom() - e.height()- e.position().y, x:0}));
                     break;
                 case "center":
-                    leftmost = sketch.util.elementWithMin(elements, function(e){ return e.x(); });
+                    leftmost = sketch.util.elementWithMin(elements, function(e){ return e.position().x; });
                     rightmost = sketch.util.elementWithMax(elements, function(e){ return e.right(); });
-                    center = ~~(leftmost.x() + (rightmost.right() - leftmost.x()) / 2);
-                    commands = elements.map(e => e.constructPropsChangedCommand({x: center - e.width() / 2}));
+                    center = ~~(leftmost.position().x + (rightmost.right() - leftmost.position().x) / 2);
+                    elements.forEach(e => e.applyTranslation({x: center - e.width() / 2 - e.position().x, y:0}));
                     break;
                 case "middle":
-                    topMost = sketch.util.elementWithMin(elements, function(e){ return e.y(); });
+                    topMost = sketch.util.elementWithMin(elements, function(e){ return e.position().y });
                     bottomMost = sketch.util.elementWithMax(elements, function(e){ return e.bottom(); });
-                    center = ~~(topMost.y() + (bottomMost.bottom() - topMost.y()) / 2);
-                    commands = elements.map(e => e.constructPropsChangedCommand({y: center - ~~(e.height() / 2)}));
+                    center = ~~(topMost.position().y + (bottomMost.bottom() - topMost.position().y) / 2);
+                    elements.forEach(e => e.applyTranslation({y: center - ~~(e.height() / 2) - e.position().y, x:0}));
                     break;
                 case "distributeHorizontally":
-                    leftmost = sketch.util.elementWithMin(elements, function(e){ return e.x(); });
+                    leftmost = sketch.util.elementWithMin(elements, function(e){ return e.position().x; });
                     rightmost = sketch.util.elementWithMax(elements, function(e){ return e.right(); });
                     var sorted = elements.slice().sort(function(a,b){
-                        var diff = a.x() - b.x();
+                        var diff = a.position().x - b.position().x;
                         if (diff !== 0){
                             return diff;
                         }
@@ -53,21 +51,21 @@ define(function() {
                         return a.width() - b.width();
                     });
                     sum = sketch.util.sum(sorted, function(e){ return e.width(); });
-                    space = ~~((rightmost.right() - leftmost.x() - sum) / (elements.length - 1));
+                    space = ~~((rightmost.right() - leftmost.position().x - sum) / (elements.length - 1));
 
                     last = leftmost;
                     sorted.forEach(function(element){
                         if (element !== leftmost && element !== rightmost) {
-                            commands.push(element.constructPropsChangedCommand({x: last.right() + space}));
+                            element.applyTranslation({x: last.right() + space - element.position().x, y:0});
                             last = element;
                         }
                     });
                     break;
                 case "distributeVertically":
-                    topMost = sketch.util.elementWithMin(elements, function(e){ return e.y(); });
+                    topMost = sketch.util.elementWithMin(elements, function(e){ return e.position().y; });
                     bottomMost = sketch.util.elementWithMax(elements, function(e){ return e.bottom(); });
                     var sorted = elements.slice().sort(function(a,b){
-                        var diff = a.y() - b.y();
+                        var diff = a.position().y - b.position().y;
                         if (diff !== 0){
                             return diff;
                         }
@@ -75,19 +73,17 @@ define(function() {
                         return a.height() - b.height();
                     });
                     sum = sketch.util.sum(sorted, function(e){ return e.height(); });
-                    space = ~~((bottomMost.bottom() - topMost.y() - sum) / (elements.length - 1));
+                    space = ~~((bottomMost.bottom() - topMost.position().y - sum) / (elements.length - 1));
 
                     last = topMost;
                     sorted.forEach(function(element){
                         if (element !== topMost && element !== bottomMost) {
-                            commands.push(element.constructPropsChangedCommand({y: last.bottom() + space}));
+                            element.applyTranslation({y: last.bottom() + space - element.position().y, x:0});
                             last = element;
                         }
                     });
                     break;
             }
-
-            return commands;
         }
     };
 });

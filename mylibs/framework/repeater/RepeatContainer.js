@@ -187,6 +187,18 @@ export default class RepeatContainer extends Container{
         }
     }
 
+    getNumX() : number{
+        var masterWidth = this.props.masterWidth;
+        var margin = this.props.innerMarginX;
+        return masterWidth === 0 ? 1 : Math.ceil(this.width()/(masterWidth+margin));
+    }
+
+    getNumY() : number{
+        var masterHeight = this.props.masterHeight;
+        var margin = this.props.innerMarginY;
+        return masterHeight === 0 ? 1 : Math.ceil(this.height()/(masterHeight + margin));
+    }
+
     _buildChain(element){
         var i = 0;
         var next = element;
