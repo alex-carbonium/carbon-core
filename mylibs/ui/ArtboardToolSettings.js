@@ -15,7 +15,11 @@ class ArtboardToolSettings extends UIElement {
             points: []
         }
     }
-    
+
+    contextBarAllowed() {
+        return false;
+    }
+
     findPropertyDescriptor(name) {
         if(name === "name" || name === "locked") {
             return null;

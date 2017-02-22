@@ -1878,6 +1878,10 @@ export default class UIElement extends DataNode {
         return ctx.getSerializedSvg();
     }
 
+    contextBarAllowed() {
+        return true;
+    }
+
     static fromTypeString(type, parameters) {
         var components = type.split('.');
         var current = sketch;

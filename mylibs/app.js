@@ -158,6 +158,10 @@ var onBuildDefaultMenu = function (context, menu) {
     var selectComposite = context.selectComposite;
     var selection = selectComposite.elements;
 
+    if(selection && selection.length && !selection[0].contextBarAllowed()) {
+        return;
+    }
+
     // if(this.viewModel.commentsMode()){
     //     menu.addComment = {
     //         name:"Add comment",

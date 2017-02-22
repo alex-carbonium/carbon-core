@@ -39,6 +39,10 @@ export default class DefaultFormatter extends UIElement {
         }
         return super.findPropertyDescriptor(name);
     }
+
+    contextBarAllowed() {
+        return false;
+    }
 }
 DefaultFormatter.prototype.t = Types.DefaultFormatter;
 

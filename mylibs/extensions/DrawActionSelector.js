@@ -35,21 +35,21 @@ var registerCommands = function () {
     var actionManager = this.app.actionManager;
     var that = this;
 
-    actionManager.registerAction(ViewTool.Text, "Text tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Text, "@tool.text", "Drawing", function () {
         that.detachAll();
         that._textTool.attach(that.app, that.view, that.controller);
         that._currentAction = that._textTool;
         that.app.allowSelection(false);
     }, "ui-text");
 
-    actionManager.registerAction(ViewTool.Image, "Image tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Image, "@tool.image", "Drawing", function () {
         that.detachAll();
         that._imageCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._imageCreator;
         that.app.allowSelection(false);
     }, "ui-text");
 
-    actionManager.registerAction(ViewTool.Path, "Pen tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Path, "@tool.pen", "Drawing", function () {
         that.detachAll();
         that._polylineCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._polylineCreator;
@@ -63,7 +63,7 @@ var registerCommands = function () {
         }
     }, "ui-pen");
 
-    actionManager.registerAction(ViewTool.Rectangle, "Rectangle tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Rectangle, "@tool.rect", "Drawing", function () {
         that.detachAll();
         that._rectCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._rectCreator;
@@ -73,7 +73,7 @@ var registerCommands = function () {
         Invalidate.request();
     }, "ui-rectangle");
 
-    actionManager.registerAction(ViewTool.Star, "Star tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Star, "@tool.star", "Drawing", function () {
         that.detachAll();
         that._starCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._starCreator;
@@ -83,7 +83,7 @@ var registerCommands = function () {
 
     }, "ui-star");
 
-    actionManager.registerAction(ViewTool.Triangle, "Triangle tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Triangle, "@tool.triangle", "Drawing", function () {
         that.detachAll();
         that._triangleCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._triangleCreator;
@@ -93,7 +93,7 @@ var registerCommands = function () {
 
     }, "ui-ploygon");
 
-    actionManager.registerAction(ViewTool.Polygon, "Polygon tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Polygon, "@tool.polygon", "Drawing", function () {
         that.detachAll();
         that._polygonCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._polygonCreator;
@@ -104,7 +104,7 @@ var registerCommands = function () {
     }, "ui-ploygon");
 
 
-    actionManager.registerAction(ViewTool.Artboard, "Artboard tool", "Artboard", function () {
+    actionManager.registerAction(ViewTool.Artboard, "@tool.artboard", "Artboard", function () {
         that.detachAll();
         that._artboardCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._artboardCreator;
@@ -121,7 +121,7 @@ var registerCommands = function () {
 
     }, "");
 
-    actionManager.registerAction(ViewTool.Section, "Section tool", "Section", function () {
+    actionManager.registerAction(ViewTool.Section, "@tool.section", "Section", function () {
         that.detachAll();
         that._sectionCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._sectionCreator;
@@ -157,7 +157,7 @@ var registerCommands = function () {
         Selection.refreshSelection();
     }, "ui-line");
 
-    actionManager.registerAction(ViewTool.Pointer, "Selection tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Pointer, "@tool.selection", "Drawing", function () {
         that.detachAll();
         Selection.directSelectionEnabled(false);
         that.app.allowSelection(true);
@@ -165,7 +165,7 @@ var registerCommands = function () {
         Selection.refreshSelection();
     }, "ui-arrow");
 
-    actionManager.registerAction(ViewTool.PointerDirect, "Direct selection tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.PointerDirect, "@tool.DirectSelection", "Drawing", function () {
         that.detachAll();
         Selection.directSelectionEnabled(true);
         Selection.invertDirectSelection(true);
@@ -175,7 +175,7 @@ var registerCommands = function () {
     }, "ui-arrow-black");
 
 
-    actionManager.registerAction(ViewTool.Pencil, "Pencil tool", "Drawing", function () {
+    actionManager.registerAction(ViewTool.Pencil, "@tool.pencil", "Drawing", function () {
         that.detachAll();
         that._pencilCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._pencilCreator;
@@ -183,7 +183,7 @@ var registerCommands = function () {
         Selection.makeSelection([that._defaultShapeSettings]);
     }, "ui-pencil");
 
-    actionManager.registerAction("handToolRelease", "Hand tool release", "Drawing utils", function () {
+    actionManager.registerAction("handToolRelease", "@tool.handRelease", "Drawing utils", function () {
         //User released spacebar
         if (that._currentAction == that._handTool) {
             //deattach hand tool
@@ -201,7 +201,7 @@ var registerCommands = function () {
         }
     });
 
-    actionManager.registerAction(ViewTool.Hand, "Hand Tool", "Drawing utils", function () {
+    actionManager.registerAction(ViewTool.Hand, "@tool.hand", "Drawing utils", function () {
         attachHandTool();
     });
 

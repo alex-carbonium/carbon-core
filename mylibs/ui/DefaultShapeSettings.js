@@ -25,6 +25,10 @@ class DefaultShapeSettings extends UIElement {
         return new AppPropsChanged(this._app, {defaultShapeSettings: changes});
     }
 
+    contextBarAllowed() {
+        return false;
+    }
+
     findPropertyDescriptor(name) {
         if(name === "name" || name === "locked") {
             return null;

@@ -136,17 +136,17 @@ export default class ActionManager implements IActionManager {
         };
         var moving = null;
 
-        this.registerAction("copy", "Copy", "Editing", function () {
+        this.registerAction("copy", "@copy", "Editing", function () {
             return new AllCommands.Copy(Selection.getSelection());
         }, "ui-copy").setCondition(function () {
             return selectionMade();
         });
-        this.registerAction("paste", "Paste", "Editing", function () {
+        this.registerAction("paste", "@paste", "Editing", function () {
             return new AllCommands.Paste(that.app.activePage);
         }, "ui-paste").setCondition(function () {
             return clipboard.hasValue();
         });
-        this.registerAction("cut", "Cut", "Editing", function () {
+        this.registerAction("cut", "@cut", "Editing", function () {
             var deleteCommand;
             var selection = Selection.getSelection();
             if (selection.length === 1) {
@@ -160,28 +160,28 @@ export default class ActionManager implements IActionManager {
         }, "ui-cut").setCondition(function () {
             return selectionMade();
         });
-        this.registerAction("delete", "Delete", "Editing", function () {
+        this.registerAction("delete", "@delete", "Editing", function () {
             Delete.run(Selection.getSelection());
         }, "ui-delete").setCondition(function () {
             return selectionMade();
         });
 
-        this.registerAction("duplicate", "Duplicate", "Editing", function () {
+        this.registerAction("duplicate", "@duplicate", "Editing", function () {
             return Duplicate.run(Selection.getSelection());
         }, "ui-duplicate").setCondition(function () {
             return selectionMade();
         });
 
-        this.registerAction("bringToFront", "Bring to front", "Layering", function () {
+        this.registerAction("bringToFront", "@bring to front", "Layering", function () {
             return new ChangeZOrder(Selection.getSelection(), "front");
         }, "ui-bring-to-front");
-        this.registerAction("sendToBack", "Send to back", "Layering", function () {
+        this.registerAction("sendToBack", "@send to back", "Layering", function () {
             return new ChangeZOrder(Selection.getSelection(), "back");
         }, "ui-send-to-back");
-        this.registerAction("bringForward", "Bring forward", "Layering", function () {
+        this.registerAction("bringForward", "@bring forward", "Layering", function () {
             return new ChangeZOrder(Selection.getSelection(), "forward");
         }, "ui-bring-forward");
-        this.registerAction("sendBackward", "Send backward", "Layering", function () {
+        this.registerAction("sendBackward", "@send backward", "Layering", function () {
             return new ChangeZOrder(Selection.getSelection(), "backward");
         }, "ui-send-backward");
 
@@ -278,19 +278,19 @@ export default class ActionManager implements IActionManager {
                 x.trackSetProps(x.selectProps(["m"]), { m: oldProps[i] }));
         });
 
-        this.registerAction("pathUnion", "Union", "Combine Paths", function () {
+        this.registerAction("pathUnion", "@path.union", "Combine Paths", function () {
             return new CombinePaths("union", Selection.getSelection());
         });
 
-        this.registerAction("pathSubtract", "Join", "Combine Paths", function () {
+        this.registerAction("pathSubtract", "@path.join", "Combine Paths", function () {
             return new CombinePaths("xor", Selection.getSelection());
         });
 
-        this.registerAction("pathIntersect", "Intersect", "Combine Paths", function () {
+        this.registerAction("pathIntersect", "@path.intersect", "Combine Paths", function () {
             return new CombinePaths("intersect", Selection.getSelection());
         });
 
-        this.registerAction("pathDifference", "Difference", "Combine Paths", function () {
+        this.registerAction("pathDifference", "@path.difference", "Combine Paths", function () {
             return new CombinePaths("difference", Selection.getSelection());
         });
 
