@@ -354,7 +354,7 @@ class Path extends Shape {
         this._lastPoints = [];
         this._currentPoint = null;
         this._selectedPoints = {};
-        this.save = debounce(this._save.bind(this), 500);
+        this.save = this._save;//debounce(this._save.bind(this), 500);
     }
 
     tryDelete(): boolean {

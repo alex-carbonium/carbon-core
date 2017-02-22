@@ -5,7 +5,7 @@ import Point from "../math/point";
 import {IGroupContainer} from "./CoreModel";
 
 var GroupArrangeStrategy = {
-    arrange: function(container: IGroupContainer){                
+    arrange: function(container: IGroupContainer, event, changeMode){                
         var items = container.children;
         if (items.length === 0){
             return;
@@ -14,7 +14,7 @@ var GroupArrangeStrategy = {
         if (items.length === 1 && container.wrapSingleChild()){
             var props = items[0].selectLayoutProps(true);
             props.m = container.parent().globalViewMatrixInverted().appended(props.m);
-            container.setProps(props);
+            container.setProps(props, changeMode);
             items[0].resetTransform();
             return;
         }
@@ -46,14 +46,14 @@ var GroupArrangeStrategy = {
         }
 
         if (container.translateChildren()){
-            container.br(container.br().withSize(xMax - xMin, yMax - yMin));
+            container.setProps({br:container.br().withSize(xMax - xMin, yMax - yMin)}, changeMode);
 
             if (xMin !== 0 || yMin !== 0){
                 var translate = new Point(-xMin, -yMin);
                 for (let i = 0, l = items.length; i < l; ++i) {
-                    items[i].applyTranslation(translate);
+                    items[i].applyTranslation(translate, false, changeMode);
                 }
-                container.applyDirectedTranslation(translate.negate());
+                container.applyDirectedTranslation(translate.negate(), changeMode);
             }
         }
         else{
@@ -87,7 +87,7 @@ var GroupArrangeStrategy = {
                 br = new Rect(xMin, yMin, w, h);
             //}
 
-            container.prepareAndSetProps({br});
+            container.prepareAndSetProps({br}, changeMode);
         }
     }
 };

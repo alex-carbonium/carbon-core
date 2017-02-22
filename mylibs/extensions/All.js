@@ -21,7 +21,8 @@ define(
         "./UserVoice",
         //"./WatermarkController",        
         "./guides/LayoutGridExtension",
-        "./guides/RulerExtension"
+        "./guides/RulerExtension", 
+        "./ContextMenuExtension"
     ],
     function(){
         return Array.prototype.slice.call(arguments);

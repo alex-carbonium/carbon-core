@@ -6,7 +6,7 @@ import BezierCurve from "math/bezierCurve";
 import Point from "../../math/point";
 import PropertyMetadata from "framework/PropertyMetadata";
 import PropertyTracker from "framework/PropertyTracker";
-import {Overflow, Types} from "framework/Defs";
+import {Overflow, Types, LineCap, LineJoin, ChangeMode} from "framework/Defs";
 import Path from "ui/common/Path";
 import GroupArrangeStrategy from "../../framework/GroupArrangeStrategy";
 import {combineRectArray} from "../../math/math";
@@ -56,6 +56,50 @@ class CompoundPath extends Container implements IGroupContainer{
         return res;
     }
 
+    lineCap(value) {
+        if (arguments.length > 0) {
+            if(value === 'round' || value === LineCap.Round){
+                value = LineCap.Round;
+            } else if (value === 'square'  || value === LineCap.Square) {
+                value = LineCap.Square;
+            } else {
+                value = LineCap.Butt;
+            }
+            this.setProps({lineCap: value});
+        }
+
+        switch(this.props.lineCap){
+            case LineCap.Round:
+                return 'round';
+            case LineCap.Square:
+                return 'square';
+            default:
+                return 'butt';
+        }
+    }
+
+    lineJoin(value) {
+        if (arguments.length > 0) {
+            if(value === 'round' || value === LineJoin.Round){
+                value = LineJoin.Round;
+            } else if (value === 'bevel'  || value === LineJoin.Bevel) {
+                value = LineJoin.Bevel;
+            } else {
+                value = LineJoin.Miter;
+            }
+            this.setProps({lineJoin: value});
+        }
+
+        switch(this.props.lineJoin){
+            case LineJoin.Round:
+                return 'round';
+            case LineJoin.Bevel:
+                return 'bevel';
+            default:
+                return 'miter';
+        }
+    }
+
 
     propsUpdated(newProps, oldProps) {
         super.propsUpdated.apply(this, arguments);
@@ -82,7 +126,7 @@ class CompoundPath extends Container implements IGroupContainer{
         }
     }
 
-    recalculate() {
+    recalculate(mode) {
         GroupArrangeStrategy.arrange(this);
 
         this._itemIds = {};
@@ -284,7 +328,7 @@ class CompoundPath extends Container implements IGroupContainer{
 
     drawSelf(context, w, h, environment) {
         if (!this.result) {
-            this.recalculate();
+            this.recalculate(ChangeMode.Self);
         }
         context.save();
 
