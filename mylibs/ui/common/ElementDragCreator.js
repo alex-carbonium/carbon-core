@@ -11,6 +11,7 @@ import Point from "../../math/point";
 import Matrix from "../../math/matrix";
 import {ViewTool} from "../../framework/Defs";
 import Tool from "./Tool";
+import {IMouseEventData, IKeyboardState} from "../../framework/CoreModel";
 
 export default class ElementDragCreator extends Tool {
     constructor(toolId: number, type, parameters) {
@@ -32,7 +33,7 @@ export default class ElementDragCreator extends Tool {
 
         this._changeMode("resize");
     }
-    mousedown(event) {
+    mousedown(event: IMouseEventData, keys: IKeyboardState) {
         var eventData = { handled: false, x: event.x, y: event.y };
         Environment.controller.startDrawingEvent.raise(eventData);
         if (eventData.handled) {
@@ -44,7 +45,7 @@ export default class ElementDragCreator extends Tool {
         }
 
         this._mousepressed = true;
-        this._prepareMousePoint(event);
+        this._prepareMousePoint(event, keys);
 
         this._startPoint = { x: this._point.x, y: this._point.y };
         this._nextPoint = { x: this._point.x, y: this._point.y };
@@ -103,8 +104,12 @@ export default class ElementDragCreator extends Tool {
         }
         event.handled = true;
     }
-    mousemove(event) {
-        this._prepareMousePoint(event);
+    mousemove(event: IMouseEventData, keys: IKeyboardState) {
+        if (!event.cursor){
+            event.cursor = "crosshair";
+        }
+
+        this._prepareMousePoint(event, keys);
 
         var artboard = App.Current.activePage.getArtboardAtPoint(event);
         if (artboard != this._hoverArtboard) {
@@ -119,7 +124,7 @@ export default class ElementDragCreator extends Tool {
                 this._cursorNotMoved = (this._point.y === this._startPoint.y) && (this._point.x === this._startPoint.x);
             }
             //if use holds shift, we must fit shape into square
-            if (event.event.shiftKey) {
+            if (keys.shift) {
                 var height = Math.abs(this._point.y - this._startPoint.y);
                 var width = Math.abs(this._point.x - this._startPoint.x);
                 var ration = Math.min(height, width);
@@ -137,10 +142,10 @@ export default class ElementDragCreator extends Tool {
             return false;
         }
     }
-    _prepareMousePoint(event) {
+    _prepareMousePoint(event: IMouseEventData, keys: IKeyboardState) {
         this._point.set(event.x, event.y);
         var round = true;
-        if (!(event.event.ctrlKey || event.event.metaKey)) {
+        if (!keys.ctrl) {
             var snapped = SnapController.applySnappingForPoint(this._point);
             if (snapped === this._point) {
                 round = true;

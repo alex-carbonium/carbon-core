@@ -14,7 +14,7 @@ import GroupContainer from "./GroupContainer";
 import Phantom from "./Phantom";
 import ObjectFactory from "./ObjectFactory";
 import {Types, ViewTool} from "./Defs";
-import {IApp, IController, IEvent} from "./CoreModel";
+import {IApp, IController, IEvent, IEvent2, IMouseEventData, IKeyboardState} from "./CoreModel";
 
 function onselect(rect) {
     var selection = this.app.activePage.getElementsInRect(rect);
@@ -127,15 +127,20 @@ export default class DesignerController implements IController {
 
     startDrawingEvent: IEvent;
     interactionActive: boolean;
+    mousedownEvent: IEvent2<IMouseEventData, IKeyboardState>;
+    mousemoveEvent: IEvent2<IMouseEventData, IKeyboardState>;
+    mouseupEvent: IEvent2<IMouseEventData, IKeyboardState>;
 
-    updateCursor(eventData) {
-        if (Cursor.hasGlobalCursor()){
-            return;
-        }
+    _lastMouseMove: IMouseEventData;
 
+    updateCursor(eventData) {        
         if (eventData){
             if (eventData.cursor){
                 Cursor.setCursor(eventData.cursor);
+                return;
+            }
+
+            if (Cursor.hasGlobalCursor()){
                 return;
             }
 
@@ -162,7 +167,9 @@ export default class DesignerController implements IController {
             }
         }
 
-        Cursor.setCursor(Selection.directSelectionEnabled() ? "direct_select_cursor" : "default_cursor");
+        if (!Cursor.hasGlobalCursor()){
+            Cursor.setCursor(Selection.directSelectionEnabled() ? "direct_select_cursor" : "default_cursor");
+        }        
     }
     _setMoveCursor(){
         Cursor.setCursor(Keyboard.state.alt ? "move_clone" : "move_cursor");
@@ -173,7 +180,7 @@ export default class DesignerController implements IController {
             var layer = this.view._layersReverse[i];
             var e = layer.hitElement(eventData, this.view.scale());
             if (e && e[method] /*&& e.canSelect()*/ && !e.locked()) {
-                e[method](eventData);
+                e[method](eventData, Keyboard.state);
                 if (eventData.handled) {
                     return false;
                 }
@@ -253,6 +260,8 @@ export default class DesignerController implements IController {
         this.stopDraggingEvent.bind(this, this.onInteractionStopped);
         this.stopRotatingEvent.bind(this, this.onInteractionStopped);
         this.stopResizingEvent.bind(this, this.onInteractionStopped);
+
+        this._lastMouseMove = null;
     }
 
     onpanstart(event) {
@@ -308,13 +317,13 @@ export default class DesignerController implements IController {
     onmousedown(eventData) {
         this._noActionsBeforeClick = true;
 
-        this.mousedownEvent.raise(eventData);
+        this.mousedownEvent.raise(eventData, Keyboard.state);
         if (eventData.handled) {
             return;
         }
 
         if (this._captureElement != null) {
-            this._captureElement.mousedown(eventData);
+            this._captureElement.mousedown(eventData, Keyboard.state);
             return;
         }
 
@@ -364,7 +373,15 @@ export default class DesignerController implements IController {
         }
     }
 
-    onmousemove(eventData) {
+    onmousemove(eventData, keys: IKeyboardState) {
+        this._lastMouseMove = {
+            x: eventData.x,
+            y: eventData.y,
+            isDragging: false,
+            handled: false,
+            cursor: null
+        };
+
         eventData.isDragging = this._draggingElement !== null;
         if (this._mouseDownData) {
             if (eventData.x === this._mouseDownData.x && eventData.y === this._mouseDownData.y) {
@@ -373,14 +390,16 @@ export default class DesignerController implements IController {
             delete this._mouseDownData;
         }
 
-        this.mousemoveEvent.raise(eventData);
+        this.mousemoveEvent.raise(eventData, keys);
         if (eventData.handled) {
             this._noActionsBeforeClick = false;
+            this.updateCursor(eventData);
             return;
         }
 
         if (this._captureElement != null) {
-            this._captureElement.mousemove(eventData);
+            this._captureElement.mousemove(eventData, keys);
+            this.updateCursor(eventData);
             this._noActionsBeforeClick = false;
             return;
         }
@@ -428,9 +447,9 @@ export default class DesignerController implements IController {
 
             return;
         }
-
-        this.updateCursor(eventData);
+        
         this._bubbleMouseEvent(eventData, "mousemove");
+        this.updateCursor(eventData);
     }
 
     onmouseenter(eventData) {
@@ -449,7 +468,7 @@ export default class DesignerController implements IController {
         eventData.element = this._draggingElement;
         eventData.interactiveElement = this._draggingElement;
 
-        this.mouseupEvent.raise(eventData);
+        this.mouseupEvent.raise(eventData, Keyboard.state);
         if (eventData.handled) {
             return;
         }
@@ -457,7 +476,7 @@ export default class DesignerController implements IController {
         this._startDraggingData = null;
 
         if (this._captureElement != null) {
-            this._captureElement.mouseup(eventData);
+            this._captureElement.mouseup(eventData, Keyboard.state);
             return;
         }
 
@@ -533,7 +552,7 @@ export default class DesignerController implements IController {
             Selection.directSelectionEnabled(newKeys.ctrl);
         }        
 
-        if (oldKeys.alt !== newKeys.alt){
+        if (oldKeys.alt !== newKeys.alt){            
             var c = Cursor.getCursor();
             if (newKeys.alt && c === "move_cursor"){
                 Cursor.setCursor("move_clone");
@@ -546,6 +565,10 @@ export default class DesignerController implements IController {
                 this._draggingElement.showOriginal(newKeys.alt);
                 Invalidate.request();
             }
+        }
+
+        if (this._lastMouseMove){
+            this.onmousemove(this._lastMouseMove, newKeys);
         }
     }
     _onSelectionModeChanged(){

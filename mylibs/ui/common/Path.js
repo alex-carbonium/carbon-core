@@ -21,6 +21,7 @@ import Command from "framework/commands/Command";
 import {Types, ChangeMode} from "../../framework/Defs";
 import ArrangeStrategy from "../../framework/ArrangeStrategy";
 import ResizeOptions from "../../decorators/ResizeOptions";
+import {IMouseEventData, IKeyboardState} from "../../framework/CoreModel";
 
 var CP_HANDLE_RADIUS = 3;
 var CP_HANDLE_RADIUS2 = 6;
@@ -653,7 +654,7 @@ class Path extends Shape {
         }
     }
 
-    mouseup(event) {
+    mouseup(event: IMouseEventData, keys: IKeyboardState) {
         delete this._altPressed;
         if (this._bendingData) {
             this._bendingData = null;
@@ -667,7 +668,7 @@ class Path extends Shape {
             return;
         }
 
-        if (this._selectedPoint && !event.event.shiftKey && !this._groupMove) {
+        if (this._selectedPoint && !keys.shift && !this._groupMove) {
             clearSelectedPoints.call(this);
         }
 
@@ -775,7 +776,7 @@ class Path extends Shape {
         // p1 = Bc - Ac*p0 - Dc*p2 -Ec*p3
     }
 
-    mousedown(event) {
+    mousedown(event: IMouseEventData, keys: IKeyboardState) {
         var x = event.x,
             y = event.y;
 
@@ -787,7 +788,7 @@ class Path extends Shape {
 
         var pt = getClickedPoint.call(this, x, y);
 
-        if (pt && event.event.shiftKey) {
+        if (pt && keys.shift) {
             addToSelectedPoints.call(this, pt);
         } else if (!pt || !this._selectedPoints[pt.idx]) {
             clearSelectedPoints.call(this);
@@ -797,7 +798,7 @@ class Path extends Shape {
 
         if (pt != null) {
             event.handled = true;
-            if (event.event.altKey) {
+            if (keys.alt) {
                 this._altPressed = true;
                 this._handlePoint = pt;
                 this._handlePoint._selectedPoint = 0;
@@ -816,7 +817,7 @@ class Path extends Shape {
             } else if (this._pointOnPath) {
                 event.handled = true;
 
-                if (!event.event.altKey) {
+                if (!keys.shift) {
                     this._bendingData = this.calculateOriginalBendingData(this._pointOnPath);
                     // set bending handler
                     this._pointOnPath = null;
@@ -846,7 +847,7 @@ class Path extends Shape {
         }
     }
 
-    mousemove(event) {
+    mousemove(event: IMouseEventData, keys: IKeyboardState) {
         if (this.mode() !== "edit") {
             return;
         }
@@ -931,7 +932,7 @@ class Path extends Shape {
             return;
         }
 
-        var pt = this.getPointIfClose({x: event.x, y: event.y});
+        var pt = this.getPointIfClose(event);
         if (this._pointOnPath !== pt) {
             this._pointOnPath = pt;
             Invalidate.requestUpperOnly();
@@ -963,6 +964,16 @@ class Path extends Shape {
 
             pt = getClickedHandlePoint.call(this, x, y);
             updateHoverHandlePoint.call(this, pt);
+        }
+
+        if (this.isHoveringOverHandle()){
+            event.cursor = "pen_move_handle";
+        }
+        else if (this.isHoveringOverPoint()){
+            event.cursor = "pen_move_point";
+        }
+        else if (keys.shift && this.isHoveringOverSegment()){
+            event.cursor = "pen_add_point";
         }
     }
 
@@ -1396,27 +1407,22 @@ class Path extends Shape {
         return this.polygonArea() > 0;
     }
 
-    cursor(event) {
-        if (this.mode() !== 'edit') {
-            return UIElement.prototype.cursor.apply(this, arguments);
-        }
-
-        var pt = getClickedPoint.call(this, event.x, event.y);
-        if (pt != null) {
-            return 'pen_move_point';
-        }
-
-        pt = getClickedHandlePoint.call(this, event.x, event.y);
-        if (pt != null) {
-            return 'pen_move_handle';
-        }
-
-        if (this._pointOnPath && event.event.altKey) {
-            return "pen_add_point";
-        }
-
-
-        return UIElement.prototype.cursor.apply(this, arguments);
+    isHoveringOverSegment(): boolean{
+        return !!this._pointOnPath;        
+    }
+    isHoveringOverHandle(): boolean{
+        return !!this._hoverHandlePoint;
+    }
+    isHoveringOverPoint(): boolean{
+        return !!this._hoverPoint;
+    }
+    get hoverPoint(){
+        return this._hoverPoint;
+    }
+    resetHover(): void{
+        this._pointOnPath = null;
+        this._hoverHandlePoint = null;
+        this._hoverPoint = null;
     }
 
     fromJSON(data) {
