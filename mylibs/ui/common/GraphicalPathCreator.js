@@ -16,8 +16,7 @@ import {IKeyboardState, IMouseEventData} from "../../framework/CoreModel";
 
 var closeCurrentPath = function (pt) {
     this._element.closed(true);
-    this._completedPath = true;
-    this._currentPoint = null;    
+    completePath.call(this);
 };
 
 var completePath = function() {
@@ -32,6 +31,7 @@ var completePath = function() {
         this._element.nextPoint = null;                
     }
     this._currentPoint = null;
+    this._completedPath = true;
     setTimeout(function () {
         if (SystemConfiguration.ResetActiveToolToDefault) {
             this._app.resetCurrentTool();
@@ -185,7 +185,7 @@ export default class GraphicalPathCreator extends Tool {
             closeCurrentPath.call(this, pt);
         } 
         else if (!this._element.closed() && pt === this._element.pointAtIndex(this._element.length() - 1)) {
-            this._completedPath = true;
+            completePath.call(this);
             this._currentPoint = null;
         } 
         else {
@@ -208,12 +208,7 @@ export default class GraphicalPathCreator extends Tool {
         this._mousepressed = false;
         this._handlingByPath = false;
         this._shouldHandleByPath = false;
-
-        if (checkIfElementAvailable.call(this)) {            
-            if (this._completedPath) {
-                completePath.call(this);
-            }
-        }
+        
         Invalidate.request();
         SnapController.clearActiveSnapLines();
     }

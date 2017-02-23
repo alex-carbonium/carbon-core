@@ -64,11 +64,12 @@ function updateSelectedPoint(pt) {
     if (this._selectedPoint !== pt) {
         this._selectedPoint = pt;
         if (pt) {
-            this.setProps({currentPointType: pt.type, currentPointX: pt.x, currentPointY: pt.y});
-        } else {
-            this.setProps({currentPointType: null, currentPointX: 0, currentPointY: 0});
-        }
-        Selection.refreshSelection();
+            this.runtimeProps.currentPointX = pt.x;
+            this.runtimeProps.currentPointY = pt.y;
+            this._selectedPoint.type = pt.type;
+        }         
+        this.setProps({selectedPointIdx: pt ? pt.idx : -1}, ChangeMode.Self);
+        Selection.reselect();
     }
 }
 
@@ -80,7 +81,12 @@ function addToSelectedPoints(pt) {
         delete this._selectedPoints[pt.idx];
     } else {
         this._selectedPoints[pt.idx] = pt;
+    }    
+
+    if (this.props.selectedPointIdx !== -1 && Object.keys(this._selectedPoints).length > 1){
+        this.setProps({selectedPointIdx: -1}, ChangeMode.Self);
     }
+
     Invalidate.requestUpperOnly();
 }
 
@@ -597,13 +603,15 @@ class Path extends Shape {
         return point;
     }
 
-    changePointAtIndex(point, idx) {
+    changePointAtIndex(point, idx, changeMode: ChangeMode = ChangeMode.Model) {
         this.points.splice(idx, 1, point);
         if (this.mode() === 'edit') {
             SnapController.calculateSnappingPointsForPath(this);
         }
 
-        this.save();
+        if (changeMode !== ChangeMode.Self){
+            this.save();
+        }        
     }
 
     length() {
@@ -792,9 +800,7 @@ class Path extends Shape {
             addToSelectedPoints.call(this, pt);
         } else if (!pt || !this._selectedPoints[pt.idx]) {
             clearSelectedPoints.call(this);
-        }
-
-        updateSelectedPoint.call(this, pt);
+        }                   
 
         if (pt != null) {
             event.handled = true;
@@ -817,29 +823,32 @@ class Path extends Shape {
             } else if (this._pointOnPath) {
                 event.handled = true;
 
-                if (!keys.shift) {
+                if (keys.shift) {                                        
+                    var data = this.getInsertPointData(this._pointOnPath);
+                    if (data.length === 1) {
+                        var newPoint = this.insertPointAtIndex(data[0], data[0].idx);
+                    } else {
+                        this.changePointAtIndex(data[0], data[0].idx);
+                        this.changePointAtIndex(data[1], data[1].idx);
+                        newPoint = this.insertPointAtIndex(data[2], data[2].idx);
+                    }
+
+                    this._currentPoint = newPoint;
+                    this._originalPoint = clone(newPoint);
+
+                    this._pointOnPath = null;
+                    Invalidate.request();
+                }
+                else{
                     this._bendingData = this.calculateOriginalBendingData(this._pointOnPath);
                     // set bending handler
                     this._pointOnPath = null;
-                    return;
-                }
-
-
-                var data = this.getInsertPointData(this._pointOnPath);
-                if (data.length === 1) {
-                    var newPoint = this.insertPointAtIndex(data[0], data[0].idx);
-                } else {
-                    this.changePointAtIndex(data[0], data[0].idx);
-                    this.changePointAtIndex(data[1], data[1].idx);
-                    newPoint = this.insertPointAtIndex(data[2], data[2].idx);
-                }
-
-                this._currentPoint = newPoint;
-                this._originalPoint = clone(newPoint);
-
-                this._pointOnPath = null;
-                Invalidate.request();
+                }                
             }
+        }
+
+        if (Object.keys(this._selectedPoints).length <= 1){
+            updateSelectedPoint.call(this, pt);
         }
 
         if (event.handled){
@@ -966,14 +975,17 @@ class Path extends Shape {
             updateHoverHandlePoint.call(this, pt);
         }
 
-        if (this.isHoveringOverHandle()){
+        if (this.isHoveringOverHandle() || (this.isHoveringOverPoint() && keys.alt)){
             event.cursor = "pen_move_handle";
         }
         else if (this.isHoveringOverPoint()){
             event.cursor = "pen_move_point";
+        }        
+        else if (this.isHoveringOverSegment()){
+            event.cursor = keys.shift ? "pen_add_point" : "pen_move_segment"; 
         }
-        else if (keys.shift && this.isHoveringOverSegment()){
-            event.cursor = "pen_add_point";
+        else{
+            event.cursor = Environment.controller.defaultCursor();
         }
     }
 
@@ -1005,15 +1017,6 @@ class Path extends Shape {
         if (changes.pointRounding) {
             //  moveAllPoints.call(this, 0, 0);
         }
-    }
-
-    propsUpdated(props, oldProps) {
-        if (props.currentPointType !== undefined && this._selectedPoint) {
-            this._selectedPoint.type = props.currentPointType;
-            Invalidate.request();
-        }
-
-        UIElement.prototype.propsUpdated.apply(this, arguments);
     }
 
     hitTest(point, scale) {
@@ -1545,6 +1548,36 @@ class Path extends Shape {
         this.curveToPoint(p, c, c);
     }
 
+    currentPointX(value: number, changeMode: ChangeMode): number{
+        if (arguments.length && this._selectedPoint){
+            var newPoint = Object.assign({}, this._selectedPoint);
+            newPoint.x = value;            
+            this._selectedPoint = newPoint;
+            this.changePointAtIndex(newPoint, newPoint.idx, changeMode);
+            this.runtimeProps.currentPointX = newPoint.x;
+            Invalidate.request();
+        }
+        return this.runtimeProps.currentPointX;
+    }
+    currentPointY(value: number, changeMode: ChangeMode): number{
+        if (arguments.length && this._selectedPoint){
+            var newPoint = Object.assign({}, this._selectedPoint);
+            newPoint.y = value;            
+            this._selectedPoint = newPoint;            
+            this.changePointAtIndex(newPoint, newPoint.idx, changeMode);
+            this.runtimeProps.currentPointY = newPoint.y;
+            Invalidate.request();
+        }
+        return this.runtimeProps.currentPointY;
+    }
+    currentPointType(value: PointType, changeMode: ChangeMode): PointType{
+        if (arguments.length && this._selectedPoint){
+            this._selectedPoint.type = value;            
+            Invalidate.request();
+            Selection.reselect();
+        }
+        return this._selectedPoint ? this._selectedPoint.type : null;
+    }
 
     fromSvgString(d, matrix) {
         var path = d.match(/[mzlhvcsqta][^mzlhvcsqta]*/gi);
@@ -1966,29 +1999,26 @@ PropertyMetadata.registerForType(Path, {
     currentPointX: {
         displayName: "X",
         type: "numeric",
-        useInModel: false,
-        editable: true,
-        defaultValue: undefined
+        defaultValue: 0,
+        computed: true
     },
     currentPointY: {
         displayName: "Y",
         type: "numeric",
-        useInModel: false,
-        editable: true,
-        defaultValue: undefined
+        defaultValue: 0,
+        computed: true
     },
     currentPointType: {
         displayName: "Point type",
         type: "multiSwitch",
-        useInModel: false,
-        editable: true,
-        defaultValue: PointType.Mirrored,
+        defaultValue: null,
+        computed: true,
         options: {
             items: [
-                {value: PointType.Straight, icon: "ico-point-straight"},
-                {value: PointType.Mirrored, icon: "ico-point-mirrored"},
-                {value: PointType.Assymetric, icon: "ico-point-assymetric"},
-                {value: PointType.Disconnected, icon: "ico-point-disconnected"}
+                {value: PointType.Straight, icon: "ico-prop_node-straight"},
+                {value: PointType.Mirrored, icon: "ico-prop_node-mirrroed"},
+                {value: PointType.Assymetric, icon: "ico-prop_node-assymetric"},
+                {value: PointType.Disconnected, icon: "ico-prop_node-disconnected"}
             ],
             size: 3 / 4
         }
@@ -2002,28 +2032,33 @@ PropertyMetadata.registerForType(Path, {
         defaultValue: []
     },
     groups (path) {
+        var baseGroups = PropertyMetadata.findAll(Types.Shape).groups();
+
         if (path && path.mode() === "edit"){
             return [
                 {
                     label: path.displayType(),
                     properties: ["pointRounding"]
-                },
+                },                
                 {
                     label: "@selectedPoint",
                     properties: ["currentPointX", "currentPointY", "currentPointType"]
-                }                
+                },
+                baseGroups.find(x => x.label === "Appearance"),
+                baseGroups.find(x => x.label === "@shadow")                
             ];
         }        
 
-        return PropertyMetadata.findAll(Types.Shape).groups();
+        return baseGroups;
     },
     prepareVisibility(props){
         var editMode = props.mode === "edit";
+        var pointSelected = props.selectedPointIdx !== -1;
         return {
-            currentPointX: editMode && props.currentPointType !== null,
-            currentPointY: editMode && props.currentPointType !== null,
-            currentPointType: editMode && props.currentPointType !== null,
-            pointRounding: props.mode === "edit"
+            currentPointX: editMode && pointSelected,
+            currentPointY: editMode && pointSelected,
+            currentPointType: editMode && pointSelected,
+            pointRounding: editMode
         };
     }
 });

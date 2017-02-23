@@ -2,6 +2,7 @@ import Selection from "../../framework/SelectionModel"
 import Invalidate from "../../framework/Invalidate";
 import { IApp, IView, IController, IMouseEventData, IKeyboardState, IDisposable } from "../../framework/CoreModel";
 
+//TODO: if selection is made in layers after tool is set, active frame starts to react to mouse events before the tool
 export default class Tool {
     _app: IApp;
     _view: IView;
@@ -38,12 +39,16 @@ export default class Tool {
             this.registerForDisposal(controller.mouseupEvent.bindHighPriority(this, this.mouseup));
             this.registerForDisposal(controller.mousemoveEvent.bindHighPriority(this, this.mousemove));
             this.registerForDisposal(controller.clickEvent.bindHighPriority(this, this.click));
+            this.registerForDisposal(controller.dblclickEvent.bindHighPriority(this, this.dblclick));
             this.registerForDisposal(controller.startDraggingEvent.bindHighPriority(this, this.dragElementStarted));
             this.registerForDisposal(controller.stopDraggingEvent.bindHighPriority(this, this.dragElementEnded));
         }
         if (this._view.layer3) {
             this.registerForDisposal(this._view.layer3.ondraw.bind(this, this.layerdraw));
         }
+
+        //allow the tool to update cursor immediately
+        controller.repeatLastMouseMove();
     }
     _detach() {
         this._disposables.forEach(x => x.dispose());
@@ -62,14 +67,29 @@ export default class Tool {
     mouseup(event: IMouseEventData, keys: IKeyboardState) {
     }
     mousemove(event: IMouseEventData, keys: IKeyboardState) {
+        if (!event.handled) {
+            var cursor = this.defaultCursor();
+            if (cursor) {
+                event.cursor = cursor;
+            }
+        }
     }
 
     dragElementStarted() {
     }
     dragElementEnded() {
     }
-    click(event) {
+    click(event: IMouseEventData) {
+        event.handled = true;
+    }
+    dblclick(event: IMouseEventData) {
+        //by default tools should probably handle all events and do not let elements react to double clicks, etc
+        event.handled = true;
     }
     layerdraw(context) {
+    }
+
+    defaultCursor(): string {
+        return null;
     }
 }

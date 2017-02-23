@@ -168,9 +168,13 @@ export default class DesignerController implements IController {
         }
 
         if (!Cursor.hasGlobalCursor()){
-            Cursor.setCursor(Selection.directSelectionEnabled() ? "direct_select_cursor" : "default_cursor");
+            Cursor.setCursor(this.defaultCursor());
         }        
     }
+    defaultCursor(): string{
+        return Selection.directSelectionEnabled() ? "direct_select_cursor" : "default_cursor"
+    }
+
     _setMoveCursor(){
         Cursor.setCursor(Keyboard.state.alt ? "move_clone" : "move_cursor");
     }
@@ -319,17 +323,26 @@ export default class DesignerController implements IController {
 
         this.mousedownEvent.raise(eventData, Keyboard.state);
         if (eventData.handled) {
+            if (eventData.cursor){
+                this.updateCursor(eventData);
+            }
             return;
         }
 
         if (this._captureElement != null) {
             this._captureElement.mousedown(eventData, Keyboard.state);
+            if (eventData.cursor){
+                this.updateCursor(eventData);
+            }
             return;
         }
 
         this._mouseDownData = eventData;
 
         this._bubbleMouseEvent(eventData, "mousedown");
+        if (eventData.cursor){
+            this.updateCursor(eventData);
+        }
 
         // apply default behavior
         if (!eventData.handled) {
@@ -361,9 +374,7 @@ export default class DesignerController implements IController {
                         break;
                     }
                 }
-            }
-
-            this._bubbleMouseEvent(eventData, "mousedown");
+            }            
 
             if (!eventData.handled) {
                 Selection.setupSelectFrame(new this.deps.SelectFrame(EventHandler(this, onselect)), eventData);
@@ -452,6 +463,12 @@ export default class DesignerController implements IController {
         this.updateCursor(eventData);
     }
 
+    repeatLastMouseMove(keys: IKeyboardState = Keyboard.state){
+        if (this._lastMouseMove){
+            this.onmousemove(this._lastMouseMove, keys);
+        }
+    }
+
     onmouseenter(eventData) {
         this.mouseenterEvent.raise(eventData);
 
@@ -470,6 +487,9 @@ export default class DesignerController implements IController {
 
         this.mouseupEvent.raise(eventData, Keyboard.state);
         if (eventData.handled) {
+            if (eventData.cursor){
+                this.updateCursor(eventData);
+            }            
             return;
         }
 
@@ -477,6 +497,9 @@ export default class DesignerController implements IController {
 
         if (this._captureElement != null) {
             this._captureElement.mouseup(eventData, Keyboard.state);
+            if (eventData.cursor){
+                this.updateCursor(eventData);
+            }
             return;
         }
 
@@ -491,6 +514,9 @@ export default class DesignerController implements IController {
         }
 
         this._bubbleMouseEvent(eventData, "mouseup");
+        if (eventData.cursor){
+            this.updateCursor(eventData);
+        }
         if (eventData.handled) {
             return;
         }
@@ -567,9 +593,7 @@ export default class DesignerController implements IController {
             }
         }
 
-        if (this._lastMouseMove){
-            this.onmousemove(this._lastMouseMove, newKeys);
-        }
+        this.repeatLastMouseMove(newKeys);
     }
     _onSelectionModeChanged(){
         var cursor = Cursor.getCursor();

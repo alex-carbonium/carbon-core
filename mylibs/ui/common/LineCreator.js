@@ -9,6 +9,7 @@ import SnapController from "../../framework/SnapController";
 import Brush from "../../framework/Brush";
 import Point from "../../math/point";
 import Environment from "../../environment";
+import {IKeyboardState, IMouseEventData} from "../../framework/CoreModel";
 
 function update(x1, y1, x2, y2) {
     var props = {
@@ -39,11 +40,16 @@ export default class LineCreator extends Tool {
     constructor() {        
         super(ViewTool.Line);
     }
+
+    defaultCursor(){
+        return "pen_line";
+    }
+    
     detach() {
         super.detach.apply(this, arguments);
         SnapController.clearActiveSnapLines();
     }
-    mousedown(event) {
+    mousedown(event: IMouseEventData, keys: IKeyboardState) {
         var eventData = { handled: false, x: event.x, y: event.y };
         Environment.controller.startDrawingEvent.raise(eventData);
         if (eventData.handled) {
@@ -52,7 +58,7 @@ export default class LineCreator extends Tool {
 
         this._mousepressed = true;
 
-        if (event.event.ctrlKey || event.event.metaKey) {
+        if (keys.ctrl) {
             var pos = event;
         }
         else {
@@ -99,7 +105,8 @@ export default class LineCreator extends Tool {
             App.Current.resetCurrentTool();
         }
     }
-    mousemove(event) {
+    mousemove(event: IMouseEventData, keys: IKeyboardState) {
+        super.mousemove(event, keys);        
         var artboard = App.Current.activePage.getArtboardAtPoint(event);
         if (artboard != this._hoverArtboard) {
             this._hoverArtboard = artboard;
@@ -108,7 +115,7 @@ export default class LineCreator extends Tool {
             }
         }
 
-        if (event.event.ctrlKey || event.event.metaKey) {
+        if (keys.ctrl) {
             var pos = event;
         }
         else {
@@ -118,7 +125,7 @@ export default class LineCreator extends Tool {
         if (this._mousepressed) {
             var x = pos.x,
                 y = pos.y;
-            if (event.event.shiftKey) {
+            if (keys.shift) {
                 var point = angleAdjuster.adjust(this._startPoint, { x: x, y: y });
                 x = point.x;
                 y = point.y;

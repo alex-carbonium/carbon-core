@@ -142,6 +142,7 @@ export interface IController{
     actionManager: IActionManager;
 
     updateCursor(eventData: IMouseEventData): void;
+    defaultCursor(): string;
 }
 
 export interface IActionManager{
