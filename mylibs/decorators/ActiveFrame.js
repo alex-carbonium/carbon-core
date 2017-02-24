@@ -79,6 +79,7 @@ function onMouseMove(event) {
     if (this._originalPoint) {
         this._frameType.movePoint(this._frame, this._originalPoint, event);
         event.handled = true;
+        event.cursor = this._currentCursor;
         return false;
     } 
     else if (!event.handled) {
@@ -87,6 +88,7 @@ function onMouseMove(event) {
             var p = this._frame.points[pointIndex];
             var cursorIndex = p.type.rotateCursorPointer(p.cursor, this._frame.element.angle());
             event.cursor = p.type.cursorSet[cursorIndex];
+            this._currentCursor = event.cursor;
         }
     }
 }
@@ -97,7 +99,7 @@ export default class ActiveFrame extends UIElementDecorator {
         super();
         this.margin = 0;
         this._captured = false;
-
+        this._currentCursor = null;
     }
 
     attach(element) {
