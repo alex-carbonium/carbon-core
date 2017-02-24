@@ -79,7 +79,7 @@ export default class Tool {
     }
     dragElementEnded() {
     }
-    click(event: IMouseEventData) {
+    click(event: IMouseEventData, keys: IKeyboardState) {
         event.handled = true;
     }
     dblclick(event: IMouseEventData) {

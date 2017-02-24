@@ -160,7 +160,7 @@ var onpinchmove = function (event) {
 };
 
 var onclick = function (event) {
-    Environment.controller.onclick(Environment.controller.createEventData(event));
+    Environment.controller.onclick(Environment.controller.createEventData(event), Keyboard.state);
 };
 
 var mouseOutData = null;

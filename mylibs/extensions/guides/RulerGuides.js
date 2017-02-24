@@ -58,12 +58,10 @@ export default class RulerGuides {
         this._originRect = origin.getBoundingBox();
     }
     setGuides(artboard: Artboard) {
-        var guidesX = artboard.props.guidesX;
-        var guidesY = artboard.props.guidesY;
-        if (guidesX && guidesY) {
+        if (artboard && artboard.props.guidesX && artboard.props.guidesY) {
             this._customGuides.prepareAndSetProps({
-                guidesX: guidesX,
-                guidesY: guidesY,
+                guidesX: artboard.props.guidesX,
+                guidesY: artboard.props.guidesY,
                 origin: artboard.position()
             });
         }

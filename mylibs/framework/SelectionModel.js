@@ -1,6 +1,7 @@
 import EventHelper from "./EventHelper";
 import SelectComposite from "./SelectComposite";
 import Invalidate from "./Invalidate";
+import {ViewTool} from "./Defs";
 
 var debug = require("DebugUtil")("carb:selection");
 
@@ -100,12 +101,14 @@ class SelectionModel {
 
     setupSelectFrame(selectFrame, eventData) {
         this._selectFrame = selectFrame;
-        this.startSelectionFrameEvent.raise();
-        this.makeSelection(null);
+        this.startSelectionFrameEvent.raise();        
         this._selectFrame.init(eventData);
     }
 
-    updateSelectFrame(eventData) {
+    updateSelectFrame(eventData) {        
+        if (this.selectedElements.length){
+            this.makeSelection([]);
+        }
         var rect = this._selectFrame.update(eventData);
         this.onSelectionFrameEvent.raise(rect);
     }
@@ -309,9 +312,15 @@ class SelectionModel {
 
     selectAll() {
         var page = App.Current.activePage;
+
+        if (App.Current.currentTool === ViewTool.Artboard){
+            this.makeSelection(page.getAllArtboards());
+            return;
+        }
+        
         var artboard = page.getActiveArtboard();
-        if(artboard){
-            onselect.call(this, artboard.getBoundaryRectGlobal());
+        if (artboard){
+            this.makeSelection(artboard.children);
             return;
         }
 

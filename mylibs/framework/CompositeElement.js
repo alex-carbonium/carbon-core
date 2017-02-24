@@ -307,6 +307,10 @@ export default class CompositeElement extends UIElement implements IComposite {
     }
 
     prepareDisplayPropsVisibility() {
+        if (this.count() === 0){
+            return {};
+        }
+
         var type = this.allHaveSameType() ?
             this.elements[0].systemType() :
             this.systemType();

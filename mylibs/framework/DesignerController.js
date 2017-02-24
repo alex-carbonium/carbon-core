@@ -550,16 +550,22 @@ export default class DesignerController implements IController {
         }
     }
 
-    onclick(eventData) {
+    onclick(eventData, keys: IKeyboardState) {
         if (this._noActionsBeforeClick) {
 
-            this.clickEvent.raise(eventData);
+            this.clickEvent.raise(eventData, keys);
             if (eventData.handled) {
+                if (eventData.cursor){
+                   this.updateCursor(eventData);
+                }
                 return;
             }
 
             if (this._captureElement != null) {
                 this._captureElement.click(eventData);
+                if (eventData.cursor){
+                   this.updateCursor(eventData);
+                }
                 return;
             }
 
@@ -568,7 +574,10 @@ export default class DesignerController implements IController {
             }
 
             if (!eventData.handled) {
-                this.selectByClick(eventData);
+                this.selectByClick(eventData);                
+            }
+            if (eventData.cursor){
+                this.updateCursor(eventData);
             }
         }
     }
@@ -609,7 +618,7 @@ export default class DesignerController implements IController {
             eventData.element = element;
             this.onElementClicked.raise(eventData);
             if (eventData.handled) {
-                return;
+                return null;
             }
 
             if (element.canSelect() && !element.locked()) {
@@ -622,8 +631,15 @@ export default class DesignerController implements IController {
                     Selection.selectionMode("new");
                 }
 
-                Cursor.setCursor("move_cursor");
+                eventData.cursor = "move_cursor";
             }
+            else{
+                element = null;
+            }
+        }
+
+        if (element === null){
+            Selection.makeSelection([]);
         }
 
         return element;

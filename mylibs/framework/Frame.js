@@ -207,7 +207,7 @@ export default class Frame extends Container {
     }
 
     canConvertToPath() {
-        return !!this.props.sourceProps.svg;
+        return this.props.sourceProps && !!this.props.sourceProps.svg;
     }
 
     convertToPath() {

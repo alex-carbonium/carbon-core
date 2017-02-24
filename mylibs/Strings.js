@@ -46,7 +46,6 @@ define(function(){
     add("Path", "Path");
 
     add("sketch.framework.NullPage", "No page");
-    add("sketch.framework.NoSelectionElement", "Empty selection");
     add("sketch.framework.ScrollContainer", "Scroll container");
     add("sketch.ui.common.CommentNote", "Note");
     add("sketch.framework.CorruptedElement", "Corrupted element");
