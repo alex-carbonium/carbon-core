@@ -19,7 +19,6 @@ function findItemsToSelect(eventData) {
                 Selection.makeSelection([e]);
             }.bind(this, e)
     }});
-
 };
 
 
@@ -85,6 +84,18 @@ export default class ContextMenuExtension extends ExtensionBase {
         }
 
         var items = menu.items = [];
+
+        var editingPath = selection.length === 1 && selection[0] instanceof Path && selection[0].mode() === 'edit';
+        if(editingPath && !context.eventData) {
+            items.push({
+                name: "@action.done",
+                contextBar: ContextBarPosition.Left | ContextBarPosition.Only,
+                callback: () => {
+                    actionManager.invoke("cancel");
+                }
+            });
+            return;
+        }
 
         if (selection.length) {
             if (selection.length === 1 && selection[0] instanceof RepeatContainer) {
