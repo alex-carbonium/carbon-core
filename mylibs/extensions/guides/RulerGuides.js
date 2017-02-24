@@ -86,24 +86,6 @@ export default class RulerGuides {
     canCapture(): boolean {
         return Keyboard.state.ctrl || this._app.currentTool === ViewTool.Pointer || this._app.currentTool === ViewTool.PointerDirect;
     }
-    changeCursor(cursor) {
-        this.resetCursor();
-
-        this._lastGlobalCursor = Cursor.getGlobalCursor();
-        Cursor.setGlobalCursor(cursor);
-        this._cursorChanged = true;
-    }
-    resetCursor() {
-        if (this._cursorChanged) {
-            if (this._lastGlobalCursor) {
-                Cursor.setGlobalCursor(this._lastGlobalCursor);
-            }
-            else {
-                Cursor.removeGlobalCursor();
-            }
-            this._cursorChanged = false;
-        }
-    }
 
     onDragSearching = (e: IMouseEventData) => {
         if (!this.active()) {

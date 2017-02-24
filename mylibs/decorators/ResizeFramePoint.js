@@ -111,7 +111,7 @@ export default {
 
         var s = new Point(1 + dx/frame.originalRect.width, 1 + dy/frame.originalRect.height);
 
-        var round = !keys.ctrl && !frame.isRotated && DefaultSettings.snapTo.enabled && DefaultSettings.snapTo.pixels;
+        var round = !frame.isRotated && DefaultSettings.snapTo.enabled && DefaultSettings.snapTo.pixels;
         if (round){
             var oldRect = frame.originalBoundingBox;
             var newRect = oldRect.scale(s, origin).roundMutable();

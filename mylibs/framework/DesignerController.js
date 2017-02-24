@@ -658,6 +658,9 @@ export default class DesignerController implements IController {
         element.resetTransform();
         element.applyTranslation({x: ~~(eventData.x - element.width() / 2), y: ~~(eventData.y - element.height() / 2)});
         this.beginDrag(eventData);
+        
+        Cursor.setCursor("move_cursor");
+        
         stopDragPromise
             .then(e => {
                 this.onmouseup(this.createEventData(e));

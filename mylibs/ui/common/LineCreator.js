@@ -40,10 +40,6 @@ export default class LineCreator extends Tool {
     constructor() {        
         super(ViewTool.Line);
     }
-
-    defaultCursor(){
-        return "pen_line";
-    }
     
     detach() {
         super.detach.apply(this, arguments);
@@ -107,6 +103,11 @@ export default class LineCreator extends Tool {
     }
     mousemove(event: IMouseEventData, keys: IKeyboardState) {
         super.mousemove(event, keys);        
+
+        if (event.cursor !== "pen_move_point"){
+            event.cursor = "pen_line";
+        }
+
         var artboard = App.Current.activePage.getArtboardAtPoint(event);
         if (artboard != this._hoverArtboard) {
             this._hoverArtboard = artboard;
