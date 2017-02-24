@@ -35,7 +35,8 @@ export default class DragController {
         return !e.handled;
     }
     mouseMove(e: IMouseEventData) {
-        if (e.handled || e.isDragging) {
+        //e.handled is not checked on purpose, case: path tool handles events, but ruler guide can overrule        
+        if (e.isDragging) {
             return;
         }
 

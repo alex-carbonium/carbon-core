@@ -105,24 +105,24 @@ export default class RulerGuides {
         }
     }
 
-    onDragSearching = e => {
+    onDragSearching = (e: IMouseEventData) => {
         if (!this.active()) {
             return;
         }
 
         if (isPointInRect(this._rectVertical, e)) {
-            this.changeCursor("ew-resize");
+            e.cursor = "ew-resize";
             return;
         }
         if (isPointInRect(this._rectHorizontal, e)) {
-            this.changeCursor("ns-resize");
+            e.cursor = "ns-resize";
             return;
         }
 
         let canCapture = this.canCapture();
         let x = Math.round(e.x) - this._originRect.x;
         if (canCapture && this._customGuides.tryCaptureX(x)) {
-            this.changeCursor("ew-resize");
+            e.cursor = "ew-resize";
             this._customGuides.releaseCaptured();
             Invalidate.requestUpperOnly();
             return;
@@ -130,15 +130,14 @@ export default class RulerGuides {
 
         let y = Math.round(e.y) - this._originRect.y;
         if (canCapture && this._customGuides.tryCaptureY(y)) {
-            this.changeCursor("ns-resize");
+            e.cursor = "ns-resize";
             this._customGuides.releaseCaptured();
             Invalidate.requestUpperOnly();
             return;
         }
 
         this._guideX = null;
-        this._customGuides.releaseCaptured();
-        this.resetCursor();
+        this._customGuides.releaseCaptured();        
     };
     onDragStarting = (e) => {
         if (!this.active()) {
