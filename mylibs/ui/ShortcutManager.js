@@ -81,8 +81,8 @@ export default class ShortcutManager {
 
         { key: "ctrl+shift+]", action: "bringToFront" },
         { key: "ctrl+shift+[", action: "sendToBack" },
-        { key: "ctrl+up", action: "bringForward" },
-        { key: "ctrl+down", action: "sendBackward" },
+        { key: "ctrl+]", action: "bringForward" },
+        { key: "ctrl+[", action: "sendBackward" },
 
         { key: "ctrl+n", action: "newPagePortrait" },
         { key: "ctrl+shift+n", action: "newPageLandscape" },
@@ -192,8 +192,8 @@ export default class ShortcutManager {
 
         { key: "meta+shift+]", action: "bringToFront" },
         { key: "meta+shift+[", action: "sendToBack" },
-        { key: "meta+up", action: "bringForward" },
-        { key: "meta+down", action: "sendBackward" },
+        { key: "meta+]", action: "bringForward" },
+        { key: "meta+[", action: "sendBackward" },
 
         { key: "meta+n", action: "newPagePortrait" },
         { key: "meta+shift+n", action: "newPageLandscape" },
