@@ -101,7 +101,7 @@ class SelectionModel {
     setupSelectFrame(selectFrame, eventData) {
         this._selectFrame = selectFrame;
         this.startSelectionFrameEvent.raise();
-        this.makeSelection(null);
+        this.makeSelection([]);
         this._selectFrame.init(eventData);
     }
 
@@ -209,8 +209,8 @@ class SelectionModel {
         return this._selectCompositeElement.elements;
     }
 
-    makeSelection(selection, refreshOnly) {
-        var currentSelection = this._selectCompositeElement.elements;
+    makeSelection(selection, refreshOnly, doNotTrack) {
+        var currentSelection = this._selectCompositeElement.elements;        
 
         var newSelection = this._decomposeSelection(selection);
         if (areSameArrays(currentSelection, newSelection)) {
@@ -230,7 +230,6 @@ class SelectionModel {
             this.unselectAll(refreshOnly);
         }
         else if (this._selectionMode === "add") {
-
             var alreadyAdded = false;
             each(currentSelection, function (el1) {
                 each(newSelection, function (el2) {
@@ -260,7 +259,7 @@ class SelectionModel {
         }
 
         if (!refreshOnly) {
-            this._fireOnElementSelected(currentSelection);
+            this._fireOnElementSelected(currentSelection || [], doNotTrack);
         }
     }
 
@@ -273,12 +272,12 @@ class SelectionModel {
     reselect(){
         var selection = this.selectedElements();
         this.makeSelection([], true);
-        this.makeSelection(selection);
+        this.makeSelection(selection, false, true);
     }
 
-    _fireOnElementSelected(oldSelection) {
+    _fireOnElementSelected(oldSelection, doNotTrack) {
         lockUnlockGroups.call(this, this.selectedElements());
-        this.onElementSelected.raise(this._selectCompositeElement, oldSelection);
+        this.onElementSelected.raise(this._selectCompositeElement, oldSelection, doNotTrack);
     }
 
     unselectAll(refreshOnly) {
@@ -297,7 +296,7 @@ class SelectionModel {
 
     clearSelection() {
         if (this.unselectAll()) {
-            this._fireOnElementSelected(null);
+            this._fireOnElementSelected([]);
         }
     }
 

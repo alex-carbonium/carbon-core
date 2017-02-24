@@ -1,13 +1,3 @@
-//v1.1
-// TODO: allow users to override system templates (when system template is save new asset should be added)
-// BUG: proeprties which are added to template programmaticaly are serialized into temlate, and failed during loading
-// TODO: disable width/height properties if controls is not allowed to resize
-// BUG: templated element can be dropped inside itself when part of multiselection!!
-// BUG: custom template properties are reseted when stop editing template (select tile control, set active to false, edit tempalte and then close editor, active property is reseted)
-// TODO: optimize way the path is serialized (do smth like SVG)
-// BUG: templated element children are in wrong container after restoring from json
-// TODO: think what to do with element names, they should not be part of a project, becuase it will be impossible to reuse controls betwin projects (not possible to cusomize toolbox)
-
 import LayoutGridLines from "extensions/guides/LayoutGridLines";
 import LayoutGridColumns from "extensions/guides/LayoutGridColumns";
 import CustomGuides from "extensions/guides/CustomGuides";
@@ -211,6 +201,27 @@ class App extends DataNode implements IApp {
 
         this._currentTool = ViewTool.Pointer;
         this.currentToolChanged = EventHelper.createEvent();
+
+        Selection.onElementSelected.bind((selection, oldSelection, doNotTrack)=>{
+            let selectionIds = Selection.selectedElements().map(e=>e.id());
+            let oldSelectionIds = oldSelection.map(e=>e.id());
+            if(!doNotTrack && (selectionIds.length || oldSelectionIds.length)) {
+                ModelStateListener.trackSelect(
+                    this.activePage, 
+                    selectionIds,
+                    oldSelectionIds,
+                    this.userId(),
+                    this.sessionId());
+            }
+        });
+    }
+
+    userId() {
+        return backend.getUserId();
+    }
+
+    sessionId() {
+        return backend.getSessionId();
     }
 
     activeStory(value) {

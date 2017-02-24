@@ -40,8 +40,14 @@ define(function(){
 
         registerExecutedCommand: function(cmd){
             if (!cmd.transparent()) {
-                this.stack[++this.index] = cmd;
-                this._setProperties(true, false);
+                if(cmd.flushRedoStack()) {
+                    this.stack[++this.index] = cmd;
+                    this.stack.length = this.index + 1;
+                    this._setProperties(true, false);
+                } else {
+                    this.stack.splice(++this.index, 0, cmd);                    
+                    this._setProperties(true, this.index < this.stack.length - 1);
+                }
             }
         },
 

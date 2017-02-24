@@ -166,6 +166,9 @@ var backend = globals.backend || {
     getUserId: function(){
         return localStorage.getItem("userId");
     },
+    getSessionId: function() {
+        return ''; // TODO: implement session
+    },
     isGuest: function(){
         return localStorage.getItem("isGuest") === "1";
     },

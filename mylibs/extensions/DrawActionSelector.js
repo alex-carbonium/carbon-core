@@ -59,7 +59,7 @@ var registerCommands = function () {
             element.edit();
         } else {
             that._defaultShapeSettings.updateColors();
-            Selection.makeSelection([that._defaultShapeSettings]);
+            Selection.makeSelection([that._defaultShapeSettings], false, true);
         }
     }, "ui-pen");
 
@@ -69,7 +69,7 @@ var registerCommands = function () {
         that._currentAction = that._rectCreator;
         that.app.allowSelection(false);
         that._defaultShapeSettings.updateColors();
-        Selection.makeSelection([that._defaultShapeSettings]);
+        Selection.makeSelection([that._defaultShapeSettings], false, true);
         Invalidate.request();
     }, "ui-rectangle");
 
@@ -79,7 +79,7 @@ var registerCommands = function () {
         that._currentAction = that._starCreator;
         that.app.allowSelection(false);
         that._defaultShapeSettings.updateColors();
-        Selection.makeSelection([that._defaultShapeSettings]);
+        Selection.makeSelection([that._defaultShapeSettings], false, true);
 
     }, "ui-star");
 
@@ -89,7 +89,7 @@ var registerCommands = function () {
         that._currentAction = that._triangleCreator;
         that.app.allowSelection(false);
         that._defaultShapeSettings.updateColors();
-        Selection.makeSelection([that._defaultShapeSettings]);
+        Selection.makeSelection([that._defaultShapeSettings], false, true);
 
     }, "ui-ploygon");
 
@@ -99,7 +99,7 @@ var registerCommands = function () {
         that._currentAction = that._polygonCreator;
         that.app.allowSelection(false);
         that._defaultShapeSettings.updateColors();
-        Selection.makeSelection([that._defaultShapeSettings]);
+        Selection.makeSelection([that._defaultShapeSettings], false, true);
 
     }, "ui-ploygon");
 
@@ -109,7 +109,7 @@ var registerCommands = function () {
         that._artboardCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._artboardCreator;
         that.app.allowSelection(false);
-        Selection.makeSelection([that._artboardToolSettings]);
+        Selection.makeSelection([that._artboardToolSettings], false, true);
 
     }, "ui-rectangle");
 
@@ -126,8 +126,8 @@ var registerCommands = function () {
         that._sectionCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._sectionCreator;
         //re-fire event if artboard is already selected
-        Selection.makeSelection([]);
-        Selection.makeSelection([that.app.activePage.getActiveArtboard()]);
+        Selection.makeSelection([], false, true);
+        Selection.makeSelection([that.app.activePage.getActiveArtboard()], false, true);
 
     }, "ui-rectangle");
 
@@ -137,7 +137,7 @@ var registerCommands = function () {
         that._currentAction = that._circleCreator;
         that.app.allowSelection(false);
         that._defaultShapeSettings.updateColors();
-        Selection.makeSelection([that._defaultShapeSettings]);
+        Selection.makeSelection([that._defaultShapeSettings], false, true);
     }, "ui-circle");
 
     actionManager.registerAction(ViewTool.Line, "@tool.line", "Drawing", function () {
@@ -146,7 +146,7 @@ var registerCommands = function () {
         that._currentAction = that._lineCreator;
         that.app.allowSelection(false);
         that._defaultShapeSettings.updateColors();
-        Selection.makeSelection([that._defaultShapeSettings]);
+        Selection.makeSelection([that._defaultShapeSettings], false, true);
     }, "ui-line");
 
     actionManager.registerAction(ViewTool.Proto, "@tool.prototyping", "Prototyping", function () {
@@ -180,7 +180,7 @@ var registerCommands = function () {
         that._pencilCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._pencilCreator;
         that.app.allowSelection(false);
-        Selection.makeSelection([that._defaultShapeSettings]);
+        Selection.makeSelection([that._defaultShapeSettings], false, true);
     }, "ui-pencil");
 
     actionManager.registerAction("handToolRelease", "@tool.handRelease", "Drawing utils", function () {

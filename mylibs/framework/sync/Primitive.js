@@ -115,6 +115,27 @@ Primitive.dataNodeSetProps = function(element, props, oldProps, norollback) {
     return res;
 };
 
+Primitive.selection = function(page, selection, oldSelection, userId, sessionId, norollback) {
+    var res = {
+        type: PrimitiveType.Selection, 
+        path: page.primitivePath(),
+        userId: userId,
+        selection: selection
+    };
+
+    if (!norollback) {
+        res._rollbackData = Primitive.selection(page, oldSelection || [], null, userId, sessionId, true);
+    }
+
+    if (DEBUG){
+        res.toString = function(){
+            return "SELECTION page=" + page.name() + " ids=" + JSON.stringify(selection);
+        }
+    }
+
+    return res;
+};
+
 Primitive.dataNodePatchProps = function(element, patchType, propName){
     var res = {
         type: PrimitiveType.DataNodePatchProps,

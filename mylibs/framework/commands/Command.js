@@ -8,6 +8,10 @@ export default class Command {
         return true;
     }
 
+    flushRedoStack() {
+        return true;
+    }
+
     execute(isRedo){
     }
 

@@ -44,10 +44,10 @@ Primitive.registerHandler(PrimitiveType.DataNodeAdd, function(container, p){
 Primitive.registerHandler(PrimitiveType.DataNodeRemove, function(container, p){
     var element = container.getImmediateChildById(p.childId);
     if (element){
-        container.remove(element, ChangeMode.Self);
         if(Selection.isElementSelected(element)){
-            Selection.unselectGroup([element]);
+            Selection.unselectGroup([element], true);
         }
+        container.remove(element, ChangeMode.Self);
     }
 });
 
@@ -58,6 +58,29 @@ Primitive.registerHandler(PrimitiveType.DataNodeSetProps, function(element, p){
 
 Primitive.registerHandler(PrimitiveType.DataNodeChange, function(element, p){
     element.fromJSON(p.node);
+});
+
+Primitive.registerHandler(PrimitiveType.Selection, function(page, p){
+    var selection = p.selection;
+    var selectionMap = selection.reduce((map, value)=>{
+        map[value] = true;
+        return map;
+    }, {})
+    if(!selection.length) {
+        Selection.makeSelection([], false, true);
+    } else {
+        var elements = [];
+        page.applyVisitor(e=>{
+            if(selectionMap[e.id()]) {
+                elements.push(e);
+                if(elements.length === selection.length) {
+                    return false;
+                }
+            }
+        })
+
+        Selection.makeSelection(elements, false, true);
+    }
 });
 
 Primitive.registerHandler(PrimitiveType.DataNodeChangePosition, function(container, p){

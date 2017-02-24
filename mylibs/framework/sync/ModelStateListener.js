@@ -1,6 +1,8 @@
 import Primitive from "./Primitive";
 import {PatchType} from "../Defs";
 
+var lastSelection = {};
+
 class ModelStateListener {
     constructor(){
         this.clear();
@@ -74,6 +76,15 @@ class ModelStateListener {
         var root = this._getOrCreateRootData(primitiveRoot.primitiveRootKey());
 
         root.push(Primitive.dataNodeAdd(parent, element, index));
+    }
+
+    trackSelect(page, selection, oldSelection, userId, sessionId){
+        if (this._stopCounter > 0){
+            return;
+        }
+        var root = this._getOrCreateRootData(page.primitiveRootKey());
+
+        root.push(Primitive.selection(page, selection, oldSelection, userId, sessionId));
     }
 
     trackChangePosition(primitiveRoot, parent, element, index, oldIndex){
