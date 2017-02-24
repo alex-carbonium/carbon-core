@@ -102,7 +102,7 @@ var onmousedown = function (event) {
 
 
 var onmousemove = function (event) {
-    Environment.controller.onmousemove(Environment.controller.createEventData(event));
+    Environment.controller.onmousemove(Environment.controller.createEventData(event), Keyboard.state);
     if (this._mouseButtonPressed) {
         // It is important to disable default mouse move because otherwise browser will make a text selection
         // (if there is selectable content such as comments) and then keyboard events will be handled by those selected elements
@@ -160,7 +160,7 @@ var onpinchmove = function (event) {
 };
 
 var onclick = function (event) {
-    Environment.controller.onclick(Environment.controller.createEventData(event));
+    Environment.controller.onclick(Environment.controller.createEventData(event), Keyboard.state);
 };
 
 var mouseOutData = null;

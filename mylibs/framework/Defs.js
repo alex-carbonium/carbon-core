@@ -273,7 +273,6 @@ export var Types = {
     'CompositeElement': 'm',
     'Page': 'G',
     'Line': 'l',
-    'NoSelectionElement': 'N',
     'Polygon': 'y',
     'Rectangle': 'r',
     'Section': 'S',

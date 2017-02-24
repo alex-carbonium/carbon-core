@@ -56,6 +56,18 @@ export interface IEvent<T>{
     bind(owner: any, callback: (data: T) => void): IDisposable;    
 }
 
+export interface IEvent2<T1, T2>{
+    raise(data1: T1, data2: T2): void;
+    bind(callback: (data1: T1, data2: T2) => void): IDisposable;
+    bind(owner: any, callback: (data1: T1, data2: T2) => void): IDisposable;
+}
+
+export interface IKeyboardState{
+    ctrl: boolean;
+    shift: boolean;
+    alt: boolean;
+}
+
 export interface IDisposable{    
     dispose(): void;
 }
@@ -121,12 +133,16 @@ export interface IController{
     resizingEvent: IEvent<IInteractionEventData>;
     rotatingEvent: IEvent<IInteractionEventData>;
     startDrawingEvent: IEvent<IEventData>;
+    
+    mousedownEvent: IEvent2<IMouseEventData, IKeyboardState>;
+    mousemoveEvent: IEvent2<IMouseEventData, IKeyboardState>;
 
     interactionActive: boolean;
     
     actionManager: IActionManager;
 
     updateCursor(eventData: IMouseEventData): void;
+    defaultCursor(): string;
 }
 
 export interface IActionManager{

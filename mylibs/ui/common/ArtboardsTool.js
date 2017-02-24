@@ -10,59 +10,56 @@ import ObjectFactory from "../../framework/ObjectFactory";
 import {ViewTool} from "../../framework/Defs";
 import Rect from "../../math/rect";
 import Point from "../../math/point";
+import {IKeyboardState, IMouseEventData} from "../../framework/CoreModel";
 
 export default class ArtboardsTool extends Tool {
     constructor(type, parameters) {
         super(ViewTool.Artboard);
         this._type = type;        
         this._parameters = parameters;
+        this._point = new Point(0, 0);
     }
 
     attach(app, view, controller) {
         super.attach(app, view, controller);
         SnapController.calculateSnappingPoints(app.activePage);
+
+        this._enableArtboardSelection(true);
     }
 
     detach() {
         super.detach.apply(this, arguments);
         SnapController.clearActiveSnapLines();
+        Selection.unselectAll();
+        this._enableArtboardSelection(false);
     }
 
-    mousedown(event) {
+    _enableArtboardSelection(value: boolean){
+        this._app.activePage.getAllArtboards().forEach(x => x.allowArtboardSelection(value));
+    }
 
+    mousedown(event: IMouseEventData, keys: IKeyboardState) {        
         this._cursorNotMoved = true;
 
-        var artboard = App.Current.activePage.getArtboardAtPoint(event);
-        if (artboard) {
-            if (Selection.isElementSelected(artboard)) {
-                var element = Selection.selectedElement();
-            } else {
-                element = artboard;
+        var artboard = this._app.activePage.getArtboardAtPoint(event);
+        if (artboard){
+            if (!Selection.isElementSelected(artboard)){
+                this._selectByClick(event, keys);
             }
-            if (element) {
-                this._startDraggingData = event;
-                this._startDraggingData.element = element;
-            }
-            event.handled = true;
-            return;
+            return true;
         }
-
 
         this._mousepressed = true;
-        if (event.event.ctrlKey || event.event.metaKey) {
-            var pos = event;
-        }
-        else {
-            pos = SnapController.applySnappingForPoint(event);
-        }
-        this._startPoint = {x: pos.x, y: pos.y};
-        this._nextPoint = {x: pos.x, y: pos.y};
-        event.handled = true;
+        this._prepareMousePoint(event, keys);
+
+        this._startPoint = {x: this._point.x, y: this._point.y};
+        this._nextPoint = {x: this._point.x, y: this._point.y};        
         this._element = ObjectFactory.fromType(this._type);
-        App.Current.activePage.nameProvider.assignNewName(this._element);
+        this._element.allowArtboardSelection(true);
+        this._app.activePage.nameProvider.assignNewName(this._element);
         this._cursorNotMoved = true;
 
-        var defaultSettings = App.Current.defaultShapeSettings();
+        var defaultSettings = this._app.defaultShapeSettings();
         if (defaultSettings && !this._element.noDefaultSettings) {
             this._element.setProps(defaultSettings);
         }
@@ -71,112 +68,59 @@ export default class ArtboardsTool extends Tool {
             this._element.setProps(this._parameters);
         }
 
-        if (typeof this._element.mode === "function") {
-            this._element.mode("edit");
-        }
+        event.handled = true;
         return false;
     }
 
-    selectByClick(event) {
-        var artboard = App.Current.activePage.getArtboardAtPoint(event);
-
-        if (!event.event.shiftKey) {
-            if (artboard) {
-                Selection.makeSelection([artboard]);
-            } else {
-                Selection.makeSelection([]);
-            }
-        } else {
-            if (artboard) {
-                if (Selection.isElementSelected(artboard)) {
-                    Selection.selectionMode('remove');
-                } else {
-                    Selection.selectionMode('add');
-                }
-
-                Selection.makeSelection([artboard]);
-                Selection.selectionMode('new');
-            }
-        }
-    }
-
-    click(event){
-        event.handled = true;
-    }
-
-    mouseup(event) {
+    mouseup(event: IMouseEventData, keys: IKeyboardState) {        
         this._mousepressed = false;
-        this._startDraggingData = null;
-        if (this._dragging) {
-            this._dragging = false;
-            var artboard = App.Current.activePage.getArtboardAtPoint(event);
-            if(artboard && !Selection.isElementSelected(artboard)) {
-                Selection.makeSelection([artboard]);
-            }
-
-            return;
-        }
-
+        this._ratioResizeInfo = null;
+        
         if (this._element) {
             var element = this._element;
             this._element = null;
             Invalidate.requestUpperOnly();
             var w = element.width()
                 , h = element.height();
-            if (w === 0 && h === 0) {
-                if (this._cursorNotMoved) {
-                    this.selectByClick(event);
-                    event.handled = true;
-                }
-                return;
+            if (w > 0 && h > 0) {
+                var pos = element.position();
+                this._app.activePage.dropToPage(pos.x,pos.y, element);
+                Selection.makeSelection([element]);
+                SnapController.calculateSnappingPoints(this._app.activePage);
+            }            
+
+            if (SystemConfiguration.ResetActiveToolToDefault) {
+                this._app.resetCurrentTool();
             }
 
-            var pos = element.position();
-            App.Current.activePage.dropToPage(pos.x, pos.y, element);
-            Selection.makeSelection([element]);
-            SnapController.calculateSnappingPoints(App.Current.activePage);
-        } else {
-            if (this._cursorNotMoved) {
-                this.selectByClick(event);
-                event.handled = true;
-            }
-            return;
-
-        }
-        if (SystemConfiguration.ResetActiveToolToDefault) {
-            App.Current.resetCurrentTool();
-        }
-        this._ratioResizeInfo = null;
-        event.handled = true;
+            SnapController.clearActiveSnapLines();
+        }                     
     }
 
-    mousemove(event) {
-
-        if (this._startDraggingData) {
-            Environment.controller.beginDrag(this._startDraggingData);
-            this._dragging = true;
-            this._startDraggingData = null;
+    mousemove(event: IMouseEventData, keys: IKeyboardState) {
+        if (event.cursor){ //active frame
+            return true;
         }
 
-        if (this._dragging) {
-            return;
-        }                
+        var artboard = this._app.activePage.getArtboardAtPoint(event);
+        if (!artboard){
+            event.cursor = "artboard_tool";
+        }
 
-        if (event.event.ctrlKey || event.event.metaKey) {
-            var pos = event;
+        if (!this._mousepressed){
+            return true;
         }
-        else {
-            pos = SnapController.applySnappingForPoint(event);
-        }
+        
+        this._prepareMousePoint(event, keys);
 
         if (this._mousepressed) {
             if (this._cursorNotMoved) {
-                this._cursorNotMoved = (pos.y === this._startPoint.y) && (pos.x === this._startPoint.x);
+                this._cursorNotMoved = (this._point.y === this._startPoint.y) && (this._point.x === this._startPoint.x);
             }
             //if use holds shift, we must fit shape into square
-            if (event.event.shiftKey) {
-                var height = Math.abs(pos.y - this._startPoint.y);
-                var width = Math.abs(pos.x - this._startPoint.x);
+            if (keys.shift) {
+                var height = Math.abs(this._point.y - this._startPoint.y);
+                var width = Math.abs(this._point.x - this._startPoint.x);
                 var ration = Math.min(height, width);
 
                 var x = this._startPoint.x + ration;
@@ -184,13 +128,47 @@ export default class ArtboardsTool extends Tool {
 
                 this._nextPoint = {x: x, y: y};
             } else {
-                this._nextPoint = {x: pos.x, y: pos.y};
+                this._nextPoint = {x: this._point.x, y: this._point.y};
             }
 
             Invalidate.requestUpperOnly();
             event.handled = true;
             return false;
         }
+    }
+
+    click(event: IMouseEventData, keys: IKeyboardState){
+        this._selectByClick(event, keys);
+
+        event.handled = true;
+    }
+
+    _selectByClick(event: IMouseEventData, keys: IKeyboardState){
+        var artboard = this._app.activePage.getArtboardAtPoint(event);
+
+        if (artboard !== null) {            
+            var addToSelection = keys.shift;
+            if (addToSelection) {
+                Selection.selectionMode("add");
+            }
+            Selection.makeSelection([artboard]);
+            if (addToSelection) {
+                Selection.selectionMode("new");
+            }
+
+            event.cursor = "move_cursor";            
+        }
+    }
+
+    _prepareMousePoint(event: IMouseEventData, keys: IKeyboardState) {
+        this._point.set(event.x, event.y);        
+        if (!keys.ctrl) {
+            var snapped = SnapController.applySnappingForPoint(this._point);
+            if (snapped !== this._point) {                
+                this._point.set(snapped.x, snapped.y);
+            }
+        }
+        this._point.roundMutable();
     }
 
     layerdraw(context, environment) {

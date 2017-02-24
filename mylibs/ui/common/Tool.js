@@ -1,86 +1,95 @@
 import Selection from "../../framework/SelectionModel"
 import Invalidate from "../../framework/Invalidate";
-import {IApp, IView, IController} from "../../framework/CoreModel";
+import { IApp, IView, IController, IMouseEventData, IKeyboardState, IDisposable } from "../../framework/CoreModel";
 
+//TODO: if selection is made in layers after tool is set, active frame starts to react to mouse events before the tool
 export default class Tool {
     _app: IApp;
     _view: IView;
     _controller: IController;
     _toolId: string;
+    _disposables: IDisposable[];
 
     constructor(toolId: string) {
         this._toolId = toolId;
+        this._disposables = [];
     }
 
     attach(app, view, controller) {
         this._app = app;
         this._view = view;
         this._controller = controller;
-        this._attach();        
+        this._attach();
         this._app.currentTool = this._toolId;
     }
-    detach() {                
+    detach() {
         this._detach();
     }
-    pause() {        
+    pause() {
         this._detach();
     }
-    resume() {        
+    resume() {
         this._attach();
         this._app.currentTool = this._toolId;
     }
     _attach() {
         var controller = this._controller;
         if (controller) {
-            this._mouseDownBinding = controller.mousedownEvent.bindHighPriority(this, this.mousedown);
-            this._mouseUpBinding = controller.mouseupEvent.bindHighPriority(this, this.mouseup);
-            this._mouseMoveBinding = controller.mousemoveEvent.bindHighPriority(this, this.mousemove);
-            this._clickBinding = controller.clickEvent.bindHighPriority(this, this.click);
-            this._dragElementStartedBinding = controller.startDraggingEvent.bindHighPriority(this, this.dragElementStarted);
-            this._dragElementEndedBinding = controller.stopDraggingEvent.bindHighPriority(this, this.dragElementEnded);
+            this.registerForDisposal(controller.mousedownEvent.bindHighPriority(this, this.mousedown));
+            this.registerForDisposal(controller.mouseupEvent.bindHighPriority(this, this.mouseup));
+            this.registerForDisposal(controller.mousemoveEvent.bindHighPriority(this, this.mousemove));
+            this.registerForDisposal(controller.clickEvent.bindHighPriority(this, this.click));
+            this.registerForDisposal(controller.dblclickEvent.bindHighPriority(this, this.dblclick));
+            this.registerForDisposal(controller.startDraggingEvent.bindHighPriority(this, this.dragElementStarted));
+            this.registerForDisposal(controller.stopDraggingEvent.bindHighPriority(this, this.dragElementEnded));
         }
         if (this._view.layer3) {
-            this._drawBinding = this._view.layer3.ondraw.bind(this, this.layerdraw);            
-        }                
+            this.registerForDisposal(this._view.layer3.ondraw.bind(this, this.layerdraw));
+        }
+
+        //allow the tool to update cursor immediately
+        controller.repeatLastMouseMove();
     }
     _detach() {
-        if (this._mouseDownBinding) {
-            this._mouseDownBinding.dispose();
-        }
-        if (this._mouseUpBinding) {
-            this._mouseUpBinding.dispose();
-        }
-        if (this._mouseMoveBinding) {
-            this._mouseMoveBinding.dispose();
-        }
-        if (this._drawBinding) {
-            this._drawBinding.dispose();
-        }
-        if (this._clickBinding) {
-            this._clickBinding.dispose();
-        }        
-        if (this._dragElementStartedBinding) {
-            this._dragElementStartedBinding.dispose();
-        }
-        if (this._dragElementEndedBinding) {
-            this._dragElementEndedBinding.dispose();
-        }
+        this._disposables.forEach(x => x.dispose());
+        this._disposables.length = 0;
     }
+
+    registerForDisposal(disposable: IDisposable) {
+        this._disposables.push(disposable);
+    }
+
     view() {
         return this._view;
     }
-    mousedown(event) {
+    mousedown(event: IMouseEventData, keys: IKeyboardState) {
     }
-    mouseup(event) {
+    mouseup(event: IMouseEventData, keys: IKeyboardState) {
     }
-    mousemove(event) {
+    mousemove(event: IMouseEventData, keys: IKeyboardState) {
+        if (!event.handled) {
+            var cursor = this.defaultCursor();
+            if (cursor) {
+                event.cursor = cursor;
+            }
+        }
     }
-    dragElementStarted(){
+
+    dragElementStarted() {
     }
     dragElementEnded() {
     }
-    click(event) {
+    click(event: IMouseEventData, keys: IKeyboardState) {
+        event.handled = true;
+    }
+    dblclick(event: IMouseEventData) {
+        //by default tools should probably handle all events and do not let elements react to double clicks, etc
+        event.handled = true;
     }
     layerdraw(context) {
+    }
+
+    defaultCursor(): string {
+        return null;
     }
 }

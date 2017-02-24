@@ -190,13 +190,16 @@ class ArtboardPage extends Page {
     }
 
     setActiveArtboard(artboard) {
+        var oldArtboard = this._activateArtboard;
         if (this._activeArtboard) {
             this._activeArtboard.deactivate();
         }
 
         this._activeArtboard = artboard;
-        artboard.activate();
-        Environment.controller && Environment.controller.onArtboardChanged && Environment.controller.onArtboardChanged.raise(artboard);
+        if (artboard){
+            artboard.activate();
+        }        
+        Environment.controller && Environment.controller.onArtboardChanged && Environment.controller.onArtboardChanged.raise(artboard, oldArtboard);
     }
 
     _activateArtboard(event) {
@@ -215,9 +218,6 @@ class ArtboardPage extends Page {
                 return;
             }
         }
-
-        //let's not deactivate artboard on clicking outside
-        //this.setActiveArtboard(NullArtboard);
     }
 
     get isToolboxConfigDirty(){

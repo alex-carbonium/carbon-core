@@ -80,7 +80,8 @@ function onMouseMove(event) {
         this._frameType.movePoint(this._frame, this._originalPoint, event);
         event.handled = true;
         return false;
-    } else {
+    } 
+    else if (!event.handled) {
         var pointIndex = this._frameType.hitPointIndex(this._frame, event);
         if (pointIndex !== -1) {
             var p = this._frame.points[pointIndex];

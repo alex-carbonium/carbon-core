@@ -17,10 +17,21 @@ function drawSnapLines(context, environment) {
 
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
-        var x1 = line.x1 * scale + 0.5 | 0;
-        var y1 = line.y1 * scale + 0.5 | 0;
-        var x2 = line.x2 * scale + 0.5 | 0;
-        var y2 = line.y2 * scale + 0.5 | 0;
+        var x1 = Math.round(line.x1 * scale);
+        var y1 = Math.round(line.y1 * scale);
+        var x2 = Math.round(line.x2 * scale);
+        var y2 = Math.round(line.y2 * scale);
+
+        if (x1 === x2){
+            let p = .5 * Math.sign(x1);
+            x1 += p;
+            x2 += p;
+        }
+        else if (y1 === y2){
+            let p = .5 * Math.sign(y1);
+            y1 += p;
+            y2 += p;
+        }
 
         context.strokeLine(x1, y1, x2, y2, 'red');
     }

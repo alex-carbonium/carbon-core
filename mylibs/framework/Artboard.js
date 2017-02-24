@@ -30,8 +30,8 @@ import DataNode from "framework/DataNode";
 
 class Artboard extends Container {
     constructor(props) {
-        super(props);
-        this._dragable(true);
+        super(props);    
+        this.allowArtboardSelection(false);
         this.selectFromLayersPanel = true;
         
         this.noDefaultSettings = true;
@@ -44,9 +44,10 @@ class Artboard extends Container {
         this._externals = null;
     }
 
-    _dragable(value) {
+    allowArtboardSelection(value: boolean){
         this.canMultiselectChildren = !value;
         this.multiselectTransparent = !value;
+
         this.canSelect(value);
         this.canDrag(value);
     }
@@ -97,25 +98,11 @@ class Artboard extends Container {
     }
 
     select() {
-        this._dragable(true);
+        this.allowArtboardSelection(true);
     }
 
     unselect() {
-        if (this.children.length) {
-            this._dragable(false);
-        }
-    }
-
-    acquiredChild(child, mode) {
-        super.acquiredChild(child, mode);
-        this._dragable(false);
-    }
-
-    releasingChild(child) {
-        super.releasingChild(child);
-        if (this.children.length < 2) {
-            this._dragable(true);
-        }
+        this.allowArtboardSelection(false);
     }
 
     layoutGridSettings(value) {
@@ -681,6 +668,8 @@ class Artboard extends Container {
         }
 
         super.trackDeleted.apply(this, arguments);
+
+        parent.setActiveArtboard(null);
     }
 
     registerDelete(parent, element, index, mode) {
@@ -820,7 +809,7 @@ PropertyMetadata.registerForType(Artboard, {
         defaultValue: null,
         options: {
             items: [
-                { name: "None", value: null },
+                { name: "Regular", value: null },
                 { name: "Stencil", value: ArtboardResource.Stencil },
                 { name: "Template", value: ArtboardResource.Template },
                 { name: "Frame", value: ArtboardResource.Frame },
@@ -882,15 +871,15 @@ PropertyMetadata.registerForType(Artboard, {
     groups: function () {
         return [
             {
-                label: "Appearance",
-                expanded: false,
-                properties: ["visible", "fill", "frame"]
-            },
-            {
                 label: "Layout",
                 properties: ["width", "height", "x", "y"],
                 expanded: true
             },
+            {
+                label: "Appearance",
+                expanded: false,
+                properties: ["visible", "fill", "frame"]
+            },            
             {
                 label: "States",
                 properties: ["states"],

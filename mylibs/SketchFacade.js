@@ -47,7 +47,6 @@ module.exports = {
     "CompositeElement": require("./framework/CompositeElement"),
     "Frame": require("./framework/Frame"),
     "FrameSource": require("./framework/FrameSource"),
-    "NoSelectionElement": require("./framework/NoSelectionElement"),
     "Container": require("./framework/Container"),
     "GroupContainer": require("./framework/GroupContainer"),    
     "Page": require("./framework/Page"),

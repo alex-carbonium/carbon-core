@@ -96,7 +96,7 @@ export class RenderLoop {
         this.ensureCanvasSize();
         app.platform.detachEvents();
         app.platform.attachEvents(this.viewContainer);
-        Keyboard.attach(this.viewContainer);
+        Keyboard.attach(document.body);
         view.attachToDOM(this.context, this.upperContext, this.viewContainer, redrawCallback.bind(this), cancelRedrawCallback.bind(this), renderingScheduledCallback.bind(this));
         view.middleContext = this.middleContext;
         var controller = new DesignerController(app, view, {SelectComposite, DraggingElement, SelectFrame});

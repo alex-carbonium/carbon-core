@@ -112,9 +112,6 @@ export default class RulerExtension extends RuntimeExtension {
     }
 
     onArtboardChanged(artboard: Artboard) {
-        if (!artboard) {
-            return;
-        }
         this.setOrigin(artboard);
         this._rulerGuides.setGuides(artboard);
     }
@@ -125,7 +122,13 @@ export default class RulerExtension extends RuntimeExtension {
     }
 
     setOrigin(artboard: Artboard) {
-        if (!artboard) {
+        this._artboardActive = !!artboard;
+
+        if (!this._artboardActive) {
+            this._originX = 0;
+            this._originY = 0;
+            this._originWidth = 0;
+            this._originHeight = 0;
             return;
         }
         if (this._origin) {
@@ -139,8 +142,7 @@ export default class RulerExtension extends RuntimeExtension {
         this._originX = Math.round(bb.x * this._settings.scale);
         this._originY = Math.round(bb.y * this._settings.scale);
         this._originWidth = bb.width * this._settings.scale + .5 | 0;
-        this._originHeight = bb.height * this._settings.scale + .5 | 0;
-        this._artboardActive = artboard !== NullArtboard;
+        this._originHeight = bb.height * this._settings.scale + .5 | 0;        
 
         this._rulerGuides.setOrigin(artboard);
     }
