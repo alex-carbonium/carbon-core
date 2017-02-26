@@ -521,7 +521,7 @@ class Matrix {
         return {
             translation: this.getTranslation(),
             rotation: rotate*degrees,
-            scaling: new Point(scale),
+            scaling: new Point(scale[0], scale[1]),
             skewing: new Point(skew[0]*degrees, skew[1]*degrees)
         };
     }

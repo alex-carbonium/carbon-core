@@ -63,9 +63,9 @@ export default class CompositeElement extends UIElement implements IComposite {
         }
     }
 
-    applyScaling(s, o, options) {                        
+    applyScaling(s, o, options, changeMode) {
         var resizeOptions = options && options.forChildResize(false);
-        this.elements.forEach(e => e.applyScaling(s, o, resizeOptions));
+        this.elements.forEach(e => e.applyScaling(s, o, resizeOptions, changeMode));
         this.performArrange();
     }
 
@@ -206,7 +206,7 @@ export default class CompositeElement extends UIElement implements IComposite {
         if(this.elements.length === 1){
             return this.elements[0].findPropertyDescriptor(propName);
         }
-        
+
         return PropertyMetadata.find(this._types[0], propName);
     }
     allHaveSameType() {
@@ -266,7 +266,7 @@ export default class CompositeElement extends UIElement implements IComposite {
                 }
             }
         }
-    
+
         return baseGroups;
     }
 

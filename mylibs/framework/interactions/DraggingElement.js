@@ -5,7 +5,7 @@ import Artboard from "../Artboard";
 import Invalidate from "../Invalidate";
 import {areRectsIntersecting} from "../../math/math";
 import Point from "../../math/point";
-import InteractiveElement from "./InteractiveElement";
+import TransformationElement from "./TransformationElement";
 import ArrangeStrategy from "../ArrangeStrategy";
 import Brush from "../Brush";
 import Environment from "../../environment";
@@ -22,7 +22,7 @@ function applyOrthogonalMove(pos) {
     }
 }
 
-class DraggingElement extends InteractiveElement {
+class DraggingElement extends TransformationElement {
     constructor(elementOrComposite, event) {
         super(elementOrComposite);
 
@@ -186,6 +186,10 @@ class DraggingElement extends InteractiveElement {
 
     isDropSupported(){
         return !this._elements.some(x => !x.isDropSupported());
+    }
+
+    showResizeHint(){
+        return !this._elements.some(x => !x.showResizeHint());
     }
 
     allowMoveOutChildren(event){

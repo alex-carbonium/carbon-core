@@ -112,8 +112,8 @@ class Line extends Shape {
         return false;
     }
 
-    applySizeScaling(s, o, options) {
-        this.applyMatrixScaling(s, o, options);
+    applySizeScaling(s, o, options, changeMode) {
+        this.applyMatrixScaling(s, o, options, changeMode);
     }
 
     hitTest(/*Point*/point, scale) {
@@ -200,7 +200,7 @@ class Line extends Shape {
         context.miterLimit = this.props.miterLimit;
 
         this.drawPath(context, w, h);
-        
+
         Brush.fill(this.fill(), context, 0, 0, w, h);
         Brush.stroke(this.stroke(), context, 0, 0, w, h);
 

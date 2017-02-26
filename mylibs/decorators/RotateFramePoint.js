@@ -1,7 +1,6 @@
 import CrazyScope from "../framework/CrazyManager";
 import UIElement from "../framework/UIElement";
 import Invalidate from "../framework/Invalidate";
-import Cursor from "../framework/Cursor";
 import Environment from "../environment";
 import {Types, RotationCursors} from "../framework/Defs";
 import Point from "../math/point";
@@ -29,59 +28,68 @@ export default {
         // context.fillStyle = 'red';
         // context.fill();
     },
-    rotateCursorPointer: function (index, angle) {
-        var dc = ~~(((360 - angle + 23) % 360) / 45);
+    rotateCursorPointer: function (index, angle, flipped: boolean) {
+        var alpha = angle;
+        if (flipped){
+            alpha = 90 + angle;
+            index = 8 - index;
+        }
+
+        if (alpha < 0){
+            alpha = 360 + alpha;
+        }
+        var dc = ~~(((360 - alpha + 23) % 360) / 45);
         return (index + dc) % 8;
     },
     capture: function (frame, point, mousePoint) {
-        var resizingElement = UIElement.construct(Types.TransformationElement, frame.element);
+        var resizingElement = UIElement.construct(Types.ResizeRotateElement, frame.element);
         frame.resizingElement = resizingElement;
         frame.originalRect = frame.element.getBoundaryRect();
         frame.origin = frame.element.center(true);
         frame.captureVector = new Point(mousePoint.x - frame.origin.x, mousePoint.y - frame.origin.y);
         frame.initialAngle = frame.element.angle();
+        if (frame.initialAngle < 0){
+            frame.initialAngle = 360 + frame.initialAngle;
+        }
+        frame.flipped = frame.element.isFlipped(true);
 
         Environment.view.layer3.add(resizingElement);
-        Environment.controller.startRotatingEvent.raise();
+        Environment.controller.startRotatingEvent.raise({transformationElement: frame.resizingElement});
     },
     release: function (frame, point, event) {
         if (frame.resizingElement) {
             frame.resizingElement.detach();
             frame.resizingElement.saveChanges();
 
-            if (Cursor.hasGlobalCursor()){
-                Cursor.setCursor(Cursor.getGlobalCursor());
-            }
-                        
             Environment.controller.stopRotatingEvent.raise();
         }
     },
-    change: function (frame, dx, dy, point, mousePoint, keys) {
+    change: function (frame, dx, dy, point, mousePoint, keys, event: IMouseEventData) {
         if (!frame.resizingElement) {
             return;
         }
 
         var v = new Point(mousePoint.x - frame.origin.x, mousePoint.y - frame.origin.y);
         var angle = v.getDirectedAngle(frame.captureVector);
-        var fullAngle = Math.round(frame.initialAngle + angle);
 
         if (keys.shift) {
+            var fullAngle = Math.round(frame.initialAngle + angle);
             fullAngle = Math.round(fullAngle / 15) * 15;
             angle = fullAngle - frame.initialAngle;
         }
         else{
             angle = Math.round(angle);
-        }        
+        }
 
         frame.resizingElement.applyRotation(angle, frame.origin, true);
         Invalidate.requestUpperOnly();
-        
-        Environment.controller.rotatingEvent.raise({element: frame.element, angle: fullAngle, mouseX: mousePoint.x, mouseY: mousePoint.y, interactiveElement: frame.resizingElement});
 
-        Cursor.setCursor(this._getCursor(point, fullAngle));
+        var newAngle = frame.resizingElement.angle();
+        Environment.controller.rotatingEvent.raise({element: frame.element, angle: newAngle, mouseX: mousePoint.x, mouseY: mousePoint.y, transformationElement: frame.resizingElement});
+        event.cursor = this._getCursor(point, newAngle, frame.flipped);
     },
-    _getCursor: function(point, angle){
-        var cursorIndex = this.rotateCursorPointer(point.cursor, angle);
+    _getCursor: function(point, angle, flipped){
+        var cursorIndex = this.rotateCursorPointer(point.cursor, angle, flipped);
         return this.cursorSet[cursorIndex];
     }
 }

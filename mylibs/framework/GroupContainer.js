@@ -11,9 +11,12 @@ import GlobalMatrixModifier from "./GlobalMatrixModifier";
 require("./GroupArrangeStrategy");
 
 export default class GroupContainer extends Container implements IGroupContainer {
-    hitTest(point: IPoint, scale: number) {
+    hitTest(point: IPoint, scale: number, boundaryRectOnly = false) {
         if (!super.hitTest(point, scale)) {
             return false;
+        }
+        if (boundaryRectOnly){
+            return true;
         }
         for (var i = this.children.length - 1; i >= 0; --i) {
             var el = this.children[i];
@@ -38,14 +41,14 @@ export default class GroupContainer extends Container implements IGroupContainer
         return false;
     }
 
-    applySizeScaling(s, o, options) {
+    applySizeScaling(s, o, options, changeMode) {
         UIElement.prototype.applySizeScaling.apply(this, arguments);
 
         //if group is flipped, scale children normally
         var absScale = s.abs();
         var round = this.children.length === 1;
         var resizeOptions = options && options.forChildResize(round && options.round);
-        this.children.forEach(e => e.applyScaling(absScale, Point.Zero, resizeOptions));
+        this.children.forEach(e => e.applyScaling(absScale, Point.Zero, resizeOptions, changeMode));
     }
 
     strokeBorder(context, w, h) {

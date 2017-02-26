@@ -41,7 +41,7 @@ var LineDirectionPoint = {
         context.stroke();
     },
     capture (frame) {
-        var resizingElement = UIElement.construct(Types.TransformationElement, frame.element);
+        var resizingElement = UIElement.construct(Types.ResizeRotateElement, frame.element);
         resizingElement.stroke(Brush.None);
         resizingElement.strokeFrame = false;
         frame.resizingElement = resizingElement;

@@ -5,6 +5,7 @@ import ActiveFrame from "../decorators/ActiveFrame";
 import PropertyMetadata from "../framework/PropertyMetadata";
 import {Types} from "../framework/Defs";
 import {ContentSizing} from "./Defs";
+import {ITransformationEventData} from "./CoreModel";
 
 var ContentFrameType = Object.create(DefaultFrameType);
 ContentFrameType.strokeStyle = null;
@@ -62,9 +63,9 @@ export default class FrameContent extends UIElement{
         context.restore();
     }
 
-    _onStopDragging(event){
-        if (event.interactiveElement.elements.length === 1 && event.interactiveElement.elements[0] === this){
-            var child = event.interactiveElement.children[0];
+    _onStopDragging(event: ITransformationEventData){
+        if (event.transformationElement.elements.length === 1 && event.transformationElement.elements[0] === this){
+            var child = event.transformationElement.children[0];
             this.setProps(child.selectLayoutProps(true));
         }
     }

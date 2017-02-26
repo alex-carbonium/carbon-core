@@ -67,7 +67,7 @@ function updateSelectedPoint(pt) {
             this.runtimeProps.currentPointX = pt.x;
             this.runtimeProps.currentPointY = pt.y;
             this._selectedPoint.type = pt.type;
-        }         
+        }
         this.setProps({selectedPointIdx: pt ? pt.idx : -1}, ChangeMode.Self);
         Selection.reselect();
     }
@@ -81,7 +81,7 @@ function addToSelectedPoints(pt) {
         delete this._selectedPoints[pt.idx];
     } else {
         this._selectedPoints[pt.idx] = pt;
-    }    
+    }
 
     if (this.props.selectedPointIdx !== -1 && Object.keys(this._selectedPoints).length > 1){
         this.setProps({selectedPointIdx: -1}, ChangeMode.Self);
@@ -502,7 +502,7 @@ class Path extends Shape {
                 }
             } else {
                 this.switchToEditMode(false);
-            }            
+            }
         }
 
         return this.props.mode;
@@ -538,7 +538,7 @@ class Path extends Shape {
         } else {
             this.unregisterForLayerDraw(2, this);
             Invalidate.request();
-            
+
             this._cancelBinding = null;
             SnapController.clearActiveSnapLines();
             this.nextPoint = null;
@@ -611,7 +611,7 @@ class Path extends Shape {
 
         if (changeMode !== ChangeMode.Self){
             this.save();
-        }        
+        }
     }
 
     length() {
@@ -619,12 +619,12 @@ class Path extends Shape {
     }
 
     select() {
-        this._selected = true;        
+        this._selected = true;
         this._enterBinding = Environment.controller.actionManager.subscribe('enter', this.enter.bind(this));
     }
 
     unselect() {
-        this._selected = false;        
+        this._selected = false;
 
         if (this._enterBinding) {
             this._enterBinding.dispose();
@@ -637,7 +637,7 @@ class Path extends Shape {
     }
 
     edit() {
-        this.mode("edit");        
+        this.mode("edit");
     }
 
     dblclick(event, scale) {
@@ -800,7 +800,7 @@ class Path extends Shape {
             addToSelectedPoints.call(this, pt);
         } else if (!pt || !this._selectedPoints[pt.idx]) {
             clearSelectedPoints.call(this);
-        }                   
+        }
 
         if (pt != null) {
             event.handled = true;
@@ -823,7 +823,7 @@ class Path extends Shape {
             } else if (this._pointOnPath) {
                 event.handled = true;
 
-                if (keys.shift) {                                        
+                if (keys.shift) {
                     var data = this.getInsertPointData(this._pointOnPath);
                     if (data.length === 1) {
                         var newPoint = this.insertPointAtIndex(data[0], data[0].idx);
@@ -843,7 +843,7 @@ class Path extends Shape {
                     this._bendingData = this.calculateOriginalBendingData(this._pointOnPath);
                     // set bending handler
                     this._pointOnPath = null;
-                }                
+                }
             }
         }
 
@@ -980,9 +980,9 @@ class Path extends Shape {
         }
         else if (this.isHoveringOverPoint()){
             event.cursor = "pen_move_point";
-        }        
+        }
         else if (this.isHoveringOverSegment()){
-            event.cursor = keys.shift ? "pen_add_point" : "pen_move_segment"; 
+            event.cursor = keys.shift ? "pen_add_point" : "pen_move_segment";
         }
         else{
             event.cursor = Environment.controller.defaultCursor();
@@ -1019,7 +1019,7 @@ class Path extends Shape {
         }
     }
 
-    hitTest(point, scale) {
+    hitTest(point, scale, boundaryRectOnly = false) {
         if (this._currentPoint || this._handlePoint || this._pointOnPath) {
             return true;
         }
@@ -1030,6 +1030,10 @@ class Path extends Shape {
         }
         var res = UIElement.prototype.hitTest.apply(this, arguments);
         if (res) {
+            if (boundaryRectOnly){
+                return true;
+            }
+
             var brush = this.fill();
             if (!brush || !brush.type) {
                 var p = this.getPointIfClose(point, 8);
@@ -1188,8 +1192,8 @@ class Path extends Shape {
         }
     }
 
-    applySizeScaling(s, o, options) {
-        this.applyMatrixScaling(s, o, options);
+    applySizeScaling(s, o, options, changeMode) {
+        this.applyMatrixScaling(s, o, options, changeMode);
     }
 
     shouldApplyViewMatrix(){
@@ -1411,7 +1415,7 @@ class Path extends Shape {
     }
 
     isHoveringOverSegment(): boolean{
-        return !!this._pointOnPath;        
+        return !!this._pointOnPath;
     }
     isHoveringOverHandle(): boolean{
         return !!this._hoverHandlePoint;
@@ -1551,7 +1555,7 @@ class Path extends Shape {
     currentPointX(value: number, changeMode: ChangeMode): number{
         if (arguments.length && this._selectedPoint){
             var newPoint = Object.assign({}, this._selectedPoint);
-            newPoint.x = value;            
+            newPoint.x = value;
             this._selectedPoint = newPoint;
             this.changePointAtIndex(newPoint, newPoint.idx, changeMode);
             this.runtimeProps.currentPointX = newPoint.x;
@@ -1562,8 +1566,8 @@ class Path extends Shape {
     currentPointY(value: number, changeMode: ChangeMode): number{
         if (arguments.length && this._selectedPoint){
             var newPoint = Object.assign({}, this._selectedPoint);
-            newPoint.y = value;            
-            this._selectedPoint = newPoint;            
+            newPoint.y = value;
+            this._selectedPoint = newPoint;
             this.changePointAtIndex(newPoint, newPoint.idx, changeMode);
             this.runtimeProps.currentPointY = newPoint.y;
             Invalidate.request();
@@ -1572,7 +1576,7 @@ class Path extends Shape {
     }
     currentPointType(value: PointType, changeMode: ChangeMode): PointType{
         if (arguments.length && this._selectedPoint){
-            this._selectedPoint.type = value;            
+            this._selectedPoint.type = value;
             Invalidate.request();
             Selection.reselect();
         }
@@ -2039,15 +2043,15 @@ PropertyMetadata.registerForType(Path, {
                 {
                     label: path.displayType(),
                     properties: ["pointRounding"]
-                },                
+                },
                 {
                     label: "@selectedPoint",
                     properties: ["currentPointX", "currentPointY", "currentPointType"]
                 },
                 baseGroups.find(x => x.label === "Appearance"),
-                baseGroups.find(x => x.label === "@shadow")                
+                baseGroups.find(x => x.label === "@shadow")
             ];
-        }        
+        }
 
         return baseGroups;
     },

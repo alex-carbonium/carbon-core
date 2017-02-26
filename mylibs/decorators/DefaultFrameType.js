@@ -66,7 +66,7 @@ export default {
             dx = -point.x + pt.x;
         }
 
-        point.type.change(frame, dx, dy, point, frame._mousePoint, keys);
+        point.type.change(frame, dx, dy, point, frame._mousePoint, keys, event);
     },
     releasePoint: function (frame, point, event) {
         point.type.release(frame, point, event);

@@ -303,7 +303,7 @@ export var Types = {
     'Box': 'B',
     'Shadow': 'i',
     'TransformationElement': 'te',
-    'InteractiveElement': 'in'
+    'ResizeRotateElement': 'rr'
 };
 
 if (DEBUG){
@@ -357,3 +357,5 @@ export var LineJoin = {
     Bevel: 1,
     Round: 2
 };
+
+export var FloatingPointPrecision = 10;

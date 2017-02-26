@@ -1,61 +1,138 @@
-import {Types} from "../Defs";
+import GroupContainer from "../GroupContainer";
+import CompositeElement from "../CompositeElement";
+import { ChangeMode, Types } from "../Defs";
+import Phantom from "../Phantom";
+import Brush from "../Brush";
 import PropertyMetadata from "../PropertyMetadata";
-import InteractiveElement from "./InteractiveElement";
-import ArrangeStrategy from "../ArrangeStrategy";
+import DefaultSettings from "../../DefaultSettings";
+import Selection from "../SelectionModel";
+import Environment from "../../environment";
+import GlobalMatrixModifier from "../../framework/GlobalMatrixModifier";
+import { IComposite } from "../CoreModel";
 
-export default class TransformationElement extends InteractiveElement{
-    constructor(element){
-        super(element);
+export default class TrasnformationElement extends GroupContainer implements IComposite {
+    constructor(element) {
+        super();
 
-        this._lastScaling = null;
-        this._lastRotation = null;
+        this._decorators = [];
+        this._elements = [];
+
+        var elements = element instanceof CompositeElement ? element.elements : [element];
+
+        for (var i = 0; i < elements.length; i++) {
+            var e = elements[i];
+            this._hideDecorators(e);
+            this.add(this.createClone(e));
+
+            this._elements.push(e);
+        }
+        this._hideDecorators(element);
+
+        this.performArrange();
+
+        this.showOriginal(false);
     }
 
-    createClone(element){
-        var clone = element.clone();
-        clone.setProps(element.selectLayoutProps(true));
-        clone.runtimeProps.isTransformationClone = true;
-        return clone;
+    _hideDecorators(e) {
+        if (e.decorators) {
+            e.decorators.forEach(x => {
+                if (x.visible()) {
+                    x.visible(false);
+                    this._decorators.push(x);
+                }
+            });
+        }
     }
 
-    applySizeScaling(s, o, options){
-        super.applySizeScaling(s, o, options);
-        this._lastScaling = {s, o, options};
-    }
+    strokeBorder(context, w, h) {
+        if (Brush.canApply(this.stroke())) {
+            context.save();
+            var scale = Environment.view.scale();
+            context.scale(1 / scale, 1 / scale);
+            context.beginPath();
 
-    applyRotation(angle, o, withReset, mode){
-        super.applyRotation(angle, o, withReset, mode);
-        this._lastRotation = {angle, o};
-    }
-
-    saveChanges(){
-        super.saveChanges();
-
-        for (var i = 0; i < this.children.length; i++){
-            var element = this.elements[i];
-            var clone = this.children[i];
-
-            if (this._lastScaling){
-                var globalOrigin = this._lastScaling.o;
-                var localOrigin = element.parent().globalViewMatrixInverted().transformPoint(globalOrigin);
-                var sameDirection = this.children.length === 1 || this.isRotated();
-                var round = this._lastScaling.options.round && this.children.length === 1;                
-                var resizeOptions = this._lastScaling.options.withSameDirection(sameDirection);
-                resizeOptions = resizeOptions.withReset(false).withRounding(round);
-                element.applyScaling(this._lastScaling.s, localOrigin, resizeOptions);
+            GlobalMatrixModifier.pushPrependScale();
+            try {
+                if (this.children.length === 1) {
+                    this.children[0].drawBoundaryPath(context, false);
+                }
+                else {
+                    this.drawBoundaryPath(context, false);
+                }
+                Brush.stroke(this.stroke(), context);
             }
-            if (this._lastRotation){
-                element.setTransform(element.parent().globalViewMatrixInverted().appended(clone.globalViewMatrix()));
+            finally {
+                GlobalMatrixModifier.pop();
+            }
+
+            context.restore();
+        }
+    }
+
+    createClone(element) {
+        return new Phantom(element, element.selectLayoutProps(true));
+    }
+
+    showOriginal(value) {
+        this._elements.forEach(x => x.setProps({ visible: value }, ChangeMode.Self));
+    }
+
+    saveChanges() {
+    }
+
+    refreshSelection() {
+        Selection.refreshSelection();
+    }
+
+    detach() {
+        this.showOriginal(true);
+
+        if (this._decorators) {
+            this._decorators.forEach(x => x.visible(true));
+            this._decorators = null;
+        }
+
+        this.parent().remove(this, ChangeMode.Self);
+    }
+
+    allHaveSameParent() {
+        if (this._elements.length === 0){
+            return false;
+        }
+
+        var result = true;
+        var parent = this._elements[0].parent();
+        for (let i = 1; i < this._elements.length; ++i){
+            if (this._elements[i].parent() !== parent){
+                result = false;
+                break;
             }
         }
 
-        if (this._lastScaling || this._lastRotation){
-            ArrangeStrategy.arrangeRoots(this.elements);
-        }
-        this.refreshSelection();
+        return result;
+    }
+
+    hitTest() {
+        return false;
+    }
+
+    canDrag() {
+        return false;
+    }
+
+    isTemporary() {
+        return true;
+    }
+
+    get elements() {
+        return this._elements;
     }
 }
 
-TransformationElement.prototype.t = Types.TransformationElement;
+TrasnformationElement.prototype.t = Types.TransformationElement;
 
-PropertyMetadata.registerForType(TransformationElement, {});
+PropertyMetadata.registerForType(TrasnformationElement, {
+    stroke: {
+        defaultValue: Brush.createFromColor(DefaultSettings.frame.stroke)
+    }
+});

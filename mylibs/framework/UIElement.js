@@ -21,7 +21,8 @@ import {
     Overflow,
     HorizontalAlignment,
     VerticalAlignment,
-    PointDirection
+    PointDirection,
+    ChangeMode
 } from "./Defs";
 import RotateFramePoint from "../decorators/RotateFramePoint";
 import ResizeFramePoint from "../decorators/ResizeFramePoint";
@@ -285,11 +286,7 @@ export default class UIElement extends DataNode {
 
     getRotation(global: boolean = false) {
         var decomposed = global ? this.gdm() : this.dm();
-        var angle = -decomposed.rotation;
-        if (angle < 0) {
-            angle = 360 + angle;
-        }
-        return angle;
+        return -decomposed.rotation;
     }
     applyRotation(angle, o, withReset, mode) {
         if (withReset) {
@@ -300,30 +297,36 @@ export default class UIElement extends DataNode {
     isRotated(global: boolean = false): boolean {
         return this.getRotation(global) % 360 !== 0;
     }
+    isFlipped(global: boolean = false): boolean{
+        var decomposed = global ? this.gdm() : this.dm();
+        //it is more complex to check if element is flipped vertically or horizontally.
+        //y scaling is always -1 for flipped matrix, and angle changes depending on whether it is x or y flip.
+        return Math.round(decomposed.scaling.y) === -1;
+    }
     canRotate(): boolean{
         return true;
     }
 
-    applyScaling(s, o, options) {
+    applyScaling(s, o, options, changeMode: ChangeMode) {
         if (options && options.reset) {
             this.saveOrResetLayoutProps();
         }
 
         if ((options && options.sameDirection) || !this.isRotated()) {
-            this.applySizeScaling(s, o, options);
+            this.applySizeScaling(s, o, options, changeMode);
             return true;
         }
 
-        this.applyMatrixScaling(s, o, options);
+        this.applyMatrixScaling(s, o, options, changeMode);
         return false;
     }
-    applyMatrixScaling(s, o, options) {
+    applyMatrixScaling(s, o, options, changeMode: ChangeMode) {
         if (options && options.sameDirection) {
             var localOrigin = this.viewMatrixInverted().transformPoint(o);
-            this.applyTransform(Matrix.create().scale(s.x, s.y, localOrigin.x, localOrigin.y), true);
+            this.applyTransform(Matrix.create().scale(s.x, s.y, localOrigin.x, localOrigin.y), true, changeMode);
         }
         else {
-            this.applyTransform(Matrix.create().scale(s.x, s.y, o.x, o.y));
+            this.applyTransform(Matrix.create().scale(s.x, s.y, o.x, o.y), changeMode);
         }
     }
 
@@ -341,7 +344,7 @@ export default class UIElement extends DataNode {
      *
      * Flip is detected by negative width/height, in which case the matrix is reflected relative to origin.
      */
-    applySizeScaling(s, o, options) {
+    applySizeScaling(s, o, options, changeMode: ChangeMode) {
         var br = this.getBoundaryRect();
         var newWidth = br.width * s.x;
         var newHeight = br.height * s.y;
@@ -390,7 +393,7 @@ export default class UIElement extends DataNode {
             newProps.m.ty = Math.round(newProps.m.ty);
         }
 
-        this.prepareAndSetProps(newProps);
+        this.prepareAndSetProps(newProps, changeMode);
     }
 
     applyTransform(matrix, append, mode) {
@@ -587,7 +590,7 @@ export default class UIElement extends DataNode {
 
     getBoundingBox(includeMargin: boolean = false): IRect {
         var rect = this.getBoundaryRect(includeMargin);
-        return this.transformRect(rect, this.viewMatrix());
+        return this.transformBoundingRect(rect, this.viewMatrix());
     }
 
     getBoundingBoxGlobal(includeMargin: boolean = false): IRect {
@@ -596,17 +599,17 @@ export default class UIElement extends DataNode {
         }
 
         var rect = this.getBoundaryRect(includeMargin);
-        var bb = this.transformRect(rect, this.globalViewMatrix());
+        var bb = this.transformBoundingRect(rect, this.globalViewMatrix());
         this.runtimeProps.globalClippingBox = bb;
         return bb;
     }
     getBoundingBoxRelativeToRoot(): IRect {
         var m = this.rootViewMatrix();
         var rect = this.getBoundaryRect();
-        return this.transformRect(rect, m);
+        return this.transformBoundingRect(rect, m);
     }
 
-    transformRect(rect, matrix) {
+    transformBoundingRect(rect, matrix) {
         if (matrix.isTranslatedOnly()) {
             return rect.translate(matrix.tx, matrix.ty);
         }
@@ -678,11 +681,11 @@ export default class UIElement extends DataNode {
         return new Rect(x, y, width, height);
     }
 
-    hitTest(/*Point*/point, scale, includeMargin = false) {
+    hitTest(/*Point*/point, scale, boundaryRectOnly = false) {
         if (!this.visible()) {
             return false;
         }
-        var rect = this.getHitTestBox(scale, includeMargin);
+        var rect = this.getHitTestBox(scale, false);
 
         var matrix = this.globalViewMatrixInverted();
         point = matrix.transformPoint(point);
@@ -777,8 +780,9 @@ export default class UIElement extends DataNode {
     draw(context, environment) {
         this.stopwatch.start();
 
-        var w = this.width(),
-            h = this.height();
+        var br = this.br(),
+            w = br.width,
+            h = br.height;
 
         context.save();
         context.globalAlpha = context.globalAlpha * this.opacity();
@@ -989,7 +993,7 @@ export default class UIElement extends DataNode {
             return this.getBoundingBox().x;
         }
         let m = root.globalViewMatrixInverted().appended(this.globalViewMatrix());
-        return this.transformRect(this.getBoundaryRect(), m).x;
+        return this.transformBoundingRect(this.getBoundaryRect(), m).x;
     }
     y(value, changeMode) {
         if (arguments.length !== 0) {
@@ -1004,21 +1008,37 @@ export default class UIElement extends DataNode {
             return this.getBoundingBox().y;
         }
         let m = root.globalViewMatrixInverted().appended(this.globalViewMatrix());
-        return this.transformRect(this.getBoundaryRect(), m).y;
+        return this.transformBoundingRect(this.getBoundaryRect(), m).y;
     }
     width(value, changeMode) {
         if (arguments.length !== 0) {
-            var br = this.br();
-            this.setProps({ br: br.withSize(value, br.height) }, changeMode);
+            var s = new Point(value/this.width(), 1);
+            var o = this.viewMatrix().transformPoint(this.br().centerLeft());
+            var resizeOptions = new ResizeOptions(true, false, false);
+            this.applyScaling(s, o, resizeOptions, changeMode);
         }
-        return this.br().width;
+
+        var gm = this.globalViewMatrix();
+        var scaling = 1;
+        if (!gm.isTranslatedOnly()){
+            scaling = this.gdm().scaling.x || 1;
+        }
+        return this.br().width * scaling;
     }
     height(value, changeMode) {
         if (arguments.length !== 0) {
-            var br = this.br();
-            this.setProps({ br: br.withSize(br.width, value) }, changeMode);
+            var s = new Point(1, value/this.height());
+            var o = this.viewMatrix().transformPoint(this.br().centerTop());
+            var resizeOptions = new ResizeOptions(true, false, false);
+            this.applyScaling(s, o, resizeOptions, changeMode);
         }
-        return this.br().height;
+
+        var gm = this.globalViewMatrix();
+        var scaling = 1;
+        if (!gm.isTranslatedOnly()){
+            scaling = this.gdm().scaling.y || 1;
+        }
+        return this.br().height * scaling;
     }
     angle(value, changeMode) {
         if (arguments.length !== 0) {
@@ -2145,7 +2165,7 @@ PropertyMetadata.registerForType(UIElement, {
             {
                 label: "Appearance",
                 properties: ["fill", "stroke", "opacity"]
-            },                        
+            },
             {
                 label: "@constraints",
                 properties: ["constraints"]

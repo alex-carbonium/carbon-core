@@ -100,6 +100,13 @@ export default class Rect{
     center(){
         return new Point(this.x + this.width/2, this.y + this.height/2);
     }
+    centerLeft(){
+        return new Point(this.x, this.y + this.height/2);
+    }
+    centerTop(){
+        return new Point(this.x + this.width/2, this.y);
+    }
+
     topLeft(){
         if (this.x === 0 && this.y === 0){
             return Point.Zero;

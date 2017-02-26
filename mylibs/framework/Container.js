@@ -13,7 +13,7 @@ import Rect from '../math/rect';
 
 var fwk = window.sketch.framework;
 
-export default class Container extends UIElement {        
+export default class Container extends UIElement {
     children: UIElement[];
 
     constructor() {
@@ -104,7 +104,7 @@ export default class Container extends UIElement {
 
         this.drawDecorators(context, w, h, environment);
     }
-    
+
     modifyContextBeforeDrawChildren(context) {
 
     }
@@ -146,7 +146,7 @@ export default class Container extends UIElement {
         offContext.save();
         offContext.translate(-p1.x, -p1.y);
         environment.setupContext(offContext);
-        
+
         this.renderAfterMask(offContext, items, i, environment);
 
         offContext.beginPath();
@@ -240,20 +240,20 @@ export default class Container extends UIElement {
         return super.getBoundingBox(includeMargin);
     }
 
-    hitTest(/*Point*/point, scale, includeMargin = false) {        
+    hitTest(/*Point*/point, scale, boundaryRectOnly = false) {
          if(this.runtimeProps.mask && this.lockedGroup()) {
-            return this.runtimeProps.mask.hitTest(point, scale, includeMargin );
+            return this.runtimeProps.mask.hitTest(point, scale, boundaryRectOnly);
         }
 
-        return super.hitTest(point, scale, includeMargin);
+        return super.hitTest(point, scale, boundaryRectOnly);
     }
-   
+
     getBoundaryRect(includeMargin: boolean = false) : IRect {
         var mask = this.runtimeProps.mask;
         if(mask && this.lockedGroup()) {
             var rect = mask.getBoundaryRect(includeMargin);
             var pos = mask.position();
-            return new Rect(pos.x, pos.y, rect.width, rect.height);            
+            return new Rect(pos.x, pos.y, rect.width, rect.height);
         }
 
         return super.getBoundaryRect(includeMargin);
@@ -330,7 +330,7 @@ export default class Container extends UIElement {
         var padding = this.padding();
         return this.width() - padding.left - padding.right;
     }
-    
+
     allowMoveOutChildren(value) {
         //should not check on args length
         if (value !== undefined) {
@@ -338,7 +338,7 @@ export default class Container extends UIElement {
         }
         return this.props.allowMoveOutChildren;
     }
-    
+
     add(/*UIElement*/element, mode) {
         return this.insert(element, this.children.length, mode);
     }
@@ -346,8 +346,8 @@ export default class Container extends UIElement {
     insert(/*UIElement*/element, /*int*/index, mode) {
         this.acquiredChild(element, mode);
 
-        this.insertChild(element, index, mode);        
-        
+        this.insertChild(element, index, mode);
+
         return element;
     }
 
@@ -365,7 +365,7 @@ export default class Container extends UIElement {
     contains(element) {
         return this.positionOf(element) !== -1;
     }
-    
+
     positionOf(element) {
         return this.children.indexOf(element);
     }
@@ -410,7 +410,7 @@ export default class Container extends UIElement {
     canInsert(element, index) {
         return true;
     }
-   
+
 
     releasingChild(child) {
         //child.onresize.unbind(this._childResizeHandler);
@@ -451,10 +451,18 @@ export default class Container extends UIElement {
         }
     }
     hitElement(/*Point*/position, scale, predicate, directSelection) {
-        var hitTest = predicate || this.hitTest;
-        if (!(this.hitVisible(directSelection) && hitTest.call(this, position, scale))) {
+        if (!this.hitVisible(directSelection)) {
             return null;
         }
+        if (predicate){
+            if (!predicate(this, position, scale)){
+                return null;
+            }
+        }
+        else if (!this.hitTest(position, scale)){
+            return null;
+        }
+
         var hitElement = this.hitTransparent() ? null : this;
 
         //position = sketch.math2d.rotatePoint(position, this.angle() * Math.PI / 180, this.rotationOrigin(true));
@@ -722,7 +730,7 @@ export default class Container extends UIElement {
     isAtomicInModel(value) {
         return this.field("_isAtomicInModel", value, false);
     }
-   
+
     getElementById(id) {
         var res = null;
         if (this.id() === id) {
@@ -737,7 +745,7 @@ export default class Container extends UIElement {
 
         return res;
     }
- 
+
     findSingleChildOrDefault(predicate) {
         var result = null;
         this.applyVisitor(function (el) {
@@ -770,7 +778,7 @@ export default class Container extends UIElement {
                 return x.toString()
             }).join(", ");
     }
-}    
+}
 
 Container.prototype.t = Types.Container;
 

@@ -182,8 +182,8 @@ class CompoundPath extends Container implements IGroupContainer{
         delete this._internalChange;
     }
 
-    applySizeScaling(s, o, options) {
-        this.applyMatrixScaling(s, o, options);
+    applySizeScaling(s, o, options, changeMode) {
+        this.applyMatrixScaling(s, o, options, changeMode);
     }
 
     flatten(){

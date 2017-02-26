@@ -44,7 +44,7 @@ require("framework/notifier");
 
 require("framework/CorruptedElement");
 require("framework/ScrollContainer");
-require("framework/interactions/TransformationElement");
+require("framework/interactions/ResizeRotateElement");
 
 require("framework/Circle");
 require("framework/Rectangle");

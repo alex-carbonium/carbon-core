@@ -1,3 +1,4 @@
+import {IPoint} from "../framework/CoreModel";
 
 var EPSILON = 1e-12;
 var TRIGONOMETRIC_EPSILON = 1e-7;
@@ -17,7 +18,7 @@ function isZero(val) {
  * console.log(point.x); // 10
  * console.log(point.y); // 5
  */
-export default class Point {
+export default class Point implements IPoint {
     /**
      * Creates a Point object with the given x and y coordinates.
      *
@@ -842,8 +843,8 @@ export default class Point {
     }
 
     roundMutableBy(m) {
-        this.x = Math.round(this.x * m) / m;        
-        this.y = Math.round(this.y * m) / m;        
+        this.x = Math.round(this.x * m) / m;
+        this.y = Math.round(this.y * m) / m;
     }
 
     ceil() {
@@ -870,3 +871,5 @@ export default class Point {
 }
 
 Point.Zero = new Point(0, 0);
+Point.BasisX = new Point(1, 0);
+Point.BasisY = new Point(0, 1);

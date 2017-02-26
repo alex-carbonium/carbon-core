@@ -101,12 +101,12 @@ class SelectionModel {
 
     setupSelectFrame(selectFrame, eventData) {
         this._selectFrame = selectFrame;
-        this.startSelectionFrameEvent.raise();      
-        this.makeSelection([]);          
+        this.startSelectionFrameEvent.raise();
+        this.makeSelection([]);
         this._selectFrame.init(eventData);
     }
 
-    updateSelectFrame(eventData) {        
+    updateSelectFrame(eventData) {
         if (this.selectedElements.length){
             this.makeSelection([]);
         }
@@ -214,7 +214,7 @@ class SelectionModel {
     }
 
     makeSelection(selection, refreshOnly, doNotTrack) {
-        var currentSelection = this._selectCompositeElement.elements;        
+        var currentSelection = this._selectCompositeElement.elements;
 
         var newSelection = this._decomposeSelection(selection);
         if (areSameArrays(currentSelection, newSelection)) {
@@ -271,6 +271,8 @@ class SelectionModel {
         var selection = this.selectedElements();
         this.makeSelection([], true);
         this.makeSelection(selection, true);
+
+        lockUnlockGroups.call(this, selection);
     }
 
     reselect(){
@@ -317,7 +319,7 @@ class SelectionModel {
             this.makeSelection(page.getAllArtboards());
             return;
         }
-        
+
         var artboard = page.getActiveArtboard();
         if (artboard){
             this.makeSelection(artboard.children);

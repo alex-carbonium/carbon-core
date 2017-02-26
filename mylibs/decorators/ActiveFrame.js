@@ -77,19 +77,27 @@ function onMouseUp(event) {
 
 function onMouseMove(event) {
     if (this._originalPoint) {
-        this._frameType.movePoint(this._frame, this._originalPoint, event);
-        event.handled = true;
         event.cursor = this._currentCursor;
+        this._frameType.movePoint(this._frame, this._originalPoint, event);
+        event.handled = true;        
         return false;
     } 
     else if (!event.handled) {
         var pointIndex = this._frameType.hitPointIndex(this._frame, event);
         if (pointIndex !== -1) {
             var p = this._frame.points[pointIndex];
-            var cursorIndex = p.type.rotateCursorPointer(p.cursor, this._frame.element.angle());
+            var cursorIndex = p.type.rotateCursorPointer(p.cursor, this._frame.element.angle(), this._frame.element.isFlipped(true));
             event.cursor = p.type.cursorSet[cursorIndex];
             this._currentCursor = event.cursor;
         }
+    }
+}
+
+function onClick(event){
+    var pointId = this._frameType.hitPointIndex(this._frame, event);    
+    if (pointId >= 0){
+        //do not let designer controller remove selection if clicking on a point, but outside the element
+        event.handled = true;
     }
 }
 
@@ -123,6 +131,7 @@ export default class ActiveFrame extends UIElementDecorator {
         this._mouseDownHandler = Environment.controller.mousedownEvent.bindHighPriority(this, onMouseDown);
         this._mouseUpHandler = Environment.controller.mouseupEvent.bindHighPriority(this, onMouseUp);
         this._mouseMoveHandler = Environment.controller.mousemoveEvent.bindHighPriority(this, onMouseMove);
+        this._clickHandler = Environment.controller.clickEvent.bindHighPriority(this, onClick);
 
         element.enablePropsTracking();
         PropertyTracker.propertyChanged.bind(this, propertyChanged);
@@ -151,6 +160,7 @@ export default class ActiveFrame extends UIElementDecorator {
         this._mouseDownHandler.dispose();
         this._mouseUpHandler.dispose();
         this._mouseMoveHandler.dispose();
+        this._clickHandler.dispose();
         this._environmentBinding.dispose();
     }
 

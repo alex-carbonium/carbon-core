@@ -13,7 +13,7 @@ import Environment from "../../environment";
 import DesignerView from "../../framework/DesignerView";
 import DefaultSettings from "../../DefaultSettings";
 import RulerGuides from "./RulerGuides";
-import { IArtboardProps, IApp, IView, IController, ILayer, IContext, IComposite, IInteractionEventData } from "../../framework/CoreModel";
+import { IArtboardProps, IApp, IView, IController, ILayer, IContext, IComposite, ITransformationEventData } from "../../framework/CoreModel";
 
 const config = DefaultSettings.ruler;
 const selectionSize = 3;
@@ -107,8 +107,8 @@ export default class RulerExtension extends RuntimeExtension {
         this.setHighlight(selection);
     }
 
-    onDragOrTransform(eventData: IInteractionEventData) {
-        this.setHighlight(eventData.interactiveElement);
+    onDragOrTransform(eventData: ITransformationEventData) {
+        this.setHighlight(eventData.transformationElement);
     }
 
     onArtboardChanged(artboard: Artboard) {

@@ -12,23 +12,130 @@ import Layer from "framework/Layer";
 import Container from "../framework/Container";
 import Environment from "../environment";
 import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
+import { ITransformationElement, ITransformationEventData, IPoint, IKeyboardState } from "../framework/CoreModel";
+import DefaultSettings from "../DefaultSettings";
+import Point from "../math/point";
+import Matrix from "../math/matrix";
+import { ChangeMode, FloatingPointPrecision } from "../framework/Defs";
 
 var HighlightBrush = Brush.createFromColor(SharedColors.Highlight);
 
-class ResizeHint extends Rectangle {
+class ResizeHint extends UIElement {
+    _transformationElement: ITransformationElement;
+
     constructor() {
         super();
-        this.fill(Brush.Black);
-        this.opacity(0.7);
+        this._text = "";
+        this._textWidth = -1;
+        this._totalWidth = -1;
+        this._hasDecimals = false;
+        this._transformationElement = null;
     }
 
-    hitVisible() {
-        return false;
+    start(transformationElement: ITransformationElement){
+        this._transformationElement = transformationElement;
+
+    }
+    stop(){
+        this._hasDecimals = false;
+        this._transformationElement = null;
+        this._text = "";
+        this._textWidth = -1;
     }
 
-    updateText(text, point) {
-        this._lastPoint = point;
+    _updatePosition(): void{
+        var anchorElement = this._transformationElement;
+        if (anchorElement.elements.length === 1 && !anchorElement.wrapSingleChild()){
+            //rotated elements are not wrapped when dragging
+            anchorElement = this._transformationElement.children[0];
+        }
+
+        var points = this._findBestPoints(anchorElement);
+        var p0 = points[0];
+        var p1 = points[1];
+        var matrix = Matrix.create();
+        matrix.translate(p0.x, p0.y);
+
+        var v1 = p1.subtract(p0);
+        matrix.rotate(-v1.getDirectedAngle(Point.BasisX));
+
+        this.setProps({width: p1.getDistance(p0), m: matrix}, ChangeMode.Self);
+    }
+
+    _findBestPoints(element: UIElement): Point[]{
+        var result = [];
+
+        var gm = element.globalViewMatrix();
+        var br = element.getBoundaryRect();
+        var p1 = gm.transformPoint2(br.x, br.y);
+        var p2 = gm.transformPoint2(br.x + br.width, br.y);
+        var p3 = gm.transformPoint2(br.x + br.width, br.y + br.height);
+        var p4 = gm.transformPoint2(br.x, br.y + br.height);
+
+        var points = [p1, p2, p3, p4];
+        var lowestIdx = 0;
+        for (var i = 1; i < points.length; ++i){
+            if (points[i].y > points[lowestIdx].y){
+                lowestIdx = i;
+            }
+        }
+
+        var lowestPoint = points[lowestIdx];
+        var other1 = lowestIdx === 0 ? points[points.length - 1] : points[lowestIdx - 1];
+        var other2 = lowestIdx === points.length - 1 ? points[0] : points[lowestIdx + 1];
+
+        var v1 = other1.subtract(lowestPoint);
+        var v2 = other2.subtract(lowestPoint);
+        var other = Math.round(v1.getAngle(Point.BasisY)) < Math.round(v2.getAngle(Point.BasisY)) ? other1 : other2;
+
+        if (other.x < lowestPoint.x){
+            result.push(other, lowestPoint);
+        }
+        else{
+            result.push(lowestPoint, other);
+        }
+
+        return result;
+    }
+
+    updateSizeText(){
+        var w = this._roundDecimal(this._transformationElement.width());
+        var h = this._roundDecimal(this._transformationElement.height());
+        this.updateText(this._formatDecimal(w) + " x " + this._formatDecimal(h));
+    }
+
+    updatePositionText(){
+        var x = this._roundDecimal(this._transformationElement.x());
+        var y = this._roundDecimal(this._transformationElement.y());
+        this.updateText("(" + this._formatDecimal(x) + "; " + this._formatDecimal(y) + ")");
+    }
+
+    updateAngleText(){
+        var angle = this._roundDecimal(this._transformationElement.angle());
+        this.updateText(angle + "°");
+    }
+
+    _formatDecimal(number: number): string{
+        var suffix = "";
+        var isDecimal = number % 1 !== 0;
+        if (isDecimal){
+            this._hasDecimals = true;
+        }
+        if (this._hasDecimals && !isDecimal){
+            suffix = ".0";
+        }
+        return number + suffix;
+    }
+    _roundDecimal(value: number): number{
+        return Math.round(value * FloatingPointPrecision) / FloatingPointPrecision;
+    }
+
+    updateText(text) {
         this._text = text;
+        this._textWidth = -1;
+
+        this._updatePosition();
+
         Invalidate.requestUpperOnly();
     }
 
@@ -38,44 +145,30 @@ class ResizeHint extends Rectangle {
         }
 
         var scale = environment.view.scale();
+        var fontStyle = '10px Arial';
 
-        var lines = this._text.split('\n');
-        var fontStyle = '10px/10px Arial';
+        GlobalMatrixModifier.pushPrependScale();
 
-        var measure = context.measureText(lines[0], fontStyle);
-        var width = measure.width;
-        if (lines.length > 1) {
-            for (var i = 1; i < lines.length; ++i) {
-                measure = context.measureText(lines[i], fontStyle);
-                if (measure.width > width) {
-                    width = measure.width;
-                }
-            }
-        }
-        context.scale(1 / scale, 1 / scale);
-
-        var x = ~~((this._lastPoint.x) * scale) + 30,
-            y = ~~((this._lastPoint.y) * scale) + 30;
-        var l = x - 4,
-            t = y - 3,
-            w = width + 18,
-            h = 6 + lines.length * 14;
-        //this.resize({x:l, y:t, width:w, height:h});
-        context.translate(l, t);
-        Rectangle.prototype.drawSelf.call(this, context, w, h, environment);
-        context.translate(-l, -t);
-
+        context.save();
+        context.scale(1/scale, 1/scale);
+        context.fillStyle = DefaultSettings.frame.stroke;
         context.textBaseline = 'top';
         context.font = fontStyle;
+        context.fillStyle = DefaultSettings.frame.stroke;
 
-        if (this._lastPoint) {
-
-            context.fillStyle = "white";
-            for (var i = 0; i < lines.length; ++i) {
-                context.fillText(lines[i], x, ~~y);
-                y += 14;
-            }
+        if (this._textWidth === -1){
+            this._textWidth = context.measureText(this._text, fontStyle).width;
         }
+
+        context.fillText(this._text, Math.round((this.props.width * scale - this._textWidth)/2), Math.round(5 * scale));
+
+        context.restore();
+
+        GlobalMatrixModifier.pop();
+    }
+
+    hitVisible() {
+        return false;
     }
 }
 
@@ -96,14 +189,14 @@ class SelectionRect extends UIElement {
     drawSelf(context) {
         var scale = Environment.view.scale();
 
-        context.save();                
+        context.save();
         context.setLineDash([1/scale, 1/scale]);
         context.beginPath();
-        
+
         if (this._element.hasPath()) {
             this._element.applyViewMatrix(context);
             this._element.drawPath(context, this._element.width(), this._element.height());
-        } 
+        }
         else {
             this._element.drawBoundaryPath(context);
         }
@@ -118,59 +211,44 @@ class SelectionRect extends UIElement {
     }
 }
 
-var onDraggingElement = function (event) {
-    //TODO:
-    return;
-    if (event.draggingElement.isDropSupported() && event.target != null && event.target.canAccept(event.draggingElement.elements) && !(event.target instanceof Layer), event) {
-        this._target = event.target !== event.element.parent() ? event.target : null;
-        this._dropData = event.target.getDropData({ x: event.mouseX, y: event.mouseY }, event.element);
+var onDraggingElement = function (event: ITransformationEventData, keys: IKeyboardState) {
+    if (event.transformationElement.showResizeHint()) {
+        this._hint.updatePositionText();
+    }
+
+    if (event.transformationElement.isDropSupported()
+        && event.target != null
+        && event.target.canAccept(event.draggingElement.elements, false, keys.ctrl)
+        && !(event.target instanceof Layer)
+        && event.transformationElement.allHaveSameParent()
+    ) {
+        this._target = event.target !== event.transformationElement.elements[0].parent() ? event.target : null;
+        this._dropData = event.target.getDropData({ x: event.mouseX, y: event.mouseY }, event.transformationElement);
     } else {
         this._target = null;
         this._dropData = null;
     }
-    var p = event.draggingElement.position();
-    if (event.element.showDropTarget() && this._target) {
-        if (this._target instanceof Container) {
-            p = this._target.global2local(p);
-        }
-        this._targetRect = this._target.getBoundaryRectGlobal();
-    } else {
-        p = event.element.parent().global2local(p);
-        delete this._targetRect;
-    }
 
-    if (!this._resizing && !this._rotating) {
-        if (event.element.showResizeHint()) {
-            this._hint.updateText("Left: " + ~~(p.x + 0.5) + "px\nTop: " + ~~(p.y + 0.5) + "px", {
-                x: event.mouseX,
-                y: event.mouseY
-            });
-        }
-        else {
-            this._hint.updateText(null, null);
-        }
-    }
-    updateTargetRect.call(this);
+    updateVisualizations.call(this);
 };
 
-var onStartDragging = function () {
+var onStartDragging = function (event: ITransformationEventData) {
     this._dragging = true;
     this._target = null;
-    delete this._targetRect;
+    this._hint.start(event.transformationElement);
+    this._hint.updatePositionText();
 };
 
 var onStopDragging = function (event) {
     this._dropData = null;
     this._target = null;
-    delete this._targetRect;
     this._dragging = false;
-    updateTargetRect.call(this);
+    this._hint.stop();
+    updateVisualizations.call(this);
     Invalidate.requestUpperOnly();
 };
 
 var onMouseMove = function (event) {
-    this._lastPoint = event;
-
     if (this._dragging || this._resizing || this._rotating || !App.Current.allowSelection() || this._selection !== undefined) {
         return;
     }
@@ -186,21 +264,18 @@ var onMouseMove = function (event) {
             if (!Selection.isElementSelected(target)) {
                 if (target.canSelect() && !target.locked() && (!target.lockedGroup || target.lockedGroup())) {
                     this._target = target;
-                    this._targetRect = target.getBoundaryRectGlobal();
-                    updateTargetRect.call(this);
+                    updateVisualizations.call(this);
                 } else {
                     if (this._target != null) {
                         this._target = null;
-                        delete this._targetRect;
-                        updateTargetRect.call(this);
+                        updateVisualizations.call(this);
                     }
                 }
 
             }
             else if (this._target) {
                 this._target = null;
-                delete this._targetRect;
-                updateTargetRect.call(this);
+                updateVisualizations.call(this);
             }
         }
     }
@@ -209,8 +284,7 @@ var onMouseMove = function (event) {
 var onElementSelected = function () {
     if (this._target && Selection.isElementSelected(this._target)) {
         this._target = null;
-        delete this._targetRect;
-        updateTargetRect.call(this);
+        updateVisualizations.call(this);
     }
 };
 
@@ -266,39 +340,41 @@ function onSelectionFrameStop() {
     delete this._selectionControls;
 }
 
-function onStartResizing() {
+function onStartResizing(event: ITransformationEventData) {
     this._resizing = true;
-    updateTargetRect.call(this);
+    this._hint.start(event.transformationElement);
+    this._hint.updateSizeText();
+    updateVisualizations.call(this);
 }
 
 function onStopResizing() {
     delete this._resizing;
-    updateTargetRect.call(this);
+    this._hint.stop();
+    updateVisualizations.call(this);
 }
 
-function onResizing(event) {
-    var rect = event.rect;
+function onResizing(event: ITransformationEventData) {
     if (event.element.showResizeHint()) {
-        this._hint.updateText("Width: " + ~~(rect.width + 0.5) + "px\nHeight: " + ~~(rect.height + 0.5) + "px", {
-            x: event.mouseX,
-            y: event.mouseY
-        });
+        this._hint.updateSizeText();
     }
 }
 
-function onStartRotating() {
+function onStartRotating(event: ITransformationEventData) {
     this._rotating = true;
-    updateTargetRect.call(this);
+    this._hint.start(event.transformationElement);
+    this._hint.updateAngleText();
+    updateVisualizations.call(this);
 }
 
 function onStopRotating() {
     delete this._rotating;
-    updateTargetRect.call(this);
+    this._hint.stop();
+    updateVisualizations.call(this);
 }
 
-function onRotating(event) {
+function onRotating(event: ITransformationEventData) {
     if (event.element.showResizeHint()) {
-        this._hint.updateText("Angle: " + event.angle + "°", { x: event.mouseX, y: event.mouseY });
+        this._hint.updateAngleText();
     }
 }
 
@@ -328,12 +404,11 @@ var appLoaded = function () {
 var onCancel = function () {
     if (this._target) {
         this._target = null;
-        delete this._targetRect;
-        updateTargetRect.call(this);
+        updateVisualizations.call(this);
     }
 };
 
-function updateTargetRect() {
+function updateVisualizations() {
     var data = this._dropData;
     if (data) {
         if (this._dropLine.parent() === NullContainer) {
@@ -356,7 +431,6 @@ function updateTargetRect() {
         this._hint.parent().remove(this._hint);
     }
 
-    var target = this._target;
     Invalidate.requestUpperOnly();
 }
 
@@ -368,7 +442,7 @@ export default class DropVisualization extends ExtensionBase {
         }
         super.attach.apply(this, arguments);
         app.loaded.then(appLoaded.bind(this));
-        this.registerForDispose(view.scaleChanged.bind(EventHandler(this, updateTargetRect)));
+        this.registerForDispose(view.scaleChanged.bind(EventHandler(this, updateVisualizations)));
         app.addLoadRef();
         this._dropLine = new DropLine();
         this._dropLine.setProps({
@@ -390,15 +464,15 @@ export default class DropVisualization extends ExtensionBase {
     onLayerDraw(layer, context) {
         var target = this._target || this.view._highlightTarget;
         if (target) {
-            DropVisualization.highlightElement(this.view, context, target);
+            DropVisualization.highlightElement(this.view, context, target, true);
         }
     }
 
-    static highlightElement(view, context, element) {
+    static highlightElement(view, context, element, boundaryPath = false) {
         context.save();
 
         context.beginPath();
-        if (element.hasPath()) {
+        if (element.hasPath() && !boundaryPath) {
             element.applyViewMatrix(context);
             element.drawPath(context, element.width(), element.height());
         } else {

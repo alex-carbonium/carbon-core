@@ -7,9 +7,14 @@ export interface IRect{
     height: number;
 }
 
-export interface IPoint{
+export interface ICoordinate{
     x: number;
-    y: number;    
+    y: number;
+}
+
+export interface IPoint extends ICoordinate{
+    getDistance(fromPoint: IPoint): number;
+    getDirectedAngle(fromPoint: IPoint): number;
 }
 
 export interface IContext{
@@ -19,14 +24,14 @@ export interface IContext{
     lineWidth: number;
     globalAlpha: number;
 
-    translate(x: number, y: number): void;    
-    rotate(radians: number): void;    
+    translate(x: number, y: number): void;
+    rotate(radians: number): void;
 
     moveTo(x: number, y: number): void;
-    lineTo(x: number, y: number): void;    
+    lineTo(x: number, y: number): void;
     beginPath(): void;
     closePath(): void;
-    
+
     fillRect(x: number, y: number, width: number, height: number): void;
     fillText(text: string, x: number, y: number): void;
     stroke(): void;
@@ -35,7 +40,7 @@ export interface IContext{
     restore() :void;
 }
 
-export interface IEventData{    
+export interface IEventData{
     handled: boolean;
 }
 
@@ -46,14 +51,14 @@ export interface IMouseEventData extends IEventData{
     cursor: string;
 }
 
-export interface IInteractionEventData extends IEventData{
-    interactiveElement: IComposite;
+export interface ITransformationEventData extends IEventData{
+    transformationElement: ITransformationElement;
 }
 
 export interface IEvent<T>{
     raise(data: T): void;
     bind(callback: (data: T) => void): IDisposable;
-    bind(owner: any, callback: (data: T) => void): IDisposable;    
+    bind(owner: any, callback: (data: T) => void): IDisposable;
 }
 
 export interface IEvent2<T1, T2>{
@@ -68,45 +73,52 @@ export interface IKeyboardState{
     alt: boolean;
 }
 
-export interface IDisposable{    
+export interface IDisposable{
     dispose(): void;
 }
 
 // -------------------- element model
 
-export interface IDataNode{    
+export interface IDataNode{
 }
 
-export interface IUIElement extends IDataNode{        
+export interface IUIElement extends IDataNode{
     shouldApplyViewMatrix(): boolean;
 
     getBoundingBox(): IRect;
     getBoundingBoxGlobal(): IRect;
 
-    hitTest(point: IPoint, scale: number, includeMargin: boolean): boolean;
+    hitTest(point: IPoint, scale: number, boundaryRectOnly: boolean): boolean;
     hitTestGlobalRect(rect: IRect, directSelection: boolean): boolean;
+
+    showResizeHint(): boolean;
 }
 
 export interface IContainer extends IUIElement{
     children: IUIElement[];
 }
 
-export interface IGroupContainer extends IUIElement{    
+export interface IGroupContainer extends IContainer{
     wrapSingleChild(): boolean;
     translateChildren(): boolean;
 }
 
 export interface IComposite extends IUIElement{
     elements: IUIElement[];
+
+    allHaveSameParent(): boolean;
 }
 
-export interface ILayer extends IContainer{    
+export interface ITransformationElement extends IComposite, IGroupContainer{
+}
+
+export interface ILayer extends IContainer{
 }
 
 export interface IApp extends IDataNode{
-    currentTool: string;    
+    currentTool: string;
     currentToolChanged: IEvent<string>;
-    
+
     onBuildMenu: IEvent<{a: number}>;
 
     shortcutManager: IShortcutManager;
@@ -129,16 +141,16 @@ export interface IPage{
 }
 
 export interface IController{
-    draggingEvent: IEvent<IInteractionEventData>;
-    resizingEvent: IEvent<IInteractionEventData>;
-    rotatingEvent: IEvent<IInteractionEventData>;
+    draggingEvent: IEvent<ITransformationEventData>;
+    resizingEvent: IEvent<ITransformationEventData>;
+    rotatingEvent: IEvent<ITransformationEventData>;
     startDrawingEvent: IEvent<IEventData>;
-    
+
     mousedownEvent: IEvent2<IMouseEventData, IKeyboardState>;
     mousemoveEvent: IEvent2<IMouseEventData, IKeyboardState>;
 
     interactionActive: boolean;
-    
+
     actionManager: IActionManager;
 
     updateCursor(eventData: IMouseEventData): void;
@@ -164,7 +176,7 @@ export interface IDataNodeProps{
 }
 
 export interface IUIElementProps extends IDataNodeProps{
-    visible: boolean;    
+    visible: boolean;
 }
 
 export interface IGuide{
