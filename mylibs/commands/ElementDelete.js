@@ -13,7 +13,7 @@ export default class ElementDelete extends Command{
     }
 
     execute(){
-        this.element.parent().remove(this.element);
         Selection.makeSelection([]);
+        this.element.parent().remove(this.element);        
     }
 }

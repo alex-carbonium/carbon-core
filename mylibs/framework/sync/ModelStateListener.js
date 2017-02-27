@@ -78,13 +78,13 @@ class ModelStateListener {
         root.push(Primitive.dataNodeAdd(parent, element, index));
     }
 
-    trackSelect(page, selection, oldSelection, userId, sessionId){
+    trackSelect(page, selection, oldSelection, userId){
         if (this._stopCounter > 0){
             return;
         }
         var root = this._getOrCreateRootData(page.primitiveRootKey());
 
-        root.push(Primitive.selection(page, selection, oldSelection, userId, sessionId));
+        root.push(Primitive.selection(page, selection, oldSelection, userId));
     }
 
     trackChangePosition(primitiveRoot, parent, element, index, oldIndex){

@@ -67,7 +67,6 @@ class Layer extends Container {
         this.canDrag(false);
 
         this._hitFirstElements = [];
-        this.layerIndex = 0;
     }
 
     registerHitFirstElement(element) {

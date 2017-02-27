@@ -210,19 +210,14 @@ class App extends DataNode implements IApp {
                     this.activePage, 
                     selectionIds,
                     oldSelectionIds,
-                    this.userId(),
-                    this.sessionId());
+                    this.userId());
             }
         });
     }
 
     userId() {
         return backend.getUserId();
-    }
-
-    sessionId() {
-        return backend.getSessionId();
-    }
+    } 
 
     activeStory(value) {
         if (arguments.length > 0) {

@@ -73,7 +73,6 @@ export default class ViewBase {
         layer._view = this;
 
         var setupLayerHandler = setupLayer.bind(this);
-        layer.layerIndex = this._envArray.length;
 
         this._envArray.push({
             finalRender: true,
@@ -138,7 +137,7 @@ export default class ViewBase {
         var pageMatrix = this._page.pageMatrix;
         this._page.pageMatrix = matrix;
 
-        let env = this._getEnv(this._page, true);
+        let env = this._getEnv(this._page, 1, true);
         this._drawLayer(this._page, 1, context, env);
 
         this._page.pageMatrix = pageMatrix;
@@ -155,8 +154,8 @@ export default class ViewBase {
         ContextPool.releaseContext(context);
     }
 
-    _getEnv(layer, final) {
-        let env = this._envArray[layer.layerIndex];
+    _getEnv(layer:any, layerIndex:number, final:boolean) {
+        let env = this._envArray[layerIndex - 1];
 
         env.pageMatrix = layer.pageMatrix;
         env.finalRender = final;
@@ -262,7 +261,7 @@ export default class ViewBase {
             if (scale > 1 && this.showPixels()) {
                 this._drawLayerPixelsVisible(scale);
             } else {
-                let env = this._getEnv(this._page, true);
+                let env = this._getEnv(this._page, 1, true);
                 this._drawLayer(this._page, 1, this.context, env);
             }
         }
@@ -271,8 +270,8 @@ export default class ViewBase {
             var layer = this._layers[i];
             if (layer.isInvalidateRequired()) {
                 layer.pageMatrix = this._page.pageMatrix;
-                let env = this._getEnv(layer, false);
-                this._drawLayer(layer, 2, layer.context, env);
+                let env = this._getEnv(layer, i + 1, false);
+                this._drawLayer(layer, i+1, layer.context, env);
             }
         }
     }

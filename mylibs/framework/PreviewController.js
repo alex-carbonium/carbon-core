@@ -2,6 +2,7 @@ import domUtil from "utils/dom";
 import {ActionType, ActionEvents} from "framework/Defs";
 import TouchHelper from "./TouchHelper";
 import Selection from "framework/SelectionModel";
+import EventHelper from "framework/EventHelper";
 
 function updateEvent(event) {
     var scale = this.view.scale();
@@ -18,6 +19,7 @@ export default class PreviewController {
         this.previewProxy = previewProxy;
         this.view = view;
         this.touchHelper = new TouchHelper(view);
+        this.onArtboardChanged = EventHelper.createEvent();
     }
 
     _invokeAction(action) {

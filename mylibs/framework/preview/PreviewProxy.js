@@ -2,6 +2,7 @@ import Page from "framework/Page";
 import NullPage from "framework/NullPage";
 import EventHelper from "framework/EventHelper";
 import DataNode from "framework/DataNode";
+import Matrix from "math/matrix";
 
 export default class PreviewProxy {
     constructor(app) {
@@ -14,14 +15,12 @@ export default class PreviewProxy {
         var previewClone = artboard.mirrorClone();
         var oldRect = previewClone.getBoundaryRect();
         if (artboard.props.allowVerticalResize || artboard.props.allowHorizontalResize) {
-            previewClone.setProps({
-                x: 0, y: 0,
-                width: artboard.props.allowHorizontalResize ? screenSize.width : artboard.width(),
-                height: artboard.props.allowVerticalResize ? screenSize.height : artboard.height()
-            });
+            previewClone.setTransform(Matrix.Identity);
+            previewClone.width(artboard.props.allowHorizontalResize ? screenSize.width : artboard.width());
+            previewClone.height(artboard.props.allowVerticalResize ? screenSize.height : artboard.height());
             previewClone.performArrange({oldRect});
         } else {
-            previewClone.setProps({x: 0, y: 0});
+            previewClone.setTransform(Matrix.Identity);
         }
 
         page.add(previewClone);
@@ -33,7 +32,7 @@ export default class PreviewProxy {
 
     getCurrentScreen(screenSize) {
         var activeStory = this.app.activeStory();
-        if(!activeStory){
+        if(!activeStory || !activeStory.props.homeScreen){
             // TODO: return special page with instruction that you need to create at least on artboard
             return NullPage;
         }
@@ -62,11 +61,13 @@ export default class PreviewProxy {
 
         var res = [];
 
-        artboard.applyVisitor(e=>{
-            if(elementsMap[e.id()]){
-                res.push(e);
-            }
-        })
+        if(artboard) {
+            artboard.applyVisitor(e=>{
+                if(elementsMap[e.id()]){
+                    res.push(e);
+                }
+            });
+        }
 
         return res;
     }

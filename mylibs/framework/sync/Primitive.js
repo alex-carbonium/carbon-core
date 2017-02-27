@@ -115,7 +115,7 @@ Primitive.dataNodeSetProps = function(element, props, oldProps, norollback) {
     return res;
 };
 
-Primitive.selection = function(page, selection, oldSelection, userId, sessionId, norollback) {
+Primitive.selection = function(page, selection, oldSelection, userId, norollback) {
     var res = {
         type: PrimitiveType.Selection, 
         path: page.primitivePath(),
@@ -124,7 +124,7 @@ Primitive.selection = function(page, selection, oldSelection, userId, sessionId,
     };
 
     if (!norollback) {
-        res._rollbackData = Primitive.selection(page, oldSelection || [], null, userId, sessionId, true);
+        res._rollbackData = Primitive.selection(page, oldSelection || [], null, userId, true);
     }
 
     if (DEBUG){
