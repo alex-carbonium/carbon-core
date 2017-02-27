@@ -2056,8 +2056,7 @@ PropertyMetadata.registerForType(UIElement, {
         defaultValue: false
     },
     visible: {
-        defaultValue: true,
-        customizable: true
+        defaultValue: true
     },
     hitTransparent: {
         defaultValue: false

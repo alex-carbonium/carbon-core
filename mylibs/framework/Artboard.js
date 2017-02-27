@@ -30,10 +30,10 @@ import DataNode from "framework/DataNode";
 
 class Artboard extends Container {
     constructor(props) {
-        super(props);    
+        super(props);
         this.allowArtboardSelection(false);
         this.selectFromLayersPanel = true;
-        
+
         this.noDefaultSettings = true;
         this._recorder = new PropertyStateRecorder(this);
         this._recorder.initFromJSON(this.props.states);
@@ -127,7 +127,7 @@ class Artboard extends Container {
         return 1;
     }
 
-    canAccept(elements: UIElement[]) {        
+    canAccept(elements: UIElement[]) {
         for (let i = 0; i < elements.length; ++i){
             let element = elements[i];
             if (element instanceof Artboard) {
@@ -158,7 +158,7 @@ class Artboard extends Container {
                     }
                 }
             }
-        }        
+        }
 
         return super.canAccept(elements);
     }
@@ -228,7 +228,7 @@ class Artboard extends Container {
 
         context.save();
         context.beginPath();
-        
+
         this.viewMatrix().applyToContext(context);
         if (this._active) {
             context.fillStyle = SharedColors.ArtboardActiveText;
@@ -367,6 +367,10 @@ class Artboard extends Container {
         res['groups'] = function () {
             return [
                 {
+                    label: "Layout",
+                    properties: ["width", "height", "x", "y", "constraints", "angle"]
+                },
+                {
                     label: element.name(),
                     properties: ['stateId'].concat(properties.map(p => {
                         return 'custom:' + p.controlId + ':' + p.propertyName
@@ -377,16 +381,8 @@ class Artboard extends Container {
                     properties: ["actions"]
                 },
                 {
-                    label: "Appearance",
-                    properties: ["visible"]
-                },
-                {
-                    label: "Layout",
-                    properties: ["width", "height", "x", "y", "constraints", "angle", "dockStyle", "horizontalAlignment", "verticalAlignment"]
-                },
-                {
-                    label: "Margin",
-                    properties: ["margin"]
+                    label: "@constraints",
+                    properties: ["constraints"]
                 }
             ];
         }
@@ -782,7 +778,10 @@ Artboard.prototype.t = Types.Artboard;
 var fwk = sketch.framework;
 PropertyMetadata.registerForType(Artboard, {
     fill: {
-        defaultValue: Brush.White
+        defaultValue: Brush.White,
+        options: {
+            size: 1 / 4
+        }
     },
     masterPageId: {
         displayName: "Master page",
@@ -856,7 +855,10 @@ PropertyMetadata.registerForType(Artboard, {
     frame: {
         displayName: "@frame",
         type: "frame",
-        defaultValue: null
+        defaultValue: null,
+        options: {
+            size: 3 / 4
+        }
     },
     prepareVisibility(props) {
         var showAsStencil = props.resource === ArtboardResource.Stencil;
@@ -878,8 +880,8 @@ PropertyMetadata.registerForType(Artboard, {
             {
                 label: "Appearance",
                 expanded: false,
-                properties: ["visible", "fill", "frame"]
-            },            
+                properties: ["fill", "frame"]
+            },
             {
                 label: "States",
                 properties: ["states"],
@@ -889,11 +891,11 @@ PropertyMetadata.registerForType(Artboard, {
                 label: "@advanced",
                 properties: ["resource", "allowHorizontalResize", "allowVerticalResize", "tileSize", "insertAsContent", "toolboxGroup"],
                 expanded: true
-            },
-            {
-                label: "Custom properties",
-                properties: ["customProperties"]
             }
+            // ,{
+            //     label: "Custom properties",
+            //     properties: ["customProperties"]
+            // }
         ];
     }
 });

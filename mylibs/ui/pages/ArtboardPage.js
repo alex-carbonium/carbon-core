@@ -45,7 +45,6 @@ class ArtboardPage extends Page {
         super.add.apply(this, arguments);
         if (child instanceof Artboard) {
             this._artboardNames[child.name()] = true;
-            this.setActiveArtboard(child);
         }
     }
 
@@ -198,7 +197,7 @@ class ArtboardPage extends Page {
         this._activeArtboard = artboard;
         if (artboard){
             artboard.activate();
-        }        
+        }
         Environment.controller && Environment.controller.onArtboardChanged && Environment.controller.onArtboardChanged.raise(artboard, oldArtboard);
     }
 
@@ -351,7 +350,7 @@ class ArtboardPage extends Page {
         }
         return primitives;
     }
-    
+
     arrangeRootDepthFirst(){
         for (var i = 0; i < this.children.length; i++){
             var element = this.children[i];
@@ -361,19 +360,19 @@ class ArtboardPage extends Page {
         }
     }
 
-    
+
 
     makeToolboxConfigDirty(forceUpdate, changedId){
         this.setProps({toolboxConfigId:null});
         if(forceUpdate){
             App.Current.changeToolboxPage.raise(this);
-        }        
+        }
         this.toolboxConfigIsDirty.raise(forceUpdate, changedId);
     }
 
     saveWorkspaceState(): any{
         var artboard = this.getActiveArtboard();
-        return {artboardId: artboard ? artboard.id() : null};        
+        return {artboardId: artboard ? artboard.id() : null};
     }
     restoreWorkspaceState(data: any): void{
         if (data.artboardId){
@@ -397,4 +396,3 @@ PropertyMetadata.registerForType(ArtboardPage, {
 
 
 export default ArtboardPage;
- 

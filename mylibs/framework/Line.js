@@ -332,13 +332,17 @@ PropertyMetadata.registerForType(Line, {
         return [
             {
                 label: "Layout",
-                properties: ["x", "y", "width", "height", "constraints"],
+                properties: ["x", "y", "width", "height"],
                 expanded: true
             },
             {
                 label: "Appearance",
                 expanded: false,
-                properties: ["visible", "opacity", "fill", "stroke", "dashPattern", "miterLimit", "lineCap", "lineJoin"]
+                properties: ["opacity", "fill", "stroke", "dashPattern", "miterLimit", "lineCap", "lineJoin"]
+            },
+            {
+                label: "@constraints",
+                properties: ["constraints"]
             }
         ];
     }
