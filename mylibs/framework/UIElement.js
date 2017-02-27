@@ -1504,16 +1504,20 @@ export default class UIElement extends DataNode {
         var m = global ? this.globalViewMatrix() : this.viewMatrix();
         return m.transformPoint(this.br().center());
     }
-    hitElement(position, scale, predicate) {
-        if (this.hitVisible()) {
-
-            predicate = predicate || this.hitTest;
-            if (predicate.call(this, position, scale)) {
-                return this;
+    hitElement(position, scale, predicate, directSelection) {
+        if (!this.hitVisible(directSelection)) {
+            return null;
+        }
+        if (predicate){
+            if (!predicate(this, position, scale)){
+                return null;
             }
         }
+        else if (!this.hitTest(position, scale)){
+            return null;
+        }
 
-        return null;
+        return this;
     }
     isAncestor(element) {
         var parent = this.parent();
