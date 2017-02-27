@@ -196,8 +196,15 @@ Brush.createFromObject = function (parameters) {
     return Object.freeze(Object.assign(brushDefault(), parameters));
 };
 
-Brush.extend = function(...brushes){
-    return this.createFromObject(Object.assign({}, ...brushes));
+Brush.extend = function(base, other){
+    //empty brush has type=0 in the object and base brush could have type=1 in the prototype
+    if (other === Brush.Empty){
+        return base;
+    }
+    if (base === Brush.Empty){
+        return other;
+    }
+    return this.createFromObject(Object.assign({}, base, other));
 };
 
 Brush.createFromColor = function (color, lineWidth, position) {
