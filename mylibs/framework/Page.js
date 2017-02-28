@@ -84,7 +84,7 @@ class Page extends Layer implements IPage{
     dropToPage(x, y, element) {
         var data = this.findDropToPageData(x, y, element);
 
-        var size = element.size();        
+        var size = element.size();
         element.applyTranslation(data.position, true);
         element.setProps(size);
         data.target.add(element);
@@ -112,6 +112,7 @@ class Page extends Layer implements IPage{
         }
 
         var pos = el.global2local(eventData);
+        pos.roundMutable();
 
         return {target: el, position: pos};
     }
@@ -753,7 +754,7 @@ class Page extends Layer implements IPage{
      }*/
 
      saveWorkspaceState(){
-        return null;        
+        return null;
      }
      restoreWorkspaceState(data){
      }

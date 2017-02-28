@@ -1023,7 +1023,7 @@ export default class UIElement extends DataNode {
         if (!gm.isTranslatedOnly()){
             scaling = this.gdm().scaling.x || 1;
         }
-        return this.br().width * scaling;
+        return Math.abs(this.br().width * scaling);
     }
     height(value, changeMode) {
         if (arguments.length !== 0) {
@@ -1038,7 +1038,7 @@ export default class UIElement extends DataNode {
         if (!gm.isTranslatedOnly()){
             scaling = this.gdm().scaling.y || 1;
         }
-        return this.br().height * scaling;
+        return Math.abs(this.br().height * scaling);
     }
     angle(value, changeMode) {
         if (arguments.length !== 0) {

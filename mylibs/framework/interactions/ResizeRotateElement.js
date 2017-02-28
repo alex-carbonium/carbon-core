@@ -20,6 +20,7 @@ export default class ResizeRotateElement extends TransformationElement{
 
     applySizeScaling(s, o, options){
         super.applySizeScaling(s, o, options);
+        this.performArrange();
         this._lastScaling = {s, o, options};
     }
 
