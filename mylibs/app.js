@@ -222,7 +222,7 @@ class App extends DataNode implements IApp {
     activeStory(value) {
         if (arguments.length > 0) {
             this._activeStory = value;
-            this.activeStoryChanged.raise();
+            this.activeStoryChanged.raise(value);
             Invalidate.requestUpperOnly();
         }
 
