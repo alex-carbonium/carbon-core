@@ -147,14 +147,13 @@ PropertyMetadata.registerForType(StateBoard, {
     groups: function () {
         return [
             {
-                label: "Appearance",
-                expanded: false,
-                properties: ["visible", "fill"]
+                label: "Layout",
+                properties: ["width", "height", "x", "y"]
             },
             {
-                label: "Layout",
-                properties: ["width", "height", "x", "y"],
-                expanded: true
+                label: "Appearance",
+                expanded: false,
+                properties: ["fill"]
             }
         ];
     }

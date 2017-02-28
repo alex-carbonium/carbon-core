@@ -30,7 +30,7 @@ export default class ShortcutManager {
         }
         else{
             this.mapScheme(ShortcutManager.WindowsScheme);
-        }    
+        }
     }
 
     getActionHotkey(actionName) {
@@ -122,7 +122,7 @@ export default class ShortcutManager {
 
         { key: "shift+x", action: "swapColors" },
 
-        { key: "f2", action: "editText" },
+        { key: "f2", action: "enter" },
 
         { key: "alt+ctrl+u", action: "pathUnion" },
         { key: "alt+ctrl+s", action: "pathSubtract" },
@@ -238,7 +238,7 @@ export default class ShortcutManager {
 
         { key: "shift+x", action: "swapColors" },
 
-        { key: "f2", action: "editText" },
+        { key: "f2", action: "enter" },
 
         { key: "meta+shift+d", action: "debugMode" },
         { key: "p", action: "pathTool" },
@@ -255,7 +255,7 @@ export default class ShortcutManager {
 
         { key: "h", action: "handTool" },
         { key: "space", action: "handTool", options: { repeatable: false } },
-        { key: "space", action: "handToolRelease", options: { type: "keyup" } },        
+        { key: "space", action: "handToolRelease", options: { type: "keyup" } },
 
         { key: "meta+s", action: "save" },
         { key: "meta+alt+s", action: "forceSave" },

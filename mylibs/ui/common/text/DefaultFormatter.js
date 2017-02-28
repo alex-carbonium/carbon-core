@@ -64,7 +64,7 @@ PropertyMetadata.registerForType(DefaultFormatter, {
         return [
             {
                 label: "Default font",
-                properties: ["textStyleId", "font"]
+                properties: [/*"textStyleId",*/ "font"]
             }
         ];
     }

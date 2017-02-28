@@ -238,7 +238,7 @@ export default class TextTool extends TOol {
 
     insertText(e, p = {}){
         var text = new Text();
-        App.Current.activePage.nameProvider.assignNewName(text);
+        this._app.activePage.nameProvider.assignNewName(text);
 
         var props = {
             content: "Your text here",
@@ -353,6 +353,10 @@ export default class TextTool extends TOol {
     _updateOriginal(){
         var props = Object.assign({}, this._editClone.selectLayoutProps(true));
         props.m = this._editedElement.parent().globalViewMatrixInverted().appended(props.m);
+        if (props.m.equals(this._editedElement.viewMatrix())){
+            delete props.m;
+        }
+
         props.content = this._editor.engine.save();
         props.font = this._rangeFormatter.getFirstFont();
 
@@ -362,7 +366,7 @@ export default class TextTool extends TOol {
 
         this._editedElement.prepareAndSetProps(props); //no validation, save from clone as is
     }
-    
+
     _createEditor(engine, element){
         var inlineEditor = new InlineTextEditor();
         inlineEditor.onInvalidate = this._onInvalidateEditor;

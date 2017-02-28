@@ -7,7 +7,7 @@ import PropertyMetadata from "../PropertyMetadata";
 import TextEngine from "./textengine";
 import styleManager from "../style/StyleManager";
 
-class Text extends UIElement {    
+class Text extends UIElement {
     prepareProps(changes){
         super.prepareProps(changes);
         var contentChanged = changes.content !== undefined;
@@ -18,9 +18,10 @@ class Text extends UIElement {
         var dimensionsAffected = contentChanged || brChanged || autoWidthChanged || fontChanged;
         var textAlignChanged = fontChanged && changes.font.align !== TextAlign.left;
 
-        if ((brChanged && !autoWidthChanged) || textAlignChanged){
+        if (textAlignChanged){
             changes.autoWidth = false;
         }
+
         if (autoWidthChanged && changes.autoWidth){
             if (!fontChanged || changes.font.align !== TextAlign.left){
                 changes.font = Font.extend(this.props.font, changes.font, {align: TextAlign.left});
@@ -95,9 +96,14 @@ class Text extends UIElement {
         changes.br = br.withSize(newWidth, newHeight);
     }
 
+    applySizeScaling(s, o, options, changeMode){
+        this.prepareAndSetProps({autoWidth: false}, changeMode);
+        super.applySizeScaling.apply(this, arguments);
+    }
+
     drawSelf(context, w, h, environment){
         context.save();
-        
+
         if (this.runtimeProps.engine === undefined){
             this.createEngine();
         }
@@ -226,7 +232,7 @@ PropertyMetadata.registerForType(Text, {
             baseGroups.find(x => x.label === "Appearance"),
             baseGroups.find(x => x.label === "@constraints")
         ];
-        
+
         return ownGroups;
     },
     getNonRepeatableProps: function(element, newProps){

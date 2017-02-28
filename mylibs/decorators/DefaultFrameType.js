@@ -38,6 +38,9 @@ export default {
     capturePoint: function (frame, point, event) {
         frame._mousePoint = new Point(event.x, event.y);
 
+        var matrix = frame.element.globalViewMatrixInverted();
+        frame._capturedPt = matrix.transformPoint(frame._mousePoint);
+
         point.type.capture(frame, point, frame._mousePoint);
 
         frame.keyboardToken = Keyboard.changed.bind(this, state => this.movePoint(frame, point, frame._mousePoint, state));
@@ -60,10 +63,10 @@ export default {
         var dx = 0;
         var dy = 0;
         if (point.moveDirection & PointDirection.Vertical) {
-            dy = -point.y + pt.y;
+            dy = -frame._capturedPt.y + pt.y;
         }
         if (point.moveDirection & PointDirection.Horizontal) {
-            dx = -point.x + pt.x;
+            dx = -frame._capturedPt.x + pt.x;
         }
 
         point.type.change(frame, dx, dy, point, frame._mousePoint, keys, event);

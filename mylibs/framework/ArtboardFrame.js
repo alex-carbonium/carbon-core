@@ -207,7 +207,10 @@ PropertyMetadata.registerForType(ArtboardFrameControl, {
     },
 
     groups(){
+        var baseGroups = PropertyMetadata.findForType(UIElement).groups();
+
         return [
+            baseGroups.find(x => x.label === "Layout"),
             {
                 label: "@settings",
                 properties: ["source", "content", "offsetX", "offsetY", "overflow"]
@@ -215,15 +218,8 @@ PropertyMetadata.registerForType(ArtboardFrameControl, {
             {
                 label: "Style",
                 properties: ["opacity"]
-            },
-            {
-                label: "Appearance",
-                properties: ["visible"]
-            },
-            {
-                label: "Layout",
-                properties: ["width", "height", "x", "y", "constraints", "angle", "dockStyle", "horizontalAlignment", "verticalAlignment"]
-            }]
+            }
+        ]
     }
 })
 

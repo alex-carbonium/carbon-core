@@ -156,7 +156,7 @@ PropertyMetadata.registerForType(RangeFormatter, {
         return [
             {
                 label: "Content font",
-                properties: ["textStyleId", "font"]
+                properties: [/* "textStyleId",*/ "font"]
             }
         ];
     }
