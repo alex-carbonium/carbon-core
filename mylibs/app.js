@@ -1053,6 +1053,11 @@ class App extends DataNode implements IApp {
         this.setActivePage(page);
     }
 
+    setActiveStoryById(storyId) {
+        var story = DataNode.getImmediateChildById(this, storyId, true);
+        this.activeStory(story);
+    }
+
     setupView() {
         // this.view = view;
         // this.view.setup({Layer, SelectComposite, DraggingElement, SelectFrame});
