@@ -43,6 +43,10 @@ class DefaultShapeSettings extends UIElement {
             points: []
         }
     }
+
+    isPhantom(): boolean{
+        return true;
+    }
 }
 DefaultShapeSettings.prototype.t = Types.DefaultShapeSettings;
 
@@ -76,7 +80,7 @@ PropertyMetadata.registerForType(DefaultShapeSettings, {
     groups: function(){
         return [
             {
-                label: "Default Appearance",                
+                label: "Default Appearance",
                 properties: ["fill", "stroke", "cornerRadius", "opacity"]
             }
         ];

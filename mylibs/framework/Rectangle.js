@@ -25,7 +25,7 @@ function getOffsetForPoint(w, h, scale, value) {
     return {x: d + maxRadius * posPercent, y: d + maxRadius * posPercent};
 }
 
-var LineDirectionPoint = {
+var CornerRadiusPoint = {
     cursorSet: FrameCursors,
     hitTest (frame, point, hitPoint, scale) {
         return Math.abs(point.x - hitPoint.x) < PointSize / scale && Math.abs(point.y - hitPoint.y) < PointSize / scale;
@@ -45,7 +45,6 @@ var LineDirectionPoint = {
         resizingElement.stroke(Brush.None);
         resizingElement.strokeFrame = false;
         frame.resizingElement = resizingElement;
-        resizingElement.forceDrawClone = true;
         frame.originalValue = frame.element.cornerRadius();
         frame.onlyCurrentVisible = true;
         Environment.view.layer3.add(resizingElement);
@@ -142,15 +141,16 @@ class Rectangle extends Shape {
         return true;
     }
     convertToPath() {
+        var br = this.br();
         var path = new Path()
             , x1 = 0
             , y1 = 0
-            , x2 = this.width()
-            , y2 = this.height()
+            , x2 = br.width
+            , y2 = br.height
             , cr = this.cornerRadius();
         path.setProps({pointRounding:0});
 
-        var mr = Math.min(this.width()/2, this.height()/2);
+        var mr = Math.min(br.width/2, br.height/2);
 
         if (cr.upperLeft === 0) {
             path.addPoint({x: x1, y: y1});
@@ -186,8 +186,8 @@ class Rectangle extends Shape {
         path.styleId(this.styleId());
         path.name(this.name());
 
+        path.setTransform(this.viewMatrix());
         path.adjustBoundaries();
-        path.setProps(this.selectLayoutProps());
 
         return path;
     }
@@ -294,7 +294,7 @@ class Rectangle extends Shape {
         var frame = super.createSelectionFrame(view);
 
         frame.points.push({
-            type: LineDirectionPoint,
+            type: CornerRadiusPoint,
             moveDirection: PointDirection.Any,
             x: 0,
             y: 0,
@@ -304,7 +304,7 @@ class Rectangle extends Shape {
         });
 
         frame.points.push({
-            type: LineDirectionPoint,
+            type: CornerRadiusPoint,
             moveDirection: PointDirection.Any,
             x: 0,
             y: 0,
@@ -314,7 +314,7 @@ class Rectangle extends Shape {
         });
 
         frame.points.push({
-            type: LineDirectionPoint,
+            type: CornerRadiusPoint,
             moveDirection: PointDirection.Any,
             x: 0,
             y: 0,
@@ -324,7 +324,7 @@ class Rectangle extends Shape {
         });
 
         frame.points.push({
-            type: LineDirectionPoint,
+            type: CornerRadiusPoint,
             moveDirection: PointDirection.Any,
             x: 0,
             y: 0,

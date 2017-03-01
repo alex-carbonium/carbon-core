@@ -4,7 +4,7 @@ import { ChangeMode, Types } from "../Defs";
 import Phantom from "../Phantom";
 import Brush from "../Brush";
 import PropertyMetadata from "../PropertyMetadata";
-import DefaultSettings from "../../DefaultSettings";
+import UserSettings from "../../UserSettings";
 import Selection from "../SelectionModel";
 import Environment from "../../environment";
 import GlobalMatrixModifier from "../../framework/GlobalMatrixModifier";
@@ -133,6 +133,6 @@ TrasnformationElement.prototype.t = Types.TransformationElement;
 
 PropertyMetadata.registerForType(TrasnformationElement, {
     stroke: {
-        defaultValue: Brush.createFromColor(DefaultSettings.frame.stroke)
+        defaultValue: Brush.createFromColor(UserSettings.frame.stroke)
     }
 });

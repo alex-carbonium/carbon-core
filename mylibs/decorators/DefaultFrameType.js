@@ -1,5 +1,5 @@
 import Environment from "environment";
-import DefaultSettings from "../DefaultSettings";
+import UserSettings from "../UserSettings";
 import Keyboard from "../platform/Keyboard";
 import Point from "../math/point";
 import SnapController from "../framework/SnapController";
@@ -7,7 +7,7 @@ import { PointDirection } from "../framework/Defs";
 import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
 
 export default {
-    strokeStyle: DefaultSettings.frame.stroke,
+    strokeStyle: UserSettings.frame.stroke,
     hitPointIndex: function (frame, point) {
         var matrix = frame.element.globalViewMatrixInverted();
         point = matrix.transformPoint(point);

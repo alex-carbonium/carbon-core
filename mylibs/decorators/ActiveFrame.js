@@ -4,7 +4,7 @@ import PropertyTracker from "../framework/PropertyTracker";
 import Cursor from "../framework/Cursor";
 import Invalidate from "../framework/Invalidate";
 import Environment from "../environment";
-import DefaultSettings from "../DefaultSettings";
+import UserSettings from "../UserSettings";
 
 //common code for identifying frame size during resize
 //this supports current behavior when selection frame does not move during resize
@@ -64,11 +64,11 @@ function onMouseUp(event) {
         this._frameType.releasePoint(this._frame, this._originalPoint, event);
         this._frame.captured = false;
         updatePosition(this);
-        delete this._originalPoint;        
+        delete this._originalPoint;
 
         //specific to rotation, but generalized - when releasing mouse, cursor could be over another point, so update it
         onMouseMove.call(this, event);
-        Environment.controller.updateCursor(event);        
+        Environment.controller.updateCursor(event);
 
         event.handled = true;
         return false;
@@ -79,9 +79,9 @@ function onMouseMove(event) {
     if (this._originalPoint) {
         event.cursor = this._currentCursor;
         this._frameType.movePoint(this._frame, this._originalPoint, event);
-        event.handled = true;        
+        event.handled = true;
         return false;
-    } 
+    }
     else if (!event.handled) {
         var pointIndex = this._frameType.hitPointIndex(this._frame, event);
         if (pointIndex !== -1) {
@@ -94,7 +94,7 @@ function onMouseMove(event) {
 }
 
 function onClick(event){
-    var pointId = this._frameType.hitPointIndex(this._frame, event);    
+    var pointId = this._frameType.hitPointIndex(this._frame, event);
     if (pointId >= 0){
         //do not let designer controller remove selection if clicking on a point, but outside the element
         event.handled = true;

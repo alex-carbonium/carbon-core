@@ -88,9 +88,10 @@ export default class Container extends UIElement {
     shouldApplyViewMatrix() {
         return false;
     }
-    saveOrResetLayoutProps() {
-        UIElement.prototype.saveOrResetLayoutProps.apply(this, arguments);
+    saveOrResetLayoutProps(): boolean {
+        var res = UIElement.prototype.saveOrResetLayoutProps.apply(this, arguments);
         this.children.forEach(e => e.saveOrResetLayoutProps());
+        return res;
     }
     drawSelf(context, w, h, environment) {
         context.save();

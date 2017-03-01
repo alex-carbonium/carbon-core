@@ -11,11 +11,11 @@ import Matrix from "../../math/matrix";
 import { areRectsEqual } from "../../math/math";
 import Environment from "../../environment";
 import DesignerView from "../../framework/DesignerView";
-import DefaultSettings from "../../DefaultSettings";
+import UserSettings from "../../UserSettings";
 import RulerGuides from "./RulerGuides";
 import { IArtboardProps, IApp, IView, IController, ILayer, IContext, IComposite, ITransformationEventData } from "../../framework/CoreModel";
 
-const config = DefaultSettings.ruler;
+const config = UserSettings.ruler;
 const selectionSize = 3;
 const PADDING_TOP = 32; //to match css for top bar
 const LABEL_MARGIN_X = 2;
@@ -142,7 +142,7 @@ export default class RulerExtension extends RuntimeExtension {
         this._originX = Math.round(bb.x * this._settings.scale);
         this._originY = Math.round(bb.y * this._settings.scale);
         this._originWidth = bb.width * this._settings.scale + .5 | 0;
-        this._originHeight = bb.height * this._settings.scale + .5 | 0;        
+        this._originHeight = bb.height * this._settings.scale + .5 | 0;
 
         this._rulerGuides.setOrigin(artboard);
     }

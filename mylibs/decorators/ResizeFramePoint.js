@@ -6,7 +6,7 @@ import {Types, FrameCursors} from "../framework/Defs";
 import Point from "../math/point";
 import Rect from "../math/rect";
 import {fitRect} from "../math/Fitting";
-import DefaultSettings from "../DefaultSettings";
+import UserSettings from "../UserSettings";
 
 var debug = require("DebugUtil")("carb:resizeFramePoint");
 
@@ -31,7 +31,7 @@ export default {
         frame.globalViewMatrix = frame.element.globalViewMatrix();
         frame.isRotated = frame.element.isRotated(true);
 
-        if (!frame.isRotated && DefaultSettings.snapTo.enabled && DefaultSettings.snapTo.pixels){
+        if (!frame.isRotated && UserSettings.snapTo.enabled && UserSettings.snapTo.pixels){
             frame.element.roundBoundingBoxToPixelEdge();
         }
 
@@ -111,13 +111,13 @@ export default {
 
         var s = new Point(1 + dx/frame.originalRect.width, 1 + dy/frame.originalRect.height);
 
-        var round = !frame.isRotated && DefaultSettings.snapTo.enabled && DefaultSettings.snapTo.pixels;
+        var round = !frame.isRotated && UserSettings.snapTo.enabled && UserSettings.snapTo.pixels;
         if (round){
             var oldRect = frame.originalBoundingBox;
             var newRect = oldRect.scale(s, origin).roundMutable();
             var minWidth = frame.element.minWidth();
             var minHeight = frame.element.minHeight();
-            
+
             if(minWidth && newRect.width < minWidth) {
                 newRect.width = minWidth;
             }

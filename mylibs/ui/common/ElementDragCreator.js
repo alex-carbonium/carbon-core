@@ -10,6 +10,7 @@ import Rect from "../../math/rect";
 import Point from "../../math/point";
 import Matrix from "../../math/matrix";
 import {ViewTool} from "../../framework/Defs";
+import UIElement from "../../framework/UIElement";
 import Tool from "./Tool";
 import {IMouseEventData, IKeyboardState} from "../../framework/CoreModel";
 
@@ -51,7 +52,6 @@ export default class ElementDragCreator extends Tool {
         this._nextPoint = { x: this._point.x, y: this._point.y };
         event.handled = true;
         this._element = ObjectFactory.fromType(this._type);
-        this._element.beforeAddFromToolbox();
         App.Current.activePage.nameProvider.assignNewName(this._element);
         this._cursorNotMoved = true;
 
@@ -80,21 +80,16 @@ export default class ElementDragCreator extends Tool {
 
         if (this._element) {
             Invalidate.requestUpperOnly();
-            var w = this._element.width()
-                , h = this._element.height();
-            if (w === 0 && h === 0) {
-                if (this._cursorNotMoved) {
-                    Environment.controller.selectByClick(event);
-                    App.Current.resetCurrentTool();
-                    event.handled = true;
-                }
+            if (this._cursorNotMoved) {
+                Environment.controller.selectByClick(event);
+                App.Current.resetCurrentTool();
+                event.handled = true;
                 return;
             }
 
             var pos = this._element.position();
 
             App.Current.activePage.dropToPage(pos.x, pos.y, this._element);
-            this._element.afterAddFromToolbox();
             var element = this._element;
             Selection.makeSelection([element]);
             this._hoverArtboard = null;// need to rebuild snapping data TODO: consider to just add data for a new element
@@ -123,25 +118,36 @@ export default class ElementDragCreator extends Tool {
             if (this._cursorNotMoved) {
                 this._cursorNotMoved = (this._point.y === this._startPoint.y) && (this._point.x === this._startPoint.x);
             }
+
+            var endPoint = this._point;
+
             //if use holds shift, we must fit shape into square
             if (keys.shift) {
                 var height = Math.abs(this._point.y - this._startPoint.y);
                 var width = Math.abs(this._point.x - this._startPoint.x);
-                var ration = Math.min(height, width);
-
-                var x = this._startPoint.x + ration;
-                var y = this._startPoint.y + ration;
-
-                this._nextPoint = { x: x, y: y };
-            } else {
-                this._nextPoint = { x: this._point.x, y: this._point.y };
+                var ratio = Math.min(height, width);
+                endPoint = new Point(this._startPoint.x + ratio, this._startPoint.y + ratio);
             }
+
+            this.updateElement(this._element, this._startPoint, endPoint);
 
             Invalidate.requestUpperOnly();
             event.handled = true;
             return false;
         }
     }
+
+    updateElement(element, startPoint: Point, endPoint: Point){
+        var x = Math.min(startPoint.x, endPoint.x),
+            y = Math.min(startPoint.y, endPoint.y),
+            w = Math.abs(startPoint.x - endPoint.x),
+            h = Math.abs(startPoint.y - endPoint.y);
+
+        element.resetTransform();
+        element.applyTranslation(new Point(x, y));
+        element.prepareAndSetProps({ br: new Rect(0, 0, w, h) });
+    }
+
     _prepareMousePoint(event: IMouseEventData, keys: IKeyboardState) {
         this._point.set(event.x, event.y);
         var round = true;
@@ -164,22 +170,9 @@ export default class ElementDragCreator extends Tool {
             this._element.mode(mode);
         }
     }
-    layerdraw(context, environment) {
+    layerdraw(context, environment): boolean {
         if (this._mousepressed) {
-            var x1 = this._startPoint.x
-                , y1 = this._startPoint.y
-                , x2 = this._nextPoint.x
-                , y2 = this._nextPoint.y
-                , x = Math.min(x1, x2)
-                , y = Math.min(y1, y2)
-                , w = Math.abs(x1 - x2)
-                , h = Math.abs(y1 - y2);
-
             context.save();
-
-            this._element.resetTransform();
-            this._element.applyTranslation(new Point(x, y), true);
-            this._element.prepareAndSetProps({ br: new Rect(0, 0, w, h) });
 
             this._element.applyViewMatrix(context);
             // if (this._element.clipSelf()) {
@@ -187,9 +180,18 @@ export default class ElementDragCreator extends Tool {
             //     context.clip();
             // }
 
-            this._element.drawSelf(context, w, h, environment);
+            var br = this._element.br();
+            this._element.drawSelf(context, br.width, br.height, environment);
 
             context.restore();
+
+            return true;
         }
-    }    
+
+        return false;
+    }
+
+    get element(): UIElement{
+        return this._element;
+    }
 }

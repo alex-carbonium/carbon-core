@@ -1,42 +1,39 @@
 import UIElement from "framework/UIElement";
 import nearestPoint from "math/NearestPoint";
-import commandManager from "framework/commands/CommandManager";
 import Invalidate from "framework/Invalidate";
 import {Types, FrameCursors} from "../framework/Defs";
+import Brush from "../framework/Brush";
 import Environment from "environment";
 
 const PointSize = 4;
 
 export default  {
-    cursors: FrameCursors,
+    cursorSet: FrameCursors,
     hitTest (frame, point, hitPoint, scale) {
         return Math.abs(point.x - hitPoint.x) < PointSize / scale && Math.abs(point.y - hitPoint.y) < PointSize / scale;
     },
 
-    draw (p, frame, scale, context) {
+    draw (p, frame, scale, context, matrix) {
         context.fillStyle = '#fff';
         context.strokeStyle = '#22c1ff';
         context.beginPath();
-        context.circle(~~(p.x * scale ), ~~(p.y * scale), PointSize);
+        var pt = matrix.transformPoint2(p.x, p.y, true);
+        context.circle(pt.x, pt.y, PointSize);
         context.fill();
         context.stroke();
     },
     capture (frame) {
-        var resizingElement = UIElement.construct(Types.DraggingElement, frame.element);
+        var resizingElement = UIElement.construct(Types.ResizeRotateElement, frame.element);
+        resizingElement.stroke(Brush.Empty);
         frame.resizingElement = resizingElement;
-        resizingElement.forceDrawClone = true;
+        frame.clone = frame.resizingElement.children[0];
         Environment.view.layer3.add(resizingElement);
         //App.Current.view.startRotatingEvent.raise();
     },
     release (frame) {
         if (frame.resizingElement) {
             delete frame.onlyCurrentVisible;
-            var clone = frame.resizingElement._clone;
-            var oldProps = {};
-            var props = frame.element.getPropsDiff(clone.props, oldProps);
-
-            frame.element.setProps(props);
-            commandManager.execute(frame.element.constructPropsChangedCommand(props, oldProps));
+            frame.element.selectionFrameType().saveChanges(frame, frame.clone);
 
             frame.resizingElement.detach();
         }
@@ -82,18 +79,11 @@ export default  {
         var newRadius = nearestPoint.pointDistance(p1, point);
 
         var r = {};
-        r[point.prop] = newRadius
+        r[point.prop] = newRadius;
 
-        frame.resizingElement._clone.prepareProps(r);
-        frame.resizingElement._clone.setProps(r);
+        frame.clone.saveOrResetLayoutProps();
+        frame.clone.prepareAndSetProps(r);
 
-        if(r.x !== undefined || r.y !== undefined) {
-            var globalPoint = frame.resizingElement._element.parent().local2global(r);
-            r.x = globalPoint.x || r.x;
-            r.y = globalPoint.y || r.y;
-        }
-
-        frame.resizingElement.setProps(r);
         Invalidate.requestUpperOnly();
     }
 }

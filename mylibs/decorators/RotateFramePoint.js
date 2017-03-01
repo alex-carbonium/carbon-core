@@ -6,11 +6,14 @@ import {Types, RotationCursors} from "../framework/Defs";
 import Point from "../math/point";
 import {isPointInRect} from "../math/math";
 import {IMouseEventData} from "../framework/CoreModel";
+import UserSettings from "../UserSettings";
 
-const PointSize = 20
+const PointSize = 12
     , PointSize2 = PointSize/2;
 
 export default {
+    PointSize: PointSize,
+    PointSize2: PointSize2,
     cursorSet: RotationCursors,
     hitTest: function (frame, point, hitPoint, scale) {
         var br = frame.element.getBoundaryRect();
@@ -22,11 +25,16 @@ export default {
             && point.y >= hitPoint.y - size && point.y <= hitPoint.y + size;
     },
     draw: function (p, frame, scale, context, matrix) {
-        // var pt = matrix.transformPoint2(p.x, p.y, true);
-        // context.beginPath();
-        // context.rect(pt.x - PointSize2, pt.y - PointSize2, PointSize, PointSize);
-        // context.fillStyle = 'red';
-        // context.fill();
+        if (UserSettings.internal.showRotateAreas){
+            var pt = matrix.transformPoint2(p.x, p.y, true);
+            context.save();
+            context.beginPath();
+            context.rect(pt.x - PointSize2, pt.y - PointSize2, PointSize, PointSize);
+            context.globalAlpha = .2;
+            context.fillStyle = 'red';
+            context.fill();
+            context.restore();
+        }
     },
     rotateCursorPointer: function (index, angle, flipped: boolean) {
         var alpha = angle;

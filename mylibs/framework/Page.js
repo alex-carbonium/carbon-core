@@ -83,10 +83,7 @@ class Page extends Layer implements IPage{
 
     dropToPage(x, y, element) {
         var data = this.findDropToPageData(x, y, element);
-
-        var size = element.size();
-        element.applyTranslation(data.position, true);
-        element.setProps(size);
+        element.applyTranslation(data.position.subtract(element.position()));
         data.target.add(element);
 
         return data.target;

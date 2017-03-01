@@ -42,7 +42,7 @@ import AppState from "./AppState";
 import OfflineModel from "./offline/OfflineModel";
 import Deferred from "framework/Deferred";
 import Story from "stories/Story";
-import DefaultSettings from "./DefaultSettings";
+import UserSettings from "./UserSettings";
 import ObjectFactory from "./framework/ObjectFactory";
 import ActionManager from "./ui/ActionManager";
 import ShortcutManager from "./ui/ShortcutManager";
@@ -176,7 +176,7 @@ class App extends DataNode implements IApp {
 
         this.storyInserted = EventHelper.createEvent();
         this.storyRemoved = EventHelper.createEvent();
-        this.activeStoryChanged = EventHelper.createEvent();        
+        this.activeStoryChanged = EventHelper.createEvent();
 
         this._userSettings = JSON.parse(localStorage["_userSettings"] || '{}');
 
@@ -207,7 +207,7 @@ class App extends DataNode implements IApp {
             let oldSelectionIds = oldSelection.map(e=>e.id());
             if(!doNotTrack && (selectionIds.length || oldSelectionIds.length)) {
                 ModelStateListener.trackSelect(
-                    this.activePage, 
+                    this.activePage,
                     selectionIds,
                     oldSelectionIds,
                     this.userId());
@@ -217,7 +217,7 @@ class App extends DataNode implements IApp {
 
     userId() {
         return backend.getUserId();
-    } 
+    }
 
     activeStory(value) {
         if (arguments.length > 0) {
@@ -600,17 +600,17 @@ class App extends DataNode implements IApp {
         return this.props.defaultShapeSettings;
     }
 
-    defaultFill(value) {
-        if (arguments.length === 1) {
-            this.setProps({ defaultFill: value });
+    defaultFill(value, mode) {
+        if (arguments.length) {
+            this.setProps({ defaultFill: value }, mode);
         }
 
         return this.props.defaultFill;
     }
 
-    defaultStroke(value) {
-        if (arguments.length === 1) {
-            this.setProps({ defaultStroke: value });
+    defaultStroke(value, mode) {
+        if (arguments.length) {
+            this.setProps({ defaultStroke: value }, mode);
         }
 
         return this.props.defaultStroke;
@@ -647,7 +647,7 @@ class App extends DataNode implements IApp {
             this._setUserSetting("snapTo", value);
             return value;
         }
-        return this._getUserSetting("snapTo", DefaultSettings.snapTo);
+        return this._getUserSetting("snapTo", UserSettings.snapTo);
     }
 
     _getUserSetting(name, defaultValue) {
@@ -1286,7 +1286,7 @@ class App extends DataNode implements IApp {
             }
         }
         catch (e) {
-            //ignore                
+            //ignore
         }
     }
 

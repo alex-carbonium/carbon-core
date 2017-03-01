@@ -4,7 +4,7 @@ import DragController from "../../framework/DragController";
 import SnapController from "../../framework/SnapController";
 import Cursor from "../../framework/Cursor";
 import CustomGuides from "./CustomGuides";
-import DefaultSettings from "../../DefaultSettings";
+import UserSettings from "../../UserSettings";
 import { isPointInRect } from "../../math/math";
 import { PatchType, ViewTool } from "../../framework/Defs";
 import { createUUID } from "../../util";
@@ -13,7 +13,7 @@ import Artboard from "../../framework/Artboard";
 import Keyboard from "../../platform/Keyboard";
 import { IApp, IView, IController, IDisposable, IRect, IMouseEventData } from "../../framework/CoreModel";
 
-const config = DefaultSettings.ruler;
+const config = UserSettings.ruler;
 
 export default class RulerGuides {
     _dragController: DragController;
@@ -119,7 +119,7 @@ export default class RulerGuides {
         }
 
         this._guideX = null;
-        this._customGuides.releaseCaptured();        
+        this._customGuides.releaseCaptured();
     };
     onDragStarting = (e) => {
         if (!this.active()) {
