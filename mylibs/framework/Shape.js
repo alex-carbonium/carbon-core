@@ -9,6 +9,9 @@ import Frame from "./Frame";
 import Constraints from "./Constraints";
 
 class Shape extends Container {
+    convertToPath(){
+        return null;
+    }
 
     mode(value) {
         return this.field("_mode", value, "resize");
@@ -265,7 +268,6 @@ class Shape extends Container {
         return value;
     }
 
-
     insert(frame) {
         var rect = this.getBoundaryRect();
         var parent = this.parent();
@@ -280,6 +282,13 @@ class Shape extends Container {
         group.setProps(rect);
         group.add(frame);
         parent.insert(group, idx);
+    }
+
+    skew(): void{
+        var path = this.convertToPath();
+        if (path){
+            this.parent().replace(this, path);
+        }
     }
 }
 Shape.prototype.t = Types.Shape;

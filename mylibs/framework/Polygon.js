@@ -59,6 +59,14 @@ var PolygonFrameType = {
 PolygonFrameType = Object.assign({}, DefaultFrameType, PolygonFrameType);
 
 export default class Polygon extends Shape {
+    applySizeScaling(s, o, options, changeMode) {
+        this.applyMatrixScaling(s, o, options, changeMode);
+
+        if (!options || options.final){
+            this.skew();
+        }
+    }
+
     prepareProps(changes) {
         super.prepareProps.apply(this, arguments);
 

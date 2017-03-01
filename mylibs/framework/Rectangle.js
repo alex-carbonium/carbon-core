@@ -140,7 +140,7 @@ class Rectangle extends Shape {
     canConvertToPath(){
         return true;
     }
-    convertToPath() {
+    convertToPath(): Path {
         var br = this.br();
         var path = new Path()
             , x1 = 0

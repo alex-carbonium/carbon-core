@@ -1196,6 +1196,9 @@ class Path extends Shape {
         this.applyMatrixScaling(s, o, options, changeMode);
     }
 
+    skew(): void{
+    }
+
     shouldApplyViewMatrix(){
         return false;
     }

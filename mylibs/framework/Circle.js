@@ -55,11 +55,12 @@ class Circle extends Shape {
     }
 
     convertToPath() {
+        var br = this.br();
         var path = new Path()
             , x1 = 0
             , y1 = 0
-            , w = this.width()
-            , h = this.height()
+            , w = br.width
+            , h = br.height
             , w2 = w / 2
             , h2 = h / 2;
         var dx = 0.55 * w / 2;

@@ -42,7 +42,7 @@ export default class ResizeRotateElement extends TransformationElement{
                 var sameDirection = this.children.length === 1 || this.isRotated();
                 var round = this._lastScaling.options.round && this.children.length === 1;
                 var resizeOptions = this._lastScaling.options.withSameDirection(sameDirection);
-                resizeOptions = resizeOptions.withReset(false).withRounding(round);
+                resizeOptions = resizeOptions.withReset(false).withRounding(round).withFinal(true);
                 element.applyScaling(this._lastScaling.s, localOrigin, resizeOptions);
             }
             if (this._lastRotation){

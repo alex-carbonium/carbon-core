@@ -44,6 +44,10 @@ export default class Container extends UIElement {
         this.performArrange({ oldRect, reset: options && options.reset });
     }
 
+    skew(): void{
+        this.children.forEach(x => x.skew());
+    }
+
     fillBackground(context, l, t, w, h) {
         if (this.fill() && fwk.Brush.canApply(this.fill()) && this.standardBackground()) {
             context.save();

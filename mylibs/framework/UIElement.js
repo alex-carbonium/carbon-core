@@ -307,6 +307,11 @@ export default class UIElement extends DataNode {
         }
 
         this.applyMatrixScaling(s, o, options, changeMode);
+
+        if (!options || options.final){
+            this.skew();
+        }
+
         return false;
     }
     applyMatrixScaling(s, o, options, changeMode: ChangeMode) {
@@ -317,6 +322,9 @@ export default class UIElement extends DataNode {
         else {
             this.applyTransform(Matrix.create().scale(s.x, s.y, o.x, o.y), changeMode);
         }
+    }
+
+    skew(): void{
     }
 
     first() {
