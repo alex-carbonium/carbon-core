@@ -1,7 +1,7 @@
 import ElementDragCreator from "ui/common/ElementDragCreator";
 import GraphicalPathCreator from "ui/common/GraphicalPathCreator";
 import SectionCreator from "ui/common/sections/SectionCreator";
-import StarTool from "ui/common/StarTool";
+import PolygonTool from "ui/common/PolygonTool";
 import LineCreator from "ui/common/LineCreator";
 import PencilCreator from "ui/common/PencilCreator";
 import LinkingTool from "ui/prototyping/LinkingTool";
@@ -236,10 +236,10 @@ export default class DrawActionSelector extends ExtensionBase {
         this._sectionCreator = new SectionCreator();
         this._circleCreator = new ElementDragCreator(ViewTool.Circle, Types.Circle);
         this._polylineCreator = new GraphicalPathCreator(app, Types.Path);
-        this._starCreator = new StarTool();
-        this._polygonCreator = new ElementDragCreator(ViewTool.Polygon, Types.Polygon);
+        this._starCreator = new PolygonTool(ViewTool.Star, Types.Star);
+        this._polygonCreator = new PolygonTool(ViewTool.Polygon, Types.Polygon);
+        this._triangleCreator = new PolygonTool(ViewTool.Triangle, Types.Polygon, {pointsCount: 3});
         this._artboardViewer = new ElementDragCreator(ViewTool.ArtboardViewer, Types.ArtboardFrame);
-        this._triangleCreator = new ElementDragCreator(ViewTool.Triangle, Types.Polygon, {pointsCount: 3});
         this._lineCreator = new LineCreator();
         this._prototypingTool = new LinkingTool();
         this._pencilCreator = new PencilCreator();

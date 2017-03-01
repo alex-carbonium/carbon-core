@@ -5,36 +5,26 @@ import UIElement from "framework/UIElement";
 import {PointDirection, Types, FrameCursors} from "framework/Defs";
 import LineDirectionPoint from "decorators/LineDirectionPoint";
 import RotateFramePoint from "decorators/RotateFramePoint";
+import Rect from "../math/rect";
+import Point from "../math/point";
 import Environment from "environment";
-
-var radiusChanged = function (changes) {
-    var r = changes.radius;
-    var x = this.x() + this.width() / 2,
-        y = this.y() + this.height() / 2;
-    changes.x = x - r;
-    changes.y = y - r;
-    changes.width = 2 * r;
-    changes.height = 2 * r;
-};
 
 var PolygonFrameType = {
     cursorSet: FrameCursors,
-    hitPointIndex: DefaultFrameType.hitPointIndex,
-    updateFromElement: DefaultFrameType.updateFromElement,
-    movePoint: DefaultFrameType.movePoint,
     draw: function (frame, context, currentPoint) {
-        var w = frame.getWidth();
-        var h = frame.getHeight();
-        var x = 0 | w / 2;
-        var y = 0 | h / 2;
+        var r = frame.element.radius();
+        var x = 0 | r;
+        var y = 0 | r;
         var scale = Environment.view.scale();
 
         context.save();
         context.scale(1 / scale, 1 / scale);
 
+        var matrix = frame.element.globalViewMatrix().prependedWithScale(scale, scale);
+
         if (frame.onlyCurrentVisible) {
             if (currentPoint) {
-                currentPoint.type.draw(currentPoint, frame, scale, context);
+                currentPoint.type.draw(currentPoint, frame, scale, context, matrix);
             }
         }
         else {
@@ -43,50 +33,105 @@ var PolygonFrameType = {
                 context.strokeStyle = '#22c1ff';
                 context.lineWidth = 1;
                 context.beginPath();
-                context.circlePath(x * scale, y * scale, frame.element.radius() * scale);
+                var p = matrix.transformPoint2(x, y);
+                context.circlePath(p.x, p.y, frame.element.radius() * scale);
                 context.stroke();
                 context.restore();
             }
 
             for (var i = frame.points.length - 1; i >= 0; --i) {
                 var p = frame.points[i];
-                p.type.draw(p, frame, scale, context);
+                p.type.draw(p, frame, scale, context, matrix);
             }
         }
 
         context.restore();
+    },
+    saveChanges: function(frame, clone: Polygon){
+        var props = {
+            br: clone.br(),
+            radius: clone.radius(),
+            m: frame.element.parent().globalMatrixToLocal(clone.globalViewMatrix())
+        };
+        frame.element.setProps(props);
     }
 }
+PolygonFrameType = Object.assign({}, DefaultFrameType, PolygonFrameType);
 
+export default class Polygon extends Shape {
+    prepareProps(changes) {
+        super.prepareProps.apply(this, arguments);
 
-class Polygon extends Shape {
-    constructor() {
-        super();
+        var radiusChanged = changes.hasOwnProperty("radius");
+        var countChanged = changes.hasOwnProperty("pointsCount");
+
+        if (radiusChanged){
+            changes.radius = Math.round(changes.radius);
+            if (changes.radius <= 0){
+                changes.radius = 1;
+            }
+        }
+
+        if (radiusChanged) {
+            this.onRadiusChanged(changes);
+        }
+
+        if (radiusChanged || countChanged){
+            var r = radiusChanged ? changes.radius : this.radius();
+            var count = countChanged ? changes.pointsCount : this.pointsCount();
+            changes.br = this.calculateBoundaryRect(r, count);
+        }
     }
 
-    _updateSize(changes) {
-        var oldSize = this.width();
-        var width = changes.width || oldSize;
-        var height = changes.height || oldSize;
-        var size = Math.min(width, height);
-        changes.radius = 0 | size / 2;
+    onRadiusChanged(changes) {
+        var r = changes.radius;
+        var dr = this.radius() - r;
+
+        changes.m = this.viewMatrix().clone();
+        changes.m.translate(dr, dr);
+    }
+
+    saveOrResetLayoutProps(): boolean{
+        if (super.saveOrResetLayoutProps()){
+            this.runtimeProps.origLayout.radius = this.radius();
+            return true;
+        }
+
+        this.radius(this.runtimeProps.origLayout.radius);
+        return false;
+    }
+
+    calculateBoundaryRect(externalRadius, pointsCount): Rect{
+        var step = 360 / pointsCount;
+
+        var xmin = externalRadius;
+        var xmax = 0;
+        var ymin = -externalRadius;
+        var ymax = 0;
+
+        var center = new Point(externalRadius, externalRadius);
+        var vertex = new Point(0, -externalRadius);
+
+        for (var i = 1; i < pointsCount; i++) {
+            var angle = step * i;
+            vertex.set(0, -externalRadius);
+            vertex.setAngle(-90 + angle);
+
+            xmin = Math.min(xmin, vertex.x);
+            xmax = Math.max(xmax, vertex.x);
+            ymin = Math.min(ymin, vertex.y);
+            ymax = Math.max(ymax, vertex.y);
+        }
+
+        return new Rect(xmin + externalRadius, ymin + externalRadius, xmax - xmin, ymax - ymin);
+    }
+
+    roundBoundingBoxToPixelEdge(): boolean{
+        return false;
     }
 
     selectionFrameType() {
         return PolygonFrameType;
-    }
-
-    propsUpdated(changes) {
-        super.propsUpdated.apply(this, arguments);
-    }
-    prepareProps(changes) {
-        super.prepareProps.apply(this, arguments);
-        if ((changes.radius)) {
-            radiusChanged.call(this, changes);
-        }
-        else if (changes.width !== undefined || changes.height !== undefined) {
-            this._updateSize(changes);
-        }
     }
 
     radius(value) {
@@ -106,8 +151,8 @@ class Polygon extends Shape {
     drawPath(context, w, h) {
         var step = 2 * Math.PI / this.pointsCount();
         var r = this.radius();
-        var cx = w / 2,
-            cy = h / 2;
+        var cx = r,
+            cy = r;
 
         var x = cx + r * Math.sin(Math.PI),
             y = cy + r * Math.cos(Math.PI);
@@ -131,8 +176,8 @@ class Polygon extends Shape {
 
         var step = 2 * Math.PI / this.pointsCount();
         var r = this.radius();
-        var cx = this.width() / 2,
-            cy = this.height() / 2;
+        var cx = r,
+            cy = r;
 
         var x = cx + r * Math.sin(Math.PI),
             y = cy + r * Math.cos(Math.PI);
@@ -151,12 +196,8 @@ class Polygon extends Shape {
         path.styleId(this.styleId());
         path.name(this.name());
 
-        path.x(0);
-        path.y(0);
+        path.setTransform(this.viewMatrix());
         path.adjustBoundaries();
-        path.x(path.x() + this.x());
-        path.y(path.y() + this.y());
-        path.angle(this.angle());
 
         return path;
     }
@@ -184,37 +225,36 @@ class Polygon extends Shape {
             frame: true,
             points: [
                 {
+                    type: RotateFramePoint,
+                    moveDirection: PointDirection.Any,
+                    x: 0,
+                    y: 0,
+                    cursor: 3,
+                    update: function (p, x, y, w, h, element, scale) {
+                        var radius = element.props.radius;
+
+                        p.x = 2*radius + RotateFramePoint.PointSize2/scale;
+                        p.y = radius;
+                    }
+                },
+                {
                     type: LineDirectionPoint,
                     moveDirection: PointDirection.Any,
                     x: 0,
                     y: 0,
-                    cursor: 9,
+                    cursor: 10,
                     prop: 'radius',
                     limitFrom: true,
                     update: function (p, x, y, w, h, element, scale) {
-                        var value = element.props[p.prop];
+                        var radius = element.props[p.prop];
 
-                        p.x = w / 2 + value;
-                        p.y = h / 2;
-                        p.from = {x: w / 2, y: h / 2};
+                        p.x = radius*2;
+                        p.y = radius;
+                        p.from = {x: radius, y: radius};
                         p.to = {x: p.x, y: p.y};
                     }
                 }
             ]
-        }
-
-        if (this.canRotate()) {
-            frame.points.splice(0, 0, {
-                type: RotateFramePoint,
-                moveDirection: PointDirection.Any,
-                x: 0,
-                y: 0,
-                cursor: 8,
-                update: function (p, x, y, w, h) {
-                    p.x = x + w / 2;
-                    p.y = y;
-                }
-            });
         }
 
         return frame;
@@ -227,29 +267,23 @@ PropertyMetadata.registerForType(Polygon, {
         displayName: "Radius",
         defaultValue: 15,
         type: "numeric",
-        useInModel: true,
-        editable: true
     },
     pointsCount: {
         displayName: "Points count",
         defaultValue: 6,
         type: "numeric",
-        useInModel: true,
-        editable: true,
-        validate: [
-            {minMax: [4, 100]}
-        ]
+        options: {
+            min: 3,
+            max: 20
+        }
     },
     groups(element) {
         var baseType = PropertyMetadata.baseTypeName(Polygon);
-        var baseGroups = PropertyMetadata.findAll(baseType).groups(element);
-        return [
-            {
-                label: "Polygon",
-                properties: ["radius", "pointsCount"]
-            }
-        ].concat(baseGroups);
+        var groups = PropertyMetadata.findAll(baseType).groups(element).slice();
+        groups[0] = {
+            label: "Layout",
+            properties: ["x", "y", "radius", "pointsCount", "angle"]
+        };
+        return groups;
     }
 });
-
-export default Polygon;
