@@ -366,7 +366,7 @@ export default class CompositeElement extends UIElement implements IComposite {
 
             if (this._origPropValues.length) {
                 var origProps = this._origPropValues[i];
-                element.setProps(origProps, ChangeMode.Root);
+                element.prepareAndSetProps(origProps, ChangeMode.Root);
             }
             element.setDisplayProps(elementChanges, ChangeMode.Model);
         }

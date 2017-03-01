@@ -102,15 +102,15 @@ class Circle extends Shape {
             cp1x: x1,
             cp1y: y1 + h2 + dy
         });
+
         path.closed(true);
-        // path.strokeWidth(this.strokeWidth());
         path.fill(this.fill());
         path.stroke(this.stroke());
         path.styleId(this.styleId());
         path.name(this.name());
 
+        path.setTransform(this.viewMatrix());
         path.adjustBoundaries();
-        path.setProps(this.selectLayoutProps());
 
         return path;
     }

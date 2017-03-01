@@ -5,36 +5,26 @@ import UIElement from "framework/UIElement";
 import {PointDirection, Types, FrameCursors} from "framework/Defs";
 import LineDirectionPoint from "decorators/LineDirectionPoint";
 import RotateFramePoint from "decorators/RotateFramePoint";
+import Rect from "../math/rect";
+import Point from "../math/point";
 import Environment from "environment";
-
-var radiusChanged = function (changes) {
-    var r = changes.externalRadius;
-    var x = this.x() + this.width() / 2,
-        y = this.y() + this.height() / 2;
-    changes.x = x - r;
-    changes.y = y - r;
-    changes.width = 2 * r;
-    changes.height = 2 * r;
-};
 
 var StarFrameType = {
     cursorSet: FrameCursors,
-    hitPointIndex: DefaultFrameType.hitPointIndex,
-    updateFromElement: DefaultFrameType.updateFromElement,
-    movePoint: DefaultFrameType.movePoint,
     draw: function (frame, context, currentPoint) {
-        var w = frame.getWidth();
-        var h = frame.getHeight();
-        var x = 0 | w / 2;
-        var y = 0 | h / 2;
+        var r = frame.element.externalRadius();
+        var x = 0 | r;
+        var y = 0 | r;
         var scale = Environment.view.scale();
 
         context.save();
         context.scale(1 / scale, 1 / scale);
 
+        var matrix = frame.element.globalViewMatrix().prependedWithScale(scale, scale);
+
         if (frame.onlyCurrentVisible) {
             if (currentPoint) {
-                currentPoint.type.draw(currentPoint, frame, scale, context);
+                currentPoint.type.draw(currentPoint, frame, scale, context, matrix);
             }
         }
         else {
@@ -43,22 +33,35 @@ var StarFrameType = {
                 context.strokeStyle = '#22c1ff';
                 context.lineWidth = 1;
                 context.beginPath();
-                context.circlePath(x * scale, y * scale, frame.element.externalRadius() * scale);
-                context.circlePath(x * scale, y * scale, frame.element.internalRadius() * scale);
+                var p = matrix.transformPoint2(x, y);
+                context.circlePath(p.x, p.y, frame.element.externalRadius() * scale);
+                context.stroke();
+
+                context.beginPath();
+                context.circlePath(p.x, p.y, frame.element.internalRadius() * scale);
                 context.stroke();
                 context.restore();
             }
 
-
             for (var i = frame.points.length - 1; i >= 0; --i) {
                 var p = frame.points[i];
-                p.type.draw(p, frame, scale, context);
+                p.type.draw(p, frame, scale, context, matrix);
             }
         }
 
         context.restore();
+    },
+    saveChanges: function(frame, clone){
+        var props = {
+            br: clone.br(),
+            internalRadius: clone.internalRadius(),
+            externalRadius: clone.externalRadius(),
+            m: frame.element.parent().globalMatrixToLocal(clone.globalViewMatrix())
+        };
+        frame.element.setProps(props);
     }
 }
+StarFrameType = Object.assign({}, DefaultFrameType, StarFrameType);
 
 
 class Star extends Shape {
@@ -66,34 +69,65 @@ class Star extends Shape {
         super();
     }
 
-    _updateSize(changes) {
-        var radiusRatio = this._originalRatio || (this.internalRadius() / this.externalRadius());
-        var oldSize = this.width();
-        var width = changes.width || oldSize;
-        var height = changes.height || oldSize;
-        var size = Math.min(width, height);
-        changes.externalRadius = 0 | size / 2;
+    _externalRadiusChanged(changes) {
+        var r = changes.externalRadius;
+        var dr = this.externalRadius() - r;
+
+        changes.m = this.viewMatrix().clone();
+        changes.m.translate(dr, dr);
+
+        var radiusRatio = this.internalRadius() / this.externalRadius();
         if (!isNaN(radiusRatio)) {
             changes.internalRadius = changes.externalRadius * radiusRatio;
         }
     }
 
-    selectionFrameType() {
-        return StarFrameType;
-    }
+    saveOrResetLayoutProps(): boolean{
+        if (super.saveOrResetLayoutProps()){
+            this.runtimeProps.origLayout.externalRadius = this.externalRadius();
+            this.runtimeProps.origLayout.internalRadius = this.internalRadius();
+            return true;
+        }
 
-    propsUpdated(changes) {
-        super.propsUpdated.apply(this, arguments);
+        this.internalRadius(this.runtimeProps.origLayout.internalRadius);
+        this.externalRadius(this.runtimeProps.origLayout.externalRadius);
+        return false;
     }
 
     prepareProps(changes) {
         super.prepareProps.apply(this, arguments);
-        if ((changes.externalRadius)) {
-            radiusChanged.call(this, changes);
+
+        var externalChanged = changes.hasOwnProperty("externalRadius");
+        var countChanged = changes.hasOwnProperty("pointsCount");
+
+        if (externalChanged){
+            changes.externalRadius = Math.round(changes.externalRadius);
+            if (changes.externalRadius <= 0){
+                changes.externalRadius = 1;
+            }
         }
-        if (changes.width !== undefined || changes.height !== undefined) {
-            this._updateSize(changes);
+
+        if (externalChanged) {
+            this._externalRadiusChanged(changes);
         }
+
+        if (externalChanged || countChanged){
+            var r = externalChanged ? changes.externalRadius : this.externalRadius();
+            var count = countChanged ? changes.pointsCount : this.pointsCount();
+            changes.br = this.calculateBoundaryRect(r, count);
+        }
+
+        var internalChanged = changes.hasOwnProperty("internalRadius");
+        if (internalChanged){
+            changes.internalRadius = Math.round(changes.internalRadius);
+            if (changes.internalRadius <= 0){
+                changes.internalRadius = 1;
+            }
+        }
+    }
+
+    roundBoundingBoxToPixelEdge(): boolean{
+        return false;
     }
 
     externalRadius(value) {
@@ -117,12 +151,37 @@ class Star extends Shape {
         return this.props.pointsCount;
     }
 
+    calculateBoundaryRect(externalRadius, pointsCount): Rect{
+        var step = 360 / pointsCount;
+
+        var xmin = externalRadius;
+        var xmax = 0;
+        var ymin = -externalRadius;
+        var ymax = 0;
+
+        var center = new Point(externalRadius, externalRadius);
+        var vertex = new Point(0, -externalRadius);
+
+        for (var i = 1; i < pointsCount; i++) {
+            var angle = step * i;
+            vertex.set(0, -externalRadius);
+            vertex.setAngle(-90 + angle);
+
+            xmin = Math.min(xmin, vertex.x);
+            xmax = Math.max(xmax, vertex.x);
+            ymin = Math.min(ymin, vertex.y);
+            ymax = Math.max(ymax, vertex.y);
+        }
+
+        return new Rect(xmin + externalRadius, ymin + externalRadius, xmax - xmin, ymax - ymin);
+    }
+
     drawPath(context, w, h) {
         var step = Math.PI / this.pointsCount();
         var r1 = this.externalRadius(),
             r2 = this.internalRadius();
-        var cx = w / 2,
-            cy = h / 2;
+        var cx = r1,
+            cy = r1;
 
         var x = cx + r1 * Math.sin(Math.PI),
             y = cy + r1 * Math.cos(Math.PI);
@@ -144,14 +203,6 @@ class Star extends Shape {
         context.closePath();
     }
 
-    beforeAddFromToolbox() {
-        this._originalRatio = (this.internalRadius() / this.externalRadius());
-    }
-
-    afterAddFromToolbox() {
-        delete this._originalRatio;
-    }
-
     canConvertToPath(){
         return true;
     }
@@ -161,8 +212,8 @@ class Star extends Shape {
         var step = Math.PI / this.pointsCount();
         var r1 = this.externalRadius(),
             r2 = this.internalRadius();
-        var cx = this.width() / 2,
-            cy = this.height() / 2;
+        var cx = r1,
+            cy = r1;
 
         var x = cx + r1 * Math.sin(Math.PI),
             y = cy + r1 * Math.cos(Math.PI);
@@ -185,16 +236,16 @@ class Star extends Shape {
         path.fill(this.fill());
         path.stroke(this.stroke());
         path.styleId(this.styleId());
-
-        path.x(0);
-        path.y(0);
-        path.adjustBoundaries();
-        path.x(path.x() + this.x());
-        path.y(path.y() + this.y());
-        path.angle(this.angle());
         path.name(this.name());
 
+        path.setTransform(this.viewMatrix());
+        path.adjustBoundaries();
+
         return path;
+    }
+
+    selectionFrameType() {
+        return StarFrameType;
     }
 
     createSelectionFrame(view) {
@@ -220,19 +271,32 @@ class Star extends Shape {
             frame: true,
             points: [
                 {
+                    type: RotateFramePoint,
+                    moveDirection: PointDirection.Any,
+                    x: 0,
+                    y: 0,
+                    cursor: 3,
+                    update: function (p, x, y, w, h, element, scale) {
+                        var external = element.props.externalRadius;
+
+                        p.x = 2*external + RotateFramePoint.PointSize2/scale;
+                        p.y = external;
+                    }
+                },
+                {
                     type: LineDirectionPoint,
                     moveDirection: PointDirection.Any,
                     x: 0,
                     y: 0,
-                    cursor: 9,
+                    cursor: 10,
                     prop: 'externalRadius',
                     limitFrom: true,
                     update: function (p, x, y, w, h, element, scale) {
-                        var value = element.props[p.prop];
+                        var external = element.props[p.prop];
 
-                        p.x = w / 2 + value;
-                        p.y = h / 2;
-                        p.from = {x: w / 2, y: h / 2};
+                        p.x = external*2;
+                        p.y = external;
+                        p.from = {x: external, y: external};
                         p.to = {x: p.x, y: p.y};
                     }
                 },
@@ -241,38 +305,24 @@ class Star extends Shape {
                     moveDirection: PointDirection.Any,
                     x: 0,
                     y: 0,
-                    cursor: 9,
+                    cursor: 10,
                     limitFrom: true,
                     limitTo: true,
                     prop: 'internalRadius',
                     update: function (p, x, y, w, h, element, scale) {
-                        var value = element.props[p.prop];
-                        var ext = element.props.externalRadius;
+                        var internal = element.props[p.prop];
+                        var external = element.props.externalRadius;
 
-                        p.x = w / 2 + value;
-                        p.y = h / 2;
-                        p.from = {x: w / 2, y: h / 2};
-                        p.to = {x: w / 2 + ext, y: h / 2};
+                        p.x = external;
+                        p.y = external - internal;
+                        p.from = {x: external, y: external};
+                        p.to = {x: external, y: 0};
                     },
                     change: function (frame, dx, dy, point, mousePoint, keys) {
                         LineDirectionPoint.change(frame, dx, dy, point, mousePoint, keys);
                     }
                 }
             ]
-        }
-
-        if (this.canRotate()) {
-            frame.points.splice(0, 0, {
-                type: RotateFramePoint,
-                moveDirection: PointDirection.Any,
-                x: 0,
-                y: 0,
-                cursor: 8,
-                update: function (p, x, y, w, h) {
-                    p.x = x + w / 2;
-                    p.y = y;
-                }
-            });
         }
 
         return frame;
@@ -307,13 +357,12 @@ PropertyMetadata.registerForType(Star, {
     },
     groups(element) {
         var baseType = PropertyMetadata.baseTypeName(Star);
-        var baseGroups = PropertyMetadata.findAll(baseType).groups(element);
-        return [
-            {
-                label: "Star",
-                properties: ["externalRadius", "internalRadius", "pointsCount"]
-            }
-        ].concat(baseGroups);
+        var groups = PropertyMetadata.findAll(baseType).groups(element).slice();
+        groups[0] = {
+            label: "Layout",
+            properties: ["x", "y", "externalRadius", "internalRadius", "pointsCount"]
+        };
+        return groups;
     }
 });
 

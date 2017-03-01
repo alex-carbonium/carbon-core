@@ -39,7 +39,6 @@ var LinePoint = {
         var resizingElement = frame.element.clone();
         resizingElement.opacity(0.6);
         resizingElement.setProps(frame.element.selectLayoutProps(true));
-        resizingElement.forceDrawClone = true;
         frame.resizingElement = resizingElement;
         frame.globalViewMatrix = frame.element.globalViewMatrix();
 

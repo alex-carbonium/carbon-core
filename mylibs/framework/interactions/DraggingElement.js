@@ -9,7 +9,7 @@ import TransformationElement from "./TransformationElement";
 import ArrangeStrategy from "../ArrangeStrategy";
 import Brush from "../Brush";
 import Environment from "../../environment";
-import DefaultSettings from "../../DefaultSettings";
+import UserSettings from "../../UserSettings";
 import Matrix from "../../math/matrix";
 
 var debug = require("DebugUtil")("carb:draggingElement");
@@ -29,7 +29,7 @@ class DraggingElement extends TransformationElement {
         this._initialPosition = this.getBoundingBoxGlobal().topLeft();
 
         let snappingTarget = elementOrComposite.first().parent().primitiveRoot();
-        
+
         SnapController.calculateSnappingPoints(snappingTarget);
 
         var holdPcnt = Math.round((event.x - this.x()) * 100 / this.width());
@@ -38,7 +38,7 @@ class DraggingElement extends TransformationElement {
         this._translation = new Point(0, 0);
         this._currentPosition = new Point(0, 0);
 
-        this.translationMatrix = Matrix.create();        
+        this.translationMatrix = Matrix.create();
     }
 
     wrapSingleChild(){
@@ -136,7 +136,7 @@ class DraggingElement extends TransformationElement {
 
         this._currentPosition.set(this._translation.x, this._translation.y);
 
-        var roundToPixels = !event.event.ctrlKey && DefaultSettings.snapTo.enabled && DefaultSettings.snapTo.pixels;
+        var roundToPixels = !event.event.ctrlKey && UserSettings.snapTo.enabled && UserSettings.snapTo.pixels;
         if (roundToPixels){
             this._currentPosition.roundMutable();
         }

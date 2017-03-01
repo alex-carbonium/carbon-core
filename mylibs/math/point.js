@@ -247,6 +247,7 @@ export default class Point implements IPoint {
 
     setAngle(angle) {
         this.setAngleInRadians.call(this, angle * Math.PI / 180);
+        return this;
     }
 
     /**
@@ -300,6 +301,7 @@ export default class Point implements IPoint {
                 Math.sin(angle) * length
             );
         }
+        return this;
     }
 
     /**

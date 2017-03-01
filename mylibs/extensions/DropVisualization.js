@@ -13,7 +13,7 @@ import Container from "../framework/Container";
 import Environment from "../environment";
 import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
 import { ITransformationElement, ITransformationEventData, IPoint, IKeyboardState } from "../framework/CoreModel";
-import DefaultSettings from "../DefaultSettings";
+import UserSettings from "../UserSettings";
 import Point from "../math/point";
 import Matrix from "../math/matrix";
 import { ChangeMode, FloatingPointPrecision } from "../framework/Defs";
@@ -151,10 +151,10 @@ class ResizeHint extends UIElement {
 
         context.save();
         context.scale(1/scale, 1/scale);
-        context.fillStyle = DefaultSettings.frame.stroke;
+        context.fillStyle = UserSettings.frame.stroke;
         context.textBaseline = 'top';
         context.font = fontStyle;
-        context.fillStyle = DefaultSettings.frame.stroke;
+        context.fillStyle = UserSettings.frame.stroke;
 
         if (this._textWidth === -1){
             this._textWidth = context.measureText(this._text, fontStyle).width;
@@ -224,6 +224,7 @@ var onDraggingElement = function (event: ITransformationEventData, keys: IKeyboa
     ) {
         this._target = event.target !== event.transformationElement.elements[0].parent() ? event.target : null;
         this._dropData = event.target.getDropData({ x: event.mouseX, y: event.mouseY }, event.transformationElement);
+        this._isDropTarget = true;
     } else {
         this._target = null;
         this._dropData = null;
@@ -242,6 +243,7 @@ var onStartDragging = function (event: ITransformationEventData) {
 var onStopDragging = function (event) {
     this._dropData = null;
     this._target = null;
+    this._isDropTarget = false;
     this._dragging = false;
     this._hint.stop();
     updateVisualizations.call(this);
@@ -264,6 +266,7 @@ var onMouseMove = function (event) {
             if (!Selection.isElementSelected(target)) {
                 if (target.canSelect() && !target.locked() && (!target.lockedGroup || target.lockedGroup())) {
                     this._target = target;
+                    this._isDropTarget = false;
                     updateVisualizations.call(this);
                 } else {
                     if (this._target != null) {
@@ -464,7 +467,7 @@ export default class DropVisualization extends ExtensionBase {
     onLayerDraw(layer, context) {
         var target = this._target || this.view._highlightTarget;
         if (target) {
-            DropVisualization.highlightElement(this.view, context, target, true);
+            DropVisualization.highlightElement(this.view, context, target, this._isDropTarget);
         }
     }
 

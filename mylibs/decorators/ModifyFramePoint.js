@@ -7,7 +7,7 @@ const PointSize = 5
     , PointSize2 = 2;
 
 export default {
-    cursorSet: FrameCursors, 
+    cursorSet: FrameCursors,
     hitTest: function (frame, point, hitPoint, scale) {
         return Math.abs(point.x - hitPoint.x) < PointSize / scale && Math.abs(point.y - hitPoint.y) < PointSize / scale;
     },
@@ -29,7 +29,6 @@ export default {
     },
     capture: function (frame, point) {
         var resizingElement = UIElement.construct(Types.DraggingElement, frame.element);
-        resizingElement.forceDrawClone = true;
         frame.resizingElement = resizingElement;
 
         Environment.view.layer3.add(resizingElement);

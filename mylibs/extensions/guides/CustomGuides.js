@@ -3,7 +3,7 @@ import Brush from "../../framework/Brush";
 import tinycolor from "tinycolor2/tinycolor";
 import Guide from "./Guide";
 import {Types} from "../../framework/Defs";
-import DefaultSettings from "../../DefaultSettings";
+import UserSettings from "../../UserSettings";
 import {IView, IContext, IArtboardProps, IRect, IGuide} from "../../framework/CoreModel";
 
 class CustomGuides extends Guide{
@@ -11,11 +11,11 @@ class CustomGuides extends Guide{
         super();
         this._view = view;
         this.capturedIndexX = -1;
-        this.capturedIndexY = -1;        
+        this.capturedIndexY = -1;
     }
 
     drawX(context: IContext, minx: number, height: number){
-        context.save();        
+        context.save();
 
         var scale = this._view.scale();
         context.globalAlpha *= this.opacity();
@@ -140,7 +140,7 @@ CustomGuides.getDefaultStrokeHsl = function(){
 
 PropertyMetadata.registerForType(CustomGuides, {
     stroke: {
-        defaultValue: Brush.createFromColor(DefaultSettings.guides.stroke)
+        defaultValue: Brush.createFromColor(UserSettings.guides.stroke)
     },
     opacity: {
         defaultValue: 1

@@ -101,7 +101,7 @@ export var ViewTool = {
     Hand: "handTool",
     PointerDirect: "pointerDirectTool",
     Image: "imageTool",
-    ArtboardViewer: "artboardViewerTool"    
+    ArtboardViewer: "artboardViewerTool"
 };
 
 export var PointDirection = {
@@ -333,7 +333,7 @@ export var HorizontalConstraint  = {
 
 export var ContextBarPosition = {
     None: 0,
-    Left: 1, 
+    Left: 1,
     Right: 2,
     Only: 4
 }

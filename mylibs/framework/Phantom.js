@@ -32,7 +32,7 @@ export default class Phantom extends UIElement {
             GlobalMatrixModifier.push(m => Environment.view.scaleMatrix
                 .appended(this.parent().translationMatrix)
                 .appended(m)
-            );            
+            );
 
             //do not round so that boundary path does not flicker
             this._element.drawBoundaryPath(context, false);
@@ -40,5 +40,9 @@ export default class Phantom extends UIElement {
         finally {
             GlobalMatrixModifier.pop();
         }
+    }
+
+    isPhantom(): boolean{
+        return true;
     }
 }

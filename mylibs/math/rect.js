@@ -97,7 +97,7 @@ export default class Rect{
         this.y = pos.y;
     }
 
-    center(){
+    center() {
         return new Point(this.x + this.width/2, this.y + this.height/2);
     }
     centerLeft(){
@@ -107,7 +107,7 @@ export default class Rect{
         return new Point(this.x + this.width/2, this.y);
     }
 
-    topLeft(){
+    topLeft(): Point{
         if (this.x === 0 && this.y === 0){
             return Point.Zero;
         }

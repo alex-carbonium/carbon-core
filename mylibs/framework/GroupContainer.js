@@ -1,6 +1,6 @@
 import { Types, ArrangeStrategies } from "./Defs";
 import PropertyMetadata from "./PropertyMetadata";
-import DefaultSettings from "../DefaultSettings";
+import UserSettings from "../UserSettings";
 import Container from "./Container";
 import UIElement from "./UIElement";
 import Point from "../math/point";
@@ -54,7 +54,7 @@ export default class GroupContainer extends Container implements IGroupContainer
     strokeBorder(context, w, h) {
         if (!this.lockedGroup()) {
             context.save();
-            context.strokeStyle = DefaultSettings.group.active_stroke;
+            context.strokeStyle = UserSettings.group.active_stroke;
 
             var scale = Environment.view.scale();
             context.scale(1 / scale, 1 / scale);

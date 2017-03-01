@@ -51,14 +51,7 @@ export default class UIElement extends DataNode {
     constructor() {
         super();
 
-        // public variables
-        //this.onresize = fwk.EventHelper.createEvent();
         this.stopwatch = new stopwatch();
-
-        //this._draggingOver = false;
-        //this._draggingData = null;
-        //this._lockInvalidate = false;
-        // this._seedNumber = new Date().getMilliseconds();
 
         if (DEBUG) {
             this.id(createUUID(this.t));
@@ -120,10 +113,6 @@ export default class UIElement extends DataNode {
     setProps(props) {
         var hasBr = props.hasOwnProperty("br");
 
-        if (hasBr && !(props.br instanceof Rect)) {
-            debugger;
-        }
-
         if (!hasBr) {
             var hasW = props.hasOwnProperty("width");
             var hasH = props.hasOwnProperty("height");
@@ -160,14 +149,14 @@ export default class UIElement extends DataNode {
             m
         };
     }
-    saveOrResetLayoutProps() {
+    saveOrResetLayoutProps(): boolean {
         //this happens only for clones, so no need to clear origLayout
         if (!this.runtimeProps.origLayout) {
             this.runtimeProps.origLayout = this.selectLayoutProps();
+            return true;
         }
-        else {
-            this.setProps(this.runtimeProps.origLayout);
-        }
+        this.setProps(this.runtimeProps.origLayout);
+        return false;
     }
 
     selectDisplayProps(names, metadata = this.findMetadata()): any {
@@ -506,9 +495,6 @@ export default class UIElement extends DataNode {
     }
 
     position() {
-        if (arguments.length === 1) {
-            debugger; //fix me
-        }
         return this.getBoundingBox().topLeft();
     }
     centerPositionGlobal() {
@@ -1046,7 +1032,7 @@ export default class UIElement extends DataNode {
         }
         return this.getRotation(true);
     }
-    br(value) {
+    br(value): Rect {
         if (value !== undefined) {
             this.setProps({ br: value });
         }
@@ -1534,6 +1520,10 @@ export default class UIElement extends DataNode {
     isOrphaned() {
         return this.parent() === NullContainer;
     }
+    /** Defines an element which is never added to the model, but is still drawn and could have visible properties */
+    isPhantom(): boolean{
+        return false;
+    }
     canBeRemoved() {
         return true;
     }
@@ -1620,9 +1610,9 @@ export default class UIElement extends DataNode {
                     x: 0,
                     y: 0,
                     cursor: 0,
-                    update: function (p, x, y, w, h) {
-                        p.x = x;
-                        p.y = y;
+                    update: function (p, x, y, w, h, element, scale) {
+                        p.x = x - RotateFramePoint.PointSize2/scale;
+                        p.y = y - RotateFramePoint.PointSize2/scale;
                     }
                 },
                 {
@@ -1631,9 +1621,9 @@ export default class UIElement extends DataNode {
                     x: 0,
                     y: 0,
                     cursor: 2,
-                    update: function (p, x, y, w, h) {
-                        p.x = x + w;
-                        p.y = y;
+                    update: function (p, x, y, w, h, element, scale) {
+                        p.x = x + w + RotateFramePoint.PointSize2/scale;
+                        p.y = y - RotateFramePoint.PointSize2/scale;
                     }
                 },
                 {
@@ -1642,9 +1632,9 @@ export default class UIElement extends DataNode {
                     x: 0,
                     y: 0,
                     cursor: 4,
-                    update: function (p, x, y, w, h) {
-                        p.x = x + w;
-                        p.y = y + h;
+                    update: function (p, x, y, w, h, element, scale) {
+                        p.x = x + w + RotateFramePoint.PointSize2/scale;
+                        p.y = y + h + RotateFramePoint.PointSize2/scale;
                     }
                 },
                 {
@@ -1653,9 +1643,9 @@ export default class UIElement extends DataNode {
                     x: 0,
                     y: 0,
                     cursor: 6,
-                    update: function (p, x, y, w, h) {
-                        p.x = x;
-                        p.y = y + h;
+                    update: function (p, x, y, w, h, element, scale) {
+                        p.x = x - RotateFramePoint.PointSize2/scale;
+                        p.y = y + h + RotateFramePoint.PointSize2/scale;
                     }
                 }
             );
@@ -1827,19 +1817,7 @@ export default class UIElement extends DataNode {
             points: points
         };
     }
-    getPropsDiff(other, oldProps) {
-        var res = {};
-        for (var p in other) {
-            if (this.props[p] !== other[p]) {
-                res[p] = other[p];
-                if (oldProps) {
-                    oldProps[p] = this.props[p];
-                }
-            }
-        }
 
-        return res;
-    }
     // returns deffered object
     animate(properties, duration, options, progressCallback) {
         var animationValues = [];
@@ -1883,13 +1861,6 @@ export default class UIElement extends DataNode {
             res[name] = sketch.util.flattenObject(this.props[name]);
         }
         return res;
-    }
-
-    beforeAddFromToolbox() {
-
-    }
-    afterAddFromToolbox() {
-
     }
 
     propertyMetadata() {

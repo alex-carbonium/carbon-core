@@ -1,5 +1,7 @@
 import {registerExample} from "./example";
 import Line from "../../framework/Line";
+import Star from "../../framework/Star";
+import Rect from "../../math/rect";
 import Selection from "../../framework/SelectionModel";
 
 registerExample("shape: lines", function(app, artboard){
@@ -23,4 +25,15 @@ registerExample("shape: lines", function(app, artboard){
     app.actionManager.invoke("groupElements");
 
     window.line1 = line1;
+});
+
+registerExample("shape: star, polygon", function(app, artboard){
+    var star = new Star();
+    star.prepareAndSetProps({externalRadius: 50, name: 'line 1'});
+    star.applyTranslation({x: 100, y: 300});
+    artboard.add(star);
+
+    Selection.makeSelection([star]);
+
+    window.star = star;
 });

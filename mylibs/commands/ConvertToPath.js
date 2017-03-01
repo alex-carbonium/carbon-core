@@ -23,7 +23,6 @@ export default {
                 var parent = e.parent();
                 var p = paths[i];
                 parent.replace(e, p);
-                p.setProps({width:e.width(), height:e.height()});
                 return p;
             }))
             .then(paths => Selection.makeSelection(paths));
