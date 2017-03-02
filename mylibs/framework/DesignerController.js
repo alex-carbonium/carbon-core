@@ -353,7 +353,7 @@ export default class DesignerController implements IController {
             else {
                 for (var i = 0; i < this.view._layersReverse.length ; i++) {
                     var layer = this.view._layersReverse[i];
-                    var element = layer.hitElement(eventData, this.view.scale(), null, eventData.event.ctrlKey);
+                    var element = layer.hitElement(eventData, this.view.scale(), null, Selection.directSelectionEnabled());
                     if (element !== null) {
                         if (element.canDrag()) {
                             this._startDraggingData = eventData;
@@ -535,7 +535,7 @@ export default class DesignerController implements IController {
         this._bubbleMouseEvent(eventData, "dblclick");
 
         if (!eventData.handled) {
-            var element = this.app.activePage.hitElement(eventData, this.view.scale());
+            var element = this.app.activePage.hitElement(eventData, this.view.scale(), null, Selection.directSelectionEnabled());
             if (element !== null) {
                 eventData.element = element;
                 this.onElementDblClicked.raise(eventData);
@@ -605,7 +605,7 @@ export default class DesignerController implements IController {
     }
 
     selectByClick(eventData) {
-        var element = this.app.activePage.hitElement(eventData, this.view.scale(), null, eventData.ctrlKey);
+        var element = this.app.activePage.hitElement(eventData, this.view.scale(), null, Selection.directSelectionEnabled());
 
         if (element !== null) {
             eventData.element = element;
@@ -674,7 +674,7 @@ export default class DesignerController implements IController {
     }
 
     showContextMenu(eventData) {
-        var element = this.app.activePage.hitElement(eventData, this.view.scale(), null, eventData.ctrlKey);
+        var element = this.app.activePage.hitElement(eventData, this.view.scale(), null, Selection.directSelectionEnabled());
 
         if (element !== null && !Selection.isElementSelected(element)) {
             eventData.element = element;

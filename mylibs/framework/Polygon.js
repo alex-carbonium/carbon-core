@@ -143,7 +143,7 @@ export default class Polygon extends Shape {
     mousemove(event: IMouseEventData){
         if (this.isInEditMode()){
             if (!event.cursor){
-                event.cursor = "direct_select_cursor";
+                event.cursor = "default_cursor";
             }
         }
     }

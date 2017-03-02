@@ -303,14 +303,19 @@ export default class ViewBase {
             return 1;
         }
 
-        var newValue = page.scale(value);
-        if (value) {
-            this.scaleMatrix.reset();
-            this.scaleMatrix.scale(newValue, newValue);
+        var pageScale = page.scale();
+        if (arguments.length){
+            if (value !== pageScale){
+                pageScale = page.scale(value);
+                this.scaleChanged.raise(pageScale);
+            }
 
-            this.scaleChanged.raise(newValue);
+            //matrix must always be reset
+            this.scaleMatrix.reset();
+            this.scaleMatrix.scale(pageScale, pageScale);
         }
-        return newValue;
+
+        return pageScale;
     }
 
     view() {
@@ -330,6 +335,7 @@ export default class ViewBase {
         this._envArray[0].layer = page;
 
         page.parent(this);
+        this.scale(page.scale());
     }
 
     global2local(/*Point*/pos) {
@@ -382,7 +388,7 @@ export default class ViewBase {
 
     lockedGroup() {
         return false;
-    }   
+    }
 
     scrollX(value) {
         var page = this.page;

@@ -4,7 +4,7 @@ import UIElement from "framework/UIElement";
 import Brush from "framework/Brush";
 import SharedColors from "../ui/SharedColors";
 import Selection from "framework/SelectionModel"
-import NullContainer from "framework/NullContainer";
+import NullContainer from "../framework/NullContainer";
 import Invalidate from "framework/Invalidate";
 import ExtensionBase from "./ExtensionBase";
 import DesignerView from "framework/DesignerView";
@@ -265,7 +265,7 @@ var onMouseMove = function (event) {
         return;
     }
 
-    var target = this.app.activePage.hitElement(event, this.view.scale(), null, event.ctrlKey);
+    var target = this.app.activePage.hitElement(event, this.view.scale(), null, Selection.directSelectionEnabled());
     if (this._target !== target) {
         //special case - do not highlight children of active group even though they are hit visible
         if (target && !event.ctrlKey && target.parent() instanceof Container && target.parent().activeGroup()) {

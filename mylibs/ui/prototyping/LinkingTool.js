@@ -1,11 +1,11 @@
 import Tool from "../common/Tool";
 import DropVisualization from "../../extensions/DropVisualization";
 import {createUUID} from "../../util";
-import {ActionType, 
-    AnimationType, 
+import {ActionType,
+    AnimationType,
     EasingType,
-    ActionEvents, 
-    StoryType, 
+    ActionEvents,
+    StoryType,
     ViewTool,
     PrimitiveType} from "framework/Defs";
 import * as ActionHelper from "./ActionHelper";
@@ -31,8 +31,8 @@ function hasLocationProperty(props) {
     return props.x !== undefined
         || props.y !== undefined
         || props.width !== undefined
-        || props.height !== undefined 
-        || props.m !== undefined 
+        || props.height !== undefined
+        || props.m !== undefined
         || props.br !== undefined;
 }
 
@@ -115,7 +115,7 @@ export default class LinkingTool extends Tool {
     }
 
     _handlePrototypeMouseDownEvent(scale, event) {
-        if (this._selection) {           
+        if (this._selection) {
             if (this._hitStartArrowRect(this._selection, event, scale)) {
                 this._mousepressed = true;
                 this._startPoint = {x: event.x, y: event.y, _x:event.x, _y:event.y};
@@ -131,7 +131,7 @@ export default class LinkingTool extends Tool {
         var x = rect.x + rect.width;
         var y = 0 | rect.y + (rect.height - size) / 2;
 
-        return (isPointInRect({x: x, y: y, width: size, height: size}, event));           
+        return (isPointInRect({x: x, y: y, width: size, height: size}, event));
     }
 
     _handleFlowMouseDownEvent(scale:number, event:any) {
@@ -140,7 +140,7 @@ export default class LinkingTool extends Tool {
         var artboards = page.getAllArtboards();
         for (var i = 0; i < artboards.length; ++i) {
             let artboard = artboards[i];
-            
+
             if (this._hitStartArrowRect(artboard, event, scale)) {
                 this._mousepressed = true;
                 this._startPoint = {x: event.x, y: event.y, _x:event.x, _y:event.y};
@@ -266,7 +266,7 @@ export default class LinkingTool extends Tool {
 
         var scale = this._view.scale();
 
-        var target = this._app.activePage.hitElement(event, scale, null, event.ctrlKey);
+        var target = this._app.activePage.hitElement(event, scale, null, Selection.directSelectionEnabled());
 
         if (this._target != target) {
             this._target = target;
@@ -274,7 +274,7 @@ export default class LinkingTool extends Tool {
         }
 
         if(this._isCurrentFlowStory()){
-            var handles = this._findNearByHandles(event, scale);            
+            var handles = this._findNearByHandles(event, scale);
             this._replaceHandles(handles);
         }
     }
@@ -365,10 +365,10 @@ export default class LinkingTool extends Tool {
         super.detach();
         this._view.prototyping(false);
         if(this._changedToken) {
-            this._changedToken.dispose();       
-            this._changedToken = null;     
+            this._changedToken.dispose();
+            this._changedToken = null;
         }
- 
+
         if (this._elementSelectedToken) {
             this._elementSelectedToken.dispose();
             this._elementSelectedToken = null;
@@ -411,7 +411,7 @@ export default class LinkingTool extends Tool {
                     this._addConnection(sourceElement, targetArtboard);
                 }
             }
-        });        
+        });
     }
 
     _addConnection(element, artboard) {
@@ -445,7 +445,7 @@ export default class LinkingTool extends Tool {
         var pointsMap = {};
         let BalanceMargin = 20;
         for(var c of this.connections) {
-            var from = c.connection.from;            
+            var from = c.connection.from;
             var to = c.connection.to;
             this._addBalancingConnection(pointsMap, from, to);
             this._addBalancingConnection(pointsMap, to, from);
@@ -463,18 +463,18 @@ export default class LinkingTool extends Tool {
                 list.sort((a,b)=>{
                     return a.target.x - b.target.x;
                 })
-                
+
                 var startX = 0 | list[0].source.x - BalanceMargin * (count - 1) / 2;
 
                 for(var i = 0; i < count; ++i) {
                     list[i].source._x = startX + i * BalanceMargin;
                 }
             } else {
-                
+
                 list.sort((a,b)=>{
                     return a.target.y - b.target.y;
                 })
-                
+
                 var startY = 0 | list[0].source.y - BalanceMargin * (count - 1) / 2;
 
                 for(var i = 0; i < count; ++i) {
@@ -523,12 +523,12 @@ export default class LinkingTool extends Tool {
 
     dragElementStarted(){
         this._draggingElement = true;
-        Invalidate.requestUpperOnly();    
+        Invalidate.requestUpperOnly();
     }
     dragElementEnded() {
         this._draggingElement = false;
         this._handles = [];
-        Invalidate.requestUpperOnly();    
+        Invalidate.requestUpperOnly();
     }
 
     _onAppChanged(primitives){
@@ -541,7 +541,7 @@ export default class LinkingTool extends Tool {
             var p = propChanges[i];
             var elementId = p.path[p.path.length - 1];
             var props = p.props;
-            
+
             if (hasLocationProperty(props)) {
                 for (let j = 0; j < this.connections.length; ++j) {
                     var c = this.connections[j];
@@ -551,7 +551,7 @@ export default class LinkingTool extends Tool {
                 }
             }
         }
-         
+
         this._rebalanceConnections();
     }
 
