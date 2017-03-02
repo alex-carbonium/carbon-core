@@ -1631,10 +1631,12 @@ export default class UIElement extends DataNode {
                     moveDirection: PointDirection.Any,
                     x: 0,
                     y: 0,
+                    offsetX: -RotateFramePoint.PointSize2,
+                    offsetY: -RotateFramePoint.PointSize2,
                     cursor: 0,
                     update: function (p, x, y, w, h, element, scale) {
-                        p.x = x - RotateFramePoint.PointSize2/scale;
-                        p.y = y - RotateFramePoint.PointSize2/scale;
+                        p.x = x;
+                        p.y = y;
                     }
                 },
                 {
@@ -1642,10 +1644,12 @@ export default class UIElement extends DataNode {
                     moveDirection: PointDirection.Any,
                     x: 0,
                     y: 0,
+                    offsetX: RotateFramePoint.PointSize2,
+                    offsetY: -RotateFramePoint.PointSize2,
                     cursor: 2,
                     update: function (p, x, y, w, h, element, scale) {
-                        p.x = x + w + RotateFramePoint.PointSize2/scale;
-                        p.y = y - RotateFramePoint.PointSize2/scale;
+                        p.x = x + w;
+                        p.y = y;
                     }
                 },
                 {
@@ -1653,10 +1657,12 @@ export default class UIElement extends DataNode {
                     moveDirection: PointDirection.Any,
                     x: 0,
                     y: 0,
+                    offsetX: RotateFramePoint.PointSize2,
+                    offsetY: RotateFramePoint.PointSize2,
                     cursor: 4,
                     update: function (p, x, y, w, h, element, scale) {
-                        p.x = x + w + RotateFramePoint.PointSize2/scale;
-                        p.y = y + h + RotateFramePoint.PointSize2/scale;
+                        p.x = x + w;
+                        p.y = y + h;
                     }
                 },
                 {
@@ -1664,10 +1670,12 @@ export default class UIElement extends DataNode {
                     moveDirection: PointDirection.Any,
                     x: 0,
                     y: 0,
+                    offsetX: -RotateFramePoint.PointSize2,
+                    offsetY: RotateFramePoint.PointSize2,
                     cursor: 6,
                     update: function (p, x, y, w, h, element, scale) {
-                        p.x = x - RotateFramePoint.PointSize2/scale;
-                        p.y = y + h + RotateFramePoint.PointSize2/scale;
+                        p.x = x;
+                        p.y = y + h;
                     }
                 }
             );

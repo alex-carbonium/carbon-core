@@ -27,8 +27,8 @@ function getOffsetForPoint(w, h, scale, value) {
 
 var CornerRadiusPoint = {
     cursorSet: FrameCursors,
-    hitTest (frame, point, hitPoint, scale) {
-        return Math.abs(point.x - hitPoint.x) < PointSize / scale && Math.abs(point.y - hitPoint.y) < PointSize / scale;
+    hitTest (frame, mousePoint, pt, elementPoint, scale) {
+        return Math.abs(mousePoint.x - pt.x) < PointSize / scale && Math.abs(mousePoint.y - pt.y) < PointSize / scale;
     },
 
     draw (p, frame, scale, context, matrix) {

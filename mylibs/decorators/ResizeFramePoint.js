@@ -15,8 +15,8 @@ const PointSize = 6
 
 export default {
     cursorSet: FrameCursors,
-    hitTest: function (frame, point, hitPoint, scale) {
-        return Math.abs(point.x - hitPoint.x) < PointSize / scale && Math.abs(point.y - hitPoint.y) < PointSize / scale;
+    hitTest: function (frame, mousePoint, pt, elementPoint, scale) {
+        return Math.abs(mousePoint.x - pt.x) < PointSize/scale && Math.abs(mousePoint.y - pt.y) < PointSize/scale;
     },
     draw: function (p, frame, scale, context, matrix) {
         context.fillStyle = '#fff';

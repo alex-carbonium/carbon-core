@@ -15,14 +15,12 @@ export default {
     PointSize: PointSize,
     PointSize2: PointSize2,
     cursorSet: RotationCursors,
-    hitTest: function (frame, point, hitPoint, scale) {
+    hitTest: function (frame, mousePoint, pt, elementPoint, scale) {
         var br = frame.element.getBoundaryRect();
-        if (isPointInRect(br, point)){
+        if (isPointInRect(br, elementPoint)){
             return false;
         }
-        var size = PointSize2/scale;
-        return point.x >= hitPoint.x - size && point.x <= hitPoint.x + size
-            && point.y >= hitPoint.y - size && point.y <= hitPoint.y + size;
+        return Math.abs(mousePoint.x - pt.x) < PointSize/scale && Math.abs(mousePoint.y - pt.y) < PointSize/scale;
     },
     draw: function (p, frame, scale, context, matrix) {
         if (UserSettings.internal.showRotateAreas){

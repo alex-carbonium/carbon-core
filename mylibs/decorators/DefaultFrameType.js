@@ -8,15 +8,16 @@ import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
 
 export default {
     strokeStyle: UserSettings.frame.stroke,
-    hitPointIndex: function (frame, point) {
-        var matrix = frame.element.globalViewMatrixInverted();
-        point = matrix.transformPoint(point);
-
+    hitPointIndex: function (frame, mousePoint) {
+        var gm = frame.element.globalViewMatrix();
+        var gmi = frame.element.globalViewMatrixInverted();
         var scale = Environment.view.scale();
+        var elementPoint = gmi.transformPoint(mousePoint);
 
         for (var i = frame.points.length - 1; i >= 0; --i) {
-            var p = frame.points[i];
-            if (p.type.hitTest(frame, point, p, scale)) {
+            var framePoint = frame.points[i];
+            var pt = gm.transformPoint(framePoint);
+            if (framePoint.type.hitTest(frame, mousePoint, pt, elementPoint, scale)) {
                 return i;
             }
         }

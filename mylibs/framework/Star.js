@@ -12,9 +12,8 @@ import Environment from "environment";
 var StarFrameType = {
     cursorSet: FrameCursors,
     draw: function (frame, context, currentPoint) {
-        var r = frame.element.radius();
-        var x = 0 | r;
-        var y = 0 | r;
+        var external = frame.element.radius();
+        var internal = frame.element.internalRadius();
         var scale = Environment.view.scale();
 
         context.save();
@@ -33,12 +32,11 @@ var StarFrameType = {
                 context.strokeStyle = '#22c1ff';
                 context.lineWidth = 1;
                 context.beginPath();
-                var p = matrix.transformPoint2(x, y);
-                context.circlePath(p.x, p.y, frame.element.radius() * scale);
+                context.transformedEllipsePath(0, 0, external * 2, external * 2, matrix);
                 context.stroke();
 
                 context.beginPath();
-                context.circlePath(p.x, p.y, frame.element.internalRadius() * scale);
+                context.transformedEllipsePath(external - internal, external - internal, internal * 2, internal * 2, matrix);
                 context.stroke();
                 context.restore();
             }
@@ -104,6 +102,7 @@ export default class Star extends Polygon {
     }
 
     drawPath(context, w, h) {
+        var gm = this.globalViewMatrix();
         var step = Math.PI / this.pointsCount();
         var r1 = this.radius(),
             r2 = this.internalRadius();
@@ -114,7 +113,8 @@ export default class Star extends Polygon {
             y = cy + r1 * Math.cos(Math.PI);
 
         context.beginPath();
-        context.moveTo(x, y);
+        var p = gm.transformPoint2(x, y, true);
+        context.moveTo(p.x, p.y);
         for (var i = 1; i < this.pointsCount() * 2; i++) {
             var f = Math.PI + i * step;
             //noinspection JSBitwiseOperatorUsage
@@ -125,7 +125,8 @@ export default class Star extends Polygon {
             }
             x = cx + r * Math.sin(f);
             y = cy + r * Math.cos(f);
-            context.lineTo(x, y);
+            p = gm.transformPoint2(x, y, true);
+            context.lineTo(p.x, p.y);
         }
         context.closePath();
     }
@@ -169,6 +170,9 @@ export default class Star extends Polygon {
     }
 
     selectionFrameType() {
+        if (!this.isInEditMode()) {
+            return super.selectionFrameType();
+        }
         return StarFrameType;
     }
 
@@ -190,23 +194,14 @@ export default class Star extends Polygon {
             }
         }
 
-        frame = {
+        if (!this.isInEditMode()) {
+            return super.createSelectionFrame(view);
+        }
+
+        return {
             element: this,
             frame: true,
             points: [
-                {
-                    type: RotateFramePoint,
-                    moveDirection: PointDirection.Any,
-                    x: 0,
-                    y: 0,
-                    cursor: 3,
-                    update: function (p, x, y, w, h, element, scale) {
-                        var external = element.props.radius;
-
-                        p.x = 2*external + RotateFramePoint.PointSize2/scale;
-                        p.y = external;
-                    }
-                },
                 {
                     type: LineDirectionPoint,
                     moveDirection: PointDirection.Any,
@@ -248,8 +243,6 @@ export default class Star extends Polygon {
                 }
             ]
         }
-
-        return frame;
     }
 }
 Star.prototype.t = Types.Star;

@@ -2,19 +2,19 @@ import Shape from "framework/Shape";
 import PropertyMetadata from "framework/PropertyMetadata";
 import DefaultFrameType from "decorators/DefaultFrameType";
 import UIElement from "framework/UIElement";
-import {PointDirection, Types, FrameCursors} from "framework/Defs";
+import { PointDirection, Types, FrameCursors } from "framework/Defs";
 import LineDirectionPoint from "decorators/LineDirectionPoint";
 import RotateFramePoint from "decorators/RotateFramePoint";
 import Rect from "../math/rect";
 import Point from "../math/point";
 import Environment from "environment";
+import Selection from "../framework/SelectionModel";
+import { IMouseEventData } from "../framework/CoreModel";
 
 var PolygonFrameType = {
     cursorSet: FrameCursors,
     draw: function (frame, context, currentPoint) {
         var r = frame.element.radius();
-        var x = 0 | r;
-        var y = 0 | r;
         var scale = Environment.view.scale();
 
         context.save();
@@ -33,8 +33,7 @@ var PolygonFrameType = {
                 context.strokeStyle = '#22c1ff';
                 context.lineWidth = 1;
                 context.beginPath();
-                var p = matrix.transformPoint2(x, y);
-                context.circlePath(p.x, p.y, frame.element.radius() * scale);
+                context.transformedEllipsePath(0, 0, r * 2, r * 2, matrix);
                 context.stroke();
                 context.restore();
             }
@@ -47,7 +46,7 @@ var PolygonFrameType = {
 
         context.restore();
     },
-    saveChanges: function(frame, clone: Polygon){
+    saveChanges: function (frame, clone: Polygon) {
         var props = {
             br: clone.br(),
             radius: clone.radius(),
@@ -59,12 +58,15 @@ var PolygonFrameType = {
 PolygonFrameType = Object.assign({}, DefaultFrameType, PolygonFrameType);
 
 export default class Polygon extends Shape {
+    shouldApplyViewMatrix() {
+        return false;
+    }
+
     applySizeScaling(s, o, options, changeMode) {
         this.applyMatrixScaling(s, o, options, changeMode);
+    }
 
-        if (!options || options.final){
-            this.skew();
-        }
+    skew(): void {
     }
 
     prepareProps(changes) {
@@ -73,9 +75,9 @@ export default class Polygon extends Shape {
         var radiusChanged = changes.hasOwnProperty("radius");
         var countChanged = changes.hasOwnProperty("pointsCount");
 
-        if (radiusChanged){
+        if (radiusChanged) {
             changes.radius = Math.round(changes.radius);
-            if (changes.radius <= 0){
+            if (changes.radius <= 0) {
                 changes.radius = 1;
             }
         }
@@ -84,7 +86,7 @@ export default class Polygon extends Shape {
             this.onRadiusChanged(changes);
         }
 
-        if (radiusChanged || countChanged){
+        if (radiusChanged || countChanged) {
             var r = radiusChanged ? changes.radius : this.radius();
             var count = countChanged ? changes.pointsCount : this.pointsCount();
             changes.br = this.calculateBoundaryRect(r, count);
@@ -99,8 +101,8 @@ export default class Polygon extends Shape {
         changes.m.translate(dr, dr);
     }
 
-    saveOrResetLayoutProps(): boolean{
-        if (super.saveOrResetLayoutProps()){
+    saveOrResetLayoutProps(): boolean {
+        if (super.saveOrResetLayoutProps()) {
             this.runtimeProps.origLayout.radius = this.radius();
             return true;
         }
@@ -109,7 +111,7 @@ export default class Polygon extends Shape {
         return false;
     }
 
-    calculateBoundaryRect(externalRadius, pointsCount): Rect{
+    calculateBoundaryRect(externalRadius, pointsCount): Rect {
         var step = 360 / pointsCount;
 
         var xmin = externalRadius;
@@ -134,29 +136,57 @@ export default class Polygon extends Shape {
         return new Rect(xmin + externalRadius, ymin + externalRadius, xmax - xmin, ymax - ymin);
     }
 
-    roundBoundingBoxToPixelEdge(): boolean{
+    roundBoundingBoxToPixelEdge(): boolean {
         return false;
     }
 
+    mousemove(event: IMouseEventData){
+        if (this.isInEditMode()){
+            if (!event.cursor){
+                event.cursor = "direct_select_cursor";
+            }
+        }
+    }
+
+    dblclick(event: IMouseEventData, scale) {
+        if (this.isInEditMode()) {
+            if (!this.hitTest(event, scale)) {
+                this.mode("resize");
+                this.releaseMouse(this);
+                Selection.refreshSelection();
+            }
+        }
+        else {
+            this.mode("edit");
+            this.captureMouse(this);
+            Selection.refreshSelection();
+        }
+        Environment.controller.repeatLastMouseMove();
+    }
+
     selectionFrameType() {
+        if (!this.isInEditMode()) {
+            return super.selectionFrameType();
+        }
         return PolygonFrameType;
     }
 
     radius(value) {
         if (value !== undefined) {
-            this.setProps({radius: value})
+            this.setProps({ radius: value })
         }
         return this.props.radius;
     }
 
     pointsCount(value) {
         if (value !== undefined) {
-            this.setProps({pointsCount: value})
+            this.setProps({ pointsCount: value })
         }
         return this.props.pointsCount;
     }
 
     drawPath(context, w, h) {
+        var gm = this.globalViewMatrix();
         var step = 2 * Math.PI / this.pointsCount();
         var r = this.radius();
         var cx = r,
@@ -166,17 +196,19 @@ export default class Polygon extends Shape {
             y = cy + r * Math.cos(Math.PI);
 
         context.beginPath();
-        context.moveTo(x, y);
+        var p = gm.transformPoint2(x, y, true);
+        context.moveTo(p.x, p.y);
         for (var i = 1; i < this.pointsCount(); i++) {
             var f = Math.PI + i * step;
             x = cx + r * Math.sin(f);
             y = cy + r * Math.cos(f);
-            context.lineTo(x, y);
+            p = gm.transformPoint2(x, y, true);
+            context.lineTo(p.x, p.y);
         }
         context.closePath();
     }
 
-    canConvertToPath(){
+    canConvertToPath() {
         return true;
     }
     convertToPath() {
@@ -190,12 +222,12 @@ export default class Polygon extends Shape {
         var x = cx + r * Math.sin(Math.PI),
             y = cy + r * Math.cos(Math.PI);
 
-        path.moveToPoint({x, y});
+        path.moveToPoint({ x, y });
         for (var i = 1; i < this.pointsCount(); i++) {
             var f = Math.PI + i * step;
             x = cx + r * Math.sin(f);
             y = cy + r * Math.cos(f);
-            path.lineToPoint({x, y});
+            path.lineToPoint({ x, y });
         }
 
         path.closed(true);
@@ -228,23 +260,14 @@ export default class Polygon extends Shape {
             }
         }
 
-        frame = {
+        if (!this.isInEditMode()) {
+            return super.createSelectionFrame(view);
+        }
+
+        return {
             element: this,
             frame: true,
             points: [
-                {
-                    type: RotateFramePoint,
-                    moveDirection: PointDirection.Any,
-                    x: 0,
-                    y: 0,
-                    cursor: 3,
-                    update: function (p, x, y, w, h, element, scale) {
-                        var radius = element.props.radius;
-
-                        p.x = 2*radius + RotateFramePoint.PointSize2/scale;
-                        p.y = radius;
-                    }
-                },
                 {
                     type: LineDirectionPoint,
                     moveDirection: PointDirection.Any,
@@ -256,16 +279,14 @@ export default class Polygon extends Shape {
                     update: function (p, x, y, w, h, element, scale) {
                         var radius = element.props[p.prop];
 
-                        p.x = radius*2;
+                        p.x = radius * 2;
                         p.y = radius;
-                        p.from = {x: radius, y: radius};
-                        p.to = {x: p.x, y: p.y};
+                        p.from = { x: radius, y: radius };
+                        p.to = { x: p.x, y: p.y };
                     }
                 }
             ]
         }
-
-        return frame;
     }
 }
 Polygon.prototype.t = Types.Polygon;

@@ -16,8 +16,8 @@ var bind = function () {
             }
             else {
                 that.app.actionManager.invoke("save");
+                return "leaving?";
             }
-            return "leaving?";
         }
         //do not return anything, otherwise, IE still shows dialog
     }
@@ -26,7 +26,7 @@ var bind = function () {
 export default class ClosePageDialog extends ExtensionBase {
     attach(app) {
         super.attach.apply(this, arguments);
-        
+
         if (app.platform.richUI() && !app.props.noConfirmOnClose) {
             bind.call(this);
         }

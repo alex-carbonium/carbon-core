@@ -18,9 +18,9 @@ export default class PolygonTool extends ElementDragCreator{
         element.prepareAndSetProps({radius: newRaidus});
 
         var bb = element.getBoundingBox();
-        var t = new Point(startPoint.x - bb.x - bb.width*fx,
-            startPoint.y - bb.y - bb.height*fy);
+        var t = new Point(startPoint.x - bb.x - bb.width*fx, startPoint.y - bb.y - bb.height*fy);
         element.applyTranslation(t);
+        element.applyScaling(new Point(w/bb.width, h/bb.height), startPoint);
     }
 
     layerdraw(context, environment): boolean{

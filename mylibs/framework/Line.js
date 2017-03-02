@@ -22,8 +22,8 @@ var PointSize = 6
 
 var LinePoint = {
     cursorSet: FrameCursors,
-    hitTest (frame, point, hitPoint, scale) {
-        return Math.abs(point.x - hitPoint.x) < PointSize / scale && Math.abs(point.y - hitPoint.y) < PointSize / scale;
+    hitTest (frame, mousepoint, pt, elementPoint, scale) {
+        return Math.abs(mousepoint.x - pt.x) < PointSize / scale && Math.abs(mousepoint.y - pt.y) < PointSize / scale;
     },
 
     draw (p, frame, scale, context, matrix) {

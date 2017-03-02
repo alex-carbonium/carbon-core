@@ -1,4 +1,5 @@
 import CrazyScope from "framework/CrazyManager";
+import Point from "../../math/point";
 import {IContext} from "../CoreModel";
 
 export default class Context implements IContext{
@@ -290,6 +291,58 @@ export default class Context implements IContext{
         this.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
         this.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
         this.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
+        this.closePath();
+    }
+
+    transformedEllipsePath(x, y, w, h, matrix) {
+        var kappa = .5522848,
+            ox = (w / 2) * kappa,// control point offset horizontal
+            oy = (h / 2) * kappa,// control point offset vertical
+            xe = x + w,// x-end
+            ye = y + h,// y-end
+            xm = x + w / 2,// x-middle
+            ym = y + h / 2;       // y-middle
+
+        var p = new Point(0, 0);
+        var cp1 = new Point(0, 0);
+        var cp2 = new Point(0, 0);
+
+        p.set(x, ym);
+        matrix.transformPointMutable(p);
+        this.moveTo(p.x, p.y);
+
+        p.set(xm, y);
+        cp1.set(x, ym - oy);
+        cp2.set(xm - ox, y);
+        matrix.transformPointMutable(p);
+        matrix.transformPointMutable(cp1);
+        matrix.transformPointMutable(cp2);
+        this.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, p.x, p.y);
+
+        p.set(xe, ym);
+        cp1.set(xm + ox, y);
+        cp2.set(xe, ym - oy);
+        matrix.transformPointMutable(p);
+        matrix.transformPointMutable(cp1);
+        matrix.transformPointMutable(cp2);
+        this.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, p.x, p.y);
+
+        p.set(xm, ye);
+        cp1.set(xe, ym + oy);
+        cp2.set(xm + ox, ye);
+        matrix.transformPointMutable(p);
+        matrix.transformPointMutable(cp1);
+        matrix.transformPointMutable(cp2);
+        this.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, p.x, p.y);
+
+        p.set(x, ym);
+        cp1.set(xm - ox, ye);
+        cp2.set(x, ym + oy);
+        matrix.transformPointMutable(p);
+        matrix.transformPointMutable(cp1);
+        matrix.transformPointMutable(cp2);
+        this.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, p.x, p.y);
+
         this.closePath();
     }
 
@@ -763,7 +816,7 @@ export default class Context implements IContext{
         this._context.arcTo.apply(this._context, arguments);
     }
 
-    rect(rect) {             
+    rect(rect) {
         this._context.rect.apply(this._context, arguments);
     }
 

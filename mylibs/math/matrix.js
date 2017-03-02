@@ -455,15 +455,22 @@ class Matrix {
         return this.transformPoint2(point.x, point.y, round);
     }
 
-    transformPoint2(x, y, round){
-        var px = x*this._a + y*this._c + this._tx;
-        var py = x*this._b + y*this._d + this._ty;
+    transformPoint2(x, y, round): Point{
+        var point = new Point(x, y);
+        return this.transformPointMutable(point, round);
+    }
+
+    transformPointMutable(point, round){
+        var x = point.x*this._a + point.y*this._c + this._tx;
+        var y = point.x*this._b + point.y*this._d + this._ty;
 
         if (round){
-            px = Math.round(px);
-            py = Math.round(py);
+            x = Math.round(x);
+            y = Math.round(y);
         }
-        return new Point(px, py);
+        point.set(x, y);
+
+        return point;
     }
 
     transformRect(rect){
@@ -624,7 +631,7 @@ class Matrix {
      * @param {CanvasRenderingContext2D} ctx
      */
     applyToContext(ctx){
-        if (!this.isIdentity()){            
+        if (!this.isIdentity()){
             ctx.transform(this._a, this._b, this._c, this._d,
                 this._tx, this._ty);
         }
