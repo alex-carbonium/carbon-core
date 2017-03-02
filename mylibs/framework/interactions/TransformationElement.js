@@ -59,6 +59,7 @@ export default class TrasnformationElement extends GroupContainer implements ICo
                 else {
                     this.drawBoundaryPath(context, false);
                 }
+                context.lineWidth = this.strokeWidth();
                 Brush.stroke(this.stroke(), context);
             }
             finally {

@@ -31,6 +31,7 @@ class Shape extends Container {
 
     _renderDraft(context, w, h) {
         var stroke = this.stroke();
+        var strokePosition = this.strokePosition();
 
         context.beginPath();
         this.drawPath(context, w, h);
@@ -39,13 +40,16 @@ class Shape extends Container {
             context.setLineDash(dashPattern);
         }
         Brush.fill(this.fill(), context, 0, 0, w, h);
-        if (!stroke || !stroke.type || !stroke.position) {
-
+        if (!stroke || !stroke.type || strokePosition === StrokePosition.Center) {
+            context.lineWidth = this.strokeWidth();
             Brush.stroke(stroke, context, 0, 0, w, h);
-        } else if (stroke.position === StrokePosition.Inside) {
+        }
+        else if (strokePosition === StrokePosition.Inside) {
             context.clip();
-            Brush.stroke(stroke, context, 0, 0, w, h, 2);
-        } else if (stroke.position === StrokePosition.Outside) {
+            context.lineWidth = this.strokeWidth() * 2;
+            Brush.stroke(stroke, context, 0, 0, w, h);
+        }
+        else if (strokePosition === StrokePosition.Outside) {
             context.beginPath();
             var bb = this.getBoundingBoxGlobal();
             context.rect(bb.x + 2 * bb.width, bb.y - bb.height, -3 * bb.width, 3 * bb.height);
@@ -53,19 +57,23 @@ class Shape extends Container {
             context.clip();
             context.beginPath();
             this.drawPath(context, w, h);
-            Brush.stroke(stroke, context, 0, 0, w, h, 2);
+            context.lineWidth = this.strokeWidth() * 2;
+            Brush.stroke(stroke, context, 0, 0, w, h);
         }
     }
 
     _renderFinal(context, w, h, environment) {
         var stroke = this.stroke();
+        var strokePosition = this.strokePosition();
 
         context.beginPath();
         this.drawPath(context, w, h);
         Brush.fill(this.fill(), context, 0, 0, w, h);
-        if (!stroke || !stroke.type || !stroke.position || !this.closed()) {
+        if (!stroke || !stroke.type || strokePosition === StrokePosition.Center || !this.closed()) {
+            context.lineWidth = this.strokeWidth();
             Brush.stroke(stroke, context, 0, 0, w, h);
-        } else {
+        }
+        else {
             var clippingRect = this.getBoundingBoxGlobal();
             clippingRect = this.expandRectWithBorder(clippingRect);
             if(true || !environment.offscreen) {
@@ -106,10 +114,12 @@ class Shape extends Container {
             offContext.beginPath();
             this.drawPath(offContext, w, h);
 
-            Brush.stroke(stroke, offContext, 0, 0, w, h, 2);
-            if (stroke.position === StrokePosition.Inside) {
+            offContext.lineWidth = this.strokeWidth() * 2;
+            Brush.stroke(stroke, offContext, 0, 0, w, h);
+            if (strokePosition === StrokePosition.Inside) {
                 offContext.globalCompositeOperation = "destination-in";
-            } else {
+            }
+            else {
                 offContext.globalCompositeOperation = "destination-out";
             }
             offContext.fillStyle = "black";
@@ -298,8 +308,6 @@ PropertyMetadata.registerForType(Shape, {
         defaultValue: Brush.White
     },
     stroke: {
-        displayName: "Stroke",
-        type: "stroke",
         defaultValue: Brush.Black
     },
     lineCap: {
@@ -359,7 +367,7 @@ PropertyMetadata.registerForType(Shape, {
             baseGroups.find(x => x.label === "Layout"),
             {
                 label: "Appearance",
-                properties: ["fill", "stroke", 'dashPattern', "miterLimit", "lineCap", "lineJoin", "opacity"]
+                properties: ["fill", "stroke", "strokeWidth", "strokePosition", "dashPattern", "miterLimit", "lineCap", "lineJoin", "opacity"]
             },
             {
                 label: "@shadow",

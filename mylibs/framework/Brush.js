@@ -1,7 +1,7 @@
 ﻿import Resources from "./Resources";
 import Invalidate from "./Invalidate";
 import TypeDefaults from "./TypeDefaults";
-import {Types, StrokePosition} from "./Defs";
+import {Types} from "./Defs";
 
 var Brush = sketch.framework.Brush = {};
 
@@ -14,14 +14,13 @@ var BrushType = {
 };
 
 var defaults = {
-    type: BrushType.color,
-    position: StrokePosition.Inside,
-    lineWidth: 1
+    type: BrushType.color
 };
 function BrushConstructor(){
     this.t = Types.Brush;
 }
 BrushConstructor.prototype = defaults;
+
 var brushDefault = TypeDefaults[Types.Brush] = function(){
     return new BrushConstructor();
 };
@@ -127,16 +126,11 @@ Brush.fill = function (brushObject, context, l, t, w, h) {
     return false;
 }
 
-Brush.stroke = function (brushObject, context, l, t, w, h, lineMultiplier) {
+Brush.stroke = function (brushObject, context, l, t, w, h) {
     if (Brush.canApply(brushObject)) {
         var brush = Brush.getBrush(brushObject, context, l, t, w, h);
         if (brush) {
             context.strokeStyle = brush;
-            if (brushObject.lineWidth) {
-                lineMultiplier = lineMultiplier || 1;
-                context.lineWidth = brushObject.lineWidth * lineMultiplier;
-            }
-
             context.stroke();
         }
         return true;
@@ -196,22 +190,8 @@ Brush.createFromObject = function (parameters) {
     return Object.freeze(Object.assign(brushDefault(), parameters));
 };
 
-Brush.extend = function(base, other){
-    //empty brush has type=0 in the object and base brush could have type=1 in the prototype
-    if (base === Brush.Empty || other === Brush.Empty){
-        return other;
-    }
-    return this.createFromObject(Object.assign({}, base, other));
-};
-
-Brush.createFromColor = function (color, lineWidth, position) {
+Brush.createFromColor = function (color) {
     var brush = {/*type = color by default*/ value: color};
-    if(lineWidth !== undefined){
-        brush.lineWidth = lineWidth;
-    }
-    if(position !== undefined){
-        brush.position = position;
-    }
     return this.createFromObject(brush);
 };
 

@@ -1,7 +1,7 @@
 import Shape from "framework/Shape";
 import Brush from "framework/Brush";
 import Path from "ui/common/Path";
-import {PointDirection, Types, FrameCursors} from "./Defs";
+import {PointDirection, Types, FrameCursors, ChangeMode} from "./Defs";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import Selection from "framework/SelectionModel";
@@ -35,12 +35,13 @@ var LinePoint = {
         context.fill();
         context.stroke();
     },
-    capture (frame) {
+    capture (frame, point) {
         var resizingElement = frame.element.clone();
-        resizingElement.opacity(0.6);
         resizingElement.setProps(frame.element.selectLayoutProps(true));
         frame.resizingElement = resizingElement;
         frame.globalViewMatrix = frame.element.globalViewMatrix();
+        frame.origPointX = point.x;
+        frame.origPointY = point.y;
 
         var container = frame.element.primitiveRoot();
         if (!container && frame.element instanceof SelectComposite) {
@@ -48,6 +49,7 @@ var LinePoint = {
         }
 
         SnapController.calculateSnappingPoints(container);
+        frame.element.visible(false, ChangeMode.Self)
 
         Environment.view.layer3.add(resizingElement);
     },
@@ -57,6 +59,7 @@ var LinePoint = {
         if (e) {
             var props = e.selectProps(["x1", "x2", "y1", "y2"]);
             frame.element.prepareAndSetProps(props);
+            frame.element.visible(true, ChangeMode.Self);
 
             Environment.view.layer3.remove(e);
             e.dispose();
@@ -96,9 +99,10 @@ var LinePoint = {
             dy += newPoint.y - oldy;
         }
 
-        point.x += dx;
-        point.y += dy;
+        point.x = frame.origPointX + dx;
+        point.y = frame.origPointY + dy;
 
+        frame.resizingElement.saveOrResetLayoutProps();
         point.updateElement(frame.resizingElement, dx, dy);
         Invalidate.requestUpperOnly();
     }
@@ -113,6 +117,22 @@ class Line extends Shape {
 
     applySizeScaling(s, o, options, changeMode) {
         this.applyMatrixScaling(s, o, options, changeMode);
+    }
+
+    saveOrResetLayoutProps(): boolean{
+        if (super.saveOrResetLayoutProps()){
+            this.runtimeProps.origLayout.x1 = this.x1();
+            this.runtimeProps.origLayout.x2 = this.x2();
+            this.runtimeProps.origLayout.y1 = this.y1();
+            this.runtimeProps.origLayout.y2 = this.y2();
+            return true;
+        }
+
+        this.x1(this.runtimeProps.origLayout.x1);
+        this.x2(this.runtimeProps.origLayout.x2);
+        this.y1(this.runtimeProps.origLayout.y1);
+        this.y2(this.runtimeProps.origLayout.y2);
+        return false;
     }
 
     hitTest(/*Point*/point, scale) {
@@ -165,7 +185,7 @@ class Line extends Shape {
 
         var stroke = this.stroke();
         if (stroke) {
-            var dw = stroke.lineWidth / 2;
+            var dw = this.strokeWidth()/ 2;
             var vx = p2.x - p1.x;
             var vy = p2.y - p1.y;
 
@@ -194,6 +214,7 @@ class Line extends Shape {
             context.setLineDash(dashPattern);
         }
 
+        context.lineWidth = this.strokeWidth();
         context.lineCap = this.lineCap();
         context.lineJoin = this.lineJoin();
         context.miterLimit = this.props.miterLimit;

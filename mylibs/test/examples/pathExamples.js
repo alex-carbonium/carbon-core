@@ -11,7 +11,7 @@ registerExample("path: simple", function(app, artboard){
     rect1.applyRotation(20, rect1.center());
     rect1.applyTranslation({x: 200, y: 300});
     var path1 = rect1.convertToPath();
-    path1.setProps({stroke: Brush.createFromColor("red", 1, StrokePosition.Center)});
+    path1.setProps({stroke: Brush.createFromColor("red"), strokePosition: StrokePosition.Center});
     artboard.add(path1);
 
     Selection.makeSelection([path1]);
@@ -21,7 +21,7 @@ registerExample("path: simple", function(app, artboard){
 
 registerExample("path: in a group", function(app){
     var rect1 = new Rectangle();
-    rect1.setProps({width: 100, height: 100, name: 'path1 1', stroke: Brush.createFromColor("red", 1, StrokePosition.Center)});
+    rect1.setProps({width: 100, height: 100, name: 'path1 1', stroke: Brush.createFromColor("red"), strokePosition: StrokePosition.Center});
     rect1.applyRotation(20, rect1.center());
     rect1.applyTranslation({x: 200, y: 300});
     var path1 = rect1.convertToPath();
@@ -30,7 +30,7 @@ registerExample("path: in a group", function(app){
     var rect2 = rect1.clone();
     rect2.applyTranslation({x: 200, y: 0});
     rect2.applyRotation(-20, rect2.center());
-    rect2.setProps({name: 'rect 2', stroke: Brush.createFromColor("black", 1, StrokePosition.Center)});
+    rect2.setProps({name: 'rect 2', stroke: Brush.createFromColor("black"), strokePosition: StrokePosition.Center});
     app.activePage.add(rect2);
 
     Selection.makeSelection([path1, rect2]);
@@ -53,7 +53,7 @@ registerExample("path: compound intersect", function(app){
     var circle1 = new Circle();
     circle1.setProps({width: 80, height: 80});
     circle1.applyTranslation({x: 210, y: 350});
-    circle1.setProps({name: 'circle', stroke: Brush.createFromColor("black", 1, StrokePosition.Center)});
+    circle1.setProps({name: 'circle', stroke: Brush.createFromColor("black"), strokePosition: StrokePosition.Center});
     app.activePage.add(circle1);
 
     Selection.makeSelection([path1, circle1]);
@@ -84,14 +84,14 @@ registerExample("path: stroke position", function(app){
     rect1.setProps({width: 100, height: 100, name: 'rect 1'});
     rect1.applyTranslation({x: 200, y: 300});
     var path1 = rect1.convertToPath();
-    path1.setProps({stroke: Brush.createFromColor("red", 8, StrokePosition.Outside)});
+    path1.setProps({stroke: Brush.createFromColor("red"), strokePosition: StrokePosition.Outside, strokeWidth: 8});
     app.activePage.add(path1);
 
     var rect2 = new Rectangle();
     rect2.setProps({width: 100, height: 100, name: 'rect 1'});
     rect2.applyTranslation({x: 400, y: 300});
     var path2 = rect2.convertToPath();
-    path2.setProps({stroke: Brush.createFromColor("blue", 8, StrokePosition.Inside)});
+    path2.setProps({stroke: Brush.createFromColor("blue"), strokePosition: StrokePosition.Inside, strokeWidth: 8});
     app.activePage.add(path2);
 
     Selection.makeSelection([path1]);

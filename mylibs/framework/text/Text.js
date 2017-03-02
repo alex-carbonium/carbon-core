@@ -118,6 +118,7 @@ class Text extends UIElement {
             context.restore();
             return;
         }
+        context.lineWidth = this.strokeWidth();
         Brush.stroke(this.stroke(), context, 0, 0, w, h);
 
         var verticalOffset = this.getVerticalOffset(this.runtimeProps.engine);

@@ -217,14 +217,18 @@ class Rectangle extends Shape {
         var matrix = this.globalViewMatrixInverted();
         point = matrix.transformPoint(point);
 
-        if (stroke.position === 0) {
-            outerRect = rectmath.adjustRectSize(rect, stroke.lineWidth / 2 + 1);
-            innerRect = rectmath.adjustRectSize(rect, -(stroke.lineWidth / 2 + 1));
-        } else if (stroke.position === 1) {
+        var strokePosition = this.strokePosition()
+        var strokeWidth = this.strokeWidth();
+        if (strokePosition === StrokePosition.Center) {
+            outerRect = rectmath.adjustRectSize(rect, strokeWidth / 2 + 1);
+            innerRect = rectmath.adjustRectSize(rect, -(strokeWidth / 2 + 1));
+        }
+        else if (strokePosition === StrokePosition.Inside) {
             outerRect = rectmath.adjustRectSize(rect, 1);
-            innerRect = rectmath.adjustRectSize(rect, -(stroke.lineWidth + 1));
-        } else {
-            outerRect = rectmath.adjustRectSize(rect, stroke.lineWidth + 1);
+            innerRect = rectmath.adjustRectSize(rect, -(strokeWidth + 1));
+        }
+        else {
+            outerRect = rectmath.adjustRectSize(rect, strokeWidth + 1);
             innerRect = rectmath.adjustRectSize(rect, -1);
         }
         return rectmath.isPointInRect(outerRect, point) && !rectmath.isPointInRect(innerRect, point);
@@ -252,13 +256,16 @@ class Rectangle extends Shape {
 
         this.drawInsetShadows(context, w, h, environment);
 
-        if (!stroke || !stroke.type || !stroke.position) {
+        var strokePosition = this.strokePosition();
+        var lw = this.strokeWidth();
+        context.lineWidth = lw;
+        if (!stroke || !stroke.type || strokePosition === StrokePosition.Center) {
             Brush.stroke(stroke, context, 0, 0, w, h);
-        } else {
+        }
+        else {
             context.beginPath();
-            var lw = stroke.lineWidth;
             var db = lw / 2;
-            if (stroke.position === StrokePosition.Outside) {
+            if (strokePosition === StrokePosition.Outside) {
                 lw = -lw;
                 db = -db;
             }
@@ -414,7 +421,7 @@ PropertyMetadata.registerForType(Rectangle, {
             baseGroups.find(x => x.label === "Layout"),
             {
                 label: "Appearance",
-                properties: ["fill", "stroke", 'dashPattern', "miterLimit", "lineCap", "lineJoin", "cornerRadius", "opacity"]
+                properties: ["fill", "stroke", "strokeWidth", "strokePosition", "dashPattern", "miterLimit", "lineCap", "lineJoin", "cornerRadius", "opacity"]
             },
             baseGroups.find(x => x.label === "@shadow"),
             baseGroups.find(x => x.label === "@constraints"),

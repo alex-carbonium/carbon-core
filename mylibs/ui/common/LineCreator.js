@@ -37,10 +37,10 @@ function resize(x1, y1, x2, y2) {
 }
 
 export default class LineCreator extends Tool {
-    constructor() {        
+    constructor() {
         super(ViewTool.Line);
     }
-    
+
     detach() {
         super.detach.apply(this, arguments);
         SnapController.clearActiveSnapLines();
@@ -67,11 +67,7 @@ export default class LineCreator extends Tool {
         App.Current.activePage.nameProvider.assignNewName(this._element);
         var defaultSettings = App.Current.defaultLineSettings();
         if (defaultSettings) {
-            var settings = Object.assign({}, defaultSettings, {
-                stroke: Brush.extend(defaultSettings.stroke, App.Current.defaultStroke()),
-                fill: Brush.extend(defaultSettings.fill, App.Current.defaultFill())
-            });
-            this._element.setProps(settings);
+            this._element.setProps(defaultSettings);
         }
 
         update.call(this, this._startPoint.x, this._startPoint.y, this._startPoint.x, this._startPoint.y);
@@ -102,7 +98,7 @@ export default class LineCreator extends Tool {
         }
     }
     mousemove(event: IMouseEventData, keys: IKeyboardState) {
-        super.mousemove(event, keys);        
+        super.mousemove(event, keys);
 
         if (event.cursor !== "pen_move_point"){
             event.cursor = "pen_line";

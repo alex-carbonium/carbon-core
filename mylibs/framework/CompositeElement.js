@@ -389,10 +389,7 @@ export default class CompositeElement extends UIElement implements IComposite {
     _prepareElementChanges(element: UIElement, changes: any) {
         var elementChanges = Object.assign({}, changes);
         for (var p in elementChanges) {
-            if (p === 'fill' || p === 'stroke') {
-                elementChanges[p] = Brush.extend(element.props[p], elementChanges[p])
-            }
-            else if (p === 'font') {
+            if (p === 'font') {
                 elementChanges[p] = Font.extend(element.props[p], elementChanges[p])
             }
         }

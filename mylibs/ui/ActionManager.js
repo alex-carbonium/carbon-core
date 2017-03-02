@@ -87,8 +87,8 @@ export default class ActionManager implements IActionManager {
         this._actionStartEvents = [];
         this.actionPerformed = EventHelper.createEvent();
         this.app = app;
-        
-        Selection.onElementSelected.bind(this, checkConditions);        
+
+        Selection.onElementSelected.bind(this, checkConditions);
     }
 
     notifyActionStart(actionName, e) {
@@ -110,7 +110,7 @@ export default class ActionManager implements IActionManager {
                 event.raise(actionName, result, ret);
             }
         }
-    }    
+    }
     registerAction(name, description, category, callback, image) {
         var action = { category: category, name: name, description: description, callback: callback, image: image };
 
@@ -365,8 +365,8 @@ export default class ActionManager implements IActionManager {
             selection.each(e => {
                 var fill = e.fill();
                 var stroke = e.stroke();
-                e.fill(Brush.extend(fill, { value: stroke.value, type: stroke.type }));
-                e.stroke(Brush.extend(stroke, { value: fill.value, type: fill.type }));
+                e.fill(stroke);
+                e.stroke(fill);
 
             })
         });
@@ -534,7 +534,7 @@ export default class ActionManager implements IActionManager {
         CommandManager.onCommandRolledBack.bind(this, checkConditions);
 
         checkConditions.call(this);
-    }    
+    }
     iterate(callback) {
         for (var name in this._actions) {
             callback(this._actions[name]);

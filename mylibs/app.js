@@ -286,7 +286,7 @@ class App extends DataNode implements IApp {
         this.runtimeProps = {};
     }
 
-    propsUpdated(props, oldProps) {
+    propsUpdated(props, oldProps, mode) {
         if (props.layoutGridStyle) {
             LayoutGridLines.setDefaultStrokeHsl(props.layoutGridStyle.hsl);
             LayoutGridLines.setDefaultOpacity(props.layoutGridStyle.opacity);
@@ -297,6 +297,11 @@ class App extends DataNode implements IApp {
         if (props.customGuides) {
             CustomGuides.setDefaultStrokeHsl(props.customGuides.hsl);
             CustomGuides.setDefaultOpacity(props.customGuides.opacity);
+        }
+
+        if (mode === ChangeMode.Self && props.defaultShapeSettings){
+            //if restoring from primitives or from server data
+            ObjectFactory.updatePropsWithPrototype(props.defaultShapeSettings);
         }
 
         DataNode.prototype.propsUpdated.apply(this, arguments);
@@ -544,9 +549,9 @@ class App extends DataNode implements IApp {
     fromJSON(data) {
         ModelStateListener.stop();
         var that = this;
-        that.clear();
+        that.clear()
 
-        this.setProps(data.props);
+        this.setProps(data.props, ChangeMode.Self);
         fwk.Resources.fromJSON(data.props.resources);
 
         if (this.props.styles) {
@@ -593,27 +598,28 @@ class App extends DataNode implements IApp {
         return this.props.serverless;
     }
 
-    defaultShapeSettings(value) {
-        if (arguments.length === 1) {
-            this.setProps({ defaultShapeSettings: value });
+    defaultShapeSettings(value, mode) {
+        if (arguments.length) {
+            this.setProps({ defaultShapeSettings: value }, mode);
         }
         return this.props.defaultShapeSettings;
     }
 
     defaultFill(value, mode) {
         if (arguments.length) {
-            this.setProps({ defaultFill: value }, mode);
+            var settings = Object.assign({}, this.defaultShapeSettings(), { fill: value });
+            this.defaultShapeSettings(settings, mode);
         }
 
-        return this.props.defaultFill;
+        return this.defaultShapeSettings().fill;
     }
-
     defaultStroke(value, mode) {
         if (arguments.length) {
-            this.setProps({ defaultStroke: value }, mode);
+            var settings = Object.assign({}, this.defaultShapeSettings(), { stroke: value });
+            this.defaultShapeSettings(settings, mode);
         }
 
-        return this.props.defaultStroke;
+        return this.defaultShapeSettings().stroke;
     }
 
     recentColors() {

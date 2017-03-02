@@ -85,6 +85,7 @@ export default class Container extends UIElement {
             if (dash) {
                 context.setLineDash(dash);
             }
+            context.lineWidth = this.strokeWidth();
             fwk.Brush.stroke(this.stroke(), context, 0, 0, w, h);
             context.restore();
         }

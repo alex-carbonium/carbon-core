@@ -389,6 +389,12 @@ class Path extends Shape {
         this._lastPoints = this.points;
     }
 
+    cloneProps(){
+        var props = super.cloneProps();
+        props.points = props.points.map(x => Object.assign({}, x));
+        return props;
+    }
+
     get points() {
         return this.props.points;
     }
@@ -433,12 +439,6 @@ class Path extends Shape {
                 return;
             }
         }
-    }
-
-    getMaxOuterBorder() {
-        var res = super.getMaxOuterBorder();
-
-        return res * 4;
     }
 
     _roundPoint(pt) {

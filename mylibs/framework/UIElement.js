@@ -22,7 +22,8 @@ import {
     HorizontalAlignment,
     VerticalAlignment,
     PointDirection,
-    ChangeMode
+    ChangeMode,
+    StrokePosition
 } from "./Defs";
 import RotateFramePoint from "../decorators/RotateFramePoint";
 import ResizeFramePoint from "../decorators/ResizeFramePoint";
@@ -625,17 +626,18 @@ export default class UIElement extends DataNode {
         if (!this.stroke()) {
             return 0;
         }
-        var stroke = this.stroke();
-        if (stroke.lineWidth === 0) {
+        var strokeWidth = this.strokeWidth();
+        if (strokeWidth === 0) {
             return 0;
         }
-        if (stroke.position === 0) {
-            return stroke.lineWidth / 2 + .5 | 0;
+        var strokePosition = this.strokePosition();
+        if (strokePosition === StrokePosition.Center) {
+            return strokeWidth / 2 + .5 | 0;
         }
-        if (stroke.position === 1) {
+        if (strokePosition === StrokePosition.Inside) {
             return 0;
         }
-        return stroke.lineWidth;
+        return strokeWidth;
     }
 
     expandRectWithBorder(rect) {
@@ -1091,9 +1093,9 @@ export default class UIElement extends DataNode {
     canSelect(value) {
         return this.field("_canSelect", value, true);
     }
-    visible(value) {
-        if (value !== undefined) {
-            this.setProps({ visible: value });
+    visible(value, mode: ChangeMode) {
+        if (arguments.length) {
+            this.setProps({ visible: value }, mode);
         }
         return this.props.visible;
     }
@@ -1123,11 +1125,23 @@ export default class UIElement extends DataNode {
         }
         return this.props.fill;
     }
-    stroke(value) {
+    stroke(value): Brush {
         if (value !== undefined) {
             this.setProps({ stroke: value });
         }
         return this.props.stroke;
+    }
+    strokePosition(value): StrokePosition {
+        if (value !== undefined) {
+            this.setProps({ strokePosition: value });
+        }
+        return this.props.strokePosition;
+    }
+    strokeWidth(value): number {
+        if (value !== undefined) {
+            this.setProps({ strokeWidth: value });
+        }
+        return this.props.strokeWidth;
     }
     dashPattern(value) {
         if (value !== undefined) {
@@ -1997,8 +2011,6 @@ PropertyMetadata.registerForType(UIElement, {
     name: {
         displayName: "Name",
         type: "text",
-        useInModel: true,
-        editable: false,
         defaultValue: ""
     },
     x: {
@@ -2028,7 +2040,6 @@ PropertyMetadata.registerForType(UIElement, {
     locked: {
         displayName: "Locked",
         type: "toggle",
-        useInModel: true,
         options: {
             icon: "ico-prop_lock"
         },
@@ -2073,8 +2084,6 @@ PropertyMetadata.registerForType(UIElement, {
     constraints: {
         displayName: "@constraints",
         type: "constraints",
-        useInModel: true,
-        editable: false,
         defaultValue: Constraints.Default
         // options: {
         //     items: [
@@ -2091,21 +2100,43 @@ PropertyMetadata.registerForType(UIElement, {
     },
     fill: {
         displayName: "Fill",
-        type: "fill",
-        useInModel: true,
-        editable: true,
-        defaultValue: fwk.Brush.Empty,
+        type: "brush",
+        defaultValue: Brush.Empty,
         style: 1,
         customizable: true
     },
     stroke: {
         displayName: "Stroke",
-        type: "stroke",
-        useInModel: true,
-        editable: true,
-        defaultValue: fwk.Brush.Empty,
+        type: "brush",
+        defaultValue: Brush.Empty,
         style: 1,
         customizable: true
+    },
+    strokePosition: {
+        displayName: "@strokePosition",
+        type: "multiSwitch",
+        defaultValue: StrokePosition.Inside,
+        style: 1,
+        customizable: true,
+        options: {
+            items: [
+                { value: StrokePosition.Center, icon: "ico-prop_stroke-center" },
+                { value: StrokePosition.Inside, icon: "ico-prop_stroke-inside" },
+                { value: StrokePosition.Outside, icon: "ico-prop_stroke-outside" },
+            ],
+            size: 1 / 2
+        }
+    },
+    strokeWidth: {
+        displayName: "@strokeWidth",
+        type: "numeric",
+        defaultValue: 1,
+        style: 1,
+        customizable: true,
+        options: {
+            step: 1,
+            min: 0
+        }
     },
     dashPattern: {
         displayName: "@strokePattern",
@@ -2121,13 +2152,10 @@ PropertyMetadata.registerForType(UIElement, {
     clipMask: {
         displayName: "Use as mask",
         type: "checkbox",
-        useInModel: true,
         defaultValue: false
     },
     prototyping: {
-        defaultValue: false,
-        useInModel: false,
-        editable: false
+        defaultValue: false
     },
     styleId: {
         displayName: 'Shared style',

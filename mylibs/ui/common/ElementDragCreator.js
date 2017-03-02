@@ -57,11 +57,7 @@ export default class ElementDragCreator extends Tool {
 
         var defaultSettings = App.Current.defaultShapeSettings();
         if (defaultSettings && !this._element.noDefaultSettings) {
-            var settings = Object.assign({}, defaultSettings, {
-                fill: Brush.extend(defaultSettings.fill, App.Current.defaultFill()),
-                stroke: Brush.extend(defaultSettings.stroke, App.Current.defaultStroke())
-            });
-            this._element.setProps(settings);
+            this._element.setProps(defaultSettings);
         }
 
         if (this._parameters) {

@@ -44,7 +44,7 @@ class ResizeHint extends UIElement {
     }
 
     _updatePosition(): void{
-        var anchorElement = this._transformationElement;
+        var anchorElement: UIElement = this._transformationElement;
         if (anchorElement.elements.length === 1 && !anchorElement.wrapSingleChild()){
             //rotated elements are not wrapped when dragging
             anchorElement = this._transformationElement.children[0];
@@ -54,7 +54,7 @@ class ResizeHint extends UIElement {
         var p0 = points[0];
         var p1 = points[1];
         var matrix = Matrix.create();
-        matrix.translate(p0.x, p0.y);
+        matrix.translate(p0.x, p0.y + this._findMaxOuterBorder());
 
         var v1 = p1.subtract(p0);
         matrix.rotate(-v1.getDirectedAngle(Point.BasisX));
@@ -96,6 +96,15 @@ class ResizeHint extends UIElement {
         }
 
         return result;
+    }
+
+    _findMaxOuterBorder(): number{
+        var border = 0;
+        for (let i = 0; i < this._transformationElement.elements.length; ++i){
+            let element = this._transformationElement.elements[i];
+            border = Math.max(border, element.getMaxOuterBorder());
+        }
+        return border;
     }
 
     updateSizeText(){
@@ -201,7 +210,8 @@ class SelectionRect extends UIElement {
             this._element.drawBoundaryPath(context);
         }
 
-        Brush.stroke(HighlightBrush, context, 0, 0, 0, 0, 1/scale);
+        context.lineWidth = 1/scale;
+        Brush.stroke(HighlightBrush, context);
 
         context.restore();
     }
@@ -482,8 +492,8 @@ export default class DropVisualization extends ExtensionBase {
             element.drawBoundaryPath(context);
         }
 
-        var mutltiplier = 2 / view.scale();
-        Brush.stroke(HighlightBrush, context, 0, 0, 0, 0, mutltiplier);
+        context.lineWidth = 2 / view.scale();
+        Brush.stroke(HighlightBrush, context);
         context.restore();
     }
 }

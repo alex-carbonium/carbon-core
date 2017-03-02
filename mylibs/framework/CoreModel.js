@@ -88,6 +88,8 @@ export interface IUIElement extends IDataNode{
     getBoundingBox(): IRect;
     getBoundingBoxGlobal(): IRect;
 
+    getMaxOuterBorder(): number;
+
     hitTest(point: IPoint, scale: number, boundaryRectOnly: boolean): boolean;
     hitTestGlobalRect(rect: IRect, directSelection: boolean): boolean;
 

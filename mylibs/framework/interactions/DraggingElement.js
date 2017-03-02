@@ -175,6 +175,7 @@ class DraggingElement extends TransformationElement {
                 child.drawBoundaryPath(context);
             }
 
+            context.lineWidth = this.strokeWidth();
             Brush.stroke(this.stroke(), context);
             context.restore();
         }

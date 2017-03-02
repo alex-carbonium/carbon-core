@@ -19,10 +19,10 @@ export default class DataNode{
         }
     }
 
-    prepareProps(changes: IDataNodeProps){        
+    prepareProps(changes: IDataNodeProps){
         for (let p in changes){
             let oldValue = this.props[p];
-            let newValue = changes[p];   
+            let newValue = changes[p];
             if (newValue === oldValue){
                 delete changes[p];
             }
@@ -30,16 +30,16 @@ export default class DataNode{
     }
 
     setProps(props, mode = ChangeMode.Model) {
-        var oldProps = {};        
+        var oldProps = {};
         var propsChanged = false;
         for (var p in props) {
             var oldValue = this.props[p];
             var newValue = props[p];
             if (newValue !== oldValue) {
                 propsChanged = true;
-                oldProps[p] = oldValue;                
-            }            
-        }        
+                oldProps[p] = oldValue;
+            }
+        }
 
         if (propsChanged) {
             if (mode !== ChangeMode.Self){
@@ -49,7 +49,7 @@ export default class DataNode{
             Object.assign(this.props, props);
             this.propsUpdated(props, oldProps, mode);
         }
-    }    
+    }
 
     prepareAndSetProps(props, mode) {
         this.prepareProps(props);
@@ -296,13 +296,13 @@ export default class DataNode{
 
     getImmediateChildById(id:string, materialize:boolean) {
         return DataNode.getImmediateChildById(this, id, materialize);
-    }   
+    }
 
     static getImmediateChildById(container: any, id:string, materialize:boolean = false) {
         if(!container.children) {
             return null;
         }
-        
+
         let i = 0;
         let child = null;
         for(; i < container.children.length; ++i){
@@ -312,15 +312,15 @@ export default class DataNode{
             }
             child = null;
         }
-        
+
         if(child && materialize){
             var materializedItem = ObjectFactory.getObject(child);
             if(child !== materializedItem){
                 child = container.children[i] = materializedItem;
-            }            
+            }
         }
 
-        return child;   
+        return child;
     }
 
     applyVisitorDepthFirst(callback) {
@@ -386,7 +386,7 @@ export default class DataNode{
         return json;
     }
 
-     
+
     acquiringChild(child) {
     }
 
@@ -399,7 +399,7 @@ export default class DataNode{
 
         this.setProps(data.props, ChangeMode.Self);
 
-        if (data.children) {            
+        if (data.children) {
             this.children = [];
             for(var i = 0; i < data.children.length; ++i) {
                 var child = ObjectFactory.getObject(data.children[i]);

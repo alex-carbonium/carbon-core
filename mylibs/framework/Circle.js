@@ -23,15 +23,18 @@ class Circle extends Shape {
 
         var innerRect, outerRect;
 
-        var stroke = this.stroke();
-        if (stroke.position === 0) {
-            outerRect = math.adjustRectSize(rect, stroke.lineWidth / 2 + 1);
-            innerRect = math.adjustRectSize(rect, -(stroke.lineWidth / 2 + 1));
-        } else if (stroke.position === 1) {
+        var strokePosition = this.strokePosition()
+        var strokeWidth = this.strokeWidth();
+        if (strokePosition === StrokePosition.Center) {
+            outerRect = math.adjustRectSize(rect, strokeWidth / 2 + 1);
+            innerRect = math.adjustRectSize(rect, -(strokeWidth / 2 + 1));
+        }
+        else if (strokePosition === StrokePosition.Inside) {
             outerRect = math.adjustRectSize(rect, 1);
-            innerRect = math.adjustRectSize(rect, -(stroke.lineWidth + 1));
-        } else {
-            outerRect = math.adjustRectSize(rect, stroke.lineWidth + 1);
+            innerRect = math.adjustRectSize(rect, -(strokeWidth + 1));
+        }
+        else {
+            outerRect = math.adjustRectSize(rect, strokeWidth + 1);
             innerRect = math.adjustRectSize(rect, -1);
         }
 
@@ -142,13 +145,16 @@ class Circle extends Shape {
         }
         this.drawInsetShadows(context, w, h, environment);
 
-        if (!stroke || !stroke.type || !stroke.position) {
+        var strokePosition = this.strokePosition();
+        var lw = this.strokeWidth();
+        context.lineWidth = lw;
+        if (!stroke || !stroke.type || strokePosition === StrokePosition.Center) {
             Brush.stroke(stroke, context, 0, 0, w, h);
-        } else {
+        }
+        else {
             context.beginPath();
-            var lw = stroke.lineWidth;
             var db = lw / 2;
-            if (stroke.position === StrokePosition.Outside) {
+            if (strokePosition === StrokePosition.Outside) {
                 lw = -lw;
                 db = -db;
             }

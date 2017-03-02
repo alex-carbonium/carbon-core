@@ -355,6 +355,7 @@ class CompoundPath extends Container implements IGroupContainer{
             this.drawPath(context, w, h);
 
             Brush.fill(this.fill(), context, 0, 0, w, h);
+            context.lineWidth = this.strokeWidth();
             Brush.stroke(this.stroke(), context, 0, 0, w, h);
         }
         context.restore();
