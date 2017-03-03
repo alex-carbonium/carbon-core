@@ -431,8 +431,11 @@ class Artboard extends Container {
         if (res) {
             return res;
         }
-        var pos = this.position();
-        return isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width(), height: 20 / scale }, point);
+        if (this.hasBadTransform()){
+            return false;
+        }
+        var bb = this.getBoundingBoxGlobal();
+        return isPointInRect({ x: bb.x, y: bb.y - 20 / scale, width: bb.width, height: 20 / scale }, point);
     }
 
     primitiveRoot() {

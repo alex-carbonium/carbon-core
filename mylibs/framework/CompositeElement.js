@@ -69,6 +69,13 @@ export default class CompositeElement extends UIElement implements IComposite {
         this.performArrange();
     }
 
+    hasBadTransform(): boolean{
+        return this.elements.some(x => x.hasBadTransform());
+    }
+    restoreLastGoodTransformIfNeeded(){
+        this.elements.forEach(x => x.restoreLastGoodTransformIfNeeded());
+    }
+
     performArrange() {
         if (this.elements.length > 1) {
             this.resetTransform();

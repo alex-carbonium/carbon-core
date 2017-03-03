@@ -127,6 +127,18 @@ export default class SelectComposite extends CompositeElement {
             this.selected(true);
         }
     }
+
+    updateDisplayProps(changes){
+        var hadBadTransform = this.hasBadTransform();
+        this.restoreLastGoodTransformIfNeeded();
+        super.updateDisplayProps(changes);
+        var hasBadTransform = this.hasBadTransform();
+
+        if (hadBadTransform || hasBadTransform){
+            this.selected(false);
+            this.selected(true);
+        }
+    }
 }
 
 SelectComposite.prototype.t = Types.SelectComposite;

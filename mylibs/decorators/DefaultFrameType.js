@@ -9,6 +9,10 @@ import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
 export default {
     strokeStyle: UserSettings.frame.stroke,
     hitPointIndex: function (frame, mousePoint) {
+        if (frame.hasBadTransform){
+            return -1;
+        }
+
         var gm = frame.element.globalViewMatrix();
         var gmi = frame.element.globalViewMatrixInverted();
         var scale = Environment.view.scale();
@@ -26,6 +30,11 @@ export default {
     },
 
     updateFromElement: function (frame) {
+        frame.hasBadTransform = frame.element.hasBadTransform();
+        if (frame.hasBadTransform){
+            return;
+        }
+
         var e = frame.element;
         var rect = frame.element.getBoundaryRect();
         var points = frame.points;
@@ -114,9 +123,11 @@ export default {
                 }
             }
 
-            for (var i = frame.points.length - 1; i >= 0; --i) {
-                var p = frame.points[i];
-                p.type.draw(p, frame, scale, context, matrix);
+            if (!frame.hasBadTransform){
+                for (var i = frame.points.length - 1; i >= 0; --i) {
+                    var p = frame.points[i];
+                    p.type.draw(p, frame, scale, context, matrix);
+                }
             }
         }
 

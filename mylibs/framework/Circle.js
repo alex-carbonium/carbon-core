@@ -7,7 +7,7 @@ import {Types, StrokePosition} from "./Defs";
 
 class Circle extends Shape {
     hitTest(/*Point*/point, scale) {
-        if (!this.visible()) {
+        if (!this.visible() || this.hasBadTransform()) {
             return false;
         }
 

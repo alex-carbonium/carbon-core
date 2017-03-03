@@ -1044,7 +1044,7 @@ class App extends DataNode implements IApp {
         var view = Environment.view;
         if (view) {
             view.setActivePage(page);
-            view.resize(page.viewportRect());
+            //view.resize(page.viewportRect());
             view.zoom(page.scale(), true);
         }
 

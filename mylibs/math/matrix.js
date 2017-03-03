@@ -701,6 +701,10 @@ class Matrix {
     set ty(value){
         this._ty = value
     }
+
+    static fromObject(value): Matrix{
+        return new Matrix(value._a, value._b, value._c, value._d, value._tx, value._ty);
+    }
 }
 
 Matrix.Identity = Object.freeze(Matrix.create());
