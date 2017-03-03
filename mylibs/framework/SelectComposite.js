@@ -128,6 +128,11 @@ export default class SelectComposite extends CompositeElement {
         }
     }
 
+    previewDisplayProps(changes){
+        this.restoreLastGoodTransformIfNeeded();
+        super.previewDisplayProps(changes);
+    }
+
     updateDisplayProps(changes){
         var hadBadTransform = this.hasBadTransform();
         this.restoreLastGoodTransformIfNeeded();
