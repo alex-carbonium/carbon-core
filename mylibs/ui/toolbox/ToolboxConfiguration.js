@@ -3,18 +3,19 @@ import tiler from "ui/toolbox/tiler";
 import ContextPool from "framework/render/ContextPool";
 import Environment from "environment";
 import FileProxy from "server/FileProxy";
-import Deferred from "framework/Deferred";
 import {createUUID} from "util";
 import Matrix from "math/matrix";
+import OpenTypeFontManager from "../../OpenTypeFontManager";
+import Promise from "bluebird";
 
 var PADDING = 5;
 var _configCache = {};
 export default class ToolboxConfiguration {
 
-    static renderElementsToSprite(elements, outConfig, size, contextScale) {
+    static renderElementsToSprite(elements, outConfig, contextScale): Promise<string> {
         contextScale = contextScale || 1;
         if (!elements.length) {
-            return "";
+            return Promise.resolve({});
         }
         let elementWithTiles : Array<any> = elements.map(e=> {
             if (e.props.tileSize === TileSize.Auto) {
@@ -49,8 +50,8 @@ export default class ToolboxConfiguration {
 
         var counter = 0;
         var lastX = x;
-        
-        while (i < elementWithTiles.length) {            
+
+        while (i < elementWithTiles.length) {
             let element = elementWithTiles[i].element;
             let tileSize = elementWithTiles[i].tileSize;
 
@@ -77,71 +78,86 @@ export default class ToolboxConfiguration {
         }
 
         var width: number = lastX;
-        size.width = width;
-        size.height = height;
         var context  = ContextPool.getContext(width, height, contextScale, true);
         context.clearRect(0,0, context.width, context.height);
         var env = {finalRender: true,  setupContext:()=>{}, contextScale:contextScale, offscreen:true, view:{scale:()=>1, contextScale, focused:()=>false}};
         var elementsMap = {};
+        var taskPromises = [];
         for (i = 0; i < renderTasks.length; ++i) {
-            var t = renderTasks[i];
-            var element = elementWithTiles[i].element;
-            var w = element.width();
-            var h = element.height();
-            var scale = t.data.scale;
-            var matrix = Matrix.Identity.clone();
-            context.save();
+            taskPromises.push(ToolboxConfiguration._performRenderTask(renderTasks[i], elementWithTiles[i].element, elementsMap, context, contextScale, env));
+        }
+
+        return Promise.all(taskPromises)
+            .then(() => {
+                if(outConfig) {
+                    for (i = elements.length - 1; i >= 0; --i) {
+                        outConfig.push(elementsMap[elements[i].id()]);
+                    }
+                }
+
+                return {imageData: context.canvas.toDataURL("image/png"), size: {width, height}};
+            })
+            .finally(() => {
+                ContextPool.releaseContext(context);
+            });
+    }
+
+    static _performRenderTask(t, element, elementsMap, context, contextScale, env): Promise{
+        var w = element.width();
+        var h = element.height();
+        var scale = t.data.scale;
+        var matrix = Matrix.Identity.clone();
+        context.save();
+        context.scale(contextScale, contextScale);
+        context.beginPath();
+        context.clearRect(t.x, t.y, t.data.width, t.data.height);
+        context.rect(t.x, t.y, t.data.width, t.data.height);
+        context.clip();
+
+        env.setupContext=(context) => {
             context.scale(contextScale, contextScale);
-            context.beginPath();
-            context.rect(t.x, t.y, t.data.width, t.data.height);
-            context.clip();
-
-            env.setupContext=(context) => {
-                context.scale(contextScale, contextScale);
-                env.pageMatrix.applyToContext(context);
-            }
-
-            matrix.translate(t.x + 0 | (t.data.width - w * scale) / 2, t.y + 0 | (t.data.height - h * scale) / 2);
-            matrix.scale(scale, scale);
-            matrix.append(element.viewMatrix().clone().invert());
-            env.pageMatrix = matrix;
-            matrix.applyToContext(context);
-
-            try {
-                element.standardBackground(false);
-                element.draw(context, env);
-            } finally {
-                element.standardBackground(true);
-            }
-            
-            context.restore();
-
-            elementsMap[element.id()] = {
-                "autoPosition": "center",
-                "id": element.id(),
-                "realHeight": w,
-                "realWidth": h,
-                "spriteMap": [t.x * contextScale, t.y * contextScale, t.data.width * contextScale, t.data.height * contextScale],
-                "title": element.name()
-            };
+            env.pageMatrix.applyToContext(context);
         }
 
-        if(outConfig) {
-            for (i = elements.length - 1; i >= 0; --i) {
-                outConfig.push(elementsMap[elements[i].id()]);
-            }
+        matrix.translate(t.x + 0 | (t.data.width - w * scale) / 2, t.y + 0 | (t.data.height - h * scale) / 2);
+        matrix.scale(scale, scale);
+        matrix.append(element.viewMatrix().clone().invert());
+        env.pageMatrix = matrix;
+        matrix.applyToContext(context);
+
+        try {
+            element.standardBackground(false);
+            element.draw(context, env);
+        }
+        finally {
+            element.standardBackground(true);
         }
 
-        var res =  context.canvas.toDataURL("image/png");
-        ContextPool.releaseContext(context);
-        return res;
+        context.restore();
+
+        elementsMap[element.id()] = {
+            "autoPosition": "center",
+            "id": element.id(),
+            "realHeight": w,
+            "realWidth": h,
+            "spriteMap": [t.x * contextScale, t.y * contextScale, t.data.width * contextScale, t.data.height * contextScale],
+            "title": element.name()
+        };
+
+        var fontTasks = OpenTypeFontManager.getPendingTasks();
+        if (!fontTasks.length){
+            return Promise.resolve();
+        }
+
+        return Promise.all(fontTasks)
+            .then(() => ToolboxConfiguration._performRenderTask(t, element, elementsMap, context, contextScale, env));
     }
 
     static getConfigForPage(page){
         if(page.props.toolboxConfigUrl && page.props.toolboxConfigUrl !== '#'){
             var config = _configCache[page.props.toolboxConfigUrl];
             if(config){
-                return Deferred.createResolvedPromise(config);
+                return Promise.resolve(config);
             }
             return fetch(page.props.toolboxConfigUrl).then(r=>r.json()).then(function(config){
                 _configCache[page.props.toolboxConfigUrl] = config;
@@ -157,7 +173,7 @@ export default class ToolboxConfiguration {
 
         if(!elements.length) {
             page.setProps({toolboxConfigUrl:null});
-            return Deferred.createResolvedPromise({groups:[]});
+            return Promise.resolve({groups:[]});
         }
 
         var configId = createUUID();
@@ -170,41 +186,42 @@ export default class ToolboxConfiguration {
             groupedElements[e.props.toolboxGroup] = group;
         }
         var groups = [];
-        function makeGroup(group, elements){
+        function makeGroup(group, elements): Promise{
             var config = [];
-            var size ={};
-            var spriteUrl = ToolboxConfiguration.renderElementsToSprite(elements, config, size);
+            var spriteUrlPromise = ToolboxConfiguration.renderElementsToSprite(elements, config);
 
-            var spriteUrl2x = ToolboxConfiguration.renderElementsToSprite(elements, null, size, 2);
+            var spriteUrl2xPromise = ToolboxConfiguration.renderElementsToSprite(elements, null, 2);
             var group = {
                 name:group,
                 templates:config
             };
             groups.push(group);
-            var d1 = Deferred.create();
-            var d2 = Deferred.create();
 
             if(App.Current.serverless()){
-                group.spriteUrl = spriteUrl;
-                group.spriteUrl2x = spriteUrl2x;
-                group.size = size;
-                return Deferred.createResolvedPromise();
+                return Promise.all([spriteUrlPromise, spriteUrl2xPromise])
+                    .then(sprites => {
+                        group.spriteUrl = sprites[0].imageData;
+                        group.spriteUrl2x = sprites[1];
+                        group.size = sprites[0].size;
+                    });
             }
 
-            FileProxy.uploadPublicImage(spriteUrl)
-                .then((data)=>{
-                    group.spriteUrl = data.url;
-                    d1.resolve();
-                });
-
-            FileProxy.uploadPublicImage(spriteUrl2x)
-                .then((data)=>{
-                group.spriteUrl2x = data.url;
-                group.size = size;
-                d2.resolve();
+            spriteUrlPromise = spriteUrlPromise.then(sprite =>{
+                return FileProxy.uploadPublicImage(sprite.imageData)
+                    .then((data)=>{
+                        group.spriteUrl = data.url;
+                        group.size = sprite.size;
+                    })
             });
 
-            return Deferred.when(d1, d2);
+            spriteUrl2xPromise = spriteUrl2xPromise.then(sprite =>{
+                return FileProxy.uploadPublicImage(sprite.imageData)
+                    .then((data)=>{
+                        group.spriteUrl2x = data.url;
+                    })
+            });
+
+            return Promise.all([spriteUrlPromise, spriteUrl2xPromise]);
         }
         var promises = [];
         for(var group in groupedElements) {
@@ -212,7 +229,7 @@ export default class ToolboxConfiguration {
         }
 
         var config = {groups:groups, id:configId};
-        return Deferred.when(promises)
+        return Promise.all(promises)
             .then(()=>{
                 if(App.Current.serverless()){
                     return {url:'#', configId:createUUID()};

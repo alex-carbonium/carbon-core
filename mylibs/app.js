@@ -360,7 +360,7 @@ class App extends DataNode implements IApp {
         if (OpenTypeFontManager.tryAddMetadata(metadata)){
             var metadataWithId = Object.assign({}, metadata);
             metadataWithId.id = metadata.name;
-            this.patchProps(PatchType.Insert, "fontMetadata", metadata);
+            this.patchProps(PatchType.Insert, "fontMetadata", metadataWithId);
         }
     }
     getFontMetadata(family){
@@ -1160,6 +1160,12 @@ class App extends DataNode implements IApp {
             }
         }
 
+        if (data.fontMetadata){
+            for (var metadata of data.fontMetadata){
+                this.saveFontMetadata(metadata);
+            }
+        }
+
         var i = this.children.length;
         this.children.push(pageJson);
 
@@ -1168,6 +1174,8 @@ class App extends DataNode implements IApp {
         this.children[i] = page;
         this.initPage(page);
         this.setActivePage(page);
+
+        ModelStateListener.trackInsert(this, this, page, i);
 
         return page;
     }

@@ -5,10 +5,15 @@ import ArtboardTemplateControl from "framework/ArtboardTemplateControl";
 import ToolboxConfiguration from "ui/toolbox/ToolboxConfiguration";
 import Deferred from "framework/Deferred";
 import DataNode from "framework/DataNode";
+import Font from "../Font";
 
 export default class PageExporter {
+    constructor(app){
+        this._app = app;
+    }
+
     prepareShareData(page) {
-        var clone = page.mirrorClone();        
+        var clone = page.mirrorClone();
 
         var promise;
         if(!page.props.toolboxConfigId || page.isToolboxConfigDirty){
@@ -24,7 +29,8 @@ export default class PageExporter {
 
         var styles = [];
         var textStyles = [];
-        this.populatePageStyles(clone, styles, textStyles);
+        var fontMetadata = [];
+        this.populatePageStyles(clone, styles, textStyles, fontMetadata);
 
         return promise.then(()=>{
             clone.setProps({toolboxConfigUrl:page.props.toolboxConfigUrl, toolboxConfigId:page.props.toolboxConfigId});
@@ -32,8 +38,9 @@ export default class PageExporter {
                 page:clone.toJSON(),
                 styles:styles,
                 textStyles:textStyles,
+                fontMetadata: fontMetadata,
                 publishDate:new Date(),
-                publishedBy:App.Current.companyId()
+                publishedBy:this._app.companyId()
                 // add here any external dependencies
             }
         });
@@ -50,7 +57,7 @@ export default class PageExporter {
                 var source = e.source();
                 if(source.pageId != pageId){
                     // clone referenced artboard and insert it to the current page
-                    var refPage = DataNode.getImmediateChildById(App.Current, source.pageId);
+                    var refPage = DataNode.getImmediateChildById(this._app, source.pageId);
                     var refArtboard = DataNode.getImmediateChildById(refPage, source.artboardId, true);
                     var clone = refArtboard.clone();
                     clone.setProps({id:createUUID(), x:rect.y, y:posY});
@@ -70,7 +77,7 @@ export default class PageExporter {
         return found;
     }
 
-    populatePageStyles(page, styles, textStyles){
+    populatePageStyles(page, styles, textStyles, fontMetadata){
         page.applyVisitor(e=>{
             var styleId = e.styleId();
             if(styleId){
@@ -80,6 +87,14 @@ export default class PageExporter {
             var textStyleId = e.props.textStyleId;
             if(textStyleId){
                 textStyles.push(StyleManager.getStyle(textStyleId, StyleType.Text));
+            }
+
+            var font = e.props.font;
+            if (font && font.family !== Font.Default.family){
+                var metadata = this._app.getFontMetadata(font.family);
+                if (metadata){
+                    fontMetadata.push(metadata);
+                }
             }
         })
     }

@@ -81,13 +81,22 @@ class OpenTypeFontManager extends FontManager {
 
             var metadata = this.getMetadata(family);
             if (metadata && !this._loadQueue.find(x => x.family === family && x.style === style && x.weight === weight)){
-                this._loadQueue.push({family, style, weight});
-                this._loadInternal(family, style, weight)
-                    .then(() => Invalidate.request());
+                var promise = this._loadInternal(family, style, weight)
+                    .then(() => {
+                        Invalidate.request();
+                        var i = this._loadQueue.findIndex(x => x.family === family && x.style === style && x.weight === weight);
+                        this._loadQueue.splice(i, 1);
+                    });
+
+                this._loadQueue.push({family, style, weight, promise});
             }
         }
 
         return font;
+    }
+
+    getPendingTasks(): Promise[]{
+        return this._loadQueue.map(x => x.promise);
     }
 
     getMetadata(family) {
