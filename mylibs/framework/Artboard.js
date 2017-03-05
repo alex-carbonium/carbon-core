@@ -333,7 +333,7 @@ class Artboard extends Container {
     drawSelf(context, w, h, environment) {
         context.save();
         var frame = this.frame;
-        if (frame) {
+        if (frame && environment.showFrames) {
             context.beginPath();
             var pos = this.position();
             context.rect(pos.x, pos.y, frame.runtimeProps.cloneScreenWidth, frame.runtimeProps.cloneScreenHeight);
