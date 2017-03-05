@@ -47,15 +47,14 @@ function onZoomChanged(value, oldValue) {
         view.scale(value);
     }
     else {
-
-        var viewport = App.Current.viewportSize();
+        var viewport = this.app.viewportSize();
         var scale = view.scale();
         sx /= scale;
         sy /= scale;
         sx += (viewport.width / scale) / 2;
         sy += (viewport.height / scale) / 2;
         view.scale(value);
-        var scroll = App.Current.activePage.pointToScroll({x: sx, y: sy}, viewport);
+        var scroll = this.app.activePage.pointToScroll({x: sx, y: sy}, viewport);
 
         view.scrollX(scroll.scrollX);
         view.scrollY(scroll.scrollY);
@@ -118,7 +117,7 @@ export default class ViewBase {
     }
 
     _drawLayerPixelsVisible(scale) {
-        var viewportSize = App.Current.viewportSize();
+        var viewportSize = this.app.viewportSize();
         var vw = viewportSize.width * this.contextScale + 10 * scale;
         var vh = viewportSize.height * this.contextScale + 10 * scale;
         var sw = vw / scale;
@@ -161,6 +160,7 @@ export default class ViewBase {
         env.finalRender = final;
         env.view = this;
         env.contextScale = this.contextScale;
+        env.showFrames = this.app.showFrames();
         return env;
     }
 
@@ -169,9 +169,7 @@ export default class ViewBase {
         this._registredForLayerDraw = [[], [], []];
 
         this.stopwatch = new Stopwatch("view", false);
-
         this._captureElement = null;
-
         this._width = 0;
         this._height = 0;
 
@@ -237,7 +235,7 @@ export default class ViewBase {
     }
 
     setInitialPagePlace(page) {
-        var size = App.Current.viewportSize();
+        var size = this.app.viewportSize();
         page.zoomToFit(size);
         var scale =  page.scale();
         page.scale(1);
@@ -246,7 +244,7 @@ export default class ViewBase {
 
         delete page._placeBeforeRender;
         this.zoom(scale);
-        App.Current.actionManager.invoke("refreshZoom");
+        this.app.actionManager.invoke("refreshZoom");
     }
 
     draw() {
@@ -347,7 +345,7 @@ export default class ViewBase {
     }
 
     viewportRect() {
-        var size = App.Current.viewportSize();
+        var size = this.app.viewportSize();
         var scale = this.scale();
         return {
             x: this.scrollX() / scale,
@@ -436,7 +434,7 @@ export default class ViewBase {
     ensureVisible(element) {
         var pt = element.getBoundaryRectGlobal();
         pt = {x: pt.x + pt.width / 2, y: pt.y + pt.height / 2};
-        var scroll = this.page.pointToScroll(pt, App.Current.viewportSize());
+        var scroll = this.page.pointToScroll(pt, this.app.viewportSize());
         if (scroll.scrollX) {
             this.scrollX(scroll.scrollX);
         }
@@ -448,7 +446,7 @@ export default class ViewBase {
 
     ensureScale(element) {
         var rect = element.getBoundaryRectGlobal();
-        var size = App.Current.viewportSize();
+        var size = this.app.viewportSize();
         var w = rect.width * 2;
         var h = rect.height * 2;
         var sx = size.width / w;
@@ -468,7 +466,7 @@ export default class ViewBase {
     }
 
     scrollCenterPosition() {
-        return this.page.scrollCenterPosition(App.Current.viewportSize(), this.scale());
+        return this.page.scrollCenterPosition(this.app.viewportSize(), this.scale());
     }
 
     scrollPosition() {
@@ -515,7 +513,7 @@ export default class ViewBase {
             sy /= scale;
             sx += (oldSize.width / scale) / 2;
             sy += (oldSize.height / scale) / 2;
-            var scroll = App.Current.activePage.pointToScroll({x: sx, y: sy}, newSize);
+            var scroll = this.app.activePage.pointToScroll({x: sx, y: sy}, newSize);
 
             this.scrollX(scroll.scrollX);
             this.scrollY(scroll.scrollY);
@@ -539,10 +537,10 @@ export default class ViewBase {
         return this.scale();
     }
     zoomToFit () {
-        var size = App.Current.viewportSize();
+        var size = this.app.viewportSize();
 
-        App.Current.activePage.zoomToFit(size);
-        this.zoom(App.Current.activePage.scale());
+        this.app.activePage.zoomToFit(size);
+        this.zoom(this.app.activePage.scale());
 
         this.scrollToCenter();
     }

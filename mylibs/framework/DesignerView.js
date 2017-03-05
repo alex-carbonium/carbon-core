@@ -18,8 +18,8 @@ function setupLayers(Layer) {
 }
 
 class DesignerView extends ViewBase {
-    constructor() {
-        super();
+    constructor(app) {
+        super(app);
 
         this.guideFont = Font.createFromObject({
             family: "Arial",

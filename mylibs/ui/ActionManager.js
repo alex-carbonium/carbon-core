@@ -522,6 +522,11 @@ export default class ActionManager implements IActionManager {
         this.registerAction("cancel", "Cancel", "", function () {
         });
 
+        this.registerAction("toggleFrame", "@toggleFrame", "", function () {
+            that.app.showFrames(!that.app.showFrames());
+        });
+
+
         // this.registerAction("showNavigationPane", "Expand pane", "Navigation pane", function () {
         //     that.app.viewModel.navigationModel.expandAndFocusOnSearch();
         // });

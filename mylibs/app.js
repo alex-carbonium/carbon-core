@@ -691,6 +691,13 @@ class App extends DataNode implements IApp {
         return this.props.editVersion;
     }
 
+    showFrames(value) {
+        if (arguments.length === 1) {
+            this.setProps({ showFrames: value });
+        }
+        return this.props.showFrames;
+    }
+
     companyId(value) {
         if (arguments.length === 1) {
             this._companyId = value;
@@ -1318,6 +1325,9 @@ App.prototype.t = Types.App;
 PropertyMetadata.registerForType(App, {
     defaultShapeSettings: {
         defaultValue: PropertyMetadata.getDefaultProps(Types.DefaultShapeSettings)
+    },
+    showFrames: {
+        defaultValue: true
     },
     defaultLineSettings: {
         defaultValue: PropertyMetadata.getDefaultProps(Types.DefaultLineSettings)

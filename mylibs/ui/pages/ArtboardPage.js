@@ -105,42 +105,15 @@ class ArtboardPage extends Page {
 
     draw(context, environment) {
         this._viewport = environment.view.viewportRect();
-        var artboards = this.getAllArtboards();
-        // context.save();
-        // context.beginPath();
-        // context.fillStyle = "#9EA2a6";
-        // for(var i = 0; i < artboards.length; ++i){
-        //     var artboard =  artboards[i];
-
-        //     if(artboard.visible() && artboard.drawShadowPath && areRectsIntersecting(this._viewport, artboard.getBoundaryRectGlobal()) && !artboard.frame) {
-        //         artboard.drawShadowPath(context, environment);
-        //     }
-        // }
-
-        // context.fill();
-        // context.restore();
-
+     
         super.draw.apply(this, arguments);
 
-        // context.save();
-        // context.beginPath();
-        // context.strokeStyle = "#555";
-        // context.lineWidth = 1 / environment.scale;
-        // for(var i = 0; i < artboards.length; ++i){
-        //     var artboard =  artboards[i];
-        //
-        //     if(artboard.drawFrameRect && areRectsIntersecting(this._viewport, artboard.getBoundaryRect())) {
-        //         artboard.drawFrameRect(context, environment);
-        //     }
-        // }
-        //
-        // context.stroke();
         context.restore();
     }
 
     drawChildSafe(child, context, environment) {
         if (areRectsIntersecting(this._viewport, child.getBoundaryRectGlobal())) {
-            if(child.frame){
+            if(environment.showFrames && child.frame){
                 var frame = child.frame;
                 if (frame) {
                     child.drawCustomFrame(context, environment);
@@ -148,7 +121,7 @@ class ArtboardPage extends Page {
             }
             super.drawChildSafe(child, context, environment);
             if(child instanceof Artboard){
-                if(!frame) {
+                if(!frame || !environment.showFrames) {
                     child.drawFrameRect(context, environment);
                 }
                 child.drawExtras(context, environment);

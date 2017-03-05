@@ -160,7 +160,7 @@ export default class ShortcutManager {
         { key: "ctrl+0", action: "zoom100" },
         { key: "ctrl+.", action: "zoomFit" },
 
-        { key: "f", action: "toggleFrame" },
+        { key: "f", action: "toggleFrame" },        
 
         { key: "ctrl+shift+e", action: "editTemplate" }
     ];
