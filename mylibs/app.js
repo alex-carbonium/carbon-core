@@ -127,7 +127,8 @@ class App extends DataNode implements IApp {
         super(true);
         this.viewMode = "view"; //?
         this.activePage = NullPage;
-        this._companyId = '';
+        this._companyId = "";
+        this.props.id = "";
         this._syncBroken = false;
         this._folderId = 0;
         this.isLoaded = false;
@@ -201,9 +202,6 @@ class App extends DataNode implements IApp {
 
         this._currentTool = ViewTool.Pointer;
         this.currentToolChanged = EventHelper.createEvent();
-
-        this.props.companyId = "";
-        this.props.id = "";
 
         Selection.onElementSelected.bind((selection, oldSelection, doNotTrack)=>{
             let selectionIds = Selection.selectedElements().map(e=>e.id());
