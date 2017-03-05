@@ -20,6 +20,7 @@ import backend from "../backend";
 import logger from "../logger";
 import params from "../params";
 import StateMachine from "../StateMachine";
+import DiscoverProxy from "./DiscoverProxy";
 import Promise from "bluebird";
 
 require("../DebugUtil")("carb:signalr");
@@ -27,10 +28,15 @@ require("../DebugUtil")("carb:signalr");
 var connectionStartTime;
 var noWsTransport = ['serverSentEvents', 'foreverFrame', 'longPolling'];
 
-function setupConnection(){
+function resolveConnectionAddress(app): Promise<string>{
+    return DiscoverProxy.projectHub(app.companyId(), app.id())
+        .then(data => data.url);
+}
+
+function setupConnection(url: string){
     var app = this._app;
 
-    var connection = $.hubConnection(backend.storageEndpoint);
+    var connection = $.hubConnection(url);
     if (DEBUG){
         connection.logging = debug.enabled("carb:signalr");
     }
@@ -89,9 +95,10 @@ function restartConnection(timeout){
 
     this._restartPromise = Promise.delay(timeout)
         .then(() => backend.ensureLoggedIn(initialStart || possiblyOldToken))
-        .then(() => {
+        .then(() => resolveConnectionAddress.call(this, app))
+        .then(url => {
             if (initialStart){
-                var connectionData = setupConnection.call(this);
+                var connectionData = setupConnection.call(this, url);
                 this._connection = connectionData.connection;
                 this._hub = connectionData.hub;
             }
@@ -104,7 +111,7 @@ function restartConnection(timeout){
                     this.resetConnectionTimeout();
                     app.isInOfflineMode(false);
                     sketch.analytics.event("Connection", initialStart ? "connected" : "reconnected", e.transport.name);
-                    return joinProject.call(this);
+                    return this._hub;
                 })
                 .fail(e => {
                     sketch.analytics.event("Connection", initialStart ? "connectFailed" : "reconnectFailed", "");
@@ -118,25 +125,6 @@ function restartConnection(timeout){
     this.changeState("waiting", timeout);
 
     return this._restartPromise;
-}
-
-function joinProject(){
-    var app = this._app;
-
-    if (app.isSaved()){
-        return this._hub.invoke('join', app.companyId(), app.id())
-            .done(() => {
-                logger.info('Successfully joined project group');
-                return this._hub;
-            })
-            .fail(function(error){
-                logger.error('Can\'t join project group ', error);
-                throw error;
-            });
-    }
-    else{
-        return Promise.resolve(this._hub);
-    }
 }
 
 function updateQueryString(){

@@ -2,9 +2,9 @@
 import backend from "../backend";
 export default {
     ping: function(){
-        return backend.get(backend.storageEndpoint + "/api/ping");
+        return backend.get(backend.servicesEndpoint + "/api/ping");
     },
     exception: function(){
-        return backend.get(backend.storageEndpoint + "/api/exception");
+        return backend.get(backend.servicesEndpoint + "/api/exception");
     }
 }

@@ -19,7 +19,7 @@ function generateApi(url, endpoint){
                         var model = createControllerModel(controller);
                         model.endpoint = endpoint;
                         var module = Mustache.render(template, model);
-                        var modulePath = path.join(__dirname, '../../js/mylibs/server', controllerName + 'Proxy.js');
+                        var modulePath = path.join(__dirname, '../mylibs/server', controllerName + 'Proxy.js');
                         console.log('Writing', modulePath);
                         fs.writeFileSync(modulePath, module, {encoding: 'utf-8'});
                     }

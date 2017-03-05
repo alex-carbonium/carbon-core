@@ -202,6 +202,9 @@ class App extends DataNode implements IApp {
         this._currentTool = ViewTool.Pointer;
         this.currentToolChanged = EventHelper.createEvent();
 
+        this.props.companyId = "";
+        this.props.id = "";
+
         Selection.onElementSelected.bind((selection, oldSelection, doNotTrack)=>{
             let selectionIds = Selection.selectedElements().map(e=>e.id());
             let oldSelectionIds = oldSelection.map(e=>e.id());
