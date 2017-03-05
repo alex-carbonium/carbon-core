@@ -79,7 +79,7 @@ var backend = globals.backend || {
     initOptions: function(options){
         this._globalOptions = Object.assign({}, this._globalOptions, options);
     },
-    setConnection: function(connection){        
+    setConnection: function(connection){
         this._connection = connection;
     },
     changeModel: function(app, primitives, returnModel){
@@ -165,7 +165,7 @@ var backend = globals.backend || {
     },
     getUserId: function(){
         return localStorage.getItem("userId");
-    },    
+    },
     isGuest: function(){
         return localStorage.getItem("isGuest") === "1";
     },

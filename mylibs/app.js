@@ -202,6 +202,9 @@ class App extends DataNode implements IApp {
         this._currentTool = ViewTool.Pointer;
         this.currentToolChanged = EventHelper.createEvent();
 
+        this.props.companyId = "";
+        this.props.id = "";
+
         Selection.onElementSelected.bind((selection, oldSelection, doNotTrack)=>{
             let selectionIds = Selection.selectedElements().map(e=>e.id());
             let oldSelectionIds = oldSelection.map(e=>e.id());
@@ -351,6 +354,20 @@ class App extends DataNode implements IApp {
         });
 
         this.patchProps(PatchType.Change, type === 1 ? "styles" : "textStyles", newStyle);
+    }
+
+    loadFont(family, style, weight): Promise<void>{
+        return OpenTypeFontManager.load(family, style, weight);
+    }
+    saveFontMetadata(metadata){
+        if (OpenTypeFontManager.tryAddMetadata(metadata)){
+            var metadataWithId = Object.assign({}, metadata);
+            metadataWithId.id = metadata.name;
+            this.patchProps(PatchType.Insert, "fontMetadata", metadataWithId);
+        }
+    }
+    getFontMetadata(family){
+        return OpenTypeFontManager.getMetadata(family);
     }
 
     syncBroken(value) {
@@ -761,7 +778,6 @@ class App extends DataNode implements IApp {
 
     //TODO: rethink the concept of run method for better testability
     run() {
-        var that = this;
         this.clear();
 
         //this.setProps(defaultAppProps);
@@ -769,47 +785,44 @@ class App extends DataNode implements IApp {
         this.init();
 
         var stopwatch = new Stopwatch("AppLoad", true);
-        that.platform.setupConnection(that);
+        this.platform.setupConnection(this);
 
-        var projectLoaded = that.loadMainProject();
-        var fontsLoaded = that.waitForWebFonts();
-        var dataLoaded = that.loadData();
+        var projectLoaded = this.loadMainProject();
+        var iconFontsLoaded = this.waitForWebFonts();
+        var defaultFontLoaded = OpenTypeFontManager.loadDefaultFont();
+        var dataLoaded = this.loadData();
 
-        return Promise.all([dataLoaded, projectLoaded, fontsLoaded]).then(function (result) {
+        return Promise.all([dataLoaded, projectLoaded, iconFontsLoaded, defaultFontLoaded]).then(result => {
             var data = result[0];
             stopwatch.checkpoint("DataProjectFonts");
-            that.initExtensions();
-            if (that.platform.richUI()) {
-                that.resetCurrentTool();
+            this.initExtensions();
+            if (this.platform.richUI()) {
+                this.resetCurrentTool();
             }
 
-            var fontPromises = that.loadFonts(data);
-
             if (data) {
-                that.fromJSON(data);
+                this.fromJSON(data);
                 stopwatch.checkpoint("FromJson");
             }
 
-            return Promise.all(fontPromises).then(function () {
-                stopwatch.checkpoint("FontPromises");
+            OpenTypeFontManager.appendMetadata(this.props.fontMetadata);
 
-                logger.trackEvent("AppLoaded", null, stopwatch.getMetrics());
+            logger.trackEvent("AppLoaded", null, stopwatch.getMetrics());
 
-                if (that.serverless()) {
-                    that.id("serverless");
-                }
+            if (this.serverless()) {
+                this.id("serverless");
+            }
 
-                that.raiseLoaded();
-                //this method depends on extensions (comments) being initialized
-                that.platform.postLoad(that);
+            this.raiseLoaded();
+            //this method depends on extensions (comments) being initialized
+            this.platform.postLoad(this);
 
-                that.restoreWorkspaceState();
-                that.releaseLoadRef();
+            this.restoreWorkspaceState();
+            this.releaseLoadRef();
 
-                //that.platform.ensureCanvasSize();
+            //that.platform.ensureCanvasSize();
 
-                backend.enableLoginTimer();
-            });
+            backend.enableLoginTimer();
         }).catch(function (e) {
             logger.trackEvent("App not loaded", { logLevel: "fatal", error: e });
             throw e;
@@ -872,44 +885,6 @@ class App extends DataNode implements IApp {
             return Promise.resolve();
         }
         return this.modelSyncProxy.getLatest();
-    }
-
-    loadFonts(data) {
-        var fontMetadata = [];
-        var fontUsage = [];
-        if (data) {
-            if (data.props.statistics) {
-                fontMetadata = data.props.statistics.fontMetadata;
-                fontUsage = data.props.statistics.fontUsage;
-            }
-        }
-
-        if (!fontMetadata.find(x => x.name === OpenTypeFontManager.defaultFontMetadata[0].name)) {
-            fontMetadata.push(OpenTypeFontManager.defaultFontMetadata[0]);
-        }
-        if (!fontUsage.find(x => x.family === OpenTypeFontManager.defaultFontMetadata[0].name
-            && x.style == FontStyle.Normal
-            && x.weight === FontWeight.Regular)) {
-            fontUsage.push({
-                family: OpenTypeFontManager.defaultFontMetadata[0].name,
-                style: FontStyle.Normal,
-                weight: FontWeight.Regular
-            });
-        }
-        for (var i = 0; i < fontUsage.length; i++) {
-            var usage = fontUsage[i];
-            if (!usage.weight) {
-                usage.weight = FontWeight.Regular;
-            }
-            if (!usage.style) {
-                usage.style = FontStyle.Normal;
-            }
-        }
-
-        return fontUsage.map(usage => {
-            var metadata = fontMetadata.find(x => x.name === usage.family);
-            return OpenTypeFontManager.load(metadata, usage.style, usage.weight);
-        });
     }
 
     loadMainProject() {
@@ -1051,7 +1026,7 @@ class App extends DataNode implements IApp {
         var view = Environment.view;
         if (view) {
             view.setActivePage(page);
-            view.resize(page.viewportRect());
+            //view.resize(page.viewportRect());
             view.zoom(page.scale(), true);
         }
 
@@ -1195,6 +1170,12 @@ class App extends DataNode implements IApp {
             }
         }
 
+        if (data.fontMetadata){
+            for (var metadata of data.fontMetadata){
+                this.saveFontMetadata(metadata);
+            }
+        }
+
         var i = this.children.length;
         this.children.push(pageJson);
 
@@ -1203,6 +1184,8 @@ class App extends DataNode implements IApp {
         this.children[i] = page;
         this.initPage(page);
         this.setActivePage(page);
+
+        ModelStateListener.trackInsert(this, this, page, i);
 
         return page;
     }
@@ -1381,6 +1364,9 @@ PropertyMetadata.registerForType(App, {
         defaultValue: []
     },
     userSettings: {
+        defaultValue: []
+    },
+    fontMetadata: {
         defaultValue: []
     }
 });

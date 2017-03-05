@@ -169,7 +169,7 @@ class ResizeHint extends UIElement {
             this._textWidth = context.measureText(this._text, fontStyle).width;
         }
 
-        context.fillText(this._text, Math.round((this.props.width * scale - this._textWidth)/2), Math.round(5 * scale));
+        context.fillText(this._text, Math.round((this.props.width * scale - this._textWidth)/2), Math.round(5));
 
         context.restore();
 

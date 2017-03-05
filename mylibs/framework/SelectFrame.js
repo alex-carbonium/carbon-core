@@ -1,46 +1,47 @@
-﻿import Rectangle from "framework/Rectangle";
-import PropertyMetadata from "framework/PropertyMetadata";
-import Invalidate from "framework/Invalidate";
+﻿import UIElement from "./UIElement";
+import PropertyMetadata from "./PropertyMetadata";
+import Invalidate from "./Invalidate";
+import Brush from "./Brush";
 import {Types} from "./Defs";
 import Rect from "../math/rect";
+import Point from "../math/point";
 
-var fwk = sketch.framework;
-
-class SelectFrame extends Rectangle {
+class SelectFrame extends UIElement {
     constructor(onselect) {
         super();
 
-        this._startX = 0;
-        this._startY = 0;
-
-        this.stroke(fwk.Brush.Empty);
-        this.fill(fwk.Brush.createFromColor('rgba(150,180, 250, 0.3)'));
+        this.props.br = Rect.create();
+        this.startPoint = new Point(0, 0);
 
         this.onselect = onselect;
     }
 
     init(event){
-        this._startX = event.x;
-        this._startY = event.y;
+        this.startPoint.set(event.x, event.y);
     }
 
     update(event){
-        var br = new Rect(
-            0, 0,
-            Math.abs(this._startX - event.x), Math.abs(this._startY - event.y)
-        );
-        var t = {x: Math.min(this._startX, event.x), y: Math.min(this._startY, event.y)};
-        this.applyTranslation(t, true);
-        this.prepareAndSetProps({br});
-        return this.getBoundingBox();
+        var rect = this.props.br;
+        rect.updateFromPointsMutable(this.startPoint, event);
+        rect.roundMutable();
+        return rect;
     }
     complete(event){
         event.handled = true;
-        var rect = this.getBoundingBox();
+        var rect = this.props.br;
         if (!rect.width && !rect.height) {
             return;
         }
         this.onselect.raise(rect);
+    }
+
+    drawSelf(context){
+        var r = this.props.br;
+
+        context.save();
+        context.rect(r.x, r.y, r.width, r.height);
+        Brush.fill(this.fill(), context);
+        context.restore();
     }
 
     hitTest() {
@@ -57,6 +58,10 @@ class SelectFrame extends Rectangle {
 }
 SelectFrame.prototype.t = Types.SelectFrame;
 
-PropertyMetadata.registerForType(SelectFrame, {});
+PropertyMetadata.registerForType(SelectFrame, {
+    fill: {
+        defaultValue: Brush.createFromColor('rgba(150,180, 250, 0.3)')
+    }
+});
 
 export default SelectFrame;

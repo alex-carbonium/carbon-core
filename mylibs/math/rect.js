@@ -97,6 +97,17 @@ export default class Rect{
         this.y = pos.y;
     }
 
+    updateFromPointsMutable(p1, p2){
+        var x = Math.min(p1.x, p2.x);
+        var y = Math.min(p1.y, p2.y);
+        var w = Math.max(p1.x, p2.x) - x;
+        var h = Math.max(p1.y, p2.y) - y;
+        this.x = x;
+        this.y = y;
+        this.width = w;
+        this.height = h;
+    }
+
     center() {
         return new Point(this.x + this.width/2, this.y + this.height/2);
     }
@@ -154,12 +165,14 @@ export default class Rect{
         return new Rect(obj.x, obj.y, obj.width, obj.height);
     }
 
+    static create(){
+        return new Rect(0, 0, 0, 0);
+    }
+
     static fromPoints(p1, p2){
-        var x = Math.min(p1.x, p2.x);
-        var y = Math.min(p1.y, p2.y);
-        var w = Math.max(p1.x, p2.x) - x;
-        var h = Math.max(p1.y, p2.y) - y;
-        return new Rect(x, y, w, h);
+        var rect = Rect.create();
+        rect.updateFromPointsMutable(p1, p2);
+        return rect;
     }
 }
 

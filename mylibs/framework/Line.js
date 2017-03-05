@@ -136,6 +136,10 @@ class Line extends Shape {
     }
 
     hitTest(/*Point*/point, scale) {
+        if (!this.visible() || this.hasBadTransform()){
+            return false;
+        }
+
         var matrix = this.globalViewMatrixInverted();
         var pt = matrix.transformPoint(point);
         var rect = this.getBoundaryRect();
@@ -277,7 +281,7 @@ class Line extends Shape {
             var maxX = Math.max(changes.x1, changes.x2);
             var minY = Math.min(changes.y1, changes.y2);
             var maxY = Math.max(changes.y1, changes.y2);
-            changes.br = new Rect(minX, minY, maxX - minX, maxY - minY)
+            changes.br = new Rect(minX, minY, maxX - minX || 1, maxY - minY || 1)
         }
     }
 

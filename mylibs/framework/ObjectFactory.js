@@ -135,10 +135,10 @@ var ObjectFactory = {
             props[name] = value;
         }
         else if (name === "m" || ( value && name.endsWith(':m'))){
-            props[name] = new Matrix(value._a, value._b, value._c, value._d, value._tx, value._ty);
+            props[name] = Matrix.fromObject(value);
         }
         else if (name === "br" || (value && name.endsWith(':br'))){
-            props[name] = new Rect(value.x, value.y, value.width, value.height);
+            props[name] = Rect.fromObject(value);
         }
     },
     updatePropsWithPrototype: function(props){

@@ -16,15 +16,8 @@ export default {
     use: function (code) {
         return backend.post(backend.servicesEndpoint + "/api/share/use", {code});
     },
-    publish: function (name, description, tags, pageData, previewPicture, isPublic) {
-        return backend.post(backend.servicesEndpoint + "/api/share/publishPage", {
-            name: name || ''
-            , description: description || ''
-            , tags: tags || ''
-            , isPublic: !!isPublic
-            , pageData: JSON.stringify(pageData)
-            , previewPicture: previewPicture
-        });
+    publish: function (model) {
+        return backend.post(backend.servicesEndpoint + "/api/share/publishPage", {model});
     },
     resources: function (search) {
         return backend.get(backend.servicesEndpoint + "/api/share/resources", {

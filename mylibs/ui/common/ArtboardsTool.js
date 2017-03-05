@@ -15,7 +15,7 @@ import {IKeyboardState, IMouseEventData} from "../../framework/CoreModel";
 export default class ArtboardsTool extends Tool {
     constructor(type, parameters) {
         super(ViewTool.Artboard);
-        this._type = type;        
+        this._type = type;
         this._parameters = parameters;
         this._point = new Point(0, 0);
     }
@@ -38,7 +38,7 @@ export default class ArtboardsTool extends Tool {
         this._app.activePage.getAllArtboards().forEach(x => x.allowArtboardSelection(value));
     }
 
-    mousedown(event: IMouseEventData, keys: IKeyboardState) {        
+    mousedown(event: IMouseEventData, keys: IKeyboardState) {
         this._cursorNotMoved = true;
 
         var artboard = this._app.activePage.getArtboardAtPoint(event);
@@ -53,7 +53,7 @@ export default class ArtboardsTool extends Tool {
         this._prepareMousePoint(event, keys);
 
         this._startPoint = {x: this._point.x, y: this._point.y};
-        this._nextPoint = {x: this._point.x, y: this._point.y};        
+        this._nextPoint = {x: this._point.x, y: this._point.y};
         this._element = ObjectFactory.fromType(this._type);
         this._element.allowArtboardSelection(true);
         this._app.activePage.nameProvider.assignNewName(this._element);
@@ -72,10 +72,10 @@ export default class ArtboardsTool extends Tool {
         return false;
     }
 
-    mouseup(event: IMouseEventData, keys: IKeyboardState) {        
+    mouseup(event: IMouseEventData, keys: IKeyboardState) {
         this._mousepressed = false;
         this._ratioResizeInfo = null;
-        
+
         if (this._element) {
             var element = this._element;
             this._element = null;
@@ -87,14 +87,14 @@ export default class ArtboardsTool extends Tool {
                 this._app.activePage.dropToPage(pos.x,pos.y, element);
                 Selection.makeSelection([element]);
                 SnapController.calculateSnappingPoints(this._app.activePage);
-            }            
+            }
 
             if (SystemConfiguration.ResetActiveToolToDefault) {
                 this._app.resetCurrentTool();
             }
 
             SnapController.clearActiveSnapLines();
-        }                     
+        }
     }
 
     mousemove(event: IMouseEventData, keys: IKeyboardState) {
@@ -110,7 +110,7 @@ export default class ArtboardsTool extends Tool {
         if (!this._mousepressed){
             return true;
         }
-        
+
         this._prepareMousePoint(event, keys);
 
         if (this._mousepressed) {
@@ -146,7 +146,7 @@ export default class ArtboardsTool extends Tool {
     _selectByClick(event: IMouseEventData, keys: IKeyboardState){
         var artboard = this._app.activePage.getArtboardAtPoint(event);
 
-        if (artboard !== null) {            
+        if (artboard !== null) {
             var addToSelection = keys.shift;
             if (addToSelection) {
                 Selection.selectionMode("add");
@@ -156,15 +156,15 @@ export default class ArtboardsTool extends Tool {
                 Selection.selectionMode("new");
             }
 
-            event.cursor = "move_cursor";            
+            event.cursor = "move_cursor";
         }
     }
 
     _prepareMousePoint(event: IMouseEventData, keys: IKeyboardState) {
-        this._point.set(event.x, event.y);        
+        this._point.set(event.x, event.y);
         if (!keys.ctrl) {
             var snapped = SnapController.applySnappingForPoint(this._point);
-            if (snapped !== this._point) {                
+            if (snapped !== this._point) {
                 this._point.set(snapped.x, snapped.y);
             }
         }
@@ -182,12 +182,16 @@ export default class ArtboardsTool extends Tool {
                 , w = Math.abs(x1 - x2)
                 , h = Math.abs(y1 - y2);
 
+            if (w === 0 || h === 0){
+                return;
+            }
+
             context.save();
 
             var props = {x: x, y: y, width: w, height: h};
             this._element.resetTransform();
-            this._element.applyTranslation(new Point(x, y), true);
             this._element.prepareAndSetProps({br: new Rect(0, 0, w, h)});
+            this._element.applyTranslation(new Point(x, y));
 
             this._element.applyViewMatrix(context);
             // if (this._element.clipSelf()) {

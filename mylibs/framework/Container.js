@@ -98,6 +98,10 @@ export default class Container extends UIElement {
         this.children.forEach(e => e.saveOrResetLayoutProps());
         return res;
     }
+    restoreLastGoodTransformIfNeeded(){
+        super.restoreLastGoodTransformIfNeeded();
+        this.children.forEach(x => x.restoreLastGoodTransformIfNeeded());
+    }
     drawSelf(context, w, h, environment) {
         context.save();
         this.globalViewMatrix().applyToContext(context);

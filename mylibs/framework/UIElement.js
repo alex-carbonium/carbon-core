@@ -126,12 +126,12 @@ export default class UIElement extends DataNode {
         }
         super.setProps.apply(this, arguments);
     }
-    propsUpdated(newProps, oldProps) {
-        if (newProps.hasOwnProperty("m")
-            || newProps.hasOwnProperty("stroke")
-            || newProps.hasOwnProperty("br")
-        ) {
+    propsUpdated(newProps, oldProps, mode) {
+        if (newProps.hasOwnProperty("m") || newProps.hasOwnProperty("br")) {
             this.resetGlobalViewCache();
+            if (mode === ChangeMode.Model){
+                this.saveLastGoodTransformIfNeeded(oldProps);
+            }
         }
 
         //raise events after all caches are updated
@@ -402,6 +402,45 @@ export default class UIElement extends DataNode {
     }
     resetTransform() {
         this.setProps({ m: Matrix.Identity });
+    }
+
+    hasBadTransform(): boolean{
+        return this.props.bad;
+    }
+    isBadBoundaryRect(br){
+        return br.width < 1 || br.height < 1;
+    }
+    isBadMatrix(m: Matrix){
+        return m.isSingular();
+    }
+    saveLastGoodTransformIfNeeded(oldProps): void{
+        var lastGoodProps = null;
+
+        var saveBr = !this.props.lgbr && oldProps.br && this.isBadBoundaryRect(this.br()) && !this.isBadBoundaryRect(oldProps.br);
+        var saveMatrix = !this.props.lgm && oldProps.m && this.isBadMatrix(this.viewMatrix()) && !this.isBadMatrix(oldProps.m);
+
+        if (saveBr || saveMatrix){
+            lastGoodProps = {
+                lgbr: oldProps.br || this.br(),
+                lgm: oldProps.m || this.viewMatrix(),
+                bad: true
+            };
+        }
+
+        if (lastGoodProps !== null){
+            this.setProps(lastGoodProps);
+        }
+    }
+    restoreLastGoodTransformIfNeeded(): void{
+        if (this.hasBadTransform()){
+            this.setProps({
+                br: Rect.fromObject(this.props.lgbr),
+                lgbr: null,
+                m: Matrix.fromObject(this.props.lgm),
+                lgm: null,
+                bad: false
+            });
+        }
     }
 
     roundBoundingBoxToPixelEdge(): boolean {
@@ -678,7 +717,7 @@ export default class UIElement extends DataNode {
     }
 
     hitTest(/*Point*/point, scale, boundaryRectOnly = false) {
-        if (!this.visible()) {
+        if (!this.visible() || this.hasBadTransform()) {
             return false;
         }
         var rect = this.getHitTestBox(scale, false);
@@ -774,6 +813,10 @@ export default class UIElement extends DataNode {
         }
     }
     draw(context, environment) {
+        if (this.hasBadTransform()){
+            return;
+        }
+
         this.stopwatch.start();
 
         var br = this.br(),
@@ -1014,6 +1057,10 @@ export default class UIElement extends DataNode {
             this.applyScaling(s, o, resizeOptions, changeMode);
         }
 
+        if (this.hasBadTransform()){
+            return 0;
+        }
+
         var gm = this.globalViewMatrix();
         var scaling = 1;
         if (!gm.isTranslatedOnly()){
@@ -1027,6 +1074,10 @@ export default class UIElement extends DataNode {
             var o = this.viewMatrix().transformPoint(this.br().centerTop());
             var resizeOptions = new ResizeOptions(true, false, false);
             this.applyScaling(s, o, resizeOptions, changeMode);
+        }
+
+        if (this.hasBadTransform()){
+            return 0;
         }
 
         var gm = this.globalViewMatrix();
@@ -1075,7 +1126,7 @@ export default class UIElement extends DataNode {
         return this.field("_isTemporary", value, false);
     }
     hitVisible(directSelection: boolean) {
-        if (this.locked() || !this.visible()) {
+        if (this.locked() || !this.visible() || this.hasBadTransform()) {
             return false;
         }
         var parent = this.parent();
@@ -2169,6 +2220,9 @@ PropertyMetadata.registerForType(UIElement, {
         displayName: 'Shared style',
         type: "styleName",
         defaultValue: null
+    },
+    bad: {
+        defaultValue: false
     },
     groups: function () {
         return [

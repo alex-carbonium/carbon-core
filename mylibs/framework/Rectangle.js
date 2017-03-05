@@ -201,7 +201,7 @@ class Rectangle extends Shape {
 
 
     hitTest(/*Point*/point, scale) {
-        if (!this.visible()) {
+        if (!this.visible() || this.hasBadTransform()) {
             return false;
         }
         var fill = this.fill();

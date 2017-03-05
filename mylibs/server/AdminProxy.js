@@ -2,6 +2,6 @@
 import backend from "../backend";
 export default {
     projectModel: function(companyId, modelId){
-        return backend.get(backend.storageEndpoint + "/api/admin/projectModel", { companyId, modelId });
+        return backend.get(backend.servicesEndpoint + "/api/admin/projectModel", { companyId, modelId });
     }
 }

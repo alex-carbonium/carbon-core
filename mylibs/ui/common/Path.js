@@ -1020,6 +1020,10 @@ class Path extends Shape {
     }
 
     hitTest(point, scale, boundaryRectOnly = false) {
+        if (this.hasBadTransform()){
+            return false;
+        }
+
         if (this._currentPoint || this._handlePoint || this._pointOnPath) {
             return true;
         }

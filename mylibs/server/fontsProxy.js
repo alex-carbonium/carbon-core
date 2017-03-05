@@ -2,9 +2,9 @@
 import backend from "../backend";
 export default {
     system: function(pageNumber = 1){
-        return backend.get(backend.storageEndpoint + "/api/fonts/system", { pageNumber });
+        return backend.get(backend.servicesEndpoint + "/api/fonts/system", { pageNumber });
     },
     search: function(query, pageNumber = 1){
-        return backend.get(backend.storageEndpoint + "/api/fonts/search", { query, pageNumber });
+        return backend.get(backend.servicesEndpoint + "/api/fonts/search", { query, pageNumber });
     }
 }
