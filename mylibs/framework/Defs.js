@@ -6,7 +6,8 @@ export var PrimitiveType = {
     DataNodeSetProps: 4,
     DataNodeChangePosition: 5,
     DataNodePatchProps: 6,
-    Selection: 7
+    Selection: 7,
+    View: 8
 };
 
 export var PatchType = {

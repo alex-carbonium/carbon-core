@@ -87,6 +87,14 @@ class ModelStateListener {
         root.push(Primitive.selection(page, selection, oldSelection, userId));
     }
 
+    createViewPrimitive(page, sx, sy, scale, oldsx, oldsy, oldscale){
+        if (this._stopCounter > 0){
+            return;
+        }
+
+        return Primitive.view(page, sx, sy, scale, oldsx, oldsy, oldscale);
+    }
+
     trackChangePosition(primitiveRoot, parent, element, index, oldIndex){
         if (this.stopped){
             return;

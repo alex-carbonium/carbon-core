@@ -4,6 +4,8 @@ import UIElement from "framework/UIElement";
 import {PrimitiveType, ChangeMode} from "../Defs";
 import Invalidate from "framework/Invalidate";
 import Selection from "framework/SelectionModel";
+import Environment from "environment";
+import AnimationGroup from "framework/animation/AnimationGroup";
 
 var debug = require("DebugUtil")("carb:primitivesSync");
 
@@ -82,6 +84,42 @@ Primitive.registerHandler(PrimitiveType.Selection, function(page, p){
         Selection.makeSelection(elements, false, true);
     }
 });
+
+Primitive.registerHandler(PrimitiveType.View, function(page, p) {
+    var animationValues = [];
+    var options = {duration:180};
+
+    animationValues.push({ from: page.scrollX(), to: p.x, accessor: function(value) {
+        if(arguments.length === 1) {
+            return page.scrollX(value);
+        }
+
+        return page.scrollX();
+    } });
+
+    animationValues.push({ from: page.scrollY(), to: p.y, accessor: function(value) {
+        if(arguments.length === 1) {
+            return page.scrollY(value);
+        }
+
+        return page.scrollY();
+    } });
+
+    animationValues.push({ from: Environment.view.scale(), to: p.s, accessor: function(value) {
+        if(arguments.length === 1) {
+            return Environment.view.scale(value);
+        }
+
+        return Environment.view.scale();
+    } });
+    
+    var group = new AnimationGroup(animationValues, options, ()=>{
+        Invalidate.request();
+    });
+
+    Environment.view.animationController.registerAnimationGroup(group);        
+});
+
 
 Primitive.registerHandler(PrimitiveType.DataNodeChangePosition, function(container, p){
     var element = container.getImmediateChildById(p.childId);

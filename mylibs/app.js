@@ -921,15 +921,44 @@ class App extends DataNode implements IApp {
         return primitiveRootElement;
     }
 
+    _trackViewPrimitive() {
+        if(!ModelStateListener.roots.length) {
+            return;
+        }
+        var trackundo = !!this._lastRelayoutView;
+        var sx = this.activePage.scrollX();
+        var sy = this.activePage.scrollY();
+        var scale = Environment.view.scale();
+        if(!trackundo) {
+            this._lastRelayoutView = {};
+        }
+        if(trackundo && (sx !== this._lastRelayoutView.sx ||
+            sy !== this._lastRelayoutView.sy ||
+            scale !== this._lastRelayoutView.scale)) {
+
+            return ModelStateListener.createViewPrimitive(this.activePage,
+                sx, sy, scale,
+                this._lastRelayoutView.sx,
+                this._lastRelayoutView.sy,
+                this._lastRelayoutView.scale
+            );
+        }   
+
+        this._lastRelayoutView.sx = sx;
+        this._lastRelayoutView.sy = sy;
+        this._lastRelayoutView.scale = scale;
+
+        return null;
+    }
+
     relayout() {
-        try {
+        try {            
             this.relayoutInternal();
         }
         finally {
             ModelStateListener.clear();
             this.primitiveRootCache = {};
         }
-
     }
 
     relayoutInternal() {
@@ -957,7 +986,7 @@ class App extends DataNode implements IApp {
         }
 
         if (primitives.length) {
-            this.changed.raise(primitives);
+            this.changed.raise(primitives);            
         }
 
         // this one should be in a separate loop, because we can get more elements after relayout
@@ -979,10 +1008,18 @@ class App extends DataNode implements IApp {
             }
         }
 
-        if (primitives.length) {
+        if (primitives.length) {           
             if (DEBUG) {
                 primitives.forEach(x => formatPrimitive(x, debug));
             }
+
+            var viewPrimitive = this._trackViewPrimitive();
+            
+            if(viewPrimitive){
+                primitives.push(viewPrimitive);
+                rollbacks.push(viewPrimitive);
+            }
+
             CommandManager.registerExecutedCommand(new PrimitiveSetCommand(primitives, rollbacks));
             this.changedLocally.raise(primitives);
             this.changed.raise(primitives);

@@ -136,6 +136,24 @@ Primitive.selection = function(page, selection, oldSelection, userId, norollback
     return res;
 };
 
+Primitive.view = function(page, sx, sy, scale, oldsx, oldsy, oldscale) {
+    var res = {
+        type: PrimitiveType.View, 
+        path: page.primitivePath(),
+        x: sx,
+        y: sy,
+        s: scale
+    };
+
+    if (DEBUG){
+        res.toString = function(){
+            return "VIEW page=" + page.name() + " sx=" + sx + " sy="+ sy + " scale="+scale;
+        }
+    }
+
+    return res;
+};
+
 Primitive.dataNodePatchProps = function(element, patchType, propName){
     var res = {
         type: PrimitiveType.DataNodePatchProps,
