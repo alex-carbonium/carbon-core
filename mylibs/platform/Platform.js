@@ -6,6 +6,10 @@ import params from "../params";
 
 var platform = null;
 
+function isMobile() {
+    return window && window.location && window.location.pathname.startsWith('/m/');
+}
+
 if (!isBrowser) {
     platform = new Node();
 }
@@ -14,7 +18,7 @@ else if (params.basicPlatform) {
 }
 else {    
     if (params.deviceType === "Computer" || params.deviceType === "Tablet") {
-        platform = new Desktop();
+        platform = new Desktop(!isMobile());
     }
 }
 

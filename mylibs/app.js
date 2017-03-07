@@ -1295,7 +1295,15 @@ class App extends DataNode implements IApp {
     restoreWorkspaceState(): void {
         try {
             var data = localStorage.getItem("workspace:" + this.id());
+            if(!data) {
+                return;
+            }
+
             var state = JSON.parse(data);
+            if(!state) {
+                return;
+            }
+            
             var page = this.pages.find(x => x.id() === state.pageId);
             if (page) {
                 this.setActivePage(page);

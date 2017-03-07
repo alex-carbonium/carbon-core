@@ -1,33 +1,42 @@
 import Invalidate from "framework/Invalidate";
+import All from "./All";
 
-define(["./All"], function(All){
-    return klass(All, {
-        richUI: function(){
-            return false;
-        },
-        platformSpecificRunCode: function(){
-        },
-        createCanvas: function(){
-            All.prototype.createCanvas.apply(this, arguments);
-            this.canvas.style.position = "static";
-        },
-        ensureCanvasSize: function(){
-            var view = this.view;
-            var viewWidth = view.width();
-            var viewHeight = view.height();
+export default class Basic extends All {
+    richUI() {
+        return false;
+    }
 
-            if (this.canvas.width !== viewWidth || this.canvas.height !== viewHeight) {
-                var oldSize = {width:this.canvas.width, height:this.canvas.height};
+    platformSpecificRunCode() {
+    }
 
-                this.canvas.width = viewWidth;
-                this.canvas.style.width = viewWidth + "px";
+    createCanvas() {
+        All.prototype.createCanvas.apply(this, arguments);
+        this.canvas.style.position = "static";
+    }
 
-                this.canvas.height = viewHeight;
-                this.canvas.style.height = viewHeight + "px";
+    detachEvents() {
 
-                Invalidate.request();
-            }
+    }
 
+    attachEvents() {
+
+    }
+
+    ensureCanvasSize() {
+        var view = this.view;
+        var viewWidth = view.width();
+        var viewHeight = view.height();
+
+        if (this.canvas.width !== viewWidth || this.canvas.height !== viewHeight) {
+            var oldSize = { width: this.canvas.width, height: this.canvas.height };
+
+            this.canvas.width = viewWidth;
+            this.canvas.style.width = viewWidth + "px";
+
+            this.canvas.height = viewHeight;
+            this.canvas.style.height = viewHeight + "px";
+
+            Invalidate.request();
         }
-    });
-});
+    }
+}

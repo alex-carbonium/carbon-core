@@ -400,8 +400,8 @@ export default class UIElement extends DataNode {
     setTransform(matrix, mode) {
         this.setProps({ m: matrix }, mode);
     }
-    resetTransform() {
-        this.setProps({ m: Matrix.Identity });
+    resetTransform(mode) {
+        this.setProps({ m: Matrix.Identity }, mode);
     }
 
     hasBadTransform(): boolean{

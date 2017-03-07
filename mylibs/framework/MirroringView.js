@@ -47,9 +47,10 @@ class ArtboardProxyPage extends Page {
         this._artboard = artboard;
         if(artboard) {
             this.children = [artboard];
-            artboard.setProps({x:0, y:0}, ChangeMode.Self);
-            this.width(artboard.width());
-            this.height(artboard.height());
+            artboard.resetTransform(ChangeMode.Self);
+            // artboard.setProps({x:0, y:0}, ChangeMode.Self);
+            this.setProps({br:artboard.props.br});
+            // this.height(artboard.height());
 
             this.updateScrollRanges();
         }

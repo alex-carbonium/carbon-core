@@ -262,7 +262,7 @@ var setupFiledrop = function (app) {
     $('#viewContainer').filedrop({
         url: backend.decorateUrl("/api/File/Upload"), // upload handler, handles each file separately
         data: {folderId: sketch.params.folderId},
-        error: function (err, file) {
+        error (err, file) {
             switch (err) {
                 case 'TooManyFiles':
                     notify("error", {title: "Error", text: "You tried to upload too many files at a time"});
@@ -274,12 +274,12 @@ var setupFiledrop = function (app) {
                     break;
             }
         },
-        rename: function (name) {
+        rename (name) {
             return Base64.encode(name);
         },
         maxfiles: 100,
         maxfilesize: 50, // max file size in MBs
-        drop: function (e) {
+        drop (e) {
             that.dropPosition = {x: domUtil.layerX(e), y: domUtil.layerY(e)};
 
             var original = e.originalEvent;
@@ -325,7 +325,7 @@ var setupFiledrop = function (app) {
                 }
             }
         },
-        uploadFinished: function (i, file, response, time, xhr) {
+        uploadFinished (i, file, response, time, xhr) {
             var dropPosition = that.dropPosition;
             var notice = that._uploadNotices[file.name];
             delete that._uploadNotices[file.name];
@@ -369,7 +369,7 @@ var setupFiledrop = function (app) {
                 }
             }
         },
-        beforeEach: function (file) {
+        beforeEach (file) {
             // file is a file object
             // return false to cancel upload
 
@@ -400,7 +400,7 @@ var setupFiledrop = function (app) {
                 return false;
             }
         },
-        progressUpdated: function (i, file, progress) {
+        progressUpdated (i, file, progress) {
             var notice = that._uploadNotices[file.name];
             if (notice) {
                 notice.options.text = progress + "% done.";
@@ -410,11 +410,13 @@ var setupFiledrop = function (app) {
     });
 };
 
-export default klass(All, {
-    _constructor: function () {
+export default class Desktop extends All {
+    constructor (richUI) {
+        super(richUI);
         this._mouseButtonPressed = false;
-    },
-    attachEvents: function (parentElement) {
+    }
+
+    attachEvents (parentElement) {
         this._onmousewheelHandler = onmousewheel.bind(this);
         this._onmousedownHandler = onmousedown.bind(this);
         this._onmousemoveHandler = onmousemove.bind(this);
@@ -452,8 +454,9 @@ export default klass(All, {
         hammertime.off("tap");
 
         this._parentElement = parentElement;
-    },
-    detachEvents: function () {
+    }
+
+    detachEvents () {
         var parentElement = this._parentElement;
         if (!parentElement) {
             return;
@@ -482,11 +485,13 @@ export default klass(All, {
         delete this._onmouseleaveHandler;
         delete this._oncontextmenuHandler;
         delete this._parentElement;
-    },
-    run: function (/*App*/app) {
+    }
+
+    run (/*App*/app) {
         All.prototype.run.apply(this, arguments);
-    },
-    setupConnection: function (app) {
+    }
+
+    setupConnection (app) {
         if (!sketch.params.exportMode && !app.serverless()) {
             var autoSaveTimer = new AutoSaveTimer(app, PersistentConnection.saveInterval);
             var persistentConnection = new PersistentConnection(app);
@@ -497,4 +502,4 @@ export default klass(All, {
         app.consistencyMonitor = new ConsistencyMonitor(app);
         app.consistencyMonitor.start();
     }
-});
+}
