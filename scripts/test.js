@@ -13,6 +13,7 @@ function runKarma(singleRun){
     };
     if (singleRun){
         settings.reporters = ["trx"];
+        settings.browsers = ["PhantomJS"];
         settings.browserNoActivityTimeout = 5 * 60 * 1000;
     }
 
