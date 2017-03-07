@@ -20,11 +20,12 @@ class Story extends DataNode {
     }
 
     relayout(){
-
     }
 
     relayoutCompleted(){
+    }
 
+    arrangeRootDepthFirst() {
     }
 
     removeFirst(predicate) {
