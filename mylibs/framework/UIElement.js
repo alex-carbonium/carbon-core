@@ -399,7 +399,13 @@ export default class UIElement extends DataNode {
         this.setProps({ m: matrix }, mode);
     }
     resetTransform() {
-        this.setProps({ m: Matrix.Identity });
+        var props = { m: Matrix.Identity };
+        if (this.hasBadTransform()){
+            props.bad = false;
+            props.lgbr = null;
+            props.lgm = null;
+        }
+        this.setProps(props);
     }
 
     hasBadTransform(): boolean{

@@ -946,7 +946,7 @@ class App extends DataNode implements IApp {
                 this._lastRelayoutView.sy,
                 this._lastRelayoutView.scale
             );
-        }   
+        }
 
         this._lastRelayoutView.sx = sx;
         this._lastRelayoutView.sy = sy;
@@ -956,7 +956,7 @@ class App extends DataNode implements IApp {
     }
 
     relayout() {
-        try {            
+        try {
             this.relayoutInternal();
         }
         finally {
@@ -997,7 +997,7 @@ class App extends DataNode implements IApp {
         ModelStateListener.markRelayoutCompleted();
 
         if (primitives.length) {
-            this.changed.raise(primitives);            
+            this.changed.raise(primitives);
         }
 
         // this one should be in a separate loop, because we can get more elements after relayout
@@ -1020,13 +1020,13 @@ class App extends DataNode implements IApp {
             }
         }
 
-        if (primitives.length) {           
+        if (primitives.length) {
             if (DEBUG) {
                 primitives.forEach(x => formatPrimitive(x, debug));
             }
 
             var viewPrimitive = this._trackViewPrimitive();
-            
+
             if(viewPrimitive){
                 primitives.push(viewPrimitive);
                 rollbacks.push(viewPrimitive);
@@ -1386,11 +1386,11 @@ PropertyMetadata.registerForType(App, {
             type: "stroke"
         }
     },
-    defaultFill: {
-        defaultValue: Brush.createFromColor("#B6B6B6")
-    },
-    defaultStroke: {
-        defaultValue: Brush.Black
+    defaultShapeSettings: {
+        defaultValue: {
+            fill: Brush.createFromColor(UserSettings.shapes.defaultFill),
+            stroke: Brush.createFromColor(UserSettings.shapes.defaultStroke)
+        }
     },
     defaultLayoutGridSettings: {
         defaultValue: {

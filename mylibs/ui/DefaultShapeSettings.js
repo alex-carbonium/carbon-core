@@ -4,6 +4,7 @@ import Brush from "framework/Brush";
 import QuadAndLock from "framework/QuadAndLock";
 import AppPropsChanged from "commands/AppPropsChanged";
 import {Types, ChangeMode} from "../framework/Defs";
+import UserSettings from "../UserSettings";
 
 const appearanceProps = ["fill", "stroke", "strokeWidth", "strokePosition", "opacity"];
 
@@ -11,7 +12,9 @@ class DefaultShapeSettings extends UIElement {
     constructor(app){
         super();
         this._app = app;
-        this.setProps(app.defaultShapeSettings() || PropertyMetadata.getDefaultProps(DefaultShapeSettings.prototype.t));
+
+        var props = app.defaultShapeSettings();
+        this.setProps(props);
     }
 
     updateColors(){
@@ -53,10 +56,10 @@ DefaultShapeSettings.prototype.t = Types.DefaultShapeSettings;
 
 PropertyMetadata.registerForType(DefaultShapeSettings, {
     fill: {
-        defaultValue: Brush.createFromColor("#B6B6B6")
+        defaultValue: Brush.createFromColor(UserSettings.shapes.defaultFill)
     },
     stroke: {
-        defaultValue: Brush.Black
+        defaultValue: Brush.createFromColor(UserSettings.shapes.defaultStroke)
     },
     groups: function(){
         return [

@@ -166,8 +166,13 @@ export default class ElementDragCreator extends Tool {
             this._element.mode(mode);
         }
     }
+
+    canDraw(): boolean{
+        return this._mousepressed;
+    }
+
     layerdraw(context, environment): boolean {
-        if (this._mousepressed) {
+        if (this.canDraw()) {
             context.save();
 
             this._element.applyViewMatrix(context);
@@ -180,11 +185,7 @@ export default class ElementDragCreator extends Tool {
             this._element.drawSelf(context, br.width, br.height, environment);
 
             context.restore();
-
-            return true;
         }
-
-        return false;
     }
 
     get element(): UIElement{

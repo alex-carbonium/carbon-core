@@ -24,8 +24,8 @@ export default class PolygonTool extends ElementDragCreator{
     }
 
     layerdraw(context, environment): boolean{
-        var res = super.layerdraw(context, environment);
-        if (res){
+        super.layerdraw(context, environment);
+        if (this.canDraw()){
             context.save();
             var scale = environment.view.scale();
             context.scale(1/scale, 1/scale);
@@ -40,7 +40,5 @@ export default class PolygonTool extends ElementDragCreator{
 
             context.restore();
         }
-
-        return res;
     }
 }
