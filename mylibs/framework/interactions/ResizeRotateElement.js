@@ -50,9 +50,6 @@ export default class ResizeRotateElement extends TransformationElement{
             }
         }
 
-        if (this._lastScaling || this._lastRotation){
-            ArrangeStrategy.arrangeRoots(this.elements);
-        }
         this.refreshSelection();
     }
 }

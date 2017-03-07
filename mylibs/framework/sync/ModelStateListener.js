@@ -7,6 +7,7 @@ class ModelStateListener {
     constructor(){
         this.clear();
         this._stopCounter = 0;
+        this.rootsWithAffectedLayout = [];
     }
 
     clear(){
@@ -58,6 +59,10 @@ class ModelStateListener {
                 }
             }
         }
+
+        if (element.isChangeAffectingLayout(props)){
+            this._markForRelayout(primitiveRoot);
+        }
     }
 
     trackDelete(primitiveRoot, parent, element, index){
@@ -67,6 +72,8 @@ class ModelStateListener {
         var root = this._getOrCreateRootData(primitiveRoot.primitiveRootKey());
 
         root.push(Primitive.dataNodeRemove(parent, element, index));
+
+        this._markForRelayout(primitiveRoot);
     }
 
     trackInsert(primitiveRoot, parent, element, index){
@@ -76,6 +83,8 @@ class ModelStateListener {
         var root = this._getOrCreateRootData(primitiveRoot.primitiveRootKey());
 
         root.push(Primitive.dataNodeAdd(parent, element, index));
+
+        this._markForRelayout(primitiveRoot);
     }
 
     trackSelect(page, selection, oldSelection, userId){
@@ -144,6 +153,20 @@ class ModelStateListener {
     //mark root for relayout
     touchRoot(key){
         this._getOrCreateRootData(key);
+    }
+
+    _markForRelayout(root){
+        if (this.rootsWithAffectedLayout.indexOf(root) === -1){
+            this.rootsWithAffectedLayout.push(root);
+        }
+    }
+
+    isRelayoutNeeded(root): boolean{
+        return this.rootsWithAffectedLayout.indexOf(root) !== -1;
+    }
+
+    markRelayoutCompleted(){
+        this.rootsWithAffectedLayout.length = 0;
     }
 }
 

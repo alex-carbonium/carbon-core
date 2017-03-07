@@ -230,11 +230,9 @@ export default class UIElement extends DataNode {
         }
         return properties;
     }
-    isChangeAffectingLayout(displayChanges) {
-        return displayChanges.hasOwnProperty("x") || displayChanges.hasOwnProperty("y") || displayChanges.hasOwnProperty("width") || displayChanges.hasOwnProperty("height")
-            || displayChanges.hasOwnProperty("angle")
-            || displayChanges.hasOwnProperty("br")
-            || displayChanges.hasOwnProperty("m");
+    isChangeAffectingLayout(changes): boolean {
+        return changes.hasOwnProperty("br")
+            || changes.hasOwnProperty("m");
     }
     getAffectedProperties(displayChanges): string[] {
         var properties = Object.keys(displayChanges);
@@ -2266,6 +2264,6 @@ PropertyMetadata.registerForType(UIElement, {
         };
     },
     getNonRepeatableProps: function () {
-        return ["id", "name", "visible", "source"];
+        return ["id", "name", "visible"];
     }
 });

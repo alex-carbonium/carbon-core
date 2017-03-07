@@ -15,7 +15,7 @@ import FontManager from "../font/fontmanager";
         var size = fontParams.size;
         // todo: char width cache
         var finalBounds = null;
-        var scale = 1 / font._openTypeFont.unitsPerEm * size;
+        var scale = font.getScale(size);
 
         // for (var i = 0; i < text.length; i ++) {
         //     var gbounds = font.getGlyphBoundingRect(size, text.charAt(i));
@@ -43,7 +43,7 @@ import FontManager from "../font/fontmanager";
                 minX = Math.min(minX, currX + gbounds.l);
                 maxX = Math.max(maxX, currX + gbounds.l + gbounds.w);
             }
-            
+
             currX += font.getAdvance(size, text.charAt(i), i > 0 ? text.charAt(i-1) : null);
 
             if (charSpacing) {
@@ -56,11 +56,11 @@ import FontManager from "../font/fontmanager";
         // currX += isFinite(metrics.rightSideBearing) ? metrics.rightSideBearing * scale : 0;
         // console.log(currX);
         metrics.width = currX;
-        metrics.ascent = font._openTypeFont.ascender * scale;
+        metrics.ascent = font.getAscender() * scale;
         metrics.height = font.getMaxFontHeight(size);//Math.max(height, font._openTypeFont.ascender * 2 , font._openTypeFont.descender*2,font.getMaxFontHeight(size));
         //Math.abs(font._openTypeFont.ascender - font._openTypeFont.descender) * scale;
-        metrics.descent = -font._openTypeFont.descender * scale;
-        
+        metrics.descent = -font.getDescender() * scale;
+
         if (Number.isNaN(minY)) {
             metrics.minY = Number.MAX_VALUE;
         } else {
@@ -84,7 +84,7 @@ import FontManager from "../font/fontmanager";
         } else {
             metrics.maxX = maxX;
         }
-        
+
         return metrics;
     }
 

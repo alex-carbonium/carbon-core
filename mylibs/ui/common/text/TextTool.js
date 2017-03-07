@@ -9,7 +9,6 @@ import Text from "../../../framework/text/Text";
 import Font from "../../../framework/Font";
 import Brush from "../../../framework/Brush";
 import NameProvider from "../../NameProvider";
-import OpenTypeFontManager from "../../../OpenTypeFontManager";
 import InlineTextEditor from "../../../framework/text/inlinetexteditor";
 import SharedColors from "../../SharedColors";
 import DefaultFormatter from "./DefaultFormatter";
@@ -372,7 +371,7 @@ export default class TextTool extends TOol {
         inlineEditor.onInvalidate = this._onInvalidateEditor;
         inlineEditor.onSelectionChanged = this._onSelectionChanged;
         inlineEditor.onDeactivated = () => this.endEdit();
-        inlineEditor.activate(element.viewMatrix(), engine, element.props.font, OpenTypeFontManager);
+        inlineEditor.activate(element.viewMatrix(), engine, element.props.font, this._app.fontManager);
         return inlineEditor;
     }
     _onInvalidateEditor = () => {

@@ -70,14 +70,14 @@ import {inherit} from "../util/util";
 
     /** @override */
     OpenTypeFontInfo.prototype.getGlyphBaseline = function (size) {
-        var scale = 1 / this._openTypeFont.unitsPerEm * size;
+        var scale = this.getScale(size);
         return this._openTypeFont.ascender * scale;
     };
 
     /** @override */
     OpenTypeFontInfo.prototype.getGlyphBoundingRect = function (size, glyph) {
         var glyph = this._openTypeFont.charToGlyph(glyph);
-        var scale = 1 / this._openTypeFont.unitsPerEm * size;
+        var scale = this.getScale(size);
         var metrics = glyph.getMetrics();
         var height = (metrics.yMax - metrics.yMin) * scale;
         var width = (metrics.xMax - metrics.xMin) * scale;
@@ -87,7 +87,7 @@ import {inherit} from "../util/util";
     /** @override */
     OpenTypeFontInfo.prototype.getGlyphOutline = function (size, x, y, char) {
         var outline = this._outlines[char];
-        var scale = 1 / this._openTypeFont.unitsPerEm * size;
+        var scale = this.getScale(size);
 
         if (!outline) {
             var glyph = this._openTypeFont.charToGlyph(char);
@@ -108,8 +108,12 @@ import {inherit} from "../util/util";
         return ret;
     }
 
+    OpenTypeFontInfo.prototype.getScale = function(size){
+        return 1 / this._openTypeFont.unitsPerEm * size;
+    }
+
     OpenTypeFontInfo.prototype.getAdvance = function(size, nextGlyph, prevGlyph) {
-        var scale = 1 / this._openTypeFont.unitsPerEm * size;
+        var scale = this.getScale(size);
         var glyph = this._openTypeFont.charToGlyph(nextGlyph);
         var adv = 0;
 
@@ -124,6 +128,14 @@ import {inherit} from "../util/util";
             adv += kerning * scale;
         }
         return adv;
+    }
+
+    OpenTypeFontInfo.prototype.getAscender = function(){
+        return this._openTypeFont.ascender;
+    }
+
+    OpenTypeFontInfo.prototype.getDescender = function(){
+        return this._openTypeFont.descender;
     }
 
     export default OpenTypeFontInfo;

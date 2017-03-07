@@ -19,20 +19,6 @@ var ArrangeStrategy = {
             throw new Error("Unknown arrange strategy " + container.props.arrangeStrategy);
         }
         return strategy;
-    },
-
-    arrangeRoots: function(elements){
-        var roots = [];
-        for (let i = 0; i < elements.length; i++){
-            var r = elements[i].primitiveRoot();
-            if (r && roots.indexOf(r) === -1){
-                roots.push(r);
-            }
-        }
-
-        for (let i = 0; i < roots.length; i++){
-            roots[i].arrangeRootDepthFirst();
-        }
     }
 };
 

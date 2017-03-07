@@ -19,8 +19,6 @@ export default {
             }
         }
 
-        ArrangeStrategy.arrangeRoots(parents);
-
         var sameParent = true;
         var first = parents[0];
         for (let i = 1; i < parents.length; ++i) {

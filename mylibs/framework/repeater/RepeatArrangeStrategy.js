@@ -1,6 +1,7 @@
 import RepeatViewListener from "./RepeatViewListener";;
 import ArrangeStrategy from "../ArrangeStrategy";
 import {ArrangeStrategies, ChangeMode} from "../Defs";
+import Point from "../../math/point";
 
 var debug = require("DebugUtil")("carb:repeatArrangeStrategy");
 
@@ -13,8 +14,10 @@ var Strategy = {
         }
 
         var master = items[0];
-        var masterWidth = master.width();//container.props.masterWidth;
-        var masterHeight = master.height();//container.props.masterHeight;
+        var masterBr = master.br();
+        var masterBb = master.getBoundingBox();
+        var masterWidth = masterBr.width;//container.props.masterWidth;
+        var masterHeight = masterBr.height;//container.props.masterHeight;
         var numX = container.getNumX();
         var numY = container.getNumY();
         var numTotal = numX * numY;
@@ -24,24 +27,25 @@ var Strategy = {
         }
         items.length = numTotal;
 
-        //with repeat cells having overflow=adjust, offset can be always found on the first element
-        var offsetX = master.x();
-        var offsetY = master.y();
+        //with repeat cells being groups, offset can be always found on the first element
+        var offsetX = masterBb.x;
+        var offsetY = masterBb.y;
 
         debug("Offset: x=%d y=%d", offsetX, offsetY);
 
         for (let y = 0; y < numY; ++y){
             for (let x = 0; x < numX; ++x){
-                let element = items[y * numX + x];
+                let cell = items[y * numX + x];
                 let props = {
                     name: "Cell [" + y + "," + x + "]"
                 };
-                element.setProps(props, changeMode);
-                let t = {
-                    x: x * (masterWidth + container.props.innerMarginX) + offsetX - element.x(),
-                    y: y * (masterHeight + container.props.innerMarginY) + offsetY - element.y()
-                };
-                element.applyTranslation(t, false, changeMode);
+                let bb = cell.getBoundingBox();
+                cell.prepareAndSetProps(props, changeMode);
+                let t = new Point(
+                    x * (masterWidth + container.props.innerMarginX) + offsetX - bb.x,
+                    y * (masterHeight + container.props.innerMarginY) + offsetY - bb.y
+                );
+                cell.applyTranslation(t, false, changeMode);
             }
         }
     },
@@ -58,10 +62,12 @@ var Strategy = {
         if (items.length < 2){
             return 0;
         }
-        if (items[0].y() !== items[1].y()){
+        var bb0 = items[0].getBoundingBox();
+        var bb1 = items[1].getBoundingBox();
+        if (bb0.y !== bb1.y){
             return 0;
         }
-        return items[1].x() - items[0].x() - items[0].width();
+        return bb1.x - bb0.x - bb0.width;
     },
     getActualMarginY: function(container){
         var items = container.children;
@@ -69,9 +75,12 @@ var Strategy = {
             return 0;
         }
         var item1 = null;
+        var bb0 = items[0].getBoundingBox()
+        var bb1 = null;
         for (let i = 1, l = items.length; i < l; ++i) {
             let item = items[i];
-            if (item.y() !== items[0].y()){
+            bb1 = item.getBoundingBox();
+            if (bb1.y !== bb0.y){
                 item1 = item;
                 break;
             }
@@ -79,17 +88,18 @@ var Strategy = {
         if (item1 === null){
             return 0;
         }
-        return item1.y() - items[0].y() - items[0].height();
+        return bb1.y - bb0.y - bb0.height;
     },
     updateActualMargins: function(container, dx, dy){
         var base = container.children[0];
+        var br = base.br();
         var marginX = container.props.innerMarginX + dx;
         var masterWidth = container.props.masterWidth;
         if (marginX < 0){
             masterWidth += marginX;
             marginX = 0;
-            if (masterWidth < base.width()){
-                masterWidth = base.width();
+            if (masterWidth < br.width){
+                masterWidth = br.width;
             }
         }
 
@@ -99,8 +109,8 @@ var Strategy = {
             masterHeight += marginY;
             marginY = 0;
 
-            if (masterHeight < base.height()){
-                masterHeight = base.height();
+            if (masterHeight < br.height){
+                masterHeight = br.height;
             }
         }
 

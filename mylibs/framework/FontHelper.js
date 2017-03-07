@@ -1,11 +1,10 @@
-import OpenTypeFontManager from "../OpenTypeFontManager";
 import {FontWeight, FontStyle, UnderlineStyle} from "./Defs";
 import Font from "./Font";
 import Invalidate from "./Invalidate";
 import Promise from "bluebird";
 
 export default{
-    toggleFontProperty(elements, property){
+    toggleFontProperty(app, elements, property){
         if (elements.length === 0){
             return;
         }
@@ -40,7 +39,7 @@ export default{
             }
         }
 
-        return Promise.map(newFonts, f => OpenTypeFontManager.tryLoad(f.family, f.style, f.weight))
+        return Promise.map(newFonts, f => app.fontManager.tryLoad(f.family, f.style, f.weight))
             .then(results => {
                 var allLoaded = true;
                 for (var i = 0; i < results.length; i++){

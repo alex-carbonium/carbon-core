@@ -378,10 +378,6 @@ export default class CompositeElement extends UIElement implements IComposite {
             element.setDisplayProps(elementChanges, ChangeMode.Model);
         }
 
-        if (this._affectingLayout) {
-            ArrangeStrategy.arrangeRoots(this.elements);
-        }
-
         if (this._inPreview) {
             if (PropertyTracker.resume()) {
                 PropertyTracker.flush();

@@ -18,15 +18,7 @@ var htmlLayer = document.getElementById("htmlLayer");
 
 RenderLoop.init(app, viewContainer, viewport, canvas, middleCanvas, upperCanvas, htmlPanel, htmlLayer);
 
-Intl.instance = {
-    formatMessage(msg, data){
-        var result = msg.defaultMessage;
-        if (data && data.index){
-            result += " " + data.index;
-        }
-        return result;
-    }
-};
+Intl.registerTestInstance();
 
 var examples = {};
 

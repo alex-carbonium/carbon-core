@@ -105,8 +105,6 @@ class DraggingElement extends TransformationElement {
             elements.push(target);
         }
 
-        ArrangeStrategy.arrangeRoots(this.elements.concat(oldParents));
-
         this.refreshSelection();
 
         return elements;

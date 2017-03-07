@@ -13,7 +13,7 @@ var defaults = {
     host: "http://localhost",
     devtool: "#eval",
     verbose: false,
-    showConfig: true,
+    showConfig: false,
     trace: true
 };
 
@@ -163,7 +163,6 @@ function getLoaders(settings){
 module.exports = function(settings){
     settings = extend({}, defaults, settings);
     settings.authority = settings.host ? settings.host + (settings.port ? ":" + settings.port : "") : "";
-    console.log(settings);
 
     var config = {
         context: fullPath("../mylibs"),

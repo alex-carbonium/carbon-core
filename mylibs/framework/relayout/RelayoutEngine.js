@@ -1,7 +1,7 @@
 import DeferredPrimitives from "../sync/DeferredPrimitives";
 import PrimitiveHandler from "../sync/Primitive_Handlers";
 import {formatPrimitive} from "../../util";
-import {ChangeMode} from "../Defs";
+import {ChangeMode, PrimitiveType} from "../Defs";
 
 var debug = require("DebugUtil")("carb:relayoutEngine");
 
@@ -62,13 +62,16 @@ export default class RelayoutEngine {
 
         for(var i = 0; i < primitives.length; ++i) {
             var primitive = primitives[i];
-            formatPrimitive(primitive, debug, 'External');
-            var newElement = PrimitiveHandler.handle(element, primitive);
-            if (newElement){
-                if (!newElements){
-                    newElements = [];
+            if (primitive.type !== PrimitiveType.Selection){
+                //no need to apply all selection primitives, just the last one needs to be tracked somewhere
+                formatPrimitive(primitive, debug, 'External');
+                var newElement = PrimitiveHandler.handle(element, primitive);
+                if (newElement){
+                    if (!newElements){
+                        newElements = [];
+                    }
+                    newElements.push(newElement);
                 }
-                newElements.push(newElement);
             }
         }
 
