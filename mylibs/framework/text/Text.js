@@ -240,9 +240,9 @@ PropertyMetadata.registerForType(Text, {
         var base = PropertyMetadata.findForType(UIElement).getNonRepeatableProps(element);
         var props = newProps && newProps.autoWidth !== undefined ? newProps : element.props;
         if (props.autoWidth){
-            return base.concat(["width", "height", "content"]);
+            return base.concat(["br", "content"]);
         }
-        return base.concat(["content", "height"]);
+        return base.concat(["content"]);
     }
 });
 

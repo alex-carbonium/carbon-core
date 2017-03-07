@@ -125,6 +125,8 @@ class App extends DataNode implements IApp {
 
     constructor() {
         super(true);
+
+        this._disposables = [];
         this.viewMode = "view"; //?
         this.activePage = NullPage;
         this._companyId = "";
@@ -203,7 +205,7 @@ class App extends DataNode implements IApp {
         this._currentTool = ViewTool.Pointer;
         this.currentToolChanged = EventHelper.createEvent();
 
-        Selection.onElementSelected.bind((selection, oldSelection, doNotTrack)=>{
+        var token = Selection.onElementSelected.bind((selection, oldSelection, doNotTrack)=>{
             let selectionIds = Selection.selectedElements().map(e=>e.id());
             let oldSelectionIds = oldSelection.map(e=>e.id());
             if(!doNotTrack && (selectionIds.length || oldSelectionIds.length)) {
@@ -214,6 +216,10 @@ class App extends DataNode implements IApp {
                     this.userId());
             }
         });
+        this.registerForDisposal(token);
+
+        this.fontManager = new OpenTypeFontManager();
+        this.fontManager.registerAsDefault();
     }
 
     userId() {
@@ -355,17 +361,17 @@ class App extends DataNode implements IApp {
     }
 
     loadFont(family, style, weight): Promise<void>{
-        return OpenTypeFontManager.load(family, style, weight);
+        return this.fontManager.load(family, style, weight);
     }
     saveFontMetadata(metadata){
-        if (OpenTypeFontManager.tryAddMetadata(metadata)){
+        if (this.fontManager.tryAddMetadata(metadata)){
             var metadataWithId = Object.assign({}, metadata);
             metadataWithId.id = metadata.name;
             this.patchProps(PatchType.Insert, "fontMetadata", metadataWithId);
         }
     }
     getFontMetadata(family){
-        return OpenTypeFontManager.getMetadata(family);
+        return this.fontManager.getMetadata(family);
     }
 
     syncBroken(value) {
@@ -787,7 +793,7 @@ class App extends DataNode implements IApp {
 
         var projectLoaded = this.loadMainProject();
         var iconFontsLoaded = this.waitForWebFonts();
-        var defaultFontLoaded = OpenTypeFontManager.loadDefaultFont();
+        var defaultFontLoaded = this.fontManager.loadDefaultFont();
         var dataLoaded = this.loadData();
 
         return Promise.all([dataLoaded, projectLoaded, iconFontsLoaded, defaultFontLoaded]).then(result => {
@@ -803,7 +809,7 @@ class App extends DataNode implements IApp {
                 stopwatch.checkpoint("FromJson");
             }
 
-            OpenTypeFontManager.appendMetadata(this.props.fontMetadata);
+            this.fontManager.appendMetadata(this.props.fontMetadata);
 
             logger.trackEvent("AppLoaded", null, stopwatch.getMetrics());
 
@@ -940,7 +946,7 @@ class App extends DataNode implements IApp {
                 this._lastRelayoutView.sy,
                 this._lastRelayoutView.scale
             );
-        }   
+        }
 
         this._lastRelayoutView.sx = sx;
         this._lastRelayoutView.sy = sy;
@@ -950,7 +956,7 @@ class App extends DataNode implements IApp {
     }
 
     relayout() {
-        try {            
+        try {
             this.relayoutInternal();
         }
         finally {
@@ -976,6 +982,11 @@ class App extends DataNode implements IApp {
                 }
             }
             else if (primitiveRootElement) { // the element can be deleted
+                //TODO: relayout engine is no longer relayout engine, consider merging real relayout and search for external primitives
+                if (ModelStateListener.isRelayoutNeeded(primitiveRootElement)) {
+                    primitiveRootElement.arrangeRootDepthFirst();
+                }
+
                 let res = primitiveRootElement.relayout(ModelStateListener.elementsPropsCache);
                 if (res !== null) {
                     Array.prototype.push.apply(primitives, res);
@@ -983,8 +994,10 @@ class App extends DataNode implements IApp {
             }
         }
 
+        ModelStateListener.markRelayoutCompleted();
+
         if (primitives.length) {
-            this.changed.raise(primitives);            
+            this.changed.raise(primitives);
         }
 
         // this one should be in a separate loop, because we can get more elements after relayout
@@ -994,6 +1007,7 @@ class App extends DataNode implements IApp {
             let key = roots[i].key;
             var rootPrimitives = roots[i].data;
             let primitiveRootElement = this.findPrimitiveRoot(key);
+
             if (primitiveRootElement) {
                 primitiveRootElement.relayoutCompleted();
             }
@@ -1006,13 +1020,13 @@ class App extends DataNode implements IApp {
             }
         }
 
-        if (primitives.length) {           
+        if (primitives.length) {
             if (DEBUG) {
                 primitives.forEach(x => formatPrimitive(x, debug));
             }
 
             var viewPrimitive = this._trackViewPrimitive();
-            
+
             if(viewPrimitive){
                 primitives.push(viewPrimitive);
                 rollbacks.push(viewPrimitive);
@@ -1237,6 +1251,10 @@ class App extends DataNode implements IApp {
         return this.project.addNewPage(options);
     }
 
+    registerForDisposal(d){
+        this._disposables.push(d);
+    }
+
     dispose() {
         this.loadedLevel1.cancel();
         this.loaded.cancel();
@@ -1258,6 +1276,10 @@ class App extends DataNode implements IApp {
         this.changed.clearSubscribers();
         this.changedLocally.clearSubscribers();
         this.changedExternally.clearSubscribers();
+
+        this._disposables.forEach(x => x.dispose());
+        this._disposables.length = 0;
+
         this.disposed = true;
     }
 
@@ -1372,11 +1394,11 @@ PropertyMetadata.registerForType(App, {
             type: "stroke"
         }
     },
-    defaultFill: {
-        defaultValue: Brush.createFromColor("#B6B6B6")
-    },
-    defaultStroke: {
-        defaultValue: Brush.Black
+    defaultShapeSettings: {
+        defaultValue: {
+            fill: Brush.createFromColor(UserSettings.shapes.defaultFill),
+            stroke: Brush.createFromColor(UserSettings.shapes.defaultStroke)
+        }
     },
     defaultLayoutGridSettings: {
         defaultValue: {

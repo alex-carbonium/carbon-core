@@ -544,7 +544,6 @@ class Path extends Shape {
             this.nextPoint = null;
             this.releaseMouse(this);
             this.resetGlobalViewCache();
-            ArrangeStrategy.arrangeRoots([this]);
         }
 
         Selection.reselect();

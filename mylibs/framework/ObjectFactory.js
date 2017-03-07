@@ -1,7 +1,6 @@
 import TypeDefaults from "./TypeDefaults";
 import ModelStateListener from "./sync/ModelStateListener";
 import PropertyMetadata from "./PropertyMetadata";
-import ObjectCache from "./ObjectCache";
 import EventHelper from "./EventHelper";
 import logger from "../logger";
 import Matrix from "../math/matrix";
@@ -61,23 +60,14 @@ var ObjectFactory = {
         }
 
         var res;
-        if (ObjectCache.instance.supportsType(type)) {
-            var key = current.hashKey(parameters);
-            res = ObjectCache.instance.getOrPut(type, key, function () {
-                return new current(parameters);
-            });
+        if (typeof current !== 'function') {
+            return parameters;
         }
-        else {
-            if (typeof current !== 'function') {
-                return parameters;
-            }
-            res = new current();
+        res = new current();
 
-            if (parameters !== undefined && typeof res.setProps === 'function') {
-                res.setProps(parameters);
-            }
+        if (parameters !== undefined && typeof res.setProps === 'function') {
+            res.setProps(parameters);
         }
-
 
         return res;
     },

@@ -409,4 +409,8 @@ export default class DataNode{
         }
         return this;
     }
+
+    isChangeAffectingLayout(changes): boolean {
+        return false;
+    }
 }

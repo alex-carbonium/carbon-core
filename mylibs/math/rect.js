@@ -154,11 +154,27 @@ export default class Rect{
         }
         return new Rect(this.x, this.y, w, h);
     }
+    withWidth(w){
+        if (w === this.width){
+            return this;
+        }
+        return new Rect(this.x, this.y, w, this.height);
+    }
+    withHeight(h){
+        if (h === this.height){
+            return this;
+        }
+        return new Rect(this.x, this.y, this.width, h);
+    }
     withPosition(x, y){
         if (x === this.x && y === this.y){
             return this;
         }
         return new Rect(x, y, this.width, this.height);
+    }
+
+    toArray(){
+        return [this.x, this.y, this.width, this.height];
     }
 
     static fromObject(obj){

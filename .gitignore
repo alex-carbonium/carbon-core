@@ -1,6 +1,7 @@
 *.orig
 *.rej
 *.log
+*.trx
 target/*
 node_modules/*
 *_LOCAL_*

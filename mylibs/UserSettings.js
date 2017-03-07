@@ -35,6 +35,11 @@ var settings = {
         lockedObjects: false
     },
 
+    shapes: {
+        defaultFill: "#B6B6B6",
+        defaultStroke: "black"
+    },
+
     internal: {
         showRotateAreas: false
     }

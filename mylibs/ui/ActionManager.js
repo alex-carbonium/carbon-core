@@ -69,7 +69,6 @@ function endRepeatableAction() {
     var flushNeeded = PropertyTracker.resume();
     if (flushNeeded) {
         setTimeout(() => {
-            ArrangeStrategy.arrangeRoots(Selection.selectedElements());
             PropertyTracker.flush();
         }, 0);
     }
@@ -389,14 +388,14 @@ export default class ActionManager implements IActionManager {
         }, "");
 
         this.registerAction("fontBold", "Font bold", "Font", function () {
-            return FontHelper.toggleFontProperty(Selection.selectedElements(), "weight");
+            return FontHelper.toggleFontProperty(that.app, Selection.selectedElements(), "weight");
         }, "");
 
         this.registerAction("fontItalic", "Font italic", "Font", function () {
-            return FontHelper.toggleFontProperty(Selection.selectedElements(), "style");
+            return FontHelper.toggleFontProperty(that.app, Selection.selectedElements(), "style");
         }, "");
         this.registerAction("fontUnderline", "Font underline", "Font", function () {
-            return FontHelper.toggleFontProperty(Selection.selectedElements(), "underline");
+            return FontHelper.toggleFontProperty(that.app, Selection.selectedElements(), "underline");
         }, "");
 
         this.registerAction("selectAll", "Select all elements", "View", function () {

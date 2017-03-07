@@ -63,7 +63,6 @@ var LinePoint = {
 
             Environment.view.layer3.remove(e);
             e.dispose();
-            ArrangeStrategy.arrangeRoots([frame.element]);
             Selection.refreshSelection();
         }
     },

@@ -5,7 +5,6 @@ import Environment from "environment";
 import FileProxy from "server/FileProxy";
 import {createUUID} from "util";
 import Matrix from "math/matrix";
-import OpenTypeFontManager from "../../OpenTypeFontManager";
 import Promise from "bluebird";
 
 var PADDING = 5;
@@ -144,7 +143,7 @@ export default class ToolboxConfiguration {
             "title": element.name()
         };
 
-        var fontTasks = OpenTypeFontManager.getPendingTasks();
+        var fontTasks = App.Current.fontManager.getPendingTasks();
         if (!fontTasks.length){
             return Promise.resolve();
         }

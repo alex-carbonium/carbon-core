@@ -4,6 +4,10 @@ class FontManager {
         this._defaultFont = null;
     }
 
+    registerAsDefault(){
+        FontManager.registerInstance(this);
+    }
+
     getDefaultFont(){
         return this._defaultFont;
     }

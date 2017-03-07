@@ -1,5 +1,5 @@
-if (typeof sketch === "undefined"){
-    sketch = {};
+if (typeof window.sketch === "undefined"){
+    window.sketch = {};
 }
 if (!sketch.framework){
     sketch.framework = {};

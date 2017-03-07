@@ -230,11 +230,9 @@ export default class UIElement extends DataNode {
         }
         return properties;
     }
-    isChangeAffectingLayout(displayChanges) {
-        return displayChanges.hasOwnProperty("x") || displayChanges.hasOwnProperty("y") || displayChanges.hasOwnProperty("width") || displayChanges.hasOwnProperty("height")
-            || displayChanges.hasOwnProperty("angle")
-            || displayChanges.hasOwnProperty("br")
-            || displayChanges.hasOwnProperty("m");
+    isChangeAffectingLayout(changes): boolean {
+        return changes.hasOwnProperty("br")
+            || changes.hasOwnProperty("m");
     }
     getAffectedProperties(displayChanges): string[] {
         var properties = Object.keys(displayChanges);
@@ -401,7 +399,13 @@ export default class UIElement extends DataNode {
         this.setProps({ m: matrix }, mode);
     }
     resetTransform(mode) {
-        this.setProps({ m: Matrix.Identity }, mode);
+        var props = { m: Matrix.Identity };
+        if (this.hasBadTransform()){
+            props.bad = false;
+            props.lgbr = null;
+            props.lgm = null;
+        }
+        this.setProps(props, mode);
     }
 
     hasBadTransform(): boolean{
@@ -2266,6 +2270,6 @@ PropertyMetadata.registerForType(UIElement, {
         };
     },
     getNonRepeatableProps: function () {
-        return ["id", "name", "visible", "source"];
+        return ["id", "name", "visible"];
     }
 });

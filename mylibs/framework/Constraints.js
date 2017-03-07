@@ -1,6 +1,6 @@
 import {Types, HorizontalConstraint, VerticalConstraint} from "./Defs";
 
-define(["framework/ObjectCache", "framework/TypeDefaults"], function(ObjectCache, TypeDefaults) {
+define(["framework/TypeDefaults"], function(TypeDefaults) {
     var Constraints = {};
 
     var defaults = {

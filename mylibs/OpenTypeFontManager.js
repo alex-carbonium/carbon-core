@@ -9,7 +9,7 @@ import Promise from "bluebird";
 
 var load = Promise.promisify(OpenType.load);
 
-class OpenTypeFontManager extends FontManager {
+export default class OpenTypeFontManager extends FontManager {
     constructor() {
         super();
         this._metadata = [{
@@ -40,7 +40,7 @@ class OpenTypeFontManager extends FontManager {
         return this._loadInternal(family, style, weight);
     }
 
-    _loadInternal(family, style, weight): Promise<void>{
+    _loadInternal(family, style, weight): Promise<void> {
         var metadata = this.getMetadata(family);
         return this._fileLoad(metadata, style, weight).then(file => {
             if (!file.font || !file.font.supported) {
@@ -74,13 +74,13 @@ class OpenTypeFontManager extends FontManager {
         return this._loadInternal(this._metadata[0].name, FontStyle.Normal, FontWeight.Regular);
     }
 
-    getFont(family, style, weight){
+    getFont(family, style, weight) {
         var font = super.getFont(family, style, weight);
-        if (!font){
+        if (!font) {
             font = this.getDefaultFont();
 
             var metadata = this.getMetadata(family);
-            if (metadata && !this._loadQueue.find(x => x.family === family && x.style === style && x.weight === weight)){
+            if (metadata && !this._loadQueue.find(x => x.family === family && x.style === style && x.weight === weight)) {
                 var promise = this._loadInternal(family, style, weight)
                     .then(() => {
                         Invalidate.request();
@@ -88,14 +88,14 @@ class OpenTypeFontManager extends FontManager {
                         this._loadQueue.splice(i, 1);
                     });
 
-                this._loadQueue.push({family, style, weight, promise});
+                this._loadQueue.push({ family, style, weight, promise });
             }
         }
 
         return font;
     }
 
-    getPendingTasks(): Promise[]{
+    getPendingTasks(): Promise[] {
         return this._loadQueue.map(x => x.promise);
     }
 
@@ -154,7 +154,3 @@ class OpenTypeFontManager extends FontManager {
         });
     }
 }
-
-var openTypeFontManager = new OpenTypeFontManager();
-FontManager.registerInstance(openTypeFontManager);
-export default openTypeFontManager;

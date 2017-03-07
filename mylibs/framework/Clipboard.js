@@ -24,7 +24,7 @@ class Clipboard {
         this.buffer = null;
         this.globalBoundingBoxes = null;
         this.globalMatrices = null;
-        this.rootBoundingBoxes = null;        
+        this.rootBoundingBoxes = null;
 
         this.pastingContent = false;
     }
@@ -36,7 +36,7 @@ class Clipboard {
             this._htmlElement.addEventListener("copy", this.onCopy);
             this._htmlElement.addEventListener("paste", this.onPaste);
             this._htmlElement.addEventListener("cut", this.onCut);
-        }        
+        }
     }
     hasValue(){
         return this.buffer !== null;
@@ -149,14 +149,14 @@ class Clipboard {
             globalMatrices = this.globalMatrices;
         }
 
-        if (bufferElements){            
+        if (bufferElements){
             var rootRelativeBoundingBox = rootBoundingBoxes ? combineRectArray(rootBoundingBoxes) : null;
             var globalBoundingBox = combineRectArray(globalBoundingBoxes);
             var location = choosePasteLocation(bufferElements, rootRelativeBoundingBox, this.pastingContent);
             if (location){
                 Selection.makeSelection([]);
                 for (var i = 0; i < bufferElements.length; i++){
-                    var element = bufferElements[i];                    
+                    var element = bufferElements[i];
 
                     if (location.parent === this.originalParent){
                         location.parent.insert(element, this.zOrder + 1);
@@ -182,8 +182,6 @@ class Clipboard {
                 }
                 //cause a little blink if new element was added into the same position
                 setTimeout(() => Selection.makeSelection(newSelection), 50);
-
-                ArrangeStrategy.arrangeRoots(bufferElements);
             }
         }
 
@@ -202,7 +200,7 @@ class Clipboard {
     /** The only reliable check is to use known browser versions. This is github does it. */
     testNativeSupport(){
         return (params.browser.name === "Chrome" && parseInt(params.browser.major) > 43)
-            || (params.browser.name === "Firefox" && parseInt(params.browser.major) > 41);        
+            || (params.browser.name === "Firefox" && parseInt(params.browser.major) > 41);
     }
 }
 

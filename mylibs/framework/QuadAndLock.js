@@ -1,6 +1,6 @@
 import {Types} from "./Defs";
 
-define(["framework/ObjectCache", "framework/TypeDefaults"], function(ObjectCache, TypeDefaults){
+define(["framework/TypeDefaults"], function(TypeDefaults){
     var Quad = sketch.framework.QuadAndLock = {};
 
     var defaults = {
