@@ -6,6 +6,7 @@ import Invalidate from "framework/Invalidate";
 import Selection from "framework/SelectionModel";
 import Environment from "environment";
 import AnimationGroup from "framework/animation/AnimationGroup";
+import backend from "backend";
 
 var debug = require("DebugUtil")("carb:primitivesSync");
 
@@ -86,6 +87,10 @@ Primitive.registerHandler(PrimitiveType.Selection, function(page, p){
 });
 
 Primitive.registerHandler(PrimitiveType.View, function(page, p) {
+   if(p.sessionId !== backend.sessionId) {
+        return;
+    }
+
     var animationValues = [];
     var options = {duration:180};
 

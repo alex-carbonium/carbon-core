@@ -23,13 +23,13 @@ class ArtboardProxyPage extends Page {
         this._pageChnagedToken = null;
         this._onArtboardChangedToken = null;
 
-        this._pageChnagedToken = app.pageChanged.bind(this, ()=>{
-            if(this._onArtboardChangedToken){
-                this._onArtboardChangedToken.dispose();
-            }
-            this._onArtboardChanged(app.activePage.getActiveArtboard());
-            this._onArtboardChangedToken = Environment.controller.onArtboardChanged.bind(this, ()=>this._onArtboardChanged)
+        this._pageChnagedToken = app.pageChanged.bind(this, ()=>{            
+            this._onArtboardChanged(app.activePage.getActiveArtboard());            
         });
+
+        this._onArtboardChangedToken = Environment.controller.onArtboardChanged.bind(this, ()=>{
+            this._onArtboardChanged(app.activePage.getActiveArtboard()); 
+        })
 
         view.scaleChanged.bind(()=>{
             this.updateScrollRanges();
@@ -48,16 +48,18 @@ class ArtboardProxyPage extends Page {
         if(artboard) {
             this.children = [artboard];
             artboard.resetTransform(ChangeMode.Self);
-            // artboard.setProps({x:0, y:0}, ChangeMode.Self);
             this.setProps({br:artboard.props.br});
-            // this.height(artboard.height());
 
             this.updateScrollRanges();
         }
         this._version = null;
         this.view.setActivePage(this);
 
-        this.fitToViewport();
+        if(this.view.mode === 1) {
+            this.fitToViewport();
+        } else {
+            this.view.scale(1);
+        }
     }
 
     updateScrollRanges(){
@@ -72,7 +74,11 @@ class ArtboardProxyPage extends Page {
     }
 
     fitToViewport(){
-        var rect = this.view.page.children[0].getBoundaryRect();
+        var artboard = this.view.page.children[0];
+        if(!artboard){
+            return;
+        }
+        var rect = artboard.getBoundaryRect();
         var scale = fitRectToRect(App.Current.viewportSize(), rect);
         this.view.scale(scale);
     }
@@ -120,12 +126,12 @@ PropertyMetadata.registerForType(ArtboardProxyPage, {});
 export default class MirroringView extends ViewBase{
     constructor(app){
         super(app);
-        this._invalidateRequestedToken = Invalidate.requested.bind(this, this.invalidate);
-        this._proxyPage = new ArtboardProxyPage(app, this);
+        this._invalidateRequestedToken = Invalidate.requested.bind(this, this.invalidate);        
     }
 
     setup(deps){
         super.setup(deps);
+        this._proxyPage = new ArtboardProxyPage(this.app, this);
         this.setActivePage(this._proxyPage);
     }
 

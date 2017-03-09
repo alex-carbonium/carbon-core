@@ -360,6 +360,10 @@ class App extends DataNode implements IApp {
         this.patchProps(PatchType.Change, type === 1 ? "styles" : "textStyles", newStyle);
     }
 
+    setMirrorArtboardId(pageId, artboardId) {
+        this.setProps({mirrorPageId: pageId, mirrorArtboardId: artboardId});        
+    }
+
     loadFont(family, style, weight): Promise<void>{
         return this.fontManager.load(family, style, weight);
     }

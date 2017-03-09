@@ -1,6 +1,8 @@
 import EventHelper from "framework/EventHelper";
 import domUtil from "utils/dom";
 import TouchHelper from "./TouchHelper";
+import PropertyTracker from "framework/PropertyTracker";
+import DataNode from "framework/DataNode";
 
 function updateEvent(event) {
     var scale = this.view.scale();
@@ -16,6 +18,20 @@ export default class MirroringController {
         this.view = view;
         this.onArtboardChanged = EventHelper.createEvent();
         this.touchHelper = new TouchHelper(view);
+
+        this.app.enablePropsTracking();
+        PropertyTracker.propertyChanged.bind(this, this._appPropertyChanged);
+    }
+
+    _appPropertyChanged(app, newProps, oldProps) {
+        if (newProps.mirrorArtboardId !== undefined && newProps.mirrorPageId !== undefined) {
+            var page = DataNode.getImmediateChildById(app, newProps.mirrorPageId, true);
+            if (page) {                
+                var artboard = DataNode.getImmediateChildById(page, newProps.mirrorArtboardId, true);
+                page.setActiveArtboard(artboard, true);
+                this.onArtboardChanged.raise(artboard);
+            }
+        }
     }
 
     _propagateScroll(delta, element) {
@@ -72,7 +88,7 @@ export default class MirroringController {
 
     onscroll(eventData) {
         var element = this.view.page.hitElement(eventData, this.view.scale());
-        var delta = {dx: eventData.event.deltaX, dy: eventData.event.deltaY};
+        var delta = { dx: eventData.event.deltaX, dy: eventData.event.deltaY };
         this._propagateScroll(delta, element);
     }
 
@@ -120,10 +136,11 @@ export default class MirroringController {
 
 
     ondblclick(eventData) {
-        if(this.view.scale() === 1)
-        {
+        if (this.view.scale() === 1) {
+            this.view.mode = 1;
             this.view.page.fitToViewport();
         } else {
+            this.view.mode = 0;
             this.view.scale(1);
         }
         this.view.page._version = null;

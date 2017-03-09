@@ -296,7 +296,7 @@ export default class DataNode{
 
     getImmediateChildById(id:string, materialize:boolean) {
         return DataNode.getImmediateChildById(this, id, materialize);
-    }
+    } 
 
     static getImmediateChildById(container: any, id:string, materialize:boolean = false) {
         if(!container.children) {

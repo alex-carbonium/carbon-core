@@ -161,7 +161,7 @@ class ArtboardPage extends Page {
         }
     }
 
-    setActiveArtboard(artboard) {
+    setActiveArtboard(artboard, doNotTrack) {
         var oldArtboard = this._activateArtboard;
         if (this._activeArtboard) {
             this._activeArtboard.deactivate();
@@ -170,6 +170,9 @@ class ArtboardPage extends Page {
         this._activeArtboard = artboard;
         if (artboard){
             artboard.activate();
+            !doNotTrack && App.Current.setMirrorArtboardId(App.Current.activePage.id(), artboard.id());
+        } else {
+            !doNotTrack && App.Current.setMirrorArtboardId(null, null);
         }
         Environment.controller && Environment.controller.onArtboardChanged && Environment.controller.onArtboardChanged.raise(artboard, oldArtboard);
     }
