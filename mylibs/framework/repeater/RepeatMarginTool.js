@@ -44,7 +44,7 @@ export default {
         view.unregisterForLayerDraw(2, this);
         if (this._dragController){
             this._dragController.unbind();
-            this._dragController = null;   
+            this._dragController = null;
         }
     },
     createVisualizations: function(){
@@ -56,8 +56,8 @@ export default {
         var baseMatrix = container.globalViewMatrix().clone();
         var containerWidth = container.width();
         var containerHeight = container.height();
-        var numX = container.getNumX();
-        var numY = container.getNumY();
+        var cols = container.getCols();
+        var rows = container.getRows();
         var itemBox = container.children[0].getBoundingBox();
         var marginX = this._strategy.getActualMarginX(container);
         var marginY = this._strategy.getActualMarginY(container);
@@ -74,7 +74,7 @@ export default {
         }
 
         this._margins = [];
-        for (let i = 1; i < numX; i++){
+        for (let i = 1; i < cols; i++){
             let x = itemBox.x + itemBox.width*i + marginX * (i-1);
             if (x < containerWidth){
                 let matrix = baseMatrix.clone().translate(x, 0);
@@ -90,7 +90,7 @@ export default {
                 });
             }
         }
-        for (let i = 1; i < numY; i++){
+        for (let i = 1; i < rows; i++){
             let y = itemBox.y + itemBox.height*i + marginY * (i-1);
             if (y < containerHeight){
                 let matrix = baseMatrix.clone().translate(0, y);

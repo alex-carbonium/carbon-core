@@ -899,9 +899,6 @@ export default class UIElement extends DataNode {
         path[path.length - 1] = this.id();
         return path;
     }
-    createDragClone(element) {
-        return element.clone();
-    }
     globalViewMatrix(): Matrix {
         if (!this.runtimeProps.globalViewMatrix) {
             var parent = this.parent();

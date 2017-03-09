@@ -986,11 +986,6 @@ class App extends DataNode implements IApp {
                 }
             }
             else if (primitiveRootElement) { // the element can be deleted
-                //TODO: relayout engine is no longer relayout engine, consider merging real relayout and search for external primitives
-                if (ModelStateListener.isRelayoutNeeded(primitiveRootElement)) {
-                    primitiveRootElement.arrangeRootDepthFirst();
-                }
-
                 let res = primitiveRootElement.relayout(ModelStateListener.elementsPropsCache);
                 if (res !== null) {
                     Array.prototype.push.apply(primitives, res);
@@ -1026,7 +1021,7 @@ class App extends DataNode implements IApp {
 
         if (primitives.length) {
             if (DEBUG) {
-                primitives.forEach(x => formatPrimitive(x, debug));
+                primitives.forEach(x => formatPrimitive(x, debug, 'Created'));
             }
 
             var viewPrimitive = this._trackViewPrimitive();
@@ -1329,7 +1324,7 @@ class App extends DataNode implements IApp {
             if(!state) {
                 return;
             }
-            
+
             var page = this.pages.find(x => x.id() === state.pageId);
             if (page) {
                 this.setActivePage(page);

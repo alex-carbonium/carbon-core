@@ -10,8 +10,9 @@ import QuadAndLock from './QuadAndLock';
 import logger from '../logger';
 import Matrix from '../math/matrix';
 import Rect from '../math/rect';
-
-var fwk = window.sketch.framework;
+import Brush from './Brush';
+import Box from './Box';
+import UserSettings from '../UserSettings';
 
 export default class Container extends UIElement {
     children: UIElement[];
@@ -26,9 +27,6 @@ export default class Container extends UIElement {
         e.oldRect = e.oldRect || e.newRect;
         this.arrange(e, mode);
     }
-    arrangeRootDepthFirst() {
-        this.applyVisitorDepthFirst(x => x.performArrange());
-    }
     arrangeStrategy(value) {
         if (value !== undefined) {
             this.setProps({ arrangeStrategy: value })
@@ -38,10 +36,10 @@ export default class Container extends UIElement {
     arrangeStrategyInstance() {
         return ArrangeStrategy.findStrategy(this);
     }
-    applySizeScaling(s, o, options) {
+    applySizeScaling(s, o, options, mode) {
         var oldRect = this.getBoundaryRect();
-        UIElement.prototype.applySizeScaling.apply(this, arguments);
-        this.performArrange({ oldRect, reset: options && options.reset });
+        super.applySizeScaling.apply(this, arguments);
+        this.performArrange({ oldRect, options }, mode);
     }
 
     skew(): void{
@@ -49,47 +47,51 @@ export default class Container extends UIElement {
     }
 
     fillBackground(context, l, t, w, h) {
-        if (this.fill() && fwk.Brush.canApply(this.fill()) && this.standardBackground()) {
+        if (Brush.canApply(this.fill()) && this.standardBackground()) {
             context.save();
-            var cornerRadius = this.cornerRadius();
-            if (cornerRadius !== fwk.QuadAndLock.Default) {
-                context.roundedRectDifferentRadiusesPath(l, t, w, h,
-                    cornerRadius.upperLeft,
-                    cornerRadius.upperRight,
-                    cornerRadius.bottomLeft,
-                    cornerRadius.bottomRight);
-            } else {
-                context.beginPath();
-                context.rectPath(l, t, w, h, true);
-            }
-            fwk.Brush.fill(this.fill(), context, l, t, w, h);
+            this.globalViewMatrix().applyToContext(context);
+            context.beginPath();
+            context.rect(l, t, w, h);
+            Brush.fill(this.fill(), context, l, t, w, h);
             context.restore();
         }
     }
     strokeBorder(context, w, h) {
-        //not supported for iphone
-        if (this.stroke() && fwk.Brush.canApply(this.stroke()) && this.standardBackground()) {
+        if (!this.standardBackground()){
+            return;
+        }
+
+        var stroke = this.stroke();
+        if (Brush.canApply(stroke)) {
             context.save();
+            this.globalViewMatrix().applyToContext(context);
             context.beginPath();
-            var cornerRadius = this.cornerRadius();
-            if (cornerRadius !== fwk.QuadAndLock.Default) {
-                context.roundedRectDifferentRadiusesPath(0, 0, w, h,
-                    cornerRadius.upperLeft,
-                    cornerRadius.upperRight,
-                    cornerRadius.bottomLeft,
-                    cornerRadius.bottomRight);
-            } else {
-                context.rectPath(0, 0, w, h, true);
-            }
             var dash = this.dashPattern();
             if (dash) {
                 context.setLineDash(dash);
             }
             context.lineWidth = this.strokeWidth();
-            fwk.Brush.stroke(this.stroke(), context, 0, 0, w, h);
+            var br = this.br();
+            context.rect(br.x, br.y, br.width, br.height);
+            Brush.stroke(stroke, context, 0, 0, w, h);
             context.restore();
         }
+        else{
+            if (!Brush.canApply(this.fill()) && this.showBoundaryWhenTransparent()){
+                context.save();
+                this.globalViewMatrix().applyToContext(context);
+                context.setLineDash(UserSettings.general.boundaryDash);
+                context.strokeStyle = UserSettings.general.boundaryStroke;
+                var br = this.br();
+                context.strokeRect(br.x, br.y, br.width, br.height);
+                context.restore();
+            }
+        }
     }
+    showBoundaryWhenTransparent(): boolean{
+        return false;
+    }
+
     shouldApplyViewMatrix() {
         return false;
     }
@@ -103,10 +105,7 @@ export default class Container extends UIElement {
         this.children.forEach(x => x.restoreLastGoodTransformIfNeeded());
     }
     drawSelf(context, w, h, environment) {
-        context.save();
-        this.globalViewMatrix().applyToContext(context);
         this.fillBackground(context, 0, 0, w, h);
-        context.restore();
 
         this.drawChildren(context, w, h, environment);
 
@@ -601,12 +600,6 @@ export default class Container extends UIElement {
     autoGrowMode(value) {
         return this.field("_autoGrowMode", value, true);
     }
-    cornerRadius(value) {
-        if (value !== undefined) {
-            this.setProps({ cornerRadius: value })
-        }
-        return this.props.cornerRadius;
-    }
     dropPositioning(value) {
         if (value !== undefined) {
             this.setProps({ dropPositioning: value })
@@ -813,7 +806,7 @@ PropertyMetadata.registerForType(Container, {
         type: "box",
         useInModel: true,
         editable: false,
-        defaultValue: fwk.Box.Default
+        defaultValue: Box.Default
     },
     dropPositioning: {
         displayName: "Drop position",
@@ -847,13 +840,6 @@ PropertyMetadata.registerForType(Container, {
                 { name: "Grow", value: Overflow.ExpandBoth }
             ]
         }
-    },
-    cornerRadius: {
-        displayName: "Border radius",
-        type: "quadAndLock",
-        useInModel: true,
-        editable: true,
-        defaultValue: QuadAndLock.Default
     },
     allowMoveOutChildren: {
         displayName: "Allow drag elements out",

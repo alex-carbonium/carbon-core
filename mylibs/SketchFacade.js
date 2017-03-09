@@ -49,6 +49,7 @@ module.exports = {
     "FrameSource": require("./framework/FrameSource"),
     "Container": require("./framework/Container"),
     "GroupContainer": require("./framework/GroupContainer"),
+    "RepeatContainer": require("./framework/repeater/RepeatContainer"),
     "Page": require("./framework/Page"),
     "CommandManager": require("./framework/commands/CommandManager"),
     "Brush": require("./framework/Brush"),

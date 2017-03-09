@@ -1,7 +1,7 @@
 import DeferredPrimitives from "../sync/DeferredPrimitives";
+import ModelStateListener from "../sync/ModelStateListener";
 import PrimitiveHandler from "../sync/Primitive_Handlers";
-import {formatPrimitive} from "../../util";
-import {ChangeMode, PrimitiveType} from "../Defs";
+import { ChangeMode, PrimitiveType } from "../Defs";
 
 var debug = require("DebugUtil")("carb:relayoutEngine");
 
@@ -11,48 +11,65 @@ var debug = require("DebugUtil")("carb:relayoutEngine");
 
 export default class RelayoutEngine {
 
-    static run2(root, propsHistoryMap, filter = null) {
+    static run(root, propsHistoryMap, filter = null) {
         var primitiveMap = DeferredPrimitives.releasePrimitiveMap(root);
-        return RelayoutEngine._visitElement2(root, propsHistoryMap, primitiveMap, filter);
+        var shouldArrange = ModelStateListener.isRelayoutNeeded(root);
+        return RelayoutEngine._visitElement(root, primitiveMap, propsHistoryMap, shouldArrange, filter);
     }
 
-    static _visitElement2(element, propsHistoryMap, primitiveMap, filter) {
+    static _visitElement(element, primitiveMap, propsHistoryMap, shouldArrange, filter) {
+        var oldRect;
         var primitives = null;
         var hasChildren = !!element.children;
 
         if (hasChildren) {
             var items = element.children;
             for (let i = 0, l = items.length; i < l; ++i) {
-                if (filter !== null && filter(items[i]) === false){
+                if (filter !== null && filter(items[i]) === false) {
                     continue;
                 }
-                let res = RelayoutEngine._visitElement2(items[i], propsHistoryMap, primitiveMap, filter);
-                if (res !== null){
-                    if (primitives === null){
+                let res = RelayoutEngine._visitElement(items[i], primitiveMap, propsHistoryMap, shouldArrange, filter);
+                if (res !== null) {
+                    if (primitives === null) {
                         primitives = [];
                     }
                     Array.prototype.push.apply(primitives, res);
                 }
             }
+
+            var entry = propsHistoryMap[element.id()];
+            if (entry && entry.props) {
+                oldRect = entry.props.br;
+            }
+            if (!oldRect) {
+                oldRect = element.getBoundaryRect();
+            }
         }
 
-        let res = RelayoutEngine.applyPrimitives(element, propsHistoryMap, primitiveMap, filter);
-        if (res !== null){
-            if (primitives === null){
+        let res = RelayoutEngine.applyPrimitives(element, primitiveMap, propsHistoryMap, shouldArrange, filter);
+        if (res !== null) {
+            if (primitives === null) {
                 primitives = [];
             }
             Array.prototype.push.apply(primitives, res);
         }
 
+        if (hasChildren && shouldArrange) {
+            debug("** arrange %s (%s)", element.displayName(), element.id());
+            //some bugs are here with contraints being applied twice, disabling for now
+            //this only arranges up, arrange down is done in applyScaling
+            element.performArrange(/*{oldRect}, ChangeMode.Model*/);
+        }
         return primitives;
     }
 
-    static applyPrimitives(element, propHistoryMap, primitiveMap, filter){
-        if (!primitiveMap){
+
+    static applyPrimitives(element, primitiveMap, propsHistoryMap, shouldArrange, filter) {
+        if (!primitiveMap) {
             return null;
         }
         var primitives = primitiveMap[element.id()];
-        if(!primitives) {
+        if (!primitives) {
             return null;
         }
 
@@ -60,25 +77,21 @@ export default class RelayoutEngine {
 
         debug("applyPrimitives for %s (%s)", element.displayName(), element.id());
 
-        for(var i = 0; i < primitives.length; ++i) {
+        for (var i = 0; i < primitives.length; ++i) {
             var primitive = primitives[i];
-            if (primitive.type !== PrimitiveType.Selection){
-                //no need to apply all selection primitives, just the last one needs to be tracked somewhere
-                formatPrimitive(primitive, debug, 'External');
-                var newElement = PrimitiveHandler.handle(element, primitive);
-                if (newElement){
-                    if (!newElements){
-                        newElements = [];
-                    }
-                    newElements.push(newElement);
+            var newElement = PrimitiveHandler.handle(element, primitive);
+            if (newElement) {
+                if (!newElements) {
+                    newElements = [];
                 }
+                newElements.push(newElement);
             }
         }
 
-        if (newElements){
+        if (newElements) {
             for (let i = 0, l = newElements.length; i < l; ++i) {
-                let res = RelayoutEngine._visitElement2(newElements[i], propHistoryMap, primitiveMap, filter);
-                if (res !== null){
+                let res = RelayoutEngine._visitElement(newElements[i], primitiveMap, propsHistoryMap, shouldArrange, filter);
+                if (res !== null) {
                     Array.prototype.push.apply(primitives, res);
                 }
             }

@@ -105,7 +105,7 @@ class ArtboardPage extends Page {
 
     draw(context, environment) {
         this._viewport = environment.view.viewportRect();
-     
+
         super.draw.apply(this, arguments);
 
         context.restore();
@@ -317,7 +317,7 @@ class ArtboardPage extends Page {
 
     relayout(oldPropsMap){
         var primitives = null;
-        let res = RelayoutEngine.run2(this, oldPropsMap, e => !(e instanceof Artboard));
+        let res = RelayoutEngine.run(this, oldPropsMap, e => !(e instanceof Artboard));
         if (res !== null){
             if (primitives === null){
                 primitives = [];
@@ -326,17 +326,6 @@ class ArtboardPage extends Page {
         }
         return primitives;
     }
-
-    arrangeRootDepthFirst(){
-        for (var i = 0; i < this.children.length; i++){
-            var element = this.children[i];
-            if (!(element instanceof Artboard)){
-                element.applyVisitorDepthFirst(x => x.performArrange());
-            }
-        }
-    }
-
-
 
     makeToolboxConfigDirty(forceUpdate, changedId){
         this.setProps({toolboxConfigId:null});

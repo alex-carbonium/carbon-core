@@ -8,6 +8,7 @@ require("./RepeatArrangeStrategy");
 
 export default {
     run: function(elements){
+        var sorted = elements.slice().sort((a, b) => a.zOrder() - b.zOrder());
         var element = elements[0];
         var parent = element.parent();
         var repeater = new RepeatContainer();
@@ -32,8 +33,6 @@ export default {
         var t = {x: -x1, y: -y1};
         for (let i = 0, l = elements.length; i < l; ++i) {
             let element = elements[i];
-
-            element.prepareAndSetProps({id: element.id()});
             element.applyTranslation(t);
 
             cell.add(element);
@@ -42,9 +41,9 @@ export default {
         cell.arrange({newRect:Rect.Zero, oldRect:Rect.Zero});
 
         var pos = {x: x1, y: y1};
-        repeater.setProps({width: x2 - x1, height: y2 - y1, masterWidth: x2 - x1, masterHeight: y2 - y1});
-        repeater.applyTranslation({x: pos.x, y: pos.y})
-        parent.insert(repeater, parent.getChildren().length);
+        repeater.setProps({width: x2 - x1, height: y2 - y1});
+        repeater.applyTranslation({x: pos.x, y: pos.y});
+        parent.insert(repeater, parent.children.indexOf(sorted[sorted.length - 1]));
         repeater.insert(cell, 0);
 
         Selection.makeSelection([repeater]);

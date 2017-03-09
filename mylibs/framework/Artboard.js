@@ -540,7 +540,7 @@ class Artboard extends Container {
     //}
 
     relayout(oldPropsMap) {
-        return RelayoutEngine.run2(this, oldPropsMap);
+        return RelayoutEngine.run(this, oldPropsMap);
     }
 
     getStates() {

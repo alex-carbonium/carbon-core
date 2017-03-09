@@ -473,6 +473,24 @@ class Matrix {
         return point;
     }
 
+    withTranslation(tx, ty): Matrix{
+        if (tx === this._tx && ty === this._ty){
+            return this;
+        }
+
+        return new Matrix(this._a, this._b, this._c, this._d, tx, ty);
+    }
+    withRoundedTranslation(): Matrix{
+        var ttx = Math.round(this._tx);
+        var tty = Math.round(this._ty);
+
+        if (ttx === this._tx && tty === this._ty){
+            return this;
+        }
+
+        return new Matrix(this._a, this._b, this._c, this._d, ttx, tty);
+    }
+
     transformRect(rect){
         var p1 = this.transformPoint2(rect.x, rect.y);
         var p2 = this.transformPoint2(rect.x + rect.width, rect.y);

@@ -2,7 +2,6 @@ import Brush from "../../framework/Brush";
 import Invalidate from "../../framework/Invalidate";
 import DragController from "../../framework/DragController";
 import SnapController from "../../framework/SnapController";
-import Cursor from "../../framework/Cursor";
 import CustomGuides from "./CustomGuides";
 import UserSettings from "../../UserSettings";
 import { isPointInRect } from "../../math/math";
@@ -20,7 +19,6 @@ export default class RulerGuides {
     _menuToken: IDisposable;
     _rectHorizontal: IRect;
     _rectVertical: IRect;
-    _lastGlobalCursor: string = null;
 
     constructor(app: IApp, view: IView, controller: IController) {
         this._dragController = new DragController();
@@ -49,7 +47,6 @@ export default class RulerGuides {
         this._view = view;
 
         this._hoverArtboard = null;
-        this._cursorChanged = false;
         this._removingGuide = false;
     }
 
@@ -168,6 +165,7 @@ export default class RulerGuides {
                 let pos = e.ctrlKey ? e : SnapController.applySnappingForPoint(e, false, true);
                 this._guideX.pos = Math.round(pos.x) - this._origin.x();
                 this._removingGuide = false;
+                e.cursor = "ew-resize";
             }
             Invalidate.requestUpperOnly();
         }
@@ -179,6 +177,7 @@ export default class RulerGuides {
                 let pos = e.ctrlKey ? e : SnapController.applySnappingForPoint(e, true, false);
                 this._guideY.pos = Math.round(pos.y) - this._origin.y();
                 this._removingGuide = false;
+                e.cursor = "ns-resize";
             }
             Invalidate.requestUpperOnly();
         }
@@ -361,7 +360,6 @@ export default class RulerGuides {
             });
 
             this._customGuides.releaseCaptured();
-            Cursor.removeGlobalCursor();
             Invalidate.requestUpperOnly();
         }
     }
