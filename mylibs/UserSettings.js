@@ -15,6 +15,10 @@ var settings = {
         "selection_edge_fill": "#59235d",
         "selection_fill": "rgba(89, 35, 93, 0.19)"
     },
+    general: {
+        boundaryDash: [4, 2],
+        boundaryStroke: "#ccc"
+    },
     guides: {
         stroke: "#9918ff"
     },
@@ -24,7 +28,6 @@ var settings = {
     frame: {
         stroke: '#22c1ff'
     },
-    showBoundingBoxes: false,
     snapTo: {
         enabled: true,
         pixels: true,

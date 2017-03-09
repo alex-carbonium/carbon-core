@@ -35,7 +35,7 @@ export default class DragController {
         return !e.handled;
     }
     mouseMove(e: IMouseEventData) {
-        //e.handled is not checked on purpose, case: path tool handles events, but ruler guide can overrule        
+        //e.handled is not checked on purpose, case: path tool handles events, but ruler guide can overrule
         if (e.isDragging) {
             return;
         }
@@ -80,8 +80,9 @@ export default class DragController {
         if (!this.isDragging && e.handled) {
             return;
         }
-        if (this.isDragging) {
-            if (e.x !== this._lastDragPoint.x || e.y !== this._lastDragPoint.y) {
+        //scenario: if dragStarting return true, then onStopped should be called (RepeaterMarginTool)
+        if (this.isDragging || this._dragRequested) {
+            if (this.isDragging && (e.x !== this._lastDragPoint.x || e.y !== this._lastDragPoint.y)) {
                 this.dragging(e);
             }
 
@@ -92,7 +93,7 @@ export default class DragController {
 
             this.onStopped(e);
 
-            e.handled = true;
+            e.handled = this.isDragging;
         }
         else {
             //scenario: clicking on ruler should not activate another artboard under ruler

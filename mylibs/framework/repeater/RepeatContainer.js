@@ -1,9 +1,14 @@
+import UIElement from "./../UIElement";
 import Container from "./../Container";
 import PropertyMetadata from "./../PropertyMetadata";
 import {ArrangeStrategies, Overflow, ChangeMode, Types} from "./../Defs";
 import RepeatCell from "./RepeatCell";
 import RepeatMarginTool from "./RepeatMarginTool";
 import RepeatFrameType from "./frame/RepeatFrameType";
+import UserSettings from "../../UserSettings";
+import Environment from "../../environment";
+import GlobalMatrixModifier from "../GlobalMatrixModifier";
+import Brush from "../Brush";
 
 export default class RepeatContainer extends Container{
     canAccept(){
@@ -12,16 +17,10 @@ export default class RepeatContainer extends Container{
     prepareProps(changes){
         super.prepareProps(changes);
         if (changes.innerMarginX !== undefined) {
-            changes.innerMarginX = changes.innerMarginX + .5|0;
+            changes.innerMarginX = Math.max(0, changes.innerMarginX + .5|0);
         }
         if (changes.innerMarginY !== undefined) {
-            changes.innerMarginY = changes.innerMarginY + .5|0;
-        }
-        if (changes.masterWidth !== undefined) {
-            changes.masterWidth = changes.masterWidth + .5|0;
-        }
-        if (changes.masterHeight !== undefined) {
-            changes.masterHeight = changes.masterHeight + .5|0;
+            changes.innerMarginY = Math.max(0, changes.innerMarginY + .5|0);
         }
     }
     primitiveRoot(){
@@ -70,16 +69,9 @@ export default class RepeatContainer extends Container{
             return;
         }
 
-        if (element.runtimeProps.repeatMaster){
-            element = element.runtimeProps.repeatMaster;
-            //transfer props from drag clone
-            element.setProps(props, ChangeMode.Self);
-        }
-        this._buildChain(element);
-
-        var current = element;
-        var i = 0, l = this.children.length;
-        do{
+        var chain = this._buildChain(element);
+        for (var i = 0; i < chain.length; ++i){
+            var current = chain[i];
             var nodeProps = props;
             var nodeOldProps = oldProps;
             var propsChanged = true;
@@ -95,8 +87,7 @@ export default class RepeatContainer extends Container{
             if (propsChanged){
                 realRoot.registerSetProps(current, nodeProps, nodeOldProps, mode);
             }
-            current = current.runtimeProps.repeatNext;
-        } while (++i !== l);
+        }
     }
 
     registerInsert(parent, element, index, mode){
@@ -112,18 +103,16 @@ export default class RepeatContainer extends Container{
             return;
         }
 
-        this._buildChain(parent);
-        var current = parent;
-        var i = 0, l = this.children.length;
-        do{
+        var chain = this._buildChain(parent);
+        for (var i = 0; i < chain.length; ++i){
+            var current = chain[i];
             var node = element;
             if (current !== parent){
                 node = element.clone();
                 current.insert(node, index, ChangeMode.Self);
             }
             realRoot.registerInsert(current, node, index, mode);
-            current = current.runtimeProps.repeatNext;
-        } while (++i !== l);
+        }
     }
 
     registerDelete(parent, element, index, mode){
@@ -139,18 +128,16 @@ export default class RepeatContainer extends Container{
             return;
         }
 
-        this._buildChain(parent);
-        var current = parent;
-        var i = 0, l = this.children.length;
-        do{
+        var chain = this._buildChain(parent);
+        for (var i = 0; i < chain.length; ++i){
+            var current = chain[i];
             var node = element;
             if (current !== parent){
                 node = current.children[index];
                 current.remove(node, ChangeMode.Self);
             }
             realRoot.registerDelete(current, node, mode);
-            current = current.runtimeProps.repeatNext;
-        } while (++i !== l);
+        }
     }
 
     registerChangePosition(parent, element, index, oldIndex, mode){
@@ -166,18 +153,16 @@ export default class RepeatContainer extends Container{
             return;
         }
 
-        this._buildChain(parent);
-        var current = parent;
-        var i = 0, l = this.children.length;
-        do{
+        var chain = this._buildChain(parent);
+        for (var i = 0; i < chain.length; ++i){
+            var current = chain[i];
             var node = element;
             if (current !== parent){
                 node = current.children[oldIndex];
                 current.changePosition(node, index, ChangeMode.Self);
             }
             realRoot.registerChangePosition(current, node, index, oldIndex, mode);
-            current = current.runtimeProps.repeatNext;
-        } while (++i !== l);
+        }
     }
 
     performArrange(oldRect, mode){
@@ -187,51 +172,79 @@ export default class RepeatContainer extends Container{
         }
     }
 
-    getNumX() : number{
-        var masterWidth = this.props.masterWidth;
+    getCols() : number{
+        var masterWidth = this.children[0].br().width;
         var margin = this.props.innerMarginX;
-        return masterWidth === 0 ? 1 : Math.ceil(this.width()/(masterWidth+margin));
+        var cols = masterWidth === 0 ? 1 : Math.ceil(this.br().width/(masterWidth+margin));
+        return cols < 1 ? 1 : cols;
     }
 
-    getNumY() : number{
-        var masterHeight = this.props.masterHeight;
+    getRows() : number{
+        var masterHeight = this.children[0].br().height;
         var margin = this.props.innerMarginY;
-        return masterHeight === 0 ? 1 : Math.ceil(this.height()/(masterHeight + margin));
+        var rows = masterHeight === 0 ? 1 : Math.ceil(this.br().height/(masterHeight + margin));
+        return rows < 1 ? 1 : rows;
     }
 
-    _buildChain(element){
-        var i = 0;
-        var next = element;
-        var length = this.children.length;
-        do{
-            next = next.runtimeProps.repeatNext;
-        } while (next && next !== element && ++i < length);
-
-        if (i < length){
-            var path = this._getIndexPath(element);
-            for (var j = 0; j < length; j++){
-                var cell1 = this.children[j];
-                var cell2 = j + 1 === length ? this.children[0] : this.children[j + 1];
-                var node1 = cell1;
-                var node2 = cell2;
-                for (var k = path.length - 1; k >= 0; k--){
-                    var part = path[k];
-                    node1 = node1.children[part];
-                    node2 = node2.children[part];
-                }
-                node1.runtimeProps.repeatNext = node2;
-            }
+    findMasterCounterpart(element: UIElement): UIElement{
+        var cellPath = this._getCellIndexPath(element);
+        if (cellPath.cell === this.children[0]){
+            return element;
         }
+        return this._findByIndexPath(this.children[0], cellPath.path);
     }
-    _getIndexPath(element){
+
+    findSelectionTarget(element: element): UIElement{
+        var cell = this.runtimeProps.lastActiveCell || this.children[0];
+        var cellPath = this._getCellIndexPath(element)
+        if (cellPath.cell === cell){
+            return element;
+        }
+        return this._findByIndexPath(cell, cellPath.path);
+    }
+
+    static tryFindRepeaterParent(element: UIElement): RepeatContainer{
+        var current = element.parent();
+        while (current && !(current instanceof RepeatContainer)){
+            current = current.parent();
+        }
+        return current;
+    }
+
+    _buildChain(element): UIElement[]{
+        var result = [element];
+        var cellPath = this._getCellIndexPath(element);
+        var currentCell = cellPath.cell;
+
+        for (var i = 0; i < this.children.length; ++i){
+            var cell = this.children[i];
+            if (cell === currentCell){
+                continue;
+            }
+
+            result.push(this._findByIndexPath(cell, cellPath.path));
+        }
+
+        return result;
+    }
+    _getCellIndexPath(element: UIElement): {cell: RepeatCell, path: number[]}{
         var path = [];
         var current = element;
         while (current && !(current instanceof RepeatCell)){
             path.push(current.index());
             current = current.parent();
         }
-        return path;
+        return {cell: current, path};
     }
+    _findByIndexPath(parent: Container, path: number[]): UIElement{
+        var current = parent;
+        for (var k = path.length - 1; k >= 0; k--){
+            var part = path[k];
+            current = current.children[part];
+        }
+        return current;
+    }
+
     _splitProps(element, props, oldProps){
         var common = null;
         var oldCommon = null;
@@ -275,15 +288,34 @@ export default class RepeatContainer extends Container{
     selectionFrameType() {
         return RepeatFrameType;
     }
-    createDragClone(e){
-        var clone = e.clone();
-        clone.runtimeProps.repeatMaster = e;
-        clone.runtimeProps.primitiveRoot = this;
-        return clone;
-    }
 
     selectGridProps(){
         return this.selectProps(["innerMarginX", "innerMarginY", "masterWidth", "masterHeight"]);
+    }
+
+    strokeBorder(context, w, h) {
+        if (Brush.canApply(this.stroke())){
+            super.strokeBorder(context, w, h);
+            return;
+        }
+        if (!this.lockedGroup()) {
+            context.save();
+            context.strokeStyle = UserSettings.group.active_stroke;
+
+            var scale = Environment.view.scale();
+            context.scale(1 / scale, 1 / scale);
+
+            context.beginPath();
+            try {
+                GlobalMatrixModifier.pushPrependScale();
+                super.drawBoundaryPath(context);
+                context.stroke();
+            }
+            finally {
+                GlobalMatrixModifier.pop();
+                context.restore();
+            }
+        }
     }
 }
 RepeatContainer.prototype.t = Types.RepeatContainer;

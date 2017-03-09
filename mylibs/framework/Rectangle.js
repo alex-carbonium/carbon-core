@@ -199,7 +199,6 @@ class Rectangle extends Shape {
         return this.props.cornerRadius;
     }
 
-
     hitTest(/*Point*/point, scale) {
         if (!this.visible() || this.hasBadTransform()) {
             return false;

@@ -1,31 +1,81 @@
-import RepeatViewListener from "./RepeatViewListener";;
 import ArrangeStrategy from "../ArrangeStrategy";
-import {ArrangeStrategies, ChangeMode} from "../Defs";
+import { ArrangeStrategies, ChangeMode } from "../Defs";
 import Point from "../../math/point";
+import { IContainer } from "../CoreModel";
 
 var debug = require("DebugUtil")("carb:repeatArrangeStrategy");
 
-
 var Strategy = {
-    arrange: function(container, e, changeMode){
+    arrange: function (container: IContainer, e, changeMode) {
         var items = container.children;
-        if (!items.length){
+        if (!items.length) {
             return;
         }
 
-        var master = items[0];
-        var masterBr = master.br();
-        var masterBb = master.getBoundingBox();
-        var masterWidth = masterBr.width;//container.props.masterWidth;
-        var masterHeight = masterBr.height;//container.props.masterHeight;
-        var numX = container.getNumX();
-        var numY = container.getNumY();
-        var numTotal = numX * numY;
-        while (items.length < numTotal){
-            var clone = master.clone();
-            container.insert(clone, items.length);
+        this._updateMargins(container, changeMode);
+
+        var cols = container.getCols();
+        var rows = container.getRows();
+
+        this._deleteExcessiveItems(container, rows, cols, changeMode);
+        this._insertNewItems(container, rows, cols, changeMode);
+        this._rearrangeItems(container, rows, cols, changeMode);
+    },
+
+    _updateMargins: function(container: IContainer, changeMode){
+        var master = container.children[0];
+        if (master.runtimeProps.newBr){
+            var dx = master.runtimeProps.oldBr.width - master.runtimeProps.newBr.width;
+            var dy = master.runtimeProps.oldBr.height - master.runtimeProps.newBr.height;
+            container.prepareAndSetProps({
+                innerMarginX: container.props.innerMarginX + dx,
+                innerMarginY: container.props.innerMarginY + dy
+            }, changeMode);
+
+            delete master.runtimeProps.newBr;
+            delete master.runtimeProps.oldBr;
         }
-        items.length = numTotal;
+    },
+    _deleteExcessiveItems: function (container: IContainer, rows, cols, changeMode): void {
+        var items = container.children;
+        for (let i = items.length - 1; i >= 0; --i) {
+            var item = items[i];
+            if (item.props.pos[1] >= cols || item.props.pos[0] >= rows) {
+                container.remove(item, changeMode);
+            }
+        }
+    },
+    _insertNewItems: function (container: IContainer, rows, cols, changeMode) {
+        var items = container.children;
+        var rowSize = items[items.length - 1].props.pos[1] + 1;
+        var rowDiff = cols - rowSize;
+
+        if (rowDiff > 0) {
+            for (let i = rowSize - 1; i < items.length; i += rowSize) {
+                var item = items[i];
+                for (var j = 0; j < rowDiff; ++j) {
+                    var slave = items[0].clone();
+                    slave.setProps({
+                        pos: [item.props.pos[0], item.props.pos[1] + 1]
+                    }, changeMode);
+                    container.insert(slave, i + 1, changeMode);
+                }
+                i += rowDiff;
+            }
+        }
+
+        var total = cols * rows;
+        while (items.length < total) {
+            var slave = items[0].clone();
+            container.insert(slave, items.length, changeMode);
+        }
+    },
+    _rearrangeItems: function (container: IContainer, rows, cols, changeMode) {
+        var items = container.children;
+        var master = items[0];
+        var masterBb = master.getBoundingBox();
+        var masterWidth = masterBb.width;
+        var masterHeight = masterBb.height;
 
         //with repeat cells being groups, offset can be always found on the first element
         var offsetX = masterBb.x;
@@ -33,89 +83,36 @@ var Strategy = {
 
         debug("Offset: x=%d y=%d", offsetX, offsetY);
 
-        for (let y = 0; y < numY; ++y){
-            for (let x = 0; x < numX; ++x){
-                let cell = items[y * numX + x];
+        for (let x = 0; x < rows; ++x) {
+            for (let y = 0; y < cols; ++y) {
+                let cell = items[x * cols + y];
                 let props = {
-                    name: "Cell [" + y + "," + x + "]"
+                    name: cols === 1 ? "Cell [" + y + "]" : "Cell [" + x + "," + y + "]",
+                    pos: cell.createPos(x, y)
                 };
-                let bb = cell.getBoundingBox();
                 cell.prepareAndSetProps(props, changeMode);
-                let t = new Point(
-                    x * (masterWidth + container.props.innerMarginX) + offsetX - bb.x,
-                    y * (masterHeight + container.props.innerMarginY) + offsetY - bb.y
+                var m = cell.viewMatrix().withTranslation(
+                    y * (masterWidth + container.props.innerMarginX) + offsetX,
+                    x * (masterHeight + container.props.innerMarginY) + offsetY
                 );
-                cell.applyTranslation(t, false, changeMode);
+                cell.setTransform(m, changeMode);
             }
         }
     },
-    // getNumX: function(container){
-    //     var masterWidth = container.props.masterWidth;
-    //     return masterWidth === 0 ? 1 : Math.ceil(container.width()/masterWidth);
-    // },
-    // getNumY: function(container){
-    //     var masterHeight = container.props.masterHeight;
-    //     return masterHeight === 0 ? 1 : Math.ceil(container.height()/masterHeight);
-    // },
-    getActualMarginX: function(container){
-        var items = container.children;
-        if (items.length < 2){
-            return 0;
-        }
-        var bb0 = items[0].getBoundingBox();
-        var bb1 = items[1].getBoundingBox();
-        if (bb0.y !== bb1.y){
-            return 0;
-        }
-        return bb1.x - bb0.x - bb0.width;
+
+    getActualMarginX: function (container) {
+        return container.props.innerMarginX;
     },
-    getActualMarginY: function(container){
-        var items = container.children;
-        if (items.length < 2){
-            return 0;
-        }
-        var item1 = null;
-        var bb0 = items[0].getBoundingBox()
-        var bb1 = null;
-        for (let i = 1, l = items.length; i < l; ++i) {
-            let item = items[i];
-            bb1 = item.getBoundingBox();
-            if (bb1.y !== bb0.y){
-                item1 = item;
-                break;
-            }
-        }
-        if (item1 === null){
-            return 0;
-        }
-        return bb1.y - bb0.y - bb0.height;
+    getActualMarginY: function (container) {
+        return container.props.innerMarginY;
     },
-    updateActualMargins: function(container, dx, dy){
+    updateActualMargins: function (container, dx, dy) {
         var base = container.children[0];
         var br = base.br();
         var marginX = container.props.innerMarginX + dx;
-        var masterWidth = container.props.masterWidth;
-        if (marginX < 0){
-            masterWidth += marginX;
-            marginX = 0;
-            if (masterWidth < br.width){
-                masterWidth = br.width;
-            }
-        }
-
         var marginY = container.props.innerMarginY + dy;
-        var masterHeight = container.props.masterHeight;
-        if (marginY < 0){
-            masterHeight += marginY;
-            marginY = 0;
-
-            if (masterHeight < br.height){
-                masterHeight = br.height;
-            }
-        }
-
-        debug("new margins marginX=%d marginY=%d masterWidth=%d masterHeight=%d", marginX, marginY, masterWidth, masterHeight);
-        container.prepareAndSetProps({innerMarginX: marginX, innerMarginY: marginY, masterWidth: masterWidth, masterHeight: masterHeight}, ChangeMode.Self);
+        //debug("new margins marginX=%d marginY=%d masterWidth=%d masterHeight=%d", marginX, marginY, masterWidth, masterHeight);
+        container.prepareAndSetProps({ innerMarginX: marginX, innerMarginY: marginY }, ChangeMode.Self);
         container.performArrange();
     }
 };

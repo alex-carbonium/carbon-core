@@ -90,6 +90,27 @@ describe("Repeater tests", function(){
             //assert
             assert.deepEqual(repeater.children.map(x => x.y()), [0, 100, 200]);
         });
+        it("Should repeat vertically, increase twice", function(){
+            //arrange
+            var element = new UIElement();
+            element.setProps({
+                id: "element",
+                height: 100
+            });
+
+            this.app.activePage.add(element);
+            var repeater = this.makeRepeater([element]);
+
+            //act
+            repeater.prepareAndSetProps({br: repeater.br().withHeight(300)});
+            this.app.relayout();
+
+            repeater.prepareAndSetProps({br: repeater.br().withHeight(400)});
+            this.app.relayout();
+
+            //assert
+            assert.deepEqual(repeater.children.map(x => x.y()), [0, 100, 200, 300]);
+        });
         it("Should repeat horizontally and vertically", function(){
             //arrange
             var element = new UIElement();
@@ -386,7 +407,7 @@ describe("Repeater tests", function(){
             this.app.relayout();
 
             //act
-            slave.prepareAndSetProps({autoWidth: false, br: slave.br().withWidth(100)});
+            slave.prepareAndSetProps({autoWidth: false, br: slave.br().withWidth(6)});
             this.app.relayout();
 
             //assert
@@ -394,7 +415,7 @@ describe("Repeater tests", function(){
             assert.deepEqual(texts, ["text 1", "text 222"], "Text must be different");
 
             var widths = this.mapChildren(repeater, x => x.width());
-            assert.deepEqual(widths, [100, 100], "Labels should have the same width")
+            assert.deepEqual(widths, [6, 6], "Labels should have the same width")
         });
 
         it("Should increase margins when changing width and height", function(){
@@ -462,7 +483,7 @@ describe("Repeater tests", function(){
             assert.deepEqual(ys, [30, 30], "y offset should be updated");
 
             var xs = this.mapChildren(repeater, x => x.getBoundaryRectGlobal().x);
-            assert.deepEqual(xs, [20, 70], "x offset should be updated");
+            assert.deepEqual(xs, [20, 120], "x offset should be updated");
         });
 
         it("Should correctly arrange all cells when moving slaves", function(){
@@ -741,7 +762,7 @@ describe("Repeater tests", function(){
 
             //assert
             repeater = this.app.activePage.getElementById(repeater.id());
-            assert.deepEqual(repeater.children.map(x => x.x()), [0, 50, 100], "Wrong cell positions");
+            assert.deepEqual(repeater.children.map(x => x.x()), [0, 100, 200], "Wrong cell positions");
             assert.deepEqual(this.mapChildren(repeater, x => x.width()), [50, 50, 50], "Wrong element width");
         });
         it("Should restore elements with custom properties", function(){
@@ -926,32 +947,6 @@ describe("Repeater tests", function(){
             //assert
             var clone = this.app.activePage.findSingleChildOrDefault(x => x instanceof RepeatContainer && x.id() !== repeater.id());
             assert.equal(repeater.children.length, clone.children.length);
-        });
-        it("Should react to changing properties on the clone", function(){
-            //arrange
-            var element = new UIElement();
-
-            element.setProps({
-                id: "master",
-                width: 100,
-                height: 100
-            });
-
-            this.app.activePage.add(element);
-
-            var repeater = this.makeRepeater([element]);
-
-            repeater.prepareAndSetProps({width: 300});
-            this.app.relayout();
-
-            //act
-            var lastCell = repeater.children[repeater.children.length - 1];
-            var slave = lastCell.children[lastCell.children.length - 1];
-            var dragClone = repeater.createDragClone(slave);
-            dragClone.prepareAndSetProps({width: 80});
-
-            //assert
-            assert.deepEqual(this.mapChildren(repeater, x => x.width()), [80, 80, 80]);
         });
     });
 });

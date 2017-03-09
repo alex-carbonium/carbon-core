@@ -5,7 +5,7 @@ import Point from "../math/point";
 import {IGroupContainer} from "./CoreModel";
 
 var GroupArrangeStrategy = {
-    arrange: function(container: IGroupContainer, event, changeMode){                
+    arrange: function(container: IGroupContainer, event, changeMode){
         var items = container.children;
         if (items.length === 0){
             return;
@@ -46,7 +46,7 @@ var GroupArrangeStrategy = {
         }
 
         if (container.translateChildren()){
-            container.setProps({br:container.br().withSize(xMax - xMin, yMax - yMin)}, changeMode);
+            container.prepareAndSetProps({br:container.br().withSize(xMax - xMin, yMax - yMin)}, changeMode);
 
             if (xMin !== 0 || yMin !== 0){
                 var translate = new Point(-xMin, -yMin);

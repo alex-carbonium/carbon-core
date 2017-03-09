@@ -16,12 +16,12 @@ export default {
         let items = container.children;
         let index = container.index();
         let allChildren = [];
-        let numX = container.getNumX();
-        let numY = container.getNumY();
+        let cols = container.getCols();
+        let rows = container.getRows();
 
-        for (let y = 0; y < numY; ++y){
-            for (let x = 0; x < numX; ++x){
-                let e = items[y * numX + x];
+        for (let x = 0; x < rows; ++x){
+            for (let y = 0; y < cols; ++y){
+                let e = items[x * cols + y];
                 if(e.children.length === 1) {
                     var gm = e.children[0].globalViewMatrix();
                     e = e.children[0].clone();
@@ -38,10 +38,10 @@ export default {
                     var gm = e.globalViewMatrix();
                     e = group;
                 }
-                
+
                 parent.insert(e, index);
-                e.setTransform(parent.globalViewMatrixInverted().appended(gm));      
-                allChildren.push(e);          
+                e.setTransform(parent.globalViewMatrixInverted().appended(gm));
+                allChildren.push(e);
             }
         }
 
