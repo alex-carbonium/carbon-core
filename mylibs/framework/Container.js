@@ -27,9 +27,6 @@ export default class Container extends UIElement {
         e.oldRect = e.oldRect || e.newRect;
         this.arrange(e, mode);
     }
-    arrangeRootDepthFirst() {
-        this.applyVisitorDepthFirst(x => x.performArrange());
-    }
     arrangeStrategy(value) {
         if (value !== undefined) {
             this.setProps({ arrangeStrategy: value })
@@ -42,7 +39,7 @@ export default class Container extends UIElement {
     applySizeScaling(s, o, options, mode) {
         var oldRect = this.getBoundaryRect();
         super.applySizeScaling.apply(this, arguments);
-        this.performArrange({ oldRect, reset: options && options.reset }, mode);
+        this.performArrange({ oldRect, options }, mode);
     }
 
     skew(): void{

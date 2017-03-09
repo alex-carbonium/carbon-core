@@ -25,9 +25,6 @@ class Story extends DataNode {
     relayoutCompleted(){
     }
 
-    arrangeRootDepthFirst() {
-    }
-
     removeFirst(predicate) {
         var index = this.children.findIndex(predicate);
         if(index >= 0){

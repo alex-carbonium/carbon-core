@@ -17,7 +17,7 @@ var subscribe = function(){
         }
     });
     this.registerForDisposal(s);
-    
+
     s = commandManager.onCommandExecuted.bind(function(cmd, redo){
         var primitives = cmd.toPrimitiveList();
         if(primitives && primitives.length) {
@@ -45,14 +45,11 @@ var subscribe = function(){
             if (redo){
                 primitives.forEach(x => DeferredPrimitives.register(x));
             }
-
-            //that.app.changedLocally.raise(primitives);
-            //Primitive.changeProjectFromPrimitives(that.app, primitives);
         }
         that.app.commandExecuting = false;
     });
     this.registerForDisposal(s);
-    
+
     s = commandManager.onCommandRolledBack.bind(function(cmd) {
         var primitives = cmd.rollbacks || cmd.toPrimitiveList(true);
         if (primitives) {
@@ -63,10 +60,6 @@ var subscribe = function(){
                     DeferredPrimitives.register(p);
                 }
             }
-            // that.app.raiseLogEvent(primitives);
-            // Primitive.changeProjectFromPrimitives(that.app, primitives);
-            //TODO: invalidate after undo/redo
-            //that.app.view.invalidate();
         }
     });
     this.registerForDisposal(s);

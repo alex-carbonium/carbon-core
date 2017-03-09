@@ -2,12 +2,13 @@ import ObjectFactory from "../ObjectFactory";
 import Primitive from "./Primitive";
 import UIElement from "framework/UIElement";
 import {PrimitiveType, ChangeMode} from "../Defs";
+import {formatPrimitive} from "../../util";
 import Invalidate from "framework/Invalidate";
 import Selection from "framework/SelectionModel";
 import Environment from "environment";
 import AnimationGroup from "framework/animation/AnimationGroup";
 
-var debug = require("DebugUtil")("carb:primitivesSync");
+var debug = require("DebugUtil")("carb:primitiveHandlers");
 
 var handlers = {};
 
@@ -18,7 +19,7 @@ Primitive.registerHandler = function (name, handler) {
 Primitive.changeProjectFromPrimitives = function (app, primitives) {
     for (var i = 0; i < primitives.length; ++i) {
         var p = primitives[i];
-        
+
     }
     Invalidate.request();
 };
@@ -63,6 +64,10 @@ Primitive.registerHandler(PrimitiveType.DataNodeChange, function(element, p){
 });
 
 Primitive.registerHandler(PrimitiveType.Selection, function(page, p){
+    if (!page.app.isLoaded){
+        return;
+    }
+
     var selection = p.selection;
     var selectionMap = selection.reduce((map, value)=>{
         map[value] = true;
@@ -86,6 +91,10 @@ Primitive.registerHandler(PrimitiveType.Selection, function(page, p){
 });
 
 Primitive.registerHandler(PrimitiveType.View, function(page, p) {
+    if (!page.app.isLoaded){
+        return;
+    }
+
     var animationValues = [];
     var options = {duration:180};
 
@@ -112,12 +121,12 @@ Primitive.registerHandler(PrimitiveType.View, function(page, p) {
 
         return Environment.view.scale();
     } });
-    
+
     var group = new AnimationGroup(animationValues, options, ()=>{
         Invalidate.request();
     });
 
-    Environment.view.animationController.registerAnimationGroup(group);        
+    Environment.view.animationController.registerAnimationGroup(group);
 });
 
 
@@ -135,6 +144,7 @@ Primitive.registerHandler(PrimitiveType.DataNodePatchProps, function(element, p)
 Primitive.handle = function(element, primitive){
     var h = handlers[primitive.type];
     if (h){
+        formatPrimitive(primitive, debug, 'Applying');
         return h(element, primitive);
     }
     return null;
