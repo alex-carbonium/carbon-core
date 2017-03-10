@@ -28,7 +28,7 @@ import ModelStateListener from "framework/sync/ModelStateListener";
 import DeferredPrimitives from "framework/sync/DeferredPrimitives";
 import PrimitiveHandler from "framework/sync/Primitive_Handlers";
 import PrimitiveSetCommand from "commands/PrimitiveSetCommand";
-import { createUUID, formatPrimitive } from "./util";
+import { createUUID } from "./util";
 import DesignerController from "framework/DesignerController";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
@@ -1021,7 +1021,7 @@ class App extends DataNode implements IApp {
 
         if (primitives.length) {
             if (DEBUG) {
-                primitives.forEach(x => formatPrimitive(x, debug, 'Created'));
+                primitives.forEach(x => debug('Created %p %o', x, x));
             }
 
             var viewPrimitive = this._trackViewPrimitive();

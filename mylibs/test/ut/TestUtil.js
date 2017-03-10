@@ -87,6 +87,7 @@ Util.setupApp = function(options){
         return extend(true, {}, json);
     };
     app.replayFromSavePoint = function(savepoint){
+        this.isLoaded = false;
         this.state.setExternalChange(true);
         var activePageId = this.activePage.id();
         this.fromJSON(savepoint);
@@ -98,6 +99,7 @@ Util.setupApp = function(options){
         this.relayout();
         this.setActivePageById(activePageId);
         this.state.setExternalChange(false);
+        this.isLoaded = true;
     };
 
     app.raiseLoaded();

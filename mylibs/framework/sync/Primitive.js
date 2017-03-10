@@ -66,12 +66,6 @@ Primitive.dataNodeAdd = function(parent, element, index, norollback) {
         res._rollbackData = Primitive.dataNodeRemove(parent, element, index, true);
     }
 
-    if (DEBUG){
-        res.toString = function(){
-            return "ADD parent=" + this.path[this.path.length - 1] + " child=" + this.node.type + " (" + this.node.props.id + ")";
-        }
-    }
-
     return res;
 };
 
@@ -84,12 +78,6 @@ Primitive.dataNodeRemove = function(parent, element, index, norollback) {
 
     if (!norollback) {
         res._rollbackData = Primitive.dataNodeAdd(parent, element, index, true);
-    }
-
-    if (DEBUG){
-        res.toString = function(){
-            return "REMOVE parent=" + this.path[this.path.length - 1] + " child=" + this.childId;
-        }
     }
 
     return res;
@@ -106,18 +94,12 @@ Primitive.dataNodeSetProps = function(element, props, oldProps, norollback) {
         res._rollbackData = Primitive.dataNodeSetProps(element, oldProps, null, true);
     }
 
-    if (DEBUG){
-        res.toString = function(){
-            return "SET PROPS node=" + this.path[this.path.length - 1] + " props=" + JSON.stringify(this.props);
-        }
-    }
-
     return res;
 };
 
 Primitive.selection = function(page, selection, oldSelection, userId, norollback) {
     var res = {
-        type: PrimitiveType.Selection, 
+        type: PrimitiveType.Selection,
         path: page.primitivePath(),
         userId: userId,
         selection: selection
@@ -127,29 +109,17 @@ Primitive.selection = function(page, selection, oldSelection, userId, norollback
         res._rollbackData = Primitive.selection(page, oldSelection || [], null, userId, true);
     }
 
-    if (DEBUG){
-        res.toString = function(){
-            return "SELECTION page=" + page.name() + " ids=" + JSON.stringify(selection);
-        }
-    }
-
     return res;
 };
 
 Primitive.view = function(page, sx, sy, scale, oldsx, oldsy, oldscale) {
     var res = {
-        type: PrimitiveType.View, 
+        type: PrimitiveType.View,
         path: page.primitivePath(),
         x: sx,
         y: sy,
         s: scale
     };
-
-    if (DEBUG){
-        res.toString = function(){
-            return "VIEW page=" + page.name() + " sx=" + sx + " sy="+ sy + " scale="+scale;
-        }
-    }
 
     return res;
 };
@@ -161,12 +131,6 @@ Primitive.dataNodePatchProps = function(element, patchType, propName){
         path: element.primitivePath(),
         propName
     };
-
-    if (DEBUG){
-        res.toString = function(){
-            return "PATCH PROPS node=" + this.path[this.path.length - 1] + " patchType=" + this.patchType + " prop=" + this.propName;
-        }
-    }
 
     return res;
 };
@@ -184,12 +148,6 @@ Primitive.dataNodeChange = function(element, oldJson, norollback) {
             path: element.primitivePath(),
             node: oldJson
         };
-    }
-
-    if (DEBUG){
-        res.toString = function(){
-            return "CHANGE node=" + this.path[this.path.length - 1] + " json=" + JSON.stringify(this.node);
-        }
     }
 
     return res;
@@ -210,12 +168,6 @@ Primitive.dataNodeChangePosition = function(parent, element, newPosition, oldPos
             childId: element.id(),
             newPosition: oldPosition
         };
-    }
-
-    if (DEBUG){
-        res.toString = function(){
-            return "CHANGE POSITION node=" + this.path[this.path.length - 1] + " childId=" + this.childId + " newPosition=" + this.newPosition;
-        }
     }
 
     return res;
@@ -322,7 +274,7 @@ Primitive.element_state_new = function (primitiveRootId, elementId, stateId, sta
     if (!noRollback) {
         primitive._rollbackData = Primitive.element_state_remove(primitiveRootId, elementId, stateId, null, true);
     }
-    
+
     return primitive;
 };
 

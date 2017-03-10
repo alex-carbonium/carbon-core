@@ -5,7 +5,7 @@ import DeferredPrimitives from "../framework/sync/DeferredPrimitives";
 import Invalidate from "../framework/Invalidate";
 import Selection from "../framework/SelectionModel";
 import logger from "../logger";
-import {createUUID, formatPrimitive} from "../util";
+import {createUUID} from "../util";
 import Promise from "bluebird";
 
 var debug = require("../DebugUtil")("carb:modelSync");
@@ -40,7 +40,7 @@ export default class ModelSyncProxy {
             primitive.time = new Date().valueOf();
 
             if (DEBUG){
-                formatPrimitive(primitive, debug);
+                debug("Local %p %o", primitive, primitive);
             }
 
             if (primitive.type){ //TODO: remove if when all primitives are changed
@@ -107,7 +107,7 @@ export default class ModelSyncProxy {
                 this._requestInProgress = false;
             });
     }
-    
+
     changedExternally = (primitivesStrings, fromVersion, toVersion) => {
         if (this._app.syncBroken()){
             return;
@@ -253,7 +253,7 @@ export default class ModelSyncProxy {
                 debug("Ignoring external primitive:");
             }
             if (DEBUG){
-                formatPrimitive(p, debug);
+                debug("External %p %o", p, p);
             }
         }
     }

@@ -1,4 +1,5 @@
 import {isPointInRect, adjustRectWidth, adjustRectHeight} from "math/math";
+import {ChangeMode} from "../Defs";
 import DragController from "../DragController";
 import CommandManager from "../commands/CommandManager";
 import PropertyTracker from "../PropertyTracker";
@@ -56,8 +57,8 @@ export default {
         var baseMatrix = container.globalViewMatrix().clone();
         var containerWidth = container.width();
         var containerHeight = container.height();
-        var cols = container.getCols();
-        var rows = container.getRows();
+        var cols = container.cols();
+        var rows = container.rows();
         var itemBox = container.children[0].getBoundingBox();
         var marginX = this._strategy.getActualMarginX(container);
         var marginY = this._strategy.getActualMarginY(container);
@@ -136,7 +137,7 @@ export default {
         if (canStart){
             PropertyTracker.suspend();
             ModelStateListener.stop();
-            this._oldProps = this._container.selectGridProps();
+            this._originalState = this._container.toJSON();
         }
         return canStart;
     },
@@ -152,15 +153,22 @@ export default {
         Invalidate.request();
     },
     onDragStopped: function(e){
-        ModelStateListener.start();
         var newProps = this._container.selectGridProps();
-        this._container.trackSetProps(newProps, this._oldProps);
+
+        //container needs to be completely restored to fire primitives for original cells
+        this._container.fromJSON(this._originalState);
+
+        ModelStateListener.start();
+
+        this._container.setProps(newProps);
         this._container.performArrange();
-        Invalidate.request();
+
         PropertyTracker.resume();
         PropertyTracker.flush();
 
         this.onDragSearching(e);
+
+        Invalidate.request();
     },
     updateIfAttached: function(container){
         if (container === this._container){

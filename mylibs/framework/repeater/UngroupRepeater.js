@@ -16,8 +16,8 @@ export default {
         let items = container.children;
         let index = container.index();
         let allChildren = [];
-        let cols = container.getCols();
-        let rows = container.getRows();
+        let cols = container.cols();
+        let rows = container.rows();
 
         for (let x = 0; x < rows; ++x){
             for (let y = 0; y < cols; ++y){

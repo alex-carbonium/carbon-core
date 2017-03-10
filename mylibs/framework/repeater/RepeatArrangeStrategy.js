@@ -14,8 +14,8 @@ var Strategy = {
 
         this._updateMargins(container, changeMode);
 
-        var cols = container.getCols();
-        var rows = container.getRows();
+        var cols = container.cols();
+        var rows = container.rows();
 
         this._deleteExcessiveItems(container, rows, cols, changeMode);
         this._insertNewItems(container, rows, cols, changeMode);
@@ -88,14 +88,12 @@ var Strategy = {
                 let cell = items[x * cols + y];
                 let props = {
                     name: cols === 1 ? "Cell [" + y + "]" : "Cell [" + x + "," + y + "]",
-                    pos: cell.createPos(x, y)
+                    pos: cell.createPos(x, y),
+                    m: cell.viewMatrix().withTranslation(
+                        y * (masterWidth + container.props.innerMarginX) + offsetX,
+                        x * (masterHeight + container.props.innerMarginY) + offsetY)
                 };
                 cell.prepareAndSetProps(props, changeMode);
-                var m = cell.viewMatrix().withTranslation(
-                    y * (masterWidth + container.props.innerMarginX) + offsetX,
-                    x * (masterHeight + container.props.innerMarginY) + offsetY
-                );
-                cell.setTransform(m, changeMode);
             }
         }
     },
@@ -113,7 +111,7 @@ var Strategy = {
         var marginY = container.props.innerMarginY + dy;
         //debug("new margins marginX=%d marginY=%d masterWidth=%d masterHeight=%d", marginX, marginY, masterWidth, masterHeight);
         container.prepareAndSetProps({ innerMarginX: marginX, innerMarginY: marginY }, ChangeMode.Self);
-        container.performArrange();
+        container.performArrange(null, ChangeMode.Self);
     }
 };
 

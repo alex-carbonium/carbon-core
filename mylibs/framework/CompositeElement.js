@@ -343,6 +343,25 @@ export default class CompositeElement extends UIElement implements IComposite {
         return base;
     }
 
+    getAffectedDisplayProperties(changes): string[]{
+        if (this.elements.length === 1){
+            return this.elements[0].getAffectedDisplayProperties(changes);
+        }
+        var result = [];
+        for (let i = 0; i < this.elements.length; ++i){
+            let element = this.elements[i];
+            var properties = element.getAffectedDisplayProperties(changes);
+            for (let j = 0; j < properties.length; ++j){
+                let p = properties[j];
+                if (result.indexOf(p) === -1){
+                    result.push(p);
+                }
+            }
+        }
+
+        return result;
+    }
+
     previewDisplayProps(changes: any) {
         if (!this._inPreview) {
             if (!this._affectingLayout && this.isChangeAffectingLayout(changes)) {

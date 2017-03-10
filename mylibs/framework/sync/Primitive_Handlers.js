@@ -2,7 +2,6 @@ import ObjectFactory from "../ObjectFactory";
 import Primitive from "./Primitive";
 import UIElement from "framework/UIElement";
 import {PrimitiveType, ChangeMode} from "../Defs";
-import {formatPrimitive} from "../../util";
 import Invalidate from "framework/Invalidate";
 import Selection from "framework/SelectionModel";
 import Environment from "environment";
@@ -149,7 +148,7 @@ Primitive.registerHandler(PrimitiveType.DataNodePatchProps, function(element, p)
 Primitive.handle = function(element, primitive){
     var h = handlers[primitive.type];
     if (h){
-        formatPrimitive(primitive, debug, 'Applying');
+        debug('Applying %p %o', primitive, primitive);
         return h(element, primitive);
     }
     return null;

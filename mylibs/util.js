@@ -44,21 +44,6 @@ export function contextScale(context){
     return 0 | (devicePixelRatio / backingStoreRatio);
 }
 
-var primitiveTypeNames = {};
-for (let t in PrimitiveType){
-    let n = PrimitiveType[t];
-    primitiveTypeNames[n] = t;
-}
-var patchTypeNames = {};
-for (let t in PatchType){
-    let n = PatchType[t];
-    patchTypeNames[n] = t;
-}
-export function formatPrimitive(p, output, message = ''){
-    var args = [(message ? message + ' ' : '') + '%s %o', p.toString(), p];
-    output.apply(output, args);
-}
-
 var useIntegerIds = false;
 var idCounter = 0;
 if (DEBUG){
