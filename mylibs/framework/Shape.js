@@ -278,18 +278,19 @@ class Shape extends Container {
         return value;
     }
 
+    autoPositionChildren(): boolean{
+        return true;
+    }
+
     insert(frame) {
-        var rect = this.getBoundaryRect();
+        this.setProps({clipMask: true});
+        frame.prepareAndSetProps(this.selectLayoutProps());
+
         var parent = this.parent();
         var idx = parent.remove(this);
-        this.setProps({clipMask: true, x: 0, y: 0, constraints: Constraints.All});
-
-        frame.prepareAndSetProps({x: 0, y: 0, width: rect.width, height: rect.height, constraints: Constraints.All});
-        frame.runtimeProps.resized = true;
 
         var group = new Container.GroupContainerType();
         group.add(this);
-        group.setProps(rect);
         group.add(frame);
         parent.insert(group, idx);
     }

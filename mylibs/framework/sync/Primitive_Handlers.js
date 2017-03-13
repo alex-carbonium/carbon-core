@@ -39,8 +39,11 @@ Primitive.mapChangedPageIds = function (primitives) {
 };
 
 Primitive.registerHandler(PrimitiveType.DataNodeAdd, function(container, p){
-    var element = UIElement.fromJSON(p.node);
-    container.insert(element, p.index, ChangeMode.Self);
+    var element = null;
+    if (!container.getImmediateChildById(p.node.props.id)){
+        element = UIElement.fromJSON(p.node);
+        container.insert(element, p.index, ChangeMode.Self);
+    }
     return element;
 });
 
