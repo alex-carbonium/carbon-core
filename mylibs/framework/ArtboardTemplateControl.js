@@ -123,7 +123,7 @@ export default class ArtboardTemplateControl extends Container {
             return this._artboard.name();
         }
 
-        return "Stencil";
+        return super.displayType();
     }
 
     _cloneFromArtboard(artboard) {
@@ -341,7 +341,12 @@ export default class ArtboardTemplateControl extends Container {
 
     registerSetProps(element, props, oldProps, mode) {
         if (element.id() === this.id()) {
-            return super.registerSetProps(element, props, oldProps, mode);
+            var realRoot = this._realPrimitiveRoot();
+            if (!realRoot){
+                return;
+            }
+            realRoot.registerSetProps(element, props, oldProps, mode);
+            return;
         }
 
         if(this._registerSetProps || this._initializing || this._arranging){
@@ -365,6 +370,14 @@ export default class ArtboardTemplateControl extends Container {
         this._registerSetProps = false;
     }
 
+    _realPrimitiveRoot(){
+        var parent = this.parent();
+        if (!parent){
+            return null;
+        }
+        return parent.primitiveRoot();
+    }
+
     draw(context) {
         if (this._artboard && this.runtimeProps.artboardVersion !== this._artboard.runtimeProps.version) {
             this._initFromArtboard();
@@ -374,6 +387,47 @@ export default class ArtboardTemplateControl extends Container {
 
     canAccept() {
         return false;
+    }
+
+    getNonRepeatableProps(newProps){
+        var result = super.getNonRepeatableProps(newProps);
+        if (!this._artboard){
+            return result;
+        }
+
+        var newPropsByElement = null;
+
+        for (let propertyName in newProps){
+            if (propertyName.startsWith("custom:")){
+                var prop = this._getCustomPropertyDefinition(propertyName);
+                newPropsByElement = newPropsByElement || {};
+                var elementProps = newPropsByElement[prop.controlId];
+                if (!elementProps){
+                    elementProps = {};
+                    newPropsByElement[prop.controlId] = elementProps;
+                }
+                elementProps[prop.propertyName] = newProps[propertyName];
+            }
+        }
+
+        if (newPropsByElement){
+            for (var elementId in newPropsByElement){
+                var element = this._artboard.getElementById(elementId);
+                if (!element){
+                    continue;
+                }
+
+                var nonRepeatable = element.getNonRepeatableProps(newPropsByElement[elementId]);
+                for (let i = 0; i < nonRepeatable.length; ++i){
+                    let propertyName = "custom:" + elementId + ":" + nonRepeatable[i];
+                    if (result.indexOf(propertyName) === -1){
+                        result.push(propertyName);
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 }
 ArtboardTemplateControl.prototype.t = Types.ArtboardTemplateControl;

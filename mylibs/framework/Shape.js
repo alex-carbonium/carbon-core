@@ -195,7 +195,7 @@ class Shape extends Container {
     }
 
     resizeDimensions() {
-        return this.isInEditMode() ? ResizeDimension.None : ResizeDimension.Both;
+        return this.isInEditMode() ? ResizeDimension.None : super.resizeDimensions();
     }
 
     isInEditMode(): boolean{

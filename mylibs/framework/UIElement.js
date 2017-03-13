@@ -1949,6 +1949,10 @@ export default class UIElement extends DataNode {
         return PropertyMetadata.findAll(this.t);
     }
 
+    getNonRepeatableProps(){
+        return ["id", "name", "visible"];
+    }
+
     toSVG() {
         var ctx = new C2S(this.width(), this.height());
         this.draw(ctx);
@@ -2265,8 +2269,5 @@ PropertyMetadata.registerForType(UIElement, {
         return {
             dockStyle: selection.parents().every(x => x.props.arrangeStrategy === ArrangeStrategies.Dock)
         };
-    },
-    getNonRepeatableProps: function () {
-        return ["id", "name", "visible"];
     }
 });
