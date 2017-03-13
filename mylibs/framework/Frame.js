@@ -234,6 +234,11 @@ export default class Frame extends Container {
         frame.runtimeProps.copiedFrame = this;
     }
 
+    getNonRepeatableProps () {
+        var base = super.getNonRepeatableProps();
+        return base.concat(["source"]);
+    }
+
     static uploadRequested = EventHelper.createEvent()
 }
 Frame.prototype.t = Types.Frame;
@@ -277,9 +282,5 @@ PropertyMetadata.registerForType(Frame, {
         });
 
         return baseGroups;
-    },
-    getNonRepeatableProps: function (element) {
-        var base = PropertyMetadata.findForType(Container).getNonRepeatableProps(element);
-        return base.concat(["source"]);
     }
 });

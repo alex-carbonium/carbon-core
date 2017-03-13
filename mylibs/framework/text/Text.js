@@ -189,6 +189,15 @@ class Text extends UIElement {
         }
         return false;
     }
+
+    getNonRepeatableProps(newProps){
+        var base = super.getNonRepeatableProps();
+        var props = newProps && newProps.autoWidth !== undefined ? newProps : this.props;
+        if (props.autoWidth){
+            return base.concat(["br", "content"]);
+        }
+        return base.concat(["content"]);
+    }
 }
 Text.prototype.t = Types.Text;
 
@@ -235,14 +244,6 @@ PropertyMetadata.registerForType(Text, {
         ];
 
         return ownGroups;
-    },
-    getNonRepeatableProps: function(element, newProps){
-        var base = PropertyMetadata.findForType(UIElement).getNonRepeatableProps(element);
-        var props = newProps && newProps.autoWidth !== undefined ? newProps : element.props;
-        if (props.autoWidth){
-            return base.concat(["br", "content"]);
-        }
-        return base.concat(["content"]);
     }
 });
 

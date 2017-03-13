@@ -27,6 +27,8 @@ define(["windows/Dialog", "framework/sync/Primitive"], function(Dialog, Primitiv
             }
 
             app.state.setExternalChange(false);
+            app.relayout();
+            app.restoredLocally.raise();
         };
 
         var loadLocalChanges = function(viewModel, primitives) {
@@ -66,7 +68,7 @@ define(["windows/Dialog", "framework/sync/Primitive"], function(Dialog, Primitiv
             }
         }
 
-        var checkBackups = function() {            
+        var checkBackups = function() {
             if (!this._app.id()){
                 initIfEmptyProject.call(this);
                 return Promise.resolve();

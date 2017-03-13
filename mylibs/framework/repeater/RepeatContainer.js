@@ -270,8 +270,7 @@ export default class RepeatContainer extends Container{
         var oldCommon = null;
         var commonChanged = false;
 
-        var metadata = element.propertyMetadata();
-        var nonRepeatableProps = metadata.getNonRepeatableProps(element, props);
+        var nonRepeatableProps = element.getNonRepeatableProps(props);
         for (var name in props){
             if (nonRepeatableProps.indexOf(name) === -1){
                 common = common || {};

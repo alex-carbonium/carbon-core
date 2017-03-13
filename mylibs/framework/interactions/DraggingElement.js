@@ -117,8 +117,7 @@ class DraggingElement extends TransformationElement {
             newParent.insert(element, index);
         }
 
-        //hack: shapes and frames resize children themselves, think how to do it better
-        if (!element.runtimeProps.resized){
+        if (!newParent.autoPositionChildren()){
             //must set new coordinates after parent is changed so that global caches are updated properly
             element.setTransform(newParent.globalMatrixToLocal(phantom.globalViewMatrix()));
         }

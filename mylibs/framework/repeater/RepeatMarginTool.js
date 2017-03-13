@@ -15,6 +15,7 @@ export default {
     _dragController: null,
     _marginRectX: null,
     _marginRectY: null,
+    _firstDrag: true,
     attach: function(container){
         this._container = container;
         this._container.enablePropsTracking();
@@ -133,15 +134,16 @@ export default {
         Invalidate.requestUpperOnly();
     },
     onDragStarting: function(){
-        var canStart = this._activeMargin !== null;
-        if (canStart){
+        return this._activeMargin !== null;
+    },
+    onDragging: function(e, dx, dy, ddx, ddy){
+        if (this._firstDrag){
             PropertyTracker.suspend();
             ModelStateListener.stop();
             this._originalState = this._container.toJSON();
+            this._firstDrag = false;
         }
-        return canStart;
-    },
-    onDragging: function(e, dx, dy, ddx, ddy){
+
         if (this._activeMargin.vertical){
             ddx = 0;
         }
@@ -169,6 +171,7 @@ export default {
         this.onDragSearching(e);
 
         Invalidate.request();
+        this._firstDrag = true;
     },
     updateIfAttached: function(container){
         if (container === this._container){

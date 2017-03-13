@@ -368,7 +368,7 @@ class Artboard extends Container {
             return [
                 {
                     label: "Layout",
-                    properties: ["width", "height", "x", "y", "constraints", "angle"]
+                    properties: ["width", "height", "x", "y", "angle"]
                 },
                 {
                     label: element.name(),
@@ -376,10 +376,10 @@ class Artboard extends Container {
                         return 'custom:' + p.controlId + ':' + p.propertyName
                     }))
                 },
-                {
-                    label: "Actions",
-                    properties: ["actions"]
-                },
+                // {
+                //     label: "Actions",
+                //     properties: ["actions"]
+                // },
                 {
                     label: "@constraints",
                     properties: ["constraints"]

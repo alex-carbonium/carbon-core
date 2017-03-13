@@ -233,40 +233,40 @@ export default class Container extends UIElement {
         }
     }
 
-    getBoundingBoxGlobal(includeMargin: boolean = false): IRect {
-        if(this.runtimeProps.mask && this.lockedGroup()) {
-            return this.runtimeProps.mask.getBoundingBoxGlobal(includeMargin);
-        }
+    // getBoundingBoxGlobal(includeMargin: boolean = false): IRect {
+    //     if(this.runtimeProps.mask && this.lockedGroup()) {
+    //         return this.runtimeProps.mask.getBoundingBoxGlobal(includeMargin);
+    //     }
 
-        return super.getBoundingBoxGlobal(includeMargin);
-    }
+    //     return super.getBoundingBoxGlobal(includeMargin);
+    // }
 
-    getBoundingBox(includeMargin: boolean = false) : IRect {
-        if(this.runtimeProps.mask && this.lockedGroup()) {
-            return this.runtimeProps.mask.getBoundingBox(includeMargin);
-        }
+    // getBoundingBox(includeMargin: boolean = false) : IRect {
+    //     if(this.runtimeProps.mask && this.lockedGroup()) {
+    //         return this.runtimeProps.mask.getBoundingBox(includeMargin);
+    //     }
 
-        return super.getBoundingBox(includeMargin);
-    }
+    //     return super.getBoundingBox(includeMargin);
+    // }
 
-    hitTest(/*Point*/point, scale, boundaryRectOnly = false) {
-         if(this.runtimeProps.mask && this.lockedGroup()) {
-            return this.runtimeProps.mask.hitTest(point, scale, boundaryRectOnly);
-        }
+    // hitTest(/*Point*/point, scale, boundaryRectOnly = false) {
+    //      if(this.runtimeProps.mask && this.lockedGroup()) {
+    //         return this.runtimeProps.mask.hitTest(point, scale, boundaryRectOnly);
+    //     }
 
-        return super.hitTest(point, scale, boundaryRectOnly);
-    }
+    //     return super.hitTest(point, scale, boundaryRectOnly);
+    // }
 
-    getBoundaryRect(includeMargin: boolean = false) : IRect {
-        var mask = this.runtimeProps.mask;
-        if(mask && this.lockedGroup()) {
-            var rect = mask.getBoundaryRect(includeMargin);
-            var pos = mask.position();
-            return new Rect(pos.x, pos.y, rect.width, rect.height);
-        }
+    // getBoundaryRect(includeMargin: boolean = false) : IRect {
+    //     var mask = this.runtimeProps.mask;
+    //     if(mask && this.lockedGroup()) {
+    //         var rect = mask.getBoundaryRect(includeMargin);
+    //         var pos = mask.position();
+    //         return new Rect(pos.x, pos.y, rect.width, rect.height);
+    //     }
 
-        return super.getBoundaryRect(includeMargin);
-    }
+    //     return super.getBoundaryRect(includeMargin);
+    // }
 
     drawWithMask(context, mask, i, environment) {
         if (mask.visible()) {
@@ -346,6 +346,13 @@ export default class Container extends UIElement {
             this.setProps({ allowMoveOutChildren: value })
         }
         return this.props.allowMoveOutChildren;
+    }
+
+    /**
+     * Defines whether container controls position of all children so that dragging element would not attempt to set it.
+     */
+    autoPositionChildren(): boolean{
+        return false;
     }
 
     add(/*UIElement*/element, mode) {
