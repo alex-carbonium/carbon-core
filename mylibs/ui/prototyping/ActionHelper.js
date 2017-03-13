@@ -3,7 +3,6 @@ import {distanceBetweenPoints} from "math/geometry";
 
 
 export function getConnectionPoints(from, to) {
-
     var fromRect = from.getBoundaryRectGlobal();
     var toRect = to.getBoundaryRectGlobal();
 

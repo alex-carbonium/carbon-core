@@ -64,6 +64,10 @@ Primitive.registerHandler(PrimitiveType.DataNodeChange, function(element, p){
 });
 
 Primitive.registerHandler(PrimitiveType.Selection, function(page, p){
+    if(p.sessionId !== backend.sessionId) {
+        return;
+    }
+
     if (!page.app.isLoaded){
         return;
     }

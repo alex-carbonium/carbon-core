@@ -361,12 +361,22 @@ class App extends DataNode implements IApp {
     }
 
     setMirrorArtboardId(pageId, artboardId) {
-        this.setProps({mirrorPageId: pageId, mirrorArtboardId: artboardId});        
+        this._setUserSetting("mirrorPageId", pageId);
+        this._setUserSetting("mirrorArtboardId", artboardId);
+    }
+
+    mirroringCode(value) {
+        if(arguments.length !== 0) {
+            this._setUserSetting("mirroringCode", value);
+        }
+
+        return this._getUserSetting("mirroringCode")
     }
 
     loadFont(family, style, weight): Promise<void>{
         return this.fontManager.load(family, style, weight);
     }
+
     saveFontMetadata(metadata){
         if (this.fontManager.tryAddMetadata(metadata)){
             var metadataWithId = Object.assign({}, metadata);
@@ -374,6 +384,7 @@ class App extends DataNode implements IApp {
             this.patchProps(PatchType.Insert, "fontMetadata", metadataWithId);
         }
     }
+
     getFontMetadata(family){
         return this.fontManager.getMetadata(family);
     }
@@ -684,6 +695,10 @@ class App extends DataNode implements IApp {
     _getUserSetting(name, defaultValue) {
         var userId = backend.getUserId();
 
+        return this._getSpecificUserSetting(userId, name, defaultValue);
+    }
+
+    _getSpecificUserSetting(userId, name, defaultValue) {
         for (var i = 0; i < this.props.userSettings.length; i++) {
             var s = this.props.userSettings[i];
             if (s.id.startsWith(userId) && s.id.split(":")[1] === name) {
@@ -695,7 +710,12 @@ class App extends DataNode implements IApp {
     }
     _setUserSetting(name, value) {
         var fullName = backend.getUserId() + ":" + name;
-        this.patchProps(PatchType.Change, "userSettings", { id: fullName, value });
+        var oldValue = this._getUserSetting(name);
+        if(value === null) {
+            this.patchProps(PatchType.Remove, "userSettings", { id: fullName });
+        } else {
+            this.patchProps(oldValue?PatchType.Change:PatchType.Insert, "userSettings", { id: fullName, value });
+        }
     }
 
     nextPageId() {
