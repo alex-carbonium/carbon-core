@@ -200,7 +200,7 @@ export default class ToolboxConfiguration {
                 return Promise.all([spriteUrlPromise, spriteUrl2xPromise])
                     .then(sprites => {
                         group.spriteUrl = sprites[0].imageData;
-                        group.spriteUrl2x = sprites[1];
+                        group.spriteUrl2x = sprites[1].imageData;
                         group.size = sprites[0].size;
                     });
             }

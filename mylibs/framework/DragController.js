@@ -80,9 +80,9 @@ export default class DragController {
         if (!this.isDragging && e.handled) {
             return;
         }
-        //scenario: if dragStarting return true, then onStopped should be called (RepeaterMarginTool)
-        if (this.isDragging || this._dragRequested) {
-            if (this.isDragging && (e.x !== this._lastDragPoint.x || e.y !== this._lastDragPoint.y)) {
+
+        if (this.isDragging) {
+            if (e.x !== this._lastDragPoint.x || e.y !== this._lastDragPoint.y) {
                 this.dragging(e);
             }
 
@@ -93,7 +93,7 @@ export default class DragController {
 
             this.onStopped(e);
 
-            e.handled = this.isDragging;
+            e.handled = true;
         }
         else {
             //scenario: clicking on ruler should not activate another artboard under ruler

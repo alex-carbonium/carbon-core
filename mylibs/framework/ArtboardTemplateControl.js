@@ -30,7 +30,7 @@ export default class ArtboardTemplateControl extends Container {
             selection.push(child);
         }
         parent.remove(this);
-       
+
         return selection;
     }
 
@@ -118,12 +118,12 @@ export default class ArtboardTemplateControl extends Container {
         this.setProps(res);
     }
 
-    displayType(noIndex) {
-        if (this._artboard) {            
-            return this._artboard.name() + (noIndex?'':' {index}');
+    displayType() {
+        if (this._artboard) {
+            return this._artboard.name();
         }
 
-        return "Element" + (noIndex? '' : ' {index}');
+        return "Stencil";
     }
 
     _cloneFromArtboard(artboard) {
@@ -146,7 +146,7 @@ export default class ArtboardTemplateControl extends Container {
         }
         this._cloning = true;
         var clone = UIElement.prototype.clone.apply(this, arguments);
-        
+
         delete this._cloning;
         return clone;
     }
@@ -252,12 +252,12 @@ export default class ArtboardTemplateControl extends Container {
                 var element = this.getElementById(this.id() + elementId);
 
                 var value = props[propName];
-                if(value === undefined) { // custom property was deleted, i.e by undo or reset property action 
+                if(value === undefined) { // custom property was deleted, i.e by undo or reset property action
                     var sourceElement = this._artboard.getElementById(element.sourceId());
                     delete props[propName];
                     value = sourceElement.props[prop.propertyName];
-                } 
-                
+                }
+
                 if(value && element) {
                     element.prepareAndSetProps({[prop.propertyName]: value}, ChangeMode.Self);
                 }
