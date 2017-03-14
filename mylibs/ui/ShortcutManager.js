@@ -61,8 +61,10 @@ export default class ShortcutManager {
         { key: "3", action: "library3" },
         { key: "4", action: "library4" },
 
-        { key: "ctrl+shift+>", action: "fontIncreaseSize" },
-        { key: "ctrl+shift+<", action: "fontDecreaseSize" },
+        { key: "ctrl+shift+.", action: "fontIncreaseSize" },
+        { key: "ctrl+shift+,", action: "fontDecreaseSize" },
+        { key: "alt+shift+.", action: "fontIncreaseSize1" },
+        { key: "alt+shift+,", action: "fontDecreaseSize1" },
 
         { key: "ctrl+d", action: "duplicate" },
         { key: "ctrl+g", action: "groupElements" },
@@ -160,7 +162,7 @@ export default class ShortcutManager {
         { key: "ctrl+0", action: "zoom100" },
         { key: "ctrl+.", action: "zoomFit" },
 
-        { key: "f", action: "toggleFrame" },        
+        { key: "f", action: "toggleFrame" },
 
         { key: "ctrl+shift+e", action: "editTemplate" }
     ];
@@ -172,8 +174,10 @@ export default class ShortcutManager {
         { key: "3", action: "library3" },
         { key: "4", action: "library4" },
 
-        { key: "meta+shift+>", action: "fontIncreaseSize" },
-        { key: "meta+shift+<", action: "fontDecreaseSize" },
+        { key: "meta+shift+.", action: "fontIncreaseSize" },
+        { key: "meta+shift+,", action: "fontDecreaseSize" },
+        { key: "alt+shift+.", action: "fontIncreaseSize1" },
+        { key: "alt+shift+,", action: "fontDecreaseSize1" },
 
         { key: "meta+d", action: "duplicate" },
         { key: "meta+g", action: "groupElements" },

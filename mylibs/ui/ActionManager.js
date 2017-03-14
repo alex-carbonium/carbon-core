@@ -372,19 +372,19 @@ export default class ActionManager implements IActionManager {
 
 
         this.registerAction("fontIncreaseSize", "Font increase size", "Font", function () {
-            var selection = Selection.selectedElement();
-            if (!selection) {
-                return null;
-            }
-            return new sketch.commands.FontNumericProperty('size', selection, true);
+            FontHelper.changeFontSize(Selection.selectedElements(), true, 1);
+        }, "");
+
+        this.registerAction("fontIncreaseSize1", "Font increase size by 1 pt", "Font", function () {
+            FontHelper.changeFontSize(Selection.selectedElements(), false, 1);
         }, "");
 
         this.registerAction("fontDecreaseSize", "Font decrease size", "Font", function () {
-            var selection = Selection.selectedElement();
-            if (!selection) {
-                return null;
-            }
-            return new sketch.commands.FontNumericProperty('size', selection, false);
+            FontHelper.changeFontSize(Selection.selectedElements(), true, -1);
+        }, "");
+
+        this.registerAction("fontDecreaseSize1", "Font decrease size by 1 pt", "Font", function () {
+            FontHelper.changeFontSize(Selection.selectedElements(), false, -1);
         }, "");
 
         this.registerAction("fontBold", "Font bold", "Font", function () {
@@ -475,6 +475,9 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("save", "Save", "Project actions", function () {
+            if (that.app.serverless()){
+                return that.app.offlineModel.saveBackup(that.app);
+            }
             return that.app.modelSyncProxy.change();
         }, "ui-save");
 
