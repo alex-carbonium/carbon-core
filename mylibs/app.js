@@ -714,7 +714,7 @@ class App extends DataNode implements IApp {
         if(value === null) {
             this.patchProps(PatchType.Remove, "userSettings", { id: fullName });
         } else {
-            this.patchProps(oldValue?PatchType.Change:PatchType.Insert, "userSettings", { id: fullName, value });
+            this.patchProps((oldValue === null || oldValue === undefined) ? PatchType.Insert : PatchType.Change, "userSettings", { id: fullName, value });
         }
     }
 

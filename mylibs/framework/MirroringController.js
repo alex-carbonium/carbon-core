@@ -13,9 +13,10 @@ function updateEvent(event) {
 }
 
 export default class MirroringController {
-    constructor(app, view) {
+    constructor(app, view, followUserId) {
         this.app = app;
         this.view = view;
+        this.followUserId = followUserId;
         this.onArtboardChanged = EventHelper.createEvent();
         this.touchHelper = new TouchHelper(view);
 
@@ -24,10 +25,12 @@ export default class MirroringController {
     }
 
     _appPropertyChanged(app, newProps, oldProps) {
-        if (newProps.mirrorArtboardId !== undefined && newProps.mirrorPageId !== undefined) {
-            var page = DataNode.getImmediateChildById(app, newProps.mirrorPageId, true);
+        var artboardId = app._getSpecificUserSetting(this.followUserId, 'mirrorArtboardId');
+        if(artboardId != this._currentArtboardId) {        
+            var pageId = app._getSpecificUserSetting(this.followUserId, 'mirrorPageId');
+            var page = DataNode.getImmediateChildById(app, pageId, true);
             if (page) {                
-                var artboard = DataNode.getImmediateChildById(page, newProps.mirrorArtboardId, true);
+                var artboard = DataNode.getImmediateChildById(page, artboardId, true);
                 page.setActiveArtboard(artboard, true);
                 this.onArtboardChanged.raise(artboard);
             }
