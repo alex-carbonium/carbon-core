@@ -236,7 +236,6 @@ export default class Frame extends Container {
 
     insert(frame: Frame, index, mode) {
         frame.setProps(this.selectLayoutProps());
-
         this.parent().replace(this, frame, mode);
     }
 
