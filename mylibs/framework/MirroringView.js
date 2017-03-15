@@ -13,7 +13,7 @@ function fitRectToRect(outer, inner) {
         scale = outer.height / inner.height;
     }
 
-    return scale;
+    return Math.min(1, scale);
 }
 
 class ArtboardProxyPage extends Page {
@@ -62,15 +62,15 @@ class ArtboardProxyPage extends Page {
         }
     }
 
-    updateScrollRanges(){
+    updateScrollRanges() {
         var artboard = this.children[0];
         if(!artboard){
             return;
         }
         var screenSize = App.Current.viewportSize();
         var scale = this.view.scale();
-        this.maxScrollX(Math.max(0, (artboard.width() - screenSize.width) * scale));
-        this.maxScrollY(Math.max(0, (artboard.height() - screenSize.height) * scale));
+        this.maxScrollX(Math.max(0, (artboard.width()* scale - screenSize.width) ));
+        this.maxScrollY(Math.max(0, (artboard.height()* scale - screenSize.height)));
     }
 
     fitToViewport(){
@@ -78,7 +78,7 @@ class ArtboardProxyPage extends Page {
         if(!artboard){
             return;
         }
-        var rect = artboard.getBoundaryRect();
+        var rect = clone(artboard.getBoundaryRect());
         var scale = fitRectToRect(App.Current.viewportSize(), rect);
         this.view.scale(scale);
     }
@@ -148,32 +148,4 @@ export default class MirroringView extends ViewBase{
             this._invalidateRequestedToken = null;
         }
     }
-    //
-    // draw() {
-    //     this.animationController.update();
-    //
-    //     var artboard = this._artboard;
-    //     if(artboard && this._version !== artboard.version){
-    //
-    //         var scale = 1;
-    //         if(!this.forceNoScale) {
-    //             var rect = artboard.getBoundaryRect();
-    //             scale = fitRectToRect(this.viewportSize, rect);
-    //             this.scale(scale);
-    //         }
-    //
-    //
-    //
-    //         var context = this.context;
-    //         var scale = this.scale();
-    //
-    //         context.clearRect(0,0, context.canvas.width, context.canvas.height);
-    //         context.save();
-    //         context.scale(this.contextScale * scale, this.contextScale * scale);
-    //         context.translate(-artboard.x() + (this.viewportSize.width - artboard.width() * scale)/2 | 0, -artboard.y()+ (this.viewportSize.height - artboard.height()*scale)/2 |0);
-    //         artboard.draw(context, this._envArray[0]);
-    //         context.restore();
-    //         this._version = artboard.version;
-    //     }
-  //  }
 }

@@ -27,6 +27,19 @@ export default class Context implements IContext{
         this._context.setTransform(1, 0, 0, 1, this._relativeOffsetX || 0, this._relativeOffsetY || 0);
     }
 
+    get contextScale() {
+        var devicePixelRatio = window.devicePixelRatio || 1;
+        var backingStoreRatio = this._context.backingStorePixelRatio 
+        || this._context.webkitBackingStorePixelRatio 
+        || this._context.mozBackingStorePixelRatio 
+        || this._context.msBackingStorePixelRatio 
+        || this._context.oBackingStorePixelRatio || 1;
+
+        // on some machines it is non integer, it affects rendering
+        // browser zoom is also changing this value, so need to make sure it is never 0
+        return Math.max(1, Math.round(devicePixelRatio / backingStoreRatio));            
+    }
+
     get width() {
         return this._width;
     }

@@ -256,10 +256,14 @@ var onWindowBlur = function () {
     App.Current.actionManager.invoke("cancel");
 }
 
+var onWindowResize = function () {    
+    Environment.controller.onWindowResize();
+}
+
 var setupFiledrop = function (app) {
     var that = this;
     that._uploadNotices = {};
-    $('#viewContainer').filedrop({
+    $('').filedrop({
         url: backend.decorateUrl("/api/File/Upload"), // upload handler, handles each file separately
         data: {folderId: sketch.params.folderId},
         error (err, file) {
@@ -440,6 +444,7 @@ export default class Desktop extends All {
         document.body.addEventListener('mouseup', this._onmouseupHandler);
 
         window.addEventListener('blur', onWindowBlur);
+        window.addEventListener('resize', onWindowResize);
 
 
         var hammertime = this.hammertime = new Hammer(parentElement, { drag_min_distance: 1 });

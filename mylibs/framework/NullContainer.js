@@ -18,6 +18,10 @@ class NullContainer {
         return null;
     }
 
+    incrementVersion () {
+        
+    }
+
     hitElements() {
         return [];
     }

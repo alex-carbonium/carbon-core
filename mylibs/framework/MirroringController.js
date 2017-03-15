@@ -37,6 +37,12 @@ export default class MirroringController {
         }
     }
 
+    onWindowResize() {
+        if(this.view.mode === 1) {
+            this.view.page.fitToViewport();
+        }
+    }
+
     _propagateScroll(delta, element) {
         if (delta.dx === 0 && delta.dy === 0) {
             return;

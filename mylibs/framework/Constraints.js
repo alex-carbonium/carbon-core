@@ -35,5 +35,7 @@ define(["framework/TypeDefaults"], function(TypeDefaults) {
 
     Constraints.All = Constraints.create(HorizontalConstraint.LeftRight, VerticalConstraint.TopBottom);
 
+    Constraints.StretchAll = Constraints.create(HorizontalConstraint.Stretch, VerticalConstraint.Stretch);
+
     return Constraints;
 });

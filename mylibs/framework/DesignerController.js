@@ -166,6 +166,10 @@ export default class DesignerController implements IController {
         return Selection.directSelectionEnabled() ? "direct_select_cursor" : "default_cursor"
     }
 
+    onWindowResize() {
+        
+    }
+
     _setMoveCursor(){
         Cursor.setCursor(Keyboard.state.alt ? "move_clone" : "move_cursor");
     }

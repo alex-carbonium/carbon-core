@@ -16,6 +16,7 @@ import ChangeColumnType from "../commands/ChangeColumnType";
 import ConvertToPath from "../commands/ConvertToPath";
 import DeleteCellGroup from "../commands/DeleteCellGroup";
 import Group from "../commands/Group";
+import SelectionToStencil from "../commands/SelectionToStencil";
 import Ungroup from "../commands/Ungroup";
 import InsertColumn from "../commands/InsertColumn";
 import InsertRow from "../commands/InsertRow";
@@ -96,6 +97,7 @@ export default class ActionManager implements IActionManager {
             event.raise(actionName, e);
         }
     }
+
     notifyActionCompleted(actionName, result, ret) {
         this.actionPerformed.raise(actionName, result, ret);
         var event = this._events[actionName];
@@ -110,6 +112,7 @@ export default class ActionManager implements IActionManager {
             }
         }
     }
+
     registerAction(name, description, category, callback, image) {
         var action = { category: category, name: name, description: description, callback: callback, image: image };
 
@@ -127,6 +130,7 @@ export default class ActionManager implements IActionManager {
 
         return action;
     }
+
     registerActions() {
         var that = this;
         var selectionMade = function () {
@@ -321,6 +325,10 @@ export default class ActionManager implements IActionManager {
         this.registerAction("groupElements", "Group elements", "Group", function () {
             Group.run(Selection.getSelection(), GroupContainer);
         }, "ui-group");
+
+        this.registerAction("createStencilFromSelection", "Create stencil", "Group", function () {
+            SelectionToStencil.run(Selection.getSelection());
+        });
 
         this.registerAction("ungroupElements", "Ungroup elements", "Ungroup", function () {
             Ungroup.run(Selection.getSelection());

@@ -164,7 +164,7 @@ export default class ShortcutManager {
 
         { key: "f", action: "toggleFrame" },
 
-        { key: "ctrl+shift+e", action: "editTemplate" }
+        { key: "ctrl+shift+e", action: "createStencilFromSelection" }
     ];
 
 
@@ -280,6 +280,6 @@ export default class ShortcutManager {
 
         { key: "f", action: "toggleFrame" },
 
-        { key: "meta+shift+e", action: "editTemplate" }
+        { key: "meta+shift+e", action: "createStencilFromSelection" }
     ];
 }
