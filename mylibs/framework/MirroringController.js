@@ -3,6 +3,7 @@ import domUtil from "utils/dom";
 import TouchHelper from "./TouchHelper";
 import PropertyTracker from "framework/PropertyTracker";
 import DataNode from "framework/DataNode";
+import {MirrorViewMode} from "framework/Defs";
 
 function updateEvent(event) {
     var scale = this.view.scale();
@@ -38,7 +39,7 @@ export default class MirroringController {
     }
 
     onWindowResize() {
-        if(this.view.mode === 1) {
+        if(this.view.mode === MirrorViewMode.Fit) {
             this.view.page.fitToViewport();
         }
     }
@@ -143,13 +144,32 @@ export default class MirroringController {
         }
     }
 
+    ondoubletap() {
+        this.ondblclick();
+    }
+
+    onWindowResize() {
+
+    }
 
     ondblclick(eventData) {
-        if (this.view.scale() === 1) {
-            this.view.mode = 1;
+
+        // hack: this is the hack to prevent double tap and dblclick called at the same time
+        if(this._disableDblClick) {
+            return;
+        }
+        this._disableDblClick = true;
+        setTimeout(()=> {
+            this._disableDblClick = false;
+        }, 100);
+        // end of hack
+        
+
+        if (!this.view.mode) {
+            this.view.mode = MirrorViewMode.Fit;
             this.view.page.fitToViewport();
         } else {
-            this.view.mode = 0;
+            this.view.mode = MirrorViewMode.OriginalSize;
             this.view.scale(1);
         }
         this.view.page._version = null;

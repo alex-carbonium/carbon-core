@@ -170,6 +170,10 @@ export default class DesignerController implements IController {
         
     }
 
+    ondoubletap () {
+        
+    }
+
     _setMoveCursor(){
         Cursor.setCursor(Keyboard.state.alt ? "move_clone" : "move_cursor");
     }

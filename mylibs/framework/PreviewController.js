@@ -92,6 +92,14 @@ export default class PreviewController {
         this.touchHelper.onpanend(event);
     }
 
+    ondoubletap() {
+
+    }
+
+    onWindowResize() {
+
+    }
+    
     onpinchmove(event) {
         this.touchHelper.onpinchmove(event);
         this.view.invalidate();

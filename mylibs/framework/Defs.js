@@ -227,6 +227,11 @@ export var StoryType = {
     Prototype:1
 };
 
+export var MirrorViewMode = {
+    OriginalSize:0,
+    Fit:1
+}
+
 export var ContentSizing = {
     fill: 1,
     fit: 2,

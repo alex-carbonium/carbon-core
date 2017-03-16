@@ -163,6 +163,10 @@ var onclick = function (event) {
     Environment.controller.onclick(Environment.controller.createEventData(event), Keyboard.state);
 };
 
+var ondoubletap = function (event) {
+    Environment.controller.ondoubletap(Environment.controller.createEventData(event));
+}
+
 var mouseOutData = null;
 var onDocumentMouseMove = function (event) {
     if (event.which !== 1) {
@@ -456,6 +460,7 @@ export default class Desktop extends All {
         hammertime.on("pinchstart", onpinchstart);
         hammertime.on("pinchmove", onpinchmove);
         hammertime.on("pinchend", onpinchend);
+        hammertime.on("doubletap", ondoubletap);
         hammertime.off("tap");
 
         this._parentElement = parentElement;

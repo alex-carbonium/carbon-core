@@ -2,7 +2,7 @@ import ViewBase from "./ViewBase"
 import Environment from "environment";
 import Invalidate from "framework/Invalidate"
 import Page from "framework/Page";
-import {ChangeMode, Types} from "framework/Defs";
+import {ChangeMode, Types, MirrorViewMode} from "framework/Defs";
 import PropertyMetadata from "framework/PropertyMetadata";
 
 function fitRectToRect(outer, inner) {
@@ -20,6 +20,7 @@ class ArtboardProxyPage extends Page {
     constructor(app, view){
         super();
         this.view = view;
+        this.mode = MirrorViewMode.Fit;
         this._pageChnagedToken = null;
         this._onArtboardChangedToken = null;
 
