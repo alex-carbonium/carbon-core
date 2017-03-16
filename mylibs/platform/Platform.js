@@ -17,9 +17,9 @@ else if (params.basicPlatform) {
     platform = new Basic();
 }
 else {    
-    if (params.deviceType === "Computer" || params.deviceType === "Tablet") {
+    // if (params.deviceType === "Computer" || params.deviceType === "Tablet") {
         platform = new Desktop(!isMobile());
-    }
+    // }
 }
 
 if (!platform) {
