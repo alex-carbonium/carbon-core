@@ -53,7 +53,7 @@ function getResolve(settings){
     var resolves = {
         root: [fullPath("../mylibs")],
         alias: {},
-        extensions: ["", ".es6.js", ".js", ".jsx", ".less", ".html"]
+        extensions: ["", ".js", ".jsx", ".less", ".html"]
     };
 
     return resolves;
@@ -144,12 +144,7 @@ function getLoaders(settings){
             test: /\.js$/,
             loaders: [babelLoader],
             exclude: excludes
-        },
-        {
-            test: /\.es6\.js$/,
-            loaders: [babelLoader],
-            exclude: excludes
-        },
+        },       
         {
             test: /^worker!/,
             loaders: ["worker"],
