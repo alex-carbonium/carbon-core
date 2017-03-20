@@ -8,9 +8,9 @@ import UserSettings from "../../UserSettings";
 import Selection from "../SelectionModel";
 import Environment from "../../environment";
 import GlobalMatrixModifier from "../../framework/GlobalMatrixModifier";
-import { IComposite } from "../CoreModel";
+import { IComposite, IUIElement } from "../CoreModel";
 
-export default class TrasnformationElement extends GroupContainer implements IComposite {
+export default class TransformationElement extends GroupContainer implements IComposite {
     constructor(element) {
         super();
 
@@ -24,13 +24,26 @@ export default class TrasnformationElement extends GroupContainer implements ICo
             this._hideDecorators(e);
             this.add(this.createClone(e));
 
-            this._elements.push(e);
+            this.register(e);
         }
         this._hideDecorators(element);
 
         this.performArrange();
 
         this.showOriginal(false);
+    }
+
+    register(element: IUIElement){
+        this._elements.push(element);
+    }
+    unregister(element: IUIElement){
+        var i = this._elements.indexOf(element);
+        if (i !== -1){
+            this._elements.splice(i, 1);
+        }
+    }
+    unregisterAll(){
+        this._elements.length = 0;
     }
 
     _hideDecorators(e) {
@@ -130,9 +143,9 @@ export default class TrasnformationElement extends GroupContainer implements ICo
     }
 }
 
-TrasnformationElement.prototype.t = Types.TransformationElement;
+TransformationElement.prototype.t = Types.TransformationElement;
 
-PropertyMetadata.registerForType(TrasnformationElement, {
+PropertyMetadata.registerForType(TransformationElement, {
     stroke: {
         defaultValue: Brush.createFromColor(UserSettings.frame.stroke)
     }

@@ -12,7 +12,7 @@ import Keyboard from "../platform/Keyboard";
 import Phantom from "./Phantom";
 import ObjectFactory from "./ObjectFactory";
 import {Types, ViewTool} from "./Defs";
-import {IApp, IController, IEvent, IEvent2, IMouseEventData, IKeyboardState, IUIElement} from "./CoreModel";
+import {IApp, IController, IEvent, IEvent2, IMouseEventData, IKeyboardState, IUIElement, IContainer} from "./CoreModel";
 
 function onselect(rect) {
     var selection = this.app.activePage.getElementsInRect(rect);
@@ -291,7 +291,7 @@ export default class DesignerController implements IController {
     }
 
 
-    beginDrag(event) {
+    beginDrag(event, hideFrame: boolean = true) {
         var eventData = {
             mouseX: event.x,
             mouseY: event.y,
@@ -299,7 +299,9 @@ export default class DesignerController implements IController {
             y: event.y
         };
 
-        Selection.hideFrame();
+        if (hideFrame){
+            Selection.hideFrame();
+        }
 
         this._draggingElement = new ObjectFactory.construct(Types.DraggingElement, event.element, event);
         this._draggingElement.showOriginal(event.altKey);
@@ -656,13 +658,27 @@ export default class DesignerController implements IController {
         eventData.element = element;
         element.resetTransform();
         element.applyTranslation({x: ~~(eventData.x - element.width() / 2), y: ~~(eventData.y - element.height() / 2)});
-        this.beginDrag(eventData);
+        this.beginDrag(eventData, false);
 
         Cursor.setCursor("move_cursor");
 
         stopDragPromise
             .then(e => {
-                this.onmouseup(this.createEventData(e));
+                var eventData = this.createEventData(e);
+
+                var parent = this._draggingOverElement;
+                var selectComposite = Selection.selectComposite();
+                if (selectComposite.canAccept([element], undefined, eventData.event.ctrlKey)
+                    && selectComposite.hitTest(eventData, this.view.scale(), true)
+                ){
+                    parent = Selection.selectComposite();
+                }
+
+                var br = element.br();
+                this.cancel();
+                this.insertAndSelect(element, parent, eventData.x - br.width/2, eventData.y - br.height/2);
+
+                this.stopDraggingEvent.raise(eventData, Selection.selectedElements());
             })
             .catch(e => {
                 this.cancel();
@@ -670,6 +686,29 @@ export default class DesignerController implements IController {
             });
     }
 
+    insertAndSelect(element: IUIElement, parent: IContainer, x: number, y: number){
+        var newSelection = [];
+
+        if (parent instanceof CompositeElement) {
+            for (var i = 0; i < parent.elements.length; ++i){
+                var toInsert = i === 0 ? element : element.clone();
+                newSelection.push(parent.elements[i].add(toInsert));
+            }
+        }
+        else if (element.props._unwrapContent) {
+            parent.add(element);
+            newSelection = element.unwrapToParent();
+        }
+        else {
+            if (!parent.autoPositionChildren()){
+                var newMatrix = element.viewMatrix().withTranslation(Math.round(x), Math.round(y));
+                element.setTransform(parent.globalMatrixToLocal(newMatrix));
+            }
+            newSelection.push(parent.add(element));
+        }
+
+        Selection.makeSelection(newSelection);
+    }
 
     captureMouse(/*UIElement*/element) {
         this._captureElement = element;

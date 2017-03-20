@@ -31,7 +31,7 @@ export default class CompositeElement extends UIElement implements IComposite {
         return this.children;
     }
 
-    add(element: UIElement) {
+    register(element: UIElement) {
         var systemType = element.systemType();
         if (this._types.indexOf(systemType) === -1) {
             this._types.push(systemType);
@@ -39,7 +39,7 @@ export default class CompositeElement extends UIElement implements IComposite {
         element.enablePropsTracking();
         this.children.push(element);
     }
-    remove(element: UIElement) {
+    unregister(element: UIElement) {
         element.disablePropsTracking();
 
         var systemType = element.systemType();
@@ -61,6 +61,10 @@ export default class CompositeElement extends UIElement implements IComposite {
         if (canRemoveType) {
             this._types.splice(this._types.indexOf(systemType), 1);
         }
+    }
+
+    autoPositionChildren(): boolean{
+        return true;
     }
 
     applyScaling(s, o, options, changeMode) {
@@ -125,7 +129,7 @@ export default class CompositeElement extends UIElement implements IComposite {
         }
         return false;
     }
-    clear() {
+    unregisterAll() {
         this.each(x => x.disablePropsTracking());
         this._types = [];
         //do not clear, selection model stores this by reference
@@ -147,10 +151,14 @@ export default class CompositeElement extends UIElement implements IComposite {
         }
     }
 
-    hitTest(point: IPoint, scale: number) {
+    hitTest(point: IPoint, scale: number, boundaryRectOnly: boolean = false) {
         var count = this.count();
         if (count === 0) {
             return false;
+        }
+
+        if (boundaryRectOnly && count > 1){
+            return super.hitTest(point, scale, boundaryRectOnly);
         }
 
         for (var i = count - 1; i >= 0; i--) {
@@ -164,8 +172,8 @@ export default class CompositeElement extends UIElement implements IComposite {
     hitVisible() {
         return true;
     }
-    canAccept() {
-        return false;
+    canAccept(elements, autoInsert, allowMoveIn) {
+        return this.elements.every(x => x.canAccept(elements, autoInsert, allowMoveIn));
     }
     each(callback: (e: UIElement) => boolean | void) {
         this.elements.forEach(callback);

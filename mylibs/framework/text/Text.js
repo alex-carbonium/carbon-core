@@ -6,10 +6,14 @@ import {deepEquals} from "../../util";
 import PropertyMetadata from "../PropertyMetadata";
 import TextEngine from "./textengine";
 import styleManager from "../style/StyleManager";
+import {IContainer, IDataElement} from "../CoreModel";
 
-class Text extends UIElement {
+class Text extends UIElement implements IContainer, IDataElement {
     prepareProps(changes){
+        var dataProvider = changes.dp;
+
         super.prepareProps(changes);
+
         var contentChanged = changes.content !== undefined;
         var brChanged = changes.br !== undefined;
         var autoWidthChanged = changes.autoWidth !== undefined;
@@ -59,6 +63,10 @@ class Text extends UIElement {
 
         if (changes.textStyleId !== undefined) {
             extend(changes, styleManager.getStyle(changes.textStyleId, 2).props);
+        }
+
+        if (contentChanged && this.props.dp && !dataProvider){
+            changes.dp = null;
         }
     }
     propsUpdated(newProps, oldProps){
@@ -197,6 +205,39 @@ class Text extends UIElement {
             return base.concat(["br", "content"]);
         }
         return base.concat(["content"]);
+    }
+
+    initFromData(content){
+        this.prepareAndSetProps({content, dp: this.props.dp});
+    }
+
+    canAccept(elements, autoInsert, allowMoveInOut) {
+        if (elements.length !== 1) {
+            return false;
+        }
+        var other = elements[0];
+        return other instanceof Text && other.runtimeProps.isDataElement;
+    }
+
+    add(text: Text, mode){
+        return this.insert(text, 0, mode);
+    }
+
+    insert(text: Text, index, mode){
+        this.prepareAndSetProps(text.selectProps(["content", "dp", "df"]));
+        return this;
+    }
+
+    remove(){
+        return -1;
+    }
+
+    autoPositionChildren(): boolean{
+        return true;
+    }
+
+    get children(){
+        return null;
     }
 }
 Text.prototype.t = Types.Text;

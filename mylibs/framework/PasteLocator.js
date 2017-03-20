@@ -18,19 +18,23 @@ export function choosePasteLocation(elements, rootRelativeBoundingBox = null, al
 
     var candidates = [];
     var selection = Selection.selectedElements();
-    if (bufferRect && selection.length === 1){
-        var current = selection[0];
-        do{
-            if (current.canAccept(elements, false, allowMoveIn)){
-                candidates.push(current);
-            }
-            current = current.parent();
-        } while (current && !(current instanceof Page));
-    }
-    else{
-        if (artboard.canAccept(elements, false, allowMoveIn)) {
-            candidates.push(artboard);
+    if (bufferRect){
+        if (selection.length === 1){
+            var current = selection[0];
+            do{
+                if (current.canAccept(elements, false, allowMoveIn)){
+                    candidates.push(current);
+                }
+                current = current.parent();
+            } while (current && !(current instanceof Page));
         }
+        else if (selection.length > 1 && Selection.selectComposite().canAccept(elements, false, allowMoveIn)){
+            candidates.push(Selection.selectComposite());
+        }
+    }
+
+    if (candidates.indexOf(artboard) === -1 && artboard.canAccept(elements, false, allowMoveIn)) {
+        candidates.push(artboard);
     }
 
     for (var i = 0; i < candidates.length; i++){
@@ -39,7 +43,7 @@ export function choosePasteLocation(elements, rootRelativeBoundingBox = null, al
             return result;
         }
     }
-    return {    
+    return {
         parent: Environment.view.page,
         x: viewport.x + viewport.width/2 - bufferRect.width/2,
         y: viewport.y + viewport.height/2 - bufferRect.height/2
@@ -50,7 +54,7 @@ function tryPaste(viewport, parent, bufferRect, rootRelativeBoundingBox, toleran
     var visibleRect = intersectRects(viewport, rect);
     if (visibleRect !== null){
         if (rootRelativeBoundingBox){
-            let globalPos = parent.primitiveRoot().local2global(rootRelativeBoundingBox);            
+            let globalPos = parent.primitiveRoot().local2global(rootRelativeBoundingBox);
             var intersection = intersectRects(visibleRect, {x: globalPos.x, y: globalPos.y, width: rootRelativeBoundingBox.width, height: rootRelativeBoundingBox.height});
             if (intersection !== null && intersection.width * intersection.height > tolerance){
                 return {
@@ -72,7 +76,7 @@ function tryPaste(viewport, parent, bufferRect, rootRelativeBoundingBox, toleran
             intersection = intersectRects(intersection, viewport);
         }
         if (intersection !== null && intersection.width * intersection.height > tolerance){
-            return {    
+            return {
                 parent: parent,
                 x: visibleRect.x + visibleRect.width/2 - bufferRect.width/2,
                 y: visibleRect.y + visibleRect.height/2 - bufferRect.height/2

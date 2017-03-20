@@ -135,11 +135,12 @@ export default class DataNode{
 
 
     insertChild(child, index, mode = ChangeMode.Model) {
-        this.children.splice(index, 0, child);
+        this.children.splice(Math.min(index, this.children.length), 0, child);
 
         if (mode !== ChangeMode.Self) {
             child.trackInserted(this, index, mode);
         }
+        return child;
     }
 
     removeChild(child, mode = ChangeMode.Model) {
@@ -296,7 +297,7 @@ export default class DataNode{
 
     getImmediateChildById(id:string, materialize:boolean) {
         return DataNode.getImmediateChildById(this, id, materialize);
-    } 
+    }
 
     static getImmediateChildById(container: any, id:string, materialize:boolean = false) {
         if(!container.children) {

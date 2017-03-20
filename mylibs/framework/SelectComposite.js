@@ -97,29 +97,29 @@ export default class SelectComposite extends CompositeElement {
         });
         return canResize ? ResizeDimension.Both : ResizeDimension.None;
     }
-    add(element, multiSelect, refreshOnly) {
+    register(element, multiSelect, refreshOnly) {
         for (var i = this.elements.length - 1; i >= 0; --i) {
             var e = this.elements[i];
             if (e.isDescendantOrSame(element) || element.isDescendantOrSame(e)) {
-                this.remove(e);
+                this.unregister(e);
             }
         }
         if (!refreshOnly && this._selected) {
             element.select(multiSelect);
         }
-        super.add.apply(this, arguments);
+        super.register.apply(this, arguments);
     }
-    remove(element, refreshOnly) {
+    unregister(element, refreshOnly) {
         if (!refreshOnly && this._selected) {
             element.unselect();
         }
-        super.remove.apply(this, arguments);
+        super.unregister.apply(this, arguments);
     }
-    clear(refreshOnly) {
+    unregisterAll(refreshOnly) {
         if (!refreshOnly && this._selected) {
             this.each(x => x.unselect());
         }
-        super.clear.apply(this, arguments);
+        super.unregisterAll.apply(this, arguments);
     }
 
     mousemove() {

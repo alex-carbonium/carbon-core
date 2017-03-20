@@ -220,6 +220,8 @@ class App extends DataNode implements IApp {
 
         this.fontManager = new OpenTypeFontManager();
         this.fontManager.registerAsDefault();
+
+        this.dataManager = new DataManager();
     }
 
     userId() {
@@ -334,10 +336,10 @@ class App extends DataNode implements IApp {
             switch (patchType) {
                 case PatchType.Insert:
                 case PatchType.Change:
-                    DataManager.registerProvider(item.id, CustomDataProvider.fromJSON(item));
+                    this.dataManager.registerProvider(item.id, CustomDataProvider.fromJSON(item));
                     break;
                 case PatchType.Remove:
-                    DataManager.registerProvider(item.id);
+                    this.dataManager.registerProvider(item.id);
                     break;
             }
         }
@@ -607,7 +609,7 @@ class App extends DataNode implements IApp {
         if (this.props.dataProviders) {
             for (let i = 0; i < this.props.dataProviders.length; ++i) {
                 let provider = this.props.dataProviders[i];
-                DataManager.registerProvider(provider.id, CustomDataProvider.fromJSON(provider));
+                this.dataManager.registerProvider(provider.id, CustomDataProvider.fromJSON(provider));
             }
         }
 
@@ -1291,6 +1293,11 @@ class App extends DataNode implements IApp {
             this.state.dispose();
             this.state = null;
         }
+        if (this.dataManager){
+            this.dataManager.dispose();
+            this.dataManager = null;
+        }
+
         this.logEvent.clearSubscribers();
         this.changed.clearSubscribers();
         this.changedLocally.clearSubscribers();

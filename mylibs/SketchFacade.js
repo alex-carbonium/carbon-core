@@ -96,7 +96,6 @@ module.exports = {
     "Keyboard": require("./platform/Keyboard"),
     "Platform": require("./platform/Platform"),
     "StyleManager": require("./framework/style/StyleManager"),
-    "DataManager": require("./framework/data/DataManager"),
     "Selection": require("./framework/SelectionModel"),
     "QuadAndLock": require("./framework/QuadAndLock"),
     "AnimationType": Defs.AnimationType,

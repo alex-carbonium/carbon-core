@@ -164,7 +164,7 @@ class SelectionModel {
         for (var i = 0, j = selection.length; i < j; ++i) {
             var element = selection[i];
             if (element.canSelect() || element.selectFromLayersPanel) {
-                this._selectCompositeElement.add(element, multiSelect, refreshOnly);
+                this._selectCompositeElement.register(element, multiSelect, refreshOnly);
                 canSelect = true;
             }
         }
@@ -289,7 +289,7 @@ class SelectionModel {
     unselectAll(refreshOnly) {
         this._selectCompositeElement.selected(false);
         var count = this._selectCompositeElement.count();
-        this._selectCompositeElement.clear(refreshOnly);
+        this._selectCompositeElement.unregisterAll(refreshOnly);
         return count !== 0;
     }
 
@@ -307,7 +307,7 @@ class SelectionModel {
     }
 
     clear() {
-        this._selectCompositeElement.clear();
+        this._selectCompositeElement.unregisterAll();
 
         // this.layer3.invalidate();
     }

@@ -404,10 +404,10 @@ export default class Container extends UIElement {
 
         return idx;
     }
-    replace(elementFrom, elementTo) {
+    replace(elementFrom, elementTo, mode) {
         var idx = this.positionOf(elementFrom);
-        this.remove(elementFrom);
-        this.insert(elementTo, idx);
+        this.remove(elementFrom, mode);
+        this.insert(elementTo, idx, mode);
     }
     clear() {
         for (var i = 0; i < this.children.length; i++) {

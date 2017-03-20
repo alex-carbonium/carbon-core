@@ -98,6 +98,20 @@ export interface IUIElement extends IDataNode{
 
 export interface IContainer extends IUIElement{
     children: IUIElement[];
+
+    canAccept(elements: IUIElement[], autoInsert: boolean, allowMoveIn: boolean): boolean;
+
+    /**
+     * Adds an element and returns the element which has been actually inserted.
+     */
+    add(element: IUIElement, mode: number): IUIElement;
+    /**
+     * Adds an element and returns the element which has been actually inserted.
+     */
+    insert(element: IUIElement, index: number, mode: number): IUIElement;
+    remove(element: IUIElement, mode: number): number;
+
+    autoPositionChildren(): boolean;
 }
 
 export interface IGroupContainer extends IContainer{
@@ -108,13 +122,22 @@ export interface IGroupContainer extends IContainer{
 export interface IComposite extends IUIElement{
     elements: IUIElement[];
 
+    register(element: IUIElement): void;
+    unregister(element: IUIElement): void;
+    unregisterAll(): void;
+
     allHaveSameParent(): boolean;
+    autoPositionChildren(): boolean;
 }
 
 export interface ITransformationElement extends IComposite, IGroupContainer{
 }
 
 export interface ILayer extends IContainer{
+}
+
+export interface IDataElement{
+    initFromData(content: any): void;
 }
 
 export interface IApp extends IDataNode{

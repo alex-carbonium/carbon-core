@@ -1,3 +1,4 @@
+import Text from "../text/Text";
 import DataProvider from "./DataProvider";
 
 export default class CustomDataProvider extends DataProvider{
@@ -34,6 +35,18 @@ export default class CustomDataProvider extends DataProvider{
                 examples: this.data.slice(0, 2)
             }
         ]
+    }
+    createElement(app, field){
+        var element = new Text();
+        element.prepareAndSetProps({
+            content: "= " + this.name,
+            font: app.props.defaultTextSettings.font,
+            textStyleId: app.props.defaultTextSettings.textStyleId,
+            dp: this.id,
+            df: field
+        });
+        element.runtimeProps.isDataElement = true;
+        return element;
     }
 
     toJSON(){

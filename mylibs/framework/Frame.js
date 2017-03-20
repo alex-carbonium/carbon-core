@@ -101,6 +101,10 @@ export default class Frame extends Container {
         return true;
     }
 
+    lockedGroup(): boolean{
+        return true;
+    }
+
     drawSelf(context, w, h, environment) {
         var source = this.source();
         if (!source) {
@@ -226,12 +230,14 @@ export default class Frame extends Container {
             });
     }
 
-    insert(frame) {
-        this.prepareAndSetProps({ source: frame.props.source, sourceProps: frame.props.sourceProps });
-        this.runtimeProps.sourceProps = frame.runtimeProps.sourceProps;
-        frame.parent().remove(frame);
-        frame.runtimeProps.resized = true;
-        frame.runtimeProps.copiedFrame = this;
+    autoPositionChildren(): boolean{
+        return true;
+    }
+
+    insert(frame: Frame, index, mode) {
+        frame.setProps(this.selectLayoutProps());
+
+        this.parent().replace(this, frame, mode);
     }
 
     getNonRepeatableProps () {

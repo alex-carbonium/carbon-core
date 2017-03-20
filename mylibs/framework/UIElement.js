@@ -894,6 +894,16 @@ export default class UIElement extends DataNode {
         this.runtimeProps.primitiveRoot = root;
         return root;
     }
+    isFinalRoot(): boolean{
+        return true;
+    }
+    _findFinalRoot(){
+        var root = this.primitiveRoot();
+        while (root && !root.isFinalRoot() && root.parent()){
+            root = root.parent().primitiveRoot();
+        }
+        return root;
+    }
     primitivePath() {
         var path = this.primitiveRoot().primitivePath().slice();
         path[path.length - 1] = this.id();
@@ -921,7 +931,7 @@ export default class UIElement extends DataNode {
         return this.runtimeProps.globalViewMatrixInverted;
     }
     rootViewMatrix(): Matrix {
-        var root = this.primitiveRoot();
+        var root = this._findFinalRoot();
         if (!root || root === this) {
             return this.viewMatrix();
         }
@@ -1028,7 +1038,7 @@ export default class UIElement extends DataNode {
             return;
         }
 
-        var root = this.primitiveRoot();
+        var root = this._findFinalRoot();
         if (!root || root === this) {
             return this.getBoundingBox().x;
         }
@@ -1043,7 +1053,7 @@ export default class UIElement extends DataNode {
             return;
         }
 
-        var root = this.primitiveRoot();
+        var root = this._findFinalRoot();
         if (!root || root === this) {
             return this.getBoundingBox().y;
         }
