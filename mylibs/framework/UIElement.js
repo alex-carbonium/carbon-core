@@ -232,7 +232,11 @@ export default class UIElement extends DataNode {
     }
     isChangeAffectingLayout(changes): boolean {
         return changes.hasOwnProperty("br")
-            || changes.hasOwnProperty("m");
+            || changes.hasOwnProperty("m")
+            || changes.hasOwnProperty("x")
+            || changes.hasOwnProperty("y")
+            || changes.hasOwnProperty("width")
+            || changes.hasOwnProperty("height");
     }
     getAffectedProperties(displayChanges): string[] {
         var properties = Object.keys(displayChanges);
