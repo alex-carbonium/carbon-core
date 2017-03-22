@@ -6,6 +6,8 @@ var webpackConfig = require('./make-core-config')({
 });
 
 webpackConfig.entry = {};
+webpackConfig.output.library = "test";
+delete webpackConfig.output.libraryTarget;
 
 for (var i = 0; i < webpackConfig.plugins.length; i++){
     var plugin = webpackConfig.plugins[i];
