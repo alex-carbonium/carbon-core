@@ -63,6 +63,10 @@ function updateFiles(sourceDir, targetDir){
 }
 
 function cleanPreviousFiles(dir){
+    if (!fs.existsSync(dir)){
+        return;
+    }
+
     var files = fs.readdirSync(dir);
     for (var i = 0; i < files.length; i++){
         var file = files[i];
