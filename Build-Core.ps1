@@ -17,7 +17,7 @@ try
         npm test
     }
 
-    $params = @("run", "packLib", "--", "--noColors")
+    $params = @("run", "packCore", "--", "--noColors")
     if ($Debug)
     {
         $params += "--noUglify"

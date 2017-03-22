@@ -23,6 +23,10 @@ function pack(webpackConfig) {
             if (!argv.sourceMaps){
                 dropSourceMapReferences(webpackConfig.output.path);
             }
+
+            if (argv.copyToUi){
+                updateFiles(webpackConfig.output.path, fullPath("../../carbon-ui/target"));
+            }
         });
 }
 
@@ -39,11 +43,49 @@ function dropSourceMapReferences(outPath){
     }
 }
 
+function updateFiles(sourceDir, targetDir){
+    if (fs.existsSync(targetDir)){
+        cleanPreviousFiles(targetDir);
+    }
+    else{
+        fs.mkdirSync(targetDir);
+    }
+
+    var files = fs.readdirSync(sourceDir);
+    for (var i = 0; i < files.length; i++){
+        var file = files[i];
+        if (file.endsWith(".js") || file.endsWith(".map")){
+            var filePath = path.join(sourceDir, file);
+            var destFile = path.join(targetDir, file);
+            fs.createReadStream(filePath).pipe(fs.createWriteStream(destFile));
+        }
+    }
+}
+
+function cleanPreviousFiles(dir){
+    var files = fs.readdirSync(dir);
+    for (var i = 0; i < files.length; i++){
+        var file = files[i];
+        if (file.match(/carbon\-api/g) || file.match(/carbon\-core/g)){
+            var filePath = path.join(dir, file);
+            console.log("Cleaning up", filePath);
+            fs.unlinkSync(filePath);
+        }
+    }
+}
+
+function fullPath(relativePath){
+    return path.join(__dirname, relativePath);
+}
+
 var config = require("./make-core-config")(Object.assign({
     minimize: true,
     debug: false,
+    devServer: false,
     host: "",
-    port: ""
+    port: "",
+    devtool: "#source-map"
 }, argv));
 
+cleanPreviousFiles(fullPath("../target"));
 pack(config);

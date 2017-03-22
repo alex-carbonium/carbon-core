@@ -9,9 +9,10 @@ var defaults = {
     minimize: false,
     noUglify: false,
     debug: true,
-    port: 8081,
+    port: 8090,
     host: "http://localhost",
-    devtool: "#eval",
+    devServer: true,
+    devtool: "eval",
     verbose: false,
     showConfig: false,
     trace: true
@@ -31,10 +32,18 @@ function getEntry(settings){
                 )
         };
     }
-    return {
+
+    var entry = {
         core: [fullPath("../mylibs/SketchFacade")],
         api: [fullPath("../mylibs/CarbonApi")]
     };
+
+    if (settings.devServer){
+        //entry.core.unshift('webpack-dev-server/client?' + settings.authority, 'webpack/hot/only-dev-server');
+        //entry.api.unshift('webpack-dev-server/client?' + settings.authority, 'webpack/hot/only-dev-server');
+    }
+
+    return entry;
 }
 function getOutput(settings){
     var output = {
@@ -42,10 +51,11 @@ function getOutput(settings){
     };
 
     output.path = fullPath("../target");
-    output.filename = "carbon-[name]" + (settings.example ? "" : "-[chunkhash]") + ".js";
-    output.library = "carbon-[name]";
-    output.libraryTarget = "umd";
-    console.log("Writing lib to " + output.path + output.filename);
+    output.filename = "carbon-[name]" + (settings.minimize ? "-[chunkhash]" : "") + ".js";
+    output.library = "__carbon[name]";
+    if (!settings.example){
+        output.libraryTarget = "jsonp";
+    }
 
     return output;
 }
@@ -127,7 +137,8 @@ function getLoaders(settings){
             require.resolve("babel-preset-stage-0")
         ],
         "plugins": plugins,
-        ast: false
+        ast: false,
+        cacheDirectory: true
     };
     var babelLoader = "babel?" + JSON.stringify(babelSettings);
 
@@ -144,7 +155,7 @@ function getLoaders(settings){
             test: /\.js$/,
             loaders: [babelLoader],
             exclude: excludes
-        },       
+        },
         {
             test: /^worker!/,
             loaders: ["worker"],
@@ -172,24 +183,25 @@ module.exports = function(settings){
             loaders: getLoaders(settings)
         },
         plugins: getPlugins(settings),
-        devtool: "eval",
+        devtool: settings.devtool,
         debug: !settings.minimize,
         devServer : {
             contentBase        : fullPath('../target/'),
             publicPath         : settings.authority + "/target/",
             host               : settings.host.substring(settings.host.indexOf("//") + 2),
             port               : settings.port,
+            hot                : true,
             stats: {
                 colors: true,
                 timings: true,
-                assets: false,
-                chunks: false,
-                modules: false,
-                children: false,
-                hash: false,
-                version: false,
-                errors: true,
-                errorDetails: true
+                assets: settings.verbose,
+                chunks: settings.verbose,
+                modules: settings.verbose,
+                children: settings.verbose,
+                hash: settings.verbose,
+                version: settings.verbose,
+                errors: settings.verbose,
+                errorDetails: settings.verbose
             }
         },
         cache: true

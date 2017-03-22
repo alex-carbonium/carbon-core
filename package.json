@@ -2,10 +2,10 @@
   "name": "carbon-core",
   "version": "2.0.0",
   "scripts": {
-    "start": "node ../carbon-ui/build/scripts/watch.js",
+    "start": "node ./scripts/watchCore.js",
     "test": "node ./scripts/test.js",
-    "packLib": "node ./scripts/packLib.js",
-    "example": "node ./scripts/watchCore.js --example"
+    "packCore": "node ./scripts/packCore.js",
+    "example": "node ./scripts/watchCore.js --example --port 8081"
   },
   "devDependencies": {
     "async": "2.0.1",
