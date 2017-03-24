@@ -10,7 +10,7 @@ import { createUUID } from "../../util";
 import NullArtboard from "../../framework/NullArtboard";
 import Artboard from "../../framework/Artboard";
 import Keyboard from "../../platform/Keyboard";
-import { IApp, IView, IController, IDisposable, IRect, IMouseEventData } from "../../framework/CoreModel";
+import { IApp, IView, IController, IDisposable, IRect, IMouseEventData } from "carbon-core";
 
 const config = UserSettings.ruler;
 

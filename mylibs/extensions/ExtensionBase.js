@@ -1,5 +1,5 @@
 import Environment from "environment";
-import {IApp, IView, IController} from "../framework/CoreModel";
+import {IApp, IView, IController} from "carbon-core";
 
 export default class ExtensionBase {
     app: IApp;

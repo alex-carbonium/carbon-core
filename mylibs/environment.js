@@ -1,5 +1,5 @@
 import EventHelper from "./framework/EventHelper";
-import {IView, IController} from "./framework/CoreModel";
+import {IView, IController} from "carbon-core";
 
 class Environment {
     view: IView;

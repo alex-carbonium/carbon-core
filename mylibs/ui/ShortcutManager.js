@@ -1,5 +1,5 @@
 import { ViewTool } from "../framework/Defs";
-import { IShortcut, IApp } from "../framework/CoreModel";
+import { IShortcut, IApp } from "carbon-core";
 import params from "../params";
 
 export default class ShortcutManager {

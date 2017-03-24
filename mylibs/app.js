@@ -46,7 +46,7 @@ import UserSettings from "./UserSettings";
 import ObjectFactory from "./framework/ObjectFactory";
 import ActionManager from "./ui/ActionManager";
 import ShortcutManager from "./ui/ShortcutManager";
-import { IApp, IEvent } from "./framework/CoreModel";
+import { IApp, IEvent } from "carbon-core";
 
 window.env = Environment;
 window.Selection = Selection;

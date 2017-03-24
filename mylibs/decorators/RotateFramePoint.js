@@ -5,7 +5,7 @@ import Environment from "../environment";
 import {Types, RotationCursors} from "../framework/Defs";
 import Point from "../math/point";
 import {isPointInRect} from "../math/math";
-import {IMouseEventData} from "../framework/CoreModel";
+import {IMouseEventData} from "carbon-core";
 import UserSettings from "../UserSettings";
 
 const PointSize = 12

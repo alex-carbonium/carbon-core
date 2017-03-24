@@ -30,7 +30,7 @@ import UngroupRepeater from "../framework/repeater/UngroupRepeater";
 import aligner from "../framework/Aligner";
 import Selection from "../framework/SelectionModel";
 import EventHelper from "../framework/EventHelper";
-import {IActionManager} from "../framework/CoreModel";
+import {IActionManager} from "carbon-core";
 
 var debug = require("DebugUtil")("carb:actionManager");
 

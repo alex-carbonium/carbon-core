@@ -6,7 +6,7 @@ import Point from "../../math/point";
 import Path from "./Path";
 import Environment from "../../environment";
 import Tool from "./Tool";
-import {IKeyboardState, IMouseEventData} from "../../framework/CoreModel";
+import {IKeyboardState, IMouseEventData} from "carbon-core";
 
 var Line = function (p1, p2) {
     return {
@@ -58,7 +58,7 @@ function DouglasPeucker(PointList, epsilon) {
 export default class PencilCreator extends Tool {
     constructor() {
         super(ViewTool.Pencil);
-        
+
         this.points = [];
         this._element = null;
         this._position = null;
@@ -66,7 +66,7 @@ export default class PencilCreator extends Tool {
 
     defaultCursor(): string{
         return "pen";
-    }    
+    }
 
     mousedown(event) {
         var eventData = { handled: false, x: event.x, y: event.y };
@@ -104,7 +104,7 @@ export default class PencilCreator extends Tool {
 
         var points = DouglasPeucker(this.points, 1.5 / scale);
 
-        if (points.length > 1) {            
+        if (points.length > 1) {
             var elementX = this._position.x;
             var elementY = this._position.y;
 
@@ -148,7 +148,7 @@ export default class PencilCreator extends Tool {
         super.detach();
         this._mousepressed = false;
         this.points = [];
-    }    
+    }
     layerdraw(context) {
         if (this._mousepressed) {
             context.save();

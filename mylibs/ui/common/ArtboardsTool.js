@@ -10,7 +10,7 @@ import ObjectFactory from "../../framework/ObjectFactory";
 import {ViewTool} from "../../framework/Defs";
 import Rect from "../../math/rect";
 import Point from "../../math/point";
-import {IKeyboardState, IMouseEventData} from "../../framework/CoreModel";
+import {IKeyboardState, IMouseEventData} from "carbon-core";
 
 export default class ArtboardsTool extends Tool {
     constructor(type, parameters) {

@@ -6,13 +6,13 @@ import Brush from "./Brush";
 import Font from "./Font";
 import UIElement from "./UIElement";
 import ArrangeStrategy from "./ArrangeStrategy";
-import { IGroupContainer } from "./CoreModel";
+import { IGroupContainer } from "carbon-core";
 import Box from "./Box";
 import Rect from "../math/rect";
 import Phantom from "./Phantom";
 import Environment from "../environment";
 import Selection from "./SelectionModel";
-import { IUIElementProps, IPoint, IRect, IComposite } from "../framework/CoreModel";
+import { IUIElementProps, IPoint, IRect, IComposite } from "carbon-core";
 
 export default class CompositeElement extends UIElement implements IComposite {
     constructor() {

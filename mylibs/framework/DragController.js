@@ -1,5 +1,5 @@
 import Keyboard from "../platform/Keyboard";
-import {IMouseEventData} from "./CoreModel";
+import {IMouseEventData} from "carbon-core";
 
 var debug = require("DebugUtil")("carb:dragController");
 

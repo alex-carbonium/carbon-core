@@ -1,5 +1,5 @@
 import EventHelper from "../framework/EventHelper";
-import { IKeyboardState, IEvent2 } from "../framework/CoreModel";
+import { IKeyboardState, IEvent2 } from "carbon-core";
 
 class Keyboard {
     state: IKeyboardState;

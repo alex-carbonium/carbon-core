@@ -1,7 +1,7 @@
 import Selection from "framework/SelectionModel";
 import GroupContainer from "framework/GroupContainer";
 import { ChangeMode, ArtboardResource } from "framework/Defs";
-import { IUIElement, IContainer, IGroupContainer, IRect } from "framework/CoreModel"
+import { IUIElement, IContainer, IGroupContainer, IRect } from "carbon-core"
 import Artboard from "framework/Artboard";
 import Rect from "math/rect";
 import Matrix from "math/matrix";
@@ -58,7 +58,7 @@ export default {
             resource: ArtboardResource.Stencil
         });
 
-        var artboardControl = new ArtboardTemplateControl();        
+        var artboardControl = new ArtboardTemplateControl();
         parent.add(artboardControl);
         artboardControl.setProps({
             br:group.props.br,

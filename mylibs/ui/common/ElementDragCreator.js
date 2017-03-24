@@ -12,7 +12,7 @@ import Matrix from "../../math/matrix";
 import {ViewTool} from "../../framework/Defs";
 import UIElement from "../../framework/UIElement";
 import Tool from "./Tool";
-import {IMouseEventData, IKeyboardState} from "../../framework/CoreModel";
+import {IMouseEventData, IKeyboardState} from "carbon-core";
 
 export default class ElementDragCreator extends Tool {
     constructor(toolId: number, type, parameters) {

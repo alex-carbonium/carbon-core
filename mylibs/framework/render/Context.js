@@ -1,6 +1,6 @@
 import CrazyScope from "framework/CrazyManager";
 import Point from "../../math/point";
-import {IContext} from "../CoreModel";
+import {IContext} from "carbon-core";
 
 export default class Context implements IContext{
 
@@ -29,15 +29,15 @@ export default class Context implements IContext{
 
     get contextScale() {
         var devicePixelRatio = window.devicePixelRatio || 1;
-        var backingStoreRatio = this._context.backingStorePixelRatio 
-        || this._context.webkitBackingStorePixelRatio 
-        || this._context.mozBackingStorePixelRatio 
-        || this._context.msBackingStorePixelRatio 
+        var backingStoreRatio = this._context.backingStorePixelRatio
+        || this._context.webkitBackingStorePixelRatio
+        || this._context.mozBackingStorePixelRatio
+        || this._context.msBackingStorePixelRatio
         || this._context.oBackingStorePixelRatio || 1;
 
         // on some machines it is non integer, it affects rendering
         // browser zoom is also changing this value, so need to make sure it is never 0
-        return Math.max(1, Math.round(devicePixelRatio / backingStoreRatio));            
+        return Math.max(1, Math.round(devicePixelRatio / backingStoreRatio));
     }
 
     get width() {

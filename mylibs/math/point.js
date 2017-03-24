@@ -1,4 +1,4 @@
-import {IPoint} from "../framework/CoreModel";
+import {IPoint} from "carbon-core";
 
 var EPSILON = 1e-12;
 var TRIGONOMETRIC_EPSILON = 1e-7;

@@ -9,7 +9,7 @@ import SnapController from "../../framework/SnapController";
 import Brush from "../../framework/Brush";
 import Point from "../../math/point";
 import Environment from "../../environment";
-import {IKeyboardState, IMouseEventData} from "../../framework/CoreModel";
+import {IKeyboardState, IMouseEventData} from "carbon-core";
 
 function update(x1, y1, x2, y2) {
     var props = {

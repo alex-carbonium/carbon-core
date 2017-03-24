@@ -34,7 +34,7 @@ function getEntry(settings){
     }
 
     var entry = {
-        core: [fullPath("../mylibs/SketchFacade")],
+        core: [fullPath("../mylibs/CarbonCore")],
         api: [fullPath("../mylibs/CarbonApi")]
     };
 
@@ -174,6 +174,14 @@ module.exports = function(settings){
         context: fullPath("../mylibs"),
         entry: getEntry(settings),
         output: getOutput(settings),
+        externals: {
+            "carbon-core": "window.c.ignore",
+            "carbon-api": "window.c.ignore",
+            "carbon-geometry": "window.c.ignore",
+            "carbon-rendering": "window.c.ignore",
+            "carbon-app": "window.c.ignore",
+            "carbon-basics": "window.c.ignore"
+        },
         resolve: getResolve(settings),
         resolveLoader: {
             root: fullPath("../node_modules")

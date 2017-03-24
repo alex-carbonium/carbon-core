@@ -37,7 +37,7 @@ import { createUUID, deepEquals } from "../util";
 import Rect from "../math/rect";
 import ResizeOptions from "../decorators/ResizeOptions";
 import { DisplayProperty, PropertyDescriptor } from './PropertyMetadata';
-import { IRect } from './CoreModel';
+import { IRect } from "carbon-geometry";
 
 require("../migrations/All");
 

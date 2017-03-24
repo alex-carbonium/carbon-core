@@ -5,7 +5,7 @@ import ActiveFrame from "../decorators/ActiveFrame";
 import PropertyMetadata from "../framework/PropertyMetadata";
 import {Types} from "../framework/Defs";
 import {ContentSizing} from "./Defs";
-import {ITransformationEventData} from "./CoreModel";
+import {ITransformationEventData} from "carbon-core";
 
 var ContentFrameType = Object.create(DefaultFrameType);
 ContentFrameType.strokeStyle = null;

@@ -12,7 +12,7 @@ import Layer from "framework/Layer";
 import Container from "../framework/Container";
 import Environment from "../environment";
 import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
-import { ITransformationElement, ITransformationEventData, IPoint, IKeyboardState } from "../framework/CoreModel";
+import { ITransformationElement, ITransformationEventData, IPoint, IKeyboardState } from "carbon-core";
 import UserSettings from "../UserSettings";
 import Point from "../math/point";
 import Matrix from "../math/matrix";

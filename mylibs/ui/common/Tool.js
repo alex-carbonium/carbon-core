@@ -1,6 +1,6 @@
 import Selection from "../../framework/SelectionModel"
 import Invalidate from "../../framework/Invalidate";
-import { IApp, IView, IController, IMouseEventData, IKeyboardState, IDisposable } from "../../framework/CoreModel";
+import { IApp, IView, IController, IMouseEventData, IKeyboardState, IDisposable } from "carbon-core";
 
 //TODO: if selection is made in layers after tool is set, active frame starts to react to mouse events before the tool
 export default class Tool {

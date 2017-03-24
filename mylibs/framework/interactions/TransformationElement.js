@@ -8,7 +8,7 @@ import UserSettings from "../../UserSettings";
 import Selection from "../SelectionModel";
 import Environment from "../../environment";
 import GlobalMatrixModifier from "../../framework/GlobalMatrixModifier";
-import { IComposite, IUIElement } from "../CoreModel";
+import { IComposite, IUIElement } from "carbon-core";
 
 export default class TransformationElement extends GroupContainer implements IComposite {
     constructor(element) {

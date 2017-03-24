@@ -4,7 +4,7 @@ import ModelStateListener from "./sync/ModelStateListener";
 import {PatchType, ChangeMode} from "./Defs";
 import ObjectFactory from "./ObjectFactory";
 import {createUUID} from "../util";
-import {IDataNodeProps} from './CoreModel';
+import {IDataNodeProps} from "carbon-core";
 
 export default class DataNode{
     t: string;

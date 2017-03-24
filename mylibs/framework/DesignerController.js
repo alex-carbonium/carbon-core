@@ -12,7 +12,7 @@ import Keyboard from "../platform/Keyboard";
 import Phantom from "./Phantom";
 import ObjectFactory from "./ObjectFactory";
 import {Types, ViewTool} from "./Defs";
-import {IApp, IController, IEvent, IEvent2, IMouseEventData, IKeyboardState, IUIElement, IContainer} from "./CoreModel";
+import {IApp, IController, IEvent, IEvent2, IMouseEventData, IKeyboardState, IUIElement, IContainer} from "carbon-core";
 
 function onselect(rect) {
     var selection = this.app.activePage.getElementsInRect(rect);
@@ -167,11 +167,11 @@ export default class DesignerController implements IController {
     }
 
     onWindowResize() {
-        
+
     }
 
     ondoubletap () {
-        
+
     }
 
     _setMoveCursor(){

@@ -12,7 +12,7 @@ import Invalidate from "../../framework/Invalidate";
 import {ViewTool} from "../../framework/Defs";
 import SnapController from "../../framework/SnapController";
 import Environment from "../../environment";
-import {IKeyboardState, IMouseEventData} from "../../framework/CoreModel";
+import {IKeyboardState, IMouseEventData} from "carbon-core";
 
 var closeCurrentPath = function (pt) {
     this._element.closed(true);
@@ -22,13 +22,13 @@ var closeCurrentPath = function (pt) {
 var completePath = function() {
     if (this._element) {
         if (this._element.length() > 1) {
-            this._element.adjustBoundaries();                        
+            this._element.adjustBoundaries();
         }
         else {
             this._changeMode(this._element, "resize");
             commandManager.execute(new RemovePathPointCommand(this._element, this._element.pointAtIndex(0)));
         }
-        this._element.nextPoint = null;                
+        this._element.nextPoint = null;
     }
     this._currentPoint = null;
     this._completedPath = true;
@@ -55,7 +55,7 @@ export default class GraphicalPathCreator extends Tool {
     constructor(app, type, parameters) {
         super(ViewTool.Path);
 
-        this._type = type;        
+        this._type = type;
         this._parameters = parameters;
         this.points = [];
         this._element = null;
@@ -121,7 +121,7 @@ export default class GraphicalPathCreator extends Tool {
         Environment.controller.startDrawingEvent.raise(eventData);
         if (eventData.handled){
             return true;
-        }        
+        }
 
         this._mousepressed = true;
         event.handled = true;
@@ -132,28 +132,28 @@ export default class GraphicalPathCreator extends Tool {
             return;
         }
 
-        if (this._element){        
+        if (this._element){
             var pt = this._element.controlPointForPosition(event);
             if (pt != null) {
                 this._closeOrRemovePoint(pt);
                 return;
-            }             
+            }
 
             if (this._element.closed() || this._completedPath){
                 this._changeMode(this._element, "resize");
                 this._element = null;
             }
-        }        
+        }
 
-        if (!checkIfElementAvailable.call(this)) {            
+        if (!checkIfElementAvailable.call(this)) {
             this._createNewPath(event, keys);
-        }                
+        }
 
         this._addNewPathPoint(event, keys);
     }
 
     _createNewPath(event: IMouseEventData, keys: IKeyboardState){
-        Selection.unselectAll();            
+        Selection.unselectAll();
         this._element = UIElement.fromType(this._type, this._parameters);
         this._app.activePage.nameProvider.assignNewName(this._element);
         var defaultSettings = this._app.defaultShapeSettings();
@@ -164,7 +164,7 @@ export default class GraphicalPathCreator extends Tool {
         this._app.activePage.dropToPage(event.x, event.y, this._element);
         this._changeMode(this._element, "edit");
         Selection.makeSelection([this._element]);
-        
+
         this._completedPath = false;
     }
     _addNewPathPoint(event: IMouseEventData, keys: IKeyboardState){
@@ -183,11 +183,11 @@ export default class GraphicalPathCreator extends Tool {
     _closeOrRemovePoint(pt){
         if (!this._element.closed() && pt === this._element.pointAtIndex(0)) {
             closeCurrentPath.call(this, pt);
-        } 
+        }
         else if (!this._element.closed() && pt === this._element.pointAtIndex(this._element.length() - 1)) {
             completePath.call(this);
             this._currentPoint = null;
-        } 
+        }
         else {
             commandManager.execute(new RemovePathPointCommand(this._element, pt));
             if (this._element.length() === 1) {
@@ -208,7 +208,7 @@ export default class GraphicalPathCreator extends Tool {
         this._mousepressed = false;
         this._handlingByPath = false;
         this._shouldHandleByPath = false;
-        
+
         Invalidate.request();
         SnapController.clearActiveSnapLines();
     }
@@ -217,41 +217,41 @@ export default class GraphicalPathCreator extends Tool {
         var x = event.x
             , y = event.y;
         var view = this.view();
-                        
-        event.handled = true; // do not let the path receive events since they are propagated by the tool when needed        
+
+        event.handled = true; // do not let the path receive events since they are propagated by the tool when needed
         event.cursor = "pen_add_point";
-        
+
         if (!checkIfElementAvailable.call(this)) {
             return;
         }
-       
+
         this._element.mousemove(event, keys);
 
         if (this._handlingByPath){
             return;
-        }         
+        }
 
         event.cursor = "pen_add_point";
 
-        this._shouldHandleByPath = false;                        
+        this._shouldHandleByPath = false;
         if (this._element.isHoveringOverPoint()){
             if (keys.ctrl){
                 event.cursor = "pen_move_point";
                 this._shouldHandleByPath = true;
-            }   
+            }
             else if (keys.alt){
                 event.cursor = "pen_move_handle";
                 this._shouldHandleByPath = true;
-            }                         
+            }
         }
         else if (keys.alt && this._element.isHoveringOverHandle()){
-            event.cursor = "pen_move_handle";                
+            event.cursor = "pen_move_handle";
             this._shouldHandleByPath = true;
         }
         else if (keys.shift && this._element.isHoveringOverSegment()){
             event.cursor = "pen_add_point";
             this._shouldHandleByPath = true;
-        }        
+        }
 
         if (this._shouldHandleByPath){
             this._element.nextPoint = null;
@@ -259,26 +259,26 @@ export default class GraphicalPathCreator extends Tool {
             return;
         }
 
-        if (this._element.isHoveringOverPoint()){                        
+        if (this._element.isHoveringOverPoint()){
             if (!this._element.closed() && (this._element.hoverPoint === this._element.firstPoint || this._element.hoverPoint === this._element.lastPoint)) {
                 event.cursor = "pen_close_path";
-            } 
+            }
             else {
                 event.cursor = "pen_remove_point";
-                this._element.nextPoint = null;                
-            }                    
+                this._element.nextPoint = null;
+            }
             Invalidate.request();
             SnapController.clearActiveSnapLines();
             return;
         }
-        
-        this._element.resetHover();        
+
+        this._element.resetHover();
 
         if (this._completedPath){
             return;
         }
-                    
-        var pos = this._element.globalViewMatrixInverted().transformPoint(event);            
+
+        var pos = this._element.globalViewMatrixInverted().transformPoint(event);
 
         if (!keys.ctrl) {
             pos = SnapController.applySnappingForPoint(pos);
@@ -293,7 +293,7 @@ export default class GraphicalPathCreator extends Tool {
             var point = angleAdjuster.adjust({x: this._currentPoint.x, y: this._currentPoint.y}, {x: x, y: y});
             x = point.x;
             y = point.y;
-        }        
+        }
 
         if (this._mousepressed) {
             this._element.nextPoint = null;
@@ -302,7 +302,7 @@ export default class GraphicalPathCreator extends Tool {
                 this._currentPoint.cp2y = y;
                 this._currentPoint.cp1x = this._currentPoint.x * 2 - x;
                 this._currentPoint.cp1y = this._currentPoint.y * 2 - y;
-                this._currentPoint.type = 1;                
+                this._currentPoint.type = 1;
                 Invalidate.request();
             }
         }

@@ -1,7 +1,7 @@
 import ArrangeStrategy from "../ArrangeStrategy";
 import { ArrangeStrategies, ChangeMode } from "../Defs";
 import Point from "../../math/point";
-import { IContainer } from "../CoreModel";
+import { IContainer } from "carbon-core";
 
 var debug = require("DebugUtil")("carb:repeatArrangeStrategy");
 

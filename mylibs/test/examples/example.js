@@ -1,4 +1,4 @@
-import {app, Intl, Environment, ActionManager} from "../../SketchFacade";
+import {app, Intl, Environment, ActionManager} from "../../CarbonCore";
 import RenderLoop from "../../RenderLoop";
 import ArtboardPage from "../../ui/pages/ArtboardPage";
 import Selection from "../../framework/SelectionModel";

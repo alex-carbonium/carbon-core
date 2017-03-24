@@ -18,7 +18,7 @@ import Environment from "../../environment";
 import StoryAction from "../../stories/StoryAction";
 import Link from "./Link";
 import DataNode from "framework/DataNode";
-import {IUIElement} from "framework/CoreModel";
+import {IUIElement} from "carbon-core";
 
 const HandleSize = 16;
 const HomeButtonWidth = 12;

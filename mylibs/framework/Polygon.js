@@ -9,7 +9,7 @@ import Rect from "../math/rect";
 import Point from "../math/point";
 import Environment from "environment";
 import Selection from "../framework/SelectionModel";
-import { IMouseEventData } from "../framework/CoreModel";
+import { IMouseEventData } from "carbon-core";
 
 var PolygonFrameType = {
     cursorSet: FrameCursors,

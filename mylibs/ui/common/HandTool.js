@@ -2,7 +2,7 @@ import Cursor from "../../framework/Cursor";
 import {ViewTool} from "../../framework/Defs";
 import Environment from "../../environment";
 import Tool from "./Tool";
-import {IMouseEventData} from "../../framework/CoreModel";
+import {IMouseEventData} from "carbon-core";
 
 var debug = require("../../DebugUtil")("carb:handTool");
 
@@ -37,7 +37,7 @@ export default class HandTool extends Tool {
 
         app.currentTool = ViewTool.Hand;
     }
-    detach() {        
+    detach() {
         this._detach();
         this.scrollPoint = null;
         this.scrollX = null;

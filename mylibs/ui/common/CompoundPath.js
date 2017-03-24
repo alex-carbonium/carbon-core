@@ -11,7 +11,7 @@ import Path from "ui/common/Path";
 import GroupArrangeStrategy from "../../framework/GroupArrangeStrategy";
 import {combineRectArray} from "../../math/math";
 import Rect from "../../math/rect";
-import {IGroupContainer} from "../../framework/CoreModel";
+import {IGroupContainer} from "carbon-core";
 
 function propertyChanged(element, newProps) {
     if (!this._internalChange && this._itemIds && this._itemIds[element.id()]) {

@@ -10,7 +10,7 @@ import ArrangeStrategy from "./ArrangeStrategy";
 import {setClipboardContent, tryGetClipboardContent} from "../utils/dom";
 import Delete from "../commands/Delete";
 import params from "../params";
-import {IApp} from "./CoreModel";
+import {IApp} from "carbon-core";
 
 class Clipboard {
     _app: IApp;

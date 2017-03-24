@@ -4,7 +4,7 @@ import tinycolor from "tinycolor2/tinycolor";
 import Guide from "./Guide";
 import {Types} from "../../framework/Defs";
 import UserSettings from "../../UserSettings";
-import {IView, IContext, IArtboardProps, IRect, IGuide} from "../../framework/CoreModel";
+import {IView, IContext, IArtboardProps, IRect, IGuide} from "carbon-core";
 
 class CustomGuides extends Guide{
     constructor(view: IView){

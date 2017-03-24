@@ -5,7 +5,7 @@ import Container from "./Container";
 import UIElement from "./UIElement";
 import Point from "../math/point";
 import Environment from "../environment";
-import { IGroupContainer } from "./CoreModel";
+import { IGroupContainer } from "carbon-core";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
 
 require("./GroupArrangeStrategy");

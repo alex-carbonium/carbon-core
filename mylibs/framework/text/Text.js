@@ -6,7 +6,7 @@ import {deepEquals} from "../../util";
 import PropertyMetadata from "../PropertyMetadata";
 import TextEngine from "./textengine";
 import styleManager from "../style/StyleManager";
-import {IContainer, IDataElement} from "../CoreModel";
+import {IContainer, IDataElement} from "carbon-core";
 
 class Text extends UIElement implements IContainer, IDataElement {
     prepareProps(changes){

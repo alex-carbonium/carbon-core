@@ -1,6 +1,6 @@
 import * as params from "../../params";
 import * as globals from "../../../globalRequire";
-import * as facade from "../../SketchFacade";
+import * as facade from "../../CarbonCore";
 
 import TestPlatform from "./TestPlatform";
 import TestProject from "./TestProject";
