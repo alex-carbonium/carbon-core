@@ -26,6 +26,8 @@ declare module "carbon-app" {
     export interface IView {
         viewContainerElement: HTMLElement;
 
+        animationController: IAnimationController;
+
         scale(value?: number): number;
         scrollX(value?: number): number;
         scrollY(value?: number): number;
@@ -48,9 +50,16 @@ declare module "carbon-app" {
         defaultCursor(): string;
     }
 
+    export interface IAnimationController{
+        registerAnimationGroup(group: any);
+    }
+
     export interface IActionManager {
         invoke(action: string): void;
         subscribe(action: string, cb: (action: string, result: any) => void);
+
+        getActionFullDescription(name: string, translate?: (value: string) => string): string;
+        getActionDescription(action: string): string;
     }
 
     export interface IShortcutManager {

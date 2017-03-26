@@ -6,7 +6,6 @@ import Invalidate from "../framework/Invalidate";
 import Selection from "../framework/SelectionModel";
 import logger from "../logger";
 import {createUUID} from "../util";
-import Promise from "bluebird";
 
 var debug = require("../DebugUtil")("carb:modelSync");
 

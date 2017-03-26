@@ -3,7 +3,6 @@ import Circle from "framework/Circle";
 import Text from "framework/text/Text";
 import Path from "ui/common/Path";
 import GroupContainer from "framework/GroupContainer";
-import Promise from "bluebird";
 import Matrix from "math/matrix";
 import {combineRects} from "math/math";
 

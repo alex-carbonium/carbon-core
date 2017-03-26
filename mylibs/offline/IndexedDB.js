@@ -1,4 +1,3 @@
-import Promise from "bluebird";
 
 function createStorage(db, name, options){
     if (db.objectStoreNames.contains(name)){

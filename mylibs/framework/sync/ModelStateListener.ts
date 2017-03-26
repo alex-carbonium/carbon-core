@@ -4,10 +4,17 @@ import {PatchType} from "../Defs";
 var lastSelection = {};
 
 class ModelStateListener {
+    elementsPropsCache: {};
+    roots: any[];
+    rootsWithAffectedLayout: any[];
+
+    private _stopCounter: number;
+
     constructor(){
         this.clear();
         this._stopCounter = 0;
         this.rootsWithAffectedLayout = [];
+        this.roots = [];
     }
 
     clear(){
@@ -105,7 +112,7 @@ class ModelStateListener {
     }
 
     trackChangePosition(primitiveRoot, parent, element, index, oldIndex){
-        if (this.stopped){
+        if (this._stopCounter > 0){
             return;
         }
         var root = this._getOrCreateRootData(primitiveRoot.primitiveRootKey());

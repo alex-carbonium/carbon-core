@@ -5,7 +5,6 @@ import Invalidate from "./framework/Invalidate";
 import OpenTypeFontInfo from "./framework/text/font/opentypefontinfo";
 import { FontWeight, FontStyle } from "./framework/Defs";
 import backend from "./backend";
-import Promise from "bluebird";
 
 var load = Promise.promisify(OpenType.load);
 

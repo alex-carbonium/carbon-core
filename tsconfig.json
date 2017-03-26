@@ -10,7 +10,7 @@
         "allowSyntheticDefaultImports": true
     },
     "include": [
-        "mylibs/**/*"
+        "./mylibs/**/*"
     ],
     "awesomeTypescriptLoaderOptions": {
         "useBabel": true,

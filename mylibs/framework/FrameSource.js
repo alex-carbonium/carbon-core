@@ -4,7 +4,6 @@ import backend from "../backend";
 import {ContentSizing, Types} from "./Defs";
 import {fitRect, fillRect} from "../math/Fitting";
 import IconsInfo from "../ui/IconsInfo";
-import Promise from "bluebird";
 import Rect from "../math/rect";
 
 const FrameSource = {};

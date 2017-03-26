@@ -24,7 +24,6 @@ if(ext){
 //export * from crashes in babel for some reason...
 module.exports = {
     "jquery": require("jquery/jquery.min"),
-    "Promise": require("./PromiseConfig"),
     "app": app,
     "params": params,
     "logger": require("./logger"),

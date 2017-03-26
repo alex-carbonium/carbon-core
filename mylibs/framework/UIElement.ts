@@ -41,7 +41,7 @@ import { IRect } from "carbon-geometry";
 
 require("../migrations/All");
 
-var fwk = window.sketch.framework;
+var fwk = window['sketch'].framework;
 
 fwk.Stroke = Brush;
 
@@ -49,8 +49,10 @@ fwk.DockValues = { left: "Left", top: "Top", bottom: "Bottom", right: "Right", f
 
 // constructor
 export default class UIElement extends DataNode {
+    [name: string]: any;
+
     constructor() {
-        super();
+        super(false);
 
         this.stopwatch = new stopwatch();
 
@@ -1247,7 +1249,7 @@ export default class UIElement extends DataNode {
         }
         return this.props.overflow;
     }
-    parent(/*UIElement*/value) {
+    parent(value?: any) {
         if (value !== undefined) {
             this._parent = value;
             this.resetGlobalViewCache(true);

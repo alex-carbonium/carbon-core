@@ -1,5 +1,3 @@
-import Promise from "bluebird";
-
 var resolvedPromise;
 
 var EventSubscription = function EventSubscription(event, callback){

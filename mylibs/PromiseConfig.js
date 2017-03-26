@@ -1,6 +1,6 @@
-import Promise from "bluebird";
+import bluebird from "bluebird";
 
-Promise.config({
+bluebird.config({
     warnings: false,
     longStackTraces: DEBUG,
     cancellation: true
@@ -21,5 +21,3 @@ window.addEventListener("unhandledrejection", function(e) {
         console.error(e);
     }
 });
-
-export default Promise;

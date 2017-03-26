@@ -1,7 +1,12 @@
 import PropertyMetadata from "framework/PropertyMetadata";
 import { Types } from "./Defs";
+import { IPage } from "carbon-model";
 
-class NullPage {
+class NullPage implements IPage {
+    t: string;
+    props: {};
+    children: any[];
+
     constructor() {
         this.children = [];
         this.props = {};
@@ -139,6 +144,11 @@ class NullPage {
     }
     pointToScroll() {
         return { scrollX: 0, scrollY: 0 };
+    }
+
+    saveWorkspaceState() {
+    }
+    restoreWorkspaceState(data: any): void {
     }
 }
 

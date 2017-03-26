@@ -5,7 +5,6 @@ import BuiltInDataProvider from "./BuiltInDataProvider";
 import CustomDataProvider from "./CustomDataProvider";
 import { createUUID } from "../../util";
 import { PatchType } from "../Defs";
-import Promise from "bluebird";
 import Selection from "../SelectionModel";
 import {IDisposable} from "carbon-core";
 
