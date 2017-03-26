@@ -63,7 +63,7 @@ function getResolve(settings){
     var resolves = {
         root: [fullPath("../mylibs")],
         alias: {},
-        extensions: ["", ".js", ".jsx", ".less", ".html"]
+        extensions: ["", ".js", ".jsx", ".less", ".html", ".ts"]
     };
 
     return resolves;
@@ -119,9 +119,12 @@ function getPlugins(settings){
 
 function getLoaders(settings){
     var plugins = [
+        //TODO: remove when all files migrated to typescript
+        require.resolve("babel-plugin-transform-flow-strip-types"),
+
+        require.resolve("babel-plugin-transform-promise-to-bluebird"),
         require.resolve("babel-plugin-transform-runtime"),
         require.resolve("babel-plugin-add-module-exports"),
-        require.resolve("babel-plugin-transform-flow-strip-types"),
         //remove when babel 6 has proper support for decorators
         require.resolve("babel-plugin-transform-decorators-legacy")
     ];
@@ -142,6 +145,10 @@ function getLoaders(settings){
     };
     var babelLoader = "babel?" + JSON.stringify(babelSettings);
 
+    var tsLoader = 'ts-loader?' + JSON.stringify({
+        transpileOnly: true
+    });
+
     var excludedFolders = ["node_modules", "libs", "generated"];
     var excludes = new RegExp(
         excludedFolders.map(x => "[\/\\\\]" + x + "[\/\\\\]").join("|"));
@@ -154,6 +161,11 @@ function getLoaders(settings){
         {
             test: /\.js$/,
             loaders: [babelLoader],
+            exclude: excludes
+        },
+        {
+            test: /\.ts$/,
+            loaders: [babelLoader, tsLoader],
             exclude: excludes
         },
         {
@@ -208,8 +220,8 @@ module.exports = function(settings){
                 children: settings.verbose,
                 hash: settings.verbose,
                 version: settings.verbose,
-                errors: settings.verbose,
-                errorDetails: settings.verbose
+                errors: true,
+                errorDetails: true
             }
         },
         cache: true

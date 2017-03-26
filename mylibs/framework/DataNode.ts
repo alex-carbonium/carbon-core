@@ -4,11 +4,13 @@ import ModelStateListener from "./sync/ModelStateListener";
 import {PatchType, ChangeMode} from "./Defs";
 import ObjectFactory from "./ObjectFactory";
 import {createUUID} from "../util";
-import {IDataNodeProps} from "carbon-core";
+import { IDataNodeProps } from "carbon-core";
+import { Dictionary } from "carbon-basics";
 
 export default class DataNode{
     t: string;
     props: IDataNodeProps;
+    runtimeProps: any;
     children: DataNode[];
 
     constructor(hasChildren: boolean) {
@@ -56,7 +58,7 @@ export default class DataNode{
         this.setProps(props, mode);
     }
 
-    propsUpdated(newProps, oldProps) {
+    propsUpdated(newProps, oldProps, mode) {
         if (this.runtimeProps && this.runtimeProps.trackPropsCounter) {
             PropertyTracker.changeProps(this, newProps, oldProps);
         }
@@ -120,13 +122,13 @@ export default class DataNode{
     selectProps(namesOrChanges) {
         var result = {};
         if (Array.isArray(namesOrChanges)) {
-            for (var i = 0; i < namesOrChanges.length; i++) {
+            for (let i = 0; i < namesOrChanges.length; i++) {
                 var p = namesOrChanges[i];
                 result[p] = this.props[p];
             }
         }
         else {
-            for (var i in namesOrChanges) {
+            for (let i in namesOrChanges) {
                 result[i] = this.props[i];
             }
         }
@@ -185,7 +187,7 @@ export default class DataNode{
     }
 
 
-    id(value) {
+    id(value?: string) {
         if (value !== undefined) {
             this.setProps({id: value}, ChangeMode.Self);
         }
@@ -380,7 +382,7 @@ export default class DataNode{
     }
 
     toJSON(){
-        var json = {t: this.t, props: this.cloneProps()};
+        var json: Dictionary = {t: this.t, props: this.cloneProps()};
         if (!this.isAtomicInModel() && this.children){
             json.children = this.children.map(x => x.toJSON());
         }

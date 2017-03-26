@@ -34,7 +34,6 @@ import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import ModelSyncProxy from "./server/ModelSyncProxy";
-import Promise from "bluebird";
 import DataNode from "./framework/DataNode";
 import DataManager from "./framework/data/DataManager";
 import CustomDataProvider from "./framework/data/CustomDataProvider";
@@ -46,10 +45,12 @@ import UserSettings from "./UserSettings";
 import ObjectFactory from "./framework/ObjectFactory";
 import ActionManager from "./ui/ActionManager";
 import ShortcutManager from "./ui/ShortcutManager";
+import logger from "./logger";
 import { IApp, IEvent } from "carbon-core";
+import { IPage } from "carbon-model";
 
-window.env = Environment;
-window.Selection = Selection;
+window['env'] = Environment;
+window['Selection'] = Selection;
 
 var debug = require("./DebugUtil")("carb:relayout");
 
@@ -72,8 +73,8 @@ var Path = require("./ui/common/Path");
 var CompoundPath = require("./ui/common/CompoundPath");
 
 // using
-var ui = sketch.ui,
-    fwk = sketch.framework,
+var ui = window['sketch'].ui,
+    fwk = window['sketch'].framework,
     sync = fwk.sync;
 
 var addComment = function (event) {
@@ -84,41 +85,15 @@ var addComment = function (event) {
     });
 };
 
-function showClipboardDialog() {
-    new sketch.windows.Dialog("viewmodels/ClipboardUsageDialog", { modal: true }).show();
-}
+class AppClass extends DataNode implements IApp {
+    [name: string]: any;
+    isLoaded: boolean;
+    activePage: IPage;
 
-function onDefaultFamilyChanged(event) {
-    if (event.oldValue === event.newValue) {
-        return;
-    }
-
-    fwk.Font.familyOverride = event.newValue;
-    var app = App.Current;
-
-    if (app.isLoaded) {
-        var res = confirm("Would you like to update font family on all stencils in the project?");
-        if (res) {
-            each(app.pages, function (page) {
-                page.applyVisitor(function (element) {
-                    if (element.props.font) {
-                        var oldFont = element.props.font;
-                        var newFont = fwk.Font.extend(oldFont, { family: event.newValue });
-                        element.setProps({ font: newFont });
-                        app.raiseLogEvent(Primitive.element_props_change(element, newFont, oldFont));
-                    }
-                }, false);
-            });
-        }
-
-        Invalidate.request();
-        //TODO: change toolbox
-    }
-}
-
-
-class App extends DataNode implements IApp {
     shortcutManager: ShortcutManager;
+    actionManager: ActionManager;
+
+    onBuildMenu: IEvent<{ a: number }>;
 
     currentToolChanged: IEvent<string>;
     _currentTool: string;
@@ -549,7 +524,7 @@ class App extends DataNode implements IApp {
         });
     }
 
-    toJSON(pageIdMap) {
+    toJSON(pageIdMap?:any) {
         var json = {
             t: this.t,
             children: [],
@@ -627,6 +602,7 @@ class App extends DataNode implements IApp {
         }
 
         ModelStateListener.start();
+        return this;
     }
 
     serverless(value) {
@@ -810,6 +786,8 @@ class App extends DataNode implements IApp {
     run() {
         this.clear();
 
+        backend.init(logger);
+
         //this.setProps(defaultAppProps);
 
         this.init();
@@ -926,8 +904,8 @@ class App extends DataNode implements IApp {
         return dfd.promise();
     }
 
-    get pages() {
-        return this.children.filter(p => p instanceof Page);
+    get pages(): IPage[] {
+        return (this.children as any).filter(p => p instanceof Page);
     }
 
     get stories() {
@@ -1394,12 +1372,9 @@ class App extends DataNode implements IApp {
     }
 }
 
-App.prototype.t = Types.App;
+AppClass.prototype.t = Types.App;
 
-PropertyMetadata.registerForType(App, {
-    defaultShapeSettings: {
-        defaultValue: PropertyMetadata.getDefaultProps(Types.DefaultShapeSettings)
-    },
+PropertyMetadata.registerForType(AppClass, {
     showFrames: {
         defaultValue: true
     },
@@ -1463,7 +1438,6 @@ PropertyMetadata.registerForType(App, {
 });
 
 
-window.App = App;
+window['App'] = AppClass;
 
-export default App;
-
+export default AppClass;

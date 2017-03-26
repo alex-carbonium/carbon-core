@@ -1,4 +1,6 @@
-var PropertyMetadata = {};
+import { Dictionary } from "carbon-basics";
+
+var PropertyMetadata: Dictionary = {};
 PropertyMetadata._store = {};
 PropertyMetadata._defaults = {};
 PropertyMetadata._cache = {

@@ -5,7 +5,6 @@ import Environment from "environment";
 import FileProxy from "server/FileProxy";
 import {createUUID} from "util";
 import Matrix from "math/matrix";
-import Promise from "bluebird";
 
 var PADDING = 5;
 var _configCache = {};

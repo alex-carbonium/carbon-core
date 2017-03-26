@@ -1,5 +1,4 @@
 import Selection from "framework/SelectionModel";
-import Promise from "bluebird";
 import UIElement from "../framework/UIElement";
 
 export default {

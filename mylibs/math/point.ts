@@ -1,4 +1,4 @@
-import {IPoint} from "carbon-core";
+import {IPoint} from "carbon-geometry";
 
 var EPSILON = 1e-12;
 var TRIGONOMETRIC_EPSILON = 1e-7;
@@ -19,6 +19,10 @@ function isZero(val) {
  * console.log(point.y); // 5
  */
 export default class Point implements IPoint {
+    x: number;
+    y: number;
+
+    private _angle: number;
     /**
      * Creates a Point object with the given x and y coordinates.
      *
@@ -217,7 +221,7 @@ export default class Point implements IPoint {
             // Force calculation of angle now, so it will be preserved even when
             // x and y are 0
             if (isZero(scale))
-                this.getAngle();
+                this.getAngle(Point.Zero);
             this.set(
                 this.x * scale,
                 this.y * scale
@@ -563,8 +567,7 @@ export default class Point implements IPoint {
      * var result = firstPoint * secondPoint;
      * console.log(result); // {x: 20, y: 20}
      */
-    multiply(/* point */) {
-        var point = new Point(arguments[0]);
+    multiply(point) {
         return new Point(this.x * point.x, this.y * point.y);
     }
 
@@ -601,8 +604,7 @@ export default class Point implements IPoint {
      * var result = firstPoint / secondPoint;
      * console.log(result); // {x: 4, y: 2}
      */
-    divide(/* point */) {
-        var point = new Point(arguments[0]);
+    divide(point) {
         return new Point(this.x / point.x, this.y / point.y);
     }
 
@@ -636,8 +638,7 @@ export default class Point implements IPoint {
      * var point = new Point(12, 6);
      * console.log(point % new Point(5, 2)); // {x: 2, y: 0}
      */
-    modulo(/* point */) {
-        var point = new Point(arguments[0]);
+    modulo(point) {
         return new Point(this.x % point.x, this.y % point.y);
     }
 
@@ -653,9 +654,7 @@ export default class Point implements IPoint {
      * @param {Number} tolerance the maximum distance allowed
      * @return {Boolean} {@true if it is within the given distance}
      */
-    isClose(/* point, tolerance */) {
-        var point = new Point(arguments[0]),
-            tolerance = arguments[1];
+    isClose(point, tolerance) {
         return this.getDistance(point) < tolerance;
     }
 
@@ -666,8 +665,7 @@ export default class Point implements IPoint {
      * @param {Point} point the vector to check against
      * @return {Boolean} {@true it is collinear}
      */
-    isCollinear(/* point */) {
-        var point = new Point(arguments[0]);
+    isCollinear(point) {
         return Point.isCollinear(this.x, this.y, point.x, point.y);
     }
 
@@ -678,8 +676,7 @@ export default class Point implements IPoint {
      * @param {Point} point the vector to check against
      * @return {Boolean} {@true it is orthogonal}
      */
-    isOrthogonal(/* point */) {
-        var point = new Point(arguments[0]);
+    isOrthogonal(point) {
         return Point.isOrthogonal(this.x, this.y, point.x, point.y);
     }
 
@@ -761,9 +758,7 @@ export default class Point implements IPoint {
      * var point3 = new Point(250, 35);
      * [point1, point2, point3].reduce(Point.min) // {x: 60, y: 5}
      */
-    static min(/* point1, point2 */) {
-        var point1 = new Point(arguments[0]),
-            point2 = new Point(arguments[1]);
+    static min(point1, point2) {
         return new Point(
             Math.min(point1.x, point2.x),
             Math.min(point1.y, point2.y)
@@ -792,9 +787,7 @@ export default class Point implements IPoint {
      * var point3 = new Point(250, 35);
      * [point1, point2, point3].reduce(Point.max) // {x: 250, y: 100}
      */
-    static max(/* point1, point2 */) {
-        var point1 = new Point(arguments[0]),
-            point2 = new Point(arguments[1]);
+    static max(point1, point2) {
         return new Point(
             Math.max(point1.x, point2.x),
             Math.max(point1.y, point2.y)
@@ -870,6 +863,10 @@ export default class Point implements IPoint {
         }
         return new Point(x, y);
     }
+
+    static Zero: Point;
+    static BasisX: Point;
+    static BasisY: Point;
 }
 
 Point.Zero = new Point(0, 0);

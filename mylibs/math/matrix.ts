@@ -25,6 +25,7 @@ import LineSegment from "./lineSegment";
  * matrix multiplication).
  */
 class Matrix {
+    [name: string]: any;
 
 
     /**
@@ -133,7 +134,7 @@ class Matrix {
         return this;
     }
 
-    scale(sx, sy, ox, oy){
+    scale(sx, sy, ox = undefined, oy = undefined){
         if (ox || oy)
             this.translate(ox, oy);
         this._a *= sx;
@@ -455,7 +456,7 @@ class Matrix {
         return this.transformPoint2(point.x, point.y, round);
     }
 
-    transformPoint2(x, y, round): Point{
+    transformPoint2(x, y, round = false): Point{
         var point = new Point(x, y);
         return this.transformPointMutable(point, round);
     }
@@ -629,7 +630,7 @@ class Matrix {
      * @see #decompose()
      */
     getScaling(){
-        return (this.decompose() || {}).scaling;
+        return this.decompose().scaling;
     }
 
     /**
@@ -640,7 +641,7 @@ class Matrix {
      * @see #decompose()
      */
     getRotation(){
-        return (this.decompose() || {}).rotation;
+        return this.decompose().rotation;
     }
 
     /**
@@ -723,6 +724,8 @@ class Matrix {
     static fromObject(value): Matrix{
         return new Matrix(value._a, value._b, value._c, value._d, value._tx, value._ty);
     }
+
+    static Identity: Matrix;
 }
 
 Matrix.Identity = Object.freeze(Matrix.create());

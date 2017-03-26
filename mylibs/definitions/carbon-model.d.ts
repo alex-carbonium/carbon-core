@@ -6,14 +6,16 @@ declare module "carbon-model" {
         [key: string]: any;
         id: string;
     }
-    export interface IDataNode {
+    export interface IDataNode<TProps> {
         id(value?: string): string;
+
+        props: TProps;
     }
 
     export interface IUIElementProps extends IDataNodeProps {
         visible: boolean;
     }
-    export interface IUIElement extends IDataNode {
+    export interface IUIElement<TProps extends IUIElementProps> extends IDataNode<TProps> {
         name(): string;
 
         shouldApplyViewMatrix(): boolean;
@@ -34,8 +36,11 @@ declare module "carbon-model" {
         stroke(value?: any):any;
     }
 
-    export interface IContainer extends IUIElement {
-        children: IUIElement[];
+    export interface IContainerProps extends IUIElementProps{
+
+    }
+    export interface IContainer extends IUIElement<IContainerProps> {
+        children: IUIElement<IUIElementProps>[];
 
         canAccept(elements: IUIElement[], autoInsert: boolean, allowMoveIn: boolean): boolean;
 

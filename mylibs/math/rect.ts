@@ -2,7 +2,12 @@ import Point from "./point";
 import LineSegment from "./lineSegment";
 import {isRectInRect} from "./math";
 
-export default class Rect{
+export default class Rect {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+
     constructor(x, y, w, h){
         this.x = x;
         this.y = y;
@@ -190,6 +195,8 @@ export default class Rect{
         rect.updateFromPointsMutable(p1, p2);
         return rect;
     }
+
+    static Zero: Rect;
 }
 
 Rect.Zero = new Rect(0, 0, 0, 0);

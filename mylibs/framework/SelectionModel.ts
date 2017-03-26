@@ -58,6 +58,8 @@ function onselect(rect) {
 }
 
 class SelectionModel {
+    [name: string]: any;
+
     constructor() {
         this._selectionMode = "new";
         this._selectFrame = null;
@@ -213,7 +215,7 @@ class SelectionModel {
         return this._selectCompositeElement.elements;
     }
 
-    makeSelection(selection, refreshOnly, doNotTrack) {
+    makeSelection(selection, refreshOnly = false, doNotTrack = false) {
         var currentSelection = this._selectCompositeElement.elements;
 
         var newSelection = this._decomposeSelection(selection);
@@ -281,12 +283,12 @@ class SelectionModel {
         this.makeSelection(selection, false, true);
     }
 
-    _fireOnElementSelected(oldSelection, doNotTrack) {
+    _fireOnElementSelected(oldSelection, doNotTrack = false) {
         lockUnlockGroups.call(this, this.selectedElements());
         this.onElementSelected.raise(this._selectCompositeElement, oldSelection, doNotTrack);
     }
 
-    unselectAll(refreshOnly) {
+    unselectAll(refreshOnly = false) {
         this._selectCompositeElement.selected(false);
         var count = this._selectCompositeElement.count();
         this._selectCompositeElement.unregisterAll(refreshOnly);

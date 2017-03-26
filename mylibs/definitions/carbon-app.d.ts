@@ -33,6 +33,8 @@ declare module "carbon-app" {
     export interface IView {
         viewContainerElement: HTMLElement;
 
+        animationController: IAnimationController;
+
         scale(value?: number): number;
         zoom(value? :number):void;
         zoomToFit(): void;
@@ -72,10 +74,17 @@ declare module "carbon-app" {
         condition?:boolean;
     }
 
+    export interface IAnimationController{
+        registerAnimationGroup(group: any);
+    }
+
     export interface IActionManager {
         invoke(action: string): void;
         subscribe(action: string, cb: (action: string, result: any) => void);
         registerAction(name:string, description:string, category:string, callback:(option?:any  )=>any):IAction;
+
+        getActionFullDescription(name: string, translate?: (value: string) => string): string;
+        getActionDescription(action: string): string;
     }
 
     export interface IShortcutManager {

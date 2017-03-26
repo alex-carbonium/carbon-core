@@ -21,9 +21,8 @@ import logger from "../logger";
 import params from "../params";
 import StateMachine from "../StateMachine";
 import DiscoverProxy from "./DiscoverProxy";
-import Promise from "bluebird";
 
-require("../DebugUtil")("carb:signalr");
+require<any>("../DebugUtil")("carb:signalr");
 
 var connectionStartTime;
 var noWsTransport = ['serverSentEvents', 'foreverFrame', 'longPolling'];

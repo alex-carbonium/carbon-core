@@ -1,5 +1,5 @@
-declare module "carbon-api"{
-    import bluebird from "bluebird";
+declare module "carbon-api" {
+    import { IEvent } from "carbon-basics";
 
     export interface ILogger{
         fatal(message: string, error?: Error): void;
@@ -9,9 +9,11 @@ declare module "carbon-api"{
         ensureLoggedIn(renewToken?: boolean): Promise<void>;
         getUserId(): string;
         addUrlPath(...pathes: string[]): string;
-    }
 
-    export type Promise<T> = bluebird<T>;
+        loginNeeded: IEvent<boolean>;
+        requestStarted: IEvent<string>;
+        requestEnded: IEvent<string>;
+    }
 
     export interface IAccountProxy{
         resolveCompanyId(companyName: string): Promise<{companyId: string}>;

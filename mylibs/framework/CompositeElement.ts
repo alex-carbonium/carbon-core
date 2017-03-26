@@ -105,7 +105,7 @@ export default class CompositeElement extends UIElement implements IComposite {
         }
     }
 
-    getBoundingBoxGlobal(includeMargin: ?boolean): IRect {
+    getBoundingBoxGlobal(includeMargin?: boolean): IRect {
         if (this.count() === 1) {
             return this.elements[0].getBoundingBoxGlobal(includeMargin);
         }

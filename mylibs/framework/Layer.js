@@ -77,15 +77,15 @@ class Layer extends Container {
         removeElement(this._hitFirstElements, element);
     }
 
-    scale() {
+    scale(value?: number) {
         return 1;
     }
 
-    scrollX() {
+    scrollX(value?: number) {
         return 0;
     }
 
-    scrollY() {
+    scrollY(value?: number) {
         return 0;
     }
 

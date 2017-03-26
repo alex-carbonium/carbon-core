@@ -4,7 +4,6 @@ import Invalidate from "../../framework/Invalidate";
 import SnapController from "../../framework/SnapController";
 import Environment from "../../environment";
 import Tool from "./Tool";
-import Promise from "bluebird";
 import Artboard from "../../framework/Artboard";
 import ObjectFactory from "../../framework/ObjectFactory";
 import {ViewTool} from "../../framework/Defs";

@@ -1,4 +1,3 @@
-import Promise from "bluebird";
 import {IEvent} from "carbon-core"
 
 var resolvedPromise;

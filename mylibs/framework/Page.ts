@@ -8,7 +8,7 @@ import ContextPool from "framework/render/ContextPool";
 import EventHelper from "./EventHelper";
 import Brush from "./Brush";
 import NameProvider from "ui/NameProvider";
-import {IContainer, IRect, IPage} from "carbon-core";
+import {IContainer, IRect, IPage, IArtboard} from "carbon-core";
 
 function findNextPageName() {
     var maxId = 0;
@@ -29,7 +29,8 @@ function findNextPageName() {
 
 var pageNameSlugRegex = /[^\wа-яА-Я]/g;
 
-class Page extends Layer implements IPage{
+class Page extends Layer implements IPage {
+    [name: string]: any;
 
     constructor() {
         super();
@@ -114,7 +115,7 @@ class Page extends Layer implements IPage{
         return {target: el, position: pos};
     }
 
-    scrollX() {
+    scrollX(value?:number) {
         if (arguments.length === 1) {
             this._scrollX = arguments[0];
 
@@ -130,7 +131,7 @@ class Page extends Layer implements IPage{
         return this._scrollX;
     }
 
-    scrollY(value) {
+    scrollY(value?:number) {
         if (arguments.length === 1) {
             this._scrollY = arguments[0];
 
@@ -200,7 +201,7 @@ class Page extends Layer implements IPage{
         }
     }
 
-    scale(value) {
+    scale(value?:any) {
         if (value !== undefined) {
             this._scale = value;
             this.updatePageMatrix();
@@ -601,9 +602,9 @@ class Page extends Layer implements IPage{
         return this.getContentContainer();
     }
 
-    getAllArtboards() {
+    getAllArtboards(): IArtboard[] {
         //TODO: add functionality
-        return [this.getContentContainer()];
+        return [this.getContentContainer()] as IArtboard[];
     }
 
     draw() {
