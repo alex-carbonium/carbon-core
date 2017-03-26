@@ -1,8 +1,8 @@
+import globals from "./globals";
 import { createUUID } from "./util";
 import EventHelper from "./framework/EventHelper";
 import UserManager from "oidc-client/src/UserManager";
 import Log from "oidc-client/src/Log";
-import globals from "./globals";
 import params from "./params";
 import { IBackend, ILogger } from "carbon-api";
 import { IEvent, Dictionary } from "carbon-basics";
@@ -48,6 +48,12 @@ class Backend implements IBackend {
         this.requestStarted = EventHelper.createEvent();
         this.requestEnded = EventHelper.createEvent();
         this.accessTokenChanged = EventHelper.createEvent();
+
+        var endpoints = params.endpoints;
+        this.servicesEndpoint = endpoints.services;
+        this.storageEndpoint = endpoints.storage;
+        this.cdnEndpoint = endpoints.cdn;
+        this.fileEndpoint = endpoints.file;
     }
 
     raiseLoginNeeded() {
@@ -58,12 +64,6 @@ class Backend implements IBackend {
         if (Backend._ready) {
             return;
         }
-
-        var endpoints = params.endpoints;
-        this.servicesEndpoint = endpoints.services;
-        this.storageEndpoint = endpoints.storage;
-        this.cdnEndpoint = endpoints.cdn;
-        this.fileEndpoint = endpoints.file;
 
         this.logger = logger;
 
@@ -382,6 +382,9 @@ class Backend implements IBackend {
     }
 }
 
-var backend = globals.backend || new Backend();
-globals.backend = backend;
+var backend: Backend = globals.backend;
+if (!backend){
+    backend = new Backend();
+    globals.backend = backend;
+}
 export default backend;

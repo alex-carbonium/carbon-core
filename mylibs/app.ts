@@ -786,8 +786,6 @@ class AppClass extends DataNode implements IApp {
     run() {
         this.clear();
 
-        backend.init(logger);
-
         //this.setProps(defaultAppProps);
 
         this.init();
