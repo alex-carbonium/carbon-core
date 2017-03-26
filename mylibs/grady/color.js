@@ -13,8 +13,8 @@ define(["./ColorPaletteViewModel"], function (ColorPaletteViewModel) {
                 this.properties.createProperty("colorReturnMode", "", "rgba" /* or hex */);
                 this.properties.createProperty("color", "", null);
                 this.colorPickerColor = ko.observable("#000000");
-                this.onColorUpdate = fwk.EventHelper.createEvent();
-                this.onColorUpdating = fwk.EventHelper.createEvent();
+                this.onColorUpdate = EventHelper.createEvent();
+                this.onColorUpdating = EventHelper.createEvent();
                 this.colorPicker = $();
                 this._colorPalletModel = new ColorPaletteViewModel();
                 this._colorPalletModel.colorChanged.bind(this, function(color){

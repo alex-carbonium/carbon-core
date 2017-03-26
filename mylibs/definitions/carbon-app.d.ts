@@ -79,7 +79,7 @@ declare module "carbon-app" {
     }
 
     export interface IActionManager {
-        invoke(action: string): void;
+        invoke(action: string, callback?:(success:boolean, result?:any)=>void): void;
         subscribe(action: string, cb: (action: string, result: any) => void);
         registerAction(name:string, description:string, category:string, callback:(option?:any  )=>any):IAction;
 

@@ -198,8 +198,8 @@ define(["./ColorPaletteViewModel"], function (ColorPaletteViewModel) {
                 setupDefaultSliders.call(this);
                 setupDirectionIcons.call(this);
 
-                this.onGradientUpdate = fwk.EventHelper.createEvent();
-                this.onGradientUpdating = fwk.EventHelper.createEvent();
+                this.onGradientUpdate = EventHelper.createEvent();
+                this.onGradientUpdating = EventHelper.createEvent();
                 this.colorPicker = $();
 
                 var that = this;

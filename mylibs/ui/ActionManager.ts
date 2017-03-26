@@ -12,22 +12,22 @@ import ArrangeStrategy from "../framework/ArrangeStrategy";
 import clipboard from "../framework/Clipboard";
 import PropertyTracker from "../framework/PropertyTracker";
 import Duplicate from "../commands/Duplicate";
-import ChangeColumnType from "../commands/ChangeColumnType";
+// import ChangeColumnType from "../commands/ChangeColumnType";
 import ConvertToPath from "../commands/ConvertToPath";
-import DeleteCellGroup from "../commands/DeleteCellGroup";
+// import DeleteCellGroup from "../commands/DeleteCellGroup";
 import Group from "../commands/Group";
 import SelectionToStencil from "../commands/SelectionToStencil";
 import Ungroup from "../commands/Ungroup";
-import InsertColumn from "../commands/InsertColumn";
-import InsertRow from "../commands/InsertRow";
-import ResizeColumn from "../commands/ResizeColumn";
-import ResizeRow from "../commands/ResizeRow";
+// import InsertColumn from "../commands/InsertColumn";
+// import InsertRow from "../commands/InsertRow";
+// import ResizeColumn from "../commands/ResizeColumn";
+// import ResizeRow from "../commands/ResizeRow";
 import platform from "../platform/Platform";
 import CombinePaths from "../commands/CombinePaths";
 import GroupContainer from "../framework/GroupContainer";
 import GroupInRepeater from "../framework/repeater/GroupInRepeater";
 import UngroupRepeater from "../framework/repeater/UngroupRepeater";
-import aligner from "../framework/Aligner";
+import {align} from "../framework/Aligner";
 import Selection from "../framework/SelectionModel";
 import EventHelper from "../framework/EventHelper";
 import {IActionManager, IAction, IApp, IUIElement} from "carbon-core";
@@ -77,6 +77,30 @@ function endRepeatableAction() {
     return actionStartProps;
 }
 
+class Action implements IAction
+{
+    condition:boolean;
+    private _enabled:boolean = true;
+
+    constructor(public category:string, public name:string, public description:string, public callback:(options?: any)=>any|void) {
+
+    }
+
+    setCondition (condition) {
+        this.condition = condition;
+        return this;
+    }
+
+    enabled(value?:boolean) {
+        if(value !== undefined) {
+            this._enabled = value;
+        }
+
+        return this._enabled;
+    }
+
+}
+
 export default class ActionManager implements IActionManager {
     app: IApp;
     private _actions: {
@@ -122,13 +146,10 @@ export default class ActionManager implements IActionManager {
         }
     }
 
-    registerAction(name:string, description:string, category:string, callback:(option?:any)=>void):IAction {
-        var action : IAction = { category: category, name: name, description: description, callback: callback };
 
-        action.setCondition = function (condition) {
-            action.condition = condition;
-            return action;
-        };
+    registerAction(name:string, description:string, category:string, callback:(option?:any)=>void):IAction {
+        var action : IAction = new Action(category, name, description, callback );
+
 
         this._actions[name] = action;
 
@@ -145,30 +166,32 @@ export default class ActionManager implements IActionManager {
         };
         var moving = null;
 
-        this.registerAction("copy", "@copy", "Editing", function () {
-            return new AllCommands.Copy(Selection.getSelection());
-        }).setCondition(function () {
-            return selectionMade();
-        });
-        this.registerAction("paste", "@paste", "Editing", function () {
-            return new AllCommands.Paste(that.app.activePage);
-        }).setCondition(function () {
-            return clipboard.hasValue();
-        });
-        this.registerAction("cut", "@cut", "Editing", function () {
-            var deleteCommand;
-            var selection = Selection.getSelection();
-            if (selection.length === 1) {
-                deleteCommand = selection[0].constructDeleteCommand();
-            }
-            else {
-                deleteCommand = new CompositeCommand(selection.map(x => x.constructDeleteCommand()));
-            }
-            var copyCommand = new AllCommands.Copy(selection);
-            return new CompositeCommand([copyCommand, deleteCommand]);
-        }).setCondition(function () {
-            return selectionMade();
-        });
+        // this.registerAction("copy", "@copy", "Editing", function () {
+        //     return new AllCommands.Copy(Selection.getSelection());
+        // }).setCondition(function () {
+        //     return selectionMade();
+        // });
+        // this.registerAction("paste", "@paste", "Editing", function () {
+        //     return new AllCommands.Paste(that.app.activePage);
+        // }).setCondition(function () {
+        //     return clipboard.hasValue();
+        // });
+
+        // this.registerAction("cut", "@cut", "Editing", function () {
+        //     var deleteCommand;
+        //     var selection = Selection.getSelection();
+        //     if (selection.length === 1) {
+        //         deleteCommand = selection[0].constructDeleteCommand();
+        //     }
+        //     else {
+        //         deleteCommand = new CompositeCommand(selection.map(x => x.constructDeleteCommand()));
+        //     }
+        //     var copyCommand = new AllCommands.Copy(selection);
+        //     return new CompositeCommand([copyCommand, deleteCommand]);
+        // }).setCondition(function () {
+        //     return selectionMade();
+        // });
+
         this.registerAction("delete", "@delete", "Editing", function () {
             Delete.run(Selection.getSelection());
         }).setCondition(function () {
@@ -304,28 +327,28 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("alignLeft", "Align left", "Align", function () {
-            aligner.align("left", Selection.getSelection());
+            align("left", Selection.getSelection());
         });
         this.registerAction("alignRight", "Align right", "Align", function () {
-            aligner.align("right", Selection.getSelection());
+            align("right", Selection.getSelection());
         });
         this.registerAction("alignTop", "Align top", "Align", function () {
-            aligner.align("top", Selection.getSelection());
+            align("top", Selection.getSelection());
         });
         this.registerAction("alignBottom", "Align bottom", "Align", function () {
-            aligner.align("bottom", Selection.getSelection());
+            align("bottom", Selection.getSelection());
         });
         this.registerAction("alignMiddle", "Align middle", "Align", function () {
-            aligner.align("middle", Selection.getSelection());
+            align("middle", Selection.getSelection());
         });
         this.registerAction("alignCenter", "Align center", "Align", function () {
-            aligner.align("center", Selection.getSelection());
+            align("center", Selection.getSelection());
         });
         this.registerAction("distributeHorizontally", "Distribute horizontally", "Distribute", function () {
-            aligner.align("distributeHorizontally", Selection.getSelection());
+            align("distributeHorizontally", Selection.getSelection());
         });
         this.registerAction("distributeVertically", "Distribute vertically", "Distribute", function () {
-            aligner.align("distributeVertically", Selection.getSelection());
+            align("distributeVertically", Selection.getSelection());
         });
 
         this.registerAction("groupElements", "Group elements", "Group", function () {
@@ -369,12 +392,12 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("swapColors", "Swap Colors", "Colors", function () {
-            var selection = Selection.selectedElement() as IUIElement;
+            var selection = Selection.selectedElement() as IUIElement<any>;
             if (!selection) {
                 return null;
             }
 
-            selection.each((e:IUIElement) => {
+            selection.each((e:IUIElement<any>) => {
                 var fill = e.fill();
                 var stroke = e.stroke();
                 e.fill(stroke);
@@ -457,8 +480,8 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("zoomSelection", "Zoom selection", "Zoom", function () {
-            var element = Selection.selectedElement() as IUIElement;
-            element = element || (that.app.activePage.getActiveArtboard() as IUIElement);
+            var element = Selection.selectedElement() as IUIElement<any>;
+            element = element || (that.app.activePage.getActiveArtboard() as IUIElement<any>);
             Environment.view.ensureScale(element);
             Environment.view.ensureVisible(element);
         });
@@ -559,11 +582,11 @@ export default class ActionManager implements IActionManager {
             callback(this._actions[name]);
         }
     }
-    invokeAsync(actionName, callback) {
+    invokeAsync(actionName:string, callback?:(success:boolean, result?:any)=>void):void {
         setTimeout(() => this.invoke(actionName, callback), 100);
     }
 
-    invoke(actionName, callback) {
+    invoke(actionName:string, callback?:(success:boolean, result?:any)=>void):void {
         debug("Invoking %s", actionName);
         var that = this;
         var action = this._actions[actionName];

@@ -5,7 +5,7 @@ define(function () {
         return {
             _constructor:function () {
                 this.selectedColorIndex = ko.observable(0);
-                this.colorChanged = fwk.EventHelper.createEvent();
+                this.colorChanged = EventHelper.createEvent();
                 this.activeColor = ko.observable("#fff");
                 this._lastAddedColor = -1;
                 var pallet = fwk.Resources.getColorPalette().slice(0, MAX_COLOR_COUNT);

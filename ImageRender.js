@@ -1,4 +1,5 @@
 import Environment from "environment";
+import EventHelper from "framework/EventHelper";
 
 define("bootloader", ["logger", "App"], function(logger){
     var fwk = sketch.framework;
@@ -12,7 +13,7 @@ define("bootloader", ["logger", "App"], function(logger){
             this._height = 1122;
         },
         layer3: {
-            ondraw: fwk.EventHelper.createEvent(),
+            ondraw: EventHelper.createEvent(),
             add: function(){
 
             }
@@ -54,7 +55,7 @@ define("bootloader", ["logger", "App"], function(logger){
         },
         setActivePage: function(){
         },
-        requestRedraw: function(){            
+        requestRedraw: function(){
         }
     });
 
@@ -172,7 +173,7 @@ define("bootloader", ["logger", "App"], function(logger){
                     function draw(){
                         context.save();
 
-                        context.scale(scale, scale);                        
+                        context.scale(scale, scale);
                         context.translate(scroll.x, scroll.y);
 
                         page.invalidateRequired = true;
@@ -180,17 +181,17 @@ define("bootloader", ["logger", "App"], function(logger){
 
                         context.restore();
                     }
-                    
-                    var redraw = true;                    
-                    page.invalidate = function(){                        
+
+                    var redraw = true;
+                    page.invalidate = function(){
                         redraw = true;
                     };
                     while (redraw){
-                        redraw = false;                        
-                        draw();                    
-                    }                    
+                        redraw = false;
+                        draw();
+                    }
 
-                    context.save();                
+                    context.save();
 
                     var comments = [];
                     if (projectComments){
@@ -213,9 +214,9 @@ define("bootloader", ["logger", "App"], function(logger){
                     var links = null;
                     if (showLinks){
                         links = getLinks(page, scroll, scale);
-                    }      
+                    }
 
-                    context.restore();              
+                    context.restore();
 
                     var imageData = canvas.toDataURL('image/png');
 

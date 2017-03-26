@@ -211,8 +211,8 @@ define(["./CommentsModel", "./RemoveComment"], function (CommentsModel, RemoveCo
                 });
                 this._subscriptions.push(s);
                 this.note = null;
-                this.onCommentSaved = fwk.EventHelper.createEvent();
-                this.onCommentCanceled = fwk.EventHelper.createEvent();
+                this.onCommentSaved = EventHelper.createEvent();
+                this.onCommentCanceled = EventHelper.createEvent();
                 this.focused = ko.observable(false);
                 this.commentsMode = ko.observable(false);
                 s = this.focused.subscribe(function onFocused(value){

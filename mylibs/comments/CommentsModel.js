@@ -2,6 +2,7 @@ import {createUUID} from "../util";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
+import EventHelper from "framework/EventHelper";
 
 define(["server/CommentsProxy", "./CommentNote"], function (CommentsProxy, CommentNote) {
     var fwk = sketch.framework;
@@ -177,11 +178,11 @@ define(["server/CommentsProxy", "./CommentNote"], function (CommentsProxy, Comme
                 this._loaded = false;
                 this.comments = [];
                 this.noteReferences = {};
-                this.commentAdded = fwk.EventHelper.createEvent();
-                this.commentDeleted = fwk.EventHelper.createEvent();
-                this.commentChanged = fwk.EventHelper.createEvent();
-                this.loading = fwk.EventHelper.createEvent();
-                this.loaded = fwk.EventHelper.createEvent();
+                this.commentAdded = EventHelper.createEvent();
+                this.commentDeleted = EventHelper.createEvent();
+                this.commentChanged = EventHelper.createEvent();
+                this.loading = EventHelper.createEvent();
+                this.loaded = EventHelper.createEvent();
                 this.commentsProxy = new CommentsProxy();
                 var that = this;
                 this.commentsProxy.onError.bind(function(){

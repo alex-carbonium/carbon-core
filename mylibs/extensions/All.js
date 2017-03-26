@@ -1,6 +1,6 @@
 define(
     [
-        "./ActivePageTracker",
+        // "./ActivePageTracker",
         "./Autosave",
       //  "./ClipboardSupport",
         "./ClosePageDialog",
@@ -19,9 +19,9 @@ define(
         "./StartupInfo",
         //"./TouchSupport",
         "./UserVoice",
-        //"./WatermarkController",        
+        //"./WatermarkController",
         "./guides/LayoutGridExtension",
-        "./guides/RulerExtension", 
+        "./guides/RulerExtension",
         "./ContextMenuExtension"
     ],
     function(){

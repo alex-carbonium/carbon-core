@@ -1,6 +1,6 @@
 import {createUUID} from "../util";
 
-define(["projects/Metadata", "framework/EventHelper"], function(ProjectsMetadata) {
+define(["projects/Metadata", "framework/EventHelper"], function(ProjectsMetadata, EventHelper) {
     var fwk = sketch.framework;
 
     var resourceTotalCount;
@@ -27,11 +27,11 @@ define(["projects/Metadata", "framework/EventHelper"], function(ProjectsMetadata
     clear();
 
     fwk.Resources = {
-        starting:fwk.EventHelper.createEvent(),
-        completed:fwk.EventHelper.createEvent(),
-        modified: fwk.EventHelper.createEvent(),
-        userTemplateAdded: fwk.EventHelper.createEvent(),
-        userTemplateRemoved: fwk.EventHelper.createEvent(),
+        starting:EventHelper.createEvent(),
+        completed:EventHelper.createEvent(),
+        modified: EventHelper.createEvent(),
+        userTemplateAdded: EventHelper.createEvent(),
+        userTemplateRemoved: EventHelper.createEvent(),
         reportProgress:function(event){
         }
     };

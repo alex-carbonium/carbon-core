@@ -15,6 +15,7 @@ declare module "carbon-model" {
     export interface IUIElementProps extends IDataNodeProps {
         visible: boolean;
     }
+
     export interface IUIElement<TProps extends IUIElementProps> extends IDataNode<TProps> {
         name(): string;
 
@@ -30,7 +31,7 @@ declare module "carbon-model" {
 
         showResizeHint(): boolean;
 
-        each(callback:(e:IUIElement, index?:number)=>boolean|void);
+        each(callback:(e:IUIElement<any>, index?:number)=>boolean|void);
 
         fill(value?: any):any;
         stroke(value?: any):any;
@@ -42,17 +43,17 @@ declare module "carbon-model" {
     export interface IContainer extends IUIElement<IContainerProps> {
         children: IUIElement<IUIElementProps>[];
 
-        canAccept(elements: IUIElement[], autoInsert: boolean, allowMoveIn: boolean): boolean;
+        canAccept(elements: IUIElement<any>[], autoInsert: boolean, allowMoveIn: boolean): boolean;
 
         /**
          * Adds an element and returns the element which has been actually inserted.
          */
-        add(element: IUIElement, mode: number): IUIElement;
+        add(element: IUIElement<any>, mode: number): IUIElement<any>;
         /**
          * Adds an element and returns the element which has been actually inserted.
          */
-        insert(element: IUIElement, index: number, mode: number): IUIElement;
-        remove(element: IUIElement, mode: number): number;
+        insert(element: IUIElement<any>, index: number, mode: number): IUIElement<any>;
+        remove(element: IUIElement<any>, mode: number): number;
 
         autoPositionChildren(): boolean;
 
@@ -72,11 +73,11 @@ declare module "carbon-model" {
         restoreWorkspaceState(data: any): void;
     }
 
-    export interface IComposite extends IUIElement {
-        elements: IUIElement[];
+    export interface IComposite extends IUIElement<IContainerProps> {
+        elements: IUIElement<any>[];
 
-        register(element: IUIElement): void;
-        unregister(element: IUIElement): void;
+        register(element: IUIElement<any>): void;
+        unregister(element: IUIElement<any>): void;
         unregisterAll(): void;
 
         allHaveSameParent(): boolean;

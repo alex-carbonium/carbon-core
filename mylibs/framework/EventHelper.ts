@@ -2,7 +2,7 @@ import {IEvent} from "carbon-core"
 
 var resolvedPromise;
 
-export class EventSubscription {
+class EventSubscription {
     constructor(public event:IEvent<any>, public callback:()=>void) {
 
     }
@@ -16,7 +16,7 @@ export class EventSubscription {
     }
 };
 
-export class Event<T> implements IEvent<T> {
+class Event<T> implements IEvent<T> {
     private subscribers: any[];
     private _locked: number;
     private stateChanged: any;
@@ -199,7 +199,7 @@ export class Event<T> implements IEvent<T> {
     }
 }
 
-export class EventHandler {
+class EventHandler {
     constructor(protected __target:any, protected __method: any) {
 
     }
@@ -220,7 +220,7 @@ export class EventHandler {
     }
 }
 
-export class AsyncEventHandler extends EventHandler{
+class AsyncEventHandler extends EventHandler{
     private _timerId:number;
 
     constructor(__target:any, __method:any) {
