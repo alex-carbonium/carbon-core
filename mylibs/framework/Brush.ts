@@ -3,7 +3,7 @@ import Invalidate from "./Invalidate";
 import TypeDefaults from "./TypeDefaults";
 import {Types} from "./Defs";
 
-var Brush = sketch.framework.Brush = {};
+var Brush = window['sketch'].framework.Brush = {};
 
 var BrushType = {
     empty: 0,
