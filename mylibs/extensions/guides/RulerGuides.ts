@@ -15,6 +15,8 @@ import { IApp, IView, IController, IDisposable, IRect, IMouseEventData } from "c
 const config = UserSettings.ruler;
 
 export default class RulerGuides {
+    [name: string]: any;
+
     _dragController: DragController;
     _menuToken: IDisposable;
     _rectHorizontal: IRect;

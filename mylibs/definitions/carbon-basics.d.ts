@@ -15,7 +15,7 @@ declare module "carbon-basics"{
         x: number;
         y: number;
         isDragging: boolean;
-        cursor: string;
+        cursor?: string;
     }
 
     export interface IEvent<T> {

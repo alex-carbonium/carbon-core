@@ -4,6 +4,7 @@ import {IMouseEventData} from "carbon-core";
 var debug = require("DebugUtil")("carb:dragController");
 
 export default class DragController {
+    [name: string]: any;
     _lastMouseMove: IMouseEventData;
 
     constructor() {

@@ -1193,7 +1193,7 @@ export default class UIElement extends DataNode {
         }
         return this.props.fill;
     }
-    stroke(value): Brush {
+    stroke(value?: Brush): Brush {
         if (value !== undefined) {
             this.setProps({ stroke: value });
         }
@@ -1256,7 +1256,7 @@ export default class UIElement extends DataNode {
         }
         return this._parent;
     }
-    opacity(/*double*/value) {
+    opacity(value?: number) {
         if (value !== undefined) {
             this.setProps({ opacity: value });
         }

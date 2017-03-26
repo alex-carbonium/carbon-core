@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "@types/bluebird": "3.5.2",
+    "@types/tinycolor2": "1.1.0",
     "@types/ua-parser-js": "0.7.30",
     "async": "2.0.1",
     "azure-arm-storage": "0.13.1-preview",
