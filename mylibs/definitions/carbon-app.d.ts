@@ -1,5 +1,5 @@
 declare module "carbon-app" {
-    import { IDataNode, IPage, ITransformationEventData } from "carbon-model";
+    import { IDataNode, IPage, ITransformationEventData, IUIElement } from "carbon-model";
     import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState } from "carbon-basics";
 
     export interface IApp extends IDataNode {
@@ -13,6 +13,9 @@ declare module "carbon-app" {
         shortcutManager: IShortcutManager;
         actionManager: IActionManager;
 
+        offlineModel: any;
+        modelSyncProxy:any;
+
         run(): void;
         unload(): void;
         serverless(value?: boolean): boolean;
@@ -21,14 +24,24 @@ declare module "carbon-app" {
 
         saveWorkspaceState(): void;
         restoreWorkspaceState(): void;
+
+        showFrames(value?: boolean): boolean;
+
+        addNewPage(option?:any):void;
     }
 
     export interface IView {
         viewContainerElement: HTMLElement;
 
         scale(value?: number): number;
+        zoom(value? :number):void;
+        zoomToFit(): void;
         scrollX(value?: number): number;
         scrollY(value?: number): number;
+
+        ensureScale(element:IUIElement);
+        ensureVisible(element:IUIElement);
+        scrollToCenter():void;
     }
 
     export interface IController {
@@ -48,9 +61,21 @@ declare module "carbon-app" {
         defaultCursor(): string;
     }
 
+    export interface IAction
+    {
+        name:string;
+        category?:string;
+        description?:string;
+        setCondition?:(condition)=>IAction;
+        callback?:(options?: any)=>any|void;
+        enabled?:()=>boolean;
+        condition?:boolean;
+    }
+
     export interface IActionManager {
         invoke(action: string): void;
         subscribe(action: string, cb: (action: string, result: any) => void);
+        registerAction(name:string, description:string, category:string, callback:(option?:any  )=>any):IAction;
     }
 
     export interface IShortcutManager {

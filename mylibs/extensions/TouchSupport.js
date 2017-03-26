@@ -61,7 +61,7 @@ define(function(require){
                             layerX: domUtil.layerX(appEvent),
                             layerY: domUtil.layerY(appEvent)
                         });
-                        zoomBeforeTransform = app.zoom();
+                        zoomBeforeTransform = app.scale();
                         app.zoomToPoint = {x: center.layerX / zoomBeforeTransform, y: center.layerY / zoomBeforeTransform};
                         lastScale = e.gesture.scale;
                         lastDistance = e.gesture.distance;

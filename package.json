@@ -8,7 +8,7 @@
     "example": "node ./scripts/watchCore.js --example --port 8081"
   },
   "devDependencies": {
-    "@types/bluebird": "3.5.2",
+    "@types/bluebird": "^3.5.2",
     "async": "2.0.1",
     "azure-arm-storage": "0.13.1-preview",
     "azure-keyvault": "0.10.1",

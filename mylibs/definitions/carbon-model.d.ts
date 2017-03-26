@@ -27,6 +27,11 @@ declare module "carbon-model" {
         hitTestGlobalRect(rect: IRect, directSelection: boolean): boolean;
 
         showResizeHint(): boolean;
+
+        each(callback:(e:IUIElement, index?:number)=>boolean|void);
+
+        fill(value?: any):any;
+        stroke(value?: any):any;
     }
 
     export interface IContainer extends IUIElement {
@@ -45,6 +50,8 @@ declare module "carbon-model" {
         remove(element: IUIElement, mode: number): number;
 
         autoPositionChildren(): boolean;
+
+        applyVisitor(callback:(IUIElement)=>boolean|void);
     }
 
     export interface IGroupContainer extends IContainer {
@@ -54,6 +61,7 @@ declare module "carbon-model" {
 
     export interface IPage {
         getAllArtboards(): IArtboard[];
+        getActiveArtboard() : IArtboard;
 
         saveWorkspaceState(): any;
         restoreWorkspaceState(data: any): void;
@@ -84,8 +92,10 @@ declare module "carbon-model" {
         guidesX: IGuide[];
         guidesY: IGuide[];
     }
+
     export interface IArtboard extends IContainer {
     }
+
     export interface IGuide {
         id: string;
         pos: number;

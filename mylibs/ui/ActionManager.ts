@@ -30,7 +30,8 @@ import UngroupRepeater from "../framework/repeater/UngroupRepeater";
 import aligner from "../framework/Aligner";
 import Selection from "../framework/SelectionModel";
 import EventHelper from "../framework/EventHelper";
-import {IActionManager} from "carbon-core";
+import {IActionManager, IAction, IApp, IUIElement} from "carbon-core";
+
 
 var debug = require("DebugUtil")("carb:actionManager");
 
@@ -76,9 +77,17 @@ function endRepeatableAction() {
     return actionStartProps;
 }
 
-
 export default class ActionManager implements IActionManager {
     app: IApp;
+    private _actions: {
+        [key:string]:IAction
+    };
+
+    private _events: any[];
+    private _categoryEvents: any[];
+    private _actionStartEvents: any[];
+    private actionPerformed: any;
+    private _visibleActionsConfig: any;
 
     constructor(app: IApp) {
         this._actions = {};
@@ -98,7 +107,7 @@ export default class ActionManager implements IActionManager {
         }
     }
 
-    notifyActionCompleted(actionName, result, ret) {
+    notifyActionCompleted(actionName:string, result?:any, ret?:any) {
         this.actionPerformed.raise(actionName, result, ret);
         var event = this._events[actionName];
         if (event) {
@@ -113,17 +122,14 @@ export default class ActionManager implements IActionManager {
         }
     }
 
-    registerAction(name, description, category, callback, image) {
-        var action = { category: category, name: name, description: description, callback: callback, image: image };
+    registerAction(name:string, description:string, category:string, callback:(option?:any)=>void):IAction {
+        var action : IAction = { category: category, name: name, description: description, callback: callback };
 
         action.setCondition = function (condition) {
             action.condition = condition;
             return action;
         };
-        //TODO: remove or fix without ko
-        action.enabled = function () {
-            return true
-        };
+
         this._actions[name] = action;
 
         formatActionDescription.call(this, action);
@@ -141,12 +147,12 @@ export default class ActionManager implements IActionManager {
 
         this.registerAction("copy", "@copy", "Editing", function () {
             return new AllCommands.Copy(Selection.getSelection());
-        }, "ui-copy").setCondition(function () {
+        }).setCondition(function () {
             return selectionMade();
         });
         this.registerAction("paste", "@paste", "Editing", function () {
             return new AllCommands.Paste(that.app.activePage);
-        }, "ui-paste").setCondition(function () {
+        }).setCondition(function () {
             return clipboard.hasValue();
         });
         this.registerAction("cut", "@cut", "Editing", function () {
@@ -160,33 +166,33 @@ export default class ActionManager implements IActionManager {
             }
             var copyCommand = new AllCommands.Copy(selection);
             return new CompositeCommand([copyCommand, deleteCommand]);
-        }, "ui-cut").setCondition(function () {
+        }).setCondition(function () {
             return selectionMade();
         });
         this.registerAction("delete", "@delete", "Editing", function () {
             Delete.run(Selection.getSelection());
-        }, "ui-delete").setCondition(function () {
+        }).setCondition(function () {
             return selectionMade();
         });
 
         this.registerAction("duplicate", "@duplicate", "Editing", function () {
             return Duplicate.run(Selection.getSelection());
-        }, "ui-duplicate").setCondition(function () {
+        }).setCondition(function () {
             return selectionMade();
         });
 
         this.registerAction("bringToFront", "@bring to front", "Layering", function () {
             return new ChangeZOrder(Selection.getSelection(), "front");
-        }, "ui-bring-to-front");
+        });
         this.registerAction("sendToBack", "@send to back", "Layering", function () {
             return new ChangeZOrder(Selection.getSelection(), "back");
-        }, "ui-send-to-back");
+        });
         this.registerAction("bringForward", "@bring forward", "Layering", function () {
             return new ChangeZOrder(Selection.getSelection(), "forward");
-        }, "ui-bring-forward");
+        });
         this.registerAction("sendBackward", "@send backward", "Layering", function () {
             return new ChangeZOrder(Selection.getSelection(), "backward");
-        }, "ui-send-backward");
+        });
 
         this.registerAction("moveLeft", "Left", "Positioning", function () {
             if (!moving) {
@@ -299,32 +305,32 @@ export default class ActionManager implements IActionManager {
 
         this.registerAction("alignLeft", "Align left", "Align", function () {
             aligner.align("left", Selection.getSelection());
-        }, "ui-align-left");
+        });
         this.registerAction("alignRight", "Align right", "Align", function () {
             aligner.align("right", Selection.getSelection());
-        }, "ui-align-right");
+        });
         this.registerAction("alignTop", "Align top", "Align", function () {
             aligner.align("top", Selection.getSelection());
-        }, "ui-align-top");
+        });
         this.registerAction("alignBottom", "Align bottom", "Align", function () {
             aligner.align("bottom", Selection.getSelection());
-        }, "ui-align-bottom");
+        });
         this.registerAction("alignMiddle", "Align middle", "Align", function () {
             aligner.align("middle", Selection.getSelection());
-        }, "ui-align-middle");
+        });
         this.registerAction("alignCenter", "Align center", "Align", function () {
             aligner.align("center", Selection.getSelection());
-        }, "ui-align-center");
+        });
         this.registerAction("distributeHorizontally", "Distribute horizontally", "Distribute", function () {
             aligner.align("distributeHorizontally", Selection.getSelection());
-        }, "ui-distribute_horiz");
+        });
         this.registerAction("distributeVertically", "Distribute vertically", "Distribute", function () {
             aligner.align("distributeVertically", Selection.getSelection());
-        }, "ui-distribute_vertic");
+        });
 
         this.registerAction("groupElements", "Group elements", "Group", function () {
             Group.run(Selection.getSelection(), GroupContainer);
-        }, "ui-group");
+        });
 
         this.registerAction("createStencilFromSelection", "Create stencil", "Group", function () {
             SelectionToStencil.run(Selection.getSelection());
@@ -332,15 +338,15 @@ export default class ActionManager implements IActionManager {
 
         this.registerAction("ungroupElements", "Ungroup elements", "Ungroup", function () {
             Ungroup.run(Selection.getSelection());
-        }, "ui-ungroup");
+        });
 
         this.registerAction("groupInRepeater", "Repeate grid", "Repeater", function () {
             return GroupInRepeater.run(Selection.getSelection());
-        }, "ui-group");
+        });
 
         this.registerAction("ungroupRepeater", "Ungroup grid", "Repeater", function () {
             return UngroupRepeater.run(Selection.getSelection());
-        }, "ui-group");
+        });
 
         this.registerAction("lock", "Lock", "Lock", function () {
             Selection.lock();
@@ -349,7 +355,6 @@ export default class ActionManager implements IActionManager {
         this.registerAction("unlock", "Unlock", "Lock", function () {
             Selection.unlock();
         });
-
 
         this.registerAction("unlockAllOnArtboard", "Unlock all on page", "Lock", function () {
             var artboard = that.app.activePage.getActiveArtboard();
@@ -364,67 +369,68 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("swapColors", "Swap Colors", "Colors", function () {
-            var selection = Selection.selectedElement();
+            var selection = Selection.selectedElement() as IUIElement;
             if (!selection) {
                 return null;
             }
 
-            selection.each(e => {
+            selection.each((e:IUIElement) => {
                 var fill = e.fill();
                 var stroke = e.stroke();
                 e.fill(stroke);
                 e.stroke(fill);
-
             })
         });
 
 
         this.registerAction("fontIncreaseSize", "Font increase size", "Font", function () {
             FontHelper.changeFontSize(Selection.selectedElements(), true, 1);
-        }, "");
+        });
 
         this.registerAction("fontIncreaseSize1", "Font increase size by 1 pt", "Font", function () {
             FontHelper.changeFontSize(Selection.selectedElements(), false, 1);
-        }, "");
+        });
 
         this.registerAction("fontDecreaseSize", "Font decrease size", "Font", function () {
             FontHelper.changeFontSize(Selection.selectedElements(), true, -1);
-        }, "");
+        });
 
         this.registerAction("fontDecreaseSize1", "Font decrease size by 1 pt", "Font", function () {
             FontHelper.changeFontSize(Selection.selectedElements(), false, -1);
-        }, "");
+        });
 
         this.registerAction("fontBold", "Font bold", "Font", function () {
             return FontHelper.toggleFontProperty(that.app, Selection.selectedElements(), "weight");
-        }, "");
+        });
 
         this.registerAction("fontItalic", "Font italic", "Font", function () {
             return FontHelper.toggleFontProperty(that.app, Selection.selectedElements(), "style");
-        }, "");
+        });
+
         this.registerAction("fontUnderline", "Font underline", "Font", function () {
             return FontHelper.toggleFontProperty(that.app, Selection.selectedElements(), "underline");
-        }, "");
+        });
 
         this.registerAction("selectAll", "Select all elements", "View", function () {
             Selection.selectAll();
-        }, "");
+        });
+
         this.registerAction("clearSelection", "Unselect all elements", "View", function () {
             Selection.clearSelection();
-        }, "");
+        });
 
         this.registerAction("zoomOut", "Zoom out", "Zoom", function () {
-            Environment.view.zoom(Environment.view.zoom() - 0.1);
-        }, "ui-zoom_out");
+            Environment.view.zoom(Environment.view.scale() - 0.1);
+        });
 
         this.registerAction("zoomIn", "Zoom in", "Zoom", function () {
-            Environment.view.zoom(Environment.view.zoom() + 0.1);
-        }, "ui-zoom_in");
+            Environment.view.zoom(Environment.view.scale() + 0.1);
+        });
 
         this.registerAction("zoom100", "1:1", "Zoom", function () {
             Environment.view.zoom(1);
 
-        }, "ui-zoom_100");
+        });
 
         this.registerAction("zoom8:1", "8:1", "Zoom", function () {
             Environment.view.zoom(8);
@@ -448,11 +454,11 @@ export default class ActionManager implements IActionManager {
 
         this.registerAction("zoomFit", "Zoom to fit", "Zoom", function () {
             Environment.view.zoomToFit();
-        }, "ui-zoom_fit");
+        });
 
         this.registerAction("zoomSelection", "Zoom selection", "Zoom", function () {
-            var element = Selection.selectedElement();
-            element = element || that.app.activePage.getActiveArtboard();
+            var element = Selection.selectedElement() as IUIElement;
+            element = element || (that.app.activePage.getActiveArtboard() as IUIElement);
             Environment.view.ensureScale(element);
             Environment.view.ensureVisible(element);
         });
@@ -467,31 +473,34 @@ export default class ActionManager implements IActionManager {
 
         this.registerAction("newPage", "New page", "Navigation", function (options) {
             that.app.addNewPage(options);
-        }, "");
+        });
 
         this.registerAction("undo", "Undo", "Project actions", function () {
             CommandManager.undoPrevious();
-        }, "ui-undo");
+        });
+
         this.registerAction("redo", "Redo", "Project actions", function () {
             CommandManager.redoNext();
-        }, "ui-redo");
-        this.registerAction("newPagePortrait", "New portrait page", "New page", function () {
-            that.app.project.addNewPage("portrait");
         });
-        this.registerAction("newPageLandscape", "New landscape page", "New page", function () {
-            that.app.project.addNewPage("landscape");
-        });
+
+        // this.registerAction("newPagePortrait", "New portrait page", "New page", function () {
+        //     that.app.project.addNewPage("portrait");
+        // });
+
+        // this.registerAction("newPageLandscape", "New landscape page", "New page", function () {
+        //     that.app.project.addNewPage("landscape");
+        // });
 
         this.registerAction("save", "Save", "Project actions", function () {
             if (that.app.serverless()){
                 return that.app.offlineModel.saveBackup(that.app);
             }
             return that.app.modelSyncProxy.change();
-        }, "ui-save");
+        });
 
         this.registerAction("saveBackup", "Save backup", "Project actions", function () {
             return that.app.offlineModel.saveBackup(that.app);
-        }, "ui-save");
+        });
 
         // this.registerAction("forceSave", "Force save", "Debug", function () {
         //     new DesignerProxy().post("/api/projectData/save", {
@@ -507,14 +516,14 @@ export default class ActionManager implements IActionManager {
 
         this.registerAction("convertToPath", "Convert to Path", "Path", function () {
             return ConvertToPath.run(Selection.getSelection());
-        }, "ui-convert-to-path");
+        });
 
         this.registerAction("pathFlatten", "Flatten path", "Path", function () {
             var elements = Selection.getSelection();
             for (var i = 0; i < elements.length; ++i) {
                 elements[i].flatten();
             }
-        }, "ui-convert-to-path");
+        });
 
         this.registerAction("groupWithMask", "Create mask", "Group", function () {
             var selection = Selection.getSelection();
@@ -522,14 +531,9 @@ export default class ActionManager implements IActionManager {
                 var group = Group.run(selection, GroupContainer);
                 group.children[0].setProps({ clipMask: true });
             }
-        }, "ui-convert-to-path");
-
-        this.registerAction("sacred", "Sacred action", "Debug", function () {
-            var dialog = new sketch.windows.Dialog("viewmodels/SacredDialogViewModel", { modal: true });
-            dialog.show();
         });
 
-        this.registerAction("cancel", "Cancel", "", function () {
+       this.registerAction("cancel", "Cancel", "", function () {
         });
 
         this.registerAction("toggleFrame", "@toggleFrame", "", function () {
@@ -542,7 +546,7 @@ export default class ActionManager implements IActionManager {
         // });
 
         this.registerAction("enter", "Enter", "", function () {
-        }, "");
+        });
 
         this.actionPerformed.bind(this, checkConditions);
         CommandManager.onCommandExecuted.bind(this, checkConditions);
@@ -558,6 +562,7 @@ export default class ActionManager implements IActionManager {
     invokeAsync(actionName, callback) {
         setTimeout(() => this.invoke(actionName, callback), 100);
     }
+
     invoke(actionName, callback) {
         debug("Invoking %s", actionName);
         var that = this;
@@ -570,7 +575,7 @@ export default class ActionManager implements IActionManager {
             return;
         }
 
-        var e = { handed: false };
+        var e = { handled: false };
         this.notifyActionStart(actionName, e);
         if (e.handled) {
             return;

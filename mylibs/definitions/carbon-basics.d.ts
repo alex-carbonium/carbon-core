@@ -18,6 +18,7 @@ declare module "carbon-basics"{
         raise(data: T): void;
         bind(callback: (data: T) => void): IDisposable;
         bind(owner: any, callback: (data: T) => void): IDisposable;
+        unbind(callback:(data: T) => void);
     }
 
     export interface IEvent2<T1, T2> {
