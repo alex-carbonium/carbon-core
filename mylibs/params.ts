@@ -44,6 +44,9 @@ if (DEBUG){
         }
     }
     else{
+        if (!endpoints){
+            endpoints = {};
+        }
         endpoints.services = endpoints.services || "//"+ window.location.hostname + ":9000";
         endpoints.storage = endpoints.storage || "//"+ window.location.hostname + ":9100";
         endpoints.file = endpoints.file || "//127.0.0.1:10000/devstoreaccount1";
