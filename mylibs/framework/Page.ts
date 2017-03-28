@@ -61,6 +61,14 @@ class Page extends Layer implements IPage {
         return this._nameProvider;
     }
 
+    getAllArtboards(): IArtboard[] {
+        return [];
+    }
+
+    getActiveArtboard() : IArtboard {
+        return null;
+    }
+
     getElementsInRect(rect) {
         var selection = [];
 

@@ -1,9 +1,11 @@
 import EventHelper from "./framework/EventHelper";
-import {IView, IController} from "carbon-core";
+import {IView, IController, IEnvironment, IEvent2} from "carbon-core";
 
-class Environment {
+class Environment implements IEnvironment {
     view: IView;
     controller: IController;
+    detaching: IEvent2<IView, IController>;
+    attached: IEvent2<IView, IController>;
 
     constructor(){
         this.detaching = EventHelper.createEvent();

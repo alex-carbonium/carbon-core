@@ -4,6 +4,7 @@ import Invalidate from "framework/Invalidate"
 import Page from "framework/Page";
 import {ChangeMode, Types, MirrorViewMode} from "framework/Defs";
 import PropertyMetadata from "framework/PropertyMetadata";
+import {IMirroringProxyPage} from "carbon-app";
 
 function fitRectToRect(outer, inner) {
     var scale = outer.width / inner.width;
@@ -16,7 +17,7 @@ function fitRectToRect(outer, inner) {
     return Math.min(1, scale);
 }
 
-class ArtboardProxyPage extends Page {
+class ArtboardProxyPage extends Page implements IMirroringProxyPage {
     constructor(app, view){
         super();
         this.view = view;
@@ -24,12 +25,12 @@ class ArtboardProxyPage extends Page {
         this._pageChnagedToken = null;
         this._onArtboardChangedToken = null;
 
-        this._pageChnagedToken = app.pageChanged.bind(this, ()=>{            
-            this._onArtboardChanged(app.activePage.getActiveArtboard());            
+        this._pageChnagedToken = app.pageChanged.bind(this, ()=>{
+            this._onArtboardChanged(app.activePage.getActiveArtboard());
         });
 
         this._onArtboardChangedToken = Environment.controller.onArtboardChanged.bind(this, ()=>{
-            this._onArtboardChanged(app.activePage.getActiveArtboard()); 
+            this._onArtboardChanged(app.activePage.getActiveArtboard());
         })
 
         view.scaleChanged.bind(()=>{
@@ -42,6 +43,10 @@ class ArtboardProxyPage extends Page {
         this._ss = null;
         this.minScrollX(0);
         this.minScrollY(0);
+    }
+
+    resetVersion():void {
+        this._version = null;
     }
 
     _onArtboardChanged(artboard){
@@ -129,7 +134,7 @@ PropertyMetadata.registerForType(ArtboardProxyPage, {});
 export default class MirroringView extends ViewBase{
     constructor(app){
         super(app);
-        this._invalidateRequestedToken = Invalidate.requested.bind(this, this.invalidate);        
+        this._invalidateRequestedToken = Invalidate.requested.bind(this, this.invalidate);
     }
 
     setup(deps){

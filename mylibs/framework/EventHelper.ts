@@ -264,4 +264,5 @@ export default class EventHelper  {
     static createEvent<T>() : IEvent<T>{
         return new Event<T>();
     }
+
 };

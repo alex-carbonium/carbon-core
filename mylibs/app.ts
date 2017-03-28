@@ -90,6 +90,8 @@ class AppClass extends DataNode implements IApp {
     isLoaded: boolean;
     activePage: IPage;
 
+    environment: any = Environment;
+
     shortcutManager: ShortcutManager;
     actionManager: ActionManager;
 
@@ -97,6 +99,12 @@ class AppClass extends DataNode implements IApp {
 
     currentToolChanged: IEvent<string>;
     _currentTool: string;
+
+    types:{
+        Page:IPage
+    } = {
+        Page: Page as IPage
+    }
 
     constructor() {
         super(true);

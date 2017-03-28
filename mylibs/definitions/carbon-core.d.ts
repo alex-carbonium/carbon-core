@@ -1,5 +1,4 @@
 declare module "carbon-core" {
-
     export * from "carbon-basics";
     export * from "carbon-geometry";
     export * from "carbon-api";

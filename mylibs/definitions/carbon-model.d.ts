@@ -66,6 +66,8 @@ declare module "carbon-model" {
     }
 
     export interface IPage {
+        new():IPage;
+
         getAllArtboards(): IArtboard[];
         getActiveArtboard() : IArtboard;
 

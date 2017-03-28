@@ -1,6 +1,6 @@
 import PropertyMetadata from "framework/PropertyMetadata";
 import { Types } from "./Defs";
-import { IPage } from "carbon-model";
+import { IPage, IArtboard } from "carbon-model";
 
 class NullPage implements IPage {
     t: string;
@@ -54,8 +54,8 @@ class NullPage implements IPage {
     disablePropsTracking() {
 
     }
-    getActiveArtboard() {
-
+    getActiveArtboard():IArtboard {
+        return null;
     }
     renderContentTile(context, x, y, zoom) {
     }
