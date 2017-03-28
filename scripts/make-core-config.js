@@ -146,7 +146,7 @@ function getLoaders(settings){
     var babelLoader = "babel?" + JSON.stringify(babelSettings);
 
     var tsLoader = 'ts-loader?' + JSON.stringify({
-        transpileOnly: true
+        transpileOnly: false
     });
 
     var excludedFolders = ["node_modules", "libs", "generated"];

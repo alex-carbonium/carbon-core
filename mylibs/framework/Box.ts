@@ -1,31 +1,33 @@
-import {Types} from "./Defs";
+import { Types } from "./Defs";
+import TypeDefaults from "./TypeDefaults";
 
-define(["framework/TypeDefaults"], function(TypeDefaults) {
-    var Box = sketch.framework.Box = {};
+var boxDefault = TypeDefaults[Types.Box] = function () { return new Box(); };
 
-    var defaults = {
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0
-    };
+var defaults = {
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0
+};
 
-    function BoxType(){
+export default class Box {
+    t: string;
+
+    constructor(){
         this.t = Types.Box;
     }
-    BoxType.prototype = defaults;
 
-    var boxDefault = TypeDefaults[Types.Box] = function(){return new BoxType();};
-
-    Box.createFromObject = function(obj){
+    static createFromObject(obj) {
         return Object.assign(boxDefault(), obj);
-    };
+    }
 
-    Box.create = function(left, top, right, bottom){
-        return Box.createFromObject({left: left, top: top, right: right, bottom: bottom});
-    };
+    static create(left, top, right, bottom) {
+        return Box.createFromObject({ left: left, top: top, right: right, bottom: bottom });
+    }
 
-    Box.Default = Box.createFromObject({});
+    static Default: Box;
+}
 
-    return Box;
-});
+Object.assign(Box.prototype, defaults);
+
+Box.Default = Box.createFromObject({});

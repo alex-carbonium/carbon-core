@@ -1,20 +1,22 @@
 import EventHelper from "framework/EventHelper";
 
 class Cursor {
+    [name: string]: any;
+
     constructor(){
         this.changed = EventHelper.createEvent();
-        this._hasGlobalCursor = false;        
-        this._cursor = null;    
+        this._hasGlobalCursor = false;
+        this._cursor = null;
     }
 
-    setCursor(value: string): boolean {        
+    setCursor(value: string): boolean {
         if (this._cursor !== value) {
             var old = this._cursor;
             this._cursor = value;
             this.changed.raise(value, old);
             return true;
-        }               
-        return false; 
+        }
+        return false;
     }
 
     getCursor(): string{
@@ -22,8 +24,8 @@ class Cursor {
     }
 
     setGlobalCursor(value: string) {
-        this._hasGlobalCursor = true;        
-        this.setCursor(value)        
+        this._hasGlobalCursor = true;
+        this.setCursor(value)
     }
 
     getGlobalCursor(): string{
@@ -39,8 +41,8 @@ class Cursor {
 
     removeGlobalCursor() {
         if (this._hasGlobalCursor){
-            this._hasGlobalCursor = false;            
-        }        
+            this._hasGlobalCursor = false;
+        }
     }
 }
 

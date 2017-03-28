@@ -1,12 +1,13 @@
 import UIElement from "../UIElement";
 import Brush from "../Brush";
 import Font from "../Font";
-import {TextAlign, Types} from "../Defs";
+import {Types} from "../Defs";
 import {deepEquals} from "../../util";
 import PropertyMetadata from "../PropertyMetadata";
 import TextEngine from "./textengine";
 import styleManager from "../style/StyleManager";
-import {IContainer, IDataElement} from "carbon-core";
+import { IContainer, IDataElement } from "carbon-core";
+import { TextAlign, Dictionary } from "carbon-basics";
 
 class Text extends UIElement implements IContainer, IDataElement {
     prepareProps(changes){
@@ -180,7 +181,7 @@ class Text extends UIElement implements IContainer, IDataElement {
         var stylePropNames = PropertyMetadata.getStylePropertyNamesMap(this.systemType(), 2);
         var res = {};
         for (var name in stylePropNames) {
-            res[name] = sketch.util.flattenObject(this.props[name]);
+            res[name] = window['sketch'].util.flattenObject(this.props[name]);
         }
         return res;
     }
@@ -239,6 +240,54 @@ class Text extends UIElement implements IContainer, IDataElement {
     get children(){
         return null;
     }
+
+    static fromSvgElement(element, parsedAttributes, matrix){
+        //
+        // :
+        // "cls-5"
+        // clip-path
+        // :
+        // "url(#clip-_3D_Touch)"
+        // data-name
+        // :
+        // "New Message"
+        // font-family
+        // :
+        // "Helvetica"
+        // font-size
+        // :
+        // "18px"
+        // id
+        //     :
+        //     "New_Message"
+        // transformMatrix
+        //     :
+        //     Matri
+        var text = new Text();
+        var font: Dictionary = {};
+        if(parsedAttributes.fontSize){
+            font.size = parsedAttributes.fontSize.replace('px','');
+        }
+
+        if(parsedAttributes.fontFamily){
+            font.family = 'Open Sans';//TODO: parsedAttributes.fontFamily;
+        }
+
+        var md = matrix.decompose();
+
+        var props = {
+            content:parsedAttributes.text,
+            font:Font.createFromObject(font),
+            x: md.translation.x,
+            y: md.translation.y
+        }
+
+
+
+        text.prepareAndSetProps(props);
+
+        return text;
+    }
 }
 Text.prototype.t = Types.Text;
 
@@ -287,54 +336,5 @@ PropertyMetadata.registerForType(Text, {
         return ownGroups;
     }
 });
-
-
-Text.fromSvgElement = function(element, parsedAttributes, matrix){
-    //
-    // :
-    // "cls-5"
-    // clip-path
-    // :
-    // "url(#clip-_3D_Touch)"
-    // data-name
-    // :
-    // "New Message"
-    // font-family
-    // :
-    // "Helvetica"
-    // font-size
-    // :
-    // "18px"
-    // id
-    //     :
-    //     "New_Message"
-    // transformMatrix
-    //     :
-    //     Matri
-    var text = new Text();
-    var font = {};
-    if(parsedAttributes.fontSize){
-        font.size = parsedAttributes.fontSize.replace('px','');
-    }
-
-    if(parsedAttributes.fontFamily){
-        font.family = 'Open Sans';//TODO: parsedAttributes.fontFamily;
-    }
-
-    var md = matrix.decompose();
-
-    var props = {
-        content:parsedAttributes.text,
-        font:Font.createFromObject(font),
-        x: md.translation.x,
-        y: md.translation.y
-    }
-
-
-
-    text.prepareAndSetProps(props);
-
-    return text;
-}
 
 export default Text;

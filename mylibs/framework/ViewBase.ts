@@ -65,6 +65,7 @@ function onZoomChanged(value, oldValue) {
 
 
 export default class ViewBase {
+    [name: string]: any;
 
     _registerLayer(layer) {
         this._layers.push(layer);
@@ -288,14 +289,14 @@ export default class ViewBase {
         return this._height;
     }
 
-    showPixels(value) {
+    showPixels(value?) {
         if (value !== undefined) {
             this._showPixels = value;
         }
         return this._showPixels;
     }
 
-    scale(value) {
+    scale(value?) {
         var page = this.page;
         if (!page) {
             return 1;
@@ -355,7 +356,7 @@ export default class ViewBase {
         };
     }
 
-    invalidate(layer, rect) {
+    invalidate(layer?, rect?) {
         //rect = rect || this.viewportRect();
         if (layer === undefined) {
             for (var i = 0; i < this._layers.length; i++) {
@@ -388,7 +389,7 @@ export default class ViewBase {
         return false;
     }
 
-    scrollX(value) {
+    scrollX(value?) {
         var page = this.page;
         if (!page) {
             return 0;
@@ -406,7 +407,7 @@ export default class ViewBase {
         return page.scrollX();
     }
 
-    scrollY(value) {
+    scrollY(value?) {
         var page = this.page;
         if (!page) {
             return 0;
@@ -528,7 +529,7 @@ export default class ViewBase {
     cancel() {
     }
 
-    zoom (value, norefresh) {
+    zoom (value?, norefresh?) {
         if(value !== undefined) {
             if(!norefresh && (this.scale() !== value)){
                 onZoomChanged.call(this, value, this.scale());

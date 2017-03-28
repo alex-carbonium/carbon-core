@@ -89,7 +89,7 @@ class SelectionModel {
     }
 
 
-    directSelectionEnabled(value) {
+    directSelectionEnabled(value?: boolean) {
         if (arguments.length === 1) {
             var enabled = this._invertDirectSelection ? !value : value;
             if (enabled !== this._directSelectionEnabled){

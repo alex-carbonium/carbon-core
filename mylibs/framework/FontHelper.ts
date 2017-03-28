@@ -1,4 +1,4 @@
-import { FontWeight, FontStyle, UnderlineStyle } from "./Defs";
+import { FontWeight, FontStyle, UnderlineStyle } from "carbon-basics";
 import Font from "./Font";
 import Invalidate from "./Invalidate";
 

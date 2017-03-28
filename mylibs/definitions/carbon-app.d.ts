@@ -1,12 +1,16 @@
 declare module "carbon-app" {
-    import { IDataNode, IPage, ITransformationEventData, IUIElement } from "carbon-model";
+    import { IDataNode, IPage, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IPropsOwner } from "carbon-model";
     import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState } from "carbon-basics";
 
-    export interface IAppProps {
-
+    export interface IFontMetadata{
+        name: string;
+        weight: number;
+        style: number;
     }
 
-    export interface IApp extends IDataNode<IAppProps> {
+    export interface IAppProps extends IDataNodeProps{
+    }
+    export interface IApp extends IDataNode, IPropsOwner<IAppProps> {
         isLoaded: boolean;
         activePage: IPage;
 
@@ -17,7 +21,6 @@ declare module "carbon-app" {
         shortcutManager: IShortcutManager;
         actionManager: IActionManager;
 
-        offlineModel: any;
         modelSyncProxy: any;
         platform: any; //TODO: remove platform
         environment: IEnvironment;
@@ -40,6 +43,10 @@ declare module "carbon-app" {
         addNewPage(option?: any): void;
 
         relayout(): void;
+
+        getFontMetadata(family: string): IFontMetadata;
+        saveFontMetadata(metadata: IFontMetadata): void;
+        loadFont(family: string, style: number, weight: number): Promise<void>;
     }
 
     export interface IView {
@@ -48,8 +55,10 @@ declare module "carbon-app" {
         animationController: IAnimationController;
         contextScale: number;
 
+        setActivePage(page: IPage);
+
         scale(value?: number): number;
-        zoom(value?: number): void;
+        zoom(value? :number, norefresh?: boolean):void;
         zoomToFit(): void;
         scrollX(value?: number): number;
         scrollY(value?: number): number;
@@ -66,7 +75,9 @@ declare module "carbon-app" {
 
     export interface IController {
         draggingEvent: IEvent<ITransformationEventData>;
+        startResizingEvent: IEvent<ITransformationEventData>;
         resizingEvent: IEvent<ITransformationEventData>;
+        stopResizingEvent: IEvent<ITransformationEventData>;
         rotatingEvent: IEvent<ITransformationEventData>;
         startDrawingEvent: IEvent<IEventData>;
 
@@ -79,6 +90,8 @@ declare module "carbon-app" {
 
         updateCursor(eventData: IMouseEventData): void;
         defaultCursor(): string;
+        captureMouse(element: IUIElement): void;
+        releaseMouse(element: IUIElement): void;
     }
 
     export interface IEnvironment {

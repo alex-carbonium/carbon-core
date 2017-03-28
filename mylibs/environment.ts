@@ -1,7 +1,10 @@
 import EventHelper from "./framework/EventHelper";
 import {IView, IController, IEnvironment, IEvent2} from "carbon-core";
+import { IEvent2 } from "carbon-basics";
 
 class Environment implements IEnvironment {
+    attached: IEvent2<IView, IController>;
+    detaching: IEvent2<IView, IController>;
     view: IView;
     controller: IController;
     detaching: IEvent2<IView, IController>;

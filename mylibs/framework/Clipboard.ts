@@ -13,6 +13,7 @@ import params from "../params";
 import {IApp} from "carbon-core";
 
 class Clipboard {
+    [name: string]: any;
     _app: IApp;
     globalBoundingBoxes: Rect[];
     rootBoundingBoxes: Rect[];
@@ -57,6 +58,7 @@ class Clipboard {
 
         e && e.preventDefault();
 
+        var controller = Environment.controller;
         if (e && Environment.controller.isInlineEditMode){
             var engine = Environment.controller.inlineEditor.engine;
             var selection = engine.getSelection();

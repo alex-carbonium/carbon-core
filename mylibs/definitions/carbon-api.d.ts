@@ -13,6 +13,8 @@ declare module "carbon-api" {
         loginNeeded: IEvent<boolean>;
         requestStarted: IEvent<string>;
         requestEnded: IEvent<string>;
+
+        cdnEndpoint: string;
     }
 
     export interface IAccountProxy{

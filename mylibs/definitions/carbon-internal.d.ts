@@ -8,6 +8,13 @@ declare module "carbon-internal" {
     }
 }
 
+declare module "carbon-app"{
+    export interface IApp{
+        offlineModel: any;
+        modelSyncProxy: any;
+    }
+}
+
 declare module "oidc-client/src/UserManager" {
 
     interface UserManagerOptions {

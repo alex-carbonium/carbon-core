@@ -12,9 +12,6 @@ var Resources = require("framework/Resources");
 var Defs = require("./framework/Defs");
 var Util = require("util");
 
-var fwk = sketch.framework;
-var ui = sketch.ui;
-
 var app = App.Current = new App(true);
 
 var ext = sessionStorage['extraParameters'];
@@ -72,11 +69,6 @@ export default {
     "IconsInfo": require("./ui/IconsInfo"),
     "Text": require("./framework/text/Text"),
     //expose specific defs for easier conversion to consts
-    "TextAlign": Defs.TextAlign,
-    "FontScript": Defs.FontScript,
-    "FontStyle": Defs.FontStyle,
-    "FontWeight": Defs.FontWeight,
-    "UnderlineStyle": Defs.UnderlineStyle,
     "PrimitiveType": Defs.PrimitiveType,
     "ContextBarPosition": Defs.ContextBarPosition,
     "PatchType": Defs.PatchType,

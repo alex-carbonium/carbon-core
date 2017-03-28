@@ -452,7 +452,7 @@ class Matrix {
      * A faster version of transform that only takes one point and does not
      * attempt to convert it.
      */
-    transformPoint(point, round){
+    transformPoint(point, round?: boolean){
         return this.transformPoint2(point.x, point.y, round);
     }
 

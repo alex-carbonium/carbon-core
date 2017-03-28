@@ -56,9 +56,7 @@ define(["windows/Dialog", "framework/sync/Primitive"], function(Dialog, Primitiv
             var that = this;
             if (this._app.isEmpty()) {
                 that._app.name("My awesome app"); //initial name should be in sync with actor code
-                var firstPage = that._app.project.createNewPage();
-                that._app.addPage(firstPage);
-                that._app.setActivePage(firstPage);
+                that._app.addNewPage();
                 that._app.state.isDirty(false);
             }
 

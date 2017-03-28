@@ -13,7 +13,7 @@ class Shape extends Container {
         return null;
     }
 
-    mode(value) {
+    mode(value?) {
         return this.field("_mode", value, "resize");
     }
 
@@ -206,14 +206,14 @@ class Shape extends Container {
         return !this.isInEditMode();
     }
 
-    canAccept(elements, autoInsert, allowMoveInOut){
+    canAccept(elements, autoInsert?, allowMoveInOut?){
         if (elements.length !== 1){
             return false;
         }
         return (elements[0] instanceof Frame || elements[0] instanceof Shape) && allowMoveInOut;
     }
 
-    lineCap(value) {
+    lineCap(value?) {
         if (arguments.length > 0) {
             if(value === 'round' || value === LineCap.Round){
                 value = LineCap.Round;
@@ -235,7 +235,7 @@ class Shape extends Container {
         }
     }
 
-    lineJoin(value) {
+    lineJoin(value?) {
         if (arguments.length > 0) {
             if(value === 'round' || value === LineJoin.Round){
                 value = LineJoin.Round;

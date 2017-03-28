@@ -13,3 +13,9 @@ declare class AppCurrent {
 }
 declare var App: AppCurrent;
 declare function each(arr: any[], cb: (a: any) => boolean | void);
+
+declare function extend(...objects: any[]): any;
+declare function clone<T>(obj: T): T;
+declare function map(objects: any[], func: (item: any) => any): any;
+declare function _(value: string): string;
+declare var NullContainer: any;

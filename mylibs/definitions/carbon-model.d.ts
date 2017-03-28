@@ -2,21 +2,25 @@ declare module "carbon-model" {
     import { IPoint, IRect } from "carbon-geometry";
     import { IEventData } from "carbon-basics";
 
+    export interface IPropsOwner<TProps>{
+        props: TProps;
+    }
+
     export interface IDataNodeProps {
         [key: string]: any;
         id: string;
     }
-    export interface IDataNode<TProps> {
+    export interface IDataNode {
         id(value?: string): string;
 
-        props: TProps;
+        findAllNodesDepthFirst<T extends IDataNode>(predicate: (node: T) => boolean): T[];
     }
 
     export interface IUIElementProps extends IDataNodeProps {
         visible: boolean;
     }
 
-    export interface IUIElement<TProps extends IUIElementProps> extends IDataNode<TProps> {
+    export interface IUIElement extends IDataNode, IPropsOwner<IUIElementProps> {
         name(): string;
 
         shouldApplyViewMatrix(): boolean;
@@ -31,29 +35,32 @@ declare module "carbon-model" {
 
         showResizeHint(): boolean;
 
-        each(callback:(e:IUIElement<any>, index?:number)=>boolean|void);
+        each(callback:(e:IUIElement, index?:number)=>boolean|void);
 
         fill(value?: any):any;
         stroke(value?: any):any;
+
+        clone(): IUIElement;
     }
 
     export interface IContainerProps extends IUIElementProps{
-
     }
-    export interface IContainer extends IUIElement<IContainerProps> {
-        children: IUIElement<IUIElementProps>[];
+    export interface IContainer extends IUIElement, IPropsOwner<IContainerProps> {
+        children: IUIElement[];
 
-        canAccept(elements: IUIElement<any>[], autoInsert: boolean, allowMoveIn: boolean): boolean;
+        canAccept(elements: IUIElement[], autoInsert: boolean, allowMoveIn: boolean): boolean;
 
         /**
          * Adds an element and returns the element which has been actually inserted.
          */
-        add(element: IUIElement<any>, mode: number): IUIElement<any>;
+        add(element: IUIElement, mode?: number): IUIElement;
         /**
          * Adds an element and returns the element which has been actually inserted.
          */
-        insert(element: IUIElement<any>, index: number, mode: number): IUIElement<any>;
-        remove(element: IUIElement<any>, mode: number): number;
+        insert(element: IUIElement, index: number, mode?: number): IUIElement;
+        remove(element: IUIElement, mode?: number): number;
+
+        hitElement<T extends IUIElement>(event, scale: number, predicate?, directSelection?): T;
 
         autoPositionChildren(): boolean;
 
@@ -65,7 +72,7 @@ declare module "carbon-model" {
         translateChildren(): boolean;
     }
 
-    export interface IPage {
+    export interface IPage extends IContainer {
         new():IPage;
 
         getAllArtboards(): IArtboard[];
@@ -73,13 +80,21 @@ declare module "carbon-model" {
 
         saveWorkspaceState(): any;
         restoreWorkspaceState(data: any): void;
+
+        scrollX(): number;
+        scrollY(): number;
+
+        deactivating(nextPage: IPage): boolean;
+        deactivated(): void;
+        activating(prevPage: IPage): void;
+        activated(): void;
     }
 
-    export interface IComposite extends IUIElement<IContainerProps> {
-        elements: IUIElement<any>[];
+    export interface IComposite extends IUIElement {
+        elements: IUIElement[];
 
-        register(element: IUIElement<any>): void;
-        unregister(element: IUIElement<any>): void;
+        register(element: IUIElement): void;
+        unregister(element: IUIElement): void;
         unregisterAll(): void;
 
         allHaveSameParent(): boolean;

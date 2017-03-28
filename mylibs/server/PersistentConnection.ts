@@ -37,7 +37,7 @@ function setupConnection(url: string){
 
     var connection = $.hubConnection(url);
     if (DEBUG){
-        connection.logging = debug.enabled("carb:signalr");
+        connection.logging = window['debug'].enabled("carb:signalr");
     }
 
     var hub = connection.createHubProxy('modelSyncHub');
@@ -49,7 +49,7 @@ function setupConnection(url: string){
         var goingIdle = this.state === "stopping";
 
         if (!app.quitting && !goingIdle){
-            var runtime = new Date() - connectionStartTime;
+            var runtime = new Date().getTime() - connectionStartTime;
             logger.warn("SignalR connection disconnected");
             sketch.analytics.event("Connection", "disconnected", "", runtime);
         }
@@ -135,7 +135,9 @@ function updateQueryString(){
     }
 }
 
-class PersistentConnection extends StateMachine{
+class PersistentConnection extends StateMachine {
+    [name: string]: any;
+
     constructor(app){
         super();
         this._app = app;

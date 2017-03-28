@@ -53,7 +53,7 @@ export default class DataNode{
         }
     }
 
-    prepareAndSetProps(props, mode) {
+    prepareAndSetProps(props, mode?: ChangeMode) {
         this.prepareProps(props);
         this.setProps(props, mode);
     }
@@ -238,7 +238,7 @@ export default class DataNode{
             root.registerPatchProps(this, patchType, propName, item, mode);
         }
     }
-    trackDeleted(parent, index, mode = ChangeMode.Model) {
+    trackDeleted(parent, index?: number, mode = ChangeMode.Model) {
         var primitiveRoot = parent.primitiveRoot();
         if (primitiveRoot) {
             primitiveRoot.registerDelete(parent, this, index, mode);

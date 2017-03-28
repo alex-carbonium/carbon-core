@@ -60,6 +60,3 @@ require("ui/common/ClickSpot");
 require("ui/common/StackPanel");
 
 require("svg/SvgPath");
-
-require("projects/WebProject");
-require("projects/AndroidProject");

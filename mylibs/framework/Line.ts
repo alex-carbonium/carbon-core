@@ -230,28 +230,28 @@ class Line extends Shape {
         context.restore();
     }
 
-    x1(value) {
+    x1(value?) {
         if (value !== undefined) {
             this.setProps({x1: value});
         }
         return this.props.x1;
     }
 
-    y1(value) {
+    y1(value?) {
         if (value !== undefined) {
             this.setProps({y1: value});
         }
         return this.props.y1;
     }
 
-    x2(value) {
+    x2(value?) {
         if (value !== undefined) {
             this.setProps({x2: value});
         }
         return this.props.x2;
     }
 
-    y2(value) {
+    y2(value?) {
         if (value !== undefined) {
             this.setProps({y2: value});
         }

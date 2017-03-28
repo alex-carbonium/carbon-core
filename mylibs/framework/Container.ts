@@ -21,7 +21,7 @@ export default class Container extends UIElement {
         super();
         this.children = [];
     }
-    performArrange(event, mode) {
+    performArrange(event?: any, mode?: ChangeMode) {
         var e = event || {};
         e.newRect = this.getBoundaryRect();
         e.oldRect = e.oldRect || e.newRect;
@@ -325,7 +325,7 @@ export default class Container extends UIElement {
             newChild.draw(context, environment);
         }
     }
-    padding(value) {
+    padding(value?: Box) {
         if (value !== undefined) {
             this.setProps({ padding: value })
         }
@@ -355,11 +355,11 @@ export default class Container extends UIElement {
         return false;
     }
 
-    add(/*UIElement*/element, mode) {
+    add(/*UIElement*/element, mode?: ChangeMode) {
         return this.insert(element, this.children.length, mode);
     }
 
-    insert(/*UIElement*/element, /*int*/index, mode) {
+    insert(/*UIElement*/element, /*int*/index, mode?: ChangeMode) {
         this.acquiredChild(element, mode);
 
         this.insertChild(element, index, mode);
@@ -479,7 +479,7 @@ export default class Container extends UIElement {
             return null;
         }
 
-        var hitElement = this.hitTransparent() ? null : this;
+        var hitElement: UIElement = this.hitTransparent() ? null : this;
 
         //position = sketch.math2d.rotatePoint(position, this.angle() * Math.PI / 180, this.rotationOrigin(true));
         for (let i = this.children.length - 1; i >= 0; --i) {
@@ -514,15 +514,15 @@ export default class Container extends UIElement {
     lockedGroup() {
         return this.enableGroupLocking() && !this.runtimeProps.unlocked;
     }
-    select() {
+    select(multiselect?) {
     }
-    captureMouse(/*UIElement*/element) {
+    captureMouse(/*UIElement*/element?: any) {
         Environment.controller.captureMouse(element);
     }
-    releaseMouse(/*UIElement*/element) {
+    releaseMouse(/*UIElement*/element?: any) {
         Environment.controller.releaseMouse(element);
     }
-    applyVisitor(/*Visitor*/callback, useLogicalChildren, parent) {
+    applyVisitor(/*Visitor*/callback, useLogicalChildren?: boolean, parent?: any) {
         var stop = false;
         for (let i = this.children.length - 1; i >= 0; --i) {
             var item = this.children[i];
@@ -578,15 +578,15 @@ export default class Container extends UIElement {
     globalMatrixToLocal(m: Matrix): Matrix{
         return this.globalViewMatrixInverted().appended(m);
     }
-    registerForLayerDraw(layer, element) {
+    registerForLayerDraw(layer, element?) {
         this.parent().registerForLayerDraw(layer, element);
     }
-    unregisterForLayerDraw(layer, element) {
+    unregisterForLayerDraw(layer, element?) {
         this.parent().unregisterForLayerDraw(layer, element);
     }
-    arrange(resizeEvent) {
+    arrange(resizeEvent?: any, mode?: ChangeMode) {
         UIElement.prototype.arrange.apply(this, arguments);
-        return ArrangeStrategy.arrange(this, resizeEvent);
+        ArrangeStrategy.arrange(this, resizeEvent, mode);
     }
     autoWidth() {
         var overflow = this.overflow();
@@ -607,13 +607,13 @@ export default class Container extends UIElement {
     autoGrowMode(value) {
         return this.field("_autoGrowMode", value, true);
     }
-    dropPositioning(value) {
+    dropPositioning(value?) {
         if (value !== undefined) {
             this.setProps({ dropPositioning: value })
         }
         return this.props.dropPositioning;
     }
-    enableGroupLocking(value) {
+    enableGroupLocking(value?: boolean) {
         if (value !== undefined) {
             this.setProps({ enableGroupLocking: value })
         }
@@ -649,7 +649,7 @@ export default class Container extends UIElement {
         var last = 0;
         var baseLine;
 
-        function calculateBaseLine(intervals, pos, insertIndex) {
+        function calculateBaseLine(intervals, pos, insertIndex?) {
             var minY = Number.MAX_VALUE;
             var lineY = 0;
             for (var i = 0; i < intervals.length; i++) {
@@ -737,7 +737,7 @@ export default class Container extends UIElement {
 
         return element;
     }
-    isAtomicInModel(value) {
+    isAtomicInModel(value?) {
         return this.field("_isAtomicInModel", value, false);
     }
 
@@ -787,6 +787,35 @@ export default class Container extends UIElement {
             + map(this.getChildren(), function (x) {
                 return x.toString()
             }).join(", ");
+    }
+
+    static createCanvas = function () {
+        var container = new Container();
+        container.arrangeStrategy(ArrangeStrategies.Canvas);
+        return container;
+    }
+    static createStackHorizontal = function () {
+        var container = new Container();
+        container.setProps({
+            arrangeStrategy: ArrangeStrategies.Stack,
+            stackOrientation: StackOrientation.Horizontal
+        });
+        return container;
+    }
+    static createStackVertical() {
+        var container = new Container();
+        container.arrangeStrategy(ArrangeStrategies.Stack);
+        return container;
+    };
+    static createDock() {
+        var container = new Container();
+        container.arrangeStrategy(ArrangeStrategies.Dock);
+        return container;
+    };
+    static createAlign() {
+        var container = new Container();
+        container.arrangeStrategy(ArrangeStrategies.Align);
+        return container;
     }
 }
 
@@ -856,33 +885,3 @@ PropertyMetadata.registerForType(Container, {
         defaultValue: true,
     }
 });
-
-
-Container.createCanvas = function () {
-    var container = new Container();
-    container.arrangeStrategy(ArrangeStrategies.Canvas);
-    return container;
-};
-Container.createStackHorizontal = function () {
-    var container = new Container();
-    container.setProps({
-        arrangeStrategy: ArrangeStrategies.Stack,
-        stackOrientation: StackOrientation.Horizontal
-    });
-    return container;
-};
-Container.createStackVertical = function () {
-    var container = new Container();
-    container.arrangeStrategy(ArrangeStrategies.Stack);
-    return container;
-};
-Container.createDock = function () {
-    var container = new Container();
-    container.arrangeStrategy(ArrangeStrategies.Dock);
-    return container;
-};
-Container.createAlign = function () {
-    var container = new Container();
-    container.arrangeStrategy(ArrangeStrategies.Align);
-    return container;
-};

@@ -2,7 +2,8 @@ import CrazyScope from "framework/CrazyManager";
 import Point from "../../math/point";
 import {IContext} from "carbon-core";
 
-export default class Context implements IContext{
+export default class Context implements IContext {
+    [name: string]: any;
 
     constructor(canvas) {
         if (!canvas) {
@@ -553,7 +554,7 @@ export default class Context implements IContext{
 
     }
 
-    crazyLine(fromX, fromY, toX, toY, dontMove) {
+    crazyLine(fromX, fromY, toX, toY, dontMove?) {
         // The idea is to draw a curve, setting two control points at random
         // close to each side of the line. The longer the line, the sloppier it's drawn.
         var control1x, control1y;
@@ -584,8 +585,8 @@ export default class Context implements IContext{
 
         // create a control point at random along our shifted line.
         var r = Math.random();
-        control1X = t1X + r * (t2X - t1X);
-        control1Y = t1Y + r * (t2Y - t1Y);
+        control1x = t1X + r * (t2X - t1X);
+        control1y = t1Y + r * (t2Y - t1Y);
 
         // now make t1 and t2 the coordinates of our line shifted above
         // and to the left of the original.
@@ -597,14 +598,14 @@ export default class Context implements IContext{
 
         // create a second control point at random along the shifted line.
         r = Math.random();
-        control2X = t1X + r * (t2X - t1X);
-        control2Y = t1Y + r * (t2Y - t1Y);
+        control2x = t1X + r * (t2X - t1X);
+        control2y = t1Y + r * (t2Y - t1Y);
 
         // draw the line!
         if (!dontMove) {
             this.moveTo(~~fromX, ~~fromY);
         }
-        this.bezierCurveTo(~~control1X, ~~control1Y, ~~control2X, ~~control2Y, ~~toX, ~~toY);
+        this.bezierCurveTo(~~control1x, ~~control1y, ~~control2x, ~~control2y, ~~toX, ~~toY);
     }
 
 
@@ -837,7 +838,7 @@ export default class Context implements IContext{
         this._context.arc.apply(this._context, arguments);
     }
 
-    fill() {
+    fill(mode?) {
         this._context.fill.apply(this._context, arguments);
     }
 
@@ -857,7 +858,7 @@ export default class Context implements IContext{
         this._context.drawFocusRing.apply(this._context, arguments);
     }
 
-    fillText(text, x, y, maxWidth) {
+    fillText(text, x, y, maxWidth?) {
         this._context.fillText.apply(this._context, arguments);
     }
 

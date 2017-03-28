@@ -9,7 +9,7 @@ import Rect from "../math/rect";
 var ObjectFactory = {
     objectCreationFailed: EventHelper.createEvent(),
 
-    construct: function(type){
+    construct: function(type, ...args){
         var current;
         if (typeof type === "string") {
             var typeMetadata = PropertyMetadata.findAll(type);

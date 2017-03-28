@@ -4,7 +4,7 @@ import Context from "./Context";
 var contextPool : Array<Context> = [];
 
 export default {
-    getContext(width: number, height: number, scale: number, forceExactSize:bool) : Context{
+    getContext(width: number, height: number, scale: number, forceExactSize?:boolean) : Context{
         if(forceExactSize) {
             width = width * scale;
             height = height * scale;

@@ -12,7 +12,11 @@ import Keyboard from "../platform/Keyboard";
 import Phantom from "./Phantom";
 import ObjectFactory from "./ObjectFactory";
 import {Types, ViewTool} from "./Defs";
-import {IApp, IController, IEvent, IEvent2, IMouseEventData, IKeyboardState, IUIElement, IContainer} from "carbon-core";
+import { IApp, IController, IEvent, IEvent2, IMouseEventData, IKeyboardState, IUIElement, IContainer } from "carbon-core";
+import { ITransformationEventData } from "carbon-model";
+import UIElement from "./UIElement";
+import { Dictionary } from "carbon-basics";
+import Container from "./Container";
 
 function onselect(rect) {
     var selection = this.app.activePage.getElementsInRect(rect);
@@ -55,7 +59,7 @@ function _handleDraggingOver(mousePoint, draggingElement, eventData) {
     var scale = this.view.scale();
     var dragOverElement = null;
 
-    var element = this.app.activePage.hitElementDirect(mousePoint, scale, function (element: IUIElement, position, scale) {
+    var element = this.app.activePage.hitElementDirect(mousePoint, scale, function (element: UIElement, position, scale) {
         var descendantOrSelf = draggingElement.elements.some(x => element.isDescendantOrSame(x));
         if (!descendantOrSelf && element.hitTest(position, scale, true)) {
             return true;
@@ -114,17 +118,26 @@ function dragging(event, keys: IKeyboardState) {
 }
 
 export default class DesignerController implements IController {
+    [name: string]: any;
     app: IApp;
+    actionManager: any;
 
-    startDrawingEvent: IEvent;
+    startDrawingEvent: IEvent<any>;
     interactionActive: boolean;
     mousedownEvent: IEvent2<IMouseEventData, IKeyboardState>;
     mousemoveEvent: IEvent2<IMouseEventData, IKeyboardState>;
     mouseupEvent: IEvent2<IMouseEventData, IKeyboardState>;
 
+    draggingEvent: IEvent<ITransformationEventData>;
+    startResizingEvent: IEvent<ITransformationEventData>;
+    resizingEvent: IEvent<ITransformationEventData>;
+    stopResizingEvent: IEvent<ITransformationEventData>;
+
+    rotatingEvent: IEvent<ITransformationEventData>;
+
     _lastMouseMove: IMouseEventData;
 
-    updateCursor(eventData) {
+    updateCursor(eventData?) {
         if (eventData){
             if (eventData.cursor){
                 Cursor.setCursor(eventData.cursor);
@@ -191,7 +204,7 @@ export default class DesignerController implements IController {
         }
     }
 
-    createEventData(event) {
+    createEventData(event): Dictionary {
         updateEvent.call(this, event);
         return {
             handled: false,
@@ -292,7 +305,7 @@ export default class DesignerController implements IController {
 
 
     beginDrag(event, hideFrame: boolean = true) {
-        var eventData = {
+        var eventData: Dictionary = {
             mouseX: event.x,
             mouseY: event.y,
             x: event.x,
@@ -303,7 +316,7 @@ export default class DesignerController implements IController {
             Selection.hideFrame();
         }
 
-        this._draggingElement = new ObjectFactory.construct(Types.DraggingElement, event.element, event);
+        this._draggingElement = ObjectFactory.construct(Types.DraggingElement, event.element, event);
         this._draggingElement.showOriginal(event.altKey);
 
         this.view.layer3.add(this._draggingElement);
@@ -378,7 +391,7 @@ export default class DesignerController implements IController {
             }
 
             if (!eventData.handled) {
-                Selection.setupSelectFrame(new this.deps.SelectFrame(EventHandler(this, onselect)), eventData);
+                Selection.setupSelectFrame(new this.deps.SelectFrame(onselect.bind(this)), eventData);
 
                 this.view.layer3.add(Selection.selectFrame);
             }
@@ -613,7 +626,7 @@ export default class DesignerController implements IController {
     }
 
     selectByClick(eventData) {
-        var element = this.app.activePage.hitElement(eventData, this.view.scale(), null, Selection.directSelectionEnabled());
+        var element = this.app.activePage.hitElement<UIElement>(eventData, this.view.scale(), null, Selection.directSelectionEnabled());
 
         if (element !== null) {
             eventData.element = element;
@@ -686,7 +699,7 @@ export default class DesignerController implements IController {
             });
     }
 
-    insertAndSelect(element: IUIElement, parent: IContainer, x: number, y: number){
+    insertAndSelect(element: UIElement, parent: Container, x: number, y: number){
         var newSelection = [];
 
         if (parent instanceof CompositeElement) {
@@ -719,7 +732,7 @@ export default class DesignerController implements IController {
     }
 
     showContextMenu(eventData) {
-        var element = this.app.activePage.hitElement(eventData, this.view.scale(), null, Selection.directSelectionEnabled());
+        var element = this.app.activePage.hitElement<UIElement>(eventData, this.view.scale(), null, Selection.directSelectionEnabled());
 
         if (element !== null && !Selection.isElementSelected(element)) {
             eventData.element = element;

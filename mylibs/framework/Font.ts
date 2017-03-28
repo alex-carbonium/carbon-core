@@ -1,6 +1,7 @@
 ﻿import TypeDefaults from "./TypeDefaults";
 import Brush from "./Brush";
-import {TextAlign, FontStyle, FontScript, UnderlineStyle, Types} from "./Defs";
+import { TextAlign, FontStyle, FontScript, UnderlineStyle } from "carbon-basics";
+import { Types } from "./Defs";
 
 var defaults = {
     family: "Open Sans",
@@ -16,16 +17,11 @@ var defaults = {
     style: FontStyle.Normal,
     align: TextAlign.left,
     valign: TextAlign.top
-};
-
-function FontType(){
-    this.t = Types.Font;
 }
-FontType.prototype = defaults;
 
-var fontDefault = TypeDefaults[Types.Font] = function(){
-    return new FontType();
-};
+var fontDefault = TypeDefaults[Types.Font] = function () {
+    return new Font();
+}
 
 // function getSizeForFamily(fromFamily, toFamily, size) {
 //     var newSize = size;
@@ -37,73 +33,90 @@ var fontDefault = TypeDefaults[Types.Font] = function(){
 //     return newSize;
 // }
 
-var Font = {};
+export default class Font {
+    t: string;
+    family: string;
+    size: number;
+    lineSpacing: number;
+    charSpacing: number;
+    wordSpacing: number;
+    underline: UnderlineStyle;
+    strikeout: false;
+    script: FontScript;
+    weight: number;
+    color: string;
+    style: FontStyle;
+    align: TextAlign;
+    valign: TextAlign;
 
-Font.cssString = function(font, scale){
-    var actualScale = scale || 1;
-    return [
-        font.italic ? "italic" : "",
-        font.bold ? "bold" : defaults.weight,
-        ((font.size)*actualScale) + "px",
-        '"' + font.family + '"'
-
-    ].join(' ').trim();
-};
-
-Font.isFont = function(object){
-    return object && object.t === "Font";
-};
-
-Font.toString = function(font){
-    return font.family
-        + " " + font.size
-        + " " + Brush.toString(font.color)
-        + " " + font.italic
-        + " " + font.bold
-        + " " + font.underline
-        + " " + font.lineHeight;
-};
-
-
-function resizeIfFamilyChanged(font, oldOne, newOne){
-    // if (font.family && font.hasOwnProperty("size")){
-    //     font.size = getSizeForFamily(oldOne.family, newOne.family, font.size);
-    // }
-    //else if (font.hasOwnProperty("defaultSize")) {  // this else if
-    //    font.size = getSizeForFamily(defaults.family, font.family, font.size);
-    //}
-    //
-    //if (font.hasOwnProperty("defaultSize")) {
-    //    delete font.defaultSize;
-    //}
-}
-
-Font.extend = function(...fonts){
-    var font = Font.createFromObject(Object.assign({}, ...fonts));
-    // if (newOne.family && newOne.family != oldOne.family)
-    //     resizeIfFamilyChanged(font, oldOne, newOne);
-    return font;
-};
-
-Font.createFromObject = function(values){
-    return Object.assign(fontDefault(), values);
-};
-
-Font.Default = Font.createFromObject();
-if (DEBUG){
-    Font.Default = Object.freeze(Font.Default);
-}
-
-Font.setDefaults = function(params){
-    defaults = Object.assign(defaults, params);
-    Font.Default = Font.createFromObject();
-    if (DEBUG){
-        Font.Default = Object.freeze(Font.Default);
+    constructor(){
+        this.t = Types.Font;
     }
-};
 
-Font.getDefaults = function(){
-    return defaults;
-};
+    static cssString(font, scale) {
+        var actualScale = scale || 1;
+        return [
+            font.italic ? "italic" : "",
+            font.bold ? "bold" : defaults.weight,
+            ((font.size) * actualScale) + "px",
+            '"' + font.family + '"'
 
-export default Font;
+        ].join(' ').trim();
+    }
+
+    static isFont(object) {
+        return object && object.t === "Font";
+    }
+
+    static toString(font) {
+        return font.family
+            + " " + font.size
+            + " " + Brush.toString(font.color)
+            + " " + font.italic
+            + " " + font.bold
+            + " " + font.underline
+            + " " + font.lineHeight;
+    }
+
+
+    static resizeIfFamilyChanged(font, oldOne, newOne) {
+        // if (font.family && font.hasOwnProperty("size")){
+        //     font.size = getSizeForFamily(oldOne.family, newOne.family, font.size);
+        // }
+        //else if (font.hasOwnProperty("defaultSize")) {  // this else if
+        //    font.size = getSizeForFamily(defaults.family, font.family, font.size);
+        //}
+        //
+        //if (font.hasOwnProperty("defaultSize")) {
+        //    delete font.defaultSize;
+        //}
+    }
+
+    static extend(...fonts) {
+        var font = Font.createFromObject(Object.assign({}, ...fonts));
+        // if (newOne.family && newOne.family != oldOne.family)
+        //     resizeIfFamilyChanged(font, oldOne, newOne);
+        return font;
+    }
+
+    static createFromObject(values?) {
+        return Object.assign(fontDefault(), values);
+    }
+
+    static setDefaults(params) {
+        defaults = Object.assign(defaults, params);
+        Font.Default = Font.createFromObject();
+        if (DEBUG) {
+            Font.Default = Object.freeze(Font.Default);
+        }
+    }
+
+    static getDefaults() {
+        return defaults;
+    }
+
+    static Default: Font;
+}
+Object.assign(Font.prototype, defaults);
+
+Font.Default = Object.freeze(Font.createFromObject());

@@ -13,6 +13,8 @@ import Brush from "../Brush";
 import Point from "../../math/point";
 
 export default class RepeatContainer extends Container {
+    children: RepeatCell[];
+
     canAccept() {
         return false;
     }
@@ -222,7 +224,7 @@ export default class RepeatContainer extends Container {
         return this._findByIndexPath(this.children[0], cellPath.path);
     }
 
-    findSelectionTarget(element: element): UIElement {
+    findSelectionTarget(element: UIElement): UIElement {
         var cell = this.runtimeProps.lastActiveCell || this.children[0];
         var cellPath = this._getCellIndexPath(element)
         if (cellPath.cell === cell) {
@@ -262,13 +264,13 @@ export default class RepeatContainer extends Container {
             path.push(current.index());
             current = current.parent();
         }
-        return { cell: current, path };
+        return { cell: current as RepeatCell, path };
     }
     _findByIndexPath(parent: Container, path: number[]): UIElement {
-        var current = parent;
+        var current: UIElement = parent;
         for (var k = path.length - 1; k >= 0; k--) {
             var part = path[k];
-            current = current.children[part];
+            current = current.children[part] as UIElement;
         }
         return current;
     }
@@ -345,7 +347,7 @@ export default class RepeatContainer extends Container {
         }
     }
 
-    offsetX(value, mode) {
+    offsetX(value?, mode?) {
         if (arguments.length) {
             var diff = value - this.offsetX();
             var t = new Point(diff, 0)
@@ -353,7 +355,7 @@ export default class RepeatContainer extends Container {
         }
         return this.children[0].getBoundingBox().x;
     }
-    offsetY(value, mode) {
+    offsetY(value?, mode?) {
         if (arguments.length) {
             var diff = value - this.offsetY();
             var t = new Point(0, diff)

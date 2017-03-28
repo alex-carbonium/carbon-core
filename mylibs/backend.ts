@@ -1,4 +1,5 @@
 import globals from "./globals";
+import logger, {Logger} from "./logger";
 import { createUUID } from "./util";
 import EventHelper from "./framework/EventHelper";
 import UserManager from "oidc-client/src/UserManager";
@@ -10,7 +11,7 @@ import { IPersistentConnection } from "carbon-internal";
 
 var debug = require<any>("DebugUtil")("carb:backend");
 
-enum contentTypes{
+const enum contentTypes{
     json,
     urlEncoded
 };
@@ -54,18 +55,6 @@ class Backend implements IBackend {
         this.storageEndpoint = endpoints.storage;
         this.cdnEndpoint = endpoints.cdn;
         this.fileEndpoint = endpoints.file;
-    }
-
-    raiseLoginNeeded() {
-        this.loginNeeded.raise(this.isGuest());
-    }
-
-    init(logger) {
-        if (Backend._ready) {
-            return;
-        }
-
-        this.logger = logger;
 
         Log.logger = logger;
         Log.level = Log.ERROR;
@@ -87,7 +76,13 @@ class Backend implements IBackend {
         this._userManager.events.addSilentRenewError(e => {
             logger.error("Token renew error", e);
         });
-        Backend._ready = true;
+
+        Logger.context.userId = this.getUserId();
+        Logger.context.sessionId = this.sessionId;
+    }
+
+    raiseLoginNeeded() {
+        this.loginNeeded.raise(this.isGuest());
     }
 
     setConnection(connection) {
@@ -253,14 +248,14 @@ class Backend implements IBackend {
         }
         if (data) {
             if (method === "get") {
-                url += "?" + backend.encodeUriData(data);
+                url += "?" + this.encodeUriData(data);
             }
             else {
                 //our web api
                 if (options.contentType === contentTypes.json) {
                     var split = this.splitData(data);
                     if (split[0]) {
-                        url += "?" + backend.encodeUriData(split[0]);
+                        url += "?" + this.encodeUriData(split[0]);
                     }
                     if (split[1]) {
                         fetchOptions.body = JSON.stringify(split[1]);
@@ -268,7 +263,7 @@ class Backend implements IBackend {
                 }
                 //auth service, requires all data in body
                 else {
-                    fetchOptions.body = backend.encodeUriData(data);
+                    fetchOptions.body = this.encodeUriData(data);
                 }
             }
         }
@@ -302,7 +297,7 @@ class Backend implements IBackend {
             })
             .then(this.parseJSON)
             .catch(e => {
-                backend.logger.error("Request error", e);
+                logger.error("Request error", e);
                 if (e.response && e.response.status === 401) {
                     this.raiseLoginNeeded();
                 }
@@ -353,7 +348,7 @@ class Backend implements IBackend {
         if (response.status === 401 && (!options || !options.isRetry)) {
             options = options || {};
             options.isRetry = true;
-            return backend.renewToken()
+            return this.renewToken()
                 .then(() => {
                     this.setHeaders(fetchOptions);
                     return fetch(url, fetchOptions);
@@ -371,12 +366,12 @@ class Backend implements IBackend {
     private handleServerError(data) {
         var location = data.getResponseHeader("location");
         if (location) {
-            backend.navigate(location);
+            this.navigate(location);
         }
         else {
             var message = data.getResponseHeader("errorMessage");
             if (message) {
-                backend.notify("error", message);
+                //this.notify("error", message);
             }
         }
     }

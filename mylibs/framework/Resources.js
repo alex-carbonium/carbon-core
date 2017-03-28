@@ -1,6 +1,6 @@
 import {createUUID} from "../util";
 
-define(["projects/Metadata", "framework/EventHelper"], function(ProjectsMetadata, EventHelper) {
+define(["framework/EventHelper"], function(EventHelper) {
     var fwk = sketch.framework;
 
     var resourceTotalCount;

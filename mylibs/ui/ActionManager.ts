@@ -392,12 +392,12 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("swapColors", "Swap Colors", "Colors", function () {
-            var selection = Selection.selectedElement() as IUIElement<any>;
+            var selection = Selection.selectedElement() as IUIElement;
             if (!selection) {
                 return null;
             }
 
-            selection.each((e:IUIElement<any>) => {
+            selection.each((e:IUIElement) => {
                 var fill = e.fill();
                 var stroke = e.stroke();
                 e.fill(stroke);
@@ -480,8 +480,8 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("zoomSelection", "Zoom selection", "Zoom", function () {
-            var element = Selection.selectedElement() as IUIElement<any>;
-            element = element || (that.app.activePage.getActiveArtboard() as IUIElement<any>);
+            var element = Selection.selectedElement() as IUIElement;
+            element = element || (that.app.activePage.getActiveArtboard() as IUIElement);
             Environment.view.ensureScale(element);
             Environment.view.ensureVisible(element);
         });

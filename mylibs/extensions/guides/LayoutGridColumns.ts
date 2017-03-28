@@ -1,16 +1,16 @@
 import PropertyMetadata from "framework/PropertyMetadata";
 import Brush from "framework/Brush";
-import tinycolor from "tinycolor2/tinycolor";
+import tinycolor from "tinycolor2";
 import Guide from "./Guide";
-import {Types} from "../../framework/Defs";
+import { Types } from "../../framework/Defs";
 
 class LayoutGridColumns extends Guide {
-    draw(context){
+    draw(context) {
         context.save();
 
         context.globalAlpha *= this.opacity();
         context.beginPath();
-        for (let i = 0, l = this.props.xs.length; i < l; ++i){
+        for (let i = 0, l = this.props.xs.length; i < l; ++i) {
             var x = this.props.xs[i];
             var w = i === l - 1 ? this.props.lastColumnWidth : this.props.actualColumnWidth;
             context.rect(x, 0, w, this.props.rect.height);
@@ -20,15 +20,15 @@ class LayoutGridColumns extends Guide {
 
         context.restore();
     }
-    prepareProps(props){
-        if (props.settings){
+    prepareProps(props) {
+        if (props.settings) {
             props.lastColumnWidth = props.actualColumnWidth;
 
             var xs = [];
-            var snapPoints = {xs: [], ys: []};
-            for (let i = 0; i < props.settings.columnsCount; ++i){
+            var snapPoints = { xs: [], ys: [] };
+            for (let i = 0; i < props.settings.columnsCount; ++i) {
                 var x = (i * props.actualColumnWidth) + (i > 0 ? i * props.settings.gutterWidth : 0);
-                if (x >= props.rect.width){
+                if (x >= props.rect.width) {
                     var diff = x - props.settings.gutterWidth - props.rect.width;
                     props.lastColumnWidth = (props.actualColumnWidth - diff) || props.actualColumnWidth;
                     break;
@@ -43,20 +43,20 @@ class LayoutGridColumns extends Guide {
             props.snapPoints = snapPoints;
         }
     }
+
+    static setDefaultFillHsl(hsl) {
+        var rgb = tinycolor(hsl).toRgbString();
+        var brush = Brush.createFromColor(rgb);
+        var prototype = PropertyMetadata.getPropsPrototype(LayoutGridColumns.prototype.t);
+        prototype.fill = brush;
+    }
+
+    static setDefaultOpacity(opacity) {
+        var prototype = PropertyMetadata.getPropsPrototype(LayoutGridColumns.prototype.t);
+        prototype.opacity = opacity;
+    }
 }
 LayoutGridColumns.prototype.t = Types.LayoutGridColumns;
-
-LayoutGridColumns.setDefaultFillHsl = function(hsl){
-    var rgb = tinycolor(hsl).toRgbString();
-    var brush = Brush.createFromColor(rgb);
-    var prototype = PropertyMetadata.getPropsPrototype(LayoutGridColumns.prototype.t);
-    prototype.fill = brush;
-};
-
-LayoutGridColumns.setDefaultOpacity = function(opacity){
-    var prototype = PropertyMetadata.getPropsPrototype(LayoutGridColumns.prototype.t);
-    prototype.opacity = opacity;
-};
 
 PropertyMetadata.registerForType(LayoutGridColumns, {
     opacity: {

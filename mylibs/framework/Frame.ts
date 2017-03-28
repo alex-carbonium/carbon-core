@@ -59,7 +59,7 @@ export default class Frame extends Container {
         else {
             this.setProps(this.runtimeProps.origSource);
         }
-        super.saveOrResetLayoutProps();
+        return super.saveOrResetLayoutProps();
     }
 
     clone() {
@@ -71,14 +71,14 @@ export default class Frame extends Container {
         return clone;
     }
 
-    source(value) {
+    source(value?) {
         if (value !== undefined) {
             this.setProps({ source: value });
         }
         return this.props.source;
     }
 
-    sizing(value) {
+    sizing(value?) {
         if (value !== undefined) {
             this.setProps({ sizing: value });
         }
@@ -203,7 +203,7 @@ export default class Frame extends Container {
         return true;
     }
 
-    canAccept(elements, autoInsert, allowMoveInOut) {
+    canAccept(elements, autoInsert?, allowMoveInOut?) {
         if (elements.length !== 1) {
             return false;
         }

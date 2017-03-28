@@ -9,8 +9,6 @@ import StyleManager from "framework/style/StyleManager";
 import OpenTypeFontManager from "./OpenTypeFontManager";
 import {
     Types,
-    FontWeight,
-    FontStyle,
     PatchType,
     ChangeMode,
     StoryType,
@@ -39,15 +37,16 @@ import DataManager from "./framework/data/DataManager";
 import CustomDataProvider from "./framework/data/CustomDataProvider";
 import AppState from "./AppState";
 import OfflineModel from "./offline/OfflineModel";
-import Deferred from "framework/Deferred";
 import Story from "stories/Story";
 import UserSettings from "./UserSettings";
 import ObjectFactory from "./framework/ObjectFactory";
 import ActionManager from "./ui/ActionManager";
 import ShortcutManager from "./ui/ShortcutManager";
+import ArtboardPage from "./ui/pages/ArtboardPage";
+import IconsInfo from "./ui/IconsInfo";
 import logger from "./logger";
 import { IApp, IEvent } from "carbon-core";
-import { IPage } from "carbon-model";
+import { IPage, IUIElement } from "carbon-model";
 
 window['env'] = Environment;
 window['Selection'] = Selection;
@@ -63,12 +62,10 @@ var Layer = require("framework/Layer");
 var SelectComposite = require("framework/SelectComposite");
 var SelectFrame = require("framework/SelectFrame");
 var extensions = require("extensions/All");
-var ProjectsMetadata = require("projects/Metadata");
 var domUtil = require("utils/dom");
 var Stopwatch = require("./Stopwatch");
 var WebFont = require("webfontloader");
 var PropertyMetadata = require("framework/PropertyMetadata");
-var WebProject = require("./projects/WebProject");
 var Path = require("./ui/common/Path");
 var CompoundPath = require("./ui/common/CompoundPath");
 
@@ -89,6 +86,8 @@ class AppClass extends DataNode implements IApp {
     [name: string]: any;
     isLoaded: boolean;
     activePage: IPage;
+    modelSyncProxy: any;
+    offlineModel: any;
 
     environment: any = Environment;
 
@@ -188,10 +187,10 @@ class AppClass extends DataNode implements IApp {
         this._currentTool = ViewTool.Pointer;
         this.currentToolChanged = EventHelper.createEvent();
 
-        var token = Selection.onElementSelected.bind((selection, oldSelection, doNotTrack)=>{
-            let selectionIds = Selection.selectedElements().map(e=>e.id());
-            let oldSelectionIds = oldSelection.map(e=>e.id());
-            if(!doNotTrack && (selectionIds.length || oldSelectionIds.length)) {
+        var token = Selection.onElementSelected.bind((selection, oldSelection, doNotTrack) => {
+            let selectionIds = Selection.selectedElements().map(e => e.id());
+            let oldSelectionIds = oldSelection.map(e => e.id());
+            if (!doNotTrack && (selectionIds.length || oldSelectionIds.length)) {
                 ModelStateListener.trackSelect(
                     this.activePage,
                     selectionIds,
@@ -211,7 +210,7 @@ class AppClass extends DataNode implements IApp {
         return backend.getUserId();
     }
 
-    activeStory(value) {
+    activeStory(value?: any) {
         if (arguments.length > 0) {
             this._activeStory = value;
             this.activeStoryChanged.raise(value);
@@ -291,7 +290,7 @@ class AppClass extends DataNode implements IApp {
             CustomGuides.setDefaultOpacity(props.customGuides.opacity);
         }
 
-        if (mode === ChangeMode.Self && props.defaultShapeSettings){
+        if (mode === ChangeMode.Self && props.defaultShapeSettings) {
             //if restoring from primitives or from server data
             ObjectFactory.updatePropsWithPrototype(props.defaultShapeSettings);
         }
@@ -351,26 +350,26 @@ class AppClass extends DataNode implements IApp {
     }
 
     mirroringCode(value) {
-        if(arguments.length !== 0) {
+        if (arguments.length !== 0) {
             this._setUserSetting("mirroringCode", value);
         }
 
         return this._getUserSetting("mirroringCode")
     }
 
-    loadFont(family, style, weight): Promise<void>{
+    loadFont(family, style, weight): Promise<void> {
         return this.fontManager.load(family, style, weight);
     }
 
-    saveFontMetadata(metadata){
-        if (this.fontManager.tryAddMetadata(metadata)){
+    saveFontMetadata(metadata) {
+        if (this.fontManager.tryAddMetadata(metadata)) {
             var metadataWithId = Object.assign({}, metadata);
             metadataWithId.id = metadata.name;
             this.patchProps(PatchType.Insert, "fontMetadata", metadataWithId);
         }
     }
 
-    getFontMetadata(family){
+    getFontMetadata(family) {
         return this.fontManager.getMetadata(family);
     }
 
@@ -402,7 +401,7 @@ class AppClass extends DataNode implements IApp {
         return this._isOffline;
     }
 
-    loadRef(value) {
+    loadRef(value?: number) {
         if (arguments.length === 1) {
             this.runtimeProps.loadRef = value;
         }
@@ -429,7 +428,7 @@ class AppClass extends DataNode implements IApp {
     }
 
     isElectron() {
-        return window && window.process && window.process.type === 'renderer';
+        return window && window['process'] && window['process'].type === 'renderer';
     }
 
     applyVisitor(callback) {
@@ -449,9 +448,6 @@ class AppClass extends DataNode implements IApp {
 
     initPage(page) {
         if (!page.isInitialized()) {
-            if (page.screenType && !page.screenType()) {
-                page.screenType(this.project.defaultScreenType)
-            }
             page.initPage(Environment.view);
             page._placeBeforeRender = true;
         }
@@ -472,10 +468,6 @@ class AppClass extends DataNode implements IApp {
     //TODO: if primitives call dataNode.insertChild, this is not needed
     remove(element) {
         this.removeChild(element);
-    }
-
-    activePageToDataURL(type) {
-        return Environment.view.toDataURL(type);
     }
 
     primitiveRoot() {
@@ -532,7 +524,7 @@ class AppClass extends DataNode implements IApp {
         });
     }
 
-    toJSON(pageIdMap?:any) {
+    toJSON(pageIdMap?: any) {
         var json = {
             t: this.t,
             children: [],
@@ -613,21 +605,21 @@ class AppClass extends DataNode implements IApp {
         return this;
     }
 
-    serverless(value) {
+    serverless(value?: boolean) {
         if (arguments.length === 1) {
             this.setProps({ serverless: value }, ChangeMode.Self);
         }
         return this.props.serverless;
     }
 
-    defaultShapeSettings(value, mode) {
+    defaultShapeSettings(value?: any, mode?: ChangeMode) {
         if (arguments.length) {
             this.setProps({ defaultShapeSettings: value }, mode);
         }
         return this.props.defaultShapeSettings;
     }
 
-    defaultFill(value, mode) {
+    defaultFill(value?: any, mode?: ChangeMode) {
         if (arguments.length) {
             var settings = Object.assign({}, this.defaultShapeSettings(), { fill: value });
             this.defaultShapeSettings(settings, mode);
@@ -678,7 +670,7 @@ class AppClass extends DataNode implements IApp {
         return this._getUserSetting("snapTo", UserSettings.snapTo);
     }
 
-    _getUserSetting(name, defaultValue) {
+    _getUserSetting(name, defaultValue?: any) {
         var userId = backend.getUserId();
 
         return this._getSpecificUserSetting(userId, name, defaultValue);
@@ -697,7 +689,7 @@ class AppClass extends DataNode implements IApp {
     _setUserSetting(name, value) {
         var fullName = backend.getUserId() + ":" + name;
         var oldValue = this._getUserSetting(name);
-        if(value === null) {
+        if (value === null) {
             this.patchProps(PatchType.Remove, "userSettings", { id: fullName });
         } else {
             this.patchProps((oldValue === null || oldValue === undefined) ? PatchType.Insert : PatchType.Change, "userSettings", { id: fullName, value });
@@ -801,12 +793,13 @@ class AppClass extends DataNode implements IApp {
         var stopwatch = new Stopwatch("AppLoad", true);
         this.platform.setupConnection(this);
 
-        var projectLoaded = this.loadMainProject();
+        IconsInfo.defaultFontFamily = 'NinjamockBasic2';
+
         var iconFontsLoaded = this.waitForWebFonts();
         var defaultFontLoaded = this.fontManager.loadDefaultFont();
         var dataLoaded = this.loadData();
 
-        return Promise.all([dataLoaded, projectLoaded, iconFontsLoaded, defaultFontLoaded]).then(result => {
+        return Promise.all([dataLoaded, iconFontsLoaded, defaultFontLoaded]).then(result => {
             var data = result[0];
             stopwatch.checkpoint("DataProjectFonts");
             this.initExtensions();
@@ -865,7 +858,7 @@ class AppClass extends DataNode implements IApp {
     onLoaded() {
     }
 
-    raiseLogEvent(primitive, disableMultiple) {
+    raiseLogEvent(primitive, disableMultiple?: boolean) {
         if (!primitive) {
             return;
         }
@@ -901,15 +894,6 @@ class AppClass extends DataNode implements IApp {
         return this.modelSyncProxy.getLatest();
     }
 
-    loadMainProject() {
-        var dfd = Deferred.create();
-
-        this.project = new WebProject();
-        this.project.load(this, dfd);
-
-        return dfd.promise();
-    }
-
     get pages(): IPage[] {
         return (this.children as any).filter(p => p instanceof Page);
     }
@@ -936,17 +920,17 @@ class AppClass extends DataNode implements IApp {
     }
 
     _trackViewPrimitive() {
-        if(!ModelStateListener.roots.length) {
+        if (!ModelStateListener.roots.length) {
             return;
         }
         var trackundo = !!this._lastRelayoutView;
         var sx = this.activePage.scrollX();
         var sy = this.activePage.scrollY();
         var scale = Environment.view.scale();
-        if(!trackundo) {
+        if (!trackundo) {
             this._lastRelayoutView = {};
         }
-        if(trackundo && (sx !== this._lastRelayoutView.sx ||
+        if (trackundo && (sx !== this._lastRelayoutView.sx ||
             sy !== this._lastRelayoutView.sy ||
             scale !== this._lastRelayoutView.scale)) {
 
@@ -1032,7 +1016,7 @@ class AppClass extends DataNode implements IApp {
 
             var viewPrimitive = this._trackViewPrimitive();
 
-            if(viewPrimitive){
+            if (viewPrimitive) {
                 primitives.push(viewPrimitive);
                 rollbacks.push(viewPrimitive);
             }
@@ -1125,8 +1109,8 @@ class AppClass extends DataNode implements IApp {
     }
 
     viewPointToScreen(point) {
-        var htmlParent = $(this.platform.viewContainerElement());
-        var parentOffset = htmlParent.offset();
+        var htmlParent = this.platform.viewContainerElement();
+        var parentOffset = domUtil.offset(htmlParent.offset());
         return {
             x: parentOffset.left + point.x - this.activePage.scrollX(),
             y: parentOffset.top + point.y - this.activePage.scrollY()
@@ -1159,21 +1143,21 @@ class AppClass extends DataNode implements IApp {
     // }
 
     //these should be in platform, but ImageRenderer does not have any platform
-    generateWebFontConfig(deferred, projectName) {
+    generateWebFontConfig(resolve, reject) {
         var config = {
             custom: {
                 families: []
             },
             timeout: 60 * 1000,
             active() {
-                deferred.resolve();
+                resolve();
             },
             inactive() {
                 var failedFonts = this._inactiveFonts;
                 if (!failedFonts) {
                     failedFonts = this.custom.families;
                 }
-                deferred.reject("Could not load fonts: " + failedFonts.join(", "));
+                reject(new Error("Could not load fonts: " + failedFonts.join(", ")));
             },
             fontinactive(familyName, fvd) {
                 if (!this._inactiveFonts) {
@@ -1183,28 +1167,16 @@ class AppClass extends DataNode implements IApp {
             }
         };
 
-        var project = ProjectsMetadata.projects["WebProject"];
-        config.custom.families = config.custom.families.concat(project.fontsWithIcons);
-        if (project.fonts) {
-            for (var i in project.fonts) {
-                config[i] = project.fonts[i];
-            }
-        }
+        config.custom.families = config.custom.families.concat(["NinjamockBasic2"]);
 
         return config;
     }
 
     waitForWebFonts() {
-        var deferred = Deferred.create();
-
-        var config = this.generateWebFontConfig(deferred, sketch.params.projectType);
-        WebFont.load(config);
-
-        if (sketch.params.noWaitForWebFont) {
-            deferred.resolve();
-        }
-
-        return deferred.promise();
+        return new Promise((resolve, reject) => {
+            var config = this.generateWebFontConfig(resolve, reject);
+            WebFont.load(config);
+        })
     }
 
     importPage(data) {
@@ -1224,8 +1196,8 @@ class AppClass extends DataNode implements IApp {
             }
         }
 
-        if (data.fontMetadata){
-            for (var metadata of data.fontMetadata){
+        if (data.fontMetadata) {
+            for (var metadata of data.fontMetadata) {
                 this.saveFontMetadata(metadata);
             }
         }
@@ -1244,19 +1216,27 @@ class AppClass extends DataNode implements IApp {
         return page;
     }
 
-    shortcutsEnabled(value) {
-        if (shortcut) {
-            return (shortcut.active = value);
-        }
+    createNewPage(type) {
+        var page = new ArtboardPage();
 
-        return false;
+        page.setProps({
+            orientation: (type || "portrait"),
+            width: 1000,
+            height: 1000
+        }, ChangeMode.Self);
+        //since page is a primitive root, it will fire model tracking event,
+        //causing wrong order if primitives
+
+        return page;
     }
 
     addNewPage(options) {
-        return this.project.addNewPage(options);
+        var newPage = this.createNewPage(options);
+        this.addPage(newPage);
+        this.setActivePage(newPage);
     }
 
-    registerForDisposal(d){
+    registerForDisposal(d) {
         this._disposables.push(d);
     }
 
@@ -1277,7 +1257,7 @@ class AppClass extends DataNode implements IApp {
             this.state.dispose();
             this.state = null;
         }
-        if (this.dataManager){
+        if (this.dataManager) {
             this.dataManager.dispose();
             this.dataManager = null;
         }
@@ -1327,12 +1307,12 @@ class AppClass extends DataNode implements IApp {
     restoreWorkspaceState(): void {
         try {
             var data = localStorage.getItem("workspace:" + this.id());
-            if(!data) {
+            if (!data) {
                 return;
             }
 
             var state = JSON.parse(data);
-            if(!state) {
+            if (!state) {
                 return;
             }
 
@@ -1350,7 +1330,7 @@ class AppClass extends DataNode implements IApp {
             }
 
             if (state.selection.length) {
-                var elements = this.activePage.findAllNodesDepthFirst(x => state.selection.indexOf(x.id()) !== -1);
+                var elements = this.activePage.findAllNodesDepthFirst<IUIElement>(x => state.selection.indexOf(x.id()) !== -1);
                 if (elements.length) {
                     Selection.makeSelection(elements);
                 }

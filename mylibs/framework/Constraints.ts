@@ -1,41 +1,40 @@
-import {Types, HorizontalConstraint, VerticalConstraint} from "./Defs";
+import { Types, HorizontalConstraint, VerticalConstraint } from "./Defs";
+import TypeDefaults from "./TypeDefaults";
 
-define(["framework/TypeDefaults"], function(TypeDefaults) {
-    var Constraints = {};
+var defaults = {
+    v: VerticalConstraint.Top,
+    h: HorizontalConstraint.Left
+};
 
-    var defaults = {
-        v: VerticalConstraint.Top,
-        h: HorizontalConstraint.Left
-    };
+var constraintsDefault = TypeDefaults[Types.Constraints] = function () { return new Constraints() };
 
-    function ConstraintsType(){
+export default class Constraints {
+    t: string;
+
+    constructor(){
         this.t = Types.Constraints;
     }
-    ConstraintsType.prototype = defaults;
 
-    var constraintsDefault = TypeDefaults[Types.Constraints] = function(){return new ConstraintsType()};
-
-    Constraints.hashKey = function(values){
-        return JSON.stringify(extend(constraintsDefault(), values));
-    };
-
-    Constraints.createFromObject = function(obj){
+    static createFromObject(obj) {
         return Object.assign(constraintsDefault(), obj);
-    };
+    }
 
-    Constraints.toArray = function(constraints) {
+    static toArray(constraints) {
         return [constraints.v, constraints.h];
     }
 
-    Constraints.create = function(h, v){
-        return Object.assign(constraintsDefault(), {v:v, h:h});
+    static create(h, v) {
+        return Object.assign(constraintsDefault(), { v: v, h: h });
     };
 
-    Constraints.Default = Constraints.createFromObject({});
+    static Default: Constraints;
+    static All: Constraints;
+    static StretchAll: Constraints;
+}
+Object.assign(Constraints.prototype, defaults);
 
-    Constraints.All = Constraints.create(HorizontalConstraint.LeftRight, VerticalConstraint.TopBottom);
+Constraints.Default = Constraints.createFromObject({});
 
-    Constraints.StretchAll = Constraints.create(HorizontalConstraint.Stretch, VerticalConstraint.Stretch);
+Constraints.All = Constraints.create(HorizontalConstraint.LeftRight, VerticalConstraint.TopBottom);
 
-    return Constraints;
-});
+Constraints.StretchAll = Constraints.create(HorizontalConstraint.Stretch, VerticalConstraint.Stretch);

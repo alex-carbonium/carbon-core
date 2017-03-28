@@ -10,7 +10,7 @@ import ElementMove from "../commands/ElementMove";
 import Matrix from "../math/matrix";
 import Point from "../math/point";
 import { isRectInRect, areRectsIntersecting } from "../math/math";
-import stopwatch from "../Stopwatch";
+//import stopwatch from "../Stopwatch";
 import ResizeDimension from "./ResizeDimension";
 import Constraints from "./Constraints";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
@@ -36,8 +36,9 @@ import DataNode from "./DataNode";
 import { createUUID, deepEquals } from "../util";
 import Rect from "../math/rect";
 import ResizeOptions from "../decorators/ResizeOptions";
-import { DisplayProperty, PropertyDescriptor } from './PropertyMetadata';
-import { IRect } from "carbon-geometry";
+import { PropertyDescriptor } from './PropertyMetadata';
+import { Dictionary } from "carbon-basics";
+import { IUIElementProps, IPropsOwner, IUIElement } from "carbon-model";
 
 require("../migrations/All");
 
@@ -48,13 +49,14 @@ fwk.Stroke = Brush;
 fwk.DockValues = { left: "Left", top: "Top", bottom: "Bottom", right: "Right", fill: "Fill" };
 
 // constructor
-export default class UIElement extends DataNode {
+export default class UIElement extends DataNode implements IUIElement, IPropsOwner<IUIElementProps> {
     [name: string]: any;
+    props: IUIElementProps;
 
     constructor() {
         super(false);
 
-        this.stopwatch = new stopwatch();
+        //this.stopwatch = new stopwatch();
 
         if (DEBUG) {
             this.id(createUUID(this.t));
@@ -113,7 +115,7 @@ export default class UIElement extends DataNode {
         return true;
     }
 
-    setProps(props) {
+    setProps(props, mode?: ChangeMode) {
         var hasBr = props.hasOwnProperty("br");
 
         if (!hasBr) {
@@ -145,7 +147,7 @@ export default class UIElement extends DataNode {
         this.invalidate();
     }
 
-    selectLayoutProps(global) {
+    selectLayoutProps(global?: boolean) {
         var m = global ? this.globalViewMatrix() : this.viewMatrix();
         return {
             br: this.br(),
@@ -263,16 +265,16 @@ export default class UIElement extends DataNode {
     getTranslation() {
         return this.dm().translation;
     }
-    applyTranslation(t, withReset, mode) {
+    applyTranslation(t, withReset?: boolean, mode?: ChangeMode) {
         if (withReset) {
             this.saveOrResetLayoutProps();
         }
         this.applyTransform(Matrix.create().translate(t.x, t.y), false, mode);
     }
-    applyDirectedTranslation(t, mode) {
+    applyDirectedTranslation(t, mode?: ChangeMode) {
         this.applyTransform(Matrix.create().translate(t.x, t.y), true, mode);
     }
-    applyGlobalTranslation(t, changeMode) {
+    applyGlobalTranslation(t, changeMode?: ChangeMode) {
         let m = this.globalViewMatrix().prependedWithTranslation(t.x, t.y);
         m = this.parent().globalViewMatrixInverted().appended(m);
         this.setTransform(m, changeMode);
@@ -282,7 +284,7 @@ export default class UIElement extends DataNode {
         var decomposed = global ? this.gdm() : this.dm();
         return -decomposed.rotation;
     }
-    applyRotation(angle, o, withReset, mode) {
+    applyRotation(angle, o, withReset?: boolean, mode?: ChangeMode) {
         if (withReset) {
             this.saveOrResetLayoutProps();
         }
@@ -301,7 +303,7 @@ export default class UIElement extends DataNode {
         return true;
     }
 
-    applyScaling(s, o, options, changeMode: ChangeMode) {
+    applyScaling(s, o, options, changeMode?: ChangeMode) {
         if (options && options.reset) {
             this.saveOrResetLayoutProps();
         }
@@ -325,7 +327,7 @@ export default class UIElement extends DataNode {
             this.applyTransform(Matrix.create().scale(s.x, s.y, localOrigin.x, localOrigin.y), true, changeMode);
         }
         else {
-            this.applyTransform(Matrix.create().scale(s.x, s.y, o.x, o.y), changeMode);
+            this.applyTransform(Matrix.create().scale(s.x, s.y, o.x, o.y), false, changeMode);
         }
     }
 
@@ -363,7 +365,7 @@ export default class UIElement extends DataNode {
             newX = Math.round(newX);
             newY = Math.round(newY);
         }
-        var newProps = {};
+        var newProps: Partial<IUIElementProps> = {};
         newProps.br = new Rect(Math.abs(newX), Math.abs(newY), Math.abs(newWidth), Math.abs(newHeight));
 
         var fx = s.x < 0 ? -1 : 1;
@@ -398,14 +400,14 @@ export default class UIElement extends DataNode {
         this.prepareAndSetProps(newProps, changeMode);
     }
 
-    applyTransform(matrix, append, mode) {
+    applyTransform(matrix, append?: boolean, mode?: ChangeMode) {
         this.prepareAndSetProps({ m: append ? this.props.m.appended(matrix) : this.props.m.prepended(matrix) }, mode);
     }
-    setTransform(matrix, mode) {
+    setTransform(matrix, mode?: ChangeMode) {
         this.setProps({ m: matrix }, mode);
     }
     resetTransform(mode) {
-        var props = { m: Matrix.Identity };
+        var props: Dictionary = { m: Matrix.Identity };
         if (this.hasBadTransform()){
             props.bad = false;
             props.lgbr = null;
@@ -492,9 +494,6 @@ export default class UIElement extends DataNode {
     //         }
     //     }
     // },
-    dragTo(event) {
-        this.position(event);
-    }
     // lastDrawnRect(value) {
     //     if (arguments.length !== 0) {
     //         this._lastDrawnRect = value;
@@ -506,7 +505,7 @@ export default class UIElement extends DataNode {
     }
     draggingLeft(event) {
     }
-    getDropData(event) {
+    getDropData(pos, element) {
         return null;
     }
     startResizing(eventData) {
@@ -614,7 +613,7 @@ export default class UIElement extends DataNode {
         return true;
     }
 
-    getBoundaryRect(includeMargin: boolean = false): IRect {
+    getBoundaryRect(includeMargin: boolean = false): Rect {
         var br = this.props.br;
         if (!includeMargin || this.margin() === Box.Default) {
             return br;
@@ -632,12 +631,12 @@ export default class UIElement extends DataNode {
         return this.getBoundingBoxGlobal(includeMargin);
     }
 
-    getBoundingBox(includeMargin: boolean = false): IRect {
+    getBoundingBox(includeMargin: boolean = false): Rect {
         var rect = this.getBoundaryRect(includeMargin);
         return this.transformBoundingRect(rect, this.viewMatrix());
     }
 
-    getBoundingBoxGlobal(includeMargin: boolean = false): IRect {
+    getBoundingBoxGlobal(includeMargin: boolean = false): Rect {
         if (this.runtimeProps.globalClippingBox) {
             return this.runtimeProps.globalClippingBox;
         }
@@ -647,7 +646,7 @@ export default class UIElement extends DataNode {
         this.runtimeProps.globalClippingBox = bb;
         return bb;
     }
-    getBoundingBoxRelativeToRoot(): IRect {
+    getBoundingBoxRelativeToRoot(): Rect {
         var m = this.rootViewMatrix();
         var rect = this.getBoundaryRect();
         return this.transformBoundingRect(rect, m);
@@ -697,7 +696,7 @@ export default class UIElement extends DataNode {
         return rect;
     }
 
-    getHitTestBox(scale: number, includeMargin: boolean = false, includeBorder: boolean = true): IRect {
+    getHitTestBox(scale: number, includeMargin: boolean = false, includeBorder: boolean = true): Rect {
         var rect = this.getBoundaryRect(includeMargin);
         var goodScaleW = rect.width * scale > 10;
         var goodScaleH = rect.height * scale > 10;
@@ -737,7 +736,7 @@ export default class UIElement extends DataNode {
 
         return point.x >= rect.x && point.x < rect.x + rect.width && point.y >= rect.y && point.y < rect.y + rect.height;
     }
-    hitTestGlobalRect(rect: IRect, directSelection: boolean) {
+    hitTestGlobalRect(rect: Rect, directSelection: boolean) {
         if (!this.hitVisible(directSelection)) {
             return false;
         }
@@ -827,7 +826,7 @@ export default class UIElement extends DataNode {
             return;
         }
 
-        this.stopwatch.start();
+        //this.stopwatch.start();
 
         var br = this.br(),
             w = br.width,
@@ -836,7 +835,7 @@ export default class UIElement extends DataNode {
         context.save();
         context.globalAlpha = context.globalAlpha * this.opacity();
 
-        this.applyViewMatrix(context, environment);
+        this.applyViewMatrix(context);
 
         this.clip(context);
         this.drawSelf(context, w, h, environment);
@@ -847,7 +846,7 @@ export default class UIElement extends DataNode {
 
         //console.log(this.displayName() + " : " + this.stopwatch.getElapsedTime());
     }
-    drawSelf(context, w, h) {
+    drawSelf(context, w, h, environment) {
 
     }
     drawDecorators(context, w, h, environment) {
@@ -1036,7 +1035,7 @@ export default class UIElement extends DataNode {
 
         return parent.children.indexOf(this);
     }
-    x(value, changeMode) {
+    x(value?: number, changeMode?: ChangeMode) {
         if (arguments.length !== 0) {
             var t = Point.create(value - this.x(), 0);
             this.applyGlobalTranslation(t, changeMode);
@@ -1051,7 +1050,7 @@ export default class UIElement extends DataNode {
         let m = root.globalViewMatrixInverted().appended(this.globalViewMatrix());
         return this.transformBoundingRect(this.getBoundaryRect(), m).x;
     }
-    y(value, changeMode) {
+    y(value?: number, changeMode?: ChangeMode) {
         if (arguments.length !== 0) {
             var t = Point.create(0, value - this.y());
             this.applyGlobalTranslation(t, changeMode);
@@ -1066,11 +1065,11 @@ export default class UIElement extends DataNode {
         let m = root.globalViewMatrixInverted().appended(this.globalViewMatrix());
         return this.transformBoundingRect(this.getBoundaryRect(), m).y;
     }
-    width(value, changeMode) {
+    width(value?: number, changeMode?: ChangeMode) {
         if (arguments.length !== 0) {
             var s = new Point(value/this.width(), 1);
             var o = this.viewMatrix().transformPoint(this.br().centerLeft());
-            var resizeOptions = new ResizeOptions(true, false, false);
+            var resizeOptions = new ResizeOptions(true, false, false, true);
             this.applyScaling(s, o, resizeOptions, changeMode);
         }
 
@@ -1085,11 +1084,11 @@ export default class UIElement extends DataNode {
         }
         return Math.abs(this.br().width * scaling);
     }
-    height(value, changeMode) {
+    height(value?: number, changeMode?: ChangeMode) {
         if (arguments.length !== 0) {
             var s = new Point(1, value/this.height());
             var o = this.viewMatrix().transformPoint(this.br().centerTop());
-            var resizeOptions = new ResizeOptions(true, false, false);
+            var resizeOptions = new ResizeOptions(true, false, false, true);
             this.applyScaling(s, o, resizeOptions, changeMode);
         }
 
@@ -1104,13 +1103,13 @@ export default class UIElement extends DataNode {
         }
         return Math.abs(this.br().height * scaling);
     }
-    angle(value, changeMode) {
+    angle(value?: number, changeMode?: ChangeMode) {
         if (arguments.length !== 0) {
             this.applyRotation(value - this.angle(), this.center(), false, changeMode);
         }
         return this.getRotation(true);
     }
-    br(value): Rect {
+    br(value?: Rect): Rect {
         if (value !== undefined) {
             this.setProps({ br: value });
         }
@@ -1130,7 +1129,7 @@ export default class UIElement extends DataNode {
         var margin = this.margin();
         return this.width() + margin.left + margin.right;
     }
-    locked(value) {
+    locked(value?: boolean) {
         if (value !== undefined) {
             this.setProps({ locked: value });
         }
@@ -1158,19 +1157,19 @@ export default class UIElement extends DataNode {
     hitTransparent() {
         return false;
     }
-    canSelect(value) {
+    canSelect(value?: boolean) {
         return this.field("_canSelect", value, true);
     }
-    visible(value, mode: ChangeMode) {
+    visible(value?: boolean, mode?: ChangeMode) {
         if (arguments.length) {
             this.setProps({ visible: value }, mode);
         }
         return this.props.visible;
     }
-    autoPosition(value) {
+    autoPosition(value?: string) {
         return this.field("_autoPosition", value, "center");
     }
-    allowSnapping(value) {
+    allowSnapping(value?: boolean) {
         return this.field("_allowSnapping", value, true);
     }
     tags(value) {
@@ -1187,7 +1186,7 @@ export default class UIElement extends DataNode {
 
         return res;
     }
-    fill(value) {
+    fill(value?: Brush) {
         if (value !== undefined) {
             this.setProps({ fill: value });
         }
@@ -1199,19 +1198,19 @@ export default class UIElement extends DataNode {
         }
         return this.props.stroke;
     }
-    strokePosition(value): StrokePosition {
+    strokePosition(value?: StrokePosition): StrokePosition {
         if (value !== undefined) {
             this.setProps({ strokePosition: value });
         }
         return this.props.strokePosition;
     }
-    strokeWidth(value): number {
+    strokeWidth(value?: number): number {
         if (value !== undefined) {
             this.setProps({ strokeWidth: value });
         }
         return this.props.strokeWidth;
     }
-    dashPattern(value) {
+    dashPattern(value?: any) {
         if (value !== undefined) {
             this.setProps({ dashPattern: value });
         }
@@ -1230,20 +1229,20 @@ export default class UIElement extends DataNode {
     selectFrameVisible() {
         return true;
     }
-    field(name, value, defaultValue) {
+    field(name, value, defaultValue?: any) {
         if (value !== undefined) {
             this[name] = value;
         }
         var res = this[name];
         return res !== undefined ? res : defaultValue;
     }
-    clipSelf(/*bool*/value) {
+    clipSelf(value?: boolean) {
         if (value !== undefined) {
             this.setProps({ overflow: Overflow.Clip });
         }
         return this.props.overflow === Overflow.Clip;
     }
-    overflow(value) {
+    overflow(value?: Overflow) {
         if (value !== undefined) {
             this.setProps({ overflow: value });
         }
@@ -1301,7 +1300,7 @@ export default class UIElement extends DataNode {
         }
         return this.props.flipHorizontal;
     }
-    clipMask(/*bool*/value) {
+    clipMask(value?: boolean) {
         if (value !== undefined) {
             this.setProps({ clipMask: value });
         }
@@ -1335,10 +1334,10 @@ export default class UIElement extends DataNode {
         }
         return this.props.visibleWhenDrag;
     }
-    standardBackground(value) {
+    standardBackground(value?: boolean) {
         return this.field("_standardBackground", value, true);
     }
-    name(value) {
+    name(value?: string) {
         if (value !== undefined) {
             this.setProps({ name: value });
         }
@@ -1369,10 +1368,10 @@ export default class UIElement extends DataNode {
     getDescription() {
         return _(this.t);
     }
-    applyVisitor(/*Visitor*/callback) {
+    applyVisitor(callback, useLogicalChildren?: boolean, parent?: any) {
         return callback(this);
     }
-    canAccept(elements, autoInsert) {
+    canAccept(elements, autoInsert, allowMoveInOut?: boolean) {
         return false;
     }
     canBeAccepted(element) {
@@ -1402,7 +1401,7 @@ export default class UIElement extends DataNode {
             parent.unregisterForLayerDraw(layerNum, this);
         }
     }
-    margin(value) {
+    margin(value?: Box) {
         if (value !== undefined) {
             this.setProps({ margin: value });
         }
@@ -1466,7 +1465,7 @@ export default class UIElement extends DataNode {
     cursor() {
         return null;
     }
-    resizeDimensions(value) {
+    resizeDimensions(value?: any) {
         if (value) {
             value = +value; // convert from string, to make it work with property editor
         }
@@ -1576,11 +1575,11 @@ export default class UIElement extends DataNode {
     rotationOrigin(global) {
         return this.center(global);
     }
-    center(global) {
+    center(global?: boolean) {
         var m = global ? this.globalViewMatrix() : this.viewMatrix();
         return m.transformPoint(this.br().center());
     }
-    hitElement(position, scale, predicate, directSelection) {
+    hitElement(position, scale, predicate, directSelection): UIElement {
         if (!this.hitVisible(directSelection)) {
             return null;
         }
@@ -1632,27 +1631,7 @@ export default class UIElement extends DataNode {
         return null;
     }
 
-    getTags() {
-        var tags = this.tags();
-        if (tags) {
-            return tags.split(",");
-        }
-        return [];
-    }
-    hasTag(tag) {
-        var tags = this.getTags();
-        return sketch.util.contains(tags, tag);
-    }
-    addTag(tag) {
-        var tags = this.getTags();
-        if (!sketch.util.contains(tags, tag)) {
-            tags.push(tag);
-            this.tags(tags.join(","));
-        }
-        return this;
-    }
     contextMenu(context, menu) {
-
     }
     constructMoveCommand(newParent, newIndex) {
         return new ElementMove(this, newParent, newIndex);
@@ -1925,7 +1904,7 @@ export default class UIElement extends DataNode {
         for (var propName in properties) {
             var newValue = properties[propName];
             var accessor = (function (name) {
-                return function prop_accessor(value) {
+                return function prop_accessor(value?: any) {
                     if (arguments.length > 0) {
                         that.setProps({ [name]: value });
                     }
@@ -1956,7 +1935,7 @@ export default class UIElement extends DataNode {
         var stylePropNames = PropertyMetadata.getStylePropertyNamesMap(this.systemType(), 1);
         var res = {};
         for (var name in stylePropNames) {
-            res[name] = sketch.util.flattenObject(this.props[name]);
+            res[name] = window['sketch'].util.flattenObject(this.props[name]);
         }
         return res;
     }
@@ -1965,14 +1944,14 @@ export default class UIElement extends DataNode {
         return PropertyMetadata.findAll(this.t);
     }
 
-    getNonRepeatableProps(){
+    getNonRepeatableProps(newProps?: any){
         return ["id", "name", "visible"];
     }
 
     toSVG() {
-        var ctx = new C2S(this.width(), this.height());
-        this.draw(ctx);
-        return ctx.getSerializedSvg();
+        // var ctx = new C2S(this.width(), this.height());
+        // this.draw(ctx);
+        // return ctx.getSerializedSvg();
     }
 
     contextBarAllowed() {
@@ -1981,7 +1960,7 @@ export default class UIElement extends DataNode {
 
     static fromTypeString(type, parameters) {
         var components = type.split('.');
-        var current = sketch;
+        var current = window['sketch'];
         for (var i = 1; i < components.length; i++) {
             var component = components[i];
             current = current[component];

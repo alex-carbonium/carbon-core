@@ -1,15 +1,65 @@
 import PropertyMetadata from "framework/PropertyMetadata";
-import { Types } from "./Defs";
-import { IPage, IArtboard } from "carbon-model";
+import { Types, ChangeMode } from "./Defs";
+import { IPage, IUIElement, IContainerProps, IDataNode, IArtboard } from "carbon-model";
+import { IRect, IPoint } from "carbon-geometry";
+import { Dictionary } from "carbon-basics";
+import Rect from "../math/rect";
 
 class NullPage implements IPage {
+    clone(){
+        return this;
+    }
+
+    findAllNodesDepthFirst<T extends IDataNode>(predicate: (node: T) => boolean): T[] {
+        return [];
+    }
+
+    canAccept(elements: IUIElement[], autoInsert: boolean, allowMoveIn: boolean): boolean {
+        return false;
+    }
+    insert(element: IUIElement, index: number, mode: number): IUIElement {
+        return element;
+    }
+    autoPositionChildren(): boolean {
+        return false;
+    }
+    applyVisitor(callback: (IUIElement: any) => boolean | void) {
+    }
+    shouldApplyViewMatrix(): boolean {
+        return false;
+    }
+    getBoundingBox(): IRect {
+        return Rect.Zero;
+    }
+    getBoundingBoxGlobal(): IRect {
+        return Rect.Zero;
+    }
+    getMaxOuterBorder(): number {
+        return 0;
+    }
+    hitTest(point: IPoint, scale: number, boundaryRectOnly: boolean): boolean {
+        return false;
+    }
+    hitTestGlobalRect(rect: IRect, directSelection: boolean): boolean {
+        return false;
+    }
+    showResizeHint(): boolean {
+        return false;
+    }
+    each(callback: (e: IUIElement, index?: number) => boolean | void) {
+    }
+    fill(value?: any) {
+    }
+    stroke(value?: any) {
+    }
+
     t: string;
-    props: {};
+    props: IContainerProps;
     children: any[];
 
     constructor() {
         this.children = [];
-        this.props = {};
+        this.props = null;
     }
     parent() {
 
@@ -34,9 +84,11 @@ class NullPage implements IPage {
     }
     initId() {
     }
-    add(/*UIElement*/element) {
+    add(element) {
+        return element;
     }
-    remove(/*UIElement*/element) {
+    remove(element) {
+        return -1;
     }
     clear() {
     }
@@ -64,7 +116,7 @@ class NullPage implements IPage {
     resize(rect) {
     }
     id() {
-        return 0;
+        return "";
     }
     toJSON() {
     }
@@ -72,7 +124,8 @@ class NullPage implements IPage {
     }
     timeStamp() {
     }
-    name(value) {
+    name() {
+        return "";
     }
     encodedName() {
     }
@@ -84,8 +137,9 @@ class NullPage implements IPage {
     activating() {
     }
     deactivating() {
+        return true;
     }
-    activated(previousPage) {
+    activated() {
     }
     deactivated() {
     }
@@ -131,10 +185,10 @@ class NullPage implements IPage {
         return [];
     }
     scrollX() {
-
+        return 0;
     }
     scrollY() {
-
+        return 0;
     }
     hitElement() {
         return null;

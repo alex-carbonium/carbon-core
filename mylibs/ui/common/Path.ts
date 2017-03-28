@@ -490,7 +490,7 @@ class Path extends Shape {
         this.removePointAtIndex(length - 1);
     }
 
-    mode(value) {
+    mode(value?) {
         if (arguments.length > 0) {
             var oldMode = this.mode();
 
@@ -898,7 +898,7 @@ class Path extends Shape {
             var pt = this._handlePoint;
             var newX = pos.x,
                 newY = pos.y;
-            var x = pt.x,
+            let x = pt.x,
                 y = pt.y;
             if (pt._selectedPoint === 1) {
                 pt.cp1x = newX;
@@ -966,7 +966,7 @@ class Path extends Shape {
             return pt;
         }
 
-        var x = event.x, y = event.y;
+        let x = event.x, y = event.y;
         var pt = getClickedPoint.call(this, x, y);
         if (!updateHoverPoint.call(this, pt)) {
 
@@ -988,7 +988,7 @@ class Path extends Shape {
         }
     }
 
-    closed(value) {
+    closed(value?) {
         if (value !== undefined) {
             this.setProps({closed: value});
         }
@@ -1065,10 +1065,6 @@ class Path extends Shape {
             }
         }
         return res;
-    }
-
-    selectFrameVisible() {
-        return this.mode() !== "edit";
     }
 
     resizeDimensions() {
@@ -1354,7 +1350,7 @@ class Path extends Shape {
         return this.props.joinMode;
     }
 
-    getPointIfClose(pos, dist) {
+    getPointIfClose(pos, dist?) {
         var matrix = this.globalViewMatrixInverted();
         pos = matrix.transformPoint(pos);
         var resPt = null;
