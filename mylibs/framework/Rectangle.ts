@@ -11,6 +11,7 @@ import Path from "ui/common/Path";
 import UIElement from "framework/UIElement";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
+import { Dictionary } from "carbon-basics";
 
 const PointSize = 4;
 const PointOffset = 10;
@@ -94,7 +95,7 @@ var CornerRadiusPoint = {
         }
 
         var p2 = {x: w2 + dw * rv[1], y: h2 + dh * rv[3]};
-        var pr = {};
+        var pr: Dictionary = {};
         // pr - closest point to the line
         nearestPoint.onLine(p1, p2, mousePosition, pr);
 
@@ -192,7 +193,7 @@ class Rectangle extends Shape {
         return path;
     }
 
-    cornerRadius(value) {
+    cornerRadius(value?) {
         if (value !== undefined) {
             this.setProps({cornerRadius: value})
         }
@@ -341,71 +342,71 @@ class Rectangle extends Shape {
 
         return frame;
     }
+
+    static fromSvgElement = function (element, parsedAttributes, matrix) {
+        // var parsedAttributes = svgParser.parseAttributes(element, Rectangle.ATTRIBUTE_NAMES);
+        var rect = new Rectangle();
+
+        App.Current.activePage.nameProvider.assignNewName(rect);
+        if (parsedAttributes.width) {
+            rect.width(parsedAttributes.width);
+        }
+
+        if (parsedAttributes.height) {
+            rect.height(parsedAttributes.height);
+        }
+
+        if(parsedAttributes.id){
+            rect.name(parsedAttributes.id);
+        }
+
+        rect.setProps({pointRounding: 0});
+
+        if(parsedAttributes.rx !== undefined && parsedAttributes.rx == parsedAttributes.ry){
+            var r = parseFloat(parsedAttributes.rx);
+            rect.cornerRadius({
+                bottomLeft: r,
+                bottomRight: r,
+                upperLeft: r,
+                upperRight: r,
+                locked: true
+            });
+        }
+
+        if (parsedAttributes.fill !== undefined) {
+            if(!parsedAttributes.fill || parsedAttributes.fill == "none"){
+                rect.fill(Brush.Empty);
+            } else {
+                rect.fill(Brush.createFromColor(parsedAttributes.fill));
+            }
+        }
+
+        if (parsedAttributes.stroke) {
+            rect.stroke(Brush.createFromColor(parsedAttributes.stroke));
+        } else {
+            rect.stroke(Brush.Empty);
+        }
+
+        if(parsedAttributes.opacity){
+            rect.opacity(parsedAttributes.opacity);
+        }
+
+        var pos = {x:0, y:0}
+        if (parsedAttributes.x) {
+            pos.x = parsedAttributes.x;
+        }
+        if (parsedAttributes.y) {
+            pos.y = parsedAttributes.y;
+        }
+
+        rect.applyTranslation(pos);
+
+        var path =  rect.convertToPath();
+        path.transform(matrix);
+        return path;
+    }
 }
 Rectangle.prototype.t = Types.Rectangle;
-
-Rectangle.fromSvgElement = function (element, parsedAttributes, matrix) {
-    // var parsedAttributes = svgParser.parseAttributes(element, Rectangle.ATTRIBUTE_NAMES);
-    var rect = new Rectangle();
-
-    App.Current.activePage.nameProvider.assignNewName(rect);
-    if (parsedAttributes.width) {
-        rect.width(parsedAttributes.width);
-    }
-
-    if (parsedAttributes.height) {
-        rect.height(parsedAttributes.height);
-    }
-
-    if(parsedAttributes.id){
-        rect.name(parsedAttributes.id);
-    }
-
-    rect.setProps({pointRounding: 0});
-
-    if(parsedAttributes.rx !== undefined && parsedAttributes.rx == parsedAttributes.ry){
-        var r = parseFloat(parsedAttributes.rx);
-        rect.cornerRadius({
-            bottomLeft: r,
-            bottomRight: r,
-            upperLeft: r,
-            upperRight: r,
-            locked: true
-        });
-    }
-
-    if (parsedAttributes.fill !== undefined) {
-        if(!parsedAttributes.fill || parsedAttributes.fill == "none"){
-            rect.fill(Brush.Empty);
-        } else {
-            rect.fill(Brush.createFromColor(parsedAttributes.fill));
-        }
-    }
-
-    if (parsedAttributes.stroke) {
-        rect.stroke(Brush.createFromColor(parsedAttributes.stroke));
-    } else {
-        rect.stroke(Brush.Empty);
-    }
-
-    if(parsedAttributes.opacity){
-        rect.opacity(parsedAttributes.opacity);
-    }
-
-    var pos = {x:0, y:0}
-    if (parsedAttributes.x) {
-        pos.x = parsedAttributes.x;
-    }
-    if (parsedAttributes.y) {
-        pos.y = parsedAttributes.y;
-    }
-
-    rect.applyTranslation(pos);
-
-    var path =  rect.convertToPath();
-    path.transform(matrix);
-    return path;
-};
 
 PropertyMetadata.registerForType(Rectangle, {
     cornerRadius: {

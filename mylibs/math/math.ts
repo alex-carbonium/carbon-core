@@ -409,7 +409,7 @@ export function isRectInRect(child, parent) {
         && child.y >= parent.y && child.y + child.height <= parent.y + parent.height;
 }
 
-export function combineRects() {
+export function combineRects(...rects: any[]) {
     return combineRectArray(arguments);
 }
 export function combineRectArray(rects) {
@@ -469,7 +469,7 @@ export function tsort(edges) {
         this.dependsOn = [];
     }
 
-    function visit(idstr, ancestors) {
+    function visit(idstr, ancestors?) {
         var node = nodes[idstr];
         var id = node.id;
 
@@ -518,7 +518,7 @@ export function tsort(edges) {
     }
 
     var keys = Object.keys(nodes);
-    for (var i = 0, l = keys.length; i < l; ++i) {
+    for (let i = 0, l = keys.length; i < l; ++i) {
         var key = keys[i];
         var result = visit(key);
         if (!result.success) {
@@ -534,7 +534,7 @@ export function multiplyVectorConst(point, constant) {
 }
 
 
-export function addVectors() {
+export function addVectors(...vectors: any[]) {
     var p = {x: 0, y: 0};
     for (var i = 0; i < arguments.length; ++i) {
         p.x += arguments[i].x;

@@ -241,6 +241,10 @@ class Text extends UIElement implements IContainer, IDataElement {
         return null;
     }
 
+    globalMatrixToLocal(m: any) {
+        return m;
+    }
+
     static fromSvgElement(element, parsedAttributes, matrix){
         //
         // :

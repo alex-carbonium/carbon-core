@@ -131,7 +131,7 @@ export class Logger implements ILogger {
     fatal(msg, args?){
         log("fatal", msg, args);
     }
-    trackEvent(name, properties, metrics?: any){
+    trackEvent(name, properties?, metrics?: any){
         if (properties && properties.logLevel){
             log(properties.logLevel, name, properties);
         }

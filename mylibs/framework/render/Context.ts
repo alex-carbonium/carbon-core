@@ -1,11 +1,11 @@
-import CrazyScope from "framework/CrazyManager";
+import CrazyScope from "../CrazyManager";
 import Point from "../../math/point";
 import {IContext} from "carbon-core";
 
 export default class Context implements IContext {
     [name: string]: any;
 
-    constructor(canvas) {
+    constructor(canvas?) {
         if (!canvas) {
             canvas = document.createElement("canvas");
         }
@@ -830,7 +830,7 @@ export default class Context implements IContext {
         this._context.arcTo.apply(this._context, arguments);
     }
 
-    rect(rect) {
+    rect(x, y, w, h) {
         this._context.rect.apply(this._context, arguments);
     }
 

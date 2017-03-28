@@ -80,7 +80,7 @@ import {FontWeight, FontStyle, UnderlineStyle} from "carbon-basics";
     var codeMapS = ")!@#$%^&*(:+<_>?~{|}\"~{|}\"";
     var isMac = navigator.userAgent.indexOf("Mac") != -1;
 
-    function InlineTextEditor() {
+    var InlineTextEditor: any = function() {
         this._toggles = {
             "66": 'weight',
             "73": 'style',

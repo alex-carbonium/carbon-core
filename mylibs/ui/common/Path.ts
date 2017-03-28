@@ -21,7 +21,8 @@ import Command from "framework/commands/Command";
 import {Types, ChangeMode} from "../../framework/Defs";
 import ArrangeStrategy from "../../framework/ArrangeStrategy";
 import ResizeOptions from "../../decorators/ResizeOptions";
-import {IMouseEventData, IKeyboardState} from "carbon-core";
+import { IMouseEventData, IKeyboardState } from "carbon-core";
+import { Dictionary } from "carbon-basics";
 
 var CP_HANDLE_RADIUS = 3;
 var CP_HANDLE_RADIUS2 = 6;
@@ -32,11 +33,11 @@ const POINT_STROKE = "#1592E6";
 const POINT_FILL = "#fff";
 const POINT_FILL_FIRST_OPEN = "yellow";
 
-var PointType = {
-    Straight: 0,
-    Mirrored: 1,
-    Disconnected: 2,
-    Assymetric: 3
+const enum PointType {
+    Straight,
+    Mirrored,
+    Disconnected,
+    Assymetric
 };
 
 var commandLengths = {
@@ -366,7 +367,7 @@ class Path extends Shape {
 
     tryDelete(): boolean {
         if (this._selectedPoint && this.points.length > 2) {
-            var keys = Object.keys(this._selectedPoints).map(k=>k - 0).sort((a, b)=>b - a);
+            var keys = Object.keys(this._selectedPoints).map((k: any)=>k - 0).sort((a, b)=>b - a);
             if (keys.length) {
                 for (var i = 0; i < keys.length; ++i) {
                     this.removePointAtIndex(keys[i]);
@@ -639,7 +640,7 @@ class Path extends Shape {
         this.mode("edit");
     }
 
-    dblclick(event, scale) {
+    dblclick(event, scale?) {
         if (this.mode() !== "edit") {
             this.edit();
         } else {
@@ -1283,7 +1284,7 @@ class Path extends Shape {
     }
 
     getInsertPointData(pointInfo) {
-        var pt = {x: pointInfo.x, y: pointInfo.y, idx: pointInfo.idx};
+        var pt: Dictionary = {x: pointInfo.x, y: pointInfo.y, idx: pointInfo.idx};
         var t = pointInfo.t;
         var len = this.length();
         var p4 = clone(this.points[pointInfo.idx]);
@@ -1359,7 +1360,7 @@ class Path extends Shape {
 
         function checkDistance(pt, prevPt, idx) {
             if (isLinePoint(pt) && isLinePoint(prevPt)) {
-                var pr = {x: 0, y: 0, idx: idx};
+                var pr: Dictionary = {x: 0, y: 0, idx: idx};
                 var d = nearestPoint.onLine(prevPt, pt, pos, pr);
                 setLinePoint(pr);
             } else {
@@ -1991,6 +1992,201 @@ class Path extends Shape {
             previous = current;
         }
     }
+
+    static smoothPoint = function (p, p1, p2, eps) {
+        var vx = p2.x - p1.x
+            , vy = p2.y - p1.y
+            , d = Math.sqrt(vx * vx + vy * vy)
+            , res: any = {x: p.x, y: p.y};
+        vx = vx / d * eps;
+        vy = vy / d * eps;
+
+        res.cp1x = p.x - vx;
+        res.cp2x = p.x + vx;
+        res.cp1y = p.y - vy;
+        res.cp2y = p.y + vy;
+
+        return res;
+    }
+
+    static fromSvgPathElement(element, parsedAttributes, matrix) {
+        // var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
+        var path = new Path();
+
+        App.Current.activePage.nameProvider.assignNewName(path);
+
+        setElementPropertiesFromAttributes(path, parsedAttributes);
+
+        // polygon
+        if (parsedAttributes.points) {
+            var pairs = parsedAttributes.points.replace('\n', ' ').replace('\r', ' ').split(' ');
+            for (var i = 0; i < pairs.length; ++i) {
+                var pair = pairs[i];
+                if (pair) {
+                    var xy = pair.split(',');
+                    var point = {x: parseFloat(xy[0]), y: parseFloat(xy[1])};
+                    point = matrix.transformPoint(point);
+                    path.addPoint(point);
+                }
+            }
+            path.closed(true);
+        }
+
+        if (parsedAttributes.d) {
+            path.fromSvgString(parsedAttributes.d, matrix);
+        }
+
+
+        path.adjustBoundaries();
+
+        return path;
+    }
+
+    static fromSvgLineElement(element, parsedAttributes, matrix) {
+        // var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
+        var path = new Path();
+
+        App.Current.activePage.nameProvider.assignNewName(path);
+
+        setElementPropertiesFromAttributes(path, parsedAttributes);
+
+        path.addPoint(matrix.transformPoint({x: parsedAttributes.x1 || 0, y: parsedAttributes.y1 || 0}));
+        path.addPoint(matrix.transformPoint({x: parsedAttributes.x2 || 0, y: parsedAttributes.y2 || 0}));
+
+        path.adjustBoundaries();
+
+        return path;
+    }
+
+    static fromSvgPolylineElement(element, parsedAttributes, matrix) {
+        // var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
+        var path = new Path();
+        App.Current.activePage.nameProvider.assignNewName(path);
+
+        setElementPropertiesFromAttributes(path, parsedAttributes);
+
+        if (parsedAttributes.points) {
+            var pairs = parsedAttributes.points.replace('\n', ' ').replace('\r', ' ').split(' ');
+            for (var i = 0; i < pairs.length; ++i) {
+                var pair = pairs[i];
+                if (pair) {
+                    var xy = pair.split(',');
+                    path.addPoint(matrix.transformPoint({x: parseFloat(xy[0]), y: parseFloat(xy[1])}));
+                }
+            }
+        }
+
+        path.adjustBoundaries();
+
+        return path;
+    }
+
+    static translatePoints(points, left, top) {
+        var newPoints = [];
+        for (var i = 0, l = points.length; i < l; ++i) {
+            var pt = clone(points[i]);
+            pt.x = pt.x - left;
+            pt.cp1x = pt.cp1x - left;
+            pt.cp2x = pt.cp2x - left;
+
+            pt.y = pt.y - top;
+            pt.cp1y = pt.cp1y - top;
+            pt.cp2y = pt.cp2y - top;
+
+            //this._roundPoint(pt);
+            newPoints.push(pt);
+        }
+        return newPoints;
+    }
+    static pointsToSvg(points, closed) {
+        var d = "";
+        if (!points.length) {
+            return d;
+        }
+        d = "M " + points[0].x + "," + points[0].y;
+        for (var i = 1, len = points.length; i < len; ++i) {
+            d += "\r\n" + svgCommand(points[i], points[i - 1]);
+        }
+        if (closed) {
+            d += "\r\n" + " Z";
+        }
+        return d;
+    }
+
+    static circleAtPoint(center, radius) {
+
+        const MagicNumber = 0.55228475;
+        var controlPointLength = radius * MagicNumber;
+        var path = new Path();
+        path.addPoint({
+            x: center.x - radius,
+            y: center.y,
+            cp1x: center.x - radius,
+            cp1y: center.y - controlPointLength,
+            cp2x: center.x - radius,
+            cp2y: center.y + controlPointLength
+        });
+
+        path.addPoint({
+            x: center.x,
+            y: center.y + radius,
+            cp1x: center.x - controlPointLength,
+            cp1y: center.y + radius,
+            cp2x: center.x + controlPointLength,
+            cp2y: center.y + radius
+        });
+
+
+        path.addPoint({
+            x: center.x + radius,
+            y: center.y,
+            cp1x: center.x + radius,
+            cp1y: center.y + controlPointLength,
+            cp2x: center.x + radius,
+            cp2y: center.y - controlPointLength
+        });
+
+        path.addPoint({
+            x: center.x,
+            y: center.y - radius,
+            cp1x: center.x + controlPointLength,
+            cp1y: center.y - radius,
+            cp2x: center.x - controlPointLength,
+            cp2y: center.y - radius
+        });
+
+        path.closed(true);
+        path.adjustBoundaries();
+        return path;
+    }
+
+    static rectangle(x, y, width, height) {
+        var path = new Path();
+        path.addPoint({
+            x: x,
+            y: y
+        });
+
+        path.addPoint({
+            x: x + width,
+            y: y
+        });
+
+        path.addPoint({
+            x: x + width,
+            y: y + height
+        });
+
+        path.addPoint({
+            x: x,
+            y: y + height
+        });
+
+        path.closed(true);
+        path.adjustBoundaries();
+
+        return path;
+    }
 }
 Path.prototype.t = Types.Path;
 
@@ -2070,22 +2266,6 @@ PropertyMetadata.registerForType(Path, {
 });
 
 
-Path.smoothPoint = function (p, p1, p2, eps) {
-    var vx = p2.x - p1.x
-        , vy = p2.y - p1.y
-        , d = Math.sqrt(vx * vx + vy * vy)
-        , res = {x: p.x, y: p.y};
-    vx = vx / d * eps;
-    vy = vy / d * eps;
-
-    res.cp1x = p.x - vx;
-    res.cp2x = p.x + vx;
-    res.cp1y = p.y - vy;
-    res.cp2y = p.y + vy;
-
-    return res;
-};
-
 function setElementPropertiesFromAttributes(element, parsedAttributes) {
     element.setProps({pointRounding: 0});
 
@@ -2101,7 +2281,7 @@ function setElementPropertiesFromAttributes(element, parsedAttributes) {
     }
 
     if (parsedAttributes.stroke) {
-        element.stroke(Brush.createFromColor(parsedAttributes.stroke, parsedAttributes.strokeWidth, 0));
+        element.stroke(Brush.createFromColor(parsedAttributes.stroke/*, parsedAttributes.strokeWidth, 0*/));
     } else {
         element.stroke(Brush.Empty);
     }
@@ -2127,78 +2307,6 @@ function setElementPropertiesFromAttributes(element, parsedAttributes) {
     }
 }
 
-Path.fromSvgPathElement = function (element, parsedAttributes, matrix) {
-    // var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
-    var path = new Path();
-
-    App.Current.activePage.nameProvider.assignNewName(path);
-
-    setElementPropertiesFromAttributes(path, parsedAttributes);
-
-    // polygon
-    if (parsedAttributes.points) {
-        var pairs = parsedAttributes.points.replace('\n', ' ').replace('\r', ' ').split(' ');
-        for (var i = 0; i < pairs.length; ++i) {
-            var pair = pairs[i];
-            if (pair) {
-                var xy = pair.split(',');
-                var point = {x: parseFloat(xy[0]), y: parseFloat(xy[1])};
-                point = matrix.transformPoint(point);
-                path.addPoint(point);
-            }
-        }
-        path.closed(true);
-    }
-
-    if (parsedAttributes.d) {
-        path.fromSvgString(parsedAttributes.d, matrix);
-    }
-
-
-    path.adjustBoundaries();
-
-    return path;
-};
-
-Path.fromSvgLineElement = function (element, parsedAttributes, matrix) {
-    // var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
-    var path = new Path();
-
-    App.Current.activePage.nameProvider.assignNewName(path);
-
-    setElementPropertiesFromAttributes(path, parsedAttributes);
-
-    path.addPoint(matrix.transformPoint({x: parsedAttributes.x1 || 0, y: parsedAttributes.y1 || 0}));
-    path.addPoint(matrix.transformPoint({x: parsedAttributes.x2 || 0, y: parsedAttributes.y2 || 0}));
-
-    path.adjustBoundaries();
-
-    return path;
-};
-
-Path.fromSvgPolylineElement = function (element, parsedAttributes, matrix) {
-    // var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
-    var path = new Path();
-    App.Current.activePage.nameProvider.assignNewName(path);
-
-    setElementPropertiesFromAttributes(path, parsedAttributes);
-
-    if (parsedAttributes.points) {
-        var pairs = parsedAttributes.points.replace('\n', ' ').replace('\r', ' ').split(' ');
-        for (var i = 0; i < pairs.length; ++i) {
-            var pair = pairs[i];
-            if (pair) {
-                var xy = pair.split(',');
-                path.addPoint(matrix.transformPoint({x: parseFloat(xy[0]), y: parseFloat(xy[1])}));
-            }
-        }
-    }
-
-    path.adjustBoundaries();
-
-    return path;
-};
-
 
 function svgCommand(pt, prevPt) {
     if (isLinePoint(pt) && isLinePoint(prevPt)) { // line segment
@@ -2220,113 +2328,5 @@ function svgCommand(pt, prevPt) {
 
     return "C " + cp1x + "," + cp1y + " " + cp2x + "," + cp2y + " " + pt.x + "," + pt.y;
 }
-
-Path.translatePoints = function (points, left, top) {
-    var newPoints = [];
-    for (var i = 0, l = points.length; i < l; ++i) {
-        var pt = clone(points[i]);
-        pt.x = pt.x - left;
-        pt.cp1x = pt.cp1x - left;
-        pt.cp2x = pt.cp2x - left;
-
-        pt.y = pt.y - top;
-        pt.cp1y = pt.cp1y - top;
-        pt.cp2y = pt.cp2y - top;
-
-        this._roundPoint(pt);
-        newPoints.push(pt);
-    }
-    return newPoints;
-};
-Path.pointsToSvg = function (points, closed) {
-    var d = "";
-    if (!points.length) {
-        return d;
-    }
-    d = "M " + points[0].x + "," + points[0].y;
-    for (var i = 1, len = points.length; i < len; ++i) {
-        d += "\r\n" + svgCommand(points[i], points[i - 1]);
-    }
-    if (closed) {
-        d += "\r\n" + " Z";
-    }
-    return d;
-};
-
-Path.circleAtPoint = function circleAtPoint(center, radius) {
-
-    const MagicNumber = 0.55228475;
-    var controlPointLength = radius * MagicNumber;
-    var path = new Path();
-    path.addPoint({
-        x: center.x - radius,
-        y: center.y,
-        cp1x: center.x - radius,
-        cp1y: center.y - controlPointLength,
-        cp2x: center.x - radius,
-        cp2y: center.y + controlPointLength
-    });
-
-    path.addPoint({
-        x: center.x,
-        y: center.y + radius,
-        cp1x: center.x - controlPointLength,
-        cp1y: center.y + radius,
-        cp2x: center.x + controlPointLength,
-        cp2y: center.y + radius
-    });
-
-
-    path.addPoint({
-        x: center.x + radius,
-        y: center.y,
-        cp1x: center.x + radius,
-        cp1y: center.y + controlPointLength,
-        cp2x: center.x + radius,
-        cp2y: center.y - controlPointLength
-    });
-
-    path.addPoint({
-        x: center.x,
-        y: center.y - radius,
-        cp1x: center.x + controlPointLength,
-        cp1y: center.y - radius,
-        cp2x: center.x - controlPointLength,
-        cp2y: center.y - radius
-    });
-
-    path.closed(true);
-    path.adjustBoundaries();
-    return path;
-}
-
-Path.rectangle = function circleAtPoint(x, y, width, height) {
-    var path = new Path();
-    path.addPoint({
-        x: x,
-        y: y
-    });
-
-    path.addPoint({
-        x: x + width,
-        y: y
-    });
-
-    path.addPoint({
-        x: x + width,
-        y: y + height
-    });
-
-    path.addPoint({
-        x: x,
-        y: y + height
-    });
-
-    path.closed(true);
-    path.adjustBoundaries();
-
-    return path;
-}
-
 
 export default Path;

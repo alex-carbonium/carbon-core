@@ -1,4 +1,5 @@
 import Layer from "./Layer";
+import Container from "./Container";
 import Matrix from "math/matrix";
 import {ChangeMode, Types} from "./Defs";
 import {areRectsIntersecting} from "math/math";
@@ -80,11 +81,11 @@ class Page extends Layer implements IPage {
         for (var i = 0; i < container.children.length; i++){
             var element = container.children[i];
             if (element.hitTestGlobalRect(rect)){
-                if (!element.multiselectTransparent){
+                if (!element['multiselectTransparent']){
                     selection.push(element);
                 }
-                else{
-                    this._collectDescendantsInRect(element, rect, selection);
+                else if (element instanceof Container){
+                    this._collectDescendantsInRect(element as IContainer, rect, selection);
                 }
             }
         }
@@ -479,7 +480,7 @@ class Page extends Layer implements IPage {
         return res;
     }
 
-    renderContentTile(context, x, y, zoom, contextScale) {
+    renderContentTile(context, x, y, zoom, contextScale?) {
         var rect = this.getContentOuterSize();
 
         context.save();
@@ -523,7 +524,7 @@ class Page extends Layer implements IPage {
         return canvas.toDataURL("image/png");
     }
 
-    name(value) {
+    name(value?) {
         if (value !== undefined) {
             this.setProps({name: value});
         }
@@ -538,7 +539,7 @@ class Page extends Layer implements IPage {
         return name;
     }
 
-    preview(value) {
+    preview(value?) {
         return false;
     }
 
@@ -563,14 +564,14 @@ class Page extends Layer implements IPage {
         return this.id();
     }
 
-    isPhoneVisible(visible) {
+    isPhoneVisible(visible?) {
         return false;
     }
 
     activating() {
     }
 
-    activated(previousPage) {
+    activated(previousPage?) {
         this.onActivated.raise();
 
         //setTimeout(function(){
@@ -590,6 +591,7 @@ class Page extends Layer implements IPage {
     }
 
     deactivating() {
+        return true;
     }
 
     deactivated() {
@@ -607,15 +609,15 @@ class Page extends Layer implements IPage {
 
     getActiveArtboard() {
         //TODO: add functionality
-        return this.getContentContainer();
+        return null;
     }
 
     getAllArtboards(): IArtboard[] {
         //TODO: add functionality
-        return [this.getContentContainer()] as IArtboard[];
+        return [];
     }
 
-    draw() {
+    draw(context, env) {
         return Layer.prototype.draw.apply(this, arguments);
     }
 
@@ -739,7 +741,7 @@ class Page extends Layer implements IPage {
 
     }
 
-    relayout() {
+    relayout(oldPropsMap) {
         // TODO: implement, return primitives or null
     }
 

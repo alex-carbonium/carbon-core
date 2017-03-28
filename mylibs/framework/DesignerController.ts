@@ -17,6 +17,7 @@ import { ITransformationEventData } from "carbon-model";
 import UIElement from "./UIElement";
 import { Dictionary } from "carbon-basics";
 import Container from "./Container";
+import { IArtboard } from "carbon-model";
 
 function onselect(rect) {
     var selection = this.app.activePage.getElementsInRect(rect);
@@ -121,6 +122,8 @@ export default class DesignerController implements IController {
     [name: string]: any;
     app: IApp;
     actionManager: any;
+
+    onArtboardChanged: IEvent2<IArtboard, IArtboard>;
 
     startDrawingEvent: IEvent<any>;
     interactionActive: boolean;

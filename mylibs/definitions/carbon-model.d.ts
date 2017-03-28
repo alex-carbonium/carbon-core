@@ -31,7 +31,7 @@ declare module "carbon-model" {
         getMaxOuterBorder(): number;
 
         hitTest(point: IPoint, scale: number, boundaryRectOnly: boolean): boolean;
-        hitTestGlobalRect(rect: IRect, directSelection: boolean): boolean;
+        hitTestGlobalRect(rect: IRect, directSelection?: boolean): boolean;
 
         showResizeHint(): boolean;
 

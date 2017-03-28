@@ -15,7 +15,7 @@ function parseQueryString(): IQueryStringParams{
         for (var i = 0; i < split.length; ++i){
             var parts = split[i].split("=");
             if (parts.length > 0){
-                result[decodeURIComponent(parts[0])] = parts[1] ? decodeURIComponent(parts[1]) : "";
+                result[decodeURIComponent(parts[0])] = parts[1] ? decodeURIComponent(parts[1]) : true;
             }
         }
     }

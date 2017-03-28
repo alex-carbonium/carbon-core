@@ -2,9 +2,10 @@ import Page from "./Page";
 import Selection from "./SelectionModel";
 import Container from "./Container";
 import Environment from "../environment";
-import {intersectRects, combineRectArray} from "../math/math";
+import { intersectRects, combineRectArray } from "../math/math";
+import { IContainer } from "carbon-model";
 
-export function choosePasteLocation(elements, rootRelativeBoundingBox = null, allowMoveIn = false): {parent: Container, x: number, y: number}{
+export function choosePasteLocation(elements, rootRelativeBoundingBox = null, allowMoveIn = false): {parent: IContainer, x: number, y: number}{
     //candidates: selected element and all its parents || artboard
     //1. same position - must be visible on screen and on candidate
     //2. center of visible candidate area
@@ -44,12 +45,12 @@ export function choosePasteLocation(elements, rootRelativeBoundingBox = null, al
         }
     }
     return {
-        parent: Environment.view.page,
+        parent: Environment.view.page as IContainer,
         x: viewport.x + viewport.width/2 - bufferRect.width/2,
         y: viewport.y + viewport.height/2 - bufferRect.height/2
     };
 }
-function tryPaste(viewport, parent, bufferRect, rootRelativeBoundingBox, tolerance){
+function tryPaste(viewport, parent, bufferRect, rootRelativeBoundingBox, tolerance): {parent: IContainer, x: number, y: number}{
     var rect = parent.getBoundingBoxGlobal();
     var visibleRect = intersectRects(viewport, rect);
     if (visibleRect !== null){
@@ -58,7 +59,7 @@ function tryPaste(viewport, parent, bufferRect, rootRelativeBoundingBox, toleran
             var intersection = intersectRects(visibleRect, {x: globalPos.x, y: globalPos.y, width: rootRelativeBoundingBox.width, height: rootRelativeBoundingBox.height});
             if (intersection !== null && intersection.width * intersection.height > tolerance){
                 return {
-                    parent: parent,
+                    parent: parent as IContainer,
                     x: globalPos.x,
                     y: globalPos.y
                 }
@@ -77,7 +78,7 @@ function tryPaste(viewport, parent, bufferRect, rootRelativeBoundingBox, toleran
         }
         if (intersection !== null && intersection.width * intersection.height > tolerance){
             return {
-                parent: parent,
+                parent: parent as IContainer,
                 x: visibleRect.x + visibleRect.width/2 - bufferRect.width/2,
                 y: visibleRect.y + visibleRect.height/2 - bufferRect.height/2
             }

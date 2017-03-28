@@ -1,4 +1,5 @@
 import Container from "./Container";
+import GroupContainer from "./GroupContainer";
 import ResizeDimension from "./ResizeDimension";
 import PropertyMetadata from "./PropertyMetadata";
 import Brush from "./Brush";
@@ -85,11 +86,12 @@ class Shape extends Container {
                 p2.y = 0 | p2.y * environment.contextScale + .5;
                 var sw = (p2.x - p1.x);
                 var sh = (p2.y - p1.y);
-            } else {
-                sw = 0 | clippingRect.width * environment.contextScale + .5;
-                sh = 0 | clippingRect.height * environment.contextScale + .5;
-                p1 = {x:0, y:0};
             }
+            // else {
+            //     sw = 0 | clippingRect.width * environment.contextScale + .5;
+            //     sh = 0 | clippingRect.height * environment.contextScale + .5;
+            //     p1 = {x:0, y:0};
+            // }
             sw = Math.max(sw, 1);
             sh = Math.max(sh, 1);
 
@@ -289,7 +291,7 @@ class Shape extends Container {
         var parent = this.parent();
         var idx = parent.remove(this);
 
-        var group = new Container.GroupContainerType();
+        var group = new GroupContainer();
         group.add(this);
         group.add(frame);
         parent.insert(group, idx);

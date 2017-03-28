@@ -1,3 +1,5 @@
+import Rect from "./rect";
+
 export var PointClosenessThreshold = 1e-10;
 export var TangentClosenessThreshold = 1e-12;
 export var BoundsClosenessThreshold = 1e-9;
@@ -132,7 +134,7 @@ export  function expandBoundsByPoint( topLeft,  bottomRight,  point)
         bottomRight.y = point.y;
 }
 
-export function unionRect(rect1,  rect2)
+export function unionRect(rect1, rect2): Rect
 {
     var topLeft = clone(rectGetTopLeft(rect1));
     var bottomRight = clone(rectGetBottomRight(rect1));
@@ -140,7 +142,7 @@ export function unionRect(rect1,  rect2)
     expandBoundsByPoint(topLeft, bottomRight, rectGetTopRight(rect2));
     expandBoundsByPoint(topLeft, bottomRight, rectGetBottomRight(rect2));
     expandBoundsByPoint(topLeft, bottomRight, rectGetBottomLeft(rect2));
-    return {x:topLeft.x, y:topLeft.y, width:bottomRight.x - topLeft.x, height:bottomRight.y - topLeft.y};
+    return new Rect(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y);
 }
 
 export function arePointsClose( point1,  point2)
@@ -306,9 +308,9 @@ export function areTangentsAmbigious( edge1Tangents,  edge2Tangents)
     var normalEdge1 = [ normalizePoint(edge1Tangents[0]), normalizePoint(edge1Tangents[1]) ];
     var normalEdge2 = [ normalizePoint(edge2Tangents[0]), normalizePoint(edge2Tangents[1]) ];
 
-    return arePointsCloseWithOptions(normalEdge1[0], normalEdge2[0], TangentClosenessThreshold) || 
-        arePointsCloseWithOptions(normalEdge1[0], normalEdge2[1], TangentClosenessThreshold) || 
-        arePointsCloseWithOptions(normalEdge1[1], normalEdge2[0], TangentClosenessThreshold) || 
+    return arePointsCloseWithOptions(normalEdge1[0], normalEdge2[0], TangentClosenessThreshold) ||
+        arePointsCloseWithOptions(normalEdge1[0], normalEdge2[1], TangentClosenessThreshold) ||
+        arePointsCloseWithOptions(normalEdge1[1], normalEdge2[0], TangentClosenessThreshold) ||
         arePointsCloseWithOptions(normalEdge1[1], normalEdge2[1], TangentClosenessThreshold);
 }
 

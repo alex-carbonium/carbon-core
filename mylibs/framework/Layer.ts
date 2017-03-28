@@ -6,54 +6,54 @@ import EventHelper from "framework/EventHelper";
 import {Types} from "./Defs";
 
 var clearChangedAreas = function (context) {
-    var fillStyle = this.fillStyle();
-    if (false && fillStyle) {
-        context.strokeStyle = fillStyle;
-        context.fillStyle = fillStyle;
-        if (false && this._invalidateAreas.length > 0) {  // TODO: fix it
-            each(this._invalidateAreas, function (rect) {
-                context.fillRect(rect.x - 1, rect.y - 1, rect.width + 2, rect.height + 2);
-            });
-        } else {
-            context.fillRect(0, 0, this.width(), this.height());
-        }
-    } else {
-        if (false && this._invalidateAreas.length > 0) {
-            each(this._invalidateAreas, function (rect) {
-                context.clearRect(rect.x - 1, rect.y - 1, rect.width + 2, rect.height + 2);
-            });
-        } else {
-            context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-        }
-    }
+    // var fillStyle = this.fillStyle();
+    // if (false && fillStyle) {
+    //     context.strokeStyle = fillStyle;
+    //     context.fillStyle = fillStyle;
+    //     if (false && this._invalidateAreas.length > 0) {  // TODO: fix it
+    //         each(this._invalidateAreas, function (rect) {
+    //             context.fillRect(rect.x - 1, rect.y - 1, rect.width + 2, rect.height + 2);
+    //         });
+    //     } else {
+    //         context.fillRect(0, 0, this.width(), this.height());
+    //     }
+    // } else {
+    //     if (false && this._invalidateAreas.length > 0) {
+    //         each(this._invalidateAreas, function (rect) {
+    //             context.clearRect(rect.x - 1, rect.y - 1, rect.width + 2, rect.height + 2);
+    //         });
+    //     } else {
+    //         context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+    //     }
+    // }
 
 };
 
 var addInvalidateRect = function (newRect) {
 
-    var that = this;
-    var overlapped = false;
-    each(this._invalidateAreas, function (rect, idx) {
-        if (rect === newRect) {
-            overlapped = true;
-            return false;
-        }
-        if (math.areRectsIntersect(newRect, rect)) {
-            that._invalidateAreas.splice(idx, 1);
-            overlapped = true;
-            addInvalidateRect.call(that, math.combineRects(rect, newRect));
-            return false;
-        }
-    });
+    // var that = this;
+    // var overlapped = false;
+    // each(this._invalidateAreas, function (rect, idx) {
+    //     if (rect === newRect) {
+    //         overlapped = true;
+    //         return false;
+    //     }
+    //     if (math.areRectsIntersect(newRect, rect)) {
+    //         that._invalidateAreas.splice(idx, 1);
+    //         overlapped = true;
+    //         addInvalidateRect.call(that, math.combineRects(rect, newRect));
+    //         return false;
+    //     }
+    // });
 
-    if (!overlapped) {
-        // TODO: remove offsets when all controls will be drown inside bounding box
-        newRect.x -= 50;
-        newRect.y -= 50;
-        newRect.width += 100;
-        newRect.height += 100;
-        this._invalidateAreas.push(newRect);
-    }
+    // if (!overlapped) {
+    //     // TODO: remove offsets when all controls will be drown inside bounding box
+    //     newRect.x -= 50;
+    //     newRect.y -= 50;
+    //     newRect.width += 100;
+    //     newRect.height += 100;
+    //     this._invalidateAreas.push(newRect);
+    // }
 };
 
 class Layer extends Container {
@@ -89,7 +89,7 @@ class Layer extends Container {
         return 0;
     }
 
-    hitTransparent(value) {
+    hitTransparent(value?: boolean) {
         if (value !== undefined) {
             this._hitTransparent = value;
         }
@@ -133,10 +133,10 @@ class Layer extends Container {
         }
     }
 
-    invalidate(all, rect) {
+    invalidate(all?, rect?) {
         this.invalidateRequired = true;
         if (false && rect) {
-            addInvalidateRect.call(this, rect);
+            //addInvalidateRect.call(this, rect);
         }
         var view = this._view;
         if (view) {
@@ -157,7 +157,7 @@ class Layer extends Container {
         return true;
     }
 
-    hitElement(/*Point*/position, scale, predicate, directSelection) {
+    hitElement(position, scale, predicate?, directSelection?) {
         for (var i = 0; i < this._hitFirstElements.length; ++i) {
             var element = this._hitFirstElements[i].hitElement(position, scale, predicate, directSelection);
             if (element) {

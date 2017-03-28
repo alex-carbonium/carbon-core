@@ -1,5 +1,5 @@
 declare module "carbon-app" {
-    import { IDataNode, IPage, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IPropsOwner } from "carbon-model";
+    import { ILayer, IDataNode, IPage, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IPropsOwner, IArtboard } from "carbon-model";
     import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState } from "carbon-basics";
 
     export interface IFontMetadata{
@@ -17,9 +17,11 @@ declare module "carbon-app" {
         currentTool: string;
         currentToolChanged: IEvent<string>;
 
-        onBuildMenu: IEvent<{ a: number }>;
+        onBuildMenu: IEvent2<any, any>;
         shortcutManager: IShortcutManager;
         actionManager: IActionManager;
+
+        pageChanged: IEvent2<IPage, IPage>;
 
         modelSyncProxy: any;
         platform: any; //TODO: remove platform
@@ -55,6 +57,9 @@ declare module "carbon-app" {
         animationController: IAnimationController;
         contextScale: number;
 
+        contextScale: number;
+        scaleChanged: IEvent<number>;
+
         setActivePage(page: IPage);
 
         scale(value?: number): number;
@@ -81,7 +86,10 @@ declare module "carbon-app" {
         rotatingEvent: IEvent<ITransformationEventData>;
         startDrawingEvent: IEvent<IEventData>;
 
+        onArtboardChanged: IEvent2<IArtboard, IArtboard>;
+
         mousedownEvent: IEvent2<IMouseEventData, IKeyboardState>;
+        mouseupEvent: IEvent2<IMouseEventData, IKeyboardState>;
         mousemoveEvent: IEvent2<IMouseEventData, IKeyboardState>;
 
         interactionActive: boolean;

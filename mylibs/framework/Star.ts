@@ -94,7 +94,7 @@ export default class Star extends Polygon {
         }
     }
 
-    internalRadius(value) {
+    internalRadius(value?) {
         if (value !== undefined) {
             this.setProps({internalRadius: value})
         }

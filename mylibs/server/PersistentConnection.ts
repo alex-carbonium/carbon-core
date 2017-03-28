@@ -21,6 +21,7 @@ import logger from "../logger";
 import params from "../params";
 import StateMachine from "../StateMachine";
 import DiscoverProxy from "./DiscoverProxy";
+import Promise from "bluebird";
 
 require<any>("../DebugUtil")("carb:signalr");
 
@@ -35,7 +36,7 @@ function resolveConnectionAddress(app): Promise<string>{
 function setupConnection(url: string){
     var app = this._app;
 
-    var connection = $.hubConnection(url);
+    var connection = $['hubConnection'](url);
     if (DEBUG){
         connection.logging = window['debug'].enabled("carb:signalr");
     }
@@ -51,7 +52,7 @@ function setupConnection(url: string){
         if (!app.quitting && !goingIdle){
             var runtime = new Date().getTime() - connectionStartTime;
             logger.warn("SignalR connection disconnected");
-            sketch.analytics.event("Connection", "disconnected", "", runtime);
+            window['sketch'].analytics.event("Connection", "disconnected", "", runtime);
         }
 
         if (!goingIdle){
@@ -109,11 +110,11 @@ function restartConnection(timeout){
                 .done(e => {
                     this.resetConnectionTimeout();
                     app.isInOfflineMode(false);
-                    sketch.analytics.event("Connection", initialStart ? "connected" : "reconnected", e.transport.name);
+                    window['sketch'].analytics.event("Connection", initialStart ? "connected" : "reconnected", e.transport.name);
                     return this._hub;
                 })
                 .fail(e => {
-                    sketch.analytics.event("Connection", initialStart ? "connectFailed" : "reconnectFailed", "");
+                    window['sketch'].analytics.event("Connection", initialStart ? "connectFailed" : "reconnectFailed", "");
                     if (e.source){
                         this._lastErrorCode = e.source.status;
                     }
@@ -149,7 +150,7 @@ class PersistentConnection extends StateMachine {
 
         backend.accessTokenChanged.bind(this, updateQueryString);
     }
-    start(timeout){
+    start(timeout?){
         if (this.state === "connecting"){
             return this._startPromise;
         }
@@ -189,7 +190,7 @@ class PersistentConnection extends StateMachine {
             case "connected":
                 return Promise.resolve(this._hub);
             default:
-                return Promise.reject();
+                return Promise.reject(new Error("Unexpected state: "+ this.state));
         }
     }
     resetConnectionTimeout(){
@@ -200,8 +201,8 @@ class PersistentConnection extends StateMachine {
         this.connectionTimeout = Math.min(10 * 60 * 1000, this.connectionTimeout * 2);
         return this.connectionTimeout;
     }
-}
 
-PersistentConnection.saveInterval = 4;
+    static saveInterval: number = 4;
+}
 
 export default PersistentConnection;

@@ -1,37 +1,39 @@
-import {Types} from "./Defs";
+import { Types } from "./Defs";
+import TypeDefaults from "./TypeDefaults";
 
-define(["framework/TypeDefaults"], function(TypeDefaults){
-    var Quad = sketch.framework.QuadAndLock = {};
+var defaults = {
+    bottomLeft: 0,
+    bottomRight: 0,
+    upperLeft: 0,
+    upperRight: 0,
+    locked: true
+};
 
-    var defaults = {
-        bottomLeft: 0,
-        bottomRight: 0,
-        upperLeft: 0,
-        upperRight: 0,
-        locked: true
-    };
+var quadAndLockTypeDefault = TypeDefaults[Types.QuadAndLock] = function () {
+    return new Quad();
+}
 
-    function QuadAndLockType(){
+export default class Quad {
+    t: string;
+
+    constructor(){
         this.t = Types.QuadAndLock;
     }
 
-    QuadAndLockType.prototype = defaults;
-    var quadAndLockTypeDefault =  TypeDefaults[Types.QuadAndLock] = function(){return new QuadAndLockType();}
-
-
-    Quad.createFromObject = function(obj){
+    static createFromObject(obj) {
         return Object.assign(quadAndLockTypeDefault(), obj);
-    };
+    }
 
-    Quad.extend = function(...quads){
+    static extend(...quads) {
         return Quad.createFromObject(Object.assign({}, ...quads));
-    };
+    }
 
-    Quad.hasAnyValue = function(q){
+    static hasAnyValue(q) {
         return q.bottomLeft || q.bottomRight || q.upperLeft || q.upperRight;
-    };
+    }
 
-    Quad.Default = Quad.createFromObject({});
+    static Default: Quad;
+}
+Object.assign(Quad.prototype, defaults);
 
-    return Quad;
-});
+Quad.Default = Quad.createFromObject({});

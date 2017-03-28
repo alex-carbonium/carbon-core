@@ -29,8 +29,8 @@ import DataNode from "framework/DataNode";
 
 
 class Artboard extends Container {
-    constructor(props) {
-        super(props);
+    constructor() {
+        super();
         this.allowArtboardSelection(false);
         this.selectFromLayersPanel = true;
 
@@ -127,7 +127,7 @@ class Artboard extends Container {
         return 1;
     }
 
-    canAccept(elements: UIElement[]) {
+    canAccept(elements: UIElement[], autoInsert, allowMoveIn) {
         for (let i = 0; i < elements.length; ++i){
             let element = elements[i];
             if (element instanceof Artboard) {
@@ -152,15 +152,15 @@ class Artboard extends Container {
             if (element.props.masterId) {
                 var root = element.primitiveRoot();
                 var stateboards = this.runtimeProps.stateBoards;
-                for (var i = 0; i < stateboards.length; ++i) {
-                    if (stateboards[i] === root) {
+                for (var j = 0; j < stateboards.length; ++j) {
+                    if (stateboards[j] === root) {
                         return false;
                     }
                 }
             }
         }
 
-        return super.canAccept(elements);
+        return super.canAccept(elements, autoInsert, allowMoveIn);
     }
 
     displayName() {
@@ -489,7 +489,7 @@ class Artboard extends Container {
         })
 
         res.sort((e1, e2) => {
-            return e1.displayName() > e2.displayName();
+            return e1.displayName() - e2.displayName();
         })
 
         return res;
@@ -547,7 +547,7 @@ class Artboard extends Container {
         return this._recorder.getStates();
     }
 
-    state(value) {
+    state(value?) {
         if (value !== undefined) {
             this.setProps({ state: value });
         }
@@ -715,6 +715,7 @@ class Artboard extends Container {
         if (this._recorder) {
             this._recorder.initFromJSON(this.props.states);
         }
+        return this;
     }
 
     getRecorder() {
@@ -778,7 +779,7 @@ class Artboard extends Container {
 }
 Artboard.prototype.t = Types.Artboard;
 
-var fwk = sketch.framework;
+var fwk = window['sketch'].framework;
 PropertyMetadata.registerForType(Artboard, {
     fill: {
         defaultValue: Brush.White,

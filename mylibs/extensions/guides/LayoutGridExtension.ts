@@ -6,14 +6,16 @@ import Environment from "environment";
 
 //TODO: handle artboard delete event
 
-export default klass({
-    _constructor: function (app) {
+export default class LayoutGridExtension {
+    [name: string]: any;
+
+    constructor(app) {
         this.app = app;
         this.app.loaded.then(() => {this.load()});
         this.onArtboardBackgroundDrawnHandler = this.onArtboardBackgroundDrawn.bind(this);
         this.onArtboardContentDrawnHandler = this.onArtboardContentDrawn.bind(this);
-    },
-    load: function () {
+    }
+    load() {
         this._setupPageGuides(this.app.activePage);
 
         this.app.pageChanged.bind((oldPage, newPage) => {
@@ -26,8 +28,8 @@ export default klass({
         this.app.enablePropsTracking();
 
         PropertyTracker.propertyChanged.bind(this, this._propertyChanged);
-    },
-    onArtboardBackgroundDrawn: function (artboard, context) {
+    }
+    onArtboardBackgroundDrawn(artboard, context) {
         context.save();
 
         var columns = this._layoutColumns[artboard.id()];
@@ -36,8 +38,8 @@ export default klass({
         }
 
         context.restore();
-    },
-    onArtboardContentDrawn: function (artboard, context) {
+    }
+    onArtboardContentDrawn(artboard, context) {
         context.save();
 
         var lines = this._layoutLines[artboard.id()];
@@ -46,16 +48,16 @@ export default klass({
         }
 
         context.restore();
-    },
-    _setupPageGuides: function (page) {
+    }
+    _setupPageGuides(page) {
         this._clearAll();
 
         var artboards = page.getAllArtboards();
         for (var i = 0; i < artboards.length; i++) {
             this._createArtboardLayoutGrid(artboards[i]);
         }
-    },
-    _propertyChanged: function (element, props, oldProps) {
+    }
+    _propertyChanged(element, props, oldProps) {
         if (element === this.app) {
             if (props.layoutGridStyle !== undefined) {
                 var wasShown = oldProps && oldProps.layoutGridStyle && oldProps.layoutGridStyle.show;
@@ -95,8 +97,8 @@ export default klass({
                 }
             }
         }
-    },
-    _createArtboardLayoutGrid: function (artboard) {
+    }
+    _createArtboardLayoutGrid(artboard) {
         var artboardId = artboard.id();
 
         var settings = artboard.layoutGridSettings();
@@ -118,8 +120,8 @@ export default klass({
 
             this._attachToArtboard(artboard);
         }
-    },
-    _updateArtboardLayoutGrid: function (artboard, newRect, oldRect) {
+    }
+    _updateArtboardLayoutGrid(artboard, newRect, oldRect) {
         var artboardId = artboard.id();
         var columnWidth;
         if (newRect.width !== undefined) {
@@ -136,8 +138,8 @@ export default klass({
         if (columns) {
             setupLayoutGrid(columns, artboard, columnWidth);
         }
-    },
-    _removeArtboardLayoutGrid: function (artboard) {
+    }
+    _removeArtboardLayoutGrid(artboard) {
         var artboardId = artboard.id();
 
         for (var i = SnapController.snapGuides.length - 1; i >= 0; i--) {
@@ -151,8 +153,8 @@ export default klass({
         this._detachFromArtboard(artboard);
         delete this._layoutLines[artboardId];
         delete this._layoutColumns[artboardId];
-    },
-    _attachToArtboard: function (artboard) {
+    }
+    _attachToArtboard(artboard) {
         artboard.enablePropsTracking();
         if (this._layoutColumns[artboard.id()]) {
             artboard.onBackgroundDrawn = this.onArtboardBackgroundDrawnHandler;
@@ -160,13 +162,13 @@ export default klass({
         if (this._layoutLines[artboard.id()]) {
             artboard.onContentDrawn = this.onArtboardContentDrawnHandler;
         }
-    },
-    _detachFromArtboard: function (artboard) {
+    }
+    _detachFromArtboard(artboard) {
         delete artboard.onBackgroundDrawn;
         delete artboard.onContentDrawn;
         artboard.disablePropsTracking();
-    },
-    _clearAll: function () {
+    }
+    _clearAll() {
         this._layoutLines = {};
         this._layoutColumns = {};
 
@@ -177,11 +179,11 @@ export default klass({
                 SnapController.snapGuides.splice(i, 1);
             }
         }
-    },
-    detach: function () {
+    }
+    detach() {
 
     }
-});
+}
 
 function calculateColumnWidth(settings, totalWidth) {
     if (!settings.autoColumnWidth) {

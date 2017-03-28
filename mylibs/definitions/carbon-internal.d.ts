@@ -8,10 +8,38 @@ declare module "carbon-internal" {
     }
 }
 
+declare module "carbon-model"{
+    export interface IUIElement{
+        canSelect(): boolean;
+    }
+
+    export interface IContainer{
+        globalMatrixToLocal(m: any): any;
+    }
+}
+
 declare module "carbon-app"{
     export interface IApp{
         offlineModel: any;
         modelSyncProxy: any;
+
+        viewportSize(): any;
+    }
+
+    export interface IView{
+        layer3: any;
+        scaleMatrix: any;
+        page: any;
+
+        registerForLayerDraw(layer, element);
+        unregisterForLayerDraw(layer, element);
+
+        viewportRect(): any;
+    }
+
+    export interface IController{
+        isInlineEditMode?: boolean;
+        inlineEditor?: any;
     }
 }
 

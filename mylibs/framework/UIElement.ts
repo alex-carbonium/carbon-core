@@ -37,7 +37,7 @@ import { createUUID, deepEquals } from "../util";
 import Rect from "../math/rect";
 import ResizeOptions from "../decorators/ResizeOptions";
 import { PropertyDescriptor } from './PropertyMetadata';
-import { Dictionary } from "carbon-basics";
+import { Dictionary, IKeyboardState } from "carbon-basics";
 import { IUIElementProps, IPropsOwner, IUIElement } from "carbon-model";
 
 require("../migrations/All");
@@ -142,7 +142,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         super.propsUpdated.apply(this, arguments);
         this.invalidate();
     }
-    propsPatched() {
+    propsPatched(patchType, propName, item) {
         super.propsPatched.apply(this, arguments);
         this.invalidate();
     }
@@ -334,7 +334,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
     skew(): void{
     }
 
-    first() {
+    first(): UIElement {
         return this;
     }
 
@@ -406,7 +406,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
     setTransform(matrix, mode?: ChangeMode) {
         this.setProps({ m: matrix }, mode);
     }
-    resetTransform(mode) {
+    resetTransform(mode?: ChangeMode) {
         var props: Dictionary = { m: Matrix.Identity };
         if (this.hasBadTransform()){
             props.bad = false;
@@ -970,14 +970,14 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
             }
         }
     }
-    mousemove(event) {
+    mousemove(event, keys: IKeyboardState) {
         if (this.editor != null) {
             event.handled = true;
         }
     }
-    mouseup(event) {
+    mouseup(event, keys: IKeyboardState) {
     }
-    mousedown(event) {
+    mousedown(event, keys: IKeyboardState) {
     }
     dblclick(event) {
     }
@@ -1138,7 +1138,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
     clipDragClone(value) {
         return this.field("_clipDragClone", value, false);
     }
-    isTemporary(value) {
+    isTemporary(value?) {
         return this.field("_isTemporary", value, false);
     }
     hitVisible(directSelection: boolean) {
@@ -1285,7 +1285,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         }
         return this.props.maxHeight;
     }
-    canDrag(value) {
+    canDrag(value?) {
         return this.field("_canDrag", value, true);
     }
     flipVertical(value) {
@@ -1386,7 +1386,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
             height: this.props.height
         };
     }
-    onLayerDraw(layer, context) {
+    onLayerDraw(layer, context, environment) {
 
     }
     registerForLayerDraw(layerNum) {
@@ -1923,7 +1923,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         return group.promise();
     }
 
-    styleId(value) {
+    styleId(value?) {
         if (arguments.length > 0) {
             this.setProps({ styleId: value });
         }
@@ -1976,7 +1976,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         return current;
     }
 
-    static construct() {
+    static construct(type, ...args: any[]) {
         return ObjectFactory.construct.apply(ObjectFactory, arguments);
     }
 

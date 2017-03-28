@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "@types/bluebird": "3.5.2",
+    "@types/jquery": "2.0.41",
     "@types/opentype.js": "0.0.0",
     "@types/tinycolor2": "1.1.0",
     "@types/ua-parser-js": "0.7.30",

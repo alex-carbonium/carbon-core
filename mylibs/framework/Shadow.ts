@@ -1,17 +1,18 @@
 import {Types} from "./Defs";
 import Matrix from "math/matrix";
+import { Dictionary } from "carbon-basics";
 
-var onAngleDistanceChanged = function (angle) {
-    var angle = this._angle.value() * (Math.PI / 180);
-    var x = Math.round(this._distance.value() * Math.cos(angle));
-    var y = Math.round(this._distance.value() * Math.sin(angle));
+// var onAngleDistanceChanged = function (angle) {
+//     var angle = this._angle.value() * (Math.PI / 180);
+//     var x = Math.round(this._distance.value() * Math.cos(angle));
+//     var y = Math.round(this._distance.value() * Math.sin(angle));
 
-    this._offsetX.value(x);
-    this._offsetY.value(y);
-};
+//     this._offsetX.value(x);
+//     this._offsetY.value(y);
+// };
 
-var Shadow = {};
-var matrix = new Matrix();
+var Shadow: Dictionary = {};
+var matrix = Matrix.create();
 Shadow.apply = function (element, shadowObject, context, w, h, environment) {
     if (!shadowObject.enabled || shadowObject.color == null) {
         return;

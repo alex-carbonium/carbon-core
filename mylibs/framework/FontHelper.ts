@@ -1,6 +1,7 @@
 import { FontWeight, FontStyle, UnderlineStyle } from "carbon-basics";
 import Font from "./Font";
 import Invalidate from "./Invalidate";
+import Promise from "bluebird";
 
 var fontScale = [6, 8, 9, 10, 11, 12, 14, 16, 18, 24, 30, 36, 48, 60, 72];
 
@@ -92,7 +93,7 @@ export default {
                         var f = Font.extend(newFonts[i].element.props.font, { [property]: newValue });
                         newFonts[i].element.prepareAndSetProps({ font: f });
                     }
-                    allLoaded &= loaded;
+                    allLoaded = allLoaded && loaded;
                 }
                 if (!allLoaded) {
                     console.log("//TODO: notify that not all fonts loaded")

@@ -64,25 +64,25 @@ export default class Brush {
                     }
                     brush = lingrad;
                     break;
-                case BrushType.resource:
-                    var r = Resources.getSystemResource(value);
-                    if (!r) {
-                        throw "Resource not found: " + value;
-                    }
-                    brush = r.value;
-                    return Brush.getBrush(r.value, context, l, t, w, h);
+                // case BrushType.resource:
+                //     var r = Resources.getSystemResource(value);
+                //     if (!r) {
+                //         throw "Resource not found: " + value;
+                //     }
+                //     brush = r.value;
+                //     return Brush.getBrush(r.value, context, l, t, w, h);
                 case BrushType.empty:
                     brush = null;
                     break;
-                case BrushType.pattern:
-                    var image = Resources[value];
-                    if (image) {
-                        brush = context.createPattern(image, "repeat");
-                    }
-                    else {
-                        Resources.addImage(value, value, Invalidate.request);
-                    }
-                    break;
+                // case BrushType.pattern:
+                //     var image = Resources[value];
+                //     if (image) {
+                //         brush = context.createPattern(image, "repeat");
+                //     }
+                //     else {
+                //         Resources.addImage(value, value, Invalidate.request);
+                //     }
+                //     break;
                 default:
                     throw "Unknown brush type " + type;
             }
@@ -161,12 +161,12 @@ export default class Brush {
                 case BrushType.color:
                     style.backgroundColor = brush.value;
                     break;
-                case BrushType.resource:
-                    var r = Resources.getSystemResource(brush.value);
-                    if (!r) {
-                        debugger;
-                    }
-                    return Brush.toCss(r.value);
+                // case BrushType.resource:
+                //     var r = Resources.getSystemResource(brush.value);
+                //     if (!r) {
+                //         debugger;
+                //     }
+                //     return Brush.toCss(r.value);
             }
         }
         return style;

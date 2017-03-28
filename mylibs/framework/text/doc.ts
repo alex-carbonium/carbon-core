@@ -10,7 +10,7 @@ import Runs from "./static/runs";
 import Per from "./util/per";
 import {inherit, event, deCRLFify} from "./util/util";
 
-import {TextAlign} from "framework/Defs";
+import {TextAlign} from "carbon-basics";
 
     function Doc () {
         this._width = 0;
@@ -110,7 +110,7 @@ import {TextAlign} from "framework/Defs";
     Doc.prototype.layout = function() {
         this.frame = null;
         try {
-            var frameObj = new Frame(0, 0, this._width, 0, this, 
+            var frameObj = new Frame(0, 0, this._width, 0, this,
                 undefined, undefined, undefined, this._noWrap);
             this.frame = Per.create(this.words).per((frameObj).frame,frameObj).first();
         } catch (x) {
@@ -330,7 +330,7 @@ import {TextAlign} from "framework/Defs";
         if (!startWord || !endWord) {
             return 0;
         }
-        
+
         var prefix;
         if (start === startWord.ordinal) {
             if (startWord.index > 0 && !isBreaker(this.words[startWord.index - 1])) {

@@ -7,6 +7,7 @@ import Point from "../math/point";
 import Environment from "../environment";
 import { IGroupContainer } from "carbon-core";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
+import { IPoint } from "carbon-geometry";
 
 require("./GroupArrangeStrategy");
 
@@ -83,7 +84,7 @@ export default class GroupContainer extends Container implements IGroupContainer
         return value;
     }
 
-    allowMoveOutChildren(value, event) {
+    allowMoveOutChildren(value, event?) {
         return super.allowMoveOutChildren.apply(this, arguments) || (event && event.ctrlKey);
     }
 
@@ -101,8 +102,6 @@ export default class GroupContainer extends Container implements IGroupContainer
 }
 
 GroupContainer.prototype.t = Types.GroupContainer;
-
-Container.GroupContainerType = GroupContainer;
 
 PropertyMetadata.registerForType(GroupContainer, {
     allowMoveOutChildren: {

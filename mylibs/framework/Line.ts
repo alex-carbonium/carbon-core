@@ -149,7 +149,7 @@ class Line extends Shape {
             return false;
         }
 
-        var distance = sketch.math2d.pointToLineDistance(pt, this.x1(), this.y1(), this.x2(), this.y2());
+        var distance = window['sketch'].math2d.pointToLineDistance(pt, this.x1(), this.y1(), this.x2(), this.y2());
         return Math.abs(distance) < d;
     }
 
@@ -176,7 +176,7 @@ class Line extends Shape {
         return path;
     }
 
-    drawPath(context) {
+    drawPath(context, w, h) {
         var x1 = this.x1(),
             y1 = this.y1(),
             x2 = this.x2(),

@@ -13,6 +13,7 @@ import Rect from '../math/rect';
 import Brush from './Brush';
 import Box from './Box';
 import UserSettings from '../UserSettings';
+import { IKeyboardState } from "carbon-basics";
 
 export default class Container extends UIElement {
     children: UIElement[];
@@ -433,17 +434,17 @@ export default class Container extends UIElement {
         child.parent(NullContainer);
     }
 
-    canAccept(elements) {
+    canAccept(elements, autoInsert, allowMoveInOut) {
         return !elements.some(x => !x.canBeAccepted(this));
     }
-    mousedown(event) {
+    mousedown(event, keys: IKeyboardState) {
         super.mousedown.call(this, event); //to hide inplace editor
         this.delegateToChildren("mousedown", event);
     }
-    mousemove(event) {
+    mousemove(event, keys: IKeyboardState) {
         this.delegateToChildren("mousemove", event);
     }
-    mouseup(event) {
+    mouseup(event, keys: IKeyboardState) {
         this.delegateToChildren("mouseup", event);
     }
     dblclick(event) {
@@ -548,7 +549,7 @@ export default class Container extends UIElement {
         return realParrent;
     }
 
-    resetGlobalViewCache(resetPrimitiveRoot) {
+    resetGlobalViewCache(resetPrimitiveRoot?: boolean) {
         UIElement.prototype.resetGlobalViewCache.apply(this, arguments);
 
         if (this.children) {

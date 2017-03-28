@@ -7,4 +7,10 @@ declare module "carbon-core" {
     export * from "carbon-basics";
     export * from "carbon-proxies";
     export * from "carbon-rendering";
+
+    //TODO: encapsulate or describe
+    export var RequestAnimationSettings: any;
+    export var ActionType: any;
+    export var AnimationType: any;
+    export var EasingType: any;
 }

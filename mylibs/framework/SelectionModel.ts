@@ -219,12 +219,12 @@ class SelectionModel {
         var currentSelection = this._selectCompositeElement.elements;
 
         var newSelection = this._decomposeSelection(selection);
-        if (areSameArrays(currentSelection, newSelection)) {
+        if (window['areSameArrays'](currentSelection, newSelection)) {
             return;
         }
 
         if (this._selectionMode === "add_or_replace") {
-            if (!intersectArrays(currentSelection, newSelection)) {
+            if (!window['intersectArrays'](currentSelection, newSelection)) {
                 this.unselectAll(refreshOnly);
                 currentSelection = [];
             }
@@ -260,7 +260,7 @@ class SelectionModel {
         }
         else if (this._selectionMode === "remove") {
             this.unselectAll(refreshOnly);
-            sketch.util.removeGroupFromArray(currentSelection, newSelection);
+            window['sketch'].util.removeGroupFromArray(currentSelection, newSelection);
             this.addToSelection(currentSelection, refreshOnly);
         }
 
@@ -298,7 +298,7 @@ class SelectionModel {
     unselectGroup(elements, refreshOnly) {
         this.unselectAll(refreshOnly);
         var currentSelection = this._selectCompositeElement.elements;
-        sketch.util.removeGroupFromArray(currentSelection, elements);
+        window['sketch'].util.removeGroupFromArray(currentSelection, elements);
         this.addToSelection(currentSelection, refreshOnly);
     }
 

@@ -1,5 +1,3 @@
-define(function () {
-
     function B1(t) { return t*t*t }
     function B2(t) { return 3*t*t*(1-t) }
     function B3(t) { return 3*t*(1-t)*(1-t) }
@@ -277,7 +275,7 @@ define(function () {
         return w;
     }
 
-    return {
+    export default {
          onCurve:function(p1, cp1, cp2, p2, pa, pn) {
               var tCandidate = [];
               var v = [p1, cp1, cp2, p2];
@@ -319,9 +317,10 @@ define(function () {
              return distanceSq(pn, pa);
          },
         getBezierPoint:function(t,C1,C2,C3,C4) {
-            var pos = {};
-            pos.x = C1.x*B1(t) + C2.x*B2(t) + C3.x*B3(t) + C4.x*B4(t);
-            pos.y = C1.y*B1(t) + C2.y*B2(t) + C3.y*B3(t) + C4.y*B4(t);
+            var pos = {
+                x: C1.x*B1(t) + C2.x*B2(t) + C3.x*B3(t) + C4.x*B4(t),
+                y: C1.y*B1(t) + C2.y*B2(t) + C3.y*B3(t) + C4.y*B4(t)
+            }
             return pos;
         },
         /***
@@ -333,7 +332,7 @@ define(function () {
         * @param pn nearest point (return param)
         * @return distance squared between pa and nearest point (pn)
         */
-        onLine:function(p1, p2, pa, pn, nolimit) {
+        onLine:function(p1, p2, pa, pn, nolimit?) {
             var dx = p2.x - p1.x;
             var dy = p2.y - p1.y;
             var dsq = dx*dx + dy*dy;
@@ -374,5 +373,4 @@ define(function () {
         pointDistance:function(p1, p2){
             return  Math.sqrt(distanceSq(p1, p2));
         }
-    };
-});
+    }

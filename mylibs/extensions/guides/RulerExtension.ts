@@ -14,6 +14,7 @@ import DesignerView from "../../framework/DesignerView";
 import UserSettings from "../../UserSettings";
 import RulerGuides from "./RulerGuides";
 import { IArtboardProps, IApp, IView, IController, ILayer, IContext, IComposite, ITransformationEventData } from "carbon-core";
+import { IArtboard, IUIElement } from "carbon-model";
 
 const config = UserSettings.ruler;
 const selectionSize = 3;
@@ -85,10 +86,10 @@ export default class RulerExtension extends RuntimeExtension {
     onPropertyChanged(e: UIElement, props: IArtboardProps) {
         if (e === this._origin) {
             if (e.isChangeAffectingLayout(props)) {
-                this.setOrigin(e);
+                this.setOrigin(e as Artboard);
             }
             else if (props.guidesX !== undefined || props.guidesY !== undefined) {
-                this._rulerGuides.setGuides(e);
+                this._rulerGuides.setGuides(e as Artboard);
                 SnapController.calculateSnappingPoints(e);
             }
         }
@@ -119,10 +120,10 @@ export default class RulerExtension extends RuntimeExtension {
 
     onPageChanged() {
         this._onScaleChange(this.view.scale());
-        this.onArtboardChanged(this.app.activePage.getActiveArtboard());
+        this.onArtboardChanged(this.app.activePage.getActiveArtboard() as Artboard);
     }
 
-    setOrigin(artboard: Artboard) {
+    setOrigin(artboard: IArtboard) {
         this._artboardActive = !!artboard;
 
         if (!this._artboardActive) {
@@ -221,7 +222,7 @@ export default class RulerExtension extends RuntimeExtension {
         context.restore();
     }
 
-    drawHorizontal(context: IContext, length: number, viewportHeight: number, origin: Artboard, width: number) {
+    drawHorizontal(context: IContext, length: number, viewportHeight: number, origin: number, width: number) {
         context.save();
 
         // context.fillStyle = "white";
@@ -333,7 +334,7 @@ export default class RulerExtension extends RuntimeExtension {
     }
 
 
-    drawVertical(context: IContext, length: number, viewportWidth: number, origin: Artboard, height: number) {
+    drawVertical(context: IContext, length: number, viewportWidth: number, origin: number, height: number) {
         context.save();
 
         // context.fillStyle = "white";

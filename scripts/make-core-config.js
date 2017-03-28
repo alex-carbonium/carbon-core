@@ -15,7 +15,8 @@ var defaults = {
     devtool: "eval",
     verbose: false,
     showConfig: false,
-    trace: true
+    trace: true,
+    errors: true
 };
 
 function getEntry(settings){
@@ -146,7 +147,8 @@ function getLoaders(settings){
     var babelLoader = "babel?" + JSON.stringify(babelSettings);
 
     var tsLoader = 'ts-loader?' + JSON.stringify({
-        transpileOnly: false
+        transpileOnly: false,
+        visualStudioErrorFormat: true
     });
 
     var excludedFolders = ["node_modules", "libs", "generated"];
@@ -220,8 +222,8 @@ module.exports = function(settings){
                 children: settings.verbose,
                 hash: settings.verbose,
                 version: settings.verbose,
-                errors: true,
-                errorDetails: true
+                errors: settings.errors,
+                errorDetails: settings.errors
             }
         },
         cache: true

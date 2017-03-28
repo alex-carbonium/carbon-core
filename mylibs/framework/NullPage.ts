@@ -6,6 +6,13 @@ import { Dictionary } from "carbon-basics";
 import Rect from "../math/rect";
 
 class NullPage implements IPage {
+    globalMatrixToLocal(m: any) {
+        return m;
+    }
+    canSelect(): boolean {
+        throw new Error('Method not implemented.');
+    }
+
     clone(){
         return this;
     }

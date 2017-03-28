@@ -13,7 +13,9 @@ import RelayoutEngine from "framework/relayout/RelayoutEngine";
 import SystemConfiguration from "SystemConfiguration";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
-import {Types, ArtboardResource, ViewTool} from "../../framework/Defs";
+import { Types, ArtboardResource, ViewTool } from "../../framework/Defs";
+import Rect from "../../math/rect";
+import { IArtboard } from "carbon-model";
 
 const ARTBOARD_SPACE = 100;
 
@@ -56,12 +58,12 @@ class ArtboardPage extends Page {
         }
     }
 
-    getContentOuterSize() {
+    getContentOuterSize(): Rect {
         var items = this.children;
         if (!items.length) {
-            return {x: 0, y: 0, width: 0, height: 0};
+            return Rect.Zero;
         }
-        var rect = items[0].getBoundaryRectGlobal();
+        var rect: Rect = items[0].getBoundaryRectGlobal();
         for (var i = 1; i < items.length; ++i) {
             rect = unionRect(rect, items[i].getBoundaryRectGlobal());
         }
@@ -161,8 +163,8 @@ class ArtboardPage extends Page {
         }
     }
 
-    setActiveArtboard(artboard, doNotTrack) {
-        var oldArtboard = this._activateArtboard;
+    setActiveArtboard(artboard, doNotTrack?) {
+        var oldArtboard: IArtboard = this._activeArtboard;
         if (this._activeArtboard) {
             this._activeArtboard.deactivate();
         }
@@ -177,7 +179,7 @@ class ArtboardPage extends Page {
         Environment.controller && Environment.controller.onArtboardChanged && Environment.controller.onArtboardChanged.raise(artboard, oldArtboard);
     }
 
-    _activateArtboard(event) {
+    _activateArtboard(event): IArtboard {
         var artboard = this._activeArtboard;
         if (artboard && artboard.hitTest(event)) {
             return;

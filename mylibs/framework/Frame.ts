@@ -223,7 +223,7 @@ export default class Frame extends Container {
                 return response.text();
             })
             .then(svg => {
-                return svgParser.loadSVGFromString(svg).then((result) => {
+                return window['svgParser'].loadSVGFromString(svg).then((result) => {
                     result.setProps({ x: this.x(), y: this.y() });
                     return result;
                 });

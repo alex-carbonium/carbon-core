@@ -206,7 +206,7 @@ import {inherit} from "../util/util";
                         break;
                     case 'ListNext':
                         if (balance === 0) {
-                            doc.spliceWordsWithRuns(i, 1, [util.derive(word.codeFormatting(), {
+                            doc.spliceWordsWithRuns(i, 1, [inherit(word.codeFormatting(), {
                                 text: {
                                     $: 'ListStart',
                                     marker: code.marker

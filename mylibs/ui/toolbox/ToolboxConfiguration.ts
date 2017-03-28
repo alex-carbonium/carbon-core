@@ -1,16 +1,17 @@
 import {TileSize, ArtboardResource} from "framework/Defs";
-import tiler from "ui/toolbox/tiler";
+import tiler from "./tiler";
 import ContextPool from "framework/render/ContextPool";
 import Environment from "environment";
 import FileProxy from "server/FileProxy";
 import {createUUID} from "util";
 import Matrix from "math/matrix";
+import { Dictionary } from "carbon-core";
 
 var PADDING = 5;
 var _configCache = {};
 export default class ToolboxConfiguration {
 
-    static renderElementsToSprite(elements, outConfig, contextScale): Promise<string> {
+    static renderElementsToSprite(elements, outConfig, contextScale?): Promise<any> {
         contextScale = contextScale || 1;
         if (!elements.length) {
             return Promise.resolve({});
@@ -100,7 +101,7 @@ export default class ToolboxConfiguration {
             });
     }
 
-    static _performRenderTask(t, element, elementsMap, context, contextScale, env): Promise{
+    static _performRenderTask(t, element, elementsMap, context, contextScale, env): Promise<any>{
         var w = element.width();
         var h = element.height();
         var scale = t.data.scale;
@@ -184,13 +185,13 @@ export default class ToolboxConfiguration {
             groupedElements[e.props.toolboxGroup] = group;
         }
         var groups = [];
-        function makeGroup(group, elements): Promise{
+        function makeGroup(groupName, elements): Promise<any>{
             var config = [];
             var spriteUrlPromise = ToolboxConfiguration.renderElementsToSprite(elements, config);
 
             var spriteUrl2xPromise = ToolboxConfiguration.renderElementsToSprite(elements, null, 2);
-            var group = {
-                name:group,
+            let group: Dictionary = {
+                name:groupName,
                 templates:config
             };
             groups.push(group);
@@ -222,7 +223,7 @@ export default class ToolboxConfiguration {
             return Promise.all([spriteUrlPromise, spriteUrl2xPromise]);
         }
         var promises = [];
-        for(var group in groupedElements) {
+        for(let group in groupedElements) {
             promises.push(makeGroup(group, groupedElements[group]));
         }
 

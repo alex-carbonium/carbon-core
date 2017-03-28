@@ -47,7 +47,7 @@ export default  {
         p.x = w / 2 + value;
         p.y = h / 2;
     },
-    change (frame, dx, dy, point, mousePoint) {
+    change (frame, dx, dy, point, mousePoint, keys) {
         if (!frame.resizingElement) {
             return;
         }

@@ -2,13 +2,13 @@ import {parseFont} from "./util/util";
 import Runs from "./static/runs";
 import FontManager from "../text/font/fontmanager";
 
-	function Renderer (core, context) {
+	var Renderer: any = function(core, context) {
 		this._canvasContext = context;
 		// if (this._canvasContext.hasOwnProperty("imageSmoothingQuality")) {
 		// 	this._canvasContext.imageSmoothingQuality = "high";
 		// }
 	}
-	
+
 	Renderer.RGBREGEX = /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*(\d+(?:\.\d+)?))?\s*\)$/;
 	Renderer.prototype._defaultFill = null;
 	Renderer.prototype._currentFont = null;
@@ -26,12 +26,12 @@ import FontManager from "../text/font/fontmanager";
 			get: function ()      { return this._defaultFill;},
 			set: function (style) { this._defaultFill = style; }
 		},
-	    "fillStyle": { 
-	    	get: function ()      { 
+	    "fillStyle": {
+	    	get: function ()      {
 	    		var fs = this._canvasContext.fillStyle;
 	    		var reg = null;
-	    		if (this._defaultFill && 
-	    			(!fs || fs == "transparent" || 
+	    		if (this._defaultFill &&
+	    			(!fs || fs == "transparent" ||
 	    				((reg=Renderer.RGBREGEX.exec(fs))&&(reg.length==5)&&(reg[4]==0)
 	    				))) {
 	    			fs = this._defaultFill;
@@ -49,48 +49,48 @@ import FontManager from "../text/font/fontmanager";
 				 	this._canvasContext.fillStyle = style;
 				 	this._textFillStyle = null;
 				// }
-			} 
+			}
 		},
-		"globalAlpha": { 
+		"globalAlpha": {
 	    	get: function ()      { return this._canvasContext.globalAlpha;  },
 			set: function (a)     { this._canvasContext.globalAlpha = a;     }
 		},
-		"globalCompositeOperation": { 
+		"globalCompositeOperation": {
 	    	get: function ()      { return this._canvasContext.globalCompositeOperation; },
 			set: function (op)    { this._canvasContext.globalCompositeOperation = op;   }
 		},
-		"lineWidth": { 
+		"lineWidth": {
 	    	get: function ()      { return this._canvasContext.lineWidth;    },
 			set: function (w)     { this._canvasContext.lineWidth = w;       }
 		},
-		"lineCap": { 
+		"lineCap": {
 	    	get: function ()      { return this._canvasContext.lineCap;      },
 			set: function (lc)    { this._canvasContext.lineCap = lc;        }
 		},
-		"lineJoin": { 
+		"lineJoin": {
 	    	get: function ()      { return this._canvasContext.lineJoin;     },
 			set: function (lj)    { this._canvasContext.lineJoin = lj;       }
 		},
-		"miterLimit": { 
+		"miterLimit": {
 	    	get: function ()      { return this._canvasContext.miterLimit;   },
 			set: function (ml)    { this._canvasContext.miterLimit = ml;     }
 		},
-		"strokeStyle": { 
+		"strokeStyle": {
 	    	get: function ()      { return this._canvasContext.strokeStyle;  },
 			set: function (style) {
 				if (this._renderMode & Renderer.RENDERFLAG_LOCKSTROKE) {
 					return;
 				}
 
-				if (style instanceof GPattern) {
-					this._textStrokeStyle = style;
-				} else {
-					this._canvasContext.strokeStyle = style; 
+				// if (style instanceof GPattern) {
+				// 	this._textStrokeStyle = style;
+				// } else {
+					this._canvasContext.strokeStyle = style;
 					this._textStrokeStyle = null;
-				}
-			} 
+				//}
+			}
 		},
-		"font": { 
+		"font": {
 	    	get: function ()      { return this._contextFont || this._canvasContext.font; },
 			set: function (font)  {
 				// var fontParams = parseFont(font, Runs.defaultFormatting);
@@ -106,23 +106,23 @@ import FontManager from "../text/font/fontmanager";
 
 				this._canvasContext.font = font;
 				this._contextFont = font;
-			} 
+			}
 		},
-		"textBaseline": { 
+		"textBaseline": {
 	    	get: function ()      { return this._canvasContext.textBaseline; },
-			set: function (bsln)  { this._canvasContext.textBaseline = bsln; } 
+			set: function (bsln)  { this._canvasContext.textBaseline = bsln; }
 		},
-		"textAlign": { 
+		"textAlign": {
 	    	get: function ()      { return this._canvasContext.textAlign;    },
-			set: function (align) { this._canvasContext.textAlign = align;   } 
+			set: function (align) { this._canvasContext.textAlign = align;   }
 		},
-		"width": { 
+		"width": {
 	    	get: function ()      { return this._canvasContext.width;        },
-			set: function (width) { this._canvasContext.width = width;       } 
+			set: function (width) { this._canvasContext.width = width;       }
 		},
-		"height": { 
+		"height": {
 	    	get: function ()       { return this._canvasContext.height;      },
-			set: function (height) { this._canvasContext.height = height;    } 
+			set: function (height) { this._canvasContext.height = height;    }
 		}
 	});
 
@@ -141,7 +141,7 @@ import FontManager from "../text/font/fontmanager";
 	Renderer.prototype.fill = function () {
 		this._canvasContext.fill();
 	}
-	
+
 	Renderer.prototype.fillRect = function (x, y, w, h, style) {
 		var oldStyle;
 		if (style) {
@@ -203,10 +203,10 @@ import FontManager from "../text/font/fontmanager";
 		return cf;
 	}
 
-	/* 
+	/*
 		Returns null if requested font is unavailable.
 		Also sends a request for unavailable font.
-	*/	
+	*/
 	Renderer.prototype._getFont = function (fontFamily, fontStyle, fontWeight) {
 		//var fontFamily, fontStyle, fontWeight;
 		var font = FontManager.instance.getFont(fontFamily, fontStyle, fontWeight);

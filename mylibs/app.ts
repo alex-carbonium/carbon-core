@@ -45,8 +45,10 @@ import ShortcutManager from "./ui/ShortcutManager";
 import ArtboardPage from "./ui/pages/ArtboardPage";
 import IconsInfo from "./ui/IconsInfo";
 import logger from "./logger";
+import params from "./params";
 import { IApp, IEvent } from "carbon-core";
 import { IPage, IUIElement } from "carbon-model";
+import { IEvent2 } from "carbon-basics";
 
 window['env'] = Environment;
 window['Selection'] = Selection;
@@ -105,6 +107,7 @@ class AppClass extends DataNode implements IApp {
         Page: Page as IPage
     }
 
+    pageChanged: IEvent2<IPage, IPage>;
     constructor() {
         super(true);
 
@@ -204,6 +207,11 @@ class AppClass extends DataNode implements IApp {
         this.fontManager.registerAsDefault();
 
         this.dataManager = new DataManager();
+
+        this.serverless(params.serveless);
+        if (params.clearStorage) {
+            this.offlineModel.clear();
+    }
     }
 
     userId() {

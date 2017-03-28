@@ -15,6 +15,8 @@ import Selection from "./SelectionModel";
 import { IUIElementProps, IPoint, IRect, IComposite } from "carbon-core";
 
 export default class CompositeElement extends UIElement implements IComposite {
+    children: UIElement[];
+
     constructor() {
         super();
 
@@ -28,7 +30,7 @@ export default class CompositeElement extends UIElement implements IComposite {
     }
 
     get elements(): UIElement[] {
-        return this.children;
+        return this.children as any;
     }
 
     register(element: UIElement) {
@@ -71,6 +73,7 @@ export default class CompositeElement extends UIElement implements IComposite {
         var resizeOptions = options && options.forChildResize(false);
         this.elements.forEach(e => e.applyScaling(s, o, resizeOptions, changeMode));
         this.performArrange();
+        return true;
     }
 
     hasBadTransform(): boolean{
@@ -105,7 +108,7 @@ export default class CompositeElement extends UIElement implements IComposite {
         }
     }
 
-    getBoundingBoxGlobal(includeMargin?: boolean): IRect {
+    getBoundingBoxGlobal(includeMargin?: boolean): Rect {
         if (this.count() === 1) {
             return this.elements[0].getBoundingBoxGlobal(includeMargin);
         }
