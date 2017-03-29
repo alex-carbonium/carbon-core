@@ -4,7 +4,7 @@ import CustomGuides from "extensions/guides/CustomGuides";
 import Brush from "./framework/Brush";
 import EventHelper from "./framework/EventHelper";
 import PropertyTracker from "framework/PropertyTracker";
-import Page from "framework/Page";
+import Page from "./framework/Page";
 import StyleManager from "framework/style/StyleManager";
 import OpenTypeFontManager from "./OpenTypeFontManager";
 import {
@@ -90,6 +90,7 @@ class AppClass extends DataNode implements IApp {
     activePage: IPage;
     modelSyncProxy: any;
     offlineModel: any;
+    platform: any;
 
     environment: any = Environment;
 

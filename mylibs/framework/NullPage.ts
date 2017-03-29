@@ -6,6 +6,15 @@ import { Dictionary } from "carbon-basics";
 import Rect from "../math/rect";
 
 class NullPage implements IPage {
+    t: string;
+    props: IContainerProps;
+    children: any[];
+
+    constructor() {
+        this.children = [];
+        this.props = null;
+    }
+
     globalMatrixToLocal(m: any) {
         return m;
     }
@@ -60,14 +69,6 @@ class NullPage implements IPage {
     stroke(value?: any) {
     }
 
-    t: string;
-    props: IContainerProps;
-    children: any[];
-
-    constructor() {
-        this.children = [];
-        this.props = null;
-    }
     parent() {
 
     }

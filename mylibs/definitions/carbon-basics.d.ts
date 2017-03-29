@@ -21,14 +21,18 @@ declare module "carbon-basics" {
     export interface IEvent<T> {
         raise(data: T): void;
         bind(callback: (data: T) => void): IDisposable;
+        bindAsync(callback: (data: T) => void): IDisposable;
         bind(owner: any, callback: (data: T) => void): IDisposable;
+        bindAsync(owner: any, callback: (data: T) => void): IDisposable;
         unbind(callback: (data: T) => void);
     }
 
     export interface IEvent2<T1, T2> {
         raise(data1: T1, data2: T2): void;
         bind(callback: (data1: T1, data2: T2) => void): IDisposable;
+        bindAsync(callback: (data1: T1, data2: T2) => void): IDisposable;
         bind(owner: any, callback: (data1: T1, data2: T2) => void): IDisposable;
+        bindAsync(owner: any, callback: (data1: T1, data2: T2) => void): IDisposable;
         unbind(callback: (data1: T1, data2: T2) => void);
         unbind(owner: any, callback: (data1: T1, data2: T2) => void);
     }
@@ -36,7 +40,9 @@ declare module "carbon-basics" {
     export interface IEvent3<T1, T2, T3> {
         raise(data1: T1, data2: T2, data3: T3): void;
         bind(callback: (data1: T1, data2: T2, data3: T3) => void): IDisposable;
+        bindAsync(callback: (data1: T1, data2: T2, data3: T3) => void): IDisposable;
         bind(owner: any, callback: (data1: T1, data2: T2, data3: T3) => void): IDisposable;
+        bindAsync(owner: any, callback: (data1: T1, data2: T2, data3: T3) => void): IDisposable;
         unbind(callback: (data1: T1, data2: T2, data3: T3) => void);
         unbind(owner:any, callback: (data1: T1, data2: T2, data3: T3) => void);
     }
@@ -45,6 +51,18 @@ declare module "carbon-basics" {
         ctrl: boolean;
         shift: boolean;
         alt: boolean;
+    }
+
+    export const enum ChangeMode {
+        Model, //update model
+        Root, //update node and its root, skip model update
+        Self //update node only
+    }
+
+    export const enum PatchType {
+        Insert = 1,
+        Remove = 2,
+        Change = 3
     }
 
     export const enum BrushType {
@@ -60,6 +78,9 @@ declare module "carbon-basics" {
         value: any;
 
         static createFromColor(color: string): Brush;
+        static toCss(brush: Brush): string;
+
+        static Empty: Brush;
     }
 
     export const enum TextAlign {
@@ -117,10 +138,16 @@ declare module "carbon-basics" {
         align: TextAlign;
         valign: TextAlign;
 
+        static cssString(font: Font, scale: number): string;
         static extend(font: Font, extension: Partial<Font>): Font;
+    }
+
+    export class Shadow{
+        Default: Shadow;
     }
 
     export var util: {
         debounce(func: () => any, ms: number): () => any;
+        throttle(func: (...args: any[]) => any, ms: number): () => any;
     };
 }

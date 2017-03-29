@@ -23,7 +23,7 @@ var clearChangedAreas = function (context) {
     //             context.clearRect(rect.x - 1, rect.y - 1, rect.width + 2, rect.height + 2);
     //         });
     //     } else {
-    //         context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+             context.clearRect(0, 0, context.canvas.width, context.canvas.height);
     //     }
     // }
 

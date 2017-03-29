@@ -29,7 +29,6 @@ declare module "carbon-app"{
     export interface IView{
         layer3: any;
         scaleMatrix: any;
-        page: any;
 
         registerForLayerDraw(layer, element);
         unregisterForLayerDraw(layer, element);

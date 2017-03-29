@@ -7,7 +7,7 @@ var argv = require('yargs').argv;
 var open = require('open');
 
 function watch(options) {
-    options = Object.assign({errors: false}, options);
+    options = Object.assign({}, options);
     var config    = require("./make-core-config")(options);
     var devServer = config.devServer;
     var compiler  = webpack(config);

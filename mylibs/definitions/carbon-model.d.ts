@@ -4,6 +4,8 @@ declare module "carbon-model" {
 
     export interface IPropsOwner<TProps>{
         props: TProps;
+
+        patchProps(patchType, propName, propValue);
     }
 
     export interface IDataNodeProps {
@@ -73,7 +75,7 @@ declare module "carbon-model" {
     }
 
     export interface IPage extends IContainer {
-        new():IPage;
+        new(): IPage;
 
         getAllArtboards(): IArtboard[];
         getActiveArtboard() : IArtboard;

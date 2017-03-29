@@ -1,6 +1,6 @@
 declare module "carbon-app" {
     import { ILayer, IDataNode, IPage, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IPropsOwner, IArtboard } from "carbon-model";
-    import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState } from "carbon-basics";
+    import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush } from "carbon-basics";
 
     export interface IFontMetadata{
         name: string;
@@ -12,7 +12,21 @@ declare module "carbon-app" {
     }
     export interface IApp extends IDataNode, IPropsOwner<IAppProps> {
         isLoaded: boolean;
+        loaded: Promise<void>;
+
+        logEvent: IEvent<any>;
+        changed: IEvent<any>;
+        restoredLocally: IEvent<void>;
+
         activePage: IPage;
+        pageChanged: IEvent2<IPage, IPage>;
+        pageAdded: IEvent<IPage>;
+        pageRemoved: IEvent<IPage>;
+        changeToolboxPage: IEvent<void>;
+
+        activeStory: any;
+        stories: any[];
+        setActiveStoryById(id);
 
         currentTool: string;
         currentToolChanged: IEvent<string>;
@@ -20,8 +34,6 @@ declare module "carbon-app" {
         onBuildMenu: IEvent2<any, any>;
         shortcutManager: IShortcutManager;
         actionManager: IActionManager;
-
-        pageChanged: IEvent2<IPage, IPage>;
 
         modelSyncProxy: any;
         platform: any; //TODO: remove platform
@@ -49,6 +61,18 @@ declare module "carbon-app" {
         getFontMetadata(family: string): IFontMetadata;
         saveFontMetadata(metadata: IFontMetadata): void;
         loadFont(family: string, style: number, weight: number): Promise<void>;
+
+        updateStyle(styleType, styleId, style);
+
+        setMode(mode);
+        modeChanged: IEvent<any>;
+
+        getAllFrames(): any[];
+
+        defaultFill(fill?: Brush, mode?: any): Brush;
+        defaultStroke(stroke?: Brush, mode?: any): Brush;
+        useRecentColor(color: Brush);
+        recentColors(): string[];
     }
 
     export interface IView {
@@ -57,7 +81,6 @@ declare module "carbon-app" {
         animationController: IAnimationController;
         contextScale: number;
 
-        contextScale: number;
         scaleChanged: IEvent<number>;
 
         setActivePage(page: IPage);
@@ -68,8 +91,8 @@ declare module "carbon-app" {
         scrollX(value?: number): number;
         scrollY(value?: number): number;
 
-        ensureScale(element: IUIElement<any>);
-        ensureVisible(element: IUIElement<any>);
+        ensureScale(element: IUIElement);
+        ensureVisible(element: IUIElement);
         scrollToCenter(): void;
 
         setActivePage(page: IPage);
