@@ -24,6 +24,7 @@ try
     }
     & npm $params
 
+    Copy-Item .\mylibs\definitions\carbon-*.d.ts .\target
     Remove-Item .\target\*.map
 }
 finally
