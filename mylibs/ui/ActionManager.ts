@@ -47,7 +47,7 @@ var checkConditions = function () {
 function formatActionDescription(action) {
     Object.defineProperty(action, "shortcut", {
         get: function () {
-            return this.app.shortcutManager.getActionShortcutDisplayLabel(this.name);
+            return this.app.shortcutManager.getActionHotkeyDisplayLabel(this.name);
         }
     });
 

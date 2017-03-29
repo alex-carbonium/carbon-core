@@ -283,6 +283,9 @@ class Page extends Layer implements IPage {
         return container.width() / container.height();
     }
 
+    insertArtboards(artboards){
+    }
+
     autoInsert(/*UIElement*/element) {
 
 

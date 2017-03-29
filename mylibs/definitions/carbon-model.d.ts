@@ -1,6 +1,6 @@
 declare module "carbon-model" {
     import { IPoint, IRect } from "carbon-geometry";
-    import { IEventData } from "carbon-basics";
+    import { IEventData, IConstructor } from "carbon-basics";
 
     export interface IPropsOwner<TProps>{
         props: TProps;
@@ -42,6 +42,9 @@ declare module "carbon-model" {
         fill(value?: any):any;
         stroke(value?: any):any;
 
+        width(): number;
+        height(): number;
+
         clone(): IUIElement;
     }
 
@@ -75,8 +78,6 @@ declare module "carbon-model" {
     }
 
     export interface IPage extends IContainer {
-        new(): IPage;
-
         getAllArtboards(): IArtboard[];
         getActiveArtboard() : IArtboard;
 
@@ -90,7 +91,10 @@ declare module "carbon-model" {
         deactivated(): void;
         activating(prevPage: IPage): void;
         activated(): void;
+
+        insertArtboards(artboards: IArtboard[]);
     }
+    export const Page: IPage & IConstructor<IPage>;
 
     export interface IComposite extends IUIElement {
         elements: IUIElement[];

@@ -39,13 +39,11 @@ declare module "carbon-app" {
         platform: any; //TODO: remove platform
         environment: IEnvironment;
 
-        types:{
-            Page:IPage
-        }
-
         run(): void;
         unload(): void;
         serverless(value?: boolean): boolean;
+
+        isDirty(): boolean;
 
         companyId(value?: string): string;
 
@@ -73,6 +71,8 @@ declare module "carbon-app" {
         defaultStroke(stroke?: Brush, mode?: any): Brush;
         useRecentColor(color: Brush);
         recentColors(): string[];
+
+        getAllTemplateResourceArtboards(): IArtboard[];
     }
 
     export interface IView {
@@ -149,7 +149,7 @@ declare module "carbon-app" {
     }
 
     export interface IActionManager {
-        invoke(action: string, callback?: (success: boolean, result?: any) => void): void;
+        invoke(action: string, callback?: (success: boolean, result?: any) => void): void | Promise<void>;
         subscribe(action: string, cb: (action: string, result: any) => void);
         registerAction(name: string, description: string, category: string, callback: (option?: any) => any): IAction;
 

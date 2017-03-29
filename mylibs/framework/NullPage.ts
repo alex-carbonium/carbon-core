@@ -22,7 +22,7 @@ class NullPage implements IPage {
         throw new Error('Method not implemented.');
     }
 
-    clone(){
+    clone(): IPage{
         return this;
     }
 
@@ -211,6 +211,18 @@ class NullPage implements IPage {
     saveWorkspaceState() {
     }
     restoreWorkspaceState(data: any): void {
+    }
+
+    patchProps(patchType: any, propName: any, propValue: any) {
+    }
+
+    insertArtboards(artboards: IArtboard[]) {
+    }
+    width(): number {
+        return 0;
+    }
+    height(): number {
+        return 0;
     }
 }
 

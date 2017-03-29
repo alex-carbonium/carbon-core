@@ -3,6 +3,10 @@ declare module "carbon-basics" {
         [key: string]: any;
     }
 
+    export interface IConstructor<T>{
+        new(): T;
+    }
+
     export interface IDisposable {
         dispose(): void;
     }
@@ -25,6 +29,7 @@ declare module "carbon-basics" {
         bind(owner: any, callback: (data: T) => void): IDisposable;
         bindAsync(owner: any, callback: (data: T) => void): IDisposable;
         unbind(callback: (data: T) => void);
+        clearSubscribers();
     }
 
     export interface IEvent2<T1, T2> {
@@ -35,6 +40,7 @@ declare module "carbon-basics" {
         bindAsync(owner: any, callback: (data1: T1, data2: T2) => void): IDisposable;
         unbind(callback: (data1: T1, data2: T2) => void);
         unbind(owner: any, callback: (data1: T1, data2: T2) => void);
+        clearSubscribers();
     }
 
     export interface IEvent3<T1, T2, T3> {
@@ -45,6 +51,7 @@ declare module "carbon-basics" {
         bindAsync(owner: any, callback: (data1: T1, data2: T2, data3: T3) => void): IDisposable;
         unbind(callback: (data1: T1, data2: T2, data3: T3) => void);
         unbind(owner:any, callback: (data1: T1, data2: T2, data3: T3) => void);
+        clearSubscribers();
     }
 
     export interface IKeyboardState {
@@ -78,7 +85,7 @@ declare module "carbon-basics" {
         value: any;
 
         static createFromColor(color: string): Brush;
-        static toCss(brush: Brush): string;
+        static toCss(brush: Brush): any;
 
         static Empty: Brush;
     }
@@ -143,7 +150,24 @@ declare module "carbon-basics" {
     }
 
     export class Shadow{
-        Default: Shadow;
+        static Default: Shadow;
+    }
+
+    export class QuadAndLock{
+        locked: boolean;
+
+        static Default: QuadAndLock;
+        static createFromObject(obj: any): QuadAndLock;
+        static extend(quad: QuadAndLock, extension: Partial<QuadAndLock>): QuadAndLock;
+    }
+
+    export class Box{
+        left: number;
+        top: number;
+        right: number;
+        bottom: number;
+
+        static Default: Box;
     }
 
     export var util: {

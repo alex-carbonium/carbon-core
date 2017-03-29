@@ -129,7 +129,7 @@ class Backend implements IBackend {
         this._userManager.signinSilentCallback();
     }
     isLoggedIn() {
-        return this.getAccessToken() && this.getUserId();
+        return !!this.getAccessToken() && !!this.getUserId();
     }
     loginAsGuest() {
         return this.login("trial", "trial", true);

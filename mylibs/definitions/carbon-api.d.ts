@@ -7,8 +7,13 @@ declare module "carbon-api" {
 
     export interface IBackend{
         ensureLoggedIn(renewToken?: boolean): Promise<void>;
+        logout(): Promise<void>;
+
         getUserId(): string;
         addUrlPath(...pathes: string[]): string;
+
+        isLoggedIn(): boolean;
+        isGuest(): boolean;
 
         loginNeeded: IEvent<boolean>;
         requestStarted: IEvent<string>;

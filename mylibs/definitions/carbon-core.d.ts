@@ -22,6 +22,19 @@ declare module "carbon-core" {
     export var PropertyTracker: any;
     export var Selection: any;
     export var Environment: any;
+    export var ShareProxy: any;
+    export var params: any;
+    export var MirroringController: any;
+    export var Context: any;
+    export var Layer: any;
+    export var MirroringView: any;
+    export var HorizontalConstraint: any;
+    export var VerticalConstraint: any;
+    export var Constraints: any;
+    export var ArtboardResource: any;
+    export var Types: any;
+    export var NullPage: any;
+    export var CompositeElement: any;
     export class Shape{}
     export function createUUID(): string;
 }

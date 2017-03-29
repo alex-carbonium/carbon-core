@@ -9,6 +9,7 @@ declare var require: {
 
 declare interface Promise<T>{
     finally<U>(handler: () => U): Promise<T>;
+    cancel(): void;
 }
 
 declare interface RequestInit{

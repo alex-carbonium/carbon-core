@@ -87,8 +87,18 @@ var addComment = function (event) {
 class AppClass extends DataNode implements IApp {
     [name: string]: any;
     isLoaded: boolean;
+    loaded: Promise<void>;
+
+    modeChanged: IEvent<any>;
+
     activePage: IPage;
+    pageChanged: IEvent2<IPage, IPage>;
+    pageAdded: IEvent<IPage>;
+    pageRemoved: IEvent<IPage>;
+    changeToolboxPage: IEvent<void>;
+
     modelSyncProxy: any;
+
     offlineModel: any;
     platform: any;
 
@@ -98,17 +108,13 @@ class AppClass extends DataNode implements IApp {
     actionManager: ActionManager;
 
     onBuildMenu: IEvent<{ a: number }>;
+    logEvent: IEvent<any>;
+    changed: IEvent<any>;
+    restoredLocally: IEvent<void>;
 
     currentToolChanged: IEvent<string>;
     _currentTool: string;
 
-    types:{
-        Page:IPage
-    } = {
-        Page: Page as IPage
-    }
-
-    pageChanged: IEvent2<IPage, IPage>;
     constructor() {
         super(true);
 
@@ -136,9 +142,9 @@ class AppClass extends DataNode implements IApp {
         this.savedToJson = EventHelper.createEvent();
 
 
-        this.changeToolboxPage = EventHelper.createEvent();
+        this.changeToolboxPage = EventHelper.createEvent<void>();
 
-        this.loaded = new Promise(function (resolve, reject) {
+        this.loaded = new Promise<void>(function (resolve, reject) {
             that.loadedResolve = resolve;
         });
         this.loadedLevel1 = new Promise(function (resolve, reject) {
@@ -146,7 +152,7 @@ class AppClass extends DataNode implements IApp {
         });
 
         this.reloaded = EventHelper.createEvent();
-        this.restoredLocally = EventHelper.createEvent();
+        this.restoredLocally = EventHelper.createEvent<void>();
         this.selectionMade = EventHelper.createEvent();
         this.onBuildMenu = EventHelper.createEvent();
         this.offlineModeChanged = EventHelper.createEvent();
@@ -913,6 +919,10 @@ class AppClass extends DataNode implements IApp {
 
     isEmpty() {
         return this.children.length === 0;
+    }
+
+    isDirty(){
+        return this.state.isDirty();
     }
 
     findPrimitiveRoot(key) {

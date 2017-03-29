@@ -3,7 +3,6 @@ import * as globals from "../../../globalRequire";
 import * as facade from "../../CarbonCore";
 
 import TestPlatform from "./TestPlatform";
-import TestProject from "./TestProject";
 import TestFontManager from "./TestFontManager";
 
 import NullContainer from "../../framework/NullContainer";
@@ -36,12 +35,6 @@ facade.Intl.registerTestInstance();
 
 var Util = {};
 
-backend.init(logger, {
-    services: "",
-    storage: "",
-    cdn: ""
-});
-
 Util.setupApp = function(options){
     options = extend({}, defaults, options);
 
@@ -61,8 +54,6 @@ Util.setupApp = function(options){
     view.attachToDOM(context, context, c, x => {}, x => {}, x=> {});
     var controller = new DesignerController(app, view, {SelectComposite, DraggingElement, SelectFrame});
     Environment.set(view, controller);
-
-    app.project = new TestProject();
 
     if (options.addPage){
         var page = new ArtboardPage();
