@@ -35,6 +35,7 @@ declare module "carbon-core" {
     export var Types: any;
     export var NullPage: any;
     export var CompositeElement: any;
+    export var Devices: any;
     export class Shape{}
     export function createUUID(): string;
 }

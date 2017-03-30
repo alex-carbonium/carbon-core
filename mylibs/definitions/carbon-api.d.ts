@@ -26,7 +26,12 @@ declare module "carbon-api" {
         resolveCompanyId(companyName: string): Promise<{companyId: string}>;
     }
 
+    export interface IDashboardProxy{
+        dashboard(companyId: string): Promise<any>;
+    }
+
     export var logger: ILogger;
     export var backend: IBackend;
     export var AccountProxy: IAccountProxy;
+    export var DashboardProxy: IDashboardProxy;
 }

@@ -44,14 +44,15 @@ var registerUIActions = function (app) {
 
 function findFirstSharedPage(app) {
     return null;
-    var sharedStatuses = app.viewModel.getSharedPageStatuses();
-    for (var i = 0; i < app.pages.length; i++) {
-        var page = app.pages[i];
-        if (sharedStatuses.indexOf(page.status()) !== -1) {
-            return page;
-        }
-    }
-    return null;
+    //var a =1;
+    // var sharedStatuses = app.viewModel.getSharedPageStatuses();
+    // for (var i = 0; i < app.pages.length; i++) {
+    //     var page = app.pages[i];
+    //     if (sharedStatuses.indexOf(page.status()) !== -1) {
+    //         return page;
+    //     }
+    // }
+    // return null;
 }
 
 export default class PlatformAll {

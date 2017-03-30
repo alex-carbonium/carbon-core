@@ -146,11 +146,6 @@ function getLoaders(settings){
     };
     var babelLoader = "babel?" + JSON.stringify(babelSettings);
 
-    var tsLoader = 'ts-loader?' + JSON.stringify({
-        transpileOnly: false,
-        visualStudioErrorFormat: true
-    });
-
     var excludedFolders = ["node_modules", "libs", "generated"];
     var excludes = new RegExp(
         excludedFolders.map(x => "[\/\\\\]" + x + "[\/\\\\]").join("|"));
@@ -167,7 +162,7 @@ function getLoaders(settings){
         },
         {
             test: /\.ts$/,
-            loaders: [babelLoader, tsLoader],
+            loaders: [babelLoader, "awesome-typescript-loader"],
             exclude: excludes
         },
         {
