@@ -248,11 +248,11 @@ var oncontextmenu = function (event) {
 
 var onViewFocused = function () {
     Environment.view.focused(true);
-    Invalidate.requestUpperOnly();
+    Invalidate.requestInteractionOnly();
 };
 var onViewBlurred = function () {
     Environment.view.focused(false);
-    Invalidate.requestUpperOnly();
+    Invalidate.requestInteractionOnly();
 };
 
 var onWindowBlur = function () {
@@ -260,7 +260,7 @@ var onWindowBlur = function () {
     App.Current.actionManager.invoke("cancel");
 }
 
-var onWindowResize = function () {    
+var onWindowResize = function () {
     Environment.controller.onWindowResize();
 }
 

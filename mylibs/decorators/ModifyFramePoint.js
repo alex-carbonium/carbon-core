@@ -31,7 +31,7 @@ export default {
         var resizingElement = UIElement.construct(Types.DraggingElement, frame.element);
         frame.resizingElement = resizingElement;
 
-        Environment.view.layer3.add(resizingElement);
+        Environment.view.interactionLayer.add(resizingElement);
         point.capture(frame);
     },
     release: function (frame, point) {
@@ -45,6 +45,6 @@ export default {
     },
     change: function (frame, dx, dy, point, mousePoint, keys) {
         point.change(frame, dx, dy, point, mousePoint, keys);
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     }
 }

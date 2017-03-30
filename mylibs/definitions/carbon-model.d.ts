@@ -78,7 +78,7 @@ declare module "carbon-model" {
     }
 
     export interface IPage extends IContainer {
-        getAllArtboards(): IArtboard[];
+         getAllArtboards(): IArtboard[];
         getActiveArtboard() : IArtboard;
 
         saveWorkspaceState(): any;

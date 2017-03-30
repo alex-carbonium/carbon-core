@@ -98,8 +98,8 @@
 //         this.canDrag(true);
 //         this.enableGroupLocking(true);
 //         view.makeSelection([this]);
-//         view.layer3.remove(this._resizerH);
-//         view.layer3.remove(this._resizerV);
+//         view.interactionLayer.remove(this._resizerH);
+//         view.interactionLayer.remove(this._resizerV);
 //         if (App.Current.activePage.hideHandles){
 //             App.Current.activePage.hideHandles(false);
 //         }
@@ -160,8 +160,8 @@
 //
 //         updateSnapBarPosition.call(this);
 //
-//         view.layer3.add(this._topSnapLineBar);
-//         view.layer3.add(this._leftSnapLineBar);
+//         view.interactionLayer.add(this._topSnapLineBar);
+//         view.interactionLayer.add(this._leftSnapLineBar);
 //
 //         // need to set lines after bar is added, because line pos is local
 //         this._topSnapLineBar.setLines(this._verticalSnapLines);
@@ -190,8 +190,8 @@
 //         this._resizerV = new sketch.ui.common.PortableDeviceResizePanel("vertical", this, this.viewportWidth(), this.viewportHeight());
 //         this._resizerV.cursor('s-resize');
 //
-//         view.layer3.add(this._resizerH);
-//         view.layer3.add(this._resizerV);
+//         view.interactionLayer.add(this._resizerH);
+//         view.interactionLayer.add(this._resizerV);
 //         adjustHandlesPosition.call(this);
 //     }
 //

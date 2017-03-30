@@ -311,7 +311,7 @@ class SelectionModel {
     clear() {
         this._selectCompositeElement.unregisterAll();
 
-        // this.layer3.invalidate();
+        // this.interactionLayer.invalidate();
     }
 
     selectAll() {

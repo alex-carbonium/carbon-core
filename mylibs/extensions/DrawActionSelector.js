@@ -172,7 +172,7 @@ var registerCommands = function () {
         Selection.invertDirectSelection(true);
         that.app.allowSelection(true);
         that.app.currentTool = ViewTool.PointerDirect;
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     }, "ui-arrow-black");
 
 

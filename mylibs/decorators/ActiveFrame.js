@@ -26,7 +26,7 @@ var SelectionFramePrototype = {
 
 function updatePosition(that) {
     that._frameType.updateFromElement(that._frame);
-    Invalidate.requestUpperOnly();
+    Invalidate.requestInteractionOnly();
 };
 
 function parentChanged() {
@@ -114,7 +114,7 @@ export default class ActiveFrame extends UIElementDecorator {
         UIElementDecorator.prototype.attach.call(this, element);
 
         var view = Environment.view;
-        if(!view.layer3){
+        if(!view.interactionLayer){
             return;
         }
 
@@ -137,9 +137,9 @@ export default class ActiveFrame extends UIElementDecorator {
         PropertyTracker.propertyChanged.bind(this, propertyChanged);
 
 
-        this._layerdrawHandler = view.layer3.ondraw.bind(this, this.layerdraw);
+        this._layerdrawHandler = view.interactionLayer.ondraw.bind(this, this.layerdraw);
 
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
 
         this._environmentBinding = Environment.detaching.bind(this, function(){
             this.detach();
@@ -156,7 +156,7 @@ export default class ActiveFrame extends UIElementDecorator {
         PropertyTracker.propertyChanged.unbind(this, propertyChanged);
 
         this._layerdrawHandler.dispose();
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
         this._mouseDownHandler.dispose();
         this._mouseUpHandler.dispose();
         this._mouseMoveHandler.dispose();

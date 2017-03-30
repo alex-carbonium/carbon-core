@@ -27,7 +27,7 @@ export default  {
         resizingElement.stroke(Brush.Empty);
         frame.resizingElement = resizingElement;
         frame.clone = frame.resizingElement.children[0];
-        Environment.view.layer3.add(resizingElement);
+        Environment.view.interactionLayer.add(resizingElement);
         //App.Current.view.startRotatingEvent.raise();
     },
     release (frame) {
@@ -84,6 +84,6 @@ export default  {
         frame.clone.saveOrResetLayoutProps();
         frame.clone.prepareAndSetProps(r);
 
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     }
 }

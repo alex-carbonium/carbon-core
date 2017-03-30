@@ -67,8 +67,8 @@ export default class TextTool extends TOol {
             this._onAttached = null;
         }
 
-        if (view.layer3) {
-            this._drawBinding = view.layer3.ondraw.bindHighPriority(this, this.layerdraw);
+        if (view.interactionLayer) {
+            this._drawBinding = view.interactionLayer.ondraw.bindHighPriority(this, this.layerdraw);
         }
 
         app.currentTool = ViewTool.Text;
@@ -139,12 +139,12 @@ export default class TextTool extends TOol {
         if (hit instanceof Text && hit !== this._editedElement){
             this._next = {element: hit, event: e};
             Cursor.setGlobalCursor("text");
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
         }
         else {
             if (this._next){
                 this._next = null;
-                Invalidate.requestUpperOnly();
+                Invalidate.requestInteractionOnly();
             }
             if (this._editor){
                 Cursor.removeGlobalCursor();
@@ -170,7 +170,7 @@ export default class TextTool extends TOol {
         else{
             this._dragZone = {x: e.x, y: e.y, width: 0, height: 0, flipX: false, flipY: false};
         }
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     };
     onDragging = (e, dx, dy) => {
         if (this._editor){
@@ -183,7 +183,7 @@ export default class TextTool extends TOol {
             this._dragZone.flipY = dy < 0;
         }
 
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     };
     onDragStopped = e => {
         if (this._editor){
@@ -196,7 +196,7 @@ export default class TextTool extends TOol {
             this.insertText({x: rect.x, y: rect.y}, props);
             this._dragZone = null;
         }
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     };
     onClicked = e => {
         if (this._hittingEdited(e)){
@@ -293,7 +293,7 @@ export default class TextTool extends TOol {
             engine.select(0, engine.getLength() - 1);
         }
 
-        this._view.layer3.add(clone);
+        this._view.interactionLayer.add(clone);
         Cursor.setGlobalCursor("text", true);
         Invalidate.request();
         Environment.controller.inlineEditModeChanged.raise(true, this._editor);
@@ -332,7 +332,7 @@ export default class TextTool extends TOol {
 
         this._editor = null;
         this._editedElement = null;
-        this._view.layer3.remove(this._editClone);
+        this._view.interactionLayer.remove(this._editClone);
         this._editClone = null;
         this._rangeFormatter = null;
         this._backgroundCache = null;
@@ -375,7 +375,7 @@ export default class TextTool extends TOol {
         return inlineEditor;
     }
     _onInvalidateEditor = () => {
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     };
 
     _hitNewElement(e){

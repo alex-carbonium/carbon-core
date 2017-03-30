@@ -294,7 +294,7 @@ class SnapController {
         }
 
         if(!compareSnapLines(oldSnapLines, this.snapLines)){
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
         }
 
         return snappedPoint || pos;

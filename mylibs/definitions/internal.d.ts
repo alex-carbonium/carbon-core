@@ -19,6 +19,9 @@ declare module "carbon-model"{
 }
 
 declare module "carbon-app"{
+    import { IUIElement, ILayer } from 'carbon-model';
+    import { IContext } from "carbon-rendering";
+
     export interface IApp{
         offlineModel: any;
         modelSyncProxy: any;
@@ -27,11 +30,11 @@ declare module "carbon-app"{
     }
 
     export interface IView{
-        layer3: any;
+        interactionLayer: any;
         scaleMatrix: any;
 
-        registerForLayerDraw(layer, element);
-        unregisterForLayerDraw(layer, element);
+        registerForLayerDraw(layerType:number, element:{onLayerDraw:(layer: ILayer, context: IContext)=>void});
+        unregisterForLayerDraw(layerType:number, element:any);
 
         viewportRect(): any;
     }
@@ -40,6 +43,12 @@ declare module "carbon-app"{
         isInlineEditMode?: boolean;
         inlineEditor?: any;
     }
+
+    export const MirroringController: any;
+    export const Context: any;
+    export const Layer: any;
+    export const Page: any;
+    export const MirroringView: any;
 }
 
 declare module "oidc-client/src/UserManager" {

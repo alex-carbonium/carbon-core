@@ -6,15 +6,23 @@ import SelectionModel from "./SelectionModel";
 import Cursor from "framework/Cursor";
 import Invalidate from "framework/Invalidate";
 import PixelGrid from "framework/render/PixelGrid"
+import {LayerTypes} from "framework/Defs";
+import {IsolationLayer} from "framework/IsolationLayer";
 
 function setupLayers(Layer) {
-    this.layer3 = new Layer(this);
-    this.layer3.__id__ = "Layer3";
-    this.layer3.hitTransparent(true);
+    this.interactionLayer = new Layer(this);
+    this.interactionLayer.type = LayerTypes.Interaction;
+    this.interactionLayer.hitTransparent(true);
 
-    this._registerLayer(this.layer3);
-    this.layer3.add(SelectionModel._selectCompositeElement); // TODO: think how to cut this dependency
-    this.layer3.context = this.upperContext;
+    this.isolationLayer = new IsolationLayer(this);
+    this.isolationLayer.type = LayerTypes.Isolation;
+    this.isolationLayer.hitTransparent(true);
+    this.isolationLayer.context = this.isolationContext;
+
+    this._registerLayer(this.isolationLayer);
+    this._registerLayer(this.interactionLayer);
+    this.interactionLayer.add(SelectionModel._selectCompositeElement); // TODO: think how to cut this dependency
+    this.interactionLayer.context = this.upperContext;
 }
 
 class DesignerView extends ViewBase {
@@ -37,17 +45,18 @@ class DesignerView extends ViewBase {
         setupLayers.call(this, deps.Layer);
     }
 
-    attachToDOM(context, upperContext, viewContainerElement, requestRedrawCallback, cancelRedrawCallback, renderingScheduledCallback) {
+    attachToDOM(context, upperContext, isolationContext, viewContainerElement, requestRedrawCallback, cancelRedrawCallback, renderingScheduledCallback) {
         this.viewContainerElement = viewContainerElement; // parent div element
         this.upperContext = upperContext;
+        this.isolationContext = isolationContext;
 
         this.setupRendering(context, requestRedrawCallback, cancelRedrawCallback, renderingScheduledCallback);
 
         this._cursorChangedToken = Cursor.changed.bind(this, this.updateCursor);
         this._invalidateRequestedToken = Invalidate.requested.bind(this, this.invalidate);
 
-        if (this.layer3) {
-            this.layer3.context = this.upperContext;
+        if (this.interactionLayer) {
+            this.interactionLayer.context = this.upperContext;
         }
     }
 

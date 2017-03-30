@@ -6,7 +6,7 @@ export default class PixelGrid {
 
     updateGrid() {
         var view = this.view;
-        if (!view.middleContext) {
+        if (!view.gridContext) {
             return;
         }
         var scale = view.scale();
@@ -25,16 +25,16 @@ export default class PixelGrid {
 
     clear() {
         this.clean = true;
-        if (!this.view.middleContext) {
+        if (!this.view.gridContext) {
             return;
         }
-        var context = this.view.middleContext;
+        var context = this.view.gridContext;
         context.clearRect(0, 0, context.canvas.width, context.canvas.height);
     }
 
     render() {
         var d = this.view.scale();
-        var context = this.view.middleContext;
+        var context = this.view.gridContext;
         var w = context.canvas.width;
         var h = context.canvas.height;
         this.clear();

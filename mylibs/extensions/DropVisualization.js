@@ -16,7 +16,7 @@ import { ITransformationElement, ITransformationEventData, IPoint, IKeyboardStat
 import UserSettings from "../UserSettings";
 import Point from "../math/point";
 import Matrix from "../math/matrix";
-import { ChangeMode, FloatingPointPrecision } from "../framework/Defs";
+import { ChangeMode, FloatingPointPrecision, LayerTypes } from "../framework/Defs";
 
 var HighlightBrush = Brush.createFromColor(SharedColors.Highlight);
 
@@ -145,7 +145,7 @@ class ResizeHint extends UIElement {
 
         this._updatePosition();
 
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     }
 
     drawSelf(context, w, h, environment) {
@@ -257,7 +257,7 @@ var onStopDragging = function (event) {
     this._dragging = false;
     this._hint.stop();
     updateVisualizations.call(this);
-    Invalidate.requestUpperOnly();
+    Invalidate.requestInteractionOnly();
 };
 
 var onMouseMove = function (event) {
@@ -326,7 +326,7 @@ function updateSelectionRects() {
                 control: control
             };
 
-            this.view.layer3.add(control);
+            this.view.interactionLayer.add(control);
         }
     }
 
@@ -425,7 +425,7 @@ function updateVisualizations() {
     var data = this._dropData;
     if (data) {
         if (this._dropLine.parent() === NullContainer) {
-            this.view.layer3.add(this._dropLine);
+            this.view.interactionLayer.add(this._dropLine);
         }
         this._dropLine.x1(data.x1);
         this._dropLine.x2(data.x2);
@@ -438,13 +438,13 @@ function updateVisualizations() {
 
     if (this._dragging || this._resizing || this._rotating) {
         if (this._hint.parent() === NullContainer) {
-            this.view.layer3.add(this._hint);
+            this.view.interactionLayer.add(this._hint);
         }
     } else if (!(this._hint.parent() === NullContainer)) {
         this._hint.parent().remove(this._hint);
     }
 
-    Invalidate.requestUpperOnly();
+    Invalidate.requestInteractionOnly();
 }
 
 
@@ -466,11 +466,11 @@ export default class DropVisualization extends ExtensionBase {
         this._hint = new ResizeHint();
         this._hint.crazySupported(false);
 
-        view.registerForLayerDraw(2, this);
+        view.registerForLayerDraw(LayerTypes.Interaction, this);
     }
 
     detach() {
-        this.view && this.view.unregisterForLayerDraw(2, this);
+        this.view && this.view.unregisterForLayerDraw(LayerTypes.Interaction, this);
         super.detach();
     }
 

@@ -3,7 +3,7 @@ import SectionDecorator from "./SectionDecorator";
 import Section from "../../../framework/Section";
 import Artboard from "../../../framework/Artboard";
 import NullArtboard from "../../../framework/NullArtboard";
-import {ViewTool} from "../../../framework/Defs";
+import {ViewTool, LayerTypes} from "../../../framework/Defs";
 import CommandManager from "../../../framework/commands/CommandManager";
 import CompositeCommand from "../../../framework/commands/CompositeCommand";
 import Selection from "../../../framework/SelectionModel"
@@ -27,7 +27,7 @@ export default class SectionCreator extends Tool {
         controller.stopResizingEvent.bind(this, this.onStopResizing);
         view.scaleChanged.bind(this, this.onScaleChanged);
         Selection.onElementSelected.bind(this, this.onSelection);
-        view.registerForLayerDraw(2, this);
+        view.registerForLayerDraw(LayerTypes.Interaction, this);
         Invalidate.request();
     }
 
@@ -39,7 +39,7 @@ export default class SectionCreator extends Tool {
         this._controller.stopResizingEvent.unbind(this, this.onStopResizing);
         this._view.scaleChanged.unbind(this, this.onScaleChanged);
         Selection.onElementSelected.unbind(this, this.onSelection);
-        this._view.unregisterForLayerDraw(2, this);
+        this._view.unregisterForLayerDraw(LayerTypes.Interaction, this);
         Invalidate.request();
         this.suckContent();
     }

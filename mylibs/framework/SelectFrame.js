@@ -32,7 +32,7 @@ class SelectFrame extends UIElement {
         if (!rect.width && !rect.height) {
             return;
         }
-        this.onselect.raise(rect);
+        this.onselect(rect);
     }
 
     drawSelf(context){

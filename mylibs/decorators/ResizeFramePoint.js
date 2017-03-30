@@ -54,7 +54,7 @@ export default {
 
         SnapController.calculateSnappingPoints(Environment.view.page.getActiveArtboard());
 
-        Environment.view.layer3.add(resizingElement);
+        Environment.view.interactionLayer.add(resizingElement);
         frame.resizingElement.startResizing({transformationElement: frame.resizingElement});
     },
     release: function (frame) {

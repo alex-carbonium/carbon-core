@@ -43,8 +43,8 @@ export default class Tool {
             this.registerForDisposal(controller.startDraggingEvent.bindHighPriority(this, this.dragElementStarted));
             this.registerForDisposal(controller.stopDraggingEvent.bindHighPriority(this, this.dragElementEnded));
         }
-        if (this._view.layer3) {
-            this.registerForDisposal(this._view.layer3.ondraw.bind(this, this.layerdraw));
+        if (this._view.interactionLayer) {
+            this.registerForDisposal(this._view.interactionLayer.ondraw.bind(this, this.layerdraw));
         }
 
         //allow the tool to update cursor immediately

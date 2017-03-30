@@ -53,9 +53,9 @@ export class FrameEditTool{
         //leave the selection, but remove action frame
         this._frame.decorators.forEach(x => this._frame.removeDecorator(x));
         this._tokens.push(Environment.controller.clickEvent.bind(this.onClicked));
-        this._tokens.push(Environment.view.layer3.ondraw.bindHighPriority(this, this.layerdraw));
+        this._tokens.push(Environment.view.interactionLayer.ondraw.bindHighPriority(this, this.layerdraw));
 
-        Environment.view.layer3.add(this._content);
+        Environment.view.interactionLayer.add(this._content);
         if (this._snapClone){
             SnapController.snapGuides.push(this._content, this._snapClone);
         }
@@ -89,7 +89,7 @@ export class FrameEditTool{
         }
         if (this._content){
             this._content.deactivate();
-            Environment.view.layer3.remove(this._content);
+            Environment.view.interactionLayer.remove(this._content);
             this._content.dispose();
             this._content = null;
         }

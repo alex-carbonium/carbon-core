@@ -78,7 +78,7 @@ export default class ArtboardsTool extends Tool {
         if (this._element) {
             var element = this._element;
             this._element = null;
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
             var w = element.width()
                 , h = element.height();
             if (w > 0 && h > 0) {
@@ -130,7 +130,7 @@ export default class ArtboardsTool extends Tool {
                 this._nextPoint = {x: this._point.x, y: this._point.y};
             }
 
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
             event.handled = true;
             return false;
         }

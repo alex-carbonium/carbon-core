@@ -122,7 +122,7 @@ export default class PencilCreator extends Tool {
             element.addPoint({ x: points[points.length - 1].x - elementX, y: points[points.length - 1].y - elementY });
 
             element.adjustBoundaries();
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
             Selection.makeSelection([element]);
         }
         else {
@@ -140,7 +140,7 @@ export default class PencilCreator extends Tool {
             var x = event.x
                 , y = event.y;
             this.points.push({ x: x, y: y });
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
             event.handled = true;
         }
     }

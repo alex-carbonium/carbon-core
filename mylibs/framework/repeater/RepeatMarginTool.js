@@ -7,6 +7,7 @@ import Cursor from "framework/Cursor";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import ModelStateListener from "../sync/ModelStateListener";
+import {LayerTypes} from "framework/Defs";
 
 export default {
     _container: null,
@@ -31,7 +32,7 @@ export default {
         this.createVisualizations();
 
         var view = Environment.view;
-        view.registerForLayerDraw(2, this, 0);
+        view.registerForLayerDraw(LayerTypes.Interaction, this, 0);
         this._dragController.bindToController(Environment.controller);
     },
     detach: function(container){
@@ -43,7 +44,7 @@ export default {
         this._activeMargin = null;
 
         var view = Environment.view;
-        view.unregisterForLayerDraw(2, this);
+        view.unregisterForLayerDraw(LayerTypes.Interaction, this);
         if (this._dragController){
             this._dragController.unbind();
             this._dragController = null;
@@ -126,12 +127,12 @@ export default {
                 this._activeMargin = null;
                 Cursor.removeGlobalCursor();
             }
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
         }
     },
     onDragSearchCancelled: function(){
         this._activeMargin = null;
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     },
     onDragStarting: function(){
         return this._activeMargin !== null;

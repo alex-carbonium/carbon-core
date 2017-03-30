@@ -59,7 +59,7 @@ export default {
         }
         frame.flipped = frame.element.isFlipped(true);
 
-        Environment.view.layer3.add(resizingElement);
+        Environment.view.interactionLayer.add(resizingElement);
         Environment.controller.startRotatingEvent.raise({transformationElement: frame.resizingElement});
     },
     release: function (frame, point, event) {
@@ -88,7 +88,7 @@ export default {
         }
 
         frame.resizingElement.applyRotation(angle, frame.origin, true);
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
 
         var newAngle = frame.resizingElement.angle();
         Environment.controller.rotatingEvent.raise({element: frame.element, angle: newAngle, mouseX: mousePoint.x, mouseY: mousePoint.y, transformationElement: frame.resizingElement});
