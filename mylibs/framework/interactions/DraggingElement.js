@@ -156,7 +156,7 @@ class DraggingElement extends TransformationElement {
         this.translationMatrix.ty = this._translation.y;
 
         this.applyTranslation(this._translation, true);
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     }
 
     strokeBorder(context, w, h){

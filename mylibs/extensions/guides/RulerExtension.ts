@@ -11,6 +11,7 @@ import Matrix from "../../math/matrix";
 import { areRectsEqual } from "../../math/math";
 import Environment from "../../environment";
 import DesignerView from "../../framework/DesignerView";
+import {LayerTypes} from "../../framework/Defs";
 import UserSettings from "../../UserSettings";
 import RulerGuides from "./RulerGuides";
 import { IArtboardProps, IApp, IView, IController, ILayer, IContext, IComposite, ITransformationEventData } from "carbon-core";
@@ -44,7 +45,7 @@ export default class RulerExtension extends RuntimeExtension {
 
     detach() {
         super.detach();
-        this.view && this.view.unregisterForLayerDraw(2, this);
+        this.view && this.view.unregisterForLayerDraw(LayerTypes.Interaction, this);
 
         if (this._rulerGuides) {
             this._rulerGuides.dispose();
@@ -62,7 +63,7 @@ export default class RulerExtension extends RuntimeExtension {
         var view = this.view;
         var controller = this.controller;
 
-        view.registerForLayerDraw(2, this);
+        view.registerForLayerDraw(LayerTypes.Interaction, this);
 
         this.registerForDispose(view.scaleChanged.bind(scale => {
             this._onScaleChange(scale);

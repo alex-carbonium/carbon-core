@@ -1,6 +1,7 @@
 import ExtensionBase from "./ExtensionBase";
 import DesignerView from "framework/DesignerView";
 import SnapController from "framework/SnapController";
+import {LayerTypes} from "framework/Defs";
 
 
 function drawSnapLines(context, environment) {
@@ -43,11 +44,16 @@ export default class SnapVisualization extends ExtensionBase {
     attach(app, view, controller) {
         super.attach.apply(this, arguments);
         if (view instanceof DesignerView) {
-            view.registerForLayerDraw(2, this);
+            view.registerForLayerDraw(LayerTypes.Interaction, this);
         }
     }
 
-    onLayerDraw(layerIndex, context, environment) {
+    detach() {
+        super.detach.apply(this, arguments);
+        view.unregisterForLayerDraw(LayerTypes.Interaction, this);
+    }
+
+    onLayerDraw(layer, context, environment) {
         drawSnapLines(context, environment);
     }
 }

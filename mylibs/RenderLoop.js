@@ -39,20 +39,20 @@ function renderingScheduledCallback(){
 }
 
 export class RenderLoop {
-    init(app, viewContainer, viewport, canvas, middleCanvas, upperCanvas, htmlPanel, htmlLayer){
+    init(app, viewContainer, viewport, canvas, gridCanvas, upperCanvas, htmlPanel, htmlLayer){
         this.app = app;
         this.viewContainer = viewContainer;
         this.viewport = viewport;
         this.canvas = canvas;
         this.upperCanvas = upperCanvas;
-        this.middleCanvas = middleCanvas;
+        this.gridCanvas = gridCanvas;
         this.htmlPanel = htmlPanel;
         this.htmlLayer = htmlLayer;
         this._attached = false;
 
         this.context = new Context(canvas);
         this.upperContext = new Context(upperCanvas);
-        this.middleContext = new Context(middleCanvas);
+        this.gridContext = new Context(gridCanvas);
 
         this._renderingCallback = function(){
             doRendering.call(this, false);
@@ -98,7 +98,7 @@ export class RenderLoop {
         app.platform.attachEvents(this.viewContainer);
         Keyboard.attach(document.body);
         view.attachToDOM(this.context, this.upperContext, this.viewContainer, redrawCallback.bind(this), cancelRedrawCallback.bind(this), renderingScheduledCallback.bind(this));
-        view.middleContext = this.middleContext;
+        view.gridContext = this.gridContext;
         var controller = new DesignerController(app, view, {SelectComposite, DraggingElement, SelectFrame});
         Environment.set(view, controller);
         Clipboard.attach(app);
@@ -133,8 +133,8 @@ export class RenderLoop {
             canvas.style.width = viewWidth + "px";
             this.upperCanvas.width = viewWidth*this.contextScale;
             this.upperCanvas.style.width = viewWidth + "px";
-            this.middleCanvas.width = viewWidth*this.contextScale;
-            this.middleCanvas.style.width = viewWidth + "px";
+            this.gridCanvas.width = viewWidth*this.contextScale;
+            this.gridCanvas.style.width = viewWidth + "px";
             resized = true;
         }
         if (canvas.height !== (0 | (viewHeight*this.contextScale))){
@@ -142,8 +142,8 @@ export class RenderLoop {
             canvas.style.height = viewHeight + "px";
             this.upperCanvas.height = viewHeight*this.contextScale;
             this.upperCanvas.style.height = viewHeight + "px";
-            this.middleCanvas.height = viewHeight*this.contextScale;
-            this.middleCanvas.style.height = viewHeight + "px";
+            this.gridCanvas.height = viewHeight*this.contextScale;
+            this.gridCanvas.style.height = viewHeight + "px";
             resized = true;
         }
 

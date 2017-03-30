@@ -12,7 +12,7 @@ define("bootloader", ["logger", "App"], function(logger){
             this._width = 793;
             this._height = 1122;
         },
-        layer3: {
+        interactionLayer: {
             ondraw: EventHelper.createEvent(),
             add: function(){
 

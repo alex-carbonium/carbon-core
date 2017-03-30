@@ -79,7 +79,7 @@ export default class LineCreator extends Tool {
         event.handled = true;
 
         if (this._element) {
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
             var pos = resize.call(this, this._element.x1(), this._element.y1(), this._element.x2(), this._element.y2());
 
             var w = this._element.width()
@@ -128,7 +128,7 @@ export default class LineCreator extends Tool {
                 y = point.y;
             }
             update.call(this, this._startPoint.x, this._startPoint.y, x, y);
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
             event.handled = true;
         }
     }

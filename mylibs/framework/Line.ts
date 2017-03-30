@@ -51,7 +51,7 @@ var LinePoint = {
         SnapController.calculateSnappingPoints(container);
         frame.element.visible(false, ChangeMode.Self)
 
-        Environment.view.layer3.add(resizingElement);
+        Environment.view.interactionLayer.add(resizingElement);
     },
     release (frame) {
         var e = frame.resizingElement;
@@ -61,7 +61,7 @@ var LinePoint = {
             frame.element.prepareAndSetProps(props);
             frame.element.visible(true, ChangeMode.Self);
 
-            Environment.view.layer3.remove(e);
+            Environment.view.interactionLayer.remove(e);
             e.dispose();
             Selection.refreshSelection();
         }
@@ -103,7 +103,7 @@ var LinePoint = {
 
         frame.resizingElement.saveOrResetLayoutProps();
         point.updateElement(frame.resizingElement, dx, dy);
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     }
 }
 

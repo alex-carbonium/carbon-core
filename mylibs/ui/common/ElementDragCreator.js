@@ -75,7 +75,7 @@ export default class ElementDragCreator extends Tool {
         this._mousepressed = false;
 
         if (this._element) {
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
             if (this._cursorNotMoved) {
                 Environment.controller.selectByClick(event);
                 App.Current.resetCurrentTool();
@@ -127,7 +127,7 @@ export default class ElementDragCreator extends Tool {
 
             this.updateElement(this._element, this._startPoint, endPoint);
 
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
             event.handled = true;
             return false;
         }

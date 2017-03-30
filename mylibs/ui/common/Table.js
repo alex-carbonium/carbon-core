@@ -482,7 +482,7 @@
 //             if (line.maxPos < line.currentPos) {
 //                 line.currentPos = line.maxPos;
 //             }
-//             Invalidate.requestUpperOnly();
+//             Invalidate.requestInteractionOnly();
 //         }
 //
 //         function cleanupTags(){
@@ -581,7 +581,7 @@
 //                     fwk.commandManager.execute(new sketch.commands.ResizeColumn(this, this._resizingColumn.lineNum, d, event.event.shiftKey));
 //                 }
 //                 delete this._resizingColumn;
-//                 Invalidate.requestUpperOnly();
+//                 Invalidate.requestInteractionOnly();
 //                 event.handled = true;
 //             } else if(this._resizingRow) {
 //                 this.releaseMouse(this);
@@ -594,7 +594,7 @@
 //                     fwk.commandManager.execute(new sketch.commands.ResizeRow(this, this._resizingRow.lineNum, d, event.event.shiftKey));
 //                 }
 //                 delete this._resizingRow;
-//                 Invalidate.requestUpperOnly();
+//                 Invalidate.requestInteractionOnly();
 //                 event.handled = true;
 //             }
 //         }
@@ -1096,7 +1096,7 @@
 //                     delete this._mouseUpHandler;
 //                 }
 //
-//                 Invalidate.requestUpperOnly();
+//                 Invalidate.requestInteractionOnly();
 //             },
 //             select:function(multiselect) {
 //                 Container.prototype.select.apply(this, arguments);

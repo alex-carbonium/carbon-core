@@ -89,7 +89,7 @@
 //                 delete this._snapLineToAdd;
 //                 Cursor.setGlobalCursor(cursor, true);
 //                 this._changedCursor = true;
-//                 Invalidate.requestUpperOnly();
+//                 Invalidate.requestInteractionOnly();
 //                 event.handled = true;
 //                 return;
 //             } else{
@@ -99,7 +99,7 @@
 //
 //             this._snapLineToAdd = {pos: mousePos, tmp: true};
 //             event.handled = true;
-//             Invalidate.requestUpperOnly();
+//             Invalidate.requestInteractionOnly();
 //             return;
 //         }
 //
@@ -110,7 +110,7 @@
 //
 //         if (this._snapLineToAdd){
 //             delete this._snapLineToAdd;
-//             Invalidate.requestUpperOnly();
+//             Invalidate.requestInteractionOnly();
 //         }
 //     }
 //
@@ -123,7 +123,7 @@
 //             }
 //             event.handled = true;
 //             this._snapLines.push(snapline);
-//             Invalidate.requestUpperOnly();
+//             Invalidate.requestInteractionOnly();
 //         }
 //     }
 //

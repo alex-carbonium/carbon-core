@@ -18,7 +18,7 @@ import SnapController from "framework/SnapController";
 import Box from "framework/Box";
 import {debounce} from "../../util";
 import Command from "framework/commands/Command";
-import {Types, ChangeMode} from "../../framework/Defs";
+import {Types, ChangeMode, LayerTypes} from "../../framework/Defs";
 import ArrangeStrategy from "../../framework/ArrangeStrategy";
 import ResizeOptions from "../../decorators/ResizeOptions";
 import { IMouseEventData, IKeyboardState } from "carbon-core";
@@ -88,7 +88,7 @@ function addToSelectedPoints(pt) {
         this.setProps({selectedPointIdx: -1}, ChangeMode.Self);
     }
 
-    Invalidate.requestUpperOnly();
+    Invalidate.requestInteractionOnly();
 }
 
 function clearSelectedPoints() {
@@ -421,7 +421,7 @@ class Path extends Shape {
 
     set nextPoint(value) {
         if (value != this._nextPoint) {
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
         }
         this._nextPoint = value;
         if (this._nextPoint) {
@@ -524,7 +524,7 @@ class Path extends Shape {
             this._cancelBinding.dispose();
         }
         if (edit) {
-            this.registerForLayerDraw(2, this);
+            this.registerForLayerDraw(LayerTypes.Interaction, this);
             Invalidate.request();
 
             this._currentPoint = null;
@@ -537,7 +537,7 @@ class Path extends Shape {
 
             updateSelectedPoint.call(this, this.points[0]);
         } else {
-            this.unregisterForLayerDraw(2, this);
+            this.unregisterForLayerDraw(LayerTypes.Interaction, this);
             Invalidate.request();
 
             this._cancelBinding = null;
@@ -944,7 +944,7 @@ class Path extends Shape {
         var pt = this.getPointIfClose(event);
         if (this._pointOnPath !== pt) {
             this._pointOnPath = pt;
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
         }
 
 
@@ -952,7 +952,7 @@ class Path extends Shape {
         function updateHoverPoint(pt) {
             if (this._hoverPoint !== pt) {
                 this._hoverPoint = pt;
-                Invalidate.requestUpperOnly();
+                Invalidate.requestInteractionOnly();
             }
 
             return pt;
@@ -961,7 +961,7 @@ class Path extends Shape {
         function updateHoverHandlePoint(pt) {
             if (this._hoverHandlePoint !== pt) {
                 this._hoverHandlePoint = pt;
-                Invalidate.requestUpperOnly();
+                Invalidate.requestInteractionOnly();
             }
 
             return pt;

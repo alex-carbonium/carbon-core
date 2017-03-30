@@ -106,7 +106,7 @@ export default class RulerGuides {
         if (canCapture && this._customGuides.tryCaptureX(x)) {
             e.cursor = "ew-resize";
             this._customGuides.releaseCaptured();
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
             return;
         }
 
@@ -114,7 +114,7 @@ export default class RulerGuides {
         if (canCapture && this._customGuides.tryCaptureY(y)) {
             e.cursor = "ns-resize";
             this._customGuides.releaseCaptured();
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
             return;
         }
 
@@ -144,7 +144,7 @@ export default class RulerGuides {
 
         var canStart = this._guideX !== null || this._guideY !== null;
         if (canStart) {
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
             SnapController.removeGuides(this._customGuides);
         }
         return canStart;
@@ -170,7 +170,7 @@ export default class RulerGuides {
                 this._removingGuide = false;
                 e.cursor = "ew-resize";
             }
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
         }
         else if (this._guideY !== null) {
             if (this._guideY.id && e.y < this._rectHorizontal.y + this._rectHorizontal.height) {
@@ -182,7 +182,7 @@ export default class RulerGuides {
                 this._removingGuide = false;
                 e.cursor = "ns-resize";
             }
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
         }
     };
     onDragStopped = e => {
@@ -227,14 +227,14 @@ export default class RulerGuides {
         this._removingGuide = false;
 
         this._customGuides.releaseCaptured();
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     };
     onClicked = e => {
         if (this._guideX || this._guideY) {
             this._guideX = null;
             this._guideY = null;
             this._customGuides.releaseCaptured();
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
             e.handled = true;
         }
     };
@@ -363,28 +363,28 @@ export default class RulerGuides {
             });
 
             this._customGuides.releaseCaptured();
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
         }
     }
 
     deleteGuideX(gx) {
         this._origin.patchProps(PatchType.Remove, "guidesX", gx);
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     }
     deleteGuideY(gy) {
         this._origin.patchProps(PatchType.Remove, "guidesY", gy);
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     }
     deleteGuidesOnArtboard() {
         this._origin.setProps({ guidesX: [], guidesY: [] });
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     }
     deleteGuidesOnPage() {
         var artboards = this._view.page.getAllArtboards();
         for (var i = 0; i < artboards.length; i++) {
             artboards[i].setProps({ guidesX: [], guidesY: [] });
         }
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     }
 
     dispose() {

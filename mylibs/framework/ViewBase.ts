@@ -1,10 +1,12 @@
 import AnimationController from "framework/animation/AnimationController";
-import {areRectsIntersecting} from "math/math";
+import { areRectsIntersecting } from "math/math";
 import Matrix from "math/matrix";
 import ContextPool from "framework/render/ContextPool";
 import EventHelper from "framework/EventHelper";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
+import { LayerTypes } from "framework/Defs";
+
 var Stopwatch = require("../Stopwatch");
 var debug = require("DebugUtil")("carb:view");
 
@@ -54,7 +56,7 @@ function onZoomChanged(value, oldValue) {
         sx += (viewport.width / scale) / 2;
         sy += (viewport.height / scale) / 2;
         view.scale(value);
-        var scroll = this.app.activePage.pointToScroll({x: sx, y: sy}, viewport);
+        var scroll = this.app.activePage.pointToScroll({ x: sx, y: sy }, viewport);
 
         view.scrollX(scroll.scrollX);
         view.scrollY(scroll.scrollY);
@@ -71,50 +73,33 @@ export default class ViewBase {
         this._layers.push(layer);
         this._layersReverse.splice(0, 0, layer);
         layer._view = this;
-
-        var setupLayerHandler = setupLayer.bind(this);
-
-        this._envArray.push({
-            finalRender: true,
-            pageMatrix: null,
-            layer: layer,
-            setupContext: function (context) {
-                setupLayerHandler(this.layer, context);
-            },
-            view: this
-        });
-
     }
 
-    _unregisterLayer(layer){
-        var i = this._layers.findIndex(l=>l===layer);
-        if(i >= 0){
-            this._layers.splice(i,1);
+    _unregisterLayer(layer) {
+        var i = this._layers.findIndex(l => l === layer);
+        if (i >= 0) {
+            this._layers.splice(i, 1);
         }
 
-        i = this._layersReverse.findIndex(l=>l===layer);
-        if(i >= 0){
-            this._layersReverse.splice(i,1);
-        }
-
-        i = this._envArray.findIndex(l=>l.layer===layer);
-        if(i >= 0){
-            this._envArray.splice(i,1);
+        i = this._layersReverse.findIndex(l => l === layer);
+        if (i >= 0) {
+            this._layersReverse.splice(i, 1);
         }
     }
 
-    _drawLayer(layer, layerIndex, context, environment) {
+    _drawLayer(layer, context, environment) {
         this.stopwatch.start();
         context.save();
         setupLayer.call(this, layer, context);
         layer.draw(context, environment);
 
-        var subscribers = this._registredForLayerDraw[layerIndex];
+        var subscribers = this._registredForLayerDraw[layer.type];
         for (var i = 0; i < subscribers.length; ++i) {
-            subscribers[i].onLayerDraw(layerIndex, context, environment);
+            subscribers[i].onLayerDraw(layer, context, environment);
         }
+
         context.restore();
-        debug("layer %d, metrics: %d", layerIndex, this.stopwatch.getElapsedTime())
+        debug("layer %d, metrics: %d", layer.type, this.stopwatch.getElapsedTime())
     }
 
     _drawLayerPixelsVisible(scale) {
@@ -137,8 +122,8 @@ export default class ViewBase {
         var pageMatrix = this._page.pageMatrix;
         this._page.pageMatrix = matrix;
 
-        let env = this._getEnv(this._page, 1, true);
-        this._drawLayer(this._page, 1, context, env);
+        let env = this._getEnv(this._page, true);
+        this._drawLayer(this._page, context, env);
 
         this._page.pageMatrix = pageMatrix;
 
@@ -154,8 +139,18 @@ export default class ViewBase {
         ContextPool.releaseContext(context);
     }
 
-    _getEnv(layer:any, layerIndex:number, final:boolean) {
-        let env = this._envArray[layerIndex - 1];
+    _getEnv(layer: any, final: boolean) {
+        let env: any = layer.env;
+
+        if (!env) {
+            let setupLayerHandler = setupLayer.bind(this);
+            env = layer.env = {
+                layer: layer,
+                setupContext: function (context) {
+                    setupLayerHandler(this.layer, context);
+                }
+            };
+        }
 
         env.pageMatrix = layer.pageMatrix;
         env.finalRender = final;
@@ -184,7 +179,6 @@ export default class ViewBase {
 
         this._layers = [];
         this._layersReverse = [];
-        this._envArray = [];
         this.app = app;
     }
 
@@ -238,7 +232,7 @@ export default class ViewBase {
     setInitialPagePlace(page) {
         var size = this.app.viewportSize();
         page.zoomToFit(size);
-        var scale =  page.scale();
+        var scale = page.scale();
         page.scale(1);
         var scroll = page.scrollCenterPosition(size);
         page.scrollTo(scroll);
@@ -260,17 +254,17 @@ export default class ViewBase {
             if (scale > 1 && this.showPixels()) {
                 this._drawLayerPixelsVisible(scale);
             } else {
-                let env = this._getEnv(this._page, 1, true);
-                this._drawLayer(this._page, 1, this.context, env);
+                let env = this._getEnv(this._page, true);
+                this._drawLayer(this._page, this.context, env);
             }
         }
 
-        for(var i = 1; i < this._layers.length; ++i) {
+        for (var i = 1; i < this._layers.length; ++i) {
             var layer = this._layers[i];
             if (layer.isInvalidateRequired()) {
                 layer.pageMatrix = this._page.pageMatrix;
-                let env = this._getEnv(layer, i + 1, false);
-                this._drawLayer(layer, i+1, layer.context, env);
+                let env = this._getEnv(layer, false);
+                this._drawLayer(layer, layer.context, env);
             }
         }
     }
@@ -303,8 +297,8 @@ export default class ViewBase {
         }
 
         var pageScale = page.scale();
-        if (arguments.length){
-            if (value !== pageScale){
+        if (arguments.length) {
+            if (value !== pageScale) {
                 pageScale = page.scale(value);
                 this.scaleChanged.raise(pageScale);
             }
@@ -330,8 +324,8 @@ export default class ViewBase {
         this._page = page;
         page._view = this;
         this._layers[0] = page;
-        this._layersReverse[1] = page;
-        this._envArray[0].layer = page;
+        this._layersReverse[this._layers.length - 1] = page;
+        page.type = LayerTypes.Content;
 
         page.parent(this);
         this.scale(page.scale());
@@ -356,15 +350,18 @@ export default class ViewBase {
         };
     }
 
-    invalidate(layer?, rect?) {
+    invalidate(layerType?, rect?) {
         //rect = rect || this.viewportRect();
-        if (layer === undefined) {
+        if (layerType === undefined) {
             for (var i = 0; i < this._layers.length; i++) {
                 this._layers[i].invalidate(false, rect);
             }
         }
         else {
-            this._layers[layer].invalidate(false, rect);
+            var layer = this._layers.find(l=>l.type === layerType);
+            if(layer) {
+                layer.invalidate(false, rect);
+            }
         }
         this.requestRedraw();
     }
@@ -434,7 +431,7 @@ export default class ViewBase {
 
     ensureVisible(element) {
         var pt = element.getBoundaryRectGlobal();
-        pt = {x: pt.x + pt.width / 2, y: pt.y + pt.height / 2};
+        pt = { x: pt.x + pt.width / 2, y: pt.y + pt.height / 2 };
         var scroll = this.page.pointToScroll(pt, this.app.viewportSize());
         if (scroll.scrollX) {
             this.scrollX(scroll.scrollX);
@@ -471,7 +468,7 @@ export default class ViewBase {
     }
 
     scrollPosition() {
-        return {scrollX: this.scrollX(), scrollY: this.scrollY()};
+        return { scrollX: this.scrollX(), scrollY: this.scrollY() };
     }
 
     resize(rect) {
@@ -514,7 +511,7 @@ export default class ViewBase {
             sy /= scale;
             sx += (oldSize.width / scale) / 2;
             sy += (oldSize.height / scale) / 2;
-            var scroll = this.app.activePage.pointToScroll({x: sx, y: sy}, newSize);
+            var scroll = this.app.activePage.pointToScroll({ x: sx, y: sy }, newSize);
 
             this.scrollX(scroll.scrollX);
             this.scrollY(scroll.scrollY);
@@ -529,15 +526,15 @@ export default class ViewBase {
     cancel() {
     }
 
-    zoom (value?, norefresh?) {
-        if(value !== undefined) {
-            if(!norefresh && (this.scale() !== value)){
+    zoom(value?, norefresh?) {
+        if (value !== undefined) {
+            if (!norefresh && (this.scale() !== value)) {
                 onZoomChanged.call(this, value, this.scale());
             }
         }
         return this.scale();
     }
-    zoomToFit () {
+    zoomToFit() {
         var size = this.app.viewportSize();
 
         this.app.activePage.zoomToFit(size);
@@ -545,10 +542,10 @@ export default class ViewBase {
 
         this.scrollToCenter();
     }
-    maxZoom () {
+    maxZoom() {
         return 0.01;;
     }
-    minZoom () {
+    minZoom() {
         return 16;
     }
 }

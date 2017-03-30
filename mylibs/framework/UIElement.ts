@@ -565,7 +565,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         if (this.decorators.indexOf(decorator) === -1) {
             this.decorators.push(decorator);
             decorator.attach(this);
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
         }
     }
     removeDecorator(decorator) {
@@ -576,7 +576,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
             if (this.decorators[i] === decorator) {
                 this.decorators[i].detach();
                 this.decorators.splice(i, 1);
-                Invalidate.requestUpperOnly();
+                Invalidate.requestInteractionOnly();
                 break;
             }
         }
@@ -586,7 +586,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         if (decorators) {
             decorators.forEach(x => x.detach());
             this.decorators = [];
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
         }
         return decorators;
     }
@@ -598,7 +598,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
             if (this.decorators[i].t === type.prototype.t) {
                 this.decorators[i].detach();
                 this.decorators.splice(i, 1);
-                Invalidate.requestUpperOnly();
+                Invalidate.requestInteractionOnly();
                 break;
             }
         }

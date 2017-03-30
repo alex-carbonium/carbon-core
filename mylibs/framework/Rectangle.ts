@@ -48,7 +48,7 @@ var CornerRadiusPoint = {
         frame.resizingElement = resizingElement;
         frame.originalValue = frame.element.cornerRadius();
         frame.onlyCurrentVisible = true;
-        Environment.view.layer3.add(resizingElement);
+        Environment.view.interactionLayer.add(resizingElement);
         //App.Current.view.startRotatingEvent.raise();
     },
     release (frame) {
@@ -129,7 +129,7 @@ var CornerRadiusPoint = {
             r.bottomRight = newRadius;
         }
         frame.resizingElement.children[0].cornerRadius(r);
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     }
 }
 

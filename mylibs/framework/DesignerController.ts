@@ -32,7 +32,6 @@ function stopDrag(event) {
         return false;
     }
 
-
     var elements = this._draggingElement.saveChanges(event, this._draggingOverElement, this.app.activePage);
     this._draggingElement.detach();
 
@@ -322,7 +321,7 @@ export default class DesignerController implements IController {
         this._draggingElement = ObjectFactory.construct(Types.DraggingElement, event.element, event);
         this._draggingElement.showOriginal(event.altKey);
 
-        this.view.layer3.add(this._draggingElement);
+        this.view.interactionLayer.add(this._draggingElement);
         var translation = this._draggingElement.getTranslation();
         this._draggingOffset = {
             x: event.x - translation.x,
@@ -396,7 +395,7 @@ export default class DesignerController implements IController {
             if (!eventData.handled) {
                 Selection.setupSelectFrame(new this.deps.SelectFrame(onselect.bind(this)), eventData);
 
-                this.view.layer3.add(Selection.selectFrame);
+                this.view.interactionLayer.add(Selection.selectFrame);
             }
         }
     }
@@ -458,7 +457,7 @@ export default class DesignerController implements IController {
         if (Selection.selectFrame !== null) {
             Selection.updateSelectFrame(eventData);
 
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
             return;
         }
 
@@ -524,7 +523,7 @@ export default class DesignerController implements IController {
 
         if (Selection.selectFrame !== null) {
 
-            this.view.layer3.remove(Selection.selectFrame);
+            this.view.interactionLayer.remove(Selection.selectFrame);
             Selection.completeSelectFrame(eventData);
 
             return;

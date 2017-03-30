@@ -62,7 +62,7 @@ export default class LinkingTool extends Tool {
             var h = 0 | HomeButtonHeight / scale;
             if (isPointInRect({x: x - w, y: y, width: w, height: h}, event)) {
                 this._activeStory.setProps({homeScreen: [this._app.activePage.id(), artboard.id()]});
-                Invalidate.requestUpperOnly();
+                Invalidate.requestInteractionOnly();
                 return true;
             }
         }
@@ -182,7 +182,7 @@ export default class LinkingTool extends Tool {
             if (this._currentPoint) {
                 this._linkToArtboard(event);
 
-                Invalidate.requestUpperOnly();
+                Invalidate.requestInteractionOnly();
                 delete this._currentPoint;
                 delete this._startPoint;
             }
@@ -260,7 +260,7 @@ export default class LinkingTool extends Tool {
             var x = event.x,
                 y = event.y;
             this._currentPoint = {_x: x, _y: y, x:x, y:y};
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
             event.handled = true;
         }
 
@@ -270,7 +270,7 @@ export default class LinkingTool extends Tool {
 
         if (this._target != target) {
             this._target = target;
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
         }
 
         if(this._isCurrentFlowStory()){
@@ -313,14 +313,14 @@ export default class LinkingTool extends Tool {
     _replaceHandles(handles: Array<any>) {
         if(handles.length !== this._handles.length){
             this._handles = handles;
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
             return;
         }
 
         for(var i = 0; i < handles.length; ++i){
             if(handles[i].id !== this._handles[i].id){
                 this._handles = handles;
-                Invalidate.requestUpperOnly();
+                Invalidate.requestInteractionOnly();
                 return;
             }
         }
@@ -334,7 +334,7 @@ export default class LinkingTool extends Tool {
         this._activeStoryChangedToken = this._app.activeStoryChanged.bind(this, ()=> {
             this._activeStory = this._app.activeStory();
             this._refreshConnections();
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
 
             if (this._activeStory && this._activeStory.props.homeScreen) {
                 var page = this._app.setActivePageById(this._activeStory.props.homeScreen[0]);
@@ -518,17 +518,17 @@ export default class LinkingTool extends Tool {
             }
         }
 
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     }
 
     dragElementStarted(){
         this._draggingElement = true;
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     }
     dragElementEnded() {
         this._draggingElement = false;
         this._handles = [];
-        Invalidate.requestUpperOnly();
+        Invalidate.requestInteractionOnly();
     }
 
     _onAppChanged(primitives){

@@ -115,6 +115,8 @@ class AppClass extends DataNode implements IApp {
     currentToolChanged: IEvent<string>;
     _currentTool: string;
 
+
+    pageChanged: IEvent2<IPage, IPage>;
     constructor() {
         super(true);
 
@@ -229,7 +231,7 @@ class AppClass extends DataNode implements IApp {
         if (arguments.length > 0) {
             this._activeStory = value;
             this.activeStoryChanged.raise(value);
-            Invalidate.requestUpperOnly();
+            Invalidate.requestInteractionOnly();
         }
 
         return this._activeStory;
