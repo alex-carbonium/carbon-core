@@ -16,7 +16,8 @@ import { ITransformationElement, ITransformationEventData, IPoint, IKeyboardStat
 import UserSettings from "../UserSettings";
 import Point from "../math/point";
 import Matrix from "../math/matrix";
-import { ChangeMode, FloatingPointPrecision, LayerTypes } from "../framework/Defs";
+import { ChangeMode, FloatingPointPrecision } from "../framework/Defs";
+import { LayerTypes, IUIElement } from "carbon-core";
 
 var HighlightBrush = Brush.createFromColor(SharedColors.Highlight);
 
@@ -44,7 +45,7 @@ class ResizeHint extends UIElement {
     }
 
     _updatePosition(): void{
-        var anchorElement: UIElement = this._transformationElement;
+        var anchorElement: any = this._transformationElement;
         if (anchorElement.elements.length === 1 && !anchorElement.wrapSingleChild()){
             //rotated elements are not wrapped when dragging
             anchorElement = this._transformationElement.children[0];
@@ -221,7 +222,7 @@ class SelectionRect extends UIElement {
     }
 }
 
-var onDraggingElement = function (event: ITransformationEventData, keys: IKeyboardState) {
+var onDraggingElement = function (event: any, keys: IKeyboardState) {
     if (event.transformationElement.showResizeHint()) {
         this._hint.updatePositionText();
     }
@@ -366,7 +367,7 @@ function onStopResizing() {
     updateVisualizations.call(this);
 }
 
-function onResizing(event: ITransformationEventData) {
+function onResizing(event: any) {
     if (event.element.showResizeHint()) {
         this._hint.updateSizeText();
     }
@@ -475,7 +476,7 @@ export default class DropVisualization extends ExtensionBase {
     }
 
     onLayerDraw(layer, context) {
-        var target = this._target || this.view._highlightTarget;
+        var target = this._target || (this.view as any)._highlightTarget;
         if (target) {
             DropVisualization.highlightElement(this.view, context, target, this._isDropTarget);
         }

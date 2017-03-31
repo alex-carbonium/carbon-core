@@ -6,12 +6,14 @@ declare module "carbon-model" {
         props: TProps;
 
         patchProps(patchType, propName, propValue);
+        setProps(props, mode?);
     }
 
     export interface IDataNodeProps {
         [key: string]: any;
         id: string;
     }
+
     export interface IDataNode {
         id(value?: string): string;
 
@@ -113,6 +115,9 @@ declare module "carbon-model" {
     }
 
     export interface ITransformationElement extends IComposite, IGroupContainer {
+        angle():number;
+        x():number;
+        y():number;
     }
 
     export interface ILayer extends IContainer {
@@ -138,6 +143,7 @@ declare module "carbon-model" {
 
     export interface ITransformationEventData extends IEventData {
         transformationElement: ITransformationElement;
+        element:IUIElement;
     }
 
     export const NullContainer:IContainer;

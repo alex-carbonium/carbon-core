@@ -12,9 +12,11 @@ declare module "carbon-app" {
     export interface IAppProps extends IDataNodeProps{
         customGuides: any;
     }
+
     export interface IApp extends IDataNode, IPropsOwner<IAppProps> {
         isLoaded: boolean;
         loaded: Promise<void>;
+        props:IAppProps;
 
         logEvent: IEvent<any>;
         changed: IEvent<any>;
@@ -195,9 +197,9 @@ declare module "carbon-app" {
     }
 
     export const enum LayerTypes{
-        Content,
-        Isolation,
-        Interaction
+        Content = 0,
+        Isolation = 1,
+        Interaction = 2
     }
 
     export interface IInvalidate {

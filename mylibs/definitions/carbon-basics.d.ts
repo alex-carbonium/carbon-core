@@ -170,7 +170,7 @@ declare module "carbon-basics" {
         static Default: Box;
     }
 
-    export const enum PrimitiveType {
+    export enum PrimitiveType {
         None = 0,
         DataNodeAdd = 1,
         DataNodeRemove = 2,
@@ -182,7 +182,7 @@ declare module "carbon-basics" {
         View = 8
     }
 
-    export const enum ContextBarPosition {
+    export enum ContextBarPosition {
         None = 0,
         Left = 1,
         Right = 2,

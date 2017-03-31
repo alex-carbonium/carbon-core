@@ -1,6 +1,7 @@
 import Environment from "environment";
 import Invalidate from "framework/Invalidate";
 import Point from "math/point";
+import { ICoordinate } from "carbon-core";
 var debug = require("DebugUtil")("carb:snapController");
 
 var SNAP_DELTA = 4;
@@ -28,7 +29,7 @@ function compareSnapLines(lines1, lines2){
     }
 }
 
-function buildHorizontal(snap, xs){
+function buildHorizontal(snap, xs):any{
     var scale = Environment.view.scale();
     var exs = snap.element.getSnapPoints();
     if(exs.noLine){
@@ -90,8 +91,10 @@ function collectPoints(data, element) {
 }
 
 class SnapController {
+    snapLines:any[];
+    [name:string]:any;
     calculateSnappingPointsForPath(path) {
-        var data = {};
+        var data:any = {};
         data._snapX = [];
         data._snapY = [];
         data._snapXCenter = [];
@@ -121,7 +124,7 @@ class SnapController {
     }
 
     calculateSnappingPoints(parent){
-        var data = {};
+        var data:any = {};
         data._snapX = [];
         data._snapY = [];
         data._snapXCenter = [];
@@ -150,7 +153,7 @@ class SnapController {
         var rect = element.getBoundaryRectGlobal();
         var x = rect.x;
         var y = rect.y;
-        var data = {};
+        var data:any = {};
         if (snapData !== null) {
             if (holdPcnt < 20) {
                 snapData.xs.sort((a,b)=>a-b);
@@ -229,7 +232,7 @@ class SnapController {
         if (snap !== null) {
             snappedPoint = snappedPoint || new Point(pos.x, pos.y);
             snappedPoint.y = snap.value - target._yCenter;
-            var snapLine = buildHorizontal(snap, xs.map(v=>v+pos.x));
+            let snapLine = buildHorizontal(snap, xs.map(v=>v+pos.x));
             if(snapLine) {
                 this.snapLines.push(snapLine);
             }
@@ -239,7 +242,7 @@ class SnapController {
                 if (snap !== null) {
                     snappedPoint = snappedPoint || new Point(pos.x, pos.y);
                     snappedPoint.y = snap.value - ys[i];
-                    var snapLine = buildHorizontal(snap, xs.map(v=>v+pos.x));
+                    let snapLine = buildHorizontal(snap, xs.map(v=>v+pos.x));
                     if(snapLine) {
                         this.snapLines.push(snapLine);
                     }
@@ -252,7 +255,7 @@ class SnapController {
         return snappedPoint || pos;
     }
 
-    applySnappingForPoint(pos, disableVertical, disableHorizontal){
+    applySnappingForPoint(pos:ICoordinate, disableVertical?, disableHorizontal?){
         var data = this.currentSnappingData;
         if(!data){
             return pos;
@@ -273,7 +276,7 @@ class SnapController {
             var snap = findSnap(snapX, pos.x, delta);
             if (snap !== null) {
                 snappedPoint = new Point(snap.value, pos.y);
-                var snapLine = buildVertical(snap, ys);
+                let snapLine = buildVertical(snap, ys);
                 if (snapLine) {
                     this.snapLines.push(snapLine);
                 }
@@ -286,7 +289,7 @@ class SnapController {
             if (snap !== null) {
                 snappedPoint = snappedPoint || new Point(pos.x, pos.y);
                 snappedPoint.y = snap.value;
-                var snapLine = buildHorizontal(snap, xs);
+                let snapLine = buildHorizontal(snap, xs);
                 if (snapLine) {
                     this.snapLines.push(snapLine);
                 }

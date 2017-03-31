@@ -189,7 +189,7 @@ class Matrix {
         return this;
     }
 
-    rotate(angle, cx, cy){
+    rotate(angle, cx?, cy?){
         angle *= Math.PI/180;
         // Concatenate rotation matrix into this one
         var x = cx || 0,

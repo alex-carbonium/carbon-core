@@ -53,7 +53,7 @@ export default class Font {
         this.t = Types.Font;
     }
 
-    static cssString(font, scale) {
+    static cssString(font, scale?) {
         var actualScale = scale || 1;
         return [
             font.italic ? "italic" : "",
