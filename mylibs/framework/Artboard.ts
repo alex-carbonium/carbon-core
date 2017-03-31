@@ -15,6 +15,7 @@ import Selection from "framework/SelectionModel";
 import Environment from "environment";
 import Matrix from "math/matrix";
 import DataNode from "framework/DataNode";
+import { IPropsOwner, IArtboardProps } from "carbon-model";
 
 
 //TODO: fix name of artboard on zoom
@@ -28,7 +29,9 @@ import DataNode from "framework/DataNode";
 // cleanup empty states
 
 
-class Artboard extends Container {
+class Artboard extends Container implements IPropsOwner<IArtboardProps> {
+    props: IArtboardProps;
+
     constructor() {
         super();
         this.allowArtboardSelection(false);
