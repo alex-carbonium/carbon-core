@@ -37,6 +37,8 @@ declare module "carbon-model" {
 
         getMaxOuterBorder(): number;
 
+        invalidate();
+
         hitTest(point: IPoint, scale: number, boundaryRectOnly: boolean): boolean;
         hitTestGlobalRect(rect: IRect, directSelection?: boolean): boolean;
 
@@ -76,6 +78,8 @@ declare module "carbon-model" {
         autoPositionChildren(): boolean;
 
         applyVisitor(callback:(IUIElement)=>boolean|void);
+
+        hitTransparent(value:boolean):boolean;
     }
 
     export interface IGroupContainer extends IContainer {

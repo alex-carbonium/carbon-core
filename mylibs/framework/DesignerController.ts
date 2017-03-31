@@ -156,8 +156,8 @@ export default class DesignerController implements IController {
                 return;
             }
 
-            for (var i = 0; i < this.view._layersReverse.length; i++) {
-                var layer = this.view._layersReverse[i];
+            for (var i =  this.view._layers.length - 1; i >= 0 ; i--) {
+                var layer = this.view._layers[i];
                 var element = layer.hitElement(eventData, this.view.scale());
                 if (element !== null) {
                     var cursor = element.cursor(eventData);
@@ -194,8 +194,8 @@ export default class DesignerController implements IController {
     }
 
     _bubbleMouseEvent(eventData, method) {
-        for (var i = 0; i < this.view._layersReverse.length; i++) {
-            var layer = this.view._layersReverse[i];
+        for (var i =  this.view._layers.length - 1; i >= 0 ; i--) {
+            var layer = this.view._layers[i];
             var e = layer.hitElement(eventData, this.view.scale());
             if (e && e[method] /*&& e.canSelect()*/ && !e.locked()) {
                 e[method](eventData, Keyboard.state);
@@ -374,8 +374,8 @@ export default class DesignerController implements IController {
                 }
             }
             else {
-                for (var i = 0; i < this.view._layersReverse.length ; i++) {
-                    var layer = this.view._layersReverse[i];
+                for (var i =  this.view._layers.length - 1; i >= 0 ; i--) {
+                    var layer = this.view._layers[i];
                     var element = layer.hitElement(eventData, this.view.scale(), null, Selection.directSelectionEnabled());
                     if (element !== null) {
                         if (element.canDrag()) {

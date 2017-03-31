@@ -71,7 +71,6 @@ export default class ViewBase {
 
     _registerLayer(layer) {
         this._layers.push(layer);
-        this._layersReverse.splice(0, 0, layer);
         layer._view = this;
     }
 
@@ -79,11 +78,6 @@ export default class ViewBase {
         var i = this._layers.findIndex(l => l === layer);
         if (i >= 0) {
             this._layers.splice(i, 1);
-        }
-
-        i = this._layersReverse.findIndex(l => l === layer);
-        if (i >= 0) {
-            this._layersReverse.splice(i, 1);
         }
     }
 
@@ -178,7 +172,6 @@ export default class ViewBase {
         this.scaleMatrix = Matrix.create();
 
         this._layers = [];
-        this._layersReverse = [];
         this.app = app;
     }
 
@@ -324,7 +317,6 @@ export default class ViewBase {
         this._page = page;
         page._view = this;
         this._layers[0] = page;
-        this._layersReverse[this._layers.length - 1] = page;
         page.type = LayerTypes.Content;
 
         page.parent(this);

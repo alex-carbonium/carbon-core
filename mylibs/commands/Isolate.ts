@@ -1,7 +1,7 @@
 import Selection from "framework/SelectionModel";
 import Environment from "environment";
 import { ChangeMode } from "framework/Defs";
-import { LayerTypes } from "carbon-core";
+import { LayerTypes, ILayer } from "carbon-core";
 
 export default {
     run: function(elements){
@@ -9,12 +9,13 @@ export default {
         var element = elements[0];
         var parent = element.parent();
 
-
+        var layer:ILayer = Environment.view.getLayer(LayerTypes.Isolation);
         for (let i = 0, l = sorted.length; i < l; ++i) {
             let element = sorted[i];
-            element.setProps({visible:false}, ChangeMode.Self);
-            var layer = Environment.view.getLayer(LayerTypes.Isolation);
             layer.add(element.clone());
+            element.setProps({visible:false}, ChangeMode.Self);
         }
+        layer.hitTransparent(false);
+        layer.invalidate();
     }
 }
