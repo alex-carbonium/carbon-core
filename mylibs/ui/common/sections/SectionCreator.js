@@ -3,12 +3,13 @@ import SectionDecorator from "./SectionDecorator";
 import Section from "../../../framework/Section";
 import Artboard from "../../../framework/Artboard";
 import NullArtboard from "../../../framework/NullArtboard";
-import {ViewTool, LayerTypes} from "../../../framework/Defs";
+import {ViewTool} from "../../../framework/Defs";
 import CommandManager from "../../../framework/commands/CommandManager";
 import CompositeCommand from "../../../framework/commands/CompositeCommand";
 import Selection from "../../../framework/SelectionModel"
 import Cursor from "../../../framework/Cursor";
 import Invalidate from "../../../framework/Invalidate";
+import {LayerTypes} from "carbon-core";
 
 var decorator = null;
 

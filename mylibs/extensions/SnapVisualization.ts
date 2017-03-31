@@ -3,7 +3,6 @@ import DesignerView from "framework/DesignerView";
 import SnapController from "framework/SnapController";
 import {LayerTypes} from "carbon-app";
 
-
 function drawSnapLines(context, environment) {
 
     var lines = SnapController.snapLines;

@@ -10,7 +10,7 @@ import { IsolationLayer } from "framework/IsolationLayer";
 import { LayerTypes } from "carbon-app";
 
 function setupLayers(Layer) {
-    this.interactionLayer = new Layer(this);
+    this.interactionLayer = new Layer();
     this.interactionLayer.type = LayerTypes.Interaction;
     this.interactionLayer.hitTransparent(true);
 

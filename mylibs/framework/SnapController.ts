@@ -1,6 +1,7 @@
 import Environment from "environment";
 import Invalidate from "framework/Invalidate";
 import Point from "math/point";
+import { ICoordinate } from "carbon-core";
 var debug = require("DebugUtil")("carb:snapController");
 
 var SNAP_DELTA = 4;
@@ -28,7 +29,7 @@ function compareSnapLines(lines1, lines2){
     }
 }
 
-function buildHorizontal(snap, xs){
+function buildHorizontal(snap, xs):any{
     var scale = Environment.view.scale();
     var exs = snap.element.getSnapPoints();
     if(exs.noLine){
@@ -90,9 +91,9 @@ function collectPoints(data, element) {
 }
 
 class SnapController {
-    [name: string]: any;
+    [name:string]:any;
     calculateSnappingPointsForPath(path) {
-        var data: any = {};
+        var data:any = {};
         data._snapX = [];
         data._snapY = [];
         data._snapXCenter = [];
@@ -253,7 +254,7 @@ class SnapController {
         return snappedPoint || pos;
     }
 
-    applySnappingForPoint(pos, disableVertical?, disableHorizontal?){
+    applySnappingForPoint(pos:ICoordinate, disableVertical?, disableHorizontal?){
         var data = this.currentSnappingData;
         if(!data){
             return pos;
@@ -274,7 +275,7 @@ class SnapController {
             var snap = findSnap(snapX, pos.x, delta);
             if (snap !== null) {
                 snappedPoint = new Point(snap.value, pos.y);
-                var snapLine = buildVertical(snap, ys);
+                let snapLine = buildVertical(snap, ys);
                 if (snapLine) {
                     this.snapLines.push(snapLine);
                 }
