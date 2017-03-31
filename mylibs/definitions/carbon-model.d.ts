@@ -153,7 +153,7 @@ declare module "carbon-model" {
 
     export interface ITransformationEventData extends IEventData {
         transformationElement: ITransformationElement;
-        element:IUIElement;
+        element?:IUIElement;
     }
 
     export const NullContainer:IContainer;
