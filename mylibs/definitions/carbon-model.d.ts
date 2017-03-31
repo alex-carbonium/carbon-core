@@ -5,6 +5,7 @@ declare module "carbon-model" {
     export interface IPropsOwner<TProps>{
         props: TProps;
 
+        setProps(props: Partial<TProps>, mode?);
         patchProps(patchType, propName, propValue);
     }
 

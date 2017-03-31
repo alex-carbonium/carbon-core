@@ -13,8 +13,9 @@ import Environment from "../../environment";
 import DesignerView from "../../framework/DesignerView";
 import UserSettings from "../../UserSettings";
 import RulerGuides from "./RulerGuides";
-import { IArtboardProps, IApp, LayerTypes, IView, IController, ILayer, IContext, IComposite, ITransformationEventData } from "carbon-core";
+import { IArtboardProps, IApp, IView, IController, ILayer, IContext, IComposite, ITransformationEventData } from "carbon-core";
 import { IArtboard, IUIElement } from "carbon-model";
+import { LayerTypes } from "carbon-app";
 
 const config = UserSettings.ruler;
 const selectionSize = 3;

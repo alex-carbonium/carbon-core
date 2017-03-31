@@ -39,7 +39,7 @@ declare module "carbon-app"{
         interactionLayer: any;
         scaleMatrix: any;
 
-        registerForLayerDraw(layerType:number, element:{onLayerDraw:(layer: ILayer, context: IContext)=>void});
+        registerForLayerDraw(layerType:number, element:{onLayerDraw:(layer: ILayer, context: IContext)=>void}, index?);
         unregisterForLayerDraw(layerType:number, element:any);
 
         viewportRect(): any;

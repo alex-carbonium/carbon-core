@@ -5,7 +5,8 @@ import ContextPool from "framework/render/ContextPool";
 import EventHelper from "framework/EventHelper";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
-import { ILayer, LayerTypes } from "carbon-core";
+import { ILayer } from "carbon-core";
+import { LayerTypes } from "carbon-app";
 
 var Stopwatch = require("../Stopwatch");
 var debug = require("DebugUtil")("carb:view");

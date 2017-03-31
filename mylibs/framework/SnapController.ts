@@ -90,8 +90,9 @@ function collectPoints(data, element) {
 }
 
 class SnapController {
+    [name: string]: any;
     calculateSnappingPointsForPath(path) {
-        var data = {};
+        var data: any = {};
         data._snapX = [];
         data._snapY = [];
         data._snapXCenter = [];
@@ -121,7 +122,7 @@ class SnapController {
     }
 
     calculateSnappingPoints(parent){
-        var data = {};
+        var data: any = {};
         data._snapX = [];
         data._snapY = [];
         data._snapXCenter = [];
@@ -150,7 +151,7 @@ class SnapController {
         var rect = element.getBoundaryRectGlobal();
         var x = rect.x;
         var y = rect.y;
-        var data = {};
+        var data: any = {};
         if (snapData !== null) {
             if (holdPcnt < 20) {
                 snapData.xs.sort((a,b)=>a-b);
@@ -229,7 +230,7 @@ class SnapController {
         if (snap !== null) {
             snappedPoint = snappedPoint || new Point(pos.x, pos.y);
             snappedPoint.y = snap.value - target._yCenter;
-            var snapLine = buildHorizontal(snap, xs.map(v=>v+pos.x));
+            let snapLine = buildHorizontal(snap, xs.map(v=>v+pos.x));
             if(snapLine) {
                 this.snapLines.push(snapLine);
             }
@@ -239,7 +240,7 @@ class SnapController {
                 if (snap !== null) {
                     snappedPoint = snappedPoint || new Point(pos.x, pos.y);
                     snappedPoint.y = snap.value - ys[i];
-                    var snapLine = buildHorizontal(snap, xs.map(v=>v+pos.x));
+                    let snapLine = buildHorizontal(snap, xs.map(v=>v+pos.x));
                     if(snapLine) {
                         this.snapLines.push(snapLine);
                     }
@@ -252,7 +253,7 @@ class SnapController {
         return snappedPoint || pos;
     }
 
-    applySnappingForPoint(pos, disableVertical, disableHorizontal){
+    applySnappingForPoint(pos, disableVertical?, disableHorizontal?){
         var data = this.currentSnappingData;
         if(!data){
             return pos;
@@ -286,7 +287,7 @@ class SnapController {
             if (snap !== null) {
                 snappedPoint = snappedPoint || new Point(pos.x, pos.y);
                 snappedPoint.y = snap.value;
-                var snapLine = buildHorizontal(snap, xs);
+                let snapLine = buildHorizontal(snap, xs);
                 if (snapLine) {
                     this.snapLines.push(snapLine);
                 }

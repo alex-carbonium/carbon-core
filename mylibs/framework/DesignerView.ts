@@ -6,15 +6,15 @@ import SelectionModel from "./SelectionModel";
 import Cursor from "framework/Cursor";
 import Invalidate from "framework/Invalidate";
 import PixelGrid from "framework/render/PixelGrid"
-import {LayerTypes} from "framework/Defs";
-import {IsolationLayer} from "framework/IsolationLayer";
+import { IsolationLayer } from "framework/IsolationLayer";
+import { LayerTypes } from "carbon-app";
 
 function setupLayers(Layer) {
     this.interactionLayer = new Layer(this);
     this.interactionLayer.type = LayerTypes.Interaction;
     this.interactionLayer.hitTransparent(true);
 
-    this.isolationLayer = new IsolationLayer(this);
+    this.isolationLayer = new IsolationLayer();
     this.isolationLayer.type = LayerTypes.Isolation;
     this.isolationLayer.hitTransparent(true);
     this.isolationLayer.context = this.isolationContext;
@@ -79,7 +79,7 @@ class DesignerView extends ViewBase {
         }
     }
 
-    showPixelGrid(value) {
+    showPixelGrid(value?) {
         if (value !== undefined) {
             if(this._pixelGrid !== value && !value){
                 this.pixelGrid.clear();
