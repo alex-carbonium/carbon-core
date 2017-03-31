@@ -16,6 +16,9 @@ declare module "carbon-model" {
         id(value?: string): string;
 
         findAllNodesDepthFirst<T extends IDataNode>(predicate: (node: T) => boolean): T[];
+
+        enablePropsTracking();
+        disablePropsTracking();
     }
 
     export interface IUIElementProps extends IDataNodeProps {
@@ -50,6 +53,7 @@ declare module "carbon-model" {
 
     export interface IContainerProps extends IUIElementProps{
     }
+
     export interface IContainer extends IUIElement, IPropsOwner<IContainerProps> {
         children: IUIElement[];
 
@@ -78,7 +82,7 @@ declare module "carbon-model" {
     }
 
     export interface IPage extends IContainer {
-         getAllArtboards(): IArtboard[];
+        getAllArtboards(): IArtboard[];
         getActiveArtboard() : IArtboard;
 
         saveWorkspaceState(): any;
@@ -94,6 +98,7 @@ declare module "carbon-model" {
 
         insertArtboards(artboards: IArtboard[]);
     }
+
     export const Page: IPage & IConstructor<IPage>;
 
     export interface IComposite extends IUIElement {
@@ -117,12 +122,13 @@ declare module "carbon-model" {
         initFromData(content: any): void;
     }
 
-    export interface IArtboardProps extends IUIElementProps {
+    export interface IArtboardProps extends IContainerProps {
         guidesX: IGuide[];
         guidesY: IGuide[];
     }
 
     export interface IArtboard extends IContainer {
+
     }
 
     export interface IGuide {
@@ -133,4 +139,6 @@ declare module "carbon-model" {
     export interface ITransformationEventData extends IEventData {
         transformationElement: ITransformationElement;
     }
+
+    export const NullContainer:IContainer;
 }

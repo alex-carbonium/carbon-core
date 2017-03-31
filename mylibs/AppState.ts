@@ -3,6 +3,8 @@ import Primitive from "framework/sync/Primitive_Handlers";
 import Rollbacks from "framework/sync/Rollbacks";
 import eventHelper from "framework/EventHelper";
 import DeferredPrimitives from "./framework/sync/DeferredPrimitives";
+import { IApp } from "carbon-core";
+
 
 var subscribe = function(){
     if (this.disposed){
@@ -73,7 +75,7 @@ var subscribe = function(){
 export default class AppState {
     [name: string]: any;
 
-    constructor(app) {
+    constructor(app:IApp) {
         this.app = app;
         this._subscriptions = [];
 

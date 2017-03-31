@@ -79,6 +79,8 @@ export default class ShortcutManager {
         { key: "ctrl+i", action: "fontItalic" },
         { key: "ctrl+u", action: "fontUnderline" },
 
+        { key: "alt+i", action: "isolateSelection" },
+
         { key: "ctrl+a", action: "selectAll" },
 
         { key: "ctrl+shift+]", action: "bringToFront" },
@@ -191,6 +193,8 @@ export default class ShortcutManager {
         { key: "meta+b", action: "fontBold" },
         { key: "meta+i", action: "fontItalic" },
         { key: "meta+u", action: "fontUnderline" },
+
+        { key: "alt+i", action: "isolateSelection" },
 
         { key: "meta+a", action: "selectAll" },
 

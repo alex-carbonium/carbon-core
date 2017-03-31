@@ -326,10 +326,4 @@ export enum LineJoin {
     Round
 };
 
-export enum LayerTypes {
-    Content,
-    Isolation,
-    Interaction
-}
-
 export var FloatingPointPrecision = 10;

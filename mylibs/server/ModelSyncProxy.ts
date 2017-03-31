@@ -4,15 +4,18 @@ import {ChangeMode} from "../framework/Defs";
 import DeferredPrimitives from "../framework/sync/DeferredPrimitives";
 import Invalidate from "../framework/Invalidate";
 import Selection from "../framework/SelectionModel";
+import UIElement from "../framework/UIElement";
 import logger from "../logger";
-import {createUUID} from "../util";
+import { createUUID, deepEquals } from "../util";
+import { IApp} from "carbon-core";
 
 var debug = require("../DebugUtil")("carb:modelSync");
 
 var EXTERNAL_MAP_CLEANUP_TIMEOUT = 2 * 60 * 1000;
 
 export default class ModelSyncProxy {
-    constructor(app){
+    [name:string]:any;
+    constructor(app:IApp){
         this._app = app;
         this._primitiveQueue = [];
         this._requestInProgress = false;
@@ -61,7 +64,7 @@ export default class ModelSyncProxy {
             return Promise.reject(new Error("Nothing to save"));
         }
 
-        var requestTooLong = this._requestStartTime && new Date() - this._requestStartTime > 120 * 1000;
+        var requestTooLong = this._requestStartTime && (new Date() as any) - this._requestStartTime > 120 * 1000;
         if (this._requestInProgress && !requestTooLong){
             return Promise.reject(new Error("Request in progress since " + this._requestStartTime.toISOString()));
         }
@@ -151,8 +154,8 @@ export default class ModelSyncProxy {
         Array.prototype.push.apply(this._primitiveQueue, primitives);
     }
 
-    applyPrimitives() {
-        return new Promise(this.applyPrimitivesAsync);
+    applyPrimitives() : Promise<void> {
+        return new Promise<void>(this.applyPrimitivesAsync);
     }
     applyPrimitivesAsync = (resolve, reject) => {
         var primitiveQueue = this._primitiveQueue;
@@ -178,23 +181,24 @@ export default class ModelSyncProxy {
                     break;
                 }
 
-                var promise = that._changeProject(primitive);
+                that._changeProject(primitive);
 
                 if (primitive.toVersion) {
                     debug("set from: " + app.version() + " to: " + primitive.toVersion);
                     app.version(primitive.toVersion);
                 }
 
-                if (promise) {
-                    primitiveQueue.blocked = true;
-                    promise.then(process).catch(reject);
-                    run = false;
-                }
+                // if (promise) {
+                //     primitiveQueue.blocked = true;
+                //     promise.then(process).catch(reject);
+                //     run = false;
+                // }
             } while (run);
         }
 
         process();
     };
+
     _changeProject(p){
         this._registerExternal(p);
         var changedExternally = this._externals.indexOf(p) !== -1;
@@ -204,6 +208,8 @@ export default class ModelSyncProxy {
         }
 
         this._cleanupExternals();
+
+        //TODO: it seems we have a bug here, this method should return a promise.
     }
 
     resync(data){
@@ -260,7 +266,7 @@ export default class ModelSyncProxy {
         this._locals.length = 0;
     }
     _cleanupExternals(){
-        var now = new Date();
+        var now : any = new Date();
         if (now - this._lastCleanupTime > EXTERNAL_MAP_CLEANUP_TIMEOUT) {
             var allNull = true;
             for (var i = 0; i < this._externals.length; i++){
@@ -270,7 +276,7 @@ export default class ModelSyncProxy {
                         this._externals[i] = null;
                     }
                 }
-                allNull &= !!p;
+                allNull = allNull && !!p;
             }
             if (allNull){
                 this._externals.length = 0;
@@ -283,7 +289,7 @@ export default class ModelSyncProxy {
 
 function comparePagesDebug(data, response){
     var pages = map(JSON.parse(response).children, function(pageData){
-        var page = fwk.UIElement.fromJSON(pageData);
+        var page = UIElement.fromJSON(pageData);
         var result = page.toJSON();
         page.dispose();
         return result;
@@ -291,7 +297,7 @@ function comparePagesDebug(data, response){
     var o1 = {children: pages};
 
     var o2 = {children: data.children};
-    if (!sketch.util.deepEquals(o1, o2)){
+    if (!deepEquals(o1, o2)){
         console.error("incorrect merge");
     }
 

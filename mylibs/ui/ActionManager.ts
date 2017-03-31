@@ -16,6 +16,7 @@ import Duplicate from "../commands/Duplicate";
 import ConvertToPath from "../commands/ConvertToPath";
 // import DeleteCellGroup from "../commands/DeleteCellGroup";
 import Group from "../commands/Group";
+import Isolate from "../commands/Isolate";
 import SelectionToStencil from "../commands/SelectionToStencil";
 import Ungroup from "../commands/Ungroup";
 // import InsertColumn from "../commands/InsertColumn";
@@ -353,6 +354,10 @@ export default class ActionManager implements IActionManager {
 
         this.registerAction("groupElements", "Group elements", "Group", function () {
             Group.run(Selection.getSelection(), GroupContainer);
+        });
+
+        this.registerAction("isolateSelection", "Isolate selection", "Isolation", function () {
+            Isolate.run(Selection.getSelection());
         });
 
         this.registerAction("createStencilFromSelection", "Create stencil", "Group", function () {

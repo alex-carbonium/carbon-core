@@ -46,7 +46,7 @@ import ArtboardPage from "./ui/pages/ArtboardPage";
 import IconsInfo from "./ui/IconsInfo";
 import logger from "./logger";
 import params from "./params";
-import { IApp, IEvent } from "carbon-core";
+import { IApp, IAppProps, IEvent, IEnvironment } from "carbon-core";
 import { IPage, IUIElement } from "carbon-model";
 import { IEvent2 } from "carbon-basics";
 
@@ -85,9 +85,12 @@ var addComment = function (event) {
 };
 
 class AppClass extends DataNode implements IApp {
+    props:IAppProps;
+
     [name: string]: any;
     isLoaded: boolean;
     loaded: Promise<void>;
+    project:any;
 
     modeChanged: IEvent<any>;
 
@@ -97,12 +100,14 @@ class AppClass extends DataNode implements IApp {
     pageRemoved: IEvent<IPage>;
     changeToolboxPage: IEvent<void>;
 
+    loadedLevel1:Promise<void>;
+
     modelSyncProxy: any;
 
     offlineModel: any;
     platform: any;
 
-    environment: any = Environment;
+    environment: IEnvironment = Environment;
 
     shortcutManager: ShortcutManager;
     actionManager: ActionManager;
@@ -115,8 +120,6 @@ class AppClass extends DataNode implements IApp {
     currentToolChanged: IEvent<string>;
     _currentTool: string;
 
-
-    pageChanged: IEvent2<IPage, IPage>;
     constructor() {
         super(true);
 
@@ -149,7 +152,7 @@ class AppClass extends DataNode implements IApp {
         this.loaded = new Promise<void>(function (resolve, reject) {
             that.loadedResolve = resolve;
         });
-        this.loadedLevel1 = new Promise(function (resolve, reject) {
+        this.loadedLevel1 = new Promise<void>(function (resolve, reject) {
             that.loadedLevel1Resolve = resolve;
         });
 
@@ -190,7 +193,7 @@ class AppClass extends DataNode implements IApp {
         this.state = new AppState(this);
         this.offlineModel = new OfflineModel();
 
-        this.actionManager = new ActionManager(this);
+        this.actionManager = new ActionManager(this as IApp);
         this.actionManager.registerActions();
 
         this.shortcutManager = new ShortcutManager();
@@ -500,7 +503,7 @@ class AppClass extends DataNode implements IApp {
         return path;
     }
 
-    removePage(page, setNewActive) {
+    removePage(page:IPage, setNewActive?:boolean) {
         if (!page) {
             return;
         }

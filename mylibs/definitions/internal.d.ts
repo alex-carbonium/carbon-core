@@ -47,7 +47,6 @@ declare module "carbon-app"{
     export const MirroringController: any;
     export const Context: any;
     export const Layer: any;
-    export const Page: any;
     export const MirroringView: any;
 }
 

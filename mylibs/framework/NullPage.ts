@@ -44,9 +44,6 @@ class NullPage implements IPage {
     shouldApplyViewMatrix(): boolean {
         return false;
     }
-    patchProps(patchType, propName, propValue) {
-
-    }
     getBoundingBox(): IRect {
         return Rect.Zero;
     }

@@ -5,7 +5,7 @@ import ContextPool from "framework/render/ContextPool";
 import EventHelper from "framework/EventHelper";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
-import { LayerTypes } from "framework/Defs";
+import { ILayer, LayerTypes } from "carbon-core";
 
 var Stopwatch = require("../Stopwatch");
 var debug = require("DebugUtil")("carb:view");
@@ -337,6 +337,10 @@ export default class ViewBase {
 
     local2global(/*Point*/pos) {
         return pos;
+    }
+
+    getLayer(layerType:LayerTypes) : ILayer {
+        return this._layers.find(l=>l.type === layerType);
     }
 
     viewportRect() {
