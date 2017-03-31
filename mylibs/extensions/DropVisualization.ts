@@ -44,7 +44,7 @@ class ResizeHint extends UIElement {
     }
 
     _updatePosition(): void{
-        var anchorElement: UIElement = this._transformationElement;
+        var anchorElement: any = this._transformationElement;
         if (anchorElement.elements.length === 1 && !anchorElement.wrapSingleChild()){
             //rotated elements are not wrapped when dragging
             anchorElement = this._transformationElement.children[0];
@@ -221,7 +221,7 @@ class SelectionRect extends UIElement {
     }
 }
 
-var onDraggingElement = function (event: ITransformationEventData, keys: IKeyboardState) {
+var onDraggingElement = function (event: any, keys: IKeyboardState) {
     if (event.transformationElement.showResizeHint()) {
         this._hint.updatePositionText();
     }
@@ -366,7 +366,7 @@ function onStopResizing() {
     updateVisualizations.call(this);
 }
 
-function onResizing(event: ITransformationEventData) {
+function onResizing(event: any) {
     if (event.element.showResizeHint()) {
         this._hint.updateSizeText();
     }
@@ -385,7 +385,7 @@ function onStopRotating() {
     updateVisualizations.call(this);
 }
 
-function onRotating(event: ITransformationEventData) {
+function onRotating(event: any) {
     if (event.element.showResizeHint()) {
         this._hint.updateAngleText();
     }
@@ -410,7 +410,7 @@ var appLoaded = function () {
     this.registerForDispose(Selection.onSelectionFrameEvent.bind(this, onSelectionFrame));
     this.registerForDispose(Selection.startSelectionFrameEvent.bind(this, onSelectionFrameStart));
     this.registerForDispose(Selection.stopSelectionFrameEvent.bind(this, onSelectionFrameStop));
-    this.registerForDispose(this.app.actionManager.subscribe('cancel', EventHandler(this, onCancel)));
+    this.registerForDispose(this.app.actionManager.subscribe('cancel', onCancel.bind(this)));
     this.app.releaseLoadRef();
 };
 
@@ -455,7 +455,7 @@ export default class DropVisualization extends ExtensionBase {
         }
         super.attach.apply(this, arguments);
         app.loaded.then(appLoaded.bind(this));
-        this.registerForDispose(view.scaleChanged.bind(EventHandler(this, updateVisualizations)));
+        this.registerForDispose(view.scaleChanged.bind(updateVisualizations.bind(this)));
         app.addLoadRef();
         this._dropLine = new DropLine();
         this._dropLine.setProps({
@@ -475,7 +475,7 @@ export default class DropVisualization extends ExtensionBase {
     }
 
     onLayerDraw(layer, context) {
-        var target = this._target || this.view._highlightTarget;
+        var target = this._target || this.view['_highlightTarget'];
         if (target) {
             DropVisualization.highlightElement(this.view, context, target, this._isDropTarget);
         }

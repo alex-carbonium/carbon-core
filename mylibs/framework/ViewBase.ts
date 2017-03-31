@@ -209,7 +209,7 @@ export default class ViewBase {
         this._globalContextModifier = modifier;
     }
 
-    registerForLayerDraw(layer, element, index) {
+    registerForLayerDraw(layer, element, index?) {
         this.unregisterForLayerDraw(layer, element);
         if (index === undefined) {
             this._registredForLayerDraw[layer].push(element);

@@ -7,8 +7,11 @@ import { createUUID } from "../../util";
 import { PatchType } from "../Defs";
 import Selection from "../SelectionModel";
 import {IDisposable} from "carbon-core";
+import Promise from "bluebird";
 
 export default class DataManager implements IDisposable {
+    [name: string]: any;
+
     constructor() {
         this._providers = {};
         this._disposables = [];

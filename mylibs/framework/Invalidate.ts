@@ -3,17 +3,17 @@ import {LayerTypes} from "framework/Defs";
 import { IEvent2, IRect } from "carbon-core";
 
 class Invalidate {
-    requested:IEvent2<LayerTypes, IRect>;
+    requested: any;
 
     constructor(){
         this.requested = EventHelper.createEvent();
     }
 
-    request(layer, rect){
+    request(layer?, rect?){
         this.requested.raise(layer, rect);
     }
 
-    requestInteractionOnly(rect){
+    requestInteractionOnly(rect?){
         this.requested.raise(LayerTypes.Interaction, rect);
     }
 }

@@ -647,6 +647,9 @@ export default class ActionManager implements IActionManager {
     getAction(name) {
         return this._actions[name];
     }
+    hasAction(name){
+        return this._actions.hasOwnProperty(name);
+    }
     getActionFullDescription(name, translate) {
         var action = this._actions[name];
         var shortcut = this.app.shortcutManager.getActionHotkeyDisplayLabel(name);

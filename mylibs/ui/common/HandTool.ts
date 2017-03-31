@@ -19,6 +19,8 @@ var setCursor = function (open, event: IMouseEventData) {
 };
 
 export default class HandTool extends Tool {
+    [name: string]: any;
+
     constructor(type, parameters) {
         super(ViewTool.Hand);
         this._type = type;
@@ -67,8 +69,8 @@ export default class HandTool extends Tool {
 
             var view = this.view();
 
-            var x = event.event.screenX;
-            var y = event.event.screenY;
+            var x = event['event'].screenX;
+            var y = event['event'].screenY;
             var dx = this.scrollPoint.x - x;
             var dy = this.scrollPoint.y - y;
 

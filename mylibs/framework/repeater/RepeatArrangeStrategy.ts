@@ -6,7 +6,7 @@ import { IContainer } from "carbon-core";
 var debug = require("DebugUtil")("carb:repeatArrangeStrategy");
 
 var Strategy = {
-    arrange: function (container: IContainer, e, changeMode) {
+    arrange: function (container: any, e, changeMode) {
         var items = container.children;
         if (!items.length) {
             return;
@@ -22,7 +22,7 @@ var Strategy = {
         this._rearrangeItems(container, rows, cols, changeMode);
     },
 
-    _updateMargins: function(container: IContainer, changeMode){
+    _updateMargins: function(container: any, changeMode){
         var master = container.children[0];
         if (master.runtimeProps.newBr){
             var dx = master.runtimeProps.oldBr.width - master.runtimeProps.newBr.width;
@@ -54,7 +54,7 @@ var Strategy = {
             for (let i = rowSize - 1; i < items.length; i += rowSize) {
                 var item = items[i];
                 for (var j = 0; j < rowDiff; ++j) {
-                    var slave = items[0].clone();
+                    let slave: any = items[0].clone();
                     slave.setProps({
                         pos: [item.props.pos[0], item.props.pos[1] + 1]
                     }, changeMode);
@@ -66,7 +66,7 @@ var Strategy = {
 
         var total = cols * rows;
         while (items.length < total) {
-            var slave = items[0].clone();
+            let slave = items[0].clone();
             container.insert(slave, items.length, changeMode);
         }
     },
@@ -85,7 +85,7 @@ var Strategy = {
 
         for (let x = 0; x < rows; ++x) {
             for (let y = 0; y < cols; ++y) {
-                let cell = items[x * cols + y];
+                let cell: any = items[x * cols + y];
                 let props = {
                     name: cols === 1 ? "Cell [" + y + "]" : "Cell [" + x + "," + y + "]",
                     pos: cell.createPos(x, y),

@@ -36,6 +36,19 @@ declare module "carbon-core" {
     export var NullPage: any;
     export var CompositeElement: any;
     export var Devices: any;
+    export var DesignerView: any;
+    export var DesignerController: any;
+    export var SelectComposite: any;
+    export var DraggingElement: any;
+    export var SelectFrame: any;
+    export var Keyboard: any;
+    export var Deferred: any;
+    export var ViewTool: any;
+    export var Clipboard: any;
+    export var domUtil: any;
+    export var ContextBarPosition: any;
+    export var PrimitiveType: any;
+    export var NullContainer: any;
     export class Shape{}
     export function createUUID(): string;
 }

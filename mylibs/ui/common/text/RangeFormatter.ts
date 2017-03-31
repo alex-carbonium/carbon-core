@@ -1,12 +1,12 @@
 import UIElement from "framework/UIElement";
 import PropertyMetadata from "framework/PropertyMetadata";
-import {TextAlign, ChangeMode, Types} from "framework/Defs";
+import {ChangeMode, Types} from "framework/Defs";
 import Font from "framework/Font";
 
 var debug = require("DebugUtil")("carb:rangeFormatter");
 
 export default class RangeFormatter extends UIElement {
-    init(app, engine, element, onChanged){
+    initFormatter(app, engine, element, onChanged?){
         this._app = app;
         this._engine = engine;
         this._engine.selectionChanged(this.selectionChanged);

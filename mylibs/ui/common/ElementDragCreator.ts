@@ -15,7 +15,9 @@ import Tool from "./Tool";
 import {IMouseEventData, IKeyboardState} from "carbon-core";
 
 export default class ElementDragCreator extends Tool {
-    constructor(toolId: number, type, parameters) {
+    [name: string]: any;
+
+    constructor(toolId: string, type, parameters) {
         super(toolId);
 
         this._type = type;
@@ -24,13 +26,13 @@ export default class ElementDragCreator extends Tool {
     }
     attach() {
         super.attach.apply(this, arguments);
-        Cursor.setGlobalCursor("crosshair", true);
+        Cursor.setGlobalCursor("crosshair");
     }
     detach() {
         super.detach.apply(this, arguments);
         this._mousepressed = false;
         SnapController.clearActiveSnapLines();
-        Cursor.removeGlobalCursor(true);
+        Cursor.removeGlobalCursor();
 
         this._changeMode("resize");
     }
@@ -171,7 +173,7 @@ export default class ElementDragCreator extends Tool {
         return this._mousepressed;
     }
 
-    layerdraw(context, environment): boolean {
+    layerdraw(context, environment) {
         if (this.canDraw()) {
             context.save();
 

@@ -447,7 +447,7 @@ export default class Container extends UIElement {
     mouseup(event, keys: IKeyboardState) {
         this.delegateToChildren("mouseup", event);
     }
-    dblclick(event) {
+    dblclick(event, scale) {
         this.delegateToChildren("dblclick", event);
     }
     click(event) {

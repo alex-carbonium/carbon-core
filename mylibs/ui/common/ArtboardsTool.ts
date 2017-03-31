@@ -12,6 +12,8 @@ import Point from "../../math/point";
 import {IKeyboardState, IMouseEventData} from "carbon-core";
 
 export default class ArtboardsTool extends Tool {
+    [name: string]: any;
+
     constructor(type, parameters) {
         super(ViewTool.Artboard);
         this._type = type;
@@ -19,8 +21,8 @@ export default class ArtboardsTool extends Tool {
         this._point = new Point(0, 0);
     }
 
-    attach(app, view, controller) {
-        super.attach(app, view, controller);
+    attach(app, view, controller, mousePressed) {
+        super.attach(app, view, controller, mousePressed);
         SnapController.calculateSnappingPoints(app.activePage);
 
         this._enableArtboardSelection(true);

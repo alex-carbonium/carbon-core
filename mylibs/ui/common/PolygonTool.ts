@@ -23,7 +23,7 @@ export default class PolygonTool extends ElementDragCreator{
         element.applyScaling(new Point(w/bb.width, h/bb.height), startPoint);
     }
 
-    layerdraw(context, environment): boolean{
+    layerdraw(context, environment){
         super.layerdraw(context, environment);
         if (this.canDraw()){
             context.save();

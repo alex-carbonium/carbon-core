@@ -303,7 +303,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         return true;
     }
 
-    applyScaling(s, o, options, changeMode?: ChangeMode) {
+    applyScaling(s, o, options?, changeMode?: ChangeMode) {
         if (options && options.reset) {
             this.saveOrResetLayoutProps();
         }
@@ -979,7 +979,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
     }
     mousedown(event, keys: IKeyboardState) {
     }
-    dblclick(event) {
+    dblclick(event, scale) {
     }
     click(event) {
     }
@@ -1471,7 +1471,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         }
         return this.field("_resizeDimensions", value, ResizeDimension.Both);
     }
-    init(values, isDefault, selector) {
+    init(values, isDefault?, selector?) {
         var props = {};
         var that = this;
         for (var name in values) {

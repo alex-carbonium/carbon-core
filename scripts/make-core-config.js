@@ -4,6 +4,7 @@ var path = require("path");
 var extend = require("node.extend");
 
 var HtmlWebpackPlugin = require('html-webpack-plugin');
+var CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
 
 var defaults = {
     minimize: false,
@@ -76,14 +77,7 @@ function getPlugins(settings){
         new webpack.IgnorePlugin(/\.orig$/g),
         new webpack.IgnorePlugin(/canvas/g),
 
-        // new webpack.DllPlugin({
-        //     path: fullPath("../target/[name]-manifest.json"),
-        //     name: "[name]"
-        // })
-
-        // new webpack.ProvidePlugin({
-        //     'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
-        // })
+        new CheckerPlugin()
     ];
 
     if (settings.example){

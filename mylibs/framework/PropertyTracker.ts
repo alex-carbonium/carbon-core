@@ -1,6 +1,6 @@
 import EventHelper from './EventHelper';
 import { IEvent3, Dictionary } from "carbon-basics";
-import { IUIElement } from "carbon-model";
+import { IUIElement, IContainer } from "carbon-model";
 
 var tracker = {
     _suspended: false,
@@ -8,9 +8,9 @@ var tracker = {
     _inserts: [],
     _deletes: [],
     _flushNeeded: false,
-    propertyChanged:EventHelper.createEvent() as IEvent3<IUIElement, Dictionary, Dictionary>,
-    elementDeleted:EventHelper.createEvent(),
-    elementInserted:EventHelper.createEvent(),
+    propertyChanged: EventHelper.createEvent3<any, any, any>(),
+    elementDeleted: EventHelper.createEvent(),
+    elementInserted: EventHelper.createEvent2<IContainer, IUIElement>(),
     changeProps:function(element, newProps, oldProps){
         if (!this._suspended){
             this.propertyChanged.raise(element, newProps, oldProps);

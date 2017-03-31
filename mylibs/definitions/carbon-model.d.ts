@@ -15,7 +15,12 @@ declare module "carbon-model" {
     export interface IDataNode {
         id(value?: string): string;
 
+        findNodeByIdBreadthFirst<T extends IDataNode>(predicate: (node: T) => boolean): T | null;
         findAllNodesDepthFirst<T extends IDataNode>(predicate: (node: T) => boolean): T[];
+
+        findNodeByIdBreadthFirst<T extends IDataNode>(id: string): T | null;
+
+        enablePropsTracking();
     }
 
     export interface IUIElementProps extends IDataNodeProps {
@@ -23,6 +28,8 @@ declare module "carbon-model" {
     }
 
     export interface IUIElement extends IDataNode, IPropsOwner<IUIElementProps> {
+        parent(): IContainer;
+
         name(): string;
 
         shouldApplyViewMatrix(): boolean;
@@ -42,8 +49,12 @@ declare module "carbon-model" {
         fill(value?: any):any;
         stroke(value?: any):any;
 
+        x(): number;
+        y(): number;
         width(): number;
         height(): number;
+        angle(): number;
+        zOrder(): number;
 
         clone(): IUIElement;
     }

@@ -1,13 +1,14 @@
 import UIElement from "framework/UIElement";
 import PropertyMetadata from "framework/PropertyMetadata";
-import {TextAlign, Types} from "framework/Defs";
+import {Types} from "framework/Defs";
 import Font from "framework/Font";
 
 export default class DefaultFormatter extends UIElement {
-    init(app){
+    initFormatter(app){
         this._app = app;
         this.props.textStyleId = this._app.props.defaultTextSettings.textStyleId;
         this.props.font = Font.extend(this.props.font, this._app.props.defaultTextSettings.font);
+        return this;
     }
 
     setProps(changes){

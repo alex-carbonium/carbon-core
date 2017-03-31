@@ -16,10 +16,6 @@
         "useBabel": true,
         "useCache": true,
         "transpileOnly": false,
-        "instance": "core",
-        "ignoreDiagnostics": [
-            8005, //implements can only be used in ts files
-            8010 //types can only be used in ts files
-        ]
+        "instance": "core"
     }
 }

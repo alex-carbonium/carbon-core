@@ -97,6 +97,8 @@ class AppClass extends DataNode implements IApp {
     pageRemoved: IEvent<IPage>;
     changeToolboxPage: IEvent<void>;
 
+    activeStoryChanged: IEvent<any>;
+
     modelSyncProxy: any;
 
     offlineModel: any;
@@ -107,7 +109,7 @@ class AppClass extends DataNode implements IApp {
     shortcutManager: ShortcutManager;
     actionManager: ActionManager;
 
-    onBuildMenu: IEvent<{ a: number }>;
+    onBuildMenu: any;
     logEvent: IEvent<any>;
     changed: IEvent<any>;
     restoredLocally: IEvent<void>;
@@ -115,8 +117,6 @@ class AppClass extends DataNode implements IApp {
     currentToolChanged: IEvent<string>;
     _currentTool: string;
 
-
-    pageChanged: IEvent2<IPage, IPage>;
     constructor() {
         super(true);
 
@@ -138,7 +138,7 @@ class AppClass extends DataNode implements IApp {
         //events
         this.pageAdded = EventHelper.createEvent();
         this.pageRemoved = EventHelper.createEvent();
-        this.pageChanged = EventHelper.createEvent();
+        this.pageChanged = EventHelper.createEvent2();
         this.pageChanging = EventHelper.createEvent();
         this.loadedFromJson = EventHelper.createEvent();
         this.savedToJson = EventHelper.createEvent();
@@ -459,6 +459,7 @@ class AppClass extends DataNode implements IApp {
     }
 
     addPage(page) {
+        page.enablePropsTracking();
         this.insertChild(page, this.children.length);
         this.initPage(page);
     }
@@ -500,7 +501,7 @@ class AppClass extends DataNode implements IApp {
         return path;
     }
 
-    removePage(page, setNewActive) {
+    removePage(page, setNewActive?) {
         if (!page) {
             return;
         }
@@ -1237,7 +1238,7 @@ class AppClass extends DataNode implements IApp {
         return page;
     }
 
-    createNewPage(type) {
+    createNewPage(type?) {
         var page = new ArtboardPage();
 
         page.setProps({
@@ -1251,8 +1252,8 @@ class AppClass extends DataNode implements IApp {
         return page;
     }
 
-    addNewPage(options) {
-        var newPage = this.createNewPage(options);
+    addNewPage(){
+        var newPage = this.createNewPage();
         this.addPage(newPage);
         this.setActivePage(newPage);
     }

@@ -4,13 +4,16 @@ import { IPage, IUIElement, IContainerProps, IDataNode, IArtboard } from "carbon
 import { IRect, IPoint } from "carbon-geometry";
 import { Dictionary } from "carbon-basics";
 import Rect from "../math/rect";
+import DataNode from "./DataNode";
 
-class NullPage implements IPage {
+class NullPage extends DataNode implements IPage {
     t: string;
     props: IContainerProps;
     children: any[];
+    nameProvider: any;
 
     constructor() {
+        super(false);
         this.children = [];
         this.props = null;
     }
@@ -26,8 +29,16 @@ class NullPage implements IPage {
         return this;
     }
 
-    findAllNodesDepthFirst<T extends IDataNode>(predicate: (node: T) => boolean): T[] {
-        return [];
+    zOrder(){
+        return 0;
+    }
+
+    getElementById(id){
+        return null;
+    }
+
+    getBoundaryRect(){
+        return Rect.Zero;
     }
 
     canAccept(elements: IUIElement[], autoInsert: boolean, allowMoveIn: boolean): boolean {
@@ -43,9 +54,6 @@ class NullPage implements IPage {
     }
     shouldApplyViewMatrix(): boolean {
         return false;
-    }
-    patchProps(patchType, propName, propValue) {
-
     }
     getBoundingBox(): IRect {
         return Rect.Zero;
@@ -73,7 +81,7 @@ class NullPage implements IPage {
     }
 
     parent() {
-
+        return null;
     }
     isInitialized() {
         return true;
@@ -87,8 +95,8 @@ class NullPage implements IPage {
     getAllArtboards() {
         return [];
     }
-    getArtboardAtPoint() {
-
+    getArtboardAtPoint(value) {
+        return null;
     }
     getElementsInRect() {
         return [];
@@ -130,8 +138,10 @@ class NullPage implements IPage {
         return "";
     }
     toJSON() {
+        return {};
     }
     fromJSON(data) {
+        return this;
     }
     timeStamp() {
     }
@@ -226,6 +236,18 @@ class NullPage implements IPage {
     }
     height(): number {
         return 0;
+    }
+    x(): number {
+        return 0;
+    }
+    y(): number {
+        return 0;
+    }
+    angle(): number {
+        return 0;
+    }
+
+    dropToPage(x, y, element){
     }
 }
 

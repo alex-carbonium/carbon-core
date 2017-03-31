@@ -3,7 +3,7 @@ import logger from "./logger";
 import { IEvent2 } from "carbon-basics";
 
 export default class StateMachine {
-    stateChanged: IEvent2<string, any>;
+    stateChanged: any;
     state: string;
 
     constructor(){

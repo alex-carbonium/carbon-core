@@ -27,6 +27,7 @@ declare module "carbon-basics" {
         bind(callback: (data: T) => void): IDisposable;
         bindAsync(callback: (data: T) => void): IDisposable;
         bind(owner: any, callback: (data: T) => void): IDisposable;
+        bindHighPriority(owner: any, callback: (data: T) => void): IDisposable;
         bindAsync(owner: any, callback: (data: T) => void): IDisposable;
         unbind(callback: (data: T) => void);
         clearSubscribers();
@@ -35,9 +36,11 @@ declare module "carbon-basics" {
     export interface IEvent2<T1, T2> {
         raise(data1: T1, data2: T2): void;
         bind(callback: (data1: T1, data2: T2) => void): IDisposable;
+        bindHighPriority(callback: (data1: T1, data2: T2) => void): IDisposable;
         bindAsync(callback: (data1: T1, data2: T2) => void): IDisposable;
         bind(owner: any, callback: (data1: T1, data2: T2) => void): IDisposable;
         bindAsync(owner: any, callback: (data1: T1, data2: T2) => void): IDisposable;
+        bindHighPriority(owner: any, callback: (data1: T1, data2: T2) => void): IDisposable;
         unbind(callback: (data1: T1, data2: T2) => void);
         unbind(owner: any, callback: (data1: T1, data2: T2) => void);
         clearSubscribers();
@@ -46,8 +49,10 @@ declare module "carbon-basics" {
     export interface IEvent3<T1, T2, T3> {
         raise(data1: T1, data2: T2, data3: T3): void;
         bind(callback: (data1: T1, data2: T2, data3: T3) => void): IDisposable;
+        bindHighPriority(callback: (data1: T1, data2: T2, data3: T3) => void): IDisposable;
         bindAsync(callback: (data1: T1, data2: T2, data3: T3) => void): IDisposable;
         bind(owner: any, callback: (data1: T1, data2: T2, data3: T3) => void): IDisposable;
+        bindHighPriority(owner: any, callback: (data1: T1, data2: T2, data3: T3) => void): IDisposable;
         bindAsync(owner: any, callback: (data1: T1, data2: T2, data3: T3) => void): IDisposable;
         unbind(callback: (data1: T1, data2: T2, data3: T3) => void);
         unbind(owner:any, callback: (data1: T1, data2: T2, data3: T3) => void);

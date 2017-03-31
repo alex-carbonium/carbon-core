@@ -56,7 +56,7 @@ class CompoundPath extends Container implements IGroupContainer{
         return res;
     }
 
-    lineCap(value) {
+    lineCap(value?) {
         if (arguments.length > 0) {
             if(value === 'round' || value === LineCap.Round){
                 value = LineCap.Round;
@@ -78,7 +78,7 @@ class CompoundPath extends Container implements IGroupContainer{
         }
     }
 
-    lineJoin(value) {
+    lineJoin(value?) {
         if (arguments.length > 0) {
             if(value === 'round' || value === LineJoin.Round){
                 value = LineJoin.Round;
@@ -126,7 +126,7 @@ class CompoundPath extends Container implements IGroupContainer{
         }
     }
 
-    recalculate(mode) {
+    recalculate(mode?) {
         GroupArrangeStrategy.arrange(this);
 
         this._itemIds = {};
@@ -306,7 +306,7 @@ class CompoundPath extends Container implements IGroupContainer{
         return res;
     }
 
-    drawPath(context) {
+    drawPath(context, w, h) {
         if (this.result) {
             var items = this.result;
             context.lineCap = this.lineCap();
@@ -365,7 +365,7 @@ class CompoundPath extends Container implements IGroupContainer{
 
     }
 
-    hitTransparent (value) {
+    hitTransparent (value?): boolean {
         if (value !== undefined) {
             this._hitTransparent =  value;
         }

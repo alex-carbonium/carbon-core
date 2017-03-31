@@ -164,21 +164,21 @@ export default class Polygon extends Shape {
         Environment.controller.repeatLastMouseMove();
     }
 
-    selectionFrameType() {
+    selectionFrameType(): any {
         if (!this.isInEditMode()) {
             return super.selectionFrameType();
         }
         return PolygonFrameType;
     }
 
-    radius(value) {
+    radius(value?) {
         if (value !== undefined) {
             this.setProps({ radius: value })
         }
         return this.props.radius;
     }
 
-    pointsCount(value) {
+    pointsCount(value?) {
         if (value !== undefined) {
             this.setProps({ pointsCount: value })
         }
