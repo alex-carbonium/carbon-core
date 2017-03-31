@@ -27,7 +27,7 @@ declare module "carbon-app" {
         pageAdded: IEvent<IPage>;
         pageRemoved: IEvent<IPage>;
         changeToolboxPage: IEvent<void>;
-        
+
         pages: IPage[];
         addPage(page: IPage);
         addNewPage(): void;
@@ -39,8 +39,8 @@ declare module "carbon-app" {
         stories: any[];
         activeStoryChanged: IEvent<any>;
         setActiveStoryById(id);
-       
-        loadedLevel1: Promise<void>;        
+
+        loadedLevel1: Promise<void>;
 
         currentTool: string;
         currentToolChanged: IEvent<string>;
@@ -89,13 +89,6 @@ declare module "carbon-app" {
         recentColors(): string[];
 
         getAllTemplateResourceArtboards(): IArtboard[];
-
-        setActivePageById(pageId:string);
-        removePage(page:IPage, setNewActive?:boolean)
-        addPage(page:IPage);
-        setActivePage(page:IPage);
-
-
     }
 
     export interface IView {
