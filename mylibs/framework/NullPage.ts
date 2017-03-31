@@ -21,6 +21,7 @@ class NullPage extends DataNode implements IPage {
     globalMatrixToLocal(m: any) {
         return m;
     }
+
     canSelect(): boolean {
         throw new Error('Method not implemented.');
     }
@@ -39,6 +40,10 @@ class NullPage extends DataNode implements IPage {
 
     getBoundaryRect(){
         return Rect.Zero;
+    }
+
+    hitTransparent(value?:boolean):boolean {
+        return true;
     }
 
     canAccept(elements: IUIElement[], autoInsert: boolean, allowMoveIn: boolean): boolean {
