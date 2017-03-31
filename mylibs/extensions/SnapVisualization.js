@@ -50,7 +50,7 @@ export default class SnapVisualization extends ExtensionBase {
 
     detach() {
         super.detach.apply(this, arguments);
-        view.unregisterForLayerDraw(LayerTypes.Interaction, this);
+        this.view.unregisterForLayerDraw(LayerTypes.Interaction, this);
     }
 
     onLayerDraw(layer, context, environment) {
