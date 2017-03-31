@@ -30,7 +30,7 @@ export default class FrameContent extends UIElement{
     }
 
     activate(){
-        this._tokens.push(Environment.controller.stopDraggingEvent.bind(this, this._onStopDragging));
+        this._tokens.push(Environment.controller.stopDraggingEvent.bind(this, this._onStopDragging as any));
     }
     deactivate(){
         this._tokens.forEach(x => x.dispose());
@@ -65,7 +65,7 @@ export default class FrameContent extends UIElement{
 
     _onStopDragging(event: ITransformationEventData){
         if (event.transformationElement.elements.length === 1 && event.transformationElement.elements[0] === this){
-            var child = event.transformationElement.children[0];
+            var child: any = event.transformationElement.children[0];
             this.setProps(child.selectLayoutProps(true));
         }
     }

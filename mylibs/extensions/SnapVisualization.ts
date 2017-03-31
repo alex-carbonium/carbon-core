@@ -1,7 +1,7 @@
 import ExtensionBase from "./ExtensionBase";
 import DesignerView from "framework/DesignerView";
 import SnapController from "framework/SnapController";
-import {LayerTypes} from "carbon-core";
+import {LayerTypes} from "carbon-app";
 
 function drawSnapLines(context, environment) {
 

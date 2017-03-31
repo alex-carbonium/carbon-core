@@ -4,6 +4,7 @@ var path = require("path");
 var extend = require("node.extend");
 
 var HtmlWebpackPlugin = require('html-webpack-plugin');
+var CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
 
 var defaults = {
     minimize: false,
@@ -76,14 +77,7 @@ function getPlugins(settings){
         new webpack.IgnorePlugin(/\.orig$/g),
         new webpack.IgnorePlugin(/canvas/g),
 
-        // new webpack.DllPlugin({
-        //     path: fullPath("../target/[name]-manifest.json"),
-        //     name: "[name]"
-        // })
-
-        // new webpack.ProvidePlugin({
-        //     'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
-        // })
+        new CheckerPlugin()
     ];
 
     if (settings.example){
@@ -146,11 +140,6 @@ function getLoaders(settings){
     };
     var babelLoader = "babel?" + JSON.stringify(babelSettings);
 
-    var tsLoader = 'ts-loader?' + JSON.stringify({
-        transpileOnly: false,
-        visualStudioErrorFormat: true
-    });
-
     var excludedFolders = ["node_modules", "libs", "generated"];
     var excludes = new RegExp(
         excludedFolders.map(x => "[\/\\\\]" + x + "[\/\\\\]").join("|"));
@@ -167,7 +156,7 @@ function getLoaders(settings){
         },
         {
             test: /\.ts$/,
-            loaders: [babelLoader, tsLoader],
+            loaders: [babelLoader, "awesome-typescript-loader"],
             exclude: excludes
         },
         {

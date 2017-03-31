@@ -5,7 +5,7 @@ import Point from "../math/point";
 import {IGroupContainer} from "carbon-core";
 
 var GroupArrangeStrategy = {
-    arrange: function(container: IGroupContainer, event, changeMode){
+    arrange: function(container: any, event?, changeMode?){
         var items = container.children;
         if (items.length === 0){
             return;

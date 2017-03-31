@@ -6,8 +6,9 @@ import ObjectFactory from "./ObjectFactory";
 import {createUUID} from "../util";
 import { IDataNodeProps } from "carbon-core";
 import { Dictionary } from "carbon-basics";
+import { IDataNode } from "carbon-model";
 
-export default class DataNode{
+export default class DataNode implements IDataNode{
     t: string;
     props: IDataNodeProps;
     runtimeProps: any;

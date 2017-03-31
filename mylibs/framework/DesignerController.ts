@@ -126,16 +126,23 @@ export default class DesignerController implements IController {
 
     startDrawingEvent: IEvent<any>;
     interactionActive: boolean;
+    clickEvent: IEvent2<IMouseEventData, IKeyboardState>;
+    dblclickEvent: IEvent2<IMouseEventData, IKeyboardState>;
     mousedownEvent: IEvent2<IMouseEventData, IKeyboardState>;
     mousemoveEvent: IEvent2<IMouseEventData, IKeyboardState>;
     mouseupEvent: IEvent2<IMouseEventData, IKeyboardState>;
 
+    startDraggingEvent: IEvent2<IMouseEventData, IKeyboardState>;
     draggingEvent: IEvent<ITransformationEventData>;
+    stopDraggingEvent: IEvent2<IMouseEventData, IKeyboardState>;
+
     startResizingEvent: IEvent<ITransformationEventData>;
     resizingEvent: IEvent<ITransformationEventData>;
     stopResizingEvent: IEvent<ITransformationEventData>;
 
+    startRotatingEvent: IEvent<ITransformationEventData>;
     rotatingEvent: IEvent<ITransformationEventData>;
+    stopRotatingEvent: IEvent<ITransformationEventData>;
 
     _lastMouseMove: IMouseEventData;
 
@@ -234,19 +241,19 @@ export default class DesignerController implements IController {
         this.draggingEvent = EventHelper.createEvent();
         this.draggingEnterEvent = EventHelper.createEvent();
         this.draggingLeftEvent = EventHelper.createEvent();
-        this.stopDraggingEvent = EventHelper.createEvent();
-        this.startDraggingEvent = EventHelper.createEvent();
+        this.stopDraggingEvent = EventHelper.createEvent2<IMouseEventData, IKeyboardState>();
+        this.startDraggingEvent = EventHelper.createEvent2<IMouseEventData, IKeyboardState>();
         this.startResizingEvent = EventHelper.createEvent();
         this.resizingEvent = EventHelper.createEvent();
         this.stopResizingEvent = EventHelper.createEvent();
         this.startRotatingEvent = EventHelper.createEvent();
         this.rotatingEvent = EventHelper.createEvent();
         this.stopRotatingEvent = EventHelper.createEvent();
-        this.mousemoveEvent = EventHelper.createEvent();
-        this.mousedownEvent = EventHelper.createEvent();
-        this.mouseupEvent = EventHelper.createEvent();
-        this.dblclickEvent = EventHelper.createEvent();
-        this.clickEvent = EventHelper.createEvent();
+        this.mousemoveEvent = EventHelper.createEvent2<IMouseEventData, IKeyboardState>();
+        this.mousedownEvent = EventHelper.createEvent2<IMouseEventData, IKeyboardState>();
+        this.mouseupEvent = EventHelper.createEvent2<IMouseEventData, IKeyboardState>();
+        this.dblclickEvent = EventHelper.createEvent2<IMouseEventData, IKeyboardState>();
+        this.clickEvent = EventHelper.createEvent2<IMouseEventData, IKeyboardState>();
 
 
         this.mouseenterEvent = EventHelper.createEvent();
@@ -255,7 +262,7 @@ export default class DesignerController implements IController {
 
         this.onElementClicked = EventHelper.createEvent();
         this.onElementDblClicked = EventHelper.createEvent();
-        this.onArtboardChanged = EventHelper.createEvent();
+        this.onArtboardChanged = EventHelper.createEvent2<IArtboard, IArtboard>();
         this.inlineEditModeChanged = EventHelper.createEvent();
         this.inlineEditModeChanged.bind(this, this.onInlineEditModeChanged);
         //TODO: dispose?
@@ -329,7 +336,7 @@ export default class DesignerController implements IController {
         };
 
         eventData.transformationElement = this._draggingElement;
-        this.startDraggingEvent.raise(eventData);
+        this.startDraggingEvent.raise(eventData as any, Keyboard.state);
         this._draggingOverElement = null;
     }
 
@@ -545,7 +552,7 @@ export default class DesignerController implements IController {
     }
 
     ondblclick(eventData) {
-        this.dblclickEvent.raise(eventData);
+        this.dblclickEvent.raise(eventData as any, Keyboard.state);
         if (eventData.handled) {
             return;
         }
@@ -693,11 +700,11 @@ export default class DesignerController implements IController {
                 this.cancel();
                 this.insertAndSelect(element, parent, eventData.x - br.width/2, eventData.y - br.height/2);
 
-                this.stopDraggingEvent.raise(eventData, Selection.selectedElements());
+                this.stopDraggingEvent.raise(eventData as any, Selection.selectedElements());
             })
             .catch(e => {
                 this.cancel();
-                this.stopDraggingEvent.raise(this.createEventData(e), null);
+                this.stopDraggingEvent.raise(this.createEventData(e) as any, null);
             });
     }
 

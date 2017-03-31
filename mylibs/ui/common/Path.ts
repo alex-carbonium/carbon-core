@@ -21,8 +21,9 @@ import Command from "framework/commands/Command";
 import {Types, ChangeMode} from "../../framework/Defs";
 import ArrangeStrategy from "../../framework/ArrangeStrategy";
 import ResizeOptions from "../../decorators/ResizeOptions";
-import { IMouseEventData, IKeyboardState, LayerTypes } from "carbon-core";
+import { IMouseEventData, IKeyboardState } from "carbon-core";
 import { Dictionary } from "carbon-basics";
+import { LayerTypes } from "carbon-app";
 
 var CP_HANDLE_RADIUS = 3;
 var CP_HANDLE_RADIUS2 = 6;

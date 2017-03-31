@@ -27,17 +27,25 @@ declare module "carbon-app" {
         pageAdded: IEvent<IPage>;
         pageRemoved: IEvent<IPage>;
         changeToolboxPage: IEvent<void>;
-        loadedLevel1: Promise<void>;
+        
+        pages: IPage[];
+        addPage(page: IPage);
+        addNewPage(): void;
+        removePage(page: IPage);
+        setActivePage(page: IPage);
+        setActivePageById(id: string);
 
         activeStory: any;
         stories: any[];
-        pages: IPage[];
+        activeStoryChanged: IEvent<any>;
         setActiveStoryById(id);
+       
+        loadedLevel1: Promise<void>;        
 
         currentTool: string;
         currentToolChanged: IEvent<string>;
 
-        onBuildMenu: IEvent2<any, any>;
+        onBuildMenu: any;
         shortcutManager: IShortcutManager;
         actionManager: IActionManager;
 
@@ -123,14 +131,21 @@ declare module "carbon-app" {
         startResizingEvent: IEvent<ITransformationEventData>;
         resizingEvent: IEvent<ITransformationEventData>;
         stopResizingEvent: IEvent<ITransformationEventData>;
+        startRotatingEvent: IEvent<ITransformationEventData>;
         rotatingEvent: IEvent<ITransformationEventData>;
+        stopRotatingEvent: IEvent<ITransformationEventData>;
         startDrawingEvent: IEvent<IEventData>;
 
         onArtboardChanged: IEvent2<IArtboard, IArtboard>;
 
+        clickEvent: IEvent2<IMouseEventData, IKeyboardState>;
+        dblclickEvent: IEvent2<IMouseEventData, IKeyboardState>;
         mousedownEvent: IEvent2<IMouseEventData, IKeyboardState>;
         mouseupEvent: IEvent2<IMouseEventData, IKeyboardState>;
         mousemoveEvent: IEvent2<IMouseEventData, IKeyboardState>;
+
+        startDraggingEvent: IEvent2<IMouseEventData, IKeyboardState>;
+        stopDraggingEvent: IEvent2<IMouseEventData, IKeyboardState>;
 
         interactionActive: boolean;
 
@@ -172,7 +187,9 @@ declare module "carbon-app" {
 
         getActionFullDescription(name: string, translate?: (value: string) => string): string;
         getActionDescription(action: string): string;
-        getAction(action:string):IAction;
+
+        hasAction(action: string): boolean;
+        getAction(action:string): IAction;
     }
 
     export interface IShortcutManager {

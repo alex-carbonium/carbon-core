@@ -56,6 +56,8 @@ function DouglasPeucker(PointList, epsilon) {
 };
 
 export default class PencilCreator extends Tool {
+    [name: string]: any;
+
     constructor() {
         super(ViewTool.Pencil);
 

@@ -17,7 +17,8 @@ import UserSettings from "../UserSettings";
 import Point from "../math/point";
 import Matrix from "../math/matrix";
 import { ChangeMode, FloatingPointPrecision } from "../framework/Defs";
-import { LayerTypes, IUIElement } from "carbon-core";
+import { LayerTypes } from "carbon-app";
+import { IUIElement } from "carbon-core";
 
 var HighlightBrush = Brush.createFromColor(SharedColors.Highlight);
 
@@ -386,7 +387,7 @@ function onStopRotating() {
     updateVisualizations.call(this);
 }
 
-function onRotating(event: ITransformationEventData) {
+function onRotating(event: any) {
     if (event.element.showResizeHint()) {
         this._hint.updateAngleText();
     }
@@ -411,7 +412,7 @@ var appLoaded = function () {
     this.registerForDispose(Selection.onSelectionFrameEvent.bind(this, onSelectionFrame));
     this.registerForDispose(Selection.startSelectionFrameEvent.bind(this, onSelectionFrameStart));
     this.registerForDispose(Selection.stopSelectionFrameEvent.bind(this, onSelectionFrameStop));
-    this.registerForDispose(this.app.actionManager.subscribe('cancel', EventHandler(this, onCancel)));
+    this.registerForDispose(this.app.actionManager.subscribe('cancel', onCancel.bind(this)));
     this.app.releaseLoadRef();
 };
 
@@ -456,7 +457,7 @@ export default class DropVisualization extends ExtensionBase {
         }
         super.attach.apply(this, arguments);
         app.loaded.then(appLoaded.bind(this));
-        this.registerForDispose(view.scaleChanged.bind(EventHandler(this, updateVisualizations)));
+        this.registerForDispose(view.scaleChanged.bind(updateVisualizations.bind(this)));
         app.addLoadRef();
         this._dropLine = new DropLine();
         this._dropLine.setProps({
@@ -476,7 +477,7 @@ export default class DropVisualization extends ExtensionBase {
     }
 
     onLayerDraw(layer, context) {
-        var target = this._target || (this.view as any)._highlightTarget;
+        var target = this._target || this.view['_highlightTarget'];
         if (target) {
             DropVisualization.highlightElement(this.view, context, target, this._isDropTarget);
         }

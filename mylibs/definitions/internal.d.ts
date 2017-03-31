@@ -9,8 +9,12 @@ declare module "carbon-internal" {
 }
 
 declare module "carbon-model"{
+    import { IRect } from "carbon-geometry";
+
     export interface IUIElement{
         canSelect(): boolean;
+
+        getBoundaryRect(): IRect;
     }
 
     export interface IContainer{
@@ -25,29 +29,49 @@ declare module "carbon-app"{
     export interface IApp{
         offlineModel: any;
         modelSyncProxy: any;
+        defaultShapeSettings: any;
 
         viewportSize(): any;
+        resetCurrentTool();
     }
 
     export interface IView{
         interactionLayer: any;
         scaleMatrix: any;
 
-        registerForLayerDraw(layerType:number, element:{onLayerDraw:(layer: ILayer, context: IContext)=>void});
+        registerForLayerDraw(layerType:number, element:{onLayerDraw:(layer: ILayer, context: IContext)=>void}, index?);
         unregisterForLayerDraw(layerType:number, element:any);
 
         viewportRect(): any;
+
+        prototyping(value?:boolean): boolean;
     }
 
     export interface IController{
         isInlineEditMode?: boolean;
         inlineEditor?: any;
+
+        selectByClick(event);
+        repeatLastMouseMove();
     }
 
     export const MirroringController: any;
     export const Context: any;
     export const Layer: any;
     export const MirroringView: any;
+}
+
+declare module "carbon-model"{
+    export interface IPage{
+        nameProvider: any;
+        getArtboardAtPoint(point): IArtboard;
+
+        dropToPage(x, y, element);
+    }
+
+    export interface IArtboard{
+        allowArtboardSelection(value?): boolean;
+    }
 }
 
 declare module "oidc-client/src/UserManager" {

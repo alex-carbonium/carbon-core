@@ -7,7 +7,7 @@ import Cursor from "framework/Cursor";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import ModelStateListener from "../sync/ModelStateListener";
-import {LayerTypes} from "carbon-core";
+import { LayerTypes } from "carbon-app";
 
 export default {
     _container: null,

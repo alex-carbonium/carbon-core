@@ -48,6 +48,7 @@ var checkIfElementAvailable = function () {
 
 
 export default class GraphicalPathCreator extends Tool {
+    [name: string]: any;
     _element: Path;
     _shouldHandleByPath: boolean;
     _handlingByPath: boolean;

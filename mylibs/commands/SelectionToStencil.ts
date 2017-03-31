@@ -13,7 +13,7 @@ export default {
         var sorted: IUIElement[] = elements.slice().sort((a, b) => a.zOrder() - b.zOrder());
         var element: IUIElement = elements[0];
         var parent: IContainer = element.parent();
-        var group: IGroupContainer = new GroupContainer();
+        var group = new GroupContainer();
 
         Selection.makeSelection([]);
         parent.add(group, ChangeMode.Self);
@@ -45,7 +45,7 @@ export default {
 
         // find where to place artboard
         for (let i = 0, l = sorted.length; i < l; ++i) {
-            let e = sorted[i];
+            let e: any = sorted[i];
             var vm = group.children[i].viewMatrix();
             e.setTransform(vm);
             e.setProps({

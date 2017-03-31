@@ -91,7 +91,6 @@ function collectPoints(data, element) {
 }
 
 class SnapController {
-    snapLines:any[];
     [name:string]:any;
     calculateSnappingPointsForPath(path) {
         var data:any = {};
@@ -124,7 +123,7 @@ class SnapController {
     }
 
     calculateSnappingPoints(parent){
-        var data:any = {};
+        var data: any = {};
         data._snapX = [];
         data._snapY = [];
         data._snapXCenter = [];
@@ -153,7 +152,7 @@ class SnapController {
         var rect = element.getBoundaryRectGlobal();
         var x = rect.x;
         var y = rect.y;
-        var data:any = {};
+        var data: any = {};
         if (snapData !== null) {
             if (holdPcnt < 20) {
                 snapData.xs.sort((a,b)=>a-b);

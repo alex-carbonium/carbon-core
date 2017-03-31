@@ -6,8 +6,8 @@ import SelectionModel from "./SelectionModel";
 import Cursor from "framework/Cursor";
 import Invalidate from "framework/Invalidate";
 import PixelGrid from "framework/render/PixelGrid"
-import {LayerTypes} from "carbon-core";
-import {IsolationLayer} from "framework/IsolationLayer";
+import { IsolationLayer } from "framework/IsolationLayer";
+import { LayerTypes } from "carbon-app";
 
 function setupLayers(Layer) {
     this.interactionLayer = new Layer();

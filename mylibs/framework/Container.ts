@@ -14,8 +14,10 @@ import Brush from './Brush';
 import Box from './Box';
 import UserSettings from '../UserSettings';
 import { IKeyboardState } from "carbon-basics";
+import { IPropsOwner, IContainerProps } from "carbon-model";
 
-export default class Container extends UIElement {
+export default class Container extends UIElement implements IPropsOwner<IContainerProps> {
+    props: IContainerProps;
     children: UIElement[];
 
     constructor() {
@@ -447,7 +449,7 @@ export default class Container extends UIElement {
     mouseup(event, keys: IKeyboardState) {
         this.delegateToChildren("mouseup", event);
     }
-    dblclick(event) {
+    dblclick(event, scale) {
         this.delegateToChildren("dblclick", event);
     }
     click(event) {

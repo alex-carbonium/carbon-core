@@ -60,14 +60,14 @@ export default {
         frame.flipped = frame.element.isFlipped(true);
 
         Environment.view.interactionLayer.add(resizingElement);
-        Environment.controller.startRotatingEvent.raise({transformationElement: frame.resizingElement});
+        Environment.controller.startRotatingEvent.raise({transformationElement: frame.resizingElement, handled: false});
     },
     release: function (frame, point, event) {
         if (frame.resizingElement) {
             frame.resizingElement.detach();
             frame.resizingElement.saveChanges();
 
-            Environment.controller.stopRotatingEvent.raise();
+            Environment.controller.stopRotatingEvent.raise({transformationElement: frame.resizingElement, handled: false});
         }
     },
     change: function (frame, dx, dy, point, mousePoint, keys, event: IMouseEventData) {
@@ -91,7 +91,7 @@ export default {
         Invalidate.requestInteractionOnly();
 
         var newAngle = frame.resizingElement.angle();
-        Environment.controller.rotatingEvent.raise({element: frame.element, angle: newAngle, mouseX: mousePoint.x, mouseY: mousePoint.y, transformationElement: frame.resizingElement});
+        Environment.controller.rotatingEvent.raise({element: frame.element, angle: newAngle, mouseX: mousePoint.x, mouseY: mousePoint.y, transformationElement: frame.resizingElement} as any);
         event.cursor = this._getCursor(point, newAngle, frame.flipped);
     },
     _getCursor: function(point, angle, flipped){

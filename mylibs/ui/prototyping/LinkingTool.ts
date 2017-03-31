@@ -48,6 +48,8 @@ function isVerticalPoint(point) {
 }
 
 export default class LinkingTool extends Tool {
+    [name: string]: any;
+
     constructor() {
         super(ViewTool.Proto);
     }
@@ -127,7 +129,7 @@ export default class LinkingTool extends Tool {
 
     _hitStartArrowRect(element:IUIElement, event:any, scale:number) {
         var size = HandleSize / scale;
-        var rect = element.getBoundaryRectGlobal();
+        var rect = element.getBoundingBoxGlobal();
         var x = rect.x + rect.width;
         var y = 0 | rect.y + (rect.height - size) / 2;
 
@@ -294,7 +296,7 @@ export default class LinkingTool extends Tool {
 
         for (var i = 0; i < artboards.length; ++i) {
             let artboard = artboards[i];
-            var rect = artboard.getBoundaryRectGlobal();
+            var rect = artboard.getBoundingBoxGlobal();
             rect = adjustRectSize(rect, 40 / scale);
             if(isPointInRect(rect, event)) {
                 if(!this._hasOutboundConnections(artboard)){
@@ -406,7 +408,7 @@ export default class LinkingTool extends Tool {
             var targetArtboard = DataNode.getImmediateChildById(page, action.props.targetArtboardId, true);
             var root = this._app.findNodeByIdBreadthFirst(action.props.sourceRootId);
             if (root) {
-                var sourceElement = root.getElementById(action.props.sourceElementId);
+                var sourceElement = root.findNodeByIdBreadthFirst(action.props.sourceElementId);
                 if (targetArtboard && sourceElement) {
                     this._addConnection(sourceElement, targetArtboard);
                 }
@@ -586,8 +588,6 @@ export default class LinkingTool extends Tool {
         context.beginPath();
         this._renderArrow(context, connection.from, connection.to)
 
-        var scale = this._view.scale();
-
         if(scale > 1) {
             context.lineWidth = 2 / this._view.scale();
         } else if(scale > 0.5) {
@@ -684,7 +684,7 @@ export default class LinkingTool extends Tool {
         context.lineTo(dx, size - dy);
     }
 
-    _addHandleOnElement(element, scale, handles) {
+    _addHandleOnElement(element, scale, handles?) {
         var size = HandleSize / scale;
         var rect = element.getBoundaryRectGlobal();
         var x = rect.x + rect.width;

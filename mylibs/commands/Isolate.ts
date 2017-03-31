@@ -1,7 +1,8 @@
 import Selection from "framework/SelectionModel";
 import Environment from "environment";
 import { ChangeMode } from "framework/Defs";
-import { LayerTypes, ILayer } from "carbon-core";
+import { ILayer } from "carbon-core";
+import { LayerTypes } from "carbon-app";
 
 export default {
     run: function(elements){

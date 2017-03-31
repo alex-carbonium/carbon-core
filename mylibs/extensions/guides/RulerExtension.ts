@@ -13,8 +13,9 @@ import Environment from "../../environment";
 import DesignerView from "../../framework/DesignerView";
 import UserSettings from "../../UserSettings";
 import RulerGuides from "./RulerGuides";
-import { IArtboardProps, IApp, LayerTypes, IView, IController, ILayer, IContext, IComposite, ITransformationEventData } from "carbon-core";
+import { IArtboardProps, IApp, IView, IController, ILayer, IContext, IComposite, ITransformationEventData } from "carbon-core";
 import { IArtboard, IUIElement } from "carbon-model";
+import { LayerTypes } from "carbon-app";
 
 const config = UserSettings.ruler;
 const selectionSize = 3;
@@ -53,7 +54,7 @@ export default class RulerExtension extends RuntimeExtension {
 
     _onScaleChange(scale: number) {
         calculateSettings.call(this, scale);
-        this.setOrigin(this.app.activePage.getActiveArtboard());
+        this.setOrigin(this.app.activePage.getActiveArtboard() as any);
         this.setHighlight(this._selectComposite);
     }
     onLoaded() {
@@ -113,17 +114,17 @@ export default class RulerExtension extends RuntimeExtension {
         this.setHighlight(eventData.transformationElement);
     }
 
-    onArtboardChanged(artboard: Artboard) {
+    onArtboardChanged(artboard: any, prev: any) {
         this.setOrigin(artboard);
         this._rulerGuides.setGuides(artboard);
     }
 
     onPageChanged() {
         this._onScaleChange(this.view.scale());
-        this.onArtboardChanged(this.app.activePage.getActiveArtboard() as Artboard);
+        this.onArtboardChanged(this.app.activePage.getActiveArtboard() as any, null);
     }
 
-    setOrigin(artboard: IArtboard) {
+    setOrigin(artboard: Artboard) {
         this._artboardActive = !!artboard;
 
         if (!this._artboardActive) {

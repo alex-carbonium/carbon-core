@@ -1,4 +1,4 @@
-import {IEvent} from "carbon-core"
+import {IEvent, IEvent2, IEvent3} from "carbon-core"
 
 var resolvedPromise;
 
@@ -16,7 +16,7 @@ class EventSubscription {
     }
 };
 
-class Event<T> implements IEvent<T> {
+class Event<T> implements IEvent<T>, IEvent2<any, any>, IEvent3<any, any, any>{
     private subscribers: any[];
     private _locked: number;
     private stateChanged: any;
@@ -265,4 +265,11 @@ export default class EventHelper  {
         return new Event<T>();
     }
 
+    static createEvent2<T1, T2>() : IEvent2<T1, T2>{
+        return new Event<T1>();
+    }
+
+    static createEvent3<T1, T2, T3>() : IEvent3<T1, T2, T3>{
+        return new Event<T1>();
+    }
 };

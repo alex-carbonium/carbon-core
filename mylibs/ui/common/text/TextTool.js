@@ -58,7 +58,7 @@ export default class TextTool extends TOol {
         this._onElementSelectedToken = Selection.onElementSelected.bind(this, this.onElementSelected);
 
         this._defaultFormatter = new DefaultFormatter();
-        this._defaultFormatter.init(this._app);
+        this._defaultFormatter.initFormatter(this._app);
         Selection.makeSelection([this._defaultFormatter]);
         Cursor.setGlobalCursor("text_tool");
 
@@ -281,7 +281,7 @@ export default class TextTool extends TOol {
         this._editClone.runtimeProps.keepEngine = true;
 
         this._rangeFormatter = new RangeFormatter();
-        this._rangeFormatter.init(this._app, engine, this._editClone, () => this._changed = true);
+        this._rangeFormatter.initFormatter(this._app, engine, this._editClone, () => this._changed = true);
         Selection.makeSelection([this._rangeFormatter]);
 
         if (e){

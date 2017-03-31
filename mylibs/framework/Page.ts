@@ -282,6 +282,9 @@ class Page extends Layer implements IPage {
         }
         return container.width() / container.height();
     }
+    getArtboardAtPoint(point){
+        return null;
+    }
 
     insertArtboards(artboards){
     }

@@ -15,7 +15,7 @@ export default class Tool {
         this._disposables = [];
     }
 
-    attach(app, view, controller) {
+    attach(app, view, controller, mousePressed) {
         this._app = app;
         this._view = view;
         this._controller = controller;
@@ -86,7 +86,7 @@ export default class Tool {
         //by default tools should probably handle all events and do not let elements react to double clicks, etc
         event.handled = true;
     }
-    layerdraw(context) {
+    layerdraw(context, environment) {
     }
 
     defaultCursor(): string {

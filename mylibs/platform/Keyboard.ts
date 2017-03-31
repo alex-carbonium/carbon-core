@@ -3,7 +3,7 @@ import { IKeyboardState, IEvent2 } from "carbon-core";
 
 class Keyboard {
     state: IKeyboardState;
-    changed: IEvent2<IKeyboardState, IKeyboardState>;
+    changed: any;
 
     constructor() {
         this.state = { ctrl: false, shift: false, alt: false };

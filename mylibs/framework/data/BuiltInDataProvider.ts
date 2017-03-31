@@ -104,8 +104,8 @@ const config = [
 ];
 
 export default class BuiltInDataProvider extends DataProvider {
-    fetch(fields, rowCount, seed = null) {
-        return DataProxy.generate(fields.join(","), rowCount, seed);
+    fetch(fields, rowCount) {
+        return DataProxy.generate(fields.join(","), rowCount);
     }
     getConfig() {
         return config;

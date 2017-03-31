@@ -9,7 +9,7 @@ import CompositeCommand from "../../../framework/commands/CompositeCommand";
 import Selection from "../../../framework/SelectionModel"
 import Cursor from "../../../framework/Cursor";
 import Invalidate from "../../../framework/Invalidate";
-import {LayerTypes} from "carbon-core";
+import {LayerTypes} from "carbon-app";
 
 var decorator = null;
 

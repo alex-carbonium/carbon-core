@@ -37,6 +37,8 @@ function resize(x1, y1, x2, y2) {
 }
 
 export default class LineCreator extends Tool {
+    [name: string]: any;
+
     constructor() {
         super(ViewTool.Line);
     }
