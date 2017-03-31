@@ -1,6 +1,7 @@
 declare module "carbon-app" {
     import { ILayer, IDataNode, IPage, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IPropsOwner, IArtboard } from "carbon-model";
     import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush } from "carbon-basics";
+    import { IRect } from "carbon-geometry";
 
     export interface IFontMetadata{
         name: string;
@@ -9,6 +10,7 @@ declare module "carbon-app" {
     }
 
     export interface IAppProps extends IDataNodeProps{
+        customGuides: any;
     }
     export interface IApp extends IDataNode, IPropsOwner<IAppProps> {
         isLoaded: boolean;
@@ -23,6 +25,7 @@ declare module "carbon-app" {
         pageAdded: IEvent<IPage>;
         pageRemoved: IEvent<IPage>;
         changeToolboxPage: IEvent<void>;
+        
         pages: IPage[];
         addPage(page: IPage);
         addNewPage(): void;
@@ -34,6 +37,8 @@ declare module "carbon-app" {
         stories: any[];
         activeStoryChanged: IEvent<any>;
         setActiveStoryById(id);
+       
+        loadedLevel1: Promise<void>;        
 
         currentTool: string;
         currentToolChanged: IEvent<string>;
@@ -45,6 +50,8 @@ declare module "carbon-app" {
         modelSyncProxy: any;
         platform: any; //TODO: remove platform
         environment: IEnvironment;
+
+        project: any;// TODO: remove project
 
         run(): void;
         unload(): void;
@@ -80,6 +87,13 @@ declare module "carbon-app" {
         recentColors(): string[];
 
         getAllTemplateResourceArtboards(): IArtboard[];
+
+        setActivePageById(pageId:string);
+        removePage(page:IPage, setNewActive?:boolean)
+        addPage(page:IPage);
+        setActivePage(page:IPage);
+
+
     }
 
     export interface IView {
@@ -101,6 +115,8 @@ declare module "carbon-app" {
         ensureScale(element: IUIElement);
         ensureVisible(element: IUIElement);
         scrollToCenter(): void;
+
+        getLayer(layerType:any) : ILayer;
 
         setActivePage(page: IPage);
 
@@ -171,6 +187,7 @@ declare module "carbon-app" {
         getActionDescription(action: string): string;
 
         hasAction(action: string): boolean;
+        getAction(action:string): IAction;
     }
 
     export interface IShortcutManager {
@@ -194,5 +211,19 @@ declare module "carbon-app" {
         resetVersion(): void;
     }
 
+    export const enum LayerTypes{
+        Content,
+        Isolation,
+        Interaction
+    }
+
+    export interface IInvalidate {
+        requested:IEvent2<LayerTypes, IRect>;
+        request(layer?, rect?);
+        requestInteractionOnly(rect?);
+    }
+
     export var app: IApp;
+    export var ActionManager: IActionManager;
+    export var Invalidate: IInvalidate;
 }

@@ -11,10 +11,9 @@ import Matrix from "../../math/matrix";
 import { areRectsEqual } from "../../math/math";
 import Environment from "../../environment";
 import DesignerView from "../../framework/DesignerView";
-import {LayerTypes} from "../../framework/Defs";
 import UserSettings from "../../UserSettings";
 import RulerGuides from "./RulerGuides";
-import { IArtboardProps, IApp, IView, IController, ILayer, IContext, IComposite, ITransformationEventData } from "carbon-core";
+import { IArtboardProps, IApp, LayerTypes, IView, IController, ILayer, IContext, IComposite, ITransformationEventData } from "carbon-core";
 import { IArtboard, IUIElement } from "carbon-model";
 
 const config = UserSettings.ruler;

@@ -49,6 +49,13 @@ declare module "carbon-core" {
     export var ContextBarPosition: any;
     export var PrimitiveType: any;
     export var NullContainer: any;
+    export var CustomGuides: any;
+    export var domUtil: any;
+    export var LayoutGridLines:any;
+    export var LayoutGridColumns:any;
+    export var CommandManager:any;
+    export var CompositeCommand:any;
+    export var AppPropsChanged:any;
     export class Shape{}
     export function createUUID(): string;
 }

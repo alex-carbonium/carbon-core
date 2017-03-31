@@ -175,6 +175,25 @@ declare module "carbon-basics" {
         static Default: Box;
     }
 
+    export const enum PrimitiveType {
+        None = 0,
+        DataNodeAdd = 1,
+        DataNodeRemove = 2,
+        DataNodeChange = 3,
+        DataNodeSetProps = 4,
+        DataNodeChangePosition = 5,
+        DataNodePatchProps = 6,
+        Selection = 7,
+        View = 8
+    }
+
+    export const enum ContextBarPosition {
+        None = 0,
+        Left = 1,
+        Right = 2,
+        Only = 4
+    }
+
     export var util: {
         debounce(func: () => any, ms: number): () => any;
         throttle(func: (...args: any[]) => any, ms: number): () => any;
