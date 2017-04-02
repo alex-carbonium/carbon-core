@@ -50,13 +50,13 @@ declare module "carbon-core" {
     export var PrimitiveType: any;
     export var NullContainer: any;
     export var CustomGuides: any;
-    export var domUtil: any;
     export var LayoutGridLines:any;
     export var LayoutGridColumns:any;
     export var CommandManager:any;
     export var CompositeCommand:any;
     export var AppPropsChanged:any;
     export var Invalidate:any;
+    export var SvgParser:any;
     export class Shape{}
     export function createUUID(): string;
 }
