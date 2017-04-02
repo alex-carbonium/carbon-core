@@ -90,7 +90,7 @@ export default class LineCreator extends Tool {
                 return;
             }
 
-            App.Current.activePage.dropToPage(pos.x, pos.y, this._element);
+            Environment.view.dropToLayer(pos.x, pos.y, this._element);
             var element = this._element;
             Invalidate.request();
             Selection.makeSelection([element]);

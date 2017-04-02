@@ -87,7 +87,8 @@ export default class ElementDragCreator extends Tool {
 
             var pos = this._element.position();
 
-            App.Current.activePage.dropToPage(pos.x, pos.y, this._element);
+            Environment.view.dropToLayer(pos.x, pos.y, this._element);
+
             var element = this._element;
             Selection.makeSelection([element]);
             this._hoverArtboard = null;// need to rebuild snapping data TODO: consider to just add data for a new element

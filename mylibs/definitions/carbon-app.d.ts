@@ -109,6 +109,7 @@ declare module "carbon-app" {
         contextScale: number;
 
         scaleChanged: IEvent<number>;
+        isolationLayer: any;
 
         setActivePage(page: IPage);
 
@@ -234,6 +235,7 @@ declare module "carbon-app" {
         requestInteractionOnly(rect?);
     }
 
+    
     export interface ISelectComposite extends IComposite{
         updateDisplayProps(changes);
     }

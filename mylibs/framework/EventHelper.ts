@@ -248,7 +248,6 @@ window['EventHandler'] = function(that, method) {
     return new EventHandler(that, method);
 };
 
-
 export default class EventHelper  {
     static preventDefault(event){
         if(event.preventDefault)

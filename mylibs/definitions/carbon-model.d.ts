@@ -107,7 +107,7 @@ declare module "carbon-model" {
         translateChildren(): boolean;
     }
 
-    export interface IPage extends IContainer {
+    export interface IPage extends IContainer, ILayer {
         getAllArtboards(): IArtboard[];
         getActiveArtboard(): IArtboard;
         getArtboardAtPoint(point: ICoordinate): IArtboard;
@@ -146,6 +146,12 @@ declare module "carbon-model" {
     }
 
     export interface ILayer extends IContainer {
+        dropToLayer(x, y, element);
+    }
+
+    export interface IIsolationLayer extends ILayer {
+        isolateGroup(owner:IContainer) :void;
+        exitIsolation():void;
     }
 
     export interface IDataElement {

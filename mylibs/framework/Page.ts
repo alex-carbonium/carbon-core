@@ -62,60 +62,6 @@ class Page extends Layer implements IPage {
         return this._nameProvider;
     }
 
-    getElementsInRect(rect) {
-        var selection = [];
-
-        this._collectDescendantsInRect(this, rect, selection);
-
-        return selection;
-    }
-    _collectDescendantsInRect(container: IContainer, rect: IRect, selection){
-        for (var i = 0; i < container.children.length; i++){
-            var element = container.children[i];
-            if (element.hitTestGlobalRect(rect)){
-                if (!element['multiselectTransparent']){
-                    selection.push(element);
-                }
-                else if (element instanceof Container){
-                    this._collectDescendantsInRect(element as IContainer, rect, selection);
-                }
-            }
-        }
-    }
-
-    dropToPage(x, y, element) {
-        var data = this.findDropToPageData(x, y, element);
-        element.applyTranslation(data.position.subtract(element.position()));
-        data.target.add(element);
-
-        return data.target;
-    }
-
-    findDropToPageData(x, y, element) {
-        var eventData = {
-            handled: false,
-            element: element,
-            x: x,
-            y: y
-        };
-
-        if (!element.isDropSupported()) {
-            return null;
-        }
-
-        var el = this.hitElement(eventData, this.scale());
-
-
-        while (!(el.canAccept([element]) && element.canBeAccepted(el))) {
-            el = el.parent();
-        }
-
-        var pos = el.global2local(eventData);
-        pos.roundMutable();
-
-        return {target: el, position: pos};
-    }
-
     scrollX(value?:number) {
         if (arguments.length === 1) {
             this._scrollX = arguments[0];

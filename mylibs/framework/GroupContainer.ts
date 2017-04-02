@@ -84,6 +84,10 @@ export default class GroupContainer extends Container implements IGroupContainer
         return value;
     }
 
+    dblclick(event) {
+        Environment.view.isolationLayer.isolateGroup(this);
+    }
+
     allowMoveOutChildren(value, event?) {
         return super.allowMoveOutChildren.apply(this, arguments) || (event && event.ctrlKey);
     }

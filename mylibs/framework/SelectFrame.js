@@ -26,6 +26,7 @@ class SelectFrame extends UIElement {
         rect.roundMutable();
         return rect;
     }
+
     complete(event){
         event.handled = true;
         var rect = this.props.br;

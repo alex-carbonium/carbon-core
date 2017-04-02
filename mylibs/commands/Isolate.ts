@@ -1,22 +1,19 @@
 import Selection from "framework/SelectionModel";
 import Environment from "environment";
 import { ChangeMode } from "framework/Defs";
-import { ILayer } from "carbon-core";
+import { ILayer, IUIElement, IContainer, IIsolationLayer } from "carbon-core";
 import { LayerTypes } from "carbon-app";
 
 export default {
-    run: function(elements){
-        var sorted = elements.slice().sort((a, b) => a.zOrder() - b.zOrder());
-        var element = elements[0];
-        var parent = element.parent();
-
-        var layer:ILayer = Environment.view.getLayer(LayerTypes.Isolation);
-        for (let i = 0, l = sorted.length; i < l; ++i) {
-            let element = sorted[i];
-            layer.add(element.clone());
-            element.setProps({visible:false}, ChangeMode.Self);
+    run: function(elements:IUIElement[]){
+        if(elements.length != 1 || !((elements[0] as IContainer).children instanceof Array)) {
+            return;
         }
-        layer.hitTransparent(false);
+
+        var element = elements[0];
+
+        var layer = Environment.view.getLayer(LayerTypes.Isolation) as IIsolationLayer;
+        layer.isolateGroup(element as IContainer);
         layer.invalidate();
     }
 }

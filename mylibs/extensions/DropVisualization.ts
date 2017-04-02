@@ -267,7 +267,7 @@ var onMouseMove = function (event) {
         return;
     }
 
-    var target = this.app.activePage.hitElement(event, this.view.scale(), null, Selection.directSelectionEnabled());
+    var target = this.view.hitElement(event);
     if (this._target !== target) {
         //special case - do not highlight children of active group even though they are hit visible
         if (target && !event.ctrlKey && target.parent() instanceof Container && target.parent().activeGroup()) {

@@ -1240,7 +1240,7 @@ class Path extends Shape {
     //     context.restore();
     // },
 
-    getBoundingBoxGlobal(includeMargin) {
+    getBoundingBoxGlobal(includeMargin: boolean = false): Rect {
         if (!this.runtimeProps.globalClippingBox) {
             this.runtimeProps.globalClippingBox = this.getGlobalBoundingBox();
         }

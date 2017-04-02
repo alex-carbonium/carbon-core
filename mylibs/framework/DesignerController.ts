@@ -21,9 +21,18 @@ import {choosePasteLocation} from "./PasteLocator";
 import { IArtboard } from "carbon-model";
 
 function onselect(rect) {
-    var selection = this.app.activePage.getElementsInRect(rect);
+    for(var i = this.view._layers.length - 1; i >= 0; --i) {
+        var layer = this.view._layers[i];
+        if(!layer.hitTransparent()) {
+            var selection = layer.getElementsInRect(rect);
+            if(selection) {
+                Selection.makeSelection(selection);
+            }
+            return;
+        }
+    }
 
-    Selection.makeSelection(selection);
+    Selection.makeSelection([]);
 }
 
 function stopDrag(event) {
@@ -60,7 +69,7 @@ function _handleDraggingOver(mousePoint, draggingElement, eventData) {
     var scale = this.view.scale();
     var dragOverElement = null;
 
-    var element = this.app.activePage.hitElementDirect(mousePoint, scale, function (element: UIElement, position, scale) {
+    var element = this.view.hitElementDirect(mousePoint, function (element: UIElement, position, scale) {
         var descendantOrSelf = draggingElement.elements.some(x => element.isDescendantOrSame(x));
         if (!descendantOrSelf && element.hitTest(position, scale, true)) {
             return true;
@@ -566,7 +575,7 @@ export default class DesignerController implements IController {
         this._bubbleMouseEvent(eventData, "dblclick");
 
         if (!eventData.handled) {
-            var element = this.app.activePage.hitElement(eventData, this.view.scale(), null, Selection.directSelectionEnabled());
+            var element = this.view.hitElement(eventData);
             if (element !== null) {
                 eventData.element = element;
                 this.onElementDblClicked.raise(eventData);
@@ -636,7 +645,7 @@ export default class DesignerController implements IController {
     }
 
     selectByClick(eventData) {
-        var element = this.app.activePage.hitElement<UIElement>(eventData, this.view.scale(), null, Selection.directSelectionEnabled());
+        var element = this.view.hitElement(eventData);
 
         if (element !== null) {
             eventData.element = element;
@@ -753,7 +762,7 @@ export default class DesignerController implements IController {
     }
 
     showContextMenu(eventData) {
-        var element = this.app.activePage.hitElement<UIElement>(eventData, this.view.scale(), null, Selection.directSelectionEnabled());
+        var element = this.view.hitElement(eventData);
 
         if (element !== null && !Selection.isElementSelected(element)) {
             eventData.element = element;

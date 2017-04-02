@@ -30,6 +30,10 @@ class NullPage extends UIElement implements IPage {
         return this;
     }
 
+    globalViewMatrixInverted() {
+        return null;
+    }
+
     zOrder(){
         return 0;
     }
@@ -241,7 +245,7 @@ class NullPage extends UIElement implements IPage {
         return 0;
     }
 
-    dropToPage(x, y, element){
+    dropToLayer(x, y, element){
     }
 }
 

@@ -162,7 +162,7 @@ export default class GraphicalPathCreator extends Tool {
             this._element.setProps(defaultSettings);
         }
 
-        this._app.activePage.dropToPage(event.x, event.y, this._element);
+        Environment.view.dropToLayer(event.x, event.y, this._element);
         this._changeMode(this._element, "edit");
         Selection.makeSelection([this._element]);
 

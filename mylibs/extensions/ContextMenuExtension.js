@@ -1,6 +1,6 @@
 import ExtensionBase from "./ExtensionBase";
 import {ContextBarPosition} from "framework/Defs";
-import RepeatContainer from "framework/repeater/RepeatContainer"; 
+import RepeatContainer from "framework/repeater/RepeatContainer";
 import Selection from "framework/SelectionModel";
 import GroupContainer from "framework/GroupContainer";
 import CompoundPath from "ui/common/CompoundPath";
@@ -11,7 +11,7 @@ function findItemsToSelect(eventData) {
     var items = [];
 
     var elements = this.app.activePage.hitElements(eventData, Environment.view.scale());
-    
+
     return items.map(e=>{
         return {
             name: e.displayName(),
@@ -86,7 +86,8 @@ export default class ContextMenuExtension extends ExtensionBase {
         var items = menu.items = [];
 
         var editingPath = selection.length === 1 && selection[0] instanceof Path && selection[0].mode() === 'edit';
-        if(editingPath && !context.eventData) {
+
+        if(editingPath  && !context.eventData) {
             items.push({
                 name: "@action.done",
                 contextBar: ContextBarPosition.Left | ContextBarPosition.Only,
@@ -95,6 +96,16 @@ export default class ContextMenuExtension extends ExtensionBase {
                 }
             });
             return;
+        }
+
+        if(this.view.isolationLayer.isActive && !context.eventData) {
+            items.push({
+                name: "@action.exitisolation",
+                contextBar: ContextBarPosition.Left | ContextBarPosition.Only,
+                callback: () => {
+                    actionManager.invoke("cancel");
+                }
+            });
         }
 
         if (selection.length) {

@@ -21,6 +21,7 @@ declare module "carbon-model"{
 
     export interface IContainer{
         globalMatrixToLocal(m: any): any;
+        globalViewMatrixInverted():any;
     }
 }
 
@@ -43,6 +44,8 @@ declare module "carbon-app"{
 
         registerForLayerDraw(layerType:number, element:{onLayerDraw:(layer: ILayer, context: IContext)=>void}, index?);
         unregisterForLayerDraw(layerType:number, element:any);
+
+        dropToLayer(x:number, y:number, element:IUIElement):void;
 
         viewportRect(): any;
 
@@ -70,8 +73,6 @@ declare module "carbon-app"{
 declare module "carbon-model"{
     export interface IPage{
         nameProvider: any;
-
-        dropToPage(x, y, element);
     }
 
     export interface IArtboard{

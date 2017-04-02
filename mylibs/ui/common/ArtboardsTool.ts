@@ -85,7 +85,7 @@ export default class ArtboardsTool extends Tool {
                 , h = element.height();
             if (w > 0 && h > 0) {
                 var pos = element.position();
-                this._app.activePage.dropToPage(pos.x,pos.y, element);
+                this._app.activePage.dropToLayer(pos.x, pos.y, element);
                 Selection.makeSelection([element]);
                 SnapController.calculateSnappingPoints(this._app.activePage);
             }

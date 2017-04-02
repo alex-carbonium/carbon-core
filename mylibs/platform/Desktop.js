@@ -44,7 +44,7 @@ var addDroppedImage = function (app, dropPosition, loadSrc, uploadedSrc) {
             image.x(dropX);
             image.y(dropY);
         }
-        app.activePage.dropToPage(dropX, dropY, image);
+        Environment.view.dropToLayer(dropX, dropY, image);
     };
     if (loadSrc) {
         im.src = loadSrc;

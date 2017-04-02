@@ -83,7 +83,7 @@ export default class PencilCreator extends Tool {
 
         var element = new Path();
         this._app.activePage.nameProvider.assignNewName(element);
-        this._app.activePage.dropToPage(event.x, event.y, element);
+        Environment.view.dropToLayer(event.x, event.y, element);
         this._element = element;
         this._position = new Point(event.x, event.y);
 

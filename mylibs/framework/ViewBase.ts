@@ -5,7 +5,7 @@ import ContextPool from "framework/render/ContextPool";
 import EventHelper from "framework/EventHelper";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
-import { ILayer } from "carbon-core";
+import { ILayer, IUIElement } from "carbon-core";
 import { LayerTypes, IView, IAnimationController } from "carbon-app";
 import { IEvent } from "carbon-basics";
 import { ICoordinate } from "carbon-geometry";
@@ -502,6 +502,49 @@ export default class ViewBase { //TODO: implement IView
         return true;
     }
 
+    hitElement(eventData):IUIElement {
+        for(var i = this._layers.length - 1; i >= 0; --i) {
+            var layer = this._layers[i] as any;
+            if(!layer.hitTransparent())
+            {
+                var element = layer.hitElement(eventData, this.scale(), null, Selection.directSelectionEnabled());
+                if(element) {
+                    return element;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    get layers() {
+        return this._layers;
+    }
+
+    dropToLayer(x:number, y:number, element:IUIElement):void {
+        var layers = this.layers
+        for(var i = layers.length - 1; i >= 0; --i) {
+            var layer = layers[i];
+            if(!layer.hitTransparent() && layer.canAccept(element)) {
+                layer.dropToLayer(x, y, element);
+                return;
+            }
+        }
+    }
+
+    hitElementDirect(mousePoint, callback) : IUIElement {
+        for(var i = this._layers.length - 1; i >=0; --i) {
+            var layer = this._layers[i] as any;
+            if(!layer.hitTransparent()) {
+                var element = layer.hitElementDirect(mousePoint, this.scale(), callback);
+                if(element) {
+                    return element;
+                }
+            }
+        }
+
+        return null;
+    }
 
     focused(value) {
         if (arguments.length === 1) {
