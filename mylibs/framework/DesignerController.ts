@@ -17,6 +17,7 @@ import { ITransformationEventData } from "carbon-model";
 import UIElement from "./UIElement";
 import { Dictionary } from "carbon-basics";
 import Container from "./Container";
+import {choosePasteLocation} from "./PasteLocator";
 import { IArtboard } from "carbon-model";
 
 function onselect(rect) {
@@ -774,5 +775,9 @@ export default class DesignerController implements IController {
     }
     onInteractionStopped(){
         this.interactionActive = false;
+    }
+
+    choosePasteLocation(elements: IUIElement[], allowMoveIn?: boolean){
+        return choosePasteLocation(elements, null, allowMoveIn);
     }
 }

@@ -6,7 +6,7 @@ import Brush from "./Brush";
 import Shadow from "./Shadow";
 import ContextPool from "./render/ContextPool";
 import {Types, StrokePosition, LineCap, LineJoin} from "./Defs";
-import Frame from "./Frame";
+import Image from "./Image";
 import Constraints from "./Constraints";
 
 class Shape extends Container {
@@ -212,7 +212,7 @@ class Shape extends Container {
         if (elements.length !== 1){
             return false;
         }
-        return (elements[0] instanceof Frame || elements[0] instanceof Shape) && allowMoveInOut;
+        return (elements[0] instanceof Image || elements[0] instanceof Shape) && allowMoveInOut;
     }
 
     lineCap(value?) {
@@ -284,16 +284,16 @@ class Shape extends Container {
         return true;
     }
 
-    insert(frame) {
+    insert(image) {
         this.setProps({clipMask: true});
-        frame.prepareAndSetProps(this.selectLayoutProps());
+        image.prepareAndSetProps(this.selectLayoutProps());
 
         var parent = this.parent();
         var idx = parent.remove(this);
 
         var group = new GroupContainer();
         group.add(this);
-        group.add(frame);
+        group.add(image);
         parent.insert(group, idx);
     }
 

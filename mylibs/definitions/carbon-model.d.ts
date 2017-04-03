@@ -1,13 +1,12 @@
 declare module "carbon-model" {
-    import { IPoint, IRect } from "carbon-geometry";
-    import { IEventData, IConstructor } from "carbon-basics";
+    import { IPoint, IRect, ICoordinate, IMatrix } from "carbon-geometry";
+    import { IEventData, IConstructor, IEvent } from "carbon-basics";
 
-    export interface IPropsOwner<TProps>{
+    export interface IPropsOwner<TProps> {
         props: TProps;
 
         setProps(props: Partial<TProps>, mode?);
         patchProps(patchType, propName, propValue);
-        setProps(props, mode?);
     }
 
     export interface IDataNodeProps {
@@ -25,6 +24,9 @@ declare module "carbon-model" {
 
         enablePropsTracking();
         disablePropsTracking();
+
+        toJSON(): any;
+        fromJSON(json: any): IDataNode;
     }
 
     export interface IUIElementProps extends IDataNodeProps {
@@ -35,11 +37,14 @@ declare module "carbon-model" {
         parent(): IContainer;
 
         name(): string;
+        displayName(): string;
 
         shouldApplyViewMatrix(): boolean;
 
         getBoundingBox(): IRect;
         getBoundingBoxGlobal(): IRect;
+        setSize(width: number, height: number);
+        setTransform(matrix: IMatrix);
 
         getMaxOuterBorder(): number;
 
@@ -50,10 +55,10 @@ declare module "carbon-model" {
 
         showResizeHint(): boolean;
 
-        each(callback:(e:IUIElement, index?:number)=>boolean|void);
+        each(callback: (e: IUIElement, index?: number) => boolean | void);
 
-        fill(value?: any):any;
-        stroke(value?: any):any;
+        fill(value?: any): any;
+        stroke(value?: any): any;
 
         x(): number;
         y(): number;
@@ -65,10 +70,11 @@ declare module "carbon-model" {
         clone(): IUIElement;
     }
 
-    export interface IContainerProps extends IUIElementProps{
+    export interface IContainerProps extends IUIElementProps {
     }
 
     export interface IContainer extends IUIElement, IPropsOwner<IContainerProps> {
+        props: IContainerProps;
         children: IUIElement[];
 
         canAccept(elements: IUIElement[], autoInsert: boolean, allowMoveIn: boolean): boolean;
@@ -87,9 +93,11 @@ declare module "carbon-model" {
 
         autoPositionChildren(): boolean;
 
-        applyVisitor(callback:(IUIElement)=>boolean|void);
+        applyVisitor(callback: (IUIElement) => boolean | void);
 
-        hitTransparent(value:boolean):boolean;
+        hitTransparent(value: boolean): boolean;
+
+        globalMatrixToLocal(matrix: IMatrix): IMatrix;
     }
 
     export interface IGroupContainer extends IContainer {
@@ -99,7 +107,8 @@ declare module "carbon-model" {
 
     export interface IPage extends IContainer {
         getAllArtboards(): IArtboard[];
-        getActiveArtboard() : IArtboard;
+        getActiveArtboard(): IArtboard;
+        getArtboardAtPoint(point: ICoordinate): IArtboard;
 
         saveWorkspaceState(): any;
         restoreWorkspaceState(data: any): void;
@@ -129,9 +138,9 @@ declare module "carbon-model" {
     }
 
     export interface ITransformationElement extends IComposite, IGroupContainer {
-        angle():number;
-        x():number;
-        y():number;
+        angle(): number;
+        x(): number;
+        y(): number;
     }
 
     export interface ILayer extends IContainer {
@@ -146,8 +155,9 @@ declare module "carbon-model" {
         guidesY: IGuide[];
     }
 
-    export interface IArtboard extends IContainer {
-
+    export interface IArtboard extends IContainer, IPropsOwner<IArtboardProps> {
+        props: IArtboardProps;
+        setProps(props: Partial<IArtboardProps>, mode?);
     }
 
     export interface IGuide {
@@ -157,8 +167,47 @@ declare module "carbon-model" {
 
     export interface ITransformationEventData extends IEventData {
         transformationElement: ITransformationElement;
-        element?:IUIElement;
+        element?: IUIElement;
     }
 
-    export const NullContainer:IContainer;
+    export const NullContainer: IContainer;
+
+    export const enum ImageSourceType {
+        None = 0,
+        Font = 1,
+        Url = 5
+    }
+
+    export type ImageSource =
+        { type: ImageSourceType.None } |
+        { type: ImageSourceType.Url, url: string } |
+        { type: ImageSourceType.Font, icon: string };
+
+    export const enum ContentSizing {
+        fill = 1,
+        fit = 2,
+        stretch = 3,
+        center = 4,
+        original = 5,
+        manual = 6
+    }
+
+    export interface IImageProps extends IContainerProps{
+        source: ImageSource;
+        sizing: ContentSizing;
+    }
+    export interface IImage extends IContainer, IPropsOwner<IImageProps> {
+        props: IImageProps;
+        source(value?: ImageSource): ImageSource;
+
+        setProps(props: Partial<IImageProps>, mode?);
+    }
+    export const Image: IConstructor<IImage> & IPropsOwner<IImageProps> & {
+        createUrlSource(url: string): ImageSource;
+        createFontSource(iconName: string): ImageSource;
+
+        readonly uploadRequested: IEvent<{done: Promise<void>}>;
+        readonly EmptySource: ImageSource;
+        readonly NewImageSize: number;
+    };
 }

@@ -6,7 +6,9 @@ import EventHelper from "framework/EventHelper";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
 import { ILayer } from "carbon-core";
-import { LayerTypes } from "carbon-app";
+import { LayerTypes, IView, IAnimationController } from "carbon-app";
+import { IEvent } from "carbon-basics";
+import { ICoordinate } from "carbon-geometry";
 
 var Stopwatch = require("../Stopwatch");
 var debug = require("DebugUtil")("carb:view");
@@ -67,8 +69,14 @@ function onZoomChanged(value, oldValue) {
 }
 
 
-export default class ViewBase {
+export default class ViewBase { //TODO: implement IView
     [name: string]: any;
+    //TODO: move to platform
+    viewContainerElement: HTMLElement;
+    animationController: AnimationController;
+
+    contextScale: number;
+    scaleChanged: IEvent<number>;
 
     _registerLayer(layer) {
         this._layers.push(layer);
@@ -344,6 +352,14 @@ export default class ViewBase {
             y: this.scrollY() / scale,
             width: size.width / scale,
             height: size.height / scale
+        };
+    }
+
+    pointToScreen(point: ICoordinate) {
+        var parentOffset = this.app.platform.containerOffset();
+        return {
+            x: parentOffset.left + point.x - this.page.scrollX(),
+            y: parentOffset.top + point.y - this.page.scrollY()
         };
     }
 

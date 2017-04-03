@@ -1,6 +1,7 @@
 import UIElement from "./UIElement";
 import Selection from "./SelectionModel";
 import Text from "./text/Text";
+import Image from "./Image";
 import Environment from "../environment";
 import {combineRectArray} from "../math/math";
 import Rect from "../math/rect";
@@ -130,15 +131,19 @@ class Clipboard {
         var globalMatrices = null;
         var rootBoundingBoxes = null;
         if (textData){
-            var text = new Text();
-            text.prepareAndSetProps({
-                content: textData,
-                font: this._app.props.defaultTextSettings.font,
-                textStyleId: this._app.props.defaultTextSettings.textStyleId
-            });
-            bufferElements = [text];
-            globalBoundingBoxes = [{x: 0, y: 0, width: text.width(), height: text.height()}];
-            globalMatrices = [text.viewMatrix()];
+            var newElement: UIElement = Image.tryCreateFromUrl(textData);
+            if (newElement === null){
+                newElement = new Text();
+                newElement.prepareAndSetProps({
+                    content: textData,
+                    font: this._app.props.defaultTextSettings.font,
+                    textStyleId: this._app.props.defaultTextSettings.textStyleId
+                });
+            }
+
+            bufferElements = [newElement];
+            globalBoundingBoxes = [{x: 0, y: 0, width: newElement.width(), height: newElement.height()}];
+            globalMatrices = [newElement.viewMatrix()];
         }
         else if (this.buffer){
             bufferElements = this.buffer.map(x =>{

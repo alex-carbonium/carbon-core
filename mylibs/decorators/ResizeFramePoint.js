@@ -5,7 +5,6 @@ import ResizeOptions from "./ResizeOptions";
 import {Types, FrameCursors} from "../framework/Defs";
 import Point from "../math/point";
 import Rect from "../math/rect";
-import {fitRect} from "../math/Fitting";
 import UserSettings from "../UserSettings";
 
 var debug = require("DebugUtil")("carb:resizeFramePoint");
@@ -61,7 +60,7 @@ export default {
         if (frame.resizingElement) {
             frame.resizingElement.saveChanges();
             frame.resizingElement.detach();
-            //FrameContent depends on event fired in the end
+            //ImageContent depends on event fired in the end
             frame.resizingElement.stopResizing({transformationElement: frame.resizingElement});
             delete frame.globalViewMatrix;
         }
@@ -87,7 +86,7 @@ export default {
             }
             else{
                 var boundary = Rect.fromPoints(p1, p2);
-                var fit = fitRect(frame.originalRect, boundary);
+                var fit = frame.originalRect.fit(boundary);
 
                 dx = (fit.width - frame.originalRect.width) * rv[0];
                 dy = (fit.height - frame.originalRect.height) * rv[1];

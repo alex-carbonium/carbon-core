@@ -228,7 +228,6 @@ export default class DrawActionSelector extends ExtensionBase {
             return;
         }
 
-        this.app.drawActionSelector = this;
         this._currentAction = null;
         registerCommands.call(this);
         this._rectCreator = new ElementDragCreator(ViewTool.Rectangle, Types.Rectangle);
@@ -245,28 +244,13 @@ export default class DrawActionSelector extends ExtensionBase {
         this._pencilCreator = new PencilCreator();
         this._handTool = new HandTool();
         this._textTool = new TextTool(app);
-        this._imageCreator = new ElementDragCreator(ViewTool.Image, Types.Frame);
+        this._imageCreator = new ElementDragCreator(ViewTool.Image, Types.Image);
 
         this._defaultShapeSettings = new DefaultShapeSettings(app);
         this._artboardToolSettings = new ArtboardToolSettings(app);
 
-        var that = this;
-        this._startDraggingToken = sketch.framework.pubSub.subscribe("toolbox.startDragging", function () {
-            that.wasDirectSelectionInverted = Selection.invertDirectSelection();
-            if (SystemConfiguration.ResetActiveToolToDefault) {
-                app.resetCurrentTool();
-            }
-        });
-
-        this._stopDraggingToken = sketch.framework.pubSub.subscribe("toolbox.stopDragging", function () {
-            if (that.wasDirectSelectionInverted) {
-                if (SystemConfiguration.ResetActiveToolToDefault) {
-                    app.actionManager.invoke("movePointerDirect");
-                }
-            }
-        });
-        this._pageChangedToken = app.pageChanged.bind(function () {
-            if (that._currentAction) {
+        this._pageChangedToken = app.pageChanged.bind(() => {
+            if (this._currentAction) {
                 if (SystemConfiguration.ResetActiveToolToDefault) {
                     app.resetCurrentTool();
                 }
@@ -294,7 +278,7 @@ export default class DrawActionSelector extends ExtensionBase {
     }
 
     detachAll() {
-        Cursor.removeGlobalCursor(true);
+        Cursor.removeGlobalCursor();
         if (this._currentAction) {
             this._currentAction.detach();
             this._currentAction = null;
@@ -312,8 +296,6 @@ export default class DrawActionSelector extends ExtensionBase {
     dispose() {
         this.detachAll();
 
-        sketch.framework.pubSub.unsubscribe(this._startDraggingToken);
-        sketch.framework.pubSub.unsubscribe(this._stopDraggingToken);
         if(this._pageChangedToken) {
             this._pageChangedToken.dispose();
         }

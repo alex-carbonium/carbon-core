@@ -512,4 +512,9 @@ export default class Desktop extends All {
         app.consistencyMonitor = new ConsistencyMonitor(app);
         app.consistencyMonitor.start();
     }
+
+    containerOffset(){
+        var htmlParent = this.viewContainerElement();
+        return domUtil.offset(htmlParent);
+    }
 }

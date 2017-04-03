@@ -4,13 +4,13 @@ import DefaultFrameType from "../decorators/DefaultFrameType";
 import ActiveFrame from "../decorators/ActiveFrame";
 import PropertyMetadata from "../framework/PropertyMetadata";
 import {Types} from "../framework/Defs";
-import {ContentSizing} from "./Defs";
+import {ContentSizing} from "carbon-model";
 import {ITransformationEventData} from "carbon-core";
 
 var ContentFrameType = Object.create(DefaultFrameType);
 ContentFrameType.strokeStyle = null;
 
-export default class FrameContent extends UIElement{
+export default class ImageContent extends UIElement{
     constructor(frame){
         super();
         var clone = frame.clone();
@@ -24,7 +24,7 @@ export default class FrameContent extends UIElement{
     }
 
     clone(){
-        var clone = new FrameContent(this._frame);
+        var clone = new ImageContent(this._frame);
         clone.setProps(this.cloneProps());
         return clone;
     }
@@ -90,9 +90,9 @@ export default class FrameContent extends UIElement{
     }
 }
 
-FrameContent.prototype.t = Types.FrameContent;
+ImageContent.prototype.t = Types.ImageContent;
 
-PropertyMetadata.registerForType(FrameContent, {
+PropertyMetadata.registerForType(ImageContent, {
     groups: function(){
         return [];
     }

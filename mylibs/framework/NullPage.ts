@@ -4,16 +4,16 @@ import { IPage, IUIElement, IContainerProps, IDataNode, IArtboard } from "carbon
 import { IRect, IPoint } from "carbon-geometry";
 import { Dictionary } from "carbon-basics";
 import Rect from "../math/rect";
-import DataNode from "./DataNode";
+import UIElement from "./UIElement";
 
-class NullPage extends DataNode implements IPage {
+class NullPage extends UIElement implements IPage {
     t: string;
     props: IContainerProps;
     children: any[];
     nameProvider: any;
 
     constructor() {
-        super(false);
+        super();
         this.children = [];
         this.props = null;
     }
@@ -60,12 +60,6 @@ class NullPage extends DataNode implements IPage {
     shouldApplyViewMatrix(): boolean {
         return false;
     }
-    getBoundingBox(): IRect {
-        return Rect.Zero;
-    }
-    getBoundingBoxGlobal(): IRect {
-        return Rect.Zero;
-    }
     getMaxOuterBorder(): number {
         return 0;
     }
@@ -82,17 +76,12 @@ class NullPage extends DataNode implements IPage {
     }
     fill(value?: any) {
     }
-    stroke(value?: any) {
-    }
 
     parent() {
         return null;
     }
     isInitialized() {
         return true;
-    }
-    init(view) {
-
     }
     getAllPalettes() {
         return [];

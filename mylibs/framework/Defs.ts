@@ -194,15 +194,6 @@ export enum MirrorViewMode {
     Fit = 1
 }
 
-export enum ContentSizing {
-    fill = 1,
-    fit = 2,
-    stretch = 3,
-    center = 4,
-    original = 5,
-    manual = 6
-};
-
 export enum ElementState {
     Resize = 0,
     Edit = 1
@@ -227,9 +218,8 @@ export var Types = {
     'Constraints': 'n',
     'CorruptedElement': 'x',
     'DraggingElement': 'd',
-    'Frame': 'F',
-    'FrameSource': 'I',
-    'FrameContent': 'FC',
+    'Image': 'F',
+    'ImageContent': 'FC',
     'GroupContainer': 'g',
     'App': 'A',
     'Guide': 'H',

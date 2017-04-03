@@ -30,6 +30,7 @@ declare module "carbon-basics" {
         bindHighPriority(owner: any, callback: (data: T) => void): IDisposable;
         bindAsync(owner: any, callback: (data: T) => void): IDisposable;
         unbind(callback: (data: T) => void);
+        unbind(owner: any, callback: (data: T) => void);
         clearSubscribers();
     }
 

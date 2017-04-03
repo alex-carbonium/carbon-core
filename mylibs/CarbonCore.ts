@@ -25,6 +25,7 @@ export default {
     "app": app,
     "params": params,
     "logger": logger,
+    "Rect": require("./math/rect"),
     "ObjectFactory": require("./framework/ObjectFactory"),
     "DesignerView": require("./framework/DesignerView"),
     "ViewBase": require("./framework/ViewBase"),
@@ -42,8 +43,7 @@ export default {
     "PropertyTracker": require("./framework/PropertyTracker"),
     "UIElement": require("./framework/UIElement"),
     "CompositeElement": require("./framework/CompositeElement"),
-    "Frame": require("./framework/Frame"),
-    "FrameSource": require("./framework/FrameSource"),
+    "Image": require("./framework/Image"),
     "Container": require("./framework/Container"),
     "GroupContainer": require("./framework/GroupContainer"),
     "RepeatContainer": require("./framework/repeater/RepeatContainer"),
@@ -80,7 +80,6 @@ export default {
     "ArtboardResource": Defs.ArtboardResource,
     "Types": Defs.Types,
     "ViewTool": Defs.ViewTool,
-    "Tiler": require("./ui/toolbox/tiler"),
     "Context": require("./framework/render/Context"),
     "ContextPool": require("./framework/render/ContextPool"),
     "Deferred": require("./framework/Deferred"),
@@ -133,8 +132,6 @@ export default {
     "Story": require("./stories/Story"),
     "StoryAction": require("./stories/StoryAction"),
     "StoryType": Defs.StoryType,
-
-    "Fitting": require("./math/Fitting"),
 
     "Invalidate": require("./framework/Invalidate"),
     "NameProvider": require("./ui/NameProvider")

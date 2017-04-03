@@ -265,7 +265,7 @@ export default class PlatformAll {
     registerClipboardShortcuts(app) {
     }
 
-    renderElement(e, scale, w, h) {
+    renderElementToDataUrl(e, scale, w, h) {
         var actualScale = scale || 1;
         var width = w || e.width();
         var height = h || e.height();

@@ -30,8 +30,13 @@ declare module "carbon-api" {
         dashboard(companyId: string): Promise<any>;
     }
 
-    export var logger: ILogger;
-    export var backend: IBackend;
-    export var AccountProxy: IAccountProxy;
-    export var DashboardProxy: IDashboardProxy;
+    export interface IFileProxy{
+        images(companyId: string): Promise<any>;
+    }
+
+    export const logger: ILogger;
+    export const backend: IBackend;
+    export const AccountProxy: IAccountProxy;
+    export const DashboardProxy: IDashboardProxy;
+    export const FileProxy: IFileProxy;
 }

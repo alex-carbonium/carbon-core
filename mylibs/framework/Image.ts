@@ -1,21 +1,24 @@
 import UIElement from "./UIElement";
 import Container from "./Container";
-import FrameSource from "./FrameSource";
+import ImageSourceHelper from "./ImageSourceHelper";
 import PropertyMetadata from "./PropertyMetadata";
 import Brush from "./Brush";
-import { ContentSizing, Overflow, Types, ChangeMode } from "./Defs";
+import { Overflow, Types, ChangeMode } from "./Defs";
 import Invalidate from "./Invalidate";
-import FrameEditTool from "./FrameEditTool";
+import ImageEditTool from "./ImageEditTool";
 import EventHelper from "./EventHelper";
 import RectMask from "./RectMask";
+import { ContentSizing, ImageSource, ImageSourceType, IImage, IPropsOwner, IImageProps } from "carbon-model";
 
 const DefaultSizing = ContentSizing.fill;
 
-export default class Frame extends Container {
+export default class Image extends Container implements IImage, IPropsOwner<IImageProps> {
+    props: IImageProps;
+
     prepareProps(changes) {
         super.prepareProps.apply(this, arguments);
         var source = changes.source || this.source();
-        if (FrameSource.isEditSupported(source)) {
+        if (ImageSourceHelper.isEditSupported(source)) {
             var brChanged = changes.hasOwnProperty("br");
             if (changes.hasOwnProperty("sizing") || brChanged) {
                 var oldRect = this.getBoundaryRect();
@@ -23,7 +26,7 @@ export default class Frame extends Container {
                 var sourcePropsChanged = changes.hasOwnProperty("sourceProps");
                 var sourceProps = sourcePropsChanged ? changes.sourceProps : this.props.sourceProps;
                 var runtimeSourceProps = sourcePropsChanged ? changes.sourceProps : this.runtimeProps.sourceProps;
-                FrameSource.prepareProps(source, changes.sizing || this.sizing(), oldRect, newRect,
+                ImageSourceHelper.prepareProps(source, changes.sizing || this.sizing(), oldRect, newRect,
                     sourceProps, runtimeSourceProps, changes, !this.runtimeProps.isTransformationClone);
             }
         }
@@ -44,9 +47,9 @@ export default class Frame extends Container {
             }
         }
         var source = this.source();
-        if (FrameSource.isEditSupported(source)) {
+        if (ImageSourceHelper.isEditSupported(source)) {
             if (newProps.hasOwnProperty("sizing") || newProps.hasOwnProperty("br")) {
-                FrameSource.resize(source, this.sizing(), this.getBoundaryRect(), this.runtimeProps.sourceProps);
+                ImageSourceHelper.resize(source, this.sizing(), this.getBoundaryRect(), this.runtimeProps.sourceProps);
             }
         }
         //this.createOrUpdateClippingMask(source, newProps);
@@ -71,7 +74,7 @@ export default class Frame extends Container {
         return clone;
     }
 
-    source(value?) {
+    source(value?: ImageSource): ImageSource {
         if (value !== undefined) {
             this.setProps({ source: value });
         }
@@ -86,13 +89,13 @@ export default class Frame extends Container {
     }
 
     fillBackground() {
-        if (!FrameSource.isFillSupported(this.source())) {
+        if (!ImageSourceHelper.isFillSupported(this.source())) {
             super.fillBackground.apply(this, arguments);
         }
     }
 
     strokeBorder() {
-        if (!FrameSource.isFillSupported(this.source())) {
+        if (!ImageSourceHelper.isFillSupported(this.source())) {
             super.strokeBorder.apply(this, arguments);
         }
     }
@@ -114,7 +117,7 @@ export default class Frame extends Container {
         context.save();
 
         if (!this.runtimeProps.loaded) {
-            var promise = FrameSource.load(source, this.props.sourceProps);
+            var promise = ImageSourceHelper.load(source, this.props.sourceProps);
             if (promise) {
                 promise.then(data => {
                     if (this.isDisposed()) {
@@ -132,7 +135,7 @@ export default class Frame extends Container {
                         }
                         //this.createOrUpdateClippingMask(source, this.props);
                     }
-                    FrameSource.resize(source, this.sizing(), this.getBoundaryRect(), this.runtimeProps.sourceProps);
+                    ImageSourceHelper.resize(source, this.sizing(), this.getBoundaryRect(), this.runtimeProps.sourceProps);
                     Invalidate.request();
                 });
             }
@@ -143,14 +146,14 @@ export default class Frame extends Container {
             this.drawWithMask(context, this.runtimeProps.mask, 0, environment);
         }
         else {
-            FrameSource.draw(source, context, w, h, this.props, this.runtimeProps.sourceProps);
+            ImageSourceHelper.draw(source, context, w, h, this.props, this.runtimeProps.sourceProps);
         }
 
         context.restore();
     }
 
     renderAfterMask(context) {
-        FrameSource.draw(this.source(), context, this.width(), this.height(), this.props, this.runtimeProps.sourceProps);
+        ImageSourceHelper.draw(this.source(), context, this.width(), this.height(), this.props, this.runtimeProps.sourceProps);
     }
 
     clipSelf() {
@@ -165,7 +168,7 @@ export default class Frame extends Container {
             return;
         }
         if (newProps.hasOwnProperty("angle") || newProps.hasOwnProperty("sourceProps")) {
-            var shouldClip = FrameSource.shouldClip(source, this.width(), this.height(), this.runtimeProps.sourceProps);
+            var shouldClip = ImageSourceHelper.shouldClip(source, this.width(), this.height(), this.runtimeProps.sourceProps);
             if (this.angle() % 360 === 0 || !shouldClip) {
                 delete this.runtimeProps.mask;
             }
@@ -183,17 +186,17 @@ export default class Frame extends Container {
 
     dblclick() {
         var source = this.source();
-        if (FrameSource.isEditSupported(source)) {
-            FrameEditTool.attach(this);
+        if (ImageSourceHelper.isEditSupported(source)) {
+            ImageEditTool.attach(this, Image.EmptySource);
         }
-        else if (!FrameSource.hasValue(source)) {
+        else if (!ImageSourceHelper.hasValue(source)) {
             var e = { done: null };
-            Frame.uploadRequested.raise(e);
+            Image.uploadRequested.raise(e);
             if (e.done) {
                 e.done.then(urls => this.prepareAndSetProps({
                     sizing: DefaultSizing,
                     sourceProps: null,
-                    source: FrameSource.createFromUrl(urls[0])
+                    source: Image.createUrlSource(urls[0])
                 }));
             }
         }
@@ -207,7 +210,7 @@ export default class Frame extends Container {
         if (elements.length !== 1) {
             return false;
         }
-        return elements[0] instanceof Frame && allowMoveInOut;
+        return elements[0] instanceof Image && allowMoveInOut;
     }
 
     canConvertToPath() {
@@ -234,9 +237,10 @@ export default class Frame extends Container {
         return true;
     }
 
-    insert(frame: Frame, index, mode) {
-        frame.setProps(this.selectLayoutProps());
-        this.parent().replace(this, frame, mode);
+    insert(image: Image, index, mode) {
+        image.setProps(this.selectLayoutProps());
+        this.parent().replace(this, image, mode);
+        return image;
     }
 
     getNonRepeatableProps () {
@@ -244,16 +248,38 @@ export default class Frame extends Container {
         return base.concat(["source"]);
     }
 
-    static uploadRequested = EventHelper.createEvent()
-}
-Frame.prototype.t = Types.Frame;
+    static createUrlSource(url: string): ImageSource{
+        return ImageSourceHelper.createUrlSource(url);
+    }
+    static createFontSource(iconName: string): ImageSource{
+        return ImageSourceHelper.createFontSource(iconName);
+    }
 
-PropertyMetadata.registerForType(Frame, {
+    static tryCreateFromUrl(string: string): Image | null{
+        if (!string){
+            return null;
+        }
+        if (/https?:.*(jpe?g|png)$/g.test(string)){
+            var image = new Image();
+            image.setSize(Image.NewImageSize, Image.NewImageSize);
+            image.source(Image.createUrlSource(string));
+            return image;
+        }
+        return null;
+    }
+
+    static uploadRequested = EventHelper.createEvent();
+    static EmptySource = Object.freeze<ImageSource>({type: ImageSourceType.None});
+    static readonly NewImageSize = 50;
+}
+Image.prototype.t = Types.Image;
+
+PropertyMetadata.registerForType(Image, {
     fill: {
-        defaultValue: Brush.createFromResource("default.text")
+        defaultValue: Brush.createFromColor("#333")
     },
     source: {
-        defaultValue: FrameSource.Empty
+        defaultValue: Image.EmptySource
     },
     sizing: {
         displayName: "Sizing",
@@ -276,13 +302,13 @@ PropertyMetadata.registerForType(Frame, {
     prepareVisibility: function (props) {
         var base = PropertyMetadata.findForType(Container);
         return Object.assign({}, base, {
-            sizing: FrameSource.isEditSupported(props.source)
+            sizing: ImageSourceHelper.isEditSupported(props.source)
         });
     },
     groups: function () {
         var baseGroups = PropertyMetadata.findForType(Container).groups();
         baseGroups.splice(1, 0, {
-            label: UIElement.displayType(Types.Frame),
+            label: UIElement.displayType(Types.Image),
             properties: ["sizing"]
         });
 

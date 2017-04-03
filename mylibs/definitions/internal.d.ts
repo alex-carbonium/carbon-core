@@ -15,6 +15,8 @@ declare module "carbon-model"{
         canSelect(): boolean;
 
         getBoundaryRect(): IRect;
+
+        runtimeProps: any;
     }
 
     export interface IContainer{
@@ -55,6 +57,10 @@ declare module "carbon-app"{
         repeatLastMouseMove();
     }
 
+    export interface IActionManager{
+        subscribeToActionStart(action, cb);
+    }
+
     export const MirroringController: any;
     export const Context: any;
     export const Layer: any;
@@ -64,7 +70,6 @@ declare module "carbon-app"{
 declare module "carbon-model"{
     export interface IPage{
         nameProvider: any;
-        getArtboardAtPoint(point): IArtboard;
 
         dropToPage(x, y, element);
     }
@@ -114,3 +119,5 @@ declare module "oidc-client/src/Log" {
     }
     export = Log;
 }
+
+declare function assertNever(t: never);

@@ -1,6 +1,7 @@
 import Intl from "Intl";
 
 export default class NameProvider {
+    [name: string]: any;
 
     constructor(page) {
         this._nextIndexes = {};
@@ -28,7 +29,7 @@ export default class NameProvider {
         let lastLabel = null;
         while (true) {
             var displayType = element.displayType();
-            var index = this.getNextIndex(element, displayType);            
+            var index = this.getNextIndex(element, displayType);
             var label = Intl.instance.formatMessage({
                 id: displayType,
                 defaultMessage: displayType

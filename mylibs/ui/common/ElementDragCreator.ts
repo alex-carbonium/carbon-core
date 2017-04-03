@@ -17,7 +17,7 @@ import {IMouseEventData, IKeyboardState} from "carbon-core";
 export default class ElementDragCreator extends Tool {
     [name: string]: any;
 
-    constructor(toolId: string, type, parameters) {
+    constructor(toolId: string, type, parameters?) {
         super(toolId);
 
         this._type = type;

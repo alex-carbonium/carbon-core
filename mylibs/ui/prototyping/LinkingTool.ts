@@ -296,7 +296,7 @@ export default class LinkingTool extends Tool {
 
         for (var i = 0; i < artboards.length; ++i) {
             let artboard = artboards[i];
-            var rect = artboard.getBoundingBoxGlobal();
+            var rect: any = artboard.getBoundingBoxGlobal();
             rect = adjustRectSize(rect, 40 / scale);
             if(isPointInRect(rect, event)) {
                 if(!this._hasOutboundConnections(artboard)){

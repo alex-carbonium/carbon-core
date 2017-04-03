@@ -1,5 +1,4 @@
 import {TileSize, ArtboardResource} from "framework/Defs";
-import tiler from "./tiler";
 import ContextPool from "framework/render/ContextPool";
 import Environment from "environment";
 import FileProxy from "server/FileProxy";
@@ -10,6 +9,52 @@ import { Dictionary } from "carbon-core";
 var PADDING = 5;
 var _configCache = {};
 export default class ToolboxConfiguration {
+    static chooseTileType(w, h) {
+        var opaque = w / h < 2;
+        if (opaque && h > 200) {
+            return 3;
+        }
+        var wide = w > 250;
+        if (wide) {
+            return 2;
+        }
+        return 1;
+    }
+    static fitToTile(w, h, tileType, padding) {
+        padding = padding || 0;
+        var data: Dictionary = {};
+        data.width = 128;
+        data.height = 60;
+
+        if (tileType == 3) {
+            data.width = 257;
+            data.height = 121;
+        }
+        else if (tileType == 2) {
+            data.width = 257;
+        }
+
+        var pw = data.width - padding * 2;
+        var ph = data.height - padding * 2;
+
+        if (w / h >= 1.62) {
+            data.scale = pw / w;
+            if (h * data.scale > ph) {
+                data.scale = ph / h;
+            }
+        } else {
+            data.scale = ph / h;
+            if (w * data.scale > pw) {
+                data.scale = pw / w;
+            }
+        }
+
+        if (data.scale > 1) {
+            data.scale = 1;
+        }
+
+        return data;
+    }
 
     static renderElementsToSprite(elements, outConfig, contextScale?): Promise<any> {
         contextScale = contextScale || 1;
@@ -18,7 +63,7 @@ export default class ToolboxConfiguration {
         }
         let elementWithTiles : Array<any> = elements.map(e=> {
             if (e.props.tileSize === TileSize.Auto) {
-                var tileSize = tiler.chooseTileType(e.width(), e.height());
+                var tileSize = ToolboxConfiguration.chooseTileType(e.width(), e.height());
             } else {
                 tileSize = e.props.tileSize;
             }
@@ -38,7 +83,7 @@ export default class ToolboxConfiguration {
         while (i < elementWithTiles.length && elementWithTiles[i].tileSize === TileSize.XLarge) {
             var element = elementWithTiles[i].element;
             var tileSize = elementWithTiles[i].tileSize;
-            var data = tiler.fitToTile(element.width(), element.height(), tileSize, PADDING);
+            var data = ToolboxConfiguration.fitToTile(element.width(), element.height(), tileSize, PADDING);
             renderTasks.push({x, y, data: data});
             x += data.width;
             height = Math.max(height, data.height);
@@ -60,7 +105,7 @@ export default class ToolboxConfiguration {
                 y = 0;
             }
 
-            var data = tiler.fitToTile(element.width(), element.height(), tileSize, PADDING);
+            var data = ToolboxConfiguration.fitToTile(element.width(), element.height(), tileSize, PADDING);
             renderTasks.push({x, y, data: data});
             height = Math.max(height, data.height);
             if ((counter + 1) % countOnLine === 1) {

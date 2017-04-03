@@ -1,13 +1,16 @@
 import Environment from "../environment";
-import {ChangeMode, ContentSizing} from "./Defs";
+import {ChangeMode} from "./Defs";
 import {intersectRects} from "../math/math";
-import FrameSource from "./FrameSource";
-import FrameContent from "./FrameContent";
+import ImageSourceHelper from "./ImageSourceHelper";
+import ImageContent from "./ImageContent";
 import SnapController from "./SnapController";
 import Rect from "../math/rect";
 import Selection from "./SelectionModel";
+import { ContentSizing, IImage, ImageSource } from "carbon-model";
 
-export class FrameEditTool{
+export class FrameEditTool {
+    [name: string]: any;
+
     constructor(){
         this._frame = null;
         this._tokens = null;
@@ -15,12 +18,12 @@ export class FrameEditTool{
         this._snapClone = null;
         this._content = null;
     }
-    attach(frame){
+    attach(frame: IImage, emptySource: ImageSource){
         this._tokens = [];
         this._frame = frame;
 
         //full source rect {0, 0, 1000, 500}
-        var fsr = FrameSource.boundaryRect(frame.source(), frame.runtimeProps.sourceProps);
+        var fsr = ImageSourceHelper.boundaryRect(frame.source(), frame.runtimeProps.sourceProps);
         var sr = frame.runtimeProps.sourceProps.sr;
         var dr = frame.runtimeProps.sourceProps.dr;
         var sh = dr.width/sr.width;
@@ -36,7 +39,7 @@ export class FrameEditTool{
             br: Rect.Zero.withSize(fsr.width, fsr.height),
             m: this._frame.globalViewMatrix()
         };
-        var content = new FrameContent(frame);
+        var content = new ImageContent(frame);
         content.prepareAndSetProps(contentProps, ChangeMode.Self);
         content.applyDirectedTranslation(fsr.topLeft(), ChangeMode.Self);
         content.activate();
@@ -68,7 +71,7 @@ export class FrameEditTool{
         }));
         this._tokens.push(Environment.controller.actionManager.subscribeToActionStart("delete", (a, e) => {
             this.detach(false);
-            this._frame.setProps({source: FrameSource.Empty});
+            this._frame.setProps({source: emptySource});
             e.handled = true;
         }));
 
@@ -120,7 +123,7 @@ export class FrameEditTool{
         var fr = this._frame.getBoundaryRect();
         var ir = intersectRects(fr, cr);
 
-        var fsr = FrameSource.boundaryRect(this._frame.source(), this._frame.runtimeProps.sourceProps);
+        var fsr = ImageSourceHelper.boundaryRect(this._frame.source(), this._frame.runtimeProps.sourceProps);
         var sh = cr.width / fsr.width;
         var sv = cr.height / fsr.height;
 

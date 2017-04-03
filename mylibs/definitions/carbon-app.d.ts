@@ -1,7 +1,14 @@
 declare module "carbon-app" {
-    import { ILayer, IDataNode, IPage, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IPropsOwner, IArtboard } from "carbon-model";
+    import { ILayer, IDataNode, IPage, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IPropsOwner, IArtboard, IContainer } from "carbon-model";
     import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush } from "carbon-basics";
-    import { IRect } from "carbon-geometry";
+    import { IRect, ICoordinate } from "carbon-geometry";
+
+    export interface IPlatform{
+        attachEvents(htmlElement: HTMLElement);
+        detachEvents();
+
+        renderElementToDataUrl(element: IUIElement, scale?, width?, height?);
+    }
 
     export interface IFontMetadata{
         name: string;
@@ -50,7 +57,7 @@ declare module "carbon-app" {
         actionManager: IActionManager;
 
         modelSyncProxy: any;
-        platform: any; //TODO: remove platform
+        platform: IPlatform;
         environment: IEnvironment;
 
         project: any;// TODO: remove project
@@ -89,6 +96,10 @@ declare module "carbon-app" {
         recentColors(): string[];
 
         getAllTemplateResourceArtboards(): IArtboard[];
+
+        assignNewName(element: IUIElement);
+
+        resetCurrentTool();
     }
 
     export interface IView {
@@ -106,6 +117,7 @@ declare module "carbon-app" {
         zoomToFit(): void;
         scrollX(value?: number): number;
         scrollY(value?: number): number;
+        pointToScreen(point: ICoordinate): ICoordinate;
 
         ensureScale(element: IUIElement);
         ensureVisible(element: IUIElement);
@@ -148,8 +160,11 @@ declare module "carbon-app" {
         defaultCursor(): string;
         captureMouse(element: IUIElement): void;
         releaseMouse(element: IUIElement): void;
+
+        choosePasteLocation(elements: IUIElement[], allowMoveIn?: boolean): {parent: IContainer, x: number, y: number}
     }
 
+    //TODO: rename to Workspace
     export interface IEnvironment {
         view: IView;
         controller: IController;
@@ -158,6 +173,7 @@ declare module "carbon-app" {
 
         set(view: IView, controller: IController);
     }
+    export const Environment: IEnvironment;
 
     export interface IAction {
         name: string;

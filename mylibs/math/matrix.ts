@@ -1,5 +1,6 @@
 import Point from "./point";
 import LineSegment from "./lineSegment";
+import { IMatrix } from "carbon-geometry";
 
 /**
  * @name Matrix
@@ -24,7 +25,7 @@ import LineSegment from "./lineSegment";
  * knowledge of the underlying matrix (as opposed to say simply performing
  * matrix multiplication).
  */
-class Matrix {
+class Matrix implements IMatrix {
     [name: string]: any;
 
 
@@ -723,6 +724,10 @@ class Matrix {
 
     static fromObject(value): Matrix{
         return new Matrix(value._a, value._b, value._c, value._d, value._tx, value._ty);
+    }
+
+    static createTranslationMatrix(tx: number, ty: number){
+        return Matrix.create().translate(tx, ty);
     }
 
     static Identity: Matrix;

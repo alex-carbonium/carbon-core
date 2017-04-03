@@ -21,9 +21,8 @@ var setCursor = function (open, event: IMouseEventData) {
 export default class HandTool extends Tool {
     [name: string]: any;
 
-    constructor(type, parameters) {
+    constructor(parameters?) {
         super(ViewTool.Hand);
-        this._type = type;
         this._parameters = parameters;
     }
     pause() {

@@ -53,7 +53,7 @@ export default class GraphicalPathCreator extends Tool {
     _shouldHandleByPath: boolean;
     _handlingByPath: boolean;
 
-    constructor(app, type, parameters) {
+    constructor(app, type, parameters?) {
         super(ViewTool.Path);
 
         this._type = type;

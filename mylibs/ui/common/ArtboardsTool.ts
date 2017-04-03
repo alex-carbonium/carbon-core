@@ -14,7 +14,7 @@ import {IKeyboardState, IMouseEventData} from "carbon-core";
 export default class ArtboardsTool extends Tool {
     [name: string]: any;
 
-    constructor(type, parameters) {
+    constructor(type, parameters?) {
         super(ViewTool.Artboard);
         this._type = type;
         this._parameters = parameters;

@@ -455,6 +455,10 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         }
     }
 
+    setSize(width: number, height: number){
+        this.br(this.br().withSize(width, height));
+    }
+
     roundBoundingBoxToPixelEdge(): boolean {
         var rounded = false;
         var bb = this.getBoundingBox();

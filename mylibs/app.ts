@@ -1134,16 +1134,6 @@ class AppClass extends DataNode implements IApp {
         return _(this.t);
     }
 
-    viewPointToScreen(point) {
-        var htmlParent = this.platform.viewContainerElement();
-        var parentOffset = domUtil.offset(htmlParent.offset());
-        return {
-            x: parentOffset.left + point.x - this.activePage.scrollX(),
-            y: parentOffset.top + point.y - this.activePage.scrollY()
-        };
-    }
-
-
     getDefaultCategories() {
         return ["Editing"];
     }
@@ -1381,6 +1371,10 @@ class AppClass extends DataNode implements IApp {
 
     resetCurrentTool() {
         this.actionManager.invoke(ViewTool.Pointer);
+    }
+
+    assignNewName(element: IUIElement) {
+        this.activePage.nameProvider.assignNewName(element);
     }
 }
 
