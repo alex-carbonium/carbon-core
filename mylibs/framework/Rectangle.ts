@@ -12,6 +12,7 @@ import UIElement from "framework/UIElement";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import { Dictionary } from "carbon-basics";
+import Point from "../math/point";
 
 const PointSize = 4;
 const PointOffset = 10;
@@ -391,7 +392,7 @@ class Rectangle extends Shape {
             rect.opacity(parsedAttributes.opacity);
         }
 
-        var pos = {x:0, y:0}
+        var pos = new Point(0, 0);
         if (parsedAttributes.x) {
             pos.x = parsedAttributes.x;
         }

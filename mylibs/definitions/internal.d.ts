@@ -119,5 +119,3 @@ declare module "oidc-client/src/Log" {
     }
     export = Log;
 }
-
-declare function assertNever(t: never);

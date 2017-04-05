@@ -87,24 +87,13 @@ export default class ImageSourceHelper {
         }
     }
 
-    static toString(source?: ImageSource) {
-        switch (source.type) {
-            case ImageSourceType.Font:
-                return "font " + source.icon;
-            case ImageSourceType.Url:
-                return "url " + source.url;
-            default:
-                return '';
-        }
-    }
-
     static size(source) {
         return {
             width: source.width,
             height: source.height
         }
     }
-    static boundaryRect(source, runtimeProps) {
+    static boundaryRect(source, runtimeProps): Rect | null {
         switch (source.type) {
             case ImageSourceType.Url:
                 if (!runtimeProps || !runtimeProps.image) {

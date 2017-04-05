@@ -14,7 +14,7 @@ import Brush from './Brush';
 import Box from './Box';
 import UserSettings from '../UserSettings';
 import { IKeyboardState } from "carbon-basics";
-import { IPropsOwner, IContainerProps } from "carbon-model";
+import { IPropsOwner, IContainerProps, IUIElement } from "carbon-model";
 
 export default class Container extends UIElement implements IPropsOwner<IContainerProps> {
     props: IContainerProps;
@@ -362,7 +362,7 @@ export default class Container extends UIElement implements IPropsOwner<IContain
         return this.insert(element, this.children.length, mode);
     }
 
-    insert(/*UIElement*/element, /*int*/index, mode?: ChangeMode) {
+    insert(/*UIElement*/element, /*int*/index, mode?: ChangeMode): IUIElement {
         this.acquiredChild(element, mode);
 
         this.insertChild(element, index, mode);

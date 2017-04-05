@@ -26,6 +26,7 @@ export default {
     "params": params,
     "logger": logger,
     "Rect": require("./math/rect"),
+    "Matrix": require("./math/matrix"),
     "ObjectFactory": require("./framework/ObjectFactory"),
     "DesignerView": require("./framework/DesignerView"),
     "ViewBase": require("./framework/ViewBase"),

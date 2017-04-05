@@ -48,6 +48,7 @@ class ArtboardPage extends Page {
         if (child instanceof Artboard) {
             this._artboardNames[child.name()] = true;
         }
+        return child;
     }
 
     viewportRect() {

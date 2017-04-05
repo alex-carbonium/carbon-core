@@ -9,11 +9,22 @@ import ImageEditTool from "./ImageEditTool";
 import EventHelper from "./EventHelper";
 import RectMask from "./RectMask";
 import { ContentSizing, ImageSource, ImageSourceType, IImage, IPropsOwner, IImageProps } from "carbon-model";
+import { IRect } from "carbon-geometry";
 
 const DefaultSizing = ContentSizing.fill;
 
+interface IImageRuntimeProps{
+    loaded: boolean;
+    resizeOnLoad?: boolean;
+    sourceProps?: any;
+    mask?: UIElement;
+    origSource?: any;
+    isTransformationClone?: boolean;
+}
+
 export default class Image extends Container implements IImage, IPropsOwner<IImageProps> {
     props: IImageProps;
+    runtimeProps: IImageRuntimeProps;
 
     prepareProps(changes) {
         super.prepareProps.apply(this, arguments);
@@ -135,6 +146,11 @@ export default class Image extends Container implements IImage, IPropsOwner<IIma
                         }
                         //this.createOrUpdateClippingMask(source, this.props);
                     }
+
+                    if (this.resizeOnLoad()){
+                        this.autoResize(source);
+                    }
+
                     ImageSourceHelper.resize(source, this.sizing(), this.getBoundaryRect(), this.runtimeProps.sourceProps);
                     Invalidate.request();
                 });
@@ -154,6 +170,22 @@ export default class Image extends Container implements IImage, IPropsOwner<IIma
 
     renderAfterMask(context) {
         ImageSourceHelper.draw(this.source(), context, this.width(), this.height(), this.props, this.runtimeProps.sourceProps);
+    }
+
+    autoResize(source: ImageSource){
+        var realRect = ImageSourceHelper.boundaryRect(source, this.runtimeProps.sourceProps);
+        if (realRect === null){
+            return;
+        }
+        var bb = this.getBoundingBox();
+        var center = bb.center();
+        var scaledRect = bb.scale({x: realRect.width/bb.width, y: realRect.height/bb.height}, center);
+        scaledRect = scaledRect.fit(this.parent().br(), true);
+
+        this.br(scaledRect.withPosition(0, 0));
+        if (scaledRect.x || scaledRect.y){
+            this.applyTranslation(scaledRect.topLeft().subtract(bb.topLeft()));
+        }
     }
 
     clipSelf() {
@@ -239,8 +271,16 @@ export default class Image extends Container implements IImage, IPropsOwner<IIma
 
     insert(image: Image, index, mode) {
         image.setProps(this.selectLayoutProps());
+        image.resizeOnLoad(false);
         this.parent().replace(this, image, mode);
         return image;
+    }
+
+    resizeOnLoad(value?: boolean){
+        if (arguments.length){
+            this.runtimeProps.resizeOnLoad = value;
+        }
+        return this.runtimeProps.resizeOnLoad
     }
 
     getNonRepeatableProps () {
@@ -259,10 +299,11 @@ export default class Image extends Container implements IImage, IPropsOwner<IIma
         if (!string){
             return null;
         }
-        if (/https?:.*(jpe?g|png)$/g.test(string)){
+        if (/https?:.*(jpe?g|png)$/gi.test(string)){
             var image = new Image();
             image.setSize(Image.NewImageSize, Image.NewImageSize);
             image.source(Image.createUrlSource(string));
+            image.resizeOnLoad(true);
             return image;
         }
         return null;
@@ -270,7 +311,7 @@ export default class Image extends Container implements IImage, IPropsOwner<IIma
 
     static uploadRequested = EventHelper.createEvent();
     static EmptySource = Object.freeze<ImageSource>({type: ImageSourceType.None});
-    static readonly NewImageSize = 50;
+    static readonly NewImageSize = 100;
 }
 Image.prototype.t = Types.Image;
 

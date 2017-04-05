@@ -5,6 +5,8 @@ declare module "carbon-model" {
     export interface IPropsOwner<TProps> {
         props: TProps;
 
+        prepareProps(changes: Partial<TProps>);
+        prepareAndSetProps(props: Partial<TProps>, mode?);
         setProps(props: Partial<TProps>, mode?);
         patchProps(patchType, propName, propValue);
     }
@@ -157,7 +159,10 @@ declare module "carbon-model" {
 
     export interface IArtboard extends IContainer, IPropsOwner<IArtboardProps> {
         props: IArtboardProps;
+
+        prepareProps(changes: Partial<IArtboardProps>);
         setProps(props: Partial<IArtboardProps>, mode?);
+        prepareAndSetProps(props: Partial<IArtboardProps>, mode?);
     }
 
     export interface IGuide {
@@ -200,7 +205,11 @@ declare module "carbon-model" {
         props: IImageProps;
         source(value?: ImageSource): ImageSource;
 
+        prepareProps(changes: Partial<IImageProps>);
         setProps(props: Partial<IImageProps>, mode?);
+        prepareAndSetProps(props: Partial<IImageProps>, mode?);
+
+        resizeOnLoad(value?: boolean): boolean;
     }
     export const Image: IConstructor<IImage> & IPropsOwner<IImageProps> & {
         createUrlSource(url: string): ImageSource;

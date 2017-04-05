@@ -6,6 +6,7 @@ import { Types } from "./Defs";
 import ResizeDimension from "./ResizeDimension";
 import ActiveFrame from "../decorators/ActiveFrame";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
+import { ISelectComposite } from "carbon-app";
 
 var SelectCompositeFrame = {
     hitPointIndex: function (frame, point) {
@@ -47,7 +48,7 @@ var SelectCompositeFrame = {
     }
 };
 
-export default class SelectComposite extends CompositeElement {
+export default class SelectComposite extends CompositeElement implements ISelectComposite {
     constructor() {
         super();
         this._selected = false;
@@ -83,7 +84,7 @@ export default class SelectComposite extends CompositeElement {
 
         return this._selected;
     }
-    selectionFrameType() {
+    selectionFrameType(): any {
         return SelectCompositeFrame;
     }
     resizeDimensions() {
@@ -97,7 +98,7 @@ export default class SelectComposite extends CompositeElement {
         });
         return canResize ? ResizeDimension.Both : ResizeDimension.None;
     }
-    register(element, multiSelect, refreshOnly) {
+    register(element, multiSelect?, refreshOnly?) {
         for (var i = this.elements.length - 1; i >= 0; --i) {
             var e = this.elements[i];
             if (e.isDescendantOrSame(element) || element.isDescendantOrSame(e)) {
@@ -109,13 +110,13 @@ export default class SelectComposite extends CompositeElement {
         }
         super.register.apply(this, arguments);
     }
-    unregister(element, refreshOnly) {
+    unregister(element, refreshOnly?) {
         if (!refreshOnly && this._selected) {
             element.unselect();
         }
         super.unregister.apply(this, arguments);
     }
-    unregisterAll(refreshOnly) {
+    unregisterAll(refreshOnly?) {
         if (!refreshOnly && this._selected) {
             this.each(x => x.unselect());
         }

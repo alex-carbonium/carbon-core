@@ -408,7 +408,7 @@ export default class DesignerController implements IController {
         }
     }
 
-    onmousemove(eventData, keys: IKeyboardState) {
+    onmousemove(eventData, keys: IKeyboardState = Keyboard.state) {
         this._lastMouseMove = {
             x: eventData.x,
             y: eventData.y,
@@ -709,25 +709,36 @@ export default class DesignerController implements IController {
             });
     }
 
-    insertAndSelect(element: UIElement, parent: Container, x: number, y: number){
+    insertAndSelect(newElement: UIElement, parent: Container, x: number, y: number){
         var newSelection = [];
+        var elements;
+        if (newElement instanceof CompositeElement){
+            elements = newElement.elements;
+        }
+        else{
+            elements = [newElement];
+        }
 
-        if (parent instanceof CompositeElement) {
-            for (var i = 0; i < parent.elements.length; ++i){
-                var toInsert = i === 0 ? element : element.clone();
-                newSelection.push(parent.elements[i].add(toInsert));
+        for (var i = 0; i < elements.length; i++) {
+            var element = elements[i];
+
+            if (parent instanceof CompositeElement) {
+                for (var i = 0; i < parent.elements.length; ++i){
+                    var toInsert = i === 0 ? element : element.clone();
+                    newSelection.push(parent.elements[i].add(toInsert));
+                }
             }
-        }
-        else if (element.props._unwrapContent) {
-            parent.add(element);
-            newSelection = element.unwrapToParent();
-        }
-        else {
-            if (!parent.autoPositionChildren()){
-                var newMatrix = element.viewMatrix().withTranslation(Math.round(x), Math.round(y));
-                element.setTransform(parent.globalMatrixToLocal(newMatrix));
+            else if (element.props._unwrapContent) {
+                parent.add(element);
+                newSelection = element.unwrapToParent();
             }
-            newSelection.push(parent.add(element));
+            else {
+                if (!parent.autoPositionChildren()){
+                    var newMatrix = element.viewMatrix().withTranslation(Math.round(x), Math.round(y));
+                    element.setTransform(parent.globalMatrixToLocal(newMatrix));
+                }
+                newSelection.push(parent.add(element));
+            }
         }
 
         Selection.makeSelection(newSelection);

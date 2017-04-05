@@ -1,5 +1,5 @@
 declare module "carbon-app" {
-    import { ILayer, IDataNode, IPage, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IPropsOwner, IArtboard, IContainer } from "carbon-model";
+    import { ILayer, IDataNode, IPage, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IPropsOwner, IArtboard, IContainer, IComposite } from "carbon-model";
     import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush } from "carbon-basics";
     import { IRect, ICoordinate } from "carbon-geometry";
 
@@ -234,7 +234,24 @@ declare module "carbon-app" {
         requestInteractionOnly(rect?);
     }
 
-    export var app: IApp;
-    export var ActionManager: IActionManager;
-    export var Invalidate: IInvalidate;
+    export interface ISelectComposite extends IComposite{
+        updateDisplayProps(changes);
+    }
+
+    export interface ISelection{
+        makeSelection(elements: IUIElement[]);
+        selectComposite(): ISelectComposite;
+        clearSelection();
+
+        lock();
+        unlock();
+
+        modeChangedEvent: IEvent<boolean>;
+        onElementSelected: IEvent2<IUIElement, IComposite>;
+    }
+
+    export const app: IApp;
+    export const ActionManager: IActionManager;
+    export const Selection: ISelection;
+    export const Invalidate: IInvalidate;
 }

@@ -20,7 +20,6 @@ declare module "carbon-core" {
     export var StateBoard: any;
     export var TileSize: any;
     export var PropertyTracker: any;
-    export var Selection: any;
     export var Environment: any;
     export var ShareProxy: any;
     export var params: any;

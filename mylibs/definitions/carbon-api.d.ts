@@ -40,3 +40,5 @@ declare module "carbon-api" {
     export const DashboardProxy: IDashboardProxy;
     export const FileProxy: IFileProxy;
 }
+
+declare function assertNever(t: never);

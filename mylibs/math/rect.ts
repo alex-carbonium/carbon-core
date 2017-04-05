@@ -1,7 +1,7 @@
 import Point from "./point";
 import LineSegment from "./lineSegment";
 import { isRectInRect } from "./math";
-import { IRect } from "carbon-geometry";
+import { IRect, ICoordinate } from "carbon-geometry";
 
 export default class Rect implements IRect {
     x: number;
@@ -29,7 +29,7 @@ export default class Rect implements IRect {
         }
         return new Rect(this.x + dx, this.y + dy, this.width, this.height);
     }
-    scale(s, o) {
+    scale(s: ICoordinate, o: ICoordinate) {
         return new Rect(s.x * (this.x - o.x) + o.x, s.y * (this.y - o.y) + o.y, this.width * s.x, this.height * s.y);
     }
 
@@ -172,7 +172,7 @@ export default class Rect implements IRect {
         }
         return new Rect(this.x, this.y, this.width, h);
     }
-    withPosition(x, y) {
+    withPosition(x: number, y: number) {
         if (x === this.x && y === this.y) {
             return this;
         }
@@ -183,14 +183,14 @@ export default class Rect implements IRect {
         return [this.x, this.y, this.width, this.height];
     }
 
-    fit(bounds: IRect, noScaleUp?: boolean): IRect {
+    fit(bounds: IRect, noScaleUp?: boolean): Rect {
         return this.fitOrFill(bounds, noScaleUp, true);
     }
-    fill(bounds: IRect, noScaleUp?: boolean): IRect {
+    fill(bounds: IRect, noScaleUp?: boolean): Rect {
         return this.fitOrFill(bounds, noScaleUp, false);
     }
 
-    private fitOrFill(target: IRect, noScaleUp, fit): IRect {
+    private fitOrFill(target: IRect, noScaleUp, fit): Rect {
         var pw = target.width / this.width;
         var ph = target.height / this.height;
 

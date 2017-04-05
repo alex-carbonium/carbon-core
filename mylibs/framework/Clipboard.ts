@@ -141,6 +141,8 @@ class Clipboard {
                 });
             }
 
+            this._app.assignNewName(newElement);
+
             bufferElements = [newElement];
             globalBoundingBoxes = [{x: 0, y: 0, width: newElement.width(), height: newElement.height()}];
             globalMatrices = [newElement.viewMatrix()];

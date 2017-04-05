@@ -38,7 +38,8 @@ import Rect from "../math/rect";
 import ResizeOptions from "../decorators/ResizeOptions";
 import { PropertyDescriptor } from './PropertyMetadata';
 import { Dictionary, IKeyboardState } from "carbon-basics";
-import { IUIElementProps, IPropsOwner, IUIElement } from "carbon-model";
+import { IUIElementProps, IPropsOwner, IUIElement, IContainer } from "carbon-model";
+import { ICoordinate } from "carbon-geometry";
 
 require("../migrations/All");
 
@@ -265,7 +266,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
     getTranslation() {
         return this.dm().translation;
     }
-    applyTranslation(t, withReset?: boolean, mode?: ChangeMode) {
+    applyTranslation(t: ICoordinate, withReset?: boolean, mode?: ChangeMode) {
         if (withReset) {
             this.saveOrResetLayoutProps();
         }
@@ -1005,7 +1006,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
     setDefaultAction(defaultAction) {
         this._defaultAction = defaultAction;
     }
-    select(multiSelect, view) {
+    select(multiSelect, view?) {
 
     }
     unselect() {
