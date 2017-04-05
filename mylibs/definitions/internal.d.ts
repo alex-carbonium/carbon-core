@@ -29,7 +29,7 @@ declare module "carbon-model"{
         globalMatrixToLocal(m: any): any;
         globalViewMatrixInverted():any;
         globalViewMatrix():any;
-        getElementById(id:string):IUIElement|IContainer;
+        getElementById(id:string):IUIElement|IContainer|null;
     }
 }
 
@@ -50,6 +50,7 @@ declare module "carbon-app"{
 
     export interface IView{
         interactionLayer: any;
+        isolationLayer: any;
         scaleMatrix: any;
 
         registerForLayerDraw(layerType:number, element:{onLayerDraw:(layer: ILayer, context: IContext)=>void}, index?);

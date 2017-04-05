@@ -215,7 +215,6 @@ export var Types = {
     'Font': 'f',
     'Artboard': 'a',
     'ArtboardFrame': 'af',
-    'Constraints': 'n',
     'CorruptedElement': 'x',
     'DraggingElement': 'd',
     'Image': 'F',
@@ -281,28 +280,12 @@ export enum StrokePosition {
     Outside = 2
 };
 
-export enum HorizontalConstraint {
-    Left = 1,
-    Right = 2,
-    LeftRight = 3,
-    Center = 4,
-    Stretch = 8
-};
-
 export enum ContextBarPosition {
     None = 0,
     Left = 1,
     Right = 2,
     Only = 4
 }
-
-export enum VerticalConstraint {
-    Top = 1,
-    Bottom = 2,
-    TopBottom = 3,
-    Center = 4,
-    Stretch = 8
-};
 
 export enum LineCap {
     Butt,

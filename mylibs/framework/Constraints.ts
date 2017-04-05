@@ -1,22 +1,14 @@
-import { Types, HorizontalConstraint, VerticalConstraint } from "./Defs";
-import TypeDefaults from "./TypeDefaults";
+import { Types } from "./Defs";
+import { IConstraints, HorizontalConstraint, VerticalConstraint } from "carbon-basics";
 
-var defaults = {
-    v: VerticalConstraint.Top,
-    h: HorizontalConstraint.Left
-};
-
-var constraintsDefault = TypeDefaults[Types.Constraints] = function () { return new Constraints() };
+var defaults: IConstraints = {
+    h: HorizontalConstraint.Left,
+    v: VerticalConstraint.Top
+}
 
 export default class Constraints {
-    t: string;
-
-    constructor(){
-        this.t = Types.Constraints;
-    }
-
     static createFromObject(obj) {
-        return Object.assign(constraintsDefault(), obj);
+        return Object.assign({}, defaults, obj);
     }
 
     static toArray(constraints) {
@@ -24,17 +16,14 @@ export default class Constraints {
     }
 
     static create(h, v) {
-        return Object.assign(constraintsDefault(), { v: v, h: h });
+        return Object.assign({}, { v: v, h: h });
     };
 
-    static Default: Constraints;
-    static All: Constraints;
-    static StretchAll: Constraints;
+    static Default: IConstraints;
+    static All: IConstraints;
+    static StretchAll: IConstraints;
 }
-Object.assign(Constraints.prototype, defaults);
 
-Constraints.Default = Constraints.createFromObject({});
-
+Constraints.Default = defaults;
 Constraints.All = Constraints.create(HorizontalConstraint.LeftRight, VerticalConstraint.TopBottom);
-
-Constraints.StretchAll = Constraints.create(HorizontalConstraint.Stretch, VerticalConstraint.Stretch);
+Constraints.StretchAll = Constraints.create(HorizontalConstraint.Scale, VerticalConstraint.Scale);

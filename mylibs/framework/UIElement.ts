@@ -37,7 +37,7 @@ import { createUUID, deepEquals } from "../util";
 import Rect from "../math/rect";
 import ResizeOptions from "../decorators/ResizeOptions";
 import { PropertyDescriptor } from './PropertyMetadata';
-import { Dictionary, IKeyboardState } from "carbon-basics";
+import { Dictionary, IKeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IPropsOwner, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate } from "carbon-geometry";
 
@@ -1348,7 +1348,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         }
         return this.props.name;
     }
-    constraints(value) {
+    constraints(value?: IConstraints): IConstraints {
         if (value !== undefined) {
             this.setProps({ constraints: value });
         }

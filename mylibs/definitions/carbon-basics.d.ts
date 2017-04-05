@@ -195,6 +195,34 @@ declare module "carbon-basics" {
         Only = 4
     }
 
+    export const enum VerticalConstraint {
+        Top = 1,
+        Bottom = 2,
+        TopBottom = 3,
+        Center = 4,
+        Scale = 8
+    }
+
+    export const enum HorizontalConstraint {
+        Left = 1,
+        Right = 2,
+        LeftRight = 3,
+        Center = 4,
+        Scale = 8
+    }
+
+    export interface IConstraints {
+        h: HorizontalConstraint,
+        v: VerticalConstraint
+    }
+    export const Constraints: {
+        readonly Default: IConstraints;
+        readonly All: IConstraints;
+        readonly StretchAll: IConstraints;
+
+        create(h: HorizontalConstraint, v: VerticalConstraint): IConstraints;
+    }
+
     export var util: {
         debounce(func: () => any, ms: number): () => any;
         throttle(func: (...args: any[]) => any, ms: number): () => any;

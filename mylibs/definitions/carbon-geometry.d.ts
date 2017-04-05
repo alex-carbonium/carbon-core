@@ -19,6 +19,8 @@ declare module "carbon-geometry" {
     export interface IRect extends ICoordinate, ISize {
         fit(bounds: IRect, noScaleUp?: boolean): IRect;
         fill(bounds: IRect, noScaleUp?: boolean): IRect;
+
+        topLeft(): IPoint;
     }
     interface IRectConstructor{
         new(x: number, y: number, width: number, height: number): IRect;

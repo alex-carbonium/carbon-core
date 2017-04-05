@@ -3,11 +3,7 @@ import DeferredPrimitives from "../framework/sync/DeferredPrimitives";
 define(["windows/Dialog", "framework/sync/Primitive"], function(Dialog, Primitive) {
     var fwk = sketch.framework;
 
-
-
     return klass((function() {
-
-
 
         var restoreUnsaved = function(backup){
             var app = this._app;

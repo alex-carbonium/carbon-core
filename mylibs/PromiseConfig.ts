@@ -12,9 +12,9 @@ window.addEventListener("unhandledrejection", function(e) {
     // action which is currently to log the stack trace to console.warn
     e.preventDefault();
     // NOTE: parameters are properties of the event detail property
-    if(e.detail) {
-        var reason = e.detail.reason;
-        var promise = e.detail.promise;
+    if(e['detail']) {
+        var reason = e['detail'].reason;
+        var promise = e['detail'].promise;
         // See Promise.onPossiblyUnhandledRejection for parameter documentation
         console.error(reason);
     } else {

@@ -1,6 +1,6 @@
 declare module "carbon-model" {
     import { IPoint, IRect, ICoordinate, IMatrix } from "carbon-geometry";
-    import { IEventData, IConstructor, IEvent } from "carbon-basics";
+    import { IEventData, IConstructor, IEvent, IConstraints } from "carbon-basics";
 
     export interface IPropsOwner<TProps> {
         props: TProps;
@@ -33,6 +33,7 @@ declare module "carbon-model" {
 
     export interface IUIElementProps extends IDataNodeProps {
         visible: boolean;
+        constraints: IConstraints;
     }
 
     export interface IUIElement extends IDataNode, IPropsOwner<IUIElementProps> {
@@ -42,6 +43,8 @@ declare module "carbon-model" {
         displayName(): string;
 
         shouldApplyViewMatrix(): boolean;
+        applyScaling(vector: IPoint, origin: IPoint, options?, mode?): boolean;
+        applyTranslation(vector: IPoint, withReset?, mode?): void;
 
         getBoundingBox(): IRect;
         getBoundingBoxGlobal(): IRect;
@@ -68,6 +71,8 @@ declare module "carbon-model" {
         height(): number;
         angle(): number;
         zOrder(): number;
+
+        constraints(value?: IConstraints): IConstraints;
 
         clone(): IUIElement;
     }

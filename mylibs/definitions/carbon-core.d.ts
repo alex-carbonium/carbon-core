@@ -27,9 +27,6 @@ declare module "carbon-core" {
     export var Context: any;
     export var Layer: any;
     export var MirroringView: any;
-    export var HorizontalConstraint: any;
-    export var VerticalConstraint: any;
-    export var Constraints: any;
     export var ArtboardResource: any;
     export var Types: any;
     export var NullPage: any;

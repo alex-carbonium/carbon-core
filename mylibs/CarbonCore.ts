@@ -76,8 +76,6 @@ export default {
     "ChangeMode": Defs.ChangeMode,
     "TileSize": Defs.TileSize,
     "ContentSizing": Defs.ContentSizing,
-    "HorizontalConstraint": Defs.HorizontalConstraint,
-    "VerticalConstraint": Defs.VerticalConstraint,
     "ArtboardResource": Defs.ArtboardResource,
     "Types": Defs.Types,
     "ViewTool": Defs.ViewTool,

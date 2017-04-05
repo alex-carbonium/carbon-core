@@ -8,6 +8,7 @@ import TextEngine from "./textengine";
 import styleManager from "../style/StyleManager";
 import { IContainer, IDataElement } from "carbon-core";
 import { TextAlign, Dictionary } from "carbon-basics";
+import { IUIElement } from "carbon-model";
 
 class Text extends UIElement implements IContainer, IDataElement {
     prepareProps(changes){
@@ -227,6 +228,12 @@ class Text extends UIElement implements IContainer, IDataElement {
     insert(text: Text, index, mode){
         this.prepareAndSetProps(text.selectProps(["content", "dp", "df"]));
         return this;
+    }
+
+    changePosition(element: IUIElement, index: number, mode?: number) {
+    }
+    getElementById(){
+        return null;
     }
 
     remove(){
