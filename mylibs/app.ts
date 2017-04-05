@@ -116,6 +116,7 @@ class AppClass extends DataNode implements IApp {
     onBuildMenu: any;
     logEvent: IEvent<any>;
     changed: IEvent<any>;
+    deferredChange: IEvent<any>;
     restoredLocally: IEvent<void>;
 
     currentToolChanged: IEvent<string>;
@@ -172,6 +173,7 @@ class AppClass extends DataNode implements IApp {
 
 
         this.changed = EventHelper.createEvent();
+        this.deferredChange = EventHelper.createEvent();
         this.changedLocally = EventHelper.createEvent();
         this.changedExternally = EventHelper.createEvent();
 

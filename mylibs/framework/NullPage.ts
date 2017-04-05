@@ -30,6 +30,10 @@ class NullPage extends UIElement implements IPage {
         return this;
     }
 
+    changePosition(element:IUIElement, index:number, mode?:number) {
+
+    }
+
     globalViewMatrixInverted() {
         return null;
     }

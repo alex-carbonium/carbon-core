@@ -281,7 +281,6 @@ export default class DataNode implements IDataNode{
         }
     }
 
-
     registerInsert(parent, element, index, mode = ChangeMode.Model) {
         if (mode === ChangeMode.Model) {
             ModelStateListener.trackInsert(this, parent, element, index);

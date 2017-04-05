@@ -14,10 +14,14 @@ export default class RelayoutEngine {
     static run(root, propsHistoryMap, filter = null) {
         var primitiveMap = DeferredPrimitives.releasePrimitiveMap(root);
         var shouldArrange = ModelStateListener.isRelayoutNeeded(root);
-        return RelayoutEngine._visitElement(root, primitiveMap, propsHistoryMap, shouldArrange, filter);
+        var res = RelayoutEngine.visitElement(root, primitiveMap, propsHistoryMap, shouldArrange, filter);
+
+        if(primitiveMap) {
+            App.Current.deferredChange.raise(primitiveMap);
+        }
     }
 
-    static _visitElement(element, primitiveMap, propsHistoryMap, shouldArrange, filter) {
+    static visitElement(element, primitiveMap, propsHistoryMap, shouldArrange, filter) {
         var oldRect;
         var primitives = null;
         var hasChildren = !!element.children;
@@ -28,7 +32,7 @@ export default class RelayoutEngine {
                 if (filter !== null && filter(items[i]) === false) {
                     continue;
                 }
-                let res = RelayoutEngine._visitElement(items[i], primitiveMap, propsHistoryMap, shouldArrange, filter);
+                let res = RelayoutEngine.visitElement(items[i], primitiveMap, propsHistoryMap, shouldArrange, filter);
                 if (res !== null) {
                     if (primitives === null) {
                         primitives = [];
@@ -90,7 +94,7 @@ export default class RelayoutEngine {
 
         if (newElements) {
             for (let i = 0, l = newElements.length; i < l; ++i) {
-                let res = RelayoutEngine._visitElement(newElements[i], primitiveMap, propsHistoryMap, shouldArrange, filter);
+                let res = RelayoutEngine.visitElement(newElements[i], primitiveMap, propsHistoryMap, shouldArrange, filter);
                 if (res !== null) {
                     Array.prototype.push.apply(primitives, res);
                 }

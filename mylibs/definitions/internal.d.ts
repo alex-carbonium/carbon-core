@@ -11,28 +11,38 @@ declare module "carbon-internal" {
 declare module "carbon-model"{
     import { IRect } from "carbon-geometry";
 
+    export interface IDataNode {
+        primitivePath():any;
+    }
+
     export interface IUIElement{
         canSelect(): boolean;
 
         getBoundaryRect(): IRect;
 
         runtimeProps: any;
+        globalViewMatrix():any;
+        setTransform(m:any, mode?:number);
     }
 
     export interface IContainer{
         globalMatrixToLocal(m: any): any;
         globalViewMatrixInverted():any;
+        globalViewMatrix():any;
+        getElementById(id:string):IUIElement|IContainer;
     }
 }
 
 declare module "carbon-app"{
     import { IUIElement, ILayer } from 'carbon-model';
     import { IContext } from "carbon-rendering";
+    import { IEvent } from "carbon-basics";
 
     export interface IApp{
         offlineModel: any;
         modelSyncProxy: any;
         defaultShapeSettings: any;
+        deferredChange: IEvent<any>;
 
         viewportSize(): any;
         resetCurrentTool();

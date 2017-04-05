@@ -113,13 +113,13 @@ class Layer extends Container {
         return this._fillStyle;
     }
 
-    globalViewMatrix() {
-        return Matrix.Identity;
-    }
+    // globalViewMatrix() {
+    //     return Matrix.Identity;
+    // }
 
-    globalViewMatrixInverted() {
-        return Matrix.Identity;
-    }
+    // globalViewMatrixInverted() {
+    //     return Matrix.Identity;
+    // }
 
     primitiveRoot() {
         return null;

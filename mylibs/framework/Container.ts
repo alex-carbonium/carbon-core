@@ -14,9 +14,9 @@ import Brush from './Brush';
 import Box from './Box';
 import UserSettings from '../UserSettings';
 import { IKeyboardState } from "carbon-basics";
-import { IPropsOwner, IContainerProps, IUIElement } from "carbon-model";
+import { IPropsOwner, IContainerProps, IUIElement, IContainer } from "carbon-model";
 
-export default class Container extends UIElement implements IPropsOwner<IContainerProps> {
+export default class Container extends UIElement implements IContainer, IPropsOwner<IContainerProps> {
     props: IContainerProps;
     children: UIElement[];
 
@@ -396,7 +396,9 @@ export default class Container extends UIElement implements IPropsOwner<IContain
         this.invalidate();
     }
     remove(/*UIElement*/element, mode) {
-        element.removing();
+        if(element.removing() === false) {
+            return;
+        }
 
         this.releasingChild(element);
         var idx = this.removeChild(element, mode);

@@ -89,7 +89,10 @@ declare module "carbon-model" {
          * Adds an element and returns the element which has been actually inserted.
          */
         insert(element: IUIElement, index: number, mode?: number): IUIElement;
+
         remove(element: IUIElement, mode?: number): number;
+
+        changePosition(element:IUIElement, index:number, mode?: number);
 
         hitElement<T extends IUIElement>(event, scale: number, predicate?, directSelection?): T;
 
