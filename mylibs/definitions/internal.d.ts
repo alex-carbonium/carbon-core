@@ -20,6 +20,8 @@ declare module "carbon-model"{
 
         getBoundaryRect(): IRect;
 
+        mirrorClone():IUIElement;
+
         runtimeProps: any;
         globalViewMatrix():any;
         setTransform(m:any, mode?:number);
@@ -43,6 +45,7 @@ declare module "carbon-app"{
         modelSyncProxy: any;
         defaultShapeSettings: any;
         deferredChange: IEvent<any>;
+        relayoutFinished: IEvent<any>;
 
         viewportSize(): any;
         resetCurrentTool();

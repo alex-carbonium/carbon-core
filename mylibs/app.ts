@@ -116,6 +116,7 @@ class AppClass extends DataNode implements IApp {
     onBuildMenu: any;
     logEvent: IEvent<any>;
     changed: IEvent<any>;
+    relayoutFinished: IEvent<any>;
     deferredChange: IEvent<any>;
     restoredLocally: IEvent<void>;
 
@@ -147,7 +148,7 @@ class AppClass extends DataNode implements IApp {
         this.pageChanging = EventHelper.createEvent();
         this.loadedFromJson = EventHelper.createEvent();
         this.savedToJson = EventHelper.createEvent();
-
+        this.relayoutFinished = EventHelper.createEvent();
 
         this.changeToolboxPage = EventHelper.createEvent<void>();
 
@@ -1052,6 +1053,7 @@ class AppClass extends DataNode implements IApp {
             CommandManager.registerExecutedCommand(new PrimitiveSetCommand(primitives, rollbacks));
             this.changedLocally.raise(primitives);
             this.changed.raise(primitives);
+            this.relayoutFinished.raise();
             Invalidate.request();
         }
     }
