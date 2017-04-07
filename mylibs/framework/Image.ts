@@ -9,13 +9,13 @@ import ImageEditTool from "./ImageEditTool";
 import EventHelper from "./EventHelper";
 import RectMask from "./RectMask";
 import { ContentSizing, ImageSource, ImageSourceType, IImage, IPropsOwner, IImageProps } from "carbon-model";
-import { IRect } from "carbon-geometry";
+import { IRect, OriginType } from "carbon-geometry";
 
 const DefaultSizing = ContentSizing.fill;
 
 interface IImageRuntimeProps{
     loaded: boolean;
-    resizeOnLoad?: boolean;
+    resizeOnLoad?: OriginType|null;
     sourceProps?: any;
     mask?: UIElement;
     origSource?: any;
@@ -147,8 +147,9 @@ export default class Image extends Container implements IImage, IPropsOwner<IIma
                         //this.createOrUpdateClippingMask(source, this.props);
                     }
 
-                    if (this.resizeOnLoad()){
-                        this.autoResize(source);
+                    var resizeOrigin = this.resizeOnLoad();
+                    if (resizeOrigin){
+                        this.autoResize(source, resizeOrigin);
                     }
 
                     ImageSourceHelper.resize(source, this.sizing(), this.getBoundaryRect(), this.runtimeProps.sourceProps);
@@ -172,15 +173,24 @@ export default class Image extends Container implements IImage, IPropsOwner<IIma
         ImageSourceHelper.draw(this.source(), context, this.width(), this.height(), this.props, this.runtimeProps.sourceProps);
     }
 
-    autoResize(source: ImageSource){
+    autoResize(source: ImageSource, origin: OriginType){
         var realRect = ImageSourceHelper.boundaryRect(source, this.runtimeProps.sourceProps);
         if (realRect === null){
             return;
         }
+
         var bb = this.getBoundingBox();
-        var center = bb.center();
-        var scaledRect = bb.scale({x: realRect.width/bb.width, y: realRect.height/bb.height}, center);
-        scaledRect = scaledRect.fit(this.parent().br(), true);
+        var bbNew = bb.scale({x: realRect.width/bb.width, y: realRect.height/bb.height}, bb.origin(origin));
+
+        var parentBr = this.parent().br();
+        var scaledRect = bbNew.intersect(parentBr);
+        var sx = scaledRect.width/bbNew.width;
+        var sy = scaledRect.height/bbNew.height;
+        if (sx !== 1 || sy !== 1){
+            var scale = Math.min(sx, sy);
+            scaledRect = bbNew.scale({x: scale, y: scale}, bbNew.origin(origin));
+        }
+        scaledRect.roundMutable();
 
         this.br(scaledRect.withPosition(0, 0));
         if (scaledRect.x || scaledRect.y){
@@ -242,7 +252,8 @@ export default class Image extends Container implements IImage, IPropsOwner<IIma
         if (elements.length !== 1) {
             return false;
         }
-        return elements[0] instanceof Image && allowMoveInOut;
+        var allow = this.source() === Image.EmptySource || allowMoveInOut;
+        return elements[0] instanceof Image && allow;
     }
 
     canConvertToPath() {
@@ -271,13 +282,13 @@ export default class Image extends Container implements IImage, IPropsOwner<IIma
 
     insert(image: Image, index, mode) {
         image.setProps(this.selectLayoutProps());
-        image.resizeOnLoad(false);
+        image.resizeOnLoad(null);
         this.parent().replace(this, image, mode);
         return image;
 
     }
 
-    resizeOnLoad(value?: boolean){
+    resizeOnLoad(value?: OriginType|null): OriginType|null{
         if (arguments.length){
             this.runtimeProps.resizeOnLoad = value;
         }
@@ -302,9 +313,8 @@ export default class Image extends Container implements IImage, IPropsOwner<IIma
         }
         if (/https?:.*(jpe?g|png)$/gi.test(string)){
             var image = new Image();
-            image.setSize(Image.NewImageSize, Image.NewImageSize);
+            image.size({width: Image.NewImageSize, height: Image.NewImageSize});
             image.source(Image.createUrlSource(string));
-            image.resizeOnLoad(true);
             return image;
         }
         return null;

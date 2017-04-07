@@ -11,7 +11,9 @@ import Environment from "../../environment";
 import GlobalMatrixModifier from "../GlobalMatrixModifier";
 import Brush from "../Brush";
 import Point from "../../math/point";
+import Matrix from "../../math/matrix";
 import { IUIElement, IContainer, IRepeatContainer } from "carbon-model";
+import { IMouseEventData } from "carbon-basics";
 
 interface IRepeatContainerRuntimeProps{
     lastActiveCell?: RepeatCell;
@@ -217,19 +219,23 @@ export default class RepeatContainer extends Container implements IRepeatContain
         }
     }
 
-    addDroppedElements(dropTarget: Container, elements: IUIElement[]){
+    addDroppedElements(dropTarget: Container, elements: IUIElement[], e: IMouseEventData){
         if (!elements.length){
             return;
         }
 
         this.runtimeProps.insertingMultiple = true;
+        var matrix = Matrix.createTranslationMatrix(Math.round(e.x), Math.round(e.y));
+        matrix = dropTarget.globalMatrixToLocal(matrix);
 
         var cellPath = this._getCellIndexPath(dropTarget);
         var cells = this.children;
         for (var i = 0; i < this.children.length && i < elements.length; i++) {
             var cell = this.children[i];
-            var parent = this._findByIndexPath(cell, cellPath.path);
-            parent.add(elements[i]);
+            var parent = this._findByIndexPath(cell, cellPath.path) as Container;
+            var element = elements[i];
+            element.setTransform(matrix);
+            parent.add(element);
         }
 
         this.runtimeProps.insertingMultiple = false;

@@ -1,6 +1,6 @@
 declare module "carbon-model" {
-    import { IPoint, IRect, ICoordinate, IMatrix, ISize } from "carbon-geometry";
-    import { IEventData, IConstructor, IEvent, IConstraints } from "carbon-basics";
+    import { IPoint, IRect, ICoordinate, IMatrix, ISize, OriginType } from "carbon-geometry";
+    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData } from "carbon-basics";
 
     export interface IPropsOwner<TProps> {
         props: TProps;
@@ -123,7 +123,7 @@ declare module "carbon-model" {
     }
 
     export interface IRepeatContainer extends IContainer{
-        addDroppedElements(dropTarget: IContainer, elements: IUIElement[]): void;
+        addDroppedElements(dropTarget: IContainer, elements: IUIElement[], e: IMouseEventData): void;
     }
     export interface IRepeaterProps extends IContainerProps{
     }
@@ -239,7 +239,7 @@ declare module "carbon-model" {
         setProps(props: Partial<IImageProps>, mode?);
         prepareAndSetProps(props: Partial<IImageProps>, mode?);
 
-        resizeOnLoad(value?: boolean): boolean;
+        resizeOnLoad(value?: OriginType|null): OriginType|null;
     }
     export const Image: IConstructor<IImage> & {
         createUrlSource(url: string): ImageSource;

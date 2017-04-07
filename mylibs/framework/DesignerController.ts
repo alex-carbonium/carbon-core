@@ -711,7 +711,7 @@ export default class DesignerController implements IController {
             })
             .catch(e => {
                 this.cancel();
-                this.stopDraggingEvent.raise(this.createEventData(e) as any, null);
+                this.stopDraggingEvent.raise(null, null);
             });
     }
 
