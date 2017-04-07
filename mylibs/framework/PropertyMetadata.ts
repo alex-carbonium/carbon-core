@@ -1,6 +1,4 @@
-import { Dictionary } from "carbon-basics";
-
-var PropertyMetadata: Dictionary = {};
+var PropertyMetadata: any = {};
 PropertyMetadata._store = {};
 PropertyMetadata._defaults = {};
 PropertyMetadata._cache = {
@@ -44,7 +42,7 @@ PropertyMetadata.extend = function(){
     for (var i in data){
         var props = data[i];
         var desc = {};
-        var funcs = {}; //TODO: pass functions as a separate arg        
+        var funcs = {}; //TODO: pass functions as a separate arg
         for (var p in props){
             var prop = props[p];
             if (typeof prop === "function"){
@@ -56,9 +54,9 @@ PropertyMetadata.extend = function(){
                 if (parentProp){
                     prop = Object.assign({}, parentProp, prop);
                 }
-            }            
+            }
             desc[p] = {value: prop, enumerable: true};
-        }        
+        }
 
         var entry = Object.create(parent, desc);
         Object.assign(entry, funcs);
@@ -185,5 +183,5 @@ export interface PropertyDescriptor{
     defaultValue: any,
     size?: number,
     computed?: boolean,
-    options?: any    
+    options?: any
 }

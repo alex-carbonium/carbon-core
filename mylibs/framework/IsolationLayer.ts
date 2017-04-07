@@ -1,6 +1,6 @@
 import Layer from './Layer';
 import Context from "./render/Context";
-import { IContainer, IUIElement, IIsolationLayer, Dictionary } from "carbon-core";
+import { IContainer, IUIElement, IIsolationLayer } from "carbon-core";
 import { ChangeMode, PrimitiveType } from "./Defs";
 import DataNode from "./DataNode";
 import Selection from "framework/SelectionModel";
@@ -9,7 +9,7 @@ import RelayoutEngine from "framework/relayout/RelayoutEngine";
 export class IsolationLayer extends Layer implements IIsolationLayer {
 
     private ownerElement: IContainer;
-    private trackElementIds: Dictionary = {};
+    private trackElementIds: any = {};
 
     constructor() {
         super();

@@ -1,6 +1,6 @@
-import { TextAlign, UnderlineStyle, FontScript, Dictionary } from "carbon-basics";
+import { TextAlign, UnderlineStyle, FontScript } from "carbon-basics";
 
-    var Runs: Dictionary = function() {
+    var Runs: any = function() {
     }
 
     Runs.formattingKeys = [ 'weight', 'style', 'underline', 'strikeout', 'color',

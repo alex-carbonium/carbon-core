@@ -11,9 +11,17 @@ import Environment from "../../environment";
 import GlobalMatrixModifier from "../GlobalMatrixModifier";
 import Brush from "../Brush";
 import Point from "../../math/point";
+import { IUIElement, IContainer, IRepeatContainer } from "carbon-model";
 
-export default class RepeatContainer extends Container {
+interface IRepeatContainerRuntimeProps{
+    lastActiveCell?: RepeatCell;
+    primitivePath?: string[];
+    insertingMultiple?: boolean;
+}
+
+export default class RepeatContainer extends Container implements IRepeatContainer {
     children: RepeatCell[];
+    runtimeProps: IRepeatContainerRuntimeProps;
 
     canAccept() {
         return false;
@@ -108,7 +116,7 @@ export default class RepeatContainer extends Container {
         if (!realRoot) {
             return;
         }
-        if (element === this || element instanceof RepeatCell) {
+        if (element === this || element instanceof RepeatCell || this.runtimeProps.insertingMultiple) {
             realRoot.registerSetProps(element, props, oldProps, mode);
             return;
         }
@@ -142,7 +150,7 @@ export default class RepeatContainer extends Container {
         if (!realRoot) {
             return;
         }
-        if (parent === this) {
+        if (parent === this || this.runtimeProps.insertingMultiple) {
             realRoot.registerInsert(parent, element, index, mode);
             return;
         }
@@ -167,7 +175,7 @@ export default class RepeatContainer extends Container {
         if (!realRoot) {
             return;
         }
-        if (parent === this) {
+        if (parent === this || this.runtimeProps.insertingMultiple) {
             realRoot.registerDelete(parent, element, index, mode);
             return;
         }
@@ -192,7 +200,7 @@ export default class RepeatContainer extends Container {
         if (!realRoot) {
             return;
         }
-        if (parent === this) {
+        if (parent === this || this.runtimeProps.insertingMultiple) {
             realRoot.registerChangePosition(parent, element, index, oldIndex, mode);
             return;
         }
@@ -207,6 +215,24 @@ export default class RepeatContainer extends Container {
             }
             realRoot.registerChangePosition(current, node, index, oldIndex, mode);
         }
+    }
+
+    addDroppedElements(dropTarget: Container, elements: IUIElement[]){
+        if (!elements.length){
+            return;
+        }
+
+        this.runtimeProps.insertingMultiple = true;
+
+        var cellPath = this._getCellIndexPath(dropTarget);
+        var cells = this.children;
+        for (var i = 0; i < this.children.length && i < elements.length; i++) {
+            var cell = this.children[i];
+            var parent = this._findByIndexPath(cell, cellPath.path);
+            parent.add(elements[i]);
+        }
+
+        this.runtimeProps.insertingMultiple = false;
     }
 
     performArrange(oldRect, mode = ChangeMode.Model) {

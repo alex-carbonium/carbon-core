@@ -274,6 +274,7 @@ export default class Image extends Container implements IImage, IPropsOwner<IIma
         image.resizeOnLoad(false);
         this.parent().replace(this, image, mode);
         return image;
+
     }
 
     resizeOnLoad(value?: boolean){
@@ -283,9 +284,9 @@ export default class Image extends Container implements IImage, IPropsOwner<IIma
         return this.runtimeProps.resizeOnLoad
     }
 
-    getNonRepeatableProps () {
+    getNonRepeatableProps() {
         var base = super.getNonRepeatableProps();
-        return base.concat(["source"]);
+        return base.concat(["source", "sourceProps"]);
     }
 
     static createUrlSource(url: string): ImageSource{

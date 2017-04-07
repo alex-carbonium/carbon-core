@@ -1,5 +1,3 @@
-import { Dictionary } from "carbon-basics";
-
     var Per: any = function(valOrFunc, bindThis = undefined) {
         this.forEach = toFunc(valOrFunc, bindThis);
     }
@@ -213,13 +211,13 @@ import { Dictionary } from "carbon-basics";
     };
 
     Per.prototype.first = function() {
-        var results: Dictionary = { limit: 1 };
+        var results: any = { limit: 1 };
         this.monitor(results).submit();
         return results.count > 0 ? results.first : (void 0);
     };
 
     Per.prototype.last = function() {
-        var results: Dictionary = {};
+        var results: any = {};
         this.monitor(results).submit();
         return results.count > 0 ? results.last : (void 0);
     };

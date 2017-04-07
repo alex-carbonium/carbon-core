@@ -1,8 +1,4 @@
 declare module "carbon-basics" {
-    export interface Dictionary {
-        [key: string]: any;
-    }
-
     export interface IConstructor<T>{
         new(): T;
     }

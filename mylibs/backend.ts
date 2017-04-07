@@ -6,7 +6,7 @@ import UserManager from "oidc-client/src/UserManager";
 import Log from "oidc-client/src/Log";
 import params from "./params";
 import { IBackend, ILogger } from "carbon-api";
-import { IEvent, Dictionary } from "carbon-basics";
+import { IEvent } from "carbon-basics";
 import { IPersistentConnection } from "carbon-internal";
 
 var debug = require<any>("DebugUtil")("carb:backend");
@@ -239,10 +239,10 @@ class Backend implements IBackend {
         window.location.href = fragment;
     }
 
-    private ajax(method, url: string, data: Dictionary, options) {
+    private ajax(method, url: string, data: any, options) {
         this.requestStarted.raise(url);
 
-        var fetchOptions: Dictionary = { method: method, headers: {}, mode: 'cors' };
+        var fetchOptions: any = { method: method, headers: {}, mode: 'cors' };
         if (options && options.credentials) {
             fetchOptions.credentials = options.credentials;
         }

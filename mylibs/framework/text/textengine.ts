@@ -3,7 +3,6 @@ import Renderer from "./renderer";
 import Rect from "./primitives/rect";
 import Runs from "./static/runs";
 import { deCRLFify } from "./util/util";
-import { Dictionary } from "carbon-basics";
 
 	/**
 	 * Class that serves all text layout related functions

@@ -34,6 +34,8 @@ declare module "carbon-geometry" {
         d: number;
         tx: number;
         ty: number;
+
+        withTranslation(x: number, y: number): IMatrix;
     }
     export const Matrix: IMatrix & {
         createTranslationMatrix(tx: number, ty: number): IMatrix;

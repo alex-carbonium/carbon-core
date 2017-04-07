@@ -7,7 +7,7 @@ import PropertyMetadata from "../PropertyMetadata";
 import TextEngine from "./textengine";
 import styleManager from "../style/StyleManager";
 import { IContainer, IDataElement } from "carbon-core";
-import { TextAlign, Dictionary } from "carbon-basics";
+import { TextAlign } from "carbon-basics";
 import { IUIElement } from "carbon-model";
 
 class Text extends UIElement implements IContainer, IDataElement {
@@ -275,7 +275,7 @@ class Text extends UIElement implements IContainer, IDataElement {
         //     :
         //     Matri
         var text = new Text();
-        var font: Dictionary = {};
+        var font: any = {};
         if(parsedAttributes.fontSize){
             font.size = parsedAttributes.fontSize.replace('px','');
         }

@@ -11,7 +11,6 @@ import Path from "ui/common/Path";
 import UIElement from "framework/UIElement";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
-import { Dictionary } from "carbon-basics";
 import Point from "../math/point";
 
 const PointSize = 4;
@@ -96,7 +95,7 @@ var CornerRadiusPoint = {
         }
 
         var p2 = {x: w2 + dw * rv[1], y: h2 + dh * rv[3]};
-        var pr: Dictionary = {};
+        var pr: any = {};
         // pr - closest point to the line
         nearestPoint.onLine(p1, p2, mousePosition, pr);
 

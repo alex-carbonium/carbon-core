@@ -1,10 +1,10 @@
 import Runs from "./runs";
 import OpenTypeMeasure from "../measure/opentypemeasure";
 
-import { FontStyle, FontScript, UnderlineStyle, Dictionary } from "carbon-basics";
+import { FontStyle, FontScript, UnderlineStyle } from "carbon-basics";
 
     /* TODO: cache keys should be hashes instead of these stupid strings */
-    var TextRender: Dictionary = function() {
+    var TextRender: any = function() {
 
     }
 

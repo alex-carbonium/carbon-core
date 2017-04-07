@@ -2,7 +2,6 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import { Types, ChangeMode } from "./Defs";
 import { IPage, IUIElement, IContainerProps, IDataNode, IArtboard } from "carbon-model";
 import { IRect, IPoint } from "carbon-geometry";
-import { Dictionary } from "carbon-basics";
 import Rect from "../math/rect";
 import UIElement from "./UIElement";
 

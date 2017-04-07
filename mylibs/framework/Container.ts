@@ -15,6 +15,7 @@ import Box from './Box';
 import UserSettings from '../UserSettings';
 import { IKeyboardState } from "carbon-basics";
 import { IPropsOwner, IContainerProps, IUIElement, IContainer } from "carbon-model";
+import { IMatrix } from "carbon-geometry";
 
 export default class Container extends UIElement implements IContainer, IPropsOwner<IContainerProps> {
     props: IContainerProps;
@@ -580,7 +581,7 @@ export default class Container extends UIElement implements IContainer, IPropsOw
         var matrix = this.globalViewMatrix();
         return matrix.transformPoint(pos);
     }
-    globalMatrixToLocal(m: Matrix): Matrix{
+    globalMatrixToLocal(m: IMatrix): Matrix{
         return this.globalViewMatrixInverted().appended(m);
     }
     registerForLayerDraw(layer, element?) {

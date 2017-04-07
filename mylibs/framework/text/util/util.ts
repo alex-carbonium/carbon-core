@@ -1,11 +1,11 @@
 import FontInfo from "../font/fontinfo";
 
-import { FontStyle, Dictionary } from "carbon-basics";
+import { FontStyle } from "carbon-basics";
 
 export function event() {
     var handlers = [];
 
-    var subscribe: Dictionary = function (handler) {
+    var subscribe: any = function (handler) {
         handlers.push(handler);
     };
 

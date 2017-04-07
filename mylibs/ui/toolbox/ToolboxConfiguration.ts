@@ -4,7 +4,6 @@ import Environment from "environment";
 import FileProxy from "server/FileProxy";
 import {createUUID} from "util";
 import Matrix from "math/matrix";
-import { Dictionary } from "carbon-core";
 
 var PADDING = 5;
 var _configCache = {};
@@ -22,7 +21,7 @@ export default class ToolboxConfiguration {
     }
     static fitToTile(w, h, tileType, padding) {
         padding = padding || 0;
-        var data: Dictionary = {};
+        var data: any = {};
         data.width = 128;
         data.height = 60;
 
@@ -235,7 +234,7 @@ export default class ToolboxConfiguration {
             var spriteUrlPromise = ToolboxConfiguration.renderElementsToSprite(elements, config);
 
             var spriteUrl2xPromise = ToolboxConfiguration.renderElementsToSprite(elements, null, 2);
-            let group: Dictionary = {
+            let group: any = {
                 name:groupName,
                 templates:config
             };
