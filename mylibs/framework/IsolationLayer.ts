@@ -22,7 +22,6 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
 
     private cloneAndFollow(e:IUIElement):IUIElement {
         var clone = e.mirrorClone();
-        clone.runtimeProps.isolationSource = e;
         this.trackElementIds[e.id()] = clone;
 
         return clone;
@@ -31,11 +30,6 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
     isolateGroup(owner:IContainer) : void{
         if(this.ownerElement) {
             this.exitIsolation();
-        }
-
-        // we can try to isolate isolated copy, need to take a real instance instead
-        if(owner.runtimeProps.isolationSource) {
-            owner = owner.runtimeProps.isolationSource;
         }
 
         this.ownerElement = owner;
@@ -208,7 +202,6 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         var sourceParent = (parent == this)?this.ownerElement:this.ownerElement.getElementById(parent.id()) as IContainer;
         if(sourceParent) {
             var clone = element.mirrorClone();
-            element.runtimeProps.isolationSource = clone;
             sourceParent.insert(clone, index);
         }
     }
