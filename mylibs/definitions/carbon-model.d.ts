@@ -123,6 +123,7 @@ declare module "carbon-model" {
     }
 
     export interface IRepeatContainer extends IContainer{
+        findMasterCounterpart(element: IUIElement): IUIElement;
         addDroppedElements(dropTarget: IContainer, elements: IUIElement[], e: IMouseEventData): void;
     }
     export interface IRepeaterProps extends IContainerProps{

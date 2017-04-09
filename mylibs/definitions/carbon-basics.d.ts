@@ -19,6 +19,7 @@ declare module "carbon-basics" {
     }
 
     export interface IEvent<T> {
+        raise(): void;
         raise(data: T): void;
         bind(callback: (data: T) => void): IDisposable;
         bindAsync(callback: (data: T) => void): IDisposable;
