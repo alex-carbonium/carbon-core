@@ -288,7 +288,7 @@ class Shape extends Container {
     insert(image: IImage) {
         this.setProps({clipMask: true});
         image.prepareAndSetProps(this.selectLayoutProps());
-        image.resizeOnLoad(false);
+        image.resizeOnLoad(null);
 
         var parent = this.parent();
         var idx = parent.remove(this);

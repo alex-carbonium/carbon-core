@@ -3,12 +3,14 @@ import {StyleType} from "framework/Defs";
 import {createUUID} from "../../util";
 import ArtboardTemplateControl from "framework/ArtboardTemplateControl";
 import ToolboxConfiguration from "ui/toolbox/ToolboxConfiguration";
-import Deferred from "framework/Deferred";
 import DataNode from "framework/DataNode";
 import Font from "../Font";
+import { IApp } from "carbon-app";
 
 export default class PageExporter {
-    constructor(app){
+    _app: IApp;
+
+    constructor(app: IApp){
         this._app = app;
     }
 
@@ -19,7 +21,7 @@ export default class PageExporter {
         if(!page.props.toolboxConfigId || page.isToolboxConfigDirty){
             promise = ToolboxConfiguration.buildToolboxConfig(page);
         } else {
-            promise = Deferred.createResolvedPromise();
+            promise = Promise.resolve();
         }
 
         var i = 10; // to avoid infinite recursion in case of bugs
@@ -90,10 +92,25 @@ export default class PageExporter {
             }
 
             var font = e.props.font;
-            if (font && font.family !== Font.Default.family){
-                var metadata = this._app.getFontMetadata(font.family);
-                if (metadata){
-                    fontMetadata.push(metadata);
+            if (font){
+                if (font.family !== Font.Default.family){
+                    let metadata = this._app.getFontMetadata(font.family);
+                    if (metadata){
+                        fontMetadata.push(metadata);
+                    }
+                }
+
+                var content = e.props.content;
+                if (content && Array.isArray(content)){
+                    for (var i = 0; i < content.length; i++) {
+                        var range = content[i];
+                        if (range.family && range.family !== Font.Default.family){
+                            let metadata = this._app.getFontMetadata(range.family);
+                            if (metadata){
+                                fontMetadata.push(metadata);
+                            }
+                        }
+                    }
                 }
             }
         })

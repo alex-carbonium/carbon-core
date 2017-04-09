@@ -1,8 +1,7 @@
 import { PrimitiveType } from "../Defs";
-import { Dictionary } from "carbon-basics";
 import DataNode from "../DataNode";
 
-var Primitive: Dictionary = {};
+var Primitive: any = {};
 
 Primitive._externalMap = {};
 Primitive._localMap = {};
@@ -56,7 +55,7 @@ Primitive.speculativeIndexOf = function(array, p){
 };
 
 Primitive.dataNodeAdd = function(parent, element, index, norollback) {
-    var res: Dictionary = {
+    var res: any = {
         type: PrimitiveType.DataNodeAdd,
         path: parent.primitivePath(),
         node: element.toJSON(),
@@ -71,7 +70,7 @@ Primitive.dataNodeAdd = function(parent, element, index, norollback) {
 };
 
 Primitive.dataNodeRemove = function(parent, element, index, norollback) {
-    var res: Dictionary = {
+    var res: any = {
         type: PrimitiveType.DataNodeRemove,
         path: parent.primitivePath(),
         childId: element.id()
@@ -85,7 +84,7 @@ Primitive.dataNodeRemove = function(parent, element, index, norollback) {
 };
 
 Primitive.dataNodeSetProps = function(element, props, oldProps, norollback) {
-    var res: Dictionary = {
+    var res: any = {
         type: PrimitiveType.DataNodeSetProps,
         path: element.primitivePath(),
         props: props
@@ -99,7 +98,7 @@ Primitive.dataNodeSetProps = function(element, props, oldProps, norollback) {
 };
 
 Primitive.selection = function(page, selection, oldSelection, userId, norollback) {
-    var res: Dictionary = {
+    var res: any = {
         type: PrimitiveType.Selection,
         path: page.primitivePath(),
         userId: userId,
@@ -114,7 +113,7 @@ Primitive.selection = function(page, selection, oldSelection, userId, norollback
 };
 
 Primitive.view = function(page, sx, sy, scale, oldsx, oldsy, oldscale) {
-    var res: Dictionary = {
+    var res: any = {
         type: PrimitiveType.View,
         path: page.primitivePath(),
         x: sx,
@@ -126,7 +125,7 @@ Primitive.view = function(page, sx, sy, scale, oldsx, oldsy, oldscale) {
 };
 
 Primitive.dataNodePatchProps = function(element, patchType, propName){
-    var res: Dictionary = {
+    var res: any = {
         type: PrimitiveType.DataNodePatchProps,
         patchType,
         path: element.primitivePath(),
@@ -137,7 +136,7 @@ Primitive.dataNodePatchProps = function(element, patchType, propName){
 };
 
 Primitive.dataNodeChange = function(element, oldJson, norollback) {
-    var res: Dictionary = {
+    var res: any = {
         type: PrimitiveType.DataNodeChange,
         path: element.primitivePath(),
         node: element.toJSON()
@@ -155,7 +154,7 @@ Primitive.dataNodeChange = function(element, oldJson, norollback) {
 };
 
 Primitive.dataNodeChangePosition = function(parent, element, newPosition, oldPosition, norollback) {
-    var res: Dictionary = {
+    var res: any = {
         type: PrimitiveType.DataNodeChangePosition,
         path: parent.primitivePath(),
         childId: element.id(),
@@ -179,7 +178,7 @@ Primitive.element_delete = function (primitiveRootId, parentId, element, data, n
         return;
     }
 
-    var res: Dictionary = {
+    var res: any = {
         id: {
             command: "element_delete",
             parentId: parentId,
@@ -205,7 +204,7 @@ Primitive.element_new = function (primitiveRootId, parentId, element, index, dat
     var data = data || element.toJSON();
     var order = index !== undefined ? index : element.zOrder();
 
-    var res: Dictionary = {
+    var res: any = {
         id: {
             command: "element_new",
             elementId: element.id(),
@@ -259,7 +258,7 @@ Primitive.element_state_override = function (element, stateName, stateProperties
 };
 
 Primitive.element_state_new = function (primitiveRootId, elementId, stateId, state, noRollback) {
-    var primitive: Dictionary = {
+    var primitive: any = {
         id: {
             command: "element_state_new",
             primitiveRootId,
@@ -280,7 +279,7 @@ Primitive.element_state_new = function (primitiveRootId, elementId, stateId, sta
 };
 
 Primitive.element_state_remove = function (primitiveRootId, elementId, stateId, oldState, noRollback) {
-    var primitive: Dictionary = {
+    var primitive: any = {
         id: {
             command: "element_state_remove",
             primitiveRootId,
@@ -299,7 +298,7 @@ Primitive.element_state_remove = function (primitiveRootId, elementId, stateId, 
 };
 
 Primitive.element_state_change = function (primitiveRootId, elementId, stateId, newState, oldState, noRollback) {
-    var primitive: Dictionary = {
+    var primitive: any = {
         id: {
             command: "element_state_change",
             primitiveRootId,
@@ -328,7 +327,7 @@ Primitive.element_props_change = function (primitiveRootId, elementId, props, ol
         return;
     }
 
-    var primitive: Dictionary = {
+    var primitive: any = {
         id: {
             command: "element_props_change",
             primitiveRootId: primitiveRootId,
@@ -357,7 +356,7 @@ Primitive.element_position_change = function (primitiveRootId, newParentId, elem
         return;
     }
 
-    var primitive: Dictionary = {
+    var primitive: any = {
         id: {
             command: "element_position_change",
             primitiveRootId: primitiveRootId,
@@ -416,7 +415,7 @@ Primitive.page_props_changed = function (page, props, oldProps) {
     // if (value && typeof value.toJSON === 'function') {
     //     value = value.toJSON(false);
     // }
-    var primitive: Dictionary = {
+    var primitive: any = {
         id: {
             command: 'page_props_change',
             pageId: page.id()
@@ -541,7 +540,7 @@ Primitive.pagegroup_page_move = function (page, oldGroupId, newIndex) {
 }
 
 Primitive.app_props_changed = function (app, props, oldProps) {
-    var primitive: Dictionary = {
+    var primitive: any = {
         id: {
             command: 'app_props_change'
         },

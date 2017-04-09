@@ -1,6 +1,6 @@
 declare module "carbon-model" {
-    import { IPoint, IRect, ICoordinate, IMatrix } from "carbon-geometry";
-    import { IEventData, IConstructor, IEvent, IConstraints } from "carbon-basics";
+    import { IPoint, IRect, ICoordinate, IMatrix, ISize, OriginType } from "carbon-geometry";
+    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData } from "carbon-basics";
 
     export interface IPropsOwner<TProps> {
         props: TProps;
@@ -42,14 +42,21 @@ declare module "carbon-model" {
         name(): string;
         displayName(): string;
 
+        viewMatrix(): IMatrix;
+        globalViewMatrix(): IMatrix;
+        globalViewMatrixInverted(): IMatrix;
         shouldApplyViewMatrix(): boolean;
+
         applyScaling(vector: IPoint, origin: IPoint, options?, mode?): boolean;
         applyTranslation(vector: IPoint, withReset?, mode?): void;
+        setTransform(matrix: IMatrix);
+        resetTransform();
 
+        getBoundaryRect(): IRect;
         getBoundingBox(): IRect;
         getBoundingBoxGlobal(): IRect;
-        setSize(width: number, height: number);
-        setTransform(matrix: IMatrix);
+        size(size?: ISize): ISize;
+        center(global?: boolean): IPoint;
 
         getMaxOuterBorder(): number;
 
@@ -115,6 +122,15 @@ declare module "carbon-model" {
         translateChildren(): boolean;
     }
 
+    export interface IRepeatContainer extends IContainer{
+        addDroppedElements(dropTarget: IContainer, elements: IUIElement[], e: IMouseEventData): void;
+    }
+    export interface IRepeaterProps extends IContainerProps{
+    }
+    export const RepeatContainer: IConstructor<IRepeatContainer> & {
+        tryFindRepeaterParent(element: IUIElement): IRepeatContainer | null;
+    }
+
     export interface IPage extends IContainer, ILayer {
         getAllArtboards(): IArtboard[];
         getActiveArtboard(): IArtboard;
@@ -134,7 +150,7 @@ declare module "carbon-model" {
         insertArtboards(artboards: IArtboard[]);
     }
 
-    export const Page: IPage & IConstructor<IPage>;
+    export const Page: IConstructor<IPage>;
 
     export interface IComposite extends IUIElement {
         elements: IUIElement[];
@@ -223,9 +239,9 @@ declare module "carbon-model" {
         setProps(props: Partial<IImageProps>, mode?);
         prepareAndSetProps(props: Partial<IImageProps>, mode?);
 
-        resizeOnLoad(value?: boolean): boolean;
+        resizeOnLoad(value?: OriginType|null): OriginType|null;
     }
-    export const Image: IConstructor<IImage> & IPropsOwner<IImageProps> & {
+    export const Image: IConstructor<IImage> & {
         createUrlSource(url: string): ImageSource;
         createFontSource(iconName: string): ImageSource;
 

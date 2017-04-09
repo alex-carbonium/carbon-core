@@ -1,5 +1,5 @@
 import EventHelper from './EventHelper';
-import { IEvent3, Dictionary } from "carbon-basics";
+import { IEvent3 } from "carbon-basics";
 import { IUIElement, IContainer } from "carbon-model";
 
 var tracker = {

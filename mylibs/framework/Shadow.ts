@@ -1,6 +1,5 @@
 import {Types} from "./Defs";
 import Matrix from "math/matrix";
-import { Dictionary } from "carbon-basics";
 
 // var onAngleDistanceChanged = function (angle) {
 //     var angle = this._angle.value() * (Math.PI / 180);
@@ -11,7 +10,7 @@ import { Dictionary } from "carbon-basics";
 //     this._offsetY.value(y);
 // };
 
-var Shadow: Dictionary = {};
+var Shadow: any = {};
 var matrix = Matrix.create();
 Shadow.apply = function (element, shadowObject, context, w, h, environment) {
     if (!shadowObject.enabled || shadowObject.color == null) {

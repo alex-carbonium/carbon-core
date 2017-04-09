@@ -93,7 +93,8 @@ export class FrameEditTool {
         if (this._content){
             this._content.deactivate();
             Environment.view.interactionLayer.remove(this._content);
-            this._content.dispose();
+            //disposed content sometimes is still in the old selection...
+            //this._content.dispose();
             this._content = null;
         }
         if (this._snapClone){

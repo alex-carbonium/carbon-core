@@ -3,7 +3,6 @@ import backend from "../backend";
 import { Types } from "./Defs";
 import IconsInfo from "../ui/IconsInfo";
 import Rect from "../math/rect";
-import { Dictionary } from "carbon-basics";
 import { ContentSizing, ImageSource, ImageSourceType } from "carbon-model";
 
 const iconProps = { fill: Brush.createFromColor("#ABABAB"), stroke: Brush.Empty };
@@ -114,7 +113,7 @@ export default class ImageSourceHelper {
         let cors = sourceProps && sourceProps.cors;
         if (!cors && url[0] !== '/' && url[0] !== '.'
             && url.substr(0, backend.fileEndpoint.length) !== backend.fileEndpoint
-            && url.substr(0, "data:image/png".length) !== "data:image/png") {
+            && url.substr(0, "data:image/".length) !== "data:image/") {
             url = backend.servicesEndpoint + "/api/proxy?" + url;
         }
 

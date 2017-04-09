@@ -18,19 +18,13 @@ declare module "carbon-model"{
     export interface IUIElement{
         canSelect(): boolean;
 
-        getBoundaryRect(): IRect;
-
         mirrorClone():IUIElement;
 
         runtimeProps: any;
-        globalViewMatrix():any;
-        setTransform(m:any, mode?:number);
     }
 
     export interface IContainer{
         globalMatrixToLocal(m: any): any;
-        globalViewMatrixInverted():any;
-        globalViewMatrix():any;
         getElementById(id:string):IUIElement|IContainer|null;
     }
 }

@@ -2,7 +2,7 @@
 import Invalidate from "./Invalidate";
 import TypeDefaults from "./TypeDefaults";
 import { Types } from "./Defs";
-import { Dictionary, BrushType } from "carbon-basics";
+import { BrushType } from "carbon-basics";
 
 var brushDefault = TypeDefaults[Types.Brush] = function () {
     return new Brush("black");
@@ -152,7 +152,7 @@ export default class Brush {
     }
 
     static toCss(brush) {
-        var style: Dictionary = {}
+        var style: any = {}
         if (brush) {
             switch (brush.type) {
                 case BrushType.empty:

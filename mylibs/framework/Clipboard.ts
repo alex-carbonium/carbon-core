@@ -11,7 +11,8 @@ import ArrangeStrategy from "./ArrangeStrategy";
 import {setClipboardContent, tryGetClipboardContent} from "../utils/dom";
 import Delete from "../commands/Delete";
 import params from "../params";
-import {IApp} from "carbon-core";
+import { IApp } from "carbon-core";
+import { OriginType } from "carbon-geometry";
 
 class Clipboard {
     [name: string]: any;
@@ -131,7 +132,11 @@ class Clipboard {
         var globalMatrices = null;
         var rootBoundingBoxes = null;
         if (textData){
-            var newElement: UIElement = Image.tryCreateFromUrl(textData);
+            var image = Image.tryCreateFromUrl(textData);
+            if (image){
+                image.resizeOnLoad(OriginType.Center);
+            }
+            var newElement: UIElement = image;
             if (newElement === null){
                 newElement = new Text();
                 newElement.prepareAndSetProps({

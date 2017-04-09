@@ -1,5 +1,4 @@
 import appInsights from "./appInsights";
-import { Dictionary } from "carbon-basics";
 import { ILogger } from "carbon-api";
 
 var appInsightsEnabled = !!appInsights;
@@ -114,7 +113,7 @@ function stringifyComplexProperties(data){
 }
 
 export class Logger implements ILogger {
-    static context: Dictionary = {};
+    static context: any = {};
 
     trace(msg, args?){
         log("trace", msg, args);

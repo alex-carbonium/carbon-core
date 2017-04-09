@@ -37,9 +37,9 @@ import { createUUID, deepEquals } from "../util";
 import Rect from "../math/rect";
 import ResizeOptions from "../decorators/ResizeOptions";
 import { PropertyDescriptor } from './PropertyMetadata';
-import { Dictionary, IKeyboardState, IConstraints } from "carbon-basics";
+import { IKeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IPropsOwner, IUIElement, IContainer } from "carbon-model";
-import { ICoordinate } from "carbon-geometry";
+import { ICoordinate, ISize } from "carbon-geometry";
 
 require("../migrations/All");
 
@@ -408,7 +408,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         this.setProps({ m: matrix }, mode);
     }
     resetTransform(mode?: ChangeMode) {
-        var props: Dictionary = { m: Matrix.Identity };
+        var props: any = { m: Matrix.Identity };
         if (this.hasBadTransform()){
             props.bad = false;
             props.lgbr = null;
@@ -454,10 +454,6 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
                 bad: false
             });
         }
-    }
-
-    setSize(width: number, height: number){
-        this.br(this.br().withSize(width, height));
     }
 
     roundBoundingBoxToPixelEdge(): boolean {
@@ -626,7 +622,11 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         var margin = this.margin();
         return new Rect(br.x - margin.left, br.y - margin.top, br.width + margin.left + margin.right, br.height + margin.top + margin.bottom);
     }
-    size() {
+    size(value?: ISize): ISize {
+        if (arguments.length){
+            //TODO: handle for paths based on shouldApplyViewMatrix
+            this.br(this.br().withSize(value.width, value.height));
+        }
         return {
             width: this.width(),
             height: this.height()

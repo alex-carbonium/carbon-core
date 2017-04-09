@@ -22,7 +22,6 @@ import {Types, ChangeMode} from "../../framework/Defs";
 import ArrangeStrategy from "../../framework/ArrangeStrategy";
 import ResizeOptions from "../../decorators/ResizeOptions";
 import { IMouseEventData, IKeyboardState } from "carbon-core";
-import { Dictionary } from "carbon-basics";
 import { LayerTypes } from "carbon-app";
 
 var CP_HANDLE_RADIUS = 3;
@@ -1285,7 +1284,7 @@ class Path extends Shape {
     }
 
     getInsertPointData(pointInfo) {
-        var pt: Dictionary = {x: pointInfo.x, y: pointInfo.y, idx: pointInfo.idx};
+        var pt: any = {x: pointInfo.x, y: pointInfo.y, idx: pointInfo.idx};
         var t = pointInfo.t;
         var len = this.length();
         var p4 = clone(this.points[pointInfo.idx]);
@@ -1361,7 +1360,7 @@ class Path extends Shape {
 
         function checkDistance(pt, prevPt, idx) {
             if (isLinePoint(pt) && isLinePoint(prevPt)) {
-                var pr: Dictionary = {x: 0, y: 0, idx: idx};
+                var pr: any = {x: 0, y: 0, idx: idx};
                 var d = nearestPoint.onLine(prevPt, pt, pos, pr);
                 setLinePoint(pr);
             } else {

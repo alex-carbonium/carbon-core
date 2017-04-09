@@ -5,7 +5,6 @@ import {PatchType, ChangeMode} from "./Defs";
 import ObjectFactory from "./ObjectFactory";
 import {createUUID} from "../util";
 import { IDataNodeProps } from "carbon-core";
-import { Dictionary } from "carbon-basics";
 import { IDataNode } from "carbon-model";
 
 export default class DataNode implements IDataNode{
@@ -382,7 +381,7 @@ export default class DataNode implements IDataNode{
     }
 
     toJSON(){
-        var json: Dictionary = {t: this.t, props: this.cloneProps()};
+        var json: any = {t: this.t, props: this.cloneProps()};
         if (!this.isAtomicInModel() && this.children){
             json.children = this.children.map(x => x.toJSON());
         }

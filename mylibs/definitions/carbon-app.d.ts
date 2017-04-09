@@ -118,6 +118,8 @@ declare module "carbon-app" {
         zoomToFit(): void;
         scrollX(value?: number): number;
         scrollY(value?: number): number;
+
+        viewportRect(): IRect;
         pointToScreen(point: ICoordinate): ICoordinate;
 
         ensureScale(element: IUIElement);
@@ -130,9 +132,20 @@ declare module "carbon-app" {
 
         draw();
         invalidate();
+
+        showPixels(value?: boolean): boolean;
+        showPixelGrid(value?: boolean): boolean;
+    }
+
+    export interface IDropElementData{
+        e: MouseEvent;
+        keys: IKeyboardState;
+        elements: IUIElement[];
     }
 
     export interface IController {
+        onmousemove(eventData: IMouseEventData, keys: IKeyboardState);
+
         draggingEvent: IEvent<ITransformationEventData>;
         startResizingEvent: IEvent<ITransformationEventData>;
         resizingEvent: IEvent<ITransformationEventData>;
@@ -153,16 +166,25 @@ declare module "carbon-app" {
         startDraggingEvent: IEvent2<IMouseEventData, IKeyboardState>;
         stopDraggingEvent: IEvent2<IMouseEventData, IKeyboardState>;
 
+        inlineEditModeChanged: IEvent2<boolean, any>;
+
         interactionActive: boolean;
 
         actionManager: IActionManager;
+
+        createEventData(e): IMouseEventData;
 
         updateCursor(eventData: IMouseEventData): void;
         defaultCursor(): string;
         captureMouse(element: IUIElement): void;
         releaseMouse(element: IUIElement): void;
 
+        keyboardStateFromEvent(e: MouseEvent, mutableState?: IKeyboardState): IKeyboardState;
+        beginDragElement(e: MouseEvent, element: IUIElement, dropPromise: Promise<IDropElementData>);
         choosePasteLocation(elements: IUIElement[], allowMoveIn?: boolean): {parent: IContainer, x: number, y: number}
+        insertAndSelect(element: IUIElement[], parent: IContainer, x: number, y: number);
+        getCurrentlyDraggedElements(): IUIElement[];
+        getCurrentDropTarget(eventData: IMouseEventData, keys: IKeyboardState): IContainer | null;
     }
 
     //TODO: rename to Workspace
@@ -235,7 +257,7 @@ declare module "carbon-app" {
         requestInteractionOnly(rect?);
     }
 
-    
+
     export interface ISelectComposite extends IComposite{
         updateDisplayProps(changes);
     }

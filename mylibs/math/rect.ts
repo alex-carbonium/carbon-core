@@ -1,7 +1,7 @@
 import Point from "./point";
 import LineSegment from "./lineSegment";
 import { isRectInRect } from "./math";
-import { IRect, ICoordinate } from "carbon-geometry";
+import { IRect, ICoordinate, OriginType } from "carbon-geometry";
 
 export default class Rect implements IRect {
     x: number;
@@ -124,6 +124,16 @@ export default class Rect implements IRect {
         return new Point(this.x + this.width / 2, this.y);
     }
 
+    origin(origin: OriginType): Point{
+        switch (origin){
+            case OriginType.Center:
+                return this.center();
+            case OriginType.TopLeft:
+                return this.topLeft();
+        }
+        throw new Error("wrong origin " + origin);
+    }
+
     topLeft(): Point {
         if (this.x === 0 && this.y === 0) {
             return Point.Zero;
@@ -181,6 +191,17 @@ export default class Rect implements IRect {
 
     toArray() {
         return [this.x, this.y, this.width, this.height];
+    }
+
+    intersect(other: IRect): Rect | null{
+        var l = Math.max(this.x, other.x);
+        var t = Math.max(this.y, other.y);
+        var r = Math.min(this.x + this.width, other.x + other.width);
+        var b = Math.min(this.y + this.height, other.y + other.height);
+        if (l < r && t < b) {
+            return new Rect(l, t, r - l, b - t);
+        }
+        return null;
     }
 
     fit(bounds: IRect, noScaleUp?: boolean): Rect {
