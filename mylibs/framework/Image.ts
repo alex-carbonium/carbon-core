@@ -343,7 +343,7 @@ PropertyMetadata.registerForType(Image, {
                 { name: "Center", value: ContentSizing.center },
                 { name: "Original", value: ContentSizing.original },
                 { name: "Fit frame", value: ContentSizing.stretch },
-                { name: "Manual", value: ContentSizing.manual }
+                { name: "Fixed", value: ContentSizing.fixed }
             ]
         },
         defaultValue: DefaultSizing

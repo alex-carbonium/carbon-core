@@ -63,13 +63,12 @@ class DraggingElement extends TransformationElement {
         SnapController.clearActiveSnapLines();
     }
 
-    saveChanges(event, draggingOverElement, page){
-        super.saveChanges();
+    stopDragging(event, draggingOverElement, page){
+        this.saveChanges();
         this.showOriginal(true);
 
         var artboards = page.getAllArtboards();
         var elements = [];
-        var oldParents = [];
 
         for (var i = 0; i < this.children.length; ++i){
             var phantom = this.children[i];
@@ -92,10 +91,6 @@ class DraggingElement extends TransformationElement {
             }
             else{
                 parent = phantomTarget;
-            }
-
-            if (parent !== element.parent()){
-                oldParents.push(element.parent());
             }
 
             var index = parent.positionOf(element) + 1 || parent.count();
@@ -179,19 +174,15 @@ class DraggingElement extends TransformationElement {
     }
 
     parentAllowSnapping(pos) {
-        return !this._elements.some(x => x.parent() !== this && x.parent().getDropData(x, pos) !== null);
+        return this._elements.every(x => x.parent() === this || x.parent().getDropData(x, pos) === null);
     }
 
     isDropSupported(){
-        return !this._elements.some(x => !x.isDropSupported());
-    }
-
-    showResizeHint(){
-        return !this._elements.some(x => !x.showResizeHint());
+        return this._elements.every(x => x.isDropSupported());
     }
 
     allowMoveOutChildren(event){
-        return !this._elements.some(x => x.parent() !== this && !x.parent().allowMoveOutChildren(undefined, event));
+        return this._elements.every(x => x.parent() === this || x.parent().allowMoveOutChildren(undefined, event));
     }
 }
 DraggingElement.prototype.t = Types.DraggingElement;

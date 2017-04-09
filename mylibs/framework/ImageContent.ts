@@ -5,7 +5,9 @@ import ActiveFrame from "../decorators/ActiveFrame";
 import PropertyMetadata from "../framework/PropertyMetadata";
 import {Types} from "../framework/Defs";
 import {ContentSizing} from "carbon-model";
-import {ITransformationEventData} from "carbon-core";
+import { ITransformationEventData } from "carbon-core";
+import GlobalMatrixModifier from "./GlobalMatrixModifier";
+import Intl from "../Intl";
 
 var ContentFrameType = Object.create(DefaultFrameType);
 ContentFrameType.strokeStyle = null;
@@ -17,6 +19,12 @@ export default class ImageContent extends UIElement{
         clone.prepareAndSetProps({
             sizing: ContentSizing.stretch
         });
+
+        var name = Intl.instance.formatMessage({
+            id: this.displayType(),
+            defaultMessage: this.displayType()
+        });
+        this.name(name);
 
         this._frame = frame;
         this._clone = clone;
@@ -61,6 +69,9 @@ export default class ImageContent extends UIElement{
         this.applyViewMatrix(context);
         this._clone.drawSelf(context, w, h, environment);
         context.restore();
+    }
+
+    drawBoundaryPath(context, round) {
     }
 
     _onStopDragging(event: ITransformationEventData){

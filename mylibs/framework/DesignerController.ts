@@ -40,10 +40,12 @@ function stopDrag(event) {
     if (!this._draggingElement.isDropSupported()) {
         this._draggingElement.detach();
         this.stopDraggingEvent.raise(event, null);
+        //active frame could have been hidden, show it again now
+        Selection.refreshSelection();
         return false;
     }
 
-    var elements = this._draggingElement.saveChanges(event, this._draggingOverElement, this.app.activePage);
+    var elements = this._draggingElement.stopDragging(event, this._draggingOverElement, this.app.activePage);
     this._draggingElement.detach();
 
     if (elements.length === 1) {

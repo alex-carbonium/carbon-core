@@ -21,12 +21,12 @@ export default class TransformationElement extends GroupContainer implements ICo
 
         for (var i = 0; i < elements.length; i++) {
             var e = elements[i];
-            this._hideDecorators(e);
+            this._saveDecorators(e);
             this.add(this.createClone(e));
 
             this.register(e);
         }
-        this._hideDecorators(element);
+        this._saveDecorators(element);
 
         this.performArrange();
 
@@ -46,11 +46,10 @@ export default class TransformationElement extends GroupContainer implements ICo
         this._elements.length = 0;
     }
 
-    _hideDecorators(e) {
+    _saveDecorators(e) {
         if (e.decorators) {
             e.decorators.forEach(x => {
-                if (x.visible()) {
-                    x.visible(false);
+                if (x.visible() && this._decorators.indexOf(x) === -1) {
                     this._decorators.push(x);
                 }
             });
@@ -89,6 +88,10 @@ export default class TransformationElement extends GroupContainer implements ICo
 
     showOriginal(value) {
         this._elements.forEach(x => x.setProps({ visible: value }, ChangeMode.Self));
+
+        if (this._decorators) {
+            this._decorators.forEach(x => x.visible(value));
+        }
     }
 
     saveChanges() {
@@ -100,11 +103,6 @@ export default class TransformationElement extends GroupContainer implements ICo
 
     detach() {
         this.showOriginal(true);
-
-        if (this._decorators) {
-            this._decorators.forEach(x => x.visible(true));
-            this._decorators = null;
-        }
 
         this.parent().remove(this, ChangeMode.Self);
     }
@@ -140,6 +138,10 @@ export default class TransformationElement extends GroupContainer implements ICo
 
     get elements() {
         return this._elements;
+    }
+
+    showResizeHint(){
+        return this._elements.every(x => x.showResizeHint());
     }
 }
 

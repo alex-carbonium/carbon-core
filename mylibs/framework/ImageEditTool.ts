@@ -133,7 +133,7 @@ export class FrameEditTool {
                 sr: {x: (ir.x - cr.x) / sh + .5|0, y: (ir.y - cr.y) / sv + .5|0, width: ir.width / sh + .5|0, height: ir.height / sv + .5|0},
                 dr: {x: ir.x - fr.x, y: ir.y - fr.y, width: ir.width, height: ir.height}
             }),
-            sizing: ContentSizing.manual
+            sizing: ContentSizing.fixed
         });
     }
 

@@ -42,7 +42,7 @@ export default class GroupContainer extends Container implements IGroupContainer
         return false;
     }
 
-    applySizeScaling(s, o, options, changeMode) {
+    applySizeScaling(s, o, options?, changeMode?) {
         UIElement.prototype.applySizeScaling.apply(this, arguments);
 
         //if group is flipped, scale children normally

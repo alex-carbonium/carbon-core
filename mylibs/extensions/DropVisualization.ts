@@ -248,8 +248,10 @@ var onDraggingElement = function (event: any, keys: IKeyboardState) {
 var onStartDragging = function (event: ITransformationEventData) {
     this._dragging = true;
     this._target = null;
-    this._hint.start(event.transformationElement);
-    this._hint.updatePositionText();
+    if (event.transformationElement.showResizeHint()){
+        this._hint.start(event.transformationElement);
+        this._hint.updatePositionText();
+    }
 };
 
 var onStopDragging = function (event) {
@@ -357,8 +359,10 @@ function onSelectionFrameStop() {
 
 function onStartResizing(event: ITransformationEventData) {
     this._resizing = true;
-    this._hint.start(event.transformationElement);
-    this._hint.updateSizeText();
+    if (event.transformationElement.showResizeHint()){
+        this._hint.start(event.transformationElement);
+        this._hint.updateSizeText();
+    }
     updateVisualizations.call(this);
 }
 
@@ -369,7 +373,7 @@ function onStopResizing() {
 }
 
 function onResizing(event: any) {
-    if (event.element.showResizeHint()) {
+    if (event.transformationElement.showResizeHint()) {
         this._hint.updateSizeText();
     }
 }
@@ -388,7 +392,7 @@ function onStopRotating() {
 }
 
 function onRotating(event: any) {
-    if (event.element.showResizeHint()) {
+    if (event.transformationElement.showResizeHint()) {
         this._hint.updateAngleText();
     }
 }

@@ -4,6 +4,7 @@ import { Types } from "./Defs";
 import IconsInfo from "../ui/IconsInfo";
 import Rect from "../math/rect";
 import { ContentSizing, ImageSource, ImageSourceType } from "carbon-model";
+import { IRect } from "carbon-geometry";
 
 const iconProps = { fill: Brush.createFromColor("#ABABAB"), stroke: Brush.Empty };
 const iconRuntimeProps = { glyph: IconsInfo.findGlyphString(IconsInfo.defaultFontFamily, "image") };
@@ -184,7 +185,7 @@ export default class ImageSourceHelper {
                     runtimeProps.sr = ImageSourceHelper.getUrlImageRect(runtimeProps);
                     runtimeProps.dr = newRect;
                     return;
-                case ContentSizing.manual:
+                case ContentSizing.fixed:
                     return;
             }
             assertNever(sizing);
@@ -195,16 +196,23 @@ export default class ImageSourceHelper {
     }
 
     static prepareProps(source, sizing, oldRect, newRect, props, runtimeProps, changes, fitUrl) {
+        //TODO: do distort the content resizing with some button, shift?
         if (runtimeProps) {
             switch (sizing) {
-                case ContentSizing.manual:
-                    const dw = newRect.width - oldRect.width;
-                    const dh = newRect.height - oldRect.height;
+                case ContentSizing.fixed:
+                    const dw = newRect.x + newRect.width - runtimeProps.dr.x - runtimeProps.dr.width;
+                    const dh = newRect.y + newRect.height - runtimeProps.dr.y - runtimeProps.dr.height;
+                    const sx = 1 + dw/runtimeProps.dr.width;
+                    const sy = 1 + dh/runtimeProps.dr.height;
                     const ndr = Object.assign({}, runtimeProps.dr, {
-                        width: runtimeProps.dr.width + dw,
-                        height: runtimeProps.dr.height + dh
+                        width: runtimeProps.dr.width * sx,
+                        height: runtimeProps.dr.height * sy
                     });
-                    changes.sourceProps = Object.assign({}, props, { sr: runtimeProps.sr, dr: ndr });
+                    const nsr = Object.assign({}, runtimeProps.sr, {
+                        width: runtimeProps.sr.width * sx,
+                        height: runtimeProps.sr.height * sy
+                    });
+                    changes.sourceProps = Object.assign({}, props, { sr: nsr, dr: ndr });
                     break;
             }
         }

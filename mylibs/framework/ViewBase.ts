@@ -502,15 +502,12 @@ export default class ViewBase { //TODO: implement IView
         return true;
     }
 
-    hitElement(eventData):IUIElement {
+    hitElement(eventData): IUIElement | null {
         for(var i = this._layers.length - 1; i >= 0; --i) {
             var layer = this._layers[i] as any;
-            if(!layer.hitTransparent())
-            {
-                var element = layer.hitElement(eventData, this.scale(), null, Selection.directSelectionEnabled());
-                if(element) {
-                    return element;
-                }
+            var element = layer.hitElement(eventData, this.scale(), null, Selection.directSelectionEnabled());
+            if (element) {
+                return element;
             }
         }
 
