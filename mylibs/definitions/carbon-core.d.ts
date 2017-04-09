@@ -55,6 +55,7 @@ declare module "carbon-core" {
     export var SvgParser: any;
     export var IconsInfo: any;
     export var ToolboxConfiguration: any;
+    export var RepeatContainer: any;
     export class Shape{}
     export function createUUID(): string;
 }

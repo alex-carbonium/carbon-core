@@ -31,7 +31,7 @@ import UngroupRepeater from "../framework/repeater/UngroupRepeater";
 import {align} from "../framework/Aligner";
 import Selection from "../framework/SelectionModel";
 import EventHelper from "../framework/EventHelper";
-import {IActionManager, IAction, IApp, IUIElement} from "carbon-core";
+import { IActionManager, IAction, IApp, IUIElement, IEvent } from "carbon-core";
 
 
 var debug = require("DebugUtil")("carb:actionManager");
@@ -111,7 +111,7 @@ export default class ActionManager implements IActionManager {
     private _events: any[];
     private _categoryEvents: any[];
     private _actionStartEvents: any[];
-    private actionPerformed: any;
+    public actionPerformed: IEvent<any>;
     private _visibleActionsConfig: any;
 
     constructor(app: IApp) {
@@ -133,7 +133,7 @@ export default class ActionManager implements IActionManager {
     }
 
     notifyActionCompleted(actionName:string, result?:any, ret?:any) {
-        this.actionPerformed.raise(actionName, result, ret);
+        this.actionPerformed.raise(actionName/*, result, ret*/);
         var event = this._events[actionName];
         if (event) {
             event.raise(actionName, result, ret);

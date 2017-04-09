@@ -45,7 +45,7 @@ declare module "carbon-app"{
         modelSyncProxy: any;
         defaultShapeSettings: any;
         deferredChange: IEvent<any>;
-        relayoutFinished: IEvent<any>;
+        relayoutFinished: IEvent<void>;
 
         viewportSize(): any;
         resetCurrentTool();

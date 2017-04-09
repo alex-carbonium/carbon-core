@@ -47,7 +47,6 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
             selection.push(clone);
         }
 
-       // this.id(owner.id());
         owner.setProps({visible:false}, ChangeMode.Self);
         // set layer matrix to owner element global matrix,
         // so matrixes of the copied element should be identical to source matrices

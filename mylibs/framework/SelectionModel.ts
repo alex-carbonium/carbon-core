@@ -26,11 +26,11 @@ function lockUnlockGroups(newSelectedElements) {
         }
     }
 
-    //activate self if single element is selected
-    if (this._activeGroup){
-        this._activeGroup.activeGroup(false);
-        this._activeGroup = null;
-    }
+    // //activate self if single element is selected
+    // if (this._activeGroup){
+    //     this._activeGroup.activeGroup(false);
+    //     this._activeGroup = null;
+    // }
 
     //lock anything which is not selected anymore
     for (let i = 0; i < this._unlockedContainers.length; i++){
@@ -42,10 +42,10 @@ function lockUnlockGroups(newSelectedElements) {
     }
     this._unlockedContainers = newUnlocked;
 
-    if (newSelectedElements.length === 1 && newSelectedElements[0].activeGroup){
-        newSelectedElements[0].activeGroup(true);
-        this._activeGroup = newSelectedElements[0];
-    }
+    // if (newSelectedElements.length === 1 && newSelectedElements[0].activeGroup){
+    //     newSelectedElements[0].activeGroup(true);
+    //     this._activeGroup = newSelectedElements[0];
+    // }
 
     if (invalidate){
         Invalidate.request();

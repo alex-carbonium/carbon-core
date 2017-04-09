@@ -13,6 +13,9 @@ export default {
         var element = elements[0];
 
         var layer = Environment.view.getLayer(LayerTypes.Isolation) as IIsolationLayer;
+
+        // re-read element form the model, since we can try isolate a copy from isolation layer
+        element = App.Current.activePage.getElementById(element.id());
         layer.isolateGroup(element as IContainer);
         layer.invalidate();
     }

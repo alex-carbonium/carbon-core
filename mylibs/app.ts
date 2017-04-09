@@ -116,7 +116,7 @@ class AppClass extends DataNode implements IApp {
     onBuildMenu: any;
     logEvent: IEvent<any>;
     changed: IEvent<any>;
-    relayoutFinished: IEvent<any>;
+    relayoutFinished: IEvent<void>;
     deferredChange: IEvent<any>;
     restoredLocally: IEvent<void>;
 
@@ -148,7 +148,7 @@ class AppClass extends DataNode implements IApp {
         this.pageChanging = EventHelper.createEvent();
         this.loadedFromJson = EventHelper.createEvent();
         this.savedToJson = EventHelper.createEvent();
-        this.relayoutFinished = EventHelper.createEvent();
+        this.relayoutFinished = EventHelper.createEvent<void>();
 
         this.changeToolboxPage = EventHelper.createEvent<void>();
 

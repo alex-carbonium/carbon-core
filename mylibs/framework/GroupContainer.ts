@@ -85,7 +85,7 @@ export default class GroupContainer extends Container implements IGroupContainer
     }
 
     dblclick(event) {
-        Environment.view.isolationLayer.isolateGroup(this);
+        App.Current.actionManager.invoke("isolateSelection");
     }
 
     allowMoveOutChildren(value, event?) {
