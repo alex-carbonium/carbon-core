@@ -6,10 +6,6 @@ declare module "carbon-api" {
     }
 
     export interface IBackend{
-        ensureLoggedIn(renewToken?: boolean): Promise<void>;
-        logout(): Promise<void>;
-
-        getUserId(): string;
         addUrlPath(...pathes: string[]): string;
 
         isLoggedIn(): boolean;
@@ -18,12 +14,20 @@ declare module "carbon-api" {
         loginNeeded: IEvent<boolean>;
         requestStarted: IEvent<string>;
         requestEnded: IEvent<string>;
+    }
 
-        cdnEndpoint: string;
+    export interface ISimpleResponse{
+        ok: boolean;
+        error?: string;
     }
 
     export interface IAccountProxy{
+        register(model: {username: string, email: string, password: string}): Promise<void>;
+
         resolveCompanyId(companyName: string): Promise<{companyId: string}>;
+        getCompanyName(): Promise<{companyName: string}>;
+
+        validateEmail(model: {email: string}): Promise<ISimpleResponse>;
     }
 
     export interface IDashboardProxy{
@@ -36,7 +40,6 @@ declare module "carbon-api" {
 
     export const logger: ILogger;
     export const backend: IBackend;
-    export const AccountProxy: IAccountProxy;
     export const DashboardProxy: IDashboardProxy;
     export const FileProxy: IFileProxy;
 }

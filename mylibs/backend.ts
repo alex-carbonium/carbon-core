@@ -5,7 +5,7 @@ import EventHelper from "./framework/EventHelper";
 import UserManager from "oidc-client/src/UserManager";
 import Log from "oidc-client/src/Log";
 import params from "./params";
-import { IBackend, ILogger } from "carbon-api";
+import { IBackend, ILogger, IAccountProxy } from "carbon-api";
 import { IEvent } from "carbon-basics";
 import { IPersistentConnection } from "carbon-internal";
 
@@ -42,6 +42,7 @@ class Backend implements IBackend {
     loginNeeded: IEvent<boolean>;
     requestStarted: IEvent<string>;
     requestEnded: IEvent<string>;
+    accountProxy: IAccountProxy;
 
     constructor() {
         this.sessionId = createUUID();

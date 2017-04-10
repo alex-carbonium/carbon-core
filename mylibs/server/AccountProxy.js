@@ -1,6 +1,6 @@
 // auto-generated with node ./scripts/jsClient.js
 import backend from "../backend";
-export default {
+var proxy = {
     register: function(model){
         return backend.post(backend.servicesEndpoint + "/api/account/register", { model });
     },
@@ -9,5 +9,11 @@ export default {
     },
     getCompanyName: function(){
         return backend.get(backend.servicesEndpoint + "/api/account/getCompanyName");
+    },
+    validateEmail: function(model){
+        return backend.post(backend.servicesEndpoint + "/api/account/validateEmail", { model });
     }
 }
+
+backend.accountProxy = proxy;
+export default proxy;
