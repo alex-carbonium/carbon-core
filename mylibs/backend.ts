@@ -1,17 +1,17 @@
 import globals from "./globals";
-import logger, {Logger} from "./logger";
+import logger, { Logger } from "./logger";
 import { createUUID } from "./util";
 import EventHelper from "./framework/EventHelper";
 import UserManager from "oidc-client/src/UserManager";
 import Log from "oidc-client/src/Log";
 import params from "./params";
-import { IBackend, ILogger, IAccountProxy } from "carbon-api";
+import { IBackend, ILogger, IAccountProxy, Response, ILoginModel, ILoginResult } from "carbon-api";
 import { IEvent } from "carbon-basics";
 import { IPersistentConnection } from "carbon-internal";
 
 var debug = require<any>("DebugUtil")("carb:backend");
 
-const enum contentTypes{
+const enum contentTypes {
     json,
     urlEncoded
 };
@@ -135,8 +135,8 @@ class Backend implements IBackend {
     loginAsGuest() {
         return this.login("trial", "trial", true);
     }
-    loginAsUser(username, password) {
-        return this.login(username, password, false);
+    loginAsUser(model: ILoginModel) {
+        return this.login(model.email, model.password, false);
     }
     login(username, password, isGuest) {
         var data = {
@@ -157,8 +157,33 @@ class Backend implements IBackend {
             .then(data => this.setAccessToken(data.access_token))
             .then(() => this.get(this.servicesEndpoint + "/idsrv/ext/userId", null,
                 { credentials: DEBUG ? "include" : "same-origin" }))
-            .then(data => { this.setUserId(data.userId); return data; })
-            .then(data => { this.setIsGuest(isGuest); return data; });
+            .then(data => {
+                this.setUserId(data.userId);
+                this.setIsGuest(isGuest);
+                return <Response<ILoginModel, ILoginResult>>{
+                    ok: true,
+                    result: {
+                        userId: data.userId,
+                        companyName: data.companyName
+                    }
+                };
+            })
+            .catch(e => {
+                if (e.response && e.response.status === 400) {
+                    return e.response.json()
+                        .then(json => {
+                            var isEmailError = json.error_description === "@wrongEmail" || json.error_description === "@lockedOut";
+                            return <Response<ILoginModel, ILoginResult>>{
+                                ok: false,
+                                errors: {
+                                    email: isEmailError ? json.error_description : null,
+                                    password: !isEmailError ? json.error_description : null
+                                }
+                            };
+                        });
+                }
+                throw e;
+            });
     }
     logout() {
         return this.post(this.servicesEndpoint + "/idsrv/ext/logout", null, { credentials: DEBUG ? "include" : "same-origin" })
@@ -346,6 +371,10 @@ class Backend implements IBackend {
         if (response.status >= 200 && response.status < 300) {
             return response;
         }
+        //server convention 422 - validation failed
+        if (response.status === 422) {
+            return response;
+        }
         if (response.status === 401 && (!options || !options.isRetry)) {
             options = options || {};
             options.isRetry = true;
@@ -379,7 +408,7 @@ class Backend implements IBackend {
 }
 
 var backend: Backend = globals.backend;
-if (!backend){
+if (!backend) {
     backend = new Backend();
     globals.backend = backend;
 }
