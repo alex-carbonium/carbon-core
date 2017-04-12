@@ -62,7 +62,7 @@ declare module "carbon-app" {
 
         project: any;// TODO: remove project
 
-        run(): void;
+        run(): Promise<void>;
         unload(): void;
         serverless(value?: boolean): boolean;
 

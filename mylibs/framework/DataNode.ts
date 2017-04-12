@@ -188,7 +188,7 @@ export default class DataNode implements IDataNode{
 
 
     id(value?: string) {
-        if (value !== undefined) {
+        if (arguments.length) {
             this.setProps({id: value}, ChangeMode.Self);
         }
         return this.props.id;

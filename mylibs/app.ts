@@ -856,7 +856,9 @@ class AppClass extends DataNode implements IApp {
 
             backend.enableLoginTimer();
         }).catch(function (e) {
-            logger.trackEvent("App not loaded", { logLevel: "fatal", error: e });
+            if (e.message !== "appNotFound"){
+                logger.fatal("App not loaded", { error: e });
+            }
             throw e;
         });
     }
