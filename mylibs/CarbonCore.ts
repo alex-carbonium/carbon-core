@@ -75,7 +75,6 @@ export default {
     "PatchType": Defs.PatchType,
     "ChangeMode": Defs.ChangeMode,
     "TileSize": Defs.TileSize,
-    "ContentSizing": Defs.ContentSizing,
     "ArtboardResource": Defs.ArtboardResource,
     "Types": Defs.Types,
     "ViewTool": Defs.ViewTool,

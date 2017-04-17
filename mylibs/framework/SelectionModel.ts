@@ -1,7 +1,8 @@
 import EventHelper from "./EventHelper";
 import SelectComposite from "./SelectComposite";
 import Invalidate from "./Invalidate";
-import {ViewTool} from "./Defs";
+import { ViewTool } from "./Defs";
+import UserSettings from "UserSettings";
 
 var debug = require("DebugUtil")("carb:selection");
 
@@ -10,15 +11,15 @@ function lockUnlockGroups(newSelectedElements) {
     var invalidate = false;
 
     //unlock parents
-    for (let i = 0; i < newSelectedElements.length; i++){
+    for (let i = 0; i < newSelectedElements.length; i++) {
         var el = newSelectedElements[i].parent();
         while (el && el.unlockGroup) {
             let unlocked = this._unlockedContainers.indexOf(el) !== -1;
-            if (!unlocked){
+            if (!unlocked) {
                 unlocked = el.unlockGroup();
                 invalidate = true;
             }
-            if (unlocked){
+            if (unlocked) {
                 newUnlocked.push(el);
             }
 
@@ -26,28 +27,28 @@ function lockUnlockGroups(newSelectedElements) {
         }
     }
 
-    // //activate self if single element is selected
-    // if (this._activeGroup){
-    //     this._activeGroup.activeGroup(false);
-    //     this._activeGroup = null;
-    // }
+    //activate self if single element is selected
+    if (this._activeGroup) {
+        this._activeGroup.activeGroup(false);
+        this._activeGroup = null;
+    }
 
     //lock anything which is not selected anymore
-    for (let i = 0; i < this._unlockedContainers.length; i++){
+    for (let i = 0; i < this._unlockedContainers.length; i++) {
         var c = this._unlockedContainers[i];
-        if (c.lockGroup && newUnlocked.indexOf(c) === -1){
+        if (c.lockGroup && newUnlocked.indexOf(c) === -1) {
             c.lockGroup();
             invalidate = true;
         }
     }
     this._unlockedContainers = newUnlocked;
 
-    // if (newSelectedElements.length === 1 && newSelectedElements[0].activeGroup){
-    //     newSelectedElements[0].activeGroup(true);
-    //     this._activeGroup = newSelectedElements[0];
-    // }
+    if (newSelectedElements.length === 1 && newSelectedElements[0].activeGroup) {
+        newSelectedElements[0].activeGroup(!UserSettings.group.editInIsolationMode);
+        this._activeGroup = newSelectedElements[0];
+    }
 
-    if (invalidate){
+    if (invalidate) {
         Invalidate.request();
     }
 }
@@ -59,6 +60,7 @@ function onselect(rect) {
 
 class SelectionModel {
     [name: string]: any;
+    private _activeGroup: any;
 
     constructor() {
         this._selectionMode = "new";
@@ -92,7 +94,7 @@ class SelectionModel {
     directSelectionEnabled(value?: boolean) {
         if (arguments.length === 1) {
             var enabled = this._invertDirectSelection ? !value : value;
-            if (enabled !== this._directSelectionEnabled){
+            if (enabled !== this._directSelectionEnabled) {
                 this._directSelectionEnabled = enabled;
                 debug("Direct selection: %s", enabled);
                 this.modeChangedEvent.raise(enabled);
@@ -109,7 +111,7 @@ class SelectionModel {
     }
 
     updateSelectFrame(eventData) {
-        if (this.selectedElements.length){
+        if (this.selectedElements.length) {
             this.makeSelection([]);
         }
         var rect = this._selectFrame.update(eventData);
@@ -151,7 +153,7 @@ class SelectionModel {
     selectionMode(value) {
         if (arguments.length === 1) {
             if (value !== "new" && value !== "add" && value !== "remove" && value != 'add_or_replace') {
-                throw {name: "ArgumentException", message: "Incorrect selection mode specified"};
+                throw { name: "ArgumentException", message: "Incorrect selection mode specified" };
             }
             this._selectionMode = value;
         }
@@ -179,7 +181,7 @@ class SelectionModel {
         }
     }
 
-    performArrange(){
+    performArrange() {
         this._selectCompositeElement.performArrange();
     }
 
@@ -277,7 +279,7 @@ class SelectionModel {
         lockUnlockGroups.call(this, selection);
     }
 
-    reselect(){
+    reselect() {
         var selection = this.selectedElements();
         this.makeSelection([], true);
         this.makeSelection(selection, false, true);
@@ -317,61 +319,61 @@ class SelectionModel {
     selectAll() {
         var page = App.Current.activePage;
 
-        if (App.Current.currentTool === ViewTool.Artboard){
+        if (App.Current.currentTool === ViewTool.Artboard) {
             this.makeSelection(page.getAllArtboards());
             return;
         }
 
         var artboard = page.getActiveArtboard();
-        if (artboard){
+        if (artboard) {
             this.makeSelection(artboard.children);
             return;
         }
 
         var v = Number.MAX_SAFE_INTEGER / 2;
-        onselect.call(this, {x: -v, y: -v, width: Number.MAX_SAFE_INTEGER, height: Number.MAX_SAFE_INTEGER});
+        onselect.call(this, { x: -v, y: -v, width: Number.MAX_SAFE_INTEGER, height: Number.MAX_SAFE_INTEGER });
     }
 
     hasSelectionFrame() {
         return !!this._selectFrame;
     }
 
-    lock(){
+    lock() {
         var elements = this.selectedElements();
-        for (var i = 0; i < elements.length; i++){
+        for (var i = 0; i < elements.length; i++) {
             var e = elements[i];
-            if (!e.locked()){
+            if (!e.locked()) {
                 e.locked(true);
             }
         }
         this._selectCompositeElement.selected(false);
     }
-    unlock(){
+    unlock() {
         var elements = this.selectedElements();
-        for (var i = 0; i < elements.length; i++){
+        for (var i = 0; i < elements.length; i++) {
             var e = elements[i];
-            if (e.locked()){
+            if (e.locked()) {
                 e.locked(false);
             }
         }
         this._selectCompositeElement.selected(false);
         this._selectCompositeElement.selected(true);
     }
-    hide(){
+    hide() {
         var elements = this.selectedElements();
-        for (var i = 0; i < elements.length; i++){
+        for (var i = 0; i < elements.length; i++) {
             var e = elements[i];
-            if (e.visible()){
+            if (e.visible()) {
                 e.visible(false);
             }
         }
         this._selectCompositeElement.selected(false);
     }
-    show(){
+    show() {
         var elements = this.selectedElements();
-        for (var i = 0; i < elements.length; i++){
+        for (var i = 0; i < elements.length; i++) {
             var e = elements[i];
-            if (!e.visible()){
+            if (!e.visible()) {
                 e.visible(true);
             }
         }
@@ -379,7 +381,7 @@ class SelectionModel {
         this._selectCompositeElement.selected(true);
     }
 
-    hideFrame(){
+    hideFrame() {
         this._selectCompositeElement.selected(false);
     }
 }

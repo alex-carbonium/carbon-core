@@ -226,6 +226,7 @@ declare module "carbon-model" {
         center = 4,
         original = 5,
         fixed = 6
+
     }
 
     export interface IImageProps extends IContainerProps{

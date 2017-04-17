@@ -23,7 +23,8 @@ var settings = {
         stroke: "#9918ff"
     },
     group: {
-        active_stroke: "#9918ff"
+        active_stroke: "#9918ff",
+        editInIsolationMode:true
     },
     frame: {
         stroke: '#22c1ff'

@@ -16,7 +16,7 @@ export default class GroupContainer extends Container implements IGroupContainer
         if (!super.hitTest(point, scale)) {
             return false;
         }
-        if (boundaryRectOnly){
+        if (boundaryRectOnly) {
             return true;
         }
         for (var i = this.children.length - 1; i >= 0; --i) {
@@ -85,7 +85,9 @@ export default class GroupContainer extends Container implements IGroupContainer
     }
 
     dblclick(event) {
-        App.Current.actionManager.invoke("isolateSelection");
+        if (UserSettings.group.editInIsolationMode) {
+            App.Current.actionManager.invoke("isolateSelection");
+        }
     }
 
     allowMoveOutChildren(value, event?) {

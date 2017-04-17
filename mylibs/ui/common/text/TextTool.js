@@ -247,7 +247,12 @@ export default class TextTool extends TOol {
             Object.assign(props, p);
         }
 
-        var dropData = this._app.activePage.findDropToPageData(e.x, e.y, text);
+        var dropData;
+        if(this._view.isolationLayer.isActive) {
+            dropData = this._view.isolationLayer.findDropToPageData(e.x, e.y, text);
+        } else {
+            dropData = this._app.activePage.findDropToPageData(e.x, e.y, text);
+        }
         if (dropData){
             text.applyTranslation(dropData.position);
             text.prepareAndSetProps(props);
@@ -379,7 +384,7 @@ export default class TextTool extends TOol {
     };
 
     _hitNewElement(e){
-        return this._app.activePage.hitElementDirect(e, this._view.scale())
+        return this._view.hitElementDirect(e)
     }
     _hittingEdited(e){
         if (!this._editClone){
