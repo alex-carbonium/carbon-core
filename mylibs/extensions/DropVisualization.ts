@@ -460,7 +460,7 @@ export default class DropVisualization extends ExtensionBase {
             return;
         }
         super.attach.apply(this, arguments);
-        app.loaded.then(appLoaded.bind(this));
+        app.onLoad(appLoaded.bind(this));
         this.registerForDispose(view.scaleChanged.bind(updateVisualizations.bind(this)));
         app.addLoadRef();
         this._dropLine = new DropLine();

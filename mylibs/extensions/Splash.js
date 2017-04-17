@@ -17,7 +17,7 @@ define(function() {
                 this._app = app;
                 app.properties.loadRef.bind(this, loadRefChanged);
 
-                app.loaded.then(function(){
+                app.onLoad(function(){
                     splash.css("top", $("#toolbar").outerHeight() + "px");
                 });
             }

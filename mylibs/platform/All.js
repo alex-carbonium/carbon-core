@@ -95,8 +95,6 @@ export default class PlatformAll {
         }
     }
 
-    setupConnection(app) {
-    }
     //this method depends on comments model being initialized.
     //therefore it cannot subscribe to app.loaded to avoid the implicit dependency on events order
     postLoad(app) {

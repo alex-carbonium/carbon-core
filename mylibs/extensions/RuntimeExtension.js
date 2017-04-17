@@ -7,7 +7,7 @@ export default class RuntimeExtension extends ExtensionBase{
 
     attach(app, view, controller){
         super.attach.apply(this, arguments);
-        this.app.loaded.then(() => {this.onLoaded()});
+        this.app.onLoad(() => {this.onLoaded()});
     }
 
     onLoaded(){

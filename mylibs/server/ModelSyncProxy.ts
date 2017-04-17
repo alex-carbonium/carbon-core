@@ -61,12 +61,13 @@ export default class ModelSyncProxy {
     change(){
         var syncBroken = this._app.syncBroken();
         if (!syncBroken && this._pendingPrimitives.length === 0){
-            return Promise.reject(new Error("Nothing to save"));
+            return Promise.resolve({id: this._app.id(), version: this._app.version()});
         }
 
-        var requestTooLong = this._requestStartTime && (new Date() as any) - this._requestStartTime > 120 * 1000;
-        if (this._requestInProgress && !requestTooLong){
-            return Promise.reject(new Error("Request in progress since " + this._requestStartTime.toISOString()));
+        var requestTooLong = this._requestStartTime && new Date().getTime() - this._requestStartTime > 120 * 1000;
+        if (this._requestInProgress && requestTooLong){
+            logger.warn("Request in progress since " + this._requestStartTime.toISOString());
+            return Promise.resolve({id: this._app.id(), version: this._app.version()});
         }
 
         this._requestInProgress = true;

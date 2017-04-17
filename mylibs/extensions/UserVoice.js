@@ -19,7 +19,7 @@ define(function () {
         return {
             _constructor: function (app) {
                 this._app = app;
-                //app.loaded.bind(this, run);
+                //app.onLoad(run.bind(this));
                 app.addLoadRef();
             },
             detach: function () {

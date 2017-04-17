@@ -2,7 +2,6 @@ import All from "platform/All";
 import ActivityMonitor from "ActivityMonitor";
 import AutoSaveTimer from "AutoSaveTimer";
 import PersistentConnection from "server/PersistentConnection";
-import ConsistencyMonitor from "../ConsistencyMonitor";
 //TODO: circular dependency Shape -> Frame -> FrameSource -> IconsInfo -> Platform -> Desktop -> svgParser -> Shape
 //import svgParser from "svg/SvgParser";
 import domUtil from "utils/dom";
@@ -264,160 +263,6 @@ var onWindowResize = function () {
     Environment.controller.onWindowResize();
 }
 
-var setupFiledrop = function (app) {
-    var that = this;
-    that._uploadNotices = {};
-    $('').filedrop({
-        url: backend.decorateUrl("/api/File/Upload"), // upload handler, handles each file separately
-        data: {folderId: sketch.params.folderId},
-        error (err, file) {
-            switch (err) {
-                case 'TooManyFiles':
-                    notify("error", {title: "Error", text: "You tried to upload too many files at a time"});
-                    break;
-                case 'FileTooLarge':
-                    notify("error", {title: "Error", text: "The file you are uploading is too large"});
-                    break;
-                default:
-                    break;
-            }
-        },
-        rename (name) {
-            return Base64.encode(name);
-        },
-        maxfiles: 100,
-        maxfilesize: 50, // max file size in MBs
-        drop (e) {
-            that.dropPosition = {x: domUtil.layerX(e), y: domUtil.layerY(e)};
-
-            var original = e.originalEvent;
-            while (original.originalEvent) {
-                original = original.originalEvent;
-            }
-
-            if (e.dataTransfer) {
-                if (e.dataTransfer.files.length === 1) {
-                    var file = e.dataTransfer.files[0];
-                    if (file.type === 'image/svg+xml') {
-                        var reader = new FileReader();
-                        reader.onload = function (e) {
-                            var svgText = e.target.result;
-                            svgParser.loadSVGFromString(svgText, function (a) {
-                                    a = null;
-                                },
-                                function (el, obj) {
-                                    App.Current.activePage.getContentContainer().add(obj);
-                                });
-                        };
-
-                        // Read in the image file as a data URL.
-                        reader.readAsText(file);
-
-                        return;
-                    }
-                }
-
-                var src;
-                try {
-                    src = e.dataTransfer.getData("text/plain");
-                } catch (e) {
-                    try {
-                        src = e.dataTransfer.getData("url");
-                    } catch (e) {
-                    }
-                }
-
-                if (src) {
-                    addDroppedImage(app, that.dropPosition, src, src);
-                    e.handled = true;
-                }
-            }
-        },
-        uploadFinished (i, file, response, time, xhr) {
-            var dropPosition = that.dropPosition;
-            var notice = that._uploadNotices[file.name];
-            delete that._uploadNotices[file.name];
-
-            var status = xhr.status !== 200 ? false : response.status;
-
-            if (status === true) {
-                if (window && window.FileReader) {
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        addDroppedImage(app, dropPosition, e.target.result, response.uploadedFileSrc);
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    addDroppedImage(app, dropPosition, null, response.uploadedFileSrc);
-                }
-
-                if (notice) {
-                    notice.options.type = "success";
-                    notice.options.title = file.name + " is uploaded!";
-                    notice.options.hide = true;
-                    notice.options.delay = 3000;
-                    notice.options.opacity = 1;
-                    notice.update();
-                }
-            }
-            else {
-                if (new sketch.server.ControllerProxy().handleError(xhr)) {
-                    notice.options.hide = true;
-                    notice.options.delay = 1;
-                    notice.update();
-                }
-                else if (notice) {
-                    notice.options.type = "error";
-                    notice.options.title = file.name + " was not uploaded";
-                    notice.options.text = response.error;
-                    notice.options.hide = true;
-                    notice.options.delay = 5000;
-                    notice.options.opacity = 1;
-                    notice.update();
-                }
-            }
-        },
-        beforeEach (file) {
-            // file is a file object
-            // return false to cancel upload
-
-            var notice = notify("info", {
-                title: "Uploading file " + file.name,
-                text: "Starting transfer...",
-                hide: false,
-                opacity: .8
-            });
-            that._uploadNotices[file.name] = notice;
-            if (App.Current.activePage.preview()) {
-                notify("error", {
-                    title: "Image could not be uploaded",
-                    text: "Please exit preview mode in order to add images"
-                });
-                return false;
-            }
-
-            if (!backend.isLoggedIn()) {
-                notify("error", {title: "Please log in", text: "Please log in before uploading images"});
-                return false;
-            }
-
-            if (!file.type.match(/^image\//)) {
-                notify("error", {title: "This is not an image", text: "This file does not look like an image"});
-                // Returning false will cause the
-                // file to be rejected
-                return false;
-            }
-        },
-        progressUpdated (i, file, progress) {
-            var notice = that._uploadNotices[file.name];
-            if (notice) {
-                notice.options.text = progress + "% done.";
-                notice.update();
-            }
-        }
-    });
-};
-
 export default class Desktop extends All {
     constructor (richUI) {
         super(richUI);
@@ -499,18 +344,6 @@ export default class Desktop extends All {
 
     run (/*App*/app) {
         All.prototype.run.apply(this, arguments);
-    }
-
-    setupConnection (app) {
-        if (!sketch.params.exportMode && !app.serverless()) {
-            var autoSaveTimer = new AutoSaveTimer(app, PersistentConnection.saveInterval);
-            var persistentConnection = new PersistentConnection(app);
-            app.activityMonitor = new ActivityMonitor(app, persistentConnection, autoSaveTimer);
-            app.activityMonitor.activate();
-            backend.setConnection(persistentConnection);
-        }
-        app.consistencyMonitor = new ConsistencyMonitor(app);
-        app.consistencyMonitor.start();
     }
 
     containerOffset(){

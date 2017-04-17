@@ -11,7 +11,7 @@ export default class LayoutGridExtension {
 
     constructor(app) {
         this.app = app;
-        this.app.loaded.then(() => {this.load()});
+        this.app.onLoad(() => {this.load()});
         this.onArtboardBackgroundDrawnHandler = this.onArtboardBackgroundDrawn.bind(this);
         this.onArtboardContentDrawnHandler = this.onArtboardContentDrawn.bind(this);
     }

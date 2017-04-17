@@ -1,6 +1,6 @@
 declare module "carbon-model" {
     import { IPoint, IRect, ICoordinate, IMatrix, ISize, OriginType } from "carbon-geometry";
-    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData } from "carbon-basics";
+    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable } from "carbon-basics";
 
     export interface IPropsOwner<TProps> {
         props: TProps;
@@ -16,7 +16,7 @@ declare module "carbon-model" {
         id: string;
     }
 
-    export interface IDataNode {
+    export interface IDataNode extends IDisposable {
         id(value?: string): string;
 
         findNodeByIdBreadthFirst<T extends IDataNode>(predicate: (node: T) => boolean): T | null;

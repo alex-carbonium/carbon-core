@@ -12,7 +12,7 @@ describe("Relayout engine primitive tests", function () {
             return this.app.activePage.getElementById(element.id());
         };
 
-        this.app.loaded.then(function () {
+        this.app.onLoad(function () {
             return done();
         });
     });

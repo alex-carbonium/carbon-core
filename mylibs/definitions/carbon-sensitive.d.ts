@@ -1,4 +1,6 @@
-declare module "carbon-api"{
+declare module "carbon-api" {
+    import { IEvent } from "carbon-basics";
+
     export interface ILoginModel{
         email: string;
         password: string;
@@ -10,6 +12,8 @@ declare module "carbon-api"{
     }
 
     export interface IBackend{
+        getAccessToken(): string;
+
         loginAsUser(model: ILoginModel): ResponsePromise<ILoginModel, ILoginResult>;
 
         ensureLoggedIn(renewToken?: boolean): Promise<void>;
@@ -19,6 +23,11 @@ declare module "carbon-api"{
         getAuthorizationHeaders(): any;
 
         renewTokenCallback();
+
+        startConnection();
+        shutdownConnection();
+
+        accessTokenChanged: IEvent<string>;
 
         cdnEndpoint: string;
         servicesEndpoint: string;

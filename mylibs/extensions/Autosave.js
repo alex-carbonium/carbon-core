@@ -69,7 +69,7 @@ define(["windows/Dialog", "framework/sync/Primitive"], function(Dialog, Primitiv
             }
 
             return this._app.offlineModel.getBackups(this._app.id()).then(backups => {
-                if (!backups.length) {
+                if (!backups.length || this._app.disposed) {
                     return;
                 }
 
@@ -92,7 +92,9 @@ define(["windows/Dialog", "framework/sync/Primitive"], function(Dialog, Primitiv
                     // });
                 }
             }).finally(() => {
-                initIfEmptyProject.call(this);
+                if (!this._app.disposed){
+                    initIfEmptyProject.call(this);
+                }
             });
         };
 
@@ -100,7 +102,7 @@ define(["windows/Dialog", "framework/sync/Primitive"], function(Dialog, Primitiv
             _constructor:function(app) {
                 this._app = app;
 
-                this._app.loadedLevel1.then(checkBackups.bind(this));
+                this._app.onLoad(checkBackups.bind(this));
             },
             restoreUnsaved: function() {
                 restoreUnsaved.call(this);

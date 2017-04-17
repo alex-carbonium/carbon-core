@@ -6,7 +6,7 @@
 //     beforeEach(function (done) {
 //         this.app = TestUtil.setupApp();
 //         this.app.relayout();
-//         this.app.loaded.then(() => done());
+//         this.app.onLoad(() => done());
 //     });
 //     afterEach(function () {
 //         this.app.dispose();

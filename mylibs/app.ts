@@ -44,6 +44,7 @@ import ActionManager from "./ui/ActionManager";
 import ShortcutManager from "./ui/ShortcutManager";
 import ArtboardPage from "./ui/pages/ArtboardPage";
 import IconsInfo from "./ui/IconsInfo";
+import backend from "./backend";
 import logger from "./logger";
 import params from "./params";
 import { IApp, IAppProps, IEvent, IEnvironment } from "carbon-core";
@@ -55,7 +56,6 @@ window['Selection'] = Selection;
 
 var debug = require("./DebugUtil")("carb:relayout");
 
-var backend = require("backend");
 var platform = require("platform/Platform");
 var DependencyContainer = require("DependencyContainer");
 var NullContainer = require("framework/NullContainer");
@@ -89,7 +89,6 @@ class AppClass extends DataNode implements IApp {
 
     [name: string]: any;
     isLoaded: boolean;
-    loaded: Promise<void>;
     project:any;
 
     modeChanged: IEvent<any>;
@@ -101,9 +100,9 @@ class AppClass extends DataNode implements IApp {
     changeToolboxPage: IEvent<void>;
 
     activeStoryChanged: IEvent<any>;
-    loadedLevel1:Promise<void>;
 
     modelSyncProxy: any;
+    state: any;
 
     offlineModel: any;
     platform: any;
@@ -123,6 +122,8 @@ class AppClass extends DataNode implements IApp {
     currentToolChanged: IEvent<string>;
     _currentTool: string;
 
+    private _loaded: IEvent<void>;
+
     constructor() {
         super(true);
 
@@ -135,29 +136,22 @@ class AppClass extends DataNode implements IApp {
         this._folderId = 0;
         this.isLoaded = false;
         this._allowSelection = true;
-        this.loadedProjects = [];
         this._isOffline = false;
         this._mode = "edit";
         this.styleManager = StyleManager;
         var that = this;
 
         //events
+        this._loaded = EventHelper.createEvent<void>();
+
         this.pageAdded = EventHelper.createEvent();
         this.pageRemoved = EventHelper.createEvent();
         this.pageChanged = EventHelper.createEvent2();
         this.pageChanging = EventHelper.createEvent();
-        this.loadedFromJson = EventHelper.createEvent();
         this.savedToJson = EventHelper.createEvent();
         this.relayoutFinished = EventHelper.createEvent<void>();
 
         this.changeToolboxPage = EventHelper.createEvent<void>();
-
-        this.loaded = new Promise<void>(function (resolve, reject) {
-            that.loadedResolve = resolve;
-        });
-        this.loadedLevel1 = new Promise<void>(function (resolve, reject) {
-            that.loadedLevel1Resolve = resolve;
-        });
 
         this.reloaded = EventHelper.createEvent();
         this.restoredLocally = EventHelper.createEvent<void>();
@@ -224,10 +218,32 @@ class AppClass extends DataNode implements IApp {
 
         this.dataManager = new DataManager();
 
+        token = Environment.detaching.bind(this, this.detachExtensions);
+        this.registerForDisposal(token);
+
+        token = Environment.attached.bind(this, this.initExtensions);
+        this.registerForDisposal(token);
+    }
+
+    init(){
+        this.fontManager.clear();
+        this.isLoaded = false;
+
         this.serverless(params.serveless);
         if (params.clearStorage) {
             this.offlineModel.clear();
+        }
     }
+
+    onLoad(callback: () => void){
+        if (this.isLoaded){
+            setTimeout(callback, 1);
+            return;
+        }
+        var token = this._loaded.bind(() => {
+            callback();
+            token.dispose();
+        });
     }
 
     userId() {
@@ -397,14 +413,14 @@ class AppClass extends DataNode implements IApp {
         return this.fontManager.getMetadata(family);
     }
 
-    syncBroken(value) {
+    syncBroken(value?) {
         if (arguments.length === 1) {
             this._syncBroken = value;
         }
         return this._syncBroken;
     }
 
-    isInOfflineMode(value) {
+    isInOfflineMode(value?) {
         if (value !== undefined) {
             if (value) {
                 value = false;
@@ -438,11 +454,6 @@ class AppClass extends DataNode implements IApp {
 
     addLoadRef() {
         this.loadRef(this.loadRef() + 1);
-    }
-
-    unload() {
-        this.clear();
-        this.isLoaded = false;
     }
 
     clear() {
@@ -793,30 +804,16 @@ class AppClass extends DataNode implements IApp {
         }
     }
 
-    init() {
-        Environment.detaching.bind(this, () => {
-            this.detachExtensions();
-        });
-
-        Environment.attached.bind(this, () => {
-            this.initExtensions();
-        });
-
-        this.platform.run(this);
-
-        this.setupView();
-    }
-
     //TODO: rethink the concept of run method for better testability
     run() {
         this.clear();
 
-        //this.setProps(defaultAppProps);
-
-        this.init();
+        this.platform.run(this);
 
         var stopwatch = new Stopwatch("AppLoad", true);
-        this.platform.setupConnection(this);
+        if (!this.serverless()){
+            backend.setupConnection(this);
+        }
 
         IconsInfo.defaultFontFamily = 'NinjamockBasic2';
 
@@ -864,25 +861,8 @@ class AppClass extends DataNode implements IApp {
     }
 
     raiseLoaded() {
-        //TODO: there are multiple dependencies between various components and extensions (master pages and app state, mvvm and comments).
-        // not sure what is the most graceful way to handle them.
-        // what if we have load levels like in *nix?
-        var that = this;
-        this.loadedLevel1Resolve();
-        this.loadedLevel1.then(function () {
-            that.loadedResolve();
-            that.isLoaded = true;
-            that.onLoaded();
-        }).catch(function (error) {
-            console.error(error);
-        });
-
-        this.loaded.catch(function (error) {
-            console.error(error);
-        });
-    }
-
-    onLoaded() {
+        this.isLoaded = true;
+        this._loaded.raise();
     }
 
     raiseLogEvent(primitive, disableMultiple?: boolean) {
@@ -1116,14 +1096,6 @@ class AppClass extends DataNode implements IApp {
         this.activeStory(story);
     }
 
-    setupView() {
-        // this.view = view;
-        // this.view.setup({Layer, SelectComposite, DraggingElement, SelectFrame});
-        // this.view.resize({x: 0, y: 0, width: 3000, height: 2000});
-        // this.container.view = this.view;
-        // Environment.setView(view)
-    }
-
     viewportSize() {
         return this.platform.viewportSize();
     }
@@ -1138,10 +1110,6 @@ class AppClass extends DataNode implements IApp {
 
     displayName() {
         return _(this.t);
-    }
-
-    getDefaultCategories() {
-        return ["Editing"];
     }
 
     isPreviewMode() {
@@ -1262,14 +1230,18 @@ class AppClass extends DataNode implements IApp {
         this._disposables.push(d);
     }
 
-    dispose() {
-        this.loadedLevel1.cancel();
-        this.loaded.cancel();
+    unload() {
+        this.clear();
+        this.isLoaded = false;
+
+        this.state.isDirty(false);
 
         ModelStateListener.clear();
-        if (this.persistentConnection) {
-            this.persistentConnection.stop();
-        }
+        backend.shutdownConnection();
+    }
+
+    dispose(){
+        this.unload();
 
         if (this.platform) {
             this.platform.dispose();

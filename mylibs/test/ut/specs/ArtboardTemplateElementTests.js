@@ -11,7 +11,7 @@
 
 //     beforeEach(function (done) {
 //         this.app = TestUtil.setupApp();
-//         this.app.loaded.then(function () {
+//         this.app.onLoad(function () {
 //             return done();
 //         });
 //         this.runCommands = function (commands) {

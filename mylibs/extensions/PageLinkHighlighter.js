@@ -67,7 +67,7 @@
 //             _constructor: function (app) {
 //                 if (app.platform.richUI()) {
 //                     this._app = app;
-//                     // app.loaded.bind(this, load);
+//                     // app.onLoad(load.bind(this));
 //                 }
 //             },
 //             detach:function(){

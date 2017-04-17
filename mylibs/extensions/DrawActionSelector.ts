@@ -257,7 +257,7 @@ export default class DrawActionSelector extends ExtensionBase {
             }
         });
 
-        app.loaded.then(this.load.bind(this));
+        app.onLoad(this.load.bind(this));
 
         if(app.currentTool) {
             app.actionManager.invoke(app.currentTool);

@@ -1,10 +1,6 @@
 declare module "carbon-internal" {
-    export interface IPersistentConnection {
-        getModelSyncHub(): Promise<IHub>;
-    }
-
     export interface IHub {
-        invoke(method: string, ...args: any[]): Promise<any>;
+        invoke(method: string, ...args: any[]): Promise<string>;
     }
 }
 
@@ -40,6 +36,12 @@ declare module "carbon-app"{
         defaultShapeSettings: any;
         deferredChange: IEvent<any>;
         relayoutFinished: IEvent<void>;
+        state: any;
+
+        isInOfflineMode(): boolean;
+        isNew(): boolean;
+        isSaved(): boolean;
+        syncBroken(): boolean;
 
         viewportSize(): any;
         resetCurrentTool();
@@ -108,10 +110,11 @@ declare module "oidc-client/src/UserManager" {
     class UserManager{
         constructor(options: UserManagerOptions);
 
-        signinSilent(): Promise<{access_token: string}>;
+        signinSilent(): Promise<void>;
         signinSilentCallback(): Promise<void>;
 
         events: {
+            addUserLoaded(cb: (container: {access_token: string}) => void): void;
             addSilentRenewError(cb: (error: Error) => void): void;
         }
     }
@@ -122,9 +125,9 @@ declare module "oidc-client/src/UserManager" {
 declare module "oidc-client/src/Log" {
     class Log {
         static logger: any;
-        static level: string;
+        static level: number;
 
-        static ERROR: string;
+        static ERROR: number;
     }
     export = Log;
 }

@@ -82,7 +82,7 @@ export default class AppState {
         this.changed = eventHelper.createEvent();
         this.pageModified = eventHelper.createEvent();
 
-        app.loadedLevel1.then(subscribe.bind(this));
+        app.onLoad(subscribe.bind(this));
     }
 
     setExternalChange(value){

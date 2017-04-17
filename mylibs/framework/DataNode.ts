@@ -415,4 +415,7 @@ export default class DataNode implements IDataNode{
     isChangeAffectingLayout(changes): boolean {
         return false;
     }
+
+    dispose(){
+    }
 }

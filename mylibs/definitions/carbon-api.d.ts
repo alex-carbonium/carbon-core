@@ -5,12 +5,26 @@ declare module "carbon-api" {
         fatal(message: string, error?: Error): void;
     }
 
+    export type ConnectionState =
+        {type: "notStarted"} |
+        {type: "connecting"} |
+        {type: "connected"} |
+        {type: "goingIdle"} |
+        {type: "shuttingDown"} |
+        {type: "stopped", idle: boolean} |
+        {type: "waiting", timeout: number};
+
     export interface IBackend {
         addUrlPath(...pathes: string[]): string;
 
         isLoggedIn(): boolean;
         isGuest(): boolean;
 
+        encodeUriData(data: any): string;
+
+        sessionId: string;
+
+        connectionStateChanged: IEvent<ConnectionState>;
         loginNeeded: IEvent<boolean>;
         requestStarted: IEvent<string>;
         requestEnded: IEvent<string>;

@@ -22,7 +22,6 @@ declare module "carbon-app" {
 
     export interface IApp extends IDataNode, IPropsOwner<IAppProps> {
         isLoaded: boolean;
-        loaded: Promise<void>;
         props:IAppProps;
 
         logEvent: IEvent<any>;
@@ -47,8 +46,6 @@ declare module "carbon-app" {
         activeStoryChanged: IEvent<any>;
         setActiveStoryById(id);
 
-        loadedLevel1: Promise<void>;
-
         currentTool: string;
         currentToolChanged: IEvent<string>;
 
@@ -60,9 +57,9 @@ declare module "carbon-app" {
         platform: IPlatform;
         environment: IEnvironment;
 
-        project: any;// TODO: remove project
-
+        init(): void;
         run(): Promise<void>;
+        onLoad(callback: () => void): void;
         unload(): void;
         serverless(value?: boolean): boolean;
 

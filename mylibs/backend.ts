@@ -5,9 +5,13 @@ import EventHelper from "./framework/EventHelper";
 import UserManager from "oidc-client/src/UserManager";
 import Log from "oidc-client/src/Log";
 import params from "./params";
-import { IBackend, ILogger, IAccountProxy, Response, ILoginModel, ILoginResult } from "carbon-api";
-import { IEvent } from "carbon-basics";
-import { IPersistentConnection } from "carbon-internal";
+import { IBackend, ILogger, IAccountProxy, Response, ILoginModel, ILoginResult, ConnectionState } from "carbon-api";
+import { IEvent, IDisposable } from "carbon-basics";
+import { IApp } from "carbon-app";
+import ActivityMonitor from "./ActivityMonitor";
+import AutoSaveTimer from "./AutoSaveTimer";
+import PersistentConnection from "./server/PersistentConnection";
+import ConsistencyMonitor from "./ConsistencyMonitor";
 
 var debug = require<any>("DebugUtil")("carb:backend");
 
@@ -25,10 +29,14 @@ var defaultOptions = {
 };
 
 class Backend implements IBackend {
+    consistencyMonitor: ConsistencyMonitor;
     private _userManager: UserManager;
-    private _connection: IPersistentConnection;
+    private _connectionToken: IDisposable;
     private static _ready = false;
 
+    autoSaveTimer: AutoSaveTimer;
+    connection: PersistentConnection;
+    activityMonitor: ActivityMonitor;
     logger: ILogger;
 
     fileEndpoint: any;
@@ -38,6 +46,7 @@ class Backend implements IBackend {
 
     sessionId: string;
 
+    connectionStateChanged: IEvent<ConnectionState>;
     accessTokenChanged: IEvent<string>;
     loginNeeded: IEvent<boolean>;
     requestStarted: IEvent<string>;
@@ -50,6 +59,7 @@ class Backend implements IBackend {
         this.requestStarted = EventHelper.createEvent();
         this.requestEnded = EventHelper.createEvent();
         this.accessTokenChanged = EventHelper.createEvent();
+        this.connectionStateChanged = EventHelper.createEvent<ConnectionState>();
 
         var endpoints = params.endpoints;
         this.servicesEndpoint = endpoints.services;
@@ -74,6 +84,11 @@ class Backend implements IBackend {
             filterProtocolClaims: false,
             loadUserInfo: false
         });
+        this._userManager.events.addUserLoaded(container => {
+            if (container.access_token){
+                this.setAccessToken(container.access_token);
+            }
+        });
         this._userManager.events.addSilentRenewError(e => {
             logger.error("Token renew error", e);
         });
@@ -86,14 +101,57 @@ class Backend implements IBackend {
         this.loginNeeded.raise(this.isGuest());
     }
 
-    setConnection(connection) {
-        this._connection = connection;
+    setupConnection(app: IApp){
+        if (this._connectionToken){
+            this._connectionToken.dispose();
+        }
+
+        this.autoSaveTimer = new AutoSaveTimer(app, PersistentConnection.saveInterval);
+        var persistentConnection = new PersistentConnection(app, this);
+        this.activityMonitor = new ActivityMonitor(app, persistentConnection, this.autoSaveTimer);
+        this.activityMonitor.activate();
+        this.connection = persistentConnection;
+        this._connectionToken = this.connection.stateChanged.bind(this, this.onConnectionStateChanged);
+
+        this.consistencyMonitor = new ConsistencyMonitor(app);
+        this.consistencyMonitor.start();
+
     }
-    changeModel(app, primitives, returnModel) {
-        if (!this._connection) {
+    shutdownConnection(){
+        if (this.autoSaveTimer){
+            this.autoSaveTimer.stop();
+            this.autoSaveTimer = null;
+        }
+        if (this.activityMonitor){
+            this.activityMonitor.deactivate({type: "shuttingDown"});
+            this.activityMonitor = null;
+        }
+        if (this.consistencyMonitor){
+            this.consistencyMonitor.stop();
+            this.autoSaveTimer = null;
+        }
+        if (this.connection){
+            this.connection = null;
+        }
+        if (this._connectionToken){
+            this._connectionToken.dispose();
+            this._connectionToken = null;
+        }
+    }
+    startConnection(){
+        if (this.connection){
+            this.connection.start();
+        }
+    }
+    private onConnectionStateChanged(newState: ConnectionState){
+        this.connectionStateChanged.raise(newState);
+    }
+
+    changeModel(app, primitives, returnModel): Promise<string> {
+        if (!this.connection) {
             return Promise.reject(new Error("backend connection not initialized"));
         }
-        return this._connection.getModelSyncHub().then(function (hub) {
+        return this.connection.getModelSyncHub().then(hub => {
             var primitiveStrings = primitives.map(x => JSON.stringify(x));
             return hub.invoke('changeModel', app.companyId(), app.folderId(), app.id(), primitiveStrings, returnModel);
         });
@@ -107,7 +165,7 @@ class Backend implements IBackend {
         options = Object.assign({}, defaultOptions, options);
         return this.ajax("post", url, data, options);
     }
-    ensureLoggedIn(renewToken = true) {
+    ensureLoggedIn(renewToken = false): Promise<void> {
         if (this.isLoggedIn()) {
             if (renewToken) {
                 return this.renewToken();
@@ -117,16 +175,15 @@ class Backend implements IBackend {
         return this.loginAsGuest();
     }
     renewToken() {
-        debug("Renew token");
+        debug("Renew token, session %s", this.sessionId);
         return this._userManager.signinSilent()
-            .then(data => this.setAccessToken(data.access_token))
             .catch(e => {
                 backend.raiseLoginNeeded();
                 throw e;
             });
     }
     renewTokenCallback() {
-        debug("Renew token callback");
+        debug("Renew token callback, session %s", this.sessionId);
         this._userManager.signinSilentCallback();
     }
     isLoggedIn() {
@@ -227,6 +284,7 @@ class Backend implements IBackend {
     setAccessToken(accessToken) {
         localStorage.setItem("accessToken", accessToken);
         this.accessTokenChanged.raise(accessToken);
+        debug("Access token changed, session %s", this.sessionId);
     }
     setUserId(userId) {
         localStorage.setItem("userId", userId);
@@ -407,9 +465,10 @@ class Backend implements IBackend {
     }
 }
 
-var backend: Backend = globals.backend;
+let backend: Backend = globals.backend;
 if (!backend) {
     backend = new Backend();
+    debug("created backend, session %s", backend.sessionId);
     globals.backend = backend;
 }
 export default backend;

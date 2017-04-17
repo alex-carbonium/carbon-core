@@ -15,6 +15,13 @@ export default class OpenTypeFontManager extends FontManager {
 
     constructor() {
         super();
+        this.clear();
+    }
+
+    clear(){
+        this._fonts = [];
+        this._defaultFont = null;
+
         this._metadata = [{
             "name": "Open Sans",
             "fonts": [

@@ -1,22 +1,20 @@
 import EventHelper from "./framework/EventHelper";
 import logger from "./logger";
-import { IEvent2 } from "carbon-basics";
+import { IEvent2, IEvent } from "carbon-basics";
 
-export default class StateMachine {
-    stateChanged: any;
-    state: string;
+export default class StateMachine<TState extends {type: string}> {
+    stateChanged: IEvent<TState>;
 
-    constructor(){
-        this.state = "";
+    constructor(public state: TState){
         this.stateChanged = EventHelper.createEvent();
     }
 
-    changeState(newState, arg?){
-        var changed = newState !== this.state;
+    changeState(newState: TState){
+        var changed = newState.type !== this.state.type;
         this.state = newState;
         if (changed){
-            logger.info(this.constructor.name + ": " + newState + (arg ? " (" + JSON.stringify(arg) + ")" : ""));
-            this.stateChanged.raise(newState, arg);
+            logger.info(this.constructor.name + ": " + JSON.stringify(newState));
+            this.stateChanged.raise(newState);
         }
     }
 }

@@ -47,7 +47,7 @@ define(["comments/CommentsModel"], function (CommentsModel) {
                 }
 
                 //appViewModel depends on this run first
-                app.loadedLevel1.then(appLoaded.bind(this));
+                app.onLoad(appLoaded.bind(this));
                 app.addLoadRef();
             }
         }
