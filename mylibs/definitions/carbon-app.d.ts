@@ -251,15 +251,16 @@ declare module "carbon-app" {
     }
 
     export const enum LayoutDockPosition {
-        Left = 0,
-        Right = 1,
-        Top = 3,
-        Bottom = 4
+        Left   = 1,
+        Top    = 2,
+        Right  = 3,
+        Bottom = 4,
+        Fill   = 5
     }
 
     export const enum LayoutDirection {
-        Row = 0,
-        Column = 1
+        Row = 1,
+        Column = 0
     }
 
     export interface IInvalidate {
