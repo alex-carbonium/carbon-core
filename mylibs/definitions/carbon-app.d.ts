@@ -250,6 +250,18 @@ declare module "carbon-app" {
         Interaction = 2
     }
 
+    export const enum LayoutDockPosition {
+        Left = 0,
+        Right = 1,
+        Top = 3,
+        Bottom = 4
+    }
+
+    export const enum LayoutDirection {
+        Row = 0,
+        Column = 1
+    }
+
     export interface IInvalidate {
         requested:IEvent2<LayerTypes, IRect>;
         request(layer?, rect?);
