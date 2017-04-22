@@ -240,6 +240,15 @@ declare module "carbon-app" {
         };
     }
 
+export interface IAreaConstraint {
+    l?: number;
+    r?: number;
+    t?: number;
+    b?: number;
+    w?: number;
+    h?: number;
+}
+
     export interface IMirroringProxyPage extends IPage {
         resetVersion(): void;
     }
