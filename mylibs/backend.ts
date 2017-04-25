@@ -5,8 +5,8 @@ import EventHelper from "./framework/EventHelper";
 import UserManager from "oidc-client/src/UserManager";
 import Log from "oidc-client/src/Log";
 import params from "./params";
-import { IBackend, ILogger, IAccountProxy, Response, ILoginModel, ILoginResult, ConnectionState } from "carbon-api";
-import { IEvent, IDisposable } from "carbon-basics";
+import { IBackend, ILogger, IAccountProxy, Response, ILoginModel, ILoginResult, ConnectionState, ResponsePromise } from "carbon-api";
+import { IEvent, IDisposable, LoginProvider } from "carbon-basics";
 import { IApp } from "carbon-app";
 import ActivityMonitor from "./ActivityMonitor";
 import AutoSaveTimer from "./AutoSaveTimer";
@@ -53,6 +53,8 @@ class Backend implements IBackend {
     requestEnded: IEvent<string>;
     accountProxy: IAccountProxy;
 
+    LoginProvider: LoginProvider;
+
     constructor() {
         this.sessionId = createUUID();
         this.loginNeeded = EventHelper.createEvent();
@@ -72,7 +74,7 @@ class Backend implements IBackend {
 
         this._userManager = new UserManager({
             authority: this.servicesEndpoint + "/idsrv",
-            client_id: "renew",
+            client_id: "implicit",
 
             response_type: "token",
             scope: "account",
@@ -178,7 +180,7 @@ class Backend implements IBackend {
         debug("Renew token, session %s", this.sessionId);
         return this._userManager.signinSilent()
             .catch(e => {
-                backend.raiseLoginNeeded();
+                this.raiseLoginNeeded();
                 throw e;
             });
     }
@@ -212,19 +214,7 @@ class Backend implements IBackend {
         };
         return this.post(this.servicesEndpoint + "/idsrv/connect/token", data, options)
             .then(data => this.setAccessToken(data.access_token))
-            .then(() => this.get(this.servicesEndpoint + "/idsrv/ext/userId", null,
-                { credentials: DEBUG ? "include" : "same-origin" }))
-            .then(data => {
-                this.setUserId(data.userId);
-                this.setIsGuest(isGuest);
-                return <Response<ILoginModel, ILoginResult>>{
-                    ok: true,
-                    result: {
-                        userId: data.userId,
-                        companyName: data.companyName
-                    }
-                };
-            })
+            .then(() => this.postAuthenticate(isGuest))
             .catch(e => {
                 if (e.response && e.response.status === 400) {
                     return e.response.json()
@@ -242,6 +232,44 @@ class Backend implements IBackend {
                 throw e;
             });
     }
+    loginExternal(provider: LoginProvider){
+        var url = this.servicesEndpoint + "/idsrv/connect/authorize?" + this.encodeUriData({
+            client_id: "implicit",
+            redirect_uri: window.location.protocol + "//" + window.location.host + "/a/external",
+            response_type: "token",
+            response_mode: "fragment",
+            scope: "account",
+            acr_values: "idp:" + provider + " " + "tenant:" + this.getUserId(),
+            state: createUUID(),
+            nonce: createUUID()
+        });
+        location.href = url;
+    }
+    externalCallback(){
+        var data = this.decodeUriData(location.hash.substr(1));
+        if (data.access_token){
+            this.setAccessToken(data.access_token);
+            return this.postAuthenticate(false);
+        }
+        logger.fatal("No access token in " + location.hash);
+        return Promise.reject(new Error("noAccessToken"));
+    }
+    private postAuthenticate(isGuest: boolean): ResponsePromise<ILoginModel, ILoginResult>{
+        return this.get(this.servicesEndpoint + "/idsrv/ext/userId", null,
+                { credentials: DEBUG ? "include" : "same-origin" })
+            .then(data => {
+                this.setUserId(data.userId);
+                this.setIsGuest(isGuest);
+                return <Response<ILoginModel, ILoginResult>>{
+                    ok: true,
+                    result: {
+                        userId: data.userId,
+                        companyName: data.companyName
+                    }
+                };
+            });
+    }
+
     logout() {
         return this.post(this.servicesEndpoint + "/idsrv/ext/logout", null, { credentials: DEBUG ? "include" : "same-origin" })
             .then(() => {
@@ -318,6 +346,17 @@ class Backend implements IBackend {
             s += encodeURIComponent(key) + "=" + encodeURIComponent(data[key]);
         }
         return s;
+    }
+    decodeUriData(uri) {
+        var result: any = {};
+        var split = uri.split("&");
+        for (var i = 0; i < split.length; ++i){
+            var parts = split[i].split("=");
+            if (parts.length > 0){
+                result[decodeURIComponent(parts[0])] = parts[1] ? decodeURIComponent(parts[1]) : true;
+            }
+        }
+        return result;
     }
     navigate(fragment) {
         window.location.href = fragment;

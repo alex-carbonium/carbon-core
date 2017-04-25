@@ -224,4 +224,6 @@ declare module "carbon-basics" {
         debounce(func: () => any, ms: number): () => any;
         throttle(func: (...args: any[]) => any, ms: number): () => any;
     };
+
+    export type LoginProvider = "Google" | "Facebook" | "Twitter" | "Microsoft";
 }

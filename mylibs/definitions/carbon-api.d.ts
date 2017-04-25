@@ -67,6 +67,8 @@ declare module "carbon-api" {
     export const backend: IBackend;
     export const DashboardProxy: IDashboardProxy;
     export const FileProxy: IFileProxy;
+
+    export {LoginProvider} from "carbon-basics";
 }
 
 declare function assertNever(t: never);
