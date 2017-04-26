@@ -233,13 +233,19 @@ class Backend implements IBackend {
             });
     }
     loginExternal(provider: LoginProvider){
+        var acr = "idp:" + provider;
+        var userId = this.getUserId();
+        if (userId){
+            acr += " tenant:" + this.getUserId();
+        }
+
         var url = this.servicesEndpoint + "/idsrv/connect/authorize?" + this.encodeUriData({
             client_id: "implicit",
             redirect_uri: window.location.protocol + "//" + window.location.host + "/a/external",
             response_type: "token",
             response_mode: "fragment",
             scope: "account",
-            acr_values: "idp:" + provider + " " + "tenant:" + this.getUserId(),
+            acr_values: acr,
             state: createUUID(),
             nonce: createUUID()
         });

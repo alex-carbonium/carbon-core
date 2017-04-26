@@ -1,5 +1,5 @@
 declare module "carbon-api" {
-    import { IEvent } from "carbon-basics";
+    import { IEvent, LoginProvider } from "carbon-basics";
 
     export interface ILogger {
         fatal(message: string, error?: Error): void;
@@ -46,7 +46,15 @@ declare module "carbon-api" {
     export interface IEmailValidationModel {
         email: string;
     }
+    export interface IAccountInfo{
+        name: string,
+        email: string,
+        hasPassword: boolean,
+        enabledProviders: LoginProvider[]
+    }
     export interface IAccountProxy {
+        info(): Promise<IAccountInfo>;
+
         register(model: { username: string, email: string, password: string }): Promise<void>;
 
         resolveCompanyId(companyName: string): Promise<{ companyId: string }>;

@@ -1,6 +1,9 @@
 // auto-generated with node ./scripts/jsClient.js
 import backend from "../backend";
 var proxy = {
+    info: function(){
+        return backend.get(backend.servicesEndpoint + "/api/account/info");
+    },
     register: function(model){
         return backend.post(backend.servicesEndpoint + "/api/account/register", { model });
     },

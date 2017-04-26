@@ -12,6 +12,7 @@ var defaults = {
     debug: true,
     port: 8090,
     host: "http://localhost",
+    https: false,
     devServer: true,
     devtool: "eval",
     verbose: false,
@@ -201,6 +202,7 @@ module.exports = function(settings){
             publicPath         : settings.authority + "/target/",
             host               : settings.host.substring(settings.host.indexOf("//") + 2),
             port               : settings.port,
+            https              : settings.https,
             hot                : true,
             stats: {
                 colors: true,
