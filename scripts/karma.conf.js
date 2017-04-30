@@ -5,6 +5,9 @@ var webpackConfig = require('./make-core-config')({
     host: ""
 });
 
+var testfolder = path.join(path.dirname(fs.realpathSync(__filename)), '..');
+process.chdir(testfolder);
+
 webpackConfig.entry = {};
 webpackConfig.output.library = "test";
 delete webpackConfig.output.libraryTarget;
@@ -67,7 +70,7 @@ module.exports = function(config){
         customLaunchers: {
             Chrome_DevTools_Saved_Prefs: {
                 base: 'Chrome',
-                flags: ['--user-data-dir=' + path.join(require('os').homedir(), 'carbon-chrome')]
+                flags: ['--enable-logging --v=1 --user-data-dir=' + path.join(require('os').homedir(), 'carbon-chrome')]
             }
         },
 
