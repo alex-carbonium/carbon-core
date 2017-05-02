@@ -53,6 +53,10 @@ export default class PreviewProxy {
         var artboard = page.children[0];
         var elementsMap = {};
         var activeStory = this.app.activeStory();
+        if(!activeStory) {
+            return [];
+        }
+
         activeStory.children.forEach(c=>{
            if(c.props.sourceRootId === artboard.id()){
                elementsMap[c.props.sourceElementId] = true;
