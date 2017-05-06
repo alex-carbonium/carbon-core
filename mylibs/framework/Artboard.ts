@@ -14,6 +14,7 @@ import Point from "math/point";
 import Selection from "framework/SelectionModel";
 import Environment from "environment";
 import Matrix from "math/matrix";
+import params from "params";
 import DataNode from "framework/DataNode";
 import { IPropsOwner, IArtboardProps } from "carbon-model";
 
@@ -543,7 +544,10 @@ class Artboard extends Container implements IPropsOwner<IArtboardProps> {
     //}
 
     relayout(oldPropsMap) {
-        return RelayoutEngine.run(this, oldPropsMap);
+        params.perf && performance.mark("Artboard.Relayout: " + this.id());
+        var res = RelayoutEngine.run(this, oldPropsMap);
+        params.perf && performance.measure("Artboard.Relayout: " + this.id(), "Artboard.Relayout: " + this.id());
+        return res;
     }
 
     getStates() {

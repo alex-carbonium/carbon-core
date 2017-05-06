@@ -14,6 +14,7 @@ import { isRectInRect, areRectsIntersecting } from "../math/math";
 import ResizeDimension from "./ResizeDimension";
 import Constraints from "./Constraints";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
+import params from "params";
 import {
     Types,
     DockStyle,
@@ -831,7 +832,10 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
             return;
         }
 
-        //this.stopwatch.start();
+        if(params.perf) {
+            var markName = "draw " + this.displayName() + " - " + this.id();
+            performance.mark(markName);
+        }
 
         var br = this.br(),
             w = br.width,
@@ -849,11 +853,15 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
 
         this.drawDecorators(context, w, h, environment);
 
-        //console.log(this.displayName() + " : " + this.stopwatch.getElapsedTime());
+        if(params.perf) {
+            performance.measure(markName, markName);
+        }
     }
+
     drawSelf(context, w, h, environment) {
 
     }
+
     drawDecorators(context, w, h, environment) {
         if (this.decorators) {
             context.save();

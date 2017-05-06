@@ -5,6 +5,7 @@ interface IQueryStringParams{
     backend?: string;
     clearStorage?: boolean;
     serverless?: boolean;
+    perf?:boolean;
 }
 
 function parseQueryString(): IQueryStringParams{
@@ -61,5 +62,6 @@ export default {
     transport: "auto",
     endpoints: endpoints,
     serveless: qs.serverless,
-    clearStorage: qs.clearStorage
+    clearStorage: qs.clearStorage,
+    perf: qs.perf
 };

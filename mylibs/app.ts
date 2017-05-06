@@ -226,6 +226,7 @@ class AppClass extends DataNode implements IApp {
     }
 
     init(){
+        params.perf && performance.mark("App.Init");
         this.fontManager.clear();
         this.isLoaded = false;
 
@@ -233,6 +234,7 @@ class AppClass extends DataNode implements IApp {
         if (params.clearStorage) {
             this.offlineModel.clear();
         }
+        params.perf && performance.measure("App.Init", "App.Init");
     }
 
     onLoad(callback: () => void){
@@ -806,13 +808,16 @@ class AppClass extends DataNode implements IApp {
 
     //TODO: rethink the concept of run method for better testability
     run() {
+        params.perf && performance.mark("App.run");
         this.clear();
 
         this.platform.run(this);
 
         var stopwatch = new Stopwatch("AppLoad", true);
         if (!this.serverless()){
+            params.perf && performance.mark("App.setupConnection");
             backend.setupConnection(this);
+            params.perf && performance.measure("App.setupConnection", "App.setupConnection");
         }
 
         IconsInfo.defaultFontFamily = 'NinjamockBasic2';
@@ -852,6 +857,7 @@ class AppClass extends DataNode implements IApp {
             //that.platform.ensureCanvasSize();
 
             backend.enableLoginTimer();
+            params.perf && performance.measure("App.run", "App.run");
         }).catch(function (e) {
             if (e.message !== "appNotFound"){
                 logger.fatal("App not loaded", { error: e });
@@ -962,7 +968,9 @@ class AppClass extends DataNode implements IApp {
 
     relayout() {
         try {
+            params.perf && performance.mark("App.Relayout");
             this.relayoutInternal();
+            params.perf && performance.measure("App.Relayout", "App.Relayout");
         }
         finally {
             ModelStateListener.clear();
@@ -1163,9 +1171,11 @@ class AppClass extends DataNode implements IApp {
     }
 
     waitForWebFonts() {
+        params.perf && performance.mark("App.waitForWebFonts");
         return new Promise((resolve, reject) => {
             var config = this.generateWebFontConfig(resolve, reject);
             WebFont.load(config);
+            params.perf && performance.measure("App.waitForWebFonts", "App.waitForWebFonts");
         })
     }
 
