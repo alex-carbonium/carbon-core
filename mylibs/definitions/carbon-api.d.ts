@@ -43,26 +43,6 @@ declare module "carbon-api" {
         };
     export type ResponsePromise<TModel, TResult> = Promise<Response<TModel, TResult>>;
 
-    export interface IEmailValidationModel {
-        email: string;
-    }
-    export interface IAccountInfo{
-        name: string,
-        email: string,
-        hasPassword: boolean,
-        enabledProviders: LoginProvider[]
-    }
-    export interface IAccountProxy {
-        info(): Promise<IAccountInfo>;
-
-        register(model: { username: string, email: string, password: string }): Promise<void>;
-
-        resolveCompanyId(companyName: string): Promise<{ companyId: string }>;
-        getCompanyName(): Promise<{ companyName: string }>;
-
-        validateEmail(model: IEmailValidationModel): ResponsePromise<IEmailValidationModel, void>;
-    }
-
     export interface IDashboardProxy {
         dashboard(companyId: string): Promise<any>;
     }
@@ -80,3 +60,8 @@ declare module "carbon-api" {
 }
 
 declare function assertNever(t: never);
+
+declare interface Promise<T>{
+    finally<U>(handler: () => U): Promise<T>;
+    cancel(): void;
+}

@@ -36,4 +36,40 @@ declare module "carbon-api" {
 
         accountProxy: IAccountProxy;
     }
+
+    export interface IEmailValidationModel {
+        email: string;
+    }
+    export interface IAccountOverview{
+        hasAccount: boolean;
+        info: IAccountInfo;
+        hasPassword: boolean,
+        enabledProviders: LoginProvider[]
+    }
+    export interface IAccountInfo {
+        email: string;
+        username: string;
+    }
+    export interface IChangePasswordModel{
+        oldPassword: string;
+        newPassword: string;
+    }
+    export interface IAddPasswordModel{
+        newPassword: string;
+    }
+
+    export interface IAccountProxy {
+        overview(): Promise<IAccountOverview>;
+
+        updateAccountInfo(info: IAccountInfo): ResponsePromise<IAccountInfo, void>;
+        addPassword(model: IAddPasswordModel): ResponsePromise<IAddPasswordModel, void>;
+        changePassword(model: IChangePasswordModel): ResponsePromise<IChangePasswordModel, void>;
+
+        register(model: { username: string, email: string, password: string }): Promise<void>;
+
+        resolveCompanyId(companyName: string): Promise<{ companyId: string }>;
+        getCompanyName(): Promise<{ companyName: string }>;
+
+        validateEmail(model: IEmailValidationModel): ResponsePromise<IEmailValidationModel, void>;
+    }
 }

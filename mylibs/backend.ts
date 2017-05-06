@@ -12,6 +12,7 @@ import ActivityMonitor from "./ActivityMonitor";
 import AutoSaveTimer from "./AutoSaveTimer";
 import PersistentConnection from "./server/PersistentConnection";
 import ConsistencyMonitor from "./ConsistencyMonitor";
+import bluebird from "bluebird";
 
 var debug = require<any>("DebugUtil")("carb:backend");
 
@@ -368,7 +369,7 @@ class Backend implements IBackend {
         window.location.href = fragment;
     }
 
-    private ajax(method, url: string, data: any, options) {
+    private ajax(method, url: string, data: any, options): any {
         this.requestStarted.raise(url);
 
         var fetchOptions: any = { method: method, headers: {}, mode: 'cors' };
@@ -418,7 +419,7 @@ class Backend implements IBackend {
             }
         }
 
-        return fetch(url, fetchOptions)
+        var fetchPromise = fetch(url, fetchOptions)
             .then(response => this.checkStatus(response, url, fetchOptions, options))
             .then(response => {
                 this.requestEnded.raise(url);
@@ -435,6 +436,8 @@ class Backend implements IBackend {
                 }
                 throw e;
             });
+
+        return bluebird.resolve(fetchPromise);
     }
 
     private setHeaders(fetchOptions) {
@@ -492,7 +495,7 @@ class Backend implements IBackend {
         throw error;
     }
 
-    private parseJSON(response) {
+    private parseJSON(response): any {
         return response.json();
     }
 

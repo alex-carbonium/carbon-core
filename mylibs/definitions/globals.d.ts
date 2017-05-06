@@ -7,11 +7,6 @@ declare var require: {
     ensure: (paths: string[], callback: (require: <T>(path: string) => T) => void, chunkName: string | null) => void;
 };
 
-declare interface Promise<T>{
-    finally<U>(handler: () => U): Promise<T>;
-    cancel(): void;
-}
-
 declare interface RequestInit{
     cors?: boolean;
 }

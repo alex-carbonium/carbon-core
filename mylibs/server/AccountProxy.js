@@ -1,8 +1,17 @@
 // auto-generated with node ./scripts/jsClient.js
 import backend from "../backend";
 var proxy = {
-    info: function(){
-        return backend.get(backend.servicesEndpoint + "/api/account/info");
+    overview: function(){
+        return backend.get(backend.servicesEndpoint + "/api/account/overview");
+    },
+    updateAccountInfo: function(model){
+        return backend.post(backend.servicesEndpoint + "/api/account/info", { model });
+    },
+    changePassword: function(model){
+        return backend.post(backend.servicesEndpoint + "/api/account/changePassword", { model });
+    },
+    addPassword: function(model){
+        return backend.post(backend.servicesEndpoint + "/api/account/addPassword", { model });
     },
     register: function(model){
         return backend.post(backend.servicesEndpoint + "/api/account/register", { model });
