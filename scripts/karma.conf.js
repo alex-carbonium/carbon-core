@@ -1,4 +1,5 @@
 var path = require("path");
+var fs = require("fs");
 var webpack = require("webpack");
 var webpackConfig = require('./make-core-config')({
     devServer: false,
