@@ -24,6 +24,12 @@ var proxy = {
     },
     validateEmail: function(model){
         return backend.post(backend.servicesEndpoint + "/api/account/validateEmail", { model });
+    },
+    forgotPassword: function(model){
+        return backend.post(backend.servicesEndpoint + "/api/account/forgotPassword", { model });
+    },
+    resetPassword: function(model){
+        return backend.post(backend.servicesEndpoint + "/api/account/resetPassword", { model });
     }
 }
 

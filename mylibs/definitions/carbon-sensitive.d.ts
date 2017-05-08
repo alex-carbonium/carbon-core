@@ -58,12 +58,23 @@ declare module "carbon-api" {
         newPassword: string;
     }
 
+    export interface IForgotPasswordModel{
+        email: string;
+    }
+    export interface IResetPasswordModel{
+        token: string;
+        newPassword: string;
+    }
+
     export interface IAccountProxy {
         overview(): Promise<IAccountOverview>;
 
         updateAccountInfo(info: IAccountInfo): ResponsePromise<IAccountInfo, void>;
         addPassword(model: IAddPasswordModel): ResponsePromise<IAddPasswordModel, void>;
         changePassword(model: IChangePasswordModel): ResponsePromise<IChangePasswordModel, void>;
+
+        forgotPassword(model: IForgotPasswordModel): ResponsePromise<IForgotPasswordModel, void>;
+        resetPassword(model: IResetPasswordModel): ResponsePromise<IResetPasswordModel, void>;
 
         register(model: { username: string, email: string, password: string }): Promise<void>;
 
