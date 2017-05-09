@@ -12,6 +12,7 @@ import GlobalMatrixModifier from "../GlobalMatrixModifier";
 import Brush from "../Brush";
 import Point from "../../math/point";
 import Matrix from "../../math/matrix";
+import Isolate from "../../commands/Isolate";
 import { IUIElement, IContainer, IRepeatContainer } from "carbon-model";
 import { IMouseEventData } from "carbon-basics";
 
@@ -99,6 +100,19 @@ export default class RepeatContainer extends Container implements IRepeatContain
 
     seed(): string {
         return this.id();
+    }
+
+    dblclick(event) {
+        if (UserSettings.group.editInIsolationMode) {
+            var scale = Environment.view.scale();
+            for (var i = 0; i < this.children.length; i++) {
+                var cell = this.children[i];
+                if (cell.hitTest(event, scale)){
+                    Isolate.run([cell], this);
+                    return;
+                }
+            }
+        }
     }
 
     trackInserted() {

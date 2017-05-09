@@ -1,6 +1,7 @@
 declare module "carbon-model" {
     import { IPoint, IRect, ICoordinate, IMatrix, ISize, OriginType } from "carbon-geometry";
     import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable } from "carbon-basics";
+    import { IContext } from "carbon-rendering";
 
     export interface IPropsOwner<TProps> {
         props: TProps;
@@ -82,6 +83,8 @@ declare module "carbon-model" {
         constraints(value?: IConstraints): IConstraints;
 
         clone(): IUIElement;
+
+        drawBoundaryPath(context: IContext, round?: boolean);
     }
 
     export interface IContainerProps extends IUIElementProps {
@@ -175,7 +178,7 @@ declare module "carbon-model" {
     }
 
     export interface IIsolationLayer extends ILayer {
-        isolateGroup(owner:IContainer) :void;
+        isolateGroup(owner:IContainer, clippingParent?: IUIElement) :void;
         exitIsolation():void;
     }
 

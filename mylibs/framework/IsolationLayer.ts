@@ -5,16 +5,18 @@ import { ChangeMode, PrimitiveType } from "./Defs";
 import DataNode from "./DataNode";
 import Selection from "framework/SelectionModel";
 import RelayoutEngine from "framework/relayout/RelayoutEngine";
+import UserSettings from "../UserSettings";
 
 export class IsolationLayer extends Layer implements IIsolationLayer {
 
-    private ownerElement: IContainer;
+    private ownerElement: IContainer = null;
     private trackElementIds: any = {};
-    private restoreMatrix: boolean;
+    private restoreMatrix: boolean = false;
+    private clippingParent: IUIElement = null;
 
     constructor() {
         super();
-        this.ownerElement = null;
+
         App.Current.actionManager.subscribe("cancel", () => {
            this.exitIsolation();
         })
@@ -27,11 +29,12 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         return clone;
     }
 
-    isolateGroup(owner:IContainer) : void{
+    isolateGroup(owner: IContainer, clippingParent: IUIElement = null) : void{
         if(this.ownerElement) {
             this.exitIsolation();
         }
 
+        this.clippingParent = clippingParent;
         this.ownerElement = owner;
         var children = owner.children.slice();
         var selection = [];
@@ -63,9 +66,13 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
 
         this.clear();
 
-        if(this._onAppChangedSubscription) {
+        if (this._onAppChangedSubscription) {
             this._onAppChangedSubscription.dispose();
             this._onAppChangedSubscription = null;
+        }
+        if (this._onRelayoutCompleted) {
+            this._onRelayoutCompleted.dispose();
+            this._onRelayoutCompleted = null;
         }
 
         Selection.clearSelection();
@@ -125,7 +132,20 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
             return;
         }
 
+        if (this.clippingParent){
+            context.save();
+            context.beginPath();
+            context.strokeStyle = UserSettings.group.active_stroke;
+            this.clippingParent.drawBoundaryPath(context);
+            context.stroke();
+            context.clip();
+        }
+
         super.drawSelf(context, w, h, env);
+
+        if (this.clippingParent){
+            context.restore();
+        }
     }
 
     primitiveRoot() {
