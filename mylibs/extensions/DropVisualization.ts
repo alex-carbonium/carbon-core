@@ -270,6 +270,15 @@ var onMouseMove = function (event) {
     }
 
     var target = this.view.hitElement(event);
+    if (target === Selection.selectComposite()){
+        if (this._target){
+            this._target = null;
+            this._isDropTarget = false;
+            updateVisualizations.call(this);
+        }
+        return;
+    }
+
     if (this._target !== target) {
         //special case - do not highlight children of active group even though they are hit visible
         if (target && !event.ctrlKey && target.parent() instanceof Container && target.parent().activeGroup()) {
