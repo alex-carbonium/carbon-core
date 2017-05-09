@@ -835,6 +835,7 @@ export default class Point implements IPoint {
     roundMutable() {
         this.x = Math.round(this.x);
         this.y = Math.round(this.y);
+        return this;
     }
 
     roundMutableBy(m) {

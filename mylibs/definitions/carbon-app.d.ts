@@ -272,6 +272,11 @@ export interface IAreaConstraint {
         Column = 0
     }
 
+    export const enum AlignMode {
+        Selection,
+        Parent
+    }
+
     export interface IInvalidate {
         requested:IEvent2<LayerTypes, IRect>;
         request(layer?, rect?);

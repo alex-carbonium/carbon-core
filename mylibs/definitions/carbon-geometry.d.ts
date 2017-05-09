@@ -21,6 +21,11 @@ declare module "carbon-geometry" {
         fill(bounds: IRect, noScaleUp?: boolean): IRect;
 
         topLeft(): IPoint;
+        right(): number;
+        bottom(): number;
+
+        centerX(): number;
+        centerY(): number;
     }
     interface IRectConstructor{
         new(x: number, y: number, width: number, height: number): IRect;

@@ -210,7 +210,7 @@ export default class ContextMenuExtension extends ExtensionBase {
                     callback: () => {
                         actionManager.invoke("alignTop");
                     },
-                    disabled: !selection || selection.length <= 1
+                    disabled: !selection.length
                 },
                 {
                     name: "@align.middle",
@@ -219,7 +219,7 @@ export default class ContextMenuExtension extends ExtensionBase {
                     callback: () => {
                         actionManager.invoke("alignMiddle");
                     },
-                    disabled: !selection || selection.length <= 1
+                    disabled: !selection.length
                 },
                 {
                     name: "@align.bottom",
@@ -228,7 +228,7 @@ export default class ContextMenuExtension extends ExtensionBase {
                     callback: () => {
                         actionManager.invoke("alignBottom");
                     },
-                    disabled: !selection || selection.length <= 1
+                    disabled: !selection.length
                 },
                 {
                     name: "@align.left",
@@ -237,7 +237,7 @@ export default class ContextMenuExtension extends ExtensionBase {
                     callback: () => {
                         actionManager.invoke("alignLeft");
                     },
-                    disabled: !selection || selection.length <= 1
+                    disabled: !selection.length
                 },
                 {
                     name: "@align.center",
@@ -246,7 +246,7 @@ export default class ContextMenuExtension extends ExtensionBase {
                     callback: () => {
                         actionManager.invoke("alignCenter");
                     },
-                    disabled: !selection || selection.length <= 1
+                    disabled: !selection.length
                 },
                 {
                     name: "@align.right",
@@ -255,12 +255,12 @@ export default class ContextMenuExtension extends ExtensionBase {
                     callback: () => {
                         actionManager.invoke("alignRight");
                     },
-                    disabled: !selection || selection.length <= 1
+                    disabled: !selection.length
                 },
                 {
                     name: "@distribute.vertically",
                     row: 1,
-                    icon: "ico-small-distribute-middles",
+                    icon: "ico-small-distribute-centers",
                     callback: () => {
                         actionManager.invoke("distributeVertically");
                     },
@@ -269,7 +269,7 @@ export default class ContextMenuExtension extends ExtensionBase {
                 {
                     name: "@distribute.horizontally",
                     row: 1,
-                    icon: "ico-small-distribute-centers",
+                    icon: "ico-small-distribute-middles",
                     callback: () => {
                         actionManager.invoke("distributeHorizontally");
                     },

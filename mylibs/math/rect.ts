@@ -123,6 +123,12 @@ export default class Rect implements IRect {
     centerTop() {
         return new Point(this.x + this.width / 2, this.y);
     }
+    centerX(){
+        return this.x + this.width/2;
+    }
+    centerY(){
+        return this.y + this.height/2;
+    }
 
     origin(origin: OriginType): Point{
         switch (origin){
@@ -132,6 +138,13 @@ export default class Rect implements IRect {
                 return this.topLeft();
         }
         throw new Error("wrong origin " + origin);
+    }
+
+    right(): number{
+        return this.x + this.width;
+    }
+    bottom(): number{
+        return this.y + this.height;
     }
 
     topLeft(): Point {

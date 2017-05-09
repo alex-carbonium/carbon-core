@@ -268,31 +268,6 @@ sketch.util.max = function util_max(array, accessor){
     return result;
 };
 
-sketch.util.elementWithMax = function util_elementWithMax(array, accessor){
-    var result = null;
-    var maxValue = null;
-    each(array, function(element){
-        var value = accessor(element);
-        if (value !== undefined && (maxValue === null || value > maxValue)){
-            maxValue = value;
-            result = element;
-        }
-    });
-    return result;
-};
-sketch.util.elementWithMin = function util_elementWithMin(array, accessor){
-    var result = null;
-    var minValue = null;
-    each(array, function(element){
-        var value = accessor(element);
-        if (value !== undefined && (minValue === null || value < minValue)){
-            minValue = value;
-            result = element;
-        }
-    });
-    return result;
-};
-
 sketch.util.sum = function util_sum(array, accessor){
     var result = 0;
     each(array, function(element){
