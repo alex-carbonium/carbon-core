@@ -1,17 +1,19 @@
 import UIElement from "../UIElement";
 import Brush from "../Brush";
 import Font from "../Font";
-import {Types} from "../Defs";
-import {deepEquals} from "../../util";
+import { Types } from "../Defs";
+import { deepEquals } from "../../util";
 import PropertyMetadata from "../PropertyMetadata";
 import TextEngine from "./textengine";
 import styleManager from "../style/StyleManager";
 import { IContainer, IDataElement } from "carbon-core";
 import { TextAlign } from "carbon-basics";
 import { IUIElement } from "carbon-model";
+import params from "params";
+import ContextCommandCache from "framework/render/ContextCommandCache";
 
 class Text extends UIElement implements IContainer, IDataElement {
-    prepareProps(changes){
+    prepareProps(changes) {
         var dataProvider = changes.dp;
 
         super.prepareProps(changes);
@@ -24,37 +26,37 @@ class Text extends UIElement implements IContainer, IDataElement {
         var dimensionsAffected = contentChanged || brChanged || autoWidthChanged || fontChanged;
         var textAlignChanged = fontChanged && changes.font.align !== TextAlign.left;
 
-        if (textAlignChanged){
+        if (textAlignChanged) {
             changes.autoWidth = false;
         }
 
-        if (autoWidthChanged && changes.autoWidth){
-            if (!fontChanged || changes.font.align !== TextAlign.left){
-                changes.font = Font.extend(this.props.font, changes.font, {align: TextAlign.left});
+        if (autoWidthChanged && changes.autoWidth) {
+            if (!fontChanged || changes.font.align !== TextAlign.left) {
+                changes.font = Font.extend(this.props.font, changes.font, { align: TextAlign.left });
             }
         }
 
-        if (dimensionsAffected){
+        if (dimensionsAffected) {
             var syncWidth = this.props.autoWidth;
-            if (changes.autoWidth !== undefined){
+            if (changes.autoWidth !== undefined) {
                 syncWidth = changes.autoWidth === true;
             }
-            if (!fontChanged){
+            if (!fontChanged) {
                 changes.font = this.props.font;
             }
             this._ensureBoundaryBox(changes, syncWidth);
-            if (!fontChanged){
+            if (!fontChanged) {
                 delete changes.font;
             }
         }
 
-        if (fontChanged){
+        if (fontChanged) {
             var content = changes.content !== undefined ? changes.content : this.props.content;
             var keys = Object.keys(changes.font).filter(x => changes.font[x] !== this.props.font[x]);
-            if (Array.isArray(content)){
+            if (Array.isArray(content)) {
                 for (let i = 0, l = content.length; i < l; ++i) {
                     let part = content[i];
-                    for (var j = 0; j < keys.length; j++){
+                    for (var j = 0; j < keys.length; j++) {
                         var key = keys[j];
                         delete part[key];
                     }
@@ -67,28 +69,36 @@ class Text extends UIElement implements IContainer, IDataElement {
             extend(changes, styleManager.getStyle(changes.textStyleId, 2).props);
         }
 
-        if (contentChanged && this.props.dp && !dataProvider){
+        if (contentChanged && this.props.dp && !dataProvider) {
             changes.dp = null;
         }
     }
-    propsUpdated(newProps, oldProps){
+    propsUpdated(newProps, oldProps) {
         if (!this.runtimeProps.keepEngine //to avoid disposal when editing inline
             && (newProps.br !== undefined
-            || newProps.autoWidth !== undefined
-            || newProps.font !== undefined
-            || newProps.content !== undefined)){
+                || newProps.autoWidth !== undefined
+                || newProps.font !== undefined
+                || newProps.content !== undefined)) {
             delete this.runtimeProps.engine;
+        }
+
+        if (newProps.br !== undefined
+                || newProps.autoWidth !== undefined
+                || newProps.font !== undefined
+                || newProps.content !== undefined
+                || newProps.visible !== undefined) {
+            delete this.runtimeProps.commandCache;
         }
         super.propsUpdated.apply(this, arguments);
     }
 
-    _ensureBoundaryBox(changes, forceWidth){
+    _ensureBoundaryBox(changes, forceWidth) {
         var br = changes.br || this.getBoundaryRect();
 
-        if (changes.autoWidth === undefined){
+        if (changes.autoWidth === undefined) {
             changes.autoWidth = this.props.autoWidth;
         }
-        if (changes.content === undefined){
+        if (changes.content === undefined) {
             changes.content = this.props.content;
         }
         var engine = this.createEngine(changes);
@@ -96,65 +106,86 @@ class Text extends UIElement implements IContainer, IDataElement {
         var actualHeight = engine.getActualHeight();
 
         var newWidth = br.width;
-        if (br.width < actualWidth || forceWidth){
-            newWidth = actualWidth + .5|0;
+        if (br.width < actualWidth || forceWidth) {
+            newWidth = actualWidth + .5 | 0;
         }
         var newHeight = br.height;
-        if (br.height < actualHeight){
-            newHeight = actualHeight + .5|0;
+        if (br.height < actualHeight) {
+            newHeight = actualHeight + .5 | 0;
         }
         changes.br = br.withSize(newWidth, newHeight);
     }
 
-    applySizeScaling(s, o, options, changeMode){
-        this.prepareAndSetProps({autoWidth: false}, changeMode);
+    applySizeScaling(s, o, options, changeMode) {
+        this.prepareAndSetProps({ autoWidth: false }, changeMode);
         super.applySizeScaling.apply(this, arguments);
     }
 
-    drawSelf(context, w, h, environment){
+    drawSelf(context, w, h, environment) {
+        if(false && !this.runtimeProps.keepEngine) {
+            if (!this.runtimeProps.commandCache) {
+                context = new ContextCommandCache(context);
+            } else {
+                ContextCommandCache.replay(context, this.runtimeProps.commandCache);
+                return;
+            }
+        }
+
         context.save();
 
-        if (this.runtimeProps.engine === undefined){
+        if (this.runtimeProps.engine === undefined) {
+            params.perf && performance.mark("Text.createEngine");
             this.createEngine();
+            params.perf && performance.measure("Text.createEngine", "Text.createEngine");
         }
         else {
+            params.perf && performance.mark("Text.setDefaultFormatting");
             TextEngine.setDefaultFormatting(this.props.font);
+            params.perf && performance.measure("Text.setDefaultFormatting", "Text.setDefaultFormatting");
         }
 
         context.beginPath();
+        params.perf && performance.mark("Text.fill");
         context.rectPath(0, 0, w, h);
         Brush.fill(this.fill(), context, 0, 0, w, h);
-        if (this.runtimeProps.drawText === false){
+        params.perf && performance.measure("Text.fill", "Text.fill");
+        if (this.runtimeProps.drawText === false) {
             context.restore();
             return;
         }
         context.lineWidth = this.strokeWidth();
+        params.perf && performance.mark("Text.stroke");
         Brush.stroke(this.stroke(), context, 0, 0, w, h);
+        params.perf && performance.measure("Text.stroke", "Text.stroke");
 
         var verticalOffset = this.getVerticalOffset(this.runtimeProps.engine);
-        if (verticalOffset !== 0){
+        if (verticalOffset !== 0) {
             context.translate(0, verticalOffset);
         }
-        this.runtimeProps.engine.render(context, this.runtimeProps.drawSelection, verticalOffset, environment.view?environment.view.focused():false);
+        params.perf && performance.mark("Text.render");
+        this.runtimeProps.engine.render(context, this.runtimeProps.drawSelection, verticalOffset, environment.view ? environment.view.focused() : false);
+        params.perf && performance.measure("Text.render", "Text.render");
 
         context.restore();
+
+        this.runtimeProps.commandCache = context.commands;
     }
 
-    getVerticalOffset(engine){
+    getVerticalOffset(engine) {
         var offset = 0, h;
         var height = this.height();
         var align = this.props.font.valign;
-        if (align == TextAlign.middle){
+        if (align == TextAlign.middle) {
             h = engine.getActualHeight();
-            offset = (height - h)/2;
-        } else if (align === TextAlign.bottom){
+            offset = (height - h) / 2;
+        } else if (align === TextAlign.bottom) {
             h = engine.getActualHeight();
             offset = height - h;
         }
         return offset;
     }
 
-    createEngine(props = this.props){
+    createEngine(props = this.props) {
         TextEngine.setDefaultFormatting(props.font);
 
         var engine = new TextEngine();
@@ -164,8 +195,8 @@ class Text extends UIElement implements IContainer, IDataElement {
         return engine;
     }
 
-    cursor(){
-        if (this.runtimeProps.drawSelection){
+    cursor() {
+        if (this.runtimeProps.drawSelection) {
             return "text";
         }
         super.cursor();
@@ -173,7 +204,7 @@ class Text extends UIElement implements IContainer, IDataElement {
 
     textStyleId(value) {
         if (arguments.length > 0) {
-            this.setProps({textStyleId: value});
+            this.setProps({ textStyleId: value });
         }
 
         return this.props.textStyleId;
@@ -186,13 +217,13 @@ class Text extends UIElement implements IContainer, IDataElement {
         }
         return res;
     }
-    hasPendingTexStyle(){
-        if (!this.props.textStyleId){
+    hasPendingTexStyle() {
+        if (!this.props.textStyleId) {
             return false;
         }
         var baseStyle = styleManager.getStyle(this.props.textStyleId, 2);
 
-        for (var p in baseStyle.props){
+        for (var p in baseStyle.props) {
             if (!deepEquals(this.props[p], baseStyle.props[p])) {
                 return true;
             }
@@ -200,17 +231,17 @@ class Text extends UIElement implements IContainer, IDataElement {
         return false;
     }
 
-    getNonRepeatableProps(newProps){
+    getNonRepeatableProps(newProps) {
         var base = super.getNonRepeatableProps();
         var props = newProps && newProps.autoWidth !== undefined ? newProps : this.props;
-        if (props.autoWidth){
+        if (props.autoWidth) {
             return base.concat(["br", "content"]);
         }
         return base.concat(["content"]);
     }
 
-    initFromData(content){
-        this.prepareAndSetProps({content, dp: this.props.dp});
+    initFromData(content) {
+        this.prepareAndSetProps({ content, dp: this.props.dp });
     }
 
     canAccept(elements, autoInsert, allowMoveInOut) {
@@ -221,30 +252,30 @@ class Text extends UIElement implements IContainer, IDataElement {
         return other instanceof Text && other.runtimeProps.isDataElement;
     }
 
-    add(text: Text, mode){
+    add(text: Text, mode) {
         return this.insert(text, 0, mode);
     }
 
-    insert(text: Text, index, mode){
+    insert(text: Text, index, mode) {
         this.prepareAndSetProps(text.selectProps(["content", "dp", "df"]));
         return this;
     }
 
     changePosition(element: IUIElement, index: number, mode?: number) {
     }
-    getElementById(){
+    getElementById() {
         return null;
     }
 
-    remove(){
+    remove() {
         return -1;
     }
 
-    autoPositionChildren(): boolean{
+    autoPositionChildren(): boolean {
         return true;
     }
 
-    get children(){
+    get children() {
         return null;
     }
 
@@ -252,7 +283,7 @@ class Text extends UIElement implements IContainer, IDataElement {
         return m;
     }
 
-    static fromSvgElement(element, parsedAttributes, matrix){
+    static fromSvgElement(element, parsedAttributes, matrix) {
         //
         // :
         // "cls-5"
@@ -276,19 +307,19 @@ class Text extends UIElement implements IContainer, IDataElement {
         //     Matri
         var text = new Text();
         var font: any = {};
-        if(parsedAttributes.fontSize){
-            font.size = parsedAttributes.fontSize.replace('px','');
+        if (parsedAttributes.fontSize) {
+            font.size = parsedAttributes.fontSize.replace('px', '');
         }
 
-        if(parsedAttributes.fontFamily){
+        if (parsedAttributes.fontFamily) {
             font.family = 'Open Sans';//TODO: parsedAttributes.fontFamily;
         }
 
         var md = matrix.decompose();
 
         var props = {
-            content:parsedAttributes.text,
-            font:Font.createFromObject(font),
+            content: parsedAttributes.text,
+            font: Font.createFromObject(font),
             x: md.translation.x,
             y: md.translation.y
         }
@@ -314,7 +345,7 @@ PropertyMetadata.registerForType(Text, {
         displayName: "Font",
         type: "font",
         options: {
-            fonts: [{name: "Open Sans", value: "Open Sans"}]
+            fonts: [{ name: "Open Sans", value: "Open Sans" }]
         },
         defaultValue: Font.Default,
         style: 2
@@ -325,13 +356,13 @@ PropertyMetadata.registerForType(Text, {
         options: {
             hasLabels: true,
             items: [
-                {label: "Auto", value: true},
-                {label: "Fixed", value: false}
+                { label: "Auto", value: true },
+                { label: "Fixed", value: false }
             ]
         },
         defaultValue: true
     },
-    groups: function(element){
+    groups: function (element) {
         var baseGroups = PropertyMetadata.findForType(UIElement).groups();
 
         var ownGroups = [
