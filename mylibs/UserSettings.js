@@ -45,6 +45,7 @@ var settings = {
     },
 
     text: {
+        defaultText: "Your text here",
         selectOnDblClick: true,
         insertNewOnClickOutside: true
     },

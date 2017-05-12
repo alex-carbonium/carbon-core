@@ -11,6 +11,7 @@ import Per from "./util/per";
 import {inherit, event, deCRLFify} from "./util/util";
 
 import {TextAlign} from "carbon-basics";
+import Environment from "../../environment";
 
     function Doc () {
         this._width = 0;
@@ -481,7 +482,7 @@ import {TextAlign} from "carbon-basics";
                 if (caret) {
                     ctx.save();
                     ctx.fillStyle = this.caretColor() || 'black';
-                    caret.fill(ctx);
+                    caret.fill(ctx, 1/Environment.view.scale());
                     ctx.restore();
                 }
             }

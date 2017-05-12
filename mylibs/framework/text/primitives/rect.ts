@@ -24,8 +24,8 @@
         ctx.strokeRect(this.l, this.t, this.w, this.h);
     };
 
-    Rect.prototype.fill = function(ctx) {
-        ctx.fillRect(this.l, this.t, this.w, this.h);
+    Rect.prototype.fill = function(ctx, scaleW = 1) {
+        ctx.fillRect(this.l, this.t, this.w * scaleW, this.h);
     };
 
     Rect.prototype.offset = function(x, y) {

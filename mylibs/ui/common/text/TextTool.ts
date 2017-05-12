@@ -196,9 +196,9 @@ export default class TextTool extends Tool {
         }
         else if (this._dragZone){
             var rect = this._getDrawRect(this._dragZone);
-            var props: any = {br: rect.withPosition(0, 0)};
+            var props: any = {br: rect.withPosition(0, 0).roundMutable()};
             props.autoWidth = false;
-            this.insertText({x: rect.x, y: rect.y}, props);
+            this.insertText({x: rect.x, y: rect.y}, props, true);
             this._dragZone = null;
         }
         Invalidate.requestInteractionOnly();
@@ -240,12 +240,12 @@ export default class TextTool extends Tool {
         }
     };
 
-    insertText(e, p = {}){
+    insertText(e, p = {}, fixedSize?: boolean){
         var text = new Text();
         this._app.activePage.nameProvider.assignNewName(text);
 
         var props = {
-            content: "Your text here",
+            content: UserSettings.text.defaultText,
             font: this._defaultFormatter.props.font
         };
         if (p){
@@ -260,10 +260,14 @@ export default class TextTool extends Tool {
             dropData = this._app.activePage.findDropToPageData(e.x, e.y, text);
         }
         if (dropData){
-            var engine = text.createEngine();
-            var height = engine.getActualHeight();
-            text.applyTranslation(Point.create(dropData.position.x, dropData.position.y - height/2).roundMutable());
             text.prepareAndSetProps(props);
+            var y = dropData.position.y;
+            if (!fixedSize){
+                var engine = text.createEngine();
+                var height = engine.getActualHeight();
+                y -= height/2;
+            }
+            text.applyTranslation(Point.create(dropData.position.x, y).roundMutable());
             dropData.target.add(text);
         }
 
@@ -459,14 +463,16 @@ export default class TextTool extends Tool {
 
             var r = this._getDrawRect(this._dragZone);
             context.strokeStyle = SharedColors.Highlight;
+            context.lineWidth = 1/this._view.scale();
             context.strokeRect(r.x + .5, r.y + .5, r.width - 1, r.height - 1);
-
             context.restore();
         }
         if (this._editClone){
             context.save();
             this._editClone.viewMatrix().applyToContext(context);
+            context.lineWidth = 1/this._view.scale();
             context.strokeStyle = SharedColors.Highlight;
+
             //-.5 to show the text cursor if it is at position 0, maybe can be done better...
             context.strokeRect(-.5, -.5, this._editClone.width() + 1, this._editClone.height() + 1);
             context.restore();
