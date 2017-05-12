@@ -122,14 +122,14 @@ class Text extends UIElement implements IContainer, IDataElement {
     }
 
     drawSelf(context, w, h, environment) {
-        if(false && !this.runtimeProps.keepEngine) {
-            if (!this.runtimeProps.commandCache) {
-                context = new ContextCommandCache(context);
-            } else {
-                ContextCommandCache.replay(context, this.runtimeProps.commandCache);
-                return;
-            }
-        }
+        // if(false && !this.runtimeProps.keepEngine) {
+        //     if (!this.runtimeProps.commandCache) {
+        //         context = new ContextCommandCache(context);
+        //     } else {
+        //         ContextCommandCache.replay(context, this.runtimeProps.commandCache);
+        //         return;
+        //     }
+        // }
 
         context.save();
 
