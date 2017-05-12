@@ -20,7 +20,7 @@ import logger from "../logger";
 import params from "../params";
 import StateMachine from "../StateMachine";
 import DiscoverProxy from "./DiscoverProxy";
-import Promise from "bluebird";
+import bluebird from "bluebird";
 import { IDisposable } from "carbon-basics";
 import { IBackend, ConnectionState } from "carbon-api";
 
@@ -167,7 +167,7 @@ export default class PersistentConnection extends StateMachine<ConnectionState> 
             this._restartPromise.cancel();
         }
 
-        this._restartPromise = Promise.delay(timeout)
+        this._restartPromise = bluebird.delay(timeout)
             .then(() => this.backend.ensureLoggedIn(initialStart || possiblyOldToken))
             .then(() => this.resolveConnectionAddress(app))
             .then(url => {
