@@ -828,7 +828,6 @@ class AppClass extends DataNode implements IApp {
         return Promise.all([dataLoaded, iconFontsLoaded, defaultFontLoaded]).then(result => {
             var data = result[0];
             stopwatch.checkpoint("DataProjectFonts");
-            this.initExtensions();
             if (this.platform.richUI()) {
                 this.resetCurrentTool();
             }

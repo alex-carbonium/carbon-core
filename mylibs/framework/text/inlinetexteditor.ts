@@ -149,7 +149,7 @@ import {FontWeight, FontStyle, UnderlineStyle} from "carbon-basics";
     };
 
     /** @override */
-    InlineTextEditor.prototype.deactivate = function () {
+    InlineTextEditor.prototype.deactivate = function (finalEdit?: boolean) {
         this._lastSelect = this.engine.getSelection();
         this.engine.select(0,0);
         this._activated = false;
@@ -164,7 +164,7 @@ import {FontWeight, FontStyle, UnderlineStyle} from "carbon-basics";
         this.engine.unsubscribe();
 
         this._view = null;
-        this.onDeactivated();
+        this.onDeactivated(finalEdit);
     };
 
     InlineTextEditor.prototype.caretUpdate = function (reset) {
@@ -392,7 +392,7 @@ deserunt mollit anim id est laborum.");
                 break;
             case 13: //enter
                 if (ctrlKey || metaKey){
-                    this.deactivate();
+                    this.deactivate(true);
                 }
                 else{
                     this.engine.insert("\n");
@@ -412,7 +412,7 @@ deserunt mollit anim id est laborum.");
                 if (ctrlKey || (metaKey && !shiftKey)) {
                     handled = true;
                     if (!this.engine.undo()){
-                        this.deactivate();
+                        this.deactivate(false);
                     }
                     // if (editor.hasUndoState()){
                     //     editor.undoState();
@@ -439,7 +439,7 @@ deserunt mollit anim id est laborum.");
                 }
                 break;
             case 27: //esc
-                this.deactivate();
+                this.deactivate(true);
                 break;
         }
 

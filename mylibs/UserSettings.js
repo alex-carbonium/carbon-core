@@ -44,6 +44,11 @@ var settings = {
         defaultStroke: "black"
     },
 
+    text: {
+        selectOnDblClick: true,
+        insertNewOnClickOutside: true
+    },
+
     internal: {
         showRotateAreas: false
     }

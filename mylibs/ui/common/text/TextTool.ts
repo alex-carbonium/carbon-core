@@ -2,7 +2,7 @@
 //TODO: auto-font-height feature for auto-width texts
 //TODO: strikethrough is too high due to too high ascent, why?
 
-import TOol from "../Tool";
+import Tool from "../Tool";
 import DropVisualization from "../../../extensions/DropVisualization";
 import DragController from "../../../framework/DragController";
 import Text from "../../../framework/text/Text";
@@ -20,11 +20,13 @@ import Invalidate from "../../../framework/Invalidate";
 import Environment from "../../../environment";
 import {getAverageLuminance} from "../../../math/color";
 import Rect from "../../../math/rect";
-import { ChangeMode } from "carbon-core";
+import { ChangeMode, IMouseEventData } from "carbon-core";
+import UserSettings from "../../../UserSettings";
+import Point from "../../../math/point";
 
 const CursorInvertThreshold = .4;
 
-export default class TextTool extends TOol {
+export default class TextTool extends Tool {
     [name: string]: any;
 
     constructor(app) {
@@ -88,7 +90,7 @@ export default class TextTool extends TOol {
         this._dragController.unbind();
         if (this._editor){
             Selection.makeSelection([this._editedElement]);
-            this._editor.deactivate();
+            this._editor.deactivate(false);
         }
 
         if(this._onElementSelectedToken){
@@ -149,7 +151,7 @@ export default class TextTool extends TOol {
                 this._next = null;
                 Invalidate.requestInteractionOnly();
             }
-            if (this._editor){
+            if (this._editor && !UserSettings.text.insertNewOnClickOutside){
                 Cursor.removeGlobalCursor();
             }
             else{
@@ -168,7 +170,7 @@ export default class TextTool extends TOol {
             if (hit instanceof Text){
                 this._next = {element: hit, event: e};
             }
-            this._editor.deactivate();
+            this._editor.deactivate(false);
         }
         else{
             this._dragZone = {x: e.x, y: e.y, width: 0, height: 0, flipX: false, flipY: false};
@@ -201,10 +203,10 @@ export default class TextTool extends TOol {
         }
         Invalidate.requestInteractionOnly();
     };
-    onClicked = e => {
+    onClicked = (e: IMouseEventData) => {
         if (this._hittingEdited(e)){
-            this._editor.mouseDown(e, e.event);
-            this._editor.mouseUp(e, e.event);
+            this._editor.mouseDown(e, e["event"]);
+            this._editor.mouseUp(e, e["event"]);
         }
         else{
             var hit = this._hitNewElement(e);
@@ -213,9 +215,9 @@ export default class TextTool extends TOol {
             }
             else if (this._editor){
                 Selection.makeSelection([this._editedElement]);
-                this._editor.deactivate();
+                this._editor.deactivate(!UserSettings.text.insertNewOnClickOutside);
             }
-            else if (!this._detaching){ //tool can be changed by mouse down
+            else if (UserSettings.text.insertNewOnClickOutside || !this._detaching){ //tool can be changed by mouse down
                 this.insertText(e);
             }
         }
@@ -251,13 +253,16 @@ export default class TextTool extends TOol {
         }
 
         var dropData;
-        if(this._view.isolationLayer.isActive) {
+        if (this._view.isolationLayer.isActive) {
             dropData = this._view.isolationLayer.findDropToPageData(e.x, e.y, text);
-        } else {
+        }
+        else {
             dropData = this._app.activePage.findDropToPageData(e.x, e.y, text);
         }
         if (dropData){
-            text.applyTranslation(dropData.position);
+            var engine = text.createEngine();
+            var height = engine.getActualHeight();
+            text.applyTranslation(Point.create(dropData.position.x, dropData.position.y - height/2).roundMutable());
             text.prepareAndSetProps(props);
             dropData.target.add(text);
         }
@@ -269,7 +274,7 @@ export default class TextTool extends TOol {
 
     beginEdit(text, e?){
         if (this._editor){
-            this._editor.deactivate();
+            this._editor.deactivate(false);
         }
 
         var clone = text.clone();
@@ -292,7 +297,7 @@ export default class TextTool extends TOol {
         this._rangeFormatter.initFormatter(this._app, engine, this._editClone, () => this._changed = true);
         Selection.makeSelection([this._rangeFormatter]);
 
-        if (e){
+        if (e && !UserSettings.text.selectOnDblClick){
             e.y -= text.getVerticalOffset(engine);
             this._editor.mouseDown(e);
             this._editor.mouseUp(e);
@@ -329,7 +334,7 @@ export default class TextTool extends TOol {
         }
         this._changed = true;
     };
-    endEdit(){
+    endEdit(finalEdit: boolean){
         if (this._changed){
             this._updateOriginal();
         }
@@ -351,7 +356,7 @@ export default class TextTool extends TOol {
             this._next = null;
             this.beginEdit(next.element, next.event);
         }
-        else{
+        else if (finalEdit) {
             this._detaching = true;
             setTimeout(() => this._app.resetCurrentTool());
         }
@@ -378,7 +383,7 @@ export default class TextTool extends TOol {
         var inlineEditor = new InlineTextEditor();
         inlineEditor.onInvalidate = this._onInvalidateEditor;
         inlineEditor.onSelectionChanged = this._onSelectionChanged;
-        inlineEditor.onDeactivated = () => this.endEdit();
+        inlineEditor.onDeactivated = finalEdit => this.endEdit(finalEdit);
         inlineEditor.activate(element.viewMatrix(), engine, element.props.font, this._app.fontManager);
         return inlineEditor;
     }
