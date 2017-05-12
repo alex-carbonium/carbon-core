@@ -6,8 +6,7 @@ import {ActionType,
     EasingType,
     ActionEvents,
     StoryType,
-    ViewTool,
-    PrimitiveType} from "framework/Defs";
+    ViewTool} from "framework/Defs";
 import * as ActionHelper from "./ActionHelper";
 import Matrix from "../../math/matrix";
 import {areRectsIntersecting, adjustRectSize, isPointInRect} from "../../math/math";
@@ -18,7 +17,7 @@ import Environment from "../../environment";
 import StoryAction from "../../stories/StoryAction";
 import Link from "./Link";
 import DataNode from "framework/DataNode";
-import {IUIElement} from "carbon-core";
+import { IUIElement, PrimitiveType } from "carbon-core";
 
 const HandleSize = 16;
 const HomeButtonWidth = 12;

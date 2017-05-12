@@ -1,19 +1,18 @@
 import Command from "../framework/commands/Command";
-import {PrimitiveType} from "../framework/Defs";
+import { PrimitiveType } from "carbon-core";
 
-export default klass(Command, {
-    _constructor: function (primitives, rollbacks) {
-        this.primitives = primitives;
-        this.rollbacks = rollbacks;
-    },
+export default class PrimitiveSetCommand extends Command{
+    constructor(private primitives, private rollbacks) {
+        super();
+    }
     flushRedoStack() {
         if(this.primitives.length !== 1) {
             return true;
         }
 
         return this.primitives[0].type !== PrimitiveType.Selection;
-    },
-    toPrimitiveList: function () {
+    }
+    toPrimitiveList() {
         return this.primitives;
     }
-});
+}

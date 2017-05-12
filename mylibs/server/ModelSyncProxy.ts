@@ -1,13 +1,12 @@
 import backend from "../backend";
 import Primitive from "../framework/sync/Primitive";
-import {ChangeMode} from "../framework/Defs";
 import DeferredPrimitives from "../framework/sync/DeferredPrimitives";
 import Invalidate from "../framework/Invalidate";
 import Selection from "../framework/SelectionModel";
 import UIElement from "../framework/UIElement";
 import logger from "../logger";
 import { createUUID, deepEquals } from "../util";
-import { IApp} from "carbon-core";
+import { IApp, ChangeMode } from "carbon-core";
 
 var debug = require("../DebugUtil")("carb:modelSync");
 

@@ -1,8 +1,8 @@
 // TODO: cleanup properties with the same value
 import PropertyTracker from "framework/PropertyTracker";
 import {createUUID, deepEquals} from "../util";
-import {PatchType, ChangeMode} from "./Defs";
 import ObjectFactory from "framework/ObjectFactory";
+import { ChangeMode, PatchType } from "carbon-core";
 
 function removeElement(state, elementId) {
     delete state.data[elementId];
@@ -127,6 +127,16 @@ function processPropertyChanged(state, defaultState, elementId, newProps, oldPro
     }
 }
 
+function isEmptyObject(obj){
+    for(var p in obj){
+        if(obj.hasOwnProperty(p)){
+            return false;
+        }
+    }
+
+    return true;
+}
+
 // function onLogEvent(primitives) {
 //     var that = this;
 //     primitives.forEach(e=> {
@@ -172,6 +182,8 @@ function updateFromState(state) {
 }
 
 export default class PropertyStateRecorder {
+    [name: string]: any;
+
     constructor(element) {
         this._trackingData = [];
         this._element = element;

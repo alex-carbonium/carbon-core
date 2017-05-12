@@ -3,13 +3,14 @@ import Container from "./Container";
 import ImageSourceHelper from "./ImageSourceHelper";
 import PropertyMetadata from "./PropertyMetadata";
 import Brush from "./Brush";
-import { Overflow, Types, ChangeMode } from "./Defs";
+import { Overflow, Types } from "./Defs";
 import Invalidate from "./Invalidate";
 import ImageEditTool from "./ImageEditTool";
 import EventHelper from "./EventHelper";
 import RectMask from "./RectMask";
 import { ContentSizing, ImageSource, ImageSourceType, IImage, IPropsOwner, IImageProps } from "carbon-model";
 import { IRect, OriginType } from "carbon-geometry";
+import { ChangeMode } from "carbon-core";
 
 const DefaultSizing = ContentSizing.fill;
 

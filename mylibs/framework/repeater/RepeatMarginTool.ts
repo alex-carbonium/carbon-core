@@ -1,5 +1,4 @@
 import {isPointInRect, adjustRectWidth, adjustRectHeight} from "math/math";
-import {ChangeMode} from "../Defs";
 import DragController from "../DragController";
 import CommandManager from "../commands/CommandManager";
 import PropertyTracker from "../PropertyTracker";

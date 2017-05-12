@@ -1,4 +1,4 @@
-import { Types, ArrangeStrategies, Overflow, StackAlign, StackOrientation, ChangeMode } from "./Defs";
+import { Types, ArrangeStrategies, Overflow, StackAlign, StackOrientation } from "./Defs";
 import ArrangeStrategy from "./ArrangeStrategy";
 import ContextPool from "./render/ContextPool";
 import CorruptedElement from "./CorruptedElement";
@@ -13,7 +13,7 @@ import Rect from '../math/rect';
 import Brush from './Brush';
 import Box from './Box';
 import UserSettings from '../UserSettings';
-import { IKeyboardState } from "carbon-basics";
+import { IKeyboardState, ChangeMode } from "carbon-basics";
 import { IPropsOwner, IContainerProps, IUIElement, IContainer } from "carbon-model";
 import { IMatrix } from "carbon-geometry";
 
@@ -396,7 +396,7 @@ export default class Container extends UIElement implements IContainer, IPropsOw
         this.changeChildPosition(element, index, mode);
         this.invalidate();
     }
-    remove(/*UIElement*/element, mode) {
+    remove(/*UIElement*/element, mode: ChangeMode) {
         if(element.removing() === false) {
             return;
         }

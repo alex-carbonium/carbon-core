@@ -984,16 +984,6 @@ global.detectCircularReference = function detectCircularReference(obj){
     return path.join('|');
 }
 
-global.isEmptyObject = function isEmptyObject(obj){
-    for(var p in obj){
-        if(obj.hasOwnProperty(p)){
-            return false;
-        }
-    }
-
-    return true;
-}
-
 global.resolveType = function resolveType(typeName) {
     var current = global;
     var components = typeName.split('.');

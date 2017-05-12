@@ -37,6 +37,7 @@ declare module "carbon-app"{
         deferredChange: IEvent<any>;
         relayoutFinished: IEvent<void>;
         state: any;
+        fontManager: any;
 
         isInOfflineMode(): boolean;
         isNew(): boolean;
@@ -51,6 +52,7 @@ declare module "carbon-app"{
         interactionLayer: any;
         isolationLayer: any;
         scaleMatrix: any;
+        context: any;
 
         registerForLayerDraw(layerType:number, element:{onLayerDraw:(layer: ILayer, context: IContext)=>void}, index?);
         unregisterForLayerDraw(layerType:number, element:any);
@@ -60,6 +62,7 @@ declare module "carbon-app"{
         viewportRect(): any;
 
         prototyping(value?:boolean): boolean;
+        hitElementDirect(e?);
     }
 
     export interface IController{
@@ -83,6 +86,8 @@ declare module "carbon-app"{
 declare module "carbon-model"{
     export interface IPage{
         nameProvider: any;
+
+        findDropToPageData(x, y, element);
     }
 
     export interface IArtboard{

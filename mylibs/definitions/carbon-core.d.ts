@@ -42,7 +42,6 @@ declare module "carbon-core" {
     export var Clipboard: any;
     export var domUtil: any;
     export var ContextBarPosition: any;
-    export var PrimitiveType: any;
     export var NullContainer: any;
     export var CustomGuides: any;
     export var LayoutGridLines:any;

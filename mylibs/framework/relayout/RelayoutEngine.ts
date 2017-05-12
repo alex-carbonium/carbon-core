@@ -1,7 +1,6 @@
 import DeferredPrimitives from "../sync/DeferredPrimitives";
 import ModelStateListener from "../sync/ModelStateListener";
 import PrimitiveHandler from "../sync/Primitive_Handlers";
-import { ChangeMode, PrimitiveType } from "../Defs";
 
 var debug = require("DebugUtil")("carb:relayoutEngine");
 

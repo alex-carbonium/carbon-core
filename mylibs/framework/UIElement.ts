@@ -23,7 +23,6 @@ import {
     HorizontalAlignment,
     VerticalAlignment,
     PointDirection,
-    ChangeMode,
     StrokePosition
 } from "./Defs";
 import RotateFramePoint from "../decorators/RotateFramePoint";
@@ -41,6 +40,7 @@ import { PropertyDescriptor } from './PropertyMetadata';
 import { IKeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IPropsOwner, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
+import { ChangeMode } from "carbon-core";
 
 require("../migrations/All");
 
@@ -132,7 +132,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         }
         super.setProps.apply(this, arguments);
     }
-    propsUpdated(newProps, oldProps, mode) {
+    propsUpdated(newProps, oldProps, mode?) {
         if (newProps.hasOwnProperty("m") || newProps.hasOwnProperty("br")) {
             this.resetGlobalViewCache();
             if (mode === ChangeMode.Model){

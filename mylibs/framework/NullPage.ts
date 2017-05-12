@@ -1,5 +1,5 @@
 import PropertyMetadata from "framework/PropertyMetadata";
-import { Types, ChangeMode } from "./Defs";
+import { Types } from "./Defs";
 import { IPage, IUIElement, IContainerProps, IDataNode, IArtboard } from "carbon-model";
 import { IRect, IPoint } from "carbon-geometry";
 import Rect from "../math/rect";
@@ -82,6 +82,10 @@ class NullPage extends UIElement implements IPage {
     each(callback: (e: IUIElement, index?: number) => boolean | void) {
     }
     fill(value?: any) {
+    }
+
+    findDropToPageData(x, y, element){
+        return null;
     }
 
     parent() {

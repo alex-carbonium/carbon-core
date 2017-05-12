@@ -1,5 +1,5 @@
-import { PrimitiveType } from "../Defs";
 import DataNode from "../DataNode";
+import { PrimitiveType } from "carbon-core";
 
 var Primitive: any = {};
 

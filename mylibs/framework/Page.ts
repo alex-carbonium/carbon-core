@@ -1,7 +1,7 @@
 import Layer from "./Layer";
 import Container from "./Container";
 import Matrix from "math/matrix";
-import {ChangeMode, Types} from "./Defs";
+import {Types} from "./Defs";
 import {areRectsIntersecting} from "math/math";
 import Selection from "framework/SelectionModel";
 import PropertyMetadata from "framework/PropertyMetadata";
@@ -9,7 +9,7 @@ import ContextPool from "framework/render/ContextPool";
 import EventHelper from "./EventHelper";
 import Brush from "./Brush";
 import NameProvider from "ui/NameProvider";
-import {IContainer, IRect, IPage, IArtboard} from "carbon-core";
+import { IContainer, IRect, IPage, IArtboard, ChangeMode } from "carbon-core";
 
 function findNextPageName() {
     var maxId = 0;

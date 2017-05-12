@@ -1,7 +1,7 @@
 import PropertyMetadata, { PropertyDescriptor } from "./PropertyMetadata";
 import PropertyTracker from "./PropertyTracker";
 import { leaveCommonProps } from "../util";
-import { Types, ChangeMode } from "./Defs";
+import { Types } from "./Defs";
 import Brush from "./Brush";
 import Font from "./Font";
 import UIElement from "./UIElement";
@@ -12,7 +12,7 @@ import Rect from "../math/rect";
 import Phantom from "./Phantom";
 import Environment from "../environment";
 import Selection from "./SelectionModel";
-import { IUIElementProps, IPoint, IRect, IComposite } from "carbon-core";
+import { IUIElementProps, IPoint, IRect, IComposite, ChangeMode } from "carbon-core";
 
 export default class CompositeElement extends UIElement implements IComposite {
     children: UIElement[];

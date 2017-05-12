@@ -9,8 +9,6 @@ import StyleManager from "framework/style/StyleManager";
 import OpenTypeFontManager from "./OpenTypeFontManager";
 import {
     Types,
-    PatchType,
-    ChangeMode,
     StoryType,
     StyleType,
     ArtboardResource,
@@ -47,7 +45,7 @@ import IconsInfo from "./ui/IconsInfo";
 import backend from "./backend";
 import logger from "./logger";
 import params from "./params";
-import { IApp, IAppProps, IEvent, IEnvironment } from "carbon-core";
+import { IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType } from "carbon-core";
 import { IPage, IUIElement } from "carbon-model";
 import { IEvent2 } from "carbon-basics";
 
@@ -111,6 +109,7 @@ class AppClass extends DataNode implements IApp {
 
     shortcutManager: ShortcutManager;
     actionManager: ActionManager;
+    fontManager: OpenTypeFontManager;
 
     onBuildMenu: any;
     logEvent: IEvent<any>;

@@ -5,9 +5,9 @@ import Invalidate from "./framework/Invalidate";
 import OpenTypeFontInfo from "./framework/text/font/opentypefontinfo";
 import { FontWeight, FontStyle } from "carbon-basics";
 import backend from "./backend";
-import Promise from "bluebird";
+import bluebird from "bluebird";
 
-var load = Promise.promisify(OpenType.load);
+var load = bluebird.promisify(OpenType.load);
 
 export default class OpenTypeFontManager extends FontManager {
     _metadata: any[];

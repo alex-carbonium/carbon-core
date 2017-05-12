@@ -2,7 +2,8 @@ import CanvasStrategy from "./CanvasArrangeStrategy";
 import StackStrategy from "./StackArrangeStrategy";
 import DockStrategy from "./DockArrangeStrategy";
 import AlignStrategy from "./AlignArrangeStrategy";
-import { ArrangeStrategies, ChangeMode } from "./Defs";
+import { ArrangeStrategies } from "./Defs";
+import { ChangeMode } from "carbon-core";
 
 var ArrangeStrategy = {
     _strategies: [],

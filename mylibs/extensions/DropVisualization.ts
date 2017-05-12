@@ -16,9 +16,9 @@ import { ITransformationElement, ITransformationEventData, IPoint, IKeyboardStat
 import UserSettings from "../UserSettings";
 import Point from "../math/point";
 import Matrix from "../math/matrix";
-import { ChangeMode, FloatingPointPrecision } from "../framework/Defs";
+import { FloatingPointPrecision } from "../framework/Defs";
 import { LayerTypes } from "carbon-app";
-import { IUIElement } from "carbon-core";
+import { IUIElement, ChangeMode } from "carbon-core";
 
 var HighlightBrush = Brush.createFromColor(SharedColors.Highlight);
 

@@ -1,6 +1,6 @@
 declare module "carbon-model" {
     import { IPoint, IRect, ICoordinate, IMatrix, ISize, OriginType } from "carbon-geometry";
-    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable } from "carbon-basics";
+    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable, ChangeMode } from "carbon-basics";
     import { IContext } from "carbon-rendering";
 
     export interface IPropsOwner<TProps> {
@@ -103,11 +103,11 @@ declare module "carbon-model" {
         /**
          * Adds an element and returns the element which has been actually inserted.
          */
-        insert(element: IUIElement, index: number, mode?: number): IUIElement;
+        insert(element: IUIElement, index: number, mode?: ChangeMode): IUIElement;
 
-        remove(element: IUIElement, mode?: number): number;
+        remove(element: IUIElement, mode?: ChangeMode): number;
 
-        changePosition(element:IUIElement, index:number, mode?: number);
+        changePosition(element:IUIElement, index:number, mode?: ChangeMode);
 
         hitElement<T extends IUIElement>(event, scale: number, predicate?, directSelection?): T;
 

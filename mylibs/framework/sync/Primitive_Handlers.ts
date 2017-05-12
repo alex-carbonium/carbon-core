@@ -1,12 +1,13 @@
 import ObjectFactory from "../ObjectFactory";
 import Primitive from "./Primitive";
 import UIElement from "framework/UIElement";
-import {PrimitiveType, ChangeMode} from "../Defs";
 import Invalidate from "framework/Invalidate";
 import Selection from "framework/SelectionModel";
 import Environment from "environment";
 import AnimationGroup from "framework/animation/AnimationGroup";
 import backend from "backend";
+import { ChangeMode } from "carbon-basics";
+import { PrimitiveType } from "carbon-core";
 
 var debug = require("DebugUtil")("carb:primitiveHandlers");
 

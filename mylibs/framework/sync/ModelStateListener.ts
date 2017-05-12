@@ -1,5 +1,5 @@
 import Primitive from "./Primitive";
-import {PatchType} from "../Defs";
+import { PatchType } from "carbon-core";
 
 var lastSelection = {};
 

@@ -2,9 +2,10 @@ import ViewBase from "./ViewBase"
 import Environment from "environment";
 import Invalidate from "framework/Invalidate"
 import Page from "framework/Page";
-import {ChangeMode, Types, MirrorViewMode} from "framework/Defs";
+import {Types, MirrorViewMode} from "framework/Defs";
 import PropertyMetadata from "framework/PropertyMetadata";
 import {IMirroringProxyPage} from "carbon-app";
+import { ChangeMode } from "carbon-core";
 
 function fitRectToRect(outer, inner) {
     var scale = outer.width / inner.width;

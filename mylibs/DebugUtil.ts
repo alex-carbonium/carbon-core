@@ -1,5 +1,5 @@
-import { PrimitiveType } from "./framework/Defs";
 import debug from "debug";
+import { PrimitiveType } from "carbon-core";
 
 function nodeName(primitive){
     if (primitive.props && primitive.props.name){

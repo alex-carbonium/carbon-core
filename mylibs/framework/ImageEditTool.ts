@@ -1,5 +1,4 @@
 import Environment from "../environment";
-import {ChangeMode} from "./Defs";
 import {intersectRects} from "../math/math";
 import ImageSourceHelper from "./ImageSourceHelper";
 import ImageContent from "./ImageContent";
@@ -7,6 +6,7 @@ import SnapController from "./SnapController";
 import Rect from "../math/rect";
 import Selection from "./SelectionModel";
 import { ContentSizing, IImage, ImageSource } from "carbon-model";
+import { ChangeMode } from "carbon-core";
 
 export class FrameEditTool {
     [name: string]: any;

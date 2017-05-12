@@ -1,7 +1,7 @@
 import Shape from "framework/Shape";
 import Brush from "framework/Brush";
 import Path from "ui/common/Path";
-import {PointDirection, Types, FrameCursors, ChangeMode} from "./Defs";
+import {PointDirection, Types, FrameCursors} from "./Defs";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import Selection from "framework/SelectionModel";
@@ -12,6 +12,7 @@ import PropertyMetadata from "./PropertyMetadata";
 import ArrangeStrategy from "./ArrangeStrategy";
 import Rect from "../math/rect";
 import Point from "../math/point";
+import { ChangeMode } from "carbon-core";
 
 //TODO: add line width property
 //TODO: line angle should be calculated as the angle between points, not matrix angle

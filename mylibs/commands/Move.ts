@@ -1,5 +1,5 @@
 import Point from "math/point";
-import {ChangeMode} from "../framework/Defs";
+import { ChangeMode } from "carbon-core";
 
 export default {
     run: function(elements, direction, offset = 1){

@@ -6,7 +6,7 @@ import Page from "framework/Page";
 import * as math from "math/math";
 import { isPointInRect } from "math/math";
 import SharedColors from "ui/SharedColors";
-import { ChangeMode, TileSize, Types, ArtboardResource, PatchType } from "./Defs";
+import { TileSize, Types, ArtboardResource } from "./Defs";
 import RelayoutEngine from "./relayout/RelayoutEngine";
 import PropertyStateRecorder from "framework/PropertyStateRecorder";
 import ModelStateListener from "framework/sync/ModelStateListener";
@@ -17,6 +17,7 @@ import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
 import { IPropsOwner, IArtboardProps } from "carbon-model";
+import { ChangeMode, PatchType } from "carbon-core";
 
 
 //TODO: fix name of artboard on zoom

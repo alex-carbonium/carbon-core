@@ -2,10 +2,11 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import PropertyStateRecorder from "framework/PropertyStateRecorder";
 import Container from "framework/Container";
 import UIElement from "framework/UIElement";
-import {Overflow, ChangeMode, Types} from "./Defs";
+import {Overflow, Types} from "./Defs";
 import Selection from "framework/SelectionModel";
 import DataNode from "framework/DataNode";
 import ObjectFactory from "framework/ObjectFactory";
+import { ChangeMode } from "carbon-core";
 
 export default class ArtboardTemplateControl extends Container {
     constructor() {
@@ -76,7 +77,7 @@ export default class ArtboardTemplateControl extends Container {
 
         if (this._allowHResize || this._allowVResize) {
 
-            var props = {};
+            var props: any = {};
             if (this._allowHResize) {
                 props.width = currentSize.width || artboard.width();
             }
@@ -193,7 +194,7 @@ export default class ArtboardTemplateControl extends Container {
                 var newSize = this.size();
                 var oldSize = {width: oldProps.width || newSize.width, height: oldProps.height || newSize.height};
 
-                this.arrange({oldRect: oldSize, newRect: newSize}, null, ChangeMode.Self);
+                this.arrange({oldRect: oldSize, newRect: newSize}, ChangeMode.Self);
             }
 
             if (props.stateId !== undefined) {
@@ -204,20 +205,20 @@ export default class ArtboardTemplateControl extends Container {
         }
     }
 
-    arrange(resizeEvent){
+    arrange(resizeEvent, mode?){
         this._arranging = true;
-        super.arrange(resizeEvent);
+        super.arrange(resizeEvent, mode);
         this._arranging = false;
     }
 
     _changeState(stateId) {
         var defaultState = this._artboard._recorder.getStateById('default');
 
-        PropertyStateRecorder.applyState(this, defaultState, this.id());
+        PropertyStateRecorder.applyState(this, defaultState);
         if (stateId !== 'default') {
             var newState = this._artboard._recorder.getStateById(stateId);
             if(newState) {
-                PropertyStateRecorder.applyState(this, newState, this.id());
+                PropertyStateRecorder.applyState(this, newState);
             }
         }
     }
@@ -284,7 +285,7 @@ export default class ArtboardTemplateControl extends Container {
         return false;
     }
 
-    source(value) {
+    source(value?) {
         if (arguments.length > 0) {
             this.setProps({source: value});
         }
@@ -383,10 +384,6 @@ export default class ArtboardTemplateControl extends Container {
             this._initFromArtboard();
         }
         super.draw.apply(this, arguments);
-    }
-
-    canAccept() {
-        return false;
     }
 
     getNonRepeatableProps(newProps){

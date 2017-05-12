@@ -2,7 +2,7 @@ import UIElement from "./../UIElement";
 import Container from "./../Container";
 import PropertyTracker from "./../PropertyTracker";
 import PropertyMetadata from "./../PropertyMetadata";
-import { ArrangeStrategies, Overflow, ChangeMode, Types } from "./../Defs";
+import { ArrangeStrategies, Overflow, Types } from "./../Defs";
 import RepeatCell from "./RepeatCell";
 import RepeatMarginTool from "./RepeatMarginTool";
 import RepeatFrameType from "./frame/RepeatFrameType";
@@ -15,6 +15,7 @@ import Matrix from "../../math/matrix";
 import Isolate from "../../commands/Isolate";
 import { IUIElement, IContainer, IRepeatContainer } from "carbon-model";
 import { IMouseEventData } from "carbon-basics";
+import { ChangeMode } from "carbon-core";
 
 interface IRepeatContainerRuntimeProps{
     lastActiveCell?: RepeatCell;

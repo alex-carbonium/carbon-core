@@ -18,10 +18,10 @@ import SnapController from "framework/SnapController";
 import Box from "framework/Box";
 import {debounce} from "../../util";
 import Command from "framework/commands/Command";
-import {Types, ChangeMode} from "../../framework/Defs";
+import {Types} from "../../framework/Defs";
 import ArrangeStrategy from "../../framework/ArrangeStrategy";
 import ResizeOptions from "../../decorators/ResizeOptions";
-import { IMouseEventData, IKeyboardState } from "carbon-core";
+import { IMouseEventData, IKeyboardState, ChangeMode } from "carbon-core";
 import { LayerTypes } from "carbon-app";
 
 var CP_HANDLE_RADIUS = 3;

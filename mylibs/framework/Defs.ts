@@ -1,29 +1,5 @@
 //TODO: change all enum to const enum when all files are migrated
 
-export enum PrimitiveType {
-    None = 0,
-    DataNodeAdd = 1,
-    DataNodeRemove = 2,
-    DataNodeChange = 3,
-    DataNodeSetProps = 4,
-    DataNodeChangePosition = 5,
-    DataNodePatchProps = 6,
-    Selection = 7,
-    View = 8
-};
-
-export enum PatchType {
-    Insert = 1,
-    Remove = 2,
-    Change = 3
-};
-
-export enum ChangeMode {
-    Model, //update model
-    Root, //update node and its root, skip model update
-    Self //update node only
-};
-
 export enum TileSize {
     Auto,
     Small,

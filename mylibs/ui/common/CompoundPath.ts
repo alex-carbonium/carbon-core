@@ -6,12 +6,12 @@ import BezierCurve from "math/bezierCurve";
 import Point from "../../math/point";
 import PropertyMetadata from "framework/PropertyMetadata";
 import PropertyTracker from "framework/PropertyTracker";
-import {Overflow, Types, LineCap, LineJoin, ChangeMode} from "framework/Defs";
+import {Overflow, Types, LineCap, LineJoin} from "framework/Defs";
 import Path from "ui/common/Path";
 import GroupArrangeStrategy from "../../framework/GroupArrangeStrategy";
 import {combineRectArray} from "../../math/math";
 import Rect from "../../math/rect";
-import {IGroupContainer} from "carbon-core";
+import { IGroupContainer, ChangeMode } from "carbon-core";
 
 function propertyChanged(element, newProps) {
     if (!this._internalChange && this._itemIds && this._itemIds[element.id()]) {

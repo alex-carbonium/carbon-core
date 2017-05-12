@@ -173,7 +173,7 @@ declare module "carbon-basics" {
         static Default: Box;
     }
 
-    export enum PrimitiveType {
+    export const enum PrimitiveType {
         None = 0,
         DataNodeAdd = 1,
         DataNodeRemove = 2,

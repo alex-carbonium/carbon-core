@@ -1,10 +1,9 @@
 import PropertyMetadata from "./PropertyMetadata";
 import PropertyTracker from "./PropertyTracker";
 import ModelStateListener from "./sync/ModelStateListener";
-import {PatchType, ChangeMode} from "./Defs";
 import ObjectFactory from "./ObjectFactory";
 import {createUUID} from "../util";
-import { IDataNodeProps } from "carbon-core";
+import { IDataNodeProps, ChangeMode, PatchType } from "carbon-core";
 import { IDataNode } from "carbon-model";
 
 export default class DataNode implements IDataNode{

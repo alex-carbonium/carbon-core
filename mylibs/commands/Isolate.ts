@@ -1,6 +1,5 @@
 import Selection from "framework/SelectionModel";
 import Environment from "environment";
-import { ChangeMode } from "framework/Defs";
 import { ILayer, IUIElement, IContainer, IIsolationLayer } from "carbon-core";
 import { LayerTypes } from "carbon-app";
 

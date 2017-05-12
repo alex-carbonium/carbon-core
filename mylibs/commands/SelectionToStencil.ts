@@ -1,7 +1,7 @@
 import Selection from "framework/SelectionModel";
 import GroupContainer from "framework/GroupContainer";
-import { ChangeMode, ArtboardResource } from "framework/Defs";
-import { IUIElement, IContainer, IGroupContainer, IRect } from "carbon-core"
+import { ArtboardResource } from "framework/Defs";
+import { IUIElement, IContainer, IGroupContainer, IRect, ChangeMode } from "carbon-core"
 import Artboard from "framework/Artboard";
 import Rect from "math/rect";
 import Matrix from "math/matrix";
@@ -20,9 +20,9 @@ export default {
 
         for (let i = 0, l = sorted.length; i < l; ++i) {
             let element = sorted[i];
-            group.insert(element.clone(), i);
+            group.insert(element.clone(), i, ChangeMode.Self);
         }
-        group.performArrange();
+        group.performArrange(null, ChangeMode.Self);
 
         var boundingBox: IRect = group.getBoundingBoxGlobal();
         var globalMatrix = group.globalViewMatrixInverted();
@@ -30,7 +30,7 @@ export default {
         // create artboard of the same size
         var page = App.Current.activePage;
         var position = page.getNextAvailiablePosition(boundingBox.width, boundingBox.height);
-        var matrix = new Matrix(1, 0, 0, 1, position.x, position.y);
+        var matrix = Matrix.createTranslationMatrix(position.x, position.y);
 
         var artboard = new Artboard();
         page.add(artboard);
@@ -70,7 +70,7 @@ export default {
         });
         App.Current.activePage.nameProvider.assignNewName(artboardControl);
 
-        parent.remove(group);
+        parent.remove(group, ChangeMode.Self);
 
         Selection.makeSelection([artboardControl]);
     }

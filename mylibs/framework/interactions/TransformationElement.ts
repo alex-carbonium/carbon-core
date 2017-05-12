@@ -1,6 +1,6 @@
 import GroupContainer from "../GroupContainer";
 import CompositeElement from "../CompositeElement";
-import { ChangeMode, Types } from "../Defs";
+import { Types } from "../Defs";
 import Phantom from "../Phantom";
 import Brush from "../Brush";
 import PropertyMetadata from "../PropertyMetadata";
@@ -8,7 +8,7 @@ import UserSettings from "../../UserSettings";
 import Selection from "../SelectionModel";
 import Environment from "../../environment";
 import GlobalMatrixModifier from "../../framework/GlobalMatrixModifier";
-import { IComposite, IUIElement } from "carbon-core";
+import { IComposite, IUIElement, ChangeMode } from "carbon-core";
 
 export default class TransformationElement extends GroupContainer implements IComposite {
     constructor(element) {

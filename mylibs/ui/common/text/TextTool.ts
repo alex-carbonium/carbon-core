@@ -13,17 +13,20 @@ import InlineTextEditor from "../../../framework/text/inlinetexteditor";
 import SharedColors from "../../SharedColors";
 import DefaultFormatter from "./DefaultFormatter";
 import RangeFormatter from "./RangeFormatter";
-import {ViewTool, ChangeMode} from "../../../framework/Defs";
+import {ViewTool} from "../../../framework/Defs";
 import Selection from "../../../framework/SelectionModel";
 import Cursor from "../../../framework/Cursor";
 import Invalidate from "../../../framework/Invalidate";
 import Environment from "../../../environment";
 import {getAverageLuminance} from "../../../math/color";
 import Rect from "../../../math/rect";
+import { ChangeMode } from "carbon-core";
 
 const CursorInvertThreshold = .4;
 
 export default class TextTool extends TOol {
+    [name: string]: any;
+
     constructor(app) {
         super(ViewTool.Text);
         this._app = app;
@@ -80,7 +83,7 @@ export default class TextTool extends TOol {
             this._drawBinding.dispose();
             this._drawBinding = null;
         }
-        Cursor.removeGlobalCursor(true);
+        Cursor.removeGlobalCursor();
         Selection.onElementSelected.unbind(this, this.onElementSelected);
         this._dragController.unbind();
         if (this._editor){
@@ -191,7 +194,7 @@ export default class TextTool extends TOol {
         }
         else if (this._dragZone){
             var rect = this._getDrawRect(this._dragZone);
-            var props = {br: rect.withPosition(0, 0)};
+            var props: any = {br: rect.withPosition(0, 0)};
             props.autoWidth = false;
             this.insertText({x: rect.x, y: rect.y}, props);
             this._dragZone = null;
@@ -264,7 +267,7 @@ export default class TextTool extends TOol {
         this.beginEdit(text);
     }
 
-    beginEdit(text, e){
+    beginEdit(text, e?){
         if (this._editor){
             this._editor.deactivate();
         }
@@ -299,7 +302,7 @@ export default class TextTool extends TOol {
         }
 
         this._view.interactionLayer.add(clone);
-        Cursor.setGlobalCursor("text", true);
+        Cursor.setGlobalCursor("text");
         Invalidate.request();
         Environment.controller.inlineEditModeChanged.raise(true, this._editor);
 

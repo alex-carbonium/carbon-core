@@ -5,12 +5,12 @@ import SnapController from "../../framework/SnapController";
 import CustomGuides from "./CustomGuides";
 import UserSettings from "../../UserSettings";
 import { isPointInRect } from "../../math/math";
-import { PatchType, ViewTool } from "../../framework/Defs";
+import { ViewTool } from "../../framework/Defs";
 import { createUUID } from "../../util";
 import NullArtboard from "../../framework/NullArtboard";
 import Artboard from "../../framework/Artboard";
 import Keyboard from "../../platform/Keyboard";
-import { IApp, IView, IController, IDisposable, IRect, IMouseEventData } from "carbon-core";
+import { IApp, IView, IController, IDisposable, IRect, IMouseEventData, PatchType } from "carbon-core";
 import { IArtboard } from "carbon-model";
 
 const config = UserSettings.ruler;

@@ -4,9 +4,8 @@ import PropertyTracker from "../PropertyTracker";
 import BuiltInDataProvider from "./BuiltInDataProvider";
 import CustomDataProvider from "./CustomDataProvider";
 import { createUUID } from "../../util";
-import { PatchType } from "../Defs";
 import Selection from "../SelectionModel";
-import {IDisposable} from "carbon-core";
+import { IDisposable, PatchType } from "carbon-core";
 import Promise from "bluebird";
 
 export default class DataManager implements IDisposable {

@@ -1,7 +1,6 @@
 import Layer from './Layer';
 import Context from "./render/Context";
-import { IContainer, IUIElement, IIsolationLayer } from "carbon-core";
-import { ChangeMode, PrimitiveType } from "./Defs";
+import { IContainer, IUIElement, IIsolationLayer, ChangeMode } from "carbon-core";
 import DataNode from "./DataNode";
 import Selection from "framework/SelectionModel";
 import RelayoutEngine from "framework/relayout/RelayoutEngine";

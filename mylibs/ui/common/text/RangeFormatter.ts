@@ -1,7 +1,8 @@
 import UIElement from "framework/UIElement";
 import PropertyMetadata from "framework/PropertyMetadata";
-import {ChangeMode, Types} from "framework/Defs";
+import {Types} from "framework/Defs";
 import Font from "framework/Font";
+import { ChangeMode } from "carbon-core";
 
 var debug = require("DebugUtil")("carb:rangeFormatter");
 
