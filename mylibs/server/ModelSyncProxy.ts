@@ -63,8 +63,8 @@ export default class ModelSyncProxy {
             return Promise.resolve({id: this._app.id(), version: this._app.version()});
         }
 
-        var requestTooLong = this._requestStartTime && new Date().getTime() - this._requestStartTime > 120 * 1000;
-        if (this._requestInProgress && requestTooLong){
+        var requestTooLong = this._requestStartTime && (new Date() as any) - this._requestStartTime > 120 * 1000;
+        if (this._requestInProgress && !requestTooLong){
             logger.warn("Request in progress since " + this._requestStartTime.toISOString());
             return Promise.resolve({id: this._app.id(), version: this._app.version()});
         }
