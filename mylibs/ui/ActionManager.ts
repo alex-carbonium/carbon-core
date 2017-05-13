@@ -448,11 +448,11 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("zoomOut", "Zoom out", "Zoom", function () {
-            Environment.view.zoom(Environment.view.scale() - 0.1);
+            Environment.view.zoomOutStep();
         });
 
         this.registerAction("zoomIn", "Zoom in", "Zoom", function () {
-            Environment.view.zoom(Environment.view.scale() + 0.1);
+            Environment.view.zoomInStep();
         });
 
         this.registerAction("zoom100", "1:1", "Zoom", function () {

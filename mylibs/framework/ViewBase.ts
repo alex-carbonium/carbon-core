@@ -13,6 +13,8 @@ import { ICoordinate } from "carbon-geometry";
 var Stopwatch = require("../Stopwatch");
 var debug = require("DebugUtil")("carb:view");
 
+const ZoomSteps = [0.02, 0.03, 0.06, 0.13, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256];
+
 function setupLayers(Layer) {
     var layer = new Layer(this);
     this._page = layer;
@@ -211,7 +213,7 @@ export default class ViewBase { //TODO: implement IView
         this._globalContextModifier = modifier;
     }
 
-    registerForLayerDraw(layer, element, index?:number) {
+    registerForLayerDraw(layer, element, index?: number) {
         this.unregisterForLayerDraw(layer, element);
         if (index === undefined) {
             this._registredForLayerDraw[layer].push(element);
@@ -340,8 +342,8 @@ export default class ViewBase { //TODO: implement IView
         return pos;
     }
 
-    getLayer(layerType:LayerTypes) : ILayer {
-        return this._layers.find(l=>l.type === layerType);
+    getLayer(layerType: LayerTypes): ILayer {
+        return this._layers.find(l => l.type === layerType);
     }
 
     viewportRect() {
@@ -371,8 +373,8 @@ export default class ViewBase { //TODO: implement IView
             }
         }
         else {
-            var layer = this._layers.find(l=>l.type === layerType);
-            if(layer) {
+            var layer = this._layers.find(l => l.type === layerType);
+            if (layer) {
                 layer.invalidate(false, rect);
             }
         }
@@ -503,7 +505,7 @@ export default class ViewBase { //TODO: implement IView
     }
 
     hitElement(eventData): IUIElement | null {
-        for(var i = this._layers.length - 1; i >= 0; --i) {
+        for (var i = this._layers.length - 1; i >= 0; --i) {
             var layer = this._layers[i] as any;
             var element = layer.hitElement(eventData, this.scale(), null, Selection.directSelectionEnabled());
             if (element) {
@@ -518,23 +520,45 @@ export default class ViewBase { //TODO: implement IView
         return this._layers;
     }
 
-    dropToLayer(x:number, y:number, element:IUIElement):void {
+    dropToLayer(x: number, y: number, element: IUIElement): void {
         var layers = this.layers
-        for(var i = layers.length - 1; i >= 0; --i) {
+        for (var i = layers.length - 1; i >= 0; --i) {
             var layer = layers[i];
-            if(!layer.hitTransparent() && layer.canAccept(element)) {
+            if (!layer.hitTransparent() && layer.canAccept(element)) {
                 layer.dropToLayer(x, y, element);
                 return;
             }
         }
     }
 
-    hitElementDirect(mousePoint, callback) : IUIElement {
-        for(var i = this._layers.length - 1; i >=0; --i) {
+    zoomOutStep() {
+        var scale = this.scale();
+        for (var i = ZoomSteps.length; i >= 0; --i) {
+            var s = ZoomSteps[i];
+            if (s < scale) {
+                this.scale(s);
+                break;
+            }
+        }
+    }
+
+    zoomInStep() {
+        var scale = this.scale();
+        for (var i = 0; i < ZoomSteps.length; ++i) {
+            var s = ZoomSteps[i];
+            if (s > scale) {
+                this.scale(s);
+                break;
+            }
+        }
+    }
+
+    hitElementDirect(mousePoint, callback): IUIElement {
+        for (var i = this._layers.length - 1; i >= 0; --i) {
             var layer = this._layers[i] as any;
-            if(!layer.hitTransparent()) {
+            if (!layer.hitTransparent()) {
                 var element = layer.hitElementDirect(mousePoint, this.scale(), callback);
-                if(element) {
+                if (element) {
                     return element;
                 }
             }

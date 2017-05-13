@@ -63,6 +63,9 @@ declare module "carbon-app"{
 
         prototyping(value?:boolean): boolean;
         hitElementDirect(e?);
+
+        zoomOutStep():void;
+        zoomInStep():void;
     }
 
     export interface IController{

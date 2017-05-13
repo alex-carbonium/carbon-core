@@ -77,15 +77,19 @@ export default class Tool {
 
     dragElementStarted() {
     }
+
     dragElementEnded() {
     }
+
     click(event: IMouseEventData, keys: IKeyboardState) {
         event.handled = true;
     }
+
     dblclick(event: IMouseEventData) {
         //by default tools should probably handle all events and do not let elements react to double clicks, etc
         event.handled = true;
     }
+
     layerdraw(context, environment) {
     }
 
