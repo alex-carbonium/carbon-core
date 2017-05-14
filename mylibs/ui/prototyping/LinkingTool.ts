@@ -7,8 +7,7 @@ import {
     EasingType,
     ActionEvents,
     StoryType,
-    ViewTool,
-    PrimitiveType
+    ViewTool
 } from "framework/Defs";
 import * as ActionHelper from "./ActionHelper";
 import Matrix from "../../math/matrix";
@@ -95,6 +94,7 @@ export default class LinkingTool extends Tool {
                 var index = i;
                 if (isPointInRect(this._getCupRectForPoint(from, scale), event)
                     || isPointInRect(this._getCupRectForPoint(to, scale), event)) {
+                    this._currentPoint = { x: event.x, y: event.y };
                     this._onFirstMove = () => {
                         this._mousepressed = true;
                         this._startPoint = { _x: from.x, _y: from.y, x: from.x, y: from.y };
@@ -156,7 +156,7 @@ export default class LinkingTool extends Tool {
     }
 
     click(event: IMouseEventData, keys: IKeyboardState) {
-        //event.handled = true;
+        // this method should be empty
     }
 
     onclick(event) {
@@ -261,12 +261,19 @@ export default class LinkingTool extends Tool {
     };
 
     mousemove(event) {
-        this._onFirstMove && this._onFirstMove();
-        delete this._onFirstMove;
+        var x = event.x,
+            y = event.y;
+        if (this._onFirstMove) {
+            var dx = x - this._currentPoint.x,
+                dy = y - this._currentPoint.y;
+
+            if (dx * dx + dy * dy > 2 * 2) {
+                this._onFirstMove();
+                delete this._onFirstMove;
+            }
+        }
 
         if (this._mousepressed) {
-            var x = event.x,
-                y = event.y;
             this._currentPoint = { _x: x, _y: y, x: x, y: y };
             Invalidate.requestInteractionOnly();
             event.handled = true;
@@ -609,12 +616,6 @@ export default class LinkingTool extends Tool {
 
         context.stroke();
 
-        // context.beginPath();
-        // this._renderCupForConnection(context, connection.from, scale);
-        // this._renderCupForConnection(context, connection.to, scale)
-
-        // context.fill();
-
         context.beginPath();
         this._renderInArrow(context, connection.to, scale);
         context.lineJoin = "bevel";
@@ -644,7 +645,8 @@ export default class LinkingTool extends Tool {
 
     _renderCup(context, point, scale) {
         var rect = this._getCupRectForPoint(point, scale);
-        context.rect(rect.x, rect.y, rect.width, rect.height);
+        var r = rect.width / 2 | 0;
+        context.roundedRectPath(rect.x, rect.y, rect.width, rect.height, r, r);
     }
 
     _renderCupForConnection(context, point, scale) {
@@ -664,9 +666,9 @@ export default class LinkingTool extends Tool {
     }
 
     _renderStartConnectionLine(context, point, scale) {
-        if (scale < 1) {
-            scale = 1;
-        }
+        // if (scale < 1) {
+        //     scale = 1;
+        // }
         var size = HandleSize;
         var s2 = size / 2;
         var x = point._x;
@@ -689,14 +691,14 @@ export default class LinkingTool extends Tool {
         }
         context.lineWidth = lw;
         matrix.applyToContext(context);
-        context.moveTo(size - lw / 2, (size  - size / scale) / 2);
-        context.lineTo(size - lw / 2,  (size  + size / scale) / 2);
+        context.moveTo(size - lw / 2, (size - size / scale) / 2);
+        context.lineTo(size - lw / 2, (size + size / scale) / 2);
     }
 
     _renderInArrow(context, point, scale) {
-        if (scale < 1) {
-            scale = 1;
-        }
+        // if (scale < 1) {
+        //     scale = 1;
+        // }
         var size = HandleSize / scale;
         var dx = size / 2;
         var dy = size / 4;
@@ -741,7 +743,7 @@ export default class LinkingTool extends Tool {
         var y = handle.y;
 
         context.beginPath();
-        context.rectPath(x, y, size, size);
+        context.roundedRectPath(x, y, size, size, size/2, size/2);
         context.fillStyle = DefaultLinkColor;
         context.fill();
 

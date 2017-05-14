@@ -922,11 +922,13 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         }
         return root;
     }
+
     primitivePath() {
         var path = this.primitiveRoot().primitivePath().slice();
         path[path.length - 1] = this.id();
         return path;
     }
+
     globalViewMatrix(): Matrix {
         if (!this.runtimeProps.globalViewMatrix) {
             var parent = this.parent();

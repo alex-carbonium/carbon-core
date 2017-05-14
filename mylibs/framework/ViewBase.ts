@@ -330,7 +330,7 @@ export default class ViewBase { //TODO: implement IView
         this._layers[0] = page;
         page.type = LayerTypes.Content;
 
-        page.parent(this);
+        //page.parent(this);
         this.scale(page.scale());
     }
 
