@@ -118,6 +118,7 @@ declare module "carbon-app" {
 
         viewportRect(): IRect;
         pointToScreen(point: ICoordinate): ICoordinate;
+        logicalCoordinateToScreen(point: ICoordinate) : ICoordinate;
 
         ensureScale(element: IUIElement);
         ensureVisible(element: IUIElement);

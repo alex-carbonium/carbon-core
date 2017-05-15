@@ -330,7 +330,6 @@ export default class ViewBase { //TODO: implement IView
         this._layers[0] = page;
         page.type = LayerTypes.Content;
 
-        //page.parent(this);
         this.scale(page.scale());
     }
 
@@ -486,6 +485,13 @@ export default class ViewBase { //TODO: implement IView
         return { scrollX: this.scrollX(), scrollY: this.scrollY() };
     }
 
+    logicalCoordinateToScreen(point: ICoordinate): ICoordinate {
+        return {
+            x: (point.x * this.scale() - this.scrollX()),
+            y: (point.y * this.scale() - this.scrollY())
+        }
+    }
+
     resize(rect) {
         this.width(rect.width);
         this.height(rect.height);
@@ -527,28 +533,6 @@ export default class ViewBase { //TODO: implement IView
             if (!layer.hitTransparent() && layer.canAccept(element)) {
                 layer.dropToLayer(x, y, element);
                 return;
-            }
-        }
-    }
-
-    zoomOutStep() {
-        var scale = this.scale();
-        for (var i = ZoomSteps.length; i >= 0; --i) {
-            var s = ZoomSteps[i];
-            if (s < scale) {
-                this.scale(s);
-                break;
-            }
-        }
-    }
-
-    zoomInStep() {
-        var scale = this.scale();
-        for (var i = 0; i < ZoomSteps.length; ++i) {
-            var s = ZoomSteps[i];
-            if (s > scale) {
-                this.scale(s);
-                break;
             }
         }
     }
@@ -611,6 +595,7 @@ export default class ViewBase { //TODO: implement IView
         }
         return this.scale();
     }
+
     zoomToFit() {
         var size = this.app.viewportSize();
 
@@ -619,9 +604,33 @@ export default class ViewBase { //TODO: implement IView
 
         this.scrollToCenter();
     }
-    maxZoom() {
-        return 0.01;;
+
+    zoomOutStep() {
+        var scale = this.scale();
+        for (var i = ZoomSteps.length; i >= 0; --i) {
+            var s = ZoomSteps[i];
+            if (s < scale) {
+                this.zoom(s);
+                break;
+            }
+        }
     }
+
+    zoomInStep() {
+        var scale = this.scale();
+        for (var i = 0; i < ZoomSteps.length; ++i) {
+            var s = ZoomSteps[i];
+            if (s > scale) {
+                this.zoom(s);
+                break;
+            }
+        }
+    }
+
+    maxZoom() {
+        return 0.01;
+    }
+
     minZoom() {
         return 16;
     }

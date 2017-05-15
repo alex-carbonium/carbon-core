@@ -18,6 +18,7 @@ import params from "params";
 import DataNode from "framework/DataNode";
 import { IPropsOwner, IArtboardProps } from "carbon-model";
 import { ChangeMode, PatchType } from "carbon-core";
+import { measureText } from "framework/text/MeasureTextCache";
 
 
 //TODO: fix name of artboard on zoom
@@ -49,7 +50,7 @@ class Artboard extends Container implements IPropsOwner<IArtboardProps> {
         this._externals = null;
     }
 
-    allowArtboardSelection(value: boolean){
+    allowArtboardSelection(value: boolean) {
         this.canMultiselectChildren = !value;
         this.multiselectTransparent = !value;
 
@@ -57,7 +58,7 @@ class Artboard extends Container implements IPropsOwner<IArtboardProps> {
         this.canDrag(value);
     }
 
-    canRotate(): boolean{
+    canRotate(): boolean {
         return false;
     }
 
@@ -133,7 +134,7 @@ class Artboard extends Container implements IPropsOwner<IArtboardProps> {
     }
 
     canAccept(elements: UIElement[], autoInsert, allowMoveIn) {
-        for (let i = 0; i < elements.length; ++i){
+        for (let i = 0; i < elements.length; ++i) {
             let element = elements[i];
             if (element instanceof Artboard) {
                 return false;
@@ -225,11 +226,27 @@ class Artboard extends Container implements IPropsOwner<IArtboardProps> {
         this._renderHeader(context);
     }
 
+    fitTextToWidth(context, text, width) {
+        var m = measureText(context, text);
+        params.perf && performance.mark("fitTextToWidth");
+        if(m.width > width) {
+            var elipsisWidth = measureText(context, '...').width;
+            width -= elipsisWidth;
+            do {
+                text = text.substr(0, text.length - 1);
+                m = measureText(context, text);
+            } while(text != '' && m.width > width);
+            text += '...';
+        }
+        params.perf && performance.measure("fitTextToWidth", "fitTextToWidth");
+
+        return text;
+    }
+
+
+
     _renderHeader(context) {
         var scale = Environment.view.scale();
-        if(scale < .3) {
-            return; // do not render name if artboard is too small
-        }
 
         context.save();
         context.beginPath();
@@ -240,13 +257,21 @@ class Artboard extends Container implements IPropsOwner<IArtboardProps> {
         } else {
             context.fillStyle = SharedColors.ArtboardText;
         }
-        scale = Math.max(1, scale);
-        context.font = (0 | (10 / scale)) + "px Lato, LatoLight, Arial, Helvetica, sans-serif";
-        context.rect(0, -16 / scale, this.width(), 16 / scale);
-        context.clip();
 
+        context.font = "11 px Lato, LatoLight, Arial, Helvetica, sans-serif";
+
+        var width = this.width();
+
+
+        var rect = this.getBoundaryRectGlobal();
+
+        var pos = Environment.view.logicalCoordinateToScreen(rect);
+var text = this.fitTextToWidth(context, this.headerText(), width * scale);
         context.beginPath();
-        context.fillText(this.headerText(), 0, -5 / scale);
+        context.resetTransform();
+        context.scale(Environment.view.contextScale, Environment.view.contextScale);
+
+        context.fillText(text, pos.x, pos.y - 2 * Environment.view.contextScale);
 
         context.restore();
     };
@@ -285,18 +310,18 @@ class Artboard extends Container implements IPropsOwner<IArtboardProps> {
         context.moveTo(x + dw, y);
         context.lineTo(x, y);
         context.lineTo(x, y + rect.height);
-        context.lineTo(x+dw, y + rect.height)
+        context.lineTo(x + dw, y + rect.height)
 
         context.moveTo(x + rect.width - dw, y);
         context.lineTo(x + rect.width, y);
         context.lineTo(x + rect.width, y + rect.height);
         context.lineTo(x + rect.width - dw, y + rect.height)
-       // context.rect(x, y, rect.width, rect.height);
+        // context.rect(x, y, rect.width, rect.height);
         context.strokeStyle = SharedColors.ArtboardText;
         context.lineWidth = 1 / scale;
         context.stroke();
 
-        if(scale >= 0.5) {
+        if (scale >= 0.5) {
             context.font = (0 | (10 / scale)) + "px Lato, LatoLight, Arial, Helvetica, sans-serif";
             context.beginPath();
             context.rectPath(x, y - 20 / scale, Math.max(150, this.width()), 20 / scale);
@@ -436,7 +461,7 @@ class Artboard extends Container implements IPropsOwner<IArtboardProps> {
         if (res) {
             return res;
         }
-        if (this.hasBadTransform()){
+        if (this.hasBadTransform()) {
             return false;
         }
         var bb = this.getBoundingBoxGlobal();

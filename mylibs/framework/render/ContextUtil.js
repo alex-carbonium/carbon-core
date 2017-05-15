@@ -1,3 +1,5 @@
+import { measureText } from '../text/MeasureTextCache';
+
 define(function() {
     return klass({
         _constructor: function(context) {
@@ -6,7 +8,7 @@ define(function() {
         measureText: function(text, fontStyle) {
             this.context.save();
             this.context.font = fontStyle;
-            var measure = this.context.measureText(text);
+            var measure = measureText(this.context, text);
             this.context.restore();
             return measure;
         }
