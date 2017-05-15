@@ -9,7 +9,7 @@ var tracker = {
     _deletes: [],
     _flushNeeded: false,
     propertyChanged: EventHelper.createEvent3<any, any, any>(),
-    elementDeleted: EventHelper.createEvent(),
+    elementDeleted: EventHelper.createEvent2<IContainer, IUIElement>(),
     elementInserted: EventHelper.createEvent2<IContainer, IUIElement>(),
     changeProps:function(element, newProps, oldProps){
         if (!this._suspended){

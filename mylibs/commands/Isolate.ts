@@ -1,6 +1,6 @@
 import Selection from "framework/SelectionModel";
 import Environment from "environment";
-import { ILayer, IUIElement, IContainer, IIsolationLayer } from "carbon-core";
+import { ILayer, IUIElement, IContainer, IIsolationLayer, IIsolatable } from "carbon-core";
 import { LayerTypes } from "carbon-app";
 
 export default {
@@ -15,7 +15,7 @@ export default {
 
         // re-read element form the model, since we can try isolate a copy from isolation layer
         element = App.Current.activePage.getElementById(element.id());
-        layer.isolateGroup(element as IContainer, clippingParent);
+        layer.isolateGroup(element as IIsolatable, clippingParent);
         layer.invalidate();
     }
 }

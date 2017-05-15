@@ -12,6 +12,7 @@ declare module "carbon-model"{
     }
 
     export interface IUIElement{
+        systemType(): string;
         canSelect(): boolean;
 
         mirrorClone():IUIElement;

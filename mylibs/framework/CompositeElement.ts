@@ -13,8 +13,11 @@ import Phantom from "./Phantom";
 import Environment from "../environment";
 import Selection from "./SelectionModel";
 import { IUIElementProps, IPoint, IRect, IComposite, ChangeMode } from "carbon-core";
+import CommonPropsManager from "./CommonPropsManager";
 
 export default class CompositeElement extends UIElement implements IComposite {
+    private _commonPropsManager: CommonPropsManager;
+
     children: UIElement[];
 
     constructor() {
@@ -25,6 +28,7 @@ export default class CompositeElement extends UIElement implements IComposite {
         this._origPropValues = [];
         this._affectingLayout = false;
         this._inPreview = false;
+        this._commonPropsManager = new CommonPropsManager();
 
         PropertyTracker.propertyChanged.bind(this, this._onPropsChanged);
     }
@@ -221,7 +225,7 @@ export default class CompositeElement extends UIElement implements IComposite {
         return "";
     }
     findPropertyDescriptor(propName: string) {
-        if(this.elements.length === 1){
+        if (this._types.length === 1){
             return this.elements[0].findPropertyDescriptor(propName);
         }
 
@@ -256,177 +260,27 @@ export default class CompositeElement extends UIElement implements IComposite {
     }
 
     createPropertyGroups() {
-        if (this.count() === 0) {
-            return [];
-        }
-
-        if (this._types.length === 1) {
-            let type = this._types[0];
-            let metadata = PropertyMetadata.findAll(type);
-            let element = this.count() === 1 ? this.elements[0] : null;
-            let groups = metadata ? metadata.groups(element) : [];
-            return groups;
-        }
-
-        let baseMetadata = PropertyMetadata.findAll(this._types[0]);
-        let baseGroups = baseMetadata.groups();
-        for (var i = 1; i < this._types.length; i++) {
-            var type = this._types[i];
-            var otherMetadata = PropertyMetadata.findAll(type);
-
-            for (var i = 0; i < baseGroups.length; i++) {
-                var group = baseGroups[i];
-                for (var j = group.properties.length - 1; j >= 0; --j) {
-                    var propertyName = group.properties[j];
-                    if (!this._matchingPropertyExists(baseMetadata, otherMetadata, propertyName)){
-                        group.properties.splice(j, 1);
-                    }
-                }
-            }
-        }
-
-        return baseGroups;
-    }
-
-    _matchingPropertyExists(metadata1, metadata2, propertyName): boolean {
-        var propertyMetadata1 = metadata1[propertyName];
-        if (!propertyMetadata1){
-            return false;
-        }
-        var propertyMetadata2 = metadata2[propertyName];
-        if (!propertyMetadata2){
-            return false;
-        }
-
-        return propertyMetadata1.type === propertyMetadata2.type;
+        return this._commonPropsManager.createGroups(this.elements);
     }
 
     getDisplayPropValue(propertyName: string, descriptor: PropertyDescriptor) {
-        if (this.count() === 1) {
-            return this.elements[0].getDisplayPropValue(propertyName, descriptor);
-        }
-
-        var values = this.elements.map(x => x.getDisplayPropValue(propertyName, descriptor));
-        var base = values[0];
-        for (let i = 1; i < values.length; ++i) {
-            let next = values[i];
-            let isComplex = typeof next === "object" || Array.isArray(next);
-            if (isComplex) {
-                base = clone(base);
-                leaveCommonProps(base, next);
-            }
-            else if (next !== base) {
-                base = undefined;
-                break;
-            }
-        }
-
-        return base;
+        return this._commonPropsManager.getDisplayPropValue(this.elements, propertyName, descriptor);
     }
 
     prepareDisplayPropsVisibility() {
-        if (this.count() === 0){
-            return {};
-        }
-
-        var type = this.allHaveSameType() ?
-            this.elements[0].systemType() :
-            this.systemType();
-
-        var metadata = PropertyMetadata.findAll(type);
-        if (!metadata || !metadata.prepareVisibility) {
-            return {};
-        }
-
-        var base = metadata.prepareVisibility(this.elements[0].props, this, Environment.view);
-        for (let i = 1; i < this.elements.length; ++i) {
-            let element = this.elements[i];
-            let next = metadata.prepareVisibility(element.props, this, Environment.view);
-            if (next) {
-                for (let p in next) {
-                    let visible = next[p];
-                    if (!visible) {
-                        base[p] = false;
-                    }
-                }
-            }
-        }
-        return base;
+        return this._commonPropsManager.prepareDisplayPropsVisibility(this.elements, this.systemType());
     }
 
     getAffectedDisplayProperties(changes): string[]{
-        if (this.elements.length === 1){
-            return this.elements[0].getAffectedDisplayProperties(changes);
-        }
-        var result = [];
-        for (let i = 0; i < this.elements.length; ++i){
-            let element = this.elements[i];
-            var properties = element.getAffectedDisplayProperties(changes);
-            for (let j = 0; j < properties.length; ++j){
-                let p = properties[j];
-                if (result.indexOf(p) === -1){
-                    result.push(p);
-                }
-            }
-        }
-
-        return result;
+        return this._commonPropsManager.getAffectedDisplayProperties(this.elements, changes);
     }
 
     previewDisplayProps(changes: any) {
-        if (!this._inPreview) {
-            if (!this._affectingLayout && this.isChangeAffectingLayout(changes)) {
-                Selection.hideFrame();
-                this._affectingLayout = true;
-            }
-
-            PropertyTracker.suspend();
-        }
-        this._inPreview = true;
-
-        for (var i = 0; i < this.elements.length; i++) {
-            var element = this.elements[i];
-            var elementChanges = this._prepareElementChanges(element, changes);
-            if (!this._origPropValues[i]) {
-                var properties = element.getAffectedProperties(changes);
-                this._origPropValues[i] = element.selectProps(properties);
-            }
-            element.setDisplayProps(elementChanges, ChangeMode.Root);
-        }
+        return this._commonPropsManager.previewDisplayProps(this.elements, changes);
     }
 
     updateDisplayProps(changes: any) {
-        for (var i = 0; i < this.elements.length; i++) {
-            var element = this.elements[i];
-
-            var elementChanges = this._prepareElementChanges(element, changes);
-
-            if (this._origPropValues.length) {
-                var origProps = this._origPropValues[i];
-                element.prepareAndSetProps(origProps, ChangeMode.Root);
-            }
-            element.setDisplayProps(elementChanges, ChangeMode.Model);
-        }
-
-        if (this._inPreview) {
-            if (PropertyTracker.resume()) {
-                PropertyTracker.flush();
-            }
-        }
-
-        this._origPropValues.length = 0;
-        this._affectingLayout = false;
-        this._inPreview = false;
-    }
-
-    _prepareElementChanges(element: UIElement, changes: any) {
-        var elementChanges = Object.assign({}, changes);
-        for (var p in elementChanges) {
-            if (p === 'font') {
-                elementChanges[p] = Font.extend(element.props[p], elementChanges[p])
-            }
-        }
-        return elementChanges;
+        return this._commonPropsManager.updateDisplayProps(this.elements, changes);
     }
 
     _onPropsChanged(element: UIElement, newProps: IUIElementProps) {
@@ -439,30 +293,17 @@ export default class CompositeElement extends UIElement implements IComposite {
                 PropertyTracker.changeProps(this, newProps, {});
                 return;
             }
-            //for multiselection, capture all changes within the current tick and fire a single update on next tick
-            if (!this._newPropsForNextTick) {
-                this._newPropsForNextTick = {};
-            }
-
-            this._newPropsForNextTick = Object.assign(this._newPropsForNextTick, newProps);
-
-            if (this._propsChangedTimer) {
-                clearTimeout(this._propsChangedTimer);
-                this._propsChangedTimer = 0;
-            }
-            this._propsChangedTimer = setTimeout(() => this._onPropsChangedNextTick(), 1);
+            this._commonPropsManager.onChildPropsChanged(newProps, this.onChildrenPropsChanged);
         }
     }
-    _onPropsChangedNextTick() {
+    private onChildrenPropsChanged = mergedProps => {
         if (this.isDisposed()) {
             return;
         }
-        var newProps = this._newPropsForNextTick;
-        this._newPropsForNextTick = null;
 
         this.performArrange();
-        PropertyTracker.changeProps(this, newProps, {});
-    }
+        PropertyTracker.changeProps(this, mergedProps, {});
+    };
 
     dispose() {
         super.dispose.apply(this, arguments);

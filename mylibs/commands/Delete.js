@@ -29,7 +29,7 @@ export default {
         }
 
         var newSelection = [];
-        if (sameParent && !(first instanceof Artboard)) {
+        if (sameParent && !(first instanceof Artboard) && !first.isOrphaned()) {
             newSelection.push(first);
         }
         Selection.makeSelection(newSelection);

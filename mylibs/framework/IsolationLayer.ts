@@ -1,6 +1,6 @@
 import Layer from './Layer';
 import Context from "./render/Context";
-import { IContainer, IUIElement, IIsolationLayer, ChangeMode } from "carbon-core";
+import { IContainer, IUIElement, IIsolationLayer, ChangeMode, IIsolatable } from "carbon-core";
 import DataNode from "./DataNode";
 import Selection from "framework/SelectionModel";
 import RelayoutEngine from "framework/relayout/RelayoutEngine";
@@ -8,7 +8,7 @@ import UserSettings from "../UserSettings";
 
 export class IsolationLayer extends Layer implements IIsolationLayer {
 
-    private ownerElement: IContainer = null;
+    private ownerElement: IIsolatable = null;
     private trackElementIds: any = {};
     private restoreMatrix: boolean = false;
     private clippingParent: IUIElement = null;
@@ -28,7 +28,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         return clone;
     }
 
-    isolateGroup(owner: IContainer, clippingParent: IUIElement = null) : void{
+    isolateGroup(owner: IIsolatable, clippingParent: IUIElement = null) : void{
         if(this.ownerElement) {
             this.exitIsolation();
         }
@@ -61,6 +61,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         this.hitTransparent(true);
 
         this.ownerElement.setProps({visible:true}, ChangeMode.Self);
+        this.ownerElement.onIsolationExited();
         this.ownerElement = null;
 
         this.clear();
@@ -102,6 +103,10 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
 
     get isActive() {
         return this.ownerElement !== null;
+    }
+
+    isActivatedFor(element: IUIElement){
+        return this.isActive && this.ownerElement === element;
     }
 
     hitElement(/*Point*/position, scale, predicate, directSelection) {

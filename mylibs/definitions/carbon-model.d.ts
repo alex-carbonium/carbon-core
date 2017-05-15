@@ -125,6 +125,8 @@ declare module "carbon-model" {
         translateChildren(): boolean;
     }
 
+    export const GroupContainer: IConstructor<IGroupContainer>;
+
     export interface IRepeatContainer extends IContainer{
         findMasterCounterpart(element: IUIElement): IUIElement;
         addDroppedElements(dropTarget: IContainer, elements: IUIElement[], e: IMouseEventData): void;
@@ -178,8 +180,12 @@ declare module "carbon-model" {
     }
 
     export interface IIsolationLayer extends ILayer {
-        isolateGroup(owner:IContainer, clippingParent?: IUIElement) :void;
+        isolateGroup(owner: IIsolatable, clippingParent?: IUIElement) :void;
         exitIsolation():void;
+    }
+
+    export interface IIsolatable extends IContainer{
+        onIsolationExited();
     }
 
     export interface IDataElement {
