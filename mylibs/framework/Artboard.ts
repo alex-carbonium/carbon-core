@@ -229,13 +229,13 @@ class Artboard extends Container implements IPropsOwner<IArtboardProps> {
     fitTextToWidth(context, text, width) {
         var m = measureText(context, text);
         params.perf && performance.mark("fitTextToWidth");
-        if(m.width > width) {
+        if (m.width > width) {
             var elipsisWidth = measureText(context, '...').width;
             width -= elipsisWidth;
             do {
                 text = text.substr(0, text.length - 1);
                 m = measureText(context, text);
-            } while(text != '' && m.width > width);
+            } while (text != '' && m.width > width);
             text += '...';
         }
         params.perf && performance.measure("fitTextToWidth", "fitTextToWidth");
@@ -266,12 +266,17 @@ class Artboard extends Container implements IPropsOwner<IArtboardProps> {
         var rect = this.getBoundaryRectGlobal();
 
         var pos = Environment.view.logicalCoordinateToScreen(rect);
-var text = this.fitTextToWidth(context, this.headerText(), width * scale);
+        var px = 0;
+        if(Environment.view.prototyping()) {
+            px = 14;
+        }
+
+        var text = this.fitTextToWidth(context, this.headerText(), (width - px) * scale);
         context.beginPath();
         context.resetTransform();
         context.scale(Environment.view.contextScale, Environment.view.contextScale);
 
-        context.fillText(text, pos.x, pos.y - 2 * Environment.view.contextScale);
+        context.fillText(text, pos.x + px, pos.y - 2 * Environment.view.contextScale);
 
         context.restore();
     };

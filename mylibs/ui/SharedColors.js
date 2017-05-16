@@ -1,5 +1,5 @@
 export default {
-    ArtboardText: "#898497",
+    ArtboardText: "#808284",
     ArtboardActiveText: "#59f",
     Highlight: "#22c1ff"
 }

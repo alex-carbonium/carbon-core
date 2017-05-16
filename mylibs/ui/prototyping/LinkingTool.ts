@@ -22,11 +22,12 @@ import DataNode from "framework/DataNode";
 import { IUIElement, IMouseEventData, IKeyboardState, PrimitiveType } from "carbon-core";
 
 const HandleSize = 12;
-const HomeButtonWidth = 12;
-const HomeButtonHeight = 24;
+const HomeButtonWidth = 14;
+const HomeButtonHeight = 16;
 
 const DefaultLinkColor = "#1592E6";
-const InactiveLinkColor = 'gray';
+const HoverLinkColor = "#662d8f";
+const InactiveLinkColor = '808284';
 
 function hasLocationProperty(props) {
     return props.x !== undefined
@@ -55,19 +56,29 @@ export default class LinkingTool extends Tool {
         super(ViewTool.Proto);
     }
 
-    _handleClickToHomeScreen(event, scale) {
+    _pointToHomeScreenArtboard(event, scale) {
         var artboards = this._app.activePage.getAllArtboards();
         for (var i = 0; i < artboards.length; ++i) {
             let artboard = artboards[i];
             var x = artboard.x();
             var y = artboard.y();
-            var w = 0 | HomeButtonWidth / scale;
-            var h = 0 | HomeButtonHeight / scale;
-            if (isPointInRect({ x: x - w, y: y, width: w, height: h }, event)) {
-                this._activeStory.setProps({ homeScreen: [this._app.activePage.id(), artboard.id()] });
-                Invalidate.requestInteractionOnly();
-                return true;
+            var w = HomeButtonWidth / scale;
+            var h = HomeButtonHeight / scale;
+            if (isPointInRect({ x: x, y: y - h, width: w, height: h }, event)) {
+                return artboard;
             }
+        }
+
+        return null;
+    }
+
+    _handleClickToHomeScreen(event, scale) {
+        var artboard = this._pointToHomeScreenArtboard(event, scale);
+
+        if (artboard) {
+            this._activeStory.setProps({ homeScreen: [this._app.activePage.id(), artboard.id()] });
+            Invalidate.requestInteractionOnly();
+            return true;
         }
 
         return false;
@@ -260,6 +271,19 @@ export default class LinkingTool extends Tool {
         }
     };
 
+    _getHandleAtPoint(event, scale) {
+        for (var i = 0; i < this._handles.length; ++i) {
+            var handle = this._handles[i];
+            if (isPointInRect({ x: handle.x, y: handle.y, width: HandleSize / scale, height: HandleSize / scale }, event)) {
+                break;
+            } else {
+                handle = null;
+            }
+        }
+
+        return handle;
+    }
+
     mousemove(event) {
         var x = event.x,
             y = event.y;
@@ -272,17 +296,34 @@ export default class LinkingTool extends Tool {
                 delete this._onFirstMove;
             }
         }
+        var scale = this._view.scale();
 
         if (this._mousepressed) {
             this._currentPoint = { _x: x, _y: y, x: x, y: y };
             Invalidate.requestInteractionOnly();
             event.handled = true;
+            this._hoverArboardHomeButton = null;
+            this._hoverHandle = null;
+        } else {
+            let artboard = this._pointToHomeScreenArtboard(event, scale);
+            if (artboard !== this._hoverArboardHomeButton) {
+                this._hoverArboardHomeButton = artboard;
+                this._hoverHandle = null;
+                Invalidate.requestInteractionOnly();
+            } else {
+                var handle = this._getHandleAtPoint(event, scale);
+
+                if (handle !== this._hoverHandle) {
+                    this._hoverHandle = handle;
+                    Invalidate.requestInteractionOnly();
+                }
+            }
         }
 
-        var scale = this._view.scale();
-
         var target = this._app.activePage.hitElement(event, scale, null, Selection.directSelectionEnabled());
-
+        if (target === this._app.activePage) {
+            target = null;
+        }
         if (this._target != target) {
             this._target = target;
             Invalidate.requestInteractionOnly();
@@ -312,9 +353,9 @@ export default class LinkingTool extends Tool {
             var rect: any = artboard.getBoundingBoxGlobal();
             rect = adjustRectSize(rect, 40 / scale);
             if (isPointInRect(rect, event)) {
-                if (!this._hasOutboundConnections(artboard)) {
+               // if (!this._hasOutboundConnections(artboard)) {
                     this._addHandleOnElement(artboard, scale, handles);
-                }
+               // }
             }
         }
 
@@ -611,7 +652,7 @@ export default class LinkingTool extends Tool {
         } else if (scale > 0.5) {
             context.lineWidth = 2;
         } else {
-            context.lineWidth = 1 / scale;
+            context.lineWidth = 2 / scale;
         }
 
         context.stroke();
@@ -743,8 +784,12 @@ export default class LinkingTool extends Tool {
         var y = handle.y;
 
         context.beginPath();
-        context.roundedRectPath(x, y, size, size, size/2, size/2);
-        context.fillStyle = DefaultLinkColor;
+        context.roundedRectPath(x, y, size, size, size / 2, size / 2);
+        if (handle === this._hoverHandle) {
+            context.fillStyle = HoverLinkColor;
+        } else {
+            context.fillStyle = InactiveLinkColor;
+        }
         context.fill();
 
         context.beginPath();
@@ -787,7 +832,7 @@ export default class LinkingTool extends Tool {
         var artboards = page.getAllArtboards();
         for (var i = 0; i < artboards.length; ++i) {
             let artboard = artboards[i];
-            if (areRectsIntersecting(this._viewport, artboard.getBoundaryRect())) {
+            if (areRectsIntersecting(this._viewport, artboard.getBoundingBoxGlobal())) {
                 this._drawButtonForArtboard(artboard, scale, context, page);
             }
         }
@@ -796,20 +841,24 @@ export default class LinkingTool extends Tool {
     _drawButtonForArtboard(artboard, scale, context, page) {
         var x = artboard.x();
         var y = artboard.y();
-        var w = 0 | HomeButtonWidth / scale;
-        var h = 0 | HomeButtonHeight / scale;
+        var w = 7 / scale;
+        var h = 5 / scale;
 
         context.save();
-
         if (this._activeStory.props.homeScreen && this._activeStory.props.homeScreen[1] === artboard.id()) {
             context.fillStyle = DefaultLinkColor;
-            // TODO: draw home icon here
+        } else if (artboard == this._hoverArboardHomeButton) {
+            context.fillStyle = HoverLinkColor;
         } else {
             context.fillStyle = "gray";
         }
 
         context.beginPath();
-        context.rect(x - w, y, w, h);
+        context.rect(x, y - 7 / scale, w, h);
+        context.moveTo(x - 2 / scale, y - 7 / scale);
+        context.lineTo(x + 4 / scale, y - 13 / scale);
+        context.lineTo(x + w + 2 / scale, y - 7 / scale);
+        context.closePath();
         context.fill();
         context.restore();
     };
