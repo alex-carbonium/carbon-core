@@ -21,13 +21,13 @@ import Link from "./Link";
 import DataNode from "framework/DataNode";
 import { IUIElement, IMouseEventData, IKeyboardState, PrimitiveType } from "carbon-core";
 
-const HandleSize = 12;
+const HandleSize = 14;
 const HomeButtonWidth = 14;
 const HomeButtonHeight = 16;
 
 const DefaultLinkColor = "#1592E6";
 const HoverLinkColor = "#662d8f";
-const InactiveLinkColor = '808284';
+const InactiveLinkColor = '#808284';
 
 function hasLocationProperty(props) {
     return props.x !== undefined
@@ -353,9 +353,9 @@ export default class LinkingTool extends Tool {
             var rect: any = artboard.getBoundingBoxGlobal();
             rect = adjustRectSize(rect, 40 / scale);
             if (isPointInRect(rect, event)) {
-               // if (!this._hasOutboundConnections(artboard)) {
-                    this._addHandleOnElement(artboard, scale, handles);
-               // }
+                // if (!this._hasOutboundConnections(artboard)) {
+                this._addHandleOnElement(artboard, scale, handles);
+                // }
             }
         }
 
@@ -659,9 +659,8 @@ export default class LinkingTool extends Tool {
 
         context.beginPath();
         this._renderInArrow(context, connection.to, scale);
-        context.lineJoin = "bevel";
-        context.lineWidth = 2 / scale;
-        context.stroke();
+        context.lineWidth = 2;
+        context.fill2();
         context.restore();
     }
 
@@ -765,6 +764,8 @@ export default class LinkingTool extends Tool {
         context.moveTo(dx, dy);
         context.lineTo(size, size / 2);
         context.lineTo(dx, size - dy);
+        context.lineTo(dx + size / 6, size / 2);
+        context.closePath();
     }
 
     _addHandleOnElement(element, scale, handles?) {
@@ -854,10 +855,11 @@ export default class LinkingTool extends Tool {
         }
 
         context.beginPath();
-        context.rect(x, y - 7 / scale, w, h);
-        context.moveTo(x - 2 / scale, y - 7 / scale);
-        context.lineTo(x + 4 / scale, y - 13 / scale);
-        context.lineTo(x + w + 2 / scale, y - 7 / scale);
+        var offsetFromArtboard = 8 / scale;
+        context.rect(x, y - offsetFromArtboard, w, h);
+        context.moveTo(x - 2 / scale, y - offsetFromArtboard);
+        context.lineTo(x + 4 / scale, y - offsetFromArtboard - 6 / scale);
+        context.lineTo(x + w + 2 / scale, y - offsetFromArtboard);
         context.closePath();
         context.fill();
         context.restore();

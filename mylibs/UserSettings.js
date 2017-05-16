@@ -27,7 +27,8 @@ var settings = {
         editInIsolationMode:true
     },
     frame: {
-        stroke: '#22c1ff'
+        stroke: '#22c1ff',
+        prototypingFill: 'rgba(17, 117, 186, 0.2)'
     },
     snapTo: {
         enabled: true,

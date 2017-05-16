@@ -1680,6 +1680,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
             return {
                 element: this,
                 frame: true,
+                fill:true,
                 points: []
             }
         }

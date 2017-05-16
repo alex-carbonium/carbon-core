@@ -300,6 +300,10 @@ class Rectangle extends Shape {
     createSelectionFrame(view) {
         var frame = super.createSelectionFrame(view);
 
+        if (view.prototyping()) {
+            return frame;
+        }
+
         frame.points.push({
             type: CornerRadiusPoint,
             moveDirection: PointDirection.Any,

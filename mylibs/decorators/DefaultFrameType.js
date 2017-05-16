@@ -8,6 +8,7 @@ import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
 
 export default {
     strokeStyle: UserSettings.frame.stroke,
+    fillStyle: UserSettings.frame.prototypingFill,
     hitPointIndex: function (frame, mousePoint) {
         if (frame.hasBadTransform){
             return -1;
@@ -117,6 +118,10 @@ export default {
                     }
                     finally {
                         GlobalMatrixModifier.pop();
+                    }
+                    if(frame.fill && this.fillStyle) {
+                        context.fillStyle = this.fillStyle;
+                        context.fill();
                     }
                     context.stroke();
                     context.restore();

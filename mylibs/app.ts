@@ -83,11 +83,11 @@ var addComment = function (event) {
 };
 
 class AppClass extends DataNode implements IApp {
-    props:IAppProps;
+    props: IAppProps;
 
     [name: string]: any;
     isLoaded: boolean;
-    project:any;
+    project: any;
 
     modeChanged: IEvent<any>;
 
@@ -224,7 +224,7 @@ class AppClass extends DataNode implements IApp {
         this.registerForDisposal(token);
     }
 
-    init(){
+    init() {
         params.perf && performance.mark("App.Init");
         this.fontManager.clear();
         this.isLoaded = false;
@@ -236,8 +236,8 @@ class AppClass extends DataNode implements IApp {
         params.perf && performance.measure("App.Init", "App.Init");
     }
 
-    onLoad(callback: () => void){
-        if (this.isLoaded){
+    onLoad(callback: () => void) {
+        if (this.isLoaded) {
             setTimeout(callback, 1);
             return;
         }
@@ -499,6 +499,13 @@ class AppClass extends DataNode implements IApp {
 
     //TODO: if primitives call dataNode.insertChild, this is not needed
     insert(element, index, mode) {
+        // if (element instanceof Page) {
+        //     this.initPage(element);
+        // } else
+        if (element instanceof Story) {
+            this.initStory(element);
+        }
+
         this.insertChild(element, index, mode);
     }
 
@@ -520,7 +527,7 @@ class AppClass extends DataNode implements IApp {
         return path;
     }
 
-    removePage(page:IPage, setNewActive?:boolean) {
+    removePage(page: IPage, setNewActive?: boolean) {
         if (!page) {
             return;
         }
@@ -813,7 +820,7 @@ class AppClass extends DataNode implements IApp {
         this.platform.run(this);
 
         var stopwatch = new Stopwatch("AppLoad", true);
-        if (!this.serverless()){
+        if (!this.serverless()) {
             params.perf && performance.mark("App.setupConnection");
             backend.setupConnection(this);
             params.perf && performance.measure("App.setupConnection", "App.setupConnection");
@@ -857,7 +864,7 @@ class AppClass extends DataNode implements IApp {
             backend.enableLoginTimer();
             params.perf && performance.measure("App.run", "App.run");
         }).catch(function (e) {
-            if (e.message !== "appNotFound"){
+            if (e.message !== "appNotFound") {
                 logger.fatal("App not loaded", { error: e });
             }
             throw e;
@@ -917,7 +924,7 @@ class AppClass extends DataNode implements IApp {
         return this.children.length === 0;
     }
 
-    isDirty(){
+    isDirty() {
         return this.state.isDirty();
     }
 
@@ -1228,7 +1235,7 @@ class AppClass extends DataNode implements IApp {
         return page;
     }
 
-    addNewPage(){
+    addNewPage() {
         var newPage = this.createNewPage();
         this.addPage(newPage);
         this.setActivePage(newPage);
@@ -1248,7 +1255,7 @@ class AppClass extends DataNode implements IApp {
         backend.shutdownConnection();
     }
 
-    dispose(){
+    dispose() {
         this.unload();
 
         if (this.platform) {
@@ -1280,6 +1287,7 @@ class AppClass extends DataNode implements IApp {
         story.setProps(props);
         this.insertChild(story, this.children.length);
         this.initStory(story);
+        this.activeStory(story);
     }
 
     initStory(story) {
