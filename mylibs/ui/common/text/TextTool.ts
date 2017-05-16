@@ -170,7 +170,7 @@ export default class TextTool extends Tool {
             if (hit instanceof Text){
                 this._next = {element: hit, event: e};
             }
-            this._editor.deactivate(false);
+            this._editor.deactivate(!UserSettings.text.insertNewOnClickOutside);
         }
         else{
             this._dragZone = {x: e.x, y: e.y, width: 0, height: 0, flipX: false, flipY: false};
@@ -215,7 +215,7 @@ export default class TextTool extends Tool {
             }
             else if (this._editor){
                 Selection.makeSelection([this._editedElement]);
-                this._editor.deactivate(!UserSettings.text.insertNewOnClickOutside);
+                this._editor.deactivate(UserSettings.text.insertNewOnClickOutside);
             }
             else if (UserSettings.text.insertNewOnClickOutside || !this._detaching){ //tool can be changed by mouse down
                 this.insertText(e);
@@ -276,7 +276,7 @@ export default class TextTool extends Tool {
         this.beginEdit(text);
     }
 
-    beginEdit(text, e?){
+    beginEdit(text, e?, selectText = UserSettings.text.selectOnDblClick){
         if (this._editor){
             this._editor.deactivate(false);
         }
@@ -301,7 +301,7 @@ export default class TextTool extends Tool {
         this._rangeFormatter.initFormatter(this._app, engine, this._editClone, () => this._changed = true);
         Selection.makeSelection([this._rangeFormatter]);
 
-        if (e && !UserSettings.text.selectOnDblClick){
+        if (e && !selectText){
             e.y -= text.getVerticalOffset(engine);
             this._editor.mouseDown(e);
             this._editor.mouseUp(e);
@@ -358,7 +358,7 @@ export default class TextTool extends Tool {
         var next = this._next;
         if (next){
             this._next = null;
-            this.beginEdit(next.element, next.event);
+            this.beginEdit(next.element, next.event, false);
         }
         else if (finalEdit) {
             this._detaching = true;
