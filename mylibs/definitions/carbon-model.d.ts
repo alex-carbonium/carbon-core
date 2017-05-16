@@ -181,6 +181,7 @@ declare module "carbon-model" {
 
     export interface IIsolationLayer extends ILayer {
         isActive: boolean;
+        findDropToPageData(x, y, element);
         isActivatedFor(owner: IIsolatable): boolean;
         isolateGroup(owner: IIsolatable, clippingParent?: IUIElement) :void;
         exitIsolation():void;
