@@ -20,7 +20,7 @@ import Invalidate from "../../../framework/Invalidate";
 import Environment from "../../../environment";
 import {getAverageLuminance} from "../../../math/color";
 import Rect from "../../../math/rect";
-import { ChangeMode, IMouseEventData } from "carbon-core";
+import { ChangeMode, IMouseEventData, IElementEventData } from "carbon-core";
 import UserSettings from "../../../UserSettings";
 import Point from "../../../math/point";
 
@@ -51,7 +51,7 @@ export default class TextTool extends Tool {
         this._dragController.onDragging = this.onDragging;
         this._dragController.onStopped = this.onDragStopped;
 
-        this._dblclickEventToken = Environment.controller.dblclickEvent.bind(this, this.onDblClick);
+        this._dblclickEventToken = Environment.controller.onElementDblClicked.bind(this, this.onDblClick);
         this._editTextToken = this._app.actionManager.subscribe("enter", this.onEditTextAction);
 
         this._onAttached = null;
@@ -223,7 +223,7 @@ export default class TextTool extends Tool {
         }
         e.handled = true;
     };
-    onDblClick = e => {
+    onDblClick = (e: IElementEventData) => {
         if (this._hittingEdited(e)){
             this._editor.mouseDown(e);
             this._editor.mouseUp(e);
@@ -231,7 +231,7 @@ export default class TextTool extends Tool {
             e.handled = true;
         }
         else{
-            var hit = this._hitNewElement(e);
+            var hit = e.element;
             if (hit instanceof Text && this._app.currentTool !== ViewTool.Text){
                 this._onAttached = () => {this.beginEdit(hit, e);};
                 this._app.actionManager.invoke("textTool");

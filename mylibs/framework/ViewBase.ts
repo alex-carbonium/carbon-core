@@ -510,8 +510,9 @@ export default class ViewBase { //TODO: implement IView
         return true;
     }
 
-    hitElement(eventData): IUIElement | null {
-        for (var i = this._layers.length - 1; i >= 0; --i) {
+    hitElement(eventData, includeInteractionLayer?: boolean): IUIElement | null {
+        var start = includeInteractionLayer ? this._layers.length - 1 : this._layers.length - 2;
+        for (var i = start; i >= 0; --i) {
             var layer = this._layers[i] as any;
             var element = layer.hitElement(eventData, this.scale(), null, Selection.directSelectionEnabled());
             if (element) {
@@ -537,7 +538,8 @@ export default class ViewBase { //TODO: implement IView
         }
     }
 
-    hitElementDirect(mousePoint, callback): IUIElement {
+    hitElementDirect(mousePoint, callback, includeInteractionLayer?: boolean): IUIElement {
+        var start = includeInteractionLayer ? this._layers.length - 1 : this._layers.length - 2;
         for (var i = this._layers.length - 1; i >= 0; --i) {
             var layer = this._layers[i] as any;
             if (!layer.hitTransparent()) {

@@ -2,13 +2,13 @@ import Container from "../Container";
 import PropertyMetadata from "../PropertyMetadata";
 import Brush from "../Brush";
 import {Overflow, Types, ArrangeStrategies} from "../Defs";
-import {IGroupContainer} from "carbon-core";
+import { IGroupContainer, IIsolatable } from "carbon-core";
 import UserSettings from "../../UserSettings";
 import Environment from "../../environment";
 import GlobalMatrixModifier from "../GlobalMatrixModifier";
 
-export default class RepeatCell extends Container implements IGroupContainer {
-    prepareProps(changes){
+export default class RepeatCell extends Container implements IGroupContainer, IIsolatable {
+    prepareProps(changes) {
         super.prepareProps(changes);
 
         if (changes.hasOwnProperty("br")){
@@ -81,6 +81,9 @@ export default class RepeatCell extends Container implements IGroupContainer {
         if (this.runtimeProps.unlocked) {
             super.strokeBorder(context, w, h);
         }
+    }
+
+    onIsolationExited() {
     }
 }
 RepeatCell.prototype.t = Types.RepeatCell;

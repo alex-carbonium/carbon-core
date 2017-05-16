@@ -12,8 +12,7 @@ import Keyboard from "../platform/Keyboard";
 import Phantom from "./Phantom";
 import ObjectFactory from "./ObjectFactory";
 import {Types, ViewTool} from "./Defs";
-import { IApp, IController, IEvent, IEvent2, IMouseEventData, IKeyboardState, IUIElement, IContainer } from "carbon-core";
-import { ITransformationEventData } from "carbon-model";
+import { IApp, IController, IEvent, IEvent2, IMouseEventData, IKeyboardState, IUIElement, IContainer, IElementEventData, ITransformationEventData } from "carbon-core";
 import UIElement from "./UIElement";
 import Container from "./Container";
 import {choosePasteLocation} from "./PasteLocator";
@@ -137,6 +136,8 @@ export default class DesignerController implements IController {
     mousemoveEvent: IEvent2<IMouseEventData, IKeyboardState>;
     mouseupEvent: IEvent2<IMouseEventData, IKeyboardState>;
 
+    onElementDblClicked: IEvent2<IElementEventData, IKeyboardState>;
+
     startDraggingEvent: IEvent2<IMouseEventData, IKeyboardState>;
     draggingEvent: IEvent<ITransformationEventData>;
     stopDraggingEvent: IEvent2<IMouseEventData, IKeyboardState>;
@@ -150,6 +151,7 @@ export default class DesignerController implements IController {
     stopRotatingEvent: IEvent<ITransformationEventData>;
 
     inlineEditModeChanged: IEvent2<boolean, any>;
+    isolationModeChanged: IEvent<boolean>;
 
     _lastMouseMove: IMouseEventData;
     _startDraggingData: any;
@@ -275,10 +277,11 @@ export default class DesignerController implements IController {
 
 
         this.onElementClicked = EventHelper.createEvent();
-        this.onElementDblClicked = EventHelper.createEvent();
+        this.onElementDblClicked = EventHelper.createEvent2<IElementEventData, IKeyboardState>();
         this.onArtboardChanged = EventHelper.createEvent2<IArtboard, IArtboard>();
         this.inlineEditModeChanged = EventHelper.createEvent2<boolean, any>();
         this.inlineEditModeChanged.bind(this, this.onInlineEditModeChanged);
+        this.isolationModeChanged = EventHelper.createEvent<boolean>();
         //TODO: dispose?
 
         this.startDrawingEvent = EventHelper.createEvent();
@@ -584,7 +587,7 @@ export default class DesignerController implements IController {
             var element = this.view.hitElement(eventData);
             if (element !== null) {
                 eventData.element = element;
-                this.onElementDblClicked.raise(eventData);
+                this.onElementDblClicked.raise(eventData, Keyboard.state);
             }
         }
     }

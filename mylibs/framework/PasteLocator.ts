@@ -15,7 +15,9 @@ export function choosePasteLocation(elements, rootRelativeBoundingBox = null, al
     var tolerance = allowMoveIn ? 0 : bufferRect.width * bufferRect.height * .5;
 
     var viewport = Environment.view.viewportRect();
-    var artboard = Environment.view.page.getActiveArtboard();
+    var fallbackParent = Environment.view.isolationLayer.isActive ?
+        Environment.view.isolationLayer :
+        Environment.view.page.getActiveArtboard();
 
     var candidates = [];
     var selection = Selection.selectedElements();
@@ -34,8 +36,8 @@ export function choosePasteLocation(elements, rootRelativeBoundingBox = null, al
         }
     }
 
-    if (candidates.indexOf(artboard) === -1 && artboard.canAccept(elements, false, allowMoveIn)) {
-        candidates.push(artboard);
+    if (candidates.indexOf(fallbackParent) === -1 && fallbackParent.canAccept(elements, false, allowMoveIn)) {
+        candidates.push(fallbackParent);
     }
 
     for (var i = 0; i < candidates.length; i++){

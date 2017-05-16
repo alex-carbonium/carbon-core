@@ -4,7 +4,7 @@ import { ILayer, IUIElement, IContainer, IIsolationLayer, IIsolatable } from "ca
 import { LayerTypes } from "carbon-app";
 
 export default {
-    run: function(elements:IUIElement[], clippingParent?: IUIElement){
+    run: function(elements:IIsolatable[], clippingParent?: IUIElement){
         if(elements.length != 1 || !((elements[0] as IContainer).children instanceof Array)) {
             return;
         }
@@ -15,7 +15,7 @@ export default {
 
         // re-read element form the model, since we can try isolate a copy from isolation layer
         element = App.Current.activePage.getElementById(element.id());
-        layer.isolateGroup(element as IIsolatable, clippingParent);
+        layer.isolateGroup(element, clippingParent);
         layer.invalidate();
     }
 }

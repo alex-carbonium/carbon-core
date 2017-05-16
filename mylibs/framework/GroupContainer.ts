@@ -6,10 +6,11 @@ import Container from "./Container";
 import UIElement from "./UIElement";
 import Point from "../math/point";
 import Environment from "../environment";
-import { IGroupContainer, ChangeMode, IIsolatable } from "carbon-core";
+import { IGroupContainer, ChangeMode, IIsolatable, IMouseEventData } from "carbon-core";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
 import { IPoint } from "carbon-geometry";
 import CommonPropsManager from "./CommonPropsManager";
+import Isolate from "../commands/Isolate";
 
 require("./GroupArrangeStrategy");
 
@@ -98,9 +99,10 @@ export default class GroupContainer extends Container implements IGroupContainer
         return value;
     }
 
-    dblclick(event) {
-        if (UserSettings.group.editInIsolationMode) {
-            App.Current.actionManager.invoke("isolateSelection");
+    dblclick(event: IMouseEventData) {
+        if (UserSettings.group.editInIsolationMode && !Environment.view.isolationLayer.isActivatedFor(this)) {
+            Isolate.run([this]);
+            event.handled = true;
         }
     }
 

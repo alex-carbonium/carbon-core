@@ -1,5 +1,5 @@
 declare module "carbon-app" {
-    import { ILayer, IDataNode, IPage, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IPropsOwner, IArtboard, IContainer, IComposite } from "carbon-model";
+    import { ILayer, IDataNode, IPage, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IPropsOwner, IArtboard, IContainer, IComposite, IElementEventData, IIsolationLayer } from "carbon-model";
     import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush } from "carbon-basics";
     import { IRect, ICoordinate } from "carbon-geometry";
 
@@ -106,7 +106,7 @@ declare module "carbon-app" {
         contextScale: number;
 
         scaleChanged: IEvent<number>;
-        isolationLayer: any;
+        isolationLayer: IIsolationLayer;
 
         setActivePage(page: IPage);
 
@@ -161,10 +161,13 @@ declare module "carbon-app" {
         mouseupEvent: IEvent2<IMouseEventData, IKeyboardState>;
         mousemoveEvent: IEvent2<IMouseEventData, IKeyboardState>;
 
+        onElementDblClicked: IEvent2<IElementEventData, IKeyboardState>;
+
         startDraggingEvent: IEvent2<IMouseEventData, IKeyboardState>;
         stopDraggingEvent: IEvent2<IMouseEventData, IKeyboardState>;
 
         inlineEditModeChanged: IEvent2<boolean, any>;
+        isolationModeChanged: IEvent<boolean>;
 
         interactionActive: boolean;
 

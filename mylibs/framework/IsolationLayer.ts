@@ -5,6 +5,7 @@ import DataNode from "./DataNode";
 import Selection from "framework/SelectionModel";
 import RelayoutEngine from "framework/relayout/RelayoutEngine";
 import UserSettings from "../UserSettings";
+import Environment from "../environment";
 
 export class IsolationLayer extends Layer implements IIsolationLayer {
 
@@ -52,6 +53,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         this._onAppChangedSubscription = App.Current.deferredChange.bind(this, this.onAppChanged);
         this._onRelayoutCompleted = App.Current.relayoutFinished.bind(this, this.onRelayoutFinished);
         Selection.clearSelection();
+        Environment.controller.isolationModeChanged.raise(true);
     }
 
     exitIsolation():void {
@@ -77,6 +79,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
 
         Selection.clearSelection();
         Selection.refreshSelection();
+        Environment.controller.isolationModeChanged.raise(false);
     }
 
     onAppChanged(primitiveMap:any) {

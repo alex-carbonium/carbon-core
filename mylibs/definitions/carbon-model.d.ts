@@ -180,6 +180,8 @@ declare module "carbon-model" {
     }
 
     export interface IIsolationLayer extends ILayer {
+        isActive: boolean;
+        isActivatedFor(owner: IIsolatable): boolean;
         isolateGroup(owner: IIsolatable, clippingParent?: IUIElement) :void;
         exitIsolation():void;
     }
@@ -213,6 +215,10 @@ declare module "carbon-model" {
     export interface ITransformationEventData extends IEventData {
         transformationElement: ITransformationElement;
         element?: IUIElement;
+    }
+
+    export interface IElementEventData extends IMouseEventData{
+        element: IUIElement;
     }
 
     export const NullContainer: IContainer;

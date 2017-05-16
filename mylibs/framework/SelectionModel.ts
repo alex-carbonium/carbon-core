@@ -2,7 +2,8 @@ import EventHelper from "./EventHelper";
 import SelectComposite from "./SelectComposite";
 import Invalidate from "./Invalidate";
 import { ViewTool } from "./Defs";
-import UserSettings from "UserSettings";
+import UserSettings from "../UserSettings";
+import Environment from "../environment";
 
 var debug = require("DebugUtil")("carb:selection");
 
@@ -321,6 +322,11 @@ class SelectionModel {
 
         if (App.Current.currentTool === ViewTool.Artboard) {
             this.makeSelection(page.getAllArtboards());
+            return;
+        }
+
+        if (Environment.view.isolationLayer.isActive){
+            this.makeSelection(Environment.view.isolationLayer.children);
             return;
         }
 

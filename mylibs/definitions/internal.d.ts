@@ -51,7 +51,6 @@ declare module "carbon-app"{
 
     export interface IView{
         interactionLayer: any;
-        isolationLayer: any;
         scaleMatrix: any;
         context: any;
 
@@ -63,7 +62,7 @@ declare module "carbon-app"{
         viewportRect(): any;
 
         prototyping(value?:boolean): boolean;
-        hitElementDirect(e?);
+        hitElementDirect(e?, cb?, includeInteractionLayer?: boolean);
 
         zoomOutStep():void;
         zoomInStep():void;

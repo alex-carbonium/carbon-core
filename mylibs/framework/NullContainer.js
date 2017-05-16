@@ -6,6 +6,10 @@ class NullContainer {
         this.props = {};
     }
 
+    canAccept(){
+        return false;
+    }
+
     local2global(pos) {
         return pos;
     }
@@ -19,7 +23,7 @@ class NullContainer {
     }
 
     incrementVersion () {
-        
+
     }
 
     hitElements() {
