@@ -1,6 +1,6 @@
 declare module "carbon-app" {
     import { ILayer, IDataNode, IPage, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IPropsOwner, IArtboard, IContainer, IComposite, IElementEventData, IIsolationLayer } from "carbon-model";
-    import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush } from "carbon-basics";
+    import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush, IEvent3 } from "carbon-basics";
     import { IRect, ICoordinate } from "carbon-geometry";
 
     export interface IPlatform{
@@ -301,7 +301,7 @@ export interface IAreaConstraint {
         unlock();
 
         modeChangedEvent: IEvent<boolean>;
-        onElementSelected: IEvent2<IUIElement, IComposite>;
+        onElementSelected: IEvent3<IUIElement, IUIElement[], boolean>;
     }
 
     export const app: IApp;

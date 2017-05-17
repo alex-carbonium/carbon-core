@@ -131,7 +131,11 @@ export default class SelectComposite extends CompositeElement implements ISelect
 
     previewDisplayProps(changes){
         this.restoreLastGoodTransformIfNeeded();
-        super.previewDisplayProps(changes);
+        var affectingLayout = super.previewDisplayProps(changes);
+        if (affectingLayout){
+            this.selected(false);
+        }
+        return affectingLayout;
     }
 
     updateDisplayProps(changes){

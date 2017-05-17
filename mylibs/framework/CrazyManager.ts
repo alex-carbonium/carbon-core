@@ -1,5 +1,3 @@
-var fwk = window['sketch'].framework;
-
 class CrazyManager {
     [name: string]: any;
     constructor() {
@@ -19,7 +17,4 @@ class CrazyManager {
     }
 }
 
-var manager = new CrazyManager();
-fwk.CrazyScope = manager;
-
-export default manager;
+export default new CrazyManager();

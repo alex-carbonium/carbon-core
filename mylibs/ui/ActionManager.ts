@@ -167,32 +167,6 @@ export default class ActionManager implements IActionManager {
         };
         var moving = null;
 
-        // this.registerAction("copy", "@copy", "Editing", function () {
-        //     return new AllCommands.Copy(Selection.getSelection());
-        // }).setCondition(function () {
-        //     return selectionMade();
-        // });
-        // this.registerAction("paste", "@paste", "Editing", function () {
-        //     return new AllCommands.Paste(that.app.activePage);
-        // }).setCondition(function () {
-        //     return clipboard.hasValue();
-        // });
-
-        // this.registerAction("cut", "@cut", "Editing", function () {
-        //     var deleteCommand;
-        //     var selection = Selection.getSelection();
-        //     if (selection.length === 1) {
-        //         deleteCommand = selection[0].constructDeleteCommand();
-        //     }
-        //     else {
-        //         deleteCommand = new CompositeCommand(selection.map(x => x.constructDeleteCommand()));
-        //     }
-        //     var copyCommand = new AllCommands.Copy(selection);
-        //     return new CompositeCommand([copyCommand, deleteCommand]);
-        // }).setCondition(function () {
-        //     return selectionMade();
-        // });
-
         this.registerAction("delete", "@delete", "Editing", function () {
             Delete.run(Selection.getSelection());
         }).setCondition(function () {
@@ -529,18 +503,6 @@ export default class ActionManager implements IActionManager {
         this.registerAction("saveBackup", "Save backup", "Project actions", function () {
             return that.app.offlineModel.saveBackup(that.app);
         });
-
-        // this.registerAction("forceSave", "Force save", "Debug", function () {
-        //     new DesignerProxy().post("/api/projectData/save", {
-        //         id: that.app.id(),
-        //         name: that.app.name(),
-        //         projectType: that.app.projectType(),
-        //         folderId: sketch.params.folderId,
-        //         data: JSON.stringify(that.app.toJSON())
-        //     }).then(function () {
-        //         alert("Successfully saved!");
-        //     })
-        // });
 
         this.registerAction("convertToPath", "Convert to Path", "Path", function () {
             return ConvertToPath.run(Selection.getSelection());

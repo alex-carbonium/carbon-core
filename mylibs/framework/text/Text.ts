@@ -213,7 +213,7 @@ class Text extends UIElement implements IContainer, IDataElement {
         var stylePropNames = PropertyMetadata.getStylePropertyNamesMap(this.systemType(), 2);
         var res = {};
         for (var name in stylePropNames) {
-            res[name] = window['sketch'].util.flattenObject(this.props[name]);
+            res[name] = this.props[name];
         }
         return res;
     }

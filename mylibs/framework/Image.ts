@@ -352,10 +352,10 @@ PropertyMetadata.registerForType(Image, {
     overflow: {
         defaultValue: Overflow.Clip
     },
-    prepareVisibility: function (props) {
+    prepareVisibility: function (element: Image) {
         var base = PropertyMetadata.findForType(Container);
         return Object.assign({}, base, {
-            sizing: ImageSourceHelper.isEditSupported(props.source)
+            sizing: ImageSourceHelper.isEditSupported(element.props.source)
         });
     },
     groups: function () {

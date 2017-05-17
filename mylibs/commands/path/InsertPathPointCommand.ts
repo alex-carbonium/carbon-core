@@ -1,13 +1,15 @@
 import Command from "framework/commands/Command";
 import Primitive from "framework/sync/Primitive";
 
-export default klass2("sketch.commands.InsertPathPointCommand", Command, {
-   __name__: "InsertPathPointCommand",
-   _constructor: function(path, pointInfo) {
+export default class InsertPathPointCommand extends Command {
+    [x: string]: any;
+
+    constructor(path, pointInfo) {
+       super();
        this._path = path;
        this._data = path.getInsertPointData(pointInfo);
-   },
-   toPrimitiveList:function(rollback){
+   }
+   toPrimitiveList(){
        if(this._data.length == 1) {
            var pt = this._data[0];
            return [Primitive.path_insert_point(this._path.id(), pt, pt.idx)];
@@ -20,4 +22,4 @@ export default klass2("sketch.commands.InsertPathPointCommand", Command, {
                     Primitive.path_insert_point(this._path.id(), pt, pt.idx)];
        }
    }
-});
+}

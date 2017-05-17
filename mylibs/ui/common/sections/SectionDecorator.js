@@ -2,8 +2,6 @@ import Section from "framework/Section";
 import Brush from "framework/Brush";
 import {isPointInRect} from "math/math";
 import {DockStyle, ArrangeStrategies, Overflow, HorizontalAlignment, VerticalAlignment} from "framework/Defs";
-import CommandManager from "framework/commands/CommandManager";
-import CompositeCommand from "../../../framework/commands/CompositeCommand";
 import Cursor from "framework/Cursor";
 
 var handleWidth = 150;
@@ -206,7 +204,6 @@ class SectionDecorator {
         var newSection = new Section();
         var parent = this.element;
         var index = undefined;
-        var commands = [];
 
         switch (handle.type){
             case HandleTypes.OuterTop:
@@ -297,12 +294,10 @@ class SectionDecorator {
 
         parent.insert(newSection, index);
 
-        commands.push(parent.constructPropsChangedCommand({
+        parent.setProps({
             arrangeStrategy: ArrangeStrategies.Dock,
             overflow: Overflow.ExpandVertical
-        }));
-
-        CommandManager.execute(new CompositeCommand(commands));
+        });
     }
 }
 

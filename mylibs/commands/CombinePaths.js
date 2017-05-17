@@ -3,8 +3,9 @@ import CompoundPath from "../ui/common/CompoundPath";
 import Path from "ui/common/Path";
 import Selection from "../framework/SelectionModel";
 
-export default klass(Command, {
-    _constructor: function(joinMode, elements){
+export default class CombinePaths extends Command {
+    constructor(joinMode, elements){
+        super();
         this._elements = elements;
         for(var i = 0; i < elements.length; ++i) {
             var e = elements[i];
@@ -17,9 +18,9 @@ export default klass(Command, {
             }
         }
         this._joinMode = joinMode;
-    },
+    }
 
-    execute:function(){
+    execute(){
         var elements = this._elements.slice().sort((a, b) => a.zOrder() - b.zOrder());
         var path;
         var e0 = elements[0];
@@ -54,8 +55,8 @@ export default klass(Command, {
         path.recalculate();
         Selection.makeSelection([path]);
 
-    },
-    toPrimitiveList:function(){
+    }
+    toPrimitiveList(){
         return this.primitives;
     }
-});
+}

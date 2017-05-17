@@ -15,44 +15,11 @@ import Hammer from "hammerjs";
 
 var debug = require("DebugUtil")("carb:desktop");
 
-var fwk = sketch.framework;
 const WHEEL_STEP = 0.05;
 const WHEEL_STEP_BIG = 0.5;
 
 //we know that these are used anyway so no need to spam with requests
 var nonTrackedActions = ["zoomIn", "zoomOut", "copy", "paste", "duplicate", ""];
-
-var addDroppedImage = function (app, dropPosition, loadSrc, uploadedSrc) {
-    var im = new Image();
-    im.crossOrigin = "Anonymous";
-    im.onload = function () {
-        var dropX = 0;
-        var dropY = 0;
-        var image = sketch.framework.UIElement.fromType("sketch.ui.common.Image");
-        fwk.ImageSource.createFromUrlAsync(uploadedSrc).then(function (source) {
-            image.autoSizeOnFirstLoad(true);
-            image.setProps({
-                source: source
-            });
-        });
-
-        if (dropPosition) {
-            var scale = app.activePage.scale();
-            dropX = ~~(dropPosition.x / scale);
-            dropY = ~~(dropPosition.y / scale)
-            image.x(dropX);
-            image.y(dropY);
-        }
-        Environment.view.dropToLayer(dropX, dropY, image);
-    };
-    if (loadSrc) {
-        im.src = loadSrc;
-    }
-
-    if (uploadedSrc) {
-        im.src = uploadedSrc;
-    }
-};
 
 var onmousewheel = function (e) {
     var view = Environment.view;

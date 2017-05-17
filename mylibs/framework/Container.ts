@@ -487,7 +487,6 @@ export default class Container extends UIElement implements IContainer, IPropsOw
 
         var hitElement: UIElement = this.hitTransparent() ? null : this;
 
-        //position = sketch.math2d.rotatePoint(position, this.angle() * Math.PI / 180, this.rotationOrigin(true));
         for (let i = this.children.length - 1; i >= 0; --i) {
             var element = this.children[i];
             var newHit = element.hitElement(position, scale, predicate, directSelection);

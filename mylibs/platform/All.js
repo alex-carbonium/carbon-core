@@ -2,9 +2,7 @@ import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import DataNode from "framework/DataNode";
 import Matrix from "math/matrix";
-import Deferred from "framework/Deferred";
 import EventHelper from "framework/EventHelper";
-import pubSub from "framework/Pubsub";
 
 var viewId = "#viewContainer";
 
@@ -83,16 +81,9 @@ export default class PlatformAll {
                 Invalidate.request();
             }
         });
-
-        if (sketch.params.shareMode) {
-            this.disableShortcut("save");
-        }
     }
 
     dispose() {
-        if (this.viewManagertoken) {
-            pubSub.unsubscribe(this.viewManagertoken);
-        }
     }
 
     //this method depends on comments model being initialized.
@@ -100,25 +91,11 @@ export default class PlatformAll {
     postLoad(app) {
         registerUIActions(app);
         this.setStartupPage();
-        if (sketch.params.shareMode) {
-            app.viewModel.switchPreviewMode();
-        }
     }
 
     setStartupPage() {
         var app = App.Current;
         var page;
-        if (sketch.params.shareMode) {
-            var pageId = app.viewModel.shareStartupPage.value();
-            if (pageId) {
-                page = DataNode.getImmediateChildById(app, pageId + "");
-            }
-        }
-        else if (sketch.params.startupPage) {
-            page = sketch.util.firstOrDefault(app.pages, function (p) {
-                return sketch.params.startupPage === p.encodedName();
-            });
-        }
         if (!page) {
             page = findFirstSharedPage(app);
         }

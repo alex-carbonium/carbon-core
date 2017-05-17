@@ -71,9 +71,7 @@
 //             //act
 //             container1.add(container2)
 //             container2.add(element);
-//             this.runCommands([
-//                 element.constructPropsChangedCommand({height: 20})
-//             ]);
+//             element.setProps({height: 20});
 //             this.app.relayout();
 
 //             //assert
@@ -289,9 +287,7 @@
 //             var savepoint = this.app.createSavePoint();
 
 //             //act
-//             this.runCommands([
-//                 element1.constructPropsChangedCommand({x: -10})
-//             ]);
+//             element1.setProps({x: -10});
 //             this.app.relayout();
 
 //             //simulate external changes

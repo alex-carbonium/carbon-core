@@ -4,9 +4,6 @@ import PropertyMetadata from "./PropertyMetadata";
 import Box from "./Box";
 import Brush from "./Brush";
 import AnimationGroup from "./animation/AnimationGroup";
-import ElementPropsChanged from "../commands/ElementPropsChanged";
-import ElementDelete from "../commands/ElementDelete";
-import ElementMove from "../commands/ElementMove";
 import Matrix from "../math/matrix";
 import Point from "../math/point";
 import { isRectInRect, areRectsIntersecting } from "../math/math";
@@ -43,12 +40,6 @@ import { ICoordinate, ISize } from "carbon-geometry";
 import { ChangeMode } from "carbon-core";
 
 require("../migrations/All");
-
-var fwk = window['sketch'].framework;
-
-fwk.Stroke = Brush;
-
-fwk.DockValues = { left: "Left", top: "Top", bottom: "Bottom", right: "Right", fill: "Fill" };
 
 // constructor
 export default class UIElement extends DataNode implements IUIElement, IPropsOwner<IUIElementProps> {
@@ -484,18 +475,6 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
     _init() {
 
     }
-    // updateStyle() {
-    //     if (fwk.Font.familyOverride) {
-    //         if (this.props.font) {
-    //             var oldFont = this.props.font;
-    //             var oldFamily = oldFont.family;
-    //             if (oldFamily !== fwk.Font.familyOverride) {
-    //
-    //                 this.setProps({font: oldFont.extend({family: fwk.Font.familyOverride})});
-    //             }
-    //         }
-    //     }
-    // },
     // lastDrawnRect(value) {
     //     if (arguments.length !== 0) {
     //         this._lastDrawnRect = value;
@@ -1001,17 +980,6 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
     // mouseLeaveElement(event) {
     // },
     // mouseEnterElement(event) {
-    // },
-    // defaultAction(event) {
-    //     if (this._defaultAction) {
-    //         return this._defaultAction;
-    //     }
-    //     var pageId = this.pageLink();
-    //     if (pageId) {
-    //         this._defaultAction = new sketch.ui.SwitchPageAction(pageId);
-    //         return this._defaultAction;
-    //     }
-    //     return null;
     // },
     setDefaultAction(defaultAction) {
         this._defaultAction = defaultAction;
@@ -1638,21 +1606,15 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         do {
             element = nextParent;
             nextParent = !nextParent.isDisposed() ? nextParent.parent() : null;
-        } while (nextParent && (nextParent instanceof fwk.UIElement) && !(nextParent === NullContainer));
+        } while (nextParent && (nextParent instanceof UIElement) && !(nextParent === NullContainer));
 
-        if (element && (element instanceof fwk.Page)) {
+        if (element && (element.t === Types.ArtboardPage)) {
             return element;
         }
         return null;
     }
 
     contextMenu(context, menu) {
-    }
-    constructMoveCommand(newParent, newIndex) {
-        return new ElementMove(this, newParent, newIndex);
-    }
-    constructPropsChangedCommand(newProps, oldProps) {
-        return new ElementPropsChanged(this, newProps, oldProps);
     }
     tryDelete(): boolean {
         return true;
@@ -1951,7 +1913,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         var stylePropNames = PropertyMetadata.getStylePropertyNamesMap(this.systemType(), 1);
         var res = {};
         for (var name in stylePropNames) {
-            res[name] = window['sketch'].util.flattenObject(this.props[name]);
+            res[name] = this.props[name];
         }
         return res;
     }
@@ -1975,21 +1937,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
     }
 
     static fromTypeString(type, parameters) {
-        var components = type.split('.');
-        var current = window['sketch'];
-        for (var i = 1; i < components.length; i++) {
-            var component = components[i];
-            current = current[component];
-            if (!current) {
-                var newType = fwk.UIElement.upgradeTypeName(type);
-                if (newType !== type) {
-                    return fwk.UIElement.fromType(newType, parameters);
-                }
-                throw 'Type not found: ' + type;
-            }
-        }
-
-        return current;
+        return ObjectFactory.fromType(type, parameters);
     }
 
     static construct(type, ...args: any[]) {
@@ -2004,8 +1952,6 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         return ObjectFactory.fromJSON(data);
     }
 }
-
-fwk.UIElement = UIElement;
 
 UIElement.prototype.t = Types.Element;
 UIElement.prototype.__version__ = 1;
@@ -2269,16 +2215,16 @@ PropertyMetadata.registerForType(UIElement, {
             // }
         ];
     },
-    prepareVisibility: function (props, selection, view) {
-        if (view.prototyping()) {
+    prepareVisibility: function (element: UIElement) {
+        if (Environment.view.prototyping()) {
             var res = {};
-            for (var name in props) {
+            for (var name in element.props) {
                 res[name] = false;
             }
             return res;
         }
         return {
-            dockStyle: selection.parents().every(x => x.props.arrangeStrategy === ArrangeStrategies.Dock)
+            dockStyle: element.parent().arrangeStrategy() === ArrangeStrategies.Dock
         };
     }
 });

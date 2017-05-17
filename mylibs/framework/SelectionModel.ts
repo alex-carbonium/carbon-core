@@ -4,6 +4,7 @@ import Invalidate from "./Invalidate";
 import { ViewTool } from "./Defs";
 import UserSettings from "../UserSettings";
 import Environment from "../environment";
+import { ISelection, IEvent, IEvent2, IUIElement, IComposite, IEvent3 } from "carbon-core";
 
 var debug = require("DebugUtil")("carb:selection");
 
@@ -59,16 +60,19 @@ function onselect(rect) {
     Selection.makeSelection(selection);
 }
 
-class SelectionModel {
+class SelectionModel implements ISelection {
     [name: string]: any;
     private _activeGroup: any;
+
+    modeChangedEvent: IEvent<boolean>;
+    onElementSelected: IEvent3<IUIElement, IUIElement[], boolean>;
 
     constructor() {
         this._selectionMode = "new";
         this._selectFrame = null;
         this._unlockedContainers = [];
         this._activeGroup = null;
-        this.onElementSelected = EventHelper.createEvent();
+        this.onElementSelected = EventHelper.createEvent3<IUIElement, IUIElement[], boolean>();
         this.startSelectionFrameEvent = EventHelper.createEvent();
         this.onSelectionFrameEvent = EventHelper.createEvent();
         this.stopSelectionFrameEvent = EventHelper.createEvent();
@@ -222,12 +226,12 @@ class SelectionModel {
         var currentSelection = this._selectCompositeElement.elements;
 
         var newSelection = this._decomposeSelection(selection);
-        if (window['areSameArrays'](currentSelection, newSelection)) {
+        if (this.areSameArrays(currentSelection, newSelection)) {
             return;
         }
 
         if (this._selectionMode === "add_or_replace") {
-            if (!window['intersectArrays'](currentSelection, newSelection)) {
+            if (!this.intersectArrays(currentSelection, newSelection)) {
                 this.unselectAll(refreshOnly);
                 currentSelection = [];
             }
@@ -263,7 +267,7 @@ class SelectionModel {
         }
         else if (this._selectionMode === "remove") {
             this.unselectAll(refreshOnly);
-            window['sketch'].util.removeGroupFromArray(currentSelection, newSelection);
+            this.removeGroupFromArray(currentSelection, newSelection);
             this.addToSelection(currentSelection, refreshOnly);
         }
 
@@ -301,7 +305,7 @@ class SelectionModel {
     unselectGroup(elements, refreshOnly) {
         this.unselectAll(refreshOnly);
         var currentSelection = this._selectCompositeElement.elements;
-        window['sketch'].util.removeGroupFromArray(currentSelection, elements);
+        this.removeGroupFromArray(currentSelection, elements);
         this.addToSelection(currentSelection, refreshOnly);
     }
 
@@ -389,6 +393,40 @@ class SelectionModel {
 
     hideFrame() {
         this._selectCompositeElement.selected(false);
+    }
+
+    private removeGroupFromArray(array, group){
+        for(var i = 0; i < group.length; ++i){
+            var idx = array.indexOf(group[i]);
+            if(idx !== -1) {
+                array.splice(idx, 1);
+            }
+        }
+    }
+
+    private areSameArrays(array1, array2){
+        if (!array1 || !array2){
+            return false;
+        }
+        if (array1.length !== array2.length){
+            return false;
+        }
+        for (var i = 0, j = array1.length; i < j; ++i) {
+            if(array1[i] !== array2[i]){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private intersectArrays(array1, array2){
+        for(var i = 0; i < array2.length; ++i){
+            if(array1.indexOf(array2[i]) === -1){
+                return false;
+            }
+        }
+
+        return true;
     }
 }
 

@@ -7,7 +7,6 @@ require("./../globalRequire");
 
 var App = require("app");
 var AppState = require("AppState");
-var Resources = require("framework/Resources");
 
 var Defs = require("./framework/Defs");
 var Util = require("util");
@@ -38,7 +37,6 @@ export default {
     "Environment": require("./environment"),
     "backend": backend,
     "imageCache": require("./imageCache"),
-    "analytics": require("./analytics"),
     "util": require("./util"),
     "PropertyMetadata": require("./framework/PropertyMetadata"),
     "PropertyTracker": require("./framework/PropertyTracker"),
@@ -60,7 +58,6 @@ export default {
     "Shape": require("./framework/Shape"),
     "Rectangle": require("./framework/Rectangle"),
     "Circle": require("./framework/Circle"),
-    "PubSub": require("./framework/Pubsub"),
     "PageExporter": require("./framework/share/PageExporter"),
 
     "MirroringController": require("./framework/MirroringController"),
@@ -80,8 +77,6 @@ export default {
     "ViewTool": Defs.ViewTool,
     "Context": require("./framework/render/Context"),
     "ContextPool": require("./framework/render/ContextPool"),
-    "Deferred": require("./framework/Deferred"),
-    "Resources": require("./framework/Resources"),
     "Keyboard": require("./platform/Keyboard"),
     "Platform": require("./platform/Platform"),
     "StyleManager": require("./framework/style/StyleManager"),
@@ -97,7 +92,6 @@ export default {
 
     "ToolboxConfiguration": require("./ui/toolbox/ToolboxConfiguration"),
 
-    "AppPropsChanged": require("./commands/AppPropsChanged"),
     "CompositeCommand": require("./framework/commands/CompositeCommand"),
 
     "SelectComposite": require("./framework/SelectComposite"),

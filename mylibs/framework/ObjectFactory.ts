@@ -6,10 +6,10 @@ import logger from "../logger";
 import Matrix from "../math/matrix";
 import Rect from "../math/rect";
 
-var ObjectFactory = {
-    objectCreationFailed: EventHelper.createEvent(),
+export default class ObjectFactory {
+    static objectCreationFailed = EventHelper.createEvent();
 
-    construct: function(type, ...args){
+    static construct(type, ...args){
         var current;
         if (typeof type === "string") {
             var typeMetadata = PropertyMetadata.findAll(type);
@@ -24,32 +24,22 @@ var ObjectFactory = {
             throw "Type not found: " + type;
         }
 
-        var args = Array.prototype.slice.call(arguments);
-        args.splice(0, 1);
+        var newArgs = Array.prototype.slice.call(arguments);
+        newArgs.splice(0, 1);
         var instance = Object.create(current.prototype);
-        current.apply(instance, args);
+        current.apply(instance, newArgs);
         return instance;
-    },
+    }
 
-    fromType: function (type, parameters) {
-        var current = sketch;
+    static fromType(type, parameters?) {
+        var current = null;
         if (typeof type === "string") {
             var typeMetadata = PropertyMetadata.findAll(type);
             if (typeMetadata && typeMetadata._class) {
                 current = typeMetadata._class;
             }
-            if (current === sketch) {
-                var components = type.split('.');
-
-                for (var i = 1; i < components.length; i++) {
-                    var component = components[i];
-                    current = current[component];
-                    if (!current) {
-                        throw 'Type not found: ' + type;
-                    }
-                }
-            }
-        } else {
+        }
+        else {
             current = type;
         }
 
@@ -70,22 +60,22 @@ var ObjectFactory = {
         }
 
         return res;
-    },
-    fromJSON: function(data){
+    }
+    static fromJSON(data){
         if (data.t === null) {
             throw 'Invalid data, type is not specified';
         }
 
         try {
             ModelStateListener.stop();
-            var element = this.fromType(data.t);
+            var element = ObjectFactory.fromType(data.t);
             element.__state = 1;
             element.fromJSON(data);
             delete element.__state;
         } catch (e) {
             logger.error("Corrupted element in ObjectFactory.fromJSON", e);
             var args = {newObject: null, data};
-            this.objectCreationFailed.raise(args);
+            ObjectFactory.objectCreationFailed.raise(args);
             if (args.newObject){
                 return args.newObject;
             }
@@ -96,11 +86,11 @@ var ObjectFactory = {
         }
 
         return element;
-    },
-    isMaterialized(object) {
+    }
+    static isMaterialized(object) {
         return (Object.getPrototypeOf(object) !== Object.prototype);
-    },
-    getObject: function(data) {
+    }
+    static getObject(data) {
         if(!data) {
             return data;
         }
@@ -110,8 +100,8 @@ var ObjectFactory = {
         }
 
         return data;
-    },
-    tryUpdateWithPrototype: function (props, name) {
+    }
+    static tryUpdateWithPrototype(props, name) {
         var value = props[name];
         if (value && value.t) {
             var type = value.t;
@@ -130,14 +120,12 @@ var ObjectFactory = {
         else if (name === "br" || (value && name.endsWith(':br'))){
             props[name] = Rect.fromObject(value);
         }
-    },
-    updatePropsWithPrototype: function(props){
+    }
+    static updatePropsWithPrototype(props){
         for (var name in props){
             if (props.hasOwnProperty(name)){
-                this.tryUpdateWithPrototype(props, name);
+                ObjectFactory.tryUpdateWithPrototype(props, name);
             }
         }
     }
 }
-
-export default ObjectFactory;

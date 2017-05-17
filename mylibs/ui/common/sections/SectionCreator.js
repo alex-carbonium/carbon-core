@@ -4,8 +4,6 @@ import Section from "../../../framework/Section";
 import Artboard from "../../../framework/Artboard";
 import NullArtboard from "../../../framework/NullArtboard";
 import {ViewTool} from "../../../framework/Defs";
-import CommandManager from "../../../framework/commands/CommandManager";
-import CompositeCommand from "../../../framework/commands/CompositeCommand";
 import Selection from "../../../framework/SelectionModel"
 import Cursor from "../../../framework/Cursor";
 import Invalidate from "../../../framework/Invalidate";
@@ -96,11 +94,7 @@ export default class SectionCreator extends Tool {
         if(artboard === NullArtboard){
             return;
         }
-        var commands = Section.suckContent(artboard);
-
-        if (commands.length) {
-            CommandManager.execute(new CompositeCommand(commands));
-        }
+        Section.suckContent(artboard);
     }
 
     _refreshDecorator() {

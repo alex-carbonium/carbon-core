@@ -817,7 +817,6 @@ class Artboard extends Container implements IPropsOwner<IArtboardProps> {
 }
 Artboard.prototype.t = Types.Artboard;
 
-var fwk = window['sketch'].framework;
 PropertyMetadata.registerForType(Artboard, {
     fill: {
         defaultValue: Brush.White,
@@ -829,13 +828,7 @@ PropertyMetadata.registerForType(Artboard, {
         displayName: "Master page",
         type: "pageLink",  //masterPageEditorOptions
     },
-    screenType: {
-        displayName: "Device",
-        type: "choice",
-        possibleValues: fwk.devicesLookupValues,
-        useInModel: true
-    },
-    "layoutGridSettings": {
+    layoutGridSettings: {
         defaultValue: null
     },
     guidesX: {
@@ -902,8 +895,8 @@ PropertyMetadata.registerForType(Artboard, {
             size: 3 / 4
         }
     },
-    prepareVisibility(props) {
-        var showAsStencil = props.resource === ArtboardResource.Stencil;
+    prepareVisibility(element: Artboard) {
+        var showAsStencil = element.props.resource === ArtboardResource.Stencil;
         return {
             tileSize: showAsStencil,
             insertAsContent: showAsStencil,

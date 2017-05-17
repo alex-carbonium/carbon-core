@@ -1,9 +1,4 @@
 // define(["framework/Shape"], function (Shape) {
-//     if (!sketch.svg){
-//         sketch.svg = {};
-//     }
-//     var fwk = sketch.framework;
-//     var svg = sketch.svg;
 //
 //     var commandLengths = {
 //         m: 2,
@@ -150,7 +145,7 @@
 //         return item[item.length - 1];
 //     }
 //
-//     klass2("sketch.svg.Path", Shape, {
+//     klass2("SvgPath", Shape, {
 //         sourceWidth:function(/*Number*/value){
 //             return this.field("_sourceWidth", value, this.width());
 //         },

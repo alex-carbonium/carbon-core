@@ -13,6 +13,7 @@ import ArrangeStrategy from "./ArrangeStrategy";
 import Rect from "../math/rect";
 import Point from "../math/point";
 import { ChangeMode } from "carbon-core";
+import { pointToLineDistance } from "../math/geometry";
 
 //TODO: add line width property
 //TODO: line angle should be calculated as the angle between points, not matrix angle
@@ -150,7 +151,7 @@ class Line extends Shape {
             return false;
         }
 
-        var distance = window['sketch'].math2d.pointToLineDistance(pt, this.x1(), this.y1(), this.x2(), this.y2());
+        var distance = pointToLineDistance(pt, this.x1(), this.y1(), this.x2(), this.y2());
         return Math.abs(distance) < d;
     }
 

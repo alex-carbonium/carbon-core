@@ -1,5 +1,7 @@
 export default class Command {
-    constructor(primitives){
+    [x: string]: any;
+
+    constructor(primitives?) {
         this._transparent = false;
         this._primitives = primitives;
     }
@@ -25,7 +27,7 @@ export default class Command {
         return this._transparent;
     }
 
-    toPrimitiveList(){
+    toPrimitiveList(): any{
         return this._primitives;
-    }   
+    }
 }

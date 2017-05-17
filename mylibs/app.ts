@@ -55,7 +55,6 @@ window['Selection'] = Selection;
 var debug = require("./DebugUtil")("carb:relayout");
 
 var platform = require("platform/Platform");
-var DependencyContainer = require("DependencyContainer");
 var NullContainer = require("framework/NullContainer");
 var Primitive = require("framework/sync/Primitive");
 var Layer = require("framework/Layer");
@@ -68,19 +67,6 @@ var WebFont = require("webfontloader");
 var PropertyMetadata = require("framework/PropertyMetadata");
 var Path = require("./ui/common/Path");
 var CompoundPath = require("./ui/common/CompoundPath");
-
-// using
-var ui = window['sketch'].ui,
-    fwk = window['sketch'].framework,
-    sync = fwk.sync;
-
-var addComment = function (event) {
-    var scale = Environment.view.scale();
-    fwk.pubSub.publishSync("comment.addFromMenu", {
-        x: ~~(domUtil.layerX(event) / scale),
-        y: ~~(domUtil.layerY(event) / scale)
-    });
-};
 
 class AppClass extends DataNode implements IApp {
     props: IAppProps;
@@ -177,12 +163,9 @@ class AppClass extends DataNode implements IApp {
 
         this._userSettings = JSON.parse(localStorage["_userSettings"] || '{}');
 
-        this.container = new DependencyContainer();
-        this.container.app = this;
         this.migrationUpgradeNotifications = [];
 
         this.platform = platform;
-        this.resources = fwk.Resources;
 
         this.primitiveRootCache = {};
         this.modelSyncProxy = new ModelSyncProxy(this);
@@ -435,7 +418,7 @@ class AppClass extends DataNode implements IApp {
                 else {
                     this.timeWentOnline = new Date();
                 }
-                this.raiseLogEvent(value ? fwk.sync.Primitive.app_offline() : fwk.sync.Primitive.app_online());
+                //this.raiseLogEvent(value ? fwk.sync.Primitive.app_offline() : fwk.sync.Primitive.app_online());
                 this.offlineModeChanged.raise();
             }
         }
@@ -590,14 +573,6 @@ class AppClass extends DataNode implements IApp {
             }
         });
 
-        var includeResources = true;
-        if (pageIdMap) {
-            includeResources = pageIdMap['resources'];
-        }
-        if (includeResources) {
-            json.props.resources = fwk.Resources.toJSON();
-        }
-
         this.savedToJson.raise(json);
 
         return json;
@@ -609,7 +584,6 @@ class AppClass extends DataNode implements IApp {
         that.clear()
 
         this.setProps(data.props, ChangeMode.Self);
-        fwk.Resources.fromJSON(data.props.resources);
 
         if (this.props.styles) {
             for (let i = 0; i < this.props.styles.length; ++i) {
@@ -825,8 +799,6 @@ class AppClass extends DataNode implements IApp {
             backend.setupConnection(this);
             params.perf && performance.measure("App.setupConnection", "App.setupConnection");
         }
-
-        IconsInfo.defaultFontFamily = 'NinjamockBasic2';
 
         var iconFontsLoaded = this.waitForWebFonts();
         var defaultFontLoaded = this.fontManager.loadDefaultFont();
@@ -1170,7 +1142,7 @@ class AppClass extends DataNode implements IApp {
             }
         };
 
-        config.custom.families = config.custom.families.concat(["NinjamockBasic2"]);
+        config.custom.families = config.custom.families.concat(["CarbonIcons"]);
 
         return config;
     }

@@ -3,20 +3,17 @@ import Box from "./Box";
 import Brush from "./Brush";
 import PropertyMetadata from "./PropertyMetadata";
 import {Overflow, ViewTool, Types} from "./Defs";
-import Composite from "../framework/commands/CompositeCommand";
-import ElementDelete from "../commands/ElementDelete";
 import {isRectInRect, calculateRectIntersectionArea} from "math/math";
 import app from "app";
 
 export default class Section extends Container {
-    constructDeleteCommand(){
-        var commands = Section.spitContent(this);
-        commands.push(new ElementDelete(this));
-        return new Composite(commands);
+    trackDeleted(parent, index, mode) {
+        super.trackDeleted(parent, index, mode);
+        Section.spitContent(this);
+        this.parent().remove(this);
     }
 
     static suckContent(root){
-        var commands = [];
         var queue = [root];
         while (queue.length){
             var section = queue.pop();
@@ -53,8 +50,8 @@ export default class Section extends Container {
                     var newLocalRect = bestSection.global2local(globalRect);
                     newLocalRect.width = elementRect.width;
                     newLocalRect.height = elementRect.height;
-                    commands.push(element.constructMoveCommand(bestSection));
-                    commands.push(element.constructPropsChangedCommand(newLocalRect));
+                    bestSection.add(element);
+                    element.setProps(newLocalRect);
                 }
             }
 
@@ -62,8 +59,6 @@ export default class Section extends Container {
                 Array.prototype.push.apply(queue, sections);
             }
         }
-
-        return commands;
     }
     static findInnermostContainer(root, globalRect){
         var items = root.children;
@@ -89,7 +84,6 @@ export default class Section extends Container {
         return {section: root, area: ownArea};
     }
     static spitContent(element){
-        var commands = [];
         var queue = [element];
         var parent = element.parent();
         while (queue.length){
@@ -107,8 +101,8 @@ export default class Section extends Container {
                     var newLocalRect = parent.global2local(globalRect);
                     newLocalRect.width = element.width();
                     newLocalRect.height = element.height();
-                    commands.push(element.constructMoveCommand(parent));
-                    commands.push(element.constructPropsChangedCommand(newLocalRect));
+                    parent.add(element);
+                    element.setProps(newLocalRect);
                 }
             }
 
@@ -116,7 +110,6 @@ export default class Section extends Container {
                 Array.prototype.push.apply(queue, sections);
             }
         }
-        return commands;
     }
 
     prepareProps(changes){
@@ -186,12 +179,12 @@ PropertyMetadata.registerForType(Section, {
         defaultValue: [5, 5]
     },
     stroke: {
-        defaultValue: sketch.framework.Brush.createFromColor("lightgray")
+        defaultValue: Brush.createFromColor("lightgray")
     },
     highlightStroke: {
-        defaultValue: sketch.framework.Brush.createFromColor("black")
+        defaultValue: Brush.createFromColor("black")
     },
     highlightFill: {
-        defaultValue: sketch.framework.Brush.createFromColor("rgba(0, 0, 255, .2)")
+        defaultValue: Brush.createFromColor("rgba(0, 0, 255, .2)")
     }
 });

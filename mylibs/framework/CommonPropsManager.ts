@@ -2,7 +2,6 @@ import PropertyMetadata, { PropertyDescriptor } from "./PropertyMetadata";
 import UIElement from "./UIElement";
 import Environment from "../environment";
 import PropertyTracker from "./PropertyTracker";
-import Selection from "./SelectionModel";
 import { leaveCommonProps } from "../util";
 import { ChangeMode } from "carbon-core";
 import Font from "./Font";
@@ -79,10 +78,10 @@ export default class CommonPropsManager {
             return {};
         }
 
-        var base = metadata.prepareVisibility(elements[0].props, Selection.selectComposite(), Environment.view);
+        var base = metadata.prepareVisibility(elements[0]);
         for (let i = 1; i < elements.length; ++i) {
             let element = elements[i];
-            let next = metadata.prepareVisibility(element.props, Selection.selectComposite(), Environment.view);
+            let next = metadata.prepareVisibility(element);
             if (next) {
                 for (let p in next) {
                     let visible = next[p];
@@ -114,10 +113,9 @@ export default class CommonPropsManager {
         return result;
     }
 
-    previewDisplayProps(elements: UIElement[], changes: any) {
+    previewDisplayProps(elements: UIElement[], changes: any): boolean {
         if (!this._inPreview) {
             if (!this._affectingLayout && this.isChangeAffectingLayout(elements, changes)) {
-                Selection.hideFrame();
                 this._affectingLayout = true;
             }
 
@@ -134,6 +132,8 @@ export default class CommonPropsManager {
             }
             element.setDisplayProps(elementChanges, ChangeMode.Root);
         }
+
+        return this._affectingLayout;
     }
 
     updateDisplayProps(elements: UIElement[], changes: any) {

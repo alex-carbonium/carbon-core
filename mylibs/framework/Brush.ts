@@ -1,5 +1,4 @@
-﻿import Resources from "./Resources";
-import Invalidate from "./Invalidate";
+﻿import Invalidate from "./Invalidate";
 import TypeDefaults from "./TypeDefaults";
 import { Types } from "./Defs";
 import { BrushType } from "carbon-basics";
@@ -96,12 +95,12 @@ export default class Brush {
     }
 
     static toGradient(brushObject) {
-        var sliders = Resources[brushObject.value()] || [];
-        var returnSliders = [];
-        each(sliders, function () {
-            returnSliders.push([Math.round(brushObject.offset * 1000) / 10, brushObject.color]);
-        });
-        return returnSliders;
+        // var sliders = Resources[brushObject.value()] || [];
+        // var returnSliders = [];
+        // each(sliders, function () {
+        //     returnSliders.push([Math.round(brushObject.offset * 1000) / 10, brushObject.color]);
+        // });
+        // return returnSliders;
     }
 
     static fill(brushObject, context, l?: number, t?: number, w?: number, h?: number) {
@@ -206,5 +205,3 @@ export default class Brush {
 Brush.Black = Object.freeze(Brush.createFromColor('#000'));
 Brush.White = Object.freeze(Brush.createFromColor('#fff'));
 Brush.Empty = Brush.None = Object.freeze(Brush.createEmptyBrush());
-
-window['sketch'].framework.Brush = Brush;

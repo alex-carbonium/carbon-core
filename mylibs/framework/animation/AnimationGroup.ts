@@ -1,5 +1,3 @@
-import Deferred from "framework/Deferred";
-
 var easingFunctions = {
     linear: function (t, b, c, d) {
         return c * t / d + b;
@@ -106,6 +104,7 @@ var defaultOptions = {
 }
 
 export default class AnimationGroup {
+    [x: string]: any;
 
     constructor(values, options, progressCallback) {
         this._progressCallback = progressCallback;
@@ -114,11 +113,11 @@ export default class AnimationGroup {
 
         this._easing = easingFunctions[this._options.easing];
         this._completed = false;
-        this._deferred =  Deferred.create();
+        this._promise = new Promise(resolve => this._resolve = resolve);
     }
 
     promise(){
-        return this._deferred.promise();
+        return this._promise;
     }
 
     start(startTime) {
@@ -155,7 +154,7 @@ export default class AnimationGroup {
         }
         this._progressCallback();
         if (this._completed) {
-            this._deferred.resolve();
+            this._resolve();
         }
     }
 

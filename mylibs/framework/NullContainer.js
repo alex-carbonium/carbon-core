@@ -18,6 +18,10 @@ class NullContainer {
         return pos;
     }
 
+    arrangeStrategy(){
+        return -1;
+    }
+
     zOrder() {
         return null;
     }

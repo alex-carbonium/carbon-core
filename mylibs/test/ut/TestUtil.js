@@ -216,7 +216,7 @@ Util.createEvent = function(x, y){
     return event;
 };
 
-var Cmd = klass(Command, {});
+class Cmd extends Command{}
 Util.executeAnyCommand = function(){
     commandManager.execute(new Cmd());
 };

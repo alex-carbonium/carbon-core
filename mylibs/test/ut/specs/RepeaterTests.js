@@ -727,7 +727,7 @@ describe("Repeater tests", function(){
             circle = repeater.children[1].children[0].children[0];
             container2 = repeater.children[1].children[0];
 
-            circle.constructMoveCommand(container2, 0);
+            container2.add(circle);
             this.app.relayout();
 
             //assert

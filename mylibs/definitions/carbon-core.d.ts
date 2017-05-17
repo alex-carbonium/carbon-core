@@ -37,7 +37,6 @@ declare module "carbon-core" {
     export var DraggingElement: any;
     export var SelectFrame: any;
     export var Keyboard: any;
-    export var Deferred: any;
     export var ViewTool: any;
     export var Clipboard: any;
     export var domUtil: any;
@@ -48,7 +47,6 @@ declare module "carbon-core" {
     export var LayoutGridColumns:any;
     export var CommandManager:any;
     export var CompositeCommand:any;
-    export var AppPropsChanged:any;
     export var Invalidate: any;
     export var SvgParser: any;
     export var IconsInfo: any;

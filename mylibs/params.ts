@@ -25,14 +25,6 @@ function parseQueryString(): IQueryStringParams{
 
 var parser = new UAParser(navigator.userAgent);
 
-if (!window['sketch']){
-    window['sketch'] = {};
-}
-
-window['sketch'].params = {
-    projectType: "WebProject"
-};
-
 var endpoints = window['endpoints'];
 var qs = parseQueryString();
 if (DEBUG){

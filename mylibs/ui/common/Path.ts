@@ -2253,9 +2253,9 @@ PropertyMetadata.registerForType(Path, {
 
         return baseGroups;
     },
-    prepareVisibility(props){
-        var editMode = props.mode === "edit";
-        var pointSelected = props.selectedPointIdx !== -1;
+    prepareVisibility(path: Path){
+        var editMode = path.props.mode === "edit";
+        var pointSelected = path.props.selectedPointIdx !== -1;
         return {
             currentPointX: editMode && pointSelected,
             currentPointY: editMode && pointSelected,

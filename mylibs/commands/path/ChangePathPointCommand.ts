@@ -2,15 +2,17 @@ import Command from "framework/commands/Command";
 import Primitive from "framework/sync/Primitive";
 import Invalidate from "framework/Invalidate";
 
-export default klass2("sketch.commands.ChangePathPointCommand", Command, {
-    __name__: "ChangePathPointCommand",
-    _constructor: function(path, point, originalPoint) {
+export default class ChangePathPointCommand extends Command{
+    [x: string]: any;
+
+    constructor(path, point, originalPoint) {
+        super();
         this._path = path;
         this._point = point;
         this._originalPoint = originalPoint;
         this._newPoint = clone(point);
-    },
-    execute: function() {
+    }
+    execute() {
         var p = this._point,
             op = this._newPoint;
 
@@ -21,8 +23,8 @@ export default klass2("sketch.commands.ChangePathPointCommand", Command, {
         p.cp2x = op.cp2x;
         p.cp2y = op.cp2y;
         Invalidate.request();
-    },
-    rollback: function() {
+    }
+    rollback() {
         var p = this._point,
             op = this._originalPoint;
 
@@ -33,8 +35,8 @@ export default klass2("sketch.commands.ChangePathPointCommand", Command, {
         p.cp2x = op.cp2x;
         p.cp2y = op.cp2y;
         Invalidate.request();
-    },
-    toPrimitiveList:function(rollback){
+    }
+    toPrimitiveList(){
         return [Primitive.element_change(this._path)]
     }
-});
+}

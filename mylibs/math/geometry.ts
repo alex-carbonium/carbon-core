@@ -28,6 +28,12 @@ export function distancePointToLine(point, lineStartPoint, lineEndPoint)
     return distanceBetweenPoints(point, intersectionPoint);
 }
 
+export function pointToLineDistance(point, x1, y1, x2, y2) {
+    var dx = x2 - x1;
+    var dy = y1 - y2;
+    return (dy*point.x + dx*point.y + (x1*y2-x2*y1)) / Math.sqrt(dx*dx + dy*dy);
+}
+
 export function addPoint(point1, point2)
 {
     return {x:point1.x + point2.x, y:point1.y + point2.y};

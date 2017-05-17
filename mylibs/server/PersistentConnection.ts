@@ -126,7 +126,7 @@ export default class PersistentConnection extends StateMachine<ConnectionState> 
             if (!app.quitting && !goingIdle && !shuttingDown) {
                 var runtime = new Date().getTime() - connectionStartTime;
                 logger.warn("SignalR connection disconnected");
-                window['sketch'].analytics.event("Connection", "disconnected", "", runtime);
+                logger.trackEvent("disconnected", null, {runtime});
             }
 
             if (!goingIdle) {
@@ -184,11 +184,11 @@ export default class PersistentConnection extends StateMachine<ConnectionState> 
                     .done(e => {
                         this.resetConnectionTimeout();
                         app.isInOfflineMode(false);
-                        window['sketch'].analytics.event("Connection", initialStart ? "connected" : "reconnected", e.transport.name);
+                        logger.trackEvent(initialStart ? "connected" : "reconnected", {transport: e.transport.name});
                         return this._hub;
                     })
                     .fail(e => {
-                        window['sketch'].analytics.event("Connection", initialStart ? "connectFailed" : "reconnectFailed", "");
+                        logger.trackEvent(initialStart ? "connectFailed" : "reconnectFailed");
                         if (e.source) {
                             this._lastErrorCode = e.source.status;
                         }

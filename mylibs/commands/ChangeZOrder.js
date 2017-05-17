@@ -7,20 +7,7 @@ function execute(selection, mode) {
 
     var allChildren = selection[0].parent().getChildren();
     var max = allChildren.length - 1;
-    var min = sketch.util.max(allChildren,
-        function (child, i) {
-            if (child.__isMasterPageElement) {
-                return i;
-            }
-            return -1;
-        }
-    );
-    if (min >= 0) {
-        min += 1;
-    }
-    else {
-        min = 0;
-    }
+    var min = 0;
 
     switch (mode) {
         case "front":

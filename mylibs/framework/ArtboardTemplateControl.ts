@@ -449,14 +449,11 @@ PropertyMetadata.registerForType(ArtboardTemplateControl, {
     enableGroupLocking: {
         defaultValue: true
     },
-    prepareVisibility: function (props, selection, view) {
-        if (selection.elements) {
-            var elements = selection.elements;
-        } else {
-            elements = [];
-        }
+    prepareVisibility: function (element) {
         return {
-            stateId: ((elements.length == 1) && elements[0]._artboard && elements[0]._artboard.props && elements[0]._artboard.props.states && elements[0]._artboard.props.states.length > 1)
+            stateId: element._artboard && element._artboard.props
+                && element._artboard.props.states
+                && element._artboard.props.states.length > 1
         }
     },
     groups(){

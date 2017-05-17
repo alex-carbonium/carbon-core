@@ -2,7 +2,6 @@ import UIElement from "framework/UIElement";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Brush from "framework/Brush";
 import QuadAndLock from "framework/QuadAndLock";
-import AppPropsChanged from "commands/AppPropsChanged";
 import {Types} from "../framework/Defs";
 import UserSettings from "../UserSettings";
 import { ChangeMode } from "carbon-core";

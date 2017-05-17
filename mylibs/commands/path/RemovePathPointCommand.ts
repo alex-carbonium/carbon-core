@@ -3,15 +3,17 @@ import Primitive from "framework/sync/Primitive";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
 
-export default klass2("sketch.commands.RemovePathPointCommand", Command, {
-    __name__: "RemovePathPointCommand",
-    _constructor: function(path, point) {
+export default class RemovePathPointCommand extends Command {
+    [x: string]: any;
+
+    constructor(path, point) {
+        super();
         this._path = path;
         this._point = point;
         this._idx = this._path.indexOfPoint(point);
         this._parent = path.parent();
-    },
-    execute: function() {
+    }
+    execute() {
         this._path.removePointAtIndex(this._idx);
         if(this._path.length() === 0){
             Selection.unselectAll();
@@ -19,8 +21,8 @@ export default klass2("sketch.commands.RemovePathPointCommand", Command, {
         }
         this._created = false;
         Invalidate.request();
-    },
-    transparent:function(){
+    }
+    transparent(){
         return true;
     }
-});
+}
