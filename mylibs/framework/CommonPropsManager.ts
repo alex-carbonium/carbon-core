@@ -25,14 +25,14 @@ export default class CommonPropsManager {
         let baseGroups = baseMetadata.groups(baseElement);
         for (var i = 1; i < elements.length; i++) {
             var other = elements[i];
-            for (var i = 0; i < baseGroups.length; i++) {
-                var group = baseGroups[i];
-                for (var j = group.properties.length - 1; j >= 0; --j) {
-                    var propertyName = group.properties[j];
+            for (var j = 0; j < baseGroups.length; j++) {
+                var group = baseGroups[j];
+                for (var k = group.properties.length - 1; k >= 0; --k) {
+                    var propertyName = group.properties[k];
                     var descriptor1 = baseElement.findPropertyDescriptor(propertyName);
                     var descriptor2 = other.findPropertyDescriptor(propertyName);
                     if (!descriptor1 || !descriptor2 || descriptor1.type !== descriptor2.type) {
-                        group.properties.splice(j, 1);
+                        group.properties.splice(k, 1);
                     }
                 }
             }
