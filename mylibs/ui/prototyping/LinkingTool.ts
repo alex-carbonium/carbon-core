@@ -18,8 +18,10 @@ import RequestAnimationSettings from "./RequestAnimationSettings";
 import Environment from "../../environment";
 import StoryAction from "../../stories/StoryAction";
 import Link from "./Link";
+
 import DataNode from "framework/DataNode";
-import { IUIElement, IMouseEventData, IKeyboardState, PrimitiveType } from "carbon-core";
+import { IUIElement, IMouseEventData, IKeyboardState, PrimitiveType, IContext } from "carbon-core";
+import Brush from "../../framework/Brush";
 
 const HandleSize = 14;
 const HomeButtonWidth = 14;
@@ -28,6 +30,8 @@ const HomeButtonHeight = 16;
 const DefaultLinkColor = "#1592E6";
 const HoverLinkColor = "#662d8f";
 const InactiveLinkColor = '#808284';
+
+var HoverLinkColorBrush = Brush.createFromColor(HoverLinkColor);
 
 function hasLocationProperty(props) {
     return props.x !== undefined
@@ -272,6 +276,10 @@ export default class LinkingTool extends Tool {
     };
 
     _getHandleAtPoint(event, scale) {
+        if (!this._handles) {
+            return null;
+        }
+
         for (var i = 0; i < this._handles.length; ++i) {
             var handle = this._handles[i];
             if (isPointInRect({ x: handle.x, y: handle.y, width: HandleSize / scale, height: HandleSize / scale }, event)) {
@@ -282,6 +290,48 @@ export default class LinkingTool extends Tool {
         }
 
         return handle;
+    }
+
+    _getConnectionToAtPoint(event, scale) {
+        if (!this.connections) {
+            return null;
+        }
+
+        for (var i = this.connections.length - 1; i >= 0; --i) {
+            var c = this.connections[i];
+            var connection = c.connection;
+            var to = connection.to;
+
+            if (isPointInRect(this._getCupRectForPoint(to, scale), event)) {
+                return c;
+            }
+        }
+
+        return null;
+    }
+
+    _highlightHoverElements(event, scale) {
+        var hoverArboardHomeButton = this._hoverArboardHomeButton;
+        var hoverHandle = this._hoverHandle;
+        var hoverConnectionTo = this._hoverConnectionTo;
+
+        this._hoverArboardHomeButton = null;
+        this._hoverHandle = null;
+        this._hoverConnectionTo = null;
+
+        this._hoverArboardHomeButton = this._pointToHomeScreenArtboard(event, scale);
+        if (!this._hoverArboardHomeButton) {
+            this._hoverHandle = this._getHandleAtPoint(event, scale);
+            if (!this._hoverHandle) {
+                this._hoverConnectionTo = this._getConnectionToAtPoint(event, scale);
+            }
+        }
+
+        if (this._hoverArboardHomeButton !== hoverArboardHomeButton ||
+            this._hoverConnectionTo !== hoverConnectionTo ||
+            this._hoverHandle !== hoverHandle) {
+            Invalidate.requestInteractionOnly();
+        }
     }
 
     mousemove(event) {
@@ -305,19 +355,7 @@ export default class LinkingTool extends Tool {
             this._hoverArboardHomeButton = null;
             this._hoverHandle = null;
         } else {
-            let artboard = this._pointToHomeScreenArtboard(event, scale);
-            if (artboard !== this._hoverArboardHomeButton) {
-                this._hoverArboardHomeButton = artboard;
-                this._hoverHandle = null;
-                Invalidate.requestInteractionOnly();
-            } else {
-                var handle = this._getHandleAtPoint(event, scale);
-
-                if (handle !== this._hoverHandle) {
-                    this._hoverHandle = handle;
-                    Invalidate.requestInteractionOnly();
-                }
-            }
+            this._highlightHoverElements(event, scale);
         }
 
         var target = this._app.activePage.hitElement(event, scale, null, Selection.directSelectionEnabled());
@@ -481,10 +519,10 @@ export default class LinkingTool extends Tool {
     }
 
     _pointToId(p) {
-        return p.x + '_' + p.y + + '_' + (p.type & 1)
+        return p.x + '_' + p.y + '_' + (p.type & 1)
     }
 
-    _addBalancingConnection(pointsMap, source, target) {
+    _addBalancingConnection(pointsMap, source, target, element) {
         var pointId = this._pointToId(source);
         var list = pointsMap[pointId] || [];
         pointsMap[pointId] = list;
@@ -493,18 +531,19 @@ export default class LinkingTool extends Tool {
 
         list.push({
             target: target,
-            source: source
+            source: source,
+            size: (target.type & 1)?element.width():element.height()
         });
     }
 
     _rebalanceConnections() {
         var pointsMap = {};
-        let BalanceMargin = 20;
+        let BalanceMargin = 50;
         for (var c of this.connections) {
             var from = c.connection.from;
             var to = c.connection.to;
-            this._addBalancingConnection(pointsMap, from, to);
-            this._addBalancingConnection(pointsMap, to, from);
+            this._addBalancingConnection(pointsMap, from, to, c.artboard);
+            this._addBalancingConnection(pointsMap, to, from, c.element);
         }
 
         for (var id in pointsMap) {
@@ -514,15 +553,20 @@ export default class LinkingTool extends Tool {
                 continue;
             }
 
+            var size = list[0].size;
+            list.forEach(x=>{size=Math.max(size, x.size)});
+
+            var margin = size / (count + 1);
+
             if (list[0].target.type & 1) {
                 list.sort((a, b) => {
                     return a.target.x - b.target.x;
                 })
 
-                var startX = 0 | list[0].source.x - BalanceMargin * (count - 1) / 2;
+                var startX = 0 | list[0].source.x - margin * (count - 1) / 2;
 
                 for (var i = 0; i < count; ++i) {
-                    list[i].source._x = startX + i * BalanceMargin;
+                    list[i].source._x = startX + i * margin;
                 }
             } else {
 
@@ -530,10 +574,10 @@ export default class LinkingTool extends Tool {
                     return a.target.y - b.target.y;
                 })
 
-                var startY = 0 | list[0].source.y - BalanceMargin * (count - 1) / 2;
+                var startY = 0 | list[0].source.y - margin * (count - 1) / 2;
 
                 for (var i = 0; i < count; ++i) {
-                    list[i].source._y = startY + i * BalanceMargin;
+                    list[i].source._y = startY + i * margin;
                 }
             }
         }
@@ -630,7 +674,10 @@ export default class LinkingTool extends Tool {
         context.save();
 
         var connection = connectionInfo.connection;
-        if (connectionInfo.element == this._selection || this._activeStory.props.type === StoryType.Flow) {
+        if (connectionInfo === this._hoverConnectionTo) {
+            context.strokeStyle = HoverLinkColor;
+            context.fillStyle = HoverLinkColor;
+        } else if (connectionInfo.element == this._selection || this._activeStory.props.type === StoryType.Flow) {
             context.strokeStyle = DefaultLinkColor;
             context.fillStyle = DefaultLinkColor;
         } else {
@@ -645,7 +692,8 @@ export default class LinkingTool extends Tool {
         context.restore();
 
         context.beginPath();
-        this._renderArrow(context, connection.from, connection.to)
+
+        this._renderArrow(context, connection.from, connection.to);
 
         if (scale > 1) {
             context.lineWidth = 2 / scale;
@@ -658,16 +706,24 @@ export default class LinkingTool extends Tool {
         context.stroke();
 
         context.beginPath();
-        this._renderInArrow(context, connection.to, scale);
-        context.lineWidth = 2;
-        context.fill2();
+        if (connectionInfo === this._hoverConnectionTo) {
+            this._renderCup(context, connection.to, scale);
+            context.fillStyle = HoverLinkColor;
+            context.fill2();
+
+            context.fillStyle = 'white';
+            this._renderElipsis(context, connection.to, scale);
+            context.fill2();
+        } else {
+            this._renderInArrow(context, connection.to, scale);
+            context.lineWidth = 2;
+            context.fill2();
+        }
+
         context.restore();
     }
 
     _getCupRectForPoint(point, scale) {
-        if (scale < 1) {
-            scale = 1;
-        }
         var size = HandleSize / scale;
         if (point.type === PointType.Left) {
             return { x: point._x - size, y: point._y - size / 2, width: size, height: size };
@@ -685,14 +741,18 @@ export default class LinkingTool extends Tool {
 
     _renderCup(context, point, scale) {
         var rect = this._getCupRectForPoint(point, scale);
-        var r = rect.width / 2 | 0;
+        var r = rect.width / 2;
         context.roundedRectPath(rect.x, rect.y, rect.width, rect.height, r, r);
     }
 
-    _renderCupForConnection(context, point, scale) {
+    _renderElipsis(context, point, scale) {
         var rect = this._getCupRectForPoint(point, scale);
-        var r = rect.width / 2 | 0;
-        context.roundedRectPath(rect.x, rect.y, rect.width, rect.height, r, r);
+        var r = rect.width / 10;
+        var y = rect.y + rect.height / 2;
+        context.beginPath();
+        context.circlePath(rect.x + rect.width / 4, y, r);
+        context.circlePath(rect.x + rect.width / 2, y, r);
+        context.circlePath(rect.x + 3 * rect.width / 4, y, r);
     }
 
     _renderOutArrow(context, point, size) {
@@ -878,6 +938,7 @@ export default class LinkingTool extends Tool {
         if (this._mousepressed && this._currentPoint) {
             // render new (dragging) arrow
             this._renderNewArrow(context, scale);
+            this._target && DropVisualization.highlightElement(view, context, this._target, null, HoverLinkColorBrush);
         } else if (this._target) {
             DropVisualization.highlightElement(view, context, this._target);
         }
@@ -888,8 +949,11 @@ export default class LinkingTool extends Tool {
             }
         }
 
-        for (var i = 0; i < this._handles.length; ++i) {
-            this._renderHandle(context, this._handles[i], scale);
+        // do not render handle if we are hovering over other elements
+        if(!this._hoverConnectionTo) {
+            for (var i = 0; i < this._handles.length; ++i) {
+                this._renderHandle(context, this._handles[i], scale);
+            }
         }
 
         this._renderHomeScreenButton(context, scale);

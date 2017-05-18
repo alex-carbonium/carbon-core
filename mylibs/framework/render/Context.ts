@@ -513,8 +513,7 @@ export default class Context implements IContext {
     circle(centerX, centerY, radius) {
         this.beginPath();
 
-        this.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-        this.closePath();
+        this.circlePath(centerX, centerY, radius);
     }
 
     fill2() {

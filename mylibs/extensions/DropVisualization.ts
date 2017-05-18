@@ -496,7 +496,7 @@ export default class DropVisualization extends ExtensionBase {
         }
     }
 
-    static highlightElement(view, context, element, boundaryPath = false) {
+    static highlightElement(view, context, element, boundaryPath = false, highlighBrush = HighlightBrush) {
         context.save();
 
         context.beginPath();
@@ -508,7 +508,7 @@ export default class DropVisualization extends ExtensionBase {
         }
 
         context.lineWidth = 2 / view.scale();
-        Brush.stroke(HighlightBrush, context);
+        Brush.stroke(highlighBrush, context);
         context.restore();
     }
 }
