@@ -37,7 +37,7 @@ import { PropertyDescriptor } from './PropertyMetadata';
 import { IKeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IPropsOwner, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
-import { ChangeMode } from "carbon-core";
+import { ChangeMode, LayerTypes } from "carbon-core";
 
 require("../migrations/All");
 
@@ -838,7 +838,6 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
     }
 
     drawSelf(context, w, h, environment) {
-
     }
 
     drawDecorators(context, w, h, environment) {
@@ -1372,17 +1371,11 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
     onLayerDraw(layer, context, environment) {
 
     }
-    registerForLayerDraw(layerNum) {
-        var parent = this.parent();
-        if (parent) {
-            parent.registerForLayerDraw(layerNum, this);
-        }
+    registerForLayerDraw(layerNum: LayerTypes) {
+        Environment.view.registerForLayerDraw(layerNum, this);
     }
-    unregisterForLayerDraw(layerNum) {
-        var parent = this.parent();
-        if (parent) {
-            parent.unregisterForLayerDraw(layerNum, this);
-        }
+    unregisterForLayerDraw(layerNum: LayerTypes) {
+        Environment.view.unregisterForLayerDraw(layerNum, this);
     }
     margin(value?: Box) {
         if (value !== undefined) {

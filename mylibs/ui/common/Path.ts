@@ -524,7 +524,7 @@ class Path extends Shape {
             this._cancelBinding.dispose();
         }
         if (edit) {
-            this.registerForLayerDraw(LayerTypes.Interaction, this);
+            this.registerForLayerDraw(LayerTypes.Interaction);
             Invalidate.request();
 
             this._currentPoint = null;
@@ -537,7 +537,7 @@ class Path extends Shape {
 
             updateSelectedPoint.call(this, this.points[0]);
         } else {
-            this.unregisterForLayerDraw(LayerTypes.Interaction, this);
+            this.unregisterForLayerDraw(LayerTypes.Interaction);
             Invalidate.request();
 
             this._cancelBinding = null;

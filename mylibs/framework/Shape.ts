@@ -8,7 +8,7 @@ import ContextPool from "./render/ContextPool";
 import {Types, StrokePosition, LineCap, LineJoin} from "./Defs";
 import Image from "./Image";
 import Constraints from "./Constraints";
-import { IImage } from "carbon-model";
+import { IImage, IUIElement } from "carbon-model";
 
 class Shape extends Container {
     convertToPath(){
@@ -285,17 +285,19 @@ class Shape extends Container {
         return true;
     }
 
-    insert(image: IImage) {
+    insert(element: IUIElement) {
         this.setProps({clipMask: true});
-        image.prepareAndSetProps(this.selectLayoutProps());
-        image.resizeOnLoad(null);
+        element.prepareAndSetProps(this.selectLayoutProps());
+        if (element instanceof Image){
+            element.resizeOnLoad(null);
+        }
 
         var parent = this.parent();
         var idx = parent.remove(this);
 
         var group = new GroupContainer();
         group.add(this);
-        group.add(image);
+        group.add(element);
         parent.insert(group, idx);
         return group;
     }

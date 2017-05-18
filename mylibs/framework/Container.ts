@@ -583,12 +583,6 @@ export default class Container extends UIElement implements IContainer, IPropsOw
     globalMatrixToLocal(m: IMatrix): Matrix{
         return this.globalViewMatrixInverted().appended(m);
     }
-    registerForLayerDraw(layer, element?) {
-        this.parent().registerForLayerDraw(layer, element);
-    }
-    unregisterForLayerDraw(layer, element?) {
-        this.parent().unregisterForLayerDraw(layer, element);
-    }
     arrange(resizeEvent?: any, mode?: ChangeMode) {
         UIElement.prototype.arrange.apply(this, arguments);
         ArrangeStrategy.arrange(this, resizeEvent, mode);

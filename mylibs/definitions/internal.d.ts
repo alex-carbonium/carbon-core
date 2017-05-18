@@ -54,7 +54,7 @@ declare module "carbon-app"{
         scaleMatrix: any;
         context: any;
 
-        registerForLayerDraw(layerType:number, element:{onLayerDraw:(layer: ILayer, context: IContext)=>void}, index?);
+        registerForLayerDraw(layerType:number, element:{onLayerDraw:(layer: ILayer, context: IContext, environment: IEnvironment)=>void}, index?);
         unregisterForLayerDraw(layerType:number, element:any);
 
         dropToLayer(x:number, y:number, element:IUIElement):void;

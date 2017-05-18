@@ -4,7 +4,7 @@ import Matrix from "math/matrix";
 import PropertyMetadata from "framework/PropertyMetadata";
 import EventHelper from "framework/EventHelper";
 import { Types } from "./Defs";
-import { IContainer, IRect } from "carbon-core";
+import { IContainer, IRect, LayerTypes, IView } from "carbon-core";
 
 var clearChangedAreas = function (context) {
     // var fillStyle = this.fillStyle();
@@ -58,6 +58,7 @@ var addInvalidateRect = function (newRect) {
 };
 
 class Layer extends Container {
+    type: LayerTypes;
 
     constructor() {
         super();
