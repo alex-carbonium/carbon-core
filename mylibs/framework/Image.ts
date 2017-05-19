@@ -282,11 +282,12 @@ export default class Image extends Container implements IImage, IPropsOwner<IIma
     }
 
     insert(image: Image, index, mode) {
-        image.setProps(this.selectLayoutProps());
-        image.resizeOnLoad(null);
-        this.parent().replace(this, image, mode);
-        return image;
-
+        // image.setProps(this.selectLayoutProps());
+        // image.resizeOnLoad(null);
+        // this.parent().replace(this, image, mode);
+        // return image;
+        this.setProps({source: image.source()});
+        return this;
     }
 
     resizeOnLoad(value?: OriginType|null): OriginType|null{

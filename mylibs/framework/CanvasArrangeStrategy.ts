@@ -74,8 +74,10 @@ export default {
                     sy = npr.height/(pr.height || 1);
                 }
 
-                v.set(sx, sy);
-                child.applyScaling(v, new Point(ox, oy), event.options, changeMode);
+                if (sx !== 1 || sy !== 1){
+                    v.set(sx, sy);
+                    child.applyScaling(v, new Point(ox, oy), event.options, changeMode);
+                }
             }
             if (translateX || translateY){
                 v = v || new Point(0, 0);
@@ -84,12 +86,14 @@ export default {
 
                 v.set((npr.width - pr.width) * dx, (npr.height - pr.height) * dy);
 
-                let reset = event.reset;
-                let alreadyReset = scaleX || scaleY;
-                if (alreadyReset){
-                    reset = false;
+                if (v.x || v.y){
+                    let reset = event.reset;
+                    let alreadyReset = scaleX || scaleY;
+                    if (alreadyReset){
+                        reset = false;
+                    }
+                    child.applyTranslation(v, reset, changeMode);
                 }
-                child.applyTranslation(v, reset, changeMode);
             }
         }
     }

@@ -80,6 +80,9 @@ export default class ViewBase { //TODO: implement IView
     contextScale: number;
     scaleChanged: IEvent<number>;
 
+    activeLayer: ILayer = null;
+    activeLayerChanged: IEvent<ILayer> = EventHelper.createEvent<ILayer>();
+
     _registerLayer(layer) {
         this._layers.push(layer);
         layer._view = this;
@@ -329,6 +332,7 @@ export default class ViewBase { //TODO: implement IView
         page._view = this;
         this._layers[0] = page;
         page.type = LayerTypes.Content;
+        this.activateLayer(page.type);
 
         this.scale(page.scale());
     }
@@ -343,6 +347,29 @@ export default class ViewBase { //TODO: implement IView
 
     getLayer(layerType: LayerTypes): ILayer {
         return this._layers.find(l => l.type === layerType);
+    }
+
+    activateLayer(layerType: LayerTypes, silent?: boolean){
+        var layer = this.getLayer(layerType);
+
+        if (layer !== this.activeLayer){
+            if (this.activeLayer){
+                this.activeLayer.deactivate();
+                this.activeLayer.isActive = false;
+            }
+            layer.isActive = true;
+            this.activeLayer = layer;
+            if (!silent){
+                this.activeLayerChanged.raise(layer);
+            }
+        }
+    }
+
+    deactivateLayer(layerType: LayerTypes, silent?: boolean){
+        var i = this._layers.findIndex(x => x.type === layerType);
+        if (i){
+            this.activateLayer(this._layers[i - 1].type, silent);
+        }
     }
 
     viewportRect() {

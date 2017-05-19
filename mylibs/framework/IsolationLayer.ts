@@ -1,6 +1,6 @@
 import Layer from './Layer';
 import Context from "./render/Context";
-import { IContainer, IUIElement, IIsolationLayer, ChangeMode, IIsolatable } from "carbon-core";
+import { IContainer, IUIElement, IIsolationLayer, ChangeMode, IIsolatable, LayerTypes } from "carbon-core";
 import DataNode from "./DataNode";
 import Selection from "framework/SelectionModel";
 import RelayoutEngine from "framework/relayout/RelayoutEngine";
@@ -18,7 +18,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         super();
 
         App.Current.actionManager.subscribe("cancel", () => {
-           this.exitIsolation();
+           Environment.view.deactivateLayer(LayerTypes.Isolation);
         })
     }
 
@@ -30,8 +30,8 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
     }
 
     isolateGroup(owner: IIsolatable, clippingParent: IUIElement = null) : void{
-        if(this.ownerElement) {
-            this.exitIsolation();
+        if (this.ownerElement) {
+            Environment.view.deactivateLayer(this.type, true);
         }
 
         this.clippingParent = clippingParent;
@@ -53,11 +53,12 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         this._onAppChangedSubscription = App.Current.deferredChange.bind(this, this.onAppChanged);
         this._onRelayoutCompleted = App.Current.relayoutFinished.bind(this, this.onRelayoutFinished);
         Selection.clearSelection();
-        Environment.controller.isolationModeChanged.raise(true);
+
+        Environment.view.activateLayer(this.type);
     }
 
-    exitIsolation():void {
-        if(!this.ownerElement) {
+    deactivate():void {
+        if (!this.ownerElement) {
             return;
         }
         this.hitTransparent(true);
@@ -79,7 +80,6 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
 
         Selection.clearSelection();
         Selection.refreshSelection();
-        Environment.controller.isolationModeChanged.raise(false);
     }
 
     onAppChanged(primitiveMap:any) {
@@ -92,7 +92,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         // owner element can be removed, we need to exit isolation mode if that happens
         let parent = this.ownerElement.parent();
         if(parent === NullContainer) {
-            this.exitIsolation();
+            Environment.view.deactivateLayer(this.type);
         }
     }
 
@@ -102,10 +102,6 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
 
     canAccept() {
         return this.isActive;
-    }
-
-    get isActive() {
-        return this.ownerElement !== null;
     }
 
     isActivatedFor(element: IUIElement){
@@ -244,4 +240,5 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
             sourceParent.changePosition(sourceElement, index);
         }
     }
+
 }

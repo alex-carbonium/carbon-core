@@ -213,7 +213,7 @@ class Shape extends Container {
         if (elements.length !== 1){
             return false;
         }
-        return (elements[0] instanceof Image || elements[0] instanceof Shape) && allowMoveInOut;
+        return this.primitiveRoot().isEditable() && (elements[0] instanceof Image || elements[0] instanceof Shape) && allowMoveInOut;
     }
 
     lineCap(value?) {

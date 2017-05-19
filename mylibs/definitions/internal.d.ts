@@ -27,9 +27,15 @@ declare module "carbon-model"{
 }
 
 declare module "carbon-app"{
-    import { IUIElement, ILayer } from 'carbon-model';
+    import { IUIElement } from 'carbon-model';
     import { IContext } from "carbon-rendering";
     import { IEvent } from "carbon-basics";
+
+    export interface IPage{
+        nameProvider: any;
+
+        findDropToPageData(x, y, element);
+    }
 
     export interface IApp{
         offlineModel: any;
@@ -56,6 +62,9 @@ declare module "carbon-app"{
 
         registerForLayerDraw(layerType:number, element:{onLayerDraw:(layer: ILayer, context: IContext, environment: IEnvironment)=>void}, index?);
         unregisterForLayerDraw(layerType:number, element:any);
+
+        activateLayer(layerType: LayerTypes, silent?: boolean);
+        deactivateLayer(layerType: LayerTypes, silent?: boolean);
 
         dropToLayer(x:number, y:number, element:IUIElement):void;
 
@@ -87,14 +96,18 @@ declare module "carbon-app"{
 }
 
 declare module "carbon-model"{
-    export interface IPage{
-        nameProvider: any;
-
-        findDropToPageData(x, y, element);
-    }
-
     export interface IArtboard{
         allowArtboardSelection(value?): boolean;
+    }
+
+    export interface IPrimitiveRoot{
+        registerSetProps(element, props, oldProps, mode);
+        registerPatchProps(element, patchType, propName, item, mode);
+        registerDelete(parent, element, index, mode)
+        registerInsert(parent, element, index, mode)
+        registerChangePosition(parent, element, index, oldIndex, mode);
+        isEditable(): boolean;
+        isFinalRoot(): boolean;
     }
 }
 

@@ -12,7 +12,20 @@ export default {
             var clone = element.clone();
             App.Current.activePage.nameProvider.assignNewName(clone);
 
-            element.parent().insert(clone, element.zOrder() + 1);
+            var originalParent = element.parent();
+            var current = originalParent;
+            var children = [clone];
+            while (!current.canAccept(children)){
+                current = current.parent();
+            }
+
+            if (current === originalParent){
+                current.insert(clone, element.zOrder() + 1);
+            }
+            else {
+                clone.setTransform(current.globalMatrixToLocal(element.globalViewMatrix()));
+                current.add(clone);
+            }
             newSelection.push(clone);
         }
         Selection.makeSelection(newSelection);

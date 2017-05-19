@@ -1,6 +1,6 @@
 declare module "carbon-app" {
-    import { ILayer, IDataNode, IPage, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IPropsOwner, IArtboard, IContainer, IComposite, IElementEventData, IIsolationLayer } from "carbon-model";
-    import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush, IEvent3 } from "carbon-basics";
+    import { IDataNode, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IPropsOwner, IArtboard, IContainer, IComposite, IElementEventData, IIsolatable } from "carbon-model";
+    import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush, IEvent3, IConstructor } from "carbon-basics";
     import { IRect, ICoordinate } from "carbon-geometry";
 
     export interface IPlatform{
@@ -99,6 +99,45 @@ declare module "carbon-app" {
         resetCurrentTool();
     }
 
+    export interface ILayer extends IContainer {
+        type: LayerTypes;
+        isActive: boolean;
+
+        activate();
+        deactivate();
+
+        dropToLayer(x, y, element);
+
+        canChangeNodeTree(): boolean;
+    }
+
+    export interface IIsolationLayer extends ILayer {
+        findDropToPageData(x, y, element);
+        isActivatedFor(owner: IIsolatable): boolean;
+        isolateGroup(owner: IIsolatable, clippingParent?: IUIElement, e?: IMouseEventData) :void;
+    }
+
+    export interface IPage extends IContainer, ILayer {
+        getAllArtboards(): IArtboard[];
+        getActiveArtboard(): IArtboard;
+        getArtboardAtPoint(point: ICoordinate): IArtboard;
+
+        saveWorkspaceState(): any;
+        restoreWorkspaceState(data: any): void;
+
+        scrollX(): number;
+        scrollY(): number;
+
+        deactivating(nextPage: IPage): boolean;
+        deactivated(): void;
+        activating(prevPage: IPage): void;
+        activated(): void;
+
+        insertArtboards(artboards: IArtboard[]);
+    }
+
+    export const Page: IConstructor<IPage>;
+
     export interface IView {
         viewContainerElement: HTMLElement;
         page: IPage;
@@ -107,6 +146,9 @@ declare module "carbon-app" {
 
         scaleChanged: IEvent<number>;
         isolationLayer: IIsolationLayer;
+
+        activeLayer: ILayer;
+        activeLayerChanged: IEvent<ILayer>;
 
         setActivePage(page: IPage);
 
@@ -124,7 +166,7 @@ declare module "carbon-app" {
         ensureVisible(element: IUIElement);
         scrollToCenter(): void;
 
-        getLayer(layerType:any) : ILayer;
+        getLayer(layerType: LayerTypes) : ILayer;
 
         setActivePage(page: IPage);
 
@@ -167,7 +209,6 @@ declare module "carbon-app" {
         stopDraggingEvent: IEvent2<IMouseEventData, IKeyboardState>;
 
         inlineEditModeChanged: IEvent2<boolean, any>;
-        isolationModeChanged: IEvent<boolean>;
 
         interactionActive: boolean;
 

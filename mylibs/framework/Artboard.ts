@@ -17,7 +17,7 @@ import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
 import { IPropsOwner, IArtboardProps } from "carbon-model";
-import { ChangeMode, PatchType } from "carbon-core";
+import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
 
 
@@ -32,7 +32,7 @@ import { measureText } from "framework/text/MeasureTextCache";
 // cleanup empty states
 
 
-class Artboard extends Container implements IPropsOwner<IArtboardProps> {
+class Artboard extends Container implements IPropsOwner<IArtboardProps>, IPrimitiveRoot {
     props: IArtboardProps;
 
     constructor() {
@@ -473,7 +473,7 @@ class Artboard extends Container implements IPropsOwner<IArtboardProps> {
         return isPointInRect({ x: bb.x, y: bb.y - 20 / scale, width: bb.width, height: 20 / scale }, point);
     }
 
-    primitiveRoot() {
+    primitiveRoot(): IPrimitiveRoot & UIElement {
         if (!this.parent() || !this.parent().primitiveRoot()) {
             return null;
         }
@@ -531,7 +531,27 @@ class Artboard extends Container implements IPropsOwner<IArtboardProps> {
     }
 
     relayoutCompleted() {
+        //isolation hides original controls, which would be cloned in symbols
+        if (Environment.view.activeLayer.type !== LayerTypes.Isolation){
+            this.incrementVersion();
+        }
+        else if (!this.runtimeProps.layerChangedToken) {
+            this.runtimeProps.layerChangedToken =  Environment.view.activeLayerChanged.bind(this, this.activeLayerChanged);
+        }
+    }
+
+    private activeLayerChanged(layer: ILayer){
+        if (layer.type !== LayerTypes.Isolation){
+            this.incrementVersion();
+
+            this.runtimeProps.layerChangedToken.dispose();
+            delete this.runtimeProps.layerChangedToken;
+        }
+    }
+
+    incrementVersion(){
         this.runtimeProps.version++;
+
         var parent = this.parent();
         if (parent) {
             parent.incrementVersion();
@@ -813,6 +833,10 @@ class Artboard extends Container implements IPropsOwner<IArtboardProps> {
             newActions.splice(index, 1, newAction);
             this.setProps({ actions: newActions });
         }
+    }
+
+    isEditable(){
+        return true;
     }
 }
 Artboard.prototype.t = Types.Artboard;

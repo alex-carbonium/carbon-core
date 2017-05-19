@@ -137,27 +137,6 @@ declare module "carbon-model" {
         tryFindRepeaterParent(element: IUIElement): IRepeatContainer | null;
     }
 
-    export interface IPage extends IContainer, ILayer {
-        getAllArtboards(): IArtboard[];
-        getActiveArtboard(): IArtboard;
-        getArtboardAtPoint(point: ICoordinate): IArtboard;
-
-        saveWorkspaceState(): any;
-        restoreWorkspaceState(data: any): void;
-
-        scrollX(): number;
-        scrollY(): number;
-
-        deactivating(nextPage: IPage): boolean;
-        deactivated(): void;
-        activating(prevPage: IPage): void;
-        activated(): void;
-
-        insertArtboards(artboards: IArtboard[]);
-    }
-
-    export const Page: IConstructor<IPage>;
-
     export interface IComposite extends IUIElement {
         elements: IUIElement[];
 
@@ -173,18 +152,6 @@ declare module "carbon-model" {
         angle(): number;
         x(): number;
         y(): number;
-    }
-
-    export interface ILayer extends IContainer {
-        dropToLayer(x, y, element);
-    }
-
-    export interface IIsolationLayer extends ILayer {
-        isActive: boolean;
-        findDropToPageData(x, y, element);
-        isActivatedFor(owner: IIsolatable): boolean;
-        isolateGroup(owner: IIsolatable, clippingParent?: IUIElement) :void;
-        exitIsolation():void;
     }
 
     export interface IIsolatable extends IContainer{

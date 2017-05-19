@@ -11,6 +11,7 @@ import GlobalMatrixModifier from "./GlobalMatrixModifier";
 import { IPoint } from "carbon-geometry";
 import CommonPropsManager from "./CommonPropsManager";
 import Isolate from "../commands/Isolate";
+import Selection from "./SelectionModel";
 
 require("./GroupArrangeStrategy");
 
@@ -100,9 +101,18 @@ export default class GroupContainer extends Container implements IGroupContainer
     }
 
     dblclick(event: IMouseEventData) {
-        if (UserSettings.group.editInIsolationMode && !Environment.view.isolationLayer.isActivatedFor(this)) {
-            Isolate.run([this]);
-            event.handled = true;
+        if (this.primitiveRoot().isEditable()) {
+            if (UserSettings.group.editInIsolationMode && !Environment.view.isolationLayer.isActivatedFor(this)){
+                Isolate.run([this]);
+                event.handled = true;
+            }
+        }
+        else{
+            this.unlockGroup();
+            var element = this.hitElement(event, Environment.view.scale());
+            if (element && element !== this){
+                Selection.makeSelection([element]);
+            }
         }
     }
 
@@ -211,7 +221,7 @@ export default class GroupContainer extends Container implements IGroupContainer
     }
 
     canAccept(elements, autoInsert, allowMoveInOut) {
-        return allowMoveInOut;
+        return this.primitiveRoot().isEditable() && allowMoveInOut;
     }
 
     wrapSingleChild() {

@@ -1,20 +1,29 @@
 import PropertyMetadata from "framework/PropertyMetadata";
 import { Types } from "./Defs";
-import { IPage, IUIElement, IContainerProps, IDataNode, IArtboard } from "carbon-model";
-import { IRect, IPoint } from "carbon-geometry";
 import Rect from "../math/rect";
 import UIElement from "./UIElement";
+import { IUIElement, IContainerProps, IDataNode, IArtboard, IPage, IRect, IPoint, LayerTypes } from "carbon-core";
 
 class NullPage extends UIElement implements IPage {
     t: string;
     props: IContainerProps;
     children: any[];
     nameProvider: any;
+    type: LayerTypes = LayerTypes.Content;
+    isActive: boolean = false;
 
     constructor() {
         super();
         this.children = [];
         this.props = null;
+    }
+
+    activate(){
+    }
+    deactivate(){
+    }
+    canChangeNodeTree(){
+        return false;
     }
 
     globalMatrixToLocal(m: any) {

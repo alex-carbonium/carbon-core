@@ -415,11 +415,11 @@ export default class Container extends UIElement implements IContainer, IPropsOw
         this.remove(elementFrom, mode);
         this.insert(elementTo, idx, mode);
     }
-    clear() {
+    clear(mode?: ChangeMode) {
         for (var i = 0; i < this.children.length; i++) {
             var child = this.children[i];
             this.releasingChild(child);
-            child.trackDeleted(this);
+            child.trackDeleted(this, i, mode);
         }
         this.children.length = 0;
     }
@@ -440,7 +440,7 @@ export default class Container extends UIElement implements IContainer, IPropsOw
     }
 
     canAccept(elements, autoInsert, allowMoveInOut) {
-        return !elements.some(x => !x.canBeAccepted(this));
+        return this.primitiveRoot().isEditable() && elements.every(x => x.canBeAccepted(this));
     }
     mousedown(event, keys: IKeyboardState) {
         super.mousedown.call(this, event); //to hide inplace editor
@@ -472,7 +472,7 @@ export default class Container extends UIElement implements IContainer, IPropsOw
 
         }
     }
-    hitElement(/*Point*/position, scale, predicate, directSelection) {
+    hitElement(/*Point*/position, scale, predicate?, directSelection?) {
         if (!this.hitVisible(directSelection)) {
             return null;
         }
@@ -512,7 +512,7 @@ export default class Container extends UIElement implements IContainer, IPropsOw
 
         return elements;
     }
-    hitElementDirect(position, scale, predicate) {
+    hitElementDirect(position, scale, predicate?) {
         var result = this.hitElement(position, scale, predicate, true);
         return result;
     }
@@ -721,9 +721,6 @@ export default class Container extends UIElement implements IContainer, IPropsOw
         return this.global2local(pos);
     }
 
-    getChildren() {
-        return this.children;
-    }
     findElementByName(name) {
         var element;
 
@@ -735,9 +732,6 @@ export default class Container extends UIElement implements IContainer, IPropsOw
         }, false);
 
         return element;
-    }
-    isAtomicInModel(value?) {
-        return this.field("_isAtomicInModel", value, false);
     }
 
     getElementById(id) {
@@ -781,11 +775,7 @@ export default class Container extends UIElement implements IContainer, IPropsOw
         super.dispose.apply(this, arguments)
     }
     toString() {
-        return this.t.substr(this.t.lastIndexOf(".") + 1)
-            + ": "
-            + map(this.getChildren(), function (x) {
-                return x.toString()
-            }).join(", ");
+        return this.t;
     }
 
     static createCanvas = function () {

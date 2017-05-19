@@ -29,7 +29,7 @@ export function choosePasteLocation(elements, rootRelativeBoundingBox = null, al
                     candidates.push(current);
                 }
                 current = current.parent();
-            } while (current && !(current instanceof Page));
+            } while (current);
         }
         else if (selection.length > 1 && Selection.selectComposite().canAccept(elements, false, allowMoveIn)){
             candidates.push(Selection.selectComposite());
@@ -53,8 +53,14 @@ export function choosePasteLocation(elements, rootRelativeBoundingBox = null, al
     };
 }
 function tryPaste(viewport, parent, bufferRect, rootRelativeBoundingBox, tolerance): {parent: IContainer, x: number, y: number}{
-    var rect = parent.getBoundingBoxGlobal();
-    var visibleRect = intersectRects(viewport, rect);
+    var visibleRect = null;
+    if (parent instanceof Page){
+        visibleRect = viewport;
+    }
+    else {
+        var rect = parent.getBoundingBoxGlobal();
+        visibleRect = intersectRects(viewport, rect);
+    }
     if (visibleRect !== null){
         if (rootRelativeBoundingBox){
             let globalPos = parent.primitiveRoot().local2global(rootRelativeBoundingBox);

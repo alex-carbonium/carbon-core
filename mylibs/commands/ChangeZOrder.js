@@ -5,7 +5,7 @@ function execute(selection, mode) {
         return;
     }
 
-    var allChildren = selection[0].parent().getChildren();
+    var allChildren = selection[0].parent().children;
     var max = allChildren.length - 1;
     var min = 0;
 

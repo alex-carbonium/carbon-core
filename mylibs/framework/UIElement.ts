@@ -37,7 +37,7 @@ import { PropertyDescriptor } from './PropertyMetadata';
 import { IKeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IPropsOwner, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
-import { ChangeMode, LayerTypes } from "carbon-core";
+import { ChangeMode, LayerTypes, IPrimitiveRoot } from "carbon-core";
 
 require("../migrations/All");
 
@@ -881,7 +881,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         context.closePath();
     }
 
-    primitiveRoot() {
+    primitiveRoot(): IPrimitiveRoot & UIElement {
         if (this.runtimeProps.primitiveRoot) {
             return this.runtimeProps.primitiveRoot;
         }
@@ -1555,7 +1555,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         var m = global ? this.globalViewMatrix() : this.viewMatrix();
         return m.transformPoint(this.br().center());
     }
-    hitElement(position, scale, predicate, directSelection): UIElement {
+    hitElement(position, scale, predicate?, directSelection?): UIElement {
         if (!this.hitVisible(directSelection)) {
             return null;
         }

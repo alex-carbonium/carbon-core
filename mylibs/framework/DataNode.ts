@@ -3,10 +3,10 @@ import PropertyTracker from "./PropertyTracker";
 import ModelStateListener from "./sync/ModelStateListener";
 import ObjectFactory from "./ObjectFactory";
 import {createUUID} from "../util";
-import { IDataNodeProps, ChangeMode, PatchType } from "carbon-core";
-import { IDataNode } from "carbon-model";
+import { IDataNode, IDataNodeProps, ChangeMode, PatchType, IPrimitiveRoot } from "carbon-core";
 
-export default class DataNode implements IDataNode{
+//TODO: only real roots should implement IPrimitiveRoot
+export default class DataNode implements IDataNode, IPrimitiveRoot{
     t: string;
     props: IDataNodeProps;
     runtimeProps: any;
@@ -112,10 +112,6 @@ export default class DataNode implements IDataNode{
 
     cloneProps() {
         return Object.assign({}, this.props);
-    }
-
-    isAtomicInModel() {
-        return false;
     }
 
     selectProps(namesOrChanges) {
@@ -295,6 +291,13 @@ export default class DataNode implements IDataNode{
         }
     }
 
+    isEditable() {
+        return true;
+    }
+    isFinalRoot() {
+        return true;
+    }
+
     getImmediateChildById(id:string, materialize:boolean) {
         return DataNode.getImmediateChildById(this, id, materialize);
     }
@@ -381,7 +384,7 @@ export default class DataNode implements IDataNode{
 
     toJSON(){
         var json: any = {t: this.t, props: this.cloneProps()};
-        if (!this.isAtomicInModel() && this.children){
+        if (this.children){
             json.children = this.children.map(x => x.toJSON());
         }
         return json;

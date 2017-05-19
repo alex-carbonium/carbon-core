@@ -13,9 +13,10 @@ import Brush from "../Brush";
 import Point from "../../math/point";
 import Matrix from "../../math/matrix";
 import Isolate from "../../commands/Isolate";
+import Selection from "../SelectionModel";
 import { IUIElement, IContainer, IRepeatContainer } from "carbon-model";
 import { IMouseEventData } from "carbon-basics";
-import { ChangeMode } from "carbon-core";
+import { ChangeMode, IPrimitiveRoot } from "carbon-core";
 
 interface IRepeatContainerRuntimeProps{
     lastActiveCell?: RepeatCell;
@@ -23,7 +24,7 @@ interface IRepeatContainerRuntimeProps{
     insertingMultiple?: boolean;
 }
 
-export default class RepeatContainer extends Container implements IRepeatContainer {
+export default class RepeatContainer extends Container implements IRepeatContainer, IPrimitiveRoot {
     children: RepeatCell[];
     runtimeProps: IRepeatContainerRuntimeProps;
 
@@ -103,15 +104,18 @@ export default class RepeatContainer extends Container implements IRepeatContain
         return this.id();
     }
 
-    dblclick(event) {
-        if (UserSettings.group.editInIsolationMode) {
-            var scale = Environment.view.scale();
-            for (var i = 0; i < this.children.length; i++) {
-                var cell = this.children[i];
-                if (cell.hitTest(event, scale)){
-                    Isolate.run([cell], this);
-                    return;
+    dblclick(event: IMouseEventData) {
+        var scale = Environment.view.scale();
+        for (var i = 0; i < this.children.length; i++) {
+            var cell = this.children[i];
+            if (cell.hitTest(event, scale)){
+                var element = cell.hitElementDirect(event, scale);
+                if (element && element !== cell){
+                    Selection.makeSelection([element]);
                 }
+                //do not handle for text tool
+                event.handled = false;
+                return;
             }
         }
     }
@@ -232,6 +236,10 @@ export default class RepeatContainer extends Container implements IRepeatContain
             }
             realRoot.registerChangePosition(current, node, index, oldIndex, mode);
         }
+    }
+
+    isEditable(){
+        return true;
     }
 
     addDroppedElements(dropTarget: Container, elements: IUIElement[], e: IMouseEventData){

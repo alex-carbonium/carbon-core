@@ -45,9 +45,7 @@ import IconsInfo from "./ui/IconsInfo";
 import backend from "./backend";
 import logger from "./logger";
 import params from "./params";
-import { IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType } from "carbon-core";
-import { IPage, IUIElement } from "carbon-model";
-import { IEvent2 } from "carbon-basics";
+import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType } from "carbon-core";
 
 window['env'] = Environment;
 window['Selection'] = Selection;

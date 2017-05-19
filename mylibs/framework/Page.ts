@@ -9,7 +9,7 @@ import ContextPool from "framework/render/ContextPool";
 import EventHelper from "./EventHelper";
 import Brush from "./Brush";
 import NameProvider from "ui/NameProvider";
-import { IContainer, IRect, IPage, IArtboard, ChangeMode } from "carbon-core";
+import { IContainer, IRect, IPage, IArtboard, ChangeMode, IPrimitiveRoot } from "carbon-core";
 
 function findNextPageName() {
     var maxId = 0;
@@ -30,7 +30,7 @@ function findNextPageName() {
 
 var pageNameSlugRegex = /[^\wа-яА-Я]/g;
 
-class Page extends Layer implements IPage {
+class Page extends Layer implements IPage, IPrimitiveRoot {
     [name: string]: any;
 
     constructor() {
@@ -158,14 +158,6 @@ class Page extends Layer implements IPage {
 
     initId() {
         this.id(this.app.nextPageId());
-    }
-
-    isAtomicInModel() {
-        return false;
-    }
-
-    getChildren() {
-        return this.children;
     }
 
     status(value) {
@@ -570,6 +562,10 @@ class Page extends Layer implements IPage {
         return null;
      }
      restoreWorkspaceState(data){
+     }
+
+     isEditable(){
+         return true;
      }
 }
 Page.prototype.t = Types.Page;

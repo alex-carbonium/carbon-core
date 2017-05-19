@@ -6,9 +6,15 @@ import {Overflow, Types} from "./Defs";
 import Selection from "framework/SelectionModel";
 import DataNode from "framework/DataNode";
 import ObjectFactory from "framework/ObjectFactory";
-import { ChangeMode } from "carbon-core";
+import { ChangeMode, IArtboard, IMouseEventData, IIsolatable, IPrimitiveRoot } from "carbon-core";
+import { createUUID } from "../util";
+import Isolate from "../commands/Isolate";
+import Environment from "../environment";
+import UserSettings from "../UserSettings";
+import Text from "./text/Text";
 
-export default class ArtboardTemplateControl extends Container {
+
+export default class ArtboardTemplateControl extends Container implements IPrimitiveRoot {
     constructor() {
         super();
     }
@@ -92,7 +98,7 @@ export default class ArtboardTemplateControl extends Container {
     }
 
     toJSON() {
-        return UIElement.prototype.toJSON.apply(this, arguments);
+        return {t: this.t, props: this.cloneProps()};
     }
 
     _setupCustomProperties(artboard) {
@@ -128,22 +134,25 @@ export default class ArtboardTemplateControl extends Container {
     }
 
     _cloneFromArtboard(artboard) {
-        this.clear();
+        this.clear(ChangeMode.Self);
+        var baseId = this.id();
 
         for (var i = 0; i < artboard.children.length; i++) {
             var child = artboard.children[i];
-            var clone = child.clone();
-            clone.id(this.id() + child.id())
-            clone.sourceId(child.id());
-            clone.canDrag(false);
-            clone.resizeDimensions(0);
+            var clone = child.mirrorClone();
+            clone.applyVisitor(x => {
+                x.sourceId(x.id());
+                x.id(baseId + x.id())
+                x.canDrag(false);
+                x.resizeDimensions(0);
+            });
             this.add(clone, ChangeMode.Self);
         }
     };
 
     clone() {
         if (this._cloning) {
-            throw "Can't clone, chain contains recursive references";
+            throw new Error("Can't clone, chain contains recursive references");
         }
         this._cloning = true;
         var clone = UIElement.prototype.clone.apply(this, arguments);
@@ -205,7 +214,7 @@ export default class ArtboardTemplateControl extends Container {
         }
     }
 
-    arrange(resizeEvent, mode?){
+    arrange(resizeEvent?, mode?){
         this._arranging = true;
         super.arrange(resizeEvent, mode);
         this._arranging = false;
@@ -293,11 +302,7 @@ export default class ArtboardTemplateControl extends Container {
         return this.props.source;
     }
 
-    isAtomicInModel() {
-        return true;
-    }
-
-    primitiveRoot() {
+    primitiveRoot(): IPrimitiveRoot & UIElement {
         if (!this.parent() || !this.parent().primitiveRoot()) {
             return null;
         }
@@ -371,6 +376,16 @@ export default class ArtboardTemplateControl extends Container {
         this._registerSetProps = false;
     }
 
+    registerDelete(parent: Container, element: UIElement, index: number, mode: ChangeMode = ChangeMode.Model){
+        if (mode === ChangeMode.Model){
+            element.setProps({visible: false}, mode);
+        }
+    }
+
+    isEditable(){
+        return false;
+    }
+
     _realPrimitiveRoot(){
         var parent = this.parent();
         if (!parent){
@@ -425,6 +440,16 @@ export default class ArtboardTemplateControl extends Container {
         }
 
         return result;
+    }
+
+    dblclick(event: IMouseEventData) {
+        var element = this.hitElementDirect(event, Environment.view.scale());
+        if (element !== this){
+            Selection.makeSelection([element]);
+        }
+
+        //do not handle for text tool
+        event.handled = false;
     }
 }
 ArtboardTemplateControl.prototype.t = Types.ArtboardTemplateControl;

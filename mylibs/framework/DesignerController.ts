@@ -151,7 +151,6 @@ export default class DesignerController implements IController {
     stopRotatingEvent: IEvent<ITransformationEventData>;
 
     inlineEditModeChanged: IEvent2<boolean, any>;
-    isolationModeChanged: IEvent<boolean>;
 
     _lastMouseMove: IMouseEventData;
     _startDraggingData: any;
@@ -281,7 +280,6 @@ export default class DesignerController implements IController {
         this.onArtboardChanged = EventHelper.createEvent2<IArtboard, IArtboard>();
         this.inlineEditModeChanged = EventHelper.createEvent2<boolean, any>();
         this.inlineEditModeChanged.bind(this, this.onInlineEditModeChanged);
-        this.isolationModeChanged = EventHelper.createEvent<boolean>();
         //TODO: dispose?
 
         this.startDrawingEvent = EventHelper.createEvent();
