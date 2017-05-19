@@ -363,7 +363,7 @@ PropertyMetadata.registerForType(Line, {
             {
                 label: "Appearance",
                 expanded: false,
-                properties: ["opacity", "fill", "stroke", "dashPattern", "miterLimit", "lineCap", "lineJoin"]
+                properties: ["fill", "stroke", "strokeWidth", "dashPattern", "lineCap", "opacity"]
             },
             {
                 label: "@constraints",

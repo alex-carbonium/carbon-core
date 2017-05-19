@@ -6,10 +6,10 @@ import BezierCurve from "math/bezierCurve";
 import Point from "../../math/point";
 import PropertyMetadata from "framework/PropertyMetadata";
 import PropertyTracker from "framework/PropertyTracker";
-import {Overflow, Types, LineCap, LineJoin} from "framework/Defs";
+import { Overflow, Types, LineCap, LineJoin } from "framework/Defs";
 import Path from "ui/common/Path";
 import GroupArrangeStrategy from "../../framework/GroupArrangeStrategy";
-import {combineRectArray} from "../../math/math";
+import { combineRectArray } from "../../math/math";
 import Rect from "../../math/rect";
 import { IGroupContainer, ChangeMode } from "carbon-core";
 
@@ -20,7 +20,7 @@ function propertyChanged(element, newProps) {
         }
     }
 }
-class CompoundPath extends Container implements IGroupContainer{
+class CompoundPath extends Container implements IGroupContainer {
 
     static bezierPathsFromGraph(graph) {
         // Convert this graph into a bezier path. This is straightforward, each contour
@@ -58,17 +58,17 @@ class CompoundPath extends Container implements IGroupContainer{
 
     lineCap(value?) {
         if (arguments.length > 0) {
-            if(value === 'round' || value === LineCap.Round){
+            if (value === 'round' || value === LineCap.Round) {
                 value = LineCap.Round;
-            } else if (value === 'square'  || value === LineCap.Square) {
+            } else if (value === 'square' || value === LineCap.Square) {
                 value = LineCap.Square;
             } else {
                 value = LineCap.Butt;
             }
-            this.setProps({lineCap: value});
+            this.setProps({ lineCap: value });
         }
 
-        switch(this.props.lineCap){
+        switch (this.props.lineCap) {
             case LineCap.Round:
                 return 'round';
             case LineCap.Square:
@@ -80,17 +80,17 @@ class CompoundPath extends Container implements IGroupContainer{
 
     lineJoin(value?) {
         if (arguments.length > 0) {
-            if(value === 'round' || value === LineJoin.Round){
+            if (value === 'round' || value === LineJoin.Round) {
                 value = LineJoin.Round;
-            } else if (value === 'bevel'  || value === LineJoin.Bevel) {
+            } else if (value === 'bevel' || value === LineJoin.Bevel) {
                 value = LineJoin.Bevel;
             } else {
                 value = LineJoin.Miter;
             }
-            this.setProps({lineJoin: value});
+            this.setProps({ lineJoin: value });
         }
 
-        switch(this.props.lineJoin){
+        switch (this.props.lineJoin) {
             case LineJoin.Round:
                 return 'round';
             case LineJoin.Bevel:
@@ -186,15 +186,15 @@ class CompoundPath extends Container implements IGroupContainer{
         this.applyMatrixScaling(s, o, options, changeMode);
     }
 
-    flatten(){
+    flatten() {
         this.recalculate();
         var path;
-        if(this.result.length === 1){
+        if (this.result.length === 1) {
             path = this.result[0].clone();
         }
         else {
             path = new CompoundPath();
-            for(var i = 0; i < this.result.length; ++i) {
+            for (var i = 0; i < this.result.length; ++i) {
                 var p = this.result[i].clone();
                 p.joinMode("union");
                 p.fill(this.fill());
@@ -207,7 +207,7 @@ class CompoundPath extends Container implements IGroupContainer{
         path.name(this.displayName());
         path.styleId(this.styleId());
         path.setProps(this.selectLayoutProps());
-        if(this.result.length>1){
+        if (this.result.length > 1) {
             path.recalculate();
         }
         var parent = this.parent();
@@ -218,7 +218,7 @@ class CompoundPath extends Container implements IGroupContainer{
 
     _updateGraph() {
         this._graph = new BezierGraph();
-        for (var i = 0; i < this.result.length; i++){
+        for (var i = 0; i < this.result.length; i++) {
             var p = this.result[i];
             this._graph.initWithBezierPath(p, p.viewMatrix());
         }
@@ -226,7 +226,7 @@ class CompoundPath extends Container implements IGroupContainer{
 
     offsetGraph() {
         var graph = new BezierGraph();
-        for (var i = 0; i < this.result.length; i++){
+        for (var i = 0; i < this.result.length; i++) {
             var p = this.result[i];
             graph.initWithBezierPath(p, this.viewMatrix());
         }
@@ -236,14 +236,14 @@ class CompoundPath extends Container implements IGroupContainer{
 
     joinMode(value) {
         if (arguments.length > 0) {
-            this.setProps({joinMode: value});
+            this.setProps({ joinMode: value });
         }
 
         return this.props.joinMode;
     }
 
     canAccept(elements) {
-        if (elements.length !== 1){
+        if (elements.length !== 1) {
             return false;
         }
         if (!this._itemIds) {
@@ -252,8 +252,8 @@ class CompoundPath extends Container implements IGroupContainer{
         return this._itemIds[elements[0].id()];
     }
 
-    getHitTestBox(){
-        if (this.lockedGroup()){
+    getHitTestBox() {
+        if (this.lockedGroup()) {
             return this.getBoundaryRect();
         }
         return this.runtimeProps.fullBoundaryRect;
@@ -272,7 +272,7 @@ class CompoundPath extends Container implements IGroupContainer{
 
             var brush = this.fill();
             if (this.lockedGroup() && (!brush || !brush.type)) {
-                for (var i = 0; i < this.result.length; i++){
+                for (var i = 0; i < this.result.length; i++) {
                     var path = this.result[i];
                     var p = path.getPointIfClose(point, 8);
                     if (p) {
@@ -289,14 +289,14 @@ class CompoundPath extends Container implements IGroupContainer{
                     return false;
                 }
                 var count = 0;
-                var ray = BezierCurve.bezierCurveWithLine(point, {x: point.x + 100000, y: point.y});
+                var ray = BezierCurve.bezierCurveWithLine(point, { x: point.x + 100000, y: point.y });
                 for (let i = 0, l = graph.contours.length; i < l; ++i) {
                     var curve = graph.contours[i];
                     for (var j = 0, k = curve.edges.length; j < k; ++j) {
                         var edge = curve.edges[j];
                         edge.intersectionsWithBezierCurve(ray, {}, () => {
-                                count++;
-                            }
+                            count++;
+                        }
                         )
                     }
                 }
@@ -365,9 +365,9 @@ class CompoundPath extends Container implements IGroupContainer{
 
     }
 
-    hitTransparent (value?): boolean {
+    hitTransparent(value?): boolean {
         if (value !== undefined) {
-            this._hitTransparent =  value;
+            this._hitTransparent = value;
         }
         return this._hitTransparent;
     }
@@ -379,7 +379,7 @@ class CompoundPath extends Container implements IGroupContainer{
             this._trackerSubscription.dispose();
             delete this._trackerSubscription;
         }
-        this.applyVisitor(e=>{
+        this.applyVisitor(e => {
             e.disablePropsTracking();
         });
         delete this.runtimeProps.fullBoundaryRect;
@@ -388,10 +388,10 @@ class CompoundPath extends Container implements IGroupContainer{
     unlockGroup() {
         super.unlockGroup();
         this.hitTransparent(true);
-        if(!this._trackerSubscription) {
+        if (!this._trackerSubscription) {
             this._trackerSubscription = PropertyTracker.propertyChanged.bind(this, propertyChanged);
         }
-        this.applyVisitor(e=>{
+        this.applyVisitor(e => {
             e.enablePropsTracking();
         });
 
@@ -403,10 +403,10 @@ class CompoundPath extends Container implements IGroupContainer{
         return true;
     }
 
-    wrapSingleChild(){
+    wrapSingleChild() {
         return true;
     }
-    translateChildren(){
+    translateChildren() {
         return false;
     }
 }
@@ -421,6 +421,10 @@ PropertyMetadata.registerForType(CompoundPath, {
     },
     overflow: {
         defaultValue: Overflow.Visible
+    },
+
+    groups() {
+        return PropertyMetadata.findAll(Types.Shape).groups();
     }
 });
 
