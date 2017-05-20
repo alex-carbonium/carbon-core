@@ -1,14 +1,15 @@
 import DataNode from "../framework/DataNode";
 import PropertyMetadata from "../framework/PropertyMetadata";
+import RelayoutEngine from "framework/relayout/RelayoutEngine";
 import {Types} from "../framework/Defs";
+import params from "params";
 
 class Story extends DataNode {
+    _parent:any;
+
     constructor() {
         super(true);
-    }
-
-    primitiveRoot() {
-        return this;
+        this.initId();
     }
 
     resetRuntimeProps() {
@@ -19,7 +20,15 @@ class Story extends DataNode {
         this.insertChild(action, this.children.length);
     }
 
-    relayout(){
+    displayName() {
+        return '';
+    }
+
+    relayout(oldPropsMap){
+        params.perf && performance.mark("Artboard.Relayout: " + this.id());
+        var res = RelayoutEngine.run(this, oldPropsMap);
+        params.perf && performance.measure("Artboard.Relayout: " + this.id(), "Artboard.Relayout: " + this.id());
+        return res;
     }
 
     relayoutCompleted(){
@@ -30,6 +39,10 @@ class Story extends DataNode {
         if(index >= 0){
             this.removeChildByIndex(index);
         }
+    }
+
+    primitiveRoot() {
+        return this;
     }
 
     primitivePath() {
@@ -43,6 +56,16 @@ class Story extends DataNode {
 
     primitiveRootKey() {
         return this.id();
+    }
+
+    insert(/*UIElement*/element, /*int*/index, mode?) {
+        this.insertChild(element, index, mode);
+
+        return element;
+    }
+
+    performArrange() {
+
     }
 }
 Story.prototype.t = Types.Story;

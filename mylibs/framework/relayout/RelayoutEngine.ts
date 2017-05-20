@@ -21,7 +21,7 @@ export default class RelayoutEngine {
     }
 
     static visitElement(element, primitiveMap, propsHistoryMap, shouldArrange, filter) {
-        var oldRect;
+        // var oldRect;
         var primitives = null;
         var hasChildren = !!element.children;
 
@@ -40,13 +40,13 @@ export default class RelayoutEngine {
                 }
             }
 
-            var entry = propsHistoryMap[element.id()];
-            if (entry && entry.props) {
-                oldRect = entry.props.br;
-            }
-            if (!oldRect) {
-                oldRect = element.getBoundaryRect();
-            }
+            // var entry = propsHistoryMap[element.id()];
+            // if (entry && entry.props) {
+            //     oldRect = entry.props.br;
+            // }
+            // if (!oldRect) {
+            //     oldRect = element.getBoundaryRect();
+            // }
         }
 
         let res = RelayoutEngine.applyPrimitives(element, primitiveMap, propsHistoryMap, shouldArrange, filter);

@@ -237,6 +237,10 @@ class AppClass extends DataNode implements IApp {
             this._activeStory = value;
             this.activeStoryChanged.raise(value);
             Invalidate.requestInteractionOnly();
+            if(value) {
+                var page = this.findNodeByIdBreadthFirst(value.props.pageId);
+                this.setActivePage(page);
+            }
         }
 
         return this._activeStory;
@@ -484,7 +488,9 @@ class AppClass extends DataNode implements IApp {
         //     this.initPage(element);
         // } else
         if (element instanceof Story) {
-            this.initStory(element);
+            if(!this.activeStory()) {
+                this.activeStory(element);
+            }
         }
 
         this.insertChild(element, index, mode);
@@ -1271,6 +1277,11 @@ class AppClass extends DataNode implements IApp {
     removeStory(story) {
         this.removeChild(story);
         this.storyRemoved.raise(story);
+    }
+
+    removeStoryById(id) {
+        var story = this.findNodeByIdBreadthFirst(id);
+        this.removeStory(story);
     }
 
     saveWorkspaceState(): void {

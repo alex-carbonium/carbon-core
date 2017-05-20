@@ -79,7 +79,7 @@ export default class LinkingTool extends Tool {
     _handleClickToHomeScreen(event, scale) {
         var artboard = this._pointToHomeScreenArtboard(event, scale);
 
-        if (artboard) {
+        if (artboard && this._activeStory) {
             this._activeStory.setProps({ homeScreen: [this._app.activePage.id(), artboard.id()] });
             Invalidate.requestInteractionOnly();
             return true;
@@ -176,6 +176,9 @@ export default class LinkingTool extends Tool {
 
     onclick(event) {
         delete this._onFirstMove;
+        if(!this._activeStory) {
+            return;
+        }
         var scale = this._view.scale();
         for (var i = this.connections.length - 1; i >= 0; --i) {
             var connection = this.connections[i];
@@ -391,9 +394,7 @@ export default class LinkingTool extends Tool {
             var rect: any = artboard.getBoundingBoxGlobal();
             rect = adjustRectSize(rect, 40 / scale);
             if (isPointInRect(rect, event)) {
-                // if (!this._hasOutboundConnections(artboard)) {
                 this._addHandleOnElement(artboard, scale, handles);
-                // }
             }
         }
 
@@ -542,8 +543,8 @@ export default class LinkingTool extends Tool {
         for (var c of this.connections) {
             var from = c.connection.from;
             var to = c.connection.to;
-            this._addBalancingConnection(pointsMap, from, to, c.artboard);
-            this._addBalancingConnection(pointsMap, to, from, c.element);
+            this._addBalancingConnection(pointsMap, from, to, c.element);
+            this._addBalancingConnection(pointsMap, to, from, c.artboard);
         }
 
         for (var id in pointsMap) {
@@ -677,7 +678,7 @@ export default class LinkingTool extends Tool {
         if (connectionInfo === this._hoverConnectionTo) {
             context.strokeStyle = HoverLinkColor;
             context.fillStyle = HoverLinkColor;
-        } else if (connectionInfo.element == this._selection || this._activeStory.props.type === StoryType.Flow) {
+        } else if (connectionInfo.element == this._selection || (this._activeStory && this._activeStory.props.type === StoryType.Flow)) {
             context.strokeStyle = DefaultLinkColor;
             context.fillStyle = DefaultLinkColor;
         } else {
@@ -906,7 +907,7 @@ export default class LinkingTool extends Tool {
         var h = 5 / scale;
 
         context.save();
-        if (this._activeStory.props.homeScreen && this._activeStory.props.homeScreen[1] === artboard.id()) {
+        if (this._activeStory && this._activeStory.props.homeScreen && this._activeStory.props.homeScreen[1] === artboard.id()) {
             context.fillStyle = DefaultLinkColor;
         } else if (artboard == this._hoverArboardHomeButton) {
             context.fillStyle = HoverLinkColor;
