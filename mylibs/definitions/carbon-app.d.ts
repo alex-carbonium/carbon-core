@@ -1,5 +1,5 @@
 declare module "carbon-app" {
-    import { IDataNode, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IPropsOwner, IArtboard, IContainer, IComposite, IElementEventData, IIsolatable } from "carbon-model";
+    import { IDataNode, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IElementEventData, IIsolatable } from "carbon-model";
     import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush, IEvent3, IConstructor } from "carbon-basics";
     import { IRect, ICoordinate } from "carbon-geometry";
 
@@ -20,7 +20,7 @@ declare module "carbon-app" {
         customGuides: any;
     }
 
-    export interface IApp extends IDataNode, IPropsOwner<IAppProps> {
+    export interface IApp extends IDataNode<IAppProps> {
         isLoaded: boolean;
         props:IAppProps;
 
@@ -44,7 +44,10 @@ declare module "carbon-app" {
         activeStory: any;
         stories: any[];
         activeStoryChanged: IEvent<any>;
+        storyInserted: IEvent<any>;
+        storyRemoved: IEvent<any>;
         setActiveStoryById(id);
+        removeStory(story);
 
         currentTool: string;
         currentToolChanged: IEvent<string>;

@@ -82,6 +82,8 @@ class AppClass extends DataNode implements IApp {
     changeToolboxPage: IEvent<void>;
 
     activeStoryChanged: IEvent<any>;
+    storyInserted: IEvent<any>;
+    storyRemoved: IEvent<any>;
 
     modelSyncProxy: any;
     state: any;

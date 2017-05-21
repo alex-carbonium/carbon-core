@@ -8,7 +8,7 @@ import Invalidate from "./Invalidate";
 import ImageEditTool from "./ImageEditTool";
 import EventHelper from "./EventHelper";
 import RectMask from "./RectMask";
-import { ContentSizing, ImageSource, ImageSourceType, IImage, IPropsOwner, IImageProps } from "carbon-model";
+import { ContentSizing, ImageSource, ImageSourceType, IImage, IImageProps } from "carbon-model";
 import { IRect, OriginType } from "carbon-geometry";
 import { ChangeMode } from "carbon-core";
 
@@ -23,8 +23,7 @@ interface IImageRuntimeProps{
     isTransformationClone?: boolean;
 }
 
-export default class Image extends Container implements IImage, IPropsOwner<IImageProps> {
-    props: IImageProps;
+export default class Image extends Container<IImageProps> implements IImage {
     runtimeProps: IImageRuntimeProps;
 
     prepareProps(changes) {

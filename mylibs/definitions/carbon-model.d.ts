@@ -3,7 +3,12 @@ declare module "carbon-model" {
     import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable, ChangeMode, ArtboardResource } from "carbon-basics";
     import { IContext } from "carbon-rendering";
 
-    export interface IPropsOwner<TProps> {
+    export interface IDataNodeProps {
+        [key: string]: any;
+        id: string;
+    }
+
+    export interface IDataNode<TProps extends IDataNodeProps = IDataNodeProps> extends IDisposable {
         props: TProps;
 
         prepareProps(changes: Partial<TProps>);
@@ -11,14 +16,7 @@ declare module "carbon-model" {
         setProps(props: Partial<TProps>, mode?);
         patchProps(patchType, propName, propValue);
         selectProps(names: (keyof TProps)[]): Partial<TProps>;
-    }
 
-    export interface IDataNodeProps {
-        [key: string]: any;
-        id: string;
-    }
-
-    export interface IDataNode extends IDisposable {
         id(value?: string): string;
 
         getImmediateChildById<T extends IDataNode>(id: string, materialize?:boolean): T | null;
@@ -37,7 +35,7 @@ declare module "carbon-model" {
         constraints: IConstraints;
     }
 
-    export interface IUIElement extends IDataNode, IPropsOwner<IUIElementProps> {
+    export interface IUIElement<TProps extends IUIElementProps = IUIElementProps> extends IDataNode<TProps> {
         parent(): IContainer;
 
         name(): string;
@@ -90,8 +88,7 @@ declare module "carbon-model" {
     export interface IContainerProps extends IUIElementProps {
     }
 
-    export interface IContainer extends IUIElement, IPropsOwner<IContainerProps> {
-        props: IContainerProps;
+    export interface IContainer<TProps extends IContainerProps = IContainerProps> extends IUIElement<TProps> {
         children: IUIElement[];
 
         canAccept(elements: IUIElement[], autoInsert: boolean, allowMoveIn: boolean): boolean;
@@ -173,13 +170,7 @@ declare module "carbon-model" {
         guidesY: IGuide[];
     }
 
-    export interface IArtboard extends IContainer, IPropsOwner<IArtboardProps> {
-        props: IArtboardProps;
-
-        prepareProps(changes: Partial<IArtboardProps>);
-        setProps(props: Partial<IArtboardProps>, mode?);
-        prepareAndSetProps(props: Partial<IArtboardProps>, mode?);
-        selectProps(names: (keyof IArtboardProps)[]): Partial<IArtboardProps>;
+    export interface IArtboard extends IContainer<IArtboardProps> {
     }
 
     export type SymbolSource = {
@@ -189,13 +180,7 @@ declare module "carbon-model" {
     export interface ISymbolProps extends IContainerProps{
         source: SymbolSource;
     }
-    export interface ISymbol extends IContainer, IPropsOwner<ISymbolProps>{
-        props: ISymbolProps;
-
-        prepareProps(changes: Partial<ISymbolProps>);
-        setProps(props: Partial<ISymbolProps>, mode?: ChangeMode);
-        prepareAndSetProps(props: Partial<ISymbolProps>, mode?: ChangeMode);
-        selectProps(names: (keyof ISymbolProps)[]): Partial<ISymbolProps>;
+    export interface ISymbol extends IContainer<ISymbolProps>{
     }
 
     export interface IGuide {
@@ -239,14 +224,8 @@ declare module "carbon-model" {
         source: ImageSource;
         sizing: ContentSizing;
     }
-    export interface IImage extends IContainer, IPropsOwner<IImageProps> {
-        props: IImageProps;
+    export interface IImage extends IContainer<IImageProps> {
         source(value?: ImageSource): ImageSource;
-
-        prepareProps(changes: Partial<IImageProps>);
-        setProps(props: Partial<IImageProps>, mode?);
-        prepareAndSetProps(props: Partial<IImageProps>, mode?);
-        selectProps(names: (keyof IImageProps)[]): Partial<IImageProps>;
 
         resizeOnLoad(value?: OriginType|null): OriginType|null;
     }

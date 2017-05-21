@@ -16,7 +16,7 @@ import Environment from "environment";
 import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
-import { IPropsOwner, IArtboardProps } from "carbon-model";
+import {  IArtboardProps } from "carbon-model";
 import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardResource, IIsolatable } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
 
@@ -32,9 +32,7 @@ import { measureText } from "framework/text/MeasureTextCache";
 // cleanup empty states
 
 
-class Artboard extends Container<IArtboardProps> implements IPropsOwner<IArtboardProps>, IPrimitiveRoot, IIsolatable {
-    props: IArtboardProps;
-
+class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIsolatable {
     constructor() {
         super();
         this.allowArtboardSelection(false);

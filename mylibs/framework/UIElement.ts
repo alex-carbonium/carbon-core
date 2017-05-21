@@ -35,14 +35,14 @@ import Rect from "../math/rect";
 import ResizeOptions from "../decorators/ResizeOptions";
 import { PropertyDescriptor } from './PropertyMetadata';
 import { IKeyboardState, IConstraints } from "carbon-basics";
-import { IUIElementProps, IPropsOwner, IUIElement, IContainer } from "carbon-model";
+import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
 import { ChangeMode, LayerTypes, IPrimitiveRoot, IRect, IMatrix } from "carbon-core";
 
 require("../migrations/All");
 
 // constructor
-export default class UIElement<TProps extends IUIElementProps = IUIElementProps> extends DataNode<TProps> implements IUIElement, IPropsOwner<TProps> {
+export default class UIElement<TProps extends IUIElementProps = IUIElementProps> extends DataNode<TProps> implements IUIElement<TProps> {
     [name: string]: any;
     props: TProps;
 

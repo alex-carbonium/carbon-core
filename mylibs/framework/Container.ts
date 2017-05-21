@@ -14,10 +14,10 @@ import Brush from './Brush';
 import Box from './Box';
 import UserSettings from '../UserSettings';
 import { IKeyboardState, ChangeMode } from "carbon-basics";
-import { IPropsOwner, IContainerProps, IUIElement, IContainer } from "carbon-model";
+import { IContainerProps, IUIElement, IContainer } from "carbon-model";
 import { IMatrix } from "carbon-geometry";
 
-export default class Container<TProps extends IContainerProps  = IContainerProps> extends UIElement<TProps> implements IContainer, IPropsOwner<IContainerProps> {
+export default class Container<TProps extends IContainerProps  = IContainerProps> extends UIElement<TProps> implements IContainer<IContainerProps> {
     props: TProps;
     children: UIElement[];
 
