@@ -271,6 +271,9 @@ class Text extends UIElement implements IContainer, IDataElement {
         return -1;
     }
 
+    flatten(){
+    }
+
     autoPositionChildren(): boolean {
         return true;
     }
