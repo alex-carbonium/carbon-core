@@ -31,7 +31,7 @@ var defaults = {
 };
 
 facade.app.dispose();
-facade.Intl.registerTestInstance();
+facade.CoreIntl.registerTestInstance();
 
 var Util = {};
 
