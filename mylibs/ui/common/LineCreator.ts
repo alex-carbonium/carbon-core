@@ -9,6 +9,7 @@ import SnapController from "../../framework/SnapController";
 import Brush from "../../framework/Brush";
 import Point from "../../math/point";
 import Environment from "../../environment";
+import UserSettings from "UserSettings";
 import {IKeyboardState, IMouseEventData} from "carbon-core";
 
 function update(x1, y1, x2, y2) {
@@ -130,9 +131,12 @@ export default class LineCreator extends Tool {
                 y = point.y;
             }
             update.call(this, this._startPoint.x, this._startPoint.y, x, y);
-            Invalidate.requestInteractionOnly();
             event.handled = true;
+        } else {
+            this._startPoint = { x: Math.round(event.x), y: Math.round(event.y) };
         }
+
+        Invalidate.requestInteractionOnly();
     }
     layerdraw(context, environment) {
         if (this._mousepressed) {
@@ -140,6 +144,17 @@ export default class LineCreator extends Tool {
             var e = this._element;
             e.applyViewMatrix(context);
             e.drawSelf(context, e.width(), e.height(), environment);
+            context.restore();
+        } else  {
+            context.save();
+            var scale = Environment.view.scale();
+            context.fillStyle = UserSettings.path.pointFill;
+            context.strokeStyle = UserSettings.path.pointStroke;
+            context.lineWidth = 1 / scale;
+            context.circle(this._startPoint.x, this._startPoint.y, 4 / scale);
+
+            context.fill();
+            context.stroke();
             context.restore();
         }
     }

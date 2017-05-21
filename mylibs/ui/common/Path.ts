@@ -23,15 +23,16 @@ import ArrangeStrategy from "../../framework/ArrangeStrategy";
 import ResizeOptions from "../../decorators/ResizeOptions";
 import { IMouseEventData, IKeyboardState, ChangeMode } from "carbon-core";
 import { LayerTypes } from "carbon-app";
+import UserSettings from "UserSettings";
 
 var CP_HANDLE_RADIUS = 3;
 var CP_HANDLE_RADIUS2 = 6;
 var CP_RADIUS = 4;
 var CP_RADIUS2 = 8;
 
-const POINT_STROKE = "#1592E6";
-const POINT_FILL = "#fff";
-const POINT_FILL_FIRST_OPEN = "yellow";
+const POINT_STROKE = UserSettings.path.pointStroke;
+const POINT_FILL = UserSettings.path.pointFill;
+const POINT_FILL_FIRST_OPEN = UserSettings.path.pointFillFirstPoint;
 
 const enum PointType {
     Straight,
@@ -1150,7 +1151,6 @@ class Path extends Shape {
                         needClearStyle = true;
                     }
                     context.beginPath();
-                    //context.circle(cp2.x, cp2.y, CP_HANDLE_RADIUS / scale);
                     context.moveTo(cp2.x - r, cp2.y);
                     context.lineTo(cp2.x, cp2.y - r);
                     context.lineTo(cp2.x + r, cp2.y);

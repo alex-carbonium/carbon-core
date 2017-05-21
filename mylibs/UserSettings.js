@@ -24,7 +24,7 @@ var settings = {
     },
     group: {
         active_stroke: "#9918ff",
-        editInIsolationMode:true
+        editInIsolationMode: true
     },
     frame: {
         stroke: '#22c1ff',
@@ -49,6 +49,12 @@ var settings = {
         defaultText: "Your text here",
         selectOnDblClick: true,
         insertNewOnClickOutside: false
+    },
+
+    path: {
+        pointStroke: "#1592E6",
+        pointFill: "#fff",
+        pointFillFirstPoint: "yellow"
     },
 
     internal: {
