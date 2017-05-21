@@ -241,13 +241,10 @@ declare module "carbon-app" {
     export const Environment: IEnvironment;
 
     export interface IAction {
+        id: string;
         name: string;
-        category?: string;
-        description?: string;
-        setCondition?: (condition) => IAction;
-        callback?: (options?: any) => any | void;
-        enabled?: () => boolean;
-        condition?: boolean;
+        callback: (selection: ISelection) => any; //TODO: replace with void when action do not return commands
+        condition?: (selection: ISelection) => boolean;
     }
 
     export interface IAnimationController {
@@ -259,7 +256,7 @@ declare module "carbon-app" {
 
         invoke(action: string, callback?: (success: boolean, result?: any) => void): void | Promise<void>;
         subscribe(action: string, cb: (action: string, result: any) => void);
-        registerAction(name: string, description: string, category: string, callback: (option?: any) => any): IAction;
+        registerAction(name: string, description: string, category: string, callback: (selection?: ISelection, app?: IApp) => any): IAction;
 
         getActionFullDescription(name: string, translate?: (value: string) => string): string;
         getActionDescription(action: string): string;
@@ -270,7 +267,7 @@ declare module "carbon-app" {
 
     export interface IShortcutManager {
         mapDefaultScheme(): void;
-        mapScheme(scheme: IShortcut[]): void;
+        mapScheme(scheme: IShortcutScheme): void;
 
         getActionHotkey(actionName: string): string;
         getActionHotkeyDisplayLabel(actionName: string): string;
@@ -283,6 +280,11 @@ declare module "carbon-app" {
             type?: string,
             repeatable?: boolean
         };
+    }
+
+    export interface IShortcutScheme{
+        windows: IShortcut[],
+        mac: IShortcut[]
     }
 
 export interface IAreaConstraint {
@@ -334,6 +336,8 @@ export interface IAreaConstraint {
     }
 
     export interface ISelection{
+        elements: IUIElement[];
+
         makeSelection(elements: IUIElement[]);
         selectComposite(): ISelectComposite;
         clearSelection();

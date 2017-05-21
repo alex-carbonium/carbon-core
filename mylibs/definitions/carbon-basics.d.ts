@@ -185,13 +185,6 @@ declare module "carbon-basics" {
         View = 8
     }
 
-    export enum ContextBarPosition {
-        None = 0,
-        Left = 1,
-        Right = 2,
-        Only = 4
-    }
-
     export const enum VerticalConstraint {
         Top = 1,
         Bottom = 2,
@@ -206,6 +199,13 @@ declare module "carbon-basics" {
         LeftRight = 3,
         Center = 4,
         Scale = 8
+    }
+
+    export const enum ArtboardResource {
+        Symbol = 1,
+        Template = 2,
+        Frame = 3,
+        Palette = 4
     }
 
     export interface IConstraints {

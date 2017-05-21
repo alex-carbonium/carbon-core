@@ -6,9 +6,9 @@ import {createUUID} from "../util";
 import { IDataNode, IDataNodeProps, ChangeMode, PatchType, IPrimitiveRoot } from "carbon-core";
 
 //TODO: only real roots should implement IPrimitiveRoot
-export default class DataNode implements IDataNode, IPrimitiveRoot{
+export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> implements IDataNode, IPrimitiveRoot{
     t: string;
-    props: IDataNodeProps;
+    props: TProps;
     runtimeProps: any;
     children: DataNode[];
 
@@ -104,7 +104,7 @@ export default class DataNode implements IDataNode, IPrimitiveRoot{
         this.propsPatched(patchType, propName, item);
     }
 
-    propsPatched(patchType, propName, item) {
+    propsPatched(patchType, propName: keyof TProps, item) {
         if (this.runtimeProps && this.runtimeProps.trackPropsCounter) {
             PropertyTracker.changeProps(this, this.selectProps([propName]), {});
         }
@@ -114,18 +114,11 @@ export default class DataNode implements IDataNode, IPrimitiveRoot{
         return Object.assign({}, this.props);
     }
 
-    selectProps(namesOrChanges) {
-        var result = {};
-        if (Array.isArray(namesOrChanges)) {
-            for (let i = 0; i < namesOrChanges.length; i++) {
-                var p = namesOrChanges[i];
-                result[p] = this.props[p];
-            }
-        }
-        else {
-            for (let i in namesOrChanges) {
-                result[i] = this.props[i];
-            }
+    selectProps(names: (keyof TProps)[]): Partial<TProps> {
+        var result: Partial<TProps> = {};
+        for (let i = 0; i < names.length; i++) {
+            var p = names[i];
+            result[p] = this.props[p];
         }
         return result;
     }
@@ -298,7 +291,7 @@ export default class DataNode implements IDataNode, IPrimitiveRoot{
         return true;
     }
 
-    getImmediateChildById(id:string, materialize:boolean) {
+    getImmediateChildById(id:string, materialize?:boolean) {
         return DataNode.getImmediateChildById(this, id, materialize);
     }
 

@@ -7,7 +7,7 @@ import {Types} from "../framework/Defs";
 import {ContentSizing} from "carbon-model";
 import { ITransformationEventData } from "carbon-core";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
-import Intl from "../Intl";
+import CoreIntl from "../CoreIntl";
 
 var ContentFrameType = Object.create(DefaultFrameType);
 ContentFrameType.strokeStyle = null;
@@ -20,7 +20,7 @@ export default class ImageContent extends UIElement{
             sizing: ContentSizing.stretch
         });
 
-        var name = Intl.instance.formatMessage({
+        var name = CoreIntl.instance.formatMessage({
             id: this.displayType(),
             defaultMessage: this.displayType()
         });

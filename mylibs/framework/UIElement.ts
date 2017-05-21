@@ -37,14 +37,14 @@ import { PropertyDescriptor } from './PropertyMetadata';
 import { IKeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IPropsOwner, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
-import { ChangeMode, LayerTypes, IPrimitiveRoot } from "carbon-core";
+import { ChangeMode, LayerTypes, IPrimitiveRoot, IRect, IMatrix } from "carbon-core";
 
 require("../migrations/All");
 
 // constructor
-export default class UIElement extends DataNode implements IUIElement, IPropsOwner<IUIElementProps> {
+export default class UIElement<TProps extends IUIElementProps = IUIElementProps> extends DataNode<TProps> implements IUIElement, IPropsOwner<TProps> {
     [name: string]: any;
-    props: IUIElementProps;
+    props: TProps;
 
     constructor() {
         super(false);
@@ -140,7 +140,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         this.invalidate();
     }
 
-    selectLayoutProps(global?: boolean) {
+    selectLayoutProps(global?: boolean): Partial<IUIElementProps> {
         var m = global ? this.globalViewMatrix() : this.viewMatrix();
         return {
             br: this.br(),
@@ -415,7 +415,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
     isBadBoundaryRect(br){
         return br.width < 1 || br.height < 1;
     }
-    isBadMatrix(m: Matrix){
+    isBadMatrix(m: IMatrix){
         return m.isSingular();
     }
     saveLastGoodTransformIfNeeded(oldProps): void{
@@ -594,7 +594,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         return true;
     }
 
-    getBoundaryRect(includeMargin: boolean = false): Rect {
+    getBoundaryRect(includeMargin: boolean = false): IRect {
         var br = this.props.br;
         if (!includeMargin || this.margin() === Box.Default) {
             return br;
@@ -681,7 +681,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         return rect;
     }
 
-    getHitTestBox(scale: number, includeMargin: boolean = false, includeBorder: boolean = true): Rect {
+    getHitTestBox(scale: number, includeMargin: boolean = false, includeBorder: boolean = true): IRect {
         var rect = this.getBoundaryRect(includeMargin);
         var goodScaleW = rect.width * scale > 10;
         var goodScaleH = rect.height * scale > 10;
@@ -907,7 +907,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         return path;
     }
 
-    globalViewMatrix(): Matrix {
+    globalViewMatrix(): IMatrix {
         if (!this.runtimeProps.globalViewMatrix) {
             var parent = this.parent();
             if (!parent || parent === NullContainer) {
@@ -928,7 +928,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
 
         return this.runtimeProps.globalViewMatrixInverted;
     }
-    rootViewMatrix(): Matrix {
+    rootViewMatrix(): IMatrix {
         var root = this._findFinalRoot();
         if (!root || root === this) {
             return this.viewMatrix();
@@ -1091,7 +1091,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         }
         return this.getRotation(true);
     }
-    br(value?: Rect): Rect {
+    br(value?: IRect): IRect {
         if (value !== undefined) {
             this.setProps({ br: value });
         }
@@ -1427,7 +1427,7 @@ export default class UIElement extends DataNode implements IUIElement, IPropsOwn
         clone.id(createUUID());
         return clone;
     }
-    sourceId(id) {
+    sourceId(id?) {
         if (arguments.length > 0) {
             this.setProps({ sourceId: id });
         }

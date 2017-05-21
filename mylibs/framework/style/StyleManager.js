@@ -1,4 +1,4 @@
-import Intl from "Intl";
+import CoreIntl from "../../CoreIntl";
 import EventHelper from "framework/EventHelper";
 import {createUUID} from "../../util";
 
@@ -61,7 +61,7 @@ class StyleManager {
         for (var i = 0; i < styles.length; ++i) {
             stylesMap[styles[i].name] = true;
         }
-        var label = Intl.instance.formatMessage({
+        var label = CoreIntl.instance.formatMessage({
             id: "newstyle.name",
             defaultMessage: "{type} style"
         }, {type: element.displayName()});

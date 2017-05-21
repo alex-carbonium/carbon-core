@@ -1,6 +1,6 @@
 declare module "carbon-model" {
     import { IPoint, IRect, ICoordinate, IMatrix, ISize, OriginType } from "carbon-geometry";
-    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable, ChangeMode } from "carbon-basics";
+    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable, ChangeMode, ArtboardResource } from "carbon-basics";
     import { IContext } from "carbon-rendering";
 
     export interface IPropsOwner<TProps> {
@@ -10,6 +10,7 @@ declare module "carbon-model" {
         prepareAndSetProps(props: Partial<TProps>, mode?);
         setProps(props: Partial<TProps>, mode?);
         patchProps(patchType, propName, propValue);
+        selectProps(names: (keyof TProps)[]): Partial<TProps>;
     }
 
     export interface IDataNodeProps {
@@ -20,9 +21,8 @@ declare module "carbon-model" {
     export interface IDataNode extends IDisposable {
         id(value?: string): string;
 
-        findNodeByIdBreadthFirst<T extends IDataNode>(predicate: (node: T) => boolean): T | null;
+        getImmediateChildById<T extends IDataNode>(id: string, materialize?:boolean): T | null;
         findAllNodesDepthFirst<T extends IDataNode>(predicate: (node: T) => boolean): T[];
-
         findNodeByIdBreadthFirst<T extends IDataNode>(id: string): T | null;
 
         enablePropsTracking();
@@ -118,6 +118,11 @@ declare module "carbon-model" {
         hitTransparent(value: boolean): boolean;
 
         globalMatrixToLocal(matrix: IMatrix): IMatrix;
+
+        /**
+         * Removes the container from the hierarch promoting the children to its parent.
+         */
+        flatten(): void;
     }
 
     export interface IGroupContainer extends IContainer {
@@ -163,6 +168,7 @@ declare module "carbon-model" {
     }
 
     export interface IArtboardProps extends IContainerProps {
+        resource: ArtboardResource | null;
         guidesX: IGuide[];
         guidesY: IGuide[];
     }
@@ -173,6 +179,23 @@ declare module "carbon-model" {
         prepareProps(changes: Partial<IArtboardProps>);
         setProps(props: Partial<IArtboardProps>, mode?);
         prepareAndSetProps(props: Partial<IArtboardProps>, mode?);
+        selectProps(names: (keyof IArtboardProps)[]): Partial<IArtboardProps>;
+    }
+
+    export type SymbolSource = {
+        pageId: string;
+        artboardId: string;
+    }
+    export interface ISymbolProps extends IContainerProps{
+        source: SymbolSource;
+    }
+    export interface ISymbol extends IContainer, IPropsOwner<ISymbolProps>{
+        props: ISymbolProps;
+
+        prepareProps(changes: Partial<ISymbolProps>);
+        setProps(props: Partial<ISymbolProps>, mode?: ChangeMode);
+        prepareAndSetProps(props: Partial<ISymbolProps>, mode?: ChangeMode);
+        selectProps(names: (keyof ISymbolProps)[]): Partial<ISymbolProps>;
     }
 
     export interface IGuide {
@@ -223,6 +246,7 @@ declare module "carbon-model" {
         prepareProps(changes: Partial<IImageProps>);
         setProps(props: Partial<IImageProps>, mode?);
         prepareAndSetProps(props: Partial<IImageProps>, mode?);
+        selectProps(names: (keyof IImageProps)[]): Partial<IImageProps>;
 
         resizeOnLoad(value?: OriginType|null): OriginType|null;
     }

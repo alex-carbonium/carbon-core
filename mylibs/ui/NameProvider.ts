@@ -1,4 +1,4 @@
-import Intl from "Intl";
+import CoreIntl from "../CoreIntl";
 
 export default class NameProvider {
     [name: string]: any;
@@ -24,16 +24,16 @@ export default class NameProvider {
         return idx;
     }
 
-    assignNewName(element) {
+    assignNewName(element, separator = " ") {
         let namesMap = this._namesMap;
         let lastLabel = null;
         while (true) {
             var displayType = element.displayType();
             var index = this.getNextIndex(element, displayType);
-            var label = Intl.instance.formatMessage({
+            var label = CoreIntl.instance.formatMessage({
                 id: displayType,
                 defaultMessage: displayType
-            }) + " " + index;
+            }) + separator + index;
 
             if (!namesMap[label] || lastLabel === label) break;
             lastLabel = label;

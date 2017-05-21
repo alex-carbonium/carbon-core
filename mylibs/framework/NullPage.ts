@@ -263,6 +263,9 @@ class NullPage extends UIElement implements IPage {
 
     dropToLayer(x, y, element){
     }
+
+    flatten(){
+    }
 }
 
 NullPage.prototype.t = Types.NullPage;

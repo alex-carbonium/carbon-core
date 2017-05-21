@@ -7,6 +7,7 @@ declare module "carbon-core" {
     export * from "carbon-basics";
     export * from "carbon-proxies";
     export * from "carbon-rendering";
+    export * from "carbon-contrib";
 
     //TODO: encapsulate or describe
     export var RequestAnimationSettings: any;
@@ -26,7 +27,6 @@ declare module "carbon-core" {
     export var Context: any;
     export var Layer: any;
     export var MirroringView: any;
-    export var ArtboardResource: any;
     export var Types: any;
     export var NullPage: any;
     export var CompositeElement: any;
@@ -40,7 +40,6 @@ declare module "carbon-core" {
     export var ViewTool: any;
     export var Clipboard: any;
     export var domUtil: any;
-    export var ContextBarPosition: any;
     export var NullContainer: any;
     export var CustomGuides: any;
     export var LayoutGridLines:any;

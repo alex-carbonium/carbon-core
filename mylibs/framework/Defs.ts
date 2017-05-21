@@ -175,13 +175,6 @@ export enum ElementState {
     Edit = 1
 };
 
-export enum ArtboardResource {
-    Stencil = 1,
-    Template = 2,
-    Frame = 3,
-    Palette = 4
-}
-
 export var Types = {
     'Path': 'p',
     'Text': 't',
@@ -255,13 +248,6 @@ export enum StrokePosition {
     Inside = 1,
     Outside = 2
 };
-
-export enum ContextBarPosition {
-    None = 0,
-    Left = 1,
-    Right = 2,
-    Only = 4
-}
 
 export enum LineCap {
     Butt,

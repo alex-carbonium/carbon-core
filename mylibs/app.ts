@@ -11,9 +11,7 @@ import {
     Types,
     StoryType,
     StyleType,
-    ArtboardResource,
-    ViewTool,
-    ContextBarPosition
+    ViewTool
 } from "./framework/Defs";
 import Font from "./framework/Font";
 import GroupContainer from "./framework/GroupContainer";
@@ -45,7 +43,9 @@ import IconsInfo from "./ui/IconsInfo";
 import backend from "./backend";
 import logger from "./logger";
 import params from "./params";
-import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType } from "carbon-core";
+import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardResource } from "carbon-core";
+import { Contributions } from "./extensions/Contributions";
+import { getBuiltInExtensions } from "./extensions/BuiltInExtensions";
 
 window['env'] = Environment;
 window['Selection'] = Selection;
@@ -203,6 +203,10 @@ class AppClass extends DataNode implements IApp {
 
         token = Environment.attached.bind(this, this.initExtensions);
         this.registerForDisposal(token);
+
+        var contributions = new Contributions(this, this.actionManager, this.shortcutManager);
+        var extensions = getBuiltInExtensions(this, Environment);
+        extensions.forEach(x => x.initialize(contributions));
     }
 
     init() {

@@ -13,9 +13,10 @@ import RelayoutEngine from "framework/relayout/RelayoutEngine";
 import SystemConfiguration from "SystemConfiguration";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
-import { Types, ArtboardResource, ViewTool } from "../../framework/Defs";
+import { Types, ViewTool } from "../../framework/Defs";
 import Rect from "../../math/rect";
 import { IArtboard } from "carbon-model";
+import { ArtboardResource } from "carbon-core";
 
 const ARTBOARD_SPACE = 100;
 

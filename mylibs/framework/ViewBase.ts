@@ -9,6 +9,7 @@ import { ILayer, IUIElement } from "carbon-core";
 import { LayerTypes, IView, IAnimationController } from "carbon-app";
 import { IEvent } from "carbon-basics";
 import { ICoordinate } from "carbon-geometry";
+import Rect from "../math/rect";
 
 var Stopwatch = require("../Stopwatch");
 var debug = require("DebugUtil")("carb:view");
@@ -375,12 +376,12 @@ export default class ViewBase { //TODO: implement IView
     viewportRect() {
         var size = this.app.viewportSize();
         var scale = this.scale();
-        return {
-            x: this.scrollX() / scale,
-            y: this.scrollY() / scale,
-            width: size.width / scale,
-            height: size.height / scale
-        };
+        return new Rect(
+            this.scrollX() / scale,
+            this.scrollY() / scale,
+            size.width / scale,
+            size.height / scale
+        );
     }
 
     pointToScreen(point: ICoordinate) {

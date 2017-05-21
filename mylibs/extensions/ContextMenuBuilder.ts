@@ -1,25 +1,29 @@
-import ExtensionBase from "./ExtensionBase";
-import {ContextBarPosition} from "framework/Defs";
 import RepeatContainer from "framework/repeater/RepeatContainer";
 import Selection from "framework/SelectionModel";
 import GroupContainer from "framework/GroupContainer";
+import ArtboardTemplateControl from "../framework/ArtboardTemplateControl";
 import CompoundPath from "ui/common/CompoundPath";
 import Environment from "environment";
 import Path from "ui/common/Path";
+import CoreIntl from "../CoreIntl";
+import { ContextBarPosition, IActionManager, IView, IApp } from "carbon-core";
 
-function findItemsToSelect(eventData) {
+function findItemsToSelect(app, eventData) {
     var items = [];
 
-    var elements = this.app.activePage.hitElements(eventData, Environment.view.scale());
+    var elements = app.activePage.hitElements(eventData, Environment.view.scale());
 
-    return items.map(e=>{
-        return {
-            name: e.displayName(),
-            callback: function (e) {
-                Selection.makeSelection([e]);
-            }.bind(this, e)
-    }});
+    return items.map(itemSelector);
 };
+
+function itemSelector(e){
+    return {
+        name: e.displayName(),
+        callback: function (e) {
+            Selection.makeSelection([e]);
+        }
+    }
+}
 
 
 function canDoPathOperations(selection) {
@@ -59,31 +63,17 @@ function canConvertToPath(selection) {
     return true;
 }
 
-export default class ContextMenuExtension extends ExtensionBase {
-    attach(app, view, controller) {
-        super.attach.apply(this, arguments);
-
-        this._buildMenuToken = app.onBuildMenu.bind(this, this.onBuildDefaultMenu);
-    }
-
-    detach() {
-        super.detach();
-        if(this._buildMenuToken) {
-            this._buildMenuToken.dispose();
-            this._buildMenuToken = null;
-        }
-    }
-
-    onBuildDefaultMenu(context, menu) {
+export default class ContextMenuBuilder {
+    static build(app: IApp, context, menu) {
         var selectComposite = context.selectComposite;
         var selection = selectComposite.elements;
-        var actionManager = this.app.actionManager;
+        var actionManager = app.actionManager;
 
         if (selection && selection.length && !selection[0].contextBarAllowed()) {
             return;
         }
 
-        var items = menu.items = [];
+        var items = menu.items;
 
         var editingPath = selection.length === 1 && selection[0] instanceof Path && selection[0].mode() === 'edit';
 
@@ -98,7 +88,7 @@ export default class ContextMenuExtension extends ExtensionBase {
             return;
         }
 
-        if(this.view.isolationLayer.isActive && !context.eventData) {
+        if(Environment.view.isolationLayer.isActive && !context.eventData) {
             items.push({
                 name: "@action.exitisolation",
                 contextBar: ContextBarPosition.Left | ContextBarPosition.Only,
@@ -133,7 +123,7 @@ export default class ContextMenuExtension extends ExtensionBase {
 
 
         if (context.eventData) {
-            var itemsToSelect = findItemsToSelect.call(this, context.eventData);
+            var itemsToSelect = findItemsToSelect(app, context.eventData);
             if (itemsToSelect.length) {
                 items.push({
                     name: "Select",
@@ -149,7 +139,7 @@ export default class ContextMenuExtension extends ExtensionBase {
             icon: "copy",
             contextBar: ContextBarPosition.None,
             callback: function () {
-                showClipboardDialog();
+                //showClipboardDialog();
             },
             disabled: !(selection && selection.length > 0)
         });
@@ -159,7 +149,7 @@ export default class ContextMenuExtension extends ExtensionBase {
             icon: "cut",
             contextBar: ContextBarPosition.None,
             callback: function () {
-                showClipboardDialog();
+                //showClipboardDialog();
             },
             disabled: !(selection && selection.length > 0)
         });
@@ -169,7 +159,7 @@ export default class ContextMenuExtension extends ExtensionBase {
             icon: "paste",
             contextBar: ContextBarPosition.None,
             callback: function () {
-                showClipboardDialog();
+                //showClipboardDialog();
             }
         });
 
@@ -193,7 +183,6 @@ export default class ContextMenuExtension extends ExtensionBase {
             },
             disabled: !(selection && selection.length > 0)
         });
-
 
         items.push('-');
         items.push({
@@ -311,7 +300,6 @@ export default class ContextMenuExtension extends ExtensionBase {
             ]
         });
         items.push('-');
-
         items.push({
             name: "Path",
             contextBar: (canDoPathOperations(selection) || canFlattenPath(selection) || canConvertToPath(selection)) ? ContextBarPosition.Right : ContextBarPosition.None,

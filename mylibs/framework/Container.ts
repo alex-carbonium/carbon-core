@@ -17,8 +17,8 @@ import { IKeyboardState, ChangeMode } from "carbon-basics";
 import { IPropsOwner, IContainerProps, IUIElement, IContainer } from "carbon-model";
 import { IMatrix } from "carbon-geometry";
 
-export default class Container extends UIElement implements IContainer, IPropsOwner<IContainerProps> {
-    props: IContainerProps;
+export default class Container<TProps extends IContainerProps  = IContainerProps> extends UIElement<TProps> implements IContainer, IPropsOwner<IContainerProps> {
+    props: TProps;
     children: UIElement[];
 
     constructor() {
@@ -382,6 +382,21 @@ export default class Container extends UIElement implements IContainer, IPropsOw
         this.invalidate();
     }
 
+    flatten(){
+        let parent = this.parent();
+        let index = this.index();
+
+        for (let i = this.children.length - 1; i >= 0; --i) {
+            var e = this.children[i];
+            var gm = e.globalViewMatrix();
+            this.remove(e);
+            parent.insert(e, index);
+            e.setTransform(parent.globalViewMatrixInverted().appended(gm));
+        }
+
+        parent.remove(this);
+    }
+
     contains(element) {
         return this.positionOf(element) !== -1;
     }
@@ -396,7 +411,7 @@ export default class Container extends UIElement implements IContainer, IPropsOw
         this.changeChildPosition(element, index, mode);
         this.invalidate();
     }
-    remove(/*UIElement*/element, mode: ChangeMode) {
+    remove(/*UIElement*/element, mode?: ChangeMode) {
         if(element.removing() === false) {
             return;
         }

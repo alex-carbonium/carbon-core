@@ -6,7 +6,7 @@ import Page from "framework/Page";
 import * as math from "math/math";
 import { isPointInRect } from "math/math";
 import SharedColors from "ui/SharedColors";
-import { TileSize, Types, ArtboardResource } from "./Defs";
+import { TileSize, Types } from "./Defs";
 import RelayoutEngine from "./relayout/RelayoutEngine";
 import PropertyStateRecorder from "framework/PropertyStateRecorder";
 import ModelStateListener from "framework/sync/ModelStateListener";
@@ -17,7 +17,7 @@ import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
 import { IPropsOwner, IArtboardProps } from "carbon-model";
-import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer } from "carbon-core";
+import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardResource, IIsolatable } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
 
 
@@ -32,7 +32,7 @@ import { measureText } from "framework/text/MeasureTextCache";
 // cleanup empty states
 
 
-class Artboard extends Container implements IPropsOwner<IArtboardProps>, IPrimitiveRoot {
+class Artboard extends Container<IArtboardProps> implements IPropsOwner<IArtboardProps>, IPrimitiveRoot, IIsolatable {
     props: IArtboardProps;
 
     constructor() {
@@ -140,7 +140,7 @@ class Artboard extends Container implements IPropsOwner<IArtboardProps>, IPrimit
                 return false;
             }
 
-            if (this.props.resource === ArtboardResource.Stencil && element.children !== undefined) {
+            if (this.props.resource === ArtboardResource.Symbol && element.children !== undefined) {
                 var can = true;
                 var id = this.id();
                 element.applyVisitor(e => {
@@ -174,6 +174,21 @@ class Artboard extends Container implements IPropsOwner<IArtboardProps>, IPrimit
             return this.props.name + " (" + this._recorder.getStateById("default").name + ")";
         }
         return super.displayName();
+    }
+
+    displayType(){
+        switch (this.props.resource){
+            case ArtboardResource.Frame:
+                return "type.a_frame";
+            case ArtboardResource.Palette:
+                return "type.a_palette";
+            case ArtboardResource.Symbol:
+                return "type.a_symbol";
+            case ArtboardResource.Template:
+                return "type.a_template";
+            default:
+                return super.displayType();
+        }
     }
 
     drawShadowPath(context, environment) {
@@ -445,9 +460,9 @@ class Artboard extends Container implements IPropsOwner<IArtboardProps>, IPrimit
 
         if (props.resource !== undefined && Selection.isOnlyElementSelected(this)) {
             Selection.refreshSelection();
-            if (props.resource === ArtboardResource.Stencil) {
+            if (props.resource === ArtboardResource.Symbol) {
                 this.runtimeProps.refreshToolbox = true;
-            } else if (oldProps.resource === ArtboardResource.Stencil) {
+            } else if (oldProps.resource === ArtboardResource.Symbol) {
                 var parent = this.parent();
                 if (parent) {
                     parent.makeToolboxConfigDirty(true);
@@ -555,7 +570,7 @@ class Artboard extends Container implements IPropsOwner<IArtboardProps>, IPrimit
         var parent = this.parent();
         if (parent) {
             parent.incrementVersion();
-            if (this.props.resource === ArtboardResource.Stencil) {
+            if (this.props.resource === ArtboardResource.Symbol) {
                 parent.makeToolboxConfigDirty(this.runtimeProps.refreshToolbox, this.id());
                 delete this.runtimeProps.refreshToolbox;
             }
@@ -838,6 +853,9 @@ class Artboard extends Container implements IPropsOwner<IArtboardProps>, IPrimit
     isEditable(){
         return true;
     }
+
+    onIsolationExited(){
+    }
 }
 Artboard.prototype.t = Types.Artboard;
 
@@ -868,7 +886,7 @@ PropertyMetadata.registerForType(Artboard, {
         options: {
             items: [
                 { name: "Regular", value: null },
-                { name: "Stencil", value: ArtboardResource.Stencil },
+                { name: "Symbol", value: ArtboardResource.Symbol },
                 { name: "Template", value: ArtboardResource.Template },
                 { name: "Frame", value: ArtboardResource.Frame },
                 { name: "Palette", value: ArtboardResource.Palette },
@@ -920,7 +938,7 @@ PropertyMetadata.registerForType(Artboard, {
         }
     },
     prepareVisibility(element: Artboard) {
-        var showAsStencil = element.props.resource === ArtboardResource.Stencil;
+        var showAsStencil = element.props.resource === ArtboardResource.Symbol;
         return {
             tileSize: showAsStencil,
             insertAsContent: showAsStencil,

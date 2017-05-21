@@ -4,8 +4,21 @@ declare module "carbon-internal" {
     }
 }
 
+declare module "carbon-geometry"{
+    export interface IPoint{
+        roundMutableBy(factor: number): IPoint;
+    }
+
+    export interface IMatrix{
+        transformPoint2(x: number, y: number, round?: boolean): IPoint;
+        transformRect(rect: IRect): any;
+
+        decompose(): any;
+    }
+}
+
 declare module "carbon-model"{
-    import { IRect } from "carbon-geometry";
+    import { IRect, IMatrix } from "carbon-geometry";
 
     export interface IDataNode {
         primitivePath():any;
@@ -18,6 +31,11 @@ declare module "carbon-model"{
         mirrorClone():IUIElement;
 
         runtimeProps: any;
+    }
+
+    export interface IUIElementProps extends IDataNodeProps {
+        br: IRect;
+        m: IMatrix;
     }
 
     export interface IContainer{
@@ -67,8 +85,6 @@ declare module "carbon-app"{
         deactivateLayer(layerType: LayerTypes, silent?: boolean);
 
         dropToLayer(x:number, y:number, element:IUIElement):void;
-
-        viewportRect(): any;
 
         prototyping(value?:boolean): boolean;
         hitElementDirect(e?, cb?, includeInteractionLayer?: boolean);

@@ -1,19 +1,25 @@
 import { ViewTool } from "../framework/Defs";
-import { IShortcut, IApp } from "carbon-core";
+import { IShortcut, IApp, IShortcutScheme, IShortcutManager } from "carbon-core";
 import params from "../params";
 
-export default class ShortcutManager {
+export default class ShortcutManager implements IShortcutManager {
     actionShortcuts: {[action: string]: IShortcut[]};
 
     constructor() {
         this.actionShortcuts = {};
     }
 
-    mapScheme(scheme: IShortcut[]) {
-        this.actionShortcuts = {};
+    mapScheme(scheme: IShortcutScheme) {
+        var shortcuts;
+        if (params.deviceOS === "Mac OS"){
+            shortcuts = scheme.mac;
+        }
+        else{
+            shortcuts = scheme.windows;
+        }
 
-        for (let i = 0; i < scheme.length; ++i) {
-            let shortcut = scheme[i];
+        for (let i = 0; i < shortcuts.length; ++i) {
+            let shortcut = shortcuts[i];
 
             var actionShortctus = this.actionShortcuts[shortcut.action];
             if (!actionShortctus) {
@@ -25,12 +31,10 @@ export default class ShortcutManager {
     }
 
     mapDefaultScheme(){
-        if (params.deviceOS === "Mac OS"){
-            this.mapScheme(ShortcutManager.MacScheme);
-        }
-        else{
-            this.mapScheme(ShortcutManager.WindowsScheme);
-        }
+        this.mapScheme({
+            mac: ShortcutManager.MacShortcuts,
+            windows: ShortcutManager.WindowsShortcuts
+        })
     }
 
     getActionHotkey(actionName) {
@@ -55,7 +59,7 @@ export default class ShortcutManager {
         return shortcut;
     }
 
-    static WindowsScheme: IShortcut[] = [
+    private static WindowsShortcuts: IShortcut[] = [
         { key: "1", action: "library1" },
         { key: "2", action: "library2" },
         { key: "3", action: "library3" },
@@ -164,13 +168,11 @@ export default class ShortcutManager {
         { key: "ctrl+0", action: "zoom100" },
         { key: "ctrl+.", action: "zoomFit" },
 
-        { key: "f", action: "toggleFrame" },
-
-        { key: "ctrl+shift+e", action: "createStencilFromSelection" }
+        { key: "f", action: "toggleFrame" }
     ];
 
 
-    static MacScheme: IShortcut[] = [
+    private static MacShortcuts: IShortcut[] = [
         { key: "1", action: "library1" },
         { key: "2", action: "library2" },
         { key: "3", action: "library3" },
@@ -282,8 +284,6 @@ export default class ShortcutManager {
         { key: "meta+.", action: "zoomFit" },
         { key: "meta+alt+s", action: "zoomSelection" },
 
-        { key: "f", action: "toggleFrame" },
-
-        { key: "meta+shift+e", action: "createStencilFromSelection" }
+        { key: "f", action: "toggleFrame" }
     ];
 }

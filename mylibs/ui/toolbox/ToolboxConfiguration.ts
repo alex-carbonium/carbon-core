@@ -1,9 +1,10 @@
-import {TileSize, ArtboardResource} from "framework/Defs";
+import {TileSize} from "framework/Defs";
 import ContextPool from "framework/render/ContextPool";
 import Environment from "environment";
 import FileProxy from "server/FileProxy";
 import {createUUID} from "util";
 import Matrix from "math/matrix";
+import { ArtboardResource } from "carbon-core";
 
 var PADDING = 5;
 var _configCache = {};
@@ -212,7 +213,7 @@ export default class ToolboxConfiguration {
     }
 
     static buildToolboxConfig(page){
-        var elements = page.getAllArtboards().filter(x=>x.props.resource === ArtboardResource.Stencil);
+        var elements = page.getAllArtboards().filter(x=>x.props.resource === ArtboardResource.Symbol);
 
         if(!elements.length) {
             page.setProps({toolboxConfigUrl:null});

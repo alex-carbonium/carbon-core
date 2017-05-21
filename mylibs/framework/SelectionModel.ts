@@ -84,6 +84,10 @@ class SelectionModel implements ISelection {
         this._invertDirectSelection = false;
     }
 
+    get elements(): IUIElement[]{
+        return this._selectCompositeElement.elements;
+    }
+
     get selectFrame() {
         return this._selectFrame;
     }

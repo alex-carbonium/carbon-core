@@ -72,7 +72,6 @@ export default {
     "PatchType": Defs.PatchType,
     "ChangeMode": Defs.ChangeMode,
     "TileSize": Defs.TileSize,
-    "ArtboardResource": Defs.ArtboardResource,
     "Types": Defs.Types,
     "ViewTool": Defs.ViewTool,
     "Context": require("./framework/render/Context"),
@@ -114,7 +113,7 @@ export default {
     "StateBoard": require("./framework/StateBoard"),
     "RequestAnimationSettings": require("./ui/prototyping/RequestAnimationSettings"),
 
-    "Intl": require("./Intl"),
+    "CoreIntl": require("./CoreIntl"),
 
     "DebugUtil": require("./DebugUtil"),
     "FontsProxy": require("./server/FontsProxy"),

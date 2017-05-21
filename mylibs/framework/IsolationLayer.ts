@@ -37,11 +37,9 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         this.clippingParent = clippingParent;
         this.ownerElement = owner;
         var children = owner.children.slice();
-        var selection = [];
         for(var i = 0; i < children.length; ++i) {
             var clone = this.cloneAndFollow(children[i]);
             this.add(clone, ChangeMode.Self);
-            selection.push(clone);
         }
 
         owner.setProps({visible:false}, ChangeMode.Self);

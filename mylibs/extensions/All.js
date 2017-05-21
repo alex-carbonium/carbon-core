@@ -7,8 +7,7 @@ define(
         "./SnapVisualization",
         "./Offline",
         "./guides/LayoutGridExtension",
-        "./guides/RulerExtension",
-        "./ContextMenuExtension"
+        "./guides/RulerExtension"
     ],
     function(){
         return Array.prototype.slice.call(arguments);

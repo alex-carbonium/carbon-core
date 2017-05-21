@@ -6,7 +6,7 @@ import {Overflow, Types} from "./Defs";
 import Selection from "framework/SelectionModel";
 import DataNode from "framework/DataNode";
 import ObjectFactory from "framework/ObjectFactory";
-import { ChangeMode, IArtboard, IMouseEventData, IIsolatable, IPrimitiveRoot } from "carbon-core";
+import { ChangeMode, IArtboard, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp } from "carbon-core";
 import { createUUID } from "../util";
 import Isolate from "../commands/Isolate";
 import Environment from "../environment";
@@ -14,7 +14,9 @@ import UserSettings from "../UserSettings";
 import Text from "./text/Text";
 
 
-export default class ArtboardTemplateControl extends Container implements IPrimitiveRoot {
+export default class ArtboardTemplateControl extends Container implements ISymbol, IPrimitiveRoot {
+    props: ISymbolProps;
+
     constructor() {
         super();
     }
@@ -189,10 +191,7 @@ export default class ArtboardTemplateControl extends Container implements IPrimi
         super.propsUpdated(props, oldProps);
         if (props.source !== undefined) {
             if (!this._artboard || (props.source.pageId !== oldProps.source.pageId && props.source.artboardId !== oldProps.source.artboardId)) {
-                var page = DataNode.getImmediateChildById(App.Current, props.source.pageId);
-                if (page) {
-                    this._artboard = DataNode.getImmediateChildById(page, props.source.artboardId, true);
-                }
+                this._artboard = this.findSourceArtboard(App.Current);
                 delete this.runtimeProps.artboardVersion;
             }
 
@@ -212,6 +211,14 @@ export default class ArtboardTemplateControl extends Container implements IPrimi
                 this._updateCustomProperties();
             }
         }
+    }
+
+    findSourceArtboard(app: IApp): IArtboard | null{
+        var page = DataNode.getImmediateChildById(App.Current, this.props.source.pageId);
+        if (page) {
+            return DataNode.getImmediateChildById(page, this.props.source.artboardId, true);
+        }
+        return null;
     }
 
     arrange(resizeEvent?, mode?){
