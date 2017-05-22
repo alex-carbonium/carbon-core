@@ -1,7 +1,8 @@
 ﻿param(
     [switch] $Debug = $false,
     [string] $Branch,
-    [int] $BuildNumber = 0
+    [int] $BuildNumber = 0,
+    [string] $NpmToken
 )
 
 $ErrorActionPreference = "Stop"
@@ -68,6 +69,7 @@ try
 
     if ($Branch -eq "master" -or $Branch.StartsWith("releases"))
     {
+        "//registry.npmjs.org/:_authToken=$NpmToken" | sc ".npmrc"
         PublishPackage -Library "carbon-core"
         PublishPackage -Library "carbon-api"
     }
