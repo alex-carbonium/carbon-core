@@ -17,8 +17,7 @@ import ConvertToPath from "../commands/ConvertToPath";
 // import DeleteCellGroup from "../commands/DeleteCellGroup";
 import Group from "../commands/Group";
 import Isolate from "../commands/Isolate";
-import SelectionToStencil from "../commands/SelectionToStencil";
-import Ungroup from "../commands/Ungroup";
+import { align } from "../framework/Aligner";
 // import InsertColumn from "../commands/InsertColumn";
 // import InsertRow from "../commands/InsertRow";
 // import ResizeColumn from "../commands/ResizeColumn";
@@ -28,22 +27,11 @@ import CombinePaths from "../commands/CombinePaths";
 import GroupContainer from "../framework/GroupContainer";
 import GroupInRepeater from "../framework/repeater/GroupInRepeater";
 import UngroupRepeater from "../framework/repeater/UngroupRepeater";
-import { align } from "../framework/Aligner";
 import Selection from "../framework/SelectionModel";
 import EventHelper from "../framework/EventHelper";
-import { IActionManager, IAction, IApp, IUIElement, IEvent } from "carbon-core";
-
+import { IActionManager, IAction, IApp, IUIElement, IEvent, IContainer } from "carbon-core";
 
 var debug = require("DebugUtil")("carb:actionManager");
-
-var checkConditions = function () {
-    for (var name in this._actions) {
-        var action = this._actions[name];
-        if (action.condition) {
-            action.enabled(action.condition());
-        }
-    }
-};
 
 function formatActionDescription(action) {
     Object.defineProperty(action, "shortcut", {
@@ -78,37 +66,17 @@ function endRepeatableAction() {
     return actionStartProps;
 }
 
-class Action implements IAction {
-    condition: boolean;
-    private _enabled: boolean = true;
-
-    constructor(public category: string, public name: string, public description: string, public callback: (options?: any) => any | void) {
-
-    }
-
-    setCondition(condition) {
-        this.condition = condition;
-        return this;
-    }
-
-    enabled(value?: boolean) {
-        if (value !== undefined) {
-            this._enabled = value;
-        }
-
-        return this._enabled;
-    }
-
-}
-
 export default class ActionManager implements IActionManager {
     app: IApp;
     private _actions: {
         [key: string]: IAction
     };
 
+    private _actionsWithConditions: {
+        [key: string]: IAction
+    }
+
     private _events: any[];
-    private _categoryEvents: any[];
     private _actionStartEvents: any[];
     public actionPerformed: IEvent<any>;
     private _visibleActionsConfig: any;
@@ -116,12 +84,10 @@ export default class ActionManager implements IActionManager {
     constructor(app: IApp) {
         this._actions = {};
         this._events = [];
-        this._categoryEvents = [];
         this._actionStartEvents = [];
+        this._actionsWithConditions = {};
         this.actionPerformed = EventHelper.createEvent();
         this.app = app;
-
-        Selection.onElementSelected.bind(this, checkConditions);
     }
 
     notifyActionStart(actionName, e) {
@@ -137,26 +103,31 @@ export default class ActionManager implements IActionManager {
         if (event) {
             event.raise(actionName, result, ret);
         }
-        var action = this._actions[actionName];
-        if (action && action.category) {
-            event = this._categoryEvents[action.category];
-            if (event) {
-                event.raise(actionName, result, ret);
-            }
-        }
     }
 
 
     registerAction(name: string, description: string, category: string, callback: (option?: any) => void): IAction {
-        var action: IAction = new Action(category, name, description, callback);
+        var action: IAction = {
+            id: name,
+            name: description,
+            callback: callback
+        };
 
+        return this.registerActionInstance(action);
+    }
 
-        this._actions[name] = action;
+    registerActionInstance(action: IAction):IAction {
+        this._actions[action.id] = action;
+        if (action.condition) {
+            this._actionsWithConditions[action.id] = action;
+        }
 
         formatActionDescription.call(this, action);
 
         return action;
     }
+
+
 
     registerActions() {
         var that = this;
@@ -166,16 +137,18 @@ export default class ActionManager implements IActionManager {
         };
         var moving = null;
 
-        this.registerAction("delete", "@delete", "Editing", function () {
-            Delete.run(Selection.getSelection());
-        }).setCondition(function () {
-            return selectionMade();
+        this.registerActionInstance({
+            id: "delete",
+            name: "@delete",
+            callback: selection => Delete.run(selection.elements),
+            condition: selection => !!selection.elements.length
         });
 
-        this.registerAction("duplicate", "@duplicate", "Editing", function () {
-            return Duplicate.run(Selection.getSelection());
-        }).setCondition(function () {
-            return selectionMade();
+        this.registerActionInstance({
+            id: "duplicate",
+            name: "@duplicate",
+            callback: selection => Duplicate.run(selection.elements),
+            condition: selection => !!selection.elements.length
         });
 
         this.registerAction("bringToFront", "@bring to front", "Layering", function () {
@@ -333,12 +306,15 @@ export default class ActionManager implements IActionManager {
             Isolate.run(Selection.getSelection());
         });
 
-        this.registerAction("createStencilFromSelection", "Create stencil", "Group", function () {
-            SelectionToStencil.run(Selection.getSelection());
-        });
-
         this.registerAction("ungroupElements", "Ungroup elements", "Ungroup", function () {
-            Ungroup.run(Selection.getSelection());
+            var elements = Selection.elements as IContainer[];
+            var children = [];
+            elements.forEach(e => {
+                children = children.concat(e.children);
+                e.flatten();
+            });
+            Selection.makeSelection(children);
+
         });
 
         this.registerAction("groupInRepeater", "Repeate grid", "Repeater", function () {
@@ -539,12 +515,6 @@ export default class ActionManager implements IActionManager {
 
         this.registerAction("enter", "Enter", "", function () {
         });
-
-        this.actionPerformed.bind(this, checkConditions);
-        CommandManager.onCommandExecuted.bind(this, checkConditions);
-        CommandManager.onCommandRolledBack.bind(this, checkConditions);
-
-        checkConditions.call(this);
     }
     iterate(callback) {
         for (var name in this._actions) {
@@ -563,7 +533,8 @@ export default class ActionManager implements IActionManager {
         if (!action) {
             throw "Unknown action " + actionName;
         }
-        if (!action.enabled()) {
+
+        if (action.condition && !action.condition(Selection)) {
             return;
         }
 
@@ -573,7 +544,7 @@ export default class ActionManager implements IActionManager {
             return;
         }
 
-        var cmd = action.callback();
+        var cmd = action.callback(Selection);
 
         if (cmd) {
             if (cmd instanceof Command) {
@@ -625,20 +596,21 @@ export default class ActionManager implements IActionManager {
 
         if (shortcut) {
             if (translate) {
-                return translate(action.description) + " (" + shortcut + ")";
+                return translate(action.name) + " (" + shortcut + ")";
             }
         }
 
         if (translate) {
-            return translate(action.description);
+            return translate(action.name);
+
         }
 
-        return action.description;
+        return action.name;
     }
     getActionDescription(name) {
         var action = this._actions[name];
         if (action) {
-            return action.description;
+            return action.name;
         }
     }
     subscribe(action, handler) {
@@ -656,21 +628,6 @@ export default class ActionManager implements IActionManager {
         }
     }
 
-    subscribeToCategory(category, handler) {
-        var event = this._categoryEvents[category];
-        if (!event) {
-            event = EventHelper.createEvent();
-            this._categoryEvents[category] = event;
-        }
-        return event.bind.apply(event, Array.prototype.slice.call(arguments, 1));
-    }
-
-    unsubscribeFromCategory(category, handler) {
-        var event = this._categoryEvents[category];
-        if (event) {
-            event.unbind.apply(event, Array.prototype.slice.call(arguments, 1));
-        }
-    }
     subscribeToActionStart(action, handler) {
         var event = this._actionStartEvents[action];
         if (!event) {
