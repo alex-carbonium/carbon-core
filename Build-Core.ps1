@@ -21,7 +21,7 @@ function PublishPackage($Library)
     Copy-Item ".\target\$Main" ".\target\$Library\lib"
     Copy-Item ".\LICENSE" ".\target\$Library"
 
-    $package = (gc .\package.json) -replace '{main}',$main -replace '{library}',$Library | ConvertFrom-Json
+    $package = (gc .\package.json) -replace '-main-',$main -replace '-library-',$Library | ConvertFrom-Json
     $package.PSObject.Properties.Remove("dependencies")
     $package.PSObject.Properties.Remove("devDependencies")
     $package.PSObject.Properties.Remove("scripts")
