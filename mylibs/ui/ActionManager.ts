@@ -127,8 +127,6 @@ export default class ActionManager implements IActionManager {
         return action;
     }
 
-
-
     registerActions() {
         var that = this;
         var selectionMade = function () {

@@ -212,6 +212,7 @@ declare module "carbon-basics" {
         h: HorizontalConstraint,
         v: VerticalConstraint
     }
+
     export const Constraints: {
         readonly Default: IConstraints;
         readonly All: IConstraints;
