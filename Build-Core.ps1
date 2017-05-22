@@ -36,10 +36,12 @@ function PublishPackage($Library)
     try
     {
         Push-Location ".\target\$Library"
+        "//registry.npmjs.org/:_authToken=$NpmToken" | sc ".npmrc"
         npm publish --access public
     }
     finally
     {
+        Remove-Item ".npmrc" -ErrorAction Ignore
         Pop-Location
     }
 }
@@ -69,7 +71,6 @@ try
 
     if ($Branch -eq "master" -or $Branch.StartsWith("releases"))
     {
-        "//registry.npmjs.org/:_authToken=$NpmToken" | sc ".npmrc"
         PublishPackage -Library "carbon-core"
         PublishPackage -Library "carbon-api"
     }
