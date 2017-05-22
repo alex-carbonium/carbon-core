@@ -137,6 +137,8 @@ export default class ShortcutManager implements IShortcutManager {
         { key: "alt+ctrl+i", action: "pathIntersect" },
         { key: "alt+ctrl+x", action: "pathDifference" },
 
+        { key: "/", action: "transparentColor" },
+
         { key: "ctrl+shift+d", action: "debugMode" },
         { key: "p", action: "pathTool" },
         { key: "r", action: "rectangleTool" },
@@ -219,6 +221,8 @@ export default class ShortcutManager implements IShortcutManager {
         { key: "alt+meta+s", action: "pathSubtract" },
         { key: "alt+meta+i", action: "pathIntersect" },
         { key: "alt+meta+x", action: "pathDifference" },
+
+        { key: "/", action: "transparentColor" },
 
         { key: "shift+left", action: "moveLeft10" },
         { key: "shift+right", action: "moveRight10" },
