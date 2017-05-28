@@ -1,3 +1,9 @@
+/* @preserve
+*
+* All rights reserved (c) 2017, Carbon Design.
+* This library can only be used in software components owned by Carbon Design. Any form of other use is strictly prohibited.
+*/
+
 import domUtil from "utils/dom";
 import logger from "./logger";
 import {backend} from "./CarbonApi";
