@@ -18,8 +18,14 @@ declare class AppCurrent {
 declare var App: AppCurrent;
 declare function each(arr: any[], cb: (a: any) => boolean | void);
 
+declare interface IReference<T> {
+    value:T;
+}
+
 declare function extend(...objects: any[]): any;
 declare function clone<T>(obj: T, deep?: boolean): T;
+declare function makeRef<T>(obj?: T): IReference<T>;
+declare function emptyObject<T>() : T;
 declare function removeElement(arr, obj);
 declare function map(objects: any[], func: (item: any) => any): any;
 declare function _(value: string): string;

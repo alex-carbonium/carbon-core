@@ -8,6 +8,7 @@ declare module "carbon-core" {
     export * from "carbon-proxies";
     export * from "carbon-rendering";
     export * from "carbon-contrib";
+    export * from "carbon-bezier";
 
     //TODO: encapsulate or describe
     export var RequestAnimationSettings: any;

@@ -1,9 +1,10 @@
-import {areTangentsAmbigious, tangentsCross, areValuesCloseWithOptions} from "./geometry";
+import { areTangentsAmbigious, tangentsCross, areValuesCloseWithOptions } from "./geometry";
 import EdgeCrossing from "./edgeCrossing";
+import { IEdgeOverlap, ICoordinate, IEdgeOverlapRun, IContourOverlap, IRange, IBezierCurve, IIntersectionRange, IBezierCrossing, IContour } from "carbon-core";
 
 const OverlapThreshold = 1e-2;
 
-function computeEdge1Tangents(firstOverlap, lastOverlap, offset, edge1Tangents) {
+function computeEdge1Tangents(firstOverlap: IEdgeOverlap, lastOverlap: IEdgeOverlap, offset: number, edge1Tangents: ICoordinate[]): number {
     // edge1Tangents are firstOverlap.range1.minimum going to previous and lastOverlap.range1.maximum going to next
     var firstLength = 0.0;
     var lastLength = 0.0;
@@ -15,7 +16,7 @@ function computeEdge1Tangents(firstOverlap, lastOverlap, offset, edge1Tangents) 
         edge1Tangents[0] = firstOverlap.range.curve1LeftBezier.tangentFromRightOffset(offset);
         firstLength = firstOverlap.range.curve1LeftBezier.length();
     }
-    if (lastOverlap.range.isAtStopOfCurve1()) {
+    if (lastOverlap.range.isAtStopOfCurve1) {
         var otherEdge1 = lastOverlap.edge1.nextNonpoint;
         edge1Tangents[1] = otherEdge1.tangentFromLeftOffset(offset);
         lastLength = otherEdge1.length();
@@ -26,13 +27,13 @@ function computeEdge1Tangents(firstOverlap, lastOverlap, offset, edge1Tangents) 
     return Math.min(firstLength, lastLength);
 }
 
-function computeEdge2Tangents(firstOverlap, lastOverlap, offset, edge2Tangents) {
+function computeEdge2Tangents(firstOverlap: IEdgeOverlap, lastOverlap: IEdgeOverlap, offset: number, edge2Tangents: ICoordinate[]): number {
     // edge2Tangents are firstOverlap.range2.minimum going to previous and lastOverlap.range2.maximum going to next
     //  unless reversed, then
     // edge2Tangents are firstOverlap.range2.maximum going to next and lastOverlap.range2.minimum going to previous
     var firstLength = 0.0;
     var lastLength = 0.0;
-    if (!firstOverlap.range.reversed()) {
+    if (!firstOverlap.range.reversed) {
         if (firstOverlap.range.isAtStartOfCurve2) {
             var otherEdge2 = firstOverlap.edge2.previousNonpoint;
             edge2Tangents[0] = otherEdge2.tangentFromRightOffset(offset);
@@ -60,7 +61,7 @@ function computeEdge2Tangents(firstOverlap, lastOverlap, offset, edge2Tangents) 
         }
         if (lastOverlap.range.isAtStartOfCurve2) {
             var otherEdge2 = lastOverlap.edge2.previousNonpoint;
-            edge2Tangents[1] = otherEdge2.tangentFromRightOffset.offset();
+            edge2Tangents[1] = otherEdge2.tangentFromRightOffset(offset);
             lastLength = otherEdge2.length();
         } else {
             edge2Tangents[1] = lastOverlap.range.curve2LeftBezier.tangentFromRightOffset(offset);
@@ -70,7 +71,7 @@ function computeEdge2Tangents(firstOverlap, lastOverlap, offset, edge2Tangents) 
     return Math.min(firstLength, lastLength);
 }
 
-function computeEdge1TestPoints(firstOverlap, lastOverlap, offset, testPoints) {
+function computeEdge1TestPoints(firstOverlap: IEdgeOverlap, lastOverlap: IEdgeOverlap, offset: number, testPoints: ICoordinate[]): void {
     // edge1Tangents are firstOverlap.range1.minimum going to previous and lastOverlap.range1.maximum going to next
     if (firstOverlap.range.isAtStartOfCurve1) {
         var otherEdge1 = firstOverlap.edge1.previousNonpoint;
@@ -78,7 +79,7 @@ function computeEdge1TestPoints(firstOverlap, lastOverlap, offset, testPoints) {
     } else {
         testPoints[0] = firstOverlap.range.curve1LeftBezier.pointFromRightOffset(offset);
     }
-    if (lastOverlap.range.isAtStopOfCurve1()) {
+    if (lastOverlap.range.isAtStopOfCurve1) {
         var otherEdge1 = lastOverlap.edge1.nextNonpoint;
         testPoints[1] = otherEdge1.pointFromLeftOffset(offset);
     } else {
@@ -87,12 +88,13 @@ function computeEdge1TestPoints(firstOverlap, lastOverlap, offset, testPoints) {
 }
 
 
-export class ContourOverlap {
+export class ContourOverlap implements IContourOverlap {
+    private _runs: IEdgeOverlapRun[];
     constructor() {
         this._runs = [];
     }
 
-    addOverlap(range, edge1, edge2) {
+    addOverlap(range: IIntersectionRange, edge1: IBezierCurve, edge2: IBezierCurve): void {
         var overlap = new EdgeOverlap(edge1, edge2, range);
         var createNewRun = false;
         if (this._runs.length === 0) {
@@ -113,7 +115,7 @@ export class ContourOverlap {
         }
     }
 
-    doesContainCrossing(crossing) {
+    doesContainCrossing(crossing: IBezierCrossing): boolean {
         for (var i = 0; i < this._runs.length; ++i) {
             var run = this._runs[i];
             if (run.doesContainCrossing(crossing)) {
@@ -123,7 +125,7 @@ export class ContourOverlap {
         return false;
     }
 
-    doesContainParameter(parameter, edge) {
+    doesContainParameter(parameter: number, edge: IBezierCurve): boolean {
         for (var i = 0; i < this._runs.length; ++i) {
             var run = this._runs[i];
             if (run.doesContainParameter(parameter, edge))
@@ -132,8 +134,8 @@ export class ContourOverlap {
         return false;
     }
 
-    runsWithBlock(block) {
-        var stop = {value:false};
+    runsWithBlock(block: (run: IEdgeOverlapRun, stop: IReference<boolean>) => void) {
+        var stop = { value: false };
         for (var i = 0; i < this._runs.length; ++i) {
             var run = this._runs[i];
             block(run, stop);
@@ -142,11 +144,11 @@ export class ContourOverlap {
         }
     }
 
-    reset() {
+    reset(): void {
         this._runs = [];
     }
 
-    isComplete() {
+    isComplete(): boolean {
         // To be complete, we should have exactly one run that wraps around
         if (this._runs.length != 1)
             return false;
@@ -154,11 +156,11 @@ export class ContourOverlap {
         return this._runs[0].isComplete();
     }
 
-    isEmpty() {
+    isEmpty(): boolean {
         return this._runs.length === 0;
     }
 
-    contour1() {
+    contour1(): IContour {
         if (this._runs.length === 0)
             return null;
 
@@ -166,7 +168,7 @@ export class ContourOverlap {
         return run.contour1();
     }
 
-    contour2() {
+    contour2(): IContour {
         if (this._runs.length === 0)
             return null;
 
@@ -174,19 +176,20 @@ export class ContourOverlap {
         return run.contour2();
     }
 
-    isBetweenContour(contour1, contour2) {
+    isBetweenContour(contour1: IContour, contour2: IContour) {
         var myContour1 = this.contour1();
         var myContour2 = this.contour2();
         return (contour1 == myContour1 && contour2 == myContour2) || (contour1 == myContour2 && contour2 == myContour1);
     }
 }
 
-export class EdgeOverlapRun {
+export class EdgeOverlapRun implements IEdgeOverlapRun {
+    private _overlaps: IEdgeOverlap[];
     constructor() {
         this._overlaps = [];
     }
 
-    insertOverlap(overlap) {
+    insertOverlap(overlap:IEdgeOverlap) {
         if (this._overlaps.length == 0) {
             // The first one always works
             this._overlaps.push(overlap)
@@ -301,7 +304,7 @@ export class EdgeOverlapRun {
         middleOverlap.addMiddleCrossing();
     }
 
-    contour1() {
+    contour1():IContour {
         if (this._overlaps.length === 0)
             return null;
 
@@ -309,7 +312,7 @@ export class EdgeOverlapRun {
         return overlap.edge1.contour;
     }
 
-    contour2() {
+    contour2():IContour {
         if (this._overlaps.length === 0)
             return null;
 
@@ -319,66 +322,56 @@ export class EdgeOverlapRun {
 
 }
 
-export class EdgeOverlap {
+export class EdgeOverlap implements IEdgeOverlap {
 
-    constructor(edge1, edge2, range) {
-        this._edge1 = edge1;
-        this._edge2 = edge2;
-        this._range = range;
+    constructor(public edge1: IBezierCurve, public edge2: IBezierCurve, public range: IIntersectionRange) {
     }
 
-    get edge1(){
-        return this._edge1;
-    }
 
-    get edge2(){
-        return this._edge2;
-    }
-
-    fitsBefore(nextOverlap) {
-        if (areValuesCloseWithOptions(this._range.parameterRange1.maximum, 1.0, OverlapThreshold)) {
+    fitsBefore(nextOverlap:IEdgeOverlap):boolean {
+        if (areValuesCloseWithOptions(this.range.parameterRange1.maximum, 1.0, OverlapThreshold)) {
             // nextOverlap should start at 0 of the next edge
-            var nextEdge = this._edge1.next;
+            var nextEdge = this.edge1.next;
             return nextOverlap.edge1 == nextEdge && areValuesCloseWithOptions(nextOverlap.range.parameterRange1.minimum, 0.0, OverlapThreshold);
         }
 
         // nextOverlap should start at about maximum on the same edge
-        return nextOverlap.edge1 == this._edge1 && areValuesCloseWithOptions(nextOverlap.range.parameterRange1.minimum, this._range.parameterRange1.maximum, OverlapThreshold);
+        return nextOverlap.edge1 === this.edge1 && areValuesCloseWithOptions(nextOverlap.range.parameterRange1.minimum, this.range.parameterRange1.maximum, OverlapThreshold);
     }
 
-    fitsAfter(previousOverlap) {
-        if (areValuesCloseWithOptions(this._range.parameterRange1.minimum, 0.0, OverlapThreshold)) {
+    fitsAfter(previousOverlap:IEdgeOverlap):boolean {
+        if (areValuesCloseWithOptions(this.range.parameterRange1.minimum, 0.0, OverlapThreshold)) {
             // previousOverlap should end at 1 of the previous edge
-            var previousEdge = this._edge1.previous;
-            return previousOverlap.edge1 == previousEdge && areValuesCloseWithOptions(previousOverlap.range().parameterRange1.maximum, 1.0, OverlapThreshold);
+            var previousEdge = this.edge1.previous;
+            return previousOverlap.edge1 == previousEdge && areValuesCloseWithOptions(previousOverlap.range.parameterRange1.maximum, 1.0, OverlapThreshold);
         }
 
         // previousOverlap should end at about the minimum on the same edge
-        return previousOverlap.edge1 == this._edge1 && areValuesCloseWithOptions(previousOverlap.range().parameterRange1.maximum, this._range.parameterRange1.minimum, OverlapThreshold);
+        return previousOverlap.edge1 == this.edge1 && areValuesCloseWithOptions(previousOverlap.range.parameterRange1.maximum, this.range.parameterRange1.minimum, OverlapThreshold);
     }
 
-    addMiddleCrossing() {
-        var intersection = this._range.middleIntersection();
+    addMiddleCrossing():void {
+        var intersection = this.range.middleIntersection;
         var ourCrossing = EdgeCrossing.crossingWithIntersection(intersection);
         var theirCrossing = EdgeCrossing.crossingWithIntersection(intersection);
         ourCrossing.counterpart = theirCrossing;
         theirCrossing.counterpart = ourCrossing;
         ourCrossing.fromCrossingOverlap = true;
         theirCrossing.fromCrossingOverlap = true;
-        this._edge1.addCrossing(ourCrossing);
-        this._edge2.addCrossing(theirCrossing);
+        this.edge1.addCrossing(ourCrossing);
+        this.edge2.addCrossing(theirCrossing);
     }
 
-    doesContainParameter(parameter, edge, extendsBeforeStart, extendsAfterEnd) {
+    doesContainParameter(parameter:number, edge:IBezierCurve, extendsBeforeStart:boolean, extendsAfterEnd:boolean) {
         // By the time this is called, we know the crossing is on one of our edges.
         if (extendsBeforeStart && extendsAfterEnd)
             return true; // The crossing is on the edge somewhere, and the overlap extens past this edge in both directions, so its safe to say the crossing is contained
 
-        var parameterRange = {};
-        if (edge == this._edge1)
-            parameterRange = this._range.parameterRange1;
+        var parameterRange:IRange = {minimum:null, maximum:null};
+        if (edge == this.edge1)
+            parameterRange = this.range.parameterRange1;
         else
-            parameterRange = this._range.parameterRange2;
+            parameterRange = this.range.parameterRange2;
 
         var inLeftSide = extendsBeforeStart ? parameter >= 0.0 : parameter > parameterRange.minimum;
         var inRightSide = extendsAfterEnd ? parameter <= 1.0 : parameter < parameterRange.maximum;

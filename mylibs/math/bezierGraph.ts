@@ -5,9 +5,12 @@ import {unionRect, lineBoundsMightOverlap, isValueLessThan, isValueGreaterThan, 
 import EdgeCrossing from "./edgeCrossing";
 import BezierContour from "./bezierContour";
 import CompoundPath from "ui/common/CompoundPath";
-//import Path from "ui/common/Path";
+import { IIntersectionRange, IReference, IContour, IRectData, IBezierGraph, ICoordinate, ILocation, IBezierCrossing, IBezierCurve, IIntersection } from "carbon-core";
 
-export default class BezierGraph {
+export default class BezierGraph implements IBezierGraph {
+    private _contours:IContour[];
+    private _bounds:IRectData;
+
     constructor() {
         this._contours = [];
     }
@@ -102,7 +105,7 @@ export default class BezierGraph {
 
     }
 
-    unionWithBezierGraph(graph) {
+    unionWithBezierGraph(graph:IBezierGraph):IBezierGraph {
         // First insert FBEdgeCrossings into both graphs where the graphs
         //  cross.
         this.insertCrossingsWithBezierGraph(graph);
@@ -131,12 +134,12 @@ export default class BezierGraph {
         return result;
     }
 
-    unionNonintersectingPartsIntoGraph(result, graph) {
+    unionNonintersectingPartsIntoGraph(result:IBezierGraph, graph:IBezierGraph) {
         // Finally, process the contours that don't cross anything else. They're either
         //  completely contained in another contour, or disjoint.
-        var ourNonintersectingContours = this.nonintersectingContours().slice();
-        var theirNonintersectinContours = graph.nonintersectingContours().slice();
-        var finalNonintersectingContours = ourNonintersectingContours.slice();
+        var ourNonintersectingContours:IContour[] = this.nonintersectingContours().slice();
+        var theirNonintersectinContours:IContour[] = graph.nonintersectingContours().slice();
+        var finalNonintersectingContours:IContour[] = ourNonintersectingContours.slice();
 
         for(var e of theirNonintersectinContours) {
             finalNonintersectingContours.push(e);
@@ -163,7 +166,7 @@ export default class BezierGraph {
             result.addContour(contour);
     }
 
-    unionEquivalentNonintersectingContours(ourNonintersectingContours, theirNonintersectingContours, results) {
+    unionEquivalentNonintersectingContours(ourNonintersectingContours:IContour[], theirNonintersectingContours:IContour[], results:IContour[]):void {
         for (var ourIndex = 0; ourIndex < ourNonintersectingContours.length; ourIndex++) {
             var ourContour = ourNonintersectingContours[ourIndex];
             for (var theirIndex = 0; theirIndex < theirNonintersectingContours.length; theirIndex++) {
@@ -190,7 +193,7 @@ export default class BezierGraph {
         }
     }
 
-    intersectWithBezierGraph(graph) {
+    intersectWithBezierGraph(graph:IBezierGraph):IBezierGraph {
         // First insert FBEdgeCrossings into both graphs where the graphs cross.
         this.insertCrossingsWithBezierGraph(graph);
         this.insertSelfCrossings();
@@ -218,12 +221,12 @@ export default class BezierGraph {
         return result;
     }
 
-    intersectNonintersectingPartsIntoGraph(result, graph) {
+    intersectNonintersectingPartsIntoGraph(result:IBezierGraph, graph:IBezierGraph) {
         // Finally, process the contours that don't cross anything else. They're either
         //  completely contained in another contour, or disjoint.
         var ourNonintersectingContours = this.nonintersectingContours().slice();
         var theirNonintersectinContours = graph.nonintersectingContours().slice()
-        var finalNonintersectingContours = [];
+        var finalNonintersectingContours:IContour[] = [];
         this.intersectEquivalentNonintersectingContours(ourNonintersectingContours, theirNonintersectinContours, finalNonintersectingContours);
         // Since we're doing an intersect, assume that most of these non-crossing contours shouldn't be in
         //  the final result.
@@ -279,7 +282,7 @@ export default class BezierGraph {
         }
     }
 
-    differenceWithBezierGraph(graph) {
+    differenceWithBezierGraph(graph:IBezierGraph):IBezierGraph {
         // First insert FBEdgeCrossings into both graphs where the graphs cross.
         this.insertCrossingsWithBezierGraph(graph);
         this.insertSelfCrossings();
@@ -299,7 +302,7 @@ export default class BezierGraph {
         //  completely contained in another contour, or disjoint.
         var ourNonintersectingContours = this.nonintersectingContours().slice();
         var theirNonintersectinContours = graph.nonintersectingContours().slice();
-        var finalNonintersectingContours = [];
+        var finalNonintersectingContours:IContour[] = [];
         this.differenceEquivalentNonintersectingContours(ourNonintersectingContours, theirNonintersectinContours, finalNonintersectingContours);
 
         // We're doing an subtraction, so assume none of the contours should be in the final result
@@ -359,7 +362,7 @@ export default class BezierGraph {
         }
     }
 
-    markCrossingsAsEntryOrExitWithBezierGraph(otherGraph, markInside) {
+    markCrossingsAsEntryOrExitWithBezierGraph(otherGraph:IBezierGraph, markInside:boolean):void {
         // Walk each contour in ourself and mark the crossings with each intersecting contour as entering
         //  or exiting the final contour.
         for (let contour of this.contours) {
@@ -377,7 +380,7 @@ export default class BezierGraph {
         }
     }
 
-    xorWithBezierGraph(graph) {
+    xorWithBezierGraph(graph:IBezierGraph):IBezierGraph {
         // XOR is done by combing union (OR), intersect (AND) and difference. Specifically
         //  we compute the union of the two graphs, the intersect of them, then subtract
         //  the intersect from the union.
@@ -421,13 +424,13 @@ export default class BezierGraph {
         return allParts.differenceWithBezierGraph(intersectingParts);
     }
 
-    static fromPath(path, matrix) {
+    static fromPath(path, matrix):IBezierGraph {
         var r = new BezierGraph();
         r.initWithBezierPath(path, matrix);
         return r;
     }
 
-     insertCrossingsWithBezierGraph(other) {
+     insertCrossingsWithBezierGraph(other:IBezierGraph) {
         // Find all intersections and, if they cross the other graph, create crossings for them, and insert
         //  them into each graph's edges.
         for (var ourContour of this.contours) {
@@ -437,7 +440,7 @@ export default class BezierGraph {
                 for (var ourEdge of ourContour.edges) {
                     for (var theirEdge of theirContour.edges) {
                         // Find all intersections between these two edges (curves)
-                        var intersectRange = {};
+                        var intersectRange : IReference<IIntersectionRange> = {value:null};
                         ourEdge.intersectionsWithBezierCurve(theirEdge, intersectRange, (intersection, stop)=> {
                             // If this intersection happens at one of the ends of the edges, then mark
                             //  that on the edge. We do this here because not all intersections create
@@ -465,9 +468,10 @@ export default class BezierGraph {
                             theirEdge.addCrossing(theirCrossing);
 
                         });
-                        intersectRange = intersectRange.value;
-                        if (intersectRange != null)
-                            overlap.addOverlap(intersectRange, ourEdge, theirEdge);
+                        let intersectRangeValue = intersectRange.value;
+                        if (intersectRangeValue != null) {
+                            overlap.addOverlap(intersectRangeValue, ourEdge, theirEdge);
+                        }
                     } // end theirEdges
                 } //end ourEdges
 
@@ -491,7 +495,7 @@ export default class BezierGraph {
         } // end ourContours
     }
 
-    cleanupCrossingsWithBezierGraph(other) {
+    cleanupCrossingsWithBezierGraph(other:IBezierGraph) {
         // Remove duplicate crossings that can happen at end points of edges
         this.removeDuplicateCrossings();
         other.removeDuplicateCrossings();
@@ -500,7 +504,7 @@ export default class BezierGraph {
         other.removeCrossingsInOverlaps();
     }
 
-    removeCrossingsInOverlaps() {
+    removeCrossingsInOverlaps():void {
         for (var ourContour of this.contours) {
             for (var ourEdge of ourContour.edges) {
                 ourEdge.crossingsCopyWithBlock((crossing, stop) => {
@@ -517,7 +521,7 @@ export default class BezierGraph {
         }
     }
 
-    removeDuplicateCrossings() {
+    removeDuplicateCrossings():void {
         // Find any duplicate crossings. These will happen at the endpoints of edges.
         for (var ourContour of this.contours) {
             for (var ourEdge of ourContour.edges) {
@@ -539,7 +543,7 @@ export default class BezierGraph {
         }
     }
 
-    insertSelfCrossings() {
+    insertSelfCrossings():void {
         // Find all intersections and, if they cross other contours in this graph, create crossings for them, and insert
         //  them into each contour's edges.
         var remainingContours = this.contours.slice();
@@ -619,7 +623,7 @@ export default class BezierGraph {
     }
 
 
-    contourInsides(testContour) {
+    contourInsides(testContour:IContour) {
         // Determine if this contour, which should reside in this graph, is a filled region or
         //  a hole. Determine this by casting a ray from one edges of the contour to the outside of
         //  the entire graph. Count how many times the ray intersects a contour in the graph. If it's
@@ -648,10 +652,10 @@ export default class BezierGraph {
         return (intersectCount & 1) == 1 ? 1/*ContourInsideHole*/ : 0/*ContourInsideFilled*/;
     }
 
-    closestLocationToPoint(point) {
+    closestLocationToPoint(point:ICoordinate):ILocation {
         var closestLocation = null;
 
-        for (var contour in this._contours) {
+        for (var contour of this._contours) {
             var contourLocation = contour.closestLocationToPoint(point);
             if (contourLocation != null && (closestLocation == null || contourLocation.distance < closestLocation.distance)) {
                 closestLocation = contourLocation;
@@ -665,7 +669,7 @@ export default class BezierGraph {
         return closestLocation;
     }
 
-    containsContour(testContour) {
+    containsContour(testContour:IContour) {
         // Determine the container, if any, for the test contour. We do this by casting a ray from one end of the graph to the other,
         //  and recording the intersections before and after the test contour. If the ray intersects with a contour an odd number of
         //  times on one side, we know it contains the test contour. After determine which contours contain the test contour, we simply
@@ -743,14 +747,14 @@ export default class BezierGraph {
         return false;
     }
 
-    findBoundsOfContour(testContour, ray, testMinimum, testMaximum) {
+    findBoundsOfContour(testContour:IContour, ray:IBezierCurve, testMinimum: IReference<ICoordinate>, testMaximum: IReference<ICoordinate>) {
         // Find the bounds of test contour that lie on ray. Simply intersect the ray with test contour. For a horizontal ray, the minimum is the point
         //  with the lowest x value, the maximum with the highest x value. For a vertical ray, use the high and low y values.
 
         var horizontalRay = ray.endPoint1.y == ray.endPoint2.y; // ray has to be a vertical or horizontal line
 
         // First find all the intersections with the ray
-        var rayIntersections = [];
+        var rayIntersections:IIntersection[] = [];
         for (var edge of testContour.edges) {
             ray.intersectionsWithBezierCurve(edge, null, (intersection, stop) => {
                 rayIntersections.push(intersection);
@@ -765,27 +769,27 @@ export default class BezierGraph {
         testMaximum.value = testMinimum.value;
         for (var intersection of rayIntersections) {
             if (horizontalRay) {
-                if (intersection.location.x < testMinimum.x)
+                if (intersection.location.x < testMinimum.value.x)
                     testMinimum.value = intersection.location;
-                if (intersection.location.x > testMaximum.x)
+                if (intersection.location.x > testMaximum.value.x)
                     testMaximum.value = intersection.location;
             } else {
-                if (intersection.location.y < testMinimum.y)
+                if (intersection.location.y < testMinimum.value.y)
                     testMinimum.value = intersection.location;
-                if (intersection.location.y > testMaximum.y)
+                if (intersection.location.y > testMaximum.value.y)
                     testMaximum.value = intersection.location;
             }
         }
         return true;
     }
 
-    findCrossingsOnContainers(containers, ray, testMinimum, testMaximum, crossingsBeforeMinimum, crossingsAfterMaximum) {
+    findCrossingsOnContainers(containers:IContour[], ray:IBezierCurve, testMinimum:ICoordinate, testMaximum:ICoordinate, crossingsBeforeMinimum:IBezierCrossing[], crossingsAfterMaximum:IBezierCrossing[]) {
         // Find intersections where the ray intersects the possible containers, before the minimum point, or after the maximum point. Store these
         //  as FBEdgeCrossings in the out parameters.
         var horizontalRay = ray.endPoint1.y == ray.endPoint2.y; // ray has to be a vertical or horizontal line
 
         // Walk through each possible container, one at a time and see where it intersects
-        var ambiguousCrossings = [];
+        var ambiguousCrossings:IBezierCrossing[] = [];
         for (var container of containers) {
             for (var containerEdge of container.edges) {
                 // See where the ray intersects this particular edge
@@ -852,7 +856,7 @@ export default class BezierGraph {
         return true;
     }
 
-    numberOfTimesContour(contour, crossings) {
+    numberOfTimesContour(contour:IContour, crossings:IBezierCrossing[]):number {
         // Count how many times a contour appears in a crossings array
         var count = 0;
         for (var crossing of crossings) {
@@ -862,23 +866,23 @@ export default class BezierGraph {
         return count;
     }
 
-    eliminateContainers(containers, testContour, ray) {
+    eliminateContainers(containers:IContour[], testContour:IContour, ray:IBezierCurve):boolean {
         // This method attempts to eliminate all or all but one of the containers that might contain test contour, using the ray specified.
 
         // First determine the exterior bounds of testContour on the given ray
-        var testMinimum = {};
-        var testMaximum = {};
-        var foundBounds = this.findBoundsOfContour(testContour, ray, testMinimum, testMaximum);
+        var testMinimumRef = makeRef<ICoordinate>();
+        var testMaximumRef = makeRef<ICoordinate>();
+        var foundBounds = this.findBoundsOfContour(testContour, ray, testMinimumRef, testMaximumRef);
         if (!foundBounds)
             return false;
 
-        testMinimum = testMinimum.value;
-        testMaximum = testMaximum.value;
+        let testMinimum = testMinimumRef.value;
+        let testMaximum = testMaximumRef.value;
 
 
         // Find all the containers on either side of the otherContour
-        var crossingsBeforeMinimum = [];
-        var crossingsAfterMaximum = [];
+        var crossingsBeforeMinimum:IBezierCrossing[] = [];
+        var crossingsAfterMaximum:IBezierCrossing[] = [];
         var foundCrossings = this.findCrossingsOnContainers(containers, ray, testMinimum, testMaximum, crossingsBeforeMinimum, crossingsAfterMaximum);
         if (!foundCrossings)
             return false;
@@ -903,9 +907,9 @@ export default class BezierGraph {
         return true;
     }
 
-    contoursFromCrossings(crossings) {
+    contoursFromCrossings(crossings:IBezierCrossing[]) {
         // Determine all the unique contours in the array of crossings
-        var contours = [];
+        var contours:IContour[] = [];
         for (var crossing of crossings) {
             if (contours.indexOf(crossing.edge.contour) == -1)
                 contours.push(crossing.edge.contour);
@@ -913,11 +917,11 @@ export default class BezierGraph {
         return contours;
     }
 
-    removeContourCrossings(crossings1, crossings2) {
+    removeContourCrossings(crossings1:IBezierCrossing[], crossings2:IBezierCrossing[]) {
         // If a contour appears in crossings1, but not crossings2, remove all the associated crossings from
         //  crossings1.
 
-        var containersToRemove = [];
+        var containersToRemove:IContour[] = [];
         for (var crossingToTest of crossings1) {
             var containerToTest = crossingToTest.edge.contour;
             // See if this contour exists in the other array
@@ -932,13 +936,13 @@ export default class BezierGraph {
             if (!existsInOther)
                 containersToRemove.push(containerToTest);
         }
-        this.removeCrossings(crossings1, containersToRemove);
+        this.removeCrossings2(crossings1, containersToRemove);
     }
 
-    removeContoursThatDontContain(crossings) {
+    removeContoursThatDontContain(crossings:IBezierCrossing[]) {
         // Remove contours that cross the ray an even number of times. By the even/odd rule this means
         //  they can't contain the test contour.
-        var containersToRemove = [];
+        var containersToRemove:IContour[] = [];
         for (var crossingToTest of crossings) {
             // For this contour, count how many times it appears in the crossings array
             var containerToTest = crossingToTest.edge.contour;
@@ -951,24 +955,24 @@ export default class BezierGraph {
             if ((count % 2) != 1)
                 containersToRemove.push(containerToTest);
         }
-        this.removeCrossings(crossings, containersToRemove);
+        this.removeCrossings2(crossings, containersToRemove);
     }
 
-    removeCrossings(crossings, containersToRemove) {
+    removeCrossings2(crossings:IBezierCrossing[], containersToRemove:IContour[]) {
         // A helper method that goes through and removes all the crossings that appear on the specified
         //  contours.
 
         // First walk through and identify which crossings to remove
-        var crossingsToRemove = [];
-        for (var contour of containersToRemove) {
-            for (var crossing of crossings) {
-                if (crossing.edge.contour == contour)
+        var crossingsToRemove:IBezierCrossing[] = [];
+        for (let contour of containersToRemove) {
+            for (let crossing of crossings) {
+                if (crossing.edge.contour === contour)
                     crossingsToRemove.push(crossing);
             }
         }
         // Now walk through and remove the crossings
-        for (var crossing of crossingsToRemove) {
-            var i = crossings.indexOf(crossing);
+        for (let crossing of crossingsToRemove) {
+            let i = crossings.indexOf(crossing);
             crossings.splice(i, 1);
         }
     }
@@ -1004,7 +1008,7 @@ export default class BezierGraph {
         return null;
     }
 
-    bezierGraphFromIntersections() {
+    bezierGraphFromIntersections():IBezierGraph {
         // This method walks the current graph, starting at the crossings, and outputs the final contours
         //  of the parts of the graph that actually intersect. The general algorithm is: start an crossing
         //  we haven't seen before. If it's marked as entry, start outputing edges moving forward (i.e. using edge.next)
@@ -1073,7 +1077,7 @@ export default class BezierGraph {
         return result;
     }
 
-    removeCrossings() {
+    removeCrossings():void {
         // Crossings only make sense for the intersection between two specific graphs. In order for this
         //  graph to be usable in the future, remove all the crossings
         for (var contour of this._contours)
@@ -1081,20 +1085,20 @@ export default class BezierGraph {
                 edge.removeAllCrossings();
     }
 
-    removeOverlaps() {
+    removeOverlaps():void {
         for (var contour of this._contours)
             contour.removeAllOverlaps();
     }
 
-    addContour(contour) {
+    addContour(contour:IContour):void {
         // Add a contour to ouselves, and force the bounds to be recalculated
         this._contours.push(contour);
         this._bounds = null;
     }
 
-    nonintersectingContours() {
+    nonintersectingContours():IContour[] {
         // Find all the contours that have no crossings on them.
-        var contours = [];
+        var contours:IContour[] = [];
         for (var contour of this._contours) {
             if (contour.intersectingContours().length == 0)
                 contours.push(contour);

@@ -12,6 +12,7 @@ import GroupArrangeStrategy from "../../framework/GroupArrangeStrategy";
 import { combineRectArray } from "../../math/math";
 import Rect from "../../math/rect";
 import { IGroupContainer, ChangeMode } from "carbon-core";
+import Shape from "framework/Shape";
 
 function propertyChanged(element, newProps) {
     if (!this._internalChange && this._itemIds && this._itemIds[element.id()]) {
@@ -29,11 +30,10 @@ class CompoundPath extends Container implements IGroupContainer {
         // Be sure to mark the winding rule as even odd, or interior contours (holes)
         //  won't get filled/left alone properly.
 
-        //path.setWindingRule(NSEvenOddWindingRule);
         var res = [];
 
-        for (var i = 0, l = graph._contours.length; i < l; ++i) {
-            var contour = graph._contours[i];
+        for (var i = 0, l = graph.contours.length; i < l; ++i) {
+            var contour = graph.contours[i];
             var firstPoint = true;
             for (var edge of contour.edges) {
                 if (firstPoint) {
@@ -106,16 +106,6 @@ class CompoundPath extends Container implements IGroupContainer {
         if (this._internalChange || !this.result) {
             return;
         }
-        // if (newProps.width !== undefined || newProps.height !== undefined) {
-        //     var sw = (newProps.width || 1) / (oldProps.width || 1);
-        //     var sh = (newProps.height || 1) / (oldProps.height || 1);
-        //
-        //     for (var p of this.children) {
-        //         p.setProps({width: p.width() * sw, height: p.height() * sh, x: p.x() * sw, y: p.y() * sh});
-        //     }
-        //     this.resetGlobalViewCache();
-        //     this.recalculate();
-        // }
     }
 
     dispose() {
@@ -132,9 +122,6 @@ class CompoundPath extends Container implements IGroupContainer {
         this._itemIds = {};
 
         var items = this.children;
-        // for (let i = 0; i < items.length; ++i){
-        //     items[i].resetGlobalViewCache();
-        // }
 
         var result = BezierGraph.fromPath(items[0], items[0].viewMatrix());
         this._itemIds[items[0].id()] = true;
@@ -397,7 +384,6 @@ class CompoundPath extends Container implements IGroupContainer {
 
         var boxes = this.children.map(x => x.getBoundingBox());
         var r = combineRectArray(boxes);
-        //this.runtimeProps.fullBoundaryRect = new Rect(0, 0, r.width, r.height);
         this.runtimeProps.fullBoundaryRect = r;
 
         return true;

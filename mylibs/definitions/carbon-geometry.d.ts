@@ -7,6 +7,17 @@ declare module "carbon-geometry" {
         y: number;
     }
 
+    export interface INormilizedLine2D {
+        a:number;
+        b:number;
+        c:number;
+    }
+
+    export interface IRange {
+        minimum:number;
+        maximum:number;
+    }
+
     export interface IPoint extends ICoordinate {
         subtract(point: IPoint): IPoint;
         getAngle(point: IPoint): number;
@@ -19,7 +30,9 @@ declare module "carbon-geometry" {
         height: number;
     }
 
-    export interface IRect extends ICoordinate, ISize {
+    export type IRectData = ICoordinate & ISize;
+
+    export interface IRect extends IRectData {
         fit(bounds: IRect, noScaleUp?: boolean): IRect;
         fill(bounds: IRect, noScaleUp?: boolean): IRect;
 

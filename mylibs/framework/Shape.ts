@@ -265,7 +265,7 @@ class Shape extends Container {
             this.setProps({miterLimit: value});
         }
 
-        return this.props.mitterLimit;
+        return this.props.miterLimit;
     }
 
 

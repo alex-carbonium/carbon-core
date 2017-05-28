@@ -1,4 +1,14 @@
-export default class EdgeCrossing {
+import { IBezierCrossing, IBezierCurve, IIntersection } from "carbon-core";
+
+export default class EdgeCrossing implements IBezierCrossing {
+    private _edge:IBezierCurve;
+    private _counterpart: IBezierCrossing;
+    private _entry: boolean;
+    private _processed:boolean;
+    private _selfCrossing:boolean;
+    private _index:number;
+    private _fromCrossingOverlap:boolean;
+    private _intersection:IIntersection;
 
     get edge(){
         return this._edge;
@@ -62,7 +72,7 @@ export default class EdgeCrossing {
         return c;
     }
 
-    removeFromEdge() {
+    removeFromEdge():void {
         this._edge.removeCrossing(this);
     }
 

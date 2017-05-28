@@ -1,4 +1,5 @@
-import {bezierCurveDataIsPoint,
+import {
+    bezierCurveDataIsPoint,
     bezierCurveDataMake,
     bezierCurveDataIsEqual,
     bezierCurveDataBounds,
@@ -10,26 +11,30 @@ import {bezierCurveDataIsPoint,
     bezierCurveDataRefineParameter,
     bezierCurveDataGetLength,
     bezierCurveDataGetLengthAtParameter,
-    bezierCurveDataClosestLocationToPoint} from "./bezierCurveData";
-import { equalPoints} from "./math";
-import {normalizePoint, 
-    subtractPoint, 
+    bezierCurveDataClosestLocationToPoint
+} from "./bezierCurveData";
+import { equalPoints } from "./math";
+import {
+    normalizePoint,
+    subtractPoint,
     addPoint,
     distanceBetweenPoints,
-    unitScalePoint, 
+    unitScalePoint,
     lineBoundsMightOverlap,
     rangeMake,
     areTangentsAmbigious,
     tangentsCross,
-    removeObject} from "./geometry";
+    removeObject
+} from "./geometry";
+import { ICoordinate } from "carbon-geometry";
+import { IBezierCurve, IBezierCrossing, IBezierCurveData, IContour, IIntersectionRange, IIntersection, IReference, IntersectionBlockCallback, IRange, CurveSplit, ILocation, IRectData } from "carbon-core";
 
 
-function findEdge1TangentCurves(edge, intersection, leftCurve, rightCurve)
-{
-    if ( intersection.isAtStartOfCurve1 ) {
+function findEdge1TangentCurves(edge: IBezierCurve, intersection: IIntersection, leftCurve: IReference<IBezierCurve>, rightCurve: IReference<IBezierCurve>) {
+    if (intersection.isAtStartOfCurve1) {
         leftCurve.value = edge.previousNonpoint;
         rightCurve.value = edge;
-    } else if ( intersection.isAtStopOfCurve1 ) {
+    } else if (intersection.isAtStopOfCurve1) {
         leftCurve.value = edge;
         rightCurve.value = edge.nextNonpoint;
     } else {
@@ -38,12 +43,11 @@ function findEdge1TangentCurves(edge, intersection, leftCurve, rightCurve)
     }
 }
 
-function findEdge2TangentCurves(edge, intersection, leftCurve, rightCurve)
-{
-    if ( intersection.isAtStartOfCurve2 ) {
+function findEdge2TangentCurves(edge: IBezierCurve, intersection: IIntersection, leftCurve: IReference<IBezierCurve>, rightCurve: IReference<IBezierCurve>) {
+    if (intersection.isAtStartOfCurve2) {
         leftCurve.value = edge.previousNonpoint;
         rightCurve.value = edge;
-    } else if ( intersection.isAtStopOfCurve2 ) {
+    } else if (intersection.isAtStopOfCurve2) {
         leftCurve.value = edge;
         rightCurve.value = edge.nextNonpoint;
     } else {
@@ -52,72 +56,76 @@ function findEdge2TangentCurves(edge, intersection, leftCurve, rightCurve)
     }
 }
 
-function computeEdgeTangents(leftCurve, rightCurve, offset, edgeTangents)
-{
+function computeEdgeTangents(leftCurve: IBezierCurve, rightCurve: IBezierCurve, offset: number, edgeTangents: ICoordinate[]) {
     edgeTangents[0] = leftCurve.tangentFromRightOffset(offset);
     edgeTangents[1] = rightCurve.tangentFromLeftOffset(offset);
 }
 
 
-function computeEdge1RangeTangentCurves(edge, intersectRange, leftCurve, rightCurve)
-{
+function computeEdge1RangeTangentCurves(edge: IBezierCurve, intersectRange: IIntersectionRange, leftCurve: IReference<IBezierCurve>, rightCurve: IReference<IBezierCurve>) {
     // edge1Tangents are firstOverlap.range1.minimum going to previous and lastOverlap.range1.maximum going to next
-    if ( intersectRange.isAtStartOfCurve1 )
+    if (intersectRange.isAtStartOfCurve1)
         leftCurve.value = edge.previousNonpoint;
-    else
+    else {
         leftCurve.value = intersectRange.curve1LeftBezier;
-    if ( intersectRange.isAtStopOfCurve1 )
+    }
+
+    if (intersectRange.isAtStopOfCurve1)
         rightCurve.value = edge.nextNonpoint;
-    else
+    else {
         rightCurve.value = intersectRange.curve1RightBezier;
+    }
 }
 
-function computeEdge2RangeTangentCurves(edge, intersectRange, leftCurve, rightCurve)
-{
+function computeEdge2RangeTangentCurves(edge: IBezierCurve, intersectRange: IIntersectionRange, leftCurve: IReference<IBezierCurve>, rightCurve: IReference<IBezierCurve>) {
     // edge2Tangents are firstOverlap.range2.minimum going to previous and lastOverlap.range2.maximum going to next
-    if ( intersectRange.isAtStartOfCurve2 )
+    if (intersectRange.isAtStartOfCurve2)
         leftCurve.value = edge.previousNonpoint;
     else
         leftCurve.value = intersectRange.curve2LeftBezier;
-    if ( intersectRange.isAtStopOfCurve2 ) {
+    if (intersectRange.isAtStopOfCurve2) {
         rightCurve.value = edge.nextNonpoint;
     } else
         rightCurve.value = intersectRange.curve2RightBezier;
 }
 
 
-export default class BezierCurve {
+export default class BezierCurve implements IBezierCurve {
+    private _crossings: IBezierCrossing[];
+    private _data: IBezierCurveData;
+    private _contour: IContour;
+    private _index: number;
+    private _startShared: boolean;
 
     constructor() {
         this._crossings = [];
     }
 
-    get data() {
+    get data(): IBezierCurveData {
         return this._data;
     }
 
-
-    get endPoint1() {
+    get endPoint1(): ICoordinate {
         return this._data.endPoint1;
     }
 
-    get controlPoint1() {
+    get controlPoint1(): ICoordinate {
         return this._data.controlPoint1;
     }
 
-    get controlPoint2() {
+    get controlPoint2(): ICoordinate {
         return this._data.controlPoint2;
     }
 
-    get endPoint2() {
+    get endPoint2(): ICoordinate {
         return this._data.endPoint2;
     }
 
-    get isStraightLine() {
+    get isStraightLine(): boolean {
         return this._data.isStraightLine;
     }
 
-    static bezierCurvesFromBezierPath(path) {
+    static bezierCurvesFromBezierPath(path): IBezierCurve[] {
         // Helper method to easily convert a bezier path into an array of FBBezierCurves. Very straight forward,
         //  only lines are a special case.
 
@@ -156,31 +164,30 @@ export default class BezierCurve {
         return bezierCurves;
     }
 
-    static bezierCurveWithLine(startPoint, endPoint) {
+    static bezierCurveWithLine(startPoint: ICoordinate, endPoint: ICoordinate): IBezierCurve {
         var curve = new BezierCurve();
         curve.initWithLine(startPoint, endPoint);
         return curve;
     }
 
-    static bezierCurve(endPoint1, controlPoint1, controlPoint2, endPoint2) {
+    static bezierCurve(endPoint1: ICoordinate, controlPoint1: ICoordinate, controlPoint2: ICoordinate, endPoint2: ICoordinate): IBezierCurve {
         var curve = new BezierCurve();
         curve.init(endPoint1, controlPoint1, controlPoint2, endPoint2);
         return curve;
     }
 
-    static bezierCurveWithBezierCurveData(data) {
+    static bezierCurveWithBezierCurveData(data): IBezierCurve {
         var curve = new BezierCurve();
         curve._data = data;
         return curve;
     }
 
-
-    init(endPoint1, controlPoint1, controlPoint2, endPoint2, contour) {
+    init(endPoint1: ICoordinate, controlPoint1: ICoordinate, controlPoint2: ICoordinate, endPoint2: ICoordinate, contour?: IContour): void {
         this._data = bezierCurveDataMake(endPoint1, controlPoint1, controlPoint2, endPoint2, false);
         this._contour = contour; // no cyclical references
     }
 
-    initWithLine(startPoint, endPoint, contour) {
+    initWithLine(startPoint: ICoordinate, endPoint: ICoordinate, contour?: any): void {
         // Convert the line into a bezier curve to keep our intersection algorithm general (i.e. only
         //  has to deal with curves, not lines). As long as the control points are colinear with the
         //  end points, it'll be a line. But for consistency sake, we put the control points inside
@@ -192,52 +199,52 @@ export default class BezierCurve {
         this._contour = contour; // no cyclical references
     }
 
-    isEqual(object) {
-        if (!object instanceof BezierCurve)
+    isEqual(other: IBezierCurve): boolean {
+        if (!(other instanceof BezierCurve))
             return false;
 
         return bezierCurveDataIsEqual(this._data, other._data);
     }
 
-    doesHaveIntersectionsWithBezierCurve(curve) {
+    doesHaveIntersectionsWithBezierCurve(curve: IBezierCurve): boolean {
         var count = 0;
-        this.intersectionsWithBezierCurve(curve, null, (_, stop)=> {
+        this.intersectionsWithBezierCurve(curve, null, (_, stop) => {
             ++count;
             stop.value = true; // Only need the one
         });
         return count > 0;
     }
 
-    intersectionsWithBezierCurve(curve, intersectRange, block) {
+    intersectionsWithBezierCurve(curve: IBezierCurve, intersectRange: IReference<IIntersectionRange>, block: IntersectionBlockCallback): void {
         // For performance reasons, do a quick bounds check to see if these even might intersect
-        if (!lineBoundsMightOverlap(bezierCurveDataBoundingRect(this._data), bezierCurveDataBoundingRect(curve._data)))
+        if (!lineBoundsMightOverlap(bezierCurveDataBoundingRect(this._data), bezierCurveDataBoundingRect(curve.data)))
             return;
 
-        if (!lineBoundsMightOverlap(bezierCurveDataBounds(this._data), bezierCurveDataBounds(curve._data)))
+        if (!lineBoundsMightOverlap(bezierCurveDataBounds(this._data), bezierCurveDataBounds(curve.data)))
             return;
 
-        var usRange = rangeMake(0, 1);
-        var themRange = rangeMake(0, 1);
-        var stop = {value:false};
-        bezierCurveDataIntersectionsWithBezierCurve(this._data, curve.data, usRange, themRange, this, curve, intersectRange, 0, block, stop);
+        var usRangeRef:IReference<IRange> = {value:rangeMake(0, 1)};
+        var themRangeRef:IReference<IRange> = {value:rangeMake(0, 1)};
+        var stop:IReference<boolean> = { value: false };
+        bezierCurveDataIntersectionsWithBezierCurve(this._data, curve.data, usRangeRef, themRangeRef, this, curve, intersectRange, 0, block, stop);
     }
 
 
-    subcurveWithRange(range) {
+    subcurveWithRange(range: IRange): IBezierCurve {
         return BezierCurve.bezierCurveWithBezierCurveData(bezierCurveDataSubcurveWithRange(this._data, range));
     }
 
-    splitSubcurvesWithRange(range, curves) {
+    splitSubcurvesWithRange(range: IRange, curves: CurveSplit): void {
         // Return a bezier curve representing the parameter range specified. We do this by splitting
         //  twice: once on the minimum, the splitting the result of that on the maximum.
         // Start with the left side curve
-        var remainingCurve = {};
+        var remainingCurve = emptyObject<IBezierCurveData>();
         if (range.minimum == 0.0) {
             remainingCurve = this._data;
             if (curves.leftCurve != null)
                 curves.leftCurve = null;
         } else {
-            var leftCurveData = {};
+            var leftCurveData = emptyObject<IBezierCurveData>();
             bezierCurveDataPointAtParameter(this._data, range.minimum, leftCurveData, remainingCurve);
             if (curves.leftCurve !== undefined) {
                 curves.leftCurve = BezierCurve.bezierCurveWithBezierCurveData(leftCurveData);
@@ -255,8 +262,8 @@ export default class BezierCurve {
 
         // We need to adjust the maximum parameter to fit on the new curve before we split again
         var adjustedMaximum = (range.maximum - range.minimum) / (1.0 - range.minimum);
-        var middleCurveData = {};
-        var rightCurveData = {};
+        var middleCurveData = emptyObject<IBezierCurveData>();;
+        var rightCurveData = emptyObject<IBezierCurveData>();;
         bezierCurveDataPointAtParameter(remainingCurve, adjustedMaximum, middleCurveData, rightCurveData);
         if (curves.middleCurve !== undefined)
             curves.middleCurve = BezierCurve.bezierCurveWithBezierCurveData(middleCurveData);
@@ -264,66 +271,66 @@ export default class BezierCurve {
             curves.rightCurve = BezierCurve.bezierCurveWithBezierCurveData(rightCurveData);
     }
 
-    reversedCurve() {
+    reversedCurve(): IBezierCurve {
         return BezierCurve.bezierCurveWithBezierCurveData(bezierCurveDataReversed(this._data));
     }
 
-    pointAt(parameter, curves) {
-        var leftData = {};
-        var rightData = {};
+    pointAt(parameter: number, curves: CurveSplit): ICoordinate {
+        var leftData = emptyObject<IBezierCurveData>();
+        var rightData = emptyObject<IBezierCurveData>();
         var point = bezierCurveDataPointAtParameter(this._data, parameter, leftData, rightData);
-        if (curves.leftBezierCurve !== undefined) {
-            curves.leftBezierCurve = BezierCurve.bezierCurveWithBezierCurveData(leftData);
+        if (curves.leftCurve !== undefined) {
+            curves.leftCurve = BezierCurve.bezierCurveWithBezierCurveData(leftData);
         }
-        if (curves.rightBezierCurve !== undefined) {
-            curves.rightBezierCurve = BezierCurve.bezierCurveWithBezierCurveData(rightData);
+        if (curves.rightCurve !== undefined) {
+            curves.rightCurve = BezierCurve.bezierCurveWithBezierCurveData(rightData);
         }
         return point;
     }
 
-    refineParameter(parameter, point) {
+    refineParameter(parameter: number, point: ICoordinate): number {
         return bezierCurveDataRefineParameter(this._data, parameter, point);
     }
 
-    length() {
+    length(): number {
         return bezierCurveDataGetLength(this._data);
     }
 
-    lengthAtParameter(parameter) {
+    lengthAtParameter(parameter: number): number {
         return bezierCurveDataGetLengthAtParameter(this._data, parameter);
     }
 
-    get isPoint() {
+    get isPoint(): boolean {
         return bezierCurveDataIsPoint(this._data);
     }
 
-    closestLocationToPoint(point) {
+    closestLocationToPoint(point: ICoordinate): ILocation {
         return bezierCurveDataClosestLocationToPoint(this._data, point);
     }
 
-    get bounds() {
+    get bounds(): IRectData {
         return bezierCurveDataBounds(this._data);
     }
 
-    get boundingRect() {
+    get boundingRect(): IRectData {
         return bezierCurveDataBoundingRect(this._data);
     }
 
-    pointFromRightOffset(offset) {
+    pointFromRightOffset(offset: number): ICoordinate {
         var length = this.length();
         offset = Math.min(offset, length);
         var time = 1.0 - (offset / length);
         return bezierCurveDataPointAtParameter(this._data, time, null, null);
     }
 
-    pointFromLeftOffset(offset) {
+    pointFromLeftOffset(offset: number): ICoordinate {
         var length = this.length();
         offset = Math.min(offset, length);
         var time = offset / length;
         return bezierCurveDataPointAtParameter(this._data, time, null, null);
     }
 
-    tangentFromRightOffset(offset) {
+    tangentFromRightOffset(offset: number): ICoordinate {
         if (this._data.isStraightLine && !bezierCurveDataIsPoint(this._data))
             return subtractPoint(this._data.endPoint1, this._data.endPoint2);
 
@@ -335,15 +342,15 @@ export default class BezierCurve {
             if (offset == 0.0)
                 offset = Math.min(1.0, length);
             var time = 1.0 - (offset / length);
-            var leftCurve = {};
-            bezierCurveDataPointAtParameter(this._data, time, leftCurve, null);
-            returnValue = subtractPoint(leftCurve.controlPoint2, leftCurve.endPoint2);
+            var leftCurveData = emptyObject<IBezierCurveData>();
+            bezierCurveDataPointAtParameter(this._data, time, leftCurveData, null);
+            returnValue = subtractPoint(leftCurveData.controlPoint2, leftCurveData.endPoint2);
         }
 
         return returnValue;
     }
 
-    tangentFromLeftOffset(offset) {
+    tangentFromLeftOffset(offset: number): ICoordinate {
         if (this._data.isStraightLine && !bezierCurveDataIsPoint(this._data))
             return subtractPoint(this._data.endPoint2, this._data.endPoint1);
 
@@ -355,7 +362,7 @@ export default class BezierCurve {
             if (offset == 0.0)
                 offset = Math.min(1.0, length);
             var time = offset / length;
-            var rightCurve = {};
+            var rightCurve = emptyObject<IBezierCurveData>();
             bezierCurveDataPointAtParameter(this._data, time, null, rightCurve);
             returnValue = subtractPoint(rightCurve.controlPoint1, rightCurve.endPoint1);
         }
@@ -363,62 +370,54 @@ export default class BezierCurve {
         return returnValue;
     }
 
-    // bezierPath()
-    // {
-    //     var path = new Path();
-    //     path.moveToPoint(this.endPoint1);
-    //     path.curveToPoint(this.endPoint2, this.controlPoint1, this.controlPoint2);
-    //     return path;
-    // }
-
-    clone() {
+    clone(): IBezierCurve {
         return BezierCurve.bezierCurveWithBezierCurveData(this._data);
     }
 
     // edge
-    get index() {
+    get index(): number {
         return this._index;
     }
 
-    set index(value) {
+    set index(value: number) {
         this._index = value;
     }
 
-    get isStartShared() {
+    get isStartShared(): boolean {
         return this._startShared;
     }
 
-    set startShared(value) {
+    set startShared(value: boolean) {
         this._startShared = value;
     }
 
-    get contour() {
+    get contour(): IContour {
         return this._contour;
     }
 
-    set contour(value) {
+    set contour(value: IContour) {
         this._contour = value;
     }
 
-    addCrossing(crossing) {
+    addCrossing(crossing: IBezierCrossing): void {
         // Make sure the crossing can make it back to us, and keep all the crossings sorted
         crossing.edge = this;
         this._crossings.push(crossing);
         this.sortCrossings();
     }
 
-    removeCrossing(crossing) {
+    removeCrossing(crossing: IBezierCrossing): void {
         // Keep the crossings sorted
         crossing.edge = null;
         removeObject(this._crossings, crossing);
         this.sortCrossings();
     }
 
-    removeAllCrossings() {
+    removeAllCrossings(): void {
         this._crossings = [];
     }
 
-    get next() {
+    get next(): IBezierCurve {
         if (this._contour == null)
             return this;
 
@@ -428,7 +427,7 @@ export default class BezierCurve {
         return this.contour.edges[this._index + 1];
     }
 
-    get previous() {
+    get previous(): IBezierCurve {
         if (this._contour == null)
             return this;
 
@@ -438,64 +437,69 @@ export default class BezierCurve {
         return this.contour.edges[this._index - 1];
     }
 
-    get nextNonpoint() {
+    get nextNonpoint(): IBezierCurve {
         var edge = this.next;
-        while (edge.isPoint)
+        while (edge && edge.isPoint) {
             edge = edge.next;
+        }
         return edge;
     }
 
-    get previousNonpoint() {
+    get previousNonpoint(): IBezierCurve {
         var edge = this.previous;
-        while (edge.isPoint)
+        while (edge && edge.isPoint) {
             edge = edge.previous;
+        }
         return edge;
     }
 
-    get hasCrossings() {
+    get hasCrossings(): boolean {
         return this._crossings != null && this._crossings.length > 0;
     }
 
-    crossingsWithBlock(block) {
+    crossingsWithBlock(block: (crossing: IBezierCrossing, stop: IReference<boolean>) => void): void {
         if (this._crossings == null)
             return;
 
-        var stop = {value: false};
+        var stop = { value: false };
         for (var crossing of this._crossings) {
             block(crossing, stop);
-            if (stop.value)
+
+            if (stop.value) {
                 break;
+            }
         }
     }
 
-    crossingsCopyWithBlock(block) {
+    crossingsCopyWithBlock(block: (crossing: IBezierCrossing, stop: IReference<boolean>) => void): void {
         if (this._crossings == null)
             return;
 
-        var stop = {value: false};
+        var stop = { value: false };
         var crossingsCopy = this._crossings.slice();
         for (var crossing of crossingsCopy) {
             block(crossing, stop);
-            if (stop.value)
+            if (stop.value) {
                 break;
+            }
         }
     }
 
-    nextCrossing(crossing) {
+    nextCrossing(crossing: IBezierCrossing): IBezierCrossing {
         if (this._crossings == null || crossing.index >= (this._crossings.length - 1))
             return null;
 
         return this._crossings[crossing.index + 1];
     }
 
-    previousCrossing(crossing) {
+    previousCrossing(crossing: IBezierCrossing): IBezierCrossing {
         if (this._crossings == null || crossing.index == 0)
             return null;
 
         return this._crossings[crossing.index - 1];
     }
 
-    intersectingEdgesWithBlock(block) {
+    intersectingEdgesWithBlock(block: (edge: IBezierCurve) => void): void {
         this.crossingsWithBlock((crossing, stop) => {
             if (crossing.isSelfCrossing)
                 return; // Right now skip over this intersecting crossings
@@ -504,7 +508,7 @@ export default class BezierCurve {
         });
     }
 
-    selfIntersectingEdgesWithBlock(block) {
+    selfIntersectingEdgesWithBlock(block: (edge: IBezierCurve) => void): void {
         this.crossingsWithBlock((crossing, stop) => {
             if (!crossing.isSelfCrossing)
                 return; // Only want the this intersecting crossings
@@ -513,33 +517,35 @@ export default class BezierCurve {
         });
     }
 
-    get firstCrossing() {
+    get firstCrossing(): IBezierCrossing {
         if (this._crossings == null || this._crossings.length == 0)
             return null;
         return this._crossings[0];
     }
 
-    get lastCrossing() {
+    get lastCrossing(): IBezierCrossing {
         if (this._crossings == null || this._crossings.length == 0)
             return null;
         return this._crossings[this._crossings.length - 1];
     }
 
-    get firstNonselfCrossing() {
+    get firstNonselfCrossing(): IBezierCrossing {
         var first = this.firstCrossing;
-        while (first != null && first.isSelfCrossing)
+        while (first != null && first.isSelfCrossing) {
             first = first.next;
+        }
         return first;
     }
 
-    get lastNonselfCrossing() {
+    get lastNonselfCrossing(): IBezierCrossing {
         var last = this.lastCrossing;
-        while (last != null && last.isSelfCrossing)
+        while (last != null && last.isSelfCrossing) {
             last = last.previous;
+        }
         return last;
     }
 
-    get hasNonselfCrossings() {
+    get hasNonselfCrossings(): boolean {
         var hasNonself = false;
         for (var crossing of this._crossings) {
             if (!crossing.isSelfCrossing) {
@@ -550,7 +556,7 @@ export default class BezierCurve {
         return hasNonself;
     }
 
-    crossesEdgeAtIntersection(edge2, intersection) {
+    crossesEdgeAtIntersection(edge2: IBezierCurve, intersection: IIntersection): boolean {
         // If it's tangent, then it doesn't cross
         if (intersection.isTangent)
             return false;
@@ -567,22 +573,22 @@ export default class BezierCurve {
 
         // Calculate the four tangents: The two tangents moving away from the intersection point on this, the two tangents
         //  moving away from the intersection point on edge2.
-        var edge1Tangents = [];
-        var edge2Tangents = [];
+        var edge1Tangents:ICoordinate[] = [];
+        var edge2Tangents:ICoordinate[] = [];
         var offset = 0.0;
 
-        var edge1LeftCurve = {};
-        var edge1RightCurve = {};
-        findEdge1TangentCurves(this, intersection, edge1LeftCurve, edge1RightCurve);
-        edge1LeftCurve = edge1LeftCurve.value;
-        edge1RightCurve = edge1RightCurve.value;
+        var edge1LeftCurveRef = { value: null };
+        var edge1RightCurveRef = { value: null };
+        findEdge1TangentCurves(this, intersection, edge1LeftCurveRef, edge1RightCurveRef);
+        let edge1LeftCurve = edge1LeftCurveRef.value;
+        let edge1RightCurve = edge1RightCurveRef.value;
         var edge1Length = Math.min(edge1LeftCurve.length(), edge1RightCurve.length());
 
-        var edge2LeftCurve = {};
-        var edge2RightCurve = {};
-        findEdge2TangentCurves(edge2, intersection, edge2LeftCurve, edge2RightCurve);
-        edge2LeftCurve = edge2LeftCurve.value;
-        edge2RightCurve = edge2RightCurve.value;
+        var edge2LeftCurveRef = { value: null };
+        var edge2RightCurveRef = { value: null };
+        findEdge2TangentCurves(edge2, intersection, edge2LeftCurveRef, edge2RightCurveRef);
+        let edge2LeftCurve = edge2LeftCurveRef.value;
+        let edge2RightCurve = edge2RightCurveRef.value;
 
         var edge2Length = Math.min(edge2LeftCurve.length(), edge2RightCurve.length());
 
@@ -598,26 +604,26 @@ export default class BezierCurve {
         return tangentsCross(edge1Tangents, edge2Tangents);
     }
 
-    crossesEdgeAtIntersectionRange(edge2, intersectRange) {
+    crossesEdgeAtIntersectionRange(edge2: IBezierCurve, intersectRange: IIntersectionRange): boolean {
         // Calculate the four tangents: The two tangents moving away from the intersection point on this, the two tangents
         //  moving away from the intersection point on edge2.
-        var edge1Tangents = [];
-        var edge2Tangents = [];
+        var edge1Tangents:ICoordinate[] = [];
+        var edge2Tangents:ICoordinate[] = [];
         var offset = 0.0;
 
-        var edge1LeftCurve = {};
-        var edge1RightCurve = {};
-        computeEdge1RangeTangentCurves(this, intersectRange, edge1LeftCurve, edge1RightCurve);
-        edge1LeftCurve = edge1LeftCurve.value;
-        edge1RightCurve = edge1RightCurve.value;
+        var edge1LeftCurveRef = { value: null };
+        var edge1RightCurveRef = { value: null };
+        computeEdge1RangeTangentCurves(this, intersectRange, edge1LeftCurveRef, edge1RightCurveRef);
+        let edge1LeftCurve = edge1LeftCurveRef.value;
+        let edge1RightCurve = edge1RightCurveRef.value;
 
         var edge1Length = Math.min(edge1LeftCurve.length(), edge1RightCurve.length());
 
-        var edge2LeftCurve = {};
-        var edge2RightCurve = {};
-        computeEdge2RangeTangentCurves(edge2, intersectRange, edge2LeftCurve, edge2RightCurve);
-        edge2LeftCurve = edge2LeftCurve.value;
-        edge2RightCurve = edge2RightCurve.value;
+        var edge2LeftCurveRef = { value: null };
+        var edge2RightCurveRef = { value: null };
+        computeEdge2RangeTangentCurves(edge2, intersectRange, edge2LeftCurveRef, edge2RightCurveRef);
+        let edge2LeftCurve = edge2LeftCurveRef.value;
+        let edge2RightCurve = edge2RightCurveRef.value;
         var edge2Length = Math.min(edge2LeftCurve.length(), edge2RightCurve.length());
 
         var maxOffset = Math.min(edge1Length, edge2Length);
@@ -632,7 +638,7 @@ export default class BezierCurve {
         return tangentsCross(edge1Tangents, edge2Tangents);
     }
 
-    sortCrossings() {
+    sortCrossings():void {
         if (this._crossings == null)
             return;
 
@@ -640,8 +646,10 @@ export default class BezierCurve {
         this._crossings.sort((crossing1, crossing2) => {
             return crossing1.order - crossing2.order;
         });
+
         var index = 0;
-        for (var crossing of this._crossings)
+        for (var crossing of this._crossings) {
             crossing.index = index++;
+        }
     }
 }

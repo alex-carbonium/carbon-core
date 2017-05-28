@@ -21,7 +21,7 @@ import Command from "framework/commands/Command";
 import {Types} from "../../framework/Defs";
 import ArrangeStrategy from "../../framework/ArrangeStrategy";
 import ResizeOptions from "../../decorators/ResizeOptions";
-import { IMouseEventData, IKeyboardState, ChangeMode } from "carbon-core";
+import { IMouseEventData, IKeyboardState, ChangeMode, IIntersectionRange } from "carbon-core";
 import { LayerTypes } from "carbon-app";
 import UserSettings from "UserSettings";
 
@@ -1058,7 +1058,7 @@ class Path extends Shape {
                 var ray = BezierCurve.bezierCurveWithLine(point, {x: point.x + 100000, y: point.y})
                 for (var curve of graph.contours) {
                     for (var edge of curve.edges) {
-                        edge.intersectionsWithBezierCurve(ray, {}, ()=> {
+                        edge.intersectionsWithBezierCurve(ray, makeRef<IIntersectionRange>(), ()=> {
                             count++;
                         })
                     }

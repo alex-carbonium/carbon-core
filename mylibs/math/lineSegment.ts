@@ -1,6 +1,10 @@
 import {isValueLessThanEqualWithOptions, PointClosenessThreshold, isValueGreaterThanEqualWithOptions} from "./geometry";
+import { ICoordinate } from "carbon-core";
 
 export default class LineSegment {
+    public start:ICoordinate;
+    public end:ICoordinate;
+
     constructor(start, end){
         this.start = start;
         this.end = end;
