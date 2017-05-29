@@ -11,8 +11,12 @@ import Path from "ui/common/Path";
 import GroupArrangeStrategy from "../../framework/GroupArrangeStrategy";
 import { combineRectArray } from "../../math/math";
 import Rect from "../../math/rect";
-import { IGroupContainer, ChangeMode } from "carbon-core";
+import { IGroupContainer, ChangeMode, IMouseEventData, IIsolatable } from "carbon-core";
 import Shape from "framework/Shape";
+import UserSettings from "UserSettings";
+import Selection from "framework/SelectionModel";
+import Isolate from "commands/Isolate";
+import Environment from "environment";
 
 function propertyChanged(element, newProps) {
     if (!this._internalChange && this._itemIds && this._itemIds[element.id()]) {
@@ -21,7 +25,7 @@ function propertyChanged(element, newProps) {
         }
     }
 }
-class CompoundPath extends Container implements IGroupContainer {
+class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
 
     static bezierPathsFromGraph(graph) {
         // Convert this graph into a bezier path. This is straightforward, each contour
@@ -30,23 +34,27 @@ class CompoundPath extends Container implements IGroupContainer {
         // Be sure to mark the winding rule as even odd, or interior contours (holes)
         //  won't get filled/left alone properly.
 
-        var res = [];
+        let res = [];
 
-        for (var i = 0, l = graph.contours.length; i < l; ++i) {
-            var contour = graph.contours[i];
-            var firstPoint = true;
-            for (var edge of contour.edges) {
+        for (let i = 0, l = graph.contours.length; i < l; ++i) {
+            let contour = graph.contours[i];
+            let firstPoint = true;
+            let path;
+            for (let edge of contour.edges) {
                 if (firstPoint) {
-                    var path = new Path();
+                    path = new Path();
                     path.moveToPoint(clone(edge.endPoint1));
                     firstPoint = false;
                 }
 
-                if (edge.isStraightLine)
+                if (edge.isStraightLine) {
                     path.lineToPoint(clone(edge.endPoint2));
-                else
+                }
+                else {
                     path.curveToPoint(clone(edge.endPoint2), clone(edge.controlPoint1), clone(edge.controlPoint2));
+                }
             }
+
             path.closed(true);
             path.adjustBoundaries();
             res.push(path);
@@ -121,14 +129,14 @@ class CompoundPath extends Container implements IGroupContainer {
 
         this._itemIds = {};
 
-        var items = this.children;
+        let items = this.children;
 
-        var result = BezierGraph.fromPath(items[0], items[0].viewMatrix());
+        let result = BezierGraph.fromPath(items[0], items[0].viewMatrix());
         this._itemIds[items[0].id()] = true;
         for (let i = 1; i < items.length; ++i) {
-            var path = items[i];
+            let path = items[i];
             this._itemIds[path.id()] = true;
-            var otherGraph;
+            let otherGraph;
             if (path instanceof CompoundPath) {
                 otherGraph = path.offsetGraph();
             } else {
@@ -155,8 +163,8 @@ class CompoundPath extends Container implements IGroupContainer {
             return;
         }
 
-        var boxes = this.result.map(x => x.getBoundingBox());
-        var rect = combineRectArray(boxes);
+        let boxes = this.result.map(x => x.getBoundingBox());
+        let rect = combineRectArray(boxes);
 
         this._internalChange = true;
         this.br(rect);
@@ -175,14 +183,14 @@ class CompoundPath extends Container implements IGroupContainer {
 
     flatten() {
         this.recalculate();
-        var path;
+        let path;
         if (this.result.length === 1) {
             path = this.result[0].clone();
         }
         else {
             path = new CompoundPath();
-            for (var i = 0; i < this.result.length; ++i) {
-                var p = this.result[i].clone();
+            for (let i = 0; i < this.result.length; ++i) {
+                let p = this.result[i].clone();
                 p.joinMode("union");
                 p.fill(this.fill());
                 p.stroke(this.stroke());
@@ -197,24 +205,24 @@ class CompoundPath extends Container implements IGroupContainer {
         if (this.result.length > 1) {
             path.recalculate();
         }
-        var parent = this.parent();
-        var index = parent.positionOf(this);
+        let parent = this.parent();
+        let index = parent.positionOf(this);
         parent.remove(this);
         parent.insert(path, index);
     }
 
     _updateGraph() {
         this._graph = new BezierGraph();
-        for (var i = 0; i < this.result.length; i++) {
-            var p = this.result[i];
+        for (let i = 0; i < this.result.length; i++) {
+            let p = this.result[i];
             this._graph.initWithBezierPath(p, p.viewMatrix());
         }
     }
 
     offsetGraph() {
-        var graph = new BezierGraph();
-        for (var i = 0; i < this.result.length; i++) {
-            var p = this.result[i];
+        let graph = new BezierGraph();
+        for (let i = 0; i < this.result.length; i++) {
+            let p = this.result[i];
             graph.initWithBezierPath(p, this.viewMatrix());
         }
 
@@ -245,23 +253,48 @@ class CompoundPath extends Container implements IGroupContainer {
         }
         return this.runtimeProps.fullBoundaryRect;
     }
+
+    onIsolationExited(){
+        if (!this.count()){
+            this.parent().remove(this);
+        } else {
+            this.recalculate();
+        }
+    }
+
+    dblclick(event: IMouseEventData) {
+        if (this.primitiveRoot().isEditable()) {
+            if (UserSettings.group.editInIsolationMode && !Environment.view.isolationLayer.isActivatedFor(this)) {
+                Isolate.run([this]);
+                event.handled = true;
+            }
+        }
+        else {
+            this.unlockGroup();
+            let element = this.hitElement(event, Environment.view.scale());
+            if (element && element !== this) {
+                Selection.makeSelection([element]);
+            }
+        }
+    }
+
     hitTest(point, scale) {
         if (this._activeGroup) {
             return true;
         }
 
-        var res = super.hitTest.apply(this, arguments);
+        let res = super.hitTest.apply(this, arguments);
 
         if (res) {
-            if (this.parent() != null) {
+            if (this.parent() !== null) {
                 point = this.global2local(point);
             }
 
-            var brush = this.fill();
+            let brush = this.fill();
             if (this.lockedGroup() && (!brush || !brush.type)) {
-                for (var i = 0; i < this.result.length; i++) {
-                    var path = this.result[i];
-                    var p = path.getPointIfClose(point, 8);
+                for (let i = 0; i < this.result.length; i++) {
+                    let path = this.result[i];
+                    let p = path.getPointIfClose(point, 8);
                     if (p) {
                         return true;
                     }
@@ -269,18 +302,18 @@ class CompoundPath extends Container implements IGroupContainer {
                 return false;
             }
             else {
-                var graph;
+                let graph;
                 if (this._graph) {
                     graph = this._graph;
                 } else {
                     return false;
                 }
-                var count = 0;
-                var ray = BezierCurve.bezierCurveWithLine(point, { x: point.x + 100000, y: point.y });
+                let count = 0;
+                let ray = BezierCurve.bezierCurveWithLine(point, { x: point.x + 100000, y: point.y });
                 for (let i = 0, l = graph.contours.length; i < l; ++i) {
-                    var curve = graph.contours[i];
-                    for (var j = 0, k = curve.edges.length; j < k; ++j) {
-                        var edge = curve.edges[j];
+                    let curve = graph.contours[i];
+                    for (let j = 0, k = curve.edges.length; j < k; ++j) {
+                        let edge = curve.edges[j];
                         edge.intersectionsWithBezierCurve(ray, {}, () => {
                             count++;
                         }
@@ -295,15 +328,15 @@ class CompoundPath extends Container implements IGroupContainer {
 
     drawPath(context, w, h) {
         if (this.result) {
-            var items = this.result;
+            let items = this.result;
             context.lineCap = this.lineCap();
             context.lineJoin = this.lineJoin();
             context.mitterLimit = this.props.mitterLimit;
-            var matrix = this.globalViewMatrix();
+            let matrix = this.globalViewMatrix();
 
             context.beginPath();
-            for (var i = 0; i < items.length; ++i) {
-                var child = items[i];
+            for (let i = 0; i < items.length; ++i) {
+                let child = items[i];
                 context.save();
                 //quick assignment
                 child.props.m = matrix;
@@ -320,14 +353,14 @@ class CompoundPath extends Container implements IGroupContainer {
         context.save();
 
         if (!this.lockedGroup()) {
-            var items = this.children;
+            let items = this.children;
             context.save();
             context.lineCap = "round";
             context.strokeStyle = "gray";
 
             context.setLineDash([1, 2]);
-            for (var i = 0; i < items.length; ++i) {
-                var child = items[i];
+            for (let i = 0; i < items.length; ++i) {
+                let child = items[i];
                 context.save();
                 context.beginPath();
                 child.drawPath(context, child.width(), child.height());
@@ -382,8 +415,8 @@ class CompoundPath extends Container implements IGroupContainer {
             e.enablePropsTracking();
         });
 
-        var boxes = this.children.map(x => x.getBoundingBox());
-        var r = combineRectArray(boxes);
+        let boxes = this.children.map(x => x.getBoundingBox());
+        let r = combineRectArray(boxes);
         this.runtimeProps.fullBoundaryRect = r;
 
         return true;

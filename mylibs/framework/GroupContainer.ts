@@ -15,7 +15,7 @@ import Selection from "./SelectionModel";
 
 require("./GroupArrangeStrategy");
 
-var ownProperties: string[] = PropertyMetadata.findForType(Container)
+const ownProperties: string[] = PropertyMetadata.findForType(Container)
     .groups()
     .find(x => x.label === "Layout")
     .properties
