@@ -28,7 +28,7 @@ class DraggingElement extends TransformationElement {
 
         this._initialPosition = this.getBoundingBoxGlobal().topLeft();
 
-        let snappingTarget = elementOrComposite.first().parent().primitiveRoot();
+        let snappingTarget = elementOrComposite.first().parent().primitiveRoot() || Environment.view.page.getActiveArtboard();
 
         SnapController.calculateSnappingPoints(snappingTarget);
 

@@ -5,7 +5,6 @@ import BezierGraph from "math/bezierGraph";
 import BezierCurve from "math/bezierCurve";
 import Rect from "math/rect";
 import Point from "math/point";
-import ResizeDimension from "framework/ResizeDimension";
 import Brush from "framework/Brush";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Matrix from "math/matrix";
@@ -21,8 +20,7 @@ import Command from "framework/commands/Command";
 import { Types } from "../../framework/Defs";
 import ArrangeStrategy from "../../framework/ArrangeStrategy";
 import ResizeOptions from "../../decorators/ResizeOptions";
-import { IMouseEventData, IKeyboardState, ChangeMode, IIntersectionRange } from "carbon-core";
-import { LayerTypes } from "carbon-app";
+import { IMouseEventData, IKeyboardState, ChangeMode, IIntersectionRange, ResizeDimension, LayerTypes } from "carbon-core";
 import UserSettings from "UserSettings";
 
 const CP_HANDLE_RADIUS = 3;

@@ -1,6 +1,5 @@
 import Container from "./Container";
 import GroupContainer from "./GroupContainer";
-import ResizeDimension from "./ResizeDimension";
 import PropertyMetadata from "./PropertyMetadata";
 import Brush from "./Brush";
 import Shadow from "./Shadow";
@@ -9,6 +8,7 @@ import {Types, StrokePosition, LineCap, LineJoin} from "./Defs";
 import Image from "./Image";
 import Constraints from "./Constraints";
 import { IImage, IUIElement } from "carbon-model";
+import { ResizeDimension } from "carbon-core";
 
 class Shape extends Container {
     convertToPath(){
@@ -197,7 +197,11 @@ class Shape extends Container {
     drawPath(context, w, h){
     }
 
-    resizeDimensions() {
+    resizeDimensions(value?) {
+        if (arguments.length === 1){
+            return super.resizeDimensions(value);
+        }
+
         return this.isInEditMode() ? ResizeDimension.None : super.resizeDimensions();
     }
 

@@ -29,4 +29,3 @@ declare function emptyObject<T>() : T;
 declare function removeElement(arr, obj);
 declare function map(objects: any[], func: (item: any) => any): any;
 declare function _(value: string): string;
-declare var NullContainer: any;

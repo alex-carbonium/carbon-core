@@ -16,7 +16,7 @@ import Environment from "environment";
 import { Types, ViewTool } from "../../framework/Defs";
 import Rect from "../../math/rect";
 import { IArtboard } from "carbon-model";
-import { ArtboardResource } from "carbon-core";
+import { ArtboardType } from "carbon-core";
 
 const ARTBOARD_SPACE = 100;
 
@@ -281,7 +281,7 @@ class ArtboardPage extends Page {
         let artboards = this.getAllArtboards();
         for (let j = 0; j < artboards.length; ++j) {
             let a = artboards[j];
-            if (a.props.resource === ArtboardResource.Palette) {
+            if (a.props.type === ArtboardType.Palette) {
                 res.push(a);
             }
         }

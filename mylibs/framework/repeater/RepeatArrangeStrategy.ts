@@ -106,7 +106,7 @@ var Strategy = {
     },
     updateActualMargins: function (container, dx, dy) {
         var base = container.children[0];
-        var br = base.br();
+        var br = base.boundaryRect();
         var marginX = container.props.innerMarginX + dx;
         var marginY = container.props.innerMarginY + dy;
         //debug("new margins marginX=%d marginY=%d masterWidth=%d masterHeight=%d", marginX, marginY, masterWidth, masterHeight);

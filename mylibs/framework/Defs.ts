@@ -194,7 +194,7 @@ export var Types = {
     'CustomGuide': 'C',
     'LayoutGridColumns': 'L',
     'LayoutGridLines': 'O',
-    'ArtboardTemplateControl': 'T',
+    'Symbol': 'T',
     'Circle': 'o',
     'CompositeElement': 'm',
     'Page': 'G',

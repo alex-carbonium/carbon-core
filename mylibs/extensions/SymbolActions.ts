@@ -1,7 +1,7 @@
 import CarbonExtension from "./CarbonExtesion";
-import { IContributions, ContextBarPosition, IApp, ISelection, ChangeMode, IArtboardProps, ILayer, LayerTypes, IUIElement, IContainer, IRect, ArtboardResource } from "carbon-core";
+import { IContributions, ContextBarPosition, IApp, ISelection, ChangeMode, IArtboardProps, ILayer, LayerTypes, IUIElement, IContainer, IRect, ArtboardType, IText } from "carbon-core";
 import Constraints from "framework/Constraints";
-import ArtboardTemplateControl from "../framework/ArtboardTemplateControl";
+import Symbol, {TextMarker, BackgroundMarker} from "../framework/Symbol";
 import Artboard from "../framework/Artboard";
 import GroupContainer from "../framework/GroupContainer";
 import Matrix from "../math/matrix";
@@ -18,16 +18,28 @@ export default class SymbolActions extends CarbonExtension {
                 condition: selection => !!selection.elements.length
             },
             {
+                id: "symbols.markAsText",
+                name: "@symbols.markAsText",
+                callback: this.markAsText,
+                condition: SymbolActions.isOnMasterArtboard
+            },
+            {
+                id: "symbols.markAsBackground",
+                name: "@symbols.markAsBackground",
+                callback: this.markAsBackground,
+                condition: SymbolActions.isOnMasterArtboard
+            },
+            {
                 id: "symbols.editMaster",
                 name: "@symbols.editMaster",
                 callback: this.editMasterSymbol,
-                condition: selection => selection.elements.length === 1 && selection.elements[0] instanceof ArtboardTemplateControl
+                condition: selection => selection.elements.length === 1 && selection.elements[0] instanceof Symbol
             },
             {
                 id: "symbols.detach",
                 name: "@symbols.detach",
                 callback: this.detachInstance,
-                condition: selection => selection.elements.length && selection.elements.every(x => x instanceof ArtboardTemplateControl)
+                condition: selection => selection.elements.length && selection.elements.every(x => x instanceof Symbol)
             }
         ]);
 
@@ -35,6 +47,8 @@ export default class SymbolActions extends CarbonExtension {
             "@symbols",
             [
                 "symbols.create",
+                "symbols.markAsBackground",
+                "symbols.markAsText",
                 "symbols.editMaster",
                 "symbols.detach",
             ],
@@ -48,6 +62,16 @@ export default class SymbolActions extends CarbonExtension {
             mac: [
                 { key: "meta+shift+e", action: "symbols.create" }
             ],
+        })
+    }
+
+    static isOnMasterArtboard(selection: ISelection): boolean{
+        return selection.elements.every(x => {
+            var artboard = x.findAncestorOfType(Artboard);
+            if (!artboard){
+                return false;
+            }
+            return artboard.props.type === ArtboardType.Symbol;
         })
     }
 
@@ -83,7 +107,7 @@ export default class SymbolActions extends CarbonExtension {
             m: matrix,
             allowVerticalResize: true,
             allowHorizontalResize: true,
-            resource: ArtboardResource.Symbol
+            type: ArtboardType.Symbol
         });
         App.Current.activePage.nameProvider.assignNewName(artboard, "");
 
@@ -98,7 +122,7 @@ export default class SymbolActions extends CarbonExtension {
             artboard.insert(e, i);
         }
 
-        var artboardControl = new ArtboardTemplateControl();
+        var artboardControl = new Symbol();
         parent.add(artboardControl);
         artboardControl.setProps({
             br: group.props.br,
@@ -114,10 +138,11 @@ export default class SymbolActions extends CarbonExtension {
         parent.remove(group, ChangeMode.Self);
 
         selection.makeSelection([artboardControl]);
+        return artboardControl;
     }
 
     editMasterSymbol = (selection: ISelection) => {
-        var symbol = selection.elements[0] as ArtboardTemplateControl;
+        var symbol = selection.elements[0] as Symbol;
 
         var artboard = symbol.findSourceArtboard(this.app);
         if (!artboard) {
@@ -131,24 +156,46 @@ export default class SymbolActions extends CarbonExtension {
     }
 
     detachInstance = (selection: ISelection) => {
-        var symbols = selection.elements as ArtboardTemplateControl[];
+        var symbols = selection.elements as Symbol[];
         var children = [];
         symbols.forEach(symbol => {
-            var artboard = symbol.findSourceArtboard(this.app);
-            if (artboard){
-                var parent = symbol.parent()
-                var index = symbol.zOrder();
-                for (var i = 0; i < symbol.children.length; i++) {
-                    var child = symbol.children[i];
-                    var source = artboard.findNodeByIdBreadthFirst<IUIElement>(child.sourceId());
-                    var clone = source.clone();
-                    clone.setTransform(parent.globalMatrixToLocal(child.globalViewMatrix()));
-                    parent.insert(clone, index++);
-                    children.push(clone);
-                }
-                parent.remove(symbol);
+            var parent = symbol.parent()
+            var index = symbol.zOrder();
+            for (var i = 0; i < symbol.children.length; i++) {
+                var child = symbol.children[i];
+                var clone = child.clone();
+                clone.setTransform(parent.globalMatrixToLocal(child.globalViewMatrix()));
+                parent.insert(clone, index++);
+                children.push(clone);
             }
+            parent.remove(symbol);
         });
         selection.makeSelection(children);
+    }
+
+    markAsBackground = (selection: ISelection) => {
+        var fill = selection.elements[0].fill();
+        var stroke = selection.elements[0].stroke();
+
+        for (var i = 0; i < selection.elements.length; i++) {
+            var element = selection.elements[i];
+            element.name(BackgroundMarker);
+            if (i){
+                element.prepareAndSetProps({fill, stroke});
+            }
+        }
+    }
+
+    markAsText = (selection: ISelection) => {
+        var elements = selection.elements as IText[];
+        var font = elements[0].font();
+
+        for (var i = 0; i < elements.length; i++) {
+            var element = elements[i];
+            element.name(TextMarker);
+            if (i){
+                element.prepareAndSetProps({font});
+            }
+        }
     }
 }

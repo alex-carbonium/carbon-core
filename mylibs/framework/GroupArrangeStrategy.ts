@@ -46,7 +46,7 @@ var GroupArrangeStrategy = {
         }
 
         if (container.translateChildren()){
-            container.prepareAndSetProps({br:container.br().withSize(xMax - xMin, yMax - yMin)}, changeMode);
+            container.prepareAndSetProps({br:container.boundaryRect().withSize(xMax - xMin, yMax - yMin)}, changeMode);
 
             if (xMin !== 0 || yMin !== 0){
                 var translate = new Point(-xMin, -yMin);

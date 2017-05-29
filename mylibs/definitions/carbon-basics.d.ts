@@ -201,7 +201,7 @@ declare module "carbon-basics" {
         Scale = 8
     }
 
-    export const enum ArtboardResource {
+    export const enum ArtboardType {
         Symbol = 1,
         Template = 2,
         Frame = 3,

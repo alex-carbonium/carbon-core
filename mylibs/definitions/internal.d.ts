@@ -1,3 +1,13 @@
+declare module "carbon-basics"{
+    export const enum ResizeDimension {
+        None,
+        Vertical,
+        Horizontal,
+        Both
+    }
+}
+
+
 declare module "carbon-internal" {
     export interface IHub {
         invoke(method: string, ...args: any[]): Promise<string>;
@@ -29,6 +39,8 @@ declare module "carbon-model"{
         canSelect(): boolean;
 
         mirrorClone():IUIElement;
+
+        primitiveRoot(): IPrimitiveRoot;
 
         runtimeProps: any;
     }
@@ -80,6 +92,7 @@ declare module "carbon-app"{
 
         registerForLayerDraw(layerType:number, element:{onLayerDraw:(layer: ILayer, context: IContext, environment: IEnvironment)=>void}, index?);
         unregisterForLayerDraw(layerType:number, element:any);
+        focused(value?: boolean): boolean;
 
         activateLayer(layerType: LayerTypes, silent?: boolean);
         deactivateLayer(layerType: LayerTypes, silent?: boolean);

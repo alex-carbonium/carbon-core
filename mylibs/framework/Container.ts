@@ -12,6 +12,7 @@ import Matrix from '../math/matrix';
 import Rect from '../math/rect';
 import Brush from './Brush';
 import Box from './Box';
+import NullContainer from './NullContainer';
 import UserSettings from '../UserSettings';
 import { IKeyboardState, ChangeMode } from "carbon-basics";
 import { IContainerProps, IUIElement, IContainer } from "carbon-model";
@@ -27,7 +28,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     }
     performArrange(event?: any, mode?: ChangeMode) {
         var e = event || {};
-        e.newRect = this.getBoundaryRect();
+        e.newRect = this.boundaryRect();
         e.oldRect = e.oldRect || e.newRect;
         this.arrange(e, mode);
     }
@@ -41,7 +42,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         return ArrangeStrategy.findStrategy(this);
     }
     applySizeScaling(s, o, options, mode) {
-        var oldRect = this.getBoundaryRect();
+        var oldRect = this.boundaryRect();
         super.applySizeScaling.apply(this, arguments);
         this.performArrange({ oldRect, options }, mode);
     }
@@ -75,7 +76,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
                 context.setLineDash(dash);
             }
             context.lineWidth = this.strokeWidth();
-            var br = this.br();
+            var br = this.boundaryRect();
             context.rect(br.x, br.y, br.width, br.height);
             Brush.stroke(stroke, context, 0, 0, w, h);
             context.restore();
@@ -86,7 +87,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
                 this.globalViewMatrix().applyToContext(context);
                 context.setLineDash(UserSettings.general.boundaryDash);
                 context.strokeStyle = UserSettings.general.boundaryStroke;
-                var br = this.br();
+                var br = this.boundaryRect();
                 context.strokeRect(br.x, br.y, br.width, br.height);
                 context.restore();
             }
@@ -264,12 +265,12 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     // getBoundaryRect(includeMargin: boolean = false) : IRect {
     //     var mask = this.runtimeProps.mask;
     //     if(mask && this.lockedGroup()) {
-    //         var rect = mask.getBoundaryRect(includeMargin);
+    //         var rect = mask.boundaryRect(includeMargin);
     //         var pos = mask.position();
     //         return new Rect(pos.x, pos.y, rect.width, rect.height);
     //     }
 
-    //     return super.getBoundaryRect(includeMargin);
+    //     return super.boundaryRect(includeMargin);
     // }
 
     drawWithMask(context, mask, i, environment) {
@@ -683,7 +684,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
             for (var i = 0; i < this.children.length; i++) {
                 var _element = this.children[i];
                 if (_element !== element) {
-                    var gr = _element.getBoundaryRect();
+                    var gr = _element.boundaryRect();
                     intervals.push((last + gr.y) / 2);
                     last = gr.y + gr.height;
                 }
@@ -707,7 +708,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
             for (var i = 0; i < this.children.length; i++) {
                 var _element = this.children[i];
                 if (_element !== element) {
-                    var gr = _element.getBoundaryRect();
+                    var gr = _element.boundaryRect();
                     intervals.push((last + gr.x) / 2);
                     last = gr.x + gr.width;
                 }

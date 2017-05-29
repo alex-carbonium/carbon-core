@@ -6,16 +6,32 @@ import {Overflow, Types} from "./Defs";
 import Selection from "framework/SelectionModel";
 import DataNode from "framework/DataNode";
 import ObjectFactory from "framework/ObjectFactory";
-import { ChangeMode, IArtboard, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp } from "carbon-core";
+import { ChangeMode, IArtboard, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp, IUIElement, IUIElementProps, IText } from "carbon-core";
 import { createUUID } from "../util";
 import Isolate from "../commands/Isolate";
 import Environment from "../environment";
 import UserSettings from "../UserSettings";
 import Text from "./text/Text";
+import Brush from "./Brush";
+import Font from "./Font";
 
+interface ISymbolRuntimeProps extends IUIElementProps{
+    artboardVersion: number;
+    hasBg?: boolean;
+    hasText?: boolean;
+}
 
-export default class ArtboardTemplateControl extends Container implements ISymbol, IPrimitiveRoot {
+interface ICustomPropertyDefinition{
+    controlId: string;
+    propertyName: string;
+}
+
+export const TextMarker = "=text";
+export const BackgroundMarker = "=background";
+
+export default class Symbol extends Container implements ISymbol, IPrimitiveRoot {
     props: ISymbolProps;
+    runtimeProps: ISymbolRuntimeProps;
 
     constructor() {
         super();
@@ -58,14 +74,12 @@ export default class ArtboardTemplateControl extends Container implements ISymbo
         this._allowHResize = this._artboard.props.allowHorizontalResize;
         this._allowVResize = this._artboard.props.allowVerticalResize;
 
-        var currentSize = this.getBoundaryRect();
+        var currentSize = this.boundaryRect();
 
-        this.setProps({
-            width: artboard.width(),
-            height: artboard.height()
+        this.prepareAndSetProps({
+            br: artboard.boundaryRect(),
+            _unwrapContent: artboard.props.insertAsContent
         }, ChangeMode.Self);
-
-        this.setProps({_unwrapContent: artboard.props.insertAsContent}, ChangeMode.Self);
 
         this._cloneFromArtboard(artboard);
 
@@ -73,6 +87,20 @@ export default class ArtboardTemplateControl extends Container implements ISymbo
 
         if (this.props.stateId) {
             this._changeState(this.props.stateId);
+        }
+
+        if (this._allowHResize || this._allowVResize) {
+
+            var br = this.boundaryRect();
+            if (this._allowHResize) {
+                br = br.withWidth(currentSize.width || artboard.width());
+            }
+            if (this._allowVResize) {
+                br = br.withHeight(currentSize.height || artboard.height());
+            }
+
+            this.setProps({br}, ChangeMode.Self);
+            this.performArrange({oldRect: artboard.boundaryRect(), newRect: br}, ChangeMode.Self);
         }
 
         this._updateCustomProperties();
@@ -83,19 +111,6 @@ export default class ArtboardTemplateControl extends Container implements ISymbo
         //     this.setProps({width: this._artboard.width(), height: this._artboard.height()});
         // }
 
-        if (this._allowHResize || this._allowVResize) {
-
-            var props: any = {};
-            if (this._allowHResize) {
-                props.width = currentSize.width || artboard.width();
-            }
-            if (this._allowVResize) {
-                props.height = currentSize.height || artboard.height();
-            }
-
-            this.setProps(props, ChangeMode.Self);
-        }
-
         this._initializing = false;
     }
 
@@ -104,7 +119,7 @@ export default class ArtboardTemplateControl extends Container implements ISymbo
     }
 
     _setupCustomProperties(artboard) {
-        var res = {};
+        var res: any = {};
         var properties = artboard.props.customProperties;
 
         var childrenMap = {};
@@ -124,7 +139,22 @@ export default class ArtboardTemplateControl extends Container implements ISymbo
             propertyMapping[newName] = prop;
         }
 
-        this.setProps(res);
+        var backgrounds = this.findBackgrounds();
+        if (backgrounds.length){
+            res.fill = backgrounds[0].fill();
+            res.stroke = backgrounds[0].stroke();
+        }
+        var texts = this.findTexts();
+        if (texts.length){
+            res.font = Font.extend(this.props.font, texts[0].font());
+            if (this.props.hasOwnProperty("custom:self:font")){
+                res["custom:self:font"] = res.font;
+            }
+        }
+        this.runtimeProps.hasBg = !!backgrounds.length;
+        this.runtimeProps.hasText = !!texts.length;
+
+        this.setProps(res, ChangeMode.Self);
     }
 
     displayType() {
@@ -187,8 +217,8 @@ export default class ArtboardTemplateControl extends Container implements ISymbo
         }
     }
 
-    propsUpdated(props, oldProps) {
-        super.propsUpdated(props, oldProps);
+    propsUpdated(props, oldProps, mode) {
+        super.propsUpdated(props, oldProps, mode);
         if (props.source !== undefined) {
             if (!this._artboard || (props.source.pageId !== oldProps.source.pageId && props.source.artboardId !== oldProps.source.artboardId)) {
                 this._artboard = this.findSourceArtboard(App.Current);
@@ -198,16 +228,34 @@ export default class ArtboardTemplateControl extends Container implements ISymbo
             this._initFromArtboard();
         }
         else {
-            if ((props.width !== undefined || props.height !== undefined)) {
-                var newSize = this.size();
-                var oldSize = {width: oldProps.width || newSize.width, height: oldProps.height || newSize.height};
-
-                this.arrange({oldRect: oldSize, newRect: newSize}, ChangeMode.Self);
-            }
-
             if (props.stateId !== undefined) {
                 this._initFromArtboard();
-            } else {
+            }
+            else {
+                if (mode !== ChangeMode.Self){
+                    var changes = null;
+                    if (props.fill !== oldProps.fill){
+                        let newName = "self:fill";
+                        changes = {};
+                        changes["custom:" + newName] = props.fill;
+                        changes["owt:" + newName] = true;
+                    }
+                    if (props.stroke !== oldProps.stroke){
+                        let newName = "self:stroke";
+                        changes = changes || {};
+                        changes["custom:" + newName] = props.stroke;
+                        changes["owt:" + newName] = true;
+                    }
+                    if (props.font !== oldProps.font){
+                        let newName = "self:font";
+                        changes = changes || {};
+                        changes["custom:" + newName] = props.font;
+                        changes["owt:" + newName] = true;
+                    }
+                    if (changes){
+                        this.setProps(changes);
+                    }
+                }
                 this._updateCustomProperties();
             }
         }
@@ -219,6 +267,18 @@ export default class ArtboardTemplateControl extends Container implements ISymbo
             return DataNode.getImmediateChildById(page, this.props.source.artboardId, true);
         }
         return null;
+    }
+
+    findClone(sourceId: string): IUIElement | null{
+        return this.findNodeBreadthFirst(e => e.sourceId() === sourceId);
+    }
+
+    findBackgrounds(): IUIElement[]{
+        return this.findAllNodesDepthFirst(x => x.name() === BackgroundMarker);
+    }
+
+    findTexts(): IText[]{
+        return this.findAllNodesDepthFirst(x => x.name() === TextMarker);
     }
 
     arrange(resizeEvent?, mode?){
@@ -239,7 +299,7 @@ export default class ArtboardTemplateControl extends Container implements ISymbo
         }
     }
 
-    _getCustomPropertyDefinition(propName) {
+    _getCustomPropertyDefinition(propName): ICustomPropertyDefinition {
         if(!this._propertyMapping) {
             this._propertyMapping = {};
         }
@@ -260,13 +320,19 @@ export default class ArtboardTemplateControl extends Container implements ISymbo
         return data;
     }
 
+    private _findElementWithCustomProperty(def: ICustomPropertyDefinition): UIElement | null{
+        if (def.controlId === "self"){
+            return this;
+        }
+        return this.getElementById(this.id() + def.controlId);
+    }
+
     _updateCustomProperties() {
         var props = this.props;
         for (var propName in props) {
             if (propName.startsWith('custom:')) {
                 var prop = this._getCustomPropertyDefinition(propName);
-                var elementId = prop.controlId;
-                var element = this.getElementById(this.id() + elementId);
+                var element = this._findElementWithCustomProperty(prop);
 
                 var value = props[propName];
                 if(value === undefined) { // custom property was deleted, i.e by undo or reset property action
@@ -282,9 +348,19 @@ export default class ArtboardTemplateControl extends Container implements ISymbo
                 delete props[propName];
             }
         }
+
+        var backgrounds = this.findBackgrounds();
+        if (backgrounds.length){
+            backgrounds.forEach(x => x.setProps({fill: this.fill(), stroke: this.stroke()}));
+        }
+        var texts = this.findTexts();
+        if (texts.length){
+            texts.forEach(x => x.setProps({font: this.props.font}));
+        }
     }
 
     prepareProps(props) {
+        super.prepareProps(props);
         for (var propName in props) {
             if (propName.startsWith('custom:')) {
                 var prop = this._getCustomPropertyDefinition(propName);
@@ -352,6 +428,34 @@ export default class ArtboardTemplateControl extends Container implements ISymbo
 
     }
 
+    applySizeScaling(s, o, options, changeMode: ChangeMode = ChangeMode.Model) {
+        super.applySizeScaling.apply(this, arguments);
+
+        if (changeMode !== ChangeMode.Self){
+            var updatedProps = null;
+            var propNames = Object.keys(this.props);
+            for (var i = 0; i < propNames.length; i++) {
+                var propName = propNames[i];
+                if (propName.startsWith("custom:") && (propName.endsWith(":m") || propName.endsWith(":br"))){
+                    var def = this._getCustomPropertyDefinition(propName);
+                    var element = this._findElementWithCustomProperty(def);
+                    if (element && element !== this){
+                        var oldValue = this.props[propName];
+                        var newValue = element.props[def.propertyName];
+                        if (newValue !== oldValue){
+                            updatedProps = updatedProps || {};
+                            updatedProps[propName] = newValue;
+                        }
+                    }
+                }
+            }
+
+            if (updatedProps){
+                this.setProps(updatedProps);
+            }
+        }
+    }
+
     registerSetProps(element, props, oldProps, mode) {
         if (element.id() === this.id()) {
             var realRoot = this._realPrimitiveRoot();
@@ -368,17 +472,45 @@ export default class ArtboardTemplateControl extends Container implements ISymbo
 
         var propNames = Object.keys(props);
         var newProps = {};
+        var fillStroke = null;
+        var fontProps = null;
+        var isBackground = element.name() === BackgroundMarker;
+        var isText = element.name() === TextMarker;
+
         for (var i = 0; i < propNames.length; ++i) {
             var propName = propNames[i];
             if(propName.startsWith("custom:")){
                 continue;
             }
             var newName = element.sourceId() + ":" + propName;
-            newProps["custom:" + newName] = props[propName];
+            var customPropName = "custom:" + newName;
+
+            newProps[customPropName] = props[propName];
             newProps["owt:" + newName] = true;
+
+            if (isBackground){
+                if (propName === "fill" || propName === "stroke"){
+                    fillStroke = fillStroke || {};
+                    fillStroke[propName] = props[propName]
+                    newProps[propName] = props[propName];
+                }
+            }
+            if (isText && propName === "font"){
+                fontProps = fontProps || {};
+                fontProps.font = props[propName];
+                newProps[propName] = props[propName];
+            }
         }
 
         this._registerSetProps = true;
+
+        if (isBackground && fillStroke){
+            this.findBackgrounds().forEach(x => x.setProps(fillStroke));
+        }
+        if (isText && fontProps){
+            this.findTexts().forEach(x => x.setProps(fontProps));
+        }
+
         this.setProps(newProps);
         this._registerSetProps = false;
     }
@@ -406,6 +538,10 @@ export default class ArtboardTemplateControl extends Container implements ISymbo
             this._initFromArtboard();
         }
         super.draw.apply(this, arguments);
+    }
+
+    standardBackground() {
+        return !this.runtimeProps.hasBg;
     }
 
     getNonRepeatableProps(newProps){
@@ -459,13 +595,13 @@ export default class ArtboardTemplateControl extends Container implements ISymbo
         event.handled = false;
     }
 }
-ArtboardTemplateControl.prototype.t = Types.ArtboardTemplateControl;
+Symbol.prototype.t = Types.Symbol;
 
 
-PropertyMetadata.registerForType(ArtboardTemplateControl, {
+PropertyMetadata.registerForType(Symbol, {
     source: {
-        displayName: "Artboard",
-        type: "artboard",
+        // displayName: "Artboard",
+        // type: "artboard",
         defaultValue: {artboardId: null, pageId: null}
     },
     stateId: {
@@ -481,18 +617,28 @@ PropertyMetadata.registerForType(ArtboardTemplateControl, {
     enableGroupLocking: {
         defaultValue: true
     },
-    prepareVisibility: function (element) {
+    font: {
+        displayName: "Font",
+        type: "font",
+        defaultValue: Font.Default,
+        style: 2
+    },
+    prepareVisibility: function (element: Symbol) {
         return {
+            font: !!element.runtimeProps.hasText,
             stateId: element._artboard && element._artboard.props
                 && element._artboard.props.states
                 && element._artboard.props.states.length > 1
         }
     },
     groups(){
-        return [{
-            label: "",
-            properties: ["source"]
-        }]
+        var groups = PropertyMetadata.findForType(Container).groups();
+        groups = groups.slice();
+        groups.splice(1, 0, {
+            label: "Font",
+            properties: ["font"]
+        });
+        return groups;
     }
 })
 

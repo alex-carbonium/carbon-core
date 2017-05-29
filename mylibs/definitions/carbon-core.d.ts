@@ -17,7 +17,6 @@ declare module "carbon-core" {
     export var EasingType: any;
     export var StyleManager: any;
     export var PropertyMetadata: any;
-    export var ArtboardTemplateControl: any;
     export var Artboard: any;
     export var StateBoard: any;
     export var TileSize: any;
@@ -41,7 +40,6 @@ declare module "carbon-core" {
     export var ViewTool: any;
     export var Clipboard: any;
     export var domUtil: any;
-    export var NullContainer: any;
     export var CustomGuides: any;
     export var LayoutGridLines:any;
     export var LayoutGridColumns:any;

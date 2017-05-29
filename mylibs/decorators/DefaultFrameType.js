@@ -37,7 +37,7 @@ export default {
         }
 
         var e = frame.element;
-        var rect = frame.element.getBoundaryRect();
+        var rect = frame.element.boundaryRect();
         var points = frame.points;
         var scale = Environment.view.scale();
         for (var i = 0; i < points.length; ++i) {

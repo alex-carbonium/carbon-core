@@ -1,7 +1,7 @@
 import StyleManager from "framework/style/StyleManager";
 import {StyleType} from "framework/Defs";
 import {createUUID} from "../../util";
-import ArtboardTemplateControl from "framework/ArtboardTemplateControl";
+import Symbol from "framework/Symbol";
 import ToolboxConfiguration from "ui/toolbox/ToolboxConfiguration";
 import DataNode from "framework/DataNode";
 import Font from "../Font";
@@ -55,7 +55,7 @@ export default class PageExporter {
         var posY = rect.y + rect.height + delta;
         var found = false;
         page.applyVisitor(e=>{
-            if(e instanceof ArtboardTemplateControl) {
+            if(e instanceof Symbol) {
                 var source = e.source();
                 if(source.pageId != pageId){
                     // clone referenced artboard and insert it to the current page

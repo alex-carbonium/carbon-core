@@ -51,7 +51,7 @@ var StarFrameType = {
     },
     saveChanges: function(frame, clone){
         var props = {
-            br: clone.br(),
+            br: clone.boundaryRect(),
             internalRadius: clone.internalRadius(),
             radius: clone.radius(),
             m: frame.element.parent().globalMatrixToLocal(clone.globalViewMatrix())

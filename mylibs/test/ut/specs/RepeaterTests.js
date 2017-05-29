@@ -102,10 +102,10 @@ describe("Repeater tests", function(){
             var repeater = this.makeRepeater([element]);
 
             //act
-            repeater.prepareAndSetProps({br: repeater.br().withHeight(300)});
+            repeater.prepareAndSetProps({br: repeater.boundaryRect().withHeight(300)});
             this.app.relayout();
 
-            repeater.prepareAndSetProps({br: repeater.br().withHeight(400)});
+            repeater.prepareAndSetProps({br: repeater.boundaryRect().withHeight(400)});
             this.app.relayout();
 
             //assert
@@ -407,7 +407,7 @@ describe("Repeater tests", function(){
             this.app.relayout();
 
             //act
-            slave.prepareAndSetProps({autoWidth: false, br: slave.br().withWidth(6)});
+            slave.prepareAndSetProps({autoWidth: false, br: slave.boundaryRect().withWidth(6)});
             this.app.relayout();
 
             //assert
@@ -466,7 +466,7 @@ describe("Repeater tests", function(){
 
             var master = repeater.findSingleChildOrDefault(x => x.id() === element.id());
 
-            master.prepareAndSetProps({br: master.br().withSize(50, 60)});
+            master.prepareAndSetProps({br: master.boundaryRect().withSize(50, 60)});
             this.app.relayout();
 
             //act

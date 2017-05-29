@@ -3,6 +3,7 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import ModelStateListener from "framework/sync/ModelStateListener";
 import {Types} from "./Defs";
 import DataNode from "framework/DataNode";
+import NullContainer from "./NullContainer";
 
 class StateBoard extends Artboard {
 

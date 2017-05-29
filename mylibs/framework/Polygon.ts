@@ -48,7 +48,7 @@ var PolygonFrameType = {
     },
     saveChanges: function (frame, clone: Polygon) {
         var props = {
-            br: clone.br(),
+            br: clone.boundaryRect(),
             radius: clone.radius(),
             m: frame.element.parent().globalMatrixToLocal(clone.globalViewMatrix())
         };

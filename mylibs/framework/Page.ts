@@ -401,7 +401,7 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
     }
 
     getContentOuterSize() {
-        return this.getContentContainer().getBoundaryRect();
+        return this.getContentContainer().boundaryRect();
     }
 
     getActiveArtboard() {

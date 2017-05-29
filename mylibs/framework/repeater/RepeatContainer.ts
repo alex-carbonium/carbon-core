@@ -288,12 +288,8 @@ export default class RepeatContainer extends Container implements IRepeatContain
         return this._findByIndexPath(cell, cellPath.path);
     }
 
-    static tryFindRepeaterParent(element: UIElement): RepeatContainer {
-        var current = element.parent();
-        while (current && !(current instanceof RepeatContainer)) {
-            current = current.parent();
-        }
-        return current;
+    static tryFindRepeaterParent(element: UIElement): RepeatContainer | null {
+        return element.findAncestorOfType(RepeatContainer);
     }
 
     _buildChain(element): UIElement[] {
@@ -422,34 +418,34 @@ export default class RepeatContainer extends Container implements IRepeatContain
         if (this.children.length === 0) {
             return 1;
         }
-        var masterHeight = this.children[0].br().height;
+        var masterHeight = this.children[0].boundaryRect().height;
         var margin = this.props.innerMarginY;
         var offsetY = this.offsetY();
 
         if (arguments.length) {
             var newHeight = offsetY + value * masterHeight + (value - 1) * margin;
-            this.setProps({ br: this.br().withHeight(newHeight) }, mode);
+            this.setProps({ br: this.boundaryRect().withHeight(newHeight) }, mode);
             return value;
         }
 
-        var rows = masterHeight === 0 ? 1 : Math.ceil((this.br().height - offsetY) / (masterHeight + margin));
+        var rows = masterHeight === 0 ? 1 : Math.ceil((this.boundaryRect().height - offsetY) / (masterHeight + margin));
         return rows < 1 ? 1 : rows;
     }
     cols(value, mode) {
         if (this.children.length === 0) {
             return 1;
         }
-        var masterWidth = this.children[0].br().width;
+        var masterWidth = this.children[0].boundaryRect().width;
         var margin = this.props.innerMarginX;
         var offsetX = this.offsetX();
 
         if (arguments.length) {
             var newWidth = offsetX + value * masterWidth + (value - 1) * margin;
-            this.setProps({ br: this.br().withWidth(newWidth) }, mode);
+            this.setProps({ br: this.boundaryRect().withWidth(newWidth) }, mode);
             return value;
         }
 
-        var cols = masterWidth === 0 ? 1 : Math.ceil((this.br().width - offsetX) / (masterWidth + margin));
+        var cols = masterWidth === 0 ? 1 : Math.ceil((this.boundaryRect().width - offsetX) / (masterWidth + margin));
         return cols < 1 ? 1 : cols;
     }
 }

@@ -468,7 +468,7 @@ class Matrix implements IMatrix {
     }
 
     isTranslatedOnly() {
-        return this._a === 1 && this._b === 0 && this._c === 0 && this._d === 1;
+        return (this._a === 1 || this._a === -1) && this._b === 0 && this._c === 0 && (this._d === 1 || this._d === -1);
     }
 
     /**

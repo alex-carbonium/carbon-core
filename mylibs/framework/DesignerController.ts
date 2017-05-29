@@ -652,7 +652,7 @@ export default class DesignerController implements IController {
     }
 
     selectByClick(eventData) {
-        var element = this.view.hitElement(eventData);
+        var element = this.view.hitElement(eventData) as IUIElement;
 
         if (element !== null) {
             eventData.element = element;
@@ -671,7 +671,9 @@ export default class DesignerController implements IController {
                     Selection.selectionMode("new");
                 }
 
-                eventData.cursor = "move_cursor";
+                if (element.primitiveRoot().isEditable()) {
+                    eventData.cursor = "move_cursor";
+                }
             }
             else{
                 element = null;
@@ -705,7 +707,7 @@ export default class DesignerController implements IController {
             .then(result => {
                 var eventData = this.createEventData(result.e);
                 var parent = this.getCurrentDropTarget(eventData, result.keys);
-                var br = element.getBoundaryRect();
+                var br = element.boundaryRect();
 
                 this.cancel();
                 this.insertAndSelect(result.elements, parent, eventData.x - br.width/2, eventData.y - br.height/2);

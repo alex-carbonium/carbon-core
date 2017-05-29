@@ -79,7 +79,7 @@ export default {
             pos += child.margin().left;
             child.x(pos);
 
-            var r = child.getBoundaryRect();
+            var r = child.boundaryRect();
             var x = r.x,
                 y = r.y,
                 width = r.width,
@@ -164,7 +164,7 @@ export default {
             pos += child.margin().top;
             child.y(pos);
 
-            var r = child.getBoundaryRect();
+            var r = child.boundaryRect();
             var x = r.x,
                 y = r.y,
                 width = r.width,

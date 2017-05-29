@@ -87,7 +87,7 @@ class ArtboardProxyPage extends Page implements IMirroringProxyPage {
         }
         this.view.page.scrollX(0);
         this.view.page.scrollY(0);
-        var rect = clone(artboard.getBoundaryRect());
+        var rect = clone(artboard.boundaryRect());
         var scale = fitRectToRect(App.Current.viewportSize(), rect);
         this.view.scale(scale);
     }

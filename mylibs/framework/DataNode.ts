@@ -3,7 +3,7 @@ import PropertyTracker from "./PropertyTracker";
 import ModelStateListener from "./sync/ModelStateListener";
 import ObjectFactory from "./ObjectFactory";
 import {createUUID} from "../util";
-import { IDataNode, IDataNodeProps, ChangeMode, PatchType, IPrimitiveRoot } from "carbon-core";
+import { IDataNode, IDataNodeProps, ChangeMode, PatchType, IPrimitiveRoot, IConstructor } from "carbon-core";
 
 //TODO: only real roots should implement IPrimitiveRoot
 export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> implements IDataNode, IPrimitiveRoot{
@@ -11,6 +11,7 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
     props: TProps;
     runtimeProps: any;
     children: DataNode[];
+    protected _parent: IDataNode;
 
     constructor(hasChildren: boolean) {
         this.props = PropertyMetadata.getDefaultProps(this.t);
@@ -18,6 +19,13 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
         if (hasChildren) {
             this.children = [];
         }
+    }
+
+    parent(value?: IDataNode): IDataNode {
+        if (arguments.length) {
+            this._parent = value;
+        }
+        return this._parent;
     }
 
     prepareProps(changes: IDataNodeProps){
@@ -38,8 +46,8 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
             let  newValue = props[p];
             if (newValue !== oldValue) {
                 propsChanged = true;
-                oldProps[p] = oldValue;
             }
+            oldProps[p] = oldValue;
         }
 
         if (propsChanged) {
@@ -373,6 +381,16 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
             }
         });
         return nodes;
+    }
+    findAncestorOfType<T extends IDataNode>(type: IConstructor<T>): T | null{
+        var current = this.parent();
+        while (current){
+            if (current instanceof type){
+                return current as T;
+            }
+            current = current.parent();
+        }
+        return null;
     }
 
     toJSON(){

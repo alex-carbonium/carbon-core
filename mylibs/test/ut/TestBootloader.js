@@ -1,4 +1,4 @@
-var req = require.context('./specs', true, /\.js$/);
+var req = require.context('./specs', true, /\.(j|t)s$/);
 
 req.keys().forEach(req);
 

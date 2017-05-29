@@ -6,6 +6,7 @@ import Selection from "framework/SelectionModel";
 import RelayoutEngine from "framework/relayout/RelayoutEngine";
 import UserSettings from "../UserSettings";
 import Environment from "../environment";
+import NullContainer from "./NullContainer";
 
 export class IsolationLayer extends Layer implements IIsolationLayer {
 

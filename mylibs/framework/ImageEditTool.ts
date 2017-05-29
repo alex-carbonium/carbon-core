@@ -117,11 +117,11 @@ export class FrameEditTool {
             return;
         }
 
-        var cr = this._content.getBoundaryRect();
+        var cr = this._content.boundaryRect();
         var globalCorner = this._content.globalViewMatrix().transformPoint(cr.topLeft());
         var localCorner = this._frame.globalViewMatrixInverted().transformPoint(globalCorner, true);
         cr = cr.withPosition(localCorner.x, localCorner.y);
-        var fr = this._frame.getBoundaryRect();
+        var fr = this._frame.boundaryRect();
         var ir = intersectRects(fr, cr);
 
         var fsr = ImageSourceHelper.boundaryRect(this._frame.source(), this._frame.runtimeProps.sourceProps);

@@ -8,7 +8,6 @@ import Matrix from "../math/matrix";
 import Point from "../math/point";
 import { isRectInRect, areRectsIntersecting } from "../math/math";
 //import stopwatch from "../Stopwatch";
-import ResizeDimension from "./ResizeDimension";
 import Constraints from "./Constraints";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
 import params from "params";
@@ -37,9 +36,14 @@ import { PropertyDescriptor } from './PropertyMetadata';
 import { IKeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
-import { ChangeMode, LayerTypes, IPrimitiveRoot, IRect, IMatrix } from "carbon-core";
+import { ChangeMode, LayerTypes, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode } from "carbon-core";
 
 require("../migrations/All");
+
+export interface IUIElementRuntimeProps{
+    primitivePath: string[];
+    primitiveRootKey: string;
+}
 
 // constructor
 export default class UIElement<TProps extends IUIElementProps = IUIElementProps> extends DataNode<TProps> implements IUIElement<TProps> {
@@ -115,7 +119,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             var hasW = props.hasOwnProperty("width");
             var hasH = props.hasOwnProperty("height");
             if (hasW || hasH) {
-                var br = this.getBoundaryRect();
+                var br = this.boundaryRect();
                 var w = hasW ? props.width : br.width;
                 var h = hasH ? props.height : br.height;
                 props.br = br.withSize(w, h);
@@ -123,7 +127,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
         super.setProps.apply(this, arguments);
     }
-    propsUpdated(newProps, oldProps, mode?) {
+    propsUpdated(newProps, oldProps, mode) {
         if (newProps.hasOwnProperty("m") || newProps.hasOwnProperty("br")) {
             this.resetGlobalViewCache();
             if (mode === ChangeMode.Model){
@@ -143,7 +147,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     selectLayoutProps(global?: boolean): Partial<IUIElementProps> {
         var m = global ? this.globalViewMatrix() : this.viewMatrix();
         return {
-            br: this.br(),
+            br: this.boundaryRect(),
             m
         };
     }
@@ -152,6 +156,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (!this.runtimeProps.origLayout) {
             this.runtimeProps.origLayout = this.selectLayoutProps();
             return true;
+        }
+        if (this.hasBadTransform()){
+            this.setProps({bad: false, lgbr: null, lgm: null});
         }
         this.setProps(this.runtimeProps.origLayout);
         return false;
@@ -293,7 +300,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return Math.round(decomposed.scaling.y) === -1;
     }
     canRotate(): boolean{
-        return true;
+        var root = this.primitiveRoot();
+        return root && root.isEditable();
     }
 
     applyScaling(s, o, options?, changeMode?: ChangeMode) {
@@ -342,7 +350,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
      * Flip is detected by negative width/height, in which case the matrix is reflected relative to origin.
      */
     applySizeScaling(s, o, options, changeMode: ChangeMode) {
-        var br = this.getBoundaryRect();
+        var br = this.boundaryRect();
         var newWidth = br.width * s.x;
         var newHeight = br.height * s.y;
 
@@ -421,12 +429,12 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     saveLastGoodTransformIfNeeded(oldProps): void{
         var lastGoodProps = null;
 
-        var saveBr = !this.props.lgbr && oldProps.br && this.isBadBoundaryRect(this.br()) && !this.isBadBoundaryRect(oldProps.br);
+        var saveBr = !this.props.lgbr && oldProps.br && this.isBadBoundaryRect(this.boundaryRect()) && !this.isBadBoundaryRect(oldProps.br);
         var saveMatrix = !this.props.lgm && oldProps.m && this.isBadMatrix(this.viewMatrix()) && !this.isBadMatrix(oldProps.m);
 
         if (saveBr || saveMatrix){
             lastGoodProps = {
-                lgbr: oldProps.br || this.br(),
+                lgbr: oldProps.br || this.boundaryRect(),
                 lgm: oldProps.m || this.viewMatrix(),
                 bad: true
             };
@@ -447,7 +455,6 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             });
         }
     }
-
     roundBoundingBoxToPixelEdge(): boolean {
         var rounded = false;
         var bb = this.getBoundingBox();
@@ -594,18 +601,10 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return true;
     }
 
-    getBoundaryRect(includeMargin: boolean = false): IRect {
-        var br = this.props.br;
-        if (!includeMargin || this.margin() === Box.Default) {
-            return br;
-        }
-        var margin = this.margin();
-        return new Rect(br.x - margin.left, br.y - margin.top, br.width + margin.left + margin.right, br.height + margin.top + margin.bottom);
-    }
     size(value?: ISize): ISize {
         if (arguments.length){
             //TODO: handle for paths based on shouldApplyViewMatrix
-            this.br(this.br().withSize(value.width, value.height));
+            this.boundaryRect(this.boundaryRect().withSize(value.width, value.height));
         }
         return {
             width: this.width(),
@@ -617,7 +616,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     getBoundingBox(includeMargin: boolean = false): Rect {
-        var rect = this.getBoundaryRect(includeMargin);
+        var rect = this.boundaryRect();
         return this.transformBoundingRect(rect, this.viewMatrix());
     }
 
@@ -626,14 +625,14 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return this.runtimeProps.globalClippingBox;
         }
 
-        var rect = this.getBoundaryRect(includeMargin);
+        var rect = this.boundaryRect();
         var bb = this.transformBoundingRect(rect, this.globalViewMatrix());
         this.runtimeProps.globalClippingBox = bb;
         return bb;
     }
     getBoundingBoxRelativeToRoot(): Rect {
         var m = this.rootViewMatrix();
-        var rect = this.getBoundaryRect();
+        var rect = this.boundaryRect();
         return this.transformBoundingRect(rect, m);
     }
 
@@ -682,7 +681,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     getHitTestBox(scale: number, includeMargin: boolean = false, includeBorder: boolean = true): IRect {
-        var rect = this.getBoundaryRect(includeMargin);
+        var rect = this.boundaryRect();
         var goodScaleW = rect.width * scale > 10;
         var goodScaleH = rect.height * scale > 10;
         if (!includeBorder && goodScaleW && goodScaleW) {
@@ -740,7 +739,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return true;
         }
 
-        var br = this.getBoundaryRect();
+        var br = this.boundaryRect();
         var segments1 = m.transformRect(br);
         var segments2 = rect.segments();
 
@@ -816,7 +815,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             performance.mark(markName);
         }
 
-        var br = this.br(),
+        var br = this.boundaryRect(),
             w = br.width,
             h = br.height;
 
@@ -851,7 +850,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     drawBoundaryPath(context, round = true) {
         var matrix = this.globalViewMatrix();
-        var r = this.getBoundaryRect();
+        var r = this.boundaryRect();
         const roundFactor = 2;
 
         var p = matrix.transformPoint2(r.x, r.y);
@@ -1030,7 +1029,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return this.getBoundingBox().x;
         }
         let m = root.globalViewMatrixInverted().appended(this.globalViewMatrix());
-        return this.transformBoundingRect(this.getBoundaryRect(), m).x;
+        return this.transformBoundingRect(this.boundaryRect(), m).x;
     }
     y(value?: number, changeMode?: ChangeMode) {
         if (arguments.length !== 0) {
@@ -1045,12 +1044,12 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return this.getBoundingBox().y;
         }
         let m = root.globalViewMatrixInverted().appended(this.globalViewMatrix());
-        return this.transformBoundingRect(this.getBoundaryRect(), m).y;
+        return this.transformBoundingRect(this.boundaryRect(), m).y;
     }
     width(value?: number, changeMode?: ChangeMode) {
         if (arguments.length !== 0) {
             var s = new Point(value/this.width(), 1);
-            var o = this.viewMatrix().transformPoint(this.br().centerLeft());
+            var o = this.viewMatrix().transformPoint(this.boundaryRect().centerLeft());
             var resizeOptions = new ResizeOptions(true, false, false, true);
             this.applyScaling(s, o, resizeOptions, changeMode);
         }
@@ -1064,12 +1063,12 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (!gm.isTranslatedOnly()){
             scaling = this.gdm().scaling.x || 1;
         }
-        return Math.abs(this.br().width * scaling);
+        return Math.abs(this.boundaryRect().width * scaling);
     }
     height(value?: number, changeMode?: ChangeMode) {
         if (arguments.length !== 0) {
             var s = new Point(1, value/this.height());
-            var o = this.viewMatrix().transformPoint(this.br().centerTop());
+            var o = this.viewMatrix().transformPoint(this.boundaryRect().centerTop());
             var resizeOptions = new ResizeOptions(true, false, false, true);
             this.applyScaling(s, o, resizeOptions, changeMode);
         }
@@ -1083,7 +1082,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (!gm.isTranslatedOnly()){
             scaling = this.gdm().scaling.y || 1;
         }
-        return Math.abs(this.br().height * scaling);
+        return Math.abs(this.boundaryRect().height * scaling);
     }
     angle(value?: number, changeMode?: ChangeMode) {
         if (arguments.length !== 0) {
@@ -1091,7 +1090,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
         return this.getRotation(true);
     }
-    br(value?: IRect): IRect {
+    boundaryRect(value?: IRect): IRect {
         if (value !== undefined) {
             this.setProps({ br: value });
         }
@@ -1213,9 +1212,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     field(name, value, defaultValue?: any) {
         if (value !== undefined) {
-            this[name] = value;
+            this.runtimeProps[name] = value;
         }
-        var res = this[name];
+        var res = this.runtimeProps[name];
         return res !== undefined ? res : defaultValue;
     }
     clipSelf(value?: boolean) {
@@ -1230,12 +1229,12 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
         return this.props.overflow;
     }
-    parent(value?: any) {
-        if (value !== undefined) {
-            this._parent = value;
+    parent(value?: IDataNode): any {
+        var parent = super.parent.apply(this, arguments);
+        if (arguments.length) {
             this.resetGlobalViewCache(true);
         }
-        return this._parent;
+        return parent;
     }
     opacity(value?: number) {
         if (value !== undefined) {
@@ -1391,7 +1390,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                 return true;
             }
             current = current.parent();
-        } while (current && current !== NullContainer);
+        } while (current && current !== NullContainer as DataNode);
 
         return false;
     }
@@ -1553,7 +1552,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     center(global?: boolean) {
         var m = global ? this.globalViewMatrix() : this.viewMatrix();
-        return m.transformPoint(this.br().center());
+        return m.transformPoint(this.boundaryRect().center());
     }
     hitElement(position, scale, predicate?, directSelection?): UIElement {
         if (!this.hitVisible(directSelection)) {
@@ -1599,7 +1598,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         do {
             element = nextParent;
             nextParent = !nextParent.isDisposed() ? nextParent.parent() : null;
-        } while (nextParent && (nextParent instanceof UIElement) && !(nextParent === NullContainer));
+        } while (nextParent && (nextParent instanceof UIElement) && !(nextParent === NullContainer as DataNode));
 
         if (element && (element.t === Types.ArtboardPage)) {
             return element;
@@ -2216,8 +2215,11 @@ PropertyMetadata.registerForType(UIElement, {
             }
             return res;
         }
+        var parent = element.parent();
+        var strategy = parent.arrangeStrategy();
         return {
-            dockStyle: element.parent().arrangeStrategy() === ArrangeStrategies.Dock
+            dockStyle: strategy === ArrangeStrategies.Dock,
+            constraints: strategy === ArrangeStrategies.Canvas
         };
     }
 });

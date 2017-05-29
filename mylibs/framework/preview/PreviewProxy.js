@@ -13,7 +13,7 @@ export default class PreviewProxy {
     _makePageFromArtboard(artboard, screenSize) {
         var page = new Page();
         var previewClone = artboard.mirrorClone();
-        var oldRect = previewClone.getBoundaryRect();
+        var oldRect = previewClone.boundaryRect();
         if (artboard.props.allowVerticalResize || artboard.props.allowHorizontalResize) {
             previewClone.setTransform(Matrix.Identity);
             previewClone.width(artboard.props.allowHorizontalResize ? screenSize.width : artboard.width());
@@ -83,7 +83,7 @@ export default class PreviewProxy {
         }
         var artboard = page.children[0];
         if (artboard && (artboard.props.allowVerticalResize || artboard.props.allowHorizontalResize)) {
-            var oldRect = artboard.getBoundaryRect();
+            var oldRect = artboard.boundaryRect();
             var width = artboard.props.allowHorizontalResize ? screenSize.width : this.activePage.originalSize.width;
             var height = artboard.props.allowVerticalResize ? screenSize.height : this.activePage.originalSize.height;
             artboard.setProps({x: 0, y: 0, width: width, height: height});

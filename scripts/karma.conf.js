@@ -3,7 +3,8 @@ var fs = require("fs");
 var webpack = require("webpack");
 var webpackConfig = require('./make-core-config')({
     devServer: false,
-    host: ""
+    host: "",
+    devtool: "#inline-source-map"
 });
 
 var testfolder = path.join(path.dirname(fs.realpathSync(__filename)), '..');
@@ -31,7 +32,7 @@ module.exports = function(config){
         // list of files / patterns to load in the browser
         files: [
             '../node_modules/babel-polyfill/dist/polyfill.js',
-            '../mylibs/test/ut/TestBootloader.js',
+            '../mylibs/test/ut/TestBootloader.js'
             // {pattern: 'fonts/**/*', included: false}
         ],
         // proxies: {
@@ -42,7 +43,7 @@ module.exports = function(config){
         // preprocess matching files before serving them to the browser
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
         preprocessors: {
-            '../mylibs/test/ut/TestBootloader.js': ['webpack']
+            '../mylibs/test/ut/TestBootloader.js': ['webpack', 'sourcemap']
         },
         // test results reporter to use
         // possible values: 'dots', 'progress'

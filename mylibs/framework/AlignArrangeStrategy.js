@@ -13,7 +13,7 @@ export default {
                 return; // continue
             }
 
-            var r = child.getBoundaryRect();
+            var r = child.boundaryRect();
             var x, y, width, height;
             var leftSpace = padding.left + child.margin().left;
             var topSpace = padding.top + child.margin().top;

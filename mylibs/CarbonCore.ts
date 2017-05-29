@@ -7,6 +7,7 @@
 import domUtil from "utils/dom";
 import logger from "./logger";
 import {backend} from "./CarbonApi";
+import Symbol from "./framework/Symbol";
 
 var params = require("./params");
 require("./../globalRequire");
@@ -58,7 +59,6 @@ export default {
     "Font": require("./framework/Font"),
     "Shadow": require("./framework/Shadow"),
     "Constraints": require("./framework/Constraints"),
-    "NullContainer": require("./framework/NullContainer"),
     "NullPage": require("./framework/NullPage"),
     "Primitive": require("./framework/sync/Primitive"),
     "Shape": require("./framework/Shape"),
@@ -114,7 +114,7 @@ export default {
     "LayoutGridColumns": require("./extensions/guides/LayoutGridColumns"),
     "CustomGuides": require("./extensions/guides/CustomGuides"),
 
-    "ArtboardTemplateControl": require("./framework/ArtboardTemplateControl"),
+    "Symbol": Symbol,
     "Artboard": require("./framework/Artboard"),
     "StateBoard": require("./framework/StateBoard"),
     "RequestAnimationSettings": require("./ui/prototyping/RequestAnimationSettings"),

@@ -167,7 +167,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
         let rect = combineRectArray(boxes);
 
         this._internalChange = true;
-        this.br(rect);
+        this.boundaryRect(rect);
         this._updateGraph();
 
         if (this.parent() instanceof CompoundPath) {
@@ -249,7 +249,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
 
     getHitTestBox() {
         if (this.lockedGroup()) {
-            return this.getBoundaryRect();
+            return this.boundaryRect();
         }
         return this.runtimeProps.fullBoundaryRect;
     }

@@ -8,7 +8,7 @@ export default class RectMask extends UIElement {
     drawPath(context) {
         context.save();
 
-        var r = this.br();
+        var r = this.boundaryRect();
         context.rect(r.x, r.y, r.width, r.height);
 
         context.restore();

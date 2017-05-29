@@ -12,12 +12,12 @@ import PropertyStateRecorder from "framework/PropertyStateRecorder";
 import ModelStateListener from "framework/sync/ModelStateListener";
 import Point from "math/point";
 import Selection from "framework/SelectionModel";
+import NullContainer from "./NullContainer";
 import Environment from "environment";
 import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
-import { IArtboardProps } from "carbon-model";
-import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardResource, IIsolatable } from "carbon-core";
+import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
 
 
@@ -32,7 +32,7 @@ import { measureText } from "framework/text/MeasureTextCache";
 // cleanup empty states
 
 
-class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIsolatable {
+class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiveRoot, IIsolatable {
     constructor() {
         super();
         this.allowArtboardSelection(false);
@@ -54,6 +54,7 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
 
         this.canSelect(value);
         this.canDrag(value);
+        return value;
     }
 
     canRotate(): boolean {
@@ -138,7 +139,7 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
                 return false;
             }
 
-            if (this.props.resource === ArtboardResource.Symbol && element.children !== undefined) {
+            if (this.props.type === ArtboardType.Symbol && element.children !== undefined) {
                 let can = true;
                 let id = this.id();
                 element.applyVisitor(e => {
@@ -175,14 +176,14 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
     }
 
     displayType() {
-        switch (this.props.resource) {
-            case ArtboardResource.Frame:
+        switch (this.props.type) {
+            case ArtboardType.Frame:
                 return "type.a_frame";
-            case ArtboardResource.Palette:
+            case ArtboardType.Palette:
                 return "type.a_palette";
-            case ArtboardResource.Symbol:
+            case ArtboardType.Symbol:
                 return "type.a_symbol";
-            case ArtboardResource.Template:
+            case ArtboardType.Template:
                 return "type.a_template";
             default:
                 return super.displayType();
@@ -455,11 +456,11 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
             this._refreshMetadata();
         }
 
-        if (props.resource !== undefined && Selection.isOnlyElementSelected(this)) {
+        if (props.type !== undefined && Selection.isOnlyElementSelected(this)) {
             Selection.refreshSelection();
-            if (props.resource === ArtboardResource.Symbol) {
+            if (props.type === ArtboardType.Symbol) {
                 this.runtimeProps.refreshToolbox = true;
-            } else if (oldProps.resource === ArtboardResource.Symbol) {
+            } else if (oldProps.type === ArtboardType.Symbol) {
                 let parent = this.parent();
                 if (parent) {
                     parent.makeToolboxConfigDirty(true);
@@ -567,13 +568,13 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
         let parent = this.parent();
         if (parent) {
             parent.incrementVersion();
-            if (this.props.resource === ArtboardResource.Symbol) {
+            if (this.props.type === ArtboardType.Symbol) {
                 parent.makeToolboxConfigDirty(this.runtimeProps.refreshToolbox, this.id());
                 delete this.runtimeProps.refreshToolbox;
             }
 
-            if (this.props.resource !== undefined) {
-                App.Current.resourceChanged.raise(this.props.resource, this);
+            if (this.props.type !== undefined) {
+                App.Current.resourceChanged.raise(this.props.type, this);
             }
         }
     }
@@ -632,8 +633,8 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
         if (!this._recorder) {
             return;
         }
-        let ArtboardTemplateControl = PropertyMetadata.findAll(Types.ArtboardTemplateControl)._class;
-        PropertyMetadata.replaceForNamedType('user:' + this.name(), ArtboardTemplateControl, this.buildMetadata(this.props.customProperties));
+        var Symbol = PropertyMetadata.findAll(Types.Symbol)._class;
+        PropertyMetadata.replaceForNamedType('user:' + this.name(), Symbol, this.buildMetadata(this.props.customProperties));
     }
 
     duplicateState(name, newName) {
@@ -657,7 +658,7 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
             let transferProps = {};
             let hasAnyProps = false;
             for (let propName in props) {
-                if (element === this && (propName === 'm' || propName === 'customProperties' || propName === 'state' || propName === "states" || propName === "actions" || propName === "resource" || propName === "tileSize" || propName === "insertAsContent")) {
+                if (element === this && (propName === 'm' || propName === 'customProperties' || propName === 'state' || propName === "states" || propName === "actions" || propName === "type" || propName === "tileSize" || propName === "insertAsContent")) {
                     continue;
                 }
 
@@ -876,17 +877,17 @@ PropertyMetadata.registerForType(Artboard, {
     guidesY: {
         defaultValue: []
     },
-    resource: {
-        displayName: "@resource",
+    type: {
+        displayName: "@artboardType",
         type: "dropdown",
         defaultValue: null,
         options: {
             items: [
                 { name: "Regular", value: null },
-                { name: "Symbol", value: ArtboardResource.Symbol },
-                { name: "Template", value: ArtboardResource.Template },
-                { name: "Frame", value: ArtboardResource.Frame },
-                { name: "Palette", value: ArtboardResource.Palette },
+                { name: "Symbol", value: ArtboardType.Symbol },
+                { name: "Template", value: ArtboardType.Template },
+                { name: "Frame", value: ArtboardType.Frame },
+                { name: "Palette", value: ArtboardType.Palette },
             ]
         }
     },
@@ -935,7 +936,7 @@ PropertyMetadata.registerForType(Artboard, {
         }
     },
     prepareVisibility(element: Artboard) {
-        let showAsStencil = element.props.resource === ArtboardResource.Symbol;
+        let showAsStencil = element.props.type === ArtboardType.Symbol;
         return {
             tileSize: showAsStencil,
             insertAsContent: showAsStencil,
@@ -963,7 +964,7 @@ PropertyMetadata.registerForType(Artboard, {
             },
             {
                 label: "@advanced",
-                properties: ["resource", "allowHorizontalResize", "allowVerticalResize", "tileSize", "insertAsContent", "toolboxGroup"],
+                properties: ["type", "allowHorizontalResize", "allowVerticalResize", "tileSize", "insertAsContent", "toolboxGroup"],
                 expanded: true
             }
             // ,{

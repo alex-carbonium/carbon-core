@@ -68,7 +68,7 @@ class ResizeHint extends UIElement {
         var result = [];
 
         var gm = element.globalViewMatrix();
-        var br = element.getBoundaryRect();
+        var br = element.boundaryRect();
         var p1 = gm.transformPoint2(br.x, br.y);
         var p2 = gm.transformPoint2(br.x + br.width, br.y);
         var p3 = gm.transformPoint2(br.x + br.width, br.y + br.height);

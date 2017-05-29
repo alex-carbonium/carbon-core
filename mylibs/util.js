@@ -79,6 +79,8 @@ export var createUUID = (typeof(window.crypto) != 'undefined' && typeof(window.c
     return uuid;
 };
 
+export const emptyUuid = "00000000-0000-0000-0000-000000000000";
+
 export function leaveCommonProps(target, source){
     for (var p in target){
         var targetValue = target[p];

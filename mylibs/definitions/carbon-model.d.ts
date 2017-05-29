@@ -1,6 +1,6 @@
 declare module "carbon-model" {
     import { IPoint, IRect, ICoordinate, IMatrix, ISize, OriginType } from "carbon-geometry";
-    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable, ChangeMode, ArtboardResource } from "carbon-basics";
+    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable, ChangeMode, ArtboardType, Font } from "carbon-basics";
     import { IContext } from "carbon-rendering";
 
     export interface IDataNodeProps {
@@ -10,6 +10,8 @@ declare module "carbon-model" {
 
     export interface IDataNode<TProps extends IDataNodeProps = IDataNodeProps> extends IDisposable {
         props: TProps;
+
+        parent(value?: IDataNode): IDataNode;
 
         prepareProps(changes: Partial<TProps>);
         prepareAndSetProps(props: Partial<TProps>, mode?);
@@ -22,6 +24,7 @@ declare module "carbon-model" {
         getImmediateChildById<T extends IDataNode>(id: string, materialize?:boolean): T | null;
         findAllNodesDepthFirst<T extends IDataNode>(predicate: (node: T) => boolean): T[];
         findNodeByIdBreadthFirst<T extends IDataNode>(id: string): T | null;
+        findAncestorOfType<T extends IDataNode>(type: IConstructor<T>): T | null;
 
         enablePropsTracking();
         disablePropsTracking();
@@ -38,7 +41,7 @@ declare module "carbon-model" {
     export interface IUIElement<TProps extends IUIElementProps = IUIElementProps> extends IDataNode<TProps> {
         parent(): IContainer;
 
-        name(): string;
+        name(value?: string): string;
         displayName(): string;
 
         viewMatrix(): IMatrix;
@@ -51,7 +54,7 @@ declare module "carbon-model" {
         setTransform(matrix: IMatrix);
         resetTransform();
 
-        getBoundaryRect(): IRect;
+        boundaryRect(value?: IRect): IRect;
         getBoundingBox(): IRect;
         getBoundingBoxGlobal(): IRect;
         size(size?: ISize): ISize;
@@ -77,6 +80,8 @@ declare module "carbon-model" {
         height(): number;
         angle(): number;
         zOrder(): number;
+
+        locked(value?: boolean): boolean;
 
         constraints(value?: IConstraints): IConstraints;
 
@@ -165,7 +170,7 @@ declare module "carbon-model" {
     }
 
     export interface IArtboardProps extends IContainerProps {
-        resource: ArtboardResource | null;
+        type: ArtboardType | null;
         guidesX: IGuide[];
         guidesY: IGuide[];
     }
@@ -182,6 +187,7 @@ declare module "carbon-model" {
     }
     export interface ISymbol extends IContainer<ISymbolProps>{
     }
+    export const Symbol : IConstructor<ISymbol>;
 
     export interface IGuide {
         id: string;
@@ -196,8 +202,6 @@ declare module "carbon-model" {
     export interface IElementEventData extends IMouseEventData{
         element: IUIElement;
     }
-
-    export const NullContainer: IContainer;
 
     export const enum ImageSourceType {
         None = 0,
@@ -237,4 +241,15 @@ declare module "carbon-model" {
         readonly EmptySource: ImageSource;
         readonly NewImageSize: number;
     };
+
+    export type TextContent = string | any[];//TODO: specify range format
+    export interface ITextProps extends IUIElementProps{
+        font: Font;
+        content: TextContent;
+    }
+    export interface IText extends IContainer<ITextProps> {
+        font(value?: Font): Font;
+        content(value?: TextContent): TextContent;
+    }
+    export const Text: IConstructor<IText>;
 }

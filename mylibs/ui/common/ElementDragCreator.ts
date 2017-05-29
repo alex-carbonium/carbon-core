@@ -184,7 +184,7 @@ export default class ElementDragCreator extends Tool {
             //     context.clip();
             // }
 
-            var br = this._element.br();
+            var br = this._element.boundaryRect();
             this._element.drawSelf(context, br.width, br.height, environment);
 
             context.restore();

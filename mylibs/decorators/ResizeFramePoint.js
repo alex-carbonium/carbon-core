@@ -36,7 +36,7 @@ export default {
 
         var resizingElement = UIElement.construct(Types.ResizeRotateElement, frame.element);
 
-        var br = frame.element.br();
+        var br = frame.element.boundaryRect();
         frame.resizingElement = resizingElement;
         frame.originalRect = br;
         frame.originalBoundingBox = frame.element.getBoundingBoxGlobal();
@@ -51,7 +51,7 @@ export default {
 
         debug("Captured rect: x=%d y=%d w=%d h=%d", frame.originalRect.x, frame.originalRect.y, frame.originalRect.width, frame.originalRect.height);
 
-        SnapController.calculateSnappingPoints(Environment.view.page.getActiveArtboard());
+        SnapController.calculateSnappingPoints(resizingElement.elements[0].parent().primitiveRoot());
 
         Environment.view.interactionLayer.add(resizingElement);
         frame.resizingElement.startResizing({transformationElement: frame.resizingElement});
@@ -133,7 +133,7 @@ export default {
         Environment.controller.resizingEvent.raise({
             element: frame.element,
             transformationElement: frame.resizingElement,
-            rect: frame.resizingElement.getBoundaryRect()
+            rect: frame.resizingElement.boundaryRect()
         });
     }
 }

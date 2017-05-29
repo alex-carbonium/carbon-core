@@ -3,10 +3,10 @@ import CompositeElement from "./CompositeElement";
 import Environment from "environment";
 import PropertyMetadata from "./PropertyMetadata";
 import { Types } from "./Defs";
-import ResizeDimension from "./ResizeDimension";
 import ActiveFrame from "../decorators/ActiveFrame";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
 import { ISelectComposite } from "carbon-app";
+import { ResizeDimension } from "carbon-core";
 
 var SelectCompositeFrame = {
     hitPointIndex: function (frame, point) {

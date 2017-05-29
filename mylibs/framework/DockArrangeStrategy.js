@@ -39,7 +39,7 @@ export default {
             }
 
             let outerBox = child.getBoundingBox(true);
-            let rect = child.getBoundaryRect();
+            let rect = child.boundaryRect();
             let props = {};
 
             switch (child.dockStyle()){
@@ -78,7 +78,7 @@ export default {
         for (var i = 0; i < fillers.length; i++){
             var child = fillers[i];
             let outerBox = child.getBoundingBox(true);
-            let rect = child.getBoundaryRect();
+            let rect = child.boundaryRect();
             let props = {};
 
             props.x = posLeft + rect.x - outerBox.x;
@@ -92,7 +92,7 @@ export default {
         }
 
         if (autoWidth || autoHeight){
-            var rect = container.getBoundaryRect();
+            var rect = container.boundaryRect();
             rect.height = size.height;
             rect.width = size.width;
             return rect;

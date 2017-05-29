@@ -16,7 +16,7 @@ export default {
     PointSize2: PointSize2,
     cursorSet: RotationCursors,
     hitTest: function (frame, mousePoint, pt, elementPoint, scale) {
-        var br = frame.element.getBoundaryRect();
+        var br = frame.element.boundaryRect();
         if (isPointInRect(br, elementPoint)){
             return false;
         }
@@ -50,7 +50,7 @@ export default {
     capture: function (frame, point, mousePoint) {
         var resizingElement = UIElement.construct(Types.ResizeRotateElement, frame.element);
         frame.resizingElement = resizingElement;
-        frame.originalRect = frame.element.getBoundaryRect();
+        frame.originalRect = frame.element.boundaryRect();
         frame.origin = frame.element.center(true);
         frame.captureVector = new Point(mousePoint.x - frame.origin.x, mousePoint.y - frame.origin.y);
         frame.initialAngle = frame.element.angle();

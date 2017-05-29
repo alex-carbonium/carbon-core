@@ -48,10 +48,10 @@ define(function () {
         if(parsedChildren.length == 0){
             return null;
         }
-        var rect = parsedChildren[0].getBoundaryRect();
+        var rect = parsedChildren[0].boundaryRect();
         for(var i = 1; i < parsedChildren.length; ++i){
             var e = parsedChildren[i];
-            rect = combineRects(rect, e.getBoundaryRect());
+            rect = combineRects(rect, e.boundaryRect());
         }
 
         group.setProps(rect);
@@ -651,7 +651,7 @@ define(function () {
                 var right = 0;
                 var bottom = 0;
                 for (var i = 0; i < results.length; ++i) {
-                    var rect = results[i].getBoundaryRect();
+                    var rect = results[i].boundaryRect();
                     var r = rect.x + rect.width;
                     if (r > right) {
                         right = r;

@@ -45,7 +45,7 @@ export default class RelayoutEngine {
             //     oldRect = entry.props.br;
             // }
             // if (!oldRect) {
-            //     oldRect = element.getBoundaryRect();
+            //     oldRect = element.boundaryRect();
             // }
         }
 

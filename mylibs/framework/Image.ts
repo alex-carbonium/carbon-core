@@ -32,7 +32,7 @@ export default class Image extends Container<IImageProps> implements IImage {
         if (ImageSourceHelper.isEditSupported(source)) {
             var brChanged = changes.hasOwnProperty("br");
             if (changes.hasOwnProperty("sizing") || brChanged) {
-                var oldRect = this.getBoundaryRect();
+                var oldRect = this.boundaryRect();
                 var newRect = changes.br || oldRect;
                 var sourcePropsChanged = changes.hasOwnProperty("sourceProps");
                 var sourceProps = sourcePropsChanged ? changes.sourceProps : this.props.sourceProps;
@@ -60,7 +60,7 @@ export default class Image extends Container<IImageProps> implements IImage {
         var source = this.source();
         if (ImageSourceHelper.isEditSupported(source)) {
             if (newProps.hasOwnProperty("sizing") || newProps.hasOwnProperty("br")) {
-                ImageSourceHelper.resize(source, this.sizing(), this.getBoundaryRect(), this.runtimeProps.sourceProps);
+                ImageSourceHelper.resize(source, this.sizing(), this.boundaryRect(), this.runtimeProps.sourceProps);
             }
         }
         //this.createOrUpdateClippingMask(source, newProps);
@@ -152,7 +152,7 @@ export default class Image extends Container<IImageProps> implements IImage {
                         this.autoResize(source, resizeOrigin);
                     }
 
-                    ImageSourceHelper.resize(source, this.sizing(), this.getBoundaryRect(), this.runtimeProps.sourceProps);
+                    ImageSourceHelper.resize(source, this.sizing(), this.boundaryRect(), this.runtimeProps.sourceProps);
                     Invalidate.request();
                 });
             }
@@ -182,7 +182,7 @@ export default class Image extends Container<IImageProps> implements IImage {
         var bb = this.getBoundingBox();
         var bbNew = bb.scale({x: realRect.width/bb.width, y: realRect.height/bb.height}, bb.origin(origin));
 
-        var parentBr = this.parent().br();
+        var parentBr = this.parent().boundaryRect();
         var scaledRect = bbNew.intersect(parentBr);
         var sx = scaledRect.width/bbNew.width;
         var sy = scaledRect.height/bbNew.height;
@@ -192,7 +192,7 @@ export default class Image extends Container<IImageProps> implements IImage {
         }
         scaledRect.roundMutable();
 
-        this.br(scaledRect.withPosition(0, 0));
+        this.boundaryRect(scaledRect.withPosition(0, 0));
         if (scaledRect.x || scaledRect.y){
             this.applyTranslation(scaledRect.topLeft().subtract(bb.topLeft()));
         }

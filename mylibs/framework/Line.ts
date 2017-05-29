@@ -143,7 +143,7 @@ class Line extends Shape {
 
         var matrix = this.globalViewMatrixInverted();
         var pt = matrix.transformPoint(point);
-        var rect = this.getBoundaryRect();
+        var rect = this.boundaryRect();
 
         var d = ((4 + this.getMaxOuterBorder()) / 2) / scale;
 

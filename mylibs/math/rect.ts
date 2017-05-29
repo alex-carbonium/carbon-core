@@ -9,7 +9,7 @@ export default class Rect implements IRect {
     width: number;
     height: number;
 
-    constructor(x, y, w, h) {
+    constructor(x: number, y: number, w: number, h: number) {
         this.x = x;
         this.y = y;
         this.width = w;

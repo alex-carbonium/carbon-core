@@ -53,7 +53,6 @@ global.extend = function extend() {
     return target;
 };
 
-global.emptyUuid = "00000000-0000-0000-0000-000000000000";
 
 global.each = function each(array, callback) {
     for (var i = 0, j = array.length; i < j; ++i) {

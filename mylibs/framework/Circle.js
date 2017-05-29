@@ -58,7 +58,7 @@ class Circle extends Shape {
     }
 
     convertToPath() {
-        var br = this.br();
+        var br = this.boundaryRect();
         var path = new Path()
             , x1 = 0
             , y1 = 0

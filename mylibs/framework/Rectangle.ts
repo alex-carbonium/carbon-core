@@ -12,6 +12,7 @@ import UIElement from "framework/UIElement";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import Point from "../math/point";
+import { ResizeDimension } from "carbon-core";
 
 const PointSize = 4;
 const PointOffset = 10;
@@ -77,7 +78,7 @@ var CornerRadiusPoint = {
         if (!frame.resizingElement) {
             return;
         }
-        var rect = frame.element.getBoundaryRect();
+        var rect = frame.element.boundaryRect();
         var rv = point.rv;
         var w2 = rect.width / 2;
         var h2 = rect.height / 2;
@@ -142,7 +143,7 @@ class Rectangle extends Shape {
         return true;
     }
     convertToPath(): Path {
-        var br = this.br();
+        var br = this.boundaryRect();
         var path = new Path()
             , x1 = 0
             , y1 = 0
@@ -301,6 +302,10 @@ class Rectangle extends Shape {
         var frame = super.createSelectionFrame(view);
 
         if (view.prototyping()) {
+            return frame;
+        }
+
+        if (this.resizeDimensions() === ResizeDimension.None){
             return frame;
         }
 

@@ -51,7 +51,7 @@ export default  {
         if (!frame.resizingElement) {
             return;
         }
-        var rect = frame.element.getBoundaryRect();
+        var rect = frame.element.boundaryRect();
         var mousePosition = frame.element.globalViewMatrixInverted().transformPoint(mousePoint);
 
         // p1, p2, gives us line equation

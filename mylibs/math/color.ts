@@ -1,4 +1,4 @@
-import tinycolor from "tinycolor2/tinycolor";
+import tinycolor from "tinycolor2";
 
 const imageDataStep = 4;
 
@@ -16,7 +16,7 @@ export function getAverageLuminance(imageData){
                     b: imageData.data[index + 2],
                     a: imageData.data[index + 3]
                 });
-                sum += c.getLuminance();
+                sum += c['getLuminance'](); //official api, but not present in types
                 count += 1;
             }
         }

@@ -43,7 +43,7 @@ import IconsInfo from "./ui/IconsInfo";
 import backend from "./backend";
 import logger from "./logger";
 import params from "./params";
-import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardResource } from "carbon-core";
+import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType } from "carbon-core";
 import { Contributions } from "./extensions/Contributions";
 import { getBuiltInExtensions } from "./extensions/BuiltInExtensions";
 
@@ -53,7 +53,6 @@ window['Selection'] = Selection;
 var debug = require("./DebugUtil")("carb:relayout");
 
 var platform = require("platform/Platform");
-var NullContainer = require("framework/NullContainer");
 var Primitive = require("framework/sync/Primitive");
 var Layer = require("framework/Layer");
 var SelectComposite = require("framework/SelectComposite");
@@ -259,7 +258,7 @@ class AppClass extends DataNode implements IApp {
             var artboards = page.getAllArtboards();
             for (var j = 0; j < artboards.length; ++j) {
                 var a = artboards[j];
-                if (a.props.resource === ArtboardResource.Frame) {
+                if (a.props.type === ArtboardType.Frame) {
                     res.push(a);
                 }
             }
@@ -276,7 +275,7 @@ class AppClass extends DataNode implements IApp {
             var artboards = page.getAllArtboards();
             for (var j = 0; j < artboards.length; ++j) {
                 var a = artboards[j];
-                if (a.props.resource === ArtboardResource.Palette) {
+                if (a.props.type === ArtboardType.Palette) {
                     res.push(a);
                 }
             }
@@ -293,7 +292,7 @@ class AppClass extends DataNode implements IApp {
             var artboards = page.getAllArtboards();
             for (var j = 0; j < artboards.length; ++j) {
                 var a = artboards[j];
-                if (a.props.resource === ArtboardResource.Template) {
+                if (a.props.type === ArtboardType.Template) {
                     children.push(a);
                 }
             }

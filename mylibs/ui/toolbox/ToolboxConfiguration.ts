@@ -4,7 +4,7 @@ import Environment from "environment";
 import FileProxy from "server/FileProxy";
 import {createUUID} from "util";
 import Matrix from "math/matrix";
-import { ArtboardResource } from "carbon-core";
+import { ArtboardType } from "carbon-core";
 
 var PADDING = 5;
 var _configCache = {};
@@ -213,7 +213,7 @@ export default class ToolboxConfiguration {
     }
 
     static buildToolboxConfig(page){
-        var elements = page.getAllArtboards().filter(x=>x.props.resource === ArtboardResource.Symbol);
+        var elements = page.getAllArtboards().filter(x=>x.props.type === ArtboardType.Symbol);
 
         if(!elements.length) {
             page.setProps({toolboxConfigUrl:null});

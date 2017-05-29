@@ -16,6 +16,9 @@ function runKarma(singleRun){
         settings.browsers = ["PhantomJS"];
         settings.browserNoActivityTimeout = 5 * 60 * 1000;
     }
+    else if (argv.browser){
+        settings.browsers = [argv.browser];
+    }
 
     var server = new KarmaServer(settings);
     server.start();

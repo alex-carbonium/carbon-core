@@ -6,13 +6,12 @@ import { deepEquals } from "../../util";
 import PropertyMetadata from "../PropertyMetadata";
 import TextEngine from "./textengine";
 import styleManager from "../style/StyleManager";
-import { IContainer, IDataElement } from "carbon-core";
-import { TextAlign } from "carbon-basics";
-import { IUIElement } from "carbon-model";
+import { IContainer, IDataElement, IText, TextAlign, IUIElement, ITextProps, TextContent } from "carbon-core";
 import params from "params";
 import ContextCommandCache from "framework/render/ContextCommandCache";
+import Environment from "../../environment";
 
-class Text extends UIElement implements IContainer, IDataElement {
+class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElement {
     prepareProps(changes) {
         var dataProvider = changes.dp;
 
@@ -93,7 +92,7 @@ class Text extends UIElement implements IContainer, IDataElement {
     }
 
     _ensureBoundaryBox(changes, forceWidth) {
-        var br = changes.br || this.getBoundaryRect();
+        var br = changes.br || this.boundaryRect();
 
         if (changes.autoWidth === undefined) {
             changes.autoWidth = this.props.autoWidth;
@@ -121,7 +120,7 @@ class Text extends UIElement implements IContainer, IDataElement {
         super.applySizeScaling.apply(this, arguments);
     }
 
-    drawSelf(context, w, h, environment) {
+    drawSelf(context, w, h) {
         // if(false && !this.runtimeProps.keepEngine) {
         //     if (!this.runtimeProps.commandCache) {
         //         context = new ContextCommandCache(context);
@@ -163,7 +162,7 @@ class Text extends UIElement implements IContainer, IDataElement {
             context.translate(0, verticalOffset);
         }
         params.perf && performance.mark("Text.render");
-        this.runtimeProps.engine.render(context, this.runtimeProps.drawSelection, verticalOffset, environment.view ? environment.view.focused() : false);
+        this.runtimeProps.engine.render(context, this.runtimeProps.drawSelection, verticalOffset, Environment.view ? Environment.view.focused() : false);
         params.perf && performance.measure("Text.render", "Text.render");
 
         context.restore();
@@ -189,7 +188,7 @@ class Text extends UIElement implements IContainer, IDataElement {
         TextEngine.setDefaultFormatting(props.font);
 
         var engine = new TextEngine();
-        engine.updateSize(props.autoWidth ? 10000 : (props.br || this.getBoundaryRect()).width, 10000);
+        engine.updateSize(props.autoWidth ? 10000 : (props.br || this.boundaryRect()).width, 10000);
         engine.setText(props.content);
         this.runtimeProps.engine = engine;
         return engine;
@@ -286,6 +285,20 @@ class Text extends UIElement implements IContainer, IDataElement {
         return m;
     }
 
+    font(value?: Font){
+        if (arguments.length) {
+            this.setProps({ font: value });
+        }
+        return this.props.font;
+    }
+
+    content(value?: TextContent){
+        if (arguments.length) {
+            this.setProps({ content: value });
+        }
+        return this.props.content;
+    }
+
     static fromSvgElement(element, parsedAttributes, matrix) {
         //
         // :
@@ -347,9 +360,6 @@ PropertyMetadata.registerForType(Text, {
     font: {
         displayName: "Font",
         type: "font",
-        options: {
-            fonts: [{ name: "Open Sans", value: "Open Sans" }]
-        },
         defaultValue: Font.Default,
         style: 2
     },

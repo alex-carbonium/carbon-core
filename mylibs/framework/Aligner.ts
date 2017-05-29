@@ -16,24 +16,24 @@ export function align(mode, elements: IUIElement[]) {
 
     switch (mode) {
         case "left":
-            baseX = alignMode === AlignMode.Parent ? parent.getBoundaryRect().x : findMinX(elements);
+            baseX = alignMode === AlignMode.Parent ? parent.boundaryRect().x : findMinX(elements);
             elements.forEach(e => e.applyTranslation(Point.create(baseX - e.x(), 0)));
             break;
         case "top":
-            baseY = alignMode === AlignMode.Parent ? parent.getBoundaryRect().x : findMinY(elements);
+            baseY = alignMode === AlignMode.Parent ? parent.boundaryRect().x : findMinY(elements);
             elements.forEach(e => e.applyTranslation(Point.create(0, baseY - e.y())));
             break;
         case "right":
-            baseX = alignMode === AlignMode.Parent ? parent.getBoundaryRect().right() : findMaxX(elements);
+            baseX = alignMode === AlignMode.Parent ? parent.boundaryRect().right() : findMaxX(elements);
             elements.forEach(e => e.applyTranslation(Point.create(baseX - e.x() - e.width(), 0)));
             break;
         case "bottom":
-            baseY = alignMode === AlignMode.Parent ? parent.getBoundaryRect().bottom() : findMaxY(elements);
+            baseY = alignMode === AlignMode.Parent ? parent.boundaryRect().bottom() : findMaxY(elements);
             elements.forEach(e => e.applyTranslation(Point.create(0, baseY - e.y() - e.height())));
             break;
         case "center":
             if (alignMode === AlignMode.Parent){
-                center = parent.getBoundaryRect().centerX();
+                center = parent.boundaryRect().centerX();
             }
             else {
                 leftmost = findMinX(elements);
@@ -44,7 +44,7 @@ export function align(mode, elements: IUIElement[]) {
             break;
         case "middle":
             if (alignMode === AlignMode.Parent){
-                center = parent.getBoundaryRect().centerY();
+                center = parent.boundaryRect().centerY();
             }
             else {
                 topMost = findMinY(elements);
