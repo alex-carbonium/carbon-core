@@ -1,40 +1,40 @@
 import { IBezierCrossing, IBezierCurve, IIntersection } from "carbon-core";
 
 export default class EdgeCrossing implements IBezierCrossing {
-    private _edge:IBezierCurve;
+    private _edge: IBezierCurve;
     private _counterpart: IBezierCrossing;
     private _entry: boolean;
-    private _processed:boolean;
-    private _selfCrossing:boolean;
-    private _index:number;
-    private _fromCrossingOverlap:boolean;
-    private _intersection:IIntersection;
+    private _processed: boolean;
+    private _selfCrossing: boolean;
+    private _index: number;
+    private _fromCrossingOverlap: boolean;
+    private _intersection: IIntersection;
 
-    get edge(){
+    get edge() {
         return this._edge;
     }
 
-    set edge(value){
+    set edge(value) {
         this._edge = value;
     }
 
-    get counterpart(){
+    get counterpart() {
         return this._counterpart;
     }
 
-    set counterpart(value){
+    set counterpart(value) {
         this._counterpart = value;
     }
 
-    get isEntry(){
+    get isEntry() {
         return this._entry;
     }
 
-    set entry(value){
+    set entry(value) {
         this._entry = value;
     }
 
-    get isProcessed(){
+    get processed() {
         return this._processed;
     }
 
@@ -43,36 +43,37 @@ export default class EdgeCrossing implements IBezierCrossing {
     }
 
 
-    get isSelfCrossing(){
+    get isSelfCrossing() {
         return this._selfCrossing;
     }
 
-    set selfCrossing(value){
+    set selfCrossing(value) {
         this._selfCrossing = value;
     }
 
-    get index(){
+    get index() {
         return this._index;
     }
 
-    set index(value){
+    set index(value) {
         this._index = value;
     }
-    get fromCrossingOverlap(){
+    get fromCrossingOverlap() {
         return this._fromCrossingOverlap;
     }
 
-    set fromCrossingOverlap(value){
+    set fromCrossingOverlap(value) {
         this._fromCrossingOverlap = value;
     }
 
     static crossingWithIntersection(intersection) {
-        var c = new EdgeCrossing();
+        let c = new EdgeCrossing();
         c._intersection = intersection;
+
         return c;
     }
 
-    removeFromEdge():void {
+    removeFromEdge(): void {
         this._edge.removeCrossing(this);
     }
 
@@ -89,22 +90,27 @@ export default class EdgeCrossing implements IBezierCrossing {
     }
 
     get nextNonself() {
-        var next = this.next;
-        while (next != null && next.isSelfCrossing)
+        let next = this.next;
+        while (next !== null && next.isSelfCrossing) {
             next = next.next;
+        }
+
         return next;
     }
 
     get previousNonself() {
-        var previous = this.previous;
-        while (previous != null && previous.isSelfCrossing)
+        let previous = this.previous;
+        while (previous !== null && previous.isSelfCrossing) {
             previous = previous.previous;
+        }
+
         return previous;
     }
 
     get parameter() {
-        if (this.edge == this._intersection.curve1)
+        if (this.edge === this._intersection.curve1) {
             return this._intersection.parameter1;
+        }
 
         return this._intersection.parameter2;
     }
@@ -118,35 +124,41 @@ export default class EdgeCrossing implements IBezierCrossing {
     }
 
     get leftCurve() {
-        if (this.isAtStart)
+        if (this.isAtStart) {
             return null;
+        }
 
-        if (this.edge == this._intersection.curve1)
+        if (this.edge === this._intersection.curve1) {
             return this._intersection.curve1LeftBezier;
+        }
 
         return this._intersection.curve2LeftBezier;
     }
 
     get rightCurve() {
-        if (this.isAtEnd)
+        if (this.isAtEnd) {
             return null;
+        }
 
-        if (this.edge == this._intersection.curve1)
+        if (this.edge === this._intersection.curve1) {
             return this._intersection.curve1RightBezier;
+        }
 
         return this._intersection.curve2RightBezier;
     }
 
     get isAtStart() {
-        if (this.edge == this._intersection.curve1)
+        if (this.edge === this._intersection.curve1) {
             return this._intersection.isAtStartOfCurve1;
+        }
 
         return this._intersection.isAtStartOfCurve2;
     }
 
     get isAtEnd() {
-        if (this.edge == this._intersection.curve1)
+        if (this.edge === this._intersection.curve1) {
             return this._intersection.isAtStopOfCurve1;
+        }
 
         return this._intersection.isAtStopOfCurve2;
     }

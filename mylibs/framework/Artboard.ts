@@ -16,7 +16,7 @@ import Environment from "environment";
 import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
-import {  IArtboardProps } from "carbon-model";
+import { IArtboardProps } from "carbon-model";
 import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardResource, IIsolatable } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
 
@@ -66,32 +66,32 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
         }
 
         if (!this._frame || this._frame.version !== this._frame.runtimeProps.cloneVersion) {
-            var page = DataNode.getImmediateChildById(App.Current, this.props.frame.pageId);
+            let page = DataNode.getImmediateChildById(App.Current, this.props.frame.pageId);
             if (page) {
-                var frame = DataNode.getImmediateChildById(page, this.props.frame.artboardId, true);
+                let frame = DataNode.getImmediateChildById(page, this.props.frame.artboardId, true);
 
                 if (frame.runtimeProps.clone && frame.runtimeProps.cloneVersion === frame.version) {
                     return frame.runtimeProps.clone;
                 }
 
-                var screen = frame.findElementByName('screen');
+                let screen = frame.findElementByName('screen');
                 if (!screen) {
                     this.setProps({ frame: null });
                     return null;
                 }
 
-                var frameClone = frame.clone();
+                let frameClone = frame.clone();
                 frame.runtimeProps.cloneVersion = frame.version;
                 frame.runtimeProps.clone = frameClone;
 
                 frameClone.setProps({ fill: Brush.Empty, stroke: Brush.Empty, m: Matrix.Identity });
                 frameClone.applyTranslation({ x: 0, y: 0 }, true);
 
-                var screenRect = screen.getBoundaryRectGlobal();
-                var frameRect = frame.getBoundaryRectGlobal();
+                let screenRect = screen.getBoundaryRectGlobal();
+                let frameRect = frame.getBoundaryRectGlobal();
                 frameClone.runtimeProps.frameX = frameRect.x - screenRect.x;
                 frameClone.runtimeProps.frameY = frameRect.y - screenRect.y;
-                var screenBox = screen.getBoundingBox();
+                let screenBox = screen.getBoundingBox();
                 frameClone.runtimeProps.cloneScreenWidth = screenBox.width;
                 frameClone.runtimeProps.cloneScreenHeight = screenBox.height;
                 this._frame = frame;
@@ -139,8 +139,8 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
             }
 
             if (this.props.resource === ArtboardResource.Symbol && element.children !== undefined) {
-                var can = true;
-                var id = this.id();
+                let can = true;
+                let id = this.id();
                 element.applyVisitor(e => {
                     if (e.props.source && e.props.source.artboardId === id) {
                         can = false;
@@ -154,9 +154,9 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
             }
 
             if (element.props.masterId) {
-                var root = element.primitiveRoot();
-                var stateboards = this.runtimeProps.stateBoards;
-                for (var j = 0; j < stateboards.length; ++j) {
+                let root = element.primitiveRoot();
+                let stateboards = this.runtimeProps.stateBoards;
+                for (let j = 0; j < stateboards.length; ++j) {
                     if (stateboards[j] === root) {
                         return false;
                     }
@@ -174,8 +174,8 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
         return super.displayName();
     }
 
-    displayType(){
-        switch (this.props.resource){
+    displayType() {
+        switch (this.props.resource) {
             case ArtboardResource.Frame:
                 return "type.a_frame";
             case ArtboardResource.Palette:
@@ -194,9 +194,9 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
             return;
         }
 
-        var scale = environment.view.scale() * environment.view.contextScale;
-        var s4 = 4 / scale;
-        var bb = this.getBoundingBoxGlobal();
+        let scale = environment.view.scale() * environment.view.contextScale;
+        let s4 = 4 / scale;
+        let bb = this.getBoundingBoxGlobal();
         context.rect(bb.x + bb.width, bb.y + s4, s4, bb.height);
         context.rect(bb.x + s4, bb.y + bb.height, bb.width, s4);
     }
@@ -208,20 +208,20 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
         context.save();
         context.beginPath();
         context.strokeStyle = "#999";
-        var scale = environment.view.scale();
+        let scale = environment.view.scale();
         context.lineWidth = 1 / scale;
 
-        var bb = this.getBoundingBoxGlobal();
+        let bb = this.getBoundingBoxGlobal();
         context.rect(bb.x - .5 / scale, bb.y - .5 / scale, bb.width + 1 / scale, bb.height + 1 / scale);
         context.stroke();
         context.restore();
     }
 
     drawCustomFrame(context, environment) {
-        var frame = this.frame;
+        let frame = this.frame;
 
         context.save();
-        var pos = this.position();
+        let pos = this.position();
         context.translate(pos.x + this.frame.runtimeProps.frameX, pos.y + this.frame.runtimeProps.frameY);
         frame.draw(context, environment);
         context.restore();
@@ -240,15 +240,15 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
     }
 
     fitTextToWidth(context, text, width) {
-        var m = measureText(context, text);
+        let m = measureText(context, text);
         params.perf && performance.mark("fitTextToWidth");
         if (m.width > width) {
-            var elipsisWidth = measureText(context, '...').width;
+            let elipsisWidth = measureText(context, '...').width;
             width -= elipsisWidth;
             do {
                 text = text.substr(0, text.length - 1);
                 m = measureText(context, text);
-            } while (text != '' && m.width > width);
+            } while (text !== '' && m.width > width);
             text += '...';
         }
         params.perf && performance.measure("fitTextToWidth", "fitTextToWidth");
@@ -259,7 +259,7 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
 
 
     _renderHeader(context) {
-        var scale = Environment.view.scale();
+        let scale = Environment.view.scale();
 
         context.save();
         context.beginPath();
@@ -273,18 +273,18 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
 
         context.font = "11 px Lato, LatoLight, Arial, Helvetica, sans-serif";
 
-        var width = this.width();
+        let width = this.width();
 
 
-        var rect = this.getBoundaryRectGlobal();
+        let rect = this.getBoundaryRectGlobal();
 
-        var pos = Environment.view.logicalCoordinateToScreen(rect);
-        var px = 0;
-        if(Environment.view.prototyping()) {
+        let pos = Environment.view.logicalCoordinateToScreen(rect);
+        let px = 0;
+        if (Environment.view.prototyping()) {
             px = 14;
         }
 
-        var text = this.fitTextToWidth(context, this.headerText(), (width - px) * scale);
+        let text = this.fitTextToWidth(context, this.headerText(), (width - px) * scale);
         context.beginPath();
         context.resetTransform();
         context.scale(Environment.view.contextScale, Environment.view.contextScale);
@@ -295,7 +295,7 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
     };
 
     _renderStatesFrame(context, environment) {
-        var stateboards = this.runtimeProps.stateBoards;
+        let stateboards = this.runtimeProps.stateBoards;
         if (!stateboards || !stateboards.length) {
             return;
         }
@@ -303,26 +303,25 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
         context.save();
         context.beginPath();
 
-        var stateboards = this.runtimeProps.stateBoards;
-        var states = this.props.states;
+        let states = this.props.states;
         if (states.length !== 0 && stateboards.length !== states.length - 1) {
             //can happen if artboard is drawn prior to stateboards linked themselves
             stateboards = this._linkRelatedStateBoards();
         }
 
-        var rect = this.getBoundaryRectGlobal();
-        for (var i = 0; i < stateboards.length; ++i) {
+        let rect = this.getBoundaryRectGlobal();
+        for (let i = 0; i < stateboards.length; ++i) {
             rect = math.combineRects(rect, stateboards[i].getBoundaryRectGlobal());
         }
 
-        var scale = environment.view.scale();
-        var d = Math.max(1, scale);
-        var x = rect.x - 20 / d;
+        let scale = environment.view.scale();
+        let d = Math.max(1, scale);
+        let x = rect.x - 20 / d;
         rect.width += 40 / d;
-        var y = rect.y - 30 / d;
+        let y = rect.y - 30 / d;
         rect.height += 50 / d;
 
-        var dw = 10 / d;
+        let dw = 10 / d;
 
         context.beginPath();
         context.moveTo(x + dw, y);
@@ -354,7 +353,7 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
     };
 
     clone() {
-        var clone = super.clone.apply(this, arguments);
+        let clone = super.clone.apply(this, arguments);
         if (this._recorder) {
             clone._recorder.initFromJSON(this.props.states.map(x => extend(true, {}, x)));
             clone._recorder.changeState(this.state());
@@ -380,10 +379,10 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
 
     drawSelf(context, w, h, environment) {
         context.save();
-        var frame = this.frame;
+        let frame = this.frame;
         if (frame && environment.showFrames) {
             context.beginPath();
-            var pos = this.position();
+            let pos = this.position();
             context.rect(pos.x, pos.y, frame.runtimeProps.cloneScreenWidth, frame.runtimeProps.cloneScreenHeight);
             context.clip();
         }
@@ -397,18 +396,18 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
     }
 
     buildMetadata(properties) {
-        var element = this;
-        var res = {};
+        let element = this;
+        let res = {};
 
-        var childrenMap = {};
-        for (var i = 0; i < properties.length; ++i) {
-            var prop = properties[i];
-            var child = childrenMap[prop.controlId];
+        let childrenMap = {};
+        for (let i = 0; i < properties.length; ++i) {
+            let prop = properties[i];
+            let child = childrenMap[prop.controlId];
             if (!child) {
                 child = this.getElementById(prop.controlId);
                 childrenMap[prop.controlId] = child;
             }
-            var propMetadata = PropertyMetadata.find(child.t, prop.propertyName);
+            let propMetadata = PropertyMetadata.find(child.t, prop.propertyName);
             res['custom:' + prop.controlId + ':' + prop.propertyName] = propMetadata;
         }
 
@@ -461,7 +460,7 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
             if (props.resource === ArtboardResource.Symbol) {
                 this.runtimeProps.refreshToolbox = true;
             } else if (oldProps.resource === ArtboardResource.Symbol) {
-                var parent = this.parent();
+                let parent = this.parent();
                 if (parent) {
                     parent.makeToolboxConfigDirty(true);
                 }
@@ -475,14 +474,14 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
     }
 
     hitTest(point, scale) {
-        var res = super.hitTest(point, scale);
+        let res = super.hitTest(point, scale);
         if (res) {
             return res;
         }
         if (this.hasBadTransform()) {
             return false;
         }
-        var bb = this.getBoundingBoxGlobal();
+        let bb = this.getBoundingBoxGlobal();
         return isPointInRect({ x: bb.x, y: bb.y - 20 / scale, width: bb.width, height: 20 / scale }, point);
     }
 
@@ -494,11 +493,11 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
     }
 
     primitivePath() {
-        var parent = this.parent();
+        let parent = this.parent();
         if (!parent || !parent.primitiveRoot()) {
             return null;
         }
-        var path = this.runtimeProps.primitivePath;
+        let path = this.runtimeProps.primitivePath;
         if (!path) {
             path = parent.primitivePath().slice();
             path[path.length - 1] = this.id();
@@ -509,11 +508,11 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
     }
 
     primitiveRootKey() {
-        var parent = this.parent();
+        let parent = this.parent();
         if (!parent || !parent.primitiveRoot()) {
             return null;
         }
-        var s = this.runtimeProps.primitiveRootKey;
+        let s = this.runtimeProps.primitiveRootKey;
         if (!s) {
             s = parent.id() + this.id();
             this.runtimeProps.primitiveRootKey = s;
@@ -529,7 +528,7 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
     }
 
     getChildControlList() {
-        var res = [];
+        let res = [];
         this.applyVisitor(e => {
             if (e !== this) {
                 res.push(e);
@@ -545,16 +544,16 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
 
     relayoutCompleted() {
         //isolation hides original controls, which would be cloned in symbols
-        if (Environment.view.activeLayer.type !== LayerTypes.Isolation){
+        if (Environment.view.activeLayer.type !== LayerTypes.Isolation) {
             this.incrementVersion();
         }
         else if (!this.runtimeProps.layerChangedToken) {
-            this.runtimeProps.layerChangedToken =  Environment.view.activeLayerChanged.bind(this, this.activeLayerChanged);
+            this.runtimeProps.layerChangedToken = Environment.view.activeLayerChanged.bind(this, this.activeLayerChanged);
         }
     }
 
-    private activeLayerChanged(layer: ILayer){
-        if (layer.type !== LayerTypes.Isolation){
+    private activeLayerChanged(layer: ILayer) {
+        if (layer.type !== LayerTypes.Isolation) {
             this.incrementVersion();
 
             this.runtimeProps.layerChangedToken.dispose();
@@ -562,10 +561,10 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
         }
     }
 
-    incrementVersion(){
+    incrementVersion() {
         this.runtimeProps.version++;
 
-        var parent = this.parent();
+        let parent = this.parent();
         if (parent) {
             parent.incrementVersion();
             if (this.props.resource === ArtboardResource.Symbol) {
@@ -573,7 +572,7 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
                 delete this.runtimeProps.refreshToolbox;
             }
 
-            if (this.props.resource != undefined) {
+            if (this.props.resource !== undefined) {
                 App.Current.resourceChanged.raise(this.props.resource, this);
             }
         }
@@ -584,8 +583,8 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
     }
 
     click(event) {
-        var scale = Environment.view.scale();
-        var pos = this.position();
+        let scale = Environment.view.scale();
+        let pos = this.position();
         if (isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width(), height: 20 / scale }, {
             x: event.x,
             y: event.y
@@ -609,7 +608,7 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
 
     relayout(oldPropsMap) {
         params.perf && performance.mark("Artboard.Relayout: " + this.id());
-        var res = RelayoutEngine.run(this, oldPropsMap);
+        let res = RelayoutEngine.run(this, oldPropsMap);
         params.perf && performance.measure("Artboard.Relayout: " + this.id(), "Artboard.Relayout: " + this.id());
         return res;
     }
@@ -633,7 +632,7 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
         if (!this._recorder) {
             return;
         }
-        var ArtboardTemplateControl = PropertyMetadata.findAll(Types.ArtboardTemplateControl)._class;
+        let ArtboardTemplateControl = PropertyMetadata.findAll(Types.ArtboardTemplateControl)._class;
         PropertyMetadata.replaceForNamedType('user:' + this.name(), ArtboardTemplateControl, this.buildMetadata(this.props.customProperties));
     }
 
@@ -652,13 +651,13 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
         }
 
         // TODO: move it to stateBoard controller class
-        var stateBoards = this.runtimeProps.stateBoards;
-        for (var i = 0; i < stateBoards.length; ++i) {
-            var stateBoard = stateBoards[i];
-            var transferProps = {};
-            var hasAnyProps = false;
-            for (var propName in props) {
-                if (element === this && (propName == 'm' || propName === 'customProperties' || propName === 'state' || propName === "states" || propName === "actions" || propName === "resource" || propName === "tileSize" || propName === "insertAsContent")) {
+        let stateBoards = this.runtimeProps.stateBoards;
+        for (let i = 0; i < stateBoards.length; ++i) {
+            let stateBoard = stateBoards[i];
+            let transferProps = {};
+            let hasAnyProps = false;
+            for (let propName in props) {
+                if (element === this && (propName === 'm' || propName === 'customProperties' || propName === 'state' || propName === "states" || propName === "actions" || propName === "resource" || propName === "tileSize" || propName === "insertAsContent")) {
                     continue;
                 }
 
@@ -677,10 +676,10 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
         super.propsPatched(patchType, propName, item);
 
         if (propName === 'states' && patchType === PatchType.Remove) {
-            var stateBoards = this.runtimeProps.stateBoards;
-            for (var i = 0; i < stateBoards.length; ++i) {
-                var stateBoard = stateBoards[i];
-                if (stateBoard.stateId == item.id) {
+            let stateBoards = this.runtimeProps.stateBoards;
+            for (let i = 0; i < stateBoards.length; ++i) {
+                let stateBoard = stateBoards[i];
+                if (stateBoard.stateId === item.id) {
                     stateBoard.parent().remove(stateBoard);
                     break;
                 }
@@ -695,23 +694,23 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
         }
 
         // TODO: move it to stateBoard controller class
-        var stateBoards = this.runtimeProps.stateBoards;
-        for (var i = 0; i < stateBoards.length; ++i) {
-            var stateBoard = stateBoards[i];
+        let stateBoards = this.runtimeProps.stateBoards;
+        for (let i = 0; i < stateBoards.length; ++i) {
+            let stateBoard = stateBoards[i];
             stateBoard.transferInsert(parent, element, index);
         }
     }
 
     transferInsert(fromStateId, parentId, element, index) {
-        var parent = this.getElementById(parentId);
+        let parent = this.getElementById(parentId);
         parent.insert(element, index, ChangeMode.Root);
         ModelStateListener.trackInsert(this, parent, element, index);
         this._recorder.trackInsert(element.id());
 
         // TODO: move it to stateBoard controller class
-        var stateBoards = this.runtimeProps.stateBoards;
-        for (var i = 0; i < stateBoards.length; ++i) {
-            var stateBoard = stateBoards[i];
+        let stateBoards = this.runtimeProps.stateBoards;
+        for (let i = 0; i < stateBoards.length; ++i) {
+            let stateBoard = stateBoards[i];
             if (stateBoard.stateId !== fromStateId) {
                 stateBoard.transferInsert(parent, element, index);
             }
@@ -731,9 +730,9 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
         delete this.runtimeProps.primitiveRootKey;
 
         // TODO: move it to stateBoard controller class
-        var stateBoards = this.runtimeProps.stateBoards;
-        for (var i = 0; i < stateBoards.length; ++i) {
-            var stateBoard = stateBoards[i];
+        let stateBoards = this.runtimeProps.stateBoards;
+        for (let i = 0; i < stateBoards.length; ++i) {
+            let stateBoard = stateBoards[i];
             stateBoard.parent().remove(stateBoard);
         }
 
@@ -749,17 +748,17 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
         }
 
         // TODO: move it to stateBoard controller class
-        var stateBoards = this.runtimeProps.stateBoards;
-        for (var i = 0; i < stateBoards.length; ++i) {
-            var stateBoard = stateBoards[i];
+        let stateBoards = this.runtimeProps.stateBoards;
+        for (let i = 0; i < stateBoards.length; ++i) {
+            let stateBoard = stateBoards[i];
             stateBoard.transferDelete(element);
         }
     }
 
     removeStateById(stateId) {
         this._recorder.removeStateById(stateId);
-        var stateBoards = this.runtimeProps.stateBoards;
-        for (var i = 0; i < stateBoards.length; ++i) {
+        let stateBoards = this.runtimeProps.stateBoards;
+        for (let i = 0; i < stateBoards.length; ++i) {
             if (stateBoards[i].props.stateId === stateId) {
                 stateBoards.splice(i, 1);
                 break;
@@ -774,9 +773,9 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
         }
 
         // TODO: move it to stateBoard controller class
-        var stateBoards = this.runtimeProps.stateBoards;
-        for (var i = 0; i < stateBoards.length; ++i) {
-            var stateBoard = stateBoards[i];
+        let stateBoards = this.runtimeProps.stateBoards;
+        for (let i = 0; i < stateBoards.length; ++i) {
+            let stateBoard = stateBoards[i];
             stateBoard.transferChangePosition(element, index);
         }
     }
@@ -794,11 +793,11 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
     }
 
     linkNewStateBoard(stateBoard) {
-        var margin = 40;
-        var box = this.getBoundingBox();
-        var width = box.width;
-        var height = box.height;
-        var statesCount = this._recorder.statesCount();
+        let margin = 40;
+        let box = this.getBoundingBox();
+        let width = box.width;
+        let height = box.height;
+        let statesCount = this._recorder.statesCount();
 
         stateBoard.setProps({
             masterId: this.id(),
@@ -808,9 +807,9 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
         }, ChangeMode.Self);
         stateBoard.applyTranslation(new Point(box.x, box.y + (statesCount - 1) * (height + margin)), false, ChangeMode.Self);
 
-        for (var i = 0; i < this.children.length; i++) {
-            var e = this.children[i];
-            var clone = e.clone();
+        for (let i = 0; i < this.children.length; i++) {
+            let e = this.children[i];
+            let clone = e.clone();
             clone.setProps({ masterId: e.id() }, ChangeMode.Self);
             stateBoard.add(clone, ChangeMode.Root);
         }
@@ -828,31 +827,31 @@ class Artboard extends Container<IArtboardProps> implements IPrimitiveRoot, IIso
     }
 
     _linkRelatedStateBoards() {
-        var id = this.id();
-        var stateBoards = this.runtimeProps.stateBoards;
-        var missingLinks = this.props.states.filter(x => x.id !== "default" && !stateBoards.some(y => x.id === y.props.stateId));
-        for (var i = 0; i < missingLinks.length; i++) {
-            var stateId = missingLinks[i].id;
-            var stateBoard = this.parent().findNodeBreadthFirst(x => x.props.masterId === id && x.props.stateId === stateId);
+        let id = this.id();
+        let stateBoards = this.runtimeProps.stateBoards;
+        let missingLinks = this.props.states.filter(x => x.id !== "default" && !stateBoards.some(y => x.id === y.props.stateId));
+        for (let i = 0; i < missingLinks.length; i++) {
+            let stateId = missingLinks[i].id;
+            let stateBoard = this.parent().findNodeBreadthFirst(x => x.props.masterId === id && x.props.stateId === stateId);
             this.linkStateBoard(stateBoard);
         }
         return stateBoards;
     }
 
     replaceAction(oldAction, newAction) {
-        var index = this.props.actions.findIndex(a => a === oldAction);
+        let index = this.props.actions.findIndex(a => a === oldAction);
         if (index >= 0) {
-            var newActions = this.props.actions.slice();
+            let newActions = this.props.actions.slice();
             newActions.splice(index, 1, newAction);
             this.setProps({ actions: newActions });
         }
     }
 
-    isEditable(){
+    isEditable() {
         return true;
     }
 
-    onIsolationExited(){
+    onIsolationExited() {
     }
 }
 Artboard.prototype.t = Types.Artboard;
@@ -936,7 +935,7 @@ PropertyMetadata.registerForType(Artboard, {
         }
     },
     prepareVisibility(element: Artboard) {
-        var showAsStencil = element.props.resource === ArtboardResource.Symbol;
+        let showAsStencil = element.props.resource === ArtboardResource.Symbol;
         return {
             tileSize: showAsStencil,
             insertAsContent: showAsStencil,

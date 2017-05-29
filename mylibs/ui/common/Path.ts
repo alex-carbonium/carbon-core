@@ -1,6 +1,6 @@
 import UIElement from "framework/UIElement";
-import nearestPoint from  "math/NearestPoint";
-import PropertyTracker from  "../../framework/PropertyTracker";
+import nearestPoint from "math/NearestPoint";
+import PropertyTracker from "../../framework/PropertyTracker";
 import BezierGraph from "math/bezierGraph";
 import BezierCurve from "math/bezierCurve";
 import Rect from "math/rect";
@@ -9,26 +9,26 @@ import ResizeDimension from "framework/ResizeDimension";
 import Brush from "framework/Brush";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Matrix from "math/matrix";
-import {multiplyVectorConst, addVectors, subVectors} from "math/math";
+import { multiplyVectorConst, addVectors, subVectors } from "math/math";
 import Shape from "framework/Shape";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import SnapController from "framework/SnapController";
 import Box from "framework/Box";
-import {debounce} from "../../util";
+import { debounce } from "../../util";
 import Command from "framework/commands/Command";
-import {Types} from "../../framework/Defs";
+import { Types } from "../../framework/Defs";
 import ArrangeStrategy from "../../framework/ArrangeStrategy";
 import ResizeOptions from "../../decorators/ResizeOptions";
 import { IMouseEventData, IKeyboardState, ChangeMode, IIntersectionRange } from "carbon-core";
 import { LayerTypes } from "carbon-app";
 import UserSettings from "UserSettings";
 
-var CP_HANDLE_RADIUS = 3;
-var CP_HANDLE_RADIUS2 = 6;
-var CP_RADIUS = 4;
-var CP_RADIUS2 = 8;
+const CP_HANDLE_RADIUS = 3;
+const CP_HANDLE_RADIUS2 = 6;
+const CP_RADIUS = 4;
+const CP_RADIUS2 = 8;
 
 const POINT_STROKE = UserSettings.path.pointStroke;
 const POINT_FILL = UserSettings.path.pointFill;
@@ -41,7 +41,7 @@ const enum PointType {
     Assymetric
 };
 
-var commandLengths = {
+const commandLengths = {
     m: 2,
     l: 2,
     h: 1,
@@ -70,7 +70,7 @@ function updateSelectedPoint(pt) {
             this.runtimeProps.currentPointY = pt.y;
             this._selectedPoint.type = pt.type;
         }
-        this.setProps({selectedPointIdx: pt ? pt.idx : -1}, ChangeMode.Self);
+        this.setProps({ selectedPointIdx: pt ? pt.idx : -1 }, ChangeMode.Self);
         Selection.reselect();
     }
 }
@@ -85,8 +85,8 @@ function addToSelectedPoints(pt) {
         this._selectedPoints[pt.idx] = pt;
     }
 
-    if (this.props.selectedPointIdx !== -1 && Object.keys(this._selectedPoints).length > 1){
-        this.setProps({selectedPointIdx: -1}, ChangeMode.Self);
+    if (this.props.selectedPointIdx !== -1 && Object.keys(this._selectedPoints).length > 1) {
+        this.setProps({ selectedPointIdx: -1 }, ChangeMode.Self);
     }
 
     Invalidate.requestInteractionOnly();
@@ -96,18 +96,18 @@ function clearSelectedPoints() {
     this._selectedPoints = {};
 }
 
-var isLinePoint = function (pt) {
+let isLinePoint = function (pt) {
     return pt.type === PointType.Straight;
 };
 
-var getClickedPoint = function (x, y) {
-    var pos = this.globalViewMatrixInverted().transformPoint2(x, y);
+let getClickedPoint = function (x, y) {
+    let pos = this.globalViewMatrixInverted().transformPoint2(x, y);
 
-    var zoom = Environment.view.scale();
-    for (var i = 0, len = this.points.length; i < len; ++i) {
-        var pt = this.points[i];
+    let zoom = Environment.view.scale();
+    for (let i = 0, len = this.points.length; i < len; ++i) {
+        let pt = this.points[i];
         pt.idx = i;
-        var x2 = pos.x - pt.x
+        let x2 = pos.x - pt.x
             , y2 = pos.y - pt.y
         if (x2 * x2 + y2 * y2 < CP_RADIUS2 * Environment.view.contextScale / (zoom * zoom)) {
             return pt;
@@ -116,18 +116,18 @@ var getClickedPoint = function (x, y) {
     return null;
 };
 
-var getClickedHandlePoint = function (x, y) {
-    var pos = this.globalViewMatrixInverted().transformPoint2(x, y);
+let getClickedHandlePoint = function (x, y) {
+    let pos = this.globalViewMatrixInverted().transformPoint2(x, y);
 
-    var zoom = Environment.view.scale();
+    let zoom = Environment.view.scale();
 
-    for (var i = 0, len = this.points.length; i < len; ++i) {
-        var pt = this.points[i];
+    for (let i = 0, len = this.points.length; i < len; ++i) {
+        let pt = this.points[i];
         pt.idx = i;
         if (isLinePoint(pt)) {
             continue;
         }
-        var x2 = pos.x - pt.cp1x
+        let x2 = pos.x - pt.cp1x
             , y2 = pos.y - pt.cp1y
         if (x2 * x2 + y2 * y2 < CP_HANDLE_RADIUS2 * Environment.view.contextScale / (zoom * zoom)) {
             pt._selectedPoint = 1;
@@ -144,14 +144,14 @@ var getClickedHandlePoint = function (x, y) {
     return null;
 };
 
-var setLinePoint = function (pt) {
+let setLinePoint = function (pt) {
     pt.cp1x = pt.cp2x = pt.x;
     pt.cp1y = pt.cp2y = pt.y;
 };
 
-var drawSegment = function (context, pt, prevPt, closing) {
-    var m = this.globalViewMatrix();
-    var xy = m.transformPoint(pt);
+let drawSegment = function (context, pt, prevPt, closing) {
+    let m = this.globalViewMatrix();
+    let xy = m.transformPoint(pt);
 
     if (!this._firstPoint) {
         this._firstPoint = pt;
@@ -162,7 +162,7 @@ var drawSegment = function (context, pt, prevPt, closing) {
     else if (isLinePoint(pt) && (isLinePoint(prevPt))) { // line segment
         context.lineTo(xy.x, xy.y);
     } else { // cubic bezier segment
-        var cp1x = prevPt.cp2x
+        let cp1x = prevPt.cp2x
             , cp1y = prevPt.cp2y
             , cp2x = pt.cp1x
             , cp2y = pt.cp1y;
@@ -175,8 +175,8 @@ var drawSegment = function (context, pt, prevPt, closing) {
             cp2y = pt.y;//cp1y;
         }
 
-        var cp1 = m.transformPoint2(cp1x, cp1y);
-        var cp2 = m.transformPoint2(cp2x, cp2y);
+        let cp1 = m.transformPoint2(cp1x, cp1y);
+        let cp2 = m.transformPoint2(cp2x, cp2y);
         context.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, xy.x, xy.y);
     }
 
@@ -187,14 +187,14 @@ var drawSegment = function (context, pt, prevPt, closing) {
     }
 };
 
-var scalePointsToNewSize = function () {
-    var bb = this.getBoundingBox();
-    var m = this.viewMatrix();
-    for (var i = 0; i < this.points.length; ++i) {
-        var pt = this.points[i];
-        var xy = m.transformPoint2(pt.x, pt.y);
-        var cp1 = m.transformPoint2(pt.cp1x, pt.cp1y);
-        var cp2 = m.transformPoint2(pt.cp2x, pt.cp2y);
+let scalePointsToNewSize = function () {
+    let bb = this.getBoundingBox();
+    let m = this.viewMatrix();
+    for (let i = 0; i < this.points.length; ++i) {
+        let pt = this.points[i];
+        let xy = m.transformPoint2(pt.x, pt.y);
+        let cp1 = m.transformPoint2(pt.cp1x, pt.cp1y);
+        let cp2 = m.transformPoint2(pt.cp2x, pt.cp2y);
         pt.x = xy.x - bb.x;
         pt.y = xy.y - bb.y;
         pt.cp1x = cp1.x - bb.x;
@@ -204,12 +204,12 @@ var scalePointsToNewSize = function () {
         this._roundPoint(pt);
     }
     this.setTransform(Matrix.create().translate(bb.x, bb.y));
-    this.setProps({br: bb.withPosition(0, 0)});
+    this.setProps({ br: bb.withPosition(0, 0) });
 };
 
 function moveAllPoints(dx, dy) {
-    for (var i = 0, len = this.points.length; i < len; ++i) {
-        var pt = this.points[i];
+    for (let i = 0, len = this.points.length; i < len; ++i) {
+        let pt = this.points[i];
         pt.x -= dx;
         pt.y -= dy;
         pt.cp1x -= dx;
@@ -222,10 +222,10 @@ function moveAllPoints(dx, dy) {
 
 
 function moveCurrentPoint(dx, dy) {
-    var keys = Object.keys(this._selectedPoints);
+    let keys = Object.keys(this._selectedPoints);
     if (keys.length) {
-        for (var i = 0; i < keys.length; ++i) {
-            var p = this._selectedPoints[keys[i]];
+        for (let i = 0; i < keys.length; ++i) {
+            let p = this._selectedPoints[keys[i]];
             p.x -= dx;
             p.y -= dy;
             p.cp1x -= dx;
@@ -241,31 +241,31 @@ function moveCurrentPoint(dx, dy) {
         this._currentPoint.cp1y -= dy;
         this._currentPoint.cp2x -= dx;
         this._currentPoint.cp2y -= dy;
-        this.setProps({currentPointX: this._currentPoint.x, currentPointY: this._currentPoint.y}, ChangeMode.Root);
+        this.setProps({ currentPointX: this._currentPoint.x, currentPointY: this._currentPoint.y }, ChangeMode.Root);
     }
 }
 
 function drawArc(path, x, y, coords, matrix) {
-    var rx = coords[0];
-    var ry = coords[1];
-    var rot = coords[2];
-    var large = coords[3];
-    var sweep = coords[4];
-    var ex = coords[5];
-    var ey = coords[6];
-    var segs = arcToSegments(ex, ey, rx, ry, large, sweep, rot, x, y);
-    for (var i = 0; i < segs.length; i++) {
-        var bez = segmentToBezier.apply(this, segs[i]);
+    let rx = coords[0];
+    let ry = coords[1];
+    let rot = coords[2];
+    let large = coords[3];
+    let sweep = coords[4];
+    let ex = coords[5];
+    let ey = coords[6];
+    let segs = arcToSegments(ex, ey, rx, ry, large, sweep, rot, x, y);
+    for (let i = 0; i < segs.length; i++) {
+        let bez = segmentToBezier.apply(this, segs[i]);
 
-        var cp1 = matrix.transformPoint2(bez[0], bez[1]);
-        var cp2 = matrix.transformPoint2(bez[2], bez[3]);
-        var p = matrix.transformPoint2(bez[4], bez[5]);
+        let cp1 = matrix.transformPoint2(bez[0], bez[1]);
+        let cp2 = matrix.transformPoint2(bez[2], bez[3]);
+        let p = matrix.transformPoint2(bez[4], bez[5]);
 
         path.curveToPoint(p, cp1, cp2);
     }
 }
 
-var arcToSegmentsCache = {},
+let arcToSegmentsCache = {},
     segmentToBezierCache = {},
     _join = Array.prototype.join,
     argsString;
@@ -277,52 +277,57 @@ function arcToSegments(x, y, rx, ry, large, sweep, rotateX, ox, oy) {
         return arcToSegmentsCache[argsString];
     }
 
-    var th = rotateX * (Math.PI / 180);
-    var sin_th = Math.sin(th);
-    var cos_th = Math.cos(th);
+    let th = rotateX * (Math.PI / 180);
+    let sin_th = Math.sin(th);
+    let cos_th = Math.cos(th);
     rx = Math.abs(rx);
     ry = Math.abs(ry);
-    var px = cos_th * (ox - x) * 0.5 + sin_th * (oy - y) * 0.5;
-    var py = cos_th * (oy - y) * 0.5 - sin_th * (ox - x) * 0.5;
-    var pl = (px * px) / (rx * rx) + (py * py) / (ry * ry);
+    let px = cos_th * (ox - x) * 0.5 + sin_th * (oy - y) * 0.5;
+    let py = cos_th * (oy - y) * 0.5 - sin_th * (ox - x) * 0.5;
+    let pl = (px * px) / (rx * rx) + (py * py) / (ry * ry);
     if (pl > 1) {
         pl = Math.sqrt(pl);
         rx *= pl;
         ry *= pl;
     }
 
-    var a00 = cos_th / rx;
-    var a01 = sin_th / rx;
-    var a10 = (-sin_th) / ry;
-    var a11 = (cos_th) / ry;
-    var x0 = a00 * ox + a01 * oy;
-    var y0 = a10 * ox + a11 * oy;
-    var x1 = a00 * x + a01 * y;
-    var y1 = a10 * x + a11 * y;
+    let a00 = cos_th / rx;
+    let a01 = sin_th / rx;
+    let a10 = (-sin_th) / ry;
+    let a11 = (cos_th) / ry;
+    let x0 = a00 * ox + a01 * oy;
+    let y0 = a10 * ox + a11 * oy;
+    let x1 = a00 * x + a01 * y;
+    let y1 = a10 * x + a11 * y;
 
-    var d = (x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0);
-    var sfactor_sq = 1 / d - 0.25;
-    if (sfactor_sq < 0) sfactor_sq = 0;
-    var sfactor = Math.sqrt(sfactor_sq);
-    if (sweep === large) sfactor = -sfactor;
-    var xc = 0.5 * (x0 + x1) - sfactor * (y1 - y0);
-    var yc = 0.5 * (y0 + y1) + sfactor * (x1 - x0);
+    let d = (x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0);
+    let sfactor_sq = 1 / d - 0.25;
+    if (sfactor_sq < 0) {
+        sfactor_sq = 0;
+    }
+    let sfactor = Math.sqrt(sfactor_sq);
+    if (sweep === large) {
+        sfactor = -sfactor;
+    }
 
-    var th0 = Math.atan2(y0 - yc, x0 - xc);
-    var th1 = Math.atan2(y1 - yc, x1 - xc);
+    let xc = 0.5 * (x0 + x1) - sfactor * (y1 - y0);
+    let yc = 0.5 * (y0 + y1) + sfactor * (x1 - x0);
 
-    var th_arc = th1 - th0;
+    let th0 = Math.atan2(y0 - yc, x0 - xc);
+    let th1 = Math.atan2(y1 - yc, x1 - xc);
+
+    let th_arc = th1 - th0;
     if (th_arc < 0 && sweep === 1) {
         th_arc += 2 * Math.PI;
     } else if (th_arc > 0 && sweep === 0) {
         th_arc -= 2 * Math.PI;
     }
 
-    var segments = Math.ceil(Math.abs(th_arc / (Math.PI * 0.5 + 0.001)));
-    var result = [];
-    for (var i = 0; i < segments; i++) {
-        var th2 = th0 + i * th_arc / segments;
-        var th3 = th0 + (i + 1) * th_arc / segments;
+    let segments = Math.ceil(Math.abs(th_arc / (Math.PI * 0.5 + 0.001)));
+    let result = [];
+    for (let i = 0; i < segments; i++) {
+        let th2 = th0 + i * th_arc / segments;
+        let th3 = th0 + (i + 1) * th_arc / segments;
         result[i] = [xc, yc, th2, th3, rx, ry, sin_th, cos_th];
     }
 
@@ -335,19 +340,19 @@ function segmentToBezier(cx, cy, th0, th1, rx, ry, sin_th, cos_th) {
         return segmentToBezierCache[argsString];
     }
 
-    var a00 = cos_th * rx;
-    var a01 = -sin_th * ry;
-    var a10 = sin_th * rx;
-    var a11 = cos_th * ry;
+    let a00 = cos_th * rx;
+    let a01 = -sin_th * ry;
+    let a10 = sin_th * rx;
+    let a11 = cos_th * ry;
 
-    var th_half = 0.5 * (th1 - th0);
-    var t = (8 / 3) * Math.sin(th_half * 0.5) * Math.sin(th_half * 0.5) / Math.sin(th_half);
-    var x1 = cx + Math.cos(th0) - t * Math.sin(th0);
-    var y1 = cy + Math.sin(th0) + t * Math.cos(th0);
-    var x3 = cx + Math.cos(th1);
-    var y3 = cy + Math.sin(th1);
-    var x2 = x3 + t * Math.sin(th1);
-    var y2 = y3 - t * Math.cos(th1);
+    let th_half = 0.5 * (th1 - th0);
+    let t = (8 / 3) * Math.sin(th_half * 0.5) * Math.sin(th_half * 0.5) / Math.sin(th_half);
+    let x1 = cx + Math.cos(th0) - t * Math.sin(th0);
+    let y1 = cy + Math.sin(th0) + t * Math.cos(th0);
+    let x3 = cx + Math.cos(th1);
+    let y3 = cy + Math.sin(th1);
+    let x2 = x3 + t * Math.sin(th1);
+    let y2 = y3 - t * Math.cos(th1);
 
     return (segmentToBezierCache[argsString] = [
         a00 * x1 + a01 * y1, a10 * x1 + a11 * y1,
@@ -368,9 +373,9 @@ class Path extends Shape {
 
     tryDelete(): boolean {
         if (this._selectedPoint && this.points.length > 2) {
-            var keys = Object.keys(this._selectedPoints).map((k: any)=>k - 0).sort((a, b)=>b - a);
+            let keys = Object.keys(this._selectedPoints).map((k: any) => k - 0).sort((a, b) => b - a);
             if (keys.length) {
-                for (var i = 0; i < keys.length; ++i) {
+                for (let i = 0; i < keys.length; ++i) {
                     this.removePointAtIndex(keys[i]);
                 }
                 clearSelectedPoints.call(this);
@@ -385,14 +390,14 @@ class Path extends Shape {
     }
 
     _save() {
-        var newPoints = this.points.slice();
+        let newPoints = this.points.slice();
         this.props.points = this._lastPoints;
-        this.setProps({points: newPoints});
+        this.setProps({ points: newPoints });
         this._lastPoints = this.points;
     }
 
-    cloneProps(){
-        var props = super.cloneProps();
+    cloneProps() {
+        let props = super.cloneProps();
         props.points = props.points.map(x => Object.assign({}, x));
         return props;
     }
@@ -402,7 +407,7 @@ class Path extends Shape {
     }
 
     set points(value) {
-        this.setProps({points: value});
+        this.setProps({ points: value });
     }
 
     controlPointForPosition(pos) {
@@ -413,15 +418,15 @@ class Path extends Shape {
         return this.points[idx];
     }
 
-    get firstPoint(){
+    get firstPoint() {
         return this.points[0];
     }
-    get lastPoint(){
+    get lastPoint() {
         return this.points[this.points.length - 1];
     }
 
     set nextPoint(value) {
-        if (value != this._nextPoint) {
+        if (value !== this._nextPoint) {
             Invalidate.requestInteractionOnly();
         }
         this._nextPoint = value;
@@ -435,7 +440,7 @@ class Path extends Shape {
     }
 
     removeControlPoint(pt) {
-        for (var i = 0; i < this.points.length; ++i) {
+        for (let i = 0; i < this.points.length; ++i) {
             if (this.points[i] === pt) {
                 this.points.splice(i, 1);
                 return;
@@ -444,7 +449,7 @@ class Path extends Shape {
     }
 
     _roundPoint(pt) {
-        var x, y;
+        let x, y;
         if (this.props.pointRounding === 0) {
             x = (0 | (pt.x + 0.005) * 100) / 100;
             y = (0 | (pt.y + 0.005) * 100) / 100;
@@ -470,7 +475,7 @@ class Path extends Shape {
     }
 
     indexOfPoint(pt) {
-        for (var i = 0; i < this.points.length; ++i) {
+        for (let i = 0; i < this.points.length; ++i) {
             if (this.points[i] === pt) {
                 return i;
             }
@@ -488,15 +493,15 @@ class Path extends Shape {
     }
 
     removeLastPoint() {
-        var length = this.length();
+        let length = this.length();
         this.removePointAtIndex(length - 1);
     }
 
     mode(value?) {
         if (arguments.length > 0) {
-            var oldMode = this.mode();
+            let oldMode = this.mode();
 
-            this.setProps({mode: value});
+            this.setProps({ mode: value });
 
             if (value === "edit") {
                 if (oldMode !== "edit") {
@@ -554,17 +559,17 @@ class Path extends Shape {
     _initPoint(point) {
         this._roundPoint(point);
         if (point.type === undefined) {
-            if (point.cp1x == undefined && point.cp2x == undefined) {
+            if (point.cp1x === undefined && point.cp2x === undefined) {
                 point.type = PointType.Straight;
                 point.cp1x = point.x;
                 point.cp1y = point.y;
                 point.cp2x = point.x;
                 point.cp2y = point.y;
-            } else if (point.cp1x == undefined) {
+            } else if (point.cp1x === undefined) {
                 point.type = PointType.Assymetric;
                 point.cp1x = point.x;
                 point.cp1y = point.y;
-            } else if (point.cp2x == undefined) {
+            } else if (point.cp2x === undefined) {
                 point.type = PointType.Assymetric;
                 point.cp2x = point.x;
                 point.cp2y = point.y;
@@ -576,8 +581,9 @@ class Path extends Shape {
     }
 
     addPoint(point) {
-        if (!point)
+        if (!point) {
             return;
+        }
 
         this._initPoint(point);
         this.points.push(point);
@@ -610,7 +616,7 @@ class Path extends Shape {
             SnapController.calculateSnappingPointsForPath(this);
         }
 
-        if (changeMode !== ChangeMode.Self){
+        if (changeMode !== ChangeMode.Self) {
             this.save();
         }
     }
@@ -633,7 +639,7 @@ class Path extends Shape {
         }
     }
 
-    selectFrameVisible(){
+    selectFrameVisible() {
         return this.mode() !== "edit";
     }
 
@@ -645,7 +651,7 @@ class Path extends Shape {
         if (this.mode() !== "edit") {
             this.edit();
         } else {
-            var pt = getClickedPoint.call(this, event.x, event.y);
+            let pt = getClickedPoint.call(this, event.x, event.y);
             if (pt) {
                 if (pt.type !== PointType.Straight) {
                     pt.type = PointType.Straight;
@@ -681,8 +687,8 @@ class Path extends Shape {
             clearSelectedPoints.call(this);
         }
 
-        var pt = this._currentPoint || this._handlePoint;
-        if (pt != null) {
+        let pt = this._currentPoint || this._handlePoint;
+        if (pt !== null) {
             SnapController.clearActiveSnapLines();
             this._currentPoint = null;
             this._handlePoint = null;
@@ -697,8 +703,8 @@ class Path extends Shape {
 
     bendPoints(newPos, data) {
         // p2 = (Bc - (Ac + Iij)*p0 - (Ec - Kij)*p3 - Bdtij  ) / DD;
-        var Bc = multiplyVectorConst(newPos, 1 / data.C);
-        var p2 = multiplyVectorConst(
+        let Bc = multiplyVectorConst(newPos, 1 / data.C);
+        let p2 = multiplyVectorConst(
             addVectors(
                 Bc,
                 multiplyVectorConst(data.p0, -(data.Ac + data.Iij)),
@@ -709,17 +715,17 @@ class Path extends Shape {
         );
 
         // p1 = Bc - Ac*p0 - Dc*p2 -Ec*p3
-        var p1 = addVectors(
+        let p1 = addVectors(
             Bc,
             multiplyVectorConst(data.p0, -data.Ac),
             multiplyVectorConst(p2, -data.Dc),
             multiplyVectorConst(data.p3, -data.Ec)
         );
 
-        var len = this.length();
-        var p1idx = (data.idx - 1 + len) % len;
-        var p0 = clone(this.points[p1idx]);
-        var p3 = clone(this.points[data.idx]);
+        let len = this.length();
+        let p1idx = (data.idx - 1 + len) % len;
+        let p0 = clone(this.points[p1idx]);
+        let p3 = clone(this.points[data.idx]);
 
         p0.cp2x = p1.x;
         p0.cp2y = p1.y;
@@ -732,41 +738,41 @@ class Path extends Shape {
     }
 
     calculateOriginalBendingData(point) {
-        var len = this.length();
-        var p1idx = (point.idx - 1 + len) % len;
-        var p0 = this.points[p1idx];
-        var p3 = this.points[point.idx];
-        var p1 = {x: p0.cp2x, y: p0.cp2y};
-        var p2 = {x: p3.cp1x, y: p3.cp1y};
-        var t = point.t;
-        var t_2 = t * t;
-        var t_3 = t_2 * t;
-        var tm1 = 1 - t;
-        var tm1_2 = tm1 * tm1;
-        var tm1_3 = tm1_2 * tm1;
+        let len = this.length();
+        let p1idx = (point.idx - 1 + len) % len;
+        let p0 = this.points[p1idx];
+        let p3 = this.points[point.idx];
+        let p1 = { x: p0.cp2x, y: p0.cp2y };
+        let p2 = { x: p3.cp1x, y: p3.cp1y };
+        let t = point.t;
+        let t_2 = t * t;
+        let t_3 = t_2 * t;
+        let tm1 = 1 - t;
+        let tm1_2 = tm1 * tm1;
+        let tm1_3 = tm1_2 * tm1;
 
-        var A = tm1_3;
-        var C = 3 * tm1_2 * t;
-        var D = 3 * tm1 * t_2;
-        var E = t_3;
+        let A = tm1_3;
+        let C = 3 * tm1_2 * t;
+        let D = 3 * tm1 * t_2;
+        let E = t_3;
 
-        var Bt = addVectors(
+        let Bt = addVectors(
             multiplyVectorConst(p0, A),
             multiplyVectorConst(p1, C),
             multiplyVectorConst(p2, D),
             multiplyVectorConst(p3, E)
         );
 
-        var I = 3 * tm1_2;
-        var J = 6 * tm1 * t;
-        var K = 3 * t_2;
+        let I = 3 * tm1_2;
+        let J = 6 * tm1 * t;
+        let K = 3 * t_2;
 
-        var Bdt = addVectors(
+        let Bdt = addVectors(
             multiplyVectorConst(subVectors(p1, p0), I),
             multiplyVectorConst(subVectors(p2, p1), J),
             multiplyVectorConst(subVectors(p3, p2), K)
         );
-        var IJ = I - J;
+        let IJ = I - J;
         return {
             Bt: Bt,
             C: C,
@@ -786,7 +792,7 @@ class Path extends Shape {
     }
 
     mousedown(event: IMouseEventData, keys: IKeyboardState) {
-        var x = event.x,
+        let x = event.x,
             y = event.y;
 
         this._groupMove = false;
@@ -795,7 +801,7 @@ class Path extends Shape {
             return;
         }
 
-        var pt = getClickedPoint.call(this, x, y);
+        let pt = getClickedPoint.call(this, x, y);
 
         if (pt && keys.shift) {
             addToSelectedPoints.call(this, pt);
@@ -803,7 +809,7 @@ class Path extends Shape {
             clearSelectedPoints.call(this);
         }
 
-        if (pt != null) {
+        if (pt !== null) {
             event.handled = true;
             if (keys.alt) {
                 this._altPressed = true;
@@ -816,7 +822,7 @@ class Path extends Shape {
             this._pointOnPath = null;
         } else {
             pt = getClickedHandlePoint.call(this, x, y);
-            if (pt != null) {
+            if (pt !== null) {
                 event.handled = true;
                 this._handlePoint = pt;
                 this._originalPoint = clone(pt);
@@ -825,9 +831,10 @@ class Path extends Shape {
                 event.handled = true;
 
                 if (keys.shift) {
-                    var data = this.getInsertPointData(this._pointOnPath);
+                    let data = this.getInsertPointData(this._pointOnPath);
+                    let newPoint = null;
                     if (data.length === 1) {
-                        var newPoint = this.insertPointAtIndex(data[0], data[0].idx);
+                        newPoint = this.insertPointAtIndex(data[0], data[0].idx);
                     } else {
                         this.changePointAtIndex(data[0], data[0].idx);
                         this.changePointAtIndex(data[1], data[1].idx);
@@ -840,7 +847,7 @@ class Path extends Shape {
                     this._pointOnPath = null;
                     Invalidate.request();
                 }
-                else{
+                else {
                     this._bendingData = this.calculateOriginalBendingData(this._pointOnPath);
                     // set bending handler
                     this._pointOnPath = null;
@@ -848,11 +855,11 @@ class Path extends Shape {
             }
         }
 
-        if (Object.keys(this._selectedPoints).length <= 1){
+        if (Object.keys(this._selectedPoints).length <= 1) {
             updateSelectedPoint.call(this, pt);
         }
 
-        if (event.handled){
+        if (event.handled) {
             PropertyTracker.suspend();
         }
     }
@@ -862,7 +869,7 @@ class Path extends Shape {
             return;
         }
 
-        var pos = {x: event.x, y: event.y};
+        let pos = { x: event.x, y: event.y };
 
         if (this._bendingData) {
             event.handled = true;
@@ -876,14 +883,14 @@ class Path extends Shape {
         }
 
 
-        if (this._currentPoint != null) {
+        if (this._currentPoint !== null) {
             pos = SnapController.applySnappingForPoint(pos);
 
             pos = this.globalViewMatrixInverted().transformPoint(pos);
 
             this._roundPoint(pos);
 
-            var newX = pos.x
+            let newX = pos.x
                 , newY = pos.y
                 , dx = this._currentPoint.x - newX
                 , dy = this._currentPoint.y - newY;
@@ -893,30 +900,31 @@ class Path extends Shape {
                 Invalidate.request();
             }
             return;
-        } else if (this._handlePoint != null) {
+        } else if (this._handlePoint !== null) {
             pos = SnapController.applySnappingForPoint(pos);
             pos = this.globalViewMatrixInverted().transformPoint(pos);
             // this._roundPoint(pos);
-            var pt = this._handlePoint;
-            var newX = pos.x,
+            let pt = this._handlePoint;
+            let newX = pos.x,
                 newY = pos.y;
             let x = pt.x,
                 y = pt.y;
+            let x2, y2;
             if (pt._selectedPoint === 1) {
                 pt.cp1x = newX;
                 pt.cp1y = newY;
-                var x2 = pt.cp2x,
-                    y2 = pt.cp2y;
+                x2 = pt.cp2x;
+                y2 = pt.cp2y;
             } else {
                 pt.cp2x = newX;
                 pt.cp2y = newY;
-                var x2 = pt.cp1x,
-                    y2 = pt.cp1y;
+                x2 = pt.cp1x;
+                y2 = pt.cp1y;
             }
 
             if (pt.type !== PointType.Disconnected) {
-                var len2 = Math.sqrt((x - x2) * (x - x2) + (y - y2) * (y - y2));
-                var len1 = Math.sqrt((x - newX) * (x - newX) + (y - newY) * (y - newY));
+                let len2 = Math.sqrt((x - x2) * (x - x2) + (y - y2) * (y - y2));
+                let len1 = Math.sqrt((x - newX) * (x - newX) + (y - newY) * (y - newY));
 
                 if (this._altPressed || pt._selectedPoint === 0 || pt.type === PointType.Mirrored) { // move both handles
                     len2 = len1;
@@ -926,8 +934,8 @@ class Path extends Shape {
                 }
 
                 if (len1 > 0) {
-                    var vx = (newX - x) * len2 / len1;
-                    var vy = (newY - y) * len2 / len1;
+                    let vx = (newX - x) * len2 / len1;
+                    let vy = (newY - y) * len2 / len1;
 
                     if (pt._selectedPoint === 1) {
                         pt.cp2x = x - vx;
@@ -942,7 +950,7 @@ class Path extends Shape {
             return;
         }
 
-        var pt = this.getPointIfClose(event);
+        let pt = this.getPointIfClose(event);
         if (this._pointOnPath !== pt) {
             this._pointOnPath = pt;
             Invalidate.requestInteractionOnly();
@@ -969,30 +977,30 @@ class Path extends Shape {
         }
 
         let x = event.x, y = event.y;
-        var pt = getClickedPoint.call(this, x, y);
+        pt = getClickedPoint.call(this, x, y);
         if (!updateHoverPoint.call(this, pt)) {
 
             pt = getClickedHandlePoint.call(this, x, y);
             updateHoverHandlePoint.call(this, pt);
         }
 
-        if (this.isHoveringOverHandle() || (this.isHoveringOverPoint() && keys.alt)){
+        if (this.isHoveringOverHandle() || (this.isHoveringOverPoint() && keys.alt)) {
             event.cursor = "pen_move_handle";
         }
-        else if (this.isHoveringOverPoint()){
+        else if (this.isHoveringOverPoint()) {
             event.cursor = "pen_move_point";
         }
-        else if (this.isHoveringOverSegment()){
+        else if (this.isHoveringOverSegment()) {
             event.cursor = keys.shift ? "pen_add_point" : "pen_move_segment";
         }
-        else{
+        else {
             event.cursor = Environment.controller.defaultCursor();
         }
     }
 
     closed(value?) {
         if (value !== undefined) {
-            this.setProps({closed: value});
+            this.setProps({ closed: value });
         }
         return this.props.closed;
     }
@@ -1021,7 +1029,7 @@ class Path extends Shape {
     }
 
     hitTest(point, scale, boundaryRectOnly = false) {
-        if (this.hasBadTransform()){
+        if (this.hasBadTransform()) {
             return false;
         }
 
@@ -1029,19 +1037,19 @@ class Path extends Shape {
             return true;
         }
 
-        if ((getClickedPoint.call(this, point.x, point.y) != null)
-            || (getClickedHandlePoint.call(this, point.x, point.y) != null)) {
+        if ((getClickedPoint.call(this, point.x, point.y) !== null)
+            || (getClickedHandlePoint.call(this, point.x, point.y) !== null)) {
             return true;
         }
-        var res = UIElement.prototype.hitTest.apply(this, arguments);
+        let res = UIElement.prototype.hitTest.apply(this, arguments);
         if (res) {
-            if (boundaryRectOnly){
+            if (boundaryRectOnly) {
                 return true;
             }
 
-            var brush = this.fill();
+            let brush = this.fill();
             if (!brush || !brush.type) {
-                var p = this.getPointIfClose(point, 8);
+                let p = this.getPointIfClose(point, 8);
                 if (p) {
                     return true;
                 } else {
@@ -1049,16 +1057,16 @@ class Path extends Shape {
                 }
             }
             else {
-                var matrix = this.parent().globalViewMatrixInverted();
+                let matrix = this.parent().globalViewMatrixInverted();
                 point = matrix.transformPoint(point);
 
-                var graph = BezierGraph.fromPath(this, this.viewMatrix());
+                let graph = BezierGraph.fromPath(this, this.viewMatrix());
 
-                var count = 0;
-                var ray = BezierCurve.bezierCurveWithLine(point, {x: point.x + 100000, y: point.y})
-                for (var curve of graph.contours) {
-                    for (var edge of curve.edges) {
-                        edge.intersectionsWithBezierCurve(ray, makeRef<IIntersectionRange>(), ()=> {
+                let count = 0;
+                let ray = BezierCurve.bezierCurveWithLine(point, { x: point.x + 100000, y: point.y })
+                for (let curve of graph.contours) {
+                    for (let edge of curve.edges) {
+                        edge.intersectionsWithBezierCurve(ray, makeRef<IIntersectionRange>(), () => {
                             count++;
                         })
                     }
@@ -1075,7 +1083,7 @@ class Path extends Shape {
 
     onLayerDraw(layer, context, environment) {
         if (this._selected && this.mode() === "edit") {
-            var scale = environment.view.scale();
+            let scale = environment.view.scale();
             context.save();
 
             context.lineWidth = 1 / scale;
@@ -1083,17 +1091,18 @@ class Path extends Shape {
             context.strokeStyle = "rgba(100,100,255,0.5)";
             context.beginPath();
 
-            var matrix = this.globalViewMatrix();
-            var w = this.props.width,
+            let matrix = this.globalViewMatrix();
+            let w = this.props.width,
                 h = this.props.height;
 
-            var handlePoint = this._handlePoint || this._hoverHandlePoint;
-            var hoverPoint = this._currentPoint || this._hoverPoint;
+            let handlePoint = this._handlePoint || this._hoverHandlePoint;
+            let hoverPoint = this._currentPoint || this._hoverPoint;
 
             this.drawPath(context, w, h);
             if (this.nextPoint && this.points.length && !this.closed()) {
-                if (hoverPoint == this.points[0]) {
-                    var nextPt = hoverPoint;
+                let nextPt;
+                if (hoverPoint === this.points[0]) {
+                    nextPt = hoverPoint;
                 } else {
                     nextPt = this.nextPoint;
                 }
@@ -1101,7 +1110,7 @@ class Path extends Shape {
             }
             context.stroke();
 
-            var needClearStyle = true;
+            let needClearStyle = true;
 
             function clearStyle() {
                 if (needClearStyle) {
@@ -1112,29 +1121,29 @@ class Path extends Shape {
             }
 
 
-            for (var i = 0, len = this.points.length; i < len; ++i) {
-                var pt = this.points[i];
-                var tpt = matrix.transformPoint(pt);
+            for (let i = 0, len = this.points.length; i < len; ++i) {
+                let pt = this.points[i];
+                let tpt = matrix.transformPoint(pt);
 
                 clearStyle();
 
                 if (!isLinePoint(pt)) {
 
-                    var cp1 = matrix.transformPoint2(pt.cp1x, pt.cp1y);
-                    var cp2 = matrix.transformPoint2(pt.cp2x, pt.cp2y);
+                    let cp1 = matrix.transformPoint2(pt.cp1x, pt.cp1y);
+                    let cp2 = matrix.transformPoint2(pt.cp2x, pt.cp2y);
                     context.beginPath();
                     context.moveTo(cp1.x, cp1.y);
                     context.lineTo(tpt.x, tpt.y);
                     context.lineTo(cp2.x, cp2.y);
                     context.stroke();
 
-                    if (pt === handlePoint && (handlePoint._selectedPoint == 1 || this._altPressed)) {
+                    if (pt === handlePoint && (handlePoint._selectedPoint === 1 || this._altPressed)) {
                         context.fillStyle = POINT_STROKE;
                         needClearStyle = true;
                     }
 
                     //context.circle(cp1.x, cp1.y, CP_HANDLE_RADIUS / scale);
-                    var r = CP_HANDLE_RADIUS / scale;
+                    let r = CP_HANDLE_RADIUS / scale;
                     context.beginPath();
                     context.moveTo(cp1.x - r, cp1.y);
                     context.lineTo(cp1.x, cp1.y - r);
@@ -1146,7 +1155,7 @@ class Path extends Shape {
 
                     clearStyle();
 
-                    if (pt === handlePoint && (handlePoint._selectedPoint == 2 || this._altPressed)) {
+                    if (pt === handlePoint && (handlePoint._selectedPoint === 2 || this._altPressed)) {
                         context.fillStyle = POINT_STROKE;
                         needClearStyle = true;
                     }
@@ -1169,11 +1178,10 @@ class Path extends Shape {
                     needClearStyle = true;
                 }
 
-                var r = CP_RADIUS;
-                if (i === 0 && !this.closed() && !pt.closed)
-                {
+                let r = CP_RADIUS;
+                if (i === 0 && !this.closed() && !pt.closed) {
                     r--;
-                    context.circle(tpt.x, tpt.y, (r + 2)/ scale);
+                    context.circle(tpt.x, tpt.y, (r + 2) / scale);
                     context.stroke();
                 }
 
@@ -1184,7 +1192,7 @@ class Path extends Shape {
 
             if (this._pointOnPath) {
                 context.fillStyle = POINT_STROKE;
-                var pp = this.globalViewMatrix().transformPoint(this._pointOnPath);
+                let pp = this.globalViewMatrix().transformPoint(this._pointOnPath);
                 context.circle(pp.x, pp.y, CP_RADIUS / scale);
                 context.fill2();
             }
@@ -1196,23 +1204,23 @@ class Path extends Shape {
         this.applyMatrixScaling(s, o, options, changeMode);
     }
 
-    skew(): void{
+    skew(): void {
     }
 
-    shouldApplyViewMatrix(){
+    shouldApplyViewMatrix() {
         return false;
     }
 
     drawPath(context, w, h) {
-        if (this.points.length == 0) {
+        if (this.points.length === 0) {
             return;
         }
 
-        var pt;
-        var points = this.points;
+        let pt;
+        let points = this.points;
         this._firstPoint = null;
-        var prevPt = null;// = pt = points[0];
-        for (var i = 0, len = points.length; i < len; ++i) {
+        let prevPt = null;// = pt = points[0];
+        for (let i = 0, len = points.length; i < len; ++i) {
             pt = points[i];
             drawSegment.call(this, context, pt, prevPt);
             prevPt = pt;
@@ -1247,12 +1255,12 @@ class Path extends Shape {
         return this.runtimeProps.globalClippingBox;
     }
 
-    getBoundingBox(){
-        if (this.points.length <= 1){
+    getBoundingBox() {
+        if (this.points.length <= 1) {
             return Rect.Zero;
         }
-        if (!this.runtimeProps.bb){
-            var graph = new BezierGraph();
+        if (!this.runtimeProps.bb) {
+            let graph = new BezierGraph();
             graph.initWithBezierPath(this, this.viewMatrix());
             this.runtimeProps.bb = Rect.fromObject(graph.bounds);
         }
@@ -1261,10 +1269,10 @@ class Path extends Shape {
     }
 
     getGlobalBoundingBox() {
-        if (this.points.length <= 1){
+        if (this.points.length <= 1) {
             return Rect.Zero;
         }
-        var graph = new BezierGraph();
+        let graph = new BezierGraph();
         graph.initWithBezierPath(this, this.globalViewMatrix());
         return Rect.fromObject(graph.bounds);
     }
@@ -1275,22 +1283,22 @@ class Path extends Shape {
             return;
         }
 
-        var graph = new BezierGraph();
+        let graph = new BezierGraph();
         graph.initWithBezierPath(this, Matrix.Identity);
 
-        this.prepareAndSetProps({br: Rect.fromObject(graph.bounds)});
+        this.prepareAndSetProps({ br: Rect.fromObject(graph.bounds) });
 
         this.save();
     }
 
     getInsertPointData(pointInfo) {
-        var pt: any = {x: pointInfo.x, y: pointInfo.y, idx: pointInfo.idx};
-        var t = pointInfo.t;
-        var len = this.length();
-        var p4 = clone(this.points[pointInfo.idx]);
+        let pt: any = { x: pointInfo.x, y: pointInfo.y, idx: pointInfo.idx };
+        let t = pointInfo.t;
+        let len = this.length();
+        let p4 = clone(this.points[pointInfo.idx]);
         p4.idx = pointInfo.idx;
-        var p1idx = (pointInfo.idx - 1 + len) % len;
-        var p1 = clone(this.points[p1idx]);
+        let p1idx = (pointInfo.idx - 1 + len) % len;
+        let p1 = clone(this.points[p1idx]);
         p1.idx = p1idx;
 
         if (isLinePoint(p4) && isLinePoint(p1)) {
@@ -1304,29 +1312,29 @@ class Path extends Shape {
                 p4.cp1x = p4.x;//p1.cp2x;
                 p4.cp1y = p4.y;//p1.cp2y;
             }
-            var p3 = {x: p4.cp1x, y: p4.cp1y};
-            var p2 = {x: p1.cp2x, y: p1.cp2y};
+            let p3 = { x: p4.cp1x, y: p4.cp1y };
+            let p2 = { x: p1.cp2x, y: p1.cp2y };
 
-            var p11 = {
+            let p11 = {
                 x: p1.x + t * (p2.x - p1.x)
                 , y: p1.y + t * (p2.y - p1.y)
             }
                 , p12 = {
-                x: p2.x + t * (p3.x - p2.x)
-                , y: p2.y + t * (p3.y - p2.y)
-            }
+                    x: p2.x + t * (p3.x - p2.x)
+                    , y: p2.y + t * (p3.y - p2.y)
+                }
                 , p13 = {
-                x: p3.x + t * (p4.x - p3.x)
-                , y: p3.y + t * (p4.y - p3.y)
-            }
+                    x: p3.x + t * (p4.x - p3.x)
+                    , y: p3.y + t * (p4.y - p3.y)
+                }
                 , p21 = {
-                x: p11.x + t * (p12.x - p11.x)
-                , y: p11.y + t * (p12.y - p11.y)
-            }
+                    x: p11.x + t * (p12.x - p11.x)
+                    , y: p11.y + t * (p12.y - p11.y)
+                }
                 , p22 = {
-                x: p12.x + t * (p13.x - p12.x)
-                , y: p12.y + t * (p13.y - p12.y)
-            };
+                    x: p12.x + t * (p13.x - p12.x)
+                    , y: p12.y + t * (p13.y - p12.y)
+                };
 
             p1.cp2x = p11.x;
             p1.cp2y = p11.y;
@@ -1345,31 +1353,30 @@ class Path extends Shape {
 
     joinMode(value) {
         if (arguments.length > 0) {
-            this.setProps({joinMode: value});
+            this.setProps({ joinMode: value });
         }
 
         return this.props.joinMode;
     }
 
     getPointIfClose(pos, dist?) {
-        var matrix = this.globalViewMatrixInverted();
+        let matrix = this.globalViewMatrixInverted();
         pos = matrix.transformPoint(pos);
-        var resPt = null;
-        var prevPt = this.points[0];
+        let resPt = null;
+        let prevPt = this.points[0];
         dist = (dist || 4) / Environment.view.scale() * Environment.view.contextScale;
 
         function checkDistance(pt, prevPt, idx) {
+            let pr = { x: 0, y: 0, idx: idx, t:undefined };
+            let d;
             if (isLinePoint(pt) && isLinePoint(prevPt)) {
-                var pr: any = {x: 0, y: 0, idx: idx};
-                var d = nearestPoint.onLine(prevPt, pt, pos, pr);
+                d = nearestPoint.onLine(prevPt, pt, pos, pr);
                 setLinePoint(pr);
             } else {
-
-
-                var p1 = {x: prevPt.x, y: prevPt.y};
-                var p2 = {x: pt.x, y: pt.y};
-                var cp2 = {x: pt.cp1x, y: pt.cp1y};
-                var cp1 = {x: prevPt.cp2x, y: prevPt.cp2y};
+                let p1 = { x: prevPt.x, y: prevPt.y };
+                let p2 = { x: pt.x, y: pt.y };
+                let cp2 = { x: pt.cp1x, y: pt.cp1y };
+                let cp1 = { x: prevPt.cp2x, y: prevPt.cp2y };
                 if (isLinePoint(prevPt)) {
                     cp1.x = prevPt.x;//cp2.x;
                     cp1.y = prevPt.y;//cp2.y;
@@ -1378,18 +1385,18 @@ class Path extends Shape {
                     cp2.y = pt.y;//cp1.y;
                 }
 
-                pr = {x: 0, y: 0, idx: idx};
                 d = nearestPoint.onCurve(p1, cp1, cp2, p2, pos, pr);
             }
+
             d = Math.abs(d);
             if (d < dist) {
                 dist = d;
-                resPt = {x: pr.x, y: pr.y, idx: idx, t: pr.t};
+                resPt = { x: pr.x, y: pr.y, idx: idx, t: pr.t };
             }
         }
 
-        for (var i = 1; i < this.points.length; ++i) {
-            var pt = this.points[i];
+        for (let i = 1; i < this.points.length; ++i) {
+            let pt = this.points[i];
             checkDistance(pt, prevPt, i);
             prevPt = pt;
         }
@@ -1402,11 +1409,11 @@ class Path extends Shape {
     }
 
     polygonArea() {
-        var area = 0;
-        var points = this.points;
+        let area = 0;
+        let points = this.points;
 
-        for (var i = 0, len = points.length; i < len; i++) {
-            var j = (i + 1) % len;
+        for (let i = 0, len = points.length; i < len; i++) {
+            let j = (i + 1) % len;
             area += points[i].x * points[j].y;
             area -= points[j].x * points[i].y;
         }
@@ -1417,19 +1424,19 @@ class Path extends Shape {
         return this.polygonArea() > 0;
     }
 
-    isHoveringOverSegment(): boolean{
+    isHoveringOverSegment(): boolean {
         return !!this._pointOnPath;
     }
-    isHoveringOverHandle(): boolean{
+    isHoveringOverHandle(): boolean {
         return !!this._hoverHandlePoint;
     }
-    isHoveringOverPoint(): boolean{
+    isHoveringOverPoint(): boolean {
         return !!this._hoverPoint;
     }
-    get hoverPoint(){
+    get hoverPoint() {
         return this._hoverPoint;
     }
-    resetHover(): void{
+    resetHover(): void {
         this._pointOnPath = null;
         this._hoverHandlePoint = null;
         this._hoverPoint = null;
@@ -1438,7 +1445,7 @@ class Path extends Shape {
     fromJSON(data) {
         this.points.length = 0;
 
-        var current = UIElement.prototype.fromJSON.call(this, data);
+        let current = UIElement.prototype.fromJSON.call(this, data);
 
         this._currentPoint = null;
         this._handlePoint = null;
@@ -1447,14 +1454,14 @@ class Path extends Shape {
     }
 
     elements(matrix, offset, angle, origin) {
-        var points = this.points;
-        var res = [];
+        let points = this.points;
+        let res = [];
         if (!points.length) {
             return res;
         }
 
 
-        offset = offset || {x: 0, y: 0};
+        offset = offset || { x: 0, y: 0 };
 
         // if (this._sourceRect) {
         //     matrix.scale(this.width() / this._sourceRect.width, this.height() / this._sourceRect.height);
@@ -1465,18 +1472,18 @@ class Path extends Shape {
         // }
         // matrix.translate(offset.x, offset.y);
 
-        var pt;
-        var prevPt = pt = points[0];
-        var p = matrix.transformPoint(prevPt);
-        res.push({kind: "M", point: p});
+        let pt;
+        let prevPt = pt = points[0];
+        let p = matrix.transformPoint(prevPt);
+        res.push({ kind: "M", point: p });
 
 
         function buildSegment(pt, prevPt, matrix) {
             if (isLinePoint(pt) && isLinePoint(prevPt)) { // line segment
                 p = matrix.transformPoint(pt);
-                res.push({kind: "L", point: p});
+                res.push({ kind: "L", point: p });
             } else { // cubic bezier segment
-                var cp1x = prevPt.cp2x
+                let cp1x = prevPt.cp2x
                     , cp1y = prevPt.cp2y
                     , cp2x = pt.cp1x
                     , cp2y = pt.cp1y;
@@ -1490,20 +1497,20 @@ class Path extends Shape {
                 }
 
                 p = matrix.transformPoint(pt);
-                var p1 = matrix.transformPoint2(cp1x, cp1y);
-                var p2 = matrix.transformPoint2(cp2x, cp2y);
-                res.push({kind: "C", point: p, controlPoints: [p1, p2]});
+                let p1 = matrix.transformPoint2(cp1x, cp1y);
+                let p2 = matrix.transformPoint2(cp2x, cp2y);
+                res.push({ kind: "C", point: p, controlPoints: [p1, p2] });
             }
         }
 
-        for (var i = 1, len = points.length; i < len; ++i) {
+        for (let i = 1, len = points.length; i < len; ++i) {
             pt = points[i];
             buildSegment(pt, prevPt, matrix);
             prevPt = pt;
         }
         if (true/*this.closed()*/) {
             buildSegment(points[0], prevPt, matrix);
-            res.push({kind: "Z"});
+            res.push({ kind: "Z" });
         }
 
         return res;
@@ -1515,7 +1522,7 @@ class Path extends Shape {
     }
 
     moveTo(x, y) {
-        this._lastPoint = this.addPoint({x, y});
+        this._lastPoint = this.addPoint({ x, y });
         this._lastPoint.moveTo = true;
     }
 
@@ -1528,7 +1535,7 @@ class Path extends Shape {
     }
 
     lineTo(x, y) {
-        this._lastPoint = this.addPoint({x, y});
+        this._lastPoint = this.addPoint({ x, y });
     }
 
     curveToPoint(point, cp1, cp2) {
@@ -1545,7 +1552,7 @@ class Path extends Shape {
         this._lastPoint.cp2x = cp1x;
         this._lastPoint.cp2y = cp1y;
         this._lastPoint.type = PointType.Assymetric;
-        this._lastPoint = this.addPoint({x, y});
+        this._lastPoint = this.addPoint({ x, y });
         this._lastPoint.cp1x = cp2x;
         this._lastPoint.cp1y = cp2y;
         this._lastPoint.type = PointType.Assymetric;
@@ -1555,9 +1562,9 @@ class Path extends Shape {
         this.curveToPoint(p, c, c);
     }
 
-    currentPointX(value: number, changeMode: ChangeMode): number{
-        if (arguments.length && this._selectedPoint){
-            var newPoint = Object.assign({}, this._selectedPoint);
+    currentPointX(value: number, changeMode: ChangeMode): number {
+        if (arguments.length && this._selectedPoint) {
+            let newPoint = Object.assign({}, this._selectedPoint);
             newPoint.x = value;
             this._selectedPoint = newPoint;
             this.changePointAtIndex(newPoint, newPoint.idx, changeMode);
@@ -1566,9 +1573,9 @@ class Path extends Shape {
         }
         return this.runtimeProps.currentPointX;
     }
-    currentPointY(value: number, changeMode: ChangeMode): number{
-        if (arguments.length && this._selectedPoint){
-            var newPoint = Object.assign({}, this._selectedPoint);
+    currentPointY(value: number, changeMode: ChangeMode): number {
+        if (arguments.length && this._selectedPoint) {
+            let newPoint = Object.assign({}, this._selectedPoint);
             newPoint.y = value;
             this._selectedPoint = newPoint;
             this.changePointAtIndex(newPoint, newPoint.idx, changeMode);
@@ -1577,8 +1584,8 @@ class Path extends Shape {
         }
         return this.runtimeProps.currentPointY;
     }
-    currentPointType(value: PointType, changeMode: ChangeMode): PointType{
-        if (arguments.length && this._selectedPoint){
+    currentPointType(value: PointType, changeMode: ChangeMode): PointType {
+        if (arguments.length && this._selectedPoint) {
             this._selectedPoint.type = value;
             Invalidate.request();
             Selection.reselect();
@@ -1587,26 +1594,26 @@ class Path extends Shape {
     }
 
     fromSvgString(d, matrix) {
-        var path = d.match(/[mzlhvcsqta][^mzlhvcsqta]*/gi);
-        var svgCommands = this._parsePath(path);
+        let path = d.match(/[mzlhvcsqta][^mzlhvcsqta]*/gi);
+        let svgCommands = this._parsePath(path);
         this._renderSvgCommands(svgCommands, matrix);
         this.adjustBoundaries();
     }
 
     _splitPoints(path) {
-        var state = 0;
-        var res = [];
-        var pos = 0;
+        let state = 0;
+        let res = [];
+        let pos = 0;
 
-        for (var i = 0; i < path.length; ++i) {
-            var c = path[i];
+        for (let i = 0; i < path.length; ++i) {
+            let c = path[i];
             switch (state) {
                 case 0: // begining of number
                     if (c >= '0' && c <= '9') {
                         state = 1;
                         pos = i;
                     }
-                    else if (c == '.') {
+                    else if (c === '.') {
                         state = 2;
                         pos = i;
                     }
@@ -1619,7 +1626,7 @@ class Path extends Shape {
                     if (c >= '0' && c <= '9') {
                         state = 1;
                     }
-                    else if (c == '.') {
+                    else if (c === '.') {
                         state = 2;
                     }
                     else {
@@ -1648,28 +1655,28 @@ class Path extends Shape {
     }
 
     _parsePath(path) {
-        var result = [],
+        let result = [],
             currentPath,
             chunks,
             parsed;
 
-        for (var i = 0, chunksParsed, len = path.length; i < len; i++) {
+        for (let i = 0, chunksParsed, len = path.length; i < len; i++) {
             currentPath = path[i];
             chunks = this._splitPoints(currentPath.slice(1).trim());
             chunksParsed = [currentPath.charAt(0)];
 
-            for (var j = 0, jlen = chunks.length; j < jlen; j++) {
+            for (let j = 0, jlen = chunks.length; j < jlen; j++) {
                 parsed = parseFloat(chunks[j]);
                 if (!isNaN(parsed)) {
                     chunksParsed.push(parsed);
                 }
             }
 
-            var command = chunksParsed[0].toLowerCase(),
+            let command = chunksParsed[0].toLowerCase(),
                 commandLength = commandLengths[command];
 
             if (chunksParsed.length - 1 > commandLength) {
-                for (var k = 1, klen = chunksParsed.length; k < klen; k += commandLength) {
+                for (let k = 1, klen = chunksParsed.length; k < klen; k += commandLength) {
                     result.push([chunksParsed[0]].concat(chunksParsed.slice(k, k + commandLength)));
                 }
             }
@@ -1681,20 +1688,20 @@ class Path extends Shape {
         return result;
     }
 
-    transform(matrix){
-        var points = this.points;
-        for(var i = 0; i < points.length; ++i) {
-            var point = points[i];
-            var p = matrix.transformPoint2(point.x, point.y);
+    transform(matrix) {
+        let points = this.points;
+        for (let i = 0; i < points.length; ++i) {
+            let point = points[i];
+            let p = matrix.transformPoint2(point.x, point.y);
             point.x = p.x;
             point.y = p.y;
-            if(point.cp1x !== undefined) {
-                var cp1 = matrix.transformPoint2(point.cp1x, point.cp1y);
+            if (point.cp1x !== undefined) {
+                let cp1 = matrix.transformPoint2(point.cp1x, point.cp1y);
                 point.cp1x = cp1.x;
                 point.cp1y = cp1.y;
             }
-            if(point.cp2x != undefined) {
-                var cp2 = matrix.transformPoint2(point.cp2x, point.cp2y);
+            if (point.cp2x !== undefined) {
+                let cp2 = matrix.transformPoint2(point.cp2x, point.cp2y);
                 point.cp2x = cp2.x;
                 point.cp2y = cp2.y;
             }
@@ -1702,13 +1709,13 @@ class Path extends Shape {
         this.adjustBoundaries();
     }
 
-    resetGlobalViewCache(){
+    resetGlobalViewCache() {
         super.resetGlobalViewCache.apply(this, arguments);
         delete this.runtimeProps.bb;
     }
 
     _renderSvgCommands(commands, matrix) {
-        var current, // current instruction
+        let current, // current instruction
             previous = null,
             x = 0, // current x
             y = 0, // current y
@@ -1723,7 +1730,7 @@ class Path extends Shape {
             l = 0,//this.x(),//-((this.width() / 2) + this.pathOffset.x),
             t = 0;//this.y();//-((this.height() / 2) + this.pathOffset.y);
 
-        for (var i = 0, len = commands.length; i < len; ++i) {
+        for (let i = 0, len = commands.length; i < len; ++i) {
 
             current = commands[i];
 
@@ -1994,10 +2001,10 @@ class Path extends Shape {
     }
 
     static smoothPoint = function (p, p1, p2, eps) {
-        var vx = p2.x - p1.x
+        let vx = p2.x - p1.x
             , vy = p2.y - p1.y
             , d = Math.sqrt(vx * vx + vy * vy)
-            , res: any = {x: p.x, y: p.y};
+            , res: any = { x: p.x, y: p.y };
         vx = vx / d * eps;
         vy = vy / d * eps;
 
@@ -2010,8 +2017,8 @@ class Path extends Shape {
     }
 
     static fromSvgPathElement(element, parsedAttributes, matrix) {
-        // var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
-        var path = new Path();
+        // let parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
+        let path = new Path();
 
         App.Current.activePage.nameProvider.assignNewName(path);
 
@@ -2019,12 +2026,12 @@ class Path extends Shape {
 
         // polygon
         if (parsedAttributes.points) {
-            var pairs = parsedAttributes.points.replace('\n', ' ').replace('\r', ' ').split(' ');
-            for (var i = 0; i < pairs.length; ++i) {
-                var pair = pairs[i];
+            let pairs = parsedAttributes.points.replace('\n', ' ').replace('\r', ' ').split(' ');
+            for (let i = 0; i < pairs.length; ++i) {
+                let pair = pairs[i];
                 if (pair) {
-                    var xy = pair.split(',');
-                    var point = {x: parseFloat(xy[0]), y: parseFloat(xy[1])};
+                    let xy = pair.split(',');
+                    let point = { x: parseFloat(xy[0]), y: parseFloat(xy[1]) };
                     point = matrix.transformPoint(point);
                     path.addPoint(point);
                 }
@@ -2043,15 +2050,15 @@ class Path extends Shape {
     }
 
     static fromSvgLineElement(element, parsedAttributes, matrix) {
-        // var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
-        var path = new Path();
+        // let parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
+        let path = new Path();
 
         App.Current.activePage.nameProvider.assignNewName(path);
 
         setElementPropertiesFromAttributes(path, parsedAttributes);
 
-        path.addPoint(matrix.transformPoint({x: parsedAttributes.x1 || 0, y: parsedAttributes.y1 || 0}));
-        path.addPoint(matrix.transformPoint({x: parsedAttributes.x2 || 0, y: parsedAttributes.y2 || 0}));
+        path.addPoint(matrix.transformPoint({ x: parsedAttributes.x1 || 0, y: parsedAttributes.y1 || 0 }));
+        path.addPoint(matrix.transformPoint({ x: parsedAttributes.x2 || 0, y: parsedAttributes.y2 || 0 }));
 
         path.adjustBoundaries();
 
@@ -2059,19 +2066,19 @@ class Path extends Shape {
     }
 
     static fromSvgPolylineElement(element, parsedAttributes, matrix) {
-        // var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
-        var path = new Path();
+        // let parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
+        let path = new Path();
         App.Current.activePage.nameProvider.assignNewName(path);
 
         setElementPropertiesFromAttributes(path, parsedAttributes);
 
         if (parsedAttributes.points) {
-            var pairs = parsedAttributes.points.replace('\n', ' ').replace('\r', ' ').split(' ');
-            for (var i = 0; i < pairs.length; ++i) {
-                var pair = pairs[i];
+            let pairs = parsedAttributes.points.replace('\n', ' ').replace('\r', ' ').split(' ');
+            for (let i = 0; i < pairs.length; ++i) {
+                let pair = pairs[i];
                 if (pair) {
-                    var xy = pair.split(',');
-                    path.addPoint(matrix.transformPoint({x: parseFloat(xy[0]), y: parseFloat(xy[1])}));
+                    let xy = pair.split(',');
+                    path.addPoint(matrix.transformPoint({ x: parseFloat(xy[0]), y: parseFloat(xy[1]) }));
                 }
             }
         }
@@ -2082,9 +2089,9 @@ class Path extends Shape {
     }
 
     static translatePoints(points, left, top) {
-        var newPoints = [];
-        for (var i = 0, l = points.length; i < l; ++i) {
-            var pt = clone(points[i]);
+        let newPoints = [];
+        for (let i = 0, l = points.length; i < l; ++i) {
+            let pt = clone(points[i]);
             pt.x = pt.x - left;
             pt.cp1x = pt.cp1x - left;
             pt.cp2x = pt.cp2x - left;
@@ -2099,12 +2106,12 @@ class Path extends Shape {
         return newPoints;
     }
     static pointsToSvg(points, closed) {
-        var d = "";
+        let d = "";
         if (!points.length) {
             return d;
         }
         d = "M " + points[0].x + "," + points[0].y;
-        for (var i = 1, len = points.length; i < len; ++i) {
+        for (let i = 1, len = points.length; i < len; ++i) {
             d += "\r\n" + svgCommand(points[i], points[i - 1]);
         }
         if (closed) {
@@ -2116,8 +2123,8 @@ class Path extends Shape {
     static circleAtPoint(center, radius) {
 
         const MagicNumber = 0.55228475;
-        var controlPointLength = radius * MagicNumber;
-        var path = new Path();
+        let controlPointLength = radius * MagicNumber;
+        let path = new Path();
         path.addPoint({
             x: center.x - radius,
             y: center.y,
@@ -2161,7 +2168,7 @@ class Path extends Shape {
     }
 
     static rectangle(x, y, width, height) {
-        var path = new Path();
+        let path = new Path();
         path.addPoint({
             x: x,
             y: y
@@ -2217,10 +2224,10 @@ PropertyMetadata.registerForType(Path, {
         computed: true,
         options: {
             items: [
-                {value: PointType.Straight, icon: "ico-prop_node-straight"},
-                {value: PointType.Mirrored, icon: "ico-prop_node-mirrroed"},
-                {value: PointType.Assymetric, icon: "ico-prop_node-assymetric"},
-                {value: PointType.Disconnected, icon: "ico-prop_node-disconnected"}
+                { value: PointType.Straight, icon: "ico-prop_node-straight" },
+                { value: PointType.Mirrored, icon: "ico-prop_node-mirrroed" },
+                { value: PointType.Assymetric, icon: "ico-prop_node-assymetric" },
+                { value: PointType.Disconnected, icon: "ico-prop_node-disconnected" }
             ],
             size: 3 / 4
         }
@@ -2233,10 +2240,10 @@ PropertyMetadata.registerForType(Path, {
     points: {
         defaultValue: []
     },
-    groups (path) {
-        var baseGroups = PropertyMetadata.findAll(Types.Shape).groups();
+    groups(path) {
+        let baseGroups = PropertyMetadata.findAll(Types.Shape).groups();
 
-        if (path && path.mode() === "edit"){
+        if (path && path.mode() === "edit") {
             return [
                 {
                     label: path.displayType(),
@@ -2253,9 +2260,9 @@ PropertyMetadata.registerForType(Path, {
 
         return baseGroups;
     },
-    prepareVisibility(path: Path){
-        var editMode = path.props.mode === "edit";
-        var pointSelected = path.props.selectedPointIdx !== -1;
+    prepareVisibility(path: Path) {
+        let editMode = path.props.mode === "edit";
+        let pointSelected = path.props.selectedPointIdx !== -1;
         return {
             currentPointX: editMode && pointSelected,
             currentPointY: editMode && pointSelected,
@@ -2267,10 +2274,10 @@ PropertyMetadata.registerForType(Path, {
 
 
 function setElementPropertiesFromAttributes(element, parsedAttributes) {
-    element.setProps({pointRounding: 0});
+    element.setProps({ pointRounding: 0 });
 
     if (parsedAttributes.fill !== undefined) {
-        if (!parsedAttributes.fill || parsedAttributes.fill == "none") {
+        if (!parsedAttributes.fill || parsedAttributes.fill === "none") {
             element.fill(Brush.Empty);
         } else {
             element.fill(Brush.createFromColor(parsedAttributes.fill));
@@ -2290,7 +2297,7 @@ function setElementPropertiesFromAttributes(element, parsedAttributes) {
         element.opacity(parsedAttributes.opacity);
     }
 
-    if (parsedAttributes.miterLimit != undefined) {
+    if (parsedAttributes.miterLimit !== undefined) {
         element.miterLimit(parsedAttributes.miterLimit);
     }
 
@@ -2313,7 +2320,7 @@ function svgCommand(pt, prevPt) {
         return "L " + pt.x + "," + pt.y;
     }
     // cubic bezier segment
-    var cp1x = prevPt.cp2x
+    let cp1x = prevPt.cp2x
         , cp1y = prevPt.cp2y
         , cp2x = pt.cp1x
         , cp2y = pt.cp1y;

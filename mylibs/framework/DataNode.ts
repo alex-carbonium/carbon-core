@@ -31,11 +31,11 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
     }
 
     setProps(props, mode = ChangeMode.Model) {
-        var oldProps = {};
-        var propsChanged = false;
-        for (var p in props) {
-            var oldValue = this.props[p];
-            var newValue = props[p];
+        let  oldProps = {};
+        let  propsChanged = false;
+        for (let  p in props) {
+            let  oldValue = this.props[p];
+            let  newValue = props[p];
             if (newValue !== oldValue) {
                 propsChanged = true;
                 oldProps[p] = oldValue;
@@ -69,7 +69,7 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
             this.trackPatchProps(patchType, propName, item, mode);
         }
         let array;
-        var current = this.props[propName];
+        let  current = this.props[propName];
         if(current instanceof Array){
             array = current.slice();
         } else {
@@ -115,9 +115,9 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
     }
 
     selectProps(names: (keyof TProps)[]): Partial<TProps> {
-        var result: Partial<TProps> = {};
+        let  result: Partial<TProps> = {};
         for (let i = 0; i < names.length; i++) {
-            var p = names[i];
+            let  p = names[i];
             result[p] = this.props[p];
         }
         return result;
@@ -134,7 +134,7 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
     }
 
     removeChild(child, mode = ChangeMode.Model) {
-        var idx = this.children.indexOf(child);
+        let  idx = this.children.indexOf(child);
         if (idx !== -1) {
             this.removeChildByIndex(idx, mode);
         }
@@ -142,7 +142,7 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
     }
 
     removeChildByIndex(index, mode = ChangeMode.Model) {
-        var child = this.children.splice(index, 1)[0];
+        let  child = this.children.splice(index, 1)[0];
         if (mode !== ChangeMode.Self) {
             child.trackDeleted(this, index, mode);
         }
@@ -150,9 +150,9 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
     }
 
     changeChildPosition(child, index, mode = ChangeMode.Model) {
-        var oldIndex;
-        var items = this.children;
-        for (var i = items.length - 1; i >= 0; i--) {
+        let  oldIndex;
+        let  items = this.children;
+        for (let  i = items.length - 1; i >= 0; i--) {
             if (items[i] === child) {
                 oldIndex = i;
                 if (i === index) {
@@ -214,7 +214,7 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
 
 
     trackSetProps(props, oldProps, mode = ChangeMode.Model) {
-        var primitiveRoot = this.primitiveRoot();
+        let  primitiveRoot = this.primitiveRoot();
         if (primitiveRoot) {
             primitiveRoot.registerSetProps(this, props, oldProps, mode);
         }
@@ -227,21 +227,21 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
         }
     }
     trackDeleted(parent, index?: number, mode = ChangeMode.Model) {
-        var primitiveRoot = parent.primitiveRoot();
+        let  primitiveRoot = parent.primitiveRoot();
         if (primitiveRoot) {
             primitiveRoot.registerDelete(parent, this, index, mode);
         }
     }
 
     trackInserted(parent, index, mode = ChangeMode.Model) {
-        var primitiveRoot = parent.primitiveRoot();
+        let  primitiveRoot = parent.primitiveRoot();
         if (primitiveRoot) {
             primitiveRoot.registerInsert(parent, this, index, mode);
         }
     }
 
     trackChangePosition(parent, index, oldIndex, mode = ChangeMode.Model) {
-        var primitiveRoot = parent.primitiveRoot();
+        let  primitiveRoot = parent.primitiveRoot();
         if (primitiveRoot) {
             primitiveRoot.registerChangePosition(parent, this, index, oldIndex, mode);
         }
@@ -311,7 +311,7 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
         }
 
         if(child && materialize){
-            var materializedItem = ObjectFactory.getObject(child);
+            let  materializedItem = ObjectFactory.getObject(child);
             if(child !== materializedItem){
                 child = container.children[i] = materializedItem;
             }
@@ -322,8 +322,8 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
 
     applyVisitorDepthFirst(callback) {
         if (this.children) {
-            for (var i = 0; i < this.children.length; i++) {
-                var child = this.children[i];
+            for (let  i = 0; i < this.children.length; i++) {
+                let  child = this.children[i];
                 if (child.applyVisitorDepthFirst(callback) === false) {
                     return false;
                 }
@@ -333,10 +333,10 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
     }
 
     applyVisitorBreadthFirst(visitor) {
-        var queue = [this];
-        var i = -1;
+        let  queue = [this];
+        let  i = -1;
         while (++i !== queue.length) {
-            var element = queue[i];
+            let  element = queue[i];
             if (visitor(element) === false) {
                 break;
             }
@@ -351,7 +351,7 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
     }
 
     findNodeBreadthFirst(func) {
-        var node = null;
+        let  node = null;
         this.applyVisitorBreadthFirst(x => {
             if (func(x)) {
                 node = x;
@@ -366,7 +366,7 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
         return this.findNodeBreadthFirst(x => x.id() === id);
     }
     findAllNodesDepthFirst(func) {
-        var nodes = [];
+        let  nodes = [];
         this.applyVisitorDepthFirst(x => {
             if (func(x)) {
                 nodes.push(x);
@@ -376,7 +376,7 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
     }
 
     toJSON(){
-        var json: any = {t: this.t, props: this.cloneProps()};
+        let  json: any = {t: this.t, props: this.cloneProps()};
         if (this.children){
             json.children = this.children.map(x => x.toJSON());
         }
@@ -398,8 +398,8 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
 
         if (data.children) {
             this.children = [];
-            for(var i = 0; i < data.children.length; ++i) {
-                var child = ObjectFactory.getObject(data.children[i]);
+            for(let  i = 0; i < data.children.length; ++i) {
+                let  child = ObjectFactory.getObject(data.children[i]);
                 this.children.push(child);
                 this.acquiredChild(child, ChangeMode.Self);
             }

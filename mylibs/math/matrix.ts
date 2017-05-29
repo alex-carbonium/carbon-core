@@ -26,14 +26,18 @@ import { IMatrix } from "carbon-geometry";
  * matrix multiplication).
  */
 class Matrix implements IMatrix {
-    [name: string]: any;
-
+    private _a: number;
+    private _b: number;
+    private _c: number;
+    private _d: number;
+    private _tx: number;
+    private _ty: number;
 
     /**
      * Creates a 2D affine transform.
      *
      */
-    constructor(a, b, c, d, tx, ty){
+    constructor(a, b, c, d, tx, ty) {
         this._a = a;
         this._b = b;
         this._c = c;
@@ -53,20 +57,21 @@ class Matrix implements IMatrix {
      * @param {Number} ty the ty property of the transform
      * @return {Matrix} this affine transform
      */
-    set(a, b, c, d, tx, ty){
+    set(a, b, c, d, tx, ty) {
         this._a = a;
         this._b = b;
         this._c = c;
         this._d = d;
         this._tx = tx;
         this._ty = ty;
+
         return this;
     }
 
     /**
      * @return {Matrix} a copy of this transform
      */
-    clone(){
+    clone() {
         return new Matrix(this._a, this._b, this._c, this._d,
             this._tx, this._ty);
     }
@@ -77,7 +82,7 @@ class Matrix implements IMatrix {
      * @param {Matrix} matrix the matrix to compare this matrix to
      * @return {Boolean} {@true if the matrices are equal}
      */
-    equals(mx){
+    equals(mx) {
         return mx === this || mx && this._a === mx._a && this._b === mx._b
             && this._c === mx._c && this._d === mx._d
             && this._tx === mx._tx && this._ty === mx._ty;
@@ -86,20 +91,21 @@ class Matrix implements IMatrix {
     /**
      * @return {String} a string representation of this transform
      */
-    toString(){
+    toString() {
         return '[[' + [(this._a), (this._c),
-                (this._tx)].join(', ') + '], ['
+        (this._tx)].join(', ') + '], ['
             + [(this._b), (this._d),
-                (this._ty)].join(', ') + ']]';
+            (this._ty)].join(', ') + ']]';
     }
 
     /**
      * Resets the matrix by setting its values to the ones of the identity
      * matrix that results in no transformation.
      */
-    reset(){
+    reset() {
         this._a = this._d = 1;
         this._b = this._c = this._tx = this._ty = 0;
+
         return this;
     }
 
@@ -121,29 +127,35 @@ class Matrix implements IMatrix {
      * @param {Number} dy the distance to translate in the y direction
      * @return {Matrix} this affine transform
      */
-    translatePoint(point){
-        var x = point.x,
+    translatePoint(point) {
+        let x = point.x,
             y = point.y;
-        this._tx += x*this._a + y*this._c;
-        this._ty += x*this._b + y*this._d;
+        this._tx += x * this._a + y * this._c;
+        this._ty += x * this._b + y * this._d;
+
         return this;
     }
 
-    translate(x, y){
-        this._tx += x*this._a + y*this._c;
-        this._ty += x*this._b + y*this._d;
+    translate(x, y) {
+        this._tx += x * this._a + y * this._c;
+        this._ty += x * this._b + y * this._d;
+
         return this;
     }
 
-    scale(sx, sy, ox = undefined, oy = undefined){
-        if (ox || oy)
+    scale(sx, sy, ox = undefined, oy = undefined) {
+        if (ox || oy) {
             this.translate(ox, oy);
+        }
+
         this._a *= sx;
         this._b *= sx;
         this._c *= sy;
         this._d *= sy;
-        if (ox || oy)
+        if (ox || oy) {
             this.translate(-ox, -oy);
+        }
+
         return this;
     }
 
@@ -168,47 +180,49 @@ class Matrix implements IMatrix {
      * @param {Point} center
      * @return {Matrix} this affine transform
      */
-    rotatePoint(angle, center = Point.Zero){
-        angle *= Math.PI/180;
+    rotatePoint(angle, center = Point.Zero) {
+        angle *= Math.PI / 180;
         // Concatenate rotation matrix into this one
-        var x = center.x,
+        let x = center.x,
             y = center.y,
             cos = Math.cos(angle),
             sin = Math.sin(angle),
-            tx = x - x*cos + y*sin,
-            ty = y - x*sin - y*cos,
+            tx = x - x * cos + y * sin,
+            ty = y - x * sin - y * cos,
             a = this._a,
             b = this._b,
             c = this._c,
             d = this._d;
-        this._a = cos*a + sin*c;
-        this._b = cos*b + sin*d;
-        this._c = -sin*a + cos*c;
-        this._d = -sin*b + cos*d;
-        this._tx += tx*a + ty*c;
-        this._ty += tx*b + ty*d;
+        this._a = cos * a + sin * c;
+        this._b = cos * b + sin * d;
+        this._c = -sin * a + cos * c;
+        this._d = -sin * b + cos * d;
+        this._tx += tx * a + ty * c;
+        this._ty += tx * b + ty * d;
+
         return this;
     }
 
-    rotate(angle, cx?, cy?){
-        angle *= Math.PI/180;
+    rotate(angle, cx?, cy?) {
+        angle *= Math.PI / 180;
         // Concatenate rotation matrix into this one
-        var x = cx || 0,
+        let x = cx || 0,
             y = cy || 0,
             cos = Math.cos(angle),
             sin = Math.sin(angle),
-            tx = x - x*cos + y*sin,
-            ty = y - x*sin - y*cos,
+            tx = x - x * cos + y * sin,
+            ty = y - x * sin - y * cos,
             a = this._a,
             b = this._b,
             c = this._c,
             d = this._d;
-        this._a = cos*a + sin*c;
-        this._b = cos*b + sin*d;
-        this._c = -sin*a + cos*c;
-        this._d = -sin*b + cos*d;
-        this._tx += tx*a + ty*c;
-        this._ty += tx*b + ty*d;
+        this._a = cos * a + sin * c;
+        this._b = cos * b + sin * d;
+        this._c = -sin * a + cos * c;
+        this._d = -sin * b + cos * d;
+        this._tx += tx * a + ty * c;
+        this._ty += tx * b + ty * d;
+
         return this;
     }
 
@@ -231,19 +245,22 @@ class Matrix implements IMatrix {
      * @param {Point} [center] the center for the shear transformation
      * @return {Matrix} this affine transform
      */
-    shear(shear, center){
-        if (center)
+    shear(shear, center) {
+        if (center) {
             this.translate(center.x, center.y);
-        var a = this._a,
+        }
+
+        let a = this._a,
             b = this._b;
-        this._a += shear.y*this._c;
-        this._b += shear.y*this._d;
-        this._c += shear.x*a;
-        this._d += shear.x*b;
-        if (center){
-            var nc = center.negate();
+        this._a += shear.y * this._c;
+        this._b += shear.y * this._d;
+        this._c += shear.x * a;
+        this._d += shear.x * b;
+        if (center) {
+            let nc = center.negate();
             this.translate(nc.x, nc.y);
         }
+
         return this;
     }
 
@@ -266,10 +283,11 @@ class Matrix implements IMatrix {
      * @param {Point} [center] the center for the skew transformation
      * @return {Matrix} this affine transform
      */
-    skew(skew, center){
-        var toRadians = Math.PI/180,
-            shear = new Point(Math.tan(skew.x*toRadians),
-                Math.tan(skew.y*toRadians));
+    skew(skew, center) {
+        let toRadians = Math.PI / 180,
+            shear = new Point(Math.tan(skew.x * toRadians),
+                Math.tan(skew.y * toRadians));
+
         return this.shear(shear, center);
     }
 
@@ -280,8 +298,8 @@ class Matrix implements IMatrix {
      * @param {Matrix} matrix the matrix to append
      * @return {Matrix} this matrix, modified
      */
-    append(mx){
-        var a1 = this._a,
+    append(mx) {
+        let a1 = this._a,
             b1 = this._b,
             c1 = this._c,
             d1 = this._d,
@@ -291,12 +309,13 @@ class Matrix implements IMatrix {
             d2 = mx._d,
             tx2 = mx._tx,
             ty2 = mx._ty;
-        this._a = a2*a1 + c2*c1;
-        this._c = b2*a1 + d2*c1;
-        this._b = a2*b1 + c2*d1;
-        this._d = b2*b1 + d2*d1;
-        this._tx += tx2*a1 + ty2*c1;
-        this._ty += tx2*b1 + ty2*d1;
+        this._a = a2 * a1 + c2 * c1;
+        this._c = b2 * a1 + d2 * c1;
+        this._b = a2 * b1 + c2 * d1;
+        this._d = b2 * b1 + d2 * d1;
+        this._tx += tx2 * a1 + ty2 * c1;
+        this._ty += tx2 * b1 + ty2 * d1;
+
         return this;
     }
 
@@ -308,7 +327,7 @@ class Matrix implements IMatrix {
      * @param {Matrix} matrix the matrix to append
      * @return {Matrix} the newly created matrix
      */
-    appended(mx){
+    appended(mx) {
         return this.clone().append(mx);
     }
 
@@ -319,8 +338,8 @@ class Matrix implements IMatrix {
      * @param {Matrix} matrix the matrix to prepend
      * @return {Matrix} this matrix, modified
      */
-    prepend(mx){
-        var a1 = this._a,
+    prepend(mx) {
+        let a1 = this._a,
             b1 = this._b,
             c1 = this._c,
             d1 = this._d,
@@ -332,12 +351,13 @@ class Matrix implements IMatrix {
             d2 = mx._d,
             tx2 = mx._tx,
             ty2 = mx._ty;
-        this._a = a2*a1 + b2*b1;
-        this._c = a2*c1 + b2*d1;
-        this._b = c2*a1 + d2*b1;
-        this._d = c2*c1 + d2*d1;
-        this._tx = a2*tx1 + b2*ty1 + tx2;
-        this._ty = c2*tx1 + d2*ty1 + ty2;
+        this._a = a2 * a1 + b2 * b1;
+        this._c = a2 * c1 + b2 * d1;
+        this._b = c2 * a1 + d2 * b1;
+        this._d = c2 * c1 + d2 * d1;
+        this._tx = a2 * tx1 + b2 * ty1 + tx2;
+        this._ty = c2 * tx1 + d2 * ty1 + ty2;
+
         return this;
     }
 
@@ -349,15 +369,15 @@ class Matrix implements IMatrix {
      * @param {Matrix} matrix the matrix to prepend
      * @return {Matrix} the newly created matrix
      */
-    prepended(mx){
+    prepended(mx) {
         return this.clone().prepend(mx);
     }
 
-    prependedWithScale(sx, sy){
+    prependedWithScale(sx, sy) {
         return this.prepended(Matrix.create().scale(sx, sy));
     }
 
-    prependedWithTranslation(tx, ty){
+    prependedWithTranslation(tx, ty) {
         return this.prepended(Matrix.create().translate(tx, ty));
     }
 
@@ -368,24 +388,25 @@ class Matrix implements IMatrix {
      *
      * @return {Matrix} this matrix, or `null`, if the matrix is singular.
      */
-    invert(){
-        var a = this._a,
+    invert() {
+        let a = this._a,
             b = this._b,
             c = this._c,
             d = this._d,
             tx = this._tx,
             ty = this._ty,
-            det = a*d - b*c,
+            det = a * d - b * c,
             res = null;
-        if (det && !isNaN(det) && isFinite(tx) && isFinite(ty)){
-            this._a = d/det;
-            this._b = -b/det;
-            this._c = -c/det;
-            this._d = a/det;
-            this._tx = (c*ty - d*tx)/det;
-            this._ty = (b*tx - a*ty)/det;
+        if (det && !isNaN(det) && isFinite(tx) && isFinite(ty)) {
+            this._a = d / det;
+            this._b = -b / det;
+            this._c = -c / det;
+            this._d = a / det;
+            this._tx = (c * ty - d * tx) / det;
+            this._ty = (b * tx - a * ty) / det;
             res = this;
         }
+
         return res;
     }
 
@@ -396,7 +417,7 @@ class Matrix implements IMatrix {
      *
      * @return {Matrix} this matrix, or `null`, if the matrix is singular.
      */
-    inverted(){
+    inverted() {
         return this.clone().invert();
     }
 
@@ -408,18 +429,18 @@ class Matrix implements IMatrix {
      * @return {Matrix} a clone of this matrix, with {@link #tx} and {@link #ty}
      * set to `0`.
      */
-    _shiftless(){
+    _shiftless() {
         return new Matrix(this._a, this._b, this._c, this._d, 0, 0);
     }
 
-    _orNullIfIdentity(){
+    _orNullIfIdentity() {
         return this.isIdentity() ? null : this;
     }
 
     /**
      * @return {Boolean} whether this transform is the identity transform
      */
-    isIdentity(){
+    isIdentity() {
         return this._a === 1 && this._b === 0 && this._c === 0 && this._d === 1
             && this._tx === 0 && this._ty === 0;
     }
@@ -430,8 +451,9 @@ class Matrix implements IMatrix {
      *
      * @return {Boolean} whether the transform is invertible
      */
-    isInvertible(){
-        var det = this._a*this._d - this._c*this._b;
+    isInvertible() {
+        let det = this._a * this._d - this._c * this._b;
+
         return det && !isNaN(det) && isFinite(this._tx) && isFinite(this._ty);
     }
 
@@ -441,11 +463,11 @@ class Matrix implements IMatrix {
      *
      * @return {Boolean} whether the matrix is singular
      */
-    isSingular(){
+    isSingular() {
         return !this.isInvertible();
     }
 
-    isTranslatedOnly(){
+    isTranslatedOnly() {
         return this._a === 1 && this._b === 0 && this._c === 0 && this._d === 1;
     }
 
@@ -453,20 +475,21 @@ class Matrix implements IMatrix {
      * A faster version of transform that only takes one point and does not
      * attempt to convert it.
      */
-    transformPoint(point, round?: boolean){
+    transformPoint(point, round?: boolean) {
         return this.transformPoint2(point.x, point.y, round);
     }
 
-    transformPoint2(x, y, round = false): Point{
-        var point = new Point(x, y);
+    transformPoint2(x, y, round = false): Point {
+        let point = new Point(x, y);
+
         return this.transformPointMutable(point, round);
     }
 
-    transformPointMutable(point, round){
-        var x = point.x*this._a + point.y*this._c + this._tx;
-        var y = point.x*this._b + point.y*this._d + this._ty;
+    transformPointMutable(point, round) {
+        let x = point.x * this._a + point.y * this._c + this._tx;
+        let y = point.x * this._b + point.y * this._d + this._ty;
 
-        if (round){
+        if (round) {
             x = Math.round(x);
             y = Math.round(y);
         }
@@ -475,29 +498,29 @@ class Matrix implements IMatrix {
         return point;
     }
 
-    withTranslation(tx, ty): Matrix{
-        if (tx === this._tx && ty === this._ty){
+    withTranslation(tx, ty): Matrix {
+        if (tx === this._tx && ty === this._ty) {
             return this;
         }
 
         return new Matrix(this._a, this._b, this._c, this._d, tx, ty);
     }
-    withRoundedTranslation(): Matrix{
-        var ttx = Math.round(this._tx);
-        var tty = Math.round(this._ty);
+    withRoundedTranslation(): Matrix {
+        let ttx = Math.round(this._tx);
+        let tty = Math.round(this._ty);
 
-        if (ttx === this._tx && tty === this._ty){
+        if (ttx === this._tx && tty === this._ty) {
             return this;
         }
 
         return new Matrix(this._a, this._b, this._c, this._d, ttx, tty);
     }
 
-    transformRect(rect){
-        var p1 = this.transformPoint2(rect.x, rect.y);
-        var p2 = this.transformPoint2(rect.x + rect.width, rect.y);
-        var p3 = this.transformPoint2(rect.x + rect.width, rect.y + rect.height);
-        var p4 = this.transformPoint2(rect.x, rect.y + rect.height);
+    transformRect(rect) {
+        let p1 = this.transformPoint2(rect.x, rect.y);
+        let p2 = this.transformPoint2(rect.x + rect.width, rect.y);
+        let p3 = this.transformPoint2(rect.x + rect.width, rect.y + rect.height);
+        let p4 = this.transformPoint2(rect.x, rect.y + rect.height);
 
         return [
             new LineSegment(p1, p2),
@@ -515,41 +538,42 @@ class Matrix implements IMatrix {
      * @return {Object} the decomposed matrix, or `null` if decomposition is not
      *     possible
      */
-    decompose(){
+    decompose() {
         // http://dev.w3.org/csswg/css3-2d-transforms/#matrix-decomposition
         // http://www.maths-informatique-jeux.com/blog/frederic/?post/2013/12/01/Decomposition-of-2D-transform-matrices
         // https://github.com/wisec/DOMinator/blob/master/layout/style/nsStyleAnimation.cpp#L946
-        var a = this._a,
+        let a = this._a,
             b = this._b,
             c = this._c,
             d = this._d,
-            det = a*d - b*c,
+            det = a * d - b * c,
             sqrt = Math.sqrt,
             atan2 = Math.atan2,
-            degrees = 180/Math.PI,
+            degrees = 180 / Math.PI,
             rotate,
             scale,
             skew;
-        if (a !== 0 || b !== 0){
-            var r = sqrt(a*a + b*b);
-            rotate = Math.acos(a/r)*(b > 0 ? 1 : -1);
-            scale = [r, det/r];
-            skew = [atan2(a*c + b*d, r*r), 0];
-        } else if (c !== 0 || d !== 0){
-            var s = sqrt(c*c + d*d);
+        if (a !== 0 || b !== 0) {
+            let r = sqrt(a * a + b * b);
+            rotate = Math.acos(a / r) * (b > 0 ? 1 : -1);
+            scale = [r, det / r];
+            skew = [atan2(a * c + b * d, r * r), 0];
+        } else if (c !== 0 || d !== 0) {
+            let s = sqrt(c * c + d * d);
             // rotate = Math.PI/2 - (d > 0 ? Math.acos(-c/s) : -Math.acos(c/s));
-            rotate = Math.asin(c/s)*(d > 0 ? 1 : -1);
-            scale = [det/s, s];
-            skew = [0, atan2(a*c + b*d, s*s)];
-        } else{ // a = b = c = d = 0
+            rotate = Math.asin(c / s) * (d > 0 ? 1 : -1);
+            scale = [det / s, s];
+            skew = [0, atan2(a * c + b * d, s * s)];
+        } else { // a = b = c = d = 0
             rotate = 0;
             skew = scale = [0, 0];
         }
+
         return {
             translation: this.getTranslation(),
-            rotation: rotate*degrees,
+            rotation: rotate * degrees,
             scaling: new Point(scale[0], scale[1]),
-            skewing: new Point(skew[0]*degrees, skew[1]*degrees)
+            skewing: new Point(skew[0] * degrees, skew[1] * degrees)
         };
     }
 
@@ -608,7 +632,7 @@ class Matrix implements IMatrix {
      * @bean
      * @type Number[]
      */
-    getValues(){
+    getValues() {
         return [this._a, this._b, this._c, this._d, this._tx, this._ty];
     }
 
@@ -618,7 +642,7 @@ class Matrix implements IMatrix {
      * @bean
      * @type Point
      */
-    getTranslation(){
+    getTranslation() {
         // No decomposition is required to extract translation.
         return new Point(this._tx, this._ty);
     }
@@ -630,7 +654,7 @@ class Matrix implements IMatrix {
      * @type Point
      * @see #decompose()
      */
-    getScaling(){
+    getScaling() {
         return this.decompose().scaling;
     }
 
@@ -641,7 +665,7 @@ class Matrix implements IMatrix {
      * @type Number
      * @see #decompose()
      */
-    getRotation(){
+    getRotation() {
         return this.decompose().rotation;
     }
 
@@ -650,8 +674,8 @@ class Matrix implements IMatrix {
      *
      * @param {CanvasRenderingContext2D} ctx
      */
-    applyToContext(ctx){
-        if (!this.isIdentity()){
+    applyToContext(ctx) {
+        if (!this.isIdentity()) {
             ctx.transform(this._a, this._b, this._c, this._d,
                 this._tx, this._ty);
         }
@@ -662,77 +686,77 @@ class Matrix implements IMatrix {
      *
      * @param {CanvasRenderingContext2D} ctx
      */
-    setToContext(ctx){
-        if (!this.isIdentity()){
+    setToContext(ctx) {
+        if (!this.isIdentity()) {
             ctx.setTransform(this._a, this._b, this._c, this._d,
                 this._tx, this._ty);
         }
     }
 
-    static create(){
+    static create() {
         return new Matrix(1, 0, 0, 1, 0, 0);
     }
 
-    get a(){
+    get a() {
         return this._a;
     }
 
-    set a(value){
+    set a(value) {
         this._a = value
     }
 
-    get b(){
+    get b() {
         return this._b;
     }
 
-    set b(value){
+    set b(value) {
         this._b = value
     }
 
-    get c(){
+    get c() {
         return this._c;
     }
 
-    set c(value){
+    set c(value) {
         this._c = value
     }
 
 
-    get d(){
+    get d() {
         return this._d;
     }
 
-    set d(value){
+    set d(value) {
         this._d = value
     }
 
-    get tx(){
+    get tx() {
         return this._tx;
     }
 
-    set tx(value){
+    set tx(value) {
         this._tx = value
     }
 
-    get ty(){
+    get ty() {
         return this._ty;
     }
 
-    set ty(value){
+    set ty(value) {
         this._ty = value
     }
 
-    static fromObject(value): Matrix{
+    static fromObject(value): Matrix {
         return new Matrix(value._a, value._b, value._c, value._d, value._tx, value._ty);
     }
 
-    static createTranslationMatrix(tx: number, ty: number){
+    static createTranslationMatrix(tx: number, ty: number) {
         return Matrix.create().translate(tx, ty);
     }
 
     static Identity: Matrix;
 }
 
-Matrix.Identity = Object.freeze(Matrix.create());
+Matrix.Identity = Object.freeze(Matrix.create()) as any;
 
 export default Matrix;

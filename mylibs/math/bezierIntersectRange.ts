@@ -28,39 +28,46 @@ export default class BezierIntersectRange implements IIntersectionRange {
 
     get curve1LeftBezier(): IBezierCurve {
         this.computeCurve1();
+
         return this._curve1LeftBezier;
     }
 
     get curve1OverlappingBezier(): IBezierCurve {
         this.computeCurve1();
+
         return this._curve1MiddleBezier;
     }
 
     get curve1RightBezier(): IBezierCurve {
         this.computeCurve1();
+
         return this._curve1RightBezier;
     }
 
     get curve2LeftBezier(): IBezierCurve {
         this.computeCurve2();
+
         return this._curve2LeftBezier;
     }
 
     get curve2OverlappingBezier(): IBezierCurve {
         this.computeCurve2();
+
         return this._curve2MiddleBezier;
     }
 
     get curve2RightBezier(): IBezierCurve {
         this.computeCurve2();
+
         return this._curve2RightBezier;
     }
 
     computeCurve1(): void {
-        if (!this._needToComputeCurve1)
+        if (!this._needToComputeCurve1) {
             return;
+        }
 
-        var curves = { leftCurve: null, middleCurve: null, rightCurve: null };
+        let curves = { leftCurve: null, middleCurve: null, rightCurve: null };
         this.curve1.splitSubcurvesWithRange(this.parameterRange1, curves);
         this._curve1LeftBezier = curves.leftCurve;
         this._curve1MiddleBezier = curves.middleCurve;
@@ -70,10 +77,11 @@ export default class BezierIntersectRange implements IIntersectionRange {
     }
 
     computeCurve2(): void {
-        if (!this._needToComputeCurve2)
+        if (!this._needToComputeCurve2) {
             return;
+        }
 
-        var curves = { leftCurve: null, middleCurve: null, rightCurve: null };
+        let curves = { leftCurve: null, middleCurve: null, rightCurve: null };
         this.curve2.splitSubcurvesWithRange(this.parameterRange2, curves);
         this._curve2LeftBezier = curves.leftCurve;
         this._curve2MiddleBezier = curves.middleCurve;
@@ -103,8 +111,8 @@ export default class BezierIntersectRange implements IIntersectionRange {
             this.curve2, (this.parameterRange2.minimum + this.parameterRange2.maximum) / 2.0);
     }
 
-    merge(other: IIntersectionRange):void {
-        var o = (other as any) as BezierIntersectRange;
+    merge(other: IIntersectionRange): void {
+        let o = (other as any) as BezierIntersectRange;
         // We assume the caller already knows we're talking about the same curves
         this.parameterRange1 = rangeUnion(this.parameterRange1, o.parameterRange1);
         this.parameterRange2 = rangeUnion(this.parameterRange2, o.parameterRange2);

@@ -1,10 +1,10 @@
 import { distanceBetweenPoints, areValuesClose } from "./geometry";
 import Rect from "./rect";
-import { INormilizedLine2D } from "carbon-core";
+import { INormilizedLine2D, IRectData, IRect } from "carbon-core";
 import { ICoordinate } from "carbon-geometry";
 
 // Legendre-Gauss abscissae (xi values, defined at i=n as the roots of the nth order Legendre polynomial Pn(x))
-var legendreGaussAbscissaeValues = [[], [],
+const legendreGaussAbscissaeValues = [[], [],
 [-0.5773502691896257310588680411456152796745, 0.5773502691896257310588680411456152796745],
 [0.0000000000000000000000000000000000000000, -0.7745966692414834042779148148838430643082, 0.7745966692414834042779148148838430643082],
 [-0.3399810435848562573113440521410666406155, 0.3399810435848562573113440521410666406155, -0.8611363115940525725378051902225706726313, 0.8611363115940525725378051902225706726313],
@@ -31,7 +31,7 @@ var legendreGaussAbscissaeValues = [[], [],
 ];
 
 // Legendre-Gauss weights (wi values, defined by a export function linked to in the Bezier primer article)
-var legendreGaussWeightValues = [[], [],
+const legendreGaussWeightValues = [[], [],
 [1.0000000000000000000000000000000000000000, 1.0000000000000000000000000000000000000000],
 [0.8888888888888888395456433499930426478386, 0.5555555555555555802271783250034786760807, 0.5555555555555555802271783250034786760807],
 [0.6521451548625460947761212082696147263050, 0.6521451548625460947761212082696147263050, 0.3478548451374538497127275604725582525134, 0.3478548451374538497127275604725582525134],
@@ -63,43 +63,46 @@ var legendreGaussWeightValues = [[], [],
 //          http://www.cs.mtu.edu/~shene/COURSES/cs3621/NOTES/geometry/basic.html
 //
 export function normalizedLineMake(point1: ICoordinate, point2: ICoordinate): INormilizedLine2D {
-    var line = { a: point1.y - point2.y, b: point2.x - point1.x, c: point1.x * point2.y - point2.x * point1.y };
-    var distance = Math.sqrt(line.b * line.b + line.a * line.a);
+    let line = { a: point1.y - point2.y, b: point2.x - point1.x, c: point1.x * point2.y - point2.x * point1.y };
+    let distance = Math.sqrt(line.b * line.b + line.a * line.a);
 
     // GPC: prevent divide-by-zero from putting NaNs into the values which cause trouble further on. I'm not sure
     // what cases trigger this, but sometimes point1 == point2 so distance is 0.
-    if (distance != 0.0) {
+    if (distance !== 0.0) {
         line.a /= distance;
         line.b /= distance;
         line.c /= distance;
-    } else
+    } else {
         line.a = line.b = line.c = 0;
+    }
 
     return line;
 }
 
-export function normalizedLineMakeWithCoefficients(a, b, c) {
+export function normalizedLineMakeWithCoefficients(a: number, b: number, c: number): INormilizedLine2D {
     return { a, b, c };
 }
 
-export function normalizedLineOffset(line: INormilizedLine2D, offset:number) {
+export function normalizedLineOffset(line: INormilizedLine2D, offset: number): INormilizedLine2D {
     line.c += offset;
+
     return line;
 }
 
-export function normalizedLineDistanceFromPoint(line: INormilizedLine2D, point: ICoordinate) {
+export function normalizedLineDistanceFromPoint(line: INormilizedLine2D, point: ICoordinate): number {
     return line.a * point.x + line.b * point.y + line.c;
 }
 
-export function normalizedLineIntersection(line1:INormilizedLine2D, line2:INormilizedLine2D) {
-    var denominator = line1.a * line2.b - line2.a * line1.b;
+export function normalizedLineIntersection(line1: INormilizedLine2D, line2: INormilizedLine2D): ICoordinate {
+    let denominator = line1.a * line2.b - line2.a * line1.b;
+
     return {
         x: (line1.b * line2.c - line2.b * line1.c) / denominator,
         y: (line1.a * line2.c - line2.a * line1.c) / denominator
     };
 }
 
-export function equalPoints(p1, p2) {
+export function equalPoints(p1: ICoordinate, p2: ICoordinate): boolean {
     if (p1 === p2) {
         return true;
     }
@@ -107,33 +110,37 @@ export function equalPoints(p1, p2) {
     return p1.x === p2.x && p1.y === p2.y;
 }
 
-export function parameterOfPointOnLine(lineStart, lineEnd, point) {
+export function parameterOfPointOnLine(lineStart: ICoordinate, lineEnd: ICoordinate, point: ICoordinate): number {
     // Note: its asumed you have already checked that point is colinear with the line (lineStart, lineEnd)
-    var lineLength = distanceBetweenPoints(lineStart, lineEnd);
-    var lengthFromStart = distanceBetweenPoints(point, lineStart);
-    var parameter = lengthFromStart / lineLength;
+    let lineLength = distanceBetweenPoints(lineStart, lineEnd);
+    let lengthFromStart = distanceBetweenPoints(point, lineStart);
+    let parameter = lengthFromStart / lineLength;
 
     // The only tricky thing here is the sign. Is the point _before_ lineStart, or after lineStart?
-    var lengthFromEnd = distanceBetweenPoints(point, lineEnd);
-    if (areValuesClose(lineLength + lengthFromStart, lengthFromEnd))
+    let lengthFromEnd = distanceBetweenPoints(point, lineEnd);
+    if (areValuesClose(lineLength + lengthFromStart, lengthFromEnd)) {
         parameter = -parameter;
+    }
 
     return parameter;
 }
 
-export function linesIntersect(line1Start, line1End, line2Start, line2End) {
-    var line1 = normalizedLineMake(line1Start, line1End);
-    var line2 = normalizedLineMake(line2Start, line2End);
-    var outIntersect = normalizedLineIntersection(line1, line2);
-    if (isNaN(outIntersect.x) || isNaN(outIntersect.y))
+export function linesIntersect(line1Start: ICoordinate, line1End: ICoordinate, line2Start: ICoordinate, line2End: ICoordinate): ICoordinate {
+    let line1 = normalizedLineMake(line1Start, line1End);
+    let line2 = normalizedLineMake(line2Start, line2End);
+    let outIntersect = normalizedLineIntersection(line1, line2);
+    if (isNaN(outIntersect.x) || isNaN(outIntersect.y)) {
         return null;
+    }
+
     outIntersect.y = -outIntersect.y;
+
     return outIntersect;
 }
 
 // The three points are a counter-clockwise turn if the return value is greater than 0,
 //  clockwise if less than 0, or colinear if 0.
-export function counterClockwiseTurn(point1, point2, point3) {
+export function counterClockwiseTurn(point1: ICoordinate, point2: ICoordinate, point3: ICoordinate): number {
     // We're calculating the signed area of the triangle formed by the three points. Well,
     //  almost the area of the triangle -- we'd need to divide by 2. But since we only
     //  care about the direction (i.e. the sign) dividing by 2 is an unnecessary step.
@@ -142,23 +149,26 @@ export function counterClockwiseTurn(point1, point2, point3) {
 }
 
 // Calculate if and where the given line intersects the horizontal line at y.
-export function lineIntersectsHorizontalLine(startPoint, endPoint, y) {
+export function lineIntersectsHorizontalLine(startPoint: ICoordinate, endPoint: ICoordinate, y: number): ICoordinate {
     // Do a quick test to see if y even falls on the startPoint,endPoint line
-    var minY = Math.min(startPoint.y, endPoint.y);
-    var maxY = Math.max(startPoint.y, endPoint.y);
-    if ((y < minY && !areValuesClose(y, minY)) || (y > maxY && !areValuesClose(y, maxY)))
+    let minY = Math.min(startPoint.y, endPoint.y);
+    let maxY = Math.max(startPoint.y, endPoint.y);
+    if ((y < minY && !areValuesClose(y, minY)) || (y > maxY && !areValuesClose(y, maxY))) {
         return null;
+    }
 
     // There's an intersection here somewhere
-    if (startPoint.x == endPoint.x)
+    if (startPoint.x === endPoint.x) {
         return { x: startPoint.x, y: y };
+    }
     else {
-        var slope = (endPoint.y - startPoint.y) / (endPoint.x - startPoint.x);
+        let slope = (endPoint.y - startPoint.y) / (endPoint.x - startPoint.x);
+
         return { x: (y - startPoint.y) / slope + startPoint.x, y: y };
     }
 }
 
-export function bezierWithPoints(degree, bezierPoints, parameter, leftCurve, rightCurve) {
+export function bezierWithPoints(degree: number, bezierPoints: ICoordinate[], parameter: number, leftCurve: ICoordinate[], rightCurve: ICoordinate[]): ICoordinate {
     // Calculate a point on the bezier curve passed in, specifically the point at parameter.
     //  We're using De Casteljau's algorithm, which not only calculates the point at parameter
     //  in a numerically stable way, it also computes the two resulting bezier curves that
@@ -171,92 +181,101 @@ export function bezierWithPoints(degree, bezierPoints, parameter, leftCurve, rig
     // degree is the order of the bezier path, which will be cubic (3) most of the time.
 
     // With this algorithm we start out with the points in the bezier path.
-    var points = []; // we assume we'll never get more than a cubic bezier
-    for (var i = 0; i <= degree; i++)
+    let points: ICoordinate[] = []; // we assume we'll never get more than a cubic bezier
+    for (let i = 0; i <= degree; i++) {
         points[i] = clone(bezierPoints[i]);
+    }
 
     // If the caller is asking for the resulting bezier curves, start filling those in
-    if (leftCurve)
+    if (leftCurve) {
         leftCurve[0] = clone(points[0]);
-    if (rightCurve)
+    }
+    if (rightCurve) {
         rightCurve[degree] = clone(points[degree]);
+    }
 
-    for (var k = 1; k <= degree; k++) {
-        for (var i = 0; i <= (degree - k); i++) {
+    for (let k = 1; k <= degree; k++) {
+        for (let i = 0; i <= (degree - k); i++) {
             points[i].x = (1.0 - parameter) * points[i].x + parameter * points[i + 1].x;
             points[i].y = (1.0 - parameter) * points[i].y + parameter * points[i + 1].y;
         }
 
-        if (leftCurve)
+        if (leftCurve) {
             leftCurve[k] = clone(points[0]);
-        if (rightCurve)
+        }
+        if (rightCurve) {
             rightCurve[degree - k] = clone(points[degree - k]);
+        }
     }
 
     // The point in the curve at parameter ends up in points[0]
     return clone(points[0])
 }
 
-export function computeCubicFirstDerivativeRoots(a:number, b:number, c:number, d:number, outRoots:number[]) {
+export function computeCubicFirstDerivativeRoots(a: number, b: number, c: number, d: number, outRoots: number[]): void {
     // See http://processingjs.nihongoresources.com/bezierinfo/#bounds for where the formulas come from
-    var denominator = -a + 3.0 * b - 3.0 * c + d;
+    let denominator = -a + 3.0 * b - 3.0 * c + d;
     if (!areValuesClose(denominator, 0.0)) {
-        var numeratorLeft = -a + 2.0 * b - c;
-        var numeratorRight = -Math.sqrt(-a * (c - d) + b * b - b * (c + d) + c * c);
-        var t1 = (numeratorLeft + numeratorRight) / denominator;
-        var t2 = (numeratorLeft - numeratorRight) / denominator;
+        let numeratorLeft = -a + 2.0 * b - c;
+        let numeratorRight = -Math.sqrt(-a * (c - d) + b * b - b * (c + d) + c * c);
+        let t1 = (numeratorLeft + numeratorRight) / denominator;
+        let t2 = (numeratorLeft - numeratorRight) / denominator;
         outRoots[0] = t1;
         outRoots[1] = t2;
+
         return;
     }
 
     // If denominator == 0, fall back to
-    var t = (a - b) / (2.0 * (a - 2.0 * b + c));
+    let t = (a - b) / (2.0 * (a - 2.0 * b + c));
     outRoots[0] = t;
 }
 
 
-export function gaussQuadratureBaseForCubic(t, p1, p2, p3, p4) {
-    var t1 = -3.0 * p1 + 9.0 * p2 - 9.0 * p3 + 3.0 * p4;
-    var t2 = t * t1 + 6.0 * p1 - 12.0 * p2 + 6.0 * p3;
+export function gaussQuadratureBaseForCubic(t: number, p1: number, p2: number, p3: number, p4: number): number {
+    let t1 = -3.0 * p1 + 9.0 * p2 - 9.0 * p3 + 3.0 * p4;
+    let t2 = t * t1 + 6.0 * p1 - 12.0 * p2 + 6.0 * p3;
+
     return t * t2 - 3.0 * p1 + 3.0 * p2;
     //return t * (t * (-3 * p1 + 9 * p2 - 9 * p3 + 3 * p4) + 6 * p1 + 12 * p2 + 3 * p3) - 3 * p1 + 3 * p2;
 }
 
-export function gaussQuadratureFOfTForCubic(t, p1, p2, p3, p4) {
-    var baseX = gaussQuadratureBaseForCubic(t, p1.x, p2.x, p3.x, p4.x);
-    var baseY = gaussQuadratureBaseForCubic(t, p1.y, p2.y, p3.y, p4.y);
+export function gaussQuadratureFOfTForCubic(t: number, p1: ICoordinate, p2: ICoordinate, p3: ICoordinate, p4: ICoordinate): number {
+    let baseX = gaussQuadratureBaseForCubic(t, p1.x, p2.x, p3.x, p4.x);
+    let baseY = gaussQuadratureBaseForCubic(t, p1.y, p2.y, p3.y, p4.y);
 
     return Math.sqrt(baseX * baseX + baseY * baseY);
 }
 
-export function gaussQuadratureComputeCurveLengthForCubic(z, steps, p1, p2, p3, p4) {
-    var z2 = z / 2.0;
-    var sum = 0.0;
-    for (var i = 0; i < steps; i++) {
-        var correctedT = z2 * legendreGaussAbscissaeValues[steps][i] + z2;
+export function gaussQuadratureComputeCurveLengthForCubic(z: number, steps: number, p1: ICoordinate, p2: ICoordinate, p3: ICoordinate, p4: ICoordinate): number {
+    let z2 = z / 2.0;
+    let sum = 0.0;
+    for (let i = 0; i < steps; i++) {
+        let correctedT = z2 * legendreGaussAbscissaeValues[steps][i] + z2;
         sum += legendreGaussWeightValues[steps][i] * gaussQuadratureFOfTForCubic(correctedT, p1, p2, p3, p4);
     }
+
     return z2 * sum;
 }
 
-
-export function countBezierCrossings(bezierPoints, degree) {
-    var count = 0;
-    var sign = Math.sign(bezierPoints[0].y);
-    var previousSign = sign;
-    for (var i = 1; i <= degree; i++) {
+export function countBezierCrossings(bezierPoints: ICoordinate[], degree: number): number {
+    let count = 0;
+    let sign = Math.sign(bezierPoints[0].y);
+    let previousSign = sign;
+    for (let i = 1; i <= degree; i++) {
         sign = Math.sign(bezierPoints[i].y);
-        if (sign != previousSign)
+        if (sign !== previousSign) {
             count++;
+        }
         previousSign = sign;
     }
+
     return count;
 }
 
-var findBezierRootsMaximumDepth = 64;
+let findBezierRootsMaximumDepth = 64;
 
-export function ldexp(mantissa, exponent) {
+export function ldexp(mantissa: number, exponent: number) {
     return exponent > 1023 // avoid multiplying by infinity
         ? mantissa * Math.pow(2, 1023) * Math.pow(2, exponent - 1023)
         : exponent < -1074 // avoid multiplying by zero
@@ -265,30 +284,32 @@ export function ldexp(mantissa, exponent) {
 }
 
 
-export function isControlPolygonFlatEnough(bezierPoints, degree) {
-    var findBezierRootsErrorThreshold = ldexp(1, -(findBezierRootsMaximumDepth - 1));
+export function isControlPolygonFlatEnough(bezierPoints: ICoordinate[], degree: number): ICoordinate {
+    let findBezierRootsErrorThreshold = ldexp(1, -(findBezierRootsMaximumDepth - 1));
 
-    var line = normalizedLineMake(bezierPoints[0], bezierPoints[degree]);
+    let line = normalizedLineMake(bezierPoints[0], bezierPoints[degree]);
 
     // Find the bounds around the line
-    var belowDistance = 0;
-    var aboveDistance = 0;
-    for (var i = 1; i < degree; i++) {
-        var distance = normalizedLineDistanceFromPoint(line, bezierPoints[i]);
-        if (distance > aboveDistance)
+    let belowDistance = 0;
+    let aboveDistance = 0;
+    for (let i = 1; i < degree; i++) {
+        let distance = normalizedLineDistanceFromPoint(line, bezierPoints[i]);
+        if (distance > aboveDistance) {
             aboveDistance = distance;
-        if (distance < belowDistance)
+        }
+        if (distance < belowDistance) {
             belowDistance = distance;
+        }
     }
 
-    var zeroLine = normalizedLineMakeWithCoefficients(0, 1, 0);
-    var aboveLine = normalizedLineOffset(line, -aboveDistance);
-    var intersect1 = normalizedLineIntersection(zeroLine, aboveLine);
+    let zeroLine = normalizedLineMakeWithCoefficients(0, 1, 0);
+    let aboveLine = normalizedLineOffset(line, -aboveDistance);
+    let intersect1 = normalizedLineIntersection(zeroLine, aboveLine);
 
-    var belowLine = normalizedLineOffset(line, -belowDistance);
-    var intersect2 = normalizedLineIntersection(zeroLine, belowLine);
+    let belowLine = normalizedLineOffset(line, -belowDistance);
+    let intersect2 = normalizedLineIntersection(zeroLine, belowLine);
 
-    var error = Math.max(intersect1.x, intersect2.x) - Math.min(intersect1.x, intersect2.x);
+    let error = Math.max(intersect1.x, intersect2.x) - Math.min(intersect1.x, intersect2.x);
     if (error < findBezierRootsErrorThreshold) {
         return normalizedLineIntersection(zeroLine, line);
     }
@@ -296,26 +317,29 @@ export function isControlPolygonFlatEnough(bezierPoints, degree) {
     return null;
 }
 
-export function findBezierRootsWithDepth(bezierPoints, degree, depth, block) {
-    var crossingCount = countBezierCrossings(bezierPoints, degree);
-    if (crossingCount == 0)
+export function findBezierRootsWithDepth(bezierPoints: ICoordinate[], degree: number, depth: number, block: (n: number) => void): void {
+    let crossingCount = countBezierCrossings(bezierPoints, degree);
+    if (crossingCount === 0) {
         return;
-    else if (crossingCount == 1) {
+    }
+    else if (crossingCount === 1) {
         if (depth >= findBezierRootsMaximumDepth) {
-            var root = (bezierPoints[0].x + bezierPoints[degree].x) / 2.0;
+            let root = (bezierPoints[0].x + bezierPoints[degree].x) / 2.0;
             block(root);
+
             return;
         }
-        var intersectionPoint = null;
+        let intersectionPoint = null;
         if (intersectionPoint = isControlPolygonFlatEnough(bezierPoints, degree)) {
             block(intersectionPoint.x);
+
             return;
         }
     }
 
     // Subdivide and try again
-    var leftCurve = []; // assume 5th degree
-    var rightCurve = [];
+    let leftCurve = []; // assume 5th degree
+    let rightCurve = [];
     bezierWithPoints(degree, bezierPoints, 0.5, leftCurve, rightCurve);
     findBezierRootsWithDepth(leftCurve, degree, depth + 1, block);
     findBezierRootsWithDepth(rightCurve, degree, depth + 1, block);
@@ -328,12 +352,13 @@ export function findBezierRoots(bezierPoints, degree, block) {
 //////////////////////////////////////////////////////////////////////////////////
 // Convex Hull functions
 
-export function convexHullDoPointsTurnWrongDirection(point1, point2, point3) {
-    var area = counterClockwiseTurn(point1, point2, point3);
+export function convexHullDoPointsTurnWrongDirection(point1: ICoordinate, point2: ICoordinate, point3: ICoordinate): boolean {
+    let area = counterClockwiseTurn(point1, point2, point3);
+
     return areValuesClose(area, 0.0) || area < 0.0;
 }
 
-export function convexHullBuildFromPoints(points:ICoordinate[], results:ICoordinate[]) {
+export function convexHullBuildFromPoints(points: ICoordinate[], results: ICoordinate[]) {
     // Compute the convex hull for this bezier curve. The convex hull is made up of the end and control points.
     //  The hard part is determine the order they go in, and if any are inside or colinear with the convex hull.
 
@@ -341,17 +366,17 @@ export function convexHullBuildFromPoints(points:ICoordinate[], results:ICoordin
     //  http://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
 
     // Start with all the end and control points in any order.
-    var numberOfPoints = 4;
+    let numberOfPoints = 4;
 
     // Sort points ascending x, if equal compare y
     //  Bubble sort, which should be ok with a max of 4 elements, and the fact that our one current use case
     //  already has them in ascending X order (i.e. should be just comparisons to verify)
-    var sortLength = numberOfPoints;
+    let sortLength = numberOfPoints;
     do {
-        var newSortLength = 0;
-        for (var i = 1; i < sortLength; i++) {
+        let newSortLength = 0;
+        for (let i = 1; i < sortLength; i++) {
             if (points[i - 1].x > points[i].x || (areValuesClose(points[i - 1].x, points[i].x) && points[i - 1].y > points[i].y)) {
-                var tempPoint = points[i];
+                let tempPoint = points[i];
                 points[i] = points[i - 1];
                 points[i - 1] = tempPoint;
                 newSortLength = i;
@@ -362,201 +387,212 @@ export function convexHullBuildFromPoints(points:ICoordinate[], results:ICoordin
 
 
     // Build lower hull
-    for (var i = 0; i < numberOfPoints; i++) {
-        while (results.length >= 2 && convexHullDoPointsTurnWrongDirection(results[results.length - 2], results[results.length - 1], points[i]))
+    for (let i = 0; i < numberOfPoints; i++) {
+        while (results.length >= 2 && convexHullDoPointsTurnWrongDirection(results[results.length - 2], results[results.length - 1], points[i])) {
             results.pop();
+        }
+
         results.push(points[i]);
     }
 
     // Build upper hull
-    for (var i = numberOfPoints - 2, thresholdIndex = results.length + 1; i >= 0; i--) {
-        while (results.length >= thresholdIndex && convexHullDoPointsTurnWrongDirection(results[results.length - 2], results[results.length - 1], points[i]))
+    for (let i = numberOfPoints - 2, thresholdIndex = results.length + 1; i >= 0; i--) {
+        while (results.length >= thresholdIndex && convexHullDoPointsTurnWrongDirection(results[results.length - 2], results[results.length - 1], points[i])) {
             results.pop();
+        }
+
         results.push(points[i]);
     }
 }
 
 
-export function areRectsIntersecting(r1, r2) {
+export function areRectsIntersecting(r1: IRectData, r2: IRectData): boolean {
     return r1.x <= r2.x + r2.width && r1.x + r1.width >= r2.x
         && r1.y <= r2.y + r2.height && r1.y + r1.height >= r2.y;
 }
 
-export function areRectsEqual(r1, r2) {
+export function areRectsEqual(r1: IRectData, r2: IRectData): boolean {
     return r1.x === r2.x && r1.width === r2.width
         && r1.y === r2.y && r1.height === r2.height;
 }
 
-export function intersectRects(r1, r2) {
-    var l = Math.max(r1.x, r2.x);
-    var t = Math.max(r1.y, r2.y);
-    var r = Math.min(r1.x + r1.width, r2.x + r2.width);
-    var b = Math.min(r1.y + r1.height, r2.y + r2.height);
+export function intersectRects(r1: IRectData, r2: IRectData): IRectData {
+    let l = Math.max(r1.x, r2.x);
+    let t = Math.max(r1.y, r2.y);
+    let r = Math.min(r1.x + r1.width, r2.x + r2.width);
+    let b = Math.min(r1.y + r1.height, r2.y + r2.height);
     if (l < r && t < b) {
         return { x: l, y: t, width: r - l, height: b - t };
     }
+
     return null;
 }
 
-export function calculateRectIntersectionArea(r1, r2) {
-    var r = intersectRects(r1, r2);
+export function calculateRectIntersectionArea(r1: IRectData, r2: IRectData) {
+    let r = intersectRects(r1, r2);
     if (r === null) {
         return 0;
     }
+
     return r.width * r.height;
 }
 
-export function isRectInRect(child, parent) {
+export function isRectInRect(child: IRectData, parent: IRectData): boolean {
     return child.x >= parent.x && child.x + child.width <= parent.x + parent.width
         && child.y >= parent.y && child.y + child.height <= parent.y + parent.height;
 }
 
-export function combineRects(...rects: any[]) {
-    return combineRectArray(arguments);
+export function combineRects(...rects: Rect[]): Rect {
+    return combineRectArray(rects);
 }
-export function combineRectArray(rects) {
+export function combineRectArray(rects: Rect[]): Rect {
     if (rects.length === 0) {
         return Rect.Zero;
     }
+
     if (rects.length === 1) {
         return rects[0];
     }
-    var rect = rects[0];
-    var xmin = rect.x;
-    var ymin = rect.y;
-    var xmax = rect.x + rect.width;
-    var ymax = rect.y + rect.height;
-    for (var i = 1; i < rects.length; i++) {
-        var rect2 = rects[i];
+
+    let rect = rects[0];
+    let xmin = rect.x;
+    let ymin = rect.y;
+    let xmax = rect.x + rect.width;
+    let ymax = rect.y + rect.height;
+    for (let i = 1; i < rects.length; i++) {
+        let rect2 = rects[i];
         xmin = Math.min(xmin, rect2.x);
         ymin = Math.min(ymin, rect2.y);
         xmax = Math.max(xmax, rect2.x + rect2.width);
         ymax = Math.max(ymax, rect2.y + rect2.height);
     }
+
     return new Rect(xmin, ymin, xmax - xmin, ymax - ymin);
 }
-export function adjustRectSize(rect, delta) {
-    var d2 = delta * 2;
+export function adjustRectSize(rect: IRectData, delta: number): IRectData {
+    let d2 = delta * 2;
+
     return { x: rect.x - delta, y: rect.y - delta, width: rect.width + d2, height: rect.height + d2 };
 }
-export function adjustRectWidth(rect, delta) {
+export function adjustRectWidth(rect: IRectData, delta: number): IRectData {
     return { x: rect.x, y: rect.y, width: rect.width + delta, height: rect.height };
 }
-export function adjustRectHeight(rect, delta) {
+export function adjustRectHeight(rect: IRectData, delta: number): IRectData {
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height + delta };
 }
-export function isPointInRect(rect, point) {
+export function isPointInRect(rect: IRectData, point: ICoordinate): boolean {
     return point.x >= rect.x && point.x < rect.x + rect.width && point.y >= rect.y && point.y < rect.y + rect.height;
 }
 
-export function isPointInEllipse(rect, point) {
-    var cx = rect.x + rect.width / 2;
-    var cy = rect.y + rect.height / 2;
-    var rx = rect.width / 2;
-    var ry = rect.height / 2;
+export function isPointInEllipse(rect: IRectData, point: ICoordinate): boolean {
+    let cx = rect.x + rect.width / 2;
+    let cy = rect.y + rect.height / 2;
+    let rx = rect.width / 2;
+    let ry = rect.height / 2;
 
-    var dx = (point.x - cx) / rx;
-    var dy = (point.y - cy) / ry;
+    let dx = (point.x - cx) / rx;
+    let dy = (point.y - cy) / ry;
 
     return dx * dx + dy * dy <= 1;
 }
 
-export function tsort(edges) {
-    var nodes = {};
-    var sorted = [];
-    var visited = {};
+// export function tsort(edges) {
+//     let nodes = {};
+//     let sorted = [];
+//     let visited = {};
 
-    function Node(id) {
-        this.id = id;
-        this.dependsOn = [];
-    }
+//     function Node(id) {
+//         this.id = id;
+//         this.dependsOn = [];
+//     }
 
-    function visit(idstr, ancestors?) {
-        var node = nodes[idstr];
-        var id = node.id;
+//     function visit(idstr, ancestors?) {
+//         let node = nodes[idstr];
+//         let id = node.id;
 
-        if (visited[idstr]) {
-            return { success: true };
-        }
-        if (!ancestors) {
-            ancestors = [];
-        }
-        ancestors.push(id);
-        visited[idstr] = true;
+//         if (visited[idstr]) {
+//             return { success: true };
+//         }
+//         if (!ancestors) {
+//             ancestors = [];
+//         }
+//         ancestors.push(id);
+//         visited[idstr] = true;
 
-        for (var i = 0, l = node.dependsOn.length; i < l; ++i) {
-            var depId = node.dependsOn[i];
-            if (ancestors.indexOf(depId) !== -1) {
-                return { success: false, closedAt: [depId, id] };
-            }
-            var result = visit(depId.toString(), map(ancestors,
+//         for (let i = 0, l = node.dependsOn.length; i < l; ++i) {
+//             let depId = node.dependsOn[i];
+//             if (ancestors.indexOf(depId) !== -1) {
+//                 return { success: false, closedAt: [depId, id] };
+//             }
+//             let result = visit(depId.toString(), map(ancestors,
 
-                function (x) {
-                    return x;
-                }
-            ))
-                ;
-            if (!result.success) {
-                return result;
-            }
-        }
+//                 function (x) {
+//                     return x;
+//                 }
+//             ));
 
-        sorted.unshift(id);
-        return { success: true };
-    }
+//             if (!result.success) {
+//                 return result;
+//             }
+//         }
 
-    for (var i = 0, l = edges.length; i < l; ++i) {
-        var edge = edges[i];
-        var from = edge[0];
-        var to = edge[1];
+//         sorted.unshift(id);
 
-        if (!nodes[from]) {
-            nodes[from] = new Node(from);
-        }
-        if (!nodes[to]) {
-            nodes[to] = new Node(to);
-        }
-        nodes[from].dependsOn.push(to);
-    }
+//         return { success: true };
+//     }
 
-    var keys = Object.keys(nodes);
-    for (let i = 0, l = keys.length; i < l; ++i) {
-        var key = keys[i];
-        var result = visit(key);
-        if (!result.success) {
-            return result;
-        }
-    }
+//     for (let i = 0, l = edges.length; i < l; ++i) {
+//         let edge = edges[i];
+//         let from = edge[0];
+//         let to = edge[1];
 
-    return { success: true, sorted: sorted };
-}
+//         if (!nodes[from]) {
+//             nodes[from] = new Node(from);
+//         }
+//         if (!nodes[to]) {
+//             nodes[to] = new Node(to);
+//         }
+//         nodes[from].dependsOn.push(to);
+//     }
 
-export function multiplyVectorConst(point, constant) {
+//     let keys = Object.keys(nodes);
+//     for (let i = 0, l = keys.length; i < l; ++i) {
+//         let key = keys[i];
+//         let result = visit(key);
+//         if (!result.success) {
+//             return result;
+//         }
+//     }
+
+//     return { success: true, sorted: sorted };
+// }
+
+export function multiplyVectorConst(point: ICoordinate, constant: number): ICoordinate {
     return { x: point.x * constant, y: point.y * constant };
 }
 
 
-export function addVectors(...vectors: any[]) {
-    var p = { x: 0, y: 0 };
-    for (var i = 0; i < arguments.length; ++i) {
+export function addVectors(...vectors: ICoordinate[]): ICoordinate {
+    let p = { x: 0, y: 0 };
+    for (let i = 0; i < arguments.length; ++i) {
         p.x += arguments[i].x;
         p.y += arguments[i].y;
     }
 
     return p;
 }
-export function subVectors(p1, p2) {
-    var p = { x: p1.x - p2.x, y: p1.y - p2.y };
+export function subVectors(p1: ICoordinate, p2: ICoordinate): ICoordinate {
+    let p = { x: p1.x - p2.x, y: p1.y - p2.y };
 
     return p;
 }
 
 export function rotatePointByDegree(point, degree, origin) {
-    var angle = degree * Math.PI / 180;
-    var cosa = Math.cos(-angle);
-    var sina = Math.sin(-angle);
-    var dx = point.x - origin.x;
-    var dy = point.y - origin.y;
+    let angle = degree * Math.PI / 180;
+    let cosa = Math.cos(-angle);
+    let sina = Math.sin(-angle);
+    let dx = point.x - origin.x;
+    let dy = point.y - origin.y;
     return {
         x: origin.x + dx * cosa - dy * sina,
         y: origin.y + dx * sina + dy * cosa

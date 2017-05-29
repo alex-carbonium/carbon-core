@@ -121,7 +121,6 @@ declare module "carbon-bezier" {
         previous: IBezierCrossing;
         fromCrossingOverlap:boolean;
         processed:boolean;
-        isProcessed:boolean;
 
         isAtStart:boolean;
         isAtEnd:boolean;

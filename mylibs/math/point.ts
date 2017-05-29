@@ -1,7 +1,8 @@
-import {IPoint} from "carbon-geometry";
+import { IPoint } from "carbon-geometry";
 
-var EPSILON = 1e-12;
-var TRIGONOMETRIC_EPSILON = 1e-7;
+const EPSILON = 1e-12;
+const TRIGONOMETRIC_EPSILON = 1e-7;
+
 function isZero(val) {
     return val >= -EPSILON && val <= EPSILON;
 }
@@ -14,7 +15,7 @@ function isZero(val) {
  *
  * @classexample
  * // Create a point at x: 10, y: 5
- * var point = new Point(10, 5);
+ * let point = new Point(10, 5);
  * console.log(point.x); // 10
  * console.log(point.y); // 5
  */
@@ -32,7 +33,7 @@ export default class Point implements IPoint {
      *
      * @example
      * // Create a point at x: 10, y: 5
-     * var point = new Point(10, 5);
+     * let point = new Point(10, 5);
      * console.log(point.x); // 10
      * console.log(point.y); // 5
      */
@@ -45,8 +46,8 @@ export default class Point implements IPoint {
      *
      * @example
      * // Creating a point at x: 10, y: 5 using an array of numbers:
-     * var array = [10, 5];
-     * var point = new Point(array);
+     * let array = [10, 5];
+     * let point = new Point(array);
      * console.log(point.x); // 10
      * console.log(point.y); // 5
      *
@@ -55,11 +56,11 @@ export default class Point implements IPoint {
      *
      * // Create a circle shaped path at x: 50, y: 50
      * // with a radius of 30:
-     * var path = new Path.Circle([50, 50], 30);
+     * let path = new Path.Circle([50, 50], 30);
      * path.fillColor = 'red';
      *
      * // Which is the same as doing:
-     * var path = new Path.Circle(new Point(50, 50), 30);
+     * let path = new Path.Circle(new Point(50, 50), 30);
      * path.fillColor = 'red';
      */
     /**
@@ -72,7 +73,7 @@ export default class Point implements IPoint {
      * // Creating a point using an object literal with length and angle
      * // properties:
      *
-     * var point = new Point({
+     * let point = new Point({
      *     length: 10,
      *     angle: 90
      * });
@@ -82,7 +83,7 @@ export default class Point implements IPoint {
      * @example
      * // Creating a point at x: 10, y: 20 using an object literal:
      *
-     * var point = new Point({
+     * let point = new Point({
      *     x: 10,
      *     y: 20
      * });
@@ -92,14 +93,14 @@ export default class Point implements IPoint {
      * @example
      * // Passing an object to a functionality that expects a point:
      *
-     * var center = {
+     * let center = {
      *     x: 50,
      *     y: 50
      * };
      *
      * // Creates a circle shaped path at x: 50, y: 50
      * // with a radius of 30:
-     * var path = new Path.Circle(center, 30);
+     * let path = new Path.Circle(center, 30);
      * path.fillColor = 'red';
      */
     /**
@@ -113,9 +114,9 @@ export default class Point implements IPoint {
      * // Creating a point using a size object.
      *
      * // Create a Size with a width of 100pt and a height of 50pt
-     * var size = new Size(100, 50);
+     * let size = new Size(100, 50);
      * console.log(size); // { width: 100, height: 50 }
-     * var point = new Point(size);
+     * let point = new Point(size);
      * console.log(point); // { x: 100, y: 50 }
      */
     /**
@@ -143,9 +144,10 @@ export default class Point implements IPoint {
      * @type Number
      */
 
-    set(x, y) {
+    set(x: number, y: number) {
         this.x = x;
         this.y = y;
+
         return this;
     }
 
@@ -157,7 +159,7 @@ export default class Point implements IPoint {
      * @return {Boolean} {@true if the points are equal}
      *
      * @example
-     * var point = new Point(5, 10);
+     * let point = new Point(5, 10);
      * console.log(point == new Point(5, 10)); // true
      * console.log(point == new Point(1, 1)); // false
      * console.log(point != new Point(1, 1)); // true
@@ -165,8 +167,8 @@ export default class Point implements IPoint {
     equals(point) {
         return this === point || point
             && (this.x === point.x && this.y === point.y
-            || Array.isArray(point)
-            && this.x === point[0] && this.y === point[1])
+                || Array.isArray(point)
+                && this.x === point[0] && this.y === point[1])
             || false;
     }
 
@@ -174,11 +176,11 @@ export default class Point implements IPoint {
      * Returns a copy of the point.
      *
      * @example
-     * var point1 = new Point();
-     * var point2 = point1;
+     * let point1 = new Point();
+     * let point2 = point1;
      * point2.x = 1; // also changes point1.x
      *
-     * var point2 = point1.clone();
+     * let point2 = point1.clone();
      * point2.x = 1; // doesn't change point1.x
      *
      * @return {Point} the cloned point
@@ -211,17 +213,18 @@ export default class Point implements IPoint {
         // Whenever chaining both x & y, use #set() instead of direct
         // assignment, so LinkedPoint does not report changes twice.
         if (this.isZero()) {
-            var angle = this._angle || 0;
+            let angle = this._angle || 0;
             this.set(
                 Math.cos(angle) * length,
                 Math.sin(angle) * length
             );
         } else {
-            var scale = length / this.getLength();
+            let scale = length / this.getLength();
             // Force calculation of angle now, so it will be preserved even when
             // x and y are 0
-            if (isZero(scale))
+            if (isZero(scale)) {
                 this.getAngle(Point.Zero);
+            }
             this.set(
                 this.x * scale,
                 this.y * scale
@@ -280,11 +283,12 @@ export default class Point implements IPoint {
                 ? this._angle || 0
                 : this._angle = Math.atan2(this.y, this.x);
         } else {
-            var div = this.getLength() * point.getLength();
+            let div = this.getLength() * point.getLength();
             if (isZero(div)) {
                 return NaN;
             } else {
-                var a = this.dot(point) / div;
+                let a = this.dot(point) / div;
+
                 return Math.acos(a < -1 ? -1 : a > 1 ? 1 : a);
             }
         }
@@ -297,7 +301,7 @@ export default class Point implements IPoint {
         // since updating x / y does not automatically change _angle!
         this._angle = angle;
         if (!this.isZero()) {
-            var length = this.getLength();
+            let length = this.getLength();
             // Use #set() instead of direct assignment of x/y, so LinkedPoint
             // does not report changes twice.
             this.set(
@@ -305,6 +309,7 @@ export default class Point implements IPoint {
                 Math.sin(angle) * length
             );
         }
+
         return this;
     }
 
@@ -320,7 +325,7 @@ export default class Point implements IPoint {
      * @type Number
      *
      * @example
-     * var point = new Point({
+     * let point = new Point({
      *     angle: 10,
      *     length: 20
      * });
@@ -364,9 +369,10 @@ export default class Point implements IPoint {
     }
 
     getDistanceSquared(point) {
-        var x = point.x - this.x,
+        let x = point.x - this.x,
             y = point.y - this.y,
             d = x * x + y * y;
+
         return d;
     }
 
@@ -375,9 +381,10 @@ export default class Point implements IPoint {
     }
 
     getDistanceSquared2(x, y) {
-        var dx = x - this.x,
+        let dx = x - this.x,
             dy = y - this.y,
             d = dx * dx + dy * dy;
+
         return d;
     }
 
@@ -392,14 +399,18 @@ export default class Point implements IPoint {
      *     by this point's coordinates
      */
     normalize(length) {
-        if (length === undefined)
+        if (length === undefined) {
             length = 1;
-        var current = this.getLength(),
+        }
+
+        let current = this.getLength(),
             scale = current !== 0 ? length / current : 0,
             point = new Point(this.x * scale, this.y * scale);
         // Preserve angle.
-        if (scale >= 0)
+        if (scale >= 0) {
             point._angle = this._angle;
+        }
+
         return point;
     }
 
@@ -415,10 +426,12 @@ export default class Point implements IPoint {
      * @return {Point} the rotated point
      */
     rotate(angle, center) {
-        if (angle === 0)
+        if (angle === 0) {
             return this.clone();
+        }
+
         angle = angle * Math.PI / 180;
-        var point = center ? this.subtract(center) : this,
+        let point = center ? this.subtract(center) : this,
             sin = Math.sin(angle),
             cos = Math.cos(angle);
         point = new Point(
@@ -451,8 +464,8 @@ export default class Point implements IPoint {
      * @return {Point} the addition of the point and the value as a new point
      *
      * @example
-     * var point = new Point(5, 10);
-     * var result = point + 20;
+     * let point = new Point(5, 10);
+     * let result = point + 20;
      * console.log(result); // {x: 25, y: 30}
      */
     /**
@@ -467,9 +480,9 @@ export default class Point implements IPoint {
      * @return {Point} the addition of the two points as a new point
      *
      * @example
-     * var point1 = new Point(5, 10);
-     * var point2 = new Point(10, 20);
-     * var result = point1 + point2;
+     * let point1 = new Point(5, 10);
+     * let point2 = new Point(10, 20);
+     * let result = point1 + point2;
      * console.log(result); // {x: 15, y: 30}
      */
     add(point) {
@@ -502,8 +515,8 @@ export default class Point implements IPoint {
      * @return {Point} the subtraction of the point and the value as a new point
      *
      * @example
-     * var point = new Point(10, 20);
-     * var result = point - 5;
+     * let point = new Point(10, 20);
+     * let result = point - 5;
      * console.log(result); // {x: 5, y: 15}
      */
     /**
@@ -518,9 +531,9 @@ export default class Point implements IPoint {
      * @return {Point} the subtraction of the two points as a new point
      *
      * @example
-     * var firstPoint = new Point(10, 20);
-     * var secondPoint = new Point(5, 5);
-     * var result = firstPoint - secondPoint;
+     * let firstPoint = new Point(10, 20);
+     * let secondPoint = new Point(5, 5);
+     * let result = firstPoint - secondPoint;
      * console.log(result); // {x: 5, y: 15}
      */
     subtract(point) {
@@ -546,8 +559,8 @@ export default class Point implements IPoint {
      *     point
      *
      * @example
-     * var point = new Point(10, 20);
-     * var result = point * 2;
+     * let point = new Point(10, 20);
+     * let result = point * 2;
      * console.log(result); // {x: 20, y: 40}
      */
     /**
@@ -562,9 +575,9 @@ export default class Point implements IPoint {
      * @return {Point} the multiplication of the two points as a new point
      *
      * @example
-     * var firstPoint = new Point(5, 10);
-     * var secondPoint = new Point(4, 2);
-     * var result = firstPoint * secondPoint;
+     * let firstPoint = new Point(5, 10);
+     * let secondPoint = new Point(4, 2);
+     * let result = firstPoint * secondPoint;
      * console.log(result); // {x: 20, y: 20}
      */
     multiply(point) {
@@ -583,8 +596,8 @@ export default class Point implements IPoint {
      * @return {Point} the division of the point and the value as a new point
      *
      * @example
-     * var point = new Point(10, 20);
-     * var result = point / 2;
+     * let point = new Point(10, 20);
+     * let result = point / 2;
      * console.log(result); // {x: 5, y: 10}
      */
     /**
@@ -599,9 +612,9 @@ export default class Point implements IPoint {
      * @return {Point} the division of the two points as a new point
      *
      * @example
-     * var firstPoint = new Point(8, 10);
-     * var secondPoint = new Point(2, 5);
-     * var result = firstPoint / secondPoint;
+     * let firstPoint = new Point(8, 10);
+     * let secondPoint = new Point(2, 5);
+     * let result = firstPoint / secondPoint;
      * console.log(result); // {x: 4, y: 2}
      */
     divide(point) {
@@ -620,7 +633,7 @@ export default class Point implements IPoint {
      * as a new point
      *
      * @example
-     * var point = new Point(12, 6);
+     * let point = new Point(12, 6);
      * console.log(point % 5); // {x: 2, y: 1}
      */
     /**
@@ -635,7 +648,7 @@ export default class Point implements IPoint {
      * other as a new point
      *
      * @example
-     * var point = new Point(12, 6);
+     * let point = new Point(12, 6);
      * console.log(point % new Point(5, 2)); // {x: 2, y: 0}
      */
     modulo(point) {
@@ -728,7 +741,8 @@ export default class Point implements IPoint {
      * @return {Point} the projection of the point onto another point
      */
     project(point) {
-        var scale = point.isZero() ? 0 : this.dot(point) / point.dot(point);
+        let scale = point.isZero() ? 0 : this.dot(point) / point.dot(point);
+
         return new Point(
             point.x * scale,
             point.y * scale
@@ -746,16 +760,16 @@ export default class Point implements IPoint {
      * @return {Point} the newly created point object
      *
      * @example
-     * var point1 = new Point(10, 100);
-     * var point2 = new Point(200, 5);
-     * var minPoint = Point.min(point1, point2);
+     * let point1 = new Point(10, 100);
+     * let point2 = new Point(200, 5);
+     * let minPoint = Point.min(point1, point2);
      * console.log(minPoint); // {x: 10, y: 5}
      *
      * @example
      * // Find the minimum of multiple points:
-     * var point1 = new Point(60, 100);
-     * var point2 = new Point(200, 5);
-     * var point3 = new Point(250, 35);
+     * let point1 = new Point(60, 100);
+     * let point2 = new Point(200, 5);
+     * let point3 = new Point(250, 35);
      * [point1, point2, point3].reduce(Point.min) // {x: 60, y: 5}
      */
     static min(point1, point2) {
@@ -775,16 +789,16 @@ export default class Point implements IPoint {
      * @return {Point} the newly created point object
      *
      * @example
-     * var point1 = new Point(10, 100);
-     * var point2 = new Point(200, 5);
-     * var maxPoint = Point.max(point1, point2);
+     * let point1 = new Point(10, 100);
+     * let point2 = new Point(200, 5);
+     * let maxPoint = Point.max(point1, point2);
      * console.log(maxPoint); // {x: 200, y: 100}
      *
      * @example
      * // Find the maximum of multiple points:
-     * var point1 = new Point(60, 100);
-     * var point2 = new Point(200, 5);
-     * var point3 = new Point(250, 35);
+     * let point1 = new Point(60, 100);
+     * let point2 = new Point(200, 5);
+     * let point3 = new Point(250, 35);
      * [point1, point2, point3].reduce(Point.max) // {x: 250, y: 100}
      */
     static max(point1, point2) {
@@ -802,11 +816,11 @@ export default class Point implements IPoint {
      * @static
      *
      * @example
-     * var maxPoint = new Point(100, 100);
-     * var randomPoint = Point.random();
+     * let maxPoint = new Point(100, 100);
+     * let randomPoint = Point.random();
      *
      * // A point between {x:0, y:0} and {x:100, y:100}:
-     * var point = maxPoint * randomPoint;
+     * let point = maxPoint * randomPoint;
      */
     static random() {
         return new Point(Math.random(), Math.random());
@@ -853,14 +867,14 @@ export default class Point implements IPoint {
     }
 
     abs() {
-        if (this.x >= 0 && this.y >= 0){
+        if (this.x >= 0 && this.y >= 0) {
             return this;
         }
         return new Point(Math.abs(this.x), Math.abs(this.y));
     }
 
-    static create(x, y){
-        if (x === 0 && y === 0){
+    static create(x, y) {
+        if (x === 0 && y === 0) {
             return Point.Zero;
         }
         return new Point(x, y);

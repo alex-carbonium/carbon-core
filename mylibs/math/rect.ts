@@ -34,10 +34,10 @@ export default class Rect implements IRect {
     }
 
     round() {
-        var l = Math.round(this.x);
-        var r = Math.round(this.x + this.width);
-        var t = Math.round(this.y);
-        var b = Math.round(this.y + this.height);
+        let l = Math.round(this.x);
+        let r = Math.round(this.x + this.width);
+        let t = Math.round(this.y);
+        let b = Math.round(this.y + this.height);
 
         if (l === this.x && r === this.x + this.width && t === this.y && b === this.y + this.height) {
             return this;
@@ -46,8 +46,8 @@ export default class Rect implements IRect {
     }
 
     roundPosition() {
-        var l = Math.round(this.x);
-        var t = Math.round(this.y);
+        let l = Math.round(this.x);
+        let t = Math.round(this.y);
 
         if (l === this.x && t === this.y) {
             return this;
@@ -56,10 +56,10 @@ export default class Rect implements IRect {
     }
 
     roundMutable() {
-        var l = Math.round(this.x);
-        var r = Math.round(this.x + this.width);
-        var t = Math.round(this.y);
-        var b = Math.round(this.y + this.height);
+        let l = Math.round(this.x);
+        let r = Math.round(this.x + this.width);
+        let t = Math.round(this.y);
+        let b = Math.round(this.y + this.height);
         this.x = l;
         this.y = t;
         this.width = r - l;
@@ -68,8 +68,8 @@ export default class Rect implements IRect {
     }
 
     roundSize() {
-        var w = Math.round(this.width);
-        var h = Math.round(this.height);
+        let w = Math.round(this.width);
+        let h = Math.round(this.height);
 
         if (w === this.width && h === this.height) {
             return this;
@@ -91,8 +91,8 @@ export default class Rect implements IRect {
     }
 
     combineMutable(rect) {
-        var r = this.x + this.width;
-        var b = this.y + this.height;
+        let r = this.x + this.width;
+        let b = this.y + this.height;
         this.x = Math.min(this.x, rect.x);
         this.y = Math.min(this.y, rect.y);
         this.width = Math.max(r, rect.x + rect.width) - this.x;
@@ -104,10 +104,10 @@ export default class Rect implements IRect {
     }
 
     updateFromPointsMutable(p1, p2) {
-        var x = Math.min(p1.x, p2.x);
-        var y = Math.min(p1.y, p2.y);
-        var w = Math.max(p1.x, p2.x) - x;
-        var h = Math.max(p1.y, p2.y) - y;
+        let x = Math.min(p1.x, p2.x);
+        let y = Math.min(p1.y, p2.y);
+        let w = Math.max(p1.x, p2.x) - x;
+        let h = Math.max(p1.y, p2.y) - y;
         this.x = x;
         this.y = y;
         this.width = w;
@@ -123,15 +123,15 @@ export default class Rect implements IRect {
     centerTop() {
         return new Point(this.x + this.width / 2, this.y);
     }
-    centerX(){
-        return this.x + this.width/2;
+    centerX() {
+        return this.x + this.width / 2;
     }
-    centerY(){
-        return this.y + this.height/2;
+    centerY() {
+        return this.y + this.height / 2;
     }
 
-    origin(origin: OriginType): Point{
-        switch (origin){
+    origin(origin: OriginType): Point {
+        switch (origin) {
             case OriginType.Center:
                 return this.center();
             case OriginType.TopLeft:
@@ -140,10 +140,10 @@ export default class Rect implements IRect {
         throw new Error("wrong origin " + origin);
     }
 
-    right(): number{
+    right(): number {
         return this.x + this.width;
     }
-    bottom(): number{
+    bottom(): number {
         return this.y + this.height;
     }
 
@@ -164,10 +164,10 @@ export default class Rect implements IRect {
     }
 
     segments() {
-        var p1 = this.topLeft();
-        var p2 = this.topRight();
-        var p3 = this.bottomRight();
-        var p4 = this.bottomLeft();
+        let p1 = this.topLeft();
+        let p2 = this.topRight();
+        let p3 = this.bottomRight();
+        let p4 = this.bottomLeft();
 
         return [
             new LineSegment(p1, p2),
@@ -206,11 +206,11 @@ export default class Rect implements IRect {
         return [this.x, this.y, this.width, this.height];
     }
 
-    intersect(other: IRect): Rect | null{
-        var l = Math.max(this.x, other.x);
-        var t = Math.max(this.y, other.y);
-        var r = Math.min(this.x + this.width, other.x + other.width);
-        var b = Math.min(this.y + this.height, other.y + other.height);
+    intersect(other: IRect): Rect | null {
+        let l = Math.max(this.x, other.x);
+        let t = Math.max(this.y, other.y);
+        let r = Math.min(this.x + this.width, other.x + other.width);
+        let b = Math.min(this.y + this.height, other.y + other.height);
         if (l < r && t < b) {
             return new Rect(l, t, r - l, b - t);
         }
@@ -225,10 +225,10 @@ export default class Rect implements IRect {
     }
 
     private fitOrFill(target: IRect, noScaleUp, fit): Rect {
-        var pw = target.width / this.width;
-        var ph = target.height / this.height;
+        let pw = target.width / this.width;
+        let ph = target.height / this.height;
 
-        var p;
+        let p;
         if (fit) {
             p = ph < pw ? ph : pw;
         }
@@ -236,11 +236,12 @@ export default class Rect implements IRect {
             p = ph > pw ? ph : pw;
         }
 
-        if (p > 1 && noScaleUp)
+        if (p > 1 && noScaleUp) {
             return this;
+        }
 
-        var w2 = this.width * p;
-        var h2 = this.height * p;
+        let w2 = this.width * p;
+        let h2 = this.height * p;
         return new Rect(
             target.x + (target.width - w2) / 2,
             target.y + (target.height - h2) / 2,
@@ -258,7 +259,7 @@ export default class Rect implements IRect {
     }
 
     static fromPoints(p1, p2) {
-        var rect = Rect.create();
+        let rect = Rect.create();
         rect.updateFromPointsMutable(p1, p2);
         return rect;
     }

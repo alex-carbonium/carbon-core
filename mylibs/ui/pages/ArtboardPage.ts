@@ -30,7 +30,7 @@ class ArtboardPage extends Page {
 
     initPage(view) {
         super.initPage(view);
-        var artboard = this.getFirstArtboard();
+        let artboard = this.getFirstArtboard();
         if (!artboard) {
             artboard = new Artboard();
             artboard.setProps({width: 1000, height: 1000});
@@ -61,12 +61,12 @@ class ArtboardPage extends Page {
     }
 
     getContentOuterSize(): Rect {
-        var items = this.children;
+        let items = this.children;
         if (!items.length) {
             return Rect.Zero;
         }
-        var rect: Rect = items[0].getBoundaryRectGlobal();
-        for (var i = 1; i < items.length; ++i) {
+        let rect: Rect = items[0].getBoundaryRectGlobal();
+        for (let i = 1; i < items.length; ++i) {
             rect = unionRect(rect, items[i].getBoundaryRectGlobal());
         }
 
@@ -74,8 +74,8 @@ class ArtboardPage extends Page {
     }
 
     getPagePoint(anchorX, anchorY) {
-        var x, y;
-        var rect = this.getContentOuterSize();
+        let x, y;
+        let rect = this.getContentOuterSize();
         switch (anchorX) {
             case "x":
                 x = rect.x;
@@ -116,9 +116,10 @@ class ArtboardPage extends Page {
     }
 
     drawChildSafe(child, context, environment) {
+        let frame = null;
         if (areRectsIntersecting(this._viewport, child.getBoundaryRectGlobal())) {
             if(environment.showFrames && child.frame){
-                var frame = child.frame;
+                frame = child.frame;
                 if (frame) {
                     child.drawCustomFrame(context, environment);
                 }
@@ -134,10 +135,10 @@ class ArtboardPage extends Page {
     }
 
     insertArtboards(screens) {
-        var commands = [];
-        var pos = this.getNextAvailiablePosition(screens[0].w, screens[0].h);
-        for (var screen of screens) {
-            var artboard;
+        let commands = [];
+        let pos = this.getNextAvailiablePosition(screens[0].w, screens[0].h);
+        for (let screen of screens) {
+            let artboard;
             if(screen.i){
                 artboard = screen.i.clone();
             } else {
@@ -166,7 +167,7 @@ class ArtboardPage extends Page {
     }
 
     setActiveArtboard(artboard, doNotTrack?) {
-        var oldArtboard: IArtboard = this._activeArtboard;
+        let oldArtboard: IArtboard = this._activeArtboard;
         if (this._activeArtboard) {
             this._activeArtboard.deactivate();
         }
@@ -182,14 +183,14 @@ class ArtboardPage extends Page {
     }
 
     _activateArtboard(event): IArtboard {
-        var artboard = this._activeArtboard;
+        let artboard = this._activeArtboard;
         if (artboard && artboard.hitTest(event)) {
             return;
         }
 
-        var artboards = this.getAllArtboards();
+        let artboards = this.getAllArtboards();
 
-        for (var i = 0, length = artboards.length; i < length; ++i) {
+        for (let i = 0, length = artboards.length; i < length; ++i) {
             artboard = artboards[i];
             if (artboard.hitTest(event)) {
                 this.setActiveArtboard(artboard);
@@ -227,9 +228,9 @@ class ArtboardPage extends Page {
     }
 
     getNextAvailiablePosition(width, height) {
-        var maxX = 0, maxY = 0;
-        for (var a of this.children) {
-            var right = a.right();
+        let maxX = 0, maxY = 0;
+        for (let a of this.children) {
+            let right = a.right();
             if (right > maxX) {
                 maxX = right;
                 maxY = a.y();
@@ -246,8 +247,8 @@ class ArtboardPage extends Page {
         if (!this.children || !this._artboardNames[name]) {
             return name
         }
-        var testIndex = this.children.length;
-        var testName;
+        let testIndex = this.children.length;
+        let testName;
         while (true) {
             testName = name + " " + testIndex;
             if (!this._artboardNames[testName]) {
@@ -264,10 +265,10 @@ class ArtboardPage extends Page {
     }
 
     getAllArtboards() {
-        var items = this.children;
-        var res = [];
+        let items = this.children;
+        let res = [];
         //reversing for hit testing
-        for (var i = items.length - 1; i >= 0; --i) {
+        for (let i = items.length - 1; i >= 0; --i) {
             if (items[i] instanceof Artboard /*&& !(items[i] instanceof StateBoard)*/) {
                 res.push(items[i]);
             }
@@ -276,10 +277,10 @@ class ArtboardPage extends Page {
     }
 
     getAllPalettes() {
-        var res = [];
-        var artboards = this.getAllArtboards();
-        for (var j = 0; j < artboards.length; ++j) {
-            var a = artboards[j];
+        let res = [];
+        let artboards = this.getAllArtboards();
+        for (let j = 0; j < artboards.length; ++j) {
+            let a = artboards[j];
             if (a.props.resource === ArtboardResource.Palette) {
                 res.push(a);
             }
@@ -289,8 +290,8 @@ class ArtboardPage extends Page {
     }
 
     eachArtboard(callback) {
-        var items = this.children;
-        for (var i = 0; i < items.length; ++i) {
+        let items = this.children;
+        for (let i = 0; i < items.length; ++i) {
             if (items[i] instanceof Artboard) {
                 callback(items[i]);
             }
@@ -298,7 +299,7 @@ class ArtboardPage extends Page {
     }
 
     getArtboardAtPoint(point) {
-        for (var artboard of this.getAllArtboards()) {
+        for (let artboard of this.getAllArtboards()) {
             if (artboard.hitTest(point)) {
                 return artboard;
             }
@@ -308,9 +309,9 @@ class ArtboardPage extends Page {
     }
 
     getFirstArtboard() {
-        var items = this.children;
-        var res = null;
-        for (var i = 0; i < items.length; ++i) {
+        let items = this.children;
+        let res = null;
+        for (let i = 0; i < items.length; ++i) {
             if (items[i] instanceof Artboard) {
                 res = items[i];
                 break;
@@ -320,7 +321,7 @@ class ArtboardPage extends Page {
     }
 
     relayout(oldPropsMap){
-        var primitives = null;
+        let primitives = null;
         let res = RelayoutEngine.run(this, oldPropsMap, e => !(e instanceof Artboard));
         if (res !== null){
             if (primitives === null){
@@ -340,12 +341,12 @@ class ArtboardPage extends Page {
     }
 
     saveWorkspaceState(): any{
-        var artboard = this.getActiveArtboard();
+        let artboard = this.getActiveArtboard();
         return {artboardId: artboard ? artboard.id() : null};
     }
     restoreWorkspaceState(data: any): void{
         if (data.artboardId){
-            var artboard = this.getAllArtboards().find(x => x.id() === data.artboardId);
+            let artboard = this.getAllArtboards().find(x => x.id() === data.artboardId);
             if (artboard){
                 this.setActiveArtboard(artboard);
             }
