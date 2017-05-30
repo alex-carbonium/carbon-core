@@ -1,6 +1,6 @@
 {
 	"rules": {
-		"no-unused-expression": true,
+		"no-unused-expression": false,
 		"no-duplicate-variable": true,
 		"no-unused-variable": true,
 		"curly": true,
@@ -14,6 +14,6 @@
 		"no-trailing-whitespace": true,
 		"no-use-before-declare": true,
 		"newline-before-return": false,
-		"no-var-keyword": true
+		"no-var-keyword": false
 	}
 }

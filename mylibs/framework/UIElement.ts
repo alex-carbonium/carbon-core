@@ -64,7 +64,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         this.parent(NullContainer);
     }
     invalidate() {
-        var parent = this.parent();
+        let parent = this.parent();
         if (parent) {
             parent.invalidate();
         }
@@ -88,7 +88,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             extend(changes, styleManager.getStyle(changes.styleId, 1).props);
         }
 
-        var hasBr = changes.hasOwnProperty("br");
+        let hasBr = changes.hasOwnProperty("br");
         if (hasBr && !(changes.br instanceof Rect)) {
             changes.br = Rect.fromObject(changes.br);
         }
@@ -98,9 +98,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (!this.props.styleId) {
             return false;
         }
-        var baseStyle = styleManager.getStyle(this.props.styleId, 1);
+        let baseStyle = styleManager.getStyle(this.props.styleId, 1);
 
-        for (var p in baseStyle.props) {
+        for (let p in baseStyle.props) {
             if (!deepEquals(this.props[p], baseStyle.props[p])) {
                 return true;
             }
@@ -113,21 +113,22 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     setProps(props, mode?: ChangeMode) {
-        var hasBr = props.hasOwnProperty("br");
+        let hasBr = props.hasOwnProperty("br");
 
         if (!hasBr) {
-            var hasW = props.hasOwnProperty("width");
-            var hasH = props.hasOwnProperty("height");
+            let hasW = props.hasOwnProperty("width");
+            let hasH = props.hasOwnProperty("height");
             if (hasW || hasH) {
-                var br = this.boundaryRect();
-                var w = hasW ? props.width : br.width;
-                var h = hasH ? props.height : br.height;
+                let br = this.getBoundaryRect();
+                let w = hasW ? props.width : br.width;
+                let h = hasH ? props.height : br.height;
                 props.br = br.withSize(w, h);
             }
         }
         super.setProps.apply(this, arguments);
     }
-    propsUpdated(newProps, oldProps, mode) {
+
+    propsUpdated(newProps, oldProps, mode?) {
         if (newProps.hasOwnProperty("m") || newProps.hasOwnProperty("br")) {
             this.resetGlobalViewCache();
             if (mode === ChangeMode.Model){
@@ -145,7 +146,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     selectLayoutProps(global?: boolean): Partial<IUIElementProps> {
-        var m = global ? this.globalViewMatrix() : this.viewMatrix();
+        let m = global ? this.globalViewMatrix() : this.viewMatrix();
         return {
             br: this.boundaryRect(),
             m
@@ -165,10 +166,10 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     selectDisplayProps(names, metadata = this.findMetadata()): any {
-        var values = {};
-        for (var i = 0; i < names.length; i++) {
-            var propertyName = names[i];
-            var descriptor: PropertyDescriptor = metadata[names[i]];
+        let values = {};
+        for (let i = 0; i < names.length; i++) {
+            let propertyName = names[i];
+            let descriptor: PropertyDescriptor = metadata[names[i]];
             if (descriptor.computed) {
                 values[propertyName] = this[propertyName]();
             }
@@ -180,7 +181,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     getDisplayPropValue(propertyName: string, descriptor: PropertyDescriptor = null): any {
         if (!descriptor) {
-            var metadata = this.findMetadata();
+            let metadata = this.findMetadata();
             if (metadata) {
                 descriptor = metadata[propertyName];
             }
@@ -192,10 +193,10 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.props[propertyName];
     }
     setDisplayProps(changes, changeMode, metadata = this.findMetadata()) {
-        var names = Object.keys(changes);
-        for (var i = 0; i < names.length; i++) {
-            var propertyName = names[i];
-            var descriptor: PropertyDescriptor = metadata[propertyName];
+        let names = Object.keys(changes);
+        for (let i = 0; i < names.length; i++) {
+            let propertyName = names[i];
+            let descriptor: PropertyDescriptor = metadata[propertyName];
             if (descriptor.computed) {
                 this[propertyName](changes[propertyName], changeMode);
                 delete changes[propertyName];
@@ -205,7 +206,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         this.prepareAndSetProps(changes, changeMode);
     }
     getAffectedDisplayProperties(changes): string[] {
-        var properties = Object.keys(changes);
+        let properties = Object.keys(changes);
         if (changes.hasOwnProperty("br") || changes.hasOwnProperty("m")) {
             if (properties.indexOf("x") === -1) {
                 properties.push("x");
@@ -223,7 +224,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                 properties.push("angle");
             }
 
-            var i = properties.indexOf("br");
+            let i = properties.indexOf("br");
             if (i !== -1) {
                 properties.splice(i, 1);
             }
@@ -243,9 +244,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             || changes.hasOwnProperty("height");
     }
     getAffectedProperties(displayChanges): string[] {
-        var properties = Object.keys(displayChanges);
-        var result = [];
-        var layoutPropsAdded = false;
+        let properties = Object.keys(displayChanges);
+        let result = [];
+        let layoutPropsAdded = false;
         for (let i = 0; i < properties.length; ++i) {
             let p = properties[i];
             if (p === 'x' || p === 'y' || p === 'width' || p === 'height' || p === 'angle') {
@@ -281,7 +282,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     getRotation(global: boolean = false) {
-        var decomposed = global ? this.gdm() : this.dm();
+        let decomposed = global ? this.gdm() : this.dm();
         return -decomposed.rotation;
     }
     applyRotation(angle, o, withReset?: boolean, mode?: ChangeMode) {
@@ -294,7 +295,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.getRotation(global) % 360 !== 0;
     }
     isFlipped(global: boolean = false): boolean{
-        var decomposed = global ? this.gdm() : this.dm();
+        let decomposed = global ? this.gdm() : this.dm();
         //it is more complex to check if element is flipped vertically or horizontally.
         //y scaling is always -1 for flipped matrix, and angle changes depending on whether it is x or y flip.
         return Math.round(decomposed.scaling.y) === -1;
@@ -324,7 +325,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     applyMatrixScaling(s, o, options, changeMode: ChangeMode) {
         if (options && options.sameDirection) {
-            var localOrigin = this.viewMatrixInverted().transformPoint(o);
+            let localOrigin = this.viewMatrixInverted().transformPoint(o);
             this.applyTransform(Matrix.create().scale(s.x, s.y, localOrigin.x, localOrigin.y), true, changeMode);
         }
         else {
@@ -359,27 +360,27 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             newHeight = Math.round(newHeight);
         }
 
-        var localOrigin = this.viewMatrixInverted().transformPoint(o);
-        var newX = s.x * br.x;
-        var newY = s.y * br.y;
+        let localOrigin = this.viewMatrixInverted().transformPoint(o);
+        let newX = s.x * br.x;
+        let newY = s.y * br.y;
         if (options && options.round) {
             newX = Math.round(newX);
             newY = Math.round(newY);
         }
-        var newProps: Partial<IUIElementProps> = {};
+        let newProps: Partial<IUIElementProps> = {};
         newProps.br = new Rect(Math.abs(newX), Math.abs(newY), Math.abs(newWidth), Math.abs(newHeight));
 
-        var fx = s.x < 0 ? -1 : 1;
-        var fy = s.y < 0 ? -1 : 1;
-        var dx = s.x * (br.x - localOrigin.x) + localOrigin.x - newX;
-        var dy = s.y * (br.y - localOrigin.y) + localOrigin.y - newY;
+        let fx = s.x < 0 ? -1 : 1;
+        let fy = s.y < 0 ? -1 : 1;
+        let dx = s.x * (br.x - localOrigin.x) + localOrigin.x - newX;
+        let dy = s.y * (br.y - localOrigin.y) + localOrigin.y - newY;
         if (options && options.round) {
             dx = Math.round(dx);
             dy = Math.round(dy);
         }
 
         if (fx === -1 || fy === -1 || dx !== 0 || dy !== 0) {
-            var matrix = this.viewMatrix();
+            let matrix = this.viewMatrix();
             if (fx === -1 || fy === -1) {
                 if (fx === -1) {
                     dx = -dx;
@@ -408,7 +409,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         this.setProps({ m: matrix }, mode);
     }
     resetTransform(mode?: ChangeMode) {
-        var props: any = { m: Matrix.Identity };
+        let props: any = { m: Matrix.Identity };
         if (this.hasBadTransform()){
             props.bad = false;
             props.lgbr = null;
@@ -426,8 +427,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     isBadMatrix(m: IMatrix){
         return m.isSingular();
     }
+
     saveLastGoodTransformIfNeeded(oldProps): void{
-        var lastGoodProps = null;
+        let lastGoodProps = null;
 
         var saveBr = !this.props.lgbr && oldProps.br && this.isBadBoundaryRect(this.boundaryRect()) && !this.isBadBoundaryRect(oldProps.br);
         var saveMatrix = !this.props.lgm && oldProps.m && this.isBadMatrix(this.viewMatrix()) && !this.isBadMatrix(oldProps.m);
@@ -438,12 +440,17 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                 lgm: oldProps.m || this.viewMatrix(),
                 bad: true
             };
+        } else {
+            lastGoodProps = {
+                bad: false
+            };
         }
 
         if (lastGoodProps !== null){
             this.setProps(lastGoodProps);
         }
     }
+
     restoreLastGoodTransformIfNeeded(): void{
         if (this.hasBadTransform()){
             this.setProps({
@@ -456,19 +463,19 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
     }
     roundBoundingBoxToPixelEdge(): boolean {
-        var rounded = false;
-        var bb = this.getBoundingBox();
-        var bb1 = bb.roundPosition();
+        let rounded = false;
+        let bb = this.getBoundingBox();
+        let bb1 = bb.roundPosition();
         if (bb1 !== bb) {
-            var t = bb1.topLeft().subtract(bb.topLeft());
+            let t = bb1.topLeft().subtract(bb.topLeft());
             this.applyTranslation(t);
             bb1 = bb1.translate(t.x, t.y);
             rounded = true;
         }
-        var bb2 = bb1.roundSize();
+        let bb2 = bb1.roundSize();
         if (bb2 !== bb1) {
-            var s = new Point(bb2.width / bb1.width, bb2.height / bb1.height);
-            var canRound = this.shouldApplyViewMatrix();
+            let s = new Point(bb2.width / bb1.width, bb2.height / bb1.height);
+            let canRound = this.shouldApplyViewMatrix();
             this.applyScaling(s, bb1.topLeft(), ResizeOptions.Default.withRounding(canRound).withReset(false));
             rounded = true;
         }
@@ -514,12 +521,12 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return this.runtimeProps.snapPoints;
         }
 
-        var rect = this.getBoundaryRectGlobal();
-        var x = rect.x,
+        let rect = this.getBoundaryRectGlobal();
+        let x = rect.x,
             y = rect.y,
             width = rect.width,
             height = rect.height;
-        var origin = this.rotationOrigin(true);
+        let origin = this.rotationOrigin(true);
 
         if (local) {
             x = 0;
@@ -543,7 +550,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.getBoundingBox().topLeft();
     }
     centerPositionGlobal() {
-        var rect = this.getBoundaryRectGlobal();
+        let rect = this.getBoundaryRectGlobal();
         return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
     }
     addDecorator(decorator) {
@@ -560,7 +567,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (!this.decorators) {
             return;
         }
-        for (var i = 0, max = this.decorators.length; i < max; i++) {
+        for (let i = 0, max = this.decorators.length; i < max; i++) {
             if (this.decorators[i] === decorator) {
                 this.decorators[i].detach();
                 this.decorators.splice(i, 1);
@@ -570,7 +577,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
     }
     removeAllDecorators() {
-        var decorators = this.decorators;
+        let decorators = this.decorators;
         if (decorators) {
             decorators.forEach(x => x.detach());
             this.decorators = [];
@@ -582,7 +589,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (!this.decorators) {
             return;
         }
-        for (var i = 0, max = this.decorators.length; i < max; i++) {
+        for (let i = 0, max = this.decorators.length; i < max; i++) {
             if (this.decorators[i].t === type.prototype.t) {
                 this.decorators[i].detach();
                 this.decorators.splice(i, 1);
@@ -641,15 +648,15 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return rect.translate(matrix.tx, matrix.ty);
         }
 
-        var p1 = matrix.transformPoint2(rect.x, rect.y);
-        var p2 = matrix.transformPoint2(rect.x + rect.width, rect.y);
-        var p3 = matrix.transformPoint2(rect.x + rect.width, rect.y + rect.height);
-        var p4 = matrix.transformPoint2(rect.x, rect.y + rect.height);
+        let p1 = matrix.transformPoint2(rect.x, rect.y);
+        let p2 = matrix.transformPoint2(rect.x + rect.width, rect.y);
+        let p3 = matrix.transformPoint2(rect.x + rect.width, rect.y + rect.height);
+        let p4 = matrix.transformPoint2(rect.x, rect.y + rect.height);
 
-        var l = Math.min(p1.x, p2.x, p3.x, p4.x);
-        var r = Math.max(p1.x, p2.x, p3.x, p4.x);
-        var t = Math.min(p1.y, p2.y, p3.y, p4.y);
-        var b = Math.max(p1.y, p2.y, p3.y, p4.y);
+        let l = Math.min(p1.x, p2.x, p3.x, p4.x);
+        let r = Math.max(p1.x, p2.x, p3.x, p4.x);
+        let t = Math.min(p1.y, p2.y, p3.y, p4.y);
+        let b = Math.max(p1.y, p2.y, p3.y, p4.y);
 
         return new Rect(l, t, r - l, b - t);
     }
@@ -658,11 +665,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (!this.stroke()) {
             return 0;
         }
-        var strokeWidth = this.strokeWidth();
+        let strokeWidth = this.strokeWidth();
         if (strokeWidth === 0) {
             return 0;
         }
-        var strokePosition = this.strokePosition();
+        let strokePosition = this.strokePosition();
         if (strokePosition === StrokePosition.Center) {
             return strokeWidth / 2 + .5 | 0;
         }
@@ -673,7 +680,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     expandRectWithBorder(rect) {
-        var border = this.getMaxOuterBorder();
+        let border = this.getMaxOuterBorder();
         if (border !== 0) {
             return rect.expand(border);
         }
@@ -688,15 +695,15 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return rect;
         }
 
-        var border = this.getMaxOuterBorder();
+        let border = this.getMaxOuterBorder();
         if (border === 0 && goodScaleW && goodScaleH) {
             return rect;
         }
 
-        var x = rect.x - border;
-        var y = rect.y - border;
-        var width = rect.width + border;
-        var height = rect.height + border;
+        let x = rect.x - border;
+        let y = rect.y - border;
+        let width = rect.width + border;
+        let height = rect.height + border;
 
         if (!goodScaleW) {
             x -= 5;
@@ -713,9 +720,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (!this.visible() || this.hasBadTransform()) {
             return false;
         }
-        var rect = this.getHitTestBox(scale, false);
+        let rect = this.getHitTestBox(scale, false);
 
-        var matrix = this.globalViewMatrixInverted();
+        let matrix = this.globalViewMatrixInverted();
         point = matrix.transformPoint(point);
 
         return point.x >= rect.x && point.x < rect.x + rect.width && point.y >= rect.y && point.y < rect.y + rect.height;
@@ -725,12 +732,12 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return false;
         }
 
-        var bb = this.getBoundingBoxGlobal();
+        let bb = this.getBoundingBoxGlobal();
         if (!areRectsIntersecting(bb, rect)) {
             return false;
         }
 
-        var m = this.globalViewMatrix();
+        let m = this.globalViewMatrix();
         if (m.isTranslatedOnly()) {
             return true;
         }
@@ -743,10 +750,10 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         var segments1 = m.transformRect(br);
         var segments2 = rect.segments();
 
-        for (var i = 0; i < segments1.length; i++) {
-            var s1 = segments1[i];
-            for (var j = 0; j < segments2.length; j++) {
-                var s2 = segments2[j];
+        for (let i = 0; i < segments1.length; i++) {
+            let s1 = segments1[i];
+            for (let j = 0; j < segments2.length; j++) {
+                let s2 = segments2[j];
                 if (s1.intersects(s2)) {
                     return true;
                 }
@@ -755,7 +762,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return false;
     }
     // pageLink(value) {
-    //     var action = this.action();
+    //     let action = this.action();
     //     if (action.type === 0/*PageLink*/) {
     //         return action.pageId;
     //     }
@@ -809,9 +816,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (this.hasBadTransform()){
             return;
         }
-
+        let markName;
         if(params.perf) {
-            var markName = "draw " + this.displayName() + " - " + this.id();
+            markName = "draw " + this.displayName() + " - " + this.id();
             performance.mark(markName);
         }
 
@@ -842,7 +849,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     drawDecorators(context, w, h, environment) {
         if (this.decorators) {
             context.save();
-            for (var i = 0, j = this.decorators.length; i < j; ++i) {
+            for (let i = 0, j = this.decorators.length; i < j; ++i) {
                 this.decorators[i].draw(context, w, h, environment);
             }
             context.restore();
@@ -853,7 +860,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         var r = this.boundaryRect();
         const roundFactor = 2;
 
-        var p = matrix.transformPoint2(r.x, r.y);
+        let p = matrix.transformPoint2(r.x, r.y);
         if (round) {
             p.roundMutableBy(roundFactor);
         }
@@ -884,8 +891,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (this.runtimeProps.primitiveRoot) {
             return this.runtimeProps.primitiveRoot;
         }
-        var parent = this.parent();
-        var root = parent ? parent.primitiveRoot() : null;
+        let parent = this.parent();
+        let root = parent ? parent.primitiveRoot() : null;
         this.runtimeProps.primitiveRoot = root;
         return root;
     }
@@ -893,7 +900,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return true;
     }
     _findFinalRoot(){
-        var root = this.primitiveRoot();
+        let root = this.primitiveRoot();
         while (root && !root.isFinalRoot() && root.parent()){
             root = root.parent().primitiveRoot();
         }
@@ -901,19 +908,19 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     primitivePath() {
-        var path = this.primitiveRoot().primitivePath().slice();
+        let path = this.primitiveRoot().primitivePath().slice();
         path[path.length - 1] = this.id();
         return path;
     }
 
     globalViewMatrix(): IMatrix {
         if (!this.runtimeProps.globalViewMatrix) {
-            var parent = this.parent();
+            let parent = this.parent();
             if (!parent || parent === NullContainer) {
                 return GlobalMatrixModifier.applyToMatrix(this.viewMatrix());
             }
 
-            var matrix = parent.globalViewMatrix().clone();
+            let matrix = parent.globalViewMatrix().clone();
             matrix.append(this.viewMatrix());
             this.runtimeProps.globalViewMatrix = Object.freeze(matrix);
         }
@@ -928,18 +935,18 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.runtimeProps.globalViewMatrixInverted;
     }
     rootViewMatrix(): IMatrix {
-        var root = this._findFinalRoot();
+        let root = this._findFinalRoot();
         if (!root || root === this) {
             return this.viewMatrix();
         }
-        var current = this;
-        var matrices = [];
+        let current = this;
+        let matrices = [];
         while (current !== root) {
             matrices.push(current.viewMatrix());
             current = current.parent();
         }
 
-        var m = matrices[matrices.length - 1];
+        let m = matrices[matrices.length - 1];
         for (let i = matrices.length - 2; i >= 0; --i) {
             m = m.appended(matrices[i]);
         }
@@ -963,7 +970,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
     }
     mousemove(event, keys: IKeyboardState) {
-        if (this.editor != null) {
+        if (this.editor !== null) {
             event.handled = true;
         }
     }
@@ -1009,22 +1016,27 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (arguments.length > 0) {
             throw "zOrder is readonly";
         }
-        var parent = this.parent();
+        let parent = this.parent();
         if (!parent || parent === NullContainer) {
             return null;
         }
 
         return parent.children.indexOf(this);
     }
+
+    mode(value?:any):any {
+
+    }
+
     x(value?: number, changeMode?: ChangeMode) {
         if (arguments.length !== 0) {
-            var t = Point.create(value - this.x(), 0);
+            let t = Point.create(value - this.x(), 0);
             this.applyGlobalTranslation(t, changeMode);
 
             return;
         }
 
-        var root = this._findFinalRoot();
+        let root = this._findFinalRoot();
         if (!root || root === this) {
             return this.getBoundingBox().x;
         }
@@ -1033,13 +1045,13 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     y(value?: number, changeMode?: ChangeMode) {
         if (arguments.length !== 0) {
-            var t = Point.create(0, value - this.y());
+            let t = Point.create(0, value - this.y());
             this.applyGlobalTranslation(t, changeMode);
 
             return;
         }
 
-        var root = this._findFinalRoot();
+        let root = this._findFinalRoot();
         if (!root || root === this) {
             return this.getBoundingBox().y;
         }
@@ -1058,8 +1070,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return 0;
         }
 
-        var gm = this.globalViewMatrix();
-        var scaling = 1;
+        let gm = this.globalViewMatrix();
+        let scaling = 1;
         if (!gm.isTranslatedOnly()){
             scaling = this.gdm().scaling.x || 1;
         }
@@ -1077,8 +1089,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return 0;
         }
 
-        var gm = this.globalViewMatrix();
-        var scaling = 1;
+        let gm = this.globalViewMatrix();
+        let scaling = 1;
         if (!gm.isTranslatedOnly()){
             scaling = this.gdm().scaling.y || 1;
         }
@@ -1103,11 +1115,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.position().y + this.height();
     }
     outerHeight() {
-        var margin = this.margin();
+        let margin = this.margin();
         return this.height() + margin.top + margin.bottom;
     }
     outerWidth() {
-        var margin = this.margin();
+        let margin = this.margin();
         return this.width() + margin.left + margin.right;
     }
     locked(value?: boolean) {
@@ -1126,7 +1138,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (this.locked() || !this.visible() || this.hasBadTransform()) {
             return false;
         }
-        var parent = this.parent();
+        let parent = this.parent();
         if (!parent) {
             return false;
         }
@@ -1160,7 +1172,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.field("_crazySupported", value, true);
     }
     customScale(value) {
-        var res = this.field("_customScale", value, false);
+        let res = this.field("_customScale", value, false);
         if (value !== undefined) {
             this.resetGlobalViewCache();
         }
@@ -1384,7 +1396,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     isDescendantOrSame(element: UIElement): boolean {
-        var current = this;
+        let current = this;
         do {
             if (current.isSameAs(element)) {
                 return true;
@@ -1422,7 +1434,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         each([this], callback);
     }
     clone() {
-        var clone = ObjectFactory.fromType(this.t, this.cloneProps());
+        let clone = ObjectFactory.fromType(this.t, this.cloneProps());
         clone.id(createUUID());
         return clone;
     }
@@ -1434,7 +1446,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.props.sourceId || this.props.id;
     }
     mirrorClone() {
-        var clone = ObjectFactory.fromType(this.t, this.cloneProps());
+        let clone = ObjectFactory.fromType(this.t, this.cloneProps());
         return clone;
     }
     cursor() {
@@ -1447,13 +1459,13 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.field("_resizeDimensions", value, ResizeDimension.Both);
     }
     init(values, isDefault?, selector?) {
-        var props = {};
-        var that = this;
-        for (var name in values) {
+        let props = {};
+        let that = this;
+        for (let name in values) {
             if (name[0] === "_") {
                 this.field(name, values[name]);
             } else if (name[0] === "#") {
-                var elementName = name.substr(1);
+                let elementName = name.substr(1);
                 this.findSingleChildOrDefault(function (e) {
                     if (e.name() === elementName) {
                         e.init(values[name]);
@@ -1462,11 +1474,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             } else if (name[0] === "$") {
 
             } else {
-                var value = values[name];
+                let value = values[name];
                 if (value && value.t) {
-                    var type = value.t;
-                    var defaultFunc = TypeDefaults[type];
-                    var defaults = {};
+                    let type = value.t;
+                    let defaultFunc = TypeDefaults[type];
+                    let defaults = {};
                     if (defaultFunc) {
                         defaults = defaultFunc();
                     }
@@ -1522,8 +1534,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.t;
     }
     getPath() {
-        var path = [this];
-        var e = this;
+        let path = [this];
+        let e = this;
         while (typeof e.parent === "function" && e.parent()) {
             path.push(e.parent());
             e = e.parent();
@@ -1551,7 +1563,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.center(global);
     }
     center(global?: boolean) {
-        var m = global ? this.globalViewMatrix() : this.viewMatrix();
+        let m = global ? this.globalViewMatrix() : this.viewMatrix();
         return m.transformPoint(this.boundaryRect().center());
     }
     hitElement(position, scale, predicate?, directSelection?): UIElement {
@@ -1570,7 +1582,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this;
     }
     isAncestor(element) {
-        var parent = this.parent();
+        let parent = this.parent();
         while (parent) {
             if (parent === element) {
                 return true;
@@ -1593,8 +1605,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     page() {
-        var element;
-        var nextParent = this;
+        let element;
+        let nextParent = this;
         do {
             element = nextParent;
             nextParent = !nextParent.isDisposed() ? nextParent.parent() : null;
@@ -1639,7 +1651,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             }
         }
 
-        var points = [];
+        let points = [];
 
         if (this.canRotate()) {
             points.push(
@@ -1867,13 +1879,13 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
     // returns deffered object
     animate(properties, duration, options, progressCallback) {
-        var animationValues = [];
+        let animationValues = [];
         options = extend({}, options);
         options.duration = duration || 0;
-        var that = this;
-        for (var propName in properties) {
-            var newValue = properties[propName];
-            var accessor = (function (name) {
+        let that = this;
+        for (let propName in properties) {
+            let newValue = properties[propName];
+            let accessor = (function (name) {
                 return function prop_accessor(value?: any) {
                     if (arguments.length > 0) {
                         that.setProps({ [name]: value });
@@ -1882,12 +1894,12 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                 }
             })(propName);
 
-            var currentValue = accessor();
+            let currentValue = accessor();
 
             animationValues.push({ from: currentValue, to: newValue, accessor: accessor });
         }
 
-        var group = new AnimationGroup(animationValues, options, progressCallback);
+        let group = new AnimationGroup(animationValues, options, progressCallback);
         Environment.view.animationController.registerAnimationGroup(group);
 
         return group.promise();
@@ -1902,9 +1914,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     getStyleProps() {
-        var stylePropNames = PropertyMetadata.getStylePropertyNamesMap(this.systemType(), 1);
-        var res = {};
-        for (var name in stylePropNames) {
+        let stylePropNames = PropertyMetadata.getStylePropertyNamesMap(this.systemType(), 1);
+        let res = {};
+        for (let name in stylePropNames) {
             res[name] = this.props[name];
         }
         return res;
@@ -1919,7 +1931,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     toSVG() {
-        // var ctx = new C2S(this.width(), this.height());
+        // let ctx = new C2S(this.width(), this.height());
         // this.draw(ctx);
         // return ctx.getSerializedSvg();
     }
@@ -2209,8 +2221,8 @@ PropertyMetadata.registerForType(UIElement, {
     },
     prepareVisibility: function (element: UIElement) {
         if (Environment.view.prototyping()) {
-            var res = {};
-            for (var name in element.props) {
+            let res = {};
+            for (let name in element.props) {
                 res[name] = false;
             }
             return res;

@@ -6,15 +6,15 @@ import UserSettings from "../UserSettings";
 import Environment from "../environment";
 import { ISelection, IEvent, IEvent2, IUIElement, IComposite, IEvent3 } from "carbon-core";
 
-var debug = require("DebugUtil")("carb:selection");
+let debug = require("DebugUtil")("carb:selection");
 
 function lockUnlockGroups(newSelectedElements) {
-    var newUnlocked = [];
-    var invalidate = false;
+    let newUnlocked = [];
+    let invalidate = false;
 
     //unlock parents
     for (let i = 0; i < newSelectedElements.length; i++) {
-        var el = newSelectedElements[i].parent();
+        let el = newSelectedElements[i].parent();
         while (el && el.unlockGroup) {
             let unlocked = this._unlockedContainers.indexOf(el) !== -1;
             if (!unlocked) {
@@ -37,7 +37,7 @@ function lockUnlockGroups(newSelectedElements) {
 
     //lock anything which is not selected anymore
     for (let i = 0; i < this._unlockedContainers.length; i++) {
-        var c = this._unlockedContainers[i];
+        let c = this._unlockedContainers[i];
         if (c.lockGroup && newUnlocked.indexOf(c) === -1) {
             c.lockGroup();
             invalidate = true;
@@ -55,7 +55,7 @@ function lockUnlockGroups(newSelectedElements) {
     }
 }
 function onselect(rect) {
-    var selection = App.Current.activePage.getElementsInRect(rect);
+    let selection = App.Current.activePage.getElementsInRect(rect);
 
     Selection.makeSelection(selection);
 }
@@ -102,7 +102,7 @@ class SelectionModel implements ISelection {
 
     directSelectionEnabled(value?: boolean) {
         if (arguments.length === 1) {
-            var enabled = this._invertDirectSelection ? !value : value;
+            let enabled = this._invertDirectSelection ? !value : value;
             if (enabled !== this._directSelectionEnabled) {
                 this._directSelectionEnabled = enabled;
                 debug("Direct selection: %s", enabled);
@@ -123,7 +123,7 @@ class SelectionModel implements ISelection {
         if (this.selectedElements.length) {
             this.makeSelection([]);
         }
-        var rect = this._selectFrame.update(eventData);
+        let rect = this._selectFrame.update(eventData);
         this.onSelectionFrameEvent.raise(rect);
     }
 
@@ -161,7 +161,7 @@ class SelectionModel implements ISelection {
 
     selectionMode(value) {
         if (arguments.length === 1) {
-            if (value !== "new" && value !== "add" && value !== "remove" && value != 'add_or_replace') {
+            if (value !== "new" && value !== "add" && value !== "remove" && value !== 'add_or_replace') {
                 throw { name: "ArgumentException", message: "Incorrect selection mode specified" };
             }
             this._selectionMode = value;
@@ -169,14 +169,14 @@ class SelectionModel implements ISelection {
         return this._selectionMode;
     }
 
-    addToSelection(/*Array*/elements, refreshOnly) {
-        var multiSelect = elements.length > 1;
-        var selection = this._decomposeSelection(elements);
+    addToSelection(/*Array*/elements:IUIElement[], refreshOnly:boolean) {
+        let multiSelect = elements.length > 1;
+        let selection = this._decomposeSelection(elements);
 
-        var canSelect = false;
-        for (var i = 0, j = selection.length; i < j; ++i) {
-            var element = selection[i];
-            if (element.canSelect() || element.selectFromLayersPanel) {
+        let canSelect = false;
+        for (let i = 0, j = selection.length; i < j; ++i) {
+            let element = selection[i];
+            if (element.canSelect() || element.runtimeProps.selectFromLayersPanel) {
                 this._selectCompositeElement.register(element, multiSelect, refreshOnly);
                 canSelect = true;
             }
@@ -194,23 +194,23 @@ class SelectionModel implements ISelection {
         this._selectCompositeElement.performArrange();
     }
 
-    getSelection() {
-        var selectedElement = this.selectedElement();
+    getSelection() : IUIElement[] {
+        let selectedElement = this.selectedElement();
         if (!selectedElement) {
             return null;
         }
         return this._decomposeSelection([selectedElement]);
     }
 
-    _decomposeSelection(selection) {
+    _decomposeSelection(selection) : IUIElement[] {
         if (!selection) {
             return [];
         }
 
-        var newSelection = selection;
+        let newSelection = selection;
 
         if (selection.length === 1) {
-            var selectedElement = selection[0];
+            let selectedElement = selection[0];
 
             if (selectedElement instanceof SelectComposite) {
                 newSelection = [];
@@ -227,9 +227,9 @@ class SelectionModel implements ISelection {
     }
 
     makeSelection(selection, refreshOnly = false, doNotTrack = false) {
-        var currentSelection = this._selectCompositeElement.elements;
+        let currentSelection = this._selectCompositeElement.elements;
 
-        var newSelection = this._decomposeSelection(selection);
+        let newSelection = this._decomposeSelection(selection);
         if (this.areSameArrays(currentSelection, newSelection)) {
             return;
         }
@@ -247,7 +247,7 @@ class SelectionModel implements ISelection {
             this.unselectAll(refreshOnly);
         }
         else if (this._selectionMode === "add") {
-            var alreadyAdded = false;
+            let alreadyAdded = false;
             each(currentSelection, function (el1) {
                 each(newSelection, function (el2) {
                     if (el1 === el2) {
@@ -281,7 +281,7 @@ class SelectionModel implements ISelection {
     }
 
     refreshSelection() {
-        var selection = this.selectedElements();
+        let selection = this.selectedElements();
         this.makeSelection([], true);
         this.makeSelection(selection, true);
 
@@ -289,7 +289,7 @@ class SelectionModel implements ISelection {
     }
 
     reselect() {
-        var selection = this.selectedElements();
+        let selection = this.selectedElements();
         this.makeSelection([], true);
         this.makeSelection(selection, false, true);
     }
@@ -301,14 +301,14 @@ class SelectionModel implements ISelection {
 
     unselectAll(refreshOnly = false) {
         this._selectCompositeElement.selected(false);
-        var count = this._selectCompositeElement.count();
+        let count = this._selectCompositeElement.count();
         this._selectCompositeElement.unregisterAll(refreshOnly);
         return count !== 0;
     }
 
     unselectGroup(elements, refreshOnly) {
         this.unselectAll(refreshOnly);
-        var currentSelection = this._selectCompositeElement.elements;
+        let currentSelection = this._selectCompositeElement.elements;
         this.removeGroupFromArray(currentSelection, elements);
         this.addToSelection(currentSelection, refreshOnly);
     }
@@ -326,7 +326,7 @@ class SelectionModel implements ISelection {
     }
 
     selectAll() {
-        var page = App.Current.activePage;
+        let page = App.Current.activePage;
 
         if (App.Current.currentTool === ViewTool.Artboard) {
             this.makeSelection(page.getAllArtboards());
@@ -338,13 +338,13 @@ class SelectionModel implements ISelection {
             return;
         }
 
-        var artboard = page.getActiveArtboard();
+        let artboard = page.getActiveArtboard();
         if (artboard) {
             this.makeSelection(artboard.children);
             return;
         }
 
-        var v = Number.MAX_SAFE_INTEGER / 2;
+        let v = Number.MAX_SAFE_INTEGER / 2;
         onselect.call(this, { x: -v, y: -v, width: Number.MAX_SAFE_INTEGER, height: Number.MAX_SAFE_INTEGER });
     }
 
@@ -353,9 +353,9 @@ class SelectionModel implements ISelection {
     }
 
     lock() {
-        var elements = this.selectedElements();
-        for (var i = 0; i < elements.length; i++) {
-            var e = elements[i];
+        let elements = this.selectedElements();
+        for (let i = 0; i < elements.length; i++) {
+            let e = elements[i];
             if (!e.locked()) {
                 e.locked(true);
             }
@@ -363,9 +363,9 @@ class SelectionModel implements ISelection {
         this._selectCompositeElement.selected(false);
     }
     unlock() {
-        var elements = this.selectedElements();
-        for (var i = 0; i < elements.length; i++) {
-            var e = elements[i];
+        let elements = this.selectedElements();
+        for (let i = 0; i < elements.length; i++) {
+            let e = elements[i];
             if (e.locked()) {
                 e.locked(false);
             }
@@ -374,9 +374,9 @@ class SelectionModel implements ISelection {
         this._selectCompositeElement.selected(true);
     }
     hide() {
-        var elements = this.selectedElements();
-        for (var i = 0; i < elements.length; i++) {
-            var e = elements[i];
+        let elements = this.selectedElements();
+        for (let i = 0; i < elements.length; i++) {
+            let e = elements[i];
             if (e.visible()) {
                 e.visible(false);
             }
@@ -384,9 +384,9 @@ class SelectionModel implements ISelection {
         this._selectCompositeElement.selected(false);
     }
     show() {
-        var elements = this.selectedElements();
-        for (var i = 0; i < elements.length; i++) {
-            var e = elements[i];
+        let elements = this.selectedElements();
+        for (let i = 0; i < elements.length; i++) {
+            let e = elements[i];
             if (!e.visible()) {
                 e.visible(true);
             }
@@ -400,8 +400,8 @@ class SelectionModel implements ISelection {
     }
 
     private removeGroupFromArray(array, group){
-        for(var i = 0; i < group.length; ++i){
-            var idx = array.indexOf(group[i]);
+        for(let i = 0; i < group.length; ++i){
+            let idx = array.indexOf(group[i]);
             if(idx !== -1) {
                 array.splice(idx, 1);
             }
@@ -415,7 +415,7 @@ class SelectionModel implements ISelection {
         if (array1.length !== array2.length){
             return false;
         }
-        for (var i = 0, j = array1.length; i < j; ++i) {
+        for (let i = 0, j = array1.length; i < j; ++i) {
             if(array1[i] !== array2[i]){
                 return false;
             }
@@ -424,7 +424,7 @@ class SelectionModel implements ISelection {
     }
 
     private intersectArrays(array1, array2){
-        for(var i = 0; i < array2.length; ++i){
+        for(let i = 0; i < array2.length; ++i){
             if(array1.indexOf(array2[i]) === -1){
                 return false;
             }
@@ -434,6 +434,6 @@ class SelectionModel implements ISelection {
     }
 }
 
-var Selection = new SelectionModel();
+let Selection = new SelectionModel();
 
 export default Selection;

@@ -27,7 +27,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         this.children = [];
     }
     performArrange(event?: any, mode?: ChangeMode) {
-        var e = event || {};
+        let  e = event || {};
         e.newRect = this.boundaryRect();
         e.oldRect = e.oldRect || e.newRect;
         this.arrange(e, mode);
@@ -66,12 +66,12 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
             return;
         }
 
-        var stroke = this.stroke();
+        let  stroke = this.stroke();
         if (Brush.canApply(stroke)) {
             context.save();
             this.globalViewMatrix().applyToContext(context);
             context.beginPath();
-            var dash = this.dashPattern();
+            let  dash = this.dashPattern();
             if (dash) {
                 context.setLineDash(dash);
             }
@@ -101,14 +101,16 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         return false;
     }
     saveOrResetLayoutProps(): boolean {
-        var res = UIElement.prototype.saveOrResetLayoutProps.apply(this, arguments);
+        let  res = UIElement.prototype.saveOrResetLayoutProps.apply(this, arguments);
         this.children.forEach(e => e.saveOrResetLayoutProps());
         return res;
     }
+
     restoreLastGoodTransformIfNeeded(){
         super.restoreLastGoodTransformIfNeeded();
         this.children.forEach(x => x.restoreLastGoodTransformIfNeeded());
     }
+
     drawSelf(context, w, h, environment) {
         this.fillBackground(context, 0, 0, w, h);
 
@@ -142,18 +144,18 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
             return;
         }
 
-        var clipingRect = mask.getBoundingBoxGlobal(false, true);
-        var p1 = environment.pageMatrix.transformPoint2(clipingRect.x, clipingRect.y);
-        var p2 = environment.pageMatrix.transformPoint2(clipingRect.x + clipingRect.width, clipingRect.y + clipingRect.height);
+        let  clipingRect = mask.getBoundingBoxGlobal(false, true);
+        let  p1 = environment.pageMatrix.transformPoint2(clipingRect.x, clipingRect.y);
+        let  p2 = environment.pageMatrix.transformPoint2(clipingRect.x + clipingRect.width, clipingRect.y + clipingRect.height);
         p1.x = Math.max(0, 0 | p1.x * environment.contextScale);
         p1.y = Math.max(0, 0 | p1.y * environment.contextScale);
         p2.x = 0 | p2.x * environment.contextScale + .5;
         p2.y = 0 | p2.y * environment.contextScale + .5;
 
-        var sw = p2.x - p1.x;
-        var sh = p2.y - p1.y;
+        let  sw = p2.x - p1.x;
+        let  sh = p2.y - p1.y;
 
-        var offContext = ContextPool.getContext(sw, sh, environment.contextScale, true);
+        let  offContext = ContextPool.getContext(sw, sh, environment.contextScale, true);
         offContext.relativeOffsetX = -p1.x;
         offContext.relativeOffsetY = -p1.y;
 
@@ -185,7 +187,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     }
     renderAfterMask(context, items, i, environment) {
         for (; i < items.length; ++i) {
-            var child = items[i];
+            let  child = items[i];
 
             if (child.visible()) {
                 this.drawChildSafe(child, context, environment);
@@ -198,10 +200,10 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
             throw "Can't clone, chain contains recursive references";
         }
         this._cloning = true;
-        var clone = UIElement.prototype.clone.apply(this, arguments);
+        let  clone = UIElement.prototype.clone.apply(this, arguments);
 
-        for (var i = 0; i < this.children.length; i++) {
-            var e = this.children[i];
+        for (let  i = 0; i < this.children.length; i++) {
+            let  e = this.children[i];
             clone.add(e.clone(), ChangeMode.Self);
         }
         delete this._cloning;
@@ -209,10 +211,10 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     }
 
     mirrorClone() {
-        var clone = UIElement.prototype.mirrorClone.apply(this, arguments);
+        let  clone = UIElement.prototype.mirrorClone.apply(this, arguments);
 
-        for (var i = 0; i < this.children.length; i++) {
-            var e = this.children[i];
+        for (let  i = 0; i < this.children.length; i++) {
+            let  e = this.children[i];
             clone.add(e.mirrorClone(), ChangeMode.Self);
         }
 
@@ -223,9 +225,9 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         this.modifyContextBeforeDrawChildren(context);
         this.runtimeProps.mask = null;
         if (this.children) {
-            var items = this.children;
-            for (var i = 0; i < items.length; ++i) {
-                var child = items[i];
+            let  items = this.children;
+            for (let  i = 0; i < items.length; ++i) {
+                let  child = items[i];
                 if (child.clipMask()) {
                     this.drawWithMask(context, child, i, environment);
                     this.runtimeProps.mask = child;
@@ -263,7 +265,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     // }
 
     // getBoundaryRect(includeMargin: boolean = false) : IRect {
-    //     var mask = this.runtimeProps.mask;
+    //     let  mask = this.runtimeProps.mask;
     //     if(mask && this.lockedGroup()) {
     //         var rect = mask.boundaryRect(includeMargin);
     //         var pos = mask.position();
@@ -301,7 +303,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
                 child.makeCorrupted();
                 return;
             }
-            var data;
+            let  data;
             try {
                 data = child.toJSON(true);
             }
@@ -317,11 +319,11 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
                     }
                 }
             }
-            var newChild = new CorruptedElement(data);
+            let  newChild = new CorruptedElement(data);
             newChild.parent(child.parent());
-            var items = this.children;
-            for (var i = 0; i < items.length; ++i) {
-                var c = items[i];
+            let  items = this.children;
+            for (let  i = 0; i < items.length; ++i) {
+                let  c = items[i];
                 if (c === child) {
                     items.splice(i, 1, newChild);
                     break;
@@ -337,11 +339,11 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         return this.props.padding;
     }
     innerHeight() {
-        var padding = this.padding();
+        let  padding = this.padding();
         return this.height() - padding.top - padding.bottom;
     }
     innerWidth() {
-        var padding = this.padding();
+        let  padding = this.padding();
         return this.width() - padding.left - padding.right;
     }
 
@@ -373,7 +375,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     }
 
     acquiredChild(child, mode) {
-        var oldParent = child.parent();
+        let  oldParent = child.parent();
         if (oldParent && !(oldParent === NullContainer)) {
             oldParent.remove(child, mode);
         }
@@ -388,8 +390,8 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         let index = this.index();
 
         for (let i = this.children.length - 1; i >= 0; --i) {
-            var e = this.children[i];
-            var gm = e.globalViewMatrix();
+            let  e = this.children[i];
+            let  gm = e.globalViewMatrix();
             this.remove(e);
             parent.insert(e, index);
             e.setTransform(parent.globalViewMatrixInverted().appended(gm));
@@ -418,7 +420,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         }
 
         this.releasingChild(element);
-        var idx = this.removeChild(element, mode);
+        let  idx = this.removeChild(element, mode);
 
         element.removed();
 
@@ -427,13 +429,13 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         return idx;
     }
     replace(elementFrom, elementTo, mode) {
-        var idx = this.positionOf(elementFrom);
+        let  idx = this.positionOf(elementFrom);
         this.remove(elementFrom, mode);
         this.insert(elementTo, idx, mode);
     }
     clear(mode?: ChangeMode) {
-        for (var i = 0; i < this.children.length; i++) {
-            var child = this.children[i];
+        for (let  i = 0; i < this.children.length; i++) {
+            let  child = this.children[i];
             this.releasingChild(child);
             child.trackDeleted(this, i, mode);
         }
@@ -478,7 +480,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     }
     delegateToChildren(name, event) {
         for (let i = this.children.length - 1; i >= 0; --i) {
-            var element = this.children[i];
+            let  element = this.children[i];
             if (element.hitTest(event.x, event.y, event._scale)) {
                 element[name](event);
                 if (event.handled) {
@@ -501,11 +503,11 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
             return null;
         }
 
-        var hitElement: UIElement = this.hitTransparent() ? null : this;
+        let  hitElement: UIElement = this.hitTransparent() ? null : this;
 
         for (let i = this.children.length - 1; i >= 0; --i) {
-            var element = this.children[i];
-            var newHit = element.hitElement(position, scale, predicate, directSelection);
+            let  element = this.children[i];
+            let  newHit = element.hitElement(position, scale, predicate, directSelection);
             if (newHit) {
                 hitElement = newHit;
                 break;
@@ -515,8 +517,8 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         return hitElement;
     }
     hitElements(/*Point*/position, scale) {
-        var that = this;
-        var elements = [];
+        let  that = this;
+        let  elements = [];
 
         this.applyVisitor(function (element) {
             if (that !== element) {
@@ -529,7 +531,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         return elements;
     }
     hitElementDirect(position, scale, predicate?) {
-        var result = this.hitElement(position, scale, predicate, true);
+        let  result = this.hitElement(position, scale, predicate, true);
         return result;
     }
     lockedGroup() {
@@ -544,9 +546,9 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         Environment.controller.releaseMouse(element);
     }
     applyVisitor(/*Visitor*/callback, useLogicalChildren?: boolean, parent?: any) {
-        var stop = false;
+        let  stop = false;
         for (let i = this.children.length - 1; i >= 0; --i) {
-            var item = this.children[i];
+            let  item = this.children[i];
             if (item.applyVisitor(callback, useLogicalChildren, this) === false) {
                 stop = true;
                 break;
@@ -558,7 +560,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         return false;
     }
     findActualParentForAncestorById(elementId) {
-        var realParrent = null;
+        let  realParrent = null;
         this.applyVisitor(function (e, p) {
             if (e.id() === elementId) {
                 realParrent = p;
@@ -574,26 +576,26 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
 
         if (this.children) {
             for (let i = this.children.length - 1; i >= 0; --i) {
-                var e = this.children[i];
+                let  e = this.children[i];
                 e.resetGlobalViewCache(resetPrimitiveRoot);
             }
         }
     }
     global2local(/*Point*/pos) {
-        var parent = this.parent();
-        if (parent == null || !this.globalViewMatrix) {
+        let  parent = this.parent();
+        if (parent === null || !this.globalViewMatrix) {
             return pos;
         }
-        var matrix = this.globalViewMatrixInverted();
+        let  matrix = this.globalViewMatrixInverted();
         return matrix.transformPoint(pos);
     }
     local2global(/*Point*/pos) {
-        var parent = this.parent();
-        if (parent == null || !this.globalViewMatrix) {
+        let  parent = this.parent();
+        if (parent === null || !this.globalViewMatrix) {
             return pos;
         }
 
-        var matrix = this.globalViewMatrix();
+        let  matrix = this.globalViewMatrix();
         return matrix.transformPoint(pos);
     }
     globalMatrixToLocal(m: IMatrix): Matrix{
@@ -604,19 +606,19 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         ArrangeStrategy.arrange(this, resizeEvent, mode);
     }
     autoWidth() {
-        var overflow = this.overflow();
+        let  overflow = this.overflow();
         return overflow === Overflow.AdjustHorizontal || overflow === Overflow.AdjustBoth || this.autoExpandWidth();
     }
     autoHeight() {
-        var overflow = this.overflow();
+        let  overflow = this.overflow();
         return overflow === Overflow.AdjustVertical || overflow === Overflow.AdjustBoth || this.autoExpandHeight();
     }
     autoExpandWidth() {
-        var overflow = this.overflow();
+        let  overflow = this.overflow();
         return overflow === Overflow.ExpandHorizontal || overflow === Overflow.ExpandBoth;
     }
     autoExpandHeight() {
-        var overflow = this.overflow();
+        let  overflow = this.overflow();
         return overflow === Overflow.ExpandVertical || overflow === Overflow.ExpandBoth;
     }
     autoGrowMode(value) {
@@ -655,21 +657,21 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         return this.runtimeProps.activeGroup;
     }
     getDropData(pos, element) {
-        var width = this.width(),
+        let  width = this.width(),
             height = this.height();
 
         pos = this.global2local(pos);
 
-        var intervals = [];
-        var last = 0;
-        var baseLine;
+        let  intervals = [];
+        let  last = 0;
+        let  baseLine;
 
         function calculateBaseLine(intervals, pos, insertIndex?) {
-            var minY = Number.MAX_VALUE;
-            var lineY = 0;
-            for (var i = 0; i < intervals.length; i++) {
-                var itr = intervals[i];
-                var minCandidate = Math.abs(itr - pos);
+            let  minY = Number.MAX_VALUE;
+            let  lineY = 0;
+            for (let  i = 0; i < intervals.length; i++) {
+                let  itr = intervals[i];
+                let  minCandidate = Math.abs(itr - pos);
                 if (minCandidate < minY) {
                     minY = minCandidate;
                     lineY = itr;
@@ -679,10 +681,10 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
             return { lineY: lineY, insertIndex: insertIndex };
         }
 
-        var dropPositioning = this.dropPositioning();
+        let  dropPositioning = this.dropPositioning();
         if (dropPositioning === 'vertical') {
-            for (var i = 0; i < this.children.length; i++) {
-                var _element = this.children[i];
+            for (let  i = 0; i < this.children.length; i++) {
+                let  _element = this.children[i];
                 if (_element !== element) {
                     var gr = _element.boundaryRect();
                     intervals.push((last + gr.y) / 2);
@@ -694,8 +696,8 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
 
             baseLine = calculateBaseLine(intervals, pos.y);
 
-            var pt1 = this.local2global({ x: 5, y: baseLine.lineY });
-            var pt2 = this.local2global({ x: width - 10, y: baseLine.lineY });
+            let  pt1 = this.local2global({ x: 5, y: baseLine.lineY });
+            let  pt2 = this.local2global({ x: width - 10, y: baseLine.lineY });
             return {
                 x1: pt1.x,
                 y1: pt1.y,
@@ -705,8 +707,8 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
                 angle: this.angle()
             }
         } else if (dropPositioning === 'horizontal') {
-            for (var i = 0; i < this.children.length; i++) {
-                var _element = this.children[i];
+            for (let  i = 0; i < this.children.length; i++) {
+                let  _element = this.children[i];
                 if (_element !== element) {
                     var gr = _element.boundaryRect();
                     intervals.push((last + gr.x) / 2);
@@ -718,8 +720,8 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
 
             baseLine = calculateBaseLine(intervals, pos.x);
 
-            var pt1 = this.local2global({ x: baseLine.lineY, y: 5 });
-            var pt2 = this.local2global({ x: baseLine.lineY, y: height - 10 });
+            let  pt1 = this.local2global({ x: baseLine.lineY, y: 5 });
+            let  pt2 = this.local2global({ x: baseLine.lineY, y: height - 10 });
             return {
                 x1: pt1.x,
                 y1: pt1.y,
@@ -738,7 +740,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     }
 
     findElementByName(name) {
-        var element;
+        let  element;
 
         this.applyVisitor(function (el) {
             if (el.name() === name) {
@@ -751,7 +753,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     }
 
     getElementById(id) {
-        var res = null;
+        let  res = null;
         if (this.id() === id) {
             return this;
         }
@@ -766,7 +768,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     }
 
     findSingleChildOrDefault(predicate) {
-        var result = null;
+        let  result = null;
         this.applyVisitor(function (el) {
             if (predicate(el)) {
                 result = el;
@@ -781,8 +783,8 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
             return;
         }
 
-        for (var i = 0; i < this.children.length; i++) {
-            var e = this.children[i];
+        for (let  i = 0; i < this.children.length; i++) {
+            let  e = this.children[i];
             if (!e.isDisposed()) {
                 e.dispose();
             }
@@ -795,12 +797,12 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     }
 
     static createCanvas = function () {
-        var container = new Container();
+        let  container = new Container();
         container.arrangeStrategy(ArrangeStrategies.Canvas);
         return container;
     }
     static createStackHorizontal = function () {
-        var container = new Container();
+        let  container = new Container();
         container.setProps({
             arrangeStrategy: ArrangeStrategies.Stack,
             stackOrientation: StackOrientation.Horizontal
@@ -808,17 +810,17 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         return container;
     }
     static createStackVertical() {
-        var container = new Container();
+        let  container = new Container();
         container.arrangeStrategy(ArrangeStrategies.Stack);
         return container;
     };
     static createDock() {
-        var container = new Container();
+        let  container = new Container();
         container.arrangeStrategy(ArrangeStrategies.Dock);
         return container;
     };
     static createAlign() {
-        var container = new Container();
+        let  container = new Container();
         container.arrangeStrategy(ArrangeStrategies.Align);
         return container;
     }

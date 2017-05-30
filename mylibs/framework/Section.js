@@ -160,8 +160,7 @@ export default class Section extends Container {
 
 }
 Section.prototype.t = Types.Section;;
-
-Section.prototype.selectFromLayersPanel = true;
+Section.prototype.runtimeProps = {selectFromLayersPanel:true};
 Section.prototype.multiselectTransparent = true;
 Section.prototype.canMultiselectChildren = true;
 

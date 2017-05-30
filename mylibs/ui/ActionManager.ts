@@ -29,9 +29,9 @@ import GroupInRepeater from "../framework/repeater/GroupInRepeater";
 import UngroupRepeater from "../framework/repeater/UngroupRepeater";
 import Selection from "../framework/SelectionModel";
 import EventHelper from "../framework/EventHelper";
-import { IActionManager, IAction, IApp, IUIElement, IEvent, IContainer } from "carbon-core";
+import { IActionManager, IAction, IApp, IUIElement, IEvent, IContainer, IIsolatable } from "carbon-core";
 
-var debug = require("DebugUtil")("carb:actionManager");
+const debug = require("DebugUtil")("carb:actionManager");
 
 function formatActionDescription(action) {
     Object.defineProperty(action, "shortcut", {
@@ -50,14 +50,14 @@ function formatActionDescription(action) {
     // })
 }
 
-var actionStartProps;
+let actionStartProps;
 function startRepeatableAction(oldPropsSelector) {
     PropertyTracker.suspend();
     actionStartProps = Selection.selectComposite().map(x => oldPropsSelector(x));
     Selection.hideFrame();
 }
 function endRepeatableAction() {
-    var flushNeeded = PropertyTracker.resume();
+    let flushNeeded = PropertyTracker.resume();
     if (flushNeeded) {
         setTimeout(() => {
             PropertyTracker.flush();
@@ -91,7 +91,7 @@ export default class ActionManager implements IActionManager {
     }
 
     notifyActionStart(actionName, e) {
-        var event = this._actionStartEvents[actionName];
+        let event = this._actionStartEvents[actionName];
         if (event) {
             event.raise(actionName, e);
         }
@@ -99,7 +99,7 @@ export default class ActionManager implements IActionManager {
 
     notifyActionCompleted(actionName: string, result?: any, ret?: any) {
         this.actionPerformed.raise(actionName/*, result, ret*/);
-        var event = this._events[actionName];
+        let event = this._events[actionName];
         if (event) {
             event.raise(actionName, result, ret);
         }
@@ -107,7 +107,7 @@ export default class ActionManager implements IActionManager {
 
 
     registerAction(name: string, description: string, category: string, callback: (option?: any) => void): IAction {
-        var action: IAction = {
+        let action: IAction = {
             id: name,
             name: description,
             callback: callback
@@ -128,12 +128,12 @@ export default class ActionManager implements IActionManager {
     }
 
     registerActions() {
-        var that = this;
-        var selectionMade = function () {
-            var selection = Selection.getSelection();
+        let that = this;
+        let selectionMade = function () {
+            let selection = Selection.getSelection();
             return selection && selection.length > 0;
         };
-        var moving = null;
+        let moving = null;
 
         this.registerActionInstance({
             id: "delete",
@@ -250,7 +250,7 @@ export default class ActionManager implements IActionManager {
 
         this.registerAction("moveFinished", "Move finished", "Positioning", function () {
             moving = false;
-            var oldProps = endRepeatableAction();
+            let oldProps = endRepeatableAction();
             Selection.selectedElements().forEach((x, i) =>
                 x.trackSetProps(x.selectProps(["m"]), { m: oldProps[i] }));
         });
@@ -301,12 +301,12 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("isolateSelection", "Isolate selection", "Isolation", function () {
-            Isolate.run(Selection.getSelection());
+            Isolate.run(Selection.getSelection() as IIsolatable[]);
         });
 
         this.registerAction("ungroupElements", "Ungroup elements", "Ungroup", function () {
-            var elements = Selection.elements as IContainer[];
-            var children = [];
+            let elements = Selection.elements as IContainer[];
+            let children = [];
             elements.forEach(e => {
                 children = children.concat(e.children);
                 e.flatten();
@@ -332,8 +332,8 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("unlockAllOnArtboard", "Unlock all on page", "Lock", function () {
-            var artboard = that.app.activePage.getActiveArtboard();
-            var selection = [];
+            let artboard = that.app.activePage.getActiveArtboard();
+            let selection = [];
             artboard.applyVisitor(function (e) {
                 if (e.locked()) {
                     e.locked(false);
@@ -344,14 +344,14 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("swapColors", "Swap Colors", "Colors", function () {
-            var selection = Selection.selectedElement() as IUIElement;
+            let selection = Selection.selectedElement() as IUIElement;
             if (!selection) {
                 return null;
             }
 
             selection.each((e: IUIElement) => {
-                var fill = e.fill();
-                var stroke = e.stroke();
+                let fill = e.fill();
+                let stroke = e.stroke();
                 e.fill(stroke);
                 e.stroke(fill);
             })
@@ -432,7 +432,7 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("zoomSelection", "Zoom selection", "Zoom", function () {
-            var element = Selection.selectedElement() as IUIElement;
+            let element = Selection.selectedElement() as IUIElement;
             element = element || (that.app.activePage.getActiveArtboard() as IUIElement);
             Environment.view.ensureScale(element);
             Environment.view.ensureVisible(element);
@@ -485,21 +485,24 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("pathFlatten", "Flatten path", "Path", function () {
-            var elements = Selection.getSelection();
-            for (var i = 0; i < elements.length; ++i) {
+            let elements = Selection.getSelection();
+            for (let i = 0; i < elements.length; ++i) {
                 elements[i].flatten();
             }
         });
 
         this.registerAction("groupWithMask", "Create mask", "Group", function () {
-            var selection = Selection.getSelection();
-            if (typeof selection[0].drawPath == 'function') {
-                var group = Group.run(selection, GroupContainer);
+            let selection = Selection.getSelection();
+            if (typeof selection[0].drawPath === 'function') {
+                let group = Group.run(selection, GroupContainer);
                 group.children[0].setProps({ clipMask: true });
             }
         });
 
         this.registerAction("cancel", "Cancel", "", function () {
+        });
+
+        this.registerAction("exitisolation", "Exit isolation", "", function () {
         });
 
         this.registerAction("toggleFrame", "@toggleFrame", "", function () {
@@ -515,7 +518,7 @@ export default class ActionManager implements IActionManager {
         });
     }
     iterate(callback) {
-        for (var name in this._actions) {
+        for (let name in this._actions) {
             callback(this._actions[name]);
         }
     }
@@ -525,8 +528,8 @@ export default class ActionManager implements IActionManager {
 
     invoke(actionName: string, callback?: (success: boolean, result?: any) => void): void {
         debug("Invoking %s", actionName);
-        var that = this;
-        var action = this._actions[actionName];
+        let that = this;
+        let action = this._actions[actionName];
 
         if (!action) {
             throw "Unknown action " + actionName;
@@ -536,13 +539,13 @@ export default class ActionManager implements IActionManager {
             return;
         }
 
-        var e = { handled: false };
+        let e = { handled: false };
         this.notifyActionStart(actionName, e);
         if (e.handled) {
             return;
         }
 
-        var cmd = action.callback(Selection);
+        let cmd = action.callback(Selection);
 
         if (cmd) {
             if (cmd instanceof Command) {
@@ -574,7 +577,7 @@ export default class ActionManager implements IActionManager {
         Invalidate.request();
     }
     getActionsInCategory(category) {
-        var result = [];
+        let result = [];
         this.iterate(function (action) {
             if (action.category === category) {
                 result.push(action);
@@ -589,8 +592,8 @@ export default class ActionManager implements IActionManager {
         return this._actions.hasOwnProperty(name);
     }
     getActionFullDescription(name, translate) {
-        var action = this._actions[name];
-        var shortcut = this.app.shortcutManager.getActionHotkeyDisplayLabel(name);
+        let action = this._actions[name];
+        let shortcut = this.app.shortcutManager.getActionHotkeyDisplayLabel(name);
 
         if (shortcut) {
             if (translate) {
@@ -606,28 +609,29 @@ export default class ActionManager implements IActionManager {
         return action.name;
     }
     getActionDescription(name) {
-        var action = this._actions[name];
+        let action = this._actions[name];
         if (action) {
             return action.name;
         }
     }
     subscribe(action, handler) {
-        var event = this._events[action];
+        let event = this._events[action];
         if (!event) {
             event = EventHelper.createEvent();
             this._events[action] = event;
         }
         return event.bind.apply(event, Array.prototype.slice.call(arguments, 1));
     }
+
     unsubscribe(action, handler) {
-        var event = this._events[action];
+        let event = this._events[action];
         if (event) {
             event.unbind.apply(event, Array.prototype.slice.call(arguments, 1));
         }
     }
 
     subscribeToActionStart(action, handler) {
-        var event = this._actionStartEvents[action];
+        let event = this._actionStartEvents[action];
         if (!event) {
             event = EventHelper.createEvent();
             this._actionStartEvents[action] = event;

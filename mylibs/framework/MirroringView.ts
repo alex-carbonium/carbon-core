@@ -8,9 +8,9 @@ import {IMirroringProxyPage} from "carbon-app";
 import { ChangeMode } from "carbon-core";
 
 function fitRectToRect(outer, inner) {
-    var scale = outer.width / inner.width;
+    let scale = outer.width / inner.width;
 
-    var newHeight = inner.height * scale;
+    let newHeight = inner.height * scale;
     if (newHeight > outer.height) {
         scale = outer.height / inner.height;
     }
@@ -22,7 +22,7 @@ class ArtboardProxyPage extends Page implements IMirroringProxyPage {
     constructor(app, view){
         super();
         this.view = view;
-        this.mode = MirrorViewMode.Fit;
+        this.fitMode = MirrorViewMode.Fit;
         this._pageChnagedToken = null;
         this._onArtboardChangedToken = null;
 
@@ -62,7 +62,7 @@ class ArtboardProxyPage extends Page implements IMirroringProxyPage {
         this._version = null;
         this.view.setActivePage(this);
 
-        if(this.view.mode === 1) {
+        if(this.view.fitMode === 1) {
             this.fitToViewport();
         } else {
             this.view.scale(1);
@@ -70,18 +70,18 @@ class ArtboardProxyPage extends Page implements IMirroringProxyPage {
     }
 
     updateScrollRanges() {
-        var artboard = this.children[0];
+        let artboard = this.children[0];
         if(!artboard){
             return;
         }
-        var screenSize = App.Current.viewportSize();
-        var scale = this.view.scale();
+        let screenSize = App.Current.viewportSize();
+        let scale = this.view.scale();
         this.maxScrollX(Math.max(0, (artboard.width()* scale - screenSize.width) ));
         this.maxScrollY(Math.max(0, (artboard.height()* scale - screenSize.height)));
     }
 
     fitToViewport(){
-        var artboard = this.view.page.children[0];
+        let artboard = this.view.page.children[0];
         if(!artboard){
             return;
         }
@@ -94,7 +94,7 @@ class ArtboardProxyPage extends Page implements IMirroringProxyPage {
 
     isInvalidateRequired()
     {
-        var artboard = this.children[0];
+        let artboard = this.children[0];
         if(!artboard){
             return false;
         }
@@ -107,7 +107,7 @@ class ArtboardProxyPage extends Page implements IMirroringProxyPage {
 
     draw(){
         super.draw.apply(this, arguments);
-        var artboard = this.children[0];
+        let artboard = this.children[0];
         if(artboard){
             this._version = artboard.version;
         }

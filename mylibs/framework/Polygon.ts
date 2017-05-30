@@ -11,16 +11,16 @@ import Environment from "environment";
 import Selection from "../framework/SelectionModel";
 import { IMouseEventData } from "carbon-core";
 
-var PolygonFrameType = {
+let PolygonFrameType = {
     cursorSet: FrameCursors,
     draw: function (frame, context, currentPoint) {
-        var r = frame.element.radius();
-        var scale = Environment.view.scale();
+        let r = frame.element.radius();
+        let scale = Environment.view.scale();
 
         context.save();
         context.scale(1 / scale, 1 / scale);
 
-        var matrix = frame.element.globalViewMatrix().prependedWithScale(scale, scale);
+        let matrix = frame.element.globalViewMatrix().prependedWithScale(scale, scale);
 
         if (frame.onlyCurrentVisible) {
             if (currentPoint) {
@@ -38,8 +38,8 @@ var PolygonFrameType = {
                 context.restore();
             }
 
-            for (var i = frame.points.length - 1; i >= 0; --i) {
-                var p = frame.points[i];
+            for (let i = frame.points.length - 1; i >= 0; --i) {
+                let p = frame.points[i];
                 p.type.draw(p, frame, scale, context, matrix);
             }
         }
@@ -47,7 +47,7 @@ var PolygonFrameType = {
         context.restore();
     },
     saveChanges: function (frame, clone: Polygon) {
-        var props = {
+        let props = {
             br: clone.boundaryRect(),
             radius: clone.radius(),
             m: frame.element.parent().globalMatrixToLocal(clone.globalViewMatrix())
@@ -72,8 +72,8 @@ export default class Polygon extends Shape {
     prepareProps(changes) {
         super.prepareProps.apply(this, arguments);
 
-        var radiusChanged = changes.hasOwnProperty("radius");
-        var countChanged = changes.hasOwnProperty("pointsCount");
+        let radiusChanged = changes.hasOwnProperty("radius");
+        let countChanged = changes.hasOwnProperty("pointsCount");
 
         if (radiusChanged) {
             changes.radius = Math.round(changes.radius);
@@ -87,15 +87,15 @@ export default class Polygon extends Shape {
         }
 
         if (radiusChanged || countChanged) {
-            var r = radiusChanged ? changes.radius : this.radius();
-            var count = countChanged ? changes.pointsCount : this.pointsCount();
+            let r = radiusChanged ? changes.radius : this.radius();
+            let count = countChanged ? changes.pointsCount : this.pointsCount();
             changes.br = this.calculateBoundaryRect(r, count);
         }
     }
 
     onRadiusChanged(changes) {
-        var r = changes.radius;
-        var dr = this.radius() - r;
+        let r = changes.radius;
+        let dr = this.radius() - r;
 
         changes.m = this.viewMatrix().clone();
         changes.m.translate(dr, dr);
@@ -112,18 +112,18 @@ export default class Polygon extends Shape {
     }
 
     calculateBoundaryRect(externalRadius, pointsCount): Rect {
-        var step = 360 / pointsCount;
+        let step = 360 / pointsCount;
 
-        var xmin = externalRadius;
-        var xmax = 0;
-        var ymin = -externalRadius;
-        var ymax = 0;
+        let xmin = externalRadius;
+        let xmax = 0;
+        let ymin = -externalRadius;
+        let ymax = 0;
 
-        var center = new Point(externalRadius, externalRadius);
-        var vertex = new Point(0, -externalRadius);
+        let center = new Point(externalRadius, externalRadius);
+        let vertex = new Point(0, -externalRadius);
 
-        for (var i = 1; i < pointsCount; i++) {
-            var angle = step * i;
+        for (let i = 1; i < pointsCount; i++) {
+            let angle = step * i;
             vertex.set(0, -externalRadius);
             vertex.setAngle(-90 + angle);
 
@@ -186,20 +186,20 @@ export default class Polygon extends Shape {
     }
 
     drawPath(context, w, h) {
-        var gm = this.globalViewMatrix();
-        var step = 2 * Math.PI / this.pointsCount();
-        var r = this.radius();
-        var cx = r,
+        let gm = this.globalViewMatrix();
+        let step = 2 * Math.PI / this.pointsCount();
+        let r = this.radius();
+        let cx = r,
             cy = r;
 
-        var x = cx + r * Math.sin(Math.PI),
+        let x = cx + r * Math.sin(Math.PI),
             y = cy + r * Math.cos(Math.PI);
 
         context.beginPath();
-        var p = gm.transformPoint2(x, y, true);
+        let p = gm.transformPoint2(x, y, true);
         context.moveTo(p.x, p.y);
-        for (var i = 1; i < this.pointsCount(); i++) {
-            var f = Math.PI + i * step;
+        for (let i = 1; i < this.pointsCount(); i++) {
+            let f = Math.PI + i * step;
             x = cx + r * Math.sin(f);
             y = cy + r * Math.cos(f);
             p = gm.transformPoint2(x, y, true);
@@ -211,20 +211,21 @@ export default class Polygon extends Shape {
     canConvertToPath() {
         return true;
     }
-    convertToPath() {
-        var path = UIElement.construct(Types.Path);
 
-        var step = 2 * Math.PI / this.pointsCount();
-        var r = this.radius();
-        var cx = r,
+    convertToPath() {
+        let path = UIElement.construct(Types.Path);
+
+        let step = 2 * Math.PI / this.pointsCount();
+        let r = this.radius();
+        let cx = r,
             cy = r;
 
-        var x = cx + r * Math.sin(Math.PI),
+        let x = cx + r * Math.sin(Math.PI),
             y = cy + r * Math.cos(Math.PI);
 
         path.moveToPoint({ x, y });
-        for (var i = 1; i < this.pointsCount(); i++) {
-            var f = Math.PI + i * step;
+        for (let i = 1; i < this.pointsCount(); i++) {
+            let f = Math.PI + i * step;
             x = cx + r * Math.sin(f);
             y = cy + r * Math.cos(f);
             path.lineToPoint({ x, y });
@@ -243,7 +244,7 @@ export default class Polygon extends Shape {
     }
 
     createSelectionFrame(view) {
-        var frame;
+        let frame;
         if (!this.selectFrameVisible()) {
             return {
                 element: this,
@@ -277,7 +278,7 @@ export default class Polygon extends Shape {
                     prop: 'radius',
                     limitFrom: true,
                     update: function (p, x, y, w, h, element, scale) {
-                        var radius = element.props[p.prop];
+                        let radius = element.props[p.prop];
 
                         p.x = radius * 2;
                         p.y = radius;
@@ -307,8 +308,8 @@ PropertyMetadata.registerForType(Polygon, {
         }
     },
     groups(element) {
-        var baseType = PropertyMetadata.baseTypeName(Polygon);
-        var groups = PropertyMetadata.findAll(baseType).groups(element).slice();
+        let baseType = PropertyMetadata.baseTypeName(Polygon);
+        let groups = PropertyMetadata.findAll(baseType).groups(element).slice();
         groups[0] = {
             label: "Layout",
             properties: ["x", "y", "radius", "pointsCount", "angle"]

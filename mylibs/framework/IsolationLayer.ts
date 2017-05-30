@@ -7,6 +7,7 @@ import RelayoutEngine from "framework/relayout/RelayoutEngine";
 import UserSettings from "../UserSettings";
 import Environment from "../environment";
 import NullContainer from "./NullContainer";
+import Path from "ui/common/Path";
 
 export class IsolationLayer extends Layer implements IIsolationLayer {
 
@@ -18,35 +19,46 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
     constructor() {
         super();
 
+        App.Current.actionManager.subscribe("exitisolation", () => {
+            Environment.view.deactivateLayer(LayerTypes.Isolation);
+        })
+
         App.Current.actionManager.subscribe("cancel", () => {
-           Environment.view.deactivateLayer(LayerTypes.Isolation);
+            let selection = Selection.getSelection();
+            if (selection) {
+                let editingPath = selection.length === 1 && selection[0] instanceof Path && selection[0].mode() === 'edit';
+
+                if (!editingPath) {
+                    Environment.view.deactivateLayer(LayerTypes.Isolation);
+                }
+            }
         })
     }
 
-    private cloneAndFollow(e:IUIElement):IUIElement {
-        var clone = e.mirrorClone();
+    private cloneAndFollow(e: IUIElement): IUIElement {
+        let clone = e.mirrorClone();
         this.trackElementIds[e.id()] = clone;
 
         return clone;
     }
 
-    isolateGroup(owner: IIsolatable, clippingParent: IUIElement = null) : void{
+    isolateGroup(owner: IIsolatable, clippingParent: IUIElement = null): void {
         if (this.ownerElement) {
             Environment.view.deactivateLayer(this.type, true);
         }
 
         this.clippingParent = clippingParent;
         this.ownerElement = owner;
-        var children = owner.children.slice();
-        for(var i = 0; i < children.length; ++i) {
-            var clone = this.cloneAndFollow(children[i]);
+        let children = owner.children.slice();
+        for (let i = 0; i < children.length; ++i) {
+            let clone = this.cloneAndFollow(children[i]);
             this.add(clone, ChangeMode.Self);
         }
 
-        owner.setProps({visible:false}, ChangeMode.Self);
+        owner.setProps({ visible: false }, ChangeMode.Self);
         // set layer matrix to owner element global matrix,
         // so matrixes of the copied element should be identical to source matrices
-        this.setProps({m:owner.globalViewMatrix(), br:owner.props.br}, ChangeMode.Self);
+        this.setProps({ m: owner.globalViewMatrix(), br: owner.props.br }, ChangeMode.Self);
         this.hitTransparent(false);
 
         this._onAppChangedSubscription = App.Current.deferredChange.bind(this, this.onAppChanged);
@@ -56,13 +68,13 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         Environment.view.activateLayer(this.type);
     }
 
-    deactivate():void {
+    deactivate(): void {
         if (!this.ownerElement) {
             return;
         }
         this.hitTransparent(true);
 
-        this.ownerElement.setProps({visible:true}, ChangeMode.Self);
+        this.ownerElement.setProps({ visible: true }, ChangeMode.Self);
         this.ownerElement.onIsolationExited();
         this.ownerElement = null;
 
@@ -81,16 +93,16 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         Selection.refreshSelection();
     }
 
-    onAppChanged(primitiveMap:any) {
-        var that = this;
+    onAppChanged(primitiveMap: any) {
+        let that = this;
 
-        var refreshState = false;
+        let refreshState = false;
 
         RelayoutEngine.visitElement(this, primitiveMap, {}, true, null);
 
         // owner element can be removed, we need to exit isolation mode if that happens
         let parent = this.ownerElement.parent();
-        if(parent === NullContainer) {
+        if (parent === NullContainer) {
             Environment.view.deactivateLayer(this.type);
         }
     }
@@ -103,21 +115,21 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         return this.isActive;
     }
 
-    isActivatedFor(element: IUIElement){
+    isActivatedFor(element: IUIElement) {
         return this.isActive && this.ownerElement === element;
     }
 
     hitElement(/*Point*/position, scale, predicate, directSelection) {
-        if(!this.isActive) {
+        if (!this.isActive) {
             return null;
         }
 
-        var element = super.hitElement(position, scale, predicate, directSelection);
+        let element = super.hitElement(position, scale, predicate, directSelection);
         return element || this;
     }
 
-    draw(context:Context, environment:any){
-        if(this.isActive) {
+    draw(context: Context, environment: any) {
+        if (this.isActive) {
             context.save();
             context.beginPath();
             context.fillStyle = "rgba(255,255,255,0.6)";
@@ -129,12 +141,12 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         super.draw(context, environment);
     }
 
-    drawSelf(context:Context, w:number, h:number, env:any) {
-        if(!this.isActive) {
+    drawSelf(context: Context, w: number, h: number, env: any) {
+        if (!this.isActive) {
             return;
         }
 
-        if (this.clippingParent){
+        if (this.clippingParent) {
             context.save();
             context.beginPath();
             context.strokeStyle = UserSettings.group.active_stroke;
@@ -145,7 +157,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
 
         super.drawSelf(context, w, h, env);
 
-        if (this.clippingParent){
+        if (this.clippingParent) {
             context.restore();
         }
     }
@@ -166,26 +178,26 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
     }
 
     onRelayoutFinished() {
-        if(this.restoreMatrix) {
+        if (this.restoreMatrix) {
             this.restoreMatrix = false;
-            this.setProps({m:this.ownerElement.globalViewMatrix(), br:this.ownerElement.props.br}, ChangeMode.Self);
-            this.ownerElement.applyVisitor(source=>{
-                var target = this.getElementById(source.id());
-                if(target) {
-                    target.setProps({m:source.props.m, br:source.props.br}, ChangeMode.Self);
+            this.setProps({ m: this.ownerElement.globalViewMatrix(), br: this.ownerElement.props.br }, ChangeMode.Self);
+            this.ownerElement.applyVisitor(source => {
+                let target = this.getElementById(source.id());
+                if (target) {
+                    target.setProps({ m: source.props.m, br: source.props.br }, ChangeMode.Self);
                 }
             });
         }
     }
 
     registerSetProps(element, props, oldProps, mode = ChangeMode.Model) {
-        if(!this.ownerElement) {
+        if (!this.ownerElement) {
             return;
         }
 
-        var sourceElement = this.ownerElement.getElementById(element.id());
-        if(sourceElement) {
-            if(props.m) {
+        let sourceElement = this.ownerElement.getElementById(element.id());
+        if (sourceElement) {
+            if (props.m) {
                 this.restoreMatrix = true;
             }
 
@@ -194,48 +206,48 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
     }
 
     registerPatchProps(element, patchType, propName, item, mode = ChangeMode.Model) {
-        if(!this.ownerElement) {
+        if (!this.ownerElement) {
             return;
         }
 
-        var sourceElement = this.ownerElement.getElementById(element.id());
-        if(sourceElement) {
+        let sourceElement = this.ownerElement.getElementById(element.id());
+        if (sourceElement) {
             sourceElement.patchProps(patchType, propName, item);
         }
     }
 
     registerDelete(parent, element, index, mode = ChangeMode.Model) {
-        if(!this.ownerElement) {
+        if (!this.ownerElement) {
             return;
         }
 
-        var sourceElement = this.ownerElement.getElementById(element.id());
-        var sourceParent = (parent == this)?this.ownerElement:this.ownerElement.getElementById(parent.id()) as IContainer;
-        if(sourceElement && sourceParent) {
+        let sourceElement = this.ownerElement.getElementById(element.id());
+        let sourceParent = (parent === this) ? this.ownerElement : this.ownerElement.getElementById(parent.id()) as IContainer;
+        if (sourceElement && sourceParent) {
             sourceParent.remove(sourceElement);
         }
     }
 
     registerInsert(parent, element, index, mode = ChangeMode.Model) {
-        if(!this.ownerElement) {
+        if (!this.ownerElement) {
             return;
         }
 
-        var sourceParent = (parent == this)?this.ownerElement:this.ownerElement.getElementById(parent.id()) as IContainer;
-        if(sourceParent) {
-            var clone = element.mirrorClone();
+        let sourceParent = (parent === this) ? this.ownerElement : this.ownerElement.getElementById(parent.id()) as IContainer;
+        if (sourceParent) {
+            let clone = element.mirrorClone();
             sourceParent.insert(clone, index);
         }
     }
 
     registerChangePosition(parent, element, index, oldIndex, mode = ChangeMode.Model) {
-        if(!this.ownerElement) {
+        if (!this.ownerElement) {
             return;
         }
 
-        var sourceElement = this.ownerElement.getElementById(element.id());
-        var sourceParent = (parent == this)?this.ownerElement:this.ownerElement.getElementById(parent.id()) as IContainer;
-        if(sourceElement && sourceParent) {
+        let sourceElement = this.ownerElement.getElementById(element.id());
+        let sourceParent = (parent === this) ? this.ownerElement : this.ownerElement.getElementById(parent.id()) as IContainer;
+        if (sourceElement && sourceParent) {
             sourceParent.changePosition(sourceElement, index);
         }
     }

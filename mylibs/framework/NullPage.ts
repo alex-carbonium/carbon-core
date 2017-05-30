@@ -34,6 +34,10 @@ class NullPage extends UIElement implements IPage {
         throw new Error('Method not implemented.');
     }
 
+    mode(v?:any):any {
+
+    }
+
     clone(): IPage{
         return this;
     }

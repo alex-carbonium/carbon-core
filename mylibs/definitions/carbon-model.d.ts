@@ -42,6 +42,9 @@ declare module "carbon-model" {
         parent(): IContainer;
 
         name(value?: string): string;
+        drawPath?(context:IContext, w:number, h:number);
+        
+        mode(value?:any):any;
         displayName(): string;
 
         viewMatrix(): IMatrix;
@@ -120,11 +123,6 @@ declare module "carbon-model" {
         hitTransparent(value: boolean): boolean;
 
         globalMatrixToLocal(matrix: IMatrix): IMatrix;
-
-        /**
-         * Removes the container from the hierarch promoting the children to its parent.
-         */
-        flatten(): void;
     }
 
     export interface IGroupContainer extends IContainer {

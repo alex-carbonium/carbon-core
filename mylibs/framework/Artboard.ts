@@ -36,7 +36,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     constructor() {
         super();
         this.allowArtboardSelection(false);
-        this.selectFromLayersPanel = true;
+        this.runtimeProps.selectFromLayersPanel = true;
 
         this.noDefaultSettings = true;
         this._recorder = new PropertyStateRecorder(this);

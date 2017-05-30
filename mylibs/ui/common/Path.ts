@@ -515,6 +515,7 @@ class Path extends Shape {
 
     cancel() {
         this.mode("resize");
+        return false;// stop propagation
     }
 
     enter() {

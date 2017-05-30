@@ -9,18 +9,18 @@ import CoreIntl from "../CoreIntl";
 import { ContextBarPosition, IActionManager, IView, IApp } from "carbon-core";
 
 function findItemsToSelect(app, eventData) {
-    var items = [];
+    let items = []
 
-    var elements = app.activePage.hitElements(eventData, Environment.view.scale());
+    let elements = app.activePage.hitElements(eventData, Environment.view.scale())
 
-    return items.map(itemSelector);
+    return items.map(itemSelector)
 };
 
 function itemSelector(e){
     return {
         name: e.displayName(),
         callback: function (e) {
-            Selection.makeSelection([e]);
+            Selection.makeSelection([e])
         }
     }
 }
@@ -28,64 +28,64 @@ function itemSelector(e){
 
 function canDoPathOperations(selection) {
     if (selection.length < 2) {
-        return false;
+        return false
     }
 
-    for (var i = 0; i < selection.length; ++i) {
-        var e = selection[i];
+    for (let i = 0; i < selection.length; ++i) {
+        let e = selection[i]
         if (!(e instanceof Path) && !(e instanceof CompoundPath) && (typeof e.convertToPath !== "function")) {
-            return false;
+            return false
         }
     }
-    return true;
+    return true
 }
 
 function canFlattenPath(selection) {
-    if (selection.length != 1) {
-        return false;
+    if (selection.length !== 1) {
+        return false
     }
 
-    var e = selection[0];
-    return (e instanceof CompoundPath);
+    let e = selection[0]
+    return (e instanceof CompoundPath)
 }
 
 function canConvertToPath(selection) {
     if (selection.length < 1) {
-        return false;
+        return false
     }
 
-    for (var i = 0; i < selection.length; ++i) {
-        var e = selection[i];
+    for (let i = 0; i < selection.length; ++i) {
+        let e = selection[i]
         if (!e.canConvertToPath()) {
-            return false;
+            return false
         }
     }
-    return true;
+    return true
 }
 
 export default class ContextMenuBuilder {
     static build(app: IApp, context, menu) {
-        var selectComposite = context.selectComposite;
-        var selection = selectComposite.elements;
-        var actionManager = app.actionManager;
+        let selectComposite = context.selectComposite
+        let selection = selectComposite.elements
+        let actionManager = app.actionManager
 
         if (selection && selection.length && !selection[0].contextBarAllowed()) {
-            return;
+            return
         }
 
-        var items = menu.items;
+        let items = menu.items
 
-        var editingPath = selection.length === 1 && selection[0] instanceof Path && selection[0].mode() === 'edit';
+        let editingPath = selection.length === 1 && selection[0] instanceof Path && selection[0].mode() === 'edit'
 
         if(editingPath  && !context.eventData) {
             items.push({
                 name: "@action.done",
                 contextBar: ContextBarPosition.Left | ContextBarPosition.Only,
                 callback: () => {
-                    actionManager.invoke("cancel");
+                    actionManager.invoke("cancel")
                 }
-            });
-            return;
+            })
+            return
         }
 
         if(Environment.view.isolationLayer.isActive && !context.eventData) {
@@ -93,9 +93,9 @@ export default class ContextMenuBuilder {
                 name: "@action.exitisolation",
                 contextBar: ContextBarPosition.Left | ContextBarPosition.Only,
                 callback: () => {
-                    actionManager.invoke("cancel");
+                    actionManager.invoke("exitisolation")
                 }
-            });
+            })
         }
 
         if (selection.length) {
@@ -105,32 +105,32 @@ export default class ContextMenuBuilder {
                     icon: "ungroup-grid",
                     contextBar: ContextBarPosition.Left,
                     callback: () => {
-                        actionManager.invoke("ungroupRepeater");
+                        actionManager.invoke("ungroupRepeater")
                     }
-                });
+                })
             } else {
                 items.push({
                     name: "@repeater.group",
                     icon: "ico--repeater",
                     contextBar: ContextBarPosition.Left,
                     callback: () => {
-                        actionManager.invoke("groupInRepeater");
+                        actionManager.invoke("groupInRepeater")
                     }
-                });
+                })
             }
-            items.push('-');
+            items.push('-')
         }
 
 
         if (context.eventData) {
-            var itemsToSelect = findItemsToSelect(app, context.eventData);
+            let itemsToSelect = findItemsToSelect(app, context.eventData)
             if (itemsToSelect.length) {
                 items.push({
                     name: "Select",
                     contextBar: ContextBarPosition.None,
                     items: itemsToSelect
-                });
-                items.push('-');
+                })
+                items.push('-')
             }
         }
 
@@ -142,7 +142,7 @@ export default class ContextMenuBuilder {
                 //showClipboardDialog();
             },
             disabled: !(selection && selection.length > 0)
-        });
+        })
 
         items.push({
             name: "Cut",
@@ -152,7 +152,7 @@ export default class ContextMenuBuilder {
                 //showClipboardDialog();
             },
             disabled: !(selection && selection.length > 0)
-        });
+        })
 
         items.push({
             name: "Paste",
@@ -161,30 +161,30 @@ export default class ContextMenuBuilder {
             callback: function () {
                 //showClipboardDialog();
             }
-        });
+        })
 
         items.push({
             name: "Duplicate",
             icon: "duplicate",
             contextBar: ContextBarPosition.None,
             callback: () => {
-                actionManager.invoke("duplicate");
+                actionManager.invoke("duplicate")
             },
             disabled: !(selection && selection.length > 0)
-        });
+        })
 
-        items.push('-');
+        items.push('-')
         items.push({
             name: "Delete",
             icon: "delete",
             contextBar: ContextBarPosition.None,
             callback: () => {
-                actionManager.invoke("delete");
+                actionManager.invoke("delete")
             },
             disabled: !(selection && selection.length > 0)
-        });
+        })
 
-        items.push('-');
+        items.push('-')
         items.push({
             name: "@menu.align",
             contextBar: ContextBarPosition.Right,
@@ -197,7 +197,7 @@ export default class ContextMenuBuilder {
                     row: 0,
                     icon: "ico-small-align-tops",
                     callback: () => {
-                        actionManager.invoke("alignTop");
+                        actionManager.invoke("alignTop")
                     },
                     disabled: !selection.length
                 },
@@ -206,7 +206,7 @@ export default class ContextMenuBuilder {
                     row: 0,
                     icon: "ico-small-align-middles",
                     callback: () => {
-                        actionManager.invoke("alignMiddle");
+                        actionManager.invoke("alignMiddle")
                     },
                     disabled: !selection.length
                 },
@@ -215,7 +215,7 @@ export default class ContextMenuBuilder {
                     row: 0,
                     icon: "ico-small-align-bottoms",
                     callback: () => {
-                        actionManager.invoke("alignBottom");
+                        actionManager.invoke("alignBottom")
                     },
                     disabled: !selection.length
                 },
@@ -224,7 +224,7 @@ export default class ContextMenuBuilder {
                     row: 0,
                     icon: "ico-small-align-lefts",
                     callback: () => {
-                        actionManager.invoke("alignLeft");
+                        actionManager.invoke("alignLeft")
                     },
                     disabled: !selection.length
                 },
@@ -233,7 +233,7 @@ export default class ContextMenuBuilder {
                     row: 0,
                     icon: "ico-small-align-centers",
                     callback: () => {
-                        actionManager.invoke("alignCenter");
+                        actionManager.invoke("alignCenter")
                     },
                     disabled: !selection.length
                 },
@@ -242,7 +242,7 @@ export default class ContextMenuBuilder {
                     row: 0,
                     icon: "ico-small-align-rights",
                     callback: () => {
-                        actionManager.invoke("alignRight");
+                        actionManager.invoke("alignRight")
                     },
                     disabled: !selection.length
                 },
@@ -251,7 +251,7 @@ export default class ContextMenuBuilder {
                     row: 1,
                     icon: "ico-small-distribute-centers",
                     callback: () => {
-                        actionManager.invoke("distributeVertically");
+                        actionManager.invoke("distributeVertically")
                     },
                     disabled: !selection || selection.length <= 1
                 },
@@ -260,14 +260,14 @@ export default class ContextMenuBuilder {
                     row: 1,
                     icon: "ico-small-distribute-middles",
                     callback: () => {
-                        actionManager.invoke("distributeHorizontally");
+                        actionManager.invoke("distributeHorizontally")
                     },
                     disabled: !selection || selection.length <= 1
                 }
             ]
-        });
+        })
 
-        items.push('-');
+        items.push('-')
 
         items.push({
             name: "Grouping",
@@ -277,7 +277,7 @@ export default class ContextMenuBuilder {
                     name: "Group",
                     icon: "group",
                     callback: () => {
-                        actionManager.invoke("groupElements");
+                        actionManager.invoke("groupElements")
                     },
                     disabled: !selection || selection.length <= 1
                 },
@@ -285,7 +285,7 @@ export default class ContextMenuBuilder {
                     name: "Ungroup",
                     icon: "ungroup",
                     callback: () => {
-                        actionManager.invoke("ungroupElements");
+                        actionManager.invoke("ungroupElements")
                     },
                     disabled: !selection || selection.length !== 1 || !(selection[0] instanceof GroupContainer)
                 },
@@ -293,13 +293,13 @@ export default class ContextMenuBuilder {
                     name: "Mask",
                     icon: "mask",
                     callback: () => {
-                        actionManager.invoke("groupWithMask");
+                        actionManager.invoke("groupWithMask")
                     },
                     disabled: !selection || selection.length < 2 || (typeof selection[0].drawPath !== 'function')
                 }
             ]
-        });
-        items.push('-');
+        })
+        items.push('-')
         items.push({
             name: "Path",
             contextBar: (canDoPathOperations(selection) || canFlattenPath(selection) || canConvertToPath(selection)) ? ContextBarPosition.Right : ContextBarPosition.None,
@@ -308,7 +308,7 @@ export default class ContextMenuBuilder {
                     name: "Union",
                     icon: "pathUnion",
                     callback: () => {
-                        actionManager.invoke("pathUnion");
+                        actionManager.invoke("pathUnion")
                     },
                     disabled: !canDoPathOperations(selection)
                 },
@@ -316,7 +316,7 @@ export default class ContextMenuBuilder {
                     name: "Intersect",
                     icon: "pathIntersect",
                     callback: () => {
-                        actionManager.invoke("pathIntersect");
+                        actionManager.invoke("pathIntersect")
                     },
                     disabled: !canDoPathOperations(selection)
                 },
@@ -324,7 +324,7 @@ export default class ContextMenuBuilder {
                     name: "Difference",
                     icon: "pathDifference",
                     callback: () => {
-                        actionManager.invoke("pathDifference");
+                        actionManager.invoke("pathDifference")
                     },
                     disabled: !canDoPathOperations(selection)
                 },
@@ -332,7 +332,7 @@ export default class ContextMenuBuilder {
                     name: "Subtract",
                     icon: "pathSubtract",
                     callback: () => {
-                        actionManager.invoke("pathSubtract");
+                        actionManager.invoke("pathSubtract")
                     },
                     disabled: !canDoPathOperations(selection)
                 },
@@ -340,7 +340,7 @@ export default class ContextMenuBuilder {
                     name: "Flatten",
                     icon: "pathFlatten",
                     callback: () => {
-                        actionManager.invoke("pathFlatten");
+                        actionManager.invoke("pathFlatten")
                     },
                     disabled: !canFlattenPath(selection)
                 },
@@ -348,12 +348,12 @@ export default class ContextMenuBuilder {
                     name: "Convert to path",
                     icon: "convertToPath",
                     callback: () => {
-                        actionManager.invoke("convertToPath");
+                        actionManager.invoke("convertToPath")
                     },
                     disabled: !canConvertToPath(selection)
                 }
             ]
-        });
+        })
 
 
 
@@ -365,7 +365,7 @@ export default class ContextMenuBuilder {
                     name: "Bring to Front",
                     icon: "ico-small-send-to-foreground",
                     callback: () => {
-                        actionManager.invoke("bringToFront");
+                        actionManager.invoke("bringToFront")
                     },
                     disabled: !selection || !selection.length
                 },
@@ -373,7 +373,7 @@ export default class ContextMenuBuilder {
                     name: "Send to Back",
                     icon: "ico-small-send-to-background",
                     callback: () => {
-                        actionManager.invoke("sendToBack");
+                        actionManager.invoke("sendToBack")
                     },
                     disabled: !selection || !selection.length
                 },
@@ -381,7 +381,7 @@ export default class ContextMenuBuilder {
                     name: "Bring Forward",
                     icon: "ico-small-move-upper",
                     callback: () => {
-                        actionManager.invoke("bringForward");
+                        actionManager.invoke("bringForward")
                     },
                     disabled: !selection || !selection.length
                 },
@@ -389,11 +389,11 @@ export default class ContextMenuBuilder {
                     name: "Send Backward",
                     icon: "ico-small-move-lower",
                     callback: () => {
-                        actionManager.invoke("sendBackward");
+                        actionManager.invoke("sendBackward")
                     },
                     disabled: !selection || !selection.length
                 }
             ]
-        });
+        })
     }
 }

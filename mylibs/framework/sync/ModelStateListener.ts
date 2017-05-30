@@ -1,7 +1,7 @@
 import Primitive from "./Primitive";
 import { PatchType } from "carbon-core";
 
-var lastSelection = {};
+let lastSelection = {};
 
 class ModelStateListener {
     elementsPropsCache: {};
@@ -33,7 +33,7 @@ class ModelStateListener {
     }
 
     _getOrCreateRootData(key){
-        var root = this.roots.find(x => x.key === key);
+        let root = this.roots.find(x => x.key === key);
         if (!root){
             root = {key, data: []};
             this.roots.push(root);
@@ -45,22 +45,22 @@ class ModelStateListener {
         if (this._stopCounter > 0){
             return;
         }
-        var root = this._getOrCreateRootData(primitiveRoot.primitiveRootKey());
+        let root = this._getOrCreateRootData(primitiveRoot.primitiveRootKey());
 
-        var primitive = Primitive.dataNodeSetProps(element, props, oldProps);
+        let primitive = Primitive.dataNodeSetProps(element, props, oldProps);
         root.push(primitive);
 
-        var elementId = element.id();
-        var oldPrimitive = this.elementsPropsCache[elementId];
+        let elementId = element.id();
+        let oldPrimitive = this.elementsPropsCache[elementId];
         if (!oldPrimitive){
             oldPrimitive = primitive._rollbackData;
             this.elementsPropsCache[elementId] = oldPrimitive;
         }
         else{
-            var initialOldProps = oldPrimitive.props;
+            let initialOldProps = oldPrimitive.props;
 
             // we need to keep original property in this frame, in case setProps called many times for the same property
-            for (var p in oldProps){
+            for (let p in oldProps){
                 if (initialOldProps[p] === undefined){
                     initialOldProps[p] = oldProps[p];
                 }
@@ -76,7 +76,7 @@ class ModelStateListener {
         if (this._stopCounter > 0){
             return;
         }
-        var root = this._getOrCreateRootData(primitiveRoot.primitiveRootKey());
+        let root = this._getOrCreateRootData(primitiveRoot.primitiveRootKey());
 
         root.push(Primitive.dataNodeRemove(parent, element, index));
 
@@ -87,7 +87,7 @@ class ModelStateListener {
         if (this._stopCounter > 0){
             return;
         }
-        var root = this._getOrCreateRootData(primitiveRoot.primitiveRootKey());
+        let root = this._getOrCreateRootData(primitiveRoot.primitiveRootKey());
 
         root.push(Primitive.dataNodeAdd(parent, element, index));
 
@@ -98,7 +98,7 @@ class ModelStateListener {
         if (this._stopCounter > 0){
             return;
         }
-        var root = this._getOrCreateRootData(page.primitiveRootKey());
+        let root = this._getOrCreateRootData(page.primitiveRootKey());
 
         root.push(Primitive.selection(page, selection, oldSelection, userId));
     }
@@ -115,7 +115,7 @@ class ModelStateListener {
         if (this._stopCounter > 0){
             return;
         }
-        var root = this._getOrCreateRootData(primitiveRoot.primitiveRootKey());
+        let root = this._getOrCreateRootData(primitiveRoot.primitiveRootKey());
 
         root.push(Primitive.dataNodeChangePosition(parent, element, index, oldIndex));
     }
@@ -124,8 +124,8 @@ class ModelStateListener {
         if (this._stopCounter > 0){
             return;
         }
-        var primitive = Primitive.dataNodePatchProps(element, patchType, propName);
-        var rollback = Primitive.dataNodePatchProps(element, 0, propName);
+        let primitive = Primitive.dataNodePatchProps(element, patchType, propName);
+        let rollback = Primitive.dataNodePatchProps(element, 0, propName);
         primitive._rollbackData = rollback;
 
         switch (patchType){
@@ -145,7 +145,7 @@ class ModelStateListener {
                 primitive.item = item;
 
                 let array = element.props[propName];
-                var oldItem = array.find(x => x.id === item.id);
+                let oldItem = array.find(x => x.id === item.id);
                 rollback.patchType = PatchType.Change;
                 rollback.item = oldItem;
                 break;
@@ -153,7 +153,7 @@ class ModelStateListener {
                 throw new Error("Unknown patch type " + patchType);
         }
 
-        var root = this._getOrCreateRootData(primitiveRoot.primitiveRootKey());
+        let root = this._getOrCreateRootData(primitiveRoot.primitiveRootKey());
         root.push(primitive);
     }
 
