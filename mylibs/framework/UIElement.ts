@@ -440,7 +440,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                 lgm: oldProps.m || this.viewMatrix(),
                 bad: true
             };
-        } else {
+        } else if(this.props.bad) {
             lastGoodProps = {
                 bad: false
             };

@@ -145,12 +145,12 @@ class ArtboardPage extends Page {
                 artboard = new Artboard();
             }
             artboard.setProps({
-                x: pos.x,
-                y: pos.y,
                 width: screen.w,
                 height: screen.h,
-                resource:null
+                toolboxGroup:null
             });
+            artboard.resetTransform();
+            artboard.applyTranslation(pos);
 
             this.nameProvider.assignNewName(artboard);
 
