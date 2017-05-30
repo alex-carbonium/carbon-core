@@ -43,7 +43,7 @@ declare module "carbon-model" {
 
         name(value?: string): string;
         drawPath?(context:IContext, w:number, h:number);
-        
+
         mode(value?:any):any;
         displayName(): string;
 

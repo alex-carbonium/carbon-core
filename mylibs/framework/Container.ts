@@ -27,7 +27,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         this.children = [];
     }
     performArrange(event?: any, mode?: ChangeMode) {
-        let  e = event || {};
+        let e = event || {};
         e.newRect = this.boundaryRect();
         e.oldRect = e.oldRect || e.newRect;
         this.arrange(e, mode);
@@ -42,12 +42,12 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         return ArrangeStrategy.findStrategy(this);
     }
     applySizeScaling(s, o, options, mode) {
-        var oldRect = this.boundaryRect();
+        let oldRect = this.boundaryRect();
         super.applySizeScaling.apply(this, arguments);
         this.performArrange({ oldRect, options }, mode);
     }
 
-    skew(): void{
+    skew(): void {
         this.children.forEach(x => x.skew());
     }
 
@@ -62,38 +62,39 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         }
     }
     strokeBorder(context, w, h) {
-        if (!this.standardBackground()){
+        if (!this.standardBackground()) {
             return;
         }
 
-        let  stroke = this.stroke();
+        let stroke = this.stroke();
         if (Brush.canApply(stroke)) {
             context.save();
             this.globalViewMatrix().applyToContext(context);
             context.beginPath();
-            let  dash = this.dashPattern();
+            let dash = this.dashPattern();
             if (dash) {
                 context.setLineDash(dash);
             }
             context.lineWidth = this.strokeWidth();
-            var br = this.boundaryRect();
+            let br = this.boundaryRect();
             context.rect(br.x, br.y, br.width, br.height);
             Brush.stroke(stroke, context, 0, 0, w, h);
             context.restore();
         }
-        else{
-            if (!Brush.canApply(this.fill()) && this.showBoundaryWhenTransparent()){
+        else {
+            if (!Brush.canApply(this.fill()) && this.showBoundaryWhenTransparent()) {
                 context.save();
                 this.globalViewMatrix().applyToContext(context);
                 context.setLineDash(UserSettings.general.boundaryDash);
                 context.strokeStyle = UserSettings.general.boundaryStroke;
-                var br = this.boundaryRect();
+                let br = this.boundaryRect();
                 context.strokeRect(br.x, br.y, br.width, br.height);
                 context.restore();
             }
         }
     }
-    showBoundaryWhenTransparent(): boolean{
+
+    showBoundaryWhenTransparent(): boolean {
         return false;
     }
 
@@ -101,12 +102,12 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         return false;
     }
     saveOrResetLayoutProps(): boolean {
-        let  res = UIElement.prototype.saveOrResetLayoutProps.apply(this, arguments);
+        let res = UIElement.prototype.saveOrResetLayoutProps.apply(this, arguments);
         this.children.forEach(e => e.saveOrResetLayoutProps());
         return res;
     }
 
-    restoreLastGoodTransformIfNeeded(){
+    restoreLastGoodTransformIfNeeded() {
         super.restoreLastGoodTransformIfNeeded();
         this.children.forEach(x => x.restoreLastGoodTransformIfNeeded());
     }
@@ -128,15 +129,13 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     renderMaskedElements(context, mask, i, items, environment) {
         if (!environment.finalRender && mask.drawPath) {
             context.beginPath();
-            if(mask.shouldApplyViewMatrix())
-            {
+            if (mask.shouldApplyViewMatrix()) {
                 mask.globalViewMatrix().applyToContext(context);
             }
 
             mask.drawPath(context, mask.width(), mask.height());
             context.clip("evenodd");
-            if(mask.shouldApplyViewMatrix())
-            {
+            if (mask.shouldApplyViewMatrix()) {
                 mask.globalViewMatrixInverted().applyToContext(context);
             }
 
@@ -144,18 +143,18 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
             return;
         }
 
-        let  clipingRect = mask.getBoundingBoxGlobal(false, true);
-        let  p1 = environment.pageMatrix.transformPoint2(clipingRect.x, clipingRect.y);
-        let  p2 = environment.pageMatrix.transformPoint2(clipingRect.x + clipingRect.width, clipingRect.y + clipingRect.height);
+        let clipingRect = mask.getBoundingBoxGlobal(false, true);
+        let p1 = environment.pageMatrix.transformPoint2(clipingRect.x, clipingRect.y);
+        let p2 = environment.pageMatrix.transformPoint2(clipingRect.x + clipingRect.width, clipingRect.y + clipingRect.height);
         p1.x = Math.max(0, 0 | p1.x * environment.contextScale);
         p1.y = Math.max(0, 0 | p1.y * environment.contextScale);
         p2.x = 0 | p2.x * environment.contextScale + .5;
         p2.y = 0 | p2.y * environment.contextScale + .5;
 
-        let  sw = p2.x - p1.x;
-        let  sh = p2.y - p1.y;
+        let sw = p2.x - p1.x;
+        let sh = p2.y - p1.y;
 
-        let  offContext = ContextPool.getContext(sw, sh, environment.contextScale, true);
+        let offContext = ContextPool.getContext(sw, sh, environment.contextScale, true);
         offContext.relativeOffsetX = -p1.x;
         offContext.relativeOffsetY = -p1.y;
 
@@ -166,8 +165,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         this.renderAfterMask(offContext, items, i, environment);
 
         offContext.beginPath();
-        if(mask.shouldApplyViewMatrix())
-        {
+        if (mask.shouldApplyViewMatrix()) {
             mask.globalViewMatrix().applyToContext(offContext);
         }
         offContext.globalCompositeOperation = "destination-in";
@@ -187,7 +185,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     }
     renderAfterMask(context, items, i, environment) {
         for (; i < items.length; ++i) {
-            let  child = items[i];
+            let child = items[i];
 
             if (child.visible()) {
                 this.drawChildSafe(child, context, environment);
@@ -200,10 +198,10 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
             throw "Can't clone, chain contains recursive references";
         }
         this._cloning = true;
-        let  clone = UIElement.prototype.clone.apply(this, arguments);
+        let clone = UIElement.prototype.clone.apply(this, arguments);
 
-        for (let  i = 0; i < this.children.length; i++) {
-            let  e = this.children[i];
+        for (let i = 0; i < this.children.length; i++) {
+            let e = this.children[i];
             clone.add(e.clone(), ChangeMode.Self);
         }
         delete this._cloning;
@@ -211,10 +209,10 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     }
 
     mirrorClone() {
-        let  clone = UIElement.prototype.mirrorClone.apply(this, arguments);
+        let clone = UIElement.prototype.mirrorClone.apply(this, arguments);
 
-        for (let  i = 0; i < this.children.length; i++) {
-            let  e = this.children[i];
+        for (let i = 0; i < this.children.length; i++) {
+            let e = this.children[i];
             clone.add(e.mirrorClone(), ChangeMode.Self);
         }
 
@@ -225,9 +223,9 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         this.modifyContextBeforeDrawChildren(context);
         this.runtimeProps.mask = null;
         if (this.children) {
-            let  items = this.children;
-            for (let  i = 0; i < items.length; ++i) {
-                let  child = items[i];
+            let items = this.children;
+            for (let i = 0; i < items.length; ++i) {
+                let child = items[i];
                 if (child.clipMask()) {
                     this.drawWithMask(context, child, i, environment);
                     this.runtimeProps.mask = child;
@@ -267,8 +265,8 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     // getBoundaryRect(includeMargin: boolean = false) : IRect {
     //     let  mask = this.runtimeProps.mask;
     //     if(mask && this.lockedGroup()) {
-    //         var rect = mask.boundaryRect(includeMargin);
-    //         var pos = mask.position();
+    //         let  rect = mask.boundaryRect(includeMargin);
+    //         let  pos = mask.position();
     //         return new Rect(pos.x, pos.y, rect.width, rect.height);
     //     }
 
@@ -303,7 +301,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
                 child.makeCorrupted();
                 return;
             }
-            let  data;
+            let data;
             try {
                 data = child.toJSON(true);
             }
@@ -319,11 +317,11 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
                     }
                 }
             }
-            let  newChild = new CorruptedElement(data);
+            let newChild = new CorruptedElement(data);
             newChild.parent(child.parent());
-            let  items = this.children;
-            for (let  i = 0; i < items.length; ++i) {
-                let  c = items[i];
+            let items = this.children;
+            for (let i = 0; i < items.length; ++i) {
+                let c = items[i];
                 if (c === child) {
                     items.splice(i, 1, newChild);
                     break;
@@ -339,11 +337,11 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         return this.props.padding;
     }
     innerHeight() {
-        let  padding = this.padding();
+        let padding = this.padding();
         return this.height() - padding.top - padding.bottom;
     }
     innerWidth() {
-        let  padding = this.padding();
+        let padding = this.padding();
         return this.width() - padding.left - padding.right;
     }
 
@@ -358,7 +356,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     /**
      * Defines whether container controls position of all children so that dragging element would not attempt to set it.
      */
-    autoPositionChildren(): boolean{
+    autoPositionChildren(): boolean {
         return false;
     }
 
@@ -375,7 +373,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     }
 
     acquiredChild(child, mode) {
-        let  oldParent = child.parent();
+        let oldParent = child.parent();
         if (oldParent && !(oldParent === NullContainer)) {
             oldParent.remove(child, mode);
         }
@@ -385,13 +383,13 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         this.invalidate();
     }
 
-    flatten(){
+    flatten() {
         let parent = this.parent();
         let index = this.index();
 
         for (let i = this.children.length - 1; i >= 0; --i) {
-            let  e = this.children[i];
-            let  gm = e.globalViewMatrix();
+            let e = this.children[i];
+            let gm = e.globalViewMatrix();
             this.remove(e);
             parent.insert(e, index);
             e.setTransform(parent.globalViewMatrixInverted().appended(gm));
@@ -415,12 +413,12 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         this.invalidate();
     }
     remove(/*UIElement*/element, mode?: ChangeMode) {
-        if(element.removing() === false) {
+        if (element.removing() === false) {
             return;
         }
 
         this.releasingChild(element);
-        let  idx = this.removeChild(element, mode);
+        let idx = this.removeChild(element, mode);
 
         element.removed();
 
@@ -429,13 +427,13 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         return idx;
     }
     replace(elementFrom, elementTo, mode) {
-        let  idx = this.positionOf(elementFrom);
+        let idx = this.positionOf(elementFrom);
         this.remove(elementFrom, mode);
         this.insert(elementTo, idx, mode);
     }
     clear(mode?: ChangeMode) {
-        for (let  i = 0; i < this.children.length; i++) {
-            let  child = this.children[i];
+        for (let i = 0; i < this.children.length; i++) {
+            let child = this.children[i];
             this.releasingChild(child);
             child.trackDeleted(this, i, mode);
         }
@@ -480,7 +478,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     }
     delegateToChildren(name, event) {
         for (let i = this.children.length - 1; i >= 0; --i) {
-            let  element = this.children[i];
+            let element = this.children[i];
             if (element.hitTest(event.x, event.y, event._scale)) {
                 element[name](event);
                 if (event.handled) {
@@ -494,20 +492,20 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         if (!this.hitVisible(directSelection)) {
             return null;
         }
-        if (predicate){
-            if (!predicate(this, position, scale)){
+        if (predicate) {
+            if (!predicate(this, position, scale)) {
                 return null;
             }
         }
-        else if (!this.hitTest(position, scale)){
+        else if (!this.hitTest(position, scale)) {
             return null;
         }
 
-        let  hitElement: UIElement = this.hitTransparent() ? null : this;
+        let hitElement: UIElement = this.hitTransparent() ? null : this;
 
         for (let i = this.children.length - 1; i >= 0; --i) {
-            let  element = this.children[i];
-            let  newHit = element.hitElement(position, scale, predicate, directSelection);
+            let element = this.children[i];
+            let newHit = element.hitElement(position, scale, predicate, directSelection);
             if (newHit) {
                 hitElement = newHit;
                 break;
@@ -517,8 +515,8 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         return hitElement;
     }
     hitElements(/*Point*/position, scale) {
-        let  that = this;
-        let  elements = [];
+        let that = this;
+        let elements = [];
 
         this.applyVisitor(function (element) {
             if (that !== element) {
@@ -531,7 +529,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         return elements;
     }
     hitElementDirect(position, scale, predicate?) {
-        let  result = this.hitElement(position, scale, predicate, true);
+        let result = this.hitElement(position, scale, predicate, true);
         return result;
     }
     lockedGroup() {
@@ -546,9 +544,9 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         Environment.controller.releaseMouse(element);
     }
     applyVisitor(/*Visitor*/callback, useLogicalChildren?: boolean, parent?: any) {
-        let  stop = false;
+        let stop = false;
         for (let i = this.children.length - 1; i >= 0; --i) {
-            let  item = this.children[i];
+            let item = this.children[i];
             if (item.applyVisitor(callback, useLogicalChildren, this) === false) {
                 stop = true;
                 break;
@@ -560,7 +558,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         return false;
     }
     findActualParentForAncestorById(elementId) {
-        let  realParrent = null;
+        let realParrent = null;
         this.applyVisitor(function (e, p) {
             if (e.id() === elementId) {
                 realParrent = p;
@@ -576,29 +574,29 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
 
         if (this.children) {
             for (let i = this.children.length - 1; i >= 0; --i) {
-                let  e = this.children[i];
+                let e = this.children[i];
                 e.resetGlobalViewCache(resetPrimitiveRoot);
             }
         }
     }
     global2local(/*Point*/pos) {
-        let  parent = this.parent();
+        let parent = this.parent();
         if (parent === null || !this.globalViewMatrix) {
             return pos;
         }
-        let  matrix = this.globalViewMatrixInverted();
+        let matrix = this.globalViewMatrixInverted();
         return matrix.transformPoint(pos);
     }
     local2global(/*Point*/pos) {
-        let  parent = this.parent();
+        let parent = this.parent();
         if (parent === null || !this.globalViewMatrix) {
             return pos;
         }
 
-        let  matrix = this.globalViewMatrix();
+        let matrix = this.globalViewMatrix();
         return matrix.transformPoint(pos);
     }
-    globalMatrixToLocal(m: IMatrix): Matrix{
+    globalMatrixToLocal(m: IMatrix): Matrix {
         return this.globalViewMatrixInverted().appended(m);
     }
     arrange(resizeEvent?: any, mode?: ChangeMode) {
@@ -606,19 +604,19 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         ArrangeStrategy.arrange(this, resizeEvent, mode);
     }
     autoWidth() {
-        let  overflow = this.overflow();
+        let overflow = this.overflow();
         return overflow === Overflow.AdjustHorizontal || overflow === Overflow.AdjustBoth || this.autoExpandWidth();
     }
     autoHeight() {
-        let  overflow = this.overflow();
+        let overflow = this.overflow();
         return overflow === Overflow.AdjustVertical || overflow === Overflow.AdjustBoth || this.autoExpandHeight();
     }
     autoExpandWidth() {
-        let  overflow = this.overflow();
+        let overflow = this.overflow();
         return overflow === Overflow.ExpandHorizontal || overflow === Overflow.ExpandBoth;
     }
     autoExpandHeight() {
-        let  overflow = this.overflow();
+        let overflow = this.overflow();
         return overflow === Overflow.ExpandVertical || overflow === Overflow.ExpandBoth;
     }
     autoGrowMode(value) {
@@ -657,21 +655,21 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         return this.runtimeProps.activeGroup;
     }
     getDropData(pos, element) {
-        let  width = this.width(),
+        let width = this.width(),
             height = this.height();
 
         pos = this.global2local(pos);
 
-        let  intervals = [];
-        let  last = 0;
-        let  baseLine;
+        let intervals = [];
+        let last = 0;
+        let baseLine;
 
         function calculateBaseLine(intervals, pos, insertIndex?) {
-            let  minY = Number.MAX_VALUE;
-            let  lineY = 0;
-            for (let  i = 0; i < intervals.length; i++) {
-                let  itr = intervals[i];
-                let  minCandidate = Math.abs(itr - pos);
+            let minY = Number.MAX_VALUE;
+            let lineY = 0;
+            for (let i = 0; i < intervals.length; i++) {
+                let itr = intervals[i];
+                let minCandidate = Math.abs(itr - pos);
                 if (minCandidate < minY) {
                     minY = minCandidate;
                     lineY = itr;
@@ -681,12 +679,12 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
             return { lineY: lineY, insertIndex: insertIndex };
         }
 
-        let  dropPositioning = this.dropPositioning();
+        let dropPositioning = this.dropPositioning();
         if (dropPositioning === 'vertical') {
-            for (let  i = 0; i < this.children.length; i++) {
-                let  _element = this.children[i];
+            for (let i = 0; i < this.children.length; i++) {
+                let _element = this.children[i];
                 if (_element !== element) {
-                    var gr = _element.boundaryRect();
+                    let gr = _element.boundaryRect();
                     intervals.push((last + gr.y) / 2);
                     last = gr.y + gr.height;
                 }
@@ -696,8 +694,8 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
 
             baseLine = calculateBaseLine(intervals, pos.y);
 
-            let  pt1 = this.local2global({ x: 5, y: baseLine.lineY });
-            let  pt2 = this.local2global({ x: width - 10, y: baseLine.lineY });
+            let pt1 = this.local2global({ x: 5, y: baseLine.lineY });
+            let pt2 = this.local2global({ x: width - 10, y: baseLine.lineY });
             return {
                 x1: pt1.x,
                 y1: pt1.y,
@@ -707,10 +705,10 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
                 angle: this.angle()
             }
         } else if (dropPositioning === 'horizontal') {
-            for (let  i = 0; i < this.children.length; i++) {
-                let  _element = this.children[i];
+            for (let i = 0; i < this.children.length; i++) {
+                let _element = this.children[i];
                 if (_element !== element) {
-                    var gr = _element.boundaryRect();
+                    let gr = _element.boundaryRect();
                     intervals.push((last + gr.x) / 2);
                     last = gr.x + gr.width;
                 }
@@ -720,8 +718,8 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
 
             baseLine = calculateBaseLine(intervals, pos.x);
 
-            let  pt1 = this.local2global({ x: baseLine.lineY, y: 5 });
-            let  pt2 = this.local2global({ x: baseLine.lineY, y: height - 10 });
+            let pt1 = this.local2global({ x: baseLine.lineY, y: 5 });
+            let pt2 = this.local2global({ x: baseLine.lineY, y: height - 10 });
             return {
                 x1: pt1.x,
                 y1: pt1.y,
@@ -740,7 +738,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     }
 
     findElementByName(name) {
-        let  element;
+        let element;
 
         this.applyVisitor(function (el) {
             if (el.name() === name) {
@@ -753,7 +751,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     }
 
     getElementById(id) {
-        let  res = null;
+        let res = null;
         if (this.id() === id) {
             return this;
         }
@@ -768,7 +766,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     }
 
     findSingleChildOrDefault(predicate) {
-        let  result = null;
+        let result = null;
         this.applyVisitor(function (el) {
             if (predicate(el)) {
                 result = el;
@@ -783,8 +781,8 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
             return;
         }
 
-        for (let  i = 0; i < this.children.length; i++) {
-            let  e = this.children[i];
+        for (let i = 0; i < this.children.length; i++) {
+            let e = this.children[i];
             if (!e.isDisposed()) {
                 e.dispose();
             }
@@ -797,12 +795,12 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     }
 
     static createCanvas = function () {
-        let  container = new Container();
+        let container = new Container();
         container.arrangeStrategy(ArrangeStrategies.Canvas);
         return container;
     }
     static createStackHorizontal = function () {
-        let  container = new Container();
+        let container = new Container();
         container.setProps({
             arrangeStrategy: ArrangeStrategies.Stack,
             stackOrientation: StackOrientation.Horizontal
@@ -810,17 +808,17 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         return container;
     }
     static createStackVertical() {
-        let  container = new Container();
+        let container = new Container();
         container.arrangeStrategy(ArrangeStrategies.Stack);
         return container;
     };
     static createDock() {
-        let  container = new Container();
+        let container = new Container();
         container.arrangeStrategy(ArrangeStrategies.Dock);
         return container;
     };
     static createAlign() {
-        let  container = new Container();
+        let container = new Container();
         container.arrangeStrategy(ArrangeStrategies.Align);
         return container;
     }
