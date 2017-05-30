@@ -119,7 +119,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             let hasW = props.hasOwnProperty("width");
             let hasH = props.hasOwnProperty("height");
             if (hasW || hasH) {
-                let br = this.getBoundaryRect();
+                let br = this.boundaryRect();
                 let w = hasW ? props.width : br.width;
                 let h = hasH ? props.height : br.height;
                 props.br = br.withSize(w, h);

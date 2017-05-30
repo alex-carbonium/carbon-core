@@ -14,6 +14,10 @@ class NullContainer extends DataNode implements IContainer {
         super(false);
     }
 
+    mode(v?:any):any {
+
+    }
+
     boundaryRect(){
         return Rect.Zero;
     }
