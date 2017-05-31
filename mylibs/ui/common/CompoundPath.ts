@@ -209,6 +209,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
         let index = parent.positionOf(this);
         parent.remove(this);
         parent.insert(path, index);
+        Selection.makeSelection([path]);
     }
 
     _updateGraph() {

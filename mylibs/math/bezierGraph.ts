@@ -71,7 +71,7 @@ export default class BezierGraph implements IBezierGraph {
                     {
                         // GPC: skip degenerate case where all points are equal
 
-                        if (equalPoints(element.point, lastPoint) && equalPoints(element.point, element.controlPoints[0]) && equalPoints(element.point, element.controlPoints[1])) {
+                        if (!lastPoint || (equalPoints(element.point, lastPoint) && equalPoints(element.point, element.controlPoints[0]) && equalPoints(element.point, element.controlPoints[1]))) {
                             continue;
                         }
 
@@ -133,6 +133,8 @@ export default class BezierGraph implements IBezierGraph {
         this.removeOverlaps();
         graph.removeOverlaps();
 
+        (result as any)._cleanupEmptyContours();
+
         return result;
     }
 
@@ -168,6 +170,14 @@ export default class BezierGraph implements IBezierGraph {
         // Append the final nonintersecting contours
         for (let contour of finalNonintersectingContours) {
             result.addContour(contour);
+        }
+    }
+
+    _cleanupEmptyContours() {
+        for (let i = this._contours.length - 1; i >= 0; --i) {
+            if (this._contours[i].edges.length === 0) {
+                this._contours.splice(i, 1);
+            }
         }
     }
 
@@ -223,6 +233,8 @@ export default class BezierGraph implements IBezierGraph {
         graph.removeCrossings();
         this.removeOverlaps();
         graph.removeOverlaps();
+
+        (result as any)._cleanupEmptyContours();
 
         return result;
     }
@@ -343,6 +355,8 @@ export default class BezierGraph implements IBezierGraph {
         this.removeOverlaps();
         graph.removeOverlaps();
 
+        (result as any)._cleanupEmptyContours();
+
         return result;
     }
 
@@ -437,7 +451,11 @@ export default class BezierGraph implements IBezierGraph {
         this.removeOverlaps();
         graph.removeOverlaps();
 
-        return allParts.differenceWithBezierGraph(intersectingParts);
+        var result = allParts.differenceWithBezierGraph(intersectingParts);
+
+        (result as any)._cleanupEmptyContours();
+
+        return result;
     }
 
     static fromPath(path, matrix): IBezierGraph {
