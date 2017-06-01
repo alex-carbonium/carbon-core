@@ -34,7 +34,7 @@ export default class BezierContour implements IContour {
     }
 
     static bezierContourWithCurve(curve: IBezierCurve): IContour {
-        let  contour = new BezierContour();
+        let contour = new BezierContour();
         contour.addCurve(curve);
 
         return contour;
@@ -57,7 +57,7 @@ export default class BezierContour implements IContour {
     addCurveFrom(startCrossing: IBezierCrossing, endCrossing: IBezierCrossing): void {
         // First construct the curve that we're going to add, by seeing which crossing
         //  is null. If the crossing isn't given go to the end of the edge on that side.
-        let  curve = null;
+        let curve = null;
         if (startCrossing === null && endCrossing !== null) {
             // From start to endCrossing
             curve = endCrossing.leftCurve;
@@ -84,7 +84,7 @@ export default class BezierContour implements IContour {
     addReverseCurveFrom(startCrossing: IBezierCrossing, endCrossing: IBezierCrossing): void {
         // First construct the curve that we're going to add, by seeing which crossing
         //  is null. If the crossing isn't given go to the end of the edge on that side.
-        let  curve: IBezierCurve = null;
+        let curve: IBezierCurve = null;
         if (startCrossing === null && endCrossing !== null) {
             // From start to endCrossing
             curve = endCrossing.leftCurve;
@@ -109,9 +109,9 @@ export default class BezierContour implements IContour {
             return null;
         }
 
-        let  totalBounds = null;
-        for (let  edge of this._edges) {
-            let  bounds = edge.bounds;
+        let totalBounds = null;
+        for (let edge of this._edges) {
+            let bounds = edge.bounds;
             if (!totalBounds) {
                 totalBounds = bounds;
             } else {
@@ -135,9 +135,9 @@ export default class BezierContour implements IContour {
             return null;
         }
 
-        let  totalBounds = null;
-        for (let  edge of this._edges) {
-            let  bounds = edge.boundingRect;
+        let totalBounds = null;
+        for (let edge of this._edges) {
+            let bounds = edge.boundingRect;
             if (!totalBounds) {
                 totalBounds = bounds;
             } else {
@@ -155,7 +155,7 @@ export default class BezierContour implements IContour {
             return null;
         }
 
-        let  edge = this._edges[0];
+        let edge = this._edges[0];
 
         return edge.endPoint1;
     }
@@ -168,20 +168,20 @@ export default class BezierContour implements IContour {
         // Create a test line from our point to somewhere outside our graph. We'll see how many times the test
         //  line intersects edges of the graph. Based on the even/odd rule, if it's an odd number, we're inside
         //  the graph, if even, outside.
-        let  lineEndPoint: ICoordinate = {
+        let lineEndPoint: ICoordinate = {
             x: testPoint.x > this.bounds.x ? this.bounds.x - 10 : (this.bounds.x + this.bounds.width) + 10,
             y: testPoint.y
         };
         /* just move us outside the bounds of the graph */
-        let  testCurve = BezierCurve.bezierCurveWithLine(testPoint, lineEndPoint);
+        let testCurve = BezierCurve.bezierCurveWithLine(testPoint, lineEndPoint);
 
-        let  intersectCount = this.numberOfIntersectionsWithRay(testCurve);
+        let intersectCount = this.numberOfIntersectionsWithRay(testCurve);
 
         return (intersectCount & 1) === 1;
     }
 
     numberOfIntersectionsWithRay(testEdge: IBezierCurve): number {
-        let  count = 0;
+        let count = 0;
         this.intersectionsWithRay(testEdge, (intersection) => {
             count++;
         });
@@ -190,13 +190,13 @@ export default class BezierContour implements IContour {
     }
 
     intersectionsWithRay(testEdge: IBezierCurve, block: (p: IIntersection) => void): void {
-        let  firstIntersection = null;
-        let  previousIntersection = null;
+        let firstIntersection = null;
+        let previousIntersection = null;
 
         // Count how many times we intersect with this particular contour
-        for (let  edge of this._edges) {
+        for (let edge of this._edges) {
             // Check for intersections between our test ray and the rest of the bezier graph
-            let  intersectRange: IReference<IIntersectionRange> = { value: null };
+            let intersectRange: IReference<IIntersectionRange> = { value: null };
             testEdge.intersectionsWithBezierCurve(edge, intersectRange, (intersection: IIntersection) => {
                 // Make sure this is a proper crossing
                 if (!testEdge.crossesEdgeAtIntersection(edge, intersection) || edge.isPoint) {// don't count tangents
@@ -206,12 +206,12 @@ export default class BezierContour implements IContour {
                 // Make sure we don't count the same intersection twice. This happens when the ray crosses at
                 //  start or end of an edge.
                 if (intersection.isAtStartOfCurve2 && previousIntersection !== null) {
-                    let  previousEdge = edge.previous;
+                    let previousEdge = edge.previous;
                     if (previousIntersection.isAtEndPointOfCurve2 && previousEdge === previousIntersection.curve2) {
                         return;
                     }
                 } else if (intersection.isAtEndPointOfCurve2 && firstIntersection !== null) {
-                    let  nextEdge = edge.next;
+                    let nextEdge = edge.next;
                     if (firstIntersection.isAtStartOfCurve2 && nextEdge === firstIntersection.curve2) {
                         return;
                     }
@@ -255,15 +255,15 @@ export default class BezierContour implements IContour {
 
     testPointForContainment(): ICoordinate {
         // Start with the startEdge, and if it's not shared (overlapping) then use its first point
-        let  testEdge = this.startEdge();
+        let testEdge = this.startEdge();
         if (!testEdge.isStartShared) {
             return testEdge.endPoint1;
         }
 
         // At this point we know that all the end points defining this contour are shared. We'll
         //  need to somewhat arbitrarily pick a point on an edge that's not overlapping
-        let  stopValue = testEdge;
-        let  parameter = 0.5;
+        let stopValue = testEdge;
+        let parameter = 0.5;
         while (this.doesOverlapContainParameter(parameter, testEdge)) {
             testEdge = testEdge.next;
             if (testEdge === stopValue) {
@@ -276,7 +276,7 @@ export default class BezierContour implements IContour {
 
     startingEdge(outEdge: IReference<IBezierCurve>, outParameter: IReference<number>, outPoint: IReference<ICoordinate>): void {
         // Start with the startEdge, and if it's not shared (overlapping) then use its first point
-        let  testEdge = this.startEdge();
+        let testEdge = this.startEdge();
         if (!testEdge.isStartShared) {
             outEdge.value = testEdge;
             outParameter.value = 0.0;
@@ -287,8 +287,8 @@ export default class BezierContour implements IContour {
 
         // At this point we know that all the end points defining this contour are shared. We'll
         //  need to somewhat arbitrarily pick a point on an edge that's not overlapping
-        let  stopValue = testEdge;
-        let  parameter = 0.5;
+        let stopValue = testEdge;
+        let parameter = 0.5;
         while (this.doesOverlapContainParameter(parameter, testEdge)) {
             testEdge = testEdge.next;
             if (testEdge === stopValue) {
@@ -308,9 +308,9 @@ export default class BezierContour implements IContour {
         // When marking we need to start at a point that is clearly either inside or outside
         //  the other graph, otherwise we could mark the crossings exactly opposite of what
         //  they're supposed to be.
-        let  startEdgeRef: IReference<IBezierCurve> = { value: null };
-        let  startPointRef: IReference<ICoordinate> = { value: null };
-        let  startParameterRef: IReference<number> = { value: null };
+        let startEdgeRef: IReference<IBezierCurve> = { value: null };
+        let startPointRef: IReference<ICoordinate> = { value: null };
+        let startParameterRef: IReference<number> = { value: null };
         this.startingEdge(startEdgeRef, startParameterRef, startPointRef);
         let startEdge = startEdgeRef.value;
         let startParameter = startParameterRef.value;
@@ -318,17 +318,17 @@ export default class BezierContour implements IContour {
 
         // Calculate the first entry value. We need to determine if the edge we're starting
         //  on is inside or outside the otherContour.
-        let  contains = otherContour.contourAndSelfIntersectingContoursContainPoint(startPoint);
-        let  isEntry = markInside ? !contains : contains;
-        let  otherContours = otherContour.selfIntersectingContours.slice();
+        let contains = otherContour.contourAndSelfIntersectingContoursContainPoint(startPoint);
+        let isEntry = markInside ? !contains : contains;
+        let otherContours = otherContour.selfIntersectingContours.slice();
         otherContours.push(otherContour);
 
-        let  StopParameterNoLimit = 2.0; // needs to be > 1.0
-        let  StartParameterNoLimit = 0.0;
+        let StopParameterNoLimit = 2.0; // needs to be > 1.0
+        let StartParameterNoLimit = 0.0;
 
         // Walk all the edges in this contour and mark the crossings
         isEntry = this.markCrossingsOnEdge(startEdge, startParameter, StopParameterNoLimit, otherContours, isEntry);
-        let  edge = startEdge.next;
+        let edge = startEdge.next;
         while (edge !== startEdge) {
             isEntry = this.markCrossingsOnEdge(edge, StartParameterNoLimit, StopParameterNoLimit, otherContours, isEntry);
             edge = edge.next;
@@ -337,7 +337,7 @@ export default class BezierContour implements IContour {
     }
 
     markCrossingsOnEdge(edge: IBezierCurve, startParameter: number, stopParameter: number, otherContours: IContour[], startIsEntry: boolean): boolean {
-        let  isEntry = startIsEntry;
+        let isEntry = startIsEntry;
         // Mark all the crossings on this edge
         edge.crossingsWithBlock((crossing, stop) => {
             // skip over other contours
@@ -357,13 +357,13 @@ export default class BezierContour implements IContour {
     }
 
     contourAndSelfIntersectingContoursContainPoint(point: ICoordinate): boolean {
-        let  containerCount = 0;
+        let containerCount = 0;
         if (this.containsPoint(point)) {
             containerCount++;
         }
 
-        let  intersectingContours = this.selfIntersectingContours;
-        for (let  contour of intersectingContours) {
+        let intersectingContours = this.selfIntersectingContours;
+        for (let contour of intersectingContours) {
             if (contour.containsPoint(point)) {
                 containerCount++;
             }
@@ -378,8 +378,8 @@ export default class BezierContour implements IContour {
             return;
         }
 
-        let  first = this._edges[0];
-        let  last = this._edges[this._edges.length - 1];
+        let first = this._edges[0];
+        let last = this._edges[this._edges.length - 1];
 
         if (!arePointsClose(first.endPoint1, last.endPoint2)) {
             this.addCurve(BezierCurve.bezierCurveWithLine(last.endPoint2, first.endPoint1));
@@ -387,9 +387,9 @@ export default class BezierContour implements IContour {
     }
 
     reversedContour(): IContour {
-        let  revContour = new BezierContour();
+        let revContour = new BezierContour();
 
-        for (let  edge of this._edges) {
+        for (let edge of this._edges) {
             revContour.addReverseCurve(edge);
         }
 
@@ -398,11 +398,11 @@ export default class BezierContour implements IContour {
 
 
     direction(): ContourDirection {
-        let  lastPoint = null, currentPoint = null;
-        let  firstPoint = true;
-        let  a = 0.0;
+        let lastPoint = null, currentPoint = null;
+        let firstPoint = true;
+        let a = 0.0;
 
-        for (let  edge of this._edges) {
+        for (let edge of this._edges) {
             if (firstPoint) {
                 lastPoint = edge.endPoint1;
                 firstPoint = false;
@@ -418,7 +418,7 @@ export default class BezierContour implements IContour {
 
 
     contourMadeClockwiseIfNecessary(): IContour {
-        let  dir = this.direction();
+        let dir = this.direction();
 
         if (dir === ContourDirection.Clockwise) {
             return this;
@@ -428,14 +428,14 @@ export default class BezierContour implements IContour {
     }
 
     crossesOwnContour(contour: IContour): boolean {
-        for (let  edge of this._edges) {
-            let  intersects = false;
+        for (let edge of this._edges) {
+            let intersects = false;
             edge.crossingsWithBlock((crossing, stop) => {
                 if (!crossing.isSelfCrossing) {
                     return; // Only want the this intersecting crossings
                 }
 
-                let  intersectingEdge = crossing.counterpart.edge;
+                let intersectingEdge = crossing.counterpart.edge;
                 if (intersectingEdge.contour === contour) {
                     intersects = true;
                     stop.value = true;
@@ -452,8 +452,8 @@ export default class BezierContour implements IContour {
 
     intersectingContours(): IContour[] {
         // Go and find all the unique contours that intersect this specific contour
-        let  contours: IContour[] = [];
-        for (let  edge of this._edges) {
+        let contours: IContour[] = [];
+        for (let edge of this._edges) {
             edge.intersectingEdgesWithBlock((intersectingEdge) => {
                 if (contours.indexOf(intersectingEdge.contour) === -1) {
                     contours.push(intersectingEdge.contour);
@@ -466,14 +466,14 @@ export default class BezierContour implements IContour {
 
     get selfIntersectingContours(): IContour[] {
         // Go and find all the unique contours that intersect this specific contour from our own graph
-        let  contours: IContour[] = [];
+        let contours: IContour[] = [];
         this.addSelfIntersectingContoursToArray(contours, this);
 
         return contours;
     }
 
     addSelfIntersectingContoursToArray(contours: IContour[], originalContour: IContour): void {
-        for (let  edge of this._edges) {
+        for (let edge of this._edges) {
             edge.selfIntersectingEdgesWithBlock((intersectingEdge) => {
                 if (intersectingEdge.contour !== originalContour && contours.indexOf(intersectingEdge.contour) === -1) {
                     contours.push(intersectingEdge.contour);
@@ -504,7 +504,7 @@ export default class BezierContour implements IContour {
             return false;
         }
 
-        for (let  overlap of this._overlaps) {
+        for (let overlap of this._overlaps) {
             if (overlap.isBetweenContour(this, other) && overlap.isComplete()) {
                 return true;
             }
@@ -518,9 +518,9 @@ export default class BezierContour implements IContour {
             return;
         }
 
-        for (let  overlap of this._overlaps) {
+        for (let overlap of this._overlaps) {
             overlap.runsWithBlock((run, stop) => {
-                for (let  edgeOverlap of run.overlaps()) {
+                for (let edgeOverlap of run.overlaps()) {
                     block(edgeOverlap);
                 }
             });
@@ -532,7 +532,7 @@ export default class BezierContour implements IContour {
             return false;
         }
 
-        for (let  overlap of this._overlaps) {
+        for (let overlap of this._overlaps) {
             if (overlap.doesContainCrossing(crossing)) {
                 return true;
             }
@@ -546,7 +546,7 @@ export default class BezierContour implements IContour {
             return false;
         }
 
-        for (let  overlap of this._overlaps) {
+        for (let overlap of this._overlaps) {
             if (overlap.doesContainParameter(parameter, edge)) {
                 return true;
             }
@@ -556,11 +556,11 @@ export default class BezierContour implements IContour {
     }
 
     closestLocationToPoint(point: ICoordinate): ILocation {
-        let  closestEdge = null;
-        let  location: ILocation = { distance: null, parameter: 0 };
+        let closestEdge = null;
+        let location: ILocation = { distance: null, parameter: 0 };
 
-        for (let  edge of this._edges) {
-            let  edgeLocation = edge.closestLocationToPoint(point);
+        for (let edge of this._edges) {
+            let edgeLocation = edge.closestLocationToPoint(point);
             if (closestEdge === null || edgeLocation.distance < location.distance) {
                 closestEdge = edge;
                 location = edgeLocation;
@@ -571,7 +571,7 @@ export default class BezierContour implements IContour {
             return null;
         }
 
-        let  curveLocation = new CurveLocation(closestEdge, location.parameter, location.distance);
+        let curveLocation = new CurveLocation(closestEdge, location.parameter, location.distance);
         curveLocation.contour = this;
 
         return curveLocation;

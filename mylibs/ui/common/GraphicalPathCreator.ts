@@ -13,8 +13,11 @@ import UserSettings from "UserSettings";
 import { IKeyboardState, IMouseEventData, IContext } from "carbon-core";
 
 var closeCurrentPath = function (pt) {
-    this._pathElement.closed(true);
-    completePath.call(this);
+    var points = this._pathElement.props.points;
+    var lastPoint = points[points.length - 1];
+    lastPoint.closed = true;
+    this._pathElement.changePointAtIndex(lastPoint, points.length - 1);
+    this._startSegmentPoint = null;
 };
 
 var completePath = function () {
@@ -41,7 +44,8 @@ var checkIfElementAvailable = function () {
     if (this._pathElement && this._pathElement.isOrphaned()) {
         this._pathElement = null;
     }
-    return this._pathElement != null;
+
+    return !!this._pathElement;
 };
 
 
@@ -125,7 +129,7 @@ export default class GraphicalPathCreator extends Tool {
         this._mousepressed = true;
         event.handled = true;
 
-        if (this._shouldHandleByPath) {
+        if (this._shouldHandleByPath && this._pathElement) {
             this._pathElement.mousedown(event, keys);
             this._handlingByPath = true;
             return;
@@ -133,9 +137,8 @@ export default class GraphicalPathCreator extends Tool {
 
         if (this._pathElement) {
             var pt = this._pathElement.controlPointForPosition(event);
-            if (pt != null) {
-                // this._closeOrRemovePoint(pt);
-                this._addNewPathPoint(event, keys, true);
+            if (pt) {
+                this._closeOrRemovePoint(pt);
                 return;
             }
 
@@ -183,7 +186,7 @@ export default class GraphicalPathCreator extends Tool {
         }
     }
 
-    _addNewPathPoint(event: IMouseEventData, keys: IKeyboardState, closed?: boolean) {
+    _addNewPathPoint(event: IMouseEventData, keys: IKeyboardState) {
         var pos;
         if (!keys.ctrl) {
             pos = SnapController.applySnappingForPoint(event);
@@ -192,17 +195,16 @@ export default class GraphicalPathCreator extends Tool {
         }
 
         pos = this._pathElement.globalViewMatrixInverted().transformPoint(pos);
-        this._currentPoint = { x: pos.x, y: pos.y, closed:closed, moveTo: this._startSegmentPoint === null };
+        this._currentPoint = { x: pos.x, y: pos.y, moveTo: this._startSegmentPoint === null };
         if(!this._pathElement.points.length) {
             this._pathElement.parent().add(this._pathElement);
         }
         this._pathElement.insertPointAtIndex(this._currentPoint, this._pathElement.points.length);
+
         SnapController.calculateSnappingPointsForPath(this._pathElement);
         Invalidate.request();
 
-        if(closed) {
-            this._startSegmentPoint = null;
-        } else if(!this._startSegmentPoint) {
+        if (!this._startSegmentPoint) {
             this._startSegmentPoint = this._currentPoint;
         }
     }
@@ -210,10 +212,10 @@ export default class GraphicalPathCreator extends Tool {
         if (!this._pathElement.closed() && pt === this._startSegmentPoint) {
             closeCurrentPath.call(this, pt);
         }
-        else if (!this._pathElement.closed() && pt === this._pathElement.pointAtIndex(this._pathElement.length() - 1)) {
-            completePath.call(this);
-            this._currentPoint = null;
-        }
+        // else if (!this._pathElement.closed() && pt === this._pathElement.pointAtIndex(this._pathElement.length() - 1)) {
+        //     completePath.call(this);
+        //     this._currentPoint = null;
+        // }
         else {
             this.removePointAtIndex(this._pathElement, pt);
             if (this._pathElement.length() === 1) {

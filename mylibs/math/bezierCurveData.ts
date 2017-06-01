@@ -814,7 +814,7 @@ export function bezierCurveDataIntersectionsWithBezierCurve(me: IBezierCurveData
                     let leftIntersectRangeRef: IReference<IIntersectionRange> = { value: null };
                     bezierCurveDataIntersectionsWithBezierCurve(us1, them, usRange1, themRangeCopy1, originalUs, originalThem, leftIntersectRangeRef, depth + 1, outputBlock, stop);
                     let leftIntersectRange = leftIntersectRangeRef.value;
-                    if (intersectRange.value !== null) {
+                    if (intersectRange && intersectRange.value) {
                         intersectRange.value = bezierCurveDataMergeIntersectRange(intersectRange.value, leftIntersectRange);
                     }
 
@@ -825,7 +825,7 @@ export function bezierCurveDataIntersectionsWithBezierCurve(me: IBezierCurveData
                     let rightIntersectRangeRef: IReference<IIntersectionRange> = { value: null };
                     bezierCurveDataIntersectionsWithBezierCurve(us2, them, usRange2, themRangeCopy2, originalUs, originalThem, rightIntersectRangeRef, depth + 1, outputBlock, stop);
                     let rightIntersectRange = rightIntersectRangeRef.value;
-                    if (intersectRange.value !== null) {
+                    if (intersectRange && intersectRange.value) {
                         intersectRange.value = bezierCurveDataMergeIntersectRange(intersectRange.value, rightIntersectRange);
                     }
 
@@ -851,7 +851,7 @@ export function bezierCurveDataIntersectionsWithBezierCurve(me: IBezierCurveData
                     let leftIntersectRangeRef: IReference<IIntersectionRange> = makeRef<IIntersectionRange>();
                     bezierCurveDataIntersectionsWithBezierCurve(us, them1, usRangeCopy1, themRange1, originalUs, originalThem, leftIntersectRangeRef, depth + 1, outputBlock, stop);
                     let leftIntersectRange = leftIntersectRangeRef.value;
-                    if (intersectRange.value !== null) {
+                    if (intersectRange && intersectRange.value) {
                         intersectRange.value = bezierCurveDataMergeIntersectRange(intersectRange.value, leftIntersectRange);
                     }
 
@@ -862,7 +862,7 @@ export function bezierCurveDataIntersectionsWithBezierCurve(me: IBezierCurveData
                     let rightIntersectRangeRef: IReference<IIntersectionRange> = makeRef<IIntersectionRange>();
                     bezierCurveDataIntersectionsWithBezierCurve(us, them2, usRangeCopy2, themRange2, originalUs, originalThem, rightIntersectRangeRef, depth + 1, outputBlock, stop);
                     let rightIntersectRange = rightIntersectRangeRef.value;
-                    if (intersectRange.value !== null) {
+                    if (intersectRange && intersectRange.value) {
                         intersectRange.value = bezierCurveDataMergeIntersectRange(intersectRange.value, rightIntersectRange);
                     }
 

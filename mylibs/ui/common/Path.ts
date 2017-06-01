@@ -388,11 +388,23 @@ class Path extends Shape {
     }
 
     _save() {
-        let newPoints = this.points.slice();
+        let newPoints = this.points;
         this.props.points = this._lastPoints;
         this.setProps({ points: newPoints });
-        this._lastPoints = this.points;
+        this._lastPoints = this.points.slice();
+
+        // var points: any[] = this._lastPoints;
+        // console.log(points.reduce((prev, current, indx, arr) => {
+        //     return prev + ' ' + `(${current.x},${current.y})`
+        // }, ''));
     }
+
+    // propsUpdated(newProps, oldProps, mode) {
+    //     super.propsUpdated(newProps, oldProps, mode);
+    //     if(newProps.points) {
+
+    //     }
+    // }
 
     cloneProps() {
         let props = super.cloneProps();
@@ -534,13 +546,13 @@ class Path extends Shape {
 
             this._currentPoint = null;
             scalePointsToNewSize.call(this);
-            this.save();
             SnapController.calculateSnappingPointsForPath(this);
 
             this._cancelBinding = Environment.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
             this.captureMouse(this);
 
             updateSelectedPoint.call(this, this.points[0]);
+            this.save();//?????
         } else {
             this.unregisterForLayerDraw(LayerTypes.Interaction);
             Invalidate.request();
@@ -687,7 +699,7 @@ class Path extends Shape {
         }
 
         let pt = this._currentPoint || this._handlePoint;
-        if (pt !== null) {
+        if (pt) {
             SnapController.clearActiveSnapLines();
             this._currentPoint = null;
             this._handlePoint = null;
@@ -807,7 +819,7 @@ class Path extends Shape {
             clearSelectedPoints.call(this);
         }
 
-        if (pt !== null) {
+        if (pt) {
             event.handled = true;
             if (keys.alt) {
                 this._altPressed = true;
@@ -820,7 +832,7 @@ class Path extends Shape {
             this._pointOnPath = null;
         } else {
             pt = getClickedHandlePoint.call(this, x, y);
-            if (pt !== null) {
+            if (pt) {
                 event.handled = true;
                 this._handlePoint = pt;
                 this._originalPoint = clone(pt);
@@ -881,7 +893,7 @@ class Path extends Shape {
         }
 
 
-        if (this._currentPoint !== null) {
+        if (this._currentPoint) {
             pos = SnapController.applySnappingForPoint(pos);
 
             pos = this.globalViewMatrixInverted().transformPoint(pos);
@@ -898,7 +910,7 @@ class Path extends Shape {
                 Invalidate.request();
             }
             return;
-        } else if (this._handlePoint !== null) {
+        } else if (this._handlePoint) {
             pos = SnapController.applySnappingForPoint(pos);
             pos = this.globalViewMatrixInverted().transformPoint(pos);
             // this._roundPoint(pos);
@@ -1035,8 +1047,8 @@ class Path extends Shape {
             return true;
         }
 
-        if ((getClickedPoint.call(this, point.x, point.y) !== null)
-            || (getClickedHandlePoint.call(this, point.x, point.y) !== null)) {
+        if ((getClickedPoint.call(this, point.x, point.y))
+            || (getClickedHandlePoint.call(this, point.x, point.y))) {
             return true;
         }
         let res = UIElement.prototype.hitTest.apply(this, arguments);
@@ -1097,7 +1109,7 @@ class Path extends Shape {
             let hoverPoint = this._currentPoint || this._hoverPoint;
 
             this.drawPath(context, w, h);
-            if (this.nextPoint && this.points.length && !this.closed()) {
+            if (this.nextPoint && this.points.length && !this.closed() && !this.points[this.points.length-1].closed) {
                 let nextPt;
                 if (hoverPoint === this.points[0]) {
                     nextPt = hoverPoint;
@@ -1365,7 +1377,7 @@ class Path extends Shape {
         dist = (dist || 4) / Environment.view.scale() * Environment.view.contextScale;
 
         function checkDistance(pt, prevPt, idx) {
-            let pr = { x: 0, y: 0, idx: idx, t:undefined };
+            let pr = { x: 0, y: 0, idx: idx, t: undefined };
             let d;
             if (isLinePoint(pt) && isLinePoint(prevPt)) {
                 d = nearestPoint.onLine(prevPt, pt, pos, pr);
@@ -1461,22 +1473,17 @@ class Path extends Shape {
 
         offset = offset || { x: 0, y: 0 };
 
-        // if (this._sourceRect) {
-        //     matrix.scale(this.width() / this._sourceRect.width, this.height() / this._sourceRect.height);
-        // }
-
-        // if (angle && origin) {
-        //     matrix.rotate(angle, origin.x, origin.y);
-        // }
-        // matrix.translate(offset.x, offset.y);
-
         let pt;
         let prevPt = pt = points[0];
         let p = matrix.transformPoint(prevPt);
         res.push({ kind: "M", point: p });
 
+        function buildSegment(pt, prevPt, matrix, nomove?) {
+            if(pt.moveTo && !nomove) {
+                p = matrix.transformPoint(pt);
+                res.push({ kind: "M", point: p });
+            }
 
-        function buildSegment(pt, prevPt, matrix) {
             if (isLinePoint(pt) && isLinePoint(prevPt)) { // line segment
                 p = matrix.transformPoint(pt);
                 res.push({ kind: "L", point: p });
@@ -1499,6 +1506,10 @@ class Path extends Shape {
                 let p2 = matrix.transformPoint2(cp2x, cp2y);
                 res.push({ kind: "C", point: p, controlPoints: [p1, p2] });
             }
+
+            if(pt.closed && !nomove) {
+                res.push({ kind: "Z" });
+            }
         }
 
         for (let i = 1, len = points.length; i < len; ++i) {
@@ -1506,8 +1517,9 @@ class Path extends Shape {
             buildSegment(pt, prevPt, matrix);
             prevPt = pt;
         }
-        if (true/*this.closed()*/) {
-            buildSegment(points[0], prevPt, matrix);
+
+        if (!prevPt.closed && !prevPt.moveTo) {
+            buildSegment(points[0], prevPt, matrix, true);
             res.push({ kind: "Z" });
         }
 
