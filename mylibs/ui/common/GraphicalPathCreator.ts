@@ -1,8 +1,5 @@
 import Tool from "./Tool";
 import angleAdjuster from "../../math/AngleAdjuster";
-import RemovePathPointCommand from "../../commands/path/RemovePathPointCommand";
-import AddPathPointCommand from "../../commands/path/AddPathPointCommand";
-import commandManager from "../../framework/commands/CommandManager";
 import UIElement from "../../framework/UIElement";
 import Path from "./Path";
 import SystemConfiguration from "../../SystemConfiguration";
@@ -27,7 +24,7 @@ var completePath = function () {
         }
         else {
             this._changeMode(this._pathElement, "resize");
-            commandManager.execute(new RemovePathPointCommand(this._pathElement, this._pathElement.pointAtIndex(0)));
+            this.removePointAtIndex(this._pathElement, this._pathElement.pointAtIndex(0));
         }
         this._pathElement.nextPoint = null;
     }
@@ -196,7 +193,10 @@ export default class GraphicalPathCreator extends Tool {
 
         pos = this._pathElement.globalViewMatrixInverted().transformPoint(pos);
         this._currentPoint = { x: pos.x, y: pos.y, closed:closed, moveTo: this._startSegmentPoint === null };
-        commandManager.execute(new AddPathPointCommand(this._pathElement, this._currentPoint));
+        if(!this._pathElement.points.length) {
+            this._pathElement.parent().add(this._pathElement);
+        }
+        this._pathElement.insertPointAtIndex(this._currentPoint, this._pathElement.points.length);
         SnapController.calculateSnappingPointsForPath(this._pathElement);
         Invalidate.request();
 
@@ -215,7 +215,7 @@ export default class GraphicalPathCreator extends Tool {
             this._currentPoint = null;
         }
         else {
-            commandManager.execute(new RemovePathPointCommand(this._pathElement, pt));
+            this.removePointAtIndex(this._pathElement, pt);
             if (this._pathElement.length() === 1) {
                 this._pathElement = null;
             } else {
@@ -224,6 +224,14 @@ export default class GraphicalPathCreator extends Tool {
         }
 
         Invalidate.request();
+    }
+    removePointAtIndex(path, pt){
+        let idx = path.indexOfPoint(pt);
+        path.removePointAtIndex(idx);
+        if (path.length() === 0) {
+            Selection.unselectAll();
+            path.parent().remove(path);
+        }
     }
 
     mouseup(event: IMouseEventData, keys: IKeyboardState) {

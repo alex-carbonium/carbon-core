@@ -137,42 +137,17 @@ function isEmptyObject(obj){
     return true;
 }
 
-// function onLogEvent(primitives) {
-//     var that = this;
-//     primitives.forEach(e=> {
-//         let cmd = e.id.command;
-//
-//         if (cmd === "element_new") {
-//             if (that._elementsMap[e.id.parentId]) {
-//                 var element = that._elementsMap[e.id.elementId] = that._element.getElementById(e.id.elementId);
-//                 element.enablePropsTracking();
-//             }
-//         } else if (cmd === "element_delete") {
-//             if (that._elementsMap[e.id.parentId]) {
-//                 delete that._elementsMap[e.id.elementId];
-//             }
-//         } else if (cmd === "element_position_change") {
-//             if (e.id.parentId !== e.data.oldParentId &&
-//                 that._elementsMap[e.data.oldParentId] && !that._elementsMap[e.id.parentId]) {
-//                 delete that._elementsMap[e.id.elementId];
-//             }
-//         }
-//     })
-// }
-
 function addElementTracking(element) {
     // var elementsMap = this._elementsMaps;
     // element.applyVisitor(e=>{
     //     elementsMap[e.id] = e;
     // });
 
-    // this.app.logEvent.bind(this, onLogEvent);
     // PropertyTracker.propertyChanged.bind(this, processPropertyChanged);
 }
 
 function disposeTracker() {
     // PropertyTracker.propertyChanged.unbind(this, processPropertyChanged);
-    // this.app.logEvent.unbind(this, onLogEvent);
 }
 
 function updateFromState(state) {

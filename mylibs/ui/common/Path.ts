@@ -694,7 +694,6 @@ class Path extends Shape {
             if (!pointsEqual(pt, this._originalPoint)) {
                 this.changePointAtIndex(pt, pt.idx);
                 this.adjustBoundaries();
-                //  commandManager.execute(new ChangePathPointCommand(this, pt, this._originalPoint));
             }
             PropertyTracker.resumeAndFlush();
         }

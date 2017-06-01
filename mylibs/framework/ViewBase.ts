@@ -5,11 +5,9 @@ import ContextPool from "framework/render/ContextPool";
 import EventHelper from "framework/EventHelper";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
-import { ILayer, IUIElement } from "carbon-core";
-import { LayerTypes, IView, IAnimationController } from "carbon-app";
-import { IEvent } from "carbon-basics";
-import { ICoordinate } from "carbon-geometry";
+import { LayerTypes, IView, IAnimationController, ILayer, IUIElement, ViewState, IEvent, ICoordinate } from "carbon-core";
 import Rect from "../math/rect";
+import AnimationGroup from "./animation/AnimationGroup";
 
 var Stopwatch = require("../Stopwatch");
 var debug = require("DebugUtil")("carb:view");
@@ -83,6 +81,8 @@ export default class ViewBase { //TODO: implement IView
 
     activeLayer: ILayer = null;
     activeLayerChanged: IEvent<ILayer> = EventHelper.createEvent<ILayer>();
+
+    private _viewState: ViewState = {scale: 0, sx: 0, sy: 0};
 
     _registerLayer(layer) {
         this._layers.push(layer);
@@ -382,6 +382,57 @@ export default class ViewBase { //TODO: implement IView
             size.width / scale,
             size.height / scale
         );
+    }
+
+    get viewState(): ViewState {
+        var sx = this.scrollX();
+        var sy = this.scrollY();
+        var scale = this.scale();
+
+        if (sx !== this._viewState.sx || sy !== this._viewState.sy || scale !== this._viewState.scale) {
+            this._viewState = {sx, sy, scale};
+        }
+
+        return this._viewState;
+    }
+
+    ensureViewState(newState: ViewState) {
+        if (newState === this.viewState) {
+            return;
+        }
+
+        var animationValues = [];
+        var options = {duration:180};
+
+        animationValues.push({ from: this.scrollX(), to: newState.sx, accessor: value => {
+            if(arguments.length === 1) {
+                return this.scrollX(value);
+            }
+
+            return this.scrollX();
+        } });
+
+        animationValues.push({ from: this.scrollY(), to: newState.sy, accessor: value => {
+            if(arguments.length === 1) {
+                return this.scrollY(value);
+            }
+
+            return this.scrollY();
+        } });
+
+        animationValues.push({ from: this.scale(), to: newState.scale, accessor: value => {
+            if(arguments.length === 1) {
+                return this.scale(value);
+            }
+
+            return this.scale();
+        } });
+
+        var group = new AnimationGroup(animationValues, options, () => {
+            Invalidate.request();
+        });
+
+        this.animationController.registerAnimationGroup(group);
     }
 
     pointToScreen(point: ICoordinate) {

@@ -68,7 +68,7 @@ Primitive.registerHandler(PrimitiveType.DataNodeChange, function(element, p){
 });
 
 Primitive.registerHandler(PrimitiveType.Selection, function(page, p){
-    if(p.sessionId !== backend.sessionId) {
+    if (p.sessionId !== backend.sessionId) {
         return;
     }
 
@@ -99,7 +99,7 @@ Primitive.registerHandler(PrimitiveType.Selection, function(page, p){
 });
 
 Primitive.registerHandler(PrimitiveType.View, function(page, p) {
-   if(p.sessionId !== backend.sessionId) {
+    if (p.sessionId !== backend.sessionId) {
         return;
     }
 
@@ -107,38 +107,7 @@ Primitive.registerHandler(PrimitiveType.View, function(page, p) {
         return;
     }
 
-    var animationValues = [];
-    var options = {duration:180};
-
-    animationValues.push({ from: page.scrollX(), to: p.x, accessor: function(value) {
-        if(arguments.length === 1) {
-            return page.scrollX(value);
-        }
-
-        return page.scrollX();
-    } });
-
-    animationValues.push({ from: page.scrollY(), to: p.y, accessor: function(value) {
-        if(arguments.length === 1) {
-            return page.scrollY(value);
-        }
-
-        return page.scrollY();
-    } });
-
-    animationValues.push({ from: Environment.view.scale(), to: p.s, accessor: function(value) {
-        if(arguments.length === 1) {
-            return Environment.view.scale(value);
-        }
-
-        return Environment.view.scale();
-    } });
-
-    var group = new AnimationGroup(animationValues, options, ()=>{
-        Invalidate.request();
-    });
-
-    Environment.view.animationController.registerAnimationGroup(group);
+    Environment.view.ensureViewState(p.newState);
 });
 
 

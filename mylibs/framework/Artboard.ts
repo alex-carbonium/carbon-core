@@ -9,7 +9,7 @@ import SharedColors from "ui/SharedColors";
 import { TileSize, Types } from "./Defs";
 import RelayoutEngine from "./relayout/RelayoutEngine";
 import PropertyStateRecorder from "framework/PropertyStateRecorder";
-import ModelStateListener from "framework/sync/ModelStateListener";
+import ModelStateListener from "framework/relayout/ModelStateListener";
 import Point from "math/point";
 import Selection from "framework/SelectionModel";
 import NullContainer from "./NullContainer";

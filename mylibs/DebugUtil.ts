@@ -21,7 +21,7 @@ debug.formatters["p"] = function (p) {
         case PrimitiveType.Selection:
             return "SELECTION page=" + nodeName(p) + " ids=" + JSON.stringify(p.selection);
         case PrimitiveType.View:
-            return "VIEW page=" + nodeName(p) + " sx=" + p.s + " sy="+ p.s + " scale="+p.s;
+            return "VIEW page=" + nodeName(p) + " new=" + JSON.stringify(p.newState) + " old="+ JSON.stringify(p.oldState);
         case PrimitiveType.DataNodePatchProps:
             return "PATCH PROPS node=" + nodeName(p) + " patchType=" + p.patchType + " prop=" + p.propName;
         case PrimitiveType.DataNodeChange:

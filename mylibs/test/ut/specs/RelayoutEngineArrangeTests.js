@@ -1,6 +1,5 @@
 // import UIElement from "framework/UIElement";
 // import Container from "framework/Container";
-// import CompositeCommand from "framework/commands/CompositeCommand";
 // import CommandManager from "framework/commands/CommandManager";
 // import {ArrangeStrategies, DockStyle, Overflow} from "framework/Defs";
 // import Anchor from "framework/Anchor";

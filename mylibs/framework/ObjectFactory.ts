@@ -1,5 +1,5 @@
 import TypeDefaults from "./TypeDefaults";
-import ModelStateListener from "./sync/ModelStateListener";
+import ModelStateListener from "./relayout/ModelStateListener";
 import PropertyMetadata from "./PropertyMetadata";
 import EventHelper from "./EventHelper";
 import logger from "../logger";

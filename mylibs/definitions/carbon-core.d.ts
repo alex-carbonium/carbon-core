@@ -44,7 +44,6 @@ declare module "carbon-core" {
     export var LayoutGridLines:any;
     export var LayoutGridColumns:any;
     export var CommandManager:any;
-    export var CompositeCommand:any;
     export var Invalidate: any;
     export var SvgParser: any;
     export var IconsInfo: any;

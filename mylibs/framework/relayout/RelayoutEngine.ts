@@ -1,6 +1,7 @@
-import DeferredPrimitives from "../sync/DeferredPrimitives";
-import ModelStateListener from "../sync/ModelStateListener";
+import RelayoutQueue from "./RelayoutQueue";
+import ModelStateListener from "./ModelStateListener";
 import PrimitiveHandler from "../sync/Primitive_Handlers";
+import { NodePrimitivesMap } from "carbon-core";
 
 var debug = require("DebugUtil")("carb:relayoutEngine");
 
@@ -11,16 +12,18 @@ var debug = require("DebugUtil")("carb:relayoutEngine");
 export default class RelayoutEngine {
 
     static run(root, propsHistoryMap, filter = null) {
-        var primitiveMap = DeferredPrimitives.releasePrimitiveMap(root);
+        var primitiveMap = RelayoutQueue.dequeue(root);
         var shouldArrange = ModelStateListener.isRelayoutNeeded(root);
         var res = RelayoutEngine.visitElement(root, primitiveMap, propsHistoryMap, shouldArrange, filter);
 
         if(primitiveMap) {
             App.Current.deferredChange.raise(primitiveMap);
         }
+
+        return res;
     }
 
-    static visitElement(element, primitiveMap, propsHistoryMap, shouldArrange, filter) {
+    static visitElement(element, primitiveMap: NodePrimitivesMap, propsHistoryMap, shouldArrange, filter) {
         // var oldRect;
         var primitives = null;
         var hasChildren = !!element.children;
@@ -67,7 +70,7 @@ export default class RelayoutEngine {
     }
 
 
-    static applyPrimitives(element, primitiveMap, propsHistoryMap, shouldArrange, filter) {
+    static applyPrimitives(element, primitiveMap: NodePrimitivesMap, propsHistoryMap, shouldArrange, filter) {
         if (!primitiveMap) {
             return null;
         }

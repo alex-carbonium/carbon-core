@@ -32,6 +32,7 @@ declare module "carbon-model"{
 
     export interface IDataNode {
         primitivePath():any;
+        primitiveRootKey(): string;
     }
 
     export interface IUIElement{
@@ -60,7 +61,7 @@ declare module "carbon-model"{
 declare module "carbon-app"{
     import { IUIElement } from 'carbon-model';
     import { IContext } from "carbon-rendering";
-    import { IEvent } from "carbon-basics";
+    import { IEvent, ViewState } from "carbon-basics";
 
     export interface IPage{
         nameProvider: any;
@@ -105,6 +106,8 @@ declare module "carbon-app"{
 
         zoomOutStep():void;
         zoomInStep():void;
+
+        ensureViewState(viewState: ViewState);
     }
 
     export interface IController{

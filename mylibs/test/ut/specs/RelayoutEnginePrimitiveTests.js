@@ -1,8 +1,6 @@
 import TestUtil from "../TestUtil";
 import UIElement from "framework/UIElement";
 import Container from "framework/Container";
-import CompositeCommand from "framework/commands/CompositeCommand";
-import CommandManager from "framework/commands/CommandManager";
 
 describe("Relayout engine primitive tests", function () {
     beforeEach(function (done) {

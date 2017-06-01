@@ -18,10 +18,9 @@ import GroupContainer from "./framework/GroupContainer";
 import RepeatContainer from "./framework/repeater/RepeatContainer";
 import CommandManager from "framework/commands/CommandManager";
 import NullPage from "framework/NullPage";
-import ModelStateListener from "framework/sync/ModelStateListener";
-import DeferredPrimitives from "framework/sync/DeferredPrimitives";
+import ModelStateListener from "framework/relayout/ModelStateListener";
+import RelayoutQueue from "./framework/relayout/RelayoutQueue";
 import PrimitiveHandler from "framework/sync/Primitive_Handlers";
-import PrimitiveSetCommand from "commands/PrimitiveSetCommand";
 import { createUUID } from "./util";
 import DesignerController from "framework/DesignerController";
 import Selection from "framework/SelectionModel";
@@ -43,14 +42,13 @@ import IconsInfo from "./ui/IconsInfo";
 import backend from "./backend";
 import logger from "./logger";
 import params from "./params";
-import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType } from "carbon-core";
+import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitive, IPrimitiveRoot, ViewState } from "carbon-core";
 import { Contributions } from "./extensions/Contributions";
 import { getBuiltInExtensions } from "./extensions/BuiltInExtensions";
+import Command from "./framework/commands/Command";
 
 window['env'] = Environment;
 window['Selection'] = Selection;
-
-var debug = require("./DebugUtil")("carb:relayout");
 
 var platform = require("platform/Platform");
 var Primitive = require("framework/sync/Primitive");
@@ -65,7 +63,7 @@ var PropertyMetadata = require("framework/PropertyMetadata");
 var Path = require("./ui/common/Path");
 var CompoundPath = require("./ui/common/CompoundPath");
 
-class AppClass extends DataNode implements IApp {
+class AppClass extends DataNode implements IApp, IPrimitiveRoot {
     props: IAppProps;
 
     [name: string]: any;
@@ -97,7 +95,6 @@ class AppClass extends DataNode implements IApp {
     fontManager: OpenTypeFontManager;
 
     onBuildMenu: any;
-    logEvent: IEvent<any>;
     changed: IEvent<any>;
     relayoutFinished: IEvent<void>;
     deferredChange: IEvent<any>;
@@ -107,6 +104,7 @@ class AppClass extends DataNode implements IApp {
     _currentTool: string;
 
     private _loaded: IEvent<void>;
+    private _lastRelayoutView: ViewState = null;
 
     constructor() {
         super(true);
@@ -146,10 +144,6 @@ class AppClass extends DataNode implements IApp {
         this.modeChanged = EventHelper.createEvent();
 
         this.resourceChanged = EventHelper.createEvent();
-
-        //deprecate
-        this.logEvent = EventHelper.createEvent();
-
 
         this.changed = EventHelper.createEvent();
         this.deferredChange = EventHelper.createEvent();
@@ -425,7 +419,6 @@ class AppClass extends DataNode implements IApp {
                 else {
                     this.timeWentOnline = new Date();
                 }
-                //this.raiseLogEvent(value ? fwk.sync.Primitive.app_offline() : fwk.sync.Primitive.app_online());
                 this.offlineModeChanged.raise();
             }
         }
@@ -857,35 +850,6 @@ class AppClass extends DataNode implements IApp {
         this._loaded.raise();
     }
 
-    raiseLogEvent(primitive, disableMultiple?: boolean) {
-        if (!primitive) {
-            return;
-        }
-        if (primitive instanceof Array) {
-            for (var i = 0; i < primitive.length; ++i) {
-                this.raiseLogEvent(primitive[i]);
-            }
-            return;
-        }
-
-        if (!disableMultiple) {
-            if (this.migrationUpgradeNotifications.length) {
-                for (var i = 0, l = this.migrationUpgradeNotifications.length; i < l; ++i) {
-                    var element = this.migrationUpgradeNotifications[i];
-                    var page = element.page(); // workaround for tables in assets and composites
-                    if (page) {
-                        var p = Primitive.element_change(element, page);
-                        p.serverOnly = true;
-                        this.raiseLogEvent(p, true);
-                    }
-                }
-                this.migrationUpgradeNotifications = [];
-            }
-        }
-
-        this.logEvent.raise(primitive);
-    }
-
     loadData() {
         if (!this.id()) {
             return Promise.resolve();
@@ -923,31 +887,16 @@ class AppClass extends DataNode implements IApp {
     }
 
     _trackViewPrimitive() {
-        if (!ModelStateListener.roots.length) {
+        if (!ModelStateListener.roots.length || !this.isLoaded || this.activePage === NullPage) {
             return;
         }
-        var trackundo = !!this._lastRelayoutView;
-        var sx = this.activePage.scrollX();
-        var sy = this.activePage.scrollY();
-        var scale = Environment.view.scale();
-        if (!trackundo) {
-            this._lastRelayoutView = {};
-        }
-        if (trackundo && (sx !== this._lastRelayoutView.sx ||
-            sy !== this._lastRelayoutView.sy ||
-            scale !== this._lastRelayoutView.scale)) {
 
-            return ModelStateListener.createViewPrimitive(this.activePage,
-                sx, sy, scale,
-                this._lastRelayoutView.sx,
-                this._lastRelayoutView.sy,
-                this._lastRelayoutView.scale
-            );
+        var viewState = Environment.view.viewState;
+        if (this._lastRelayoutView !== viewState) {
+            var primitive = ModelStateListener.createViewPrimitive(this.activePage, viewState, this._lastRelayoutView);
+            this._lastRelayoutView = viewState;
+            return primitive;
         }
-
-        this._lastRelayoutView.sx = sx;
-        this._lastRelayoutView.sy = sy;
-        this._lastRelayoutView.scale = scale;
 
         return null;
     }
@@ -966,37 +915,34 @@ class AppClass extends DataNode implements IApp {
 
     relayoutInternal() {
         var roots = ModelStateListener.roots;
-        var primitives = [];
+        var localPrimitives = [];
+        var externalPrimitives = [];
+
         for (let i = 0; i < roots.length; ++i) {
             let key = roots[i].key;
             let primitiveRootElement = this.findPrimitiveRoot(key);
             if (primitiveRootElement === this) {
-                var primitiveMap = DeferredPrimitives.releasePrimitiveMap(this);
+                var primitiveMap = RelayoutQueue.dequeue(this);
                 if (primitiveMap) {
                     var appPrimitives = primitiveMap[this.primitiveRootKey()];
                     for (let j = 0; j < appPrimitives.length; j++) {
                         PrimitiveHandler.handle(this, appPrimitives[j]);
                     }
-                    Array.prototype.push.apply(primitives, appPrimitives);
+                    this.filterPrimitives(appPrimitives, localPrimitives, externalPrimitives);
                 }
             }
             else if (primitiveRootElement) { // the element can be deleted
                 let res = primitiveRootElement.relayout(ModelStateListener.elementsPropsCache);
-                if (res !== null) {
-                    Array.prototype.push.apply(primitives, res);
-                }
+                this.filterPrimitives(res, localPrimitives, externalPrimitives);
             }
         }
 
         ModelStateListener.markRelayoutCompleted();
 
-        if (primitives.length) {
-            this.changed.raise(primitives);
-        }
+        var localQueued = localPrimitives.length;
 
         // this one should be in a separate loop, because we can get more elements after relayout
         var rollbacks = [];
-        primitives = [];
         for (let i = 0; i < roots.length; ++i) {
             let key = roots[i].key;
             var rootPrimitives = roots[i].data;
@@ -1008,29 +954,52 @@ class AppClass extends DataNode implements IApp {
 
             for (var j = 0; j < rootPrimitives.length; j++) {
                 var p = rootPrimitives[j];
-                primitives.push(p);
-                rollbacks.splice(0, 0, p._rollbackData);
+                localPrimitives.push(p);
+                rollbacks.push(p._rollbackData);
                 delete p._rollbackData;
             }
         }
 
-        if (primitives.length) {
-            if (DEBUG) {
-                primitives.forEach(x => debug('Created %p %o', x, x));
-            }
-
+        //command should be produced only for new changes registered in the roots
+        if (localPrimitives.length > localQueued) {
             var viewPrimitive = this._trackViewPrimitive();
 
             if (viewPrimitive) {
-                primitives.push(viewPrimitive);
-                rollbacks.push(viewPrimitive);
+                localPrimitives.push(viewPrimitive);
+                rollbacks.push(viewPrimitive._rollbackData);
+                delete viewPrimitive._rollbackData;
             }
 
-            CommandManager.registerExecutedCommand(new PrimitiveSetCommand(primitives, rollbacks));
-            this.changedLocally.raise(primitives);
-            this.changed.raise(primitives);
+            CommandManager.registerExecutedCommand(new Command(localPrimitives, rollbacks.reverse()));
+        }
+
+        if (localPrimitives.length) {
+            this.changedLocally.raise(localPrimitives);
+        }
+
+        if (localPrimitives.length || externalPrimitives.length) {
+            let allPrimitives = localPrimitives;
+            if (externalPrimitives.length) {
+                allPrimitives = localPrimitives.concat(externalPrimitives);
+            }
+            this.changed.raise(allPrimitives);
+
             this.relayoutFinished.raise();
             Invalidate.request();
+        }
+    }
+
+    private filterPrimitives(primitives: IPrimitive[], locals: IPrimitive[], externals: IPrimitive[]) {
+        if (primitives){
+            for (var i = 0; i < primitives.length; i++) {
+                var p = primitives[i];
+                if (p.sessionId === backend.sessionId){
+                    locals.push(p);
+                }
+                else {
+                    externals.push(p);
+                }
+            }
         }
     }
 
@@ -1117,14 +1086,6 @@ class AppClass extends DataNode implements IApp {
             this.modeChanged.raise(value);
         }
     }
-
-    // setPageStatus(pageId, statusId) {
-    //     var page = this.getPageById(pageId);
-    //     if (page.status() !== statusId) {
-    //         page.status(statusId);
-    //         this.raiseLogEvent(Primitive.page_status_change(pageId, statusId, fwk.Page.Statuses[statusId]));
-    //     }
-    // }
 
     //these should be in platform, but ImageRenderer does not have any platform
     generateWebFontConfig(resolve, reject) {
@@ -1252,7 +1213,6 @@ class AppClass extends DataNode implements IApp {
             this.dataManager = null;
         }
 
-        this.logEvent.clearSubscribers();
         this.changed.clearSubscribers();
         this.changedLocally.clearSubscribers();
         this.changedExternally.clearSubscribers();
@@ -1334,6 +1294,9 @@ class AppClass extends DataNode implements IApp {
         }
         catch (e) {
             //ignore
+        }
+        finally {
+            this._lastRelayoutView = Environment.view.viewState;
         }
     }
 

@@ -97,8 +97,6 @@ export default {
 
     "ToolboxConfiguration": require("./ui/toolbox/ToolboxConfiguration"),
 
-    "CompositeCommand": require("./framework/commands/CompositeCommand"),
-
     "SelectComposite": require("./framework/SelectComposite"),
     "DraggingElement": require("./framework/interactions/DraggingElement"),
     "SelectFrame": require("./framework/SelectFrame"),

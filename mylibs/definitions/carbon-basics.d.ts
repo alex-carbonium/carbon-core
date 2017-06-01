@@ -1,6 +1,6 @@
 declare module "carbon-basics" {
-    export interface IConstructor<T>{
-        new(): T;
+    export interface IConstructor<T> {
+        new (): T;
     }
 
     export interface IDisposable {
@@ -53,7 +53,7 @@ declare module "carbon-basics" {
         bindHighPriority(owner: any, callback: (data1: T1, data2: T2, data3: T3) => void): IDisposable;
         bindAsync(owner: any, callback: (data1: T1, data2: T2, data3: T3) => void): IDisposable;
         unbind(callback: (data1: T1, data2: T2, data3: T3) => void);
-        unbind(owner:any, callback: (data1: T1, data2: T2, data3: T3) => void);
+        unbind(owner: any, callback: (data1: T1, data2: T2, data3: T3) => void);
         clearSubscribers();
     }
 
@@ -103,7 +103,7 @@ declare module "carbon-basics" {
         bottom
     }
 
-    export const enum FontWeight{
+    export const enum FontWeight {
         Thin = 100,
         ExtraLight = 200,
         Light = 300,
@@ -152,11 +152,11 @@ declare module "carbon-basics" {
         static extend(font: Font, extension: Partial<Font>): Font;
     }
 
-    export class Shadow{
+    export class Shadow {
         static Default: Shadow;
     }
 
-    export class QuadAndLock{
+    export class QuadAndLock {
         locked: boolean;
 
         static Default: QuadAndLock;
@@ -164,7 +164,7 @@ declare module "carbon-basics" {
         static extend(quad: QuadAndLock, extension: Partial<QuadAndLock>): QuadAndLock;
     }
 
-    export class Box{
+    export class Box {
         left: number;
         top: number;
         right: number;
@@ -183,6 +183,36 @@ declare module "carbon-basics" {
         DataNodePatchProps = 6,
         Selection = 7,
         View = 8
+    }
+
+    export interface IPrimitive {
+        type: PrimitiveType;
+        path: string[];
+        sessionId: string;
+
+        id: string;
+        time: number;
+
+        _rollbackData?: PrimitiveKind;
+    }
+
+    export type PrimitiveKind =
+        IPrimitive & { type: PrimitiveType.DataNodeAdd, node: object, index: number } |
+        IPrimitive & { type: PrimitiveType.DataNodeRemove, childId: number } |
+        IPrimitive & { type: PrimitiveType.DataNodeSetProps, props: object } |
+        IPrimitive & { type: PrimitiveType.DataNodePatchProps, patchType: PatchType, propName: string, item: object } |
+        IPrimitive & { type: PrimitiveType.DataNodeChange, node: object } |
+        IPrimitive & { type: PrimitiveType.DataNodeChangePosition, childId: string, newPosition: number } |
+        IPrimitive & { type: PrimitiveType.Selection, userId: string, selection: string[] } |
+        IPrimitive & { type: PrimitiveType.View, oldState: ViewState, newState: ViewState };
+
+
+    export type NodePrimitivesMap = { [nodeId: string]: IPrimitive[] };
+
+    export type ViewState = {
+        scale: number;
+        sx: number;
+        sy: number;
     }
 
     export const enum VerticalConstraint {

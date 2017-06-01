@@ -1,4 +1,4 @@
-import Primitive from "./Primitive";
+import Primitive from "../sync/Primitive";
 import { PatchType } from "carbon-core";
 
 let lastSelection = {};
@@ -98,17 +98,18 @@ class ModelStateListener {
         if (this._stopCounter > 0){
             return;
         }
+        var p = Primitive.selection(page, selection, oldSelection, userId);
         let root = this._getOrCreateRootData(page.primitiveRootKey());
 
-        root.push(Primitive.selection(page, selection, oldSelection, userId));
+        root.push(p);
     }
 
-    createViewPrimitive(page, sx, sy, scale, oldsx, oldsy, oldscale){
+    createViewPrimitive(page, newState, oldState){
         if (this._stopCounter > 0){
             return;
         }
 
-        return Primitive.view(page, sx, sy, scale, oldsx, oldsy, oldscale);
+        return Primitive.view(page, newState, oldState);
     }
 
     trackChangePosition(primitiveRoot, parent, element, index, oldIndex){
