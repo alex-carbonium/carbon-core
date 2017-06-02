@@ -9,13 +9,14 @@ export default {
         }
         var parents = [];
 
-        Selection.makeSelection([]);
-
         for (var i = 0; i < selection.length; ++i) {
             var element = selection[i];
             parents.push(element.parent());
             if (element.tryDelete()) {
+                Selection.makeSelection([]);
                 element.parent().remove(element);
+            } else {
+                return;
             }
         }
 

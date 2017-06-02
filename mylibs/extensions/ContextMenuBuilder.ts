@@ -6,7 +6,7 @@ import CompoundPath from "ui/common/CompoundPath";
 import Environment from "environment";
 import Path from "ui/common/Path";
 import CoreIntl from "../CoreIntl";
-import { ContextBarPosition, IActionManager, IView, IApp } from "carbon-core";
+import { ContextBarPosition, IActionManager, IView, IApp, ElementState } from "carbon-core";
 
 function findItemsToSelect(app, eventData) {
     let items = []
@@ -75,7 +75,7 @@ export default class ContextMenuBuilder {
 
         let items = menu.items
 
-        let editingPath = selection.length === 1 && selection[0] instanceof Path && selection[0].mode() === 'edit'
+        let editingPath = selection.length === 1 && selection[0] instanceof Path && selection[0].mode() === ElementState.Edit
 
         if(editingPath  && !context.eventData) {
             items.push({

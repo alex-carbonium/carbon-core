@@ -12,7 +12,7 @@ import Matrix from "../../math/matrix";
 import {ViewTool} from "../../framework/Defs";
 import UIElement from "../../framework/UIElement";
 import Tool from "./Tool";
-import {IMouseEventData, IKeyboardState} from "carbon-core";
+import { IMouseEventData, IKeyboardState, ElementState } from "carbon-core";
 
 export default class ElementDragCreator extends Tool {
     [name: string]: any;
@@ -34,7 +34,7 @@ export default class ElementDragCreator extends Tool {
         SnapController.clearActiveSnapLines();
         Cursor.removeGlobalCursor();
 
-        this._changeMode("resize");
+        this._changeMode(ElementState.Resize);
     }
     mousedown(event: IMouseEventData, keys: IKeyboardState) {
         var eventData = { handled: false, x: event.x, y: event.y };
@@ -44,7 +44,7 @@ export default class ElementDragCreator extends Tool {
         }
 
         if (this._element){
-            this._changeMode("resize");
+            this._changeMode(ElementState.Resize);
         }
 
         this._mousepressed = true;
@@ -66,7 +66,7 @@ export default class ElementDragCreator extends Tool {
             this._element.setProps(this._parameters);
         }
 
-        this._changeMode("edit");
+        this._changeMode(ElementState.Edit);
         return false;
     }
     mouseup(event) {
@@ -106,7 +106,7 @@ export default class ElementDragCreator extends Tool {
         this._prepareMousePoint(event, keys);
 
         var artboard = App.Current.activePage.getArtboardAtPoint(event);
-        if (artboard != this._hoverArtboard) {
+        if (artboard !== this._hoverArtboard) {
             this._hoverArtboard = artboard;
             if (artboard) {
                 SnapController.calculateSnappingPoints(artboard);
@@ -164,7 +164,7 @@ export default class ElementDragCreator extends Tool {
             this._point.roundMutable();
         }
     }
-    _changeMode(mode: string): void{
+    _changeMode(mode: ElementState): void{
         if (this._element && typeof this._element.mode === "function") {
             this._element.mode(mode);
         }

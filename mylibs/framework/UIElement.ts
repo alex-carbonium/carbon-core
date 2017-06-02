@@ -36,7 +36,7 @@ import { PropertyDescriptor } from './PropertyMetadata';
 import { IKeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
-import { ChangeMode, LayerTypes, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode } from "carbon-core";
+import { ChangeMode, LayerTypes, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint } from "carbon-core";
 
 require("../migrations/All");
 
@@ -1562,7 +1562,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     rotationOrigin(global) {
         return this.center(global);
     }
-    center(global?: boolean) {
+    center(global?: boolean):ICoordinate {
         let m = global ? this.globalViewMatrix() : this.viewMatrix();
         return m.transformPoint(this.boundaryRect().center());
     }

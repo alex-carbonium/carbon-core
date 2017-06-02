@@ -8,14 +8,14 @@ declare module "carbon-geometry" {
     }
 
     export interface INormilizedLine2D {
-        a:number;
-        b:number;
-        c:number;
+        a: number;
+        b: number;
+        c: number;
     }
 
     export interface IRange {
-        minimum:number;
-        maximum:number;
+        minimum: number;
+        maximum: number;
     }
 
     export interface IPoint extends ICoordinate {
@@ -25,7 +25,7 @@ declare module "carbon-geometry" {
         getDirectedAngle(fromPoint: IPoint): number;
     }
 
-    export interface ISize{
+    export interface ISize {
         width: number;
         height: number;
     }
@@ -51,12 +51,12 @@ declare module "carbon-geometry" {
         withSize(width: number, height: number): IRect;
         clone(): IRect;
     }
-    interface IRectConstructor{
-        new(x: number, y: number, width: number, height: number): IRect;
+    interface IRectConstructor {
+        new (x: number, y: number, width: number, height: number): IRect;
     }
     export const Rect: IRectConstructor;
 
-    export interface IMatrix{
+    export interface IMatrix {
         a: number;
         b: number;
         c: number;
@@ -66,7 +66,7 @@ declare module "carbon-geometry" {
 
         applyToContext(context: IContext);
 
-        transformPoint(point: IPoint): IPoint;
+        transformPoint(point: ICoordinate): ICoordinate;
 
         prepended(matrix: IMatrix): IMatrix;
         appended(matrix: IMatrix): IMatrix;
@@ -83,9 +83,29 @@ declare module "carbon-geometry" {
         createTranslationMatrix(tx: number, ty: number): IMatrix;
     }
 
-    export const enum OriginType{
+    export const enum OriginType {
         TopLeft = 1,
         Center
         //more
+    }
+
+    export const enum PointType {
+        Straight,
+        Mirrored,
+        Disconnected,
+        Assymetric
+    }
+
+    export interface IPathPoint extends ICoordinate {
+        type?: PointType,
+        moveTo?: boolean;
+        closed?: boolean;
+        x: number;
+        y: number;
+        cp1x?: number;
+        cp1y?: number;
+        cp2x?: number;
+        cp2y?: number;
+        idx?:number;
     }
 }

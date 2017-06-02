@@ -170,11 +170,6 @@ export enum MirrorViewMode {
     Fit = 1
 }
 
-export enum ElementState {
-    Resize = 0,
-    Edit = 1
-};
-
 export var Types = {
     'Path': 'p',
     'Text': 't',

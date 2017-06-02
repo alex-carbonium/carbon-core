@@ -11,6 +11,7 @@ import Point from "../../math/point";
 import Environment from "../../environment";
 import UserSettings from "UserSettings";
 import {IKeyboardState, IMouseEventData} from "carbon-core";
+import Cursors from "Cursors";
 
 function update(x1, y1, x2, y2) {
     var props = {
@@ -103,12 +104,12 @@ export default class LineCreator extends Tool {
     mousemove(event: IMouseEventData, keys: IKeyboardState) {
         super.mousemove(event, keys);
 
-        if (event.cursor !== "pen_move_point"){
-            event.cursor = "pen_line";
+        if (event.cursor !== Cursors.Pen.MovePoint){
+            event.cursor = Cursors.Pen.Line;
         }
 
         var artboard = App.Current.activePage.getArtboardAtPoint(event);
-        if (artboard != this._hoverArtboard) {
+        if (artboard !== this._hoverArtboard) {
             this._hoverArtboard = artboard;
             if (artboard) {
                 SnapController.calculateSnappingPoints(artboard);

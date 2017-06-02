@@ -109,6 +109,7 @@ export default {
     "ActivityProxy": require("./server/ActivityProxy"),
     "AccountProxy": require("./server/AccountProxy"),
     "FileProxy": require("./server/FileProxy"),
+    "Cursors": require("Cursors"),
 
     "LayoutGridLines": require("./extensions/guides/LayoutGridLines"),
     "LayoutGridColumns": require("./extensions/guides/LayoutGridColumns"),

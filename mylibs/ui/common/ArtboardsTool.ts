@@ -10,6 +10,7 @@ import {ViewTool} from "../../framework/Defs";
 import Rect from "../../math/rect";
 import Point from "../../math/point";
 import {IKeyboardState, IMouseEventData} from "carbon-core";
+import Cursors from "Cursors";
 
 export default class ArtboardsTool extends Tool {
     [name: string]: any;
@@ -105,7 +106,7 @@ export default class ArtboardsTool extends Tool {
 
         var artboard = this._app.activePage.getArtboardAtPoint(event);
         if (!artboard){
-            event.cursor = "artboard_tool";
+            event.cursor = Cursors.ArtboardTool;
         }
 
         if (!this._mousepressed){
@@ -157,7 +158,7 @@ export default class ArtboardsTool extends Tool {
                 Selection.selectionMode("new");
             }
 
-            event.cursor = "move_cursor";
+            event.cursor = Cursors.Move;
         }
     }
 

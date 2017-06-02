@@ -204,7 +204,7 @@ class SnapController {
         }
         if (snap !== null) {
             snappedPoint = new Point(snap.value - target._xCenter, pos.y);
-            var snapLine = buildVertical(snap, ys.map(v=>v+pos.y));
+            let snapLine = buildVertical(snap, ys.map(v=>v+pos.y));
             if(snapLine) {
                 this.snapLines.push(snapLine);
             }
@@ -213,7 +213,7 @@ class SnapController {
                 snap = findSnap(snapX, xs[i] + pos.x, delta);
                 if (snap !== null) {
                     snappedPoint = new Point(snap.value - xs[i], pos.y);
-                    var snapLine = buildVertical(snap, ys.map(v=>v+pos.y));
+                    let snapLine = buildVertical(snap, ys.map(v=>v+pos.y));
                     if(snapLine) {
                         this.snapLines.push(snapLine);
                     }

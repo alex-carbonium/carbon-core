@@ -9,7 +9,8 @@ import Rect from "../math/rect";
 import Point from "../math/point";
 import Environment from "environment";
 import Selection from "../framework/SelectionModel";
-import { IMouseEventData } from "carbon-core";
+import { IMouseEventData, ElementState } from "carbon-core";
+import Cursors from "Cursors";
 
 let PolygonFrameType = {
     cursorSet: FrameCursors,
@@ -143,7 +144,7 @@ export default class Polygon extends Shape {
     mousemove(event: IMouseEventData){
         if (this.isInEditMode()){
             if (!event.cursor){
-                event.cursor = "default_cursor";
+                event.cursor = Cursors.Default;
             }
         }
     }
@@ -151,13 +152,13 @@ export default class Polygon extends Shape {
     dblclick(event: IMouseEventData, scale) {
         if (this.isInEditMode()) {
             if (!this.hitTest(event, scale)) {
-                this.mode("resize");
+                this.mode(ElementState.Resize);
                 this.releaseMouse(this);
                 Selection.refreshSelection();
             }
         }
         else {
-            this.mode("edit");
+            this.mode(ElementState.Edit);
             this.captureMouse(this);
             Selection.refreshSelection();
         }

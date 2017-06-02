@@ -20,8 +20,9 @@ import Command from "framework/commands/Command";
 import { Types } from "../../framework/Defs";
 import ArrangeStrategy from "../../framework/ArrangeStrategy";
 import ResizeOptions from "../../decorators/ResizeOptions";
-import { IMouseEventData, IKeyboardState, ChangeMode, IIntersectionRange, ResizeDimension, LayerTypes } from "carbon-core";
+import { IMouseEventData, IKeyboardState, ChangeMode, IIntersectionRange, ResizeDimension, LayerTypes, IContainerProps, PointType, IPathPoint, IUIElementProps, ElementState } from "carbon-core";
 import UserSettings from "UserSettings";
+import Cursors from "Cursors";
 
 const CP_HANDLE_RADIUS = 3;
 const CP_HANDLE_RADIUS2 = 6;
@@ -31,13 +32,6 @@ const CP_RADIUS2 = 8;
 const POINT_STROKE = UserSettings.path.pointStroke;
 const POINT_FILL = UserSettings.path.pointFill;
 const POINT_FILL_FIRST_OPEN = UserSettings.path.pointFillFirstPoint;
-
-const enum PointType {
-    Straight,
-    Mirrored,
-    Disconnected,
-    Assymetric
-};
 
 const commandLengths = {
     m: 2,
@@ -60,19 +54,6 @@ function pointsEqual(p1, p2) {
         && p1.cp2x === p2.cp2x && p1.cp2y === p2.cp2y;
 }
 
-function updateSelectedPoint(pt) {
-    if (this._selectedPoint !== pt) {
-        this._selectedPoint = pt;
-        if (pt) {
-            this.runtimeProps.currentPointX = pt.x;
-            this.runtimeProps.currentPointY = pt.y;
-            this._selectedPoint.type = pt.type;
-        }
-        this.setProps({ selectedPointIdx: pt ? pt.idx : -1 }, ChangeMode.Self);
-        Selection.reselect();
-    }
-}
-
 function addToSelectedPoints(pt) {
     if (this._selectedPoint && !Object.keys(this._selectedPoints).length) {
         this._selectedPoints[this._selectedPoint.idx] = this._selectedPoint;
@@ -83,8 +64,8 @@ function addToSelectedPoints(pt) {
         this._selectedPoints[pt.idx] = pt;
     }
 
-    if (this.props.selectedPointIdx !== -1 && Object.keys(this._selectedPoints).length > 1) {
-        this.setProps({ selectedPointIdx: -1 }, ChangeMode.Self);
+    if (this.runtimeProps.selectedPointIdx !== -1 && Object.keys(this._selectedPoints).length > 1) {
+        this.runtimeProps.selectedPointIdx = -1;
     }
 
     Invalidate.requestInteractionOnly();
@@ -154,6 +135,7 @@ let drawSegment = function (context, pt, prevPt, closing) {
     if (!this._firstPoint) {
         this._firstPoint = pt;
     }
+
     if ((pt.moveTo || this._firstPoint === pt) && !closing) {
         context.moveTo(xy.x, xy.y);
     }
@@ -178,7 +160,7 @@ let drawSegment = function (context, pt, prevPt, closing) {
         context.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, xy.x, xy.y);
     }
 
-    if (pt.closed) {
+    if (pt.closed && !closing) {
         drawSegment.call(this, context, this._firstPoint, pt, true);
         context.closePath();
         this._firstPoint = null;
@@ -240,6 +222,7 @@ function moveCurrentPoint(dx, dy) {
         this._currentPoint.cp2x -= dx;
         this._currentPoint.cp2y -= dy;
         this.setProps({ currentPointX: this._currentPoint.x, currentPointY: this._currentPoint.y }, ChangeMode.Root);
+        this._saveOnMouseUp = true;
     }
 }
 
@@ -360,6 +343,12 @@ function segmentToBezier(cx, cy, th0, th1, rx, ry, sin_th, cos_th) {
 }
 
 class Path extends Shape {
+    public props: (IContainerProps | IUIElementProps) & {
+        points: IPathPoint[];
+        closed: boolean;
+        mode: ElementState;
+    }
+
     constructor() {
         super();
         this.points = [];
@@ -369,8 +358,22 @@ class Path extends Shape {
         this.save = this._save;//debounce(this._save.bind(this), 500);
     }
 
+    selectPoint(pt) {
+        if (this._selectedPoint !== pt) {
+            this._selectedPoint = pt;
+            if (pt) {
+                this.runtimeProps.currentPointX = pt.x;
+                this.runtimeProps.currentPointY = pt.y;
+                this._selectedPoint.type = pt.type;
+            }
+            this.runtimeProps.selectedPointIdx = pt ? pt.idx : -1;
+            Selection.refreshSelection();
+        }
+    }
+
     tryDelete(): boolean {
-        if (this._selectedPoint && this.points.length > 2) {
+        if (this._selectedPoint && this.points.length > 2 && this.mode() === ElementState.Edit) {
+            var index = this._selectedPoint.idx;
             let keys = Object.keys(this._selectedPoints).map((k: any) => k - 0).sort((a, b) => b - a);
             if (keys.length) {
                 for (let i = 0; i < keys.length; ++i) {
@@ -381,7 +384,13 @@ class Path extends Shape {
                 this.removePointAtIndex(this._selectedPoint.idx);
             }
 
-            updateSelectedPoint.call(this, null);
+            // TODO: clear segment if it has only one point
+
+            if (index === 0) {
+                index = this.points.length;
+            }
+
+            this.selectPoint(this.points[index - 1]);
             return false;
         }
         return true;
@@ -391,7 +400,7 @@ class Path extends Shape {
         let newPoints = this.points;
         this.props.points = this._lastPoints;
         this.setProps({ points: newPoints });
-        this._lastPoints = this.points.slice();
+        this._lastPoints = this.points.map(p=>clone(p));
 
         // var points: any[] = this._lastPoints;
         // console.log(points.reduce((prev, current, indx, arr) => {
@@ -412,11 +421,11 @@ class Path extends Shape {
         return props;
     }
 
-    get points() {
+    get points(): IPathPoint[] {
         return this.props.points;
     }
 
-    set points(value) {
+    set points(value: IPathPoint[]) {
         this.setProps({ points: value });
     }
 
@@ -495,9 +504,14 @@ class Path extends Shape {
     }
 
     removePointAtIndex(idx) {
-        this.points.splice(idx, 1);
+        var point = this.points.splice(idx, 1)[0];
+        if (point.closed && idx > 0) {
+            var prevPoint = this.points[idx - 1];
+            prevPoint.closed = true;
+            this.changePointAtIndex(prevPoint, idx - 1);
+        }
 
-        if (this.mode() === 'edit') {
+        if (this.mode() === ElementState.Edit) {
             SnapController.calculateSnappingPointsForPath(this);
         }
     }
@@ -513,11 +527,11 @@ class Path extends Shape {
 
             this.setProps({ mode: value });
 
-            if (value === "edit") {
-                if (oldMode !== "edit") {
+            if (value === ElementState.Edit) {
+                if (oldMode !== ElementState.Edit) {
                     this.switchToEditMode(true);
                 }
-            } else {
+            } else if (oldMode !== ElementState.Resize) {
                 this.switchToEditMode(false);
             }
         }
@@ -526,17 +540,17 @@ class Path extends Shape {
     }
 
     cancel() {
-        this.mode("resize");
+        this.mode(ElementState.Resize);
         return false;// stop propagation
     }
 
     enter() {
-        if (this.mode() !== "edit") {
+        if (this.mode() !== ElementState.Edit) {
             this.edit();
         }
     }
 
-    switchToEditMode(edit) {
+    switchToEditMode(edit: boolean) {
         if (this._cancelBinding) {
             this._cancelBinding.dispose();
         }
@@ -551,7 +565,7 @@ class Path extends Shape {
             this._cancelBinding = Environment.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
             this.captureMouse(this);
 
-            updateSelectedPoint.call(this, this.points[0]);
+            this.selectPoint(this.points[0]);
             this.save();//?????
         } else {
             this.unregisterForLayerDraw(LayerTypes.Interaction);
@@ -599,7 +613,7 @@ class Path extends Shape {
         this._initPoint(point);
         this.points.push(point);
 
-        if (this.mode() === 'edit') {
+        if (this.mode() === ElementState.Edit) {
             SnapController.calculateSnappingPointsForPath(this);
         }
 
@@ -612,7 +626,7 @@ class Path extends Shape {
         this._initPoint(point);
         this.points.splice(idx, 0, point);
 
-        if (this.mode() === 'edit') {
+        if (this.mode() === ElementState.Edit) {
             SnapController.calculateSnappingPointsForPath(this);
         }
 
@@ -623,7 +637,7 @@ class Path extends Shape {
 
     changePointAtIndex(point, idx, changeMode: ChangeMode = ChangeMode.Model) {
         this.points.splice(idx, 1, point);
-        if (this.mode() === 'edit') {
+        if (this.mode() === ElementState.Edit && changeMode !== ChangeMode.Self) {
             SnapController.calculateSnappingPointsForPath(this);
         }
 
@@ -637,13 +651,10 @@ class Path extends Shape {
     }
 
     select() {
-        this._selected = true;
         this._enterBinding = Environment.controller.actionManager.subscribe('enter', this.enter.bind(this));
     }
 
     unselect() {
-        this._selected = false;
-
         if (this._enterBinding) {
             this._enterBinding.dispose();
             delete this._enterBinding;
@@ -651,15 +662,15 @@ class Path extends Shape {
     }
 
     selectFrameVisible() {
-        return this.mode() !== "edit";
+        return this.mode() !== ElementState.Edit;
     }
 
     edit() {
-        this.mode("edit");
+        this.mode(ElementState.Edit);
     }
 
     dblclick(event, scale?) {
-        if (this.mode() !== "edit") {
+        if (this.mode() !== ElementState.Edit) {
             this.edit();
         } else {
             let pt = getClickedPoint.call(this, event.x, event.y);
@@ -682,6 +693,11 @@ class Path extends Shape {
 
     mouseup(event: IMouseEventData, keys: IKeyboardState) {
         delete this._altPressed;
+        if(this._saveOnMouseUp) {
+            this.save();
+            this._saveOnMouseUp = false;
+        }
+
         if (this._bendingData) {
             this._bendingData = null;
             SnapController.clearActiveSnapLines();
@@ -744,8 +760,9 @@ class Path extends Shape {
         p3.cp1y = p2.y;
         p0.type = PointType.Disconnected;
         p3.type = PointType.Disconnected;
-        this.changePointAtIndex(p0, p1idx);
-        this.changePointAtIndex(p3, data.idx);
+        this.changePointAtIndex(p0, p1idx, ChangeMode.Self);
+        this.changePointAtIndex(p3, data.idx, ChangeMode.Self);
+        this._saveOnMouseUp = true;
     }
 
     calculateOriginalBendingData(point) {
@@ -808,7 +825,7 @@ class Path extends Shape {
 
         this._groupMove = false;
 
-        if (this.mode() !== "edit") {
+        if (this.mode() !== ElementState.Edit) {
             return;
         }
 
@@ -867,7 +884,7 @@ class Path extends Shape {
         }
 
         if (Object.keys(this._selectedPoints).length <= 1) {
-            updateSelectedPoint.call(this, pt);
+            this.selectPoint(pt);
         }
 
         if (event.handled) {
@@ -876,7 +893,7 @@ class Path extends Shape {
     }
 
     mousemove(event: IMouseEventData, keys: IKeyboardState) {
-        if (this.mode() !== "edit") {
+        if (this.mode() !== ElementState.Edit) {
             return;
         }
 
@@ -910,6 +927,7 @@ class Path extends Shape {
 
                 Invalidate.request();
             }
+            this._saveOnMouseUp = true;
             return;
         } else if (this._handlePoint) {
             pos = SnapController.applySnappingForPoint(pos);
@@ -957,6 +975,7 @@ class Path extends Shape {
                     }
                 }
             }
+            this._saveOnMouseUp = true;
             Invalidate.request();
             return;
         }
@@ -996,13 +1015,13 @@ class Path extends Shape {
         }
 
         if (this.isHoveringOverHandle() || (this.isHoveringOverPoint() && keys.alt)) {
-            event.cursor = "pen_move_handle";
+            event.cursor = Cursors.Pen.MoveHandle;
         }
         else if (this.isHoveringOverPoint()) {
-            event.cursor = "pen_move_point";
+            event.cursor = Cursors.Pen.MovePoint;
         }
         else if (this.isHoveringOverSegment()) {
-            event.cursor = keys.shift ? "pen_add_point" : "pen_move_segment";
+            event.cursor = keys.shift ? Cursors.Pen.AddPoint : Cursors.Pen.MoveSegment;
         }
         else {
             event.cursor = Environment.controller.defaultCursor();
@@ -1089,11 +1108,11 @@ class Path extends Shape {
     }
 
     resizeDimensions() {
-        return (this.mode() === "resize" ? ResizeDimension.Both : ResizeDimension.None);
+        return (this.mode() === ElementState.Resize ? ResizeDimension.Both : ResizeDimension.None);
     }
 
     onLayerDraw(layer, context, environment) {
-        if (this._selected && this.mode() === "edit") {
+        if (Selection.selectedElement() === this && this.mode() === ElementState.Edit) {
             let scale = environment.view.scale();
             context.save();
 
@@ -1110,7 +1129,7 @@ class Path extends Shape {
             let hoverPoint = this._currentPoint || this._hoverPoint;
 
             this.drawPath(context, w, h);
-            if (this.nextPoint && this.points.length && !this.closed() && !this.points[this.points.length-1].closed) {
+            if (this.nextPoint && this.points.length && !this.closed() && !this.points[this.points.length - 1].closed) {
                 let nextPt;
                 if (hoverPoint === this.points[0]) {
                     nextPt = hoverPoint;
@@ -1130,16 +1149,24 @@ class Path extends Shape {
                     needClearStyle = false;
                 }
             }
+            var points = this.points;
+            function hasClosePointAfterIndex(idx) {
+                for (var i = idx + 1; i < points.length; ++i) {
+                    if (points[i].closed) {
+                        return true;
+                    }
+                }
 
+                return false;
+            }
 
-            for (let i = 0, len = this.points.length; i < len; ++i) {
-                let pt = this.points[i];
+            for (let i = 0, len = points.length; i < len; ++i) {
+                let pt = points[i];
                 let tpt = matrix.transformPoint(pt);
 
                 clearStyle();
 
                 if (!isLinePoint(pt)) {
-
                     let cp1 = matrix.transformPoint2(pt.cp1x, pt.cp1y);
                     let cp2 = matrix.transformPoint2(pt.cp2x, pt.cp2y);
                     context.beginPath();
@@ -1153,7 +1180,6 @@ class Path extends Shape {
                         needClearStyle = true;
                     }
 
-                    //context.circle(cp1.x, cp1.y, CP_HANDLE_RADIUS / scale);
                     let r = CP_HANDLE_RADIUS / scale;
                     context.beginPath();
                     context.moveTo(cp1.x - r, cp1.y);
@@ -1190,7 +1216,7 @@ class Path extends Shape {
                 }
 
                 let r = CP_RADIUS;
-                if (i === 0 && !this.closed() && !pt.closed) {
+                if ((i === 0 && !(this.closed() || hasClosePointAfterIndex(i)) && !pt.closed) || (pt.moveTo && !hasClosePointAfterIndex(i))) {
                     r--;
                     context.circle(tpt.x, tpt.y, (r + 2) / scale);
                     context.stroke();
@@ -1317,11 +1343,11 @@ class Path extends Shape {
             return [pt];
         } else {
             if (isLinePoint(p1)) {
-                p1.cp2x = p1.x;//p4.cp1x;
-                p1.cp2y = p1.y;//p4.cp1y;
+                p1.cp2x = p1.x;
+                p1.cp2y = p1.y;
             } else if (isLinePoint(p4)) {
-                p4.cp1x = p4.x;//p1.cp2x;
-                p4.cp1y = p4.y;//p1.cp2y;
+                p4.cp1x = p4.x;
+                p4.cp1y = p4.y;
             }
             let p3 = { x: p4.cp1x, y: p4.cp1y };
             let p2 = { x: p1.cp2x, y: p1.cp2y };
@@ -1480,7 +1506,7 @@ class Path extends Shape {
         res.push({ kind: "M", point: p });
 
         function buildSegment(pt, prevPt, matrix, nomove?) {
-            if(pt.moveTo && !nomove) {
+            if (pt.moveTo && !nomove) {
                 p = matrix.transformPoint(pt);
                 res.push({ kind: "M", point: p });
             }
@@ -1508,7 +1534,7 @@ class Path extends Shape {
                 res.push({ kind: "C", point: p, controlPoints: [p1, p2] });
             }
 
-            if(pt.closed && !nomove) {
+            if (pt.closed && !nomove) {
                 res.push({ kind: "Z" });
             }
         }
@@ -1599,7 +1625,7 @@ class Path extends Shape {
         if (arguments.length && this._selectedPoint) {
             this._selectedPoint.type = value;
             Invalidate.request();
-            Selection.reselect();
+            Selection.refreshSelection();
         }
         return this._selectedPoint ? this._selectedPoint.type : null;
     }
@@ -2246,7 +2272,7 @@ PropertyMetadata.registerForType(Path, {
     mode: {
         editable: false,
         useInModel: false,
-        defaultValue: "resize"
+        defaultValue: ElementState.Resize
     },
     points: {
         defaultValue: []
@@ -2254,7 +2280,7 @@ PropertyMetadata.registerForType(Path, {
     groups(path) {
         let baseGroups = PropertyMetadata.findAll(Types.Shape).groups();
 
-        if (path && path.mode() === "edit") {
+        if (path && path.mode() === ElementState.Edit) {
             return [
                 {
                     label: path.displayType(),
@@ -2272,8 +2298,8 @@ PropertyMetadata.registerForType(Path, {
         return baseGroups;
     },
     prepareVisibility(path: Path) {
-        let editMode = path.props.mode === "edit";
-        let pointSelected = path.props.selectedPointIdx !== -1;
+        let editMode = path.props.mode === ElementState.Edit;
+        let pointSelected = path.runtimeProps.selectedPointIdx !== -1;
         return {
             currentPointX: editMode && pointSelected,
             currentPointY: editMode && pointSelected,

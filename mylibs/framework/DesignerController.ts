@@ -19,6 +19,7 @@ import {choosePasteLocation} from "./PasteLocator";
 import { IArtboard } from "carbon-model";
 import Point from "../math/point";
 import { IDropElementData } from "carbon-app";
+import Cursors from "Cursors";
 
 function onselect(rect) {
     for(var i = this.view._layers.length - 1; i >= 0; --i) {
@@ -367,7 +368,7 @@ export default class DesignerController implements IController {
             return;
         }
 
-        if (this._captureElement != null) {
+        if (this._captureElement) {
             this._captureElement.mousedown(eventData, Keyboard.state);
             if (eventData.cursor){
                 this.updateCursor(eventData);
@@ -446,7 +447,7 @@ export default class DesignerController implements IController {
             return;
         }
 
-        if (this._captureElement != null) {
+        if (this._captureElement) {
             this._captureElement.mousemove(eventData, keys);
             this.updateCursor(eventData);
             this._noActionsBeforeClick = false;
@@ -484,7 +485,7 @@ export default class DesignerController implements IController {
             return;
         }
 
-        if (this._draggingElement != null) {
+        if (this._draggingElement) {
             dragging.call(this, {
                 x: (eventData.x - this._draggingOffset.x),
                 y: (eventData.y - this._draggingOffset.y),
@@ -535,7 +536,7 @@ export default class DesignerController implements IController {
         this._startDraggingData = null;
         this._startDraggingElement = null;
 
-        if (this._captureElement != null) {
+        if (this._captureElement) {
             this._captureElement.mouseup(eventData, Keyboard.state);
             if (eventData.cursor){
                 this.updateCursor(eventData);
@@ -574,7 +575,7 @@ export default class DesignerController implements IController {
             return;
         }
 
-        if (this._captureElement != null) {
+        if (this._captureElement) {
             this._captureElement.dblclick(eventData, this.view.scale());
             return;
         }
@@ -601,7 +602,7 @@ export default class DesignerController implements IController {
                 return;
             }
 
-            if (this._captureElement != null) {
+            if (this._captureElement) {
                 this._captureElement.click(eventData);
                 if (eventData.cursor){
                    this.updateCursor(eventData);
@@ -672,7 +673,7 @@ export default class DesignerController implements IController {
                 }
 
                 if (element.primitiveRoot().isEditable()) {
-                    eventData.cursor = "move_cursor";
+                    eventData.cursor = Cursors.Move;
                 }
             }
             else{
@@ -723,13 +724,13 @@ export default class DesignerController implements IController {
     insertAndSelect(elements: IUIElement[], parent: Container, x: number, y: number){
         var newSelection = [];
 
-        for (var i = 0; i < elements.length; i++) {
-            var element = elements[i];
+        for (let i = 0; i < elements.length; i++) {
+            let element = elements[i];
 
             if (parent instanceof CompositeElement) {
-                for (var i = 0; i < parent.elements.length; ++i){
-                    var toInsert = i === 0 ? element : element.clone();
-                    newSelection.push(parent.elements[i].add(toInsert));
+                for (let k = 0; k < parent.elements.length; ++k){
+                    var toInsert = k === 0 ? element : element.clone();
+                    newSelection.push(parent.elements[k].add(toInsert));
                 }
             }
             else if (element.props._unwrapContent) {
@@ -739,7 +740,7 @@ export default class DesignerController implements IController {
             }
             else {
                 if (!parent.autoPositionChildren()){
-                    var newMatrix = element.viewMatrix().withTranslation(Math.round(x), Math.round(y));
+                    let newMatrix = element.viewMatrix().withTranslation(Math.round(x), Math.round(y));
                     element.setTransform(parent.globalMatrixToLocal(newMatrix));
                 }
                 newSelection.push(parent.add(element));

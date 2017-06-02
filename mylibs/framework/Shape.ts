@@ -4,19 +4,19 @@ import PropertyMetadata from "./PropertyMetadata";
 import Brush from "./Brush";
 import Shadow from "./Shadow";
 import ContextPool from "./render/ContextPool";
-import {Types, StrokePosition, LineCap, LineJoin} from "./Defs";
+import { Types, StrokePosition, LineCap, LineJoin } from "./Defs";
 import Image from "./Image";
 import Constraints from "./Constraints";
 import { IImage, IUIElement } from "carbon-model";
-import { ResizeDimension } from "carbon-core";
+import { ResizeDimension, ElementState } from "carbon-core";
 
 class Shape extends Container {
-    convertToPath(){
+    convertToPath() {
         return null;
     }
 
     mode(value?) {
-        return this.field("_mode", value, "resize");
+        return this.field("_mode", value, ElementState.Resize);
     }
 
     closed() {
@@ -24,11 +24,11 @@ class Shape extends Container {
     }
 
     //for hit visibility
-    lockedGroup(){
+    lockedGroup() {
         return true;
     }
 
-    performArrange(){
+    performArrange() {
     }
 
     _renderDraft(context, w, h) {
@@ -78,7 +78,7 @@ class Shape extends Container {
         else {
             var clippingRect = this.getBoundingBoxGlobal();
             clippingRect = this.expandRectWithBorder(clippingRect);
-            if(true || !environment.offscreen) {
+            if (true || !environment.offscreen) {
                 var p1 = environment.pageMatrix.transformPoint2(clippingRect.x, clippingRect.y);
                 var p2 = environment.pageMatrix.transformPoint2(clippingRect.x + clippingRect.width, clippingRect.y + clippingRect.height);
                 p1.x = Math.max(0, 0 | p1.x * environment.contextScale);
@@ -111,7 +111,7 @@ class Shape extends Container {
             }
 
             // if(!environment.offscreen) {
-                this.applyViewMatrix(offContext);
+            this.applyViewMatrix(offContext);
             // }
 
             offContext.beginPath();
@@ -140,12 +140,12 @@ class Shape extends Container {
         }
     }
 
-    shouldApplyViewMatrix(){
+    shouldApplyViewMatrix() {
         return true;
     }
 
     drawSelf(context, w, h, environment) {
-       this.drawOutsetShadows(context, w, h, environment);
+        this.drawOutsetShadows(context, w, h, environment);
 
         context.save();
 
@@ -167,14 +167,14 @@ class Shape extends Container {
         context.restore();
     }
 
-    drawOutsetShadows(context, w, h, environment){
+    drawOutsetShadows(context, w, h, environment) {
         var shadows = this.props.shadows;
         var hasShadow = false;
-        if(shadows && shadows.length){
-            for(var i = 0; i < shadows.length; ++i) {
+        if (shadows && shadows.length) {
+            for (var i = 0; i < shadows.length; ++i) {
                 var shadow = shadows[i];
-                if(!shadow.inset) {
-                    Shadow.apply(this, shadow, context, w, h,environment);
+                if (!shadow.inset) {
+                    Shadow.apply(this, shadow, context, w, h, environment);
                     hasShadow = true;
                 }
             }
@@ -182,39 +182,39 @@ class Shape extends Container {
 
         return hasShadow;
     }
-    drawInsetShadows(context, w, h, environment){
+    drawInsetShadows(context, w, h, environment) {
         var shadows = this.props.shadows;
-        if(shadows && shadows.length){
-            for(var i = 0; i < shadows.length; ++i) {
+        if (shadows && shadows.length) {
+            for (var i = 0; i < shadows.length; ++i) {
                 var shadow = shadows[i];
-                if(shadow.inset) {
+                if (shadow.inset) {
                     Shadow.apply(this, shadow, context, w, h, environment);
                 }
             }
         }
     }
 
-    drawPath(context, w, h){
+    drawPath(context, w, h) {
     }
 
     resizeDimensions(value?) {
-        if (arguments.length === 1){
+        if (arguments.length === 1) {
             return super.resizeDimensions(value);
         }
 
         return this.isInEditMode() ? ResizeDimension.None : super.resizeDimensions();
     }
 
-    isInEditMode(): boolean{
-        return this.mode() === "edit";
+    isInEditMode(): boolean {
+        return this.mode() === ElementState.Edit;
     }
 
-    canRotate(){
+    canRotate() {
         return !this.isInEditMode();
     }
 
-    canAccept(elements, autoInsert?, allowMoveInOut?){
-        if (elements.length !== 1){
+    canAccept(elements, autoInsert?, allowMoveInOut?) {
+        if (elements.length !== 1) {
             return false;
         }
         return this.primitiveRoot().isEditable() && (elements[0] instanceof Image || elements[0] instanceof Shape) && allowMoveInOut;
@@ -222,17 +222,17 @@ class Shape extends Container {
 
     lineCap(value?) {
         if (arguments.length > 0) {
-            if(value === 'round' || value === LineCap.Round){
+            if (value === 'round' || value === LineCap.Round) {
                 value = LineCap.Round;
-            } else if (value === 'square'  || value === LineCap.Square) {
+            } else if (value === 'square' || value === LineCap.Square) {
                 value = LineCap.Square;
             } else {
                 value = LineCap.Butt;
             }
-            this.setProps({lineCap: value});
+            this.setProps({ lineCap: value });
         }
 
-        switch(this.props.lineCap){
+        switch (this.props.lineCap) {
             case LineCap.Round:
                 return 'round';
             case LineCap.Square:
@@ -244,17 +244,17 @@ class Shape extends Container {
 
     lineJoin(value?) {
         if (arguments.length > 0) {
-            if(value === 'round' || value === LineJoin.Round){
+            if (value === 'round' || value === LineJoin.Round) {
                 value = LineJoin.Round;
-            } else if (value === 'bevel'  || value === LineJoin.Bevel) {
+            } else if (value === 'bevel' || value === LineJoin.Bevel) {
                 value = LineJoin.Bevel;
             } else {
                 value = LineJoin.Miter;
             }
-            this.setProps({lineJoin: value});
+            this.setProps({ lineJoin: value });
         }
 
-        switch(this.props.lineJoin){
+        switch (this.props.lineJoin) {
             case LineJoin.Round:
                 return 'round';
             case LineJoin.Bevel:
@@ -266,7 +266,7 @@ class Shape extends Container {
 
     miterLimit(value) {
         if (arguments.length > 0) {
-            this.setProps({miterLimit: value});
+            this.setProps({ miterLimit: value });
         }
 
         return this.props.miterLimit;
@@ -285,14 +285,14 @@ class Shape extends Container {
         return value;
     }
 
-    autoPositionChildren(): boolean{
+    autoPositionChildren(): boolean {
         return true;
     }
 
     insert(element: IUIElement) {
-        this.setProps({clipMask: true});
+        this.setProps({ clipMask: true });
         element.prepareAndSetProps(this.selectLayoutProps());
-        if (element instanceof Image){
+        if (element instanceof Image) {
             element.resizeOnLoad(null);
         }
 
@@ -306,9 +306,9 @@ class Shape extends Container {
         return group;
     }
 
-    skew(): void{
+    skew(): void {
         var path = this.convertToPath();
-        if (path){
+        if (path) {
             this.parent().replace(this, path);
         }
     }
@@ -323,15 +323,15 @@ PropertyMetadata.registerForType(Shape, {
         defaultValue: Brush.Black
     },
     lineCap: {
-        defaultValue: LineCap.Butt ,
+        defaultValue: LineCap.Butt,
         type: "multiSwitch",
         displayName: '@lineCap',
         options: {
             size: 1 / 2,
             items: [
-                {icon: "ico-prop_cap-cut", value:    LineCap.Butt },//'butt'
-                {icon: "ico-prop_cap-round", value:  LineCap.Round },//'round'
-                {icon: "ico-prop_cap-corner", value: LineCap.Square }//'square'
+                { icon: "ico-prop_cap-cut", value: LineCap.Butt },//'butt'
+                { icon: "ico-prop_cap-round", value: LineCap.Round },//'round'
+                { icon: "ico-prop_cap-corner", value: LineCap.Square }//'square'
             ]
         },
     },
@@ -342,9 +342,9 @@ PropertyMetadata.registerForType(Shape, {
         options: {
             size: 1 / 2,
             items: [
-                {icon: "ico-prop_join-corner", value: LineJoin.Miter},
-                {icon: "ico-prop_join-bevel", value: LineJoin.Bevel},
-                {icon: "ico-prop_join-round", value: LineJoin.Round}
+                { icon: "ico-prop_join-corner", value: LineJoin.Miter },
+                { icon: "ico-prop_join-bevel", value: LineJoin.Bevel },
+                { icon: "ico-prop_join-round", value: LineJoin.Round }
             ]
         },
     },
@@ -363,7 +363,7 @@ PropertyMetadata.registerForType(Shape, {
         type: "dropdown",
         options: {
             size: 1,
-            items: [{name: "Don't round", value: 0}, {name: "Round to half pixels", value: 1}, {
+            items: [{ name: "Don't round", value: 0 }, { name: "Round to half pixels", value: 1 }, {
                 name: "Round to full pixels edges",
                 value: 2
             }]
@@ -372,7 +372,7 @@ PropertyMetadata.registerForType(Shape, {
         useInModel: true,
         editable: true
     },
-    groups () {
+    groups() {
         var baseGroups = PropertyMetadata.findAll(Types.Element).groups();
 
         return [

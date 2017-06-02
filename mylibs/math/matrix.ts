@@ -1,6 +1,7 @@
 import Point from "./point";
 import LineSegment from "./lineSegment";
 import { IMatrix } from "carbon-geometry";
+import { ICoordinate } from "carbon-core";
 
 /**
  * @name Matrix
@@ -475,7 +476,7 @@ class Matrix implements IMatrix {
      * A faster version of transform that only takes one point and does not
      * attempt to convert it.
      */
-    transformPoint(point, round?: boolean) {
+    transformPoint(point:ICoordinate, round?: boolean) {
         return this.transformPoint2(point.x, point.y, round);
     }
 
@@ -485,7 +486,7 @@ class Matrix implements IMatrix {
         return this.transformPointMutable(point, round);
     }
 
-    transformPointMutable(point, round) {
+    transformPointMutable(point:Point, round) {
         let x = point.x * this._a + point.y * this._c + this._tx;
         let y = point.x * this._b + point.y * this._d + this._ty;
 

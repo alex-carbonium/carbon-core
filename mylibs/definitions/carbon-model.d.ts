@@ -21,7 +21,7 @@ declare module "carbon-model" {
 
         id(value?: string): string;
 
-        getImmediateChildById<T extends IDataNode>(id: string, materialize?:boolean): T | null;
+        getImmediateChildById<T extends IDataNode>(id: string, materialize?: boolean): T | null;
         findAllNodesDepthFirst<T extends IDataNode>(predicate: (node: T) => boolean): T[];
         findNodeByIdBreadthFirst<T extends IDataNode>(id: string): T | null;
         findAncestorOfType<T extends IDataNode>(type: IConstructor<T>): T | null;
@@ -42,9 +42,9 @@ declare module "carbon-model" {
         parent(): IContainer;
 
         name(value?: string): string;
-        drawPath?(context:IContext, w:number, h:number);
+        drawPath?(context: IContext, w: number, h: number);
 
-        mode(value?:any):any;
+        mode(value?: any): any;
         displayName(): string;
 
         viewMatrix(): IMatrix;
@@ -61,7 +61,7 @@ declare module "carbon-model" {
         getBoundingBox(): IRect;
         getBoundingBoxGlobal(): IRect;
         size(size?: ISize): ISize;
-        center(global?: boolean): IPoint;
+        center(global?: boolean): ICoordinate;
 
         getMaxOuterBorder(): number;
 
@@ -112,7 +112,7 @@ declare module "carbon-model" {
 
         remove(element: IUIElement, mode?: ChangeMode): number;
 
-        changePosition(element:IUIElement, index:number, mode?: ChangeMode);
+        changePosition(element: IUIElement, index: number, mode?: ChangeMode);
 
         hitElement<T extends IUIElement>(event, scale: number, predicate?, directSelection?): T;
 
@@ -132,11 +132,11 @@ declare module "carbon-model" {
 
     export const GroupContainer: IConstructor<IGroupContainer>;
 
-    export interface IRepeatContainer extends IContainer{
+    export interface IRepeatContainer extends IContainer {
         findMasterCounterpart(element: IUIElement): IUIElement;
         addDroppedElements(dropTarget: IContainer, elements: IUIElement[], e: IMouseEventData): void;
     }
-    export interface IRepeaterProps extends IContainerProps{
+    export interface IRepeaterProps extends IContainerProps {
     }
     export const RepeatContainer: IConstructor<IRepeatContainer> & {
         tryFindRepeaterParent(element: IUIElement): IRepeatContainer | null;
@@ -159,7 +159,7 @@ declare module "carbon-model" {
         y(): number;
     }
 
-    export interface IIsolatable extends IContainer{
+    export interface IIsolatable extends IContainer {
         onIsolationExited();
     }
 
@@ -180,12 +180,12 @@ declare module "carbon-model" {
         pageId: string;
         artboardId: string;
     }
-    export interface ISymbolProps extends IContainerProps{
+    export interface ISymbolProps extends IContainerProps {
         source: SymbolSource;
     }
-    export interface ISymbol extends IContainer<ISymbolProps>{
+    export interface ISymbol extends IContainer<ISymbolProps> {
     }
-    export const Symbol : IConstructor<ISymbol>;
+    export const Symbol: IConstructor<ISymbol>;
 
     export interface IGuide {
         id: string;
@@ -197,7 +197,7 @@ declare module "carbon-model" {
         element?: IUIElement;
     }
 
-    export interface IElementEventData extends IMouseEventData{
+    export interface IElementEventData extends IMouseEventData {
         element: IUIElement;
     }
 
@@ -222,26 +222,26 @@ declare module "carbon-model" {
 
     }
 
-    export interface IImageProps extends IContainerProps{
+    export interface IImageProps extends IContainerProps {
         source: ImageSource;
         sizing: ContentSizing;
     }
     export interface IImage extends IContainer<IImageProps> {
         source(value?: ImageSource): ImageSource;
 
-        resizeOnLoad(value?: OriginType|null): OriginType|null;
+        resizeOnLoad(value?: OriginType | null): OriginType | null;
     }
     export const Image: IConstructor<IImage> & {
         createUrlSource(url: string): ImageSource;
         createFontSource(iconName: string): ImageSource;
 
-        readonly uploadRequested: IEvent<{done: Promise<void>}>;
+        readonly uploadRequested: IEvent<{ done: Promise<void> }>;
         readonly EmptySource: ImageSource;
         readonly NewImageSize: number;
     };
 
     export type TextContent = string | any[];//TODO: specify range format
-    export interface ITextProps extends IUIElementProps{
+    export interface ITextProps extends IUIElementProps {
         font: Font;
         content: TextContent;
     }
@@ -250,4 +250,9 @@ declare module "carbon-model" {
         content(value?: TextContent): TextContent;
     }
     export const Text: IConstructor<IText>;
+
+    export const enum ElementState {
+        Resize = 0,
+        Edit = 1
+    }
 }

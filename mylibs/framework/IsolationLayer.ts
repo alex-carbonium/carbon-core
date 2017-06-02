@@ -1,6 +1,6 @@
 import Layer from './Layer';
 import Context from "./render/Context";
-import { IContainer, IUIElement, IIsolationLayer, ChangeMode, IIsolatable, LayerTypes } from "carbon-core";
+import { IContainer, IUIElement, IIsolationLayer, ChangeMode, IIsolatable, LayerTypes, ElementState } from "carbon-core";
 import DataNode from "./DataNode";
 import Selection from "framework/SelectionModel";
 import RelayoutEngine from "framework/relayout/RelayoutEngine";
@@ -26,7 +26,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         App.Current.actionManager.subscribe("cancel", () => {
             let selection = Selection.getSelection();
             if (selection) {
-                let editingPath = selection.length === 1 && selection[0] instanceof Path && selection[0].mode() === 'edit';
+                let editingPath = selection.length === 1 && selection[0] instanceof Path && selection[0].mode() === ElementState.Edit;
 
                 if (!editingPath) {
                     Environment.view.deactivateLayer(LayerTypes.Isolation);
