@@ -1,33 +1,24 @@
+import RelayoutQueue from "../relayout/RelayoutQueue";
+import Environment from "../../environment";
+import { IPrimitive, PrimitiveType, ViewState } from "carbon-core";
+
 export default class Command {
-    [x: string]: any;
-
-    constructor(primitives?) {
-        this._transparent = false;
-        this._primitives = primitives;
-    }
-
-    canExecute(){
-        return true;
+    constructor(public primitives: IPrimitive[], public rollbacks: IPrimitive[]) {
     }
 
     flushRedoStack() {
-        return true;
+        if(this.primitives.length !== 1) {
+            return true;
+        }
+
+        return this.primitives[0].type !== PrimitiveType.Selection;
     }
 
-    execute(isRedo){
+    execute(){
+        RelayoutQueue.enqueueAll(this.primitives);
     }
 
     rollback(){
-    }
-
-    transparent(value){
-        if (arguments.length === 1 && value !== undefined){
-            this._transparent = value;
-        }
-        return this._transparent;
-    }
-
-    toPrimitiveList(): any{
-        return this._primitives;
+        RelayoutQueue.enqueueAll(this.rollbacks);
     }
 }

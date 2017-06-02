@@ -1,5 +1,6 @@
-import DeferredPrimitives from "../framework/sync/DeferredPrimitives";
 import ExtensionBase from "./ExtensionBase";
+import RelayoutQueue from "../framework/relayout/RelayoutQueue";
+import CommandManager from "../framework/commands/CommandManager";
 
 export default class AutoSave extends ExtensionBase {
     constructor(app, view, controller) {
@@ -16,10 +17,7 @@ export default class AutoSave extends ExtensionBase {
             app.clear();
         }
 
-        for (var i = 0; i < backup.changes.length; i++) {
-            DeferredPrimitives.register(backup.changes[i]);
-        }
-        app.modelSyncProxy.addPendingChanges(backup.changes);
+        RelayoutQueue.enqueueAll(backup.changes);
         app.relayout();
         if (app.pages.length) {
             app.setActivePage(app.pages[0]);
@@ -52,17 +50,19 @@ export default class AutoSave extends ExtensionBase {
     }
 
     private initIfEmptyProject() {
-        var that = this;
         if (this._app.isEmpty()) {
-            that._app.name("My awesome app"); //initial name should be in sync with actor code
-            that._app.addNewPage();
-            that._app.state.isDirty(false);
+            this._app.name("My awesome app"); //initial name should be in sync with actor code
+            this._app.addNewPage();
+            this._app.state.isDirty(false);
         }
 
-        if (!that._app.activePage) {
-            var page = that._app.pages[0];
-            that._app.setActivePage(page);
+        if (!this._app.activePage) {
+            var page = this._app.pages[0];
+            this._app.setActivePage(page);
         }
+
+        this._app.relayout();
+        CommandManager.clear();
     }
 
     private checkBackups = () => {

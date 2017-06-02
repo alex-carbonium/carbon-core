@@ -1,6 +1,6 @@
 import Artboard from "./Artboard";
 import PropertyMetadata from "framework/PropertyMetadata";
-import ModelStateListener from "framework/sync/ModelStateListener";
+import ModelStateListener from "framework/relayout/ModelStateListener";
 import {Types} from "./Defs";
 import DataNode from "framework/DataNode";
 import NullContainer from "./NullContainer";

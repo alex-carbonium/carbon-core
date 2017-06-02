@@ -2,7 +2,7 @@ import Selection from "framework/SelectionModel";
 import UIElement from "../framework/UIElement";
 
 export default {
-    run: function(elements, containerType){
+    run: function(elements){
         Selection.unselectAll();
 
         if(!elements || !elements.length){

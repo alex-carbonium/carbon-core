@@ -1,6 +1,5 @@
 import Command from "../framework/commands/Command";
 import CommandManager from "../framework/commands/CommandManager";
-import CompositeCommand from "../framework/commands/CompositeCommand";
 import ChangeZOrder from "../commands/ChangeZOrder";
 import Delete from "../commands/Delete";
 import Move from "../commands/Move";
@@ -150,16 +149,16 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("bringToFront", "@bring to front", "Layering", function () {
-            return new ChangeZOrder(Selection.getSelection(), "front");
+            ChangeZOrder.run(Selection.getSelection(), "front");
         });
         this.registerAction("sendToBack", "@send to back", "Layering", function () {
-            return new ChangeZOrder(Selection.getSelection(), "back");
+            ChangeZOrder.run(Selection.getSelection(), "back");
         });
         this.registerAction("bringForward", "@bring forward", "Layering", function () {
-            return new ChangeZOrder(Selection.getSelection(), "forward");
+            ChangeZOrder.run(Selection.getSelection(), "forward");
         });
         this.registerAction("sendBackward", "@send backward", "Layering", function () {
-            return new ChangeZOrder(Selection.getSelection(), "backward");
+            ChangeZOrder.run(Selection.getSelection(), "backward");
         });
 
         this.registerAction("moveLeft", "Left", "Positioning", function () {
@@ -256,19 +255,19 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("pathUnion", "@path.union", "Combine Paths", function () {
-            return new CombinePaths("union", Selection.getSelection());
+            CombinePaths.run("union", Selection.getSelection());
         });
 
         this.registerAction("pathSubtract", "@path.join", "Combine Paths", function () {
-            return new CombinePaths("xor", Selection.getSelection());
+            CombinePaths.run("xor", Selection.getSelection());
         });
 
         this.registerAction("pathIntersect", "@path.intersect", "Combine Paths", function () {
-            return new CombinePaths("intersect", Selection.getSelection());
+            CombinePaths.run("intersect", Selection.getSelection());
         });
 
         this.registerAction("pathDifference", "@path.difference", "Combine Paths", function () {
-            return new CombinePaths("difference", Selection.getSelection());
+            CombinePaths.run("difference", Selection.getSelection());
         });
 
         this.registerAction("alignLeft", "Align left", "Align", function () {
@@ -545,24 +544,17 @@ export default class ActionManager implements IActionManager {
             return;
         }
 
-        let cmd = action.callback(Selection);
+        let res = action.callback(Selection);
 
-        if (cmd) {
-            if (cmd instanceof Command) {
-                CommandManager.execute(cmd);
-                this.notifyActionCompleted(actionName, true);
-                if (callback) {
-                    callback(true);
-                }
-            }
-            else if (cmd.then) {
-                cmd.then(res => {
+        if (res) {
+            if (res.then) {
+                res.then(res => {
                     this.notifyActionCompleted(actionName, true, res);
                     if (callback) {
                         callback(true, res);
                     }
                 });
-                cmd.catch(e => {
+                res.catch(e => {
                     this.notifyActionCompleted(actionName, false, e);
                     if (callback) {
                         callback(false, e);
@@ -575,15 +567,6 @@ export default class ActionManager implements IActionManager {
         }
 
         Invalidate.request();
-    }
-    getActionsInCategory(category) {
-        let result = [];
-        this.iterate(function (action) {
-            if (action.category === category) {
-                result.push(action);
-            }
-        });
-        return result;
     }
     getAction(name) {
         return this._actions[name];

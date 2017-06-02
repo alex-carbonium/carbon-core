@@ -1,6 +1,6 @@
 import PropertyMetadata from "./PropertyMetadata";
 import PropertyTracker from "./PropertyTracker";
-import ModelStateListener from "./sync/ModelStateListener";
+import ModelStateListener from "./relayout/ModelStateListener";
 import ObjectFactory from "./ObjectFactory";
 import {createUUID} from "../util";
 import { IDataNode, IDataNodeProps, ChangeMode, PatchType, IPrimitiveRoot, IConstructor } from "carbon-core";

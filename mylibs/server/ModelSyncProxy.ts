@@ -1,6 +1,6 @@
 import backend from "../backend";
 import Primitive from "../framework/sync/Primitive";
-import DeferredPrimitives from "../framework/sync/DeferredPrimitives";
+import RelayoutQueue from "../framework/relayout/RelayoutQueue";
 import Invalidate from "../framework/Invalidate";
 import Selection from "../framework/SelectionModel";
 import UIElement from "../framework/UIElement";
@@ -36,18 +36,13 @@ export default class ModelSyncProxy {
     changedLocally = primitives => {
         for (var i = 0; i < primitives.length; i++){
             var primitive = primitives[i];
-            primitive.id = createUUID();
-            primitive.sessionId = backend.sessionId;
-            primitive.time = new Date().valueOf();
 
             if (DEBUG){
                 debug("Local %p %o", primitive, primitive);
             }
 
-            if (primitive.type){ //TODO: remove if when all primitives are changed
-                this._registerLocal(primitive);
-                this._pendingPrimitives.push(primitive);
-            }
+            this._registerLocal(primitive);
+            this._pendingPrimitives.push(primitive);
         }
 
         if (this._app.activityMonitor){
@@ -204,7 +199,7 @@ export default class ModelSyncProxy {
         var changedExternally = this._externals.indexOf(p) !== -1;
 
         if (changedExternally){
-            DeferredPrimitives.register(p);
+            RelayoutQueue.enqueue(p);
         }
 
         this._cleanupExternals();

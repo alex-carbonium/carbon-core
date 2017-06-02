@@ -3,7 +3,7 @@ import {UAParser} from "ua-parser-js";
 //TODO: platform should parse userAgent and queryString, params should use platform
 interface IQueryStringParams{
     backend?: string;
-    clearStorage?: boolean;
+    cls?: boolean;
     serverless?: boolean;
     perf?:boolean;
 }
@@ -54,6 +54,6 @@ export default {
     transport: "auto",
     endpoints: endpoints,
     serveless: qs.serverless,
-    clearStorage: qs.clearStorage,
+    clearStorage: qs.cls,
     perf: qs.perf
 };

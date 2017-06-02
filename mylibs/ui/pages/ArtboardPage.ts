@@ -5,9 +5,7 @@ import Page from "framework/Page";
 import PropertyMetadata from "framework/PropertyMetadata";
 import {unionRect} from "math/geometry";
 import {areRectsIntersecting} from "math/math";
-import commandManager from "framework/commands/CommandManager";
 import Matrix from "math/matrix";
-import CompositeCommand from "framework/commands/CompositeCommand";
 import NullArtboard from "framework/NullArtboard";
 import RelayoutEngine from "framework/relayout/RelayoutEngine";
 import SystemConfiguration from "SystemConfiguration";
@@ -158,8 +156,6 @@ class ArtboardPage extends Page {
 
             this.add(artboard);
         }
-
-        commandManager.execute(new CompositeCommand(commands));
 
         if(SystemConfiguration.ResetActiveToolToDefault) {
             App.Current.resetCurrentTool();

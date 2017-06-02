@@ -8,7 +8,7 @@ import Selection from "./SelectionModel";
 import { ContentSizing, IImage, ImageSource } from "carbon-model";
 import { ChangeMode } from "carbon-core";
 
-export class FrameEditTool {
+export class ImageEditTool {
     [name: string]: any;
 
     constructor(){
@@ -159,4 +159,4 @@ export class FrameEditTool {
     }
 }
 
-export default new FrameEditTool();
+export default new ImageEditTool();

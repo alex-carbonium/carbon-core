@@ -12,9 +12,7 @@ import App from "app";
 import ArtboardPage from "ui/pages/ArtboardPage";
 import OfflineModel from "offline/OfflineModel";
 import Command from "framework/commands/Command";
-import CompositeCommand from "framework/commands/CompositeCommand";
-import commandManager from "framework/commands/CommandManager";
-import DeferredPrimitives from "framework/sync/DeferredPrimitives";
+import RelayoutQueue from "framework/relayout/RelayoutQueue";
 import DesignerView from "framework/DesignerView";
 import DesignerController from "framework/DesignerController";
 import Layer from "framework/Layer";
@@ -83,10 +81,7 @@ Util.setupApp = function(options){
         var activePageId = this.activePage.id();
         this.fromJSON(savepoint);
         var primitives = this.modelSyncProxy.getPendingChanges();
-        for (var i = 0; i < primitives.length; i++){
-            var p = primitives[i];
-            DeferredPrimitives.register(p);
-        }
+        RelayoutQueue.enqueueAll(primitives);
         this.relayout();
         this.setActivePageById(activePageId);
         this.state.setExternalChange(false);
@@ -214,16 +209,6 @@ Util.waitFor = function (requestCallback, checkCallback, assertCallback) {
 Util.createEvent = function(x, y){
     var event = {layerX: x, layerY: y};
     return event;
-};
-
-class Cmd extends Command{}
-Util.executeAnyCommand = function(){
-    commandManager.execute(new Cmd());
-};
-
-Util.runCommands = function(commands){
-    var command = new CompositeCommand(commands);
-    commandManager.execute(command);
 };
 
 export default Util;

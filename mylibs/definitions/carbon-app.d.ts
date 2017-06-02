@@ -1,6 +1,6 @@
 declare module "carbon-app" {
     import { IDataNode, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IElementEventData, IIsolatable } from "carbon-model";
-    import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush, IEvent3, IConstructor } from "carbon-basics";
+    import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush, IEvent3, IConstructor, ViewState } from "carbon-basics";
     import { IRect, ICoordinate } from "carbon-geometry";
 
     export interface IPlatform{
@@ -24,7 +24,6 @@ declare module "carbon-app" {
         isLoaded: boolean;
         props:IAppProps;
 
-        logEvent: IEvent<any>;
         changed: IEvent<any>;
         restoredLocally: IEvent<void>;
 
@@ -152,6 +151,8 @@ declare module "carbon-app" {
 
         activeLayer: ILayer;
         activeLayerChanged: IEvent<ILayer>;
+
+        viewState: ViewState;
 
         setActivePage(page: IPage);
 

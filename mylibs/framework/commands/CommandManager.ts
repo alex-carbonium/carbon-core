@@ -1,48 +1,33 @@
 import EventHelper from "../EventHelper";
+import Command from "./Command";
+import { IEvent } from "carbon-core";
 
 var debug = require("DebugUtil")("carb:commandManager");
 
 class CommandManager {
-    [name: string]: any;
+    stateChanged: IEvent<{canRedo: boolean, canUndo: boolean}>;
+    private index: number;
+    private stack: Command[];
 
     constructor() {
         this.stack = [];
         this.index = -1;
         this.stateChanged = EventHelper.createEvent();
-        this.onCommandExecuting = EventHelper.createEvent();
-        this.onCommandExecuted = EventHelper.createEvent();
-        this.onCommandRolledBack = EventHelper.createEvent();
     }
 
     _setProperties(canUndo, canRedo) {
         this.stateChanged.raise({ canUndo, canRedo });
     }
 
-    execute(cmd) {
-        if (cmd.canExecute() === false) {
-            return;
-        }
-
-        this.onCommandExecuting.raise(cmd);
-        var result = cmd.execute(false);
-        this.onCommandExecuted.raise(cmd);
-        if (result === false) {
-            return;
-        }
-        this.registerExecutedCommand(cmd);
-    }
-
-    registerExecutedCommand(cmd) {
+    registerExecutedCommand(cmd: Command) {
         debug("command executed");
-        if (!cmd.transparent()) {
-            if (cmd.flushRedoStack()) {
-                this.stack[++this.index] = cmd;
-                this.stack.length = this.index + 1;
-                this._setProperties(true, false);
-            } else {
-                this.stack.splice(++this.index, 0, cmd);
-                this._setProperties(true, this.index < this.stack.length - 1);
-            }
+        if (cmd.flushRedoStack()) {
+            this.stack[++this.index] = cmd;
+            this.stack.length = this.index + 1;
+            this._setProperties(true, false);
+        } else {
+            this.stack.splice(++this.index, 0, cmd);
+            this._setProperties(true, this.index < this.stack.length - 1);
         }
     }
 
@@ -53,7 +38,6 @@ class CommandManager {
         debug("command undo");
         var cmd = this.stack[this.index--];
         cmd.rollback();
-        this.onCommandRolledBack.raise(cmd);
         this._setProperties(this.index >= 0, true);
     }
 
@@ -63,9 +47,13 @@ class CommandManager {
         }
         debug("command redo");
         var cmd = this.stack[++this.index];
-        cmd.execute(true);
-        this.onCommandExecuted.raise(cmd, true);
+        cmd.execute();
         this._setProperties(true, this.index < this.stack.length - 1);
+    }
+
+    clear(){
+        this.stack.length = 0;
+        this.index = -1;
     }
 }
 

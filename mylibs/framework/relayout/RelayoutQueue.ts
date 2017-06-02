@@ -1,9 +1,15 @@
 import logger from "../../logger";
 import ModelStateListener from "./ModelStateListener";
+import { IPrimitive, NodePrimitivesMap, IPrimitiveRoot, IUIElement, IDataNode } from "carbon-core";
 
-export default {
-    _data: {},
-    register: function(p){
+/**
+ * Contains primitives to be procecessed during next relayout of the corresponding root.
+ * Both external and local (undo, redo) primitives could be stored in the queue.
+ */
+class RelayoutQueue {
+    private data: {[key: string]: NodePrimitivesMap} = {};
+
+    enqueue(p: IPrimitive){
         var path = p.path;
         //[] -> app
         //page id, page id
@@ -25,10 +31,10 @@ export default {
             return;
         }
 
-        var rootData = this._data[key];
+        var rootData = this.data[key];
         if (!rootData){
             rootData = {};
-            this._data[key] = rootData;
+            this.data[key] = rootData;
         }
         var elementId = p.path.length ? p.path[p.path.length - 1] : '';
         var primitives = rootData[elementId];
@@ -40,14 +46,21 @@ export default {
 
         ModelStateListener.touchRoot(key);
         return key;
-    },
-    releasePrimitiveMap: function(root){
+    }
+
+    enqueueAll(primitives: IPrimitive[]){
+        primitives.forEach(x => this.enqueue(x));
+    }
+
+    dequeue(root: IPrimitiveRoot & IDataNode){
         var key = root.primitiveRootKey();
-        var rootData = this._data[key];
+        var rootData = this.data[key];
         if (!rootData){
             return null;
         }
-        delete this._data[key];
+        delete this.data[key];
         return rootData;
     }
 }
+
+export default new RelayoutQueue();
