@@ -289,6 +289,7 @@ export default class GraphicalPathCreator extends Tool {
             this._selectedPoint.x = pos.x;
             this._selectedPoint.y = pos.y;
             this._pathElement.changePointAtIndex(this._selectedPoint, this._selectedPoint.idx, ChangeMode.Self);
+            this._pathElement._refreshComputedProps();
             Invalidate.request();
             return;
         }

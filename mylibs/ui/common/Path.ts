@@ -221,8 +221,10 @@ function moveCurrentPoint(dx, dy) {
         this._currentPoint.cp1y -= dy;
         this._currentPoint.cp2x -= dx;
         this._currentPoint.cp2y -= dy;
-        this.setProps({ currentPointX: this._currentPoint.x, currentPointY: this._currentPoint.y }, ChangeMode.Root);
+        this.runtimeProps.currentPointX = this._currentPoint.x;
+        this.runtimeProps.currentPointY = this._currentPoint.y;
         this._saveOnMouseUp = true;
+        this._refreshComputedProps();
     }
 }
 
@@ -364,11 +366,20 @@ class Path extends Shape {
             if (pt) {
                 this.runtimeProps.currentPointX = pt.x;
                 this.runtimeProps.currentPointY = pt.y;
-                this._selectedPoint.type = pt.type;
+                this.runtimeProps.currentPointType= pt.type;
             }
             this.runtimeProps.selectedPointIdx = pt ? pt.idx : -1;
-            Selection.refreshSelection();
+
+            this._refreshComputedProps();
         }
+    }
+
+    _refreshComputedProps() {
+        this.propsUpdated({
+                currentPointX:this.runtimeProps.currentPointX,
+                currentPointY:this.runtimeProps.currentPointY,
+                currentPointType:this.runtimeProps.currentPointType
+            }, {}); // refresh properties
     }
 
     tryDelete(): boolean {
@@ -400,7 +411,7 @@ class Path extends Shape {
         let newPoints = this.points;
         this.props.points = this._lastPoints;
         this.setProps({ points: newPoints });
-        this._lastPoints = this.points.map(p=>clone(p));
+        this._lastPoints = this.points.map(p => clone(p));
 
         // var points: any[] = this._lastPoints;
         // console.log(points.reduce((prev, current, indx, arr) => {
@@ -574,6 +585,7 @@ class Path extends Shape {
             this._cancelBinding = null;
             SnapController.clearActiveSnapLines();
             this.nextPoint = null;
+            this.adjustBoundaries();
             this.releaseMouse(this);
             this.resetGlobalViewCache();
         }
@@ -644,6 +656,13 @@ class Path extends Shape {
         if (changeMode !== ChangeMode.Self) {
             this.save();
         }
+
+        if(this._selectedPoint && this._selectedPoint.idx === idx) {
+            this.runtimeProps.currentPointX = point.x;
+            this.runtimeProps.currentPointY = point.y;
+            this.runtimeProps.currentPointType = point.type;
+            this._refreshComputedProps();
+        }
     }
 
     length() {
@@ -693,7 +712,7 @@ class Path extends Shape {
 
     mouseup(event: IMouseEventData, keys: IKeyboardState) {
         delete this._altPressed;
-        if(this._saveOnMouseUp) {
+        if (this._saveOnMouseUp) {
             this.save();
             this._saveOnMouseUp = false;
         }
@@ -710,7 +729,7 @@ class Path extends Shape {
             return;
         }
 
-        if (this._selectedPoint && !keys.shift && !this._groupMove) {
+        if (this._selectedPoint && !(keys && keys.shift) && !this._groupMove) {
             clearSelectedPoints.call(this);
         }
 
@@ -931,13 +950,13 @@ class Path extends Shape {
         } else if (this._handlePoint) {
             pos = SnapController.applySnappingForPoint(pos);
             pos = this.globalViewMatrixInverted().transformPoint(pos);
-            // this._roundPoint(pos);
             let pt = this._handlePoint;
             let newX = pos.x,
                 newY = pos.y;
             let x = pt.x,
                 y = pt.y;
             let x2, y2;
+
             if (pt._selectedPoint === 1) {
                 pt.cp1x = newX;
                 pt.cp1y = newY;
@@ -1605,8 +1624,10 @@ class Path extends Shape {
             this._selectedPoint = newPoint;
             this.changePointAtIndex(newPoint, newPoint.idx, changeMode);
             this.runtimeProps.currentPointX = newPoint.x;
+            this._refreshComputedProps();
             Invalidate.request();
         }
+
         return this.runtimeProps.currentPointX;
     }
     currentPointY(value: number, changeMode: ChangeMode): number {
@@ -1616,17 +1637,22 @@ class Path extends Shape {
             this._selectedPoint = newPoint;
             this.changePointAtIndex(newPoint, newPoint.idx, changeMode);
             this.runtimeProps.currentPointY = newPoint.y;
+            this._refreshComputedProps();
             Invalidate.request();
         }
         return this.runtimeProps.currentPointY;
     }
     currentPointType(value: PointType, changeMode: ChangeMode): PointType {
         if (arguments.length && this._selectedPoint) {
-            this._selectedPoint.type = value;
+            let newPoint = Object.assign({}, this._selectedPoint);
+            newPoint.type = value;
+            this._selectedPoint = newPoint;
+            this.changePointAtIndex(newPoint, newPoint.idx, changeMode);
+            this.runtimeProps.currentPointType = value;
+            this._refreshComputedProps();
             Invalidate.request();
-            Selection.refreshSelection();
         }
-        return this._selectedPoint ? this._selectedPoint.type : null;
+        return this.runtimeProps.currentPointType;
     }
 
     fromSvgString(d, matrix) {
@@ -2261,7 +2287,7 @@ PropertyMetadata.registerForType(Path, {
         options: {
             items: [
                 { value: PointType.Straight, icon: "ico-prop_node-straight" },
-                { value: PointType.Mirrored, icon: "ico-prop_node-mirrroed" },
+                { value: PointType.Mirrored, icon: "ico-prop_node-mirrored" },
                 { value: PointType.Assymetric, icon: "ico-prop_node-assymetric" },
                 { value: PointType.Disconnected, icon: "ico-prop_node-disconnected" }
             ],
