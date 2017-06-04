@@ -5,7 +5,7 @@ import { LayerTypes } from "carbon-app";
 
 const Isolate = {
     run: function(elements:IIsolatable[], clippingParent: IUIElement = null){
-        if(elements.length != 1 || !((elements[0] as IContainer).children instanceof Array)) {
+        if(elements.length !== 1 || !((elements[0] as IContainer).children instanceof Array)) {
             return;
         }
 

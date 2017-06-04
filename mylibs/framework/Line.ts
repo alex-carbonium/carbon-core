@@ -1,6 +1,6 @@
 import Shape from "framework/Shape";
 import Brush from "framework/Brush";
-import Path from "ui/common/Path";
+import Path from "framework/Path";
 import {PointDirection, Types, FrameCursors} from "./Defs";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";

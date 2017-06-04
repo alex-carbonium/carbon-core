@@ -1,6 +1,6 @@
 import Command from "../framework/commands/Command";
-import CompoundPath from "../ui/common/CompoundPath";
-import Path from "ui/common/Path";
+import CompoundPath from "framework/CompoundPath";
+import Path from "framework/Path";
 import Selection from "../framework/SelectionModel";
 
 export default class CombinePaths {
@@ -26,8 +26,8 @@ export default class CombinePaths {
         if (e0 instanceof CompoundPath) {
             //TODO: (m) check if this is correct
             path = e0;
-            for (var i = 1; i < elements.length; ++i) {
-                var e = elements[i];
+            for (let i = 1; i < elements.length; ++i) {
+                let e = elements[i];
                 e.joinMode(joinMode);
                 path.add(e);
             }
@@ -43,8 +43,8 @@ export default class CombinePaths {
 
             parent.insert(path, parent.positionOf(e0));
 
-            for (var i = 0; i < elements.length; ++i) {
-                var e = elements[i];
+            for (let i = 0; i < elements.length; ++i) {
+                let e = elements[i];
                 e.joinMode(joinMode);
                 path.add(e);
             }

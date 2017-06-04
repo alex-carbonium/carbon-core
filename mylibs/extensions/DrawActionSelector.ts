@@ -13,7 +13,7 @@ import DefaultShapeSettings from "ui/DefaultShapeSettings";
 import ArtboardToolSettings from "ui/ArtboardToolSettings";
 import ArtboardFrame from "framework/ArtboardFrame";
 import {ViewTool, Types} from "../framework/Defs";
-import Path from "ui/common/Path";
+import Path from "framework/Path";
 import Star from "framework/Star";
 import Polygon from "framework/Polygon";
 import SystemConfiguration from 'SystemConfiguration';

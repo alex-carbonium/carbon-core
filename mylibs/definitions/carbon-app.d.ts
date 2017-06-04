@@ -1,6 +1,6 @@
 declare module "carbon-app" {
-    import { IDataNode, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IElementEventData, IIsolatable } from "carbon-model";
-    import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush, IEvent3, IConstructor, ViewState } from "carbon-basics";
+    import { IDataNode, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IElementEventData, IIsolatable, IMouseEventHandler } from "carbon-model";
+    import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable } from "carbon-basics";
     import { IRect, ICoordinate } from "carbon-geometry";
 
     export interface IPlatform{
@@ -222,8 +222,8 @@ declare module "carbon-app" {
 
         updateCursor(eventData: IMouseEventData): void;
         defaultCursor(): string;
-        captureMouse(element: IUIElement): void;
-        releaseMouse(element: IUIElement): void;
+        captureMouse(element: IMouseEventHandler): void;
+        releaseMouse(element: IMouseEventHandler): void;
 
         keyboardStateFromEvent(e: MouseEvent, mutableState?: IKeyboardState): IKeyboardState;
         beginDragElement(e: MouseEvent, element: IUIElement, dropPromise: Promise<IDropElementData>);
@@ -259,7 +259,7 @@ declare module "carbon-app" {
         actionPerformed: IEvent<any>;
 
         invoke(action: string, callback?: (success: boolean, result?: any) => void): void | Promise<void>;
-        subscribe(action: string, cb: (action: string, result: any) => void);
+        subscribe(action: string, cb: (action: string, result: any) => void):IDisposable;
         registerAction(name: string, description: string, category: string, callback: (selection?: ISelection, app?: IApp) => any): IAction;
 
         getActionFullDescription(name: string, translate?: (value: string) => string): string;

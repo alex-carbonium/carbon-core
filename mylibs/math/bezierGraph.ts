@@ -4,7 +4,7 @@ import { ContourOverlap } from "./contourOverlap";
 import { unionRect, lineBoundsMightOverlap, isValueLessThan, isValueGreaterThan, isValueLessThanEqual, isValueGreaterThanEqual, removeObject } from "./geometry";
 import EdgeCrossing from "./edgeCrossing";
 import BezierContour from "./bezierContour";
-import CompoundPath from "ui/common/CompoundPath";
+import CompoundPath from "framework/CompoundPath";
 import { IIntersectionRange, IReference, IContour, IRectData, IBezierGraph, ICoordinate, ILocation, IBezierCrossing, IBezierCurve, IIntersection } from "carbon-core";
 
 export default class BezierGraph implements IBezierGraph {

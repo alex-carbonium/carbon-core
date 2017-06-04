@@ -1,6 +1,6 @@
 import UIElement from "framework/UIElement";
 import nearestPoint from "math/NearestPoint";
-import PropertyTracker from "../../framework/PropertyTracker";
+import PropertyTracker from "framework/PropertyTracker";
 import BezierGraph from "math/bezierGraph";
 import BezierCurve from "math/bezierCurve";
 import Rect from "math/rect";
@@ -15,19 +15,21 @@ import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import SnapController from "framework/SnapController";
 import Box from "framework/Box";
-import { debounce } from "../../util";
+import { debounce } from "util";
 import Command from "framework/commands/Command";
-import { Types } from "../../framework/Defs";
-import ArrangeStrategy from "../../framework/ArrangeStrategy";
-import ResizeOptions from "../../decorators/ResizeOptions";
+import { Types } from "framework/Defs";
+import ArrangeStrategy from "framework/ArrangeStrategy";
+import ResizeOptions from "decorators/ResizeOptions";
 import { IMouseEventData, IKeyboardState, ChangeMode, IIntersectionRange, ResizeDimension, LayerTypes, IContainerProps, PointType, IPathPoint, IUIElementProps, ElementState } from "carbon-core";
 import UserSettings from "UserSettings";
 import Cursors from "Cursors";
+import PathManipulationDecorator from "ui/common/path/PathManipulationDecorator";
+import EditPath from "commands/EditPath";
 
-const CP_HANDLE_RADIUS = 3;
-const CP_HANDLE_RADIUS2 = 6;
-const CP_RADIUS = 4;
-const CP_RADIUS2 = 8;
+const CP_HANDLE_RADIUS = UserSettings.path.editHandleSize;
+const CP_HANDLE_RADIUS2 = CP_HANDLE_RADIUS * 2;
+const CP_RADIUS = UserSettings.path.editPointSize;
+const CP_RADIUS2 = CP_RADIUS * 2;
 
 const POINT_STROKE = UserSettings.path.pointStroke;
 const POINT_FILL = UserSettings.path.pointFill;
@@ -44,36 +46,6 @@ const commandLengths = {
     t: 2,
     a: 7
 };
-
-function pointsEqual(p1, p2) {
-    if (p1 === p2) {
-        return true;
-    }
-    return p1.type === p2.type && p1.x === p2.x && p1.y === p2.y
-        && p1.cp1x === p2.cp1x && p1.cp1y === p2.cp1y
-        && p1.cp2x === p2.cp2x && p1.cp2y === p2.cp2y;
-}
-
-function addToSelectedPoints(pt) {
-    if (this._selectedPoint && !Object.keys(this._selectedPoints).length) {
-        this._selectedPoints[this._selectedPoint.idx] = this._selectedPoint;
-    }
-    if (this._selectedPoints[pt.idx]) {
-        delete this._selectedPoints[pt.idx];
-    } else {
-        this._selectedPoints[pt.idx] = pt;
-    }
-
-    if (this.runtimeProps.selectedPointIdx !== -1 && Object.keys(this._selectedPoints).length > 1) {
-        this.runtimeProps.selectedPointIdx = -1;
-    }
-
-    Invalidate.requestInteractionOnly();
-}
-
-function clearSelectedPoints() {
-    this._selectedPoints = {};
-}
 
 let isLinePoint = function (pt) {
     return pt.type === PointType.Straight;
@@ -128,44 +100,7 @@ let setLinePoint = function (pt) {
     pt.cp1y = pt.cp2y = pt.y;
 };
 
-let drawSegment = function (context, pt, prevPt, closing) {
-    let m = this.globalViewMatrix();
-    let xy = m.transformPoint(pt);
 
-    if (!this._firstPoint) {
-        this._firstPoint = pt;
-    }
-
-    if ((pt.moveTo || this._firstPoint === pt) && !closing) {
-        context.moveTo(xy.x, xy.y);
-    }
-    else if (isLinePoint(pt) && (isLinePoint(prevPt))) { // line segment
-        context.lineTo(xy.x, xy.y);
-    } else { // cubic bezier segment
-        let cp1x = prevPt.cp2x
-            , cp1y = prevPt.cp2y
-            , cp2x = pt.cp1x
-            , cp2y = pt.cp1y;
-
-        if (isLinePoint(prevPt)) {
-            cp1x = prevPt.x;//cp2x;
-            cp1y = prevPt.y;//cp2y;
-        } else if (isLinePoint(pt)) {
-            cp2x = pt.x;//cp1x;
-            cp2y = pt.y;//cp1y;
-        }
-
-        let cp1 = m.transformPoint2(cp1x, cp1y);
-        let cp2 = m.transformPoint2(cp2x, cp2y);
-        context.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, xy.x, xy.y);
-    }
-
-    if (pt.closed && !closing) {
-        drawSegment.call(this, context, this._firstPoint, pt, true);
-        context.closePath();
-        this._firstPoint = null;
-    }
-};
 
 let scalePointsToNewSize = function () {
     let bb = this.getBoundingBox();
@@ -197,34 +132,6 @@ function moveAllPoints(dx, dy) {
         pt.cp1y -= dy;
         pt.cp2y -= dy;
         // this._roundPoint(pt);
-    }
-}
-
-
-function moveCurrentPoint(dx, dy) {
-    let keys = Object.keys(this._selectedPoints);
-    if (keys.length) {
-        for (let i = 0; i < keys.length; ++i) {
-            let p = this._selectedPoints[keys[i]];
-            p.x -= dx;
-            p.y -= dy;
-            p.cp1x -= dx;
-            p.cp1y -= dy;
-            p.cp2x -= dx;
-            p.cp2y -= dy;
-        }
-        this._groupMove = true;
-    } else {
-        this._currentPoint.x -= dx;
-        this._currentPoint.y -= dy;
-        this._currentPoint.cp1x -= dx;
-        this._currentPoint.cp1y -= dy;
-        this._currentPoint.cp2x -= dx;
-        this._currentPoint.cp2y -= dy;
-        this.runtimeProps.currentPointX = this._currentPoint.x;
-        this.runtimeProps.currentPointY = this._currentPoint.y;
-        this._saveOnMouseUp = true;
-        this._refreshComputedProps();
     }
 }
 
@@ -357,29 +264,16 @@ class Path extends Shape {
         this._lastPoints = [];
         this._currentPoint = null;
         this._selectedPoints = {};
-        this.save = this._save;//debounce(this._save.bind(this), 500);
     }
 
-    selectPoint(pt) {
-        if (this._selectedPoint !== pt) {
-            this._selectedPoint = pt;
-            if (pt) {
-                this.runtimeProps.currentPointX = pt.x;
-                this.runtimeProps.currentPointY = pt.y;
-                this.runtimeProps.currentPointType= pt.type;
-            }
-            this.runtimeProps.selectedPointIdx = pt ? pt.idx : -1;
 
-            this._refreshComputedProps();
-        }
-    }
 
     _refreshComputedProps() {
         this.propsUpdated({
-                currentPointX:this.runtimeProps.currentPointX,
-                currentPointY:this.runtimeProps.currentPointY,
-                currentPointType:this.runtimeProps.currentPointType
-            }, {}); // refresh properties
+            currentPointX: this.runtimeProps.currentPointX,
+            currentPointY: this.runtimeProps.currentPointY,
+            currentPointType: this.runtimeProps.currentPointType
+        }, {}); // refresh properties
     }
 
     tryDelete(): boolean {
@@ -390,41 +284,27 @@ class Path extends Shape {
                 for (let i = 0; i < keys.length; ++i) {
                     this.removePointAtIndex(keys[i]);
                 }
-                clearSelectedPoints.call(this);
+                this.clearSelectedPoints();
             } else {
                 this.removePointAtIndex(this._selectedPoint.idx);
             }
-
-            // TODO: clear segment if it has only one point
 
             if (index === 0) {
                 index = this.points.length;
             }
 
-            this.selectPoint(this.points[index - 1]);
+            this.selectedPoint = this.points[index - 1];
             return false;
         }
         return true;
     }
 
-    _save() {
+    save() {
         let newPoints = this.points;
         this.props.points = this._lastPoints;
         this.setProps({ points: newPoints });
         this._lastPoints = this.points.map(p => clone(p));
-
-        // var points: any[] = this._lastPoints;
-        // console.log(points.reduce((prev, current, indx, arr) => {
-        //     return prev + ' ' + `(${current.x},${current.y})`
-        // }, ''));
     }
-
-    // propsUpdated(newProps, oldProps, mode) {
-    //     super.propsUpdated(newProps, oldProps, mode);
-    //     if(newProps.points) {
-
-    //     }
-    // }
 
     cloneProps() {
         let props = super.cloneProps();
@@ -444,6 +324,10 @@ class Path extends Shape {
         return getClickedPoint.call(this, pos.x, pos.y);
     }
 
+    handlePointForPosition(pos) {
+        return getClickedHandlePoint.call(this, pos.x, pos.y);
+    }
+
     pointAtIndex(idx) {
         return this.points[idx];
     }
@@ -453,20 +337,6 @@ class Path extends Shape {
     }
     get lastPoint() {
         return this.points[this.points.length - 1];
-    }
-
-    set nextPoint(value) {
-        if (value !== this._nextPoint) {
-            Invalidate.requestInteractionOnly();
-        }
-        this._nextPoint = value;
-        if (this._nextPoint) {
-            this._initPoint(value);
-        }
-    }
-
-    get nextPoint() {
-        return this._nextPoint;
     }
 
     removeControlPoint(pt) {
@@ -550,11 +420,6 @@ class Path extends Shape {
         return this.props.mode;
     }
 
-    cancel() {
-        this.mode(ElementState.Resize);
-        return false;// stop propagation
-    }
-
     enter() {
         if (this.mode() !== ElementState.Edit) {
             this.edit();
@@ -566,28 +431,17 @@ class Path extends Shape {
             this._cancelBinding.dispose();
         }
         if (edit) {
-            this.registerForLayerDraw(LayerTypes.Interaction);
-            Invalidate.request();
+            this.addDecorator(new PathManipulationDecorator());
 
             this._currentPoint = null;
             scalePointsToNewSize.call(this);
-            SnapController.calculateSnappingPointsForPath(this);
 
-            this._cancelBinding = Environment.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
-            this.captureMouse(this);
 
-            this.selectPoint(this.points[0]);
-            this.save();//?????
+            this.selectedPoint = this.points[0];
+            this.save();
         } else {
-            this.unregisterForLayerDraw(LayerTypes.Interaction);
-            Invalidate.request();
-
-            this._cancelBinding = null;
-            SnapController.clearActiveSnapLines();
-            this.nextPoint = null;
-            this.adjustBoundaries();
-            this.releaseMouse(this);
-            this.resetGlobalViewCache();
+            // this.unregisterForLayerDraw(LayerTypes.Interaction);
+            this.removeDecoratorByType(PathManipulationDecorator)
         }
 
         Selection.reselect();
@@ -657,7 +511,7 @@ class Path extends Shape {
             this.save();
         }
 
-        if(this._selectedPoint && this._selectedPoint.idx === idx) {
+        if (this._selectedPoint && this._selectedPoint.idx === idx) {
             this.runtimeProps.currentPointX = point.x;
             this.runtimeProps.currentPointY = point.y;
             this.runtimeProps.currentPointType = point.type;
@@ -691,58 +545,6 @@ class Path extends Shape {
     dblclick(event, scale?) {
         if (this.mode() !== ElementState.Edit) {
             this.edit();
-        } else {
-            let pt = getClickedPoint.call(this, event.x, event.y);
-            if (pt) {
-                if (pt.type !== PointType.Straight) {
-                    pt.type = PointType.Straight;
-                } else {
-                    pt.type = PointType.Assymetric;
-                }
-                Invalidate.request();
-
-                return;
-            }
-
-            if (!this.hitTest(event, scale)) {
-                this.cancel();
-            }
-        }
-    }
-
-    mouseup(event: IMouseEventData, keys: IKeyboardState) {
-        delete this._altPressed;
-        if (this._saveOnMouseUp) {
-            this.save();
-            this._saveOnMouseUp = false;
-        }
-
-        if (this._bendingData) {
-            this._bendingData = null;
-            SnapController.clearActiveSnapLines();
-            this._currentPoint = null;
-            this._handlePoint = null;
-            this.adjustBoundaries();
-            this.invalidate();
-
-            PropertyTracker.resumeAndFlush();
-            return;
-        }
-
-        if (this._selectedPoint && !(keys && keys.shift) && !this._groupMove) {
-            clearSelectedPoints.call(this);
-        }
-
-        let pt = this._currentPoint || this._handlePoint;
-        if (pt) {
-            SnapController.clearActiveSnapLines();
-            this._currentPoint = null;
-            this._handlePoint = null;
-            if (!pointsEqual(pt, this._originalPoint)) {
-                this.changePointAtIndex(pt, pt.idx);
-                this.adjustBoundaries();
-            }
-            PropertyTracker.resumeAndFlush();
         }
     }
 
@@ -837,214 +639,6 @@ class Path extends Shape {
         // p1 = Bc - Ac*p0 - Dc*p2 -Ec*p3
     }
 
-    mousedown(event: IMouseEventData, keys: IKeyboardState) {
-        let x = event.x,
-            y = event.y;
-
-        this._groupMove = false;
-
-        if (this.mode() !== ElementState.Edit) {
-            return;
-        }
-
-        let pt = getClickedPoint.call(this, x, y);
-
-        if (pt && keys.shift) {
-            addToSelectedPoints.call(this, pt);
-        } else if (!pt || !this._selectedPoints[pt.idx]) {
-            clearSelectedPoints.call(this);
-        }
-
-        if (pt) {
-            event.handled = true;
-            if (keys.alt) {
-                this._altPressed = true;
-                this._handlePoint = pt;
-                this._handlePoint._selectedPoint = 0;
-            } else {
-                this._currentPoint = pt;
-            }
-            this._originalPoint = clone(pt);
-            this._pointOnPath = null;
-        } else {
-            pt = getClickedHandlePoint.call(this, x, y);
-            if (pt) {
-                event.handled = true;
-                this._handlePoint = pt;
-                this._originalPoint = clone(pt);
-                this._pointOnPath = null;
-            } else if (this._pointOnPath) {
-                event.handled = true;
-
-                if (keys.shift) {
-                    let data = this.getInsertPointData(this._pointOnPath);
-                    let newPoint = null;
-                    if (data.length === 1) {
-                        newPoint = this.insertPointAtIndex(data[0], data[0].idx);
-                    } else {
-                        this.changePointAtIndex(data[0], data[0].idx);
-                        this.changePointAtIndex(data[1], data[1].idx);
-                        newPoint = this.insertPointAtIndex(data[2], data[2].idx);
-                    }
-
-                    this._currentPoint = newPoint;
-                    this._originalPoint = clone(newPoint);
-
-                    this._pointOnPath = null;
-                    Invalidate.request();
-                }
-                else {
-                    this._bendingData = this.calculateOriginalBendingData(this._pointOnPath);
-                    // set bending handler
-                    this._pointOnPath = null;
-                }
-            }
-        }
-
-        if (Object.keys(this._selectedPoints).length <= 1) {
-            this.selectPoint(pt);
-        }
-
-        if (event.handled) {
-            PropertyTracker.suspend();
-        }
-    }
-
-    mousemove(event: IMouseEventData, keys: IKeyboardState) {
-        if (this.mode() !== ElementState.Edit) {
-            return;
-        }
-
-        let pos = { x: event.x, y: event.y };
-
-        if (this._bendingData) {
-            event.handled = true;
-
-            pos = SnapController.applySnappingForPoint(pos);
-            pos = this.globalViewMatrixInverted().transformPoint(pos);
-            this.bendPoints(pos, this._bendingData);
-
-            Invalidate.request();
-            return;
-        }
-
-
-        if (this._currentPoint) {
-            pos = SnapController.applySnappingForPoint(pos);
-
-            pos = this.globalViewMatrixInverted().transformPoint(pos);
-
-            this._roundPoint(pos);
-
-            let newX = pos.x
-                , newY = pos.y
-                , dx = this._currentPoint.x - newX
-                , dy = this._currentPoint.y - newY;
-            if (dx || dy) {
-                moveCurrentPoint.call(this, dx, dy);
-
-                Invalidate.request();
-            }
-            this._saveOnMouseUp = true;
-            return;
-        } else if (this._handlePoint) {
-            pos = SnapController.applySnappingForPoint(pos);
-            pos = this.globalViewMatrixInverted().transformPoint(pos);
-            let pt = this._handlePoint;
-            let newX = pos.x,
-                newY = pos.y;
-            let x = pt.x,
-                y = pt.y;
-            let x2, y2;
-
-            if (pt._selectedPoint === 1) {
-                pt.cp1x = newX;
-                pt.cp1y = newY;
-                x2 = pt.cp2x;
-                y2 = pt.cp2y;
-            } else {
-                pt.cp2x = newX;
-                pt.cp2y = newY;
-                x2 = pt.cp1x;
-                y2 = pt.cp1y;
-            }
-
-            if (pt.type !== PointType.Disconnected) {
-                let len2 = Math.sqrt((x - x2) * (x - x2) + (y - y2) * (y - y2));
-                let len1 = Math.sqrt((x - newX) * (x - newX) + (y - newY) * (y - newY));
-
-                if (this._altPressed || pt._selectedPoint === 0 || pt.type === PointType.Mirrored) { // move both handles
-                    len2 = len1;
-                    pt.type = PointType.Mirrored;
-                } else {
-                    pt.type = PointType.Assymetric;
-                }
-
-                if (len1 > 0) {
-                    let vx = (newX - x) * len2 / len1;
-                    let vy = (newY - y) * len2 / len1;
-
-                    if (pt._selectedPoint === 1) {
-                        pt.cp2x = x - vx;
-                        pt.cp2y = y - vy;
-                    } else {
-                        pt.cp1x = x - vx;
-                        pt.cp1y = y - vy;
-                    }
-                }
-            }
-            this._saveOnMouseUp = true;
-            Invalidate.request();
-            return;
-        }
-
-        let pt = this.getPointIfClose(event);
-        if (this._pointOnPath !== pt) {
-            this._pointOnPath = pt;
-            Invalidate.requestInteractionOnly();
-        }
-
-
-        // highligh hover points
-        function updateHoverPoint(pt) {
-            if (this._hoverPoint !== pt) {
-                this._hoverPoint = pt;
-                Invalidate.requestInteractionOnly();
-            }
-
-            return pt;
-        }
-
-        function updateHoverHandlePoint(pt) {
-            if (this._hoverHandlePoint !== pt) {
-                this._hoverHandlePoint = pt;
-                Invalidate.requestInteractionOnly();
-            }
-
-            return pt;
-        }
-
-        let x = event.x, y = event.y;
-        pt = getClickedPoint.call(this, x, y);
-        if (!updateHoverPoint.call(this, pt)) {
-
-            pt = getClickedHandlePoint.call(this, x, y);
-            updateHoverHandlePoint.call(this, pt);
-        }
-
-        if (this.isHoveringOverHandle() || (this.isHoveringOverPoint() && keys.alt)) {
-            event.cursor = Cursors.Pen.MoveHandle;
-        }
-        else if (this.isHoveringOverPoint()) {
-            event.cursor = Cursors.Pen.MovePoint;
-        }
-        else if (this.isHoveringOverSegment()) {
-            event.cursor = keys.shift ? Cursors.Pen.AddPoint : Cursors.Pen.MoveSegment;
-        }
-        else {
-            event.cursor = Environment.controller.defaultCursor();
-        }
-    }
 
     closed(value?) {
         if (value !== undefined) {
@@ -1129,132 +723,6 @@ class Path extends Shape {
         return (this.mode() === ElementState.Resize ? ResizeDimension.Both : ResizeDimension.None);
     }
 
-    onLayerDraw(layer, context, environment) {
-        if (Selection.selectedElement() === this && this.mode() === ElementState.Edit) {
-            let scale = environment.view.scale();
-            context.save();
-
-            context.lineWidth = 1 / scale;
-
-            context.strokeStyle = "rgba(100,100,255,0.5)";
-            context.beginPath();
-
-            let matrix = this.globalViewMatrix();
-            let w = this.props.width,
-                h = this.props.height;
-
-            let handlePoint = this._handlePoint || this._hoverHandlePoint;
-            let hoverPoint = this._currentPoint || this._hoverPoint;
-
-            this.drawPath(context, w, h);
-            if (this.nextPoint && this.points.length && !this.closed() && !this.points[this.points.length - 1].closed) {
-                let nextPt;
-                if (hoverPoint === this.points[0]) {
-                    nextPt = hoverPoint;
-                } else {
-                    nextPt = this.nextPoint;
-                }
-                drawSegment.call(this, context, nextPt, this.points[this.points.length - 1], true);
-            }
-            context.stroke();
-
-            let needClearStyle = true;
-
-            function clearStyle() {
-                if (needClearStyle) {
-                    context.strokeStyle = POINT_STROKE;
-                    context.fillStyle = POINT_FILL;
-                    needClearStyle = false;
-                }
-            }
-            var points = this.points;
-            function hasClosePointAfterIndex(idx) {
-                for (var i = idx + 1; i < points.length; ++i) {
-                    if (points[i].closed) {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
-            for (let i = 0, len = points.length; i < len; ++i) {
-                let pt = points[i];
-                let tpt = matrix.transformPoint(pt);
-
-                clearStyle();
-
-                if (!isLinePoint(pt)) {
-                    let cp1 = matrix.transformPoint2(pt.cp1x, pt.cp1y);
-                    let cp2 = matrix.transformPoint2(pt.cp2x, pt.cp2y);
-                    context.beginPath();
-                    context.moveTo(cp1.x, cp1.y);
-                    context.lineTo(tpt.x, tpt.y);
-                    context.lineTo(cp2.x, cp2.y);
-                    context.stroke();
-
-                    if (pt === handlePoint && (handlePoint._selectedPoint === 1 || this._altPressed)) {
-                        context.fillStyle = POINT_STROKE;
-                        needClearStyle = true;
-                    }
-
-                    let r = CP_HANDLE_RADIUS / scale;
-                    context.beginPath();
-                    context.moveTo(cp1.x - r, cp1.y);
-                    context.lineTo(cp1.x, cp1.y - r);
-                    context.lineTo(cp1.x + r, cp1.y);
-                    context.lineTo(cp1.x, cp1.y + r);
-                    context.closePath();
-                    context.fill();
-                    context.stroke();
-
-                    clearStyle();
-
-                    if (pt === handlePoint && (handlePoint._selectedPoint === 2 || this._altPressed)) {
-                        context.fillStyle = POINT_STROKE;
-                        needClearStyle = true;
-                    }
-                    context.beginPath();
-                    context.moveTo(cp2.x - r, cp2.y);
-                    context.lineTo(cp2.x, cp2.y - r);
-                    context.lineTo(cp2.x + r, cp2.y);
-                    context.lineTo(cp2.x, cp2.y + r);
-                    context.closePath();
-                    context.fill();
-                    context.stroke();
-
-                    clearStyle();
-                }
-                if (pt === hoverPoint || pt === this._selectedPoint || this._selectedPoints[pt.idx]) {
-                    context.fillStyle = POINT_STROKE;
-                    needClearStyle = true;
-                } else if (i === this.points.length - 1 && !this.closed() && !pt.closed) {
-                    context.fillStyle = POINT_FILL_FIRST_OPEN;
-                    needClearStyle = true;
-                }
-
-                let r = CP_RADIUS;
-                if ((i === 0 && !(this.closed() || hasClosePointAfterIndex(i)) && !pt.closed) || (pt.moveTo && !hasClosePointAfterIndex(i))) {
-                    r--;
-                    context.circle(tpt.x, tpt.y, (r + 2) / scale);
-                    context.stroke();
-                }
-
-                context.circle(tpt.x, tpt.y, r / scale);
-                context.fill();
-                context.stroke();
-            }
-
-            if (this._pointOnPath) {
-                context.fillStyle = POINT_STROKE;
-                let pp = this.globalViewMatrix().transformPoint(this._pointOnPath);
-                context.circle(pp.x, pp.y, CP_RADIUS / scale);
-                context.fill2();
-            }
-            context.restore();
-        }
-    }
-
     applySizeScaling(s, o, options, changeMode) {
         this.applyMatrixScaling(s, o, options, changeMode);
     }
@@ -1264,6 +732,45 @@ class Path extends Shape {
 
     shouldApplyViewMatrix() {
         return false;
+    }
+
+    _drawSegment(context, pt, prevPt, closing) {
+        let m = this.globalViewMatrix();
+        let xy = m.transformPoint(pt);
+
+        if (!this._firstPoint) {
+            this._firstPoint = pt;
+        }
+
+        if ((pt.moveTo || this._firstPoint === pt) && !closing) {
+            context.moveTo(xy.x, xy.y);
+        }
+        else if (isLinePoint(pt) && (isLinePoint(prevPt))) { // line segment
+            context.lineTo(xy.x, xy.y);
+        } else { // cubic bezier segment
+            let cp1x = prevPt.cp2x
+                , cp1y = prevPt.cp2y
+                , cp2x = pt.cp1x
+                , cp2y = pt.cp1y;
+
+            if (isLinePoint(prevPt)) {
+                cp1x = prevPt.x;//cp2x;
+                cp1y = prevPt.y;//cp2y;
+            } else if (isLinePoint(pt)) {
+                cp2x = pt.x;//cp1x;
+                cp2y = pt.y;//cp1y;
+            }
+
+            let cp1 = m.transformPoint2(cp1x, cp1y);
+            let cp2 = m.transformPoint2(cp2x, cp2y);
+            context.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, xy.x, xy.y);
+        }
+
+        if (pt.closed && !closing) {
+            this._drawSegment(context, this._firstPoint, pt, true);
+            context.closePath();
+            this._firstPoint = null;
+        }
     }
 
     drawPath(context, w, h) {
@@ -1277,30 +784,14 @@ class Path extends Shape {
         let prevPt = null;// = pt = points[0];
         for (let i = 0, len = points.length; i < len; ++i) {
             pt = points[i];
-            drawSegment.call(this, context, pt, prevPt);
+            this._drawSegment(context, pt, prevPt);
             prevPt = pt;
         }
         if (this.closed() && !prevPt.closed) {
-            drawSegment.call(this, context, points[0], prevPt, true);
+            this._drawSegment(context, points[0], prevPt, true);
             context.closePath();
         }
     }
-
-    // drawSelf (context, w, h, environment) {
-    //     if (this._points.length == 0) {
-    //         return;
-    //     }
-    //     context.save();
-    //     context.strokeStyle = "black";
-    //     context.lineCap = "round";
-    //     context.beginPath();
-    //     this.drawPath(context, w, h);
-    //
-    //     Brush.fill(this.fill(), context, 0, 0, w, h);
-    //     Brush.stroke(this.stroke(), context, 0, 0, w, h);
-    //
-    //     context.restore();
-    // },
 
     getBoundingBoxGlobal(includeMargin: boolean = false): Rect {
         if (!this.runtimeProps.globalClippingBox) {
@@ -1314,6 +805,7 @@ class Path extends Shape {
         if (this.points.length <= 1) {
             return Rect.Zero;
         }
+
         if (!this.runtimeProps.bb) {
             let graph = new BezierGraph();
             graph.initWithBezierPath(this, this.viewMatrix());
@@ -1477,24 +969,6 @@ class Path extends Shape {
 
     isClockwise() {
         return this.polygonArea() > 0;
-    }
-
-    isHoveringOverSegment(): boolean {
-        return !!this._pointOnPath;
-    }
-    isHoveringOverHandle(): boolean {
-        return !!this._hoverHandlePoint;
-    }
-    isHoveringOverPoint(): boolean {
-        return !!this._hoverPoint;
-    }
-    get hoverPoint() {
-        return this._hoverPoint;
-    }
-    resetHover(): void {
-        this._pointOnPath = null;
-        this._hoverHandlePoint = null;
-        this._hoverPoint = null;
     }
 
     fromJSON(data) {

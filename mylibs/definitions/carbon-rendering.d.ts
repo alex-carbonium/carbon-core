@@ -1,4 +1,7 @@
-declare module "carbon-rendering"{
+import { IMatrix } from "carbon-geometry";
+import { IView } from "carbon-core";
+
+declare module "carbon-rendering" {
     export interface IContext {
         font: string;
         strokeStyle: string;
@@ -11,8 +14,8 @@ declare module "carbon-rendering"{
 
         moveTo(x: number, y: number): void;
         lineTo(x: number, y: number): void;
-        circle(xc:number, yc: number, r: number): void;
-        circlePath(xc:number, yc: number, r: number): void;
+        circle(xc: number, yc: number, r: number): void;
+        circlePath(xc: number, yc: number, r: number): void;
 
         beginPath(): void;
         closePath(): void;
@@ -24,5 +27,15 @@ declare module "carbon-rendering"{
 
         save(): void;
         restore(): void;
+    }
+
+    export interface IRenderingEnvironment {
+        contextScale: number;
+        finalRender: boolean;
+        layer: any;
+        pageMatrix: IMatrix;
+        setupContext: (context: IContext) => void;
+        showFrames: boolean;
+        view: IView;
     }
 }

@@ -7,7 +7,8 @@ import RelayoutEngine from "framework/relayout/RelayoutEngine";
 import UserSettings from "../UserSettings";
 import Environment from "../environment";
 import NullContainer from "./NullContainer";
-import Path from "ui/common/Path";
+import Path from "framework/Path";
+import Matrix from "math/matrix";
 
 export class IsolationLayer extends Layer implements IIsolationLayer {
 
@@ -59,6 +60,26 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         // set layer matrix to owner element global matrix,
         // so matrixes of the copied element should be identical to source matrices
         this.setProps({ m: owner.globalViewMatrix(), br: owner.props.br }, ChangeMode.Self);
+        this.hitTransparent(false);
+
+        this._onAppChangedSubscription = App.Current.deferredChange.bind(this, this.onAppChanged);
+        this._onRelayoutCompleted = App.Current.relayoutFinished.bind(this, this.onRelayoutFinished);
+        Selection.clearSelection();
+
+        Environment.view.activateLayer(this.type);
+    }
+
+    isolateObject(object: IIsolatable): void {
+        if (this.ownerElement) {
+            Environment.view.deactivateLayer(this.type, true);
+        }
+
+
+        this.add(object, ChangeMode.Self);
+
+        // set layer matrix to owner element global matrix,
+        // so matrixes of the copied element should be identical to source matrices
+        this.setProps({ m: Matrix.Identity }, ChangeMode.Self);
         this.hitTransparent(false);
 
         this._onAppChangedSubscription = App.Current.deferredChange.bind(this, this.onAppChanged);

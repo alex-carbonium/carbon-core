@@ -1,5 +1,5 @@
 import Matrix from "../math/matrix";
-import { IContainer, IDataNodeProps, IMatrix, IPoint, IRect, ISize, IUIElement, IUIElementProps, IConstraints, IContext, IContainerProps, IDataNode } from "carbon-core";
+import { IContainer, IDataNodeProps, IMatrix, IPoint, IRect, ISize, IUIElement, IUIElementProps, IConstraints, IContext, IContainerProps, IDataNode, IMouseEventData, IKeyboardState } from "carbon-core";
 import { emptyUuid } from "../util";
 import DataNode from "./DataNode";
 import Rect from "../math/rect";
@@ -10,28 +10,35 @@ class NullContainer extends DataNode implements IContainer {
     children = [];
     props: IContainerProps = null;
 
-    constructor(){
+    constructor() {
         super(false);
     }
 
-    mode(v?:any):any {
+    mode(v?: any): any {
 
     }
 
-    boundaryRect(){
+    mousemove(event: IMouseEventData, keys: IKeyboardState) { }
+    mouseup(event: IMouseEventData, keys: IKeyboardState) { }
+    mousedown(event: IMouseEventData, keys: IKeyboardState) { }
+    dblclick(event: IMouseEventData, scale: number) { }
+    click(event: IMouseEventData) { }
+
+
+    boundaryRect() {
         return Rect.Zero;
     }
 
     hitTransparent(value: boolean): boolean {
         return true;
     }
-    globalMatrixToLocal(m: any){
+    globalMatrixToLocal(m: any) {
         return m;
     }
-    getElementById(){
+    getElementById() {
         return null;
     }
-    name(){
+    name() {
         return '';
     }
     flatten(): void {
@@ -61,7 +68,7 @@ class NullContainer extends DataNode implements IContainer {
         return Rect.Zero;
     }
     size(size?: ISize): ISize {
-        return {height: 0, width: 0};
+        return { height: 0, width: 0 };
     }
     center(global?: boolean): IPoint {
         return Point.Zero;
@@ -155,14 +162,14 @@ class NullContainer extends DataNode implements IContainer {
     dispose(): void {
     }
 
-    autoPositionChildren(){
+    autoPositionChildren() {
         return false;
     }
 
-    applyVisitor(){
+    applyVisitor() {
     }
 
-    canAccept(){
+    canAccept() {
         return false;
     }
 
@@ -174,7 +181,7 @@ class NullContainer extends DataNode implements IContainer {
         return pos;
     }
 
-    arrangeStrategy(){
+    arrangeStrategy() {
         return -1;
     }
 
@@ -182,7 +189,7 @@ class NullContainer extends DataNode implements IContainer {
         return null;
     }
 
-    incrementVersion () {
+    incrementVersion() {
 
     }
 
@@ -190,11 +197,11 @@ class NullContainer extends DataNode implements IContainer {
         return [];
     }
 
-    allowMoveOutChildren(){
+    allowMoveOutChildren() {
         return true;
     }
 
-    getDropData(){
+    getDropData() {
         return null;
     }
 
@@ -209,7 +216,7 @@ class NullContainer extends DataNode implements IContainer {
         return element;
     }
 
-    insert(element, index){
+    insert(element, index) {
         return element;
     }
 
@@ -217,7 +224,7 @@ class NullContainer extends DataNode implements IContainer {
         return -1;
     }
 
-    changePosition(element, index){
+    changePosition(element, index) {
     }
 
     clear() {
@@ -251,35 +258,35 @@ class NullContainer extends DataNode implements IContainer {
 
     }
 
-    lockedGroup(){
+    lockedGroup() {
         return false;
     }
 
-    hitElement(){
+    hitElement() {
         return null;
     }
 
-    parent(){
+    parent() {
         return null;
     }
 
-    globalViewMatrix(){
+    globalViewMatrix() {
         return Matrix.Identity;
     }
 
-    globalViewMatrixInverted(){
+    globalViewMatrixInverted() {
         return Matrix.Identity;
     }
 
-    scale(){
+    scale() {
         return 1;
     }
 
-    activeGroup(){
+    activeGroup() {
         return false;
     }
 
-    locked(){
+    locked() {
         return true;
     }
 }

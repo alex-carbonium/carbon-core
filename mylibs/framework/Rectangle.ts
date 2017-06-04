@@ -7,7 +7,7 @@ import Shadow from "framework/Shadow";
 import {PointDirection, Types, StrokePosition, FrameCursors} from "framework/Defs";
 import nearestPoint from "math/NearestPoint";
 import commandManager from "framework/commands/CommandManager";
-import Path from "ui/common/Path";
+import Path from "framework/Path";
 import UIElement from "framework/UIElement";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";

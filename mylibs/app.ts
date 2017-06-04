@@ -60,8 +60,8 @@ var domUtil = require("utils/dom");
 var Stopwatch = require("./Stopwatch");
 var WebFont = require("webfontloader");
 var PropertyMetadata = require("framework/PropertyMetadata");
-var Path = require("./ui/common/Path");
-var CompoundPath = require("./ui/common/CompoundPath");
+var Path = require("framework/Path");
+var CompoundPath = require("framework/CompoundPath");
 
 class AppClass extends DataNode implements IApp, IPrimitiveRoot {
     props: IAppProps;
@@ -1130,14 +1130,14 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
         var pageJson = data.page;
         var name = ' (' + pageJson.name + ')';
         if (data.styles) {
-            for (var style of data.styles) {
+            for (let style of data.styles) {
                 style.name += name;
                 StyleManager.registerStyle(style, StyleType.Visual)
             }
         }
 
         if (data.textStyles) {
-            for (var style of data.textStyles) {
+            for (let style of data.textStyles) {
                 style.name += name;
                 StyleManager.registerStyle(style, StyleType.Text)
             }

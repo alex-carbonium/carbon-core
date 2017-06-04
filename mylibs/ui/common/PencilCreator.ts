@@ -3,7 +3,7 @@ import Selection from "../../framework/SelectionModel";
 import Invalidate from "../../framework/Invalidate";
 import {ViewTool} from "../../framework/Defs";
 import Point from "../../math/point";
-import Path from "./Path";
+import Path from "framework/Path";
 import Environment from "../../environment";
 import Tool from "./Tool";
 import {IKeyboardState, IMouseEventData} from "carbon-core";

@@ -2,9 +2,9 @@ import RepeatContainer from "framework/repeater/RepeatContainer";
 import Selection from "framework/SelectionModel";
 import GroupContainer from "framework/GroupContainer";
 import Symbol from "../framework/Symbol";
-import CompoundPath from "ui/common/CompoundPath";
+import CompoundPath from "framework/CompoundPath";
 import Environment from "environment";
-import Path from "ui/common/Path";
+import Path from "framework/Path";
 import CoreIntl from "../CoreIntl";
 import { ContextBarPosition, IActionManager, IView, IApp, ElementState } from "carbon-core";
 

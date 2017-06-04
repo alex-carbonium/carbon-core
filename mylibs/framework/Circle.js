@@ -1,7 +1,7 @@
 ﻿import Shape from "framework/Shape";
 import Brush from "framework/Brush";
 import PropertyMetadata from "framework/PropertyMetadata";
-import Path from "ui/common/Path";
+import Path from "framework/Path";
 import * as math from "math/math";
 import {Types, StrokePosition} from "./Defs";
 

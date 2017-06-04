@@ -81,6 +81,7 @@ declare module "carbon-geometry" {
     }
     export const Matrix: IMatrix & {
         createTranslationMatrix(tx: number, ty: number): IMatrix;
+        Identity:IMatrix;
     }
 
     export const enum OriginType {

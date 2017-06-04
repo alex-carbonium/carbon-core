@@ -1,6 +1,6 @@
 declare module "carbon-model" {
     import { IPoint, IRect, ICoordinate, IMatrix, ISize, OriginType } from "carbon-geometry";
-    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable, ChangeMode, ArtboardType, Font } from "carbon-basics";
+    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable, ChangeMode, ArtboardType, Font, IKeyboardState } from "carbon-basics";
     import { IContext } from "carbon-rendering";
 
     export interface IDataNodeProps {
@@ -38,7 +38,15 @@ declare module "carbon-model" {
         constraints: IConstraints;
     }
 
-    export interface IUIElement<TProps extends IUIElementProps = IUIElementProps> extends IDataNode<TProps> {
+    export interface IMouseEventHandler {
+        mousemove(event: IMouseEventData, keys: IKeyboardState);
+        mouseup(event: IMouseEventData, keys: IKeyboardState);
+        mousedown(event: IMouseEventData, keys: IKeyboardState);
+        dblclick(event: IMouseEventData, scale: number);
+        click(event: IMouseEventData);
+    }
+
+    export interface IUIElement<TProps extends IUIElementProps = IUIElementProps> extends IDataNode<TProps>, IMouseEventHandler {
         parent(): IContainer;
 
         name(value?: string): string;

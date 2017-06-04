@@ -53,8 +53,11 @@ var settings = {
 
     path: {
         pointStroke: "#1592E6",
+        editPathStroke: "rgba(100,100,255,0.5)",
         pointFill: "#fff",
-        pointFillFirstPoint: "yellow"
+        pointFillFirstPoint: "yellow",
+        editPointSize: 4,
+        editHandleSize: 3
     },
 
     internal: {
