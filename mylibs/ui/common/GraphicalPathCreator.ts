@@ -54,11 +54,11 @@ export default class GraphicalPathCreator extends Tool {
     detach() {
         super.detach.apply(this, arguments);
 
-        if(this._pathElement) {
+        if (this._pathElement) {
             this._changeMode(this._pathElement, ElementState.Resize);
         }
 
-        if(this._cancelBinding) {
+        if (this._cancelBinding) {
             this._cancelBinding.dispose();
             this._cancelBinding = null;
         }
@@ -71,6 +71,9 @@ export default class GraphicalPathCreator extends Tool {
     }
 
     cancel() {
+        if (this._pathElement) {
+            this._pathElement.mode(ElementState.Resize);
+        }
         this._createNewPath();
     }
 
@@ -93,11 +96,11 @@ export default class GraphicalPathCreator extends Tool {
     }
 
     mousedown(event: IMouseEventData, keys: IKeyboardState) {
-        if (this._pathElement.runtimeProps.inserted&& (!this._pathElement.parent() || this._pathElement.parent() === NullContainer)) {
+        if (this._pathElement.runtimeProps.inserted && (!this._pathElement.parent() || this._pathElement.parent() === NullContainer)) {
             this._createNewPath();
         }
 
-        if(!this._pathElement.runtimeProps.inserted) {
+        if (!this._pathElement.runtimeProps.inserted) {
             Environment.view.dropToLayer(event.x, event.y, this._pathElement);
             Selection.makeSelection([this._pathElement]);
             this._pathElement.runtimeProps.inserted = true;
