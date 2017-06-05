@@ -663,7 +663,7 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
     useRecentColor(color) {
         var colors = this.props.recentColors.slice();
         for (var i = 0; i < colors.length; ++i) {
-            if (colors[i] == color) {
+            if (colors[i] === color) {
                 colors.splice(i, 1);
             }
         }
@@ -721,7 +721,7 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
     }
 
     allowSelection(value) {
-        if (value != undefined) {
+        if (value !== undefined) {
             this._allowSelection = value;
         }
         return this._allowSelection;

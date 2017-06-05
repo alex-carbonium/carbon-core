@@ -38,6 +38,14 @@ declare module "carbon-model" {
         constraints: IConstraints;
     }
 
+    export interface IDecoratable {
+        decorators:any[];
+        addDecorator(decorator);
+        removeDecorator(decorator);
+        removeAllDecorators():any[];
+        removeDecoratorByType(type);
+    }
+
     export interface IMouseEventHandler {
         mousemove(event: IMouseEventData, keys: IKeyboardState);
         mouseup(event: IMouseEventData, keys: IKeyboardState);
@@ -46,7 +54,7 @@ declare module "carbon-model" {
         click(event: IMouseEventData);
     }
 
-    export interface IUIElement<TProps extends IUIElementProps = IUIElementProps> extends IDataNode<TProps>, IMouseEventHandler {
+    export interface IUIElement<TProps extends IUIElementProps = IUIElementProps> extends IDataNode<TProps>, IMouseEventHandler, IDecoratable {
         parent(): IContainer;
 
         name(value?: string): string;

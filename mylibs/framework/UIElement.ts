@@ -37,10 +37,11 @@ import { IKeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
 import { ChangeMode, LayerTypes, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint } from "carbon-core";
+import DecoratableChain from "./DecoratableChain";
 
 require("../migrations/All");
 
-export interface IUIElementRuntimeProps{
+export interface IUIElementRuntimeProps {
     primitivePath: string[];
     primitiveRootKey: string;
 }
@@ -49,6 +50,7 @@ export interface IUIElementRuntimeProps{
 export default class UIElement<TProps extends IUIElementProps = IUIElementProps> extends DataNode<TProps> implements IUIElement<TProps> {
     [name: string]: any;
     props: TProps;
+    decorators: any[];
 
     constructor() {
         super(false);
@@ -131,7 +133,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     propsUpdated(newProps, oldProps, mode?) {
         if (newProps.hasOwnProperty("m") || newProps.hasOwnProperty("br")) {
             this.resetGlobalViewCache();
-            if (mode === ChangeMode.Model){
+            if (mode === ChangeMode.Model) {
                 this.saveLastGoodTransformIfNeeded(oldProps);
             }
         }
@@ -158,8 +160,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             this.runtimeProps.origLayout = this.selectLayoutProps();
             return true;
         }
-        if (this.hasBadTransform()){
-            this.setProps({bad: false, lgbr: null, lgm: null});
+        if (this.hasBadTransform()) {
+            this.setProps({ bad: false, lgbr: null, lgm: null });
         }
         this.setProps(this.runtimeProps.origLayout);
         return false;
@@ -198,7 +200,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             let propertyName = names[i];
             let descriptor: PropertyDescriptor = metadata[propertyName];
             if (descriptor.computed) {
-                this[propertyName](changes[propertyName], changeMode);
+                DecoratableChain.invoke(this, propertyName, [changes[propertyName], changeMode]);
                 delete changes[propertyName];
             }
         }
@@ -294,13 +296,13 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     isRotated(global: boolean = false): boolean {
         return this.getRotation(global) % 360 !== 0;
     }
-    isFlipped(global: boolean = false): boolean{
+    isFlipped(global: boolean = false): boolean {
         let decomposed = global ? this.gdm() : this.dm();
         //it is more complex to check if element is flipped vertically or horizontally.
         //y scaling is always -1 for flipped matrix, and angle changes depending on whether it is x or y flip.
         return Math.round(decomposed.scaling.y) === -1;
     }
-    canRotate(): boolean{
+    canRotate(): boolean {
         var root = this.primitiveRoot();
         return root && root.isEditable();
     }
@@ -317,7 +319,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
         this.applyMatrixScaling(s, o, options, changeMode);
 
-        if (!options || options.final){
+        if (!options || options.final) {
             this.skew();
         }
 
@@ -333,7 +335,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
     }
 
-    skew(): void{
+    skew(): void {
     }
 
     first(): UIElement {
@@ -410,7 +412,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     resetTransform(mode?: ChangeMode) {
         let props: any = { m: Matrix.Identity };
-        if (this.hasBadTransform()){
+        if (this.hasBadTransform()) {
             props.bad = false;
             props.lgbr = null;
             props.lgm = null;
@@ -418,41 +420,41 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         this.setProps(props, mode);
     }
 
-    hasBadTransform(): boolean{
+    hasBadTransform(): boolean {
         return this.props.bad;
     }
-    isBadBoundaryRect(br){
+    isBadBoundaryRect(br) {
         return br.width < 1 || br.height < 1;
     }
-    isBadMatrix(m: IMatrix){
+    isBadMatrix(m: IMatrix) {
         return m.isSingular();
     }
 
-    saveLastGoodTransformIfNeeded(oldProps): void{
+    saveLastGoodTransformIfNeeded(oldProps): void {
         let lastGoodProps = null;
 
         var saveBr = !this.props.lgbr && oldProps.br && this.isBadBoundaryRect(this.boundaryRect()) && !this.isBadBoundaryRect(oldProps.br);
         var saveMatrix = !this.props.lgm && oldProps.m && this.isBadMatrix(this.viewMatrix()) && !this.isBadMatrix(oldProps.m);
 
-        if (saveBr || saveMatrix){
+        if (saveBr || saveMatrix) {
             lastGoodProps = {
                 lgbr: oldProps.br || this.boundaryRect(),
                 lgm: oldProps.m || this.viewMatrix(),
                 bad: true
             };
-        } else if(this.props.bad) {
+        } else if (this.props.bad) {
             lastGoodProps = {
                 bad: false
             };
         }
 
-        if (lastGoodProps !== null){
+        if (lastGoodProps !== null) {
             this.setProps(lastGoodProps);
         }
     }
 
-    restoreLastGoodTransformIfNeeded(): void{
-        if (this.hasBadTransform()){
+    restoreLastGoodTransformIfNeeded(): void {
+        if (this.hasBadTransform()) {
             this.setProps({
                 br: Rect.fromObject(this.props.lgbr),
                 lgbr: null,
@@ -576,7 +578,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             }
         }
     }
-    removeAllDecorators() {
+
+    removeAllDecorators(): any[] {
         let decorators = this.decorators;
         if (decorators) {
             decorators.forEach(x => x.detach());
@@ -585,6 +588,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
         return decorators;
     }
+
     removeDecoratorByType(type) {
         if (!this.decorators) {
             return;
@@ -598,9 +602,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             }
         }
     }
-    removed() {
 
+    removed() {
+        this.removeAllDecorators();
     }
+
     removing() {
 
     }
@@ -609,7 +615,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     size(value?: ISize): ISize {
-        if (arguments.length){
+        if (arguments.length) {
             //TODO: handle for paths based on shouldApplyViewMatrix
             this.boundaryRect(this.boundaryRect().withSize(value.width, value.height));
         }
@@ -813,11 +819,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
     }
     draw(context, environment) {
-        if (this.hasBadTransform()){
+        if (this.hasBadTransform()) {
             return;
         }
         let markName;
-        if(params.perf) {
+        if (params.perf) {
             markName = "draw " + this.displayName() + " - " + this.id();
             performance.mark(markName);
         }
@@ -838,7 +844,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
         this.drawDecorators(context, w, h, environment);
 
-        if(params.perf) {
+        if (params.perf) {
             performance.measure(markName, markName);
         }
     }
@@ -896,12 +902,12 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         this.runtimeProps.primitiveRoot = root;
         return root;
     }
-    isFinalRoot(): boolean{
+    isFinalRoot(): boolean {
         return true;
     }
-    _findFinalRoot(){
+    _findFinalRoot() {
         let root = this.primitiveRoot();
-        while (root && !root.isFinalRoot() && root.parent()){
+        while (root && !root.isFinalRoot() && root.parent()) {
             root = root.parent().primitiveRoot();
         }
         return root;
@@ -1024,7 +1030,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return parent.children.indexOf(this);
     }
 
-    mode(value?:any):any {
+    mode(value?: any): any {
 
     }
 
@@ -1060,38 +1066,38 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     width(value?: number, changeMode?: ChangeMode) {
         if (arguments.length !== 0) {
-            var s = new Point(value/this.width(), 1);
+            var s = new Point(value / this.width(), 1);
             var o = this.viewMatrix().transformPoint(this.boundaryRect().centerLeft());
             var resizeOptions = new ResizeOptions(true, false, false, true);
             this.applyScaling(s, o, resizeOptions, changeMode);
         }
 
-        if (this.hasBadTransform()){
+        if (this.hasBadTransform()) {
             return 0;
         }
 
         let gm = this.globalViewMatrix();
         let scaling = 1;
-        if (!gm.isTranslatedOnly()){
+        if (!gm.isTranslatedOnly()) {
             scaling = this.gdm().scaling.x || 1;
         }
         return Math.abs(this.boundaryRect().width * scaling);
     }
     height(value?: number, changeMode?: ChangeMode) {
         if (arguments.length !== 0) {
-            var s = new Point(1, value/this.height());
+            var s = new Point(1, value / this.height());
             var o = this.viewMatrix().transformPoint(this.boundaryRect().centerTop());
             var resizeOptions = new ResizeOptions(true, false, false, true);
             this.applyScaling(s, o, resizeOptions, changeMode);
         }
 
-        if (this.hasBadTransform()){
+        if (this.hasBadTransform()) {
             return 0;
         }
 
         let gm = this.globalViewMatrix();
         let scaling = 1;
-        if (!gm.isTranslatedOnly()){
+        if (!gm.isTranslatedOnly()) {
             scaling = this.gdm().scaling.y || 1;
         }
         return Math.abs(this.boundaryRect().height * scaling);
@@ -1562,7 +1568,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     rotationOrigin(global) {
         return this.center(global);
     }
-    center(global?: boolean):ICoordinate {
+    center(global?: boolean): ICoordinate {
         let m = global ? this.globalViewMatrix() : this.viewMatrix();
         return m.transformPoint(this.boundaryRect().center());
     }
@@ -1570,12 +1576,12 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (!this.hitVisible(directSelection)) {
             return null;
         }
-        if (predicate){
-            if (!predicate(this, position, scale)){
+        if (predicate) {
+            if (!predicate(this, position, scale)) {
                 return null;
             }
         }
-        else if (!this.hitTest(position, scale)){
+        else if (!this.hitTest(position, scale)) {
             return null;
         }
 
@@ -1597,7 +1603,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.parent() === NullContainer;
     }
     /** Defines an element which is never added to the model, but is still drawn and could have visible properties */
-    isPhantom(): boolean{
+    isPhantom(): boolean {
         return false;
     }
     canBeRemoved() {
@@ -1646,7 +1652,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return {
                 element: this,
                 frame: true,
-                fill:true,
+                fill: true,
                 points: []
             }
         }
@@ -1926,7 +1932,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return PropertyMetadata.findAll(this.t);
     }
 
-    getNonRepeatableProps(newProps?: any){
+    getNonRepeatableProps(newProps?: any) {
         return ["id", "name", "visible"];
     }
 

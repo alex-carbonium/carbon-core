@@ -18,11 +18,17 @@ class NullPage extends UIElement implements IPage {
         this.props = null;
     }
 
-    activate(){
+    decorators: any[];
+    addDecorator(decorator) { }
+    removeDecorator(decorator) { }
+    removeAllDecorators():any[] { return null; }
+    removeDecoratorByType(type) { }
+
+    activate() {
     }
-    deactivate(){
+    deactivate() {
     }
-    canChangeNodeTree(){
+    canChangeNodeTree() {
         return false;
     }
 
@@ -34,15 +40,15 @@ class NullPage extends UIElement implements IPage {
         throw new Error('Method not implemented.');
     }
 
-    mode(v?:any):any {
+    mode(v?: any): any {
 
     }
 
-    clone(): IPage{
+    clone(): IPage {
         return this;
     }
 
-    changePosition(element:IUIElement, index:number, mode?:number) {
+    changePosition(element: IUIElement, index: number, mode?: number) {
 
     }
 
@@ -50,19 +56,19 @@ class NullPage extends UIElement implements IPage {
         return null;
     }
 
-    zOrder(){
+    zOrder() {
         return 0;
     }
 
-    getElementById(id){
+    getElementById(id) {
         return null;
     }
 
-    getBoundaryRect(){
+    getBoundaryRect() {
         return Rect.Zero;
     }
 
-    hitTransparent(value?:boolean):boolean {
+    hitTransparent(value?: boolean): boolean {
         return true;
     }
 
@@ -97,7 +103,7 @@ class NullPage extends UIElement implements IPage {
     fill(value?: any) {
     }
 
-    findDropToPageData(x, y, element){
+    findDropToPageData(x, y, element) {
         return null;
     }
 
@@ -143,7 +149,7 @@ class NullPage extends UIElement implements IPage {
     disablePropsTracking() {
 
     }
-    getActiveArtboard():IArtboard {
+    getActiveArtboard(): IArtboard {
         return null;
     }
     renderContentTile(context, x, y, zoom) {
@@ -265,10 +271,10 @@ class NullPage extends UIElement implements IPage {
         return 0;
     }
 
-    dropToLayer(x, y, element){
+    dropToLayer(x, y, element) {
     }
 
-    flatten(){
+    flatten() {
     }
 }
 

@@ -49,7 +49,7 @@ function moveCurrentPoint(dx, dy) {
     let path: Path = this.element;
     let keys = Object.keys(this._selectedPoints);
 
-    if (keys.length) {
+    if (keys.length > 1) {
         for (let i = 0; i < keys.length; ++i) {
             let p = this._selectedPoints[keys[i]];
             p.x -= dx;
@@ -158,9 +158,9 @@ export default class PathManipulationObject extends UIElementDecorator implement
 
         if (this.constructMode) {
             this._mousepressed = false;
-            if (this._selectedPoint) {
-                this.path.changePointAtIndex(this._originalPointBeforeMove, this._selectedPoint.idx, ChangeMode.Self);
-                this.path.changePointAtIndex(this._selectedPoint, this._selectedPoint.idx);
+            if (this.selectedPoint) {
+                this.path.changePointAtIndex(this._originalPointBeforeMove, this.selectedPoint.idx, ChangeMode.Self);
+                this.path.changePointAtIndex(this.selectedPoint, this.selectedPoint.idx);
             }
 
             Invalidate.request();
@@ -185,30 +185,39 @@ export default class PathManipulationObject extends UIElementDecorator implement
 
 
     get selectedPoint() {
-        return this._selectedPoint;
+        var keys = Object.keys(this._selectedPoints);
+        if (keys.length !== 1) {
+            return null;
+        }
+
+        return this._selectedPoints[keys[0]];
     }
 
     set selectedPoint(pt) {
-        if (this._selectedPoint !== pt) {
-            this._selectedPoint = pt;
+        if (this.selectedPoint !== pt) {
             if (pt) {
+                this._selectedPoints = { [pt.idx]: pt };
                 this.path.runtimeProps.currentPointX = pt.x;
                 this.path.runtimeProps.currentPointY = pt.y;
                 this.path.runtimeProps.currentPointType = pt.type;
+                this.path.runtimeProps.selectedPointIdx = pt.idx;
+            } else {
+                this.clearSelectedPoints();
             }
-            this.path.runtimeProps.selectedPointIdx = pt ? pt.idx : -1;
 
             this.path._refreshComputedProps();
         }
     }
+
     clearSelectedPoints() {
         this._selectedPoints = {};
+        this.path.runtimeProps.selectedPointIdx = -1;
     }
 
     addToSelectedPoints(pt) {
-        if (this._selectedPoint && !Object.keys(this._selectedPoints).length) {
-            this._selectedPoints[this._selectedPoint.idx] = this._selectedPoint;
-        }
+        // if (!this._selectedPoints) {
+        //     this._selectedPoints = {}
+        // }
         if (this._selectedPoints[pt.idx]) {
             delete this._selectedPoints[pt.idx];
         } else {
@@ -238,7 +247,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
             this.clearSelectedPoints();
         }
 
-        if (!event.handled && pt) {
+        if (!event.handled && pt && !this._selectedPoints[pt.idx]) {
             this.selectedPoint = pt;
         }
 
@@ -302,7 +311,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
 
         if (!event.handled && this.constructMode) {
             let eventData = { handled: false, x: event.x, y: event.y };
-            this._selectedPoint = null;
+            this.selectedPoint = null;
             Environment.controller.startDrawingEvent.raise(eventData);
             if (eventData.handled) {
                 return true;
@@ -473,7 +482,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         let path = this.path;
         let pt = path.controlPointForPosition(event);
 
-        this.resetHover();
+        //this.resetHover();
         if (!updateHoverPoint.call(this, pt)) {
             pt = path.handlePointForPosition(event);
             updateHoverHandlePoint.call(this, pt);
@@ -485,14 +494,17 @@ export default class PathManipulationObject extends UIElementDecorator implement
         else if (this.isHoveringOverHandle() || (this.isHoveringOverPoint() && keys.alt)) {
             event.cursor = Cursors.Pen.MoveHandle;
             this.nextPoint = null;
+            this._startPoint = null;
         }
         else if (this.isHoveringOverPoint()) {
             event.cursor = Cursors.Pen.MovePoint;
             this.nextPoint = null;
+            this._startPoint = null;
         }
         else if (this.isHoveringOverSegment()) {
             event.cursor = keys.shift ? Cursors.Pen.AddPoint : Cursors.Pen.MoveSegment;
             this.nextPoint = null;
+            this._startPoint = null;
         }
         else if (this.constructMode) {
             event.cursor = Cursors.Pen.AddPoint;
@@ -519,13 +531,16 @@ export default class PathManipulationObject extends UIElementDecorator implement
     }
 
     dblclick(event, scale: number) {
-        let pt = this.element.controlPointForPosition(event);
+        let pt = this.path.controlPointForPosition(event);
         if (pt) {
             if (pt.type !== PointType.Straight) {
                 pt.type = PointType.Straight;
             } else {
                 pt.type = PointType.Assymetric;
             }
+
+            this.path.runtimeProps.currentPointType = pt.type;
+            this.path._refreshComputedProps();
 
             Invalidate.request();
 
@@ -653,7 +668,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
 
                     clearStyle();
                 }
-                if (pt === hoverPoint || pt === this._selectedPoint || this._selectedPoints[pt.idx]) {
+                if (pt === hoverPoint || this._selectedPoints[pt.idx]) {
                     context.fillStyle = POINT_STROKE;
                     needClearStyle = true;
                 } else if (i === path.points.length - 1 && !path.closed() && !pt.closed) {
@@ -721,6 +736,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         this._originalPoint = clone(pt);
         this._handlePoint._selectedPoint = 0;
         this.nextPoint = null;
+        this._startPoint = null;
     }
 
     _closeOrRemovePoint(pt) {
@@ -741,5 +757,59 @@ export default class PathManipulationObject extends UIElementDecorator implement
         lastPoint.closed = true;
         this.path.changePointAtIndex(lastPoint, points.length - 1);
         this._startSegmentPoint = null;
+    }
+
+    currentPointType(value: PointType, changeMode: ChangeMode) {
+        let points = this._selectedPoints;
+        var keys = Object.keys(points);
+        if (keys.length === 0) {
+            return;
+        }
+
+        for (var key of Object.keys(points)) {
+            var pt = points[key];
+            let newPoint = Object.assign({}, pt);
+            newPoint.type = value;
+            this.path.changePointAtIndex(newPoint, newPoint.idx, changeMode);
+            this._selectedPoints[newPoint.idx] = newPoint;
+        }
+
+        this.path.save();
+    }
+
+    currentPointX(value: PointType, changeMode: ChangeMode) {
+        let points = this._selectedPoints;
+        var keys = Object.keys(points);
+        if (keys.length === 0) {
+            return;
+        }
+
+        for (var key of Object.keys(points)) {
+            var pt = points[key];
+            let newPoint = Object.assign({}, pt);
+            newPoint.x = value;
+            this.path.changePointAtIndex(newPoint, newPoint.idx, changeMode);
+            this._selectedPoints[newPoint.idx] = newPoint;
+        }
+
+        this.path.save();
+    }
+
+    currentPointY(value: PointType, changeMode: ChangeMode) {
+        let points = this._selectedPoints;
+        var keys = Object.keys(points);
+        if (keys.length === 0) {
+            return;
+        }
+
+        for (var key of Object.keys(points)) {
+            var pt = points[key];
+            let newPoint = Object.assign({}, pt);
+            newPoint.y = value;
+            this.path.changePointAtIndex(newPoint, newPoint.idx, changeMode);
+            this._selectedPoints[newPoint.idx] = newPoint;
+        }
+
+        this.path.save();
     }
 }

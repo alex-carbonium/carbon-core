@@ -25,6 +25,7 @@ import UserSettings from "UserSettings";
 import Cursors from "Cursors";
 import PathManipulationDecorator from "ui/common/path/PathManipulationDecorator";
 import EditPath from "commands/EditPath";
+import DecoratableChain from "./DecoratableChain";
 
 const CP_HANDLE_RADIUS = UserSettings.path.editHandleSize;
 const CP_HANDLE_RADIUS2 = CP_HANDLE_RADIUS * 2;
@@ -300,10 +301,16 @@ class Path extends Shape {
     }
 
     save() {
+        if (this._saving) {
+            return;
+        }
+        this._saving = true;
         let newPoints = this.points;
         this.props.points = this._lastPoints;
         this.setProps({ points: newPoints });
+        this.adjustBoundaries();
         this._lastPoints = this.points.map(p => clone(p));
+        this._saving = false;
     }
 
     cloneProps() {
@@ -407,14 +414,6 @@ class Path extends Shape {
             let oldMode = this.mode();
 
             this.setProps({ mode: value });
-
-            if (value === ElementState.Edit) {
-                if (oldMode !== ElementState.Edit) {
-                    this.switchToEditMode(true);
-                }
-            } else if (oldMode !== ElementState.Resize) {
-                this.switchToEditMode(false);
-            }
         }
 
         return this.props.mode;
@@ -647,29 +646,6 @@ class Path extends Shape {
         return this.props.closed;
     }
 
-    prepareProps(changes) {
-        super.prepareProps(changes);
-        // if (changes.width !== undefined && changes.width < 1) {
-        //     changes.width = 1;
-        // }
-        //
-        // if (changes.height !== undefined && changes.height < 1) {
-        //     changes.height = 1;
-        // }
-
-        if (changes.currentPointX !== undefined && this._currentPoint) {
-            changes.currentPointX = this._roundValue(changes.currentPointX);
-        }
-
-        if (changes.currentPointY !== undefined && this._currentPoint) {
-            changes.currentPointY = this._roundValue(changes.currentPointY);
-        }
-
-        if (changes.pointRounding) {
-            //  moveAllPoints.call(this, 0, 0);
-        }
-    }
-
     hitTest(point, scale, boundaryRectOnly = false) {
         if (this.hasBadTransform()) {
             return false;
@@ -734,7 +710,23 @@ class Path extends Shape {
         return false;
     }
 
-    _drawSegment(context, pt, prevPt, closing) {
+    removed() {
+        this.switchToEditMode(false);
+        super.removed();
+    }
+
+    propsUpdated(newProps, oldProps, mode?) {
+        super.propsUpdated(newProps, oldProps, mode);
+        if (newProps.points !== undefined) {
+            this.adjustBoundaries();
+        }
+
+        if (newProps.mode !== undefined && newProps.mode !== oldProps.mode) {
+            this.switchToEditMode(newProps.mode === ElementState.Edit);
+        }
+    }
+
+    _drawSegment(context, pt, prevPt, closing?) {
         let m = this.globalViewMatrix();
         let xy = m.transformPoint(pt);
 
@@ -834,8 +826,6 @@ class Path extends Shape {
         graph.initWithBezierPath(this, Matrix.Identity);
 
         this.prepareAndSetProps({ br: Rect.fromObject(graph.bounds) });
-
-        this.save();
     }
 
     getInsertPointData(pointInfo) {
@@ -1092,12 +1082,8 @@ class Path extends Shape {
     }
 
     currentPointX(value: number, changeMode: ChangeMode): number {
-        if (arguments.length && this._selectedPoint) {
-            let newPoint = Object.assign({}, this._selectedPoint);
-            newPoint.x = value;
-            this._selectedPoint = newPoint;
-            this.changePointAtIndex(newPoint, newPoint.idx, changeMode);
-            this.runtimeProps.currentPointX = newPoint.x;
+        if (arguments.length) {
+            this.runtimeProps.currentPointX = this._roundValue(value);
             this._refreshComputedProps();
             Invalidate.request();
         }
@@ -1106,11 +1092,7 @@ class Path extends Shape {
     }
     currentPointY(value: number, changeMode: ChangeMode): number {
         if (arguments.length && this._selectedPoint) {
-            let newPoint = Object.assign({}, this._selectedPoint);
-            newPoint.y = value;
-            this._selectedPoint = newPoint;
-            this.changePointAtIndex(newPoint, newPoint.idx, changeMode);
-            this.runtimeProps.currentPointY = newPoint.y;
+            this.runtimeProps.currentPointY = this._roundValue(value);
             this._refreshComputedProps();
             Invalidate.request();
         }
@@ -1118,10 +1100,6 @@ class Path extends Shape {
     }
     currentPointType(value: PointType, changeMode: ChangeMode): PointType {
         if (arguments.length && this._selectedPoint) {
-            let newPoint = Object.assign({}, this._selectedPoint);
-            newPoint.type = value;
-            this._selectedPoint = newPoint;
-            this.changePointAtIndex(newPoint, newPoint.idx, changeMode);
             this.runtimeProps.currentPointType = value;
             this._refreshComputedProps();
             Invalidate.request();
@@ -1134,6 +1112,7 @@ class Path extends Shape {
         let svgCommands = this._parsePath(path);
         this._renderSvgCommands(svgCommands, matrix);
         this.adjustBoundaries();
+        this.save();
     }
 
     _splitPoints(path) {
@@ -1243,6 +1222,7 @@ class Path extends Shape {
             }
         }
         this.adjustBoundaries();
+        this.save();
     }
 
     resetGlobalViewCache() {
@@ -1581,6 +1561,7 @@ class Path extends Shape {
 
 
         path.adjustBoundaries();
+        path.save();
 
         return path;
     }
@@ -1597,6 +1578,7 @@ class Path extends Shape {
         path.addPoint(matrix.transformPoint({ x: parsedAttributes.x2 || 0, y: parsedAttributes.y2 || 0 }));
 
         path.adjustBoundaries();
+        path.save();
 
         return path;
     }
@@ -1620,6 +1602,7 @@ class Path extends Shape {
         }
 
         path.adjustBoundaries();
+        path.save();
 
         return path;
     }
@@ -1700,6 +1683,8 @@ class Path extends Shape {
 
         path.closed(true);
         path.adjustBoundaries();
+        path.save();
+
         return path;
     }
 
@@ -1727,6 +1712,7 @@ class Path extends Shape {
 
         path.closed(true);
         path.adjustBoundaries();
+        path.save();
 
         return path;
     }
