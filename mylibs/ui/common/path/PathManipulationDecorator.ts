@@ -103,7 +103,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         Environment.controller.captureMouse(this);
         SnapController.calculateSnappingPointsForPath(this.element);
         this._cancelBinding = Environment.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
-
+        this._startSegmentPoint = this._lastSegmentStartPoint();
         Invalidate.request();
     }
 
@@ -117,7 +117,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         Environment.controller.releaseMouse(this);
         Invalidate.request();
 
-        // todo: clear all segments with less then 2 points
+        this.clearShortSegments();
 
         if (this.path.points.length < 2) {
             this.path.parent().remove(this.path);
@@ -125,10 +125,25 @@ export default class PathManipulationObject extends UIElementDecorator implement
         } else {
             this.element.adjustBoundaries();
             this.element.resetGlobalViewCache();
+            this.element.save();
+            SnapController.clearActiveSnapLines();
         }
 
-        SnapController.clearActiveSnapLines();
         super.detach();
+    }
+
+    clearShortSegments() {
+        var points = this.path.points;
+        var endSegment = points.length - 1;
+        for(var i = endSegment; i >= 0; --i) {
+            var pt = points[i];
+            if(pt.moveTo || i === 0) {
+                if(endSegment - i < 2) {
+                    points.splice(i, endSegment - i + 1);
+                }
+                endSegment = i-1;
+            }
+        }
     }
 
     cancel() {
@@ -215,9 +230,6 @@ export default class PathManipulationObject extends UIElementDecorator implement
     }
 
     addToSelectedPoints(pt) {
-        // if (!this._selectedPoints) {
-        //     this._selectedPoints = {}
-        // }
         if (this._selectedPoints[pt.idx]) {
             delete this._selectedPoints[pt.idx];
         } else {
@@ -323,10 +335,6 @@ export default class PathManipulationObject extends UIElementDecorator implement
             this._addNewPathPoint(event, keys);
         }
 
-        // if (Object.keys(this._selectedPoints).length <= 1) { // ??????
-        //     this.selectedPoint = pt;
-        // }
-
         if (event.handled) {
             PropertyTracker.suspend();
         }
@@ -371,18 +379,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
             return;
         }
 
-        // 1. move selected point
-        // bend if selected
-
-        // 3. else if in construct mode, add new point
-        // 4.1. else if consttruct mode, click to edge (split edge)
-        // 4. else if in bending mode click on edge (prepare for bending move)
-
         if (this._currentPoint) {
-            // pos = SnapController.applySnappingForPoint(pos);
-
-            // pos = path.globalViewMatrixInverted().transformPoint(pos);
-
             path._roundPoint(pos);
 
             let newX = pos.x
@@ -510,13 +507,12 @@ export default class PathManipulationObject extends UIElementDecorator implement
         let path = this.path;
         let pt = path.controlPointForPosition(event);
 
-        //this.resetHover();
         if (!updateHoverPoint.call(this, pt)) {
             pt = path.handlePointForPosition(event);
             updateHoverHandlePoint.call(this, pt);
         }
 
-        if (!this.path.closed() && (this.hoverPoint === this._startSegmentPoint)) {
+        if (this.constructMode && !this.path.closed() && (this.hoverPoint === this._startSegmentPoint)) {
             event.cursor = Cursors.Pen.ClosePath;
         }
         else if (this.isHoveringOverHandle() || (this.isHoveringOverPoint() && keys.alt)) {

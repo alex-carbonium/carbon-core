@@ -22,6 +22,7 @@ export default class GraphicalPathCreator extends Tool {
     _type: any;
     _parameters: any;
     _editTextToken: any;
+    _cancelBinding: any;
 
     constructor(app, type, parameters?) {
         super(ViewTool.Path);
@@ -57,6 +58,11 @@ export default class GraphicalPathCreator extends Tool {
             this._changeMode(this._pathElement, ElementState.Resize);
         }
 
+        if(this._cancelBinding) {
+            this._cancelBinding.dispose();
+            this._cancelBinding = null;
+        }
+
         setTimeout(function () {
             if (SystemConfiguration.ResetActiveToolToDefault) {
                 this._app.resetCurrentTool();
@@ -64,11 +70,18 @@ export default class GraphicalPathCreator extends Tool {
         }, 0);
     }
 
+    cancel() {
+        this._createNewPath();
+    }
+
     _attach() {
         super._attach.apply(this, arguments);
+        this._cancelBinding = Environment.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
         var element = Selection.selectedElement();
-        if (element instanceof Path) {
+        if (element instanceof Path && element.mode() === ElementState.Edit) {
             this._pathElement = element;
+            this._pathElement.removeDecoratorByType(PathManipulationDecorator);
+            this._pathElement.addDecorator(new PathManipulationDecorator(true));
         } else {
             this._createNewPath();
         }

@@ -593,14 +593,15 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (!this.decorators) {
             return;
         }
-        for (let i = 0, max = this.decorators.length; i < max; i++) {
+
+        for (let i = this.decorators.length - 1; i >= 0; i--) {
             if (this.decorators[i].t === type.prototype.t) {
                 this.decorators[i].detach();
                 this.decorators.splice(i, 1);
-                Invalidate.requestInteractionOnly();
-                break;
             }
         }
+
+        Invalidate.requestInteractionOnly();
     }
 
     removed() {

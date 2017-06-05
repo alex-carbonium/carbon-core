@@ -48,11 +48,20 @@ const commandLengths = {
     a: 7
 };
 
-let isLinePoint = function (pt) {
+function isLinePoint(pt) {
     return pt.type === PointType.Straight;
 };
 
-let getClickedPoint = function (x, y) {
+function pointsEqual(p1, p2) {
+    if (p1 === p2) {
+        return true;
+    }
+    return p1.type === p2.type && p1.x === p2.x && p1.y === p2.y
+        && p1.cp1x === p2.cp1x && p1.cp1y === p2.cp1y
+        && p1.cp2x === p2.cp2x && p1.cp2y === p2.cp2y;
+}
+
+function getClickedPoint(x, y) {
     let pos = this.globalViewMatrixInverted().transformPoint2(x, y);
 
     let zoom = Environment.view.scale();
@@ -68,7 +77,7 @@ let getClickedPoint = function (x, y) {
     return null;
 };
 
-let getClickedHandlePoint = function (x, y) {
+function getClickedHandlePoint(x, y) {
     let pos = this.globalViewMatrixInverted().transformPoint2(x, y);
 
     let zoom = Environment.view.scale();
@@ -96,14 +105,12 @@ let getClickedHandlePoint = function (x, y) {
     return null;
 };
 
-let setLinePoint = function (pt) {
+function setLinePoint(pt) {
     pt.cp1x = pt.cp2x = pt.x;
     pt.cp1y = pt.cp2y = pt.y;
 };
 
-
-
-let scalePointsToNewSize = function () {
+function scalePointsToNewSize() {
     let bb = this.getBoundingBox();
     let m = this.viewMatrix();
     for (let i = 0; i < this.points.length; ++i) {
@@ -281,6 +288,22 @@ class Path extends Shape {
         if (this._saving) {
             return;
         }
+
+        if(this._lastPoints && this._lastPoints.length === this.props.points.length) {
+            let allEqual = true;
+            for(var i = this._lastPoints.length - 1; i>=0; --i) {
+                var p1 = this._lastPoints[i];
+                var p2 = this.props.points[i];
+                if(!pointsEqual(p1, p2)) {
+                    allEqual = false;
+                    break;
+                }
+            }
+            if(allEqual) {
+                return;
+            }
+        }
+
         this._saving = true;
         let newPoints = this.points;
         this.props.points = this._lastPoints;
