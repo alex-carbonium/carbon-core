@@ -277,29 +277,6 @@ class Path extends Shape {
         }, {}); // refresh properties
     }
 
-    tryDelete(): boolean {
-        if (this._selectedPoint && this.points.length > 2 && this.mode() === ElementState.Edit) {
-            var index = this._selectedPoint.idx;
-            let keys = Object.keys(this._selectedPoints).map((k: any) => k - 0).sort((a, b) => b - a);
-            if (keys.length) {
-                for (let i = 0; i < keys.length; ++i) {
-                    this.removePointAtIndex(keys[i]);
-                }
-                this.clearSelectedPoints();
-            } else {
-                this.removePointAtIndex(this._selectedPoint.idx);
-            }
-
-            if (index === 0) {
-                index = this.points.length;
-            }
-
-            this.selectedPoint = this.points[index - 1];
-            return false;
-        }
-        return true;
-    }
-
     save() {
         if (this._saving) {
             return;

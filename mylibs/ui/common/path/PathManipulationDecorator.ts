@@ -477,6 +477,34 @@ export default class PathManipulationObject extends UIElementDecorator implement
         this._updateCursor(event, keys);
     }
 
+    delete(): boolean {
+        let selectedKeys = Object.keys(this._selectedPoints);
+        if (selectedKeys.length && this.path.points.length > 2 && this.path.mode() === ElementState.Edit) {
+            var index = 0;
+            if (this.selectedPoint) {
+                index = this.selectedPoint.idx;
+            }
+            let keys = selectedKeys.map((k: any) => k - 0).sort((a, b) => b - a);
+            if (keys.length) {
+                for (let i = 0; i < keys.length; ++i) {
+                    this.path.removePointAtIndex(keys[i]);
+                }
+                this.clearSelectedPoints();
+            } else {
+                this.path.removePointAtIndex(this._selectedPoint.idx);
+            }
+
+            if (index === 0) {
+                index = this.path.points.length;
+            }
+
+            this.selectedPoint = this.path.points[index - 1];
+
+            return false;
+        }
+        return true;
+    }
+
     _updateCursor(event, keys) {
         let x = event.x, y = event.y;
         let path = this.path;

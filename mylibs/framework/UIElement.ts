@@ -1626,8 +1626,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
     contextMenu(context, menu) {
     }
-    tryDelete(): boolean {
-        return true;
+
+    delete() {
+        this.parent().remove(this);
     }
     move(rect) {
         this.resize(rect);
