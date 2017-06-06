@@ -107,6 +107,10 @@ export function equalPoints(p1: ICoordinate, p2: ICoordinate): boolean {
         return true;
     }
 
+    if(!p1 || !p2) {
+        return false;
+    }
+
     return p1.x === p2.x && p1.y === p2.y;
 }
 

@@ -99,14 +99,14 @@ function getClickedHandlePoint(x, y) {
         let x2 = pos.x - pt.cp1x
             , y2 = pos.y - pt.cp1y
         if (x2 * x2 + y2 * y2 < CP_HANDLE_RADIUS2 * Environment.view.contextScale / (zoom * zoom)) {
-            pt._selectedPoint = 1;
+            pt._selectedHandle = 1;
             return pt;
         }
 
         x2 = pos.x - pt.cp2x
         y2 = pos.y - pt.cp2y
         if (x2 * x2 + y2 * y2 < CP_HANDLE_RADIUS2 * Environment.view.contextScale / (zoom * zoom)) {
-            pt._selectedPoint = 2;
+            pt._selectedHandle = 2;
             return pt;
         }
     }
@@ -278,8 +278,6 @@ class Path extends Shape {
         super();
         this.points = [];
         this._lastPoints = [];
-        this._currentPoint = null;
-        this._selectedPoints = {};
         this._lastBr = this.props.br;
         this._lastM = this.props.m;
     }
@@ -442,9 +440,7 @@ class Path extends Shape {
         if (edit) {
             this.addDecorator(new PathManipulationDecorator());
 
-            this._currentPoint = null;
             scalePointsToNewSize.call(this);
-            this.selectedPoint = this.points[0];
             this.save();
         } else {
             // this.unregisterForLayerDraw(LayerTypes.Interaction);
@@ -505,13 +501,6 @@ class Path extends Shape {
 
         if (changeMode !== ChangeMode.Self) {
             this.save();
-        }
-
-        if (this._selectedPoint && this._selectedPoint.idx === idx) {
-            this.runtimeProps.currentPointX = point.x;
-            this.runtimeProps.currentPointY = point.y;
-            this.runtimeProps.currentPointType = point.type;
-            this._refreshComputedProps();
         }
     }
 
@@ -646,10 +635,6 @@ class Path extends Shape {
     hitTest(point, scale, boundaryRectOnly = false) {
         if (this.hasBadTransform()) {
             return false;
-        }
-
-        if (this._currentPoint || this._handlePoint || this._pointOnPath) {
-            return true;
         }
 
         if ((getClickedPoint.call(this, point.x, point.y))
@@ -963,9 +948,6 @@ class Path extends Shape {
 
         let current = UIElement.prototype.fromJSON.call(this, data);
 
-        this._currentPoint = null;
-        this._handlePoint = null;
-
         return current;
     }
 
@@ -1087,16 +1069,18 @@ class Path extends Shape {
 
         return this.runtimeProps.currentPointX;
     }
+
     currentPointY(value: number, changeMode: ChangeMode): number {
-        if (arguments.length && this._selectedPoint) {
+        if (arguments.length) {
             this.runtimeProps.currentPointY = this._roundValue(value);
             this._refreshComputedProps();
             Invalidate.request();
         }
         return this.runtimeProps.currentPointY;
     }
+
     currentPointType(value: PointType, changeMode: ChangeMode): PointType {
-        if (arguments.length && this._selectedPoint) {
+        if (arguments.length) {
             this.runtimeProps.currentPointType = value;
             this._refreshComputedProps();
             Invalidate.request();
@@ -1789,6 +1773,7 @@ PropertyMetadata.registerForType(Path, {
 
         return baseGroups;
     },
+
     prepareVisibility(path: Path) {
         let editMode = path.props.mode === ElementState.Edit;
         let pointSelected = path.runtimeProps.selectedPointIdx !== -1;
