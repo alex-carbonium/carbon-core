@@ -1,4 +1,4 @@
-import {areRectsIntersecting} from "math/math";
+import { areRectsIntersecting } from "math/math";
 import EventHelper from "./EventHelper";
 import Selection from "./SelectionModel";
 import CompositeElement from "./CompositeElement";
@@ -11,22 +11,22 @@ import Page from "./Page";
 import Keyboard from "../platform/Keyboard";
 import Phantom from "./Phantom";
 import ObjectFactory from "./ObjectFactory";
-import {Types, ViewTool} from "./Defs";
+import { Types, ViewTool } from "./Defs";
 import { IApp, IController, IEvent, IEvent2, IMouseEventData, IKeyboardState, IUIElement, IContainer, IElementEventData, ITransformationEventData } from "carbon-core";
 import UIElement from "./UIElement";
 import Container from "./Container";
-import {choosePasteLocation} from "./PasteLocator";
+import { choosePasteLocation } from "./PasteLocator";
 import { IArtboard } from "carbon-model";
 import Point from "../math/point";
 import { IDropElementData } from "carbon-app";
 import Cursors from "Cursors";
 
 function onselect(rect) {
-    for(var i = this.view._layers.length - 1; i >= 0; --i) {
+    for (var i = this.view._layers.length - 1; i >= 0; --i) {
         var layer = this.view._layers[i];
-        if(!layer.hitTransparent()) {
+        if (!layer.hitTransparent()) {
             var selection = layer.getElementsInRect(rect);
-            if(selection) {
+            if (selection) {
                 Selection.makeSelection(selection);
             }
             return;
@@ -49,7 +49,7 @@ function stopDrag(event) {
     this._draggingElement.detach();
 
     if (elements.length === 1) {
-        if(elements[0].props._unwrapContent){
+        if (elements[0].props._unwrapContent) {
             elements = elements[0].unwrapToParent();
         }
     }
@@ -111,7 +111,7 @@ function dragging(event, keys: IKeyboardState) {
         event: event
     };
 
-    var mousePoint = {x: eventData.mouseX, y: eventData.mouseY};
+    var mousePoint = { x: eventData.mouseX, y: eventData.mouseY };
 
     if (this._draggingElement.allowMoveOutChildren(event)) {
         _handleDraggingOver.call(this, mousePoint, draggingElement, eventData);
@@ -158,13 +158,13 @@ export default class DesignerController implements IController {
     _startDraggingElement: IUIElement;
 
     updateCursor(eventData?) {
-        if (eventData){
-            if (eventData.cursor){
+        if (eventData) {
+            if (eventData.cursor) {
                 Cursor.setCursor(eventData.cursor);
                 return;
             }
 
-            if (Cursor.hasGlobalCursor()){
+            if (Cursor.hasGlobalCursor()) {
                 return;
             }
 
@@ -174,16 +174,16 @@ export default class DesignerController implements IController {
                 return;
             }
 
-            for (var i =  this.view._layers.length - 1; i >= 0 ; i--) {
+            for (var i = this.view._layers.length - 1; i >= 0; i--) {
                 var layer = this.view._layers[i];
                 var element = layer.hitElement(eventData, this.view.scale());
                 if (element !== null) {
                     var cursor = element.cursor(eventData);
-                    if (cursor){
+                    if (cursor) {
                         Cursor.setCursor(cursor);
                         return;
                     }
-                    if (element.canSelect() && element.canDrag() && !element.locked() && Selection.isElementSelected(element)){
+                    if (element.canSelect() && element.canDrag() && !element.locked() && Selection.isElementSelected(element)) {
                         this._setMoveCursor();
                         return;
                     }
@@ -191,11 +191,11 @@ export default class DesignerController implements IController {
             }
         }
 
-        if (!Cursor.hasGlobalCursor()){
+        if (!Cursor.hasGlobalCursor()) {
             Cursor.setCursor(this.defaultCursor());
         }
     }
-    defaultCursor(): string{
+    defaultCursor(): string {
         return Selection.directSelectionEnabled() ? "direct_select_cursor" : "default_cursor"
     }
 
@@ -203,16 +203,16 @@ export default class DesignerController implements IController {
 
     }
 
-    ondoubletap () {
+    ondoubletap() {
 
     }
 
-    _setMoveCursor(){
+    _setMoveCursor() {
         Cursor.setCursor(Keyboard.state.alt ? "move_clone" : "move_cursor");
     }
 
     _bubbleMouseEvent(eventData, method) {
-        for (var i =  this.view._layers.length - 1; i >= 0 ; i--) {
+        for (var i = this.view._layers.length - 1; i >= 0; i--) {
             var layer = this.view._layers[i];
             var e = layer.hitElement(eventData, this.view.scale());
             if (e && e[method] /*&& e.canSelect()*/ && !e.locked()) {
@@ -337,7 +337,7 @@ export default class DesignerController implements IController {
             y: event.y
         };
 
-        if (hideFrame){
+        if (hideFrame) {
             Selection.hideFrame();
         }
 
@@ -359,10 +359,11 @@ export default class DesignerController implements IController {
 
     onmousedown(eventData) {
         this._noActionsBeforeClick = true;
+        this._mouseDownData = eventData;
 
         this.mousedownEvent.raise(eventData, Keyboard.state);
         if (eventData.handled) {
-            if (eventData.cursor){
+            if (eventData.cursor) {
                 this.updateCursor(eventData);
             }
             return;
@@ -370,16 +371,16 @@ export default class DesignerController implements IController {
 
         if (this._captureElement) {
             this._captureElement.mousedown(eventData, Keyboard.state);
-            if (eventData.cursor){
+            if (eventData.cursor) {
                 this.updateCursor(eventData);
             }
             return;
         }
 
-        this._mouseDownData = eventData;
+        this._lastMouseMove = null;
 
         this._bubbleMouseEvent(eventData, "mousedown");
-        if (eventData.cursor){
+        if (eventData.cursor) {
             this.updateCursor(eventData);
         }
 
@@ -387,7 +388,7 @@ export default class DesignerController implements IController {
         if (!eventData.handled) {
             var composite = Selection.selectComposite();
             // first check current selection
-            if(composite && composite.hitTest(eventData, this.view.scale())) {
+            if (composite && composite.hitTest(eventData, this.view.scale())) {
                 if (composite.canDrag()) {
                     this._startDraggingData = eventData;
                     this._startDraggingElement = composite;
@@ -397,7 +398,7 @@ export default class DesignerController implements IController {
                 }
             }
             else {
-                for (var i =  this.view._layers.length - 1; i >= 0 ; i--) {
+                for (var i = this.view._layers.length - 1; i >= 0; i--) {
                     var layer = this.view._layers[i];
                     var element = layer.hitElement(eventData, this.view.scale(), null, Selection.directSelectionEnabled());
                     if (element !== null) {
@@ -424,6 +425,12 @@ export default class DesignerController implements IController {
     }
 
     onmousemove(eventData, keys: IKeyboardState = Keyboard.state) {
+        if (!this._lastMouseMove && this._mouseDownData &&
+            this._mouseDownData.x === eventData.x &&
+            this._mouseDownData.y === eventData.y) {
+            return; // do not realy rise mouse move if not movent after mouse down happened (bug on my laptop :) )
+        }
+
         this._lastMouseMove = {
             x: eventData.x,
             y: eventData.y,
@@ -503,8 +510,8 @@ export default class DesignerController implements IController {
         this.updateCursor(eventData);
     }
 
-    repeatLastMouseMove(keys: IKeyboardState = Keyboard.state){
-        if (this._lastMouseMove){
+    repeatLastMouseMove(keys: IKeyboardState = Keyboard.state) {
+        if (this._lastMouseMove) {
             this.onmousemove(this._lastMouseMove, keys);
         }
     }
@@ -527,7 +534,7 @@ export default class DesignerController implements IController {
 
         this.mouseupEvent.raise(eventData, Keyboard.state);
         if (eventData.handled) {
-            if (eventData.cursor){
+            if (eventData.cursor) {
                 this.updateCursor(eventData);
             }
             return;
@@ -538,7 +545,7 @@ export default class DesignerController implements IController {
 
         if (this._captureElement) {
             this._captureElement.mouseup(eventData, Keyboard.state);
-            if (eventData.cursor){
+            if (eventData.cursor) {
                 this.updateCursor(eventData);
             }
             return;
@@ -555,7 +562,7 @@ export default class DesignerController implements IController {
         }
 
         this._bubbleMouseEvent(eventData, "mouseup");
-        if (eventData.cursor){
+        if (eventData.cursor) {
             this.updateCursor(eventData);
         }
         if (eventData.handled) {
@@ -596,16 +603,16 @@ export default class DesignerController implements IController {
 
             this.clickEvent.raise(eventData, keys);
             if (eventData.handled) {
-                if (eventData.cursor){
-                   this.updateCursor(eventData);
+                if (eventData.cursor) {
+                    this.updateCursor(eventData);
                 }
                 return;
             }
 
             if (this._captureElement) {
                 this._captureElement.click(eventData);
-                if (eventData.cursor){
-                   this.updateCursor(eventData);
+                if (eventData.cursor) {
+                    this.updateCursor(eventData);
                 }
                 return;
             }
@@ -617,27 +624,27 @@ export default class DesignerController implements IController {
             if (!eventData.handled) {
                 this.selectByClick(eventData);
             }
-            if (eventData.cursor){
+            if (eventData.cursor) {
                 this.updateCursor(eventData);
             }
         }
     }
 
-    _onKeyChanged(newKeys, oldKeys){
-        if ((this.app.currentTool === ViewTool.Pointer || this.app.currentTool === ViewTool.PointerDirect) && !this.interactionActive){
+    _onKeyChanged(newKeys, oldKeys) {
+        if ((this.app.currentTool === ViewTool.Pointer || this.app.currentTool === ViewTool.PointerDirect) && !this.interactionActive) {
             Selection.directSelectionEnabled(newKeys.ctrl);
         }
 
-        if (oldKeys.alt !== newKeys.alt){
+        if (oldKeys.alt !== newKeys.alt) {
             var c = Cursor.getCursor();
-            if (newKeys.alt && c === "move_cursor"){
+            if (newKeys.alt && c === "move_cursor") {
                 Cursor.setCursor("move_clone");
             }
-            else if (!newKeys.alt && c === "move_clone"){
+            else if (!newKeys.alt && c === "move_clone") {
                 Cursor.setCursor("move_cursor");
             }
 
-            if (this._draggingElement){
+            if (this._draggingElement) {
                 this._draggingElement.showOriginal(newKeys.alt);
                 Invalidate.request();
             }
@@ -645,9 +652,9 @@ export default class DesignerController implements IController {
 
         this.repeatLastMouseMove(newKeys);
     }
-    _onSelectionModeChanged(){
+    _onSelectionModeChanged() {
         var cursor = Cursor.getCursor();
-        if (cursor === "default_cursor" || cursor === "direct_select_cursor"){
+        if (cursor === "default_cursor" || cursor === "direct_select_cursor") {
             this.updateCursor();
         }
     }
@@ -676,12 +683,12 @@ export default class DesignerController implements IController {
                     eventData.cursor = Cursors.Move;
                 }
             }
-            else{
+            else {
                 element = null;
             }
         }
 
-        if (element === null){
+        if (element === null) {
             Selection.makeSelection([]);
         }
 
@@ -711,7 +718,7 @@ export default class DesignerController implements IController {
                 var br = element.boundaryRect();
 
                 this.cancel();
-                this.insertAndSelect(result.elements, parent, eventData.x - br.width/2, eventData.y - br.height/2);
+                this.insertAndSelect(result.elements, parent, eventData.x - br.width / 2, eventData.y - br.height / 2);
 
                 this.stopDraggingEvent.raise(eventData as any, Selection.selectedElements());
             })
@@ -721,14 +728,14 @@ export default class DesignerController implements IController {
             });
     }
 
-    insertAndSelect(elements: IUIElement[], parent: Container, x: number, y: number){
+    insertAndSelect(elements: IUIElement[], parent: Container, x: number, y: number) {
         var newSelection = [];
 
         for (let i = 0; i < elements.length; i++) {
             let element = elements[i];
 
             if (parent instanceof CompositeElement) {
-                for (let k = 0; k < parent.elements.length; ++k){
+                for (let k = 0; k < parent.elements.length; ++k) {
                     var toInsert = k === 0 ? element : element.clone();
                     newSelection.push(parent.elements[k].add(toInsert));
                 }
@@ -739,7 +746,7 @@ export default class DesignerController implements IController {
                 newSelection = element['unwrapToParent']();
             }
             else {
-                if (!parent.autoPositionChildren()){
+                if (!parent.autoPositionChildren()) {
                     let newMatrix = element.viewMatrix().withTranslation(Math.round(x), Math.round(y));
                     element.setTransform(parent.globalMatrixToLocal(newMatrix));
                 }
@@ -750,34 +757,34 @@ export default class DesignerController implements IController {
         Selection.makeSelection(newSelection);
     }
 
-    getCurrentlyDraggedElements(): IUIElement[]{
-        if (!this._startDraggingElement){
+    getCurrentlyDraggedElements(): IUIElement[] {
+        if (!this._startDraggingElement) {
             return [];
         }
-        if (this._startDraggingElement instanceof CompositeElement){
+        if (this._startDraggingElement instanceof CompositeElement) {
             return this._startDraggingElement.elements;
         }
         return [this._startDraggingElement];
     }
-    getCurrentDropTarget(eventData: IMouseEventData, keys: IKeyboardState): Container | null{
+    getCurrentDropTarget(eventData: IMouseEventData, keys: IKeyboardState): Container | null {
         var parent = this._draggingOverElement;
         var selectComposite = Selection.selectComposite();
         if (selectComposite.canAccept([this._startDraggingElement], undefined, keys.ctrl)
             && selectComposite.hitTest(eventData, this.view.scale(), true)
-        ){
+        ) {
             parent = Selection.selectComposite();
         }
         return parent;
     }
 
-    keyboardStateFromEvent(e: MouseEvent, mutableState?: IKeyboardState): IKeyboardState{
-        if (mutableState){
+    keyboardStateFromEvent(e: MouseEvent, mutableState?: IKeyboardState): IKeyboardState {
+        if (mutableState) {
             mutableState.alt = e.altKey;
             mutableState.shift = e.shiftKey;
             mutableState.ctrl = e.metaKey || e.ctrlKey;
             return mutableState;
         }
-        return {alt: e.altKey, shift: e.shiftKey, ctrl: e.metaKey || e.ctrlKey};
+        return { alt: e.altKey, shift: e.shiftKey, ctrl: e.metaKey || e.ctrlKey };
     }
 
     captureMouse(/*UIElement*/element) {
@@ -805,7 +812,7 @@ export default class DesignerController implements IController {
         }
     }
 
-    onInlineEditModeChanged(mode, editor){
+    onInlineEditModeChanged(mode, editor) {
         this.isInlineEditMode = mode;
         this.inlineEditor = editor;
     }
@@ -817,14 +824,14 @@ export default class DesignerController implements IController {
         }
     }
 
-    onInteractionStarted(){
+    onInteractionStarted() {
         this.interactionActive = true;
     }
-    onInteractionStopped(){
+    onInteractionStopped() {
         this.interactionActive = false;
     }
 
-    choosePasteLocation(elements: IUIElement[], allowMoveIn?: boolean){
+    choosePasteLocation(elements: IUIElement[], allowMoveIn?: boolean) {
         return choosePasteLocation(elements, null, allowMoveIn);
     }
 }
