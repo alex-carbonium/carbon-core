@@ -666,7 +666,9 @@ export default class BezierGraph implements IBezierGraph {
             if (!this._bounds) {
                 this._bounds = clone(contour.bounds);
             } else {
-                this._bounds = unionRect(this._bounds, contour.bounds);
+                if (contour.bounds) {
+                    this._bounds = unionRect(this._bounds, contour.bounds);
+                }
             }
         }
 

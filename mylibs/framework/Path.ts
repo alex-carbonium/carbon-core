@@ -13,7 +13,6 @@ import Shape from "framework/Shape";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
-import SnapController from "framework/SnapController";
 import Box from "framework/Box";
 import { debounce } from "util";
 import Command from "framework/commands/Command";
@@ -47,6 +46,15 @@ const commandLengths = {
     t: 2,
     a: 7
 };
+
+class PathPoint extends UIElement<any> {
+    constructor(public px: number, public py: number) {
+        super();
+        this.applyTranslation({ x: px, y: py });
+        this.setProps({br:new Rect(0,0,1,1)});
+    }
+}
+
 
 function isLinePoint(pt) {
     return pt.type === PointType.Straight;
@@ -289,17 +297,17 @@ class Path extends Shape {
             return;
         }
 
-        if(this._lastPoints && this._lastPoints.length === this.props.points.length) {
+        if (this._lastPoints && this._lastPoints.length === this.props.points.length) {
             let allEqual = true;
-            for(var i = this._lastPoints.length - 1; i>=0; --i) {
+            for (var i = this._lastPoints.length - 1; i >= 0; --i) {
                 var p1 = this._lastPoints[i];
                 var p2 = this.props.points[i];
-                if(!pointsEqual(p1, p2)) {
+                if (!pointsEqual(p1, p2)) {
                     allEqual = false;
                     break;
                 }
             }
-            if(allEqual) {
+            if (allEqual) {
                 return;
             }
         }
@@ -311,7 +319,7 @@ class Path extends Shape {
         this.props.points = this._lastPoints;
         this.props.br = this._lastBr;
         this.props.m = this._lastM;
-        this.setProps({ points: newPoints, br:newBr, m:newM });
+        this.setProps({ points: newPoints, br: newBr, m: newM });
         this.adjustBoundaries();
         this._lastPoints = this.points.map(p => clone(p));
         this._lastBr = this.props.br.clone();
@@ -404,10 +412,6 @@ class Path extends Shape {
             prevPoint.closed = true;
             this.changePointAtIndex(prevPoint, idx - 1);
         }
-
-        if (this.mode() === ElementState.Edit) {
-            SnapController.calculateSnappingPointsForPath(this);
-        }
     }
 
     removeLastPoint() {
@@ -440,8 +444,6 @@ class Path extends Shape {
 
             this._currentPoint = null;
             scalePointsToNewSize.call(this);
-
-
             this.selectedPoint = this.points[0];
             this.save();
         } else {
@@ -484,10 +486,6 @@ class Path extends Shape {
         this._initPoint(point);
         this.points.push(point);
 
-        if (this.mode() === ElementState.Edit) {
-            SnapController.calculateSnappingPointsForPath(this);
-        }
-
         this.save();
 
         return point;
@@ -497,10 +495,6 @@ class Path extends Shape {
         this._initPoint(point);
         this.points.splice(idx, 0, point);
 
-        if (this.mode() === ElementState.Edit) {
-            SnapController.calculateSnappingPointsForPath(this);
-        }
-
         this.save();
 
         return point;
@@ -508,9 +502,6 @@ class Path extends Shape {
 
     changePointAtIndex(point, idx, changeMode: ChangeMode = ChangeMode.Model) {
         this.points.splice(idx, 1, point);
-        if (this.mode() === ElementState.Edit && changeMode !== ChangeMode.Self) {
-            SnapController.calculateSnappingPointsForPath(this);
-        }
 
         if (changeMode !== ChangeMode.Self) {
             this.save();
@@ -1209,6 +1200,16 @@ class Path extends Shape {
         return result;
     }
 
+    snapElements() {
+        let m = this.globalViewMatrix();
+
+        var points = this.points;
+        return points.map(p=>{
+            var pt = m.transformPoint(p);
+            return new PathPoint(pt.x, pt.y);
+        });
+    }
+
     transform(matrix) {
         let points = this.points;
         for (let i = 0; i < points.length; ++i) {
@@ -1863,5 +1864,7 @@ function svgCommand(pt, prevPt) {
 
     return "C " + cp1x + "," + cp1y + " " + cp2x + "," + cp2y + " " + pt.x + "," + pt.y;
 }
+
+
 
 export default Path;

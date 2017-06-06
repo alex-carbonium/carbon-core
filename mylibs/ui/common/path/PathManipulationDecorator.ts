@@ -100,12 +100,12 @@ export default class PathManipulationObject extends UIElementDecorator implement
         this._selectedPoints = {};
     }
 
-    onselect(rect:Rect) {
+    onselect(rect: Rect) {
         var point = this.path.globalViewMatrixInverted().transformPoint2(rect.x, rect.y);
         rect = new Rect(point.x, point.y, rect.width, rect.height);
         this.clearSelectedPoints();
-        for(var pt of this.path.points) {
-            if(rect.containsPoint(pt)) {
+        for (var pt of this.path.points) {
+            if (rect.containsPoint(pt)) {
                 this.addToSelectedPoints(pt);
             }
         }
@@ -115,7 +115,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         super.attach(element);
         Environment.view.registerForLayerDraw(LayerTypes.Interaction, this);
         Environment.controller.captureMouse(this);
-        SnapController.calculateSnappingPointsForPath(this.element);
+        SnapController.calculateSnappingPointsForPath(this.path);
         this._cancelBinding = Environment.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
         this._startSegmentPoint = this._lastSegmentStartPoint();
         this._selectFrame = new SelectFrame(this.onselect.bind(this));
@@ -169,7 +169,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         if (this.element) {
             this.element.mode(ElementState.Resize);
         }
-        return false;// stop propagation
+        return false; // stop propagation
     }
 
     mouseup(event: IMouseEventData, keys: IKeyboardState) {
@@ -183,6 +183,8 @@ export default class PathManipulationObject extends UIElementDecorator implement
             return;
         }
 
+        SnapController.clearActiveSnapLines();
+
         if (this._saveOnMouseUp) {
             path.save();
             this._saveOnMouseUp = false;
@@ -190,17 +192,14 @@ export default class PathManipulationObject extends UIElementDecorator implement
 
         if (this._bendingData) {
             this._bendingData = null;
-            SnapController.clearActiveSnapLines();
             this._currentPoint = null;
             this._handlePoint = null;
             path.adjustBoundaries();
             path.invalidate();
-
-            PropertyTracker.resumeAndFlush();
-            return;
+            event.handled = true;
         }
 
-        if (this.constructMode) {
+        if (!event.handled && this.constructMode) {
             this._mousepressed = false;
             if (this.selectedPoint) {
                 this.path.changePointAtIndex(this._originalPointBeforeMove, this.selectedPoint.idx, ChangeMode.Self);
@@ -208,25 +207,26 @@ export default class PathManipulationObject extends UIElementDecorator implement
             }
 
             Invalidate.request();
-            SnapController.clearActiveSnapLines();
             this._handlePoint = null;
             this._currentPoint = null;
-            return;
+
+            event.handled = true;
         }
 
         let pt = this._currentPoint || this._handlePoint;
-        if (pt) {
-            SnapController.clearActiveSnapLines();
+        if (!event.handled && pt) {
             this._currentPoint = null;
             this._handlePoint = null;
             if (!pointsEqual(pt, this._originalPoint)) {
                 path.changePointAtIndex(pt, pt.idx);
                 path.adjustBoundaries();
             }
-            PropertyTracker.resumeAndFlush();
+            Invalidate.request();
         }
-    }
 
+        PropertyTracker.resumeAndFlush();
+        SnapController.calculateSnappingPointsForPath(this.path);
+    }
 
     get selectedPoint() {
         var keys = Object.keys(this._selectedPoints);
@@ -409,18 +409,19 @@ export default class PathManipulationObject extends UIElementDecorator implement
         }
 
         if (!keys.ctrl) {
+            console.log(`${pos.x}:${pos.y}`)
             pos = SnapController.applySnappingForPoint(pos);
         }
         pos = path.globalViewMatrixInverted().transformPoint(pos);
 
-        if (this._bendingData) {
+        if (!event.handled && this._bendingData) {
             event.handled = true;
             path.bendPoints(pos, this._bendingData);
             Invalidate.request();
-            return;
+            event.handled = true;
         }
 
-        if (this._currentPoint) {
+        if (!event.handled && this._currentPoint) {
             path._roundPoint(pos);
 
             let newX = pos.x
@@ -433,12 +434,10 @@ export default class PathManipulationObject extends UIElementDecorator implement
                 Invalidate.request();
             }
             this._saveOnMouseUp = true;
-            return;
+            event.handled = true;
         }
 
-        if (this._handlePoint) {
-            // pos = SnapController.applySnappingForPoint(pos);
-            // pos = path.globalViewMatrixInverted().transformPoint(pos);
+        if (!event.handled && this._handlePoint) {
             let pt = this._handlePoint;
             let newX = pos.x,
                 newY = pos.y;
@@ -446,10 +445,10 @@ export default class PathManipulationObject extends UIElementDecorator implement
                 y = pt.y;
             let x2, y2;
 
-            if (this._currentPoint && keys.shift) {
-                let point = angleAdjuster.adjust({ x: pt.x, y: pt.y }, { x: x, y: y });
-                x = point.x;
-                y = point.y;
+            if (keys.shift) {
+                let point = angleAdjuster.adjust({ x: pt.x, y: pt.y }, { x: newX, y: newY });
+                newX = point.x;
+                newY = point.y;
             }
 
             if (pt._selectedPoint === 1) {
@@ -490,12 +489,10 @@ export default class PathManipulationObject extends UIElementDecorator implement
             }
             this._saveOnMouseUp = true;
             Invalidate.request();
-            return;
+            event.handled = true;
         }
 
-        if (this.constructMode) {
-            event.handled = true; // do not let the path receive events since they are propagated by the tool when needed
-
+        if (!event.handled && this.constructMode) {
             if (!this._startSegmentPoint) {
                 this._startPoint = { x: event.x, y: event.y };
                 path._roundPoint(this._startPoint);
@@ -506,10 +503,12 @@ export default class PathManipulationObject extends UIElementDecorator implement
             this.nextPoint = { x: pos.x, y: pos.y };
         }
 
-        let pt = path.getPointIfClose(event);
-        if (this._pointOnPath !== pt) {
-            this._pointOnPath = pt;
-            Invalidate.requestInteractionOnly();
+        if (!event.handled) {
+            let pt = path.getPointIfClose(event);
+            if (this._pointOnPath !== pt) {
+                this._pointOnPath = pt;
+                Invalidate.requestInteractionOnly();
+            }
         }
 
         this._updateCursor(event, keys);
@@ -796,12 +795,12 @@ export default class PathManipulationObject extends UIElementDecorator implement
             this._startSegmentPoint = pt;
         }
 
-        this.selectedPoint = null;
         this._handlePoint = pt;
         this._originalPoint = clone(pt);
         this._handlePoint._selectedPoint = 0;
         this.nextPoint = null;
         this._startPoint = null;
+        this.selectedPoint = pt;
     }
 
     _closeOrRemovePoint(pt) {
