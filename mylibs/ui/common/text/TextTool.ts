@@ -13,14 +13,14 @@ import InlineTextEditor from "../../../framework/text/inlinetexteditor";
 import SharedColors from "../../SharedColors";
 import DefaultFormatter from "./DefaultFormatter";
 import RangeFormatter from "./RangeFormatter";
-import {ViewTool} from "../../../framework/Defs";
+import { ViewTool } from "../../../framework/Defs";
 import Selection from "../../../framework/SelectionModel";
 import Cursor from "../../../framework/Cursor";
 import Invalidate from "../../../framework/Invalidate";
 import Environment from "../../../environment";
-import {getAverageLuminance} from "../../../math/color";
+import { getAverageLuminance } from "../../../math/color";
 import Rect from "../../../math/rect";
-import { ChangeMode, IMouseEventData, IElementEventData } from "carbon-core";
+import { ChangeMode, IMouseEventData, IElementEventData, VerticalConstraint, HorizontalConstraint } from "carbon-core";
 import UserSettings from "../../../UserSettings";
 import Point from "../../../math/point";
 
@@ -67,7 +67,7 @@ export default class TextTool extends Tool {
         Selection.makeSelection([this._defaultFormatter]);
         Cursor.setGlobalCursor("text_tool");
 
-        if (this._onAttached){
+        if (this._onAttached) {
             this._onAttached();
             this._onAttached = null;
         }
@@ -81,19 +81,19 @@ export default class TextTool extends Tool {
 
     detach() {
         super.detach();
-        if(this._drawBinding){
+        if (this._drawBinding) {
             this._drawBinding.dispose();
             this._drawBinding = null;
         }
         Cursor.removeGlobalCursor();
         Selection.onElementSelected.unbind(this, this.onElementSelected);
         this._dragController.unbind();
-        if (this._editor){
+        if (this._editor) {
             Selection.makeSelection([this._editedElement]);
             this._editor.deactivate(false);
         }
 
-        if(this._onElementSelectedToken){
+        if (this._onElementSelectedToken) {
             this._onElementSelectedToken.dispose();
             this._onElementSelectedToken = null;
         }
@@ -104,84 +104,84 @@ export default class TextTool extends Tool {
         Cursor.removeGlobalCursor();
     }
 
-    dispose(){
-        if(this._dblclickEventToken){
+    dispose() {
+        if (this._dblclickEventToken) {
             this._dblclickEventToken.dispose();
             this._dblclickEventToken = null;
         }
 
-        if(this._editTextToken){
+        if (this._editTextToken) {
             this._editTextToken.dispose();
             this._editTextToken = null;
         }
     }
 
-    onElementSelected(selection){
-        if (selection.count()){
+    onElementSelected(selection) {
+        if (selection.count()) {
             //handle events after active frame
             this._dragController.unbind();
             this._dragController.bindToController(Environment.controller);
         }
     }
     onEditTextAction = () => {
-        if (this._canEditSelectedElement()){
+        if (this._canEditSelectedElement()) {
             var text = Selection.selectComposite().elementAt(0);
-            if (this._app.currentTool !== ViewTool.Text){
-                this._onAttached = () => {this.beginEdit(text);};
+            if (this._app.currentTool !== ViewTool.Text) {
+                this._onAttached = () => { this.beginEdit(text); };
                 this._app.actionManager.invoke("textTool");
             }
-            else{
+            else {
                 this.beginEdit(text);
             }
         }
     };
 
     onDragSearching = e => {
-        if (this._hittingEdited(e)){
+        if (this._hittingEdited(e)) {
             return;
         }
         var hit = this._hitNewElement(e);
-        if (hit instanceof Text && hit !== this._editedElement){
-            this._next = {element: hit, event: e};
+        if (hit instanceof Text && hit !== this._editedElement) {
+            this._next = { element: hit, event: e };
             Cursor.setGlobalCursor("text");
             Invalidate.requestInteractionOnly();
         }
         else {
-            if (this._next){
+            if (this._next) {
                 this._next = null;
                 Invalidate.requestInteractionOnly();
             }
-            if (this._editor && !UserSettings.text.insertNewOnClickOutside){
+            if (this._editor && !UserSettings.text.insertNewOnClickOutside) {
                 Cursor.removeGlobalCursor();
             }
-            else{
+            else {
                 Cursor.setGlobalCursor("text_tool");
             }
         }
     };
     onDragStarting = e => {
-        if (this._hittingEdited(e)){
-            if (!e.shiftKey){ //not to interfere with shift+click selection
+        if (this._hittingEdited(e)) {
+            if (!e.shiftKey) { //not to interfere with shift+click selection
                 this._editor.mouseDown(e);
             }
         }
-        else if (this._editor){
+        else if (this._editor) {
             var hit = this._hitNewElement(e);
-            if (hit instanceof Text){
-                this._next = {element: hit, event: e};
+            if (hit instanceof Text) {
+                this._next = { element: hit, event: e };
             }
             this._editor.deactivate(!UserSettings.text.insertNewOnClickOutside);
         }
-        else{
-            this._dragZone = {x: e.x, y: e.y, width: 0, height: 0, flipX: false, flipY: false};
+        else {
+            this._dragZone = { x: e.x, y: e.y, width: 0, height: 0, flipX: false, flipY: false };
         }
         Invalidate.requestInteractionOnly();
     };
     onDragging = (e, dx, dy) => {
-        if (this._editor){
+        if (this._editor) {
             this._editor.mouseMove(e);
         }
-        else if (this._dragZone){
+        else if (this._dragZone) {
             this._dragZone.width = Math.abs(dx);
             this._dragZone.height = Math.abs(dy);
             this._dragZone.flipX = dx < 0;
@@ -191,56 +191,56 @@ export default class TextTool extends Tool {
         Invalidate.requestInteractionOnly();
     };
     onDragStopped = e => {
-        if (this._editor){
+        if (this._editor) {
             this._editor.mouseUp(e);
         }
-        else if (this._dragZone){
+        else if (this._dragZone) {
             var rect = this._getDrawRect(this._dragZone);
-            var props: any = {br: rect.withPosition(0, 0).roundMutable()};
+            var props: any = { br: rect.withPosition(0, 0).roundMutable() };
             props.autoWidth = false;
-            this.insertText({x: rect.x, y: rect.y}, props, true);
+            this.insertText({ x: rect.x, y: rect.y }, props, true);
             this._dragZone = null;
         }
         Invalidate.requestInteractionOnly();
     };
     onClicked = (e: IMouseEventData) => {
-        if (this._hittingEdited(e)){
+        if (this._hittingEdited(e)) {
             this._editor.mouseDown(e, e["event"]);
             this._editor.mouseUp(e, e["event"]);
         }
-        else{
+        else {
             var hit = this._hitNewElement(e);
-            if (hit instanceof Text){
+            if (hit instanceof Text) {
                 this.beginEdit(hit, e);
             }
-            else if (this._editor){
+            else if (this._editor) {
                 Selection.makeSelection([this._editedElement]);
                 this._editor.deactivate(UserSettings.text.insertNewOnClickOutside);
             }
-            else if (UserSettings.text.insertNewOnClickOutside || !this._detaching){ //tool can be changed by mouse down
+            else if (UserSettings.text.insertNewOnClickOutside || !this._detaching) { //tool can be changed by mouse down
                 this.insertText(e);
             }
         }
         e.handled = true;
     };
     onDblClick = (e: IElementEventData) => {
-        if (this._hittingEdited(e)){
+        if (this._hittingEdited(e)) {
             this._editor.mouseDown(e);
             this._editor.mouseUp(e);
             this._editor.mouseDblClick(e);
             e.handled = true;
         }
-        else{
+        else {
             var hit = e.element;
-            if (hit instanceof Text && this._app.currentTool !== ViewTool.Text){
-                this._onAttached = () => {this.beginEdit(hit, e);};
+            if (hit instanceof Text && this._app.currentTool !== ViewTool.Text) {
+                this._onAttached = () => { this.beginEdit(hit, e); };
                 this._app.actionManager.invoke("textTool");
                 e.handled = true;
             }
         }
     };
 
-    insertText(e, p = {}, fixedSize?: boolean){
+    insertText(e, p = {}, fixedSize?: boolean) {
         var text = new Text();
         this._app.activePage.nameProvider.assignNewName(text);
 
@@ -248,7 +248,7 @@ export default class TextTool extends Tool {
             content: UserSettings.text.defaultText,
             font: this._defaultFormatter.props.font
         };
-        if (p){
+        if (p) {
             Object.assign(props, p);
         }
 
@@ -259,13 +259,13 @@ export default class TextTool extends Tool {
         else {
             dropData = this._app.activePage.findDropToPageData(e.x, e.y, text);
         }
-        if (dropData){
+        if (dropData) {
             text.prepareAndSetProps(props);
             var y = dropData.position.y;
-            if (!fixedSize){
+            if (!fixedSize) {
                 var engine = text.createEngine();
                 var height = engine.getActualHeight();
-                y -= height/2;
+                y -= height / 2;
             }
             text.applyTranslation(Point.create(dropData.position.x, y).roundMutable());
             dropData.target.add(text);
@@ -276,8 +276,8 @@ export default class TextTool extends Tool {
         this.beginEdit(text);
     }
 
-    beginEdit(text, e?, selectText = UserSettings.text.selectOnDblClick){
-        if (this._editor){
+    beginEdit(text, e?, selectText = UserSettings.text.selectOnDblClick) {
+        if (this._editor) {
             this._editor.deactivate(false);
         }
 
@@ -301,12 +301,12 @@ export default class TextTool extends Tool {
         this._rangeFormatter.initFormatter(this._app, engine, this._editClone, () => this._changed = true);
         Selection.makeSelection([this._rangeFormatter]);
 
-        if (e && !selectText){
+        if (e && !selectText) {
             e.y -= text.getVerticalOffset(engine);
             this._editor.mouseDown(e);
             this._editor.mouseUp(e);
         }
-        else{
+        else {
             engine.select(0, engine.getLength() - 1);
         }
 
@@ -320,26 +320,52 @@ export default class TextTool extends Tool {
     }
     contentChanged = () => {
         var engine = this._editor.engine;
-        var w = engine.getActualWidth() + .5|0;
-        var h = engine.getActualHeight() + .5|0;
+        var w = engine.getActualWidth() + .5 | 0;
+        var h = engine.getActualHeight() + .5 | 0;
         var props = null;
-        if (w > this._editClone.width() || this._editClone.props.autoWidth){
+        var dx = 0;
+        var dy = 0;
+        var dw = 0;
+        var dh = 0;
+        var constraints = this._editClone.constraints();
+        var br = this._editClone.props.br;
+        if (w > this._editClone.width() || this._editClone.props.autoWidth) {
             props = props || {};
             props.width = w;
+
+            if (constraints.h === HorizontalConstraint.Right) {
+                dx = br.width - w;
+            } else if (constraints.h === HorizontalConstraint.Center) {
+                dx = (br.width - w) / 2;
+            } else if (constraints.h === HorizontalConstraint.LeftRight) {
+                dw = (w - br.width);
+            }
         }
-        if (h >= this._editClone.runtimeProps.originalHeight){
+        if (h >= this._editClone.runtimeProps.originalHeight) {
             props = props || {};
             props.height = h;
+
+            if (constraints.v === VerticalConstraint.Bottom) {
+                dy = br.height - h;
+            } else if (constraints.v === VerticalConstraint.Center) {
+                dy = (br.height - h) / 2;
+            } else if (constraints.v === VerticalConstraint.TopBottom) {
+                dh = (h - br.height);
+            }
         }
-        if (props){
+        if (props) {
+            if (dw || dh) {
+                this._editedElement.parent().autoGrow(dw, dh);
+            }
             this._editClone.setProps(props, ChangeMode.Self);
+            this._editClone.applyTranslation({ x: dx, y: dy });
             //this._editor.engine.updateSize(this._editClone.width(), this._editClone.height());
             this._resizeBackgroundIfNeeded();
         }
         this._changed = true;
     };
-    endEdit(finalEdit: boolean){
-        if (this._changed){
+    endEdit(finalEdit: boolean) {
+        if (this._changed) {
             this._updateOriginal();
         }
         delete this._editedElement.runtimeProps.engine;
@@ -356,7 +382,7 @@ export default class TextTool extends Tool {
         this._changed = false;
 
         var next = this._next;
-        if (next){
+        if (next) {
             this._next = null;
             this.beginEdit(next.element, next.event, false);
         }
@@ -366,24 +392,24 @@ export default class TextTool extends Tool {
         }
         Environment.controller.inlineEditModeChanged.raise(false, null);
     }
-    _updateOriginal(){
+    _updateOriginal() {
         var props = Object.assign({}, this._editClone.selectLayoutProps(true));
         props.m = this._editedElement.parent().globalViewMatrixInverted().appended(props.m);
-        if (props.m.equals(this._editedElement.viewMatrix())){
+        if (props.m.equals(this._editedElement.viewMatrix())) {
             delete props.m;
         }
 
         props.content = this._editor.engine.save();
         props.font = this._rangeFormatter.getFirstFont();
 
-        if (this._editClone.props.font.valign !== this._editedElement.props.font.valign){
-            props.font = Font.extend(props.font, {valign: this._editClone.props.font.valign});
+        if (this._editClone.props.font.valign !== this._editedElement.props.font.valign) {
+            props.font = Font.extend(props.font, { valign: this._editClone.props.font.valign });
         }
 
         this._editedElement.prepareAndSetProps(props); //no validation, save from clone as is
     }
 
-    _createEditor(engine, element){
+    _createEditor(engine, element) {
         var inlineEditor = new InlineTextEditor();
         inlineEditor.onInvalidate = this._onInvalidateEditor;
         inlineEditor.onSelectionChanged = this._onSelectionChanged;
@@ -395,18 +421,18 @@ export default class TextTool extends Tool {
         Invalidate.requestInteractionOnly();
     };
 
-    _hitNewElement(e){
+    _hitNewElement(e) {
         return this._view.hitElementDirect(e)
     }
-    _hittingEdited(e){
-        if (!this._editClone){
+    _hittingEdited(e) {
+        if (!this._editClone) {
             return false;
         }
         return this._editClone.hitTest(e, this._view.scale());
     }
     _canEditSelectedElement = () => {
         var selection = Selection.selectComposite();
-        if (selection.count() === 1 && selection.elementAt(0) instanceof Text){
+        if (selection.count() === 1 && selection.elementAt(0) instanceof Text) {
             return true;
         }
         return false;
@@ -415,12 +441,12 @@ export default class TextTool extends Tool {
     _onSelectionChanged = () => {
         var engine = this._editor.engine;
         var selection = engine.getSelection();
-        if (selection.start === selection.end){
-            if (!this._backgroundCache){
+        if (selection.start === selection.end) {
+            if (!this._backgroundCache) {
                 this._backgroundCache = {};
             }
             var color = this._backgroundCache[selection.start];
-            if (color === undefined){
+            if (color === undefined) {
                 color = this._pickCaretColor(engine, selection);
                 this._backgroundCache[selection.start] = color;
             }
@@ -428,70 +454,70 @@ export default class TextTool extends Tool {
         }
     };
     //does not support rotation, can be added later if needed
-    _pickCaretColor(engine, selection){
+    _pickCaretColor(engine, selection) {
         var coords = engine.getCaretCoords(selection.start);
         var global = this._editedElement.getBoundaryRectGlobal();
-        var x = (coords.l + global.x)*this._view.scale() - this._view.scrollX() + .5|0;
-        var y = (coords.t + global.y)*this._view.scale() - this._view.scrollY() + .5|0;
+        var x = (coords.l + global.x) * this._view.scale() - this._view.scrollX() + .5 | 0;
+        var y = (coords.t + global.y) * this._view.scale() - this._view.scrollY() + .5 | 0;
         var contextScale = this._view.contextScale;
         var background = this._view.context.getImageData(
-            x*contextScale - 1,
-            y*contextScale,
-            coords.w*contextScale + 2.5|0,
-            coords.h*contextScale + .5|0);
+            x * contextScale - 1,
+            y * contextScale,
+            coords.w * contextScale + 2.5 | 0,
+            coords.h * contextScale + .5 | 0);
 
         var luminance = getAverageLuminance(background);
-        if (luminance !== -1){
+        if (luminance !== -1) {
             return luminance < CursorInvertThreshold ? "white" : "black";
         }
         return "black";
     }
-    _resizeBackgroundIfNeeded(){
-        if (this._editedElement.fill() === Brush.Empty && this._editedElement.stroke() === Brush.Empty){
+    _resizeBackgroundIfNeeded() {
+        if (this._editedElement.fill() === Brush.Empty && this._editedElement.stroke() === Brush.Empty) {
             return;
         }
-        if (this._editedElement.width() === this._editClone.width() && this._editedElement.height() === this._editClone.height()){
+        if (this._editedElement.width() === this._editClone.width() && this._editedElement.height() === this._editClone.height()) {
             return;
         }
-        this._editedElement.setProps({width: this._editClone.width(), height: this._editClone.height()});
+        this._editedElement.setProps({ width: this._editClone.width(), height: this._editClone.height() });
         Invalidate.request();
     }
 
-    layerdraw(context){
-        if (this._dragZone && this._dragZone.width > 1){
+    layerdraw(context) {
+        if (this._dragZone && this._dragZone.width > 1) {
             context.save();
 
             var r = this._getDrawRect(this._dragZone);
             context.strokeStyle = SharedColors.Highlight;
-            context.lineWidth = 1/this._view.scale();
+            context.lineWidth = 1 / this._view.scale();
             context.strokeRect(r.x + .5, r.y + .5, r.width - 1, r.height - 1);
             context.restore();
         }
-        if (this._editClone){
+        if (this._editClone) {
             context.save();
             this._editClone.viewMatrix().applyToContext(context);
-            context.lineWidth = 1/this._view.scale();
+            context.lineWidth = 1 / this._view.scale();
             context.strokeStyle = SharedColors.Highlight;
 
             //-.5 to show the text cursor if it is at position 0, maybe can be done better...
             context.strokeRect(-.5, -.5, this._editClone.width() + 1, this._editClone.height() + 1);
             context.restore();
         }
-        if (this._next){
+        if (this._next) {
             DropVisualization.highlightElement(this._view, context, this._next.element);
         }
     }
-    _getDrawRect(zone){
-        if (!zone.flipX && !zone.flipY){
+    _getDrawRect(zone) {
+        if (!zone.flipX && !zone.flipY) {
             return Rect.fromObject(zone);
         }
 
         var x = zone.x;
         var y = zone.y;
-        if (this._dragZone.flipX){
+        if (this._dragZone.flipX) {
             x -= this._dragZone.width;
         }
-        if (this._dragZone.flipY){
+        if (this._dragZone.flipY) {
             y -= this._dragZone.height;
         }
         return new Rect(x, y, zone.width, zone.height);

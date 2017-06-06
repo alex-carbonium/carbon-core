@@ -853,15 +853,6 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     drawSelf(context, w, h, environment) {
     }
 
-    // drawDecorators(context, w, h, environment) {
-    //     if (this.decorators) {
-    //         context.save();
-    //         for (let i = 0, j = this.decorators.length; i < j; ++i) {
-    //             this.decorators[i].draw(context, w, h, environment);
-    //         }
-    //         context.restore();
-    //     }
-    // }
     drawBoundaryPath(context, round = true) {
         var matrix = this.globalViewMatrix();
         var r = this.boundaryRect();

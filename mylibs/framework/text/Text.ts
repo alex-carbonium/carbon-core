@@ -6,10 +6,11 @@ import { deepEquals } from "../../util";
 import PropertyMetadata from "../PropertyMetadata";
 import TextEngine from "./textengine";
 import styleManager from "../style/StyleManager";
-import { IContainer, IDataElement, IText, TextAlign, IUIElement, ITextProps, TextContent } from "carbon-core";
+import { IContainer, IDataElement, IText, TextAlign, IUIElement, ITextProps, TextContent, HorizontalConstraint, VerticalConstraint } from "carbon-core";
 import params from "params";
 import ContextCommandCache from "framework/render/ContextCommandCache";
 import Environment from "../../environment";
+import Rect from "../../math/rect";
 
 class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElement {
     prepareProps(changes) {
@@ -82,10 +83,10 @@ class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElem
         }
 
         if (newProps.br !== undefined
-                || newProps.autoWidth !== undefined
-                || newProps.font !== undefined
-                || newProps.content !== undefined
-                || newProps.visible !== undefined) {
+            || newProps.autoWidth !== undefined
+            || newProps.font !== undefined
+            || newProps.content !== undefined
+            || newProps.visible !== undefined) {
             delete this.runtimeProps.commandCache;
         }
         super.propsUpdated.apply(this, arguments);
@@ -108,11 +109,30 @@ class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElem
         if (br.width < actualWidth || forceWidth) {
             newWidth = actualWidth + .5 | 0;
         }
+
         var newHeight = br.height;
         if (br.height < actualHeight) {
             newHeight = actualHeight + .5 | 0;
         }
-        changes.br = br.withSize(newWidth, newHeight);
+
+        var constraints = this.constraints();
+        var dx = 0;
+        var dy = 0;
+
+        if (constraints.h === HorizontalConstraint.Right) {
+            dx = br.width - newWidth;
+        } else if (constraints.h === HorizontalConstraint.Center) {
+            dx = (br.width - newWidth) / 2;
+        }
+
+        if (constraints.v === VerticalConstraint.Bottom) {
+            dy = br.height - newHeight;
+        } else if (constraints.v === VerticalConstraint.Center) {
+            dy = (br.height - newHeight) / 2;
+        }
+
+        changes.br =  br.withSize(newWidth, newHeight);
+        changes.m = (changes.m || this.props.m).clone().translate(dx, dy);
     }
 
     applySizeScaling(s, o, options, changeMode) {
@@ -270,7 +290,7 @@ class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElem
         return -1;
     }
 
-    flatten(){
+    flatten() {
     }
 
     autoPositionChildren(): boolean {
@@ -285,14 +305,14 @@ class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElem
         return m;
     }
 
-    font(value?: Font){
+    font(value?: Font) {
         if (arguments.length) {
             this.setProps({ font: value });
         }
         return this.props.font;
     }
 
-    content(value?: TextContent){
+    content(value?: TextContent) {
         if (arguments.length) {
             this.setProps({ content: value });
         }

@@ -14,7 +14,7 @@ import Brush from './Brush';
 import Box from './Box';
 import NullContainer from './NullContainer';
 import UserSettings from '../UserSettings';
-import { IKeyboardState, ChangeMode } from "carbon-basics";
+import { IKeyboardState, ChangeMode, HorizontalConstraint, VerticalConstraint } from "carbon-basics";
 import { IContainerProps, IUIElement, IContainer } from "carbon-model";
 import { IMatrix } from "carbon-geometry";
 import ExtensionPoint from "./ExtensionPoint";
@@ -119,6 +119,26 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         this.drawChildren(context, w, h, environment);
 
         this.strokeBorder(context, w, h);
+    }
+
+    autoGrow(dw, dh) {
+        let br = this.props.br;
+        let nbr = br.withSize(br.width + dw, br.height + dh);
+        var c = this.constraints();
+        if(c.h !== HorizontalConstraint.LeftRight) {
+            dw = 0;
+        }
+
+        if(c.v !== VerticalConstraint.TopBottom) {
+            dh = 0;
+        }
+
+        if(dw || dh) {
+            this.parent().autoGrow(dw, dh);
+        }
+
+        this.setProps({br:nbr});
+        this.performArrange({newRect:nbr, oldRect:br});
     }
 
     modifyContextBeforeDrawChildren(context) {

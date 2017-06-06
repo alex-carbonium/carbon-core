@@ -21,8 +21,10 @@ class NullContainer extends DataNode implements IContainer {
     decorators: any[];
     addDecorator(decorator) { }
     removeDecorator(decorator) { }
-    removeAllDecorators():any[] { return null; }
+    removeAllDecorators(): any[] { return null; }
     removeDecoratorByType(type) { }
+
+    autoGrow(dw, dh) { }
 
     mousemove(event: IMouseEventData, keys: IKeyboardState) { }
     mouseup(event: IMouseEventData, keys: IKeyboardState) { }
