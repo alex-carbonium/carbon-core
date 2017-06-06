@@ -11,6 +11,8 @@ import Cursors from "Cursors";
 import PropertyTracker from "framework/PropertyTracker";
 import UIElement from "framework/UIElement";
 import angleAdjuster from "math/AngleAdjuster";
+import SelectFrame from "framework/SelectFrame";
+import Rect from "math/rect";
 
 export const enum PathManipulationMode {
     Create = 0,
@@ -91,10 +93,22 @@ export default class PathManipulationObject extends UIElementDecorator implement
     private _groupMove: boolean;
     private _cancelBinding: IDisposable;
     private _selectedPoints: any;
+    private _selectFrame: SelectFrame;
 
     constructor(public constructMode: boolean = false) {
         super();
         this._selectedPoints = {};
+    }
+
+    onselect(rect:Rect) {
+        var point = this.path.globalViewMatrixInverted().transformPoint2(rect.x, rect.y);
+        rect = new Rect(point.x, point.y, rect.width, rect.height);
+        this.clearSelectedPoints();
+        for(var pt of this.path.points) {
+            if(rect.containsPoint(pt)) {
+                this.addToSelectedPoints(pt);
+            }
+        }
     }
 
     attach(element: Path) {
@@ -104,6 +118,9 @@ export default class PathManipulationObject extends UIElementDecorator implement
         SnapController.calculateSnappingPointsForPath(this.element);
         this._cancelBinding = Environment.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
         this._startSegmentPoint = this._lastSegmentStartPoint();
+        this._selectFrame = new SelectFrame(this.onselect.bind(this));
+        Environment.view.interactionLayer.add(this._selectFrame);
+        this._selectFrame.setProps({ visible: false });
         Invalidate.request();
     }
 
@@ -128,6 +145,8 @@ export default class PathManipulationObject extends UIElementDecorator implement
             this.element.save();
             SnapController.clearActiveSnapLines();
         }
+
+        Environment.view.interactionLayer.remove(this._selectFrame);
 
         super.detach();
     }
@@ -156,6 +175,14 @@ export default class PathManipulationObject extends UIElementDecorator implement
     mouseup(event: IMouseEventData, keys: IKeyboardState) {
         delete this._altPressed;
         let path: Path = this.element;
+
+
+        if (this._selectFrame.visible()) {
+            this._selectFrame.visible(false);
+            this._selectFrame.complete(event);
+            return;
+        }
+
         if (this._saveOnMouseUp) {
             path.save();
             this._saveOnMouseUp = false;
@@ -251,12 +278,12 @@ export default class PathManipulationObject extends UIElementDecorator implement
 
         this._groupMove = false;
         let path: Path = this.element;
+        this._startSelectionPoint = null;
 
         let pt = path.controlPointForPosition(event);
 
         if (pt && keys.shift) {
             this.addToSelectedPoints(pt);
-            event.handled = true;
         } else if (!pt || !this._selectedPoints[pt.idx]) {
             this.clearSelectedPoints();
         }
@@ -289,14 +316,13 @@ export default class PathManipulationObject extends UIElementDecorator implement
 
         pt = path.handlePointForPosition(event);
         if (!event.handled && pt) {
-            event.handled = true;
             this._handlePoint = pt;
             this._originalPoint = clone(pt);
             this._pointOnPath = null;
+            event.handled = true;
         }
 
         if (!event.handled && this._pointOnPath) {
-            event.handled = true;
             if (keys.shift) {
                 let data = path.getInsertPointData(this._pointOnPath);
                 let newPoint = null;
@@ -321,6 +347,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
                 // set bending handler
                 this._pointOnPath = null;
             }
+            event.handled = true;
         }
 
         if (!event.handled && this.constructMode) {
@@ -332,13 +359,18 @@ export default class PathManipulationObject extends UIElementDecorator implement
             }
 
             this._mousepressed = true;
-            event.handled = true;
-
             this._addNewPathPoint(event, keys);
+            event.handled = true;
         }
 
         if (event.handled) {
             PropertyTracker.suspend();
+        }
+
+        if (!this.constructMode && !event.handled) {
+            this._selectFrame.visible(true);
+            this._selectFrame.init(event);
+            // this._selectFrame.applyTranslation(this._startSelectionPoint);
         }
     }
 
@@ -368,6 +400,13 @@ export default class PathManipulationObject extends UIElementDecorator implement
         let pos = { x: event.x, y: event.y };
         let path: Path = this.element;
         let view = Environment.view;
+
+        if (this._selectFrame.visible()) {
+            this._selectFrame.update(event);
+            this._selectFrame.onselect(this._selectFrame.props.br);
+            event.handled = true;
+            return;
+        }
 
         if (!keys.ctrl) {
             pos = SnapController.applySnappingForPoint(pos);

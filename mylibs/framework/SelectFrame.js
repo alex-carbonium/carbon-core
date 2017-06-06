@@ -24,6 +24,7 @@ class SelectFrame extends UIElement {
         var rect = this.props.br;
         rect.updateFromPointsMutable(this.startPoint, event);
         rect.roundMutable();
+        Invalidate.requestInteractionOnly();
         return rect;
     }
 

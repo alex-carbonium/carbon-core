@@ -1,6 +1,6 @@
 import Point from "./point";
 import LineSegment from "./lineSegment";
-import { isRectInRect } from "./math";
+import { isRectInRect, isPointInRect } from "./math";
 import { IRect, ICoordinate, OriginType } from "carbon-geometry";
 
 export default class Rect implements IRect {
@@ -84,6 +84,10 @@ export default class Rect implements IRect {
 
     containsRect(other) {
         return isRectInRect(other, this);
+    }
+
+    containsPoint(point:ICoordinate) {
+        return isPointInRect(this, point);
     }
 
     equals(other) {
