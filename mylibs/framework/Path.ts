@@ -24,7 +24,7 @@ import UserSettings from "UserSettings";
 import Cursors from "Cursors";
 import PathManipulationDecorator from "ui/common/path/PathManipulationDecorator";
 import EditPath from "commands/EditPath";
-import DecoratableChain from "./DecoratableChain";
+import ExtensionPoint from "./ExtensionPoint";
 
 const CP_HANDLE_RADIUS = UserSettings.path.editHandleSize;
 const CP_HANDLE_RADIUS2 = CP_HANDLE_RADIUS * 2;

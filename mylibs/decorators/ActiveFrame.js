@@ -164,10 +164,6 @@ export default class ActiveFrame extends UIElementDecorator {
         this._environmentBinding.dispose();
     }
 
-    draw(context) {
-
-    }
-
     layerdraw(context) {
         if (this.visible()){
             context.save();

@@ -17,6 +17,7 @@ import UserSettings from '../UserSettings';
 import { IKeyboardState, ChangeMode } from "carbon-basics";
 import { IContainerProps, IUIElement, IContainer } from "carbon-model";
 import { IMatrix } from "carbon-geometry";
+import ExtensionPoint from "./ExtensionPoint";
 
 export default class Container<TProps extends IContainerProps  = IContainerProps> extends UIElement<TProps> implements IContainer<IContainerProps> {
     props: TProps;
@@ -118,8 +119,6 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         this.drawChildren(context, w, h, environment);
 
         this.strokeBorder(context, w, h);
-
-        this.drawDecorators(context, w, h, environment);
     }
 
     modifyContextBeforeDrawChildren(context) {
@@ -294,7 +293,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
 
     drawChildSafe(child, context, environment) {
         try {
-            child.draw(context, environment);
+            ExtensionPoint.invoke(child, 'draw', [context, environment]);
         } catch (e) {
             logger.error("Draw error", e);
             if (child.canHandleCorruption()) {
@@ -327,7 +326,8 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
                     break;
                 }
             }
-            newChild.draw(context, environment);
+
+            ExtensionPoint.invoke(newChild, 'draw', [context, environment]);
         }
     }
     padding(value?: Box) {

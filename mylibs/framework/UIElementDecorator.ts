@@ -5,18 +5,24 @@ export default class UIElementDecorator {
 		this.element = null;
 		this._visible = true;
 	}
+
 	attach(element) {
 		this.element = element;
 	}
-	addDecorator() {
-	}
+
 	detach() {
 		this.element = null;
 	}
-	draw(context) {
+
+	beforeInvoke(method:string, args:any[]):boolean|void {
 	}
+
+	afterInvoke(method:string, args:any[]):boolean|void {
+	}
+
 	parent(value) {
 	}
+
 	visible(value) {
 		if (arguments.length === 1) {
 			this._visible = value;

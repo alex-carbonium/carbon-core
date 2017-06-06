@@ -519,6 +519,23 @@ export default class PathManipulationObject extends UIElementDecorator implement
         this._updateCursor(event, keys);
     }
 
+    beforeInvoke(method:string, args:any[]) {
+        switch(method) {
+            case 'delete': {
+                return this.delete.apply(this, args);
+            }
+            case 'currentPointX': {
+                return this.currentPointValue('x', args[0], args[1]);
+            }
+            case 'currentPointY': {
+                return this.currentPointValue('y', args[0], args[1]);
+            }
+            case 'currentPointType': {
+                return this.currentPointValue('type', args[0], args[1]);
+            }
+        }
+    }
+
     delete(): boolean {
         let selectedKeys = Object.keys(this._selectedPoints);
         if (selectedKeys.length && this.path.points.length > 2 && this.path.mode() === ElementState.Edit) {
@@ -829,7 +846,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         this._clearShortSegments();
     }
 
-    currentPointType(value: PointType, changeMode: ChangeMode) {
+    currentPointValue(prop:string, value: PointType, changeMode: ChangeMode) {
         let points = this._selectedPoints;
         var keys = Object.keys(points);
         if (keys.length === 0) {
@@ -839,43 +856,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         for (var key of Object.keys(points)) {
             var pt = points[key];
             let newPoint = Object.assign({}, pt);
-            newPoint.type = value;
-            this.path.changePointAtIndex(newPoint, newPoint.idx, changeMode);
-            this._selectedPoints[newPoint.idx] = newPoint;
-        }
-
-        this.path.save();
-    }
-
-    currentPointX(value: PointType, changeMode: ChangeMode) {
-        let points = this._selectedPoints;
-        var keys = Object.keys(points);
-        if (keys.length === 0) {
-            return;
-        }
-
-        for (var key of Object.keys(points)) {
-            var pt = points[key];
-            let newPoint = Object.assign({}, pt);
-            newPoint.x = value;
-            this.path.changePointAtIndex(newPoint, newPoint.idx, changeMode);
-            this._selectedPoints[newPoint.idx] = newPoint;
-        }
-
-        this.path.save();
-    }
-
-    currentPointY(value: PointType, changeMode: ChangeMode) {
-        let points = this._selectedPoints;
-        var keys = Object.keys(points);
-        if (keys.length === 0) {
-            return;
-        }
-
-        for (var key of Object.keys(points)) {
-            var pt = points[key];
-            let newPoint = Object.assign({}, pt);
-            newPoint.y = value;
+            newPoint[prop] = value;
             this.path.changePointAtIndex(newPoint, newPoint.idx, changeMode);
             this._selectedPoints[newPoint.idx] = newPoint;
         }

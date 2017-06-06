@@ -8,6 +8,7 @@ import Invalidate from "framework/Invalidate";
 import { LayerTypes, IView, IAnimationController, ILayer, IUIElement, ViewState, IEvent, ICoordinate } from "carbon-core";
 import Rect from "../math/rect";
 import AnimationGroup from "./animation/AnimationGroup";
+import ExtensionPoint from "./ExtensionPoint";
 
 var Stopwatch = require("../Stopwatch");
 var debug = require("DebugUtil")("carb:view");
@@ -100,7 +101,8 @@ export default class ViewBase { //TODO: implement IView
         this.stopwatch.start();
         context.save();
         setupLayer.call(this, layer, context);
-        layer.draw(context, environment);
+
+        ExtensionPoint.invoke(layer, 'draw', [context, environment]);
 
         var subscribers = this._registredForLayerDraw[layer.type];
         for (var i = 0; i < subscribers.length; ++i) {

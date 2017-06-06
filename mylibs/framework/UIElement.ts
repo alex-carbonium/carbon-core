@@ -37,7 +37,7 @@ import { IKeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
 import { ChangeMode, LayerTypes, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint } from "carbon-core";
-import DecoratableChain from "./DecoratableChain";
+import ExtensionPoint from "./ExtensionPoint";
 
 require("../migrations/All");
 
@@ -200,7 +200,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             let propertyName = names[i];
             let descriptor: PropertyDescriptor = metadata[propertyName];
             if (descriptor.computed) {
-                DecoratableChain.invoke(this, propertyName, [changes[propertyName], changeMode]);
+                ExtensionPoint.invoke(this, propertyName, [changes[propertyName], changeMode]);
                 delete changes[propertyName];
             }
         }
@@ -843,7 +843,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
         context.restore();
 
-        this.drawDecorators(context, w, h, environment);
+        // this.drawDecorators(context, w, h, environment);
 
         if (params.perf) {
             performance.measure(markName, markName);
@@ -853,15 +853,15 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     drawSelf(context, w, h, environment) {
     }
 
-    drawDecorators(context, w, h, environment) {
-        if (this.decorators) {
-            context.save();
-            for (let i = 0, j = this.decorators.length; i < j; ++i) {
-                this.decorators[i].draw(context, w, h, environment);
-            }
-            context.restore();
-        }
-    }
+    // drawDecorators(context, w, h, environment) {
+    //     if (this.decorators) {
+    //         context.save();
+    //         for (let i = 0, j = this.decorators.length; i < j; ++i) {
+    //             this.decorators[i].draw(context, w, h, environment);
+    //         }
+    //         context.restore();
+    //     }
+    // }
     drawBoundaryPath(context, round = true) {
         var matrix = this.globalViewMatrix();
         var r = this.boundaryRect();

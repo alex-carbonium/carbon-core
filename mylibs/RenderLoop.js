@@ -9,6 +9,7 @@ import Environment from "./environment";
 import Clipboard from "./framework/Clipboard";
 import Keyboard from "./platform/Keyboard";
 import Context from "./framework/render/Context";
+import ExtensionPoint from "framework/ExtensionPoint";
 
 var doRendering = function(continuous){
     this._renderingRequestId = 0;
@@ -111,7 +112,7 @@ export class RenderLoop {
         if (this.app.isLoaded && this.view && this.view.page != null && this.view.page !== NullPage){
             this.ensureCanvasSize();
             this.app.relayout();
-            this.view.draw();
+            ExtensionPoint.invoke(this.view, 'draw', []);
         }
     }
 

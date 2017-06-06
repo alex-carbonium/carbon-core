@@ -1,7 +1,7 @@
 import ArrangeStrategy from "../framework/ArrangeStrategy";
 import Artboard from "../framework/Artboard";
 import Selection from "../framework/SelectionModel";
-import DecoratableChain from "../framework/DecoratableChain";
+import ExtensionPoint from "../framework/ExtensionPoint";
 import NullContainer from "framework/NullContainer";
 
 export default {
@@ -14,7 +14,7 @@ export default {
         for (var i = 0; i < selection.length; ++i) {
             var element = selection[i];
             parents.push(element.parent());
-            DecoratableChain.invoke(element, 'delete', []);
+            ExtensionPoint.invoke(element, 'delete', []);
 
             if (element.parent() === null || element.parent() === NullContainer) {
                 Selection.makeSelection([]);
