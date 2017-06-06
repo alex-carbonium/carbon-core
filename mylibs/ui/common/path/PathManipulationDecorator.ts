@@ -135,19 +135,21 @@ export default class PathManipulationObject extends UIElementDecorator implement
     clearShortSegments() {
         var points = this.path.points;
         var endSegment = points.length - 1;
-        for(var i = endSegment; i >= 0; --i) {
+        for (var i = endSegment; i >= 0; --i) {
             var pt = points[i];
-            if(pt.moveTo || i === 0) {
-                if(endSegment - i < 2) {
+            if (pt.moveTo || i === 0) {
+                if (endSegment - i < 2) {
                     points.splice(i, endSegment - i + 1);
                 }
-                endSegment = i-1;
+                endSegment = i - 1;
             }
         }
     }
 
     cancel() {
-        this.element.mode(ElementState.Resize);
+        if (this.element) {
+            this.element.mode(ElementState.Resize);
+        }
         return false;// stop propagation
     }
 

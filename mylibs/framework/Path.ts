@@ -272,9 +272,9 @@ class Path extends Shape {
         this._lastPoints = [];
         this._currentPoint = null;
         this._selectedPoints = {};
+        this._lastBr = this.props.br;
+        this._lastM = this.props.m;
     }
-
-
 
     _refreshComputedProps() {
         this.propsUpdated({
@@ -306,10 +306,16 @@ class Path extends Shape {
 
         this._saving = true;
         let newPoints = this.points;
+        let newBr = this.props.br;
+        let newM = this.props.m;
         this.props.points = this._lastPoints;
-        this.setProps({ points: newPoints });
+        this.props.br = this._lastBr;
+        this.props.m = this._lastM;
+        this.setProps({ points: newPoints, br:newBr, m:newM });
         this.adjustBoundaries();
         this._lastPoints = this.points.map(p => clone(p));
+        this._lastBr = this.props.br.clone();
+        this._lastM = this.props.m.clone();
         this._saving = false;
     }
 
