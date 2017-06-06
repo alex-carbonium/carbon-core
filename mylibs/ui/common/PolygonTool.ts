@@ -1,4 +1,4 @@
-import ElementDragCreator from "./ElementDragCreator";
+import ElementDropTool from "./ElementDropTool";
 import {ViewTool, Types} from "../../framework/Defs";
 import Polygon from "../../framework/Polygon";
 import GlobalMatrixModifier from "../../framework/GlobalMatrixModifier";
@@ -6,7 +6,7 @@ import Point from "../../math/point";
 import Matrix from "../../math/matrix";
 import UserSettings from "../../UserSettings";
 
-export default class PolygonTool extends ElementDragCreator{
+export default class PolygonTool extends ElementDropTool{
     updateElement(element: Polygon, startPoint: Point, endPoint: Point){
         let w = Math.max(1, Math.abs(endPoint.x - startPoint.x));
         let h = Math.max(1,Math.abs(endPoint.y - startPoint.y));

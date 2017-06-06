@@ -1,5 +1,5 @@
-import ElementDragCreator from "ui/common/ElementDragCreator";
-import GraphicalPathCreator from "ui/common/GraphicalPathCreator";
+import ElementDropTool from "ui/common/ElementDropTool";
+import PathTool from "ui/common/PathTool";
 import SectionCreator from "ui/common/sections/SectionCreator";
 import PolygonTool from "ui/common/PolygonTool";
 import LineCreator from "ui/common/LineCreator";
@@ -230,21 +230,21 @@ export default class DrawActionSelector extends ExtensionBase {
 
         this._currentAction = null;
         registerCommands.call(this);
-        this._rectCreator = new ElementDragCreator(ViewTool.Rectangle, Types.Rectangle);
+        this._rectCreator = new ElementDropTool(ViewTool.Rectangle, Types.Rectangle);
         this._artboardCreator = new ArtboardsTool(Artboard);
         this._sectionCreator = new SectionCreator();
-        this._circleCreator = new ElementDragCreator(ViewTool.Circle, Types.Circle);
-        this._polylineCreator = new GraphicalPathCreator(app, Types.Path);
+        this._circleCreator = new ElementDropTool(ViewTool.Circle, Types.Circle);
+        this._polylineCreator = new PathTool(app, Types.Path);
         this._starCreator = new PolygonTool(ViewTool.Star, Types.Star);
         this._polygonCreator = new PolygonTool(ViewTool.Polygon, Types.Polygon);
         this._triangleCreator = new PolygonTool(ViewTool.Triangle, Types.Polygon, {pointsCount: 3});
-        this._artboardViewer = new ElementDragCreator(ViewTool.ArtboardViewer, Types.ArtboardFrame);
+        this._artboardViewer = new ElementDropTool(ViewTool.ArtboardViewer, Types.ArtboardFrame);
         this._lineCreator = new LineCreator();
         this._prototypingTool = new LinkingTool();
         this._pencilCreator = new PencilCreator();
         this._handTool = new HandTool();
         this._textTool = new TextTool(app);
-        this._imageCreator = new ElementDragCreator(ViewTool.Image, Types.Image);
+        this._imageCreator = new ElementDropTool(ViewTool.Image, Types.Image);
 
         this._defaultShapeSettings = new DefaultShapeSettings(app);
         this._artboardToolSettings = new ArtboardToolSettings(app);

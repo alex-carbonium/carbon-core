@@ -14,7 +14,7 @@ import UIElement from "../../framework/UIElement";
 import Tool from "./Tool";
 import { IMouseEventData, IKeyboardState, ElementState } from "carbon-core";
 
-export default class ElementDragCreator extends Tool {
+export default class ElementDropTool extends Tool {
     [name: string]: any;
 
     constructor(toolId: string, type, parameters?) {

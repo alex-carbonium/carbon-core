@@ -17,7 +17,7 @@ import PathManipulationDecorator from "ui/common/path/PathManipulationDecorator"
 import NullContainer from "framework/NullContainer";
 
 
-export default class GraphicalPathCreator extends Tool {
+export default class PathTool extends Tool {
     _pathElement: Path;
     _type: any;
     _parameters: any;
