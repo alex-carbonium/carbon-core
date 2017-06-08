@@ -247,9 +247,9 @@ experiment: only apply it to the renderer
 			}
 			runs = [runs];
 		} else if (txt instanceof Array){
-			if (txt.length && txt[0].valign){
-				this.verticalAlignment(txt[0].valign);
-			}
+			// if (txt.length && txt[0].valign){
+			// 	this.verticalAlignment(txt[0].valign);
+			// }
 			runs = txt;
 		} else {
 			runs = [txt];

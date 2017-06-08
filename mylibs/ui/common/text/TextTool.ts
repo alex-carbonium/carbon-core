@@ -20,7 +20,7 @@ import Invalidate from "../../../framework/Invalidate";
 import Environment from "../../../environment";
 import { getAverageLuminance } from "../../../math/color";
 import Rect from "../../../math/rect";
-import { ChangeMode, IMouseEventData, IElementEventData, VerticalConstraint, HorizontalConstraint } from "carbon-core";
+import { ChangeMode, IMouseEventData, IElementEventData, VerticalConstraint, HorizontalConstraint, TextAutoWidth } from "carbon-core";
 import UserSettings from "../../../UserSettings";
 import Point from "../../../math/point";
 
@@ -197,7 +197,7 @@ export default class TextTool extends Tool {
         else if (this._dragZone) {
             var rect = this._getDrawRect(this._dragZone);
             var props: any = { br: rect.withPosition(0, 0).roundMutable() };
-            props.autoWidth = false;
+            props.autoWidth = TextAutoWidth.Wrap;
             this.insertText({ x: rect.x, y: rect.y }, props, true);
             this._dragZone = null;
         }
@@ -263,7 +263,7 @@ export default class TextTool extends Tool {
             text.prepareAndSetProps(props);
             var y = dropData.position.y;
             if (!fixedSize) {
-                var engine = text.createEngine();
+                var engine = text.createFixedSizeEngine();
                 var height = engine.getActualHeight();
                 y -= height / 2;
             }
@@ -291,6 +291,8 @@ export default class TextTool extends Tool {
         Invalidate.request(0);
 
         var engine = clone.createEngine();
+        this._fixedEngine = clone.createFixedSizeEngine();
+
         engine.contentChanged(this.contentChanged);
         this._editor = this._createEditor(engine, clone);
         this._editedElement = text;
@@ -319,9 +321,18 @@ export default class TextTool extends Tool {
         this._next = null;
     }
     contentChanged = () => {
+        if (this._updatingContent) {
+            return;
+        }
+
+        this._updatingContent = true;
         var engine = this._editor.engine;
-        var w = engine.getActualWidth() + .5 | 0;
-        var h = engine.getActualHeight() + .5 | 0;
+        var calcEngine = (this._editClone.props.autoWidth === TextAutoWidth.Wrap) ? engine : this._fixedEngine;
+        if (calcEngine === this._fixedEngine) {
+            this._fixedEngine.setText(engine.save());
+        }
+        var w = calcEngine.getActualWidth() + .5 | 0;
+        var h = calcEngine.getActualHeight() + .5 | 0;
         var props = null;
         var dx = 0;
         var dy = 0;
@@ -329,7 +340,7 @@ export default class TextTool extends Tool {
         var dh = 0;
         var constraints = this._editClone.constraints();
         var br = this._editClone.props.br;
-        if (w > this._editClone.width() || this._editClone.props.autoWidth) {
+        if (w > this._editClone.width() || (this._editClone.props.autoWidth === TextAutoWidth.Fit)) {
             props = props || {};
             props.width = w;
 
@@ -353,16 +364,25 @@ export default class TextTool extends Tool {
                 dh = (h - br.height);
             }
         }
+
         if (props) {
+            if (calcEngine === this._fixedEngine) {
+                engine.updateSize(props.width || this._editClone.width(), props.height || this._editClone.height());
+                engine.setText(engine.save());
+                engine.getActualWidth();
+            }
+
             if (dw || dh) {
                 this._editedElement.parent().autoGrow(dw, dh);
             }
+
             this._editClone.setProps(props, ChangeMode.Self);
             this._editClone.applyTranslation({ x: dx, y: dy });
-            //this._editor.engine.updateSize(this._editClone.width(), this._editClone.height());
             this._resizeBackgroundIfNeeded();
         }
+
         this._changed = true;
+        this._updatingContent = false;
     };
     endEdit(finalEdit: boolean) {
         if (this._changed) {

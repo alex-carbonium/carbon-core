@@ -6,7 +6,7 @@ import { deepEquals } from "../../util";
 import PropertyMetadata from "../PropertyMetadata";
 import TextEngine from "./textengine";
 import styleManager from "../style/StyleManager";
-import { IContainer, IDataElement, IText, TextAlign, IUIElement, ITextProps, TextContent, HorizontalConstraint, VerticalConstraint } from "carbon-core";
+import { IContainer, IDataElement, IText, TextAlign, IUIElement, ITextProps, TextContent, HorizontalConstraint, VerticalConstraint, TextAutoWidth } from "carbon-core";
 import params from "params";
 import ContextCommandCache from "framework/render/ContextCommandCache";
 import Environment from "../../environment";
@@ -26,8 +26,9 @@ class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElem
         var dimensionsAffected = contentChanged || brChanged || autoWidthChanged || fontChanged;
         var textAlignChanged = fontChanged && changes.font.align !== TextAlign.left;
 
-        if (textAlignChanged) {
-            changes.autoWidth = false;
+        var autoWidth = changes.autoWidth || this.props.autoWidth;
+        if (textAlignChanged && autoWidth === TextAutoWidth.Fit) {
+            changes.autoWidth = TextAutoWidth.Grow;
         }
 
         if (autoWidthChanged && changes.autoWidth) {
@@ -37,9 +38,9 @@ class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElem
         }
 
         if (dimensionsAffected) {
-            var syncWidth = this.props.autoWidth;
+            var syncWidth = this.props.autoWidth === TextAutoWidth.Fit;
             if (changes.autoWidth !== undefined) {
-                syncWidth = changes.autoWidth === true;
+                syncWidth = changes.autoWidth === TextAutoWidth.Fit;
             }
             if (!fontChanged) {
                 changes.font = this.props.font;
@@ -101,7 +102,15 @@ class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElem
         if (changes.content === undefined) {
             changes.content = this.props.content;
         }
-        var engine = this.createEngine(changes);
+
+        let engine;
+        if (changes.autoWidth !== TextAutoWidth.Wrap) {
+            engine = this.createFixedSizeEngine(changes);
+            this.createEngine(changes);
+        } else {
+            engine = this.createEngine(changes);
+        }
+
         var actualWidth = engine.getActualWidth();
         var actualHeight = engine.getActualHeight();
 
@@ -131,12 +140,14 @@ class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElem
             dy = (br.height - newHeight) / 2;
         }
 
-        changes.br =  br.withSize(newWidth, newHeight);
+        changes.br = br.withSize(newWidth, newHeight);
         changes.m = (changes.m || this.props.m).clone().translate(dx, dy);
     }
 
     applySizeScaling(s, o, options, changeMode) {
-        this.prepareAndSetProps({ autoWidth: false }, changeMode);
+        if (this.props.autoWidth === TextAutoWidth.Fit) {
+            this.prepareAndSetProps({ autoWidth: TextAutoWidth.Grow }, changeMode);
+        }
         super.applySizeScaling.apply(this, arguments);
     }
 
@@ -194,7 +205,7 @@ class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElem
         var offset = 0, h;
         var height = this.height();
         var align = this.props.font.valign;
-        if (align == TextAlign.middle) {
+        if (align === TextAlign.middle) {
             h = engine.getActualHeight();
             offset = (height - h) / 2;
         } else if (align === TextAlign.bottom) {
@@ -204,12 +215,26 @@ class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElem
         return offset;
     }
 
+    createFixedSizeEngine(props = this.props) {
+        var fontClone = clone(props.font);
+        fontClone.valign = TextAlign.top;
+        fontClone.align = TextAlign.left
+        TextEngine.setDefaultFormatting(fontClone);
+        let engine = new TextEngine();
+        engine.updateSize(10000, 10000);
+        engine.setText(props.content);
+
+        return engine;
+    }
+
     createEngine(props = this.props) {
         TextEngine.setDefaultFormatting(props.font);
-
         var engine = new TextEngine();
-        engine.updateSize(props.autoWidth ? 10000 : (props.br || this.boundaryRect()).width, 10000);
+
+        engine.updateSize((props.br || this.boundaryRect()).width, 10000);
+
         engine.setText(props.content);
+
         this.runtimeProps.engine = engine;
         return engine;
     }
@@ -253,7 +278,7 @@ class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElem
     getNonRepeatableProps(newProps) {
         var base = super.getNonRepeatableProps();
         var props = newProps && newProps.autoWidth !== undefined ? newProps : this.props;
-        if (props.autoWidth) {
+        if (props.autoWidth === TextAutoWidth.Fit) {
             return base.concat(["br", "content"]);
         }
         return base.concat(["content"]);
@@ -385,15 +410,15 @@ PropertyMetadata.registerForType(Text, {
     },
     autoWidth: {
         displayName: "Width",
-        type: "switch",
+        type: "dropdown",
         options: {
-            hasLabels: true,
             items: [
-                { label: "Auto", value: true },
-                { label: "Fixed", value: false }
+                { name: "@textAutoWidth.Fit", value: TextAutoWidth.Fit },
+                { name: "@textAutoWidth.Wrap", value: TextAutoWidth.Wrap },
+                { name: "@textAutoWidth.Grow", value: TextAutoWidth.Grow }
             ]
         },
-        defaultValue: true
+        defaultValue: TextAutoWidth.Fit
     },
     groups: function (element) {
         var baseGroups = PropertyMetadata.findForType(UIElement).groups();

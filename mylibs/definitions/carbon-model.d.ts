@@ -39,10 +39,10 @@ declare module "carbon-model" {
     }
 
     export interface IDecoratable {
-        decorators:any[];
+        decorators: any[];
         addDecorator(decorator);
         removeDecorator(decorator);
-        removeAllDecorators():any[];
+        removeAllDecorators(): any[];
         removeDecoratorByType(type);
     }
 
@@ -236,6 +236,12 @@ declare module "carbon-model" {
         original = 5,
         fixed = 6
 
+    }
+
+    export const enum TextAutoWidth {
+        Wrap = 0,
+        Fit = 1,
+        Grow = 2
     }
 
     export interface IImageProps extends IContainerProps {
