@@ -12,6 +12,8 @@ import ContextCommandCache from "framework/render/ContextCommandCache";
 import Environment from "../../environment";
 import Rect from "../../math/rect";
 
+const TextMaxSize = 10000;
+
 class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElement {
     prepareProps(changes) {
         var dataProvider = changes.dp;
@@ -81,6 +83,7 @@ class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElem
                 || newProps.font !== undefined
                 || newProps.content !== undefined)) {
             delete this.runtimeProps.engine;
+            this.refreshMinSizeConstraints();
         }
 
         if (newProps.br !== undefined
@@ -88,6 +91,7 @@ class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElem
             || newProps.font !== undefined
             || newProps.content !== undefined
             || newProps.visible !== undefined) {
+
             delete this.runtimeProps.commandCache;
         }
         super.propsUpdated.apply(this, arguments);
@@ -215,13 +219,13 @@ class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElem
         return offset;
     }
 
-    createFixedSizeEngine(props = this.props) {
+    createFixedSizeEngine(props = this.props, w = TextMaxSize, h = TextMaxSize) {
         var fontClone = clone(props.font);
         fontClone.valign = TextAlign.top;
         fontClone.align = TextAlign.left
         TextEngine.setDefaultFormatting(fontClone);
         let engine = new TextEngine();
-        engine.updateSize(10000, 10000);
+        engine.updateSize(w, h);
         engine.setText(props.content);
 
         return engine;
@@ -231,12 +235,33 @@ class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElem
         TextEngine.setDefaultFormatting(props.font);
         var engine = new TextEngine();
 
-        engine.updateSize((props.br || this.boundaryRect()).width, 10000);
+        engine.updateSize((props.br || this.boundaryRect()).width, TextMaxSize);
 
         engine.setText(props.content);
 
         this.runtimeProps.engine = engine;
         return engine;
+    }
+
+    minWidth() {
+        if (this.runtimeProps.minWidth === undefined) {
+            this.calculateMinSize();
+        }
+        return this.runtimeProps.minWidth;
+    }
+
+    minHeight() {
+        if (this.runtimeProps.minHeight === undefined) {
+            this.calculateMinSize();
+        }
+        return this.runtimeProps.minHeight;
+    }
+
+    calculateMinSize() {
+        var size = (this.props.autoWidth === TextAutoWidth.Wrap) ? 0 : TextMaxSize;
+        var engine = this.createFixedSizeEngine(this.props, size, size);
+        this.runtimeProps.minWidth = engine.getActualWidth();
+        this.runtimeProps.minHeight = engine.getActualHeight();
     }
 
     cursor() {

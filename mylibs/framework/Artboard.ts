@@ -125,11 +125,11 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     minWidth() {
-        return 1;
+        return super.minWidth() || 1;
     }
 
     minHeight() {
-        return 1;
+        return super.minHeight() || 1;
     }
 
     canAccept(elements: UIElement[], autoInsert, allowMoveIn) {

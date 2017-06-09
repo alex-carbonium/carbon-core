@@ -130,12 +130,26 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         super.setProps.apply(this, arguments);
     }
 
+    refreshMinSizeConstraints() {
+        delete this.runtimeProps.minWidth;
+        delete this.runtimeProps.minHeight;
+
+        var parent = this.parent();
+        if(parent && parent !== NullContainer) {
+            parent.refreshMinSizeConstraints();
+        }
+    }
+
     propsUpdated(newProps, oldProps, mode?) {
         if (newProps.hasOwnProperty("m") || newProps.hasOwnProperty("br")) {
             this.resetGlobalViewCache();
             if (mode === ChangeMode.Model) {
                 this.saveLastGoodTransformIfNeeded(oldProps);
             }
+        }
+
+        if(newProps.hasOwnProperty("constraints")) {
+            this.refreshMinSizeConstraints();
         }
 
         //raise events after all caches are updated
@@ -789,6 +803,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (resetPrimitiveRoot) {
             delete this.runtimeProps.primitiveRoot;
         }
+
+        this.refreshMinSizeConstraints();
     }
     viewMatrix() {
         return this.props.m;

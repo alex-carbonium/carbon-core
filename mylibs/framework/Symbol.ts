@@ -93,10 +93,10 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
             var br = this.boundaryRect();
             if (this._allowHResize) {
-                br = br.withWidth(currentSize.width || artboard.width());
+                br = br.withWidth(Math.max(currentSize.width, artboard.minWidth()) || artboard.width());
             }
             if (this._allowVResize) {
-                br = br.withHeight(currentSize.height || artboard.height());
+                br = br.withHeight(Math.max(currentSize.height, artboard.minHeight()) || artboard.height());
             }
 
             this.setProps({br}, ChangeMode.Self);
@@ -194,7 +194,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     }
 
     systemType() {
-        return this._artboard != null ? 'user:' + this._artboard.name() : super.systemType();
+        return this._artboard ? 'user:' + this._artboard.name() : super.systemType();
     }
 
     onArtboardChanged() {
@@ -370,7 +370,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     }
 
     getStates() {
-        return this._artboard != null ? this._artboard.getStates() : [];
+        return this._artboard ? this._artboard.getStates() : [];
     }
 
     canAccept() {

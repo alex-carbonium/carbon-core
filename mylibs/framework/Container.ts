@@ -121,24 +121,80 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         this.strokeBorder(context, w, h);
     }
 
+    minWidth() {
+        if (this.runtimeProps.minWidth === undefined) {
+            this._calculateMinSize();
+        }
+
+        return this.runtimeProps.minWidth;
+    }
+
+    minHeight() {
+        if (this.runtimeProps.minHeight === undefined) {
+            this._calculateMinSize();
+        }
+
+        return this.runtimeProps.minHeight;
+    }
+
+    _calculateMinSize() {
+        var minWidth = 0;
+        var minHeight = 0;
+        var width = this.width();
+        var height = this.height();
+
+        for (var c of this.children) {
+            let childMinSize = this._calculateChildMinSize(c, width, height);
+            if (childMinSize.width) {
+                minWidth = Math.max(minWidth, childMinSize.width);
+            }
+
+            if (childMinSize.height) {
+                minHeight = Math.max(minHeight, childMinSize.height);
+            }
+        }
+
+        this.runtimeProps.minWidth = minWidth;
+        this.runtimeProps.minHeight = minHeight;
+    }
+
+    _calculateChildMinSize(child, width, height) {
+        var br = child.boundaryRect();
+        var mw = child.minWidth();
+        var mh = child.minHeight();
+        let c = child.constraints();
+
+        if (c.h === HorizontalConstraint.LeftRight) {
+            mw += br.x;
+            mw += (width - br.x - br.width);
+        }
+
+        if (c.v === VerticalConstraint.TopBottom) {
+            mh += br.y;
+            mh += (height - br.y - br.height);
+        }
+
+        return { width: mw, height: mh };
+    }
+
     autoGrow(dw, dh) {
         let br = this.props.br;
         let nbr = br.withSize(br.width + dw, br.height + dh);
         var c = this.constraints();
-        if(c.h !== HorizontalConstraint.LeftRight) {
+        if (c.h !== HorizontalConstraint.LeftRight) {
             dw = 0;
         }
 
-        if(c.v !== VerticalConstraint.TopBottom) {
+        if (c.v !== VerticalConstraint.TopBottom) {
             dh = 0;
         }
 
-        if(dw || dh) {
+        if (dw || dh) {
             this.parent().autoGrow(dw, dh);
         }
 
-        this.setProps({br:nbr});
-        this.performArrange({newRect:nbr, oldRect:br});
+        this.setProps({ br: nbr });
+        this.performArrange({ newRect: nbr, oldRect: br });
     }
 
     modifyContextBeforeDrawChildren(context) {
