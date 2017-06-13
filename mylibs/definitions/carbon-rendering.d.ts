@@ -9,7 +9,10 @@ declare module "carbon-rendering" {
         lineWidth: number;
         globalAlpha: number;
 
+        clearRect(x: number, y: number, width: number, height: number);
+
         translate(x: number, y: number): void;
+        scale(x: number, y: number);
         rotate(radians: number): void;
 
         moveTo(x: number, y: number): void;
@@ -28,6 +31,12 @@ declare module "carbon-rendering" {
         save(): void;
         restore(): void;
     }
+
+    interface IContextConstructor {
+        new(canvas: HTMLCanvasElement): IContext;
+    }
+
+    export const Context: IContextConstructor;
 
     export interface IRenderingEnvironment {
         contextScale: number;

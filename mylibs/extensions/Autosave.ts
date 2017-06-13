@@ -17,6 +17,7 @@ export default class AutoSave extends ExtensionBase {
             app.clear();
         }
 
+        app.modelSyncProxy.addPendingChanges(backup.changes);
         RelayoutQueue.enqueueAll(backup.changes);
         app.relayout();
         if (app.pages.length) {

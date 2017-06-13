@@ -1,34 +1,34 @@
 // auto-generated with node ./scripts/jsClient.js
 import backend from "../backend";
 var proxy = {
-    overview: function(){
+    overview(){
         return backend.get(backend.servicesEndpoint + "/api/account/overview");
     },
-    updateAccountInfo: function(model){
+    updateAccountInfo(model){
         return backend.post(backend.servicesEndpoint + "/api/account/info", { model });
     },
-    changePassword: function(model){
+    changePassword(model){
         return backend.post(backend.servicesEndpoint + "/api/account/changePassword", { model });
     },
-    addPassword: function(model){
+    addPassword(model){
         return backend.post(backend.servicesEndpoint + "/api/account/addPassword", { model });
     },
-    register: function(model){
+    register(model){
         return backend.post(backend.servicesEndpoint + "/api/account/register", { model });
     },
-    resolveCompanyId: function(companyName){
+    resolveCompanyId(companyName){
         return backend.post(backend.servicesEndpoint + "/api/account/resolveCompanyId", { companyName });
     },
-    getCompanyName: function(){
+    getCompanyName(){
         return backend.get(backend.servicesEndpoint + "/api/account/getCompanyName");
     },
-    validateEmail: function(model){
+    validateEmail(model){
         return backend.post(backend.servicesEndpoint + "/api/account/validateEmail", { model });
     },
-    forgotPassword: function(model){
+    forgotPassword(model){
         return backend.post(backend.servicesEndpoint + "/api/account/forgotPassword", { model });
     },
-    resetPassword: function(model){
+    resetPassword(model){
         return backend.post(backend.servicesEndpoint + "/api/account/resetPassword", { model });
     }
 }

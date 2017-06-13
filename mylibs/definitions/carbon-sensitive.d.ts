@@ -35,6 +35,7 @@ declare module "carbon-api" {
         servicesEndpoint: string;
 
         accountProxy: IAccountProxy;
+        shareProxy: IShareProxy;
     }
 
     export interface IEmailValidationModel {
@@ -82,5 +83,47 @@ declare module "carbon-api" {
         getCompanyName(): Promise<{ companyName: string }>;
 
         validateEmail(model: IEmailValidationModel): ResponsePromise<IEmailValidationModel, void>;
+    }
+
+    export const enum PublishScope {
+        Company,
+        Public
+    }
+    export interface IValidatePageNameModel {
+        name: string;
+        scope: PublishScope;
+    }
+    export interface IValidatePageNameResult {
+        exists: boolean
+    }
+    export interface IPublishPageModel {
+        name: string;
+        description: string;
+        tags: string;
+        pageData: string;
+        coverUrl: string;
+        scope: PublishScope;
+    }
+    export interface IPublishPageResult {
+        galleryId: string;
+    }
+    export interface IUseCodeResult {
+        companyName: string;
+        companyId: string;
+        userId: string;
+        projectId: number;
+    }
+    export interface ISharedPageSetup {
+        name: string;
+        description: string;
+        tags: string;
+        coverUrl: string;
+        scope: PublishScope;
+    }
+    export interface IShareProxy {
+        use(code: string): Promise<IUseCodeResult>;
+        getPageSetup(pageId: string): Promise<ISharedPageSetup>;
+        validatePageName(model: IValidatePageNameModel): ResponsePromise<IValidatePageNameModel, IValidatePageNameResult>;
+        publishPage(model: IPublishPageModel): ResponsePromise<IPublishPageModel, IPublishPageResult>;
     }
 }

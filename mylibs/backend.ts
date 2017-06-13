@@ -5,7 +5,7 @@ import EventHelper from "./framework/EventHelper";
 import UserManager from "oidc-client/src/UserManager";
 import Log from "oidc-client/src/Log";
 import params from "./params";
-import { IBackend, ILogger, IAccountProxy, Response, ILoginModel, ILoginResult, ConnectionState, ResponsePromise } from "carbon-api";
+import { IBackend, ILogger, IAccountProxy, Response, ILoginModel, ILoginResult, ConnectionState, ResponsePromise, IShareProxy } from "carbon-api";
 import { IEvent, IDisposable, LoginProvider } from "carbon-basics";
 import { IApp } from "carbon-app";
 import ActivityMonitor from "./ActivityMonitor";
@@ -53,6 +53,7 @@ class Backend implements IBackend {
     requestStarted: IEvent<string>;
     requestEnded: IEvent<string>;
     accountProxy: IAccountProxy;
+    shareProxy: IShareProxy;
 
     LoginProvider: LoginProvider;
 
@@ -160,11 +161,11 @@ class Backend implements IBackend {
         });
     }
 
-    get(url, data, options) {
+    get(url, data?, options?) {
         options = Object.assign({}, defaultOptions, options);
         return this.ajax("get", url, data, options);
     }
-    post(url, data, options) {
+    post(url, data, options?) {
         options = Object.assign({}, defaultOptions, options);
         return this.ajax("post", url, data, options);
     }

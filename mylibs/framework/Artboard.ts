@@ -914,8 +914,15 @@ PropertyMetadata.registerForType(Artboard, {
     },
     tileSize: {
         displayName: "@tilesize",
-        type: "tileSize",
-        defaultValue: TileSize.Small
+        type: "dropdown",
+        defaultValue: TileSize.Small,
+        options: {
+            items: [
+                {name : '@tilesize.small' , value : TileSize.Small },
+                {name : '@tilesize.large' , value : TileSize.Large },
+                {name : '@tilesize.xlarge', value : TileSize.XLarge},
+            ]
+        }
     },
     insertAsContent: {
         displayName: "@ascontent",
@@ -925,7 +932,7 @@ PropertyMetadata.registerForType(Artboard, {
     toolboxGroup: {
         displayName: "@groupname",
         type: 'text',
-        defaultValue: 'Custom'
+        defaultValue: 'My Symbols'
     },
     frame: {
         displayName: "@frame",
@@ -964,7 +971,7 @@ PropertyMetadata.registerForType(Artboard, {
             },
             {
                 label: "@advanced",
-                properties: ["type", "allowHorizontalResize", "allowVerticalResize", "tileSize", "insertAsContent", "toolboxGroup"],
+                properties: ["type", "tileSize", "toolboxGroup", "insertAsContent"],
                 expanded: true
             }
             // ,{

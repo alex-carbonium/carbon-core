@@ -239,21 +239,4 @@ export default class PlatformAll {
 
     registerClipboardShortcuts(app) {
     }
-
-    renderElementToDataUrl(e, scale, w, h) {
-        var actualScale = scale || 1;
-        var width = w || e.width();
-        var height = h || e.height();
-        var canvas = getElementCanvas();
-        canvas.width = ~~(width * actualScale);
-        canvas.height = ~~(height * actualScale);
-
-        var context = canvas.getContext("2d");
-        context.save();
-        context.scale(actualScale || 1, actualScale);
-        e.drawSelf(context, width, height, {});
-        context.restore();
-
-        return canvas.toDataURL("image/png");
-    }
 }

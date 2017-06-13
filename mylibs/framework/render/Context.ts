@@ -757,7 +757,7 @@ export default class Context implements IContext {
         this._context.restore.apply(this._context, arguments);
     }
 
-    scale(x, y) {
+    scale(x: number, y: number) {
         this._context.scale.apply(this._context, arguments);
     }
 

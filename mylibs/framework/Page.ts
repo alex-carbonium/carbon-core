@@ -10,6 +10,7 @@ import EventHelper from "./EventHelper";
 import Brush from "./Brush";
 import NameProvider from "ui/NameProvider";
 import { IContainer, IRect, IPage, IArtboard, ChangeMode, IPrimitiveRoot } from "carbon-core";
+import PageExporter from "./share/PageExporter";
 
 function findNextPageName() {
     var maxId = 0;
@@ -230,66 +231,8 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
     autoInsert(/*UIElement*/element) {
     }
 
-    renderTile(canvas, options) {
-        var context = canvas.getContext('2d');
-        var container = this.getContentContainer();
-        if (!container) {
-            context.fillStyle = 'white';
-            context.fillRect(0, 0, canvas.width, canvas.height);
-            return;
-        }
-
-        var dw = (options && options.dw) || 100,//TODO: move value somewhere to constants
-            dh = (options && options.dh) || 100,
-            sw = container.width(),
-            sh = container.height();
-        if (sw == 0 || sh == 0) {
-            return;
-        }
-        var sr = sw / sh,
-            h = dh,
-            w = dh * sr;
-        if (w > dw) {
-            w = dw;
-            h = dh / sr;
-        }
-
-        var scale = w / sw;
-        canvas.width = w;
-        canvas.height = h;
-        context.fillStyle = 'white';
-        context.fillRect(0, 0, w, h);
-        return this.renderContentTile(context, 0, 0, scale);
-    }
-
-    renderExportPreview(options) {
-        var rect = this.getContentOuterSize();
-
-        var dw = (options && options.dw) || 100,//TODO: move value somewhere to constants
-            dh = (options && options.dh) || 100,
-            sw = rect.width,
-            sh = rect.height;
-        if (sw == 0 || sh == 0) {
-            return;
-        }
-        var sr = sw / sh,
-            h = dh,
-            w = dh * sr;
-        if (w > dw) {
-            w = dw;
-            h = dh / sr;
-        }
-
-        var scale = w / sw;
-        var contextScale = 1;//options.contextScale || 1;
-        var context = ContextPool.getContext(w, h, contextScale);
-        context.fillStyle = '#b7babd';
-        context.fillRect(0, 0, w * contextScale, h * contextScale);
-        this.renderContentTile(context, 0, 0, scale, contextScale);
-
-        var res = context.canvas.toDataURL("image/png");
-        ContextPool.releaseContext(context);
-        return res;
+    export(): Promise<object>{
+        return PageExporter.prepareShareData(this);
     }
 
     renderContentTile(context, x, y, zoom, contextScale?) {
@@ -322,18 +265,6 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
             }
         });
         context.restore();
-    }
-
-    renderContentToDataURL() {
-        var content = this.getContentContainer();
-        var canvas = document.createElement("canvas");
-
-        canvas.width = content.width();
-        canvas.height = content.height();
-
-        this.renderContentTile(canvas.getContext("2d"), 0, 0, 1);
-
-        return canvas.toDataURL("image/png");
     }
 
     name(value?) {
@@ -412,10 +343,6 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
     getAllArtboards(): IArtboard[] {
         //TODO: add functionality
         return [];
-    }
-
-    draw(context, env) {
-        return Layer.prototype.draw.apply(this, arguments);
     }
 
     scrollCenterPosition(viewportSize, scale) {

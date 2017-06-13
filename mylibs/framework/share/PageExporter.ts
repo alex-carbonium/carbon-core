@@ -7,13 +7,7 @@ import DataNode from "framework/DataNode";
 import Font from "../Font";
 import { IApp } from "carbon-app";
 
-export default class PageExporter {
-    _app: IApp;
-
-    constructor(app: IApp){
-        this._app = app;
-    }
-
+export class PageExporter {
     prepareShareData(page) {
         var clone = page.mirrorClone();
 
@@ -42,7 +36,7 @@ export default class PageExporter {
                 textStyles:textStyles,
                 fontMetadata: fontMetadata,
                 publishDate:new Date(),
-                publishedBy:this._app.companyId()
+                publishedBy: page.app.companyId()
                 // add here any external dependencies
             }
         });
@@ -59,7 +53,7 @@ export default class PageExporter {
                 var source = e.source();
                 if(source.pageId != pageId){
                     // clone referenced artboard and insert it to the current page
-                    var refPage = DataNode.getImmediateChildById(this._app, source.pageId);
+                    var refPage = DataNode.getImmediateChildById(page.app, source.pageId);
                     var refArtboard = DataNode.getImmediateChildById(refPage, source.artboardId, true);
                     var clone = refArtboard.clone();
                     clone.setProps({id:createUUID(), x:rect.y, y:posY});
@@ -94,7 +88,7 @@ export default class PageExporter {
             var font = e.props.font;
             if (font){
                 if (font.family !== Font.Default.family){
-                    let metadata = this._app.getFontMetadata(font.family);
+                    let metadata = page.app.getFontMetadata(font.family);
                     if (metadata){
                         fontMetadata.push(metadata);
                     }
@@ -105,7 +99,7 @@ export default class PageExporter {
                     for (var i = 0; i < content.length; i++) {
                         var range = content[i];
                         if (range.family && range.family !== Font.Default.family){
-                            let metadata = this._app.getFontMetadata(range.family);
+                            let metadata = page.app.getFontMetadata(range.family);
                             if (metadata){
                                 fontMetadata.push(metadata);
                             }
@@ -116,3 +110,5 @@ export default class PageExporter {
         })
     }
 }
+
+export default new PageExporter();

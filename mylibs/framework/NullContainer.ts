@@ -297,6 +297,11 @@ class NullContainer extends DataNode implements IContainer {
     locked() {
         return true;
     }
+
+    draw(){
+    }
+    drawSelf(){
+    }
 }
 
 export default new NullContainer();

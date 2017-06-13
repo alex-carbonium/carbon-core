@@ -57,6 +57,10 @@ try
     {
         npm install --loglevel=error
         npm test
+        if ($LASTEXITCODE)
+        {
+            throw "Tests failed with exit code $LASTEXITCODE"
+        }
     }
 
     $params = @("run", "packCore", "--", "--noColors")
@@ -65,6 +69,10 @@ try
         $params += "--noUglify"
     }
     & npm $params
+    if ($LASTEXITCODE)
+    {
+        throw "Packaging failed with exit code $LASTEXITCODE"
+    }
 
     Copy-Item .\mylibs\definitions\carbon-*.d.ts .\target
     Remove-Item .\target\*.map

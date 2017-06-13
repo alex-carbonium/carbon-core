@@ -17,6 +17,7 @@
 
         #header{
             position: absolute;
+            top: 0;
             width: 100%;
             height: 32px;
             line-height: 32px;
@@ -26,17 +27,13 @@
             color: #CFCFCF;
         }
 
-        canvas, #htmlPanel, #htmllayer, #viewContainer, #viewport {
+        #viewport {
             position: absolute;
             top: 0;
             left: 50%;
             margin-left: -300px;
             width: 600px;
             height: 600px;
-        }
-
-        #htmlPanel {
-            pointer-events: none;
         }
     </style>
 </head>
@@ -47,14 +44,6 @@
         <button id="rerun">Run again (F3)</button>
         <!--<button id="previous">Previous (F7)</button>-->
         <!--<button id="next">Next (F8)</button>-->
-    </div>
-    <canvas id="app_canvas"></canvas>
-    <canvas id="grid_canvas"></canvas>
-    <canvas id="app_upperCanvas"></canvas>
-
-    <div id="viewContainer" tabIndex="1">
-        <div id="htmlLayer"></div>
-        <div id="htmlPanel"></div>
     </div>
 </div>
 </body>

@@ -34,6 +34,7 @@ declare module "carbon-model" {
     }
 
     export interface IUIElementProps extends IDataNodeProps {
+        br: IRect;
         visible: boolean;
         constraints: IConstraints;
     }

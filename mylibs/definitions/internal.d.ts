@@ -28,7 +28,7 @@ declare module "carbon-geometry"{
 }
 
 declare module "carbon-model"{
-    import { IRect, IMatrix } from "carbon-geometry";
+    import { IRect, IMatrix, ISize } from "carbon-geometry";
 
     export interface IDataNode {
         primitivePath():any;
@@ -43,6 +43,9 @@ declare module "carbon-model"{
         mirrorClone():IUIElement;
 
         primitiveRoot(): IPrimitiveRoot;
+
+        draw(context, environment);
+        drawSelf(context, w, h, environment);
 
         runtimeProps: any;
     }
@@ -62,6 +65,7 @@ declare module "carbon-app"{
     import { IUIElement } from 'carbon-model';
     import { IContext } from "carbon-rendering";
     import { IEvent, ViewState } from "carbon-basics";
+    import { ISize } from "carbon-geometry";
 
     export interface IPage{
         nameProvider: any;
@@ -88,6 +92,7 @@ declare module "carbon-app"{
     }
 
     export interface IView{
+        gridContext: IContext;
         interactionLayer: any;
         scaleMatrix: any;
         context: any;
@@ -108,6 +113,12 @@ declare module "carbon-app"{
         zoomInStep():void;
 
         ensureViewState(viewState: ViewState);
+
+        setup(params: any);
+        attachToDOM(context, upperContext, isolationContext, container, redrawCallback, cancelCallback, scheduledCallback);
+        detach();
+
+        viewportSizeChanged(size: ISize);
     }
 
     export interface IController{
@@ -123,7 +134,6 @@ declare module "carbon-app"{
     }
 
     export const MirroringController: any;
-    export const Context: any;
     export const Layer: any;
     export const MirroringView: any;
 }

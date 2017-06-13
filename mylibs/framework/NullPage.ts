@@ -154,8 +154,6 @@ class NullPage extends UIElement implements IPage {
     }
     renderContentTile(context, x, y, zoom) {
     }
-    renderContentToDataURL() {
-    }
     resize(rect) {
     }
     id() {
@@ -275,6 +273,10 @@ class NullPage extends UIElement implements IPage {
     }
 
     flatten() {
+    }
+
+    export(): Promise<object>{
+        return Promise.reject(new Error());
     }
 }
 

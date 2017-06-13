@@ -21,10 +21,8 @@ declare module "carbon-core" {
     export var StateBoard: any;
     export var TileSize: any;
     export var PropertyTracker: any;
-    export var ShareProxy: any;
     export var params: any;
     export var MirroringController: any;
-    export var Context: any;
     export var Layer: any;
     export var MirroringView: any;
     export var Types: any;
