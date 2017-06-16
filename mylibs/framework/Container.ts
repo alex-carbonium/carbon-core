@@ -1,4 +1,4 @@
-import { Types, ArrangeStrategies, Overflow, StackAlign, DropPositioning } from "./Defs";
+import { Types, ArrangeStrategies, Overflow, DropPositioning } from "./Defs";
 import ArrangeStrategy from "./arrangeStrategy/ArrangeStrategy";
 import ContextPool from "./render/ContextPool";
 import CorruptedElement from "./CorruptedElement";
@@ -919,9 +919,6 @@ PropertyMetadata.registerForType(Container, {
     },
     arrangeStrategy: {
         defaultValue: ArrangeStrategies.Canvas
-    },
-    stackAlign: {
-        defaultValue: StackAlign.Default
     },
     padding: {
         displayName: "Padding",

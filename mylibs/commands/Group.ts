@@ -1,11 +1,15 @@
 import Selection from "framework/SelectionModel";
 
 export default {
-    run: function(elements, containerType){
+    run: function(elements, containerType, props?){
         var sorted = elements.slice().sort((a, b) => a.zOrder() - b.zOrder());
         var element = elements[0];
         var parent = element.parent();
         var group = new containerType();
+
+        if(props) {
+            group.prepareAndSetProps(props);
+        }
 
         App.Current.activePage.nameProvider.assignNewName(group);
         parent.insert(group, parent.children.indexOf(sorted[sorted.length - 1]));
@@ -17,6 +21,7 @@ export default {
 
         group.performArrange();
         Selection.makeSelection([group]);
+
         return group;
     }
 }

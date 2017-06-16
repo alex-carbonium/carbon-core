@@ -126,7 +126,7 @@ export default class ContextMenuBuilder {
             let itemsToSelect = findItemsToSelect(app, context.eventData)
             if (itemsToSelect.length) {
                 items.push({
-                    name: "Select",
+                    name: "@select",
                     contextBar: ContextBarPosition.None,
                     items: itemsToSelect
                 })
@@ -135,7 +135,7 @@ export default class ContextMenuBuilder {
         }
 
         items.push({
-            name: "Copy",
+            name: "@copy",
             icon: "copy",
             contextBar: ContextBarPosition.None,
             callback: function () {
@@ -145,7 +145,7 @@ export default class ContextMenuBuilder {
         })
 
         items.push({
-            name: "Cut",
+            name: "@cut",
             icon: "cut",
             contextBar: ContextBarPosition.None,
             callback: function () {
@@ -155,7 +155,7 @@ export default class ContextMenuBuilder {
         })
 
         items.push({
-            name: "Paste",
+            name: "@paste",
             icon: "paste",
             contextBar: ContextBarPosition.None,
             callback: function () {
@@ -164,7 +164,7 @@ export default class ContextMenuBuilder {
         })
 
         items.push({
-            name: "Duplicate",
+            name: "@duplicate",
             icon: "duplicate",
             contextBar: ContextBarPosition.None,
             callback: () => {
@@ -175,7 +175,7 @@ export default class ContextMenuBuilder {
 
         items.push('-')
         items.push({
-            name: "Delete",
+            name: "@delete",
             icon: "delete",
             contextBar: ContextBarPosition.None,
             callback: () => {
@@ -270,11 +270,11 @@ export default class ContextMenuBuilder {
         items.push('-')
 
         items.push({
-            name: "Grouping",
+            name: "@grouping",
             contextBar: ContextBarPosition.Right,
             items: [
                 {
-                    name: "Group",
+                    name: "@group",
                     icon: "group",
                     callback: () => {
                         actionManager.invoke("groupElements")
@@ -282,7 +282,31 @@ export default class ContextMenuBuilder {
                     disabled: !selection || selection.length <= 1
                 },
                 {
-                    name: "Ungroup",
+                    name: "@group.vstack",
+                    icon: "group",
+                    callback: () => {
+                        actionManager.invoke("groupElementsVStack")
+                    },
+                    disabled: !selection || selection.length <= 1
+                },
+                {
+                    name: "@group.hstack",
+                    icon: "group",
+                    callback: () => {
+                        actionManager.invoke("groupElementsHStack")
+                    },
+                    disabled: !selection || selection.length <= 1
+                },
+                {
+                    name: "@group.canvas",
+                    icon: "group",
+                    callback: () => {
+                        actionManager.invoke("groupElementsCanvas")
+                    },
+                    disabled: !selection || selection.length <= 1
+                },
+                {
+                    name: "@ungroup",
                     icon: "ungroup",
                     callback: () => {
                         actionManager.invoke("ungroupElements")
@@ -290,7 +314,7 @@ export default class ContextMenuBuilder {
                     disabled: !selection || selection.length !== 1 || !(selection[0] instanceof GroupContainer)
                 },
                 {
-                    name: "Mask",
+                    name: "@group.mask",
                     icon: "mask",
                     callback: () => {
                         actionManager.invoke("groupWithMask")
@@ -301,11 +325,11 @@ export default class ContextMenuBuilder {
         })
         items.push('-')
         items.push({
-            name: "Path",
+            name: "@path",
             contextBar: (canDoPathOperations(selection) || canFlattenPath(selection) || canConvertToPath(selection)) ? ContextBarPosition.Right : ContextBarPosition.None,
             items: [
                 {
-                    name: "Union",
+                    name: "@union",
                     icon: "pathUnion",
                     callback: () => {
                         actionManager.invoke("pathUnion")
@@ -313,7 +337,7 @@ export default class ContextMenuBuilder {
                     disabled: !canDoPathOperations(selection)
                 },
                 {
-                    name: "Intersect",
+                    name: "@intersect",
                     icon: "pathIntersect",
                     callback: () => {
                         actionManager.invoke("pathIntersect")
@@ -321,7 +345,7 @@ export default class ContextMenuBuilder {
                     disabled: !canDoPathOperations(selection)
                 },
                 {
-                    name: "Difference",
+                    name: "@difference",
                     icon: "pathDifference",
                     callback: () => {
                         actionManager.invoke("pathDifference")
@@ -329,7 +353,7 @@ export default class ContextMenuBuilder {
                     disabled: !canDoPathOperations(selection)
                 },
                 {
-                    name: "Subtract",
+                    name: "@subtract",
                     icon: "pathSubtract",
                     callback: () => {
                         actionManager.invoke("pathSubtract")
@@ -337,7 +361,7 @@ export default class ContextMenuBuilder {
                     disabled: !canDoPathOperations(selection)
                 },
                 {
-                    name: "Flatten",
+                    name: "@flatten",
                     icon: "pathFlatten",
                     callback: () => {
                         actionManager.invoke("pathFlatten")
@@ -345,7 +369,7 @@ export default class ContextMenuBuilder {
                     disabled: !canFlattenPath(selection)
                 },
                 {
-                    name: "Convert to path",
+                    name: "@convert.to.path",
                     icon: "convertToPath",
                     callback: () => {
                         actionManager.invoke("convertToPath")
@@ -358,11 +382,11 @@ export default class ContextMenuBuilder {
 
 
         items.push({
-            name: "Arrange",
+            name: "@arrange",
             contextBar: ContextBarPosition.Right,
             items: [
                 {
-                    name: "Bring to Front",
+                    name: "@bring.to.front",
                     icon: "ico-small-send-to-foreground",
                     callback: () => {
                         actionManager.invoke("bringToFront")
@@ -370,7 +394,7 @@ export default class ContextMenuBuilder {
                     disabled: !selection || !selection.length
                 },
                 {
-                    name: "Send to Back",
+                    name: "@send.to.back",
                     icon: "ico-small-send-to-background",
                     callback: () => {
                         actionManager.invoke("sendToBack")
@@ -378,7 +402,7 @@ export default class ContextMenuBuilder {
                     disabled: !selection || !selection.length
                 },
                 {
-                    name: "Bring Forward",
+                    name: "@bring.forward",
                     icon: "ico-small-move-upper",
                     callback: () => {
                         actionManager.invoke("bringForward")
@@ -386,7 +410,7 @@ export default class ContextMenuBuilder {
                     disabled: !selection || !selection.length
                 },
                 {
-                    name: "Send Backward",
+                    name: "@send.backward",
                     icon: "ico-small-move-lower",
                     callback: () => {
                         actionManager.invoke("sendBackward")

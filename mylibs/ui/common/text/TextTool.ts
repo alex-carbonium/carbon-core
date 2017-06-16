@@ -296,6 +296,7 @@ export default class TextTool extends Tool {
         engine.contentChanged(this.contentChanged);
         this._editor = this._createEditor(engine, clone);
         this._editedElement = text;
+        this._originalBr = text.props.br;
         this._editClone = clone;
         this._editClone.runtimeProps.keepEngine = true;
 
@@ -374,6 +375,11 @@ export default class TextTool extends Tool {
 
             if (dw || dh) {
                 this._editedElement.parent().autoGrow(dw, dh);
+            } else {
+                // this is for scenario when d
+                let br = this._editedElement.props.br;
+                this._editedElement.setProps(props, ChangeMode.Self);
+                this._editedElement.parent().performArrange();
             }
 
             this._editClone.setProps(props, ChangeMode.Self);
@@ -425,6 +431,8 @@ export default class TextTool extends Tool {
         if (this._editClone.props.font.valign !== this._editedElement.props.font.valign) {
             props.font = Font.extend(props.font, { valign: this._editClone.props.font.valign });
         }
+
+        this._editedElement.setProps({ br: this._originalBr }, ChangeMode.Self);
 
         this._editedElement.prepareAndSetProps(props); //no validation, save from clone as is
     }

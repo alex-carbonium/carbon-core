@@ -32,11 +32,6 @@ export enum VerticalAlignment {
     Middle
 };
 
-export enum StackAlign {
-    Default,
-    Center
-};
-
 export enum ArrangeStrategies {
     Canvas,
     VerticalStack,
@@ -187,6 +182,10 @@ export var Types = {
     'Image': 'F',
     'ImageContent': 'FC',
     'GroupContainer': 'g',
+    'VerticalStackContainer': 'vg',
+    'HorizontalStackContainer': 'hg',
+    'CanvasContainer': 'cg',
+    'InteractiveContainer': 'ig',
     'App': 'A',
     'Guide': 'H',
     'CustomGuide': 'C',

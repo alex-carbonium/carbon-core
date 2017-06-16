@@ -7,6 +7,7 @@ import Environment from "../environment";
 import Invalidate from "../framework/Invalidate";
 import FontHelper from "../framework/FontHelper";
 import Brush from "../framework/Brush";
+import Matrix from "math/matrix";
 
 import clipboard from "../framework/Clipboard";
 import PropertyTracker from "../framework/PropertyTracker";
@@ -24,11 +25,13 @@ import { align } from "../framework/Aligner";
 import platform from "../platform/Platform";
 import CombinePaths from "../commands/CombinePaths";
 import GroupContainer from "../framework/GroupContainer";
+import InteractiveContainer from "../framework/InteractiveContainer";
 import GroupInRepeater from "../framework/repeater/GroupInRepeater";
 import UngroupRepeater from "../framework/repeater/UngroupRepeater";
 import Selection from "../framework/SelectionModel";
 import EventHelper from "../framework/EventHelper";
 import { IActionManager, IAction, IApp, IUIElement, IEvent, IContainer, IIsolatable } from "carbon-core";
+import { ArrangeStrategies, DropPositioning } from "../framework/Defs";
 
 const debug = require("DebugUtil")("carb:actionManager");
 
@@ -115,7 +118,7 @@ export default class ActionManager implements IActionManager {
         return this.registerActionInstance(action);
     }
 
-    registerActionInstance(action: IAction):IAction {
+    registerActionInstance(action: IAction): IAction {
         this._actions[action.id] = action;
         if (action.condition) {
             this._actionsWithConditions[action.id] = action;
@@ -297,6 +300,28 @@ export default class ActionManager implements IActionManager {
 
         this.registerAction("groupElements", "Group elements", "Group", function () {
             Group.run(Selection.getSelection(), GroupContainer);
+        });
+
+        this.registerAction("groupElementsVStack", "Group elements", "Group", function () {
+            var b = Selection.selectedElement().getBoundingBox();
+            Group.run(Selection.getSelection(), InteractiveContainer, {
+                arrangeStrategy: ArrangeStrategies.VerticalStack,
+                dropPositioning: DropPositioning.Vertical,
+                m: Matrix.create().translate(b.x, b.y)
+            });
+        });
+
+        this.registerAction("groupElementsHStack", "Group elements", "Group", function () {
+            var b = Selection.selectedElement().getBoundingBox();
+            Group.run(Selection.getSelection(), InteractiveContainer, {
+                arrangeStrategy: ArrangeStrategies.HorizontalStack,
+                dropPositioning: DropPositioning.Horizontal,
+                m: Matrix.create().translate(b.x, b.y)
+            });
+        });
+
+        this.registerAction("groupElementsCanvas", "Group elements", "Group", function () {
+            Group.run(Selection.getSelection(), InteractiveContainer);
         });
 
         this.registerAction("isolateSelection", "Isolate selection", "Isolation", function () {

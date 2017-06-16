@@ -1,5 +1,4 @@
 import {
-    StackAlign,
     HorizontalAlignment,
     VerticalAlignment
 } from "framework/Defs";
@@ -32,40 +31,66 @@ function getTotalChildrenHeight(container) {
     return res;
 }
 
+function calculateHeight(container) {
+    let highestChild = null;
+    let topPadding = container.padding().top;
+    let bottomPadding = container.padding().bottom;
+
+    for (let child of container.children) {
+        if (!child.visible()) {
+            continue;
+        }
+        if (!highestChild || child.height() > highestChild.height()) {
+            highestChild = child;
+        }
+    }
+
+    if (highestChild) {
+        let h = highestChild.height() + topPadding + bottomPadding
+            + highestChild.margin().top + highestChild.margin().bottom;
+        return h;
+    }
+
+    return 0;
+}
+
+function calculateWidth(container) {
+    let widestChild;
+    let leftPadding = container.padding().left;
+    let rightPadding = container.padding().right;
+
+    for (let child of container.children) {
+        if (!child.visible()) {
+            continue;
+        }
+        if (!widestChild || child.width() > widestChild.width()) {
+            widestChild = child;
+        }
+    }
+
+    if (widestChild) {
+        let w = widestChild.width() + leftPadding + rightPadding
+            + widestChild.margin().left + widestChild.margin().right;
+        return w;
+    }
+
+    return 0;
+}
+
 export let HorizontalArrangeStrategy = {
-    arrange: function (container: any, event?, changeMode?) {
+    arrange: function (container: any, e?, changeMode?) {
         let x = container.x();
         let y = container.y()
-        let w = container.width();
-        let h = container.height();
         let pos = container.padding().left;
         let topPadding = container.padding().top;
         let bottomPadding = container.padding().bottom;
-        let newWidth, newHeight;
 
-        if (container.autoHeight()) {
-            let highestChild;
+        let newHeight;
 
-            for (let child of container.children) {
-                if (!child.visible()) {
-                    continue;
-                }
-                if (!highestChild || child.height() > highestChild.height()) {
-                    highestChild = child;
-                }
-            }
-
-            if (highestChild) {
-                h = highestChild.height() + topPadding + bottomPadding
-                    + highestChild.margin().top + highestChild.margin().bottom;
-                newHeight = h;
-            }
-        }
-
-        if (container.props.stackAlign === StackAlign.Center && !container.autoWidth()) {
-            let childrenWidth = getTotalChildrenWidth(container);
-            let containerSpace = container.width() - container.padding().right - container.padding().left;
-            pos += (containerSpace - childrenWidth) / 2;
+        if(e && (e.newRect.height !== e.oldRect.height && e.newRect.height)) {
+            newHeight = e.newRect.height;
+        } else {
+            newHeight = calculateHeight(container);
         }
 
         for (let child of container.children) {
@@ -87,16 +112,16 @@ export let HorizontalArrangeStrategy = {
             switch (child.verticalAlignment()) {
                 case VerticalAlignment.Stretch:
                     y = topSpace;
-                    height = h - topSpace - bottomSpace;
+                    height = newHeight - topSpace - bottomSpace;
                     break;
                 case VerticalAlignment.Top:
                     y = topSpace;
                     break;
                 case VerticalAlignment.Middle:
-                    y = ~~(h / 2 - child.height() / 2);
+                    y = ~~(newHeight / 2 - child.height() / 2);
                     break;
                 case VerticalAlignment.Bottom:
-                    y = h - bottomSpace - child.height();
+                    y = newHeight - bottomSpace - child.height();
                     break;
             }
 
@@ -112,43 +137,22 @@ export let HorizontalArrangeStrategy = {
 
         pos += container.padding().right;
 
-        if (container.autoWidth()) {
-            container.setProps({br:container.props.br.withWidth(pos)});
-        }
+        container.setProps({ br: container.props.br.withSize(pos, newHeight) });
     }
 }
 
 export let VerticalArrangeStrategy = {
     arrange: function (container, e, changeMode) {
-        let x = container.x(), y = container.y(), w = container.width(), h = container.height();
+        let x = container.x(), y = container.y();
         let pos = container.padding().top;
         let leftPadding = container.padding().left;
         let rightPadding = container.padding().right;
-        let newWidth, newHeight;
 
-        if (container.autoWidth()) {
-            let widestChild;
-
-            for (let child of container.children) {
-                if (!child.visible()) {
-                    continue;
-                }
-                if (!widestChild || child.width() > widestChild.width()) {
-                    widestChild = child;
-                }
-            }
-
-            if (widestChild) {
-                w = widestChild.width() + leftPadding + rightPadding
-                    + widestChild.margin().left + widestChild.margin().right;
-                newWidth = w;
-            }
-        }
-
-        if (container.props.stackAlign === StackAlign.Center && !container.autoHeight()) {
-            let childrenHeight = getTotalChildrenHeight(container);
-            let containerSpace = container.height() - container.padding().top - container.padding().bottom;
-            pos += (containerSpace - childrenHeight) / 2;
+        let newWidth;
+        if(e && (e.newRect.width !== e.oldRect.width && e.newRect.width)) {
+            newWidth = e.newRect.width;
+        } else {
+            newWidth = calculateWidth(container);
         }
 
         for (let child of container.children) {
@@ -169,16 +173,16 @@ export let VerticalArrangeStrategy = {
             switch (child.horizontalAlignment()) {
                 case HorizontalAlignment.Stretch:
                     x = leftSpace;
-                    width = w - leftSpace - rightSpace;
+                    width = newWidth - leftSpace - rightSpace;
                     break;
                 case HorizontalAlignment.Left:
                     x = leftSpace;
                     break;
                 case HorizontalAlignment.Center:
-                    x = ~~(w / 2 - child.width() / 2);
+                    x = ~~(newWidth / 2 - child.width() / 2);
                     break;
                 case HorizontalAlignment.Right:
-                    x = w - rightSpace - child.width();
+                    x = newWidth - rightSpace - child.width();
                     break;
             }
 
@@ -195,15 +199,14 @@ export let VerticalArrangeStrategy = {
 
         pos += container.padding().bottom;
 
-        if (container.autoHeight()) {
-            if (container.autoGrowMode() === 'up') {
-                let delta = pos - container.height();
-                let y = container.y() - delta;
-                let x = container.x();
-                container.applyTranslation({ x, y });
-            }
-
-            container.setProps({br:container.props.br.withHeight(pos)});
+        if (container.autoGrowMode() === 'up') {
+            let delta = pos - container.height();
+            let y = container.y() - delta;
+            let x = container.x();
+            container.applyTranslation({ x, y });
         }
+
+        container.setProps({ br: container.props.br.withSize(newWidth, pos) });
+
     }
 }
