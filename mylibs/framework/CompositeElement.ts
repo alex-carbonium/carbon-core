@@ -5,7 +5,6 @@ import { Types } from "./Defs";
 import Brush from "./Brush";
 import Font from "./Font";
 import UIElement from "./UIElement";
-import ArrangeStrategy from "./ArrangeStrategy";
 import { IGroupContainer } from "carbon-core";
 import Box from "./Box";
 import Rect from "../math/rect";

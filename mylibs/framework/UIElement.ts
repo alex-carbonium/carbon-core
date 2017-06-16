@@ -257,7 +257,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             || changes.hasOwnProperty("x")
             || changes.hasOwnProperty("y")
             || changes.hasOwnProperty("width")
-            || changes.hasOwnProperty("height");
+            || changes.hasOwnProperty("height")
+            || changes.hasOwnProperty("margin")
+            || changes.hasOwnProperty("padding")
+            || changes.hasOwnProperty("arrangeStrategy")
+            || changes.hasOwnProperty("visible");
     }
     getAffectedProperties(displayChanges): string[] {
         let properties = Object.keys(displayChanges);
@@ -288,9 +292,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
         this.applyTransform(Matrix.create().translate(t.x, t.y), false, mode);
     }
+
     applyDirectedTranslation(t, mode?: ChangeMode) {
         this.applyTransform(Matrix.create().translate(t.x, t.y), true, mode);
     }
+
     applyGlobalTranslation(t, changeMode?: ChangeMode) {
         let m = this.globalViewMatrix().prependedWithTranslation(t.x, t.y);
         m = this.parent().globalViewMatrixInverted().appended(m);
@@ -421,6 +427,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     applyTransform(matrix, append?: boolean, mode?: ChangeMode) {
         this.prepareAndSetProps({ m: append ? this.props.m.appended(matrix) : this.props.m.prepended(matrix) }, mode);
     }
+
     setTransform(matrix, mode?: ChangeMode) {
         this.setProps({ m: matrix }, mode);
     }
@@ -562,9 +569,14 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.drawPath !== undefined;
     }
 
+    allowRearrange() {
+        return false;
+    }
+
     position() {
         return this.getBoundingBox().topLeft();
     }
+
     centerPositionGlobal() {
         let rect = this.getBoundaryRectGlobal();
         return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
@@ -2010,7 +2022,7 @@ PropertyMetadata.registerForType(UIElement, {
                 { name: "None", value: HorizontalAlignment.None }
             ]
         },
-        defaultValue: HorizontalAlignment.None
+        defaultValue: HorizontalAlignment.Stretch
     },
     verticalAlignment: {
         displayName: "Vertical alignment",
@@ -2025,7 +2037,7 @@ PropertyMetadata.registerForType(UIElement, {
                 { name: "None", value: VerticalAlignment.None }
             ]
         },
-        defaultValue: VerticalAlignment.None
+        defaultValue: VerticalAlignment.Stretch
     },
     visibleWhenDrag: {
         defaultValue: false

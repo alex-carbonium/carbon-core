@@ -1,8 +1,9 @@
 import PropertyMetadata from "framework/PropertyMetadata";
 import UIElement from "framework/UIElement";
-import {Overflow, Types, ElementState, ContentBehavior} from "./Defs";
+import { Overflow, Types, ContentBehavior } from "./Defs";
 import Selection from "framework/SelectionModel";
 import DataNode from "framework/DataNode";
+import { ElementState } from "carbon-core";
 
 export default class ArtboardFrameControl extends UIElement {
     constructor() {
@@ -10,7 +11,7 @@ export default class ArtboardFrameControl extends UIElement {
         this._mode = ElementState.Resize;
     }
 
-    mode(value) {
+    mode(value?) {
         if (arguments.length > 0) {
             this._mode = value;
         }
@@ -41,7 +42,7 @@ export default class ArtboardFrameControl extends UIElement {
             this.captureMouse();
             this._mousePressed = true;
             event.handled = true;
-            this._startData = {x: event.x, y: event.y, ox: this.props.offsetX, oy: this.props.offsetY};
+            this._startData = { x: event.x, y: event.y, ox: this.props.offsetX, oy: this.props.offsetY };
         }
     }
 
@@ -57,7 +58,7 @@ export default class ArtboardFrameControl extends UIElement {
         if (this._mousePressed) {
             var dx = event.x - this._startData.x;
             var dy = event.y - this._startData.y;
-            this.setProps({offsetX: Math.round(this._startData.ox + dx), offsetY: Math.round(this._startData.oy + dy)});
+            this.setProps({ offsetX: Math.round(this._startData.ox + dx), offsetY: Math.round(this._startData.oy + dy) });
         }
     }
 
@@ -112,7 +113,7 @@ export default class ArtboardFrameControl extends UIElement {
 
     source(value) {
         if (arguments.length > 0) {
-            this.setProps({source: value});
+            this.setProps({ source: value });
         }
 
         return this.props.source;
@@ -168,6 +169,7 @@ export default class ArtboardFrameControl extends UIElement {
         return false;
     }
 }
+
 ArtboardFrameControl.prototype.t = Types.ArtboardFrame;
 
 
@@ -175,7 +177,7 @@ PropertyMetadata.registerForType(ArtboardFrameControl, {
     source: {
         displayName: "Artboard",
         type: "artboard",
-        defaultValue: {artboardId: null, pageId: null}
+        defaultValue: { artboardId: null, pageId: null }
     },
     overflow: {
         defaultValue: Overflow.Clip
@@ -187,9 +189,9 @@ PropertyMetadata.registerForType(ArtboardFrameControl, {
         options: {
             size: 1,
             items: [
-                {name: "@content_original", value: ContentBehavior.Original},
+                { name: "@content_original", value: ContentBehavior.Original },
                 // {name: "@content_stretch", value: ContentBehavior.Stretch},
-                {name: "@content_scale", value: ContentBehavior.Scale}
+                { name: "@content_scale", value: ContentBehavior.Scale }
             ]
         },
         defaultValue: ContentBehavior.Original
@@ -206,7 +208,7 @@ PropertyMetadata.registerForType(ArtboardFrameControl, {
         type: "numeric"
     },
 
-    groups(){
+    groups() {
         var baseGroups = PropertyMetadata.findForType(UIElement).groups();
 
         return [

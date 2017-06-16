@@ -1,5 +1,5 @@
-import { Types, ArrangeStrategies, Overflow, StackAlign, StackOrientation } from "./Defs";
-import ArrangeStrategy from "./ArrangeStrategy";
+import { Types, ArrangeStrategies, Overflow, StackAlign, DropPositioning } from "./Defs";
+import ArrangeStrategy from "./arrangeStrategy/ArrangeStrategy";
 import ContextPool from "./render/ContextPool";
 import CorruptedElement from "./CorruptedElement";
 import { areRectsEqual } from "../math/math";
@@ -698,7 +698,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     autoGrowMode(value) {
         return this.field("_autoGrowMode", value, true);
     }
-    dropPositioning(value?) {
+    dropPositioning(value?:DropPositioning) {
         if (value !== undefined) {
             this.setProps({ dropPositioning: value })
         }
@@ -718,18 +718,21 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         }
         return false;
     }
+
     lockGroup() {
         if (this.enableGroupLocking()) {
             this.activeGroup(false);
             this.runtimeProps.unlocked = false;
         }
     }
+
     activeGroup(value) {
         if (arguments.length === 1) {
             this.runtimeProps.activeGroup = value;
         }
         return this.runtimeProps.activeGroup;
     }
+
     getDropData(pos, element) {
         let width = this.width(),
             height = this.height();
@@ -756,11 +759,14 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         }
 
         let dropPositioning = this.dropPositioning();
-        if (dropPositioning === 'vertical') {
-            for (let i = 0; i < this.children.length; i++) {
-                let _element = this.children[i];
+        if (dropPositioning === DropPositioning.Vertical) {
+            for (let _element of this.children) {
+                if(!_element.visible()) {
+                    continue;
+                }
+
                 if (_element !== element) {
-                    let gr = _element.boundaryRect();
+                    let gr = _element.getBoundingBox();
                     intervals.push((last + gr.y) / 2);
                     last = gr.y + gr.height;
                 }
@@ -770,21 +776,24 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
 
             baseLine = calculateBaseLine(intervals, pos.y);
 
-            let pt1 = this.local2global({ x: 5, y: baseLine.lineY });
-            let pt2 = this.local2global({ x: width - 10, y: baseLine.lineY });
+            let pt1 = this.globalViewMatrix().transformPoint({ x: 5, y: baseLine.lineY });
+            let pt2 = this.globalViewMatrix().transformPoint({ x: width - 10, y: baseLine.lineY });
             return {
                 x1: pt1.x,
                 y1: pt1.y,
                 x2: pt2.x,
                 y2: pt2.y,
                 index: baseLine.insertIndex,
-                angle: this.angle()
+                angle: 0//this.angle()
             }
-        } else if (dropPositioning === 'horizontal') {
-            for (let i = 0; i < this.children.length; i++) {
-                let _element = this.children[i];
+        } else if (dropPositioning === DropPositioning.Horizontal) {
+            for (let _element of this.children) {
+                if(!_element.visible()) {
+                    continue;
+                }
+
                 if (_element !== element) {
-                    let gr = _element.boundaryRect();
+                    let gr = _element.getBoundingBox();
                     intervals.push((last + gr.x) / 2);
                     last = gr.x + gr.width;
                 }
@@ -794,15 +803,15 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
 
             baseLine = calculateBaseLine(intervals, pos.x);
 
-            let pt1 = this.local2global({ x: baseLine.lineY, y: 5 });
-            let pt2 = this.local2global({ x: baseLine.lineY, y: height - 10 });
+            let pt1 = this.globalViewMatrix().transformPoint({ x: baseLine.lineY, y: 5 });
+            let pt2 = this.globalViewMatrix().transformPoint({ x: baseLine.lineY, y: height - 10 });
             return {
                 x1: pt1.x,
                 y1: pt1.y,
                 x2: pt2.x,
                 y2: pt2.y,
                 index: baseLine.insertIndex,
-                angle: this.angle()
+                angle: 0//this.angle()
             }
         }
 
@@ -878,14 +887,13 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
     static createStackHorizontal = function () {
         let container = new Container();
         container.setProps({
-            arrangeStrategy: ArrangeStrategies.Stack,
-            stackOrientation: StackOrientation.Horizontal
+            arrangeStrategy: ArrangeStrategies.HorizontalStack
         });
         return container;
     }
     static createStackVertical() {
         let container = new Container();
-        container.arrangeStrategy(ArrangeStrategies.Stack);
+        container.arrangeStrategy(ArrangeStrategies.VerticalStack);
         return container;
     };
     static createDock() {
@@ -914,9 +922,6 @@ PropertyMetadata.registerForType(Container, {
     },
     stackAlign: {
         defaultValue: StackAlign.Default
-    },
-    stackOrientation: {
-        defaultValue: StackOrientation.Vertical
     },
     padding: {
         displayName: "Padding",

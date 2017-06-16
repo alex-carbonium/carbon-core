@@ -7,7 +7,7 @@ import Environment from "../environment";
 import Invalidate from "../framework/Invalidate";
 import FontHelper from "../framework/FontHelper";
 import Brush from "../framework/Brush";
-import ArrangeStrategy from "../framework/ArrangeStrategy";
+
 import clipboard from "../framework/Clipboard";
 import PropertyTracker from "../framework/PropertyTracker";
 import Duplicate from "../commands/Duplicate";

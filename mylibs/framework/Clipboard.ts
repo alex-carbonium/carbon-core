@@ -7,7 +7,6 @@ import {combineRectArray} from "../math/math";
 import Rect from "../math/rect";
 import Matrix from "../math/matrix";
 import {choosePasteLocation} from "./PasteLocator";
-import ArrangeStrategy from "./ArrangeStrategy";
 import {setClipboardContent, tryGetClipboardContent} from "../utils/dom";
 import Delete from "../commands/Delete";
 import params from "../params";

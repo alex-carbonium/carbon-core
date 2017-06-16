@@ -1,17 +1,17 @@
 import ArrangeStrategy from "./ArrangeStrategy";
-import {ArrangeStrategies} from "./Defs";
-import Rect from "../math/rect";
-import Point from "../math/point";
-import {IGroupContainer} from "carbon-core";
+import { ArrangeStrategies } from "../Defs";
+import Rect from "math/rect";
+import Point from "math/point";
+import { IGroupContainer } from "carbon-core";
 
 var GroupArrangeStrategy = {
-    arrange: function(container: any, event?, changeMode?){
+    arrange: function (container: any, event?, changeMode?) {
         var items = container.children;
-        if (items.length === 0){
+        if (items.length === 0) {
             return;
         }
 
-        if (items.length === 1 && container.wrapSingleChild()){
+        if (items.length === 1 && container.wrapSingleChild()) {
             var props = items[0].selectLayoutProps(true);
             props.m = container.parent().globalViewMatrixInverted().appended(props.m);
             container.setProps(props, changeMode);
@@ -21,9 +21,9 @@ var GroupArrangeStrategy = {
 
         var angle = Math.round(items[0].getRotation());
         var sameAngle = !!angle;
-        if (sameAngle){
-            for (var i = 1; i < items.length; i++){
-                if (Math.round(items[i].getRotation()) !== angle){
+        if (sameAngle) {
+            for (var i = 1; i < items.length; i++) {
+                if (Math.round(items[i].getRotation()) !== angle) {
                     sameAngle = false;
                     break;
                 }
@@ -45,10 +45,10 @@ var GroupArrangeStrategy = {
             yMin = Math.min(yMin, outerBox.y);
         }
 
-        if (container.translateChildren()){
-            container.prepareAndSetProps({br:container.boundaryRect().withSize(xMax - xMin, yMax - yMin)}, changeMode);
+        if (container.translateChildren()) {
+            container.prepareAndSetProps({ br: container.boundaryRect().withSize(xMax - xMin, yMax - yMin) }, changeMode);
 
-            if (xMin !== 0 || yMin !== 0){
+            if (xMin !== 0 || yMin !== 0) {
                 var translate = new Point(-xMin, -yMin);
                 for (let i = 0, l = items.length; i < l; ++i) {
                     items[i].applyTranslation(translate, false, changeMode);
@@ -56,7 +56,7 @@ var GroupArrangeStrategy = {
                 container.applyDirectedTranslation(translate.negate(), changeMode);
             }
         }
-        else{
+        else {
             var w = xMax - xMin;
             var h = yMax - yMin;
             var br = null;
@@ -84,10 +84,10 @@ var GroupArrangeStrategy = {
             //     container.applyRotation(angle, center);
             // }
             // else{
-                br = new Rect(xMin, yMin, w, h);
+            br = new Rect(xMin, yMin, w, h);
             //}
 
-            container.prepareAndSetProps({br}, changeMode);
+            container.prepareAndSetProps({ br }, changeMode);
         }
     }
 };

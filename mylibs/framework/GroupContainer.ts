@@ -1,5 +1,5 @@
-import { Types, ArrangeStrategies } from "./Defs";
-import PropertyMetadata, {PropertyDescriptor} from "./PropertyMetadata";
+import { Types, ArrangeStrategies, DropPositioning, Overflow, StackAlign, HorizontalAlignment, VerticalAlignment } from "./Defs";
+import PropertyMetadata, { PropertyDescriptor } from "./PropertyMetadata";
 import PropertyTracker from "./PropertyTracker";
 import UserSettings from "../UserSettings";
 import Container from "./Container";
@@ -13,16 +13,16 @@ import CommonPropsManager from "./CommonPropsManager";
 import Isolate from "../commands/Isolate";
 import Selection from "./SelectionModel";
 
-require("./GroupArrangeStrategy");
+require("./arrangeStrategy/GroupArrangeStrategy");
 
 const ownProperties: string[] = PropertyMetadata.findForType(Container)
     .groups()
     .find(x => x.label === "Layout")
     .properties
-    .concat(["name", "locked", "constraints"]);
+    .concat(["name", "locked", "constraints", "arrangeStrategy", "overflow", "stackAlign"]);
 
-interface IGroupContainerRuntimeProps{
-    cpm: CommonPropsManager
+interface IGroupContainerRuntimeProps {
+    cpm: CommonPropsManager;
 }
 
 export default class GroupContainer extends Container implements IGroupContainer, IIsolatable {
@@ -43,6 +43,24 @@ export default class GroupContainer extends Container implements IGroupContainer
         }
         return false;
     }
+
+    allowRearrange() {
+        return this.props.arrangeStrategy === ArrangeStrategies.HorizontalStack ||
+            this.props.arrangeStrategy === ArrangeStrategies.VerticalStack;
+    }
+
+    dropPositioning() {
+        if (this.props.arrangeStrategy === ArrangeStrategies.HorizontalStack) {
+            return DropPositioning.Horizontal;
+        }
+
+        if (this.props.arrangeStrategy === ArrangeStrategies.VerticalStack) {
+            return DropPositioning.Vertical;
+        }
+
+        return DropPositioning.None;
+    }
+
     hitTestGlobalRect(rect) {
         if (!this.hitVisible(true)) {
             return false;
@@ -59,13 +77,16 @@ export default class GroupContainer extends Container implements IGroupContainer
     }
 
     applySizeScaling(s, o, options?, changeMode?) {
-        UIElement.prototype.applySizeScaling.apply(this, arguments);
-
-        //if group is flipped, scale children normally
-        var absScale = s.abs();
-        var round = this.children.length === 1;
-        var resizeOptions = options && options.forChildResize(round && options.round);
-        this.children.forEach(e => e.applyScaling(absScale, Point.Zero, resizeOptions, changeMode));
+        if (this.props.arrangeStrategy === ArrangeStrategies.Group) {
+            UIElement.prototype.applySizeScaling.apply(this, arguments);
+            //if group is flipped, scale children normally
+            var absScale = s.abs();
+            var round = this.children.length === 1;
+            var resizeOptions = options && options.forChildResize(round && options.round);
+            this.children.forEach(e => e.applyScaling(absScale, Point.Zero, resizeOptions, changeMode));
+        } else {
+            super.applySizeScaling(s, o, options, changeMode);
+        }
     }
 
     strokeBorder(context, w, h) {
@@ -101,76 +122,76 @@ export default class GroupContainer extends Container implements IGroupContainer
     }
 
     dblclick(event: IMouseEventData) {
-        if (this.primitiveRoot().isEditable()) {
-            if (UserSettings.group.editInIsolationMode && !Environment.view.isolationLayer.isActivatedFor(this)){
+        if (this.primitiveRoot().isEditable() && this.props.arrangeStrategy === ArrangeStrategies.Group) {
+            if (UserSettings.group.editInIsolationMode && !Environment.view.isolationLayer.isActivatedFor(this)) {
                 Isolate.run([this]);
                 event.handled = true;
             }
         }
-        else{
+        else {
             this.unlockGroup();
             var element = this.hitElement(event, Environment.view.scale());
-            if (element && element !== this){
+            if (element && element !== this) {
                 Selection.makeSelection([element]);
             }
         }
     }
 
     getDisplayPropValue(propertyName: string, descriptor: PropertyDescriptor) {
-        if (ownProperties.indexOf(propertyName) !== -1){
+        if (ownProperties.indexOf(propertyName) !== -1) {
             return super.getDisplayPropValue(propertyName, descriptor);
         }
         return this.commonPropsManager().getDisplayPropValue(this.children, propertyName, descriptor);
     }
 
-    getAffectedDisplayProperties(changes): string[]{
+    getAffectedDisplayProperties(changes): string[] {
         //no own logic for affected properties, so common implementation should cover groups
         return this.commonPropsManager().getAffectedDisplayProperties(this.children, changes);
     }
 
-    setDisplayProps(changes: any, changeMode: ChangeMode){
+    setDisplayProps(changes: any, changeMode: ChangeMode) {
         var own = null;
         var common = null;
         var keys = Object.keys(changes);
         for (var i = 0; i < keys.length; i++) {
             var prop = keys[i];
-            if (ownProperties.indexOf(prop) !== -1){
+            if (ownProperties.indexOf(prop) !== -1) {
                 own = own || {};
                 own[prop] = changes[prop];
             }
-            else{
+            else {
                 common = common || {};
                 common[prop] = changes[prop];
             }
         }
 
-        if (changeMode === ChangeMode.Model){
-            if (own){
+        if (changeMode === ChangeMode.Model) {
+            if (own) {
                 super.setDisplayProps(own, changeMode);
             }
-            if (common){
+            if (common) {
                 this.commonPropsManager().updateDisplayProps(this.children, common);
             }
         }
         else {
-            if (own){
+            if (own) {
                 super.setDisplayProps(own, changeMode);
             }
-            if (common){
+            if (common) {
                 this.commonPropsManager().previewDisplayProps(this.children, common);
             }
         }
     }
 
     findPropertyDescriptor(propName: string) {
-        if (ownProperties.indexOf(propName) !== -1){
+        if (ownProperties.indexOf(propName) !== -1) {
             return super.findPropertyDescriptor(propName);
         }
 
         for (var i = 0; i < this.children.length; i++) {
             var element = this.children[i];
             var descriptor = element.findPropertyDescriptor(propName);
-            if (descriptor){
+            if (descriptor) {
                 return descriptor;
             }
         }
@@ -178,14 +199,15 @@ export default class GroupContainer extends Container implements IGroupContainer
         return null;
     }
 
-    select(multi: boolean){
+    select(multi: boolean) {
         super.select(multi);
-        if (!multi){
+        if (!multi) {
             PropertyTracker.propertyChanged.bind(this, this.onChildPropsChanged);
             this.children.forEach(x => x.enablePropsTracking());
         }
     }
-    unselect(){
+
+    unselect() {
         PropertyTracker.propertyChanged.unbind(this, this.onChildPropsChanged);
         this.children.forEach(x => x.disablePropsTracking());
         this.commonPropsManager(null);
@@ -193,12 +215,12 @@ export default class GroupContainer extends Container implements IGroupContainer
 
     private onChildPropsChanged(element: UIElement, newProps) {
         if (this.children.indexOf(element) !== -1) {
-            if (newProps.hasOwnProperty("br") || newProps.hasOwnProperty("m")){
+            if (newProps.hasOwnProperty("br") || newProps.hasOwnProperty("m")) {
                 newProps = Object.assign({}, newProps);
                 delete newProps.br;
                 delete newProps.m;
             }
-            if (!Object.keys(newProps).length){
+            if (!Object.keys(newProps).length) {
                 return;
             }
 
@@ -232,22 +254,22 @@ export default class GroupContainer extends Container implements IGroupContainer
         return true;
     }
 
-    commonPropsManager(value?): CommonPropsManager{
-        if (arguments.length){
+    commonPropsManager(value?): CommonPropsManager {
+        if (arguments.length) {
             this.runtimeProps.cpm = value;
             return;
         }
-        if (!this.runtimeProps.cpm){
+        if (!this.runtimeProps.cpm) {
             this.runtimeProps.cpm = new CommonPropsManager();
         }
         return this.runtimeProps.cpm;
     }
 
-    remove(element, mode = ChangeMode.Model){
+    remove(element, mode = ChangeMode.Model) {
         var res = super.remove(element, mode);
 
-        if (mode === ChangeMode.Model && !this.count()){
-            if (!Environment.view.isolationLayer.isActivatedFor(this)){
+        if (mode === ChangeMode.Model && !this.count()) {
+            if (!Environment.view.isolationLayer.isActivatedFor(this)) {
                 this.parent().remove(this);
             }
         }
@@ -255,8 +277,8 @@ export default class GroupContainer extends Container implements IGroupContainer
         return res;
     }
 
-    onIsolationExited(){
-        if (!this.count()){
+    onIsolationExited() {
+        if (!this.count()) {
             this.parent().remove(this);
         }
     }
@@ -272,9 +294,70 @@ PropertyMetadata.registerForType(GroupContainer, {
         defaultValue: true
     },
     arrangeStrategy: {
-        defaultValue: ArrangeStrategies.Group
+        displayName: "@arrange.behavior",
+        defaultValue: ArrangeStrategies.Group,
+        type: "dropdown",
+        options: {
+            size: 1,
+            items: [
+                { name: "@group", value: ArrangeStrategies.Group },
+                { name: "@canvas", value: ArrangeStrategies.Canvas },
+                { name: "@horizontalStack", value: ArrangeStrategies.HorizontalStack },
+                { name: "@verticalStack", value: ArrangeStrategies.VerticalStack }
+            ]
+        }
     },
-    groups: function(group: GroupContainer){
-        return group.commonPropsManager().createGroups(group.children);
+    overflow: {
+        displayName: "@overflow",
+        defaultValue: Overflow.Visible,
+        type: "dropdown",
+        options: {
+            size: 1,
+            items: [
+                { name: "@overflow.visible", value: Overflow.Visible },
+                { name: "@overflow.clip", value: Overflow.Clip },
+                { name: "@overflow.AdjustVertical", value: Overflow.AdjustVertical },
+                { name: "@overflow.AdjustHorizontal", value: Overflow.AdjustHorizontal },
+                { name: "@overflow.AdjustBoth", value: Overflow.AdjustBoth },
+                { name: "@overflow.ExpandVertical", value: Overflow.ExpandVertical },
+                { name: "@overflow.ExpandHorizontal", value: Overflow.ExpandHorizontal },
+                { name: "@overflow.ExpandBoth", value: Overflow.ExpandBoth }
+            ]
+        }
+    },
+    stackAlign: {
+        defaultValue: StackAlign.Default,
+        displayName: "@stackAlign",
+        type: "dropdown",
+        options: {
+            size: 1,
+            items: [
+                { name: "@overflow.default", value: StackAlign.Default },
+                { name: "@overflow.center", value: StackAlign.Center }
+            ]
+        }
+    },
+    prepareVisibility(element: UIElement) {
+        return {
+            overflow: element.props.arrangeStrategy !== ArrangeStrategies.Group,
+            stackAlign: element.props.arrangeStrategy === ArrangeStrategies.HorizontalStack ||
+            element.props.arrangeStrategy === ArrangeStrategies.VerticalStack
+        };
+    },
+    groups(group: GroupContainer) {
+        var common = group.commonPropsManager().createGroups(group.children);
+        var props = ['arrangeStrategy', 'overflow'];
+        var advanced = common.find(g => g.label === "@advanced");
+        if (advanced) {
+            advanced.properties = advanced.properties.concat(props);
+            return common;
+        }
+
+        return common.concat([
+            {
+                label: "@advanced",
+                properties: props
+            }
+        ]);
     }
 });

@@ -1,12 +1,11 @@
 import PropertyMetadata from "../PropertyMetadata";
-import {Types} from "../Defs";
+import { Types } from "../Defs";
 import SnapController from "../SnapController";
 import Artboard from "../Artboard";
 import Invalidate from "../Invalidate";
-import {areRectsIntersecting} from "../../math/math";
+import { areRectsIntersecting } from "../../math/math";
 import Point from "../../math/point";
 import TransformationElement from "./TransformationElement";
-import ArrangeStrategy from "../ArrangeStrategy";
 import Brush from "../Brush";
 import Environment from "../../environment";
 import UserSettings from "../../UserSettings";
@@ -39,14 +38,18 @@ class DraggingElement extends TransformationElement {
         this._currentPosition = new Point(0, 0);
 
         this.translationMatrix = Matrix.create();
+        var parent = elementOrComposite.first().parent();
+        if(parent) {
+            parent.performArrange();
+        }
     }
 
-    wrapSingleChild(){
+    wrapSingleChild() {
         return false;
     }
 
-    createClone(element){
-        if (element.cloneWhenDragging()){
+    createClone(element) {
+        if (element.cloneWhenDragging()) {
             return element.clone();
         }
         return super.createClone(element);
@@ -63,37 +66,45 @@ class DraggingElement extends TransformationElement {
         SnapController.clearActiveSnapLines();
     }
 
-    stopDragging(event, draggingOverElement, page){
+    stopDragging(event, draggingOverElement, page) {
         this.saveChanges();
         this.showOriginal(true);
 
         var artboards = page.getAllArtboards();
         var elements = [];
 
-        for (var i = 0; i < this.children.length; ++i){
+        for (var i = 0; i < this.children.length; ++i) {
             var phantom = this.children[i];
             var element = phantom.original;
 
             var phantomTarget = artboards.find(a => areRectsIntersecting(phantom.getBoundingBoxGlobal(), a.getBoundaryRectGlobal()));
-            if (!phantomTarget){
+            if (!phantomTarget) {
                 phantomTarget = page;
             }
 
             var parent = null;
-            if (element instanceof Artboard){
+            let index = null;
+            if (element instanceof Artboard) {
                 parent = page;
             }
-            else if (!draggingOverElement){
+            else if (!draggingOverElement) {
                 parent = element.parent();
+                if (parent.allowRearrange()) {
+                    var dropData = parent.getDropData(event, element);
+                    index = dropData.index;
+                }
             }
-            else if (draggingOverElement.primitiveRoot() === phantomTarget.primitiveRoot()){
+            else if (draggingOverElement.primitiveRoot() === phantomTarget.primitiveRoot()) {
                 parent = draggingOverElement;
             }
-            else{
+            else {
                 parent = phantomTarget;
             }
 
-            var index = parent.positionOf(element) + 1 || parent.count();
+            if (index === null) {
+                index = parent.positionOf(element) + 1 || parent.count();
+            }
+
             var target = event.altKey ? element.clone() : element;
             this.dropElementOn(event, parent, target, phantom, index);
 
@@ -110,9 +121,11 @@ class DraggingElement extends TransformationElement {
 
         if (newParent !== element.parent()) {
             newParent.insert(element, index);
+        } else {
+            newParent.changePosition(element, index);
         }
 
-        if (!newParent.autoPositionChildren()){
+        if (!newParent.autoPositionChildren()) {
             //must set new coordinates after parent is changed so that global caches are updated properly
             element.setTransform(newParent.globalMatrixToLocal(phantom.globalViewMatrix()));
         }
@@ -129,15 +142,15 @@ class DraggingElement extends TransformationElement {
         this._currentPosition.set(this._translation.x, this._translation.y);
 
         var roundToPixels = !event.event.ctrlKey && UserSettings.snapTo.enabled && UserSettings.snapTo.pixels;
-        if (roundToPixels){
+        if (roundToPixels) {
             this._currentPosition.roundMutable();
         }
 
         if (this.parentAllowSnapping(event) && !(event.event.ctrlKey || event.event.metaKey)) {
             var snapped = SnapController.applySnapping(this._currentPosition, this._ownSnapPoints);
-            if (this._currentPosition !== snapped){
+            if (this._currentPosition !== snapped) {
                 this._currentPosition.set(snapped.x, snapped.y);
-                if (roundToPixels){
+                if (roundToPixels) {
                     this._currentPosition.roundMutable();
                 }
             }
@@ -154,15 +167,15 @@ class DraggingElement extends TransformationElement {
         Invalidate.requestInteractionOnly();
     }
 
-    strokeBorder(context, w, h){
-        if (Brush.canApply(this.stroke())){
+    strokeBorder(context, w, h) {
+        if (Brush.canApply(this.stroke())) {
             context.save();
 
             var scale = Environment.view.scale();
-            context.scale(1/scale, 1/scale);
+            context.scale(1 / scale, 1 / scale);
 
             context.beginPath();
-            for (var i = 0; i < this.children.length; i++){
+            for (var i = 0; i < this.children.length; i++) {
                 var child = this.children[i];
                 child.drawBoundaryPath(context);
             }
@@ -177,11 +190,11 @@ class DraggingElement extends TransformationElement {
         return this._elements.every(x => x.parent() === this || x.parent().getDropData(x, pos) === null);
     }
 
-    isDropSupported(){
+    isDropSupported() {
         return this._elements.every(x => x.isDropSupported());
     }
 
-    allowMoveOutChildren(event){
+    allowMoveOutChildren(event) {
         return this._elements.every(x => x.parent() === this || x.parent().allowMoveOutChildren(undefined, event));
     }
 }

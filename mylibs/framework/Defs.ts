@@ -36,18 +36,21 @@ export enum StackAlign {
     Default,
     Center
 };
-export enum StackOrientation {
-    Vertical,
-    Horizontal
-};
 
 export enum ArrangeStrategies {
     Canvas,
-    Stack,
+    VerticalStack,
+    HorizontalStack,
     Dock,
     Align,
     Repeat,
     Group
+};
+
+export enum DropPositioning {
+    None,
+    Vertical,
+    Horizontal
 };
 
 export enum Overflow {

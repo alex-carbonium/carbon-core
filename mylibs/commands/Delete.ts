@@ -1,4 +1,3 @@
-import ArrangeStrategy from "../framework/ArrangeStrategy";
 import Artboard from "../framework/Artboard";
 import Selection from "../framework/SelectionModel";
 import ExtensionPoint from "../framework/ExtensionPoint";

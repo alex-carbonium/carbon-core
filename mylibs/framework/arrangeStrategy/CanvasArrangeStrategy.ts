@@ -1,9 +1,9 @@
 let debug = require("DebugUtil")("carb:canvasArrangeStrategy");
-import {HorizontalConstraint, VerticalConstraint} from "carbon-basics"
-import Point from "../math/point";
+import {HorizontalConstraint, VerticalConstraint} from "carbon-basics";
+import Point from "math/point";
 import { IContainer } from "carbon-model";
 
-export default {
+export default  {
     arrange: function(container: IContainer, event, changeMode){
         let npr = event.newRect;
         let pr = event.oldRect;
@@ -28,13 +28,13 @@ export default {
             let translateX2 = false;
             let translateY2 = false;
 
-            if (constraints.h == HorizontalConstraint.LeftRight) { // stretch element horizontally
+            if (constraints.h === HorizontalConstraint.LeftRight) { // stretch element horizontally
                 scaleX = true;
             }
-            else if (constraints.h == HorizontalConstraint.Right) {
+            else if (constraints.h === HorizontalConstraint.Right) {
                 translateX = true;
             }
-            else if (constraints.h == HorizontalConstraint.Center) {
+            else if (constraints.h === HorizontalConstraint.Center) {
                 translateX = true;
                 translateX2 = true;
             }
@@ -42,17 +42,17 @@ export default {
                 scaleX = true;
             }
 
-            if (constraints.v == VerticalConstraint.TopBottom) { // stretch element vertically
+            if (constraints.v === VerticalConstraint.TopBottom) { // stretch element vertically
                 scaleY = true;
             }
-            else if (constraints.v == VerticalConstraint.Bottom) {
+            else if (constraints.v === VerticalConstraint.Bottom) {
                 translateY = true;
             }
-            else if (constraints.v == VerticalConstraint.Center) {
+            else if (constraints.v === VerticalConstraint.Center) {
                 translateY = true;
                 translateY2 = true;
             }
-            else if (constraints.v == VerticalConstraint.Scale) {
+            else if (constraints.v === VerticalConstraint.Scale) {
                 scaleY = true;
             }
 

@@ -17,7 +17,6 @@ import Box from "framework/Box";
 import { debounce } from "util";
 import Command from "framework/commands/Command";
 import { Types } from "framework/Defs";
-import ArrangeStrategy from "framework/ArrangeStrategy";
 import ResizeOptions from "decorators/ResizeOptions";
 import { IMouseEventData, IKeyboardState, ChangeMode, IIntersectionRange, ResizeDimension, LayerTypes, IContainerProps, PointType, IPathPoint, IUIElementProps, ElementState } from "carbon-core";
 import UserSettings from "UserSettings";

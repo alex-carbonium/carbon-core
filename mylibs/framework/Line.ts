@@ -9,7 +9,6 @@ import SelectComposite from "framework/SelectComposite";
 import SnapController from "framework/SnapController";
 import angleAdjuster from "math/AngleAdjuster";
 import PropertyMetadata from "./PropertyMetadata";
-import ArrangeStrategy from "./ArrangeStrategy";
 import Rect from "../math/rect";
 import Point from "../math/point";
 import { ChangeMode } from "carbon-core";

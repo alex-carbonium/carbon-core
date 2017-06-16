@@ -42,6 +42,7 @@ import IconsInfo from "./ui/IconsInfo";
 import backend from "./backend";
 import logger from "./logger";
 import params from "./params";
+import ArtboardFrame from "framework/ArtboardFrame";
 import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitive, IPrimitiveRoot, ViewState } from "carbon-core";
 import { Contributions } from "./extensions/Contributions";
 import { getBuiltInExtensions } from "./extensions/BuiltInExtensions";
@@ -49,6 +50,7 @@ import Command from "./framework/commands/Command";
 
 window['env'] = Environment;
 window['Selection'] = Selection;
+ArtboardFrame.toString();
 
 var platform = require("platform/Platform");
 var Primitive = require("framework/sync/Primitive");

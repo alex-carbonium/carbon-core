@@ -1,9 +1,9 @@
-import CanvasStrategy from "./CanvasArrangeStrategy";
-import StackStrategy from "./StackArrangeStrategy";
 import DockStrategy from "./DockArrangeStrategy";
 import AlignStrategy from "./AlignArrangeStrategy";
-import { ArrangeStrategies } from "./Defs";
+import { ArrangeStrategies } from "../Defs";
 import { ChangeMode } from "carbon-core";
+import {HorizontalArrangeStrategy, VerticalArrangeStrategy} from "./StackArrangeStrategy"
+import CanvasArrangeStrategy from "./CanvasArrangeStrategy";
 
 var ArrangeStrategy = {
     _strategies: [],
@@ -23,9 +23,11 @@ var ArrangeStrategy = {
     }
 };
 
-ArrangeStrategy.register(ArrangeStrategies.Canvas, CanvasStrategy);
+ArrangeStrategy.register(ArrangeStrategies.Canvas, CanvasArrangeStrategy);
 ArrangeStrategy.register(ArrangeStrategies.Align, AlignStrategy);
 ArrangeStrategy.register(ArrangeStrategies.Dock, DockStrategy);
-ArrangeStrategy.register(ArrangeStrategies.Stack, StackStrategy);
+
+ArrangeStrategy.register(ArrangeStrategies.VerticalStack, VerticalArrangeStrategy);
+ArrangeStrategy.register(ArrangeStrategies.HorizontalStack, HorizontalArrangeStrategy);
 
 export default ArrangeStrategy;

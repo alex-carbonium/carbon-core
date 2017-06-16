@@ -1,4 +1,4 @@
-import {DockStyle, HorizontalAlignment, VerticalAlignment} from "./Defs";
+import {DockStyle, HorizontalAlignment, VerticalAlignment} from "framework/Defs";
 import * as margins from "math/boxMargins";
 
 export default {

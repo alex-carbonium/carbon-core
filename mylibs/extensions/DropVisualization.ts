@@ -16,7 +16,7 @@ import { ITransformationElement, ITransformationEventData, IPoint, IKeyboardStat
 import UserSettings from "../UserSettings";
 import Point from "../math/point";
 import Matrix from "../math/matrix";
-import { FloatingPointPrecision } from "../framework/Defs";
+import { FloatingPointPrecision, ArrangeStrategies } from "../framework/Defs";
 import { LayerTypes } from "carbon-app";
 import { IUIElement, ChangeMode } from "carbon-core";
 
@@ -34,20 +34,20 @@ class ResizeHint extends UIElement {
         this._transformationElement = null;
     }
 
-    start(transformationElement: ITransformationElement){
+    start(transformationElement: ITransformationElement) {
         this._transformationElement = transformationElement;
 
     }
-    stop(){
+    stop() {
         this._hasDecimals = false;
         this._transformationElement = null;
         this._text = "";
         this._textWidth = -1;
     }
 
-    _updatePosition(): void{
+    _updatePosition(): void {
         var anchorElement: any = this._transformationElement;
-        if (anchorElement.elements.length === 1 && !anchorElement.wrapSingleChild()){
+        if (anchorElement.elements.length === 1 && !anchorElement.wrapSingleChild()) {
             //rotated elements are not wrapped when dragging
             anchorElement = this._transformationElement.children[0];
         }
@@ -61,10 +61,10 @@ class ResizeHint extends UIElement {
         var v1 = p1.subtract(p0);
         matrix.rotate(-v1.getDirectedAngle(Point.BasisX));
 
-        this.setProps({width: p1.getDistance(p0), m: matrix}, ChangeMode.Self);
+        this.setProps({ width: p1.getDistance(p0), m: matrix }, ChangeMode.Self);
     }
 
-    _findBestPoints(element: UIElement): Point[]{
+    _findBestPoints(element: UIElement): Point[] {
         var result = [];
 
         var gm = element.globalViewMatrix();
@@ -76,8 +76,8 @@ class ResizeHint extends UIElement {
 
         var points = [p1, p2, p3, p4];
         var lowestIdx = 0;
-        for (var i = 1; i < points.length; ++i){
-            if (points[i].y > points[lowestIdx].y){
+        for (var i = 1; i < points.length; ++i) {
+            if (points[i].y > points[lowestIdx].y) {
                 lowestIdx = i;
             }
         }
@@ -90,54 +90,54 @@ class ResizeHint extends UIElement {
         var v2 = other2.subtract(lowestPoint);
         var other = Math.round(v1.getAngle(Point.BasisY)) < Math.round(v2.getAngle(Point.BasisY)) ? other1 : other2;
 
-        if (other.x < lowestPoint.x){
+        if (other.x < lowestPoint.x) {
             result.push(other, lowestPoint);
         }
-        else{
+        else {
             result.push(lowestPoint, other);
         }
 
         return result;
     }
 
-    _findMaxOuterBorder(): number{
+    _findMaxOuterBorder(): number {
         var border = 0;
-        for (let i = 0; i < this._transformationElement.elements.length; ++i){
+        for (let i = 0; i < this._transformationElement.elements.length; ++i) {
             let element = this._transformationElement.elements[i];
             border = Math.max(border, element.getMaxOuterBorder());
         }
         return border;
     }
 
-    updateSizeText(){
+    updateSizeText() {
         var w = this._roundDecimal(this._transformationElement.width());
         var h = this._roundDecimal(this._transformationElement.height());
         this.updateText(this._formatDecimal(w) + " x " + this._formatDecimal(h));
     }
 
-    updatePositionText(){
+    updatePositionText() {
         var x = this._roundDecimal(this._transformationElement.x());
         var y = this._roundDecimal(this._transformationElement.y());
         this.updateText("(" + this._formatDecimal(x) + "; " + this._formatDecimal(y) + ")");
     }
 
-    updateAngleText(){
+    updateAngleText() {
         var angle = this._roundDecimal(this._transformationElement.angle());
         this.updateText(angle + "°");
     }
 
-    _formatDecimal(number: number): string{
+    _formatDecimal(number: number): string {
         var suffix = "";
         var isDecimal = number % 1 !== 0;
-        if (isDecimal){
+        if (isDecimal) {
             this._hasDecimals = true;
         }
-        if (this._hasDecimals && !isDecimal){
+        if (this._hasDecimals && !isDecimal) {
             suffix = ".0";
         }
         return number + suffix;
     }
-    _roundDecimal(value: number): number{
+    _roundDecimal(value: number): number {
         return Math.round(value * FloatingPointPrecision) / FloatingPointPrecision;
     }
 
@@ -161,17 +161,17 @@ class ResizeHint extends UIElement {
         GlobalMatrixModifier.pushPrependScale();
 
         context.save();
-        context.scale(1/scale, 1/scale);
+        context.scale(1 / scale, 1 / scale);
         context.fillStyle = UserSettings.frame.stroke;
         context.textBaseline = 'top';
         context.font = fontStyle;
         context.fillStyle = UserSettings.frame.stroke;
 
-        if (this._textWidth === -1){
+        if (this._textWidth === -1) {
             this._textWidth = context.measureText(this._text, fontStyle).width;
         }
 
-        context.fillText(this._text, Math.round((this.props.width * scale - this._textWidth)/2), Math.round(5));
+        context.fillText(this._text, Math.round((this.props.width * scale - this._textWidth) / 2), Math.round(5));
 
         context.restore();
 
@@ -201,7 +201,7 @@ class SelectionRect extends UIElement {
         var scale = Environment.view.scale();
 
         context.save();
-        context.setLineDash([1/scale, 1/scale]);
+        context.setLineDash([1 / scale, 1 / scale]);
         context.beginPath();
 
         if (this._element.hasPath()) {
@@ -212,7 +212,7 @@ class SelectionRect extends UIElement {
             this._element.drawBoundaryPath(context);
         }
 
-        context.lineWidth = 1/scale;
+        context.lineWidth = 1 / scale;
         Brush.stroke(HighlightBrush, context);
 
         context.restore();
@@ -229,7 +229,7 @@ var onDraggingElement = function (event: any, keys: IKeyboardState) {
     }
 
     if (event.transformationElement.isDropSupported()
-        && event.target != null
+        && event.target !== null
         && event.target.canAccept(event.draggingElement.elements, false, keys.ctrl)
         && !(event.target instanceof Layer)
         && event.transformationElement.allHaveSameParent()
@@ -238,8 +238,15 @@ var onDraggingElement = function (event: any, keys: IKeyboardState) {
         this._dropData = event.target.getDropData({ x: event.mouseX, y: event.mouseY }, event.transformationElement);
         this._isDropTarget = true;
     } else {
-        this._target = null;
-        this._dropData = null;
+        var parent = event.draggingElement.elements[0].parent();
+        if (parent.allowRearrange()) {
+            this._target = parent;
+            this._dropData = parent.getDropData({ x: event.mouseX, y: event.mouseY }, event.transformationElement);
+            this._isDropTarget = true;
+        } else {
+            this._target = null;
+            this._dropData = null;
+        }
     }
 
     updateVisualizations.call(this);
@@ -248,7 +255,7 @@ var onDraggingElement = function (event: any, keys: IKeyboardState) {
 var onStartDragging = function (event: ITransformationEventData) {
     this._dragging = true;
     this._target = null;
-    if (event.transformationElement.showResizeHint()){
+    if (event.transformationElement.showResizeHint()) {
         this._hint.start(event.transformationElement);
         this._hint.updatePositionText();
     }
@@ -270,8 +277,8 @@ var onMouseMove = function (event) {
     }
 
     var target = this.view.hitElement(event);
-    if (target === Selection.selectComposite()){
-        if (this._target){
+    if (target === Selection.selectComposite()) {
+        if (this._target) {
             this._target = null;
             this._isDropTarget = false;
             updateVisualizations.call(this);
@@ -292,7 +299,7 @@ var onMouseMove = function (event) {
                     this._isDropTarget = false;
                     updateVisualizations.call(this);
                 } else {
-                    if (this._target != null) {
+                    if (this._target !== null) {
                         this._target = null;
                         updateVisualizations.call(this);
                     }
@@ -327,8 +334,8 @@ function updateSelectionRects() {
     }
 
     for (var i = 0; i < this._selection.length; ++i) {
-        var element = this._selection[i];
-        var controlData = this._selectionControls[element.id()];
+        let element = this._selection[i];
+        let controlData = this._selectionControls[element.id()];
         if (controlData) {
             controlData.iteration = this._selectionIteration;
         } else {
@@ -368,7 +375,7 @@ function onSelectionFrameStop() {
 
 function onStartResizing(event: ITransformationEventData) {
     this._resizing = true;
-    if (event.transformationElement.showResizeHint()){
+    if (event.transformationElement.showResizeHint()) {
         this._hint.start(event.transformationElement);
         this._hint.updateSizeText();
     }
@@ -446,7 +453,6 @@ function updateVisualizations() {
         this._dropLine.x2(data.x2);
         this._dropLine.y1(data.y1);
         this._dropLine.y2(data.y2);
-        this._dropLine.angle(data.angle);
     } else if (!(this._dropLine.parent() === NullContainer)) {
         this._dropLine.parent().remove(this._dropLine);
     }
@@ -474,7 +480,8 @@ export default class DropVisualization extends ExtensionBase {
         app.addLoadRef();
         this._dropLine = new DropLine();
         this._dropLine.setProps({
-            stroke: Brush.createFromColor("red")
+            stroke: Brush.createFromColor("red"),
+            lineWidth: 2
         });
         this._dropLine.crazySupported(false);
 

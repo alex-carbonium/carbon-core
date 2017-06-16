@@ -766,6 +766,7 @@ export default class DesignerController implements IController {
         }
         return [this._startDraggingElement];
     }
+
     getCurrentDropTarget(eventData: IMouseEventData, keys: IKeyboardState): Container | null {
         var parent = this._draggingOverElement;
         var selectComposite = Selection.selectComposite();

@@ -36,16 +36,16 @@ export default class Brush {
                 case BrushType.gradient:
                     var d = value.direction || "down";
                     var lingrad = context.createLinearGradient(l, t, l, t + h); //down
-                    if (d == "up") {
+                    if (d === "up") {
                         lingrad = context.createLinearGradient(l, t + h, l, t);
                     }
-                    if (d == "left") {
+                    if (d === "left") {
                         lingrad = context.createLinearGradient(l, t, l + w, t);
                     }
-                    if (d == "right") {
+                    if (d === "right") {
                         lingrad = context.createLinearGradient(l + w, t, l, t);
                     }
-                    if (d == "radial") {
+                    if (d === "radial") {
                         var radius = Math.max(w, h) / 2 + (Math.max(w, h) / 20);
                         lingrad = context.createRadialGradient(l + w / 2, t + h / 2, 0, l + w / 2, t + h / 2, radius);
                     }

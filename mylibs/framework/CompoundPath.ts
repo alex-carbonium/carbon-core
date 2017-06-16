@@ -8,7 +8,7 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import PropertyTracker from "framework/PropertyTracker";
 import { Overflow, Types, LineCap, LineJoin } from "framework/Defs";
 import Path from "framework/Path";
-import GroupArrangeStrategy from "framework/GroupArrangeStrategy";
+import GroupArrangeStrategy from "framework/arrangeStrategy/GroupArrangeStrategy";
 import { combineRectArray } from "math/math";
 import Rect from "math/rect";
 import { IGroupContainer, ChangeMode, IMouseEventData, IIsolatable } from "carbon-core";
@@ -426,6 +426,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
     wrapSingleChild() {
         return true;
     }
+
     translateChildren() {
         return false;
     }

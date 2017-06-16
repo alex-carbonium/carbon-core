@@ -1,4 +1,4 @@
-import ArrangeStrategy from "../ArrangeStrategy";
+import ArrangeStrategy from "../arrangeStrategy/ArrangeStrategy";
 import { ArrangeStrategies } from "../Defs";
 import Point from "../../math/point";
 import { IContainer, ChangeMode } from "carbon-core";

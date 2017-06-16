@@ -1,7 +1,6 @@
 import {Types} from "../Defs";
 import PropertyMetadata from "../PropertyMetadata";
 import TransformationElement from "./TransformationElement";
-import ArrangeStrategy from "../ArrangeStrategy";
 
 export default class ResizeRotateElement extends TransformationElement{
     constructor(element){
