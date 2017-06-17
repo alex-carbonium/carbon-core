@@ -32,6 +32,7 @@ import Selection from "../framework/SelectionModel";
 import EventHelper from "../framework/EventHelper";
 import { IActionManager, IAction, IApp, IUIElement, IEvent, IContainer, IIsolatable } from "carbon-core";
 import { ArrangeStrategies, DropPositioning } from "../framework/Defs";
+import Rect from "../math/rect";
 
 const debug = require("DebugUtil")("carb:actionManager");
 
@@ -321,7 +322,12 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("groupElementsCanvas", "Group elements", "Group", function () {
-            Group.run(Selection.getSelection(), InteractiveContainer);
+            var b = Selection.selectedElement().getBoundingBox();
+            var m = Matrix.create().translate(b.x, b.y);
+            Group.run(Selection.getSelection(), InteractiveContainer, {
+                br: new Rect(0,0, b.width, b.height),
+                m: m
+            }, m.inverted());
         });
 
         this.registerAction("isolateSelection", "Isolate selection", "Isolation", function () {

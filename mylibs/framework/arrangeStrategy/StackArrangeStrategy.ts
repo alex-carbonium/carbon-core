@@ -126,10 +126,10 @@ export let HorizontalArrangeStrategy = {
             }
 
             if (r.width !== width || r.height !== height || r.x !== x || r.y !== y) {
-                child.resetTransform();
-                child.applyTranslation({ x, y }, changeMode);
+                child.resetTransform(changeMode);
+                child.applyTranslation({ x, y }, false, changeMode);
                 child.prepareAndSetProps({ br: child.props.br.withSize(width, height) }, changeMode);
-                child.arrange({ oldRect: r, newRect: { x: x, y: y, width: width, height: height } });
+                child.arrange({ oldRect: r, newRect: { x: x, y: y, width: width, height: height } }, changeMode);
             }
 
             pos += child.width() + child.margin().right;
@@ -137,7 +137,7 @@ export let HorizontalArrangeStrategy = {
 
         pos += container.padding().right;
 
-        container.setProps({ br: container.props.br.withSize(pos, newHeight) });
+        container.setProps({ br: container.props.br.withSize(pos, newHeight) }, changeMode);
     }
 }
 
@@ -188,10 +188,10 @@ export let VerticalArrangeStrategy = {
 
             let newRect = null;
             if (r.width !== width || r.height !== height || r.x !== x || r.y !== y) {
-                child.resetTransform();
-                child.applyTranslation({ x, y }, changeMode);
+                child.resetTransform(changeMode);
+                child.applyTranslation({ x, y }, false, changeMode);
                 child.prepareAndSetProps({ br: child.props.br.withSize(width, height) }, changeMode);
-                child.arrange({ oldRect: r, newRect: { x: x, y: y, width: width, height: height } });
+                child.arrange({ oldRect: r, newRect: { x: x, y: y, width: width, height: height } }, changeMode);
             }
 
             pos += child.height() + child.margin().bottom;
@@ -203,10 +203,9 @@ export let VerticalArrangeStrategy = {
             let delta = pos - container.height();
             let y = container.y() - delta;
             let x = container.x();
-            container.applyTranslation({ x, y });
+            container.applyTranslation({ x, y }, false, changeMode);
         }
 
-        container.setProps({ br: container.props.br.withSize(newWidth, pos) });
-
+        container.setProps({ br: container.props.br.withSize(newWidth, pos) }, changeMode);
     }
 }

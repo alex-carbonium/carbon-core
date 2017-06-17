@@ -376,10 +376,10 @@ export default class TextTool extends Tool {
             if (dw || dh) {
                 this._editedElement.parent().autoGrow(dw, dh);
             } else {
-                // this is for scenario when d
+                // this is for scenario when text is growing inside stack container for example
                 let br = this._editedElement.props.br;
                 this._editedElement.setProps(props, ChangeMode.Self);
-                this._editedElement.parent().performArrange();
+                this._editedElement.parent().performArrange(undefined, ChangeMode.Self);
             }
 
             this._editClone.setProps(props, ChangeMode.Self);
@@ -433,6 +433,7 @@ export default class TextTool extends Tool {
         }
 
         this._editedElement.setProps({ br: this._originalBr }, ChangeMode.Self);
+        this._editedElement.parent().performArrange(undefined, ChangeMode.Self);
 
         this._editedElement.prepareAndSetProps(props); //no validation, save from clone as is
     }
