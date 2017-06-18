@@ -304,30 +304,22 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("groupElementsVStack", "Group elements", "Group", function () {
-            var b = Selection.selectedElement().getBoundingBox();
             Group.run(Selection.getSelection(), InteractiveContainer, {
                 arrangeStrategy: ArrangeStrategies.VerticalStack,
                 dropPositioning: DropPositioning.Vertical,
-                m: Matrix.create().translate(b.x, b.y)
-            });
+            }, true);
         });
 
         this.registerAction("groupElementsHStack", "Group elements", "Group", function () {
             var b = Selection.selectedElement().getBoundingBox();
             Group.run(Selection.getSelection(), InteractiveContainer, {
                 arrangeStrategy: ArrangeStrategies.HorizontalStack,
-                dropPositioning: DropPositioning.Horizontal,
-                m: Matrix.create().translate(b.x, b.y)
-            });
+                dropPositioning: DropPositioning.Horizontal
+            }, true);
         });
 
         this.registerAction("groupElementsCanvas", "Group elements", "Group", function () {
-            var b = Selection.selectedElement().getBoundingBox();
-            var m = Matrix.create().translate(b.x, b.y);
-            Group.run(Selection.getSelection(), InteractiveContainer, {
-                br: new Rect(0,0, b.width, b.height),
-                m: m
-            }, m.inverted());
+            Group.run(Selection.getSelection(), InteractiveContainer, undefined, true);
         });
 
         this.registerAction("isolateSelection", "Isolate selection", "Isolation", function () {
