@@ -240,7 +240,7 @@ var onDraggingElement = function (event: any, keys: IKeyboardState) {
     } else {
         var parent = event.draggingElement.elements[0].parent();
         if (parent.allowRearrange()) {
-            this._target = parent;
+            this._target = null;
             this._dropData = parent.getDropData({ x: event.mouseX, y: event.mouseY }, event.transformationElement);
             this._isDropTarget = true;
         } else {
@@ -481,7 +481,7 @@ export default class DropVisualization extends ExtensionBase {
         this._dropLine = new DropLine();
         this._dropLine.setProps({
             stroke: Brush.createFromColor("red"),
-            lineWidth: 2
+            strokeWidth: 2
         });
         this._dropLine.crazySupported(false);
 

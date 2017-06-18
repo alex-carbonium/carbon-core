@@ -13,56 +13,16 @@ import Isolate from "../commands/Isolate";
 import Selection from "./SelectionModel";
 
 export default class InteractiveContainer extends Container implements IIsolatable {
-
-    hitTest(point: IPoint, scale: number, boundaryRectOnly = false) {
-        if (!super.hitTest(point, scale)) {
-            return false;
-        }
-        if (boundaryRectOnly) {
-            return true;
-        }
-        for (var i = this.children.length - 1; i >= 0; --i) {
-            var el = this.children[i];
-            if (el.hitTest(point, scale)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    hitTestGlobalRect(rect) {
-        if (!this.hitVisible(true)) {
-            return false;
-        }
-
-        for (var i = this.children.length - 1; i >= 0; --i) {
-            var el = this.children[i];
-            if (el.hitTestGlobalRect(rect, true)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     allowRearrange() {
         return this.props.arrangeStrategy === ArrangeStrategies.HorizontalStack ||
-                this.props.arrangeStrategy === ArrangeStrategies.VerticalStack;
+            this.props.arrangeStrategy === ArrangeStrategies.VerticalStack;
     }
 
     dblclick(event: IMouseEventData) {
-        if (false && this.primitiveRoot().isEditable()) {
-            if (UserSettings.group.editInIsolationMode && !Environment.view.isolationLayer.isActivatedFor(this)) {
-                Isolate.run([this]);
-                event.handled = true;
-            }
-        }
-        else {
-            this.unlockGroup();
-            var element = this.hitElement(event, Environment.view.scale());
-            if (element && element !== this) {
-                Selection.makeSelection([element]);
-            }
+        this.unlockGroup();
+        var element = this.hitElement(event, Environment.view.scale());
+        if (element && element !== this) {
+            Selection.makeSelection([element]);
         }
     }
 
@@ -84,13 +44,6 @@ export default class InteractiveContainer extends Container implements IIsolatab
             finally {
                 GlobalMatrixModifier.pop();
             }
-        }
-    }
-
-    drawPath(context) {
-        for (var i = this.children.length - 1; i >= 0; --i) {
-            var el = this.children[i];
-            el.drawBoundaryPath(context);
         }
     }
 

@@ -28,6 +28,43 @@ interface IGroupContainerRuntimeProps {
 export default class GroupContainer extends InteractiveContainer implements IGroupContainer, IIsolatable {
     runtimeProps: IGroupContainerRuntimeProps;
 
+    hitTest(point: IPoint, scale: number, boundaryRectOnly = false) {
+        if (!super.hitTest(point, scale)) {
+            return false;
+        }
+        if (boundaryRectOnly) {
+            return true;
+        }
+        for (var i = this.children.length - 1; i >= 0; --i) {
+            var el = this.children[i];
+            if (el.hitTest(point, scale)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    hitTestGlobalRect(rect) {
+        if (!this.hitVisible(true)) {
+            return false;
+        }
+
+        for (var i = this.children.length - 1; i >= 0; --i) {
+            var el = this.children[i];
+            if (el.hitTestGlobalRect(rect, true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    drawPath(context) {
+        for (var i = this.children.length - 1; i >= 0; --i) {
+            var el = this.children[i];
+            el.drawBoundaryPath(context);
+        }
+    }
 
     allowRearrange() {
         return false;
@@ -194,6 +231,9 @@ GroupContainer.prototype.t = Types.GroupContainer;
 PropertyMetadata.registerForType(GroupContainer, {
     allowMoveOutChildren: {
         defaultValue: false
+    },
+    arrangeStrategy: {
+        defaultValue: ArrangeStrategies.Group
     },
     enableGroupLocking: {
         defaultValue: true

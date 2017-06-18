@@ -7,6 +7,7 @@ import Environment from "environment";
 import Path from "framework/Path";
 import CoreIntl from "../CoreIntl";
 import { ContextBarPosition, IActionManager, IView, IApp, ElementState } from "carbon-core";
+import InteractiveContainer from "../framework/InteractiveContainer";
 
 function findItemsToSelect(app, eventData) {
     let items = []
@@ -311,7 +312,7 @@ export default class ContextMenuBuilder {
                     callback: () => {
                         actionManager.invoke("ungroupElements")
                     },
-                    disabled: !selection || selection.length !== 1 || !(selection[0] instanceof GroupContainer)
+                    disabled: !selection || selection.length !== 1 || !(selection[0] instanceof InteractiveContainer)
                 },
                 {
                     name: "@group.mask",
