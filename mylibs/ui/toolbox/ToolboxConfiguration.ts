@@ -1,9 +1,9 @@
 import {TileSize} from "framework/Defs";
 import ContextPool from "framework/render/ContextPool";
 import Environment from "environment";
-import FileProxy from "server/FileProxy";
 import {createUUID} from "util";
 import Matrix from "math/matrix";
+import backend from "../../backend";
 import { ArtboardType } from "carbon-core";
 
 var PADDING = 5;
@@ -251,7 +251,7 @@ export default class ToolboxConfiguration {
             }
 
             spriteUrlPromise = spriteUrlPromise.then(sprite =>{
-                return FileProxy.uploadPublicImage(sprite.imageData)
+                return backend.fileProxy.uploadPublicImage({content: sprite.imageData})
                     .then((data)=>{
                         group.spriteUrl = data.url;
                         group.size = sprite.size;
@@ -259,7 +259,7 @@ export default class ToolboxConfiguration {
             });
 
             spriteUrl2xPromise = spriteUrl2xPromise.then(sprite =>{
-                return FileProxy.uploadPublicImage(sprite.imageData)
+                return backend.fileProxy.uploadPublicImage({content: sprite.imageData})
                     .then((data)=>{
                         group.spriteUrl2x = data.url;
                     })
@@ -278,7 +278,7 @@ export default class ToolboxConfiguration {
                 if(App.Current.serverless()){
                     return {url:'#', configId:createUUID()};
                 }
-                return FileProxy.uploadPublicFile(JSON.stringify(config))
+                return backend.fileProxy.uploadPublicFile({content: JSON.stringify(config)});
             })
             .then((data)=>{
                 page.setProps({toolboxConfigUrl:data.url, toolboxConfigId:configId});

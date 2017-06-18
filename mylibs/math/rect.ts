@@ -268,7 +268,13 @@ export default class Rect implements IRect {
         return rect;
     }
 
+    static fromSize(width: number, height: number) {
+        return new Rect(0, 0, width, height);
+    }
+
     static Zero: Rect;
+    static Max: Rect;
 }
 
 Rect.Zero = new Rect(0, 0, 0, 0);
+Rect.Max = new Rect(-Number.MAX_VALUE/2, -Number.MAX_VALUE/2, Number.MAX_VALUE, Number.MAX_VALUE);

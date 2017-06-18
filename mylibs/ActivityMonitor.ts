@@ -3,7 +3,7 @@ import { IApp, ConnectionState, IDisposable } from "carbon-core";
 import AutoSaveTimer from "./AutoSaveTimer";
 import PersistentConnection from "./server/PersistentConnection";
 
-const IdleTimeout = DEBUG ? 60 * 1000 : 5 * 60 * 1000;
+const IdleTimeout = 5 * 60 * 1000;
 
 type ActivityMonitorState =
     { type: "notStarted" } |

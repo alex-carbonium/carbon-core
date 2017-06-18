@@ -1,5 +1,5 @@
 import {app, Intl, Environment, ActionManager} from "../../CarbonCore";
-import RenderLoop from "../../RenderLoop";
+import RenderLoop from "../../framework/render/RenderLoop";
 import ArtboardPage from "../../ui/pages/ArtboardPage";
 import Selection from "../../framework/SelectionModel";
 import Matrix from "../../math/matrix";
@@ -7,18 +7,16 @@ import Point from "../../math/point";
 import ResizeOptions from "../../decorators/ResizeOptions";
 import backend from "../../backend";
 import logger from "../../logger";
+import CoreIntl from "../../CoreIntl";
 
-var viewContainer = document.getElementById("viewContainer");
+app.setProps({noConfirmOnClose: true});
+
 var viewport = document.getElementById("viewport");
-var canvas = document.getElementById("app_canvas");
-var gridCanvas = document.getElementById("grid_canvas");
-var upperCanvas = document.getElementById("app_upperCanvas");
-var htmlPanel = document.getElementById("htmlPanel");
-var htmlLayer = document.getElementById("htmlLayer");
+var renderLoop = new RenderLoop();
+renderLoop.mount(viewport);
+renderLoop.attachDesignerView(app);
 
-RenderLoop.init(app, viewContainer, viewport, canvas, gridCanvas, upperCanvas, htmlPanel, htmlLayer);
-
-Intl.registerTestInstance();
+CoreIntl.registerTestInstance();
 
 var examples = {};
 
@@ -60,12 +58,15 @@ function runExample(name){
     app.raiseLoaded();
 
     var fn = examples[name];
-    fn(app, page.getActiveArtboard());
+    var artboard = page.getActiveArtboard();
+
+    window['page'] = page;
+    window['artboard'] = artboard;
+
+    fn(app, artboard);
 
     history.replaceState({}, document.title, location.pathname + "?" + encodeURIComponent(name));
 }
-
-backend.init(logger, {services: '', storage: '', file: '', cdn: ''});
 
 window.Matrix = Matrix;
 window.Point = Point;

@@ -38,6 +38,7 @@ import ObjectFactory from "./framework/ObjectFactory";
 import ActionManager from "./ui/ActionManager";
 import ShortcutManager from "./ui/ShortcutManager";
 import ArtboardPage from "./ui/pages/ArtboardPage";
+import Artboard from "./framework/Artboard";
 import IconsInfo from "./ui/IconsInfo";
 import backend from "./backend";
 import logger from "./logger";
@@ -245,6 +246,17 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
         }
 
         return this._activeStory;
+    }
+
+    getAllArtboards() {
+        var res = [];
+        for (var i = 0; i < this.pages.length; ++i) {
+            var page = this.pages[i];
+            var artboards = page.getAllArtboards();
+            res = res.concat(artboards);
+        }
+
+        return res;
     }
 
     getAllFrames() {
@@ -861,6 +873,15 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
 
     get pages(): IPage[] {
         return (this.children as any).filter(p => p instanceof Page);
+    }
+
+    pagesWithSymbols(){
+        return this.pages.filter(p => p.children.some(a => {
+            if (a instanceof Artboard) {
+                return a.props.type === ArtboardType.Symbol;
+            }
+            return false;
+        }));
     }
 
     get stories() {

@@ -1,13 +1,12 @@
 declare module "carbon-app" {
-    import { IDataNode, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IElementEventData, IIsolatable, IMouseEventHandler } from "carbon-model";
+    import { IDataNode, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IElementEventData, IIsolatable, IMouseEventHandler, IContainerProps } from "carbon-model";
     import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable } from "carbon-basics";
-    import { IRect, ICoordinate } from "carbon-geometry";
+    import { IRect, ICoordinate, ISize } from "carbon-geometry";
+    import { IContext } from "carbon-rendering";
 
     export interface IPlatform{
         attachEvents(htmlElement: HTMLElement);
         detachEvents();
-
-        renderElementToDataUrl(element: IUIElement, scale?, width?, height?);
     }
 
     export interface IFontMetadata{
@@ -39,6 +38,7 @@ declare module "carbon-app" {
         removePage(page: IPage);
         setActivePage(page: IPage);
         setActivePageById(id: string);
+        pagesWithSymbols(): IPage[];
 
         activeStory: any;
         stories: any[];
@@ -87,21 +87,23 @@ declare module "carbon-app" {
         setMode(mode);
         modeChanged: IEvent<any>;
 
-        getAllFrames(): any[];
+        getAllArtboards(): IArtboard[];
+        getAllFrames(): IArtboard[];
+        getAllTemplateResourceArtboards(): IArtboard[];
 
         defaultFill(fill?: Brush, mode?: any): Brush;
         defaultStroke(stroke?: Brush, mode?: any): Brush;
         useRecentColor(color: Brush);
         recentColors(): string[];
 
-        getAllTemplateResourceArtboards(): IArtboard[];
-
         assignNewName(element: IUIElement);
 
         resetCurrentTool();
+
+        isElectron(): boolean;
     }
 
-    export interface ILayer extends IContainer {
+    export interface ILayer<TProps extends IContainerProps = IContainerProps> extends IContainer<TProps> {
         type: LayerTypes;
         isActive: boolean;
 
@@ -119,7 +121,10 @@ declare module "carbon-app" {
         isolateGroup(owner: IIsolatable, clippingParent?: IUIElement, e?: IMouseEventData) :void;
     }
 
-    export interface IPage extends IContainer, ILayer {
+    export interface IPageProps extends IContainerProps {
+        galleryId?: string;
+    }
+    export interface IPage extends ILayer<IPageProps> {
         getAllArtboards(): IArtboard[];
         getActiveArtboard(): IArtboard;
         getArtboardAtPoint(point: ICoordinate): IArtboard;
@@ -136,6 +141,8 @@ declare module "carbon-app" {
         activated(): void;
 
         insertArtboards(artboards: IArtboard[]);
+
+        export(): Promise<object>;
     }
 
     export const Page: IConstructor<IPage>;
@@ -175,6 +182,8 @@ declare module "carbon-app" {
         setActivePage(page: IPage);
 
         draw();
+        renderElementToContext(element: IUIElement, context: IContext, x?: number, y?: number, zoom?: number, dpr?: number);
+        renderElementToDataUrl(element: IUIElement, bounds?: IRect, dpr?: number): string;
         invalidate();
 
         showPixels(value?: boolean): boolean;
@@ -243,6 +252,7 @@ declare module "carbon-app" {
         set(view: IView, controller: IController);
     }
     export const Environment: IEnvironment;
+    export const Workspace: IEnvironment;
 
     export interface IAction {
         id: string;
@@ -352,6 +362,17 @@ export interface IAreaConstraint {
         modeChangedEvent: IEvent<boolean>;
         onElementSelected: IEvent3<IUIElement, IUIElement[], boolean>;
     }
+
+    export interface IRenderLoop {
+        mount(element: HTMLElement);
+        unmount();
+        attachDesignerView(app: IApp);
+
+        isAttached(): boolean;
+
+        viewContainer: HTMLElement;
+    }
+    export const RenderLoop: IConstructor<IRenderLoop>;
 
     export const app: IApp;
     export const ActionManager: IActionManager;

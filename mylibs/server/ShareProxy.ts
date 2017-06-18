@@ -1,31 +1,40 @@
 // auto-generated with node ./scripts/jsClient.js
 import backend from "../backend";
-export default {
-    code: function (companyId, projectId, role) {
+var proxy = {
+    code(companyId, projectId, role) {
         return backend.get(backend.servicesEndpoint + "/api/share/code", {companyId, projectId, role});
     },
-    mirrorCode: function (companyId, projectId, enable) {
+    mirrorCode(companyId, projectId, enable) {
         return backend.get(backend.servicesEndpoint + "/api/share/mirrorCode", {companyId, projectId, enable});
     },
-    disableMirroring: function (companyId, projectId) {
+    disableMirroring(companyId, projectId) {
         return backend.post(backend.servicesEndpoint + "/api/share/disableMirroring", {companyId, projectId});
     },
-    invite: function (companyId, projectId, email, role) {
+    invite(companyId, projectId, email, role) {
         return backend.post(backend.servicesEndpoint + "/api/share/invite", {companyId, projectId, email, role});
     },
-    use: function (code) {
+    use(code) {
         return backend.post(backend.servicesEndpoint + "/api/share/use", {code});
     },
-    publish: function (model) {
+    getPageSetup(pageId: string) {
+        return backend.get(backend.servicesEndpoint + "/api/share/pageSetup", {pageId});
+    },
+    validatePageName(model) {
+        return backend.post(backend.servicesEndpoint + "/api/share/validatePageName", {model});
+    },
+    publishPage(model) {
         return backend.post(backend.servicesEndpoint + "/api/share/publishPage", {model});
     },
-    resources: function (search) {
+    resources(search) {
         return backend.get(backend.servicesEndpoint + "/api/share/resources", {
             search: search || ''
         });
     },
-    staticResources: function (search) {
+    staticResources(search) {
         return backend.get(backend.cdnEndpoint + "/target/reslist.json", {
         });
     }
 }
+
+backend.shareProxy = proxy;
+export default proxy;

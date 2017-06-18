@@ -12,7 +12,8 @@ var bind = function () {
 
         if (that.app.state && that.app.state.isDirty()) {
             if (that.app.serverless()){
-                that.app.actionManager.invoke("saveBackup");
+                //sometimes annoying, ctrl+s is better
+                //that.app.actionManager.invoke("saveBackup");
             }
             else {
                 that.app.actionManager.invoke("save");

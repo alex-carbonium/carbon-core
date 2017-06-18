@@ -95,10 +95,12 @@ const config = [
         ]
     },
     {
-        name: "Random words",
+        name: "Other",
         children: [
             { name: "Lorem Paragraph", templateId: "loremParagraph", examples: [] },
             { name: "Lorem Sentence", templateId: "loremSentence", examples: [] },
+            { name: "Number sequence", templateId: "numberSeq", examples: [1, 2] },
+            { name: "Random numbers", templateId: "numberRand", examples: [53, 14] },
         ]
     }
 ];

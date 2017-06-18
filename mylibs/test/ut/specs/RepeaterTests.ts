@@ -11,6 +11,8 @@ import {ArrangeStrategies, DockStyle, Overflow} from "framework/Defs";
 import Selection from "framework/SelectionModel";
 import Point from "../../../math/point";
 import Rect from "../../../math/rect";
+import {assert} from "chai";
+import { TextAutoWidth } from "carbon-core";
 
 describe("Repeater tests", function(){
     before(function(){
@@ -407,7 +409,7 @@ describe("Repeater tests", function(){
             this.app.relayout();
 
             //act
-            slave.prepareAndSetProps({autoWidth: false, br: slave.boundaryRect().withWidth(6)});
+            slave.prepareAndSetProps({autoWidth: TextAutoWidth.Wrap, br: slave.boundaryRect().withWidth(6)});
             this.app.relayout();
 
             //assert

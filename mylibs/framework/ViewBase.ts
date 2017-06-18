@@ -5,9 +5,11 @@ import ContextPool from "framework/render/ContextPool";
 import EventHelper from "framework/EventHelper";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
-import { LayerTypes, IView, IAnimationController, ILayer, IUIElement, ViewState, IEvent, ICoordinate } from "carbon-core";
+import { LayerTypes, IView, IAnimationController, ILayer, IUIElement, ViewState, IEvent, ICoordinate, IContext, ISize, IRect } from "carbon-core";
 import Rect from "../math/rect";
 import AnimationGroup from "./animation/AnimationGroup";
+import Context from "./render/Context";
+import GlobalMatrixModifier from "./GlobalMatrixModifier";
 import ExtensionPoint from "./ExtensionPoint";
 
 var Stopwatch = require("../Stopwatch");
@@ -276,6 +278,59 @@ export default class ViewBase { //TODO: implement IView
                 let env = this._getEnv(layer, false);
                 this._drawLayer(layer, layer.context, env);
             }
+        }
+    }
+
+    renderElementToDataUrl(element: IUIElement, bounds?: IRect, dpr = this.contextScale) {
+        let sr = element.boundaryRect();
+        let tr = sr;
+
+        if (bounds) {
+            tr = sr.fit(bounds);
+        }
+
+        var context = ContextPool.getContext(tr.width, tr.height, dpr, true);
+        context.fillStyle = '#b7babd';
+        context.fillRect(0, 0, tr.width * dpr, tr.height * dpr);
+        this.renderElementToContext(element, context, sr.x, sr.y, tr.width/sr.width, dpr);
+
+        var res = context.canvas.toDataURL("image/png");
+        ContextPool.releaseContext(context);
+        return res;
+    }
+
+    private renderElementToContext(element: IUIElement, context: IContext, x = 0, y = 0, zoom = 1, dpr = this.contextScale) {
+        var rect = element.boundaryRect();
+        let bb = element.getBoundingBoxGlobal();
+        let normalizationMatrix = Matrix.createTranslationMatrix(-bb.x, -bb.y);
+
+        try {
+            GlobalMatrixModifier.push(m => m.prepended(normalizationMatrix));
+
+            context.save();
+            context.scale(dpr, dpr);
+
+            var matrix = Matrix.create();
+            matrix.translate(x - rect.x, y - rect.y);
+            matrix.scale(zoom, zoom);
+            matrix.applyToContext(context)
+            element.invalidate();
+            element.drawSelf(context, rect.width, rect.height, {
+                finalRender: true, pageMatrix: matrix, setupContext: (context) => {
+                    context.scale(dpr, dpr);
+                    matrix.applyToContext(context);
+                },
+                view: {
+                    scale: () =>1,
+                    focused:()=>false,
+                    contextScale: dpr,
+                    viewportRect: ()=> Rect.Max
+                }
+            });
+            context.restore();
+        }
+        finally {
+            GlobalMatrixModifier.pop();
         }
     }
 
@@ -641,10 +696,6 @@ export default class ViewBase { //TODO: implement IView
         return this._focused;
     }
 
-    toDataURL(type) {
-        this.context.canvas.toDataURL(type);
-    }
-
     viewportSizeChanged(newSize) {
         if (this._oldSize) {
             var oldSize = this._oldSize;
@@ -716,5 +767,9 @@ export default class ViewBase { //TODO: implement IView
 
     minZoom() {
         return 16;
+    }
+
+    detach() {
+
     }
 }

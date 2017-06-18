@@ -58,6 +58,13 @@ class ArtboardPage extends Page {
         }
     }
 
+    /**
+     * A boundary rect of a page is computed as a rect covering all artboards. It's readonly.
+     */
+    boundaryRect(){
+        return this.getContentOuterSize();
+    }
+
     getContentOuterSize(): Rect {
         let items = this.children;
         if (!items.length) {

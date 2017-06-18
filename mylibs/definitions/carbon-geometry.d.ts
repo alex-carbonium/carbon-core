@@ -19,11 +19,18 @@ declare module "carbon-geometry" {
     }
 
     export interface IPoint extends ICoordinate {
+        add(point: IPoint): IPoint;
+        add2(x: number, y: number): IPoint;
         subtract(point: IPoint): IPoint;
         getAngle(point: IPoint): number;
         getDistance(fromPoint: IPoint): number;
         getDirectedAngle(fromPoint: IPoint): number;
     }
+    export const Point: (new(x: number, y: number) => IPoint) & {
+        create(x: number, y: number): IPoint;
+
+        Zero: IPoint;
+    };
 
     export interface ISize {
         width: number;
@@ -54,7 +61,9 @@ declare module "carbon-geometry" {
     interface IRectConstructor {
         new (x: number, y: number, width: number, height: number): IRect;
     }
-    export const Rect: IRectConstructor;
+    export const Rect: IRectConstructor & {
+        fromSize(width: number, height: number): IRect;
+    };
 
     export interface IMatrix {
         a: number;
