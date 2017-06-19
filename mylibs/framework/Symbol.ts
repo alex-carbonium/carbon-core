@@ -2,7 +2,7 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import PropertyStateRecorder from "framework/PropertyStateRecorder";
 import Container from "framework/Container";
 import UIElement from "framework/UIElement";
-import {Overflow, Types} from "./Defs";
+import { Overflow, Types } from "./Defs";
 import Selection from "framework/SelectionModel";
 import DataNode from "framework/DataNode";
 import ObjectFactory from "framework/ObjectFactory";
@@ -15,13 +15,13 @@ import Text from "./text/Text";
 import Brush from "./Brush";
 import Font from "./Font";
 
-interface ISymbolRuntimeProps extends IUIElementProps{
+interface ISymbolRuntimeProps extends IUIElementProps {
     artboardVersion: number;
     hasBg?: boolean;
     hasText?: boolean;
 }
 
-interface ICustomPropertyDefinition{
+interface ICustomPropertyDefinition {
     controlId: string;
     propertyName: string;
 }
@@ -59,7 +59,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         return selection;
     }
 
-    allowNameTranslation(){
+    allowNameTranslation() {
         return false;
     }
 
@@ -93,14 +93,14 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
             var br = this.boundaryRect();
             if (this._allowHResize) {
-                br = br.withWidth(Math.max(currentSize.width, artboard.minWidth()) || artboard.width());
+                br = br.withWidth(Math.max(currentSize.width || artboard.width(), artboard.minWidth()));
             }
             if (this._allowVResize) {
-                br = br.withHeight(Math.max(currentSize.height, artboard.minHeight()) || artboard.height());
+                br = br.withHeight(Math.max(currentSize.height || artboard.height(), artboard.minHeight()));
             }
 
-            this.setProps({br}, ChangeMode.Self);
-            this.performArrange({oldRect: artboard.boundaryRect(), newRect: br}, ChangeMode.Self);
+            this.setProps({ br }, ChangeMode.Self);
+            this.performArrange({ oldRect: artboard.boundaryRect(), newRect: br }, ChangeMode.Self);
         }
 
         this._updateCustomProperties();
@@ -115,7 +115,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     }
 
     toJSON() {
-        return {t: this.t, props: this.cloneProps()};
+        return { t: this.t, props: this.cloneProps() };
     }
 
     _setupCustomProperties(artboard) {
@@ -140,14 +140,14 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         }
 
         var backgrounds = this.findBackgrounds();
-        if (backgrounds.length){
+        if (backgrounds.length) {
             res.fill = backgrounds[0].fill();
             res.stroke = backgrounds[0].stroke();
         }
         var texts = this.findTexts();
-        if (texts.length){
+        if (texts.length) {
             res.font = Font.extend(this.props.font, texts[0].font());
-            if (this.props.hasOwnProperty("custom:self:font")){
+            if (this.props.hasOwnProperty("custom:self:font")) {
                 res["custom:self:font"] = res.font;
             }
         }
@@ -232,27 +232,27 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
                 this._initFromArtboard();
             }
             else {
-                if (mode !== ChangeMode.Self){
+                if (mode !== ChangeMode.Self) {
                     var changes = null;
-                    if (props.fill !== oldProps.fill){
+                    if (props.fill !== oldProps.fill) {
                         let newName = "self:fill";
                         changes = {};
                         changes["custom:" + newName] = props.fill;
                         changes["owt:" + newName] = true;
                     }
-                    if (props.stroke !== oldProps.stroke){
+                    if (props.stroke !== oldProps.stroke) {
                         let newName = "self:stroke";
                         changes = changes || {};
                         changes["custom:" + newName] = props.stroke;
                         changes["owt:" + newName] = true;
                     }
-                    if (props.font !== oldProps.font){
+                    if (props.font !== oldProps.font) {
                         let newName = "self:font";
                         changes = changes || {};
                         changes["custom:" + newName] = props.font;
                         changes["owt:" + newName] = true;
                     }
-                    if (changes){
+                    if (changes) {
                         this.setProps(changes);
                     }
                 }
@@ -261,7 +261,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         }
     }
 
-    findSourceArtboard(app: IApp): IArtboard | null{
+    findSourceArtboard(app: IApp): IArtboard | null {
         var page = DataNode.getImmediateChildById(App.Current, this.props.source.pageId);
         if (page) {
             return DataNode.getImmediateChildById(page, this.props.source.artboardId, true);
@@ -269,19 +269,19 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         return null;
     }
 
-    findClone(sourceId: string): IUIElement | null{
+    findClone(sourceId: string): IUIElement | null {
         return this.findNodeBreadthFirst(e => e.sourceId() === sourceId);
     }
 
-    findBackgrounds(): IUIElement[]{
+    findBackgrounds(): IUIElement[] {
         return this.findAllNodesDepthFirst(x => x.name() === BackgroundMarker);
     }
 
-    findTexts(): IText[]{
+    findTexts(): IText[] {
         return this.findAllNodesDepthFirst(x => x.name() === TextMarker);
     }
 
-    arrange(resizeEvent?, mode?){
+    arrange(resizeEvent?, mode?) {
         this._arranging = true;
         super.arrange(resizeEvent, mode);
         this._arranging = false;
@@ -293,14 +293,14 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         PropertyStateRecorder.applyState(this, defaultState);
         if (stateId !== 'default') {
             var newState = this._artboard._recorder.getStateById(stateId);
-            if(newState) {
+            if (newState) {
                 PropertyStateRecorder.applyState(this, newState);
             }
         }
     }
 
     _getCustomPropertyDefinition(propName): ICustomPropertyDefinition {
-        if(!this._propertyMapping) {
+        if (!this._propertyMapping) {
             this._propertyMapping = {};
         }
 
@@ -320,8 +320,8 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         return data;
     }
 
-    private _findElementWithCustomProperty(def: ICustomPropertyDefinition): UIElement | null{
-        if (def.controlId === "self"){
+    private _findElementWithCustomProperty(def: ICustomPropertyDefinition): UIElement | null {
+        if (def.controlId === "self") {
             return this;
         }
         return this.getElementById(this.id() + def.controlId);
@@ -335,27 +335,27 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
                 var element = this._findElementWithCustomProperty(prop);
 
                 var value = props[propName];
-                if(value === undefined) { // custom property was deleted, i.e by undo or reset property action
+                if (value === undefined) { // custom property was deleted, i.e by undo or reset property action
                     var sourceElement = this._artboard.getElementById(element.sourceId());
                     delete props[propName];
                     value = sourceElement.props[prop.propertyName];
                 }
 
-                if(value && element) {
-                    element.prepareAndSetProps({[prop.propertyName]: value}, ChangeMode.Self);
+                if (value && element) {
+                    element.prepareAndSetProps({ [prop.propertyName]: value }, ChangeMode.Self);
                 }
-            } else if(props[propName] === undefined) {
+            } else if (props[propName] === undefined) {
                 delete props[propName];
             }
         }
 
         var backgrounds = this.findBackgrounds();
-        if (backgrounds.length){
-            backgrounds.forEach(x => x.setProps({fill: this.fill(), stroke: this.stroke()}));
+        if (backgrounds.length) {
+            backgrounds.forEach(x => x.setProps({ fill: this.fill(), stroke: this.stroke() }));
         }
         var texts = this.findTexts();
-        if (texts.length){
-            texts.forEach(x => x.setProps({font: this.props.font}));
+        if (texts.length) {
+            texts.forEach(x => x.setProps({ font: this.props.font }));
         }
     }
 
@@ -379,7 +379,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
     source(value?) {
         if (arguments.length > 0) {
-            this.setProps({source: value});
+            this.setProps({ source: value });
         }
 
         return this.props.source;
@@ -431,18 +431,18 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     applySizeScaling(s, o, options, changeMode: ChangeMode = ChangeMode.Model) {
         super.applySizeScaling.apply(this, arguments);
 
-        if (changeMode !== ChangeMode.Self){
+        if (changeMode !== ChangeMode.Self) {
             var updatedProps = null;
             var propNames = Object.keys(this.props);
             for (var i = 0; i < propNames.length; i++) {
                 var propName = propNames[i];
-                if (propName.startsWith("custom:") && (propName.endsWith(":m") || propName.endsWith(":br"))){
+                if (propName.startsWith("custom:") && (propName.endsWith(":m") || propName.endsWith(":br"))) {
                     var def = this._getCustomPropertyDefinition(propName);
                     var element = this._findElementWithCustomProperty(def);
-                    if (element && element !== this){
+                    if (element && element !== this) {
                         var oldValue = this.props[propName];
                         var newValue = element.props[def.propertyName];
-                        if (newValue !== oldValue){
+                        if (newValue !== oldValue) {
                             updatedProps = updatedProps || {};
                             updatedProps[propName] = newValue;
                         }
@@ -450,7 +450,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
                 }
             }
 
-            if (updatedProps){
+            if (updatedProps) {
                 this.setProps(updatedProps);
             }
         }
@@ -459,14 +459,14 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     registerSetProps(element, props, oldProps, mode) {
         if (element.id() === this.id()) {
             var realRoot = this._realPrimitiveRoot();
-            if (!realRoot){
+            if (!realRoot) {
                 return;
             }
             realRoot.registerSetProps(element, props, oldProps, mode);
             return;
         }
 
-        if(this._registerSetProps || this._initializing || this._arranging){
+        if (this._registerSetProps || this._initializing || this._arranging) {
             return;
         }
 
@@ -479,7 +479,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
         for (var i = 0; i < propNames.length; ++i) {
             var propName = propNames[i];
-            if(propName.startsWith("custom:")){
+            if (propName.startsWith("custom:")) {
                 continue;
             }
             var newName = element.sourceId() + ":" + propName;
@@ -488,14 +488,14 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
             newProps[customPropName] = props[propName];
             newProps["owt:" + newName] = true;
 
-            if (isBackground){
-                if (propName === "fill" || propName === "stroke"){
+            if (isBackground) {
+                if (propName === "fill" || propName === "stroke") {
                     fillStroke = fillStroke || {};
                     fillStroke[propName] = props[propName]
                     newProps[propName] = props[propName];
                 }
             }
-            if (isText && propName === "font"){
+            if (isText && propName === "font") {
                 fontProps = fontProps || {};
                 fontProps.font = props[propName];
                 newProps[propName] = props[propName];
@@ -504,10 +504,10 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
         this._registerSetProps = true;
 
-        if (isBackground && fillStroke){
+        if (isBackground && fillStroke) {
             this.findBackgrounds().forEach(x => x.setProps(fillStroke));
         }
-        if (isText && fontProps){
+        if (isText && fontProps) {
             this.findTexts().forEach(x => x.setProps(fontProps));
         }
 
@@ -515,19 +515,19 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         this._registerSetProps = false;
     }
 
-    registerDelete(parent: Container, element: UIElement, index: number, mode: ChangeMode = ChangeMode.Model){
-        if (mode === ChangeMode.Model){
-            element.setProps({visible: false}, mode);
+    registerDelete(parent: Container, element: UIElement, index: number, mode: ChangeMode = ChangeMode.Model) {
+        if (mode === ChangeMode.Model) {
+            element.setProps({ visible: false }, mode);
         }
     }
 
-    isEditable(){
+    isEditable() {
         return false;
     }
 
-    _realPrimitiveRoot(){
+    _realPrimitiveRoot() {
         var parent = this.parent();
-        if (!parent){
+        if (!parent) {
             return null;
         }
         return parent.primitiveRoot();
@@ -544,20 +544,20 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         return !this.runtimeProps.hasBg;
     }
 
-    getNonRepeatableProps(newProps){
+    getNonRepeatableProps(newProps) {
         var result = super.getNonRepeatableProps(newProps);
-        if (!this._artboard){
+        if (!this._artboard) {
             return result;
         }
 
         var newPropsByElement = null;
 
-        for (let propertyName in newProps){
-            if (propertyName.startsWith("custom:")){
+        for (let propertyName in newProps) {
+            if (propertyName.startsWith("custom:")) {
                 var prop = this._getCustomPropertyDefinition(propertyName);
                 newPropsByElement = newPropsByElement || {};
                 var elementProps = newPropsByElement[prop.controlId];
-                if (!elementProps){
+                if (!elementProps) {
                     elementProps = {};
                     newPropsByElement[prop.controlId] = elementProps;
                 }
@@ -565,17 +565,17 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
             }
         }
 
-        if (newPropsByElement){
-            for (var elementId in newPropsByElement){
+        if (newPropsByElement) {
+            for (var elementId in newPropsByElement) {
                 var element = this._artboard.getElementById(elementId);
-                if (!element){
+                if (!element) {
                     continue;
                 }
 
                 var nonRepeatable = element.getNonRepeatableProps(newPropsByElement[elementId]);
-                for (let i = 0; i < nonRepeatable.length; ++i){
+                for (let i = 0; i < nonRepeatable.length; ++i) {
                     let propertyName = "custom:" + elementId + ":" + nonRepeatable[i];
-                    if (result.indexOf(propertyName) === -1){
+                    if (result.indexOf(propertyName) === -1) {
                         result.push(propertyName);
                     }
                 }
@@ -587,7 +587,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
     dblclick(event: IMouseEventData) {
         var element = this.hitElementDirect(event, Environment.view.scale());
-        if (element !== this){
+        if (element !== this) {
             Selection.makeSelection([element]);
         }
 
@@ -602,7 +602,7 @@ PropertyMetadata.registerForType(Symbol, {
     source: {
         // displayName: "Artboard",
         // type: "artboard",
-        defaultValue: {artboardId: null, pageId: null}
+        defaultValue: { artboardId: null, pageId: null }
     },
     stateId: {
         displayName: "State",
@@ -627,11 +627,11 @@ PropertyMetadata.registerForType(Symbol, {
         return {
             font: !!element.runtimeProps.hasText,
             stateId: element._artboard && element._artboard.props
-                && element._artboard.props.states
-                && element._artboard.props.states.length > 1
+            && element._artboard.props.states
+            && element._artboard.props.states.length > 1
         }
     },
-    groups(){
+    groups() {
         var groups = PropertyMetadata.findForType(Container).groups();
         groups = groups.slice();
         groups.splice(1, 0, {
