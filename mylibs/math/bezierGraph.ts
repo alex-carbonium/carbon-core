@@ -57,7 +57,7 @@ export default class BezierGraph implements IBezierGraph {
                 case "L":
                     {
                         // [MO] skip degenerate line segments
-                        if (!equalPoints(element.point, lastPoint)) {
+                        if (element.point && !equalPoints(element.point, lastPoint)) {
                             // Convert lines to bezier curves as well. Just set control point to be in the line formed
                             //  by the end points
                             contour.addCurve(BezierCurve.bezierCurveWithLine(lastPoint, element.point));
@@ -92,7 +92,7 @@ export default class BezierGraph implements IBezierGraph {
                         let firstPoint = firstEdge.endPoint1;
 
                         // Skip degenerate line segments
-                        if (!equalPoints(lastPoint, firstPoint)) {
+                        if (lastPoint && !equalPoints(lastPoint, firstPoint)) {
                             contour.addCurve(BezierCurve.bezierCurveWithLine(lastPoint, firstPoint));
                             wasClosed = true;
                         }

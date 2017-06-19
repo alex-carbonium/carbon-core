@@ -24,6 +24,8 @@ class NullContainer extends DataNode implements IContainer {
     removeAllDecorators(): any[] { return null; }
     removeDecoratorByType(type) { }
 
+    performArrange() { }
+    allowRearrange() { return false; }
     autoGrow(dw, dh) { }
 
     mousemove(event: IMouseEventData, keys: IKeyboardState) { }
@@ -298,9 +300,9 @@ class NullContainer extends DataNode implements IContainer {
         return true;
     }
 
-    draw(){
+    draw() {
     }
-    drawSelf(){
+    drawSelf() {
     }
 }
 
