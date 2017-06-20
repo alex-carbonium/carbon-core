@@ -627,16 +627,19 @@ PropertyMetadata.registerForType(Symbol, {
         return {
             font: !!element.runtimeProps.hasText,
             stateId: element._artboard && element._artboard.props
-            && element._artboard.props.states
-            && element._artboard.props.states.length > 1
+                && element._artboard.props.states
+                && element._artboard.props.states.length > 1
         }
     },
     groups() {
         var groups = PropertyMetadata.findForType(Container).groups();
         groups = groups.slice();
         groups.splice(1, 0, {
-            label: "Font",
+            label: "@font",
             properties: ["font"]
+        }, {
+            label: "@symbol",
+            properties: ["stateId"]
         });
         return groups;
     }

@@ -39,9 +39,6 @@ class DraggingElement extends TransformationElement {
 
         this.translationMatrix = Matrix.create();
         var parent = elementOrComposite.first().parent();
-        if(parent) {
-            parent.performArrange();
-        }
     }
 
     wrapSingleChild() {
