@@ -1,8 +1,9 @@
 import CarbonExtension from "./CarbonExtesion";
-import { IContributions, ContextBarPosition, IApp, ISelection, ChangeMode, IArtboardProps, ILayer, LayerTypes, IUIElement, IContainer, IRect, ArtboardType, IText } from "carbon-core";
+import { IContributions, ContextBarPosition, IApp, ISelection, ChangeMode, IArtboardProps, ILayer, LayerTypes, IUIElement, IContainer, IRect, ArtboardType, IText, UIElementFlags, IArtboard } from "carbon-core";
 import Constraints from "framework/Constraints";
-import Symbol, {TextMarker, BackgroundMarker} from "../framework/Symbol";
+import Symbol from "../framework/Symbol";
 import Artboard from "../framework/Artboard";
+import Text from "../framework/text/Text";
 import GroupContainer from "../framework/GroupContainer";
 import Matrix from "../math/matrix";
 import Rect from "../math/rect";
@@ -15,19 +16,19 @@ export default class SymbolActions extends CarbonExtension {
                 id: "symbols.create",
                 name: "@symbols.create",
                 callback: this.createSymbolFromSelection,
-                condition: selection => !!selection.elements.length
+                condition: selection => selection.elements.length && !selection.elements.some(x => x instanceof Artboard)
             },
             {
                 id: "symbols.markAsText",
                 name: "@symbols.markAsText",
                 callback: this.markAsText,
-                condition: SymbolActions.isOnMasterArtboard
+                condition: selection => SymbolActions.isInSymbol(selection) && selection.elements.every(x => x instanceof Text)
             },
             {
                 id: "symbols.markAsBackground",
                 name: "@symbols.markAsBackground",
                 callback: this.markAsBackground,
-                condition: SymbolActions.isOnMasterArtboard
+                condition: SymbolActions.isInSymbol
             },
             {
                 id: "symbols.editMaster",
@@ -65,14 +66,17 @@ export default class SymbolActions extends CarbonExtension {
         })
     }
 
-    static isOnMasterArtboard(selection: ISelection): boolean{
-        return selection.elements.every(x => {
-            var artboard = x.findAncestorOfType(Artboard);
+    static isInSymbol(selection: ISelection): boolean{
+        return selection.elements.length && selection.elements.every(x => {
+            let artboard = x.findAncestorOfType(Artboard);
             if (!artboard){
                 return false;
             }
-            return artboard.props.type === ArtboardType.Symbol;
-        })
+            if (artboard.props.type === ArtboardType.Symbol) {
+                return true;
+            }
+            return !!x.findAncestorOfType(Symbol);
+        });
     }
 
     createSymbolFromSelection = (selection: ISelection) => {
@@ -176,26 +180,70 @@ export default class SymbolActions extends CarbonExtension {
     markAsBackground = (selection: ISelection) => {
         var fill = selection.elements[0].fill();
         var stroke = selection.elements[0].stroke();
+        var newSelection: string[] = [];
+
+        var parentData = this.findArtboardAndSymbol(selection);
+        this.clearSymbolFlags(parentData.artboard, UIElementFlags.SymbolBackground);
 
         for (var i = 0; i < selection.elements.length; i++) {
             var element = selection.elements[i];
-            element.name(BackgroundMarker);
-            if (i){
+            element = parentData.artboard.getElementById(element.sourceId()) as IText;
+            element.addFlags(UIElementFlags.SymbolBackground);
+            if (i) {
                 element.prepareAndSetProps({fill, stroke});
             }
+            if (parentData.symbol) {
+                newSelection.push(element.sourceId());
+            }
+        }
+
+        if (newSelection.length) {
+            selection.clearSelection();
+            //needs to happen after relayout
+            setTimeout(() => selection.makeSelection(newSelection.map(x => parentData.symbol.findClone(x))), 1);
         }
     }
 
     markAsText = (selection: ISelection) => {
         var elements = selection.elements as IText[];
         var font = elements[0].font();
+        var newSelection: string[] = [];
+
+        var parentData = this.findArtboardAndSymbol(selection);
+        this.clearSymbolFlags(parentData.artboard, UIElementFlags.SymbolText);
 
         for (var i = 0; i < elements.length; i++) {
             var element = elements[i];
-            element.name(TextMarker);
-            if (i){
+            element = parentData.artboard.getElementById(element.sourceId()) as IText;
+            element.addFlags(UIElementFlags.SymbolText);
+            if (i) {
                 element.prepareAndSetProps({font});
             }
+            if (parentData.symbol) {
+                newSelection.push(element.sourceId());
+            }
         }
+
+        if (newSelection.length) {
+            selection.clearSelection();
+            //needs to happen after relayout
+            setTimeout(() => selection.makeSelection(newSelection.map(x => parentData.symbol.findClone(x))), 1);
+        }
+    }
+
+    private findArtboardAndSymbol(selection: ISelection){
+        var artboard: IArtboard = null;
+        var symbol = selection.elements[0].findAncestorOfType(Symbol);
+        if (symbol) {
+            artboard = symbol.findSourceArtboard(this.app);
+        }
+        else {
+            artboard = selection.elements[0].findAncestorOfType(Artboard);
+        }
+        return {artboard, symbol};
+    }
+
+    private clearSymbolFlags(artboard: IArtboard, flags: UIElementFlags) {
+        artboard.applyVisitor((x: IUIElement) => x.removeFlags(flags));
     }
 }

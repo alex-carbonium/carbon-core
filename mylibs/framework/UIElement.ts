@@ -36,7 +36,7 @@ import { PropertyDescriptor } from './PropertyMetadata';
 import { IKeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
-import { ChangeMode, LayerTypes, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint } from "carbon-core";
+import { ChangeMode, LayerTypes, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags } from "carbon-core";
 import ExtensionPoint from "./ExtensionPoint";
 
 require("../migrations/All");
@@ -108,6 +108,18 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             }
         }
         return false;
+    }
+
+    hasFlags(flags: UIElementFlags): boolean {
+        return (this.props.flags & flags) === flags;
+    }
+    addFlags(flags: UIElementFlags) {
+        this.setProps({ flags: this.props.flags | flags });
+    }
+    removeFlags(flags: UIElementFlags) {
+        if (this.hasFlags(flags)) {
+            this.setProps({ flags: this.props.flags & ~flags });
+        }
     }
 
     allowNameTranslation() {
@@ -1536,7 +1548,16 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return PropertyMetadata.getEditableProperties(this.systemType(), recursive);
     }
     displayName() {
-        return this.name() || this.displayType();
+        var name = this.name() || this.displayType();
+
+        if (this.hasFlags(UIElementFlags.SymbolBackground)) {
+            name += " (background)";
+        }
+        if (this.hasFlags(UIElementFlags.SymbolText)) {
+            name += " (text)";
+        }
+
+        return name;
     }
     displayType(): string {
         return UIElement.displayType(this.t);
@@ -2216,6 +2237,9 @@ PropertyMetadata.registerForType(UIElement, {
     },
     bad: {
         defaultValue: false
+    },
+    flags: {
+        defaultValue: 0
     },
     groups: function () {
         return [

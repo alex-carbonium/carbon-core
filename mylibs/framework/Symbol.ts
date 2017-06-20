@@ -6,7 +6,7 @@ import { Overflow, Types } from "./Defs";
 import Selection from "framework/SelectionModel";
 import DataNode from "framework/DataNode";
 import ObjectFactory from "framework/ObjectFactory";
-import { ChangeMode, IArtboard, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp, IUIElement, IUIElementProps, IText } from "carbon-core";
+import { ChangeMode, IArtboard, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp, IUIElement, IUIElementProps, IText, UIElementFlags } from "carbon-core";
 import { createUUID } from "../util";
 import Isolate from "../commands/Isolate";
 import Environment from "../environment";
@@ -25,9 +25,6 @@ interface ICustomPropertyDefinition {
     controlId: string;
     propertyName: string;
 }
-
-export const TextMarker = "=text";
-export const BackgroundMarker = "=background";
 
 export default class Symbol extends Container implements ISymbol, IPrimitiveRoot {
     props: ISymbolProps;
@@ -262,7 +259,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     }
 
     findSourceArtboard(app: IApp): IArtboard | null {
-        var page = DataNode.getImmediateChildById(App.Current, this.props.source.pageId);
+        var page = DataNode.getImmediateChildById(app, this.props.source.pageId);
         if (page) {
             return DataNode.getImmediateChildById(page, this.props.source.artboardId, true);
         }
@@ -274,11 +271,11 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     }
 
     findBackgrounds(): IUIElement[] {
-        return this.findAllNodesDepthFirst(x => x.name() === BackgroundMarker);
+        return this.findAllNodesDepthFirst(x => x.hasFlags(UIElementFlags.SymbolBackground));
     }
 
     findTexts(): IText[] {
-        return this.findAllNodesDepthFirst(x => x.name() === TextMarker);
+        return this.findAllNodesDepthFirst(x => x.hasFlags(UIElementFlags.SymbolText));
     }
 
     arrange(resizeEvent?, mode?) {
@@ -474,8 +471,8 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         var newProps = {};
         var fillStroke = null;
         var fontProps = null;
-        var isBackground = element.name() === BackgroundMarker;
-        var isText = element.name() === TextMarker;
+        var isBackground = element.hasFlags(UIElementFlags.SymbolBackground);
+        var isText = element.hasFlags(UIElementFlags.SymbolText);
 
         for (var i = 0; i < propNames.length; ++i) {
             var propName = propNames[i];

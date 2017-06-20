@@ -38,7 +38,6 @@ class DraggingElement extends TransformationElement {
         this._currentPosition = new Point(0, 0);
 
         this.translationMatrix = Matrix.create();
-        var parent = elementOrComposite.first().parent();
     }
 
     wrapSingleChild() {

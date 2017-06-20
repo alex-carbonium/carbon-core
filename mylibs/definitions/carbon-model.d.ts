@@ -37,6 +37,7 @@ declare module "carbon-model" {
         br: IRect;
         visible: boolean;
         constraints: IConstraints;
+        flags: UIElementFlags;
     }
 
     export interface IDecoratable {
@@ -53,6 +54,12 @@ declare module "carbon-model" {
         mousedown(event: IMouseEventData, keys: IKeyboardState);
         dblclick(event: IMouseEventData, scale: number);
         click(event: IMouseEventData);
+    }
+
+    export const enum UIElementFlags {
+        None = 0,
+        SymbolBackground = 1,
+        SymbolText = 1 << 1
     }
 
     export interface IUIElement<TProps extends IUIElementProps = IUIElementProps> extends IDataNode<TProps>, IMouseEventHandler, IDecoratable {
@@ -100,6 +107,9 @@ declare module "carbon-model" {
         height(): number;
         angle(): number;
         zOrder(): number;
+        hasFlags(flags: UIElementFlags): boolean;
+        addFlags(flags: UIElementFlags): void;
+        removeFlags(flags: UIElementFlags): void;
 
         locked(value?: boolean): boolean;
 

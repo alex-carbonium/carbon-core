@@ -34,6 +34,16 @@ class NullContainer extends DataNode implements IContainer {
     dblclick(event: IMouseEventData, scale: number) { }
     click(event: IMouseEventData) { }
 
+    hasFlags(){
+        return false;
+    }
+    addFlags() {
+    }
+    removeFlags() {
+    }
+    sourceId() {
+        return "";
+    }
 
     boundaryRect() {
         return Rect.Zero;

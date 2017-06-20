@@ -46,6 +46,8 @@ declare module "carbon-model"{
 
         draw(context, environment);
         drawSelf(context, w, h, environment);
+        //TODO: think how not to expose this on UIElement
+        sourceId(value?: string): string;
 
         runtimeProps: any;
     }

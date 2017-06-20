@@ -20,7 +20,7 @@ import Invalidate from "../../../framework/Invalidate";
 import Environment from "../../../environment";
 import { getAverageLuminance } from "../../../math/color";
 import Rect from "../../../math/rect";
-import { ChangeMode, IMouseEventData, IElementEventData, VerticalConstraint, HorizontalConstraint, TextAutoWidth } from "carbon-core";
+import { ChangeMode, IMouseEventData, IElementEventData, VerticalConstraint, HorizontalConstraint, TextAutoWidth, IDisposable } from "carbon-core";
 import UserSettings from "../../../UserSettings";
 import Point from "../../../math/point";
 
@@ -28,6 +28,7 @@ const CursorInvertThreshold = .4;
 
 export default class TextTool extends Tool {
     [name: string]: any;
+    private globalTokens: IDisposable[] = [];
 
     constructor(app) {
         super(ViewTool.Text);
@@ -51,8 +52,9 @@ export default class TextTool extends Tool {
         this._dragController.onDragging = this.onDragging;
         this._dragController.onStopped = this.onDragStopped;
 
-        this._dblclickEventToken = Environment.controller.onElementDblClicked.bind(this, this.onDblClick);
-        this._editTextToken = this._app.actionManager.subscribe("enter", this.onEditTextAction);
+        this.globalTokens.push(Environment.controller.dblclickEvent.bind(this, this.onDblClickEvent));
+        this.globalTokens.push(Environment.controller.onElementDblClicked.bind(this, this.onDblClickElement));
+        this.globalTokens.push(this._app.actionManager.subscribe("enter", this.onEditTextAction));
 
         this._onAttached = null;
     }
@@ -86,16 +88,16 @@ export default class TextTool extends Tool {
             this._drawBinding = null;
         }
         Cursor.removeGlobalCursor();
-        Selection.onElementSelected.unbind(this, this.onElementSelected);
-        this._dragController.unbind();
-        if (this._editor) {
-            Selection.makeSelection([this._editedElement]);
-            this._editor.deactivate(false);
-        }
 
         if (this._onElementSelectedToken) {
             this._onElementSelectedToken.dispose();
             this._onElementSelectedToken = null;
+        }
+
+        this._dragController.unbind();
+        if (this._editor) {
+            Selection.makeSelection([this._editedElement]);
+            this._editor.deactivate(false);
         }
 
         this._backgroundCache = null;
@@ -105,15 +107,8 @@ export default class TextTool extends Tool {
     }
 
     dispose() {
-        if (this._dblclickEventToken) {
-            this._dblclickEventToken.dispose();
-            this._dblclickEventToken = null;
-        }
-
-        if (this._editTextToken) {
-            this._editTextToken.dispose();
-            this._editTextToken = null;
-        }
+        this.globalTokens.forEach(x => x.dispose());
+        this.globalTokens.length = 0;
     }
 
     onElementSelected(selection) {
@@ -223,20 +218,22 @@ export default class TextTool extends Tool {
         }
         e.handled = true;
     };
-    onDblClick = (e: IElementEventData) => {
+    //occurs early to handle the element which is currently edited
+    onDblClickEvent = (e: IMouseEventData) => {
         if (this._hittingEdited(e)) {
             this._editor.mouseDown(e);
             this._editor.mouseUp(e);
             this._editor.mouseDblClick(e);
             e.handled = true;
         }
-        else {
-            var hit = e.element;
-            if (hit instanceof Text && this._app.currentTool !== ViewTool.Text) {
-                this._onAttached = () => { this.beginEdit(hit, e); };
-                this._app.actionManager.invoke("textTool");
-                e.handled = true;
-            }
+    }
+    //occurs in the end to start editing dblclicked element
+    onDblClickElement = (e: IElementEventData) => {
+        var hit = e.element;
+        if (hit instanceof Text && this._app.currentTool !== ViewTool.Text) {
+            this._onAttached = () => { this.beginEdit(hit, e); };
+            this._app.actionManager.invoke("textTool");
+            e.handled = true;
         }
     };
 
@@ -416,7 +413,9 @@ export default class TextTool extends Tool {
             this._detaching = true;
             setTimeout(() => this._app.resetCurrentTool());
         }
-        Environment.controller.inlineEditModeChanged.raise(false, null);
+        if (!next) {
+            Environment.controller.inlineEditModeChanged.raise(false, null);
+        }
     }
     _updateOriginal() {
         var props = Object.assign({}, this._editClone.selectLayoutProps(true));
