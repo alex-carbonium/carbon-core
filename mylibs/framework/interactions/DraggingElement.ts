@@ -121,7 +121,7 @@ class DraggingElement extends TransformationElement {
 
         if (newParent !== element.parent()) {
             newParent.insert(element, index);
-        } else {
+        } else if(newParent.allowRearrange() && element.zOrder() !== index) {
             newParent.changePosition(element, index);
         }
 
