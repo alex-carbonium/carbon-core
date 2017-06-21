@@ -1,6 +1,7 @@
 import RelayoutQueue from "../relayout/RelayoutQueue";
 import Environment from "../../environment";
 import { IPrimitive, PrimitiveType, ViewState } from "carbon-core";
+import { createUUID } from "../../util";
 
 export default class Command {
     constructor(public primitives: IPrimitive[], public rollbacks: IPrimitive[]) {
@@ -14,8 +15,13 @@ export default class Command {
         return this.primitives[0].type !== PrimitiveType.Selection;
     }
 
-    execute(){
-        RelayoutQueue.enqueueAll(this.primitives);
+    execute(redo?: boolean){
+        var primitives = this.primitives;
+        if (redo) {
+            primitives = this.primitives.map(x => Object.assign({}, x));
+            primitives.forEach(x => x.id = createUUID());
+        }
+        RelayoutQueue.enqueueAll(primitives);
     }
 
     rollback(){

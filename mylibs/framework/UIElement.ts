@@ -944,6 +944,13 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
         return root;
     }
+    protected findNextRoot(): IPrimitiveRoot & UIElement {
+        var parent = this.parent();
+        if (!parent) {
+            return null;
+        }
+        return parent.primitiveRoot();
+    }
 
     primitivePath() {
         let path = this.primitiveRoot().primitivePath().slice();

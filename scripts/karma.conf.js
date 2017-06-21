@@ -4,7 +4,8 @@ var webpack = require("webpack");
 var webpackConfig = require('./make-core-config')({
     devServer: false,
     host: "",
-    devtool: "#inline-source-map"
+    //devtool: "#inline-source-map"
+    devtool: "eval"
 });
 
 var testfolder = path.join(path.dirname(fs.realpathSync(__filename)), '..');

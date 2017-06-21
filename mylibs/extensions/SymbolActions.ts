@@ -80,11 +80,11 @@ export default class SymbolActions extends CarbonExtension {
     }
 
     createSymbolFromSelection = (selection: ISelection) => {
-        let  elements = selection.elements;
-        let  sorted: IUIElement[] = elements.slice().sort((a, b) => a.zOrder() - b.zOrder());
-        let  element: IUIElement = elements[0];
-        let  parent: IContainer = element.parent();
-        let  group = new GroupContainer();
+        let elements = selection.elements;
+        let sorted: IUIElement[] = elements.slice().sort((a, b) => a.zOrder() - b.zOrder());
+        let element: IUIElement = elements[0];
+        let parent: IContainer = element.parent();
+        let group = new GroupContainer();
 
         selection.makeSelection([]);
         parent.add(group, ChangeMode.Self);
@@ -95,15 +95,15 @@ export default class SymbolActions extends CarbonExtension {
         }
         group.performArrange(null, ChangeMode.Self);
 
-        let  boundingBox: IRect = group.getBoundingBoxGlobal();
-        let  globalMatrix = group.globalViewMatrixInverted();
+        let boundingBox: IRect = group.getBoundingBoxGlobal();
+        let globalMatrix = group.globalViewMatrixInverted();
 
         // create artboard of the same size
-        let  page = App.Current.activePage;
-        let  position = page.getNextAvailiablePosition(boundingBox.width, boundingBox.height);
-        let  matrix = Matrix.createTranslationMatrix(position.x, position.y);
+        let page = App.Current.activePage;
+        let position = page.getNextAvailiablePosition(boundingBox.width, boundingBox.height);
+        let matrix = Matrix.createTranslationMatrix(position.x, position.y);
 
-        let  artboard = new Artboard();
+        let artboard = new Artboard();
         page.add(artboard);
 
         artboard.setProps({
@@ -118,7 +118,7 @@ export default class SymbolActions extends CarbonExtension {
         // find where to place artboard
         for (let i = 0, l = sorted.length; i < l; ++i) {
             let e: any = sorted[i];
-            let  vm = group.children[i].viewMatrix();
+            let vm = group.children[i].viewMatrix();
             e.setTransform(vm);
             e.setProps({
                 constraints: Constraints.StretchAll
@@ -126,9 +126,9 @@ export default class SymbolActions extends CarbonExtension {
             artboard.insert(e, i);
         }
 
-        var artboardControl = new Symbol();
-        parent.add(artboardControl);
-        artboardControl.setProps({
+        var symbol = new Symbol();
+        parent.add(symbol);
+        symbol.setProps({
             br: group.props.br,
             m: group.props.m,
             source: {
@@ -137,23 +137,23 @@ export default class SymbolActions extends CarbonExtension {
             },
             name: artboard.name()
         });
-        App.Current.activePage.nameProvider.assignNewName(artboardControl);
+        App.Current.activePage.nameProvider.assignNewName(symbol);
 
         parent.remove(group, ChangeMode.Self);
 
-        selection.makeSelection([artboardControl]);
-        return artboardControl;
+        selection.makeSelection([symbol]);
+        return symbol;
     }
 
     editMasterSymbol = (selection: ISelection) => {
         var symbol = selection.elements[0] as Symbol;
 
-        let  artboard = symbol.findSourceArtboard(this.app);
+        let artboard = symbol.findSourceArtboard(this.app);
         if (!artboard) {
             return;
         }
 
-        let  page = this.app.pages.find(x => x.id() === symbol.props.source.pageId);
+        let page = this.app.pages.find(x => x.id() === symbol.props.source.pageId);
         this.app.setActivePage(page);
         this.workspace.view.ensureVisible(artboard);
         selection.makeSelection([artboard]);

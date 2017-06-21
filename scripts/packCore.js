@@ -85,6 +85,7 @@ function fullPath(relativePath){
 var config = require("./make-core-config")(Object.assign({
     minimize: true,
     debug: false,
+    trace: false,
     devServer: false,
     host: "",
     port: "",
