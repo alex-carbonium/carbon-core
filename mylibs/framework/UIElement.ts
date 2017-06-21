@@ -1472,9 +1472,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         each([this], callback);
     }
     clone() {
-        let clone = ObjectFactory.fromType(this.t, this.cloneProps());
-        clone.id(createUUID());
-        return clone;
+        let newProps = this.cloneProps();
+        newProps.id = createUUID();
+        return ObjectFactory.fromType(this.t, newProps);
     }
     sourceId(id?) {
         if (arguments.length > 0) {
