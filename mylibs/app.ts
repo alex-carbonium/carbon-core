@@ -147,6 +147,7 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
         this.modeChanged = EventHelper.createEvent();
 
         this.resourceChanged = EventHelper.createEvent();
+        this.resourceDeleted = EventHelper.createEvent();
 
         this.changed = EventHelper.createEvent();
         this.deferredChange = EventHelper.createEvent();

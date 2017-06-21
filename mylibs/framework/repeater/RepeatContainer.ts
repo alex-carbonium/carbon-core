@@ -47,24 +47,17 @@ export default class RepeatContainer extends Container implements IRepeatContain
         return false;
     }
     primitivePath() {
-        var realRoot = this._realPrimitiveRoot();
-        if (!realRoot) {
+        var nextRoot = this.findNextRoot();
+        if (!nextRoot) {
             return [];
         }
         var path = this.runtimeProps.primitivePath;
         if (!path) {
-            path = realRoot.primitivePath().slice();
+            path = nextRoot.primitivePath().slice();
             path[path.length - 1] = this.id();
             this.runtimeProps.primitivePath = path;
         }
         return path;
-    }
-    _realPrimitiveRoot() {
-        var parent = this.parent();
-        if (!parent) {
-            return null;
-        }
-        return parent.primitiveRoot();
     }
 
     getAffectedDisplayProperties(changes): string[] {
@@ -133,7 +126,7 @@ export default class RepeatContainer extends Container implements IRepeatContain
         if (mode === ChangeMode.Self) {
             return;
         }
-        var realRoot = this._realPrimitiveRoot();
+        var realRoot = this.findNextRoot();
         if (!realRoot) {
             return;
         }
@@ -167,7 +160,7 @@ export default class RepeatContainer extends Container implements IRepeatContain
         if (mode === ChangeMode.Self) {
             return;
         }
-        var realRoot = this._realPrimitiveRoot();
+        var realRoot = this.findNextRoot();
         if (!realRoot) {
             return;
         }
@@ -192,7 +185,7 @@ export default class RepeatContainer extends Container implements IRepeatContain
         if (mode === ChangeMode.Self) {
             return;
         }
-        var realRoot = this._realPrimitiveRoot();
+        var realRoot = this.findNextRoot();
         if (!realRoot) {
             return;
         }
@@ -217,7 +210,7 @@ export default class RepeatContainer extends Container implements IRepeatContain
         if (mode === ChangeMode.Self) {
             return;
         }
-        var realRoot = this._realPrimitiveRoot();
+        var realRoot = this.findNextRoot();
         if (!realRoot) {
             return;
         }

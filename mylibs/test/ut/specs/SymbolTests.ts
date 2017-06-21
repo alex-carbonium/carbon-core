@@ -4,6 +4,7 @@ import TestUtil from "../TestUtil";
 import ContextStub from "../ContextStub";
 import Artboard from "framework/Artboard";
 import Constraints from "../../../framework/Constraints";
+import CommandManager from "../../../framework/commands/CommandManager";
 import Brush from "../../../framework/Brush";
 import Font from "../../../framework/Font";
 import GroupContainer from "../../../framework/GroupContainer";
@@ -13,7 +14,7 @@ import Rect from "../../../math/rect";
 import Point from "../../../math/point";
 import Symbol from "framework/Symbol";
 import Environment from "environment";
-import {assert} from "chai";
+import { assert } from "chai";
 
 describe("Symbol tests", function () {
     beforeEach(function (done) {
@@ -175,6 +176,40 @@ describe("Symbol tests", function () {
             assert.equal(symbol.props.fill.value, "red", "Symbol must preserve fill");
         });
 
+        it("Should undo custom fill/stroke (on artboard)", function () {
+            testUndo.call(this, this.app.activePage.getActiveArtboard());
+        });
+        it("Shoud undo custom fill/stroke (on page)", function () {
+            testUndo.call(this, this.app.activePage);
+        });
+        function testUndo(container) {
+            // arrange
+            var child = new UIElement();
+            child.setProps({ fill: Brush.createFromColor("red") });
+            container.add(child);
+
+            Selection.makeSelection([child]);
+            var actions = new SymbolActions(this.app, Environment);
+            var symbol = actions.createSymbolFromSelection(Selection);
+
+            Selection.makeSelection([child]);
+            actions.markAsBackground(Selection);
+            this.app.relayout();
+            symbol.draw(new ContextStub());
+
+            // act
+            symbol.setProps({ fill: Brush.createFromColor("green") });
+            this.app.relayout();
+
+            CommandManager.undoPrevious();
+            this.app.relayout();
+
+            // assert
+            assert.equal(symbol.props.fill.value, "red", "Symbol must undo fill");
+            var clone = symbol.findClone(child.id());
+            assert.equal(clone.props.fill.value, "red", "Child must undo fill");
+        }
+
         it("Should refresh fill/stroke if not overridden", function () {
             // arrange
             var child = new UIElement();
@@ -266,7 +301,7 @@ describe("Symbol tests", function () {
             // arrange
             var text = new Text();
             text.content(["hello"]);
-            text.font(Font.createFromObject({size: 20}));
+            text.font(Font.createFromObject({ size: 20 }));
 
             Selection.makeSelection([text]);
 
@@ -306,7 +341,7 @@ describe("Symbol tests", function () {
 
             // act
             var clone1 = symbol.findClone(child1.id());
-            clone1.setProps({ font: Font.createFromObject({"color": "green"}) });
+            clone1.setProps({ font: Font.createFromObject({ "color": "green" }) });
             this.app.relayout();
             symbol.draw(new ContextStub());
 
@@ -322,7 +357,7 @@ describe("Symbol tests", function () {
             // arrange
             var text = new Text();
             text.content(["hello"]);
-            text.font(Font.createFromObject({size: 20}));
+            text.font(Font.createFromObject({ size: 20 }));
 
             Selection.makeSelection([text]);
 
@@ -336,8 +371,8 @@ describe("Symbol tests", function () {
             symbol.draw(new ContextStub());
 
             // act
-            symbol.setProps({font: Font.createFromObject({color: "red"})});
-            text.font(Font.createFromObject({size: 30}));
+            symbol.setProps({ font: Font.createFromObject({ color: "red" }) });
+            text.font(Font.createFromObject({ size: 30 }));
 
             this.app.relayout();
             symbol.draw(new ContextStub());

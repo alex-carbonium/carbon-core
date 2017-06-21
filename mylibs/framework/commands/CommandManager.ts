@@ -47,7 +47,7 @@ class CommandManager {
         }
         debug("command redo");
         var cmd = this.stack[++this.index];
-        cmd.execute();
+        cmd.execute(true);
         this._setProperties(true, this.index < this.stack.length - 1);
     }
 

@@ -235,7 +235,8 @@ declare module "carbon-basics" {
         Symbol = 1,
         Template = 2,
         Frame = 3,
-        Palette = 4
+        Palette = 4,
+        IconSet = 5
     }
 
     export interface IConstraints {

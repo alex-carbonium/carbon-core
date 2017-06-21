@@ -446,6 +446,10 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             }
         }
 
+        if(oldProps.type !== props.type && oldProps.type) {
+            App.Current.resourceDeleted.raise(oldProps.type, this);
+        }
+
         if (oldProps.name !== undefined) {
             PropertyMetadata.removeNamedType('user:' + oldProps.name)
         }
@@ -466,7 +470,6 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
                     parent.makeToolboxConfigDirty(true);
                 }
             }
-
         }
 
         if (props.frame === null) {

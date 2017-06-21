@@ -100,7 +100,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
             this.performArrange({ oldRect: artboard.boundaryRect(), newRect: br }, ChangeMode.Self);
         }
 
-        this._updateCustomProperties();
+        this.updateCustomProperties(this.props);
 
         this.runtimeProps.artboardVersion = artboard.runtimeProps.version;
 
@@ -223,39 +223,41 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
             }
 
             this._initFromArtboard();
+            return;
         }
-        else {
-            if (props.stateId !== undefined) {
-                this._initFromArtboard();
-            }
-            else {
-                if (mode !== ChangeMode.Self) {
-                    var changes = null;
-                    if (props.fill !== oldProps.fill) {
-                        let newName = "self:fill";
-                        changes = {};
-                        changes["custom:" + newName] = props.fill;
-                        changes["owt:" + newName] = true;
-                    }
-                    if (props.stroke !== oldProps.stroke) {
-                        let newName = "self:stroke";
-                        changes = changes || {};
-                        changes["custom:" + newName] = props.stroke;
-                        changes["owt:" + newName] = true;
-                    }
-                    if (props.font !== oldProps.font) {
-                        let newName = "self:font";
-                        changes = changes || {};
-                        changes["custom:" + newName] = props.font;
-                        changes["owt:" + newName] = true;
-                    }
-                    if (changes) {
-                        this.setProps(changes);
-                    }
-                }
-                this._updateCustomProperties();
-            }
+
+        if (props.stateId !== undefined) {
+            this._initFromArtboard();
+            return;
         }
+
+        if (mode !== ChangeMode.Self) {
+            var changes = null;
+            if (props.fill !== oldProps.fill) {
+                let newName = "self:fill";
+                changes = {};
+                changes["custom:" + newName] = props.fill;
+                changes["owt:" + newName] = true;
+            }
+            if (props.stroke !== oldProps.stroke) {
+                let newName = "self:stroke";
+                changes = changes || {};
+                changes["custom:" + newName] = props.stroke;
+                changes["owt:" + newName] = true;
+            }
+            if (props.font !== oldProps.font) {
+                let newName = "self:font";
+                changes = changes || {};
+                changes["custom:" + newName] = props.font;
+                changes["owt:" + newName] = true;
+            }
+            if (changes) {
+                this.setProps(changes);
+            }
+            this.updateCustomProperties(props);
+        }
+
+        this.updateMarkedElements();
     }
 
     findSourceArtboard(app: IApp): IArtboard | null {
@@ -324,8 +326,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         return this.getElementById(this.id() + def.controlId);
     }
 
-    _updateCustomProperties() {
-        var props = this.props;
+    private updateCustomProperties(props) {
         for (var propName in props) {
             if (propName.startsWith('custom:')) {
                 var prop = this._getCustomPropertyDefinition(propName);
@@ -333,8 +334,8 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
                 var value = props[propName];
                 if (value === undefined) { // custom property was deleted, i.e by undo or reset property action
-                    var sourceElement = this._artboard.getElementById(element.sourceId());
-                    delete props[propName];
+                    var sourceElement = element === this ? this._artboard : this._artboard.getElementById(element.sourceId());
+                    delete this.props[propName];
                     value = sourceElement.props[prop.propertyName];
                 }
 
@@ -342,17 +343,21 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
                     element.prepareAndSetProps({ [prop.propertyName]: value }, ChangeMode.Self);
                 }
             } else if (props[propName] === undefined) {
-                delete props[propName];
+                delete this.props[propName];
             }
         }
 
+        this.updateMarkedElements();
+    }
+
+    private updateMarkedElements() {
         var backgrounds = this.findBackgrounds();
         if (backgrounds.length) {
-            backgrounds.forEach(x => x.setProps({ fill: this.fill(), stroke: this.stroke() }));
+            backgrounds.forEach(x => x.prepareAndSetProps({ fill: this.fill(), stroke: this.stroke() }, ChangeMode.Self));
         }
         var texts = this.findTexts();
         if (texts.length) {
-            texts.forEach(x => x.setProps({ font: this.props.font }));
+            texts.forEach(x => x.prepareAndSetProps({ font: this.props.font }, ChangeMode.Self));
         }
     }
 
@@ -388,41 +393,18 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         }
         return this;
     }
-
     primitivePath() {
-        var parent = this.parent();
-        if (!parent || !parent.primitiveRoot()) {
-            return null;
+        var nextRoot = this.findNextRoot();
+        if (!nextRoot) {
+            return [];
         }
         var path = this.runtimeProps.primitivePath;
         if (!path) {
-            path = parent.primitivePath().slice();
+            path = nextRoot.primitivePath().slice();
             path[path.length - 1] = this.id();
-            path.push(this.id());
             this.runtimeProps.primitivePath = path;
         }
         return path;
-    }
-
-    primitiveRootKey() {
-        var parent = this.parent();
-        if (!parent || !parent.primitiveRoot()) {
-            return null;
-        }
-        var s = this.runtimeProps.primitiveRootKey;
-        if (!s) {
-            s = parent.id() + this.id();
-            this.runtimeProps.primitiveRootKey = s;
-        }
-        return s;
-    }
-
-    relayout() {
-
-    }
-
-    relayoutCompleted() {
-
     }
 
     applySizeScaling(s, o, options, changeMode: ChangeMode = ChangeMode.Model) {
@@ -453,9 +435,18 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         }
     }
 
+    trackInserted() {
+        delete this.runtimeProps.primitivePath;
+        super.trackInserted.apply(this, arguments);
+    }
+    trackDeleted(parent) {
+        delete this.runtimeProps.primitivePath;
+        super.trackDeleted.apply(this, arguments);
+    }
+
     registerSetProps(element, props, oldProps, mode) {
         if (element.id() === this.id()) {
-            var realRoot = this._realPrimitiveRoot();
+            var realRoot = this.findNextRoot();
             if (!realRoot) {
                 return;
             }
@@ -522,12 +513,8 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         return false;
     }
 
-    _realPrimitiveRoot() {
-        var parent = this.parent();
-        if (!parent) {
-            return null;
-        }
-        return parent.primitiveRoot();
+    isFinalRoot() {
+        return false;
     }
 
     draw(context) {
