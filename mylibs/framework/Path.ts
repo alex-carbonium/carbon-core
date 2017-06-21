@@ -1091,6 +1091,7 @@ class Path extends Shape {
         let path = d.match(/[mzlhvcsqta][^mzlhvcsqta]*/gi);
         let svgCommands = this._parsePath(path);
         this._renderSvgCommands(svgCommands, matrix);
+        this.setProps({m:matrix});
         this.adjustBoundaries();
         this.save();
     }
@@ -1245,7 +1246,7 @@ class Path extends Shape {
                 case 'l': // lineto, relative
                     x += current[1] * scaleX;
                     y += current[2] * scaleY;
-                    this.lineToPoint(matrix.transformPoint2(x + l, y + t));
+                    this.lineToPoint({x:x + l,y:y + t});
                     controlX = null;
                     controlY = null;
                     break;
@@ -1253,35 +1254,35 @@ class Path extends Shape {
                 case 'L': // lineto, absolute
                     x = current[1] * scaleX;
                     y = current[2] * scaleY;
-                    this.lineToPoint(matrix.transformPoint2(x + l, y + t));
+                    this.lineToPoint({x:x + l, y:y + t});
                     controlX = null;
                     controlY = null;
                     break;
 
                 case 'h': // horizontal lineto, relative
                     x += current[1] * scaleX;
-                    this.lineToPoint(matrix.transformPoint2(x + l, y + t));
+                    this.lineToPoint({x:x + l, y:y + t});
                     controlX = null;
                     controlY = null;
                     break;
 
                 case 'H': // horizontal lineto, absolute
                     x = current[1] * scaleX;
-                    this.lineToPoint(matrix.transformPoint2(x + l, y + t));
+                    this.lineToPoint({x:x + l, y:y + t});
                     controlX = null;
                     controlY = null;
                     break;
 
                 case 'v': // vertical lineto, relative
                     y += current[1] * scaleY;
-                    this.lineToPoint(matrix.transformPoint2(x + l, y + t));
+                    this.lineToPoint({x:x + l, y:y + t});
                     controlX = null;
                     controlY = null;
                     break;
 
                 case 'V': // verical lineto, absolute
                     y = current[1] * scaleY;
-                    this.lineToPoint(matrix.transformPoint2(x + l, y + t));
+                    this.lineToPoint({x:x + l, y:y + t});
                     controlX = null;
                     controlY = null;
                     break;
@@ -1290,7 +1291,7 @@ class Path extends Shape {
                     x += current[1] * scaleX;
                     y += current[2] * scaleY;
                     // draw a line if previous command was moveTo as well (otherwise, it will have no effect)
-                    this[(previous && (previous[0] === 'm' || previous[0] === 'M')) ? 'lineToPoint' : 'moveToPoint'](matrix.transformPoint2(x + l, y + t));
+                    this[(previous && (previous[0] === 'm' || previous[0] === 'M')) ? 'lineToPoint' : 'moveToPoint']({x:x + l, y:y + t});
                     controlX = null;
                     controlY = null;
                     break;
@@ -1299,7 +1300,7 @@ class Path extends Shape {
                     x = current[1] * scaleX;
                     y = current[2] * scaleY;
                     // draw a line if previous command was moveTo as well (otherwise, it will have no effect)
-                    this[(previous && (previous[0] === 'm' || previous[0] === 'M')) ? 'lineToPoint' : 'moveToPoint'](matrix.transformPoint2(x + l, y + t));
+                    this[(previous && (previous[0] === 'm' || previous[0] === 'M')) ? 'lineToPoint' : 'moveToPoint']({x:x + l, y:y + t});
                     controlX = null;
                     controlY = null;
                     break;
@@ -1310,12 +1311,12 @@ class Path extends Shape {
                     controlX = x + current[3] * scaleX;
                     controlY = y + current[4] * scaleY;
                     this.curveToPoint(
-                        matrix.transformPoint2(tempX + l,
-                            tempY + t),
-                        matrix.transformPoint2(x + current[1] * scaleX + l, // x1
-                            y + current[2] * scaleY + t), // y1
-                        matrix.transformPoint2(controlX + l, // x2
-                            controlY + t)
+                        {x:tempX + l,
+                            y:tempY + t},
+                        {x:x + current[1] * scaleX + l, // x1
+                            y:y + current[2] * scaleY + t}, // y1
+                        {x:controlX + l, // x2
+                            y:controlY + t}
                     );
                     x = tempX;
                     y = tempY;
@@ -1327,9 +1328,9 @@ class Path extends Shape {
                     controlX = current[3] * scaleX;
                     controlY = current[4] * scaleY;
                     this.curveToPoint(
-                        matrix.transformPoint2(x + l, y + t),
-                        matrix.transformPoint2(current[1] * scaleX + l, current[2] * scaleY + t),
-                        matrix.transformPoint2(controlX + l, controlY + t)
+                        {x:x + l, y:y + t},
+                        {x:current[1] * scaleX + l, y:current[2] * scaleY + t},
+                        {x:controlX + l, y:controlY + t}
                     );
                     break;
 
@@ -1344,9 +1345,9 @@ class Path extends Shape {
                     controlY = controlY ? (2 * y - controlY) : y;
 
                     this.curveToPoint(
-                        matrix.transformPoint2(tempX + l, tempY + t),
-                        matrix.transformPoint2(controlX + l, controlY + t),
-                        matrix.transformPoint2(x + current[1] * scaleX + l, y + current[2] * scaleY + t)
+                        {x:tempX + l, y:tempY + t},
+                        {x:controlX + l, y:controlY + t},
+                        {x:x + current[1] * scaleX + l, y:y + current[2] * scaleY + t}
                     );
                     // set control point to 2nd one of this command
                     // "... the first control point is assumed to be the reflection of the second control point on the previous command relative to the current point."
@@ -1365,9 +1366,9 @@ class Path extends Shape {
                     controlY = controlY ? (2 * y - controlY) : y;
 
                     this.curveToPoint(
-                        matrix.transformPoint2(tempX + l, tempY + t),
-                        matrix.transformPoint2(controlX + l, controlY + t),
-                        matrix.transformPoint2(current[1] * scaleX + l, current[2] * scaleY + t)
+                        {x:tempX + l, y:tempY + t},
+                        {x:controlX + l, y:controlY + t},
+                        {x:current[1] * scaleX + l, y:current[2] * scaleY + t}
                     );
                     x = tempX;
                     y = tempY;
@@ -1388,8 +1389,8 @@ class Path extends Shape {
                     controlY = y + current[2] * scaleY;
 
                     this.quadraticCurveToPoint(
-                        matrix.transformPoint2(controlX + l, controlY + t),
-                        matrix.transformPoint2(tempX + l, tempY + t)
+                        {x:controlX + l, y:controlY + t},
+                        {x:tempX + l, y:tempY + t}
                     );
                     x = tempX;
                     y = tempY;
@@ -1400,8 +1401,8 @@ class Path extends Shape {
                     tempY = current[4] * scaleY;
 
                     this.quadraticCurveToPoint(
-                        matrix.transformPoint2(current[1] * scaleX + l, current[2] * scaleY + t),
-                        matrix.transformPoint2(tempX + l, tempY + t)
+                        {x:current[1] * scaleX + l, y:current[2] * scaleY + t},
+                        {x:tempX + l, y:tempY + t}
                     );
                     x = tempX;
                     y = tempY;
@@ -1437,8 +1438,8 @@ class Path extends Shape {
                     tempControlY = controlY;
 
                     this.quadraticCurveToPoint(
-                        matrix.transformPoint2(controlX + l, controlY + t),
-                        matrix.transformPoint2(tempX + l, tempY + t)
+                        {x:controlX + l, y:controlY + t},
+                        {x:tempX + l, y:tempY + t}
                     );
                     x = tempX;
                     y = tempY;
@@ -1454,8 +1455,8 @@ class Path extends Shape {
                     controlX = 2 * x - controlX;
                     controlY = 2 * y - controlY;
                     this.quadraticCurveToPoint(
-                        matrix.transformPoint2(controlX + l, controlY + t),
-                        matrix.transformPoint2(tempX + l, tempY + t)
+                        {x:controlX + l, y:controlY + t},
+                        {x:tempX + l, y:tempY + t}
                     );
                     x = tempX;
                     y = tempY;
@@ -1471,7 +1472,7 @@ class Path extends Shape {
                         current[5],
                         current[6] * scaleX + x + l,
                         current[7] * scaleY + y + t
-                    ], matrix);
+                    ], Matrix.Identity);
                     x += current[6] * scaleX;
                     y += current[7] * scaleY;
                     controlX = null;
@@ -1488,7 +1489,7 @@ class Path extends Shape {
                         current[5],
                         current[6] * scaleX + l,
                         current[7] * scaleY + t
-                    ], matrix);
+                    ], Matrix.Identity);
                     x = current[6] * scaleX;
                     y = current[7] * scaleY;
                     controlX = null;
