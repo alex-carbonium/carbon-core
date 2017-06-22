@@ -17,7 +17,7 @@ import Environment from "environment";
 import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
-import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps } from "carbon-core";
+import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
 
 
@@ -740,6 +740,11 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             stateBoard.parent().remove(stateBoard);
         }
 
+        if (this.props.type === ArtboardType.Symbol) {
+            this.flattenRelatedSymbols(parent);
+            parent.makeToolboxConfigDirty(this.runtimeProps.refreshToolbox, this.id());
+        }
+
         super.trackDeleted.apply(this, arguments);
 
         parent.setActiveArtboard(null);
@@ -856,6 +861,21 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     onIsolationExited() {
+    }
+
+    private flattenRelatedSymbols(page) {
+        let pageId = page.id();
+        let artboardId = this.id();
+        let app = page.app;
+
+        app.applyVisitorDepthFirst(e => {
+            if (e.t === Types.Symbol) {
+                let symbol = e as ISymbol;
+                if (symbol.props.source.pageId === pageId && symbol.props.source.artboardId === artboardId) {
+                    symbol.flatten();
+                }
+            }
+        });
     }
 }
 Artboard.prototype.t = Types.Artboard;

@@ -6,7 +6,7 @@ import { Overflow, Types } from "./Defs";
 import Selection from "framework/SelectionModel";
 import DataNode from "framework/DataNode";
 import ObjectFactory from "framework/ObjectFactory";
-import { ChangeMode, IArtboard, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp, IUIElement, IUIElementProps, IText, UIElementFlags } from "carbon-core";
+import { ChangeMode, IArtboard, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp, IUIElement, IUIElementProps, IText, UIElementFlags, ResizeDimension } from "carbon-core";
 import { createUUID } from "../util";
 import Isolate from "../commands/Isolate";
 import Environment from "../environment";
@@ -29,6 +29,8 @@ interface ICustomPropertyDefinition {
 export default class Symbol extends Container implements ISymbol, IPrimitiveRoot {
     props: ISymbolProps;
     runtimeProps: ISymbolRuntimeProps;
+
+    private static flattening = false;
 
     constructor() {
         super();
@@ -173,7 +175,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
                 x.sourceId(x.id());
                 x.id(baseId + x.id())
                 x.canDrag(false);
-                x.resizeDimensions(0);
+                x.resizeDimensions(ResizeDimension.None);
             });
             this.add(clone, ChangeMode.Self);
         }
@@ -504,7 +506,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     }
 
     registerDelete(parent: Container, element: UIElement, index: number, mode: ChangeMode = ChangeMode.Model) {
-        if (mode === ChangeMode.Model) {
+        if (mode === ChangeMode.Model && !Symbol.flattening) {
             element.setProps({ visible: false }, mode);
         }
     }
@@ -577,6 +579,17 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
         //do not handle for text tool
         event.handled = false;
+    }
+
+    flatten() {
+        Symbol.flattening = true;
+        this.applyVisitor(x => {
+            x.removeFlags(UIElementFlags.SymbolBackground | UIElementFlags.SymbolText);
+            x.canDrag(true);
+            x.resizeDimensions(ResizeDimension.Both);
+        })
+        super.flatten();
+        Symbol.flattening = false;
     }
 }
 Symbol.prototype.t = Types.Symbol;

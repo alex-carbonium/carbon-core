@@ -468,7 +468,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
             let gm = e.globalViewMatrix();
             this.remove(e);
             parent.insert(e, index);
-            e.setTransform(parent.globalViewMatrixInverted().appended(gm));
+            e.setTransform(parent.globalMatrixToLocal(gm));
         }
 
         parent.remove(this);

@@ -23,6 +23,7 @@ import Rect from "../../../math/rect";
 import { ChangeMode, IMouseEventData, IElementEventData, VerticalConstraint, HorizontalConstraint, TextAutoWidth, IDisposable } from "carbon-core";
 import UserSettings from "../../../UserSettings";
 import Point from "../../../math/point";
+import Symbol from "../../../framework/Symbol";
 
 const CursorInvertThreshold = .4;
 
@@ -119,8 +120,8 @@ export default class TextTool extends Tool {
         }
     }
     onEditTextAction = () => {
-        if (this._canEditSelectedElement()) {
-            var text = Selection.selectComposite().elementAt(0);
+        let text = this.tryGetSupportedElement();
+        if (text) {
             if (this._app.currentTool !== ViewTool.Text) {
                 this._onAttached = () => { this.beginEdit(text); };
                 this._app.actionManager.invoke("textTool");
@@ -458,12 +459,21 @@ export default class TextTool extends Tool {
         }
         return this._editClone.hitTest(e, this._view.scale());
     }
-    _canEditSelectedElement = () => {
-        var selection = Selection.selectComposite();
-        if (selection.count() === 1 && selection.elementAt(0) instanceof Text) {
-            return true;
+    private tryGetSupportedElement() {
+        var selection = Selection.elements;
+        if (selection.length === 1) {
+            let element = selection[0];
+            if (element instanceof Text) {
+                return element;
+            }
+            if (element instanceof Symbol) {
+                var texts = element.findTexts();
+                if (texts.length) {
+                    return texts[0];
+                }
+            }
         }
-        return false;
+        return null;
     };
 
     _onSelectionChanged = () => {

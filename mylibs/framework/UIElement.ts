@@ -111,7 +111,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     hasFlags(flags: UIElementFlags): boolean {
-        return (this.props.flags & flags) === flags;
+        return (this.props.flags & flags) !== 0;
     }
     addFlags(flags: UIElementFlags) {
         this.setProps({ flags: this.props.flags | flags });
