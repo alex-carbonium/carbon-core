@@ -1,12 +1,13 @@
 import CarbonExtension from "./CarbonExtesion";
-import { IContributions, ContextBarPosition, IApp, ISelection, ChangeMode, IArtboardProps, ILayer, LayerTypes, IUIElement, IContainer, IRect, ArtboardType, IText, UIElementFlags, IArtboard } from "carbon-core";
+import { IContributions, ContextBarPosition, IApp, ISelection, ChangeMode, IArtboardProps, ILayer, LayerTypes, IUIElement, IContainer, IRect, ArtboardType, IText, UIElementFlags, IArtboard, IGroupContainer } from "carbon-core";
 import Constraints from "framework/Constraints";
 import Symbol from "../framework/Symbol";
 import Artboard from "../framework/Artboard";
 import Text from "../framework/text/Text";
-import GroupContainer from "../framework/GroupContainer";
+import GroupArrangeStrategy from "../framework/arrangeStrategy/GroupArrangeStrategy";
 import Matrix from "../math/matrix";
 import Rect from "../math/rect";
+import Container from "../framework/Container";
 
 export default class SymbolActions extends CarbonExtension {
     initialize(contributions: IContributions) {
@@ -84,7 +85,7 @@ export default class SymbolActions extends CarbonExtension {
         let sorted: IUIElement[] = elements.slice().sort((a, b) => a.zOrder() - b.zOrder());
         let element: IUIElement = elements[0];
         let parent: IContainer = element.parent();
-        let group = new GroupContainer();
+        let group = new MeasuringGroupContainer();
 
         selection.makeSelection([]);
         parent.add(group, ChangeMode.Self);
@@ -93,7 +94,7 @@ export default class SymbolActions extends CarbonExtension {
             let element = sorted[i];
             group.insert(element.clone(), i, ChangeMode.Self);
         }
-        group.performArrange(null, ChangeMode.Self);
+        GroupArrangeStrategy.arrange(group, null, ChangeMode.Self);
 
         let boundingBox: IRect = group.getBoundingBoxGlobal();
         let globalMatrix = group.globalViewMatrixInverted();
@@ -245,5 +246,14 @@ export default class SymbolActions extends CarbonExtension {
 
     private clearSymbolFlags(artboard: IArtboard, flags: UIElementFlags) {
         artboard.applyVisitor((x: IUIElement) => x.removeFlags(flags));
+    }
+}
+
+class MeasuringGroupContainer extends Container implements IGroupContainer {
+    translateChildren() {
+        return true;
+    }
+    wrapSingleChild() {
+        return false;
     }
 }

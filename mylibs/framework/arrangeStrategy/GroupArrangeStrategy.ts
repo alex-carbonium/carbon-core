@@ -12,13 +12,13 @@ var GroupArrangeStrategy = {
             return;
         }
 
-        // if (items.length === 1 && container.wrapSingleChild()) {
-        //     var props = items[0].selectLayoutProps(true);
-        //     props.m = container.parent().globalViewMatrixInverted().appended(props.m);
-        //     container.setProps(props, changeMode);
-        //     items[0].resetTransform(changeMode);
-        //     return;
-        // }
+        if (items.length === 1 && container.wrapSingleChild()) {
+            var props = items[0].selectLayoutProps(true);
+            props.m = container.parent().globalMatrixToLocal(props.m);
+            container.setProps(props, changeMode);
+            items[0].resetTransform(changeMode);
+            return;
+        }
 
         var angle = Math.round(items[0].getRotation());
         var sameAngle = !!angle;
