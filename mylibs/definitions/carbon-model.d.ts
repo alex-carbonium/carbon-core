@@ -59,7 +59,9 @@ declare module "carbon-model" {
     export const enum UIElementFlags {
         None = 0,
         SymbolBackground = 1,
-        SymbolText = 1 << 1
+        SymbolText = 1 << 1,
+        PaletteItem = 1 << 2,
+        Icon = 1 << 3
     }
 
     export interface IUIElement<TProps extends IUIElementProps = IUIElementProps> extends IDataNode<TProps>, IMouseEventHandler, IDecoratable {
