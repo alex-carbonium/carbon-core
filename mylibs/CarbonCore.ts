@@ -6,7 +6,7 @@
 
 import domUtil from "utils/dom";
 import logger from "./logger";
-import {backend} from "./CarbonApi";
+import { backend } from "./CarbonApi";
 import Symbol from "./framework/Symbol";
 
 var params = require("./params");
@@ -21,8 +21,8 @@ var Util = require("util");
 var app = App.Current = new App(true);
 
 var ext = sessionStorage['extraParameters'];
-if(ext){
-    app.setProps({extraParameters:ext});
+if (ext) {
+    app.setProps({ extraParameters: ext });
 }
 
 //export * from crashes in babel for some reason...
@@ -38,9 +38,9 @@ export default {
     "DesignerView": require("./framework/DesignerView"),
     "ViewBase": require("./framework/ViewBase"),
     "DesignerController": require("./framework/DesignerController"),
-    "PreviewView":require("./framework/PreviewView"),
-    "PreviewController":require("./framework/PreviewController"),
-    "PreviewProxy":require("./framework/preview/PreviewProxy"),
+    "PreviewView": require("./framework/PreviewView"),
+    "PreviewController": require("./framework/PreviewController"),
+    "PreviewProxy": require("./framework/preview/PreviewProxy"),
     "Clipboard": require("./framework/Clipboard"),
     "Environment": require("./environment"),
     "Workspace": require("./environment"),
@@ -89,6 +89,7 @@ export default {
     "StyleManager": require("./framework/style/StyleManager"),
     "Selection": require("./framework/SelectionModel"),
     "QuadAndLock": require("./framework/QuadAndLock"),
+    "IconSetSpriteManager": require("./ui/IconSetSpriteManager"),
     "AnimationType": Defs.AnimationType,
     "EasingType": Defs.EasingType,
     "ActionType": Defs.ActionType,
@@ -125,7 +126,7 @@ export default {
     "DebugUtil": require("./DebugUtil"),
     "FontsProxy": require("./server/FontsProxy"),
 
-    "SvgParser":require("svg/SvgParser"),
+    "SvgParser": require("svg/SvgParser"),
 
     "Story": require("./stories/Story"),
     "StoryAction": require("./stories/StoryAction"),

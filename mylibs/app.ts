@@ -277,14 +277,14 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
     }
 
 
-    getAllPalettes() {
+    getAllResourceArtboards(resourceType) {
         var res = [];
         for (var i = 0; i < this.pages.length; ++i) {
             var page = this.pages[i];
             var artboards = page.getAllArtboards();
             for (var j = 0; j < artboards.length; ++j) {
                 var a = artboards[j];
-                if (a.props.type === ArtboardType.Palette) {
+                if (a.props.type === resourceType) {
                     res.push(a);
                 }
             }

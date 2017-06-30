@@ -233,13 +233,15 @@ declare module "carbon-model" {
     export const enum ImageSourceType {
         None = 0,
         Font = 1,
-        Url = 5
+        Url = 5,
+        Element = 8
     }
 
     export type ImageSource =
         { type: ImageSourceType.None } |
         { type: ImageSourceType.Url, url: string } |
-        { type: ImageSourceType.Font, icon: string };
+        { type: ImageSourceType.Font, icon: string } |
+        { type: ImageSourceType.Element, pageId: string, artboardId: string, elementId: string };
 
     export const enum ContentSizing {
         fill = 1,
@@ -248,7 +250,6 @@ declare module "carbon-model" {
         center = 4,
         original = 5,
         fixed = 6
-
     }
 
     export const enum TextAutoWidth {
@@ -261,14 +262,17 @@ declare module "carbon-model" {
         source: ImageSource;
         sizing: ContentSizing;
     }
+
     export interface IImage extends IContainer<IImageProps> {
         source(value?: ImageSource): ImageSource;
 
         resizeOnLoad(value?: OriginType | null): OriginType | null;
     }
+
     export const Image: IConstructor<IImage> & {
         createUrlSource(url: string): ImageSource;
         createFontSource(iconName: string): ImageSource;
+        createElementSource(pageId: string, artboardId: string, elementId: string): ImageSource;
 
         readonly uploadRequested: IEvent<{ done: Promise<void> }>;
         readonly EmptySource: ImageSource;

@@ -45,6 +45,8 @@ declare module "carbon-app" {
         activeStoryChanged: IEvent<any>;
         storyInserted: IEvent<any>;
         storyRemoved: IEvent<any>;
+        resourceChanged: IEvent2<any, any>;
+        resourceDeleted: IEvent2<any, any>;
         setActiveStoryById(id);
         removeStory(story);
 

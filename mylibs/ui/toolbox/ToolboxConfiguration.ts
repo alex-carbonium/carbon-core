@@ -1,41 +1,41 @@
-import {TileSize} from "framework/Defs";
+import { TileSize } from "framework/Defs";
 import ContextPool from "framework/render/ContextPool";
 import Environment from "environment";
-import {createUUID} from "util";
+import { createUUID } from "util";
 import Matrix from "math/matrix";
 import backend from "../../backend";
 import { ArtboardType } from "carbon-core";
 
-var PADDING = 5;
-var _configCache = {};
+let PADDING = 5;
+let _configCache = {};
 export default class ToolboxConfiguration {
     static chooseTileType(w, h) {
-        var opaque = w / h < 2;
+        let opaque = w / h < 2;
         if (opaque && h > 200) {
-            return 3;
+            return TileSize.XLarge;
         }
-        var wide = w > 250;
+        let wide = w > 250;
         if (wide) {
-            return 2;
+            return TileSize.Large;
         }
-        return 1;
+        return TileSize.Small;
     }
     static fitToTile(w, h, tileType, padding) {
         padding = padding || 0;
-        var data: any = {};
+        let data: any = {};
         data.width = 128;
         data.height = 60;
 
-        if (tileType == 3) {
+        if (tileType === TileSize.XLarge) {
             data.width = 257;
             data.height = 121;
         }
-        else if (tileType == 2) {
+        else if (tileType === TileSize.Large ) {
             data.width = 257;
         }
 
-        var pw = data.width - padding * 2;
-        var ph = data.height - padding * 2;
+        let pw = data.width - padding * 2;
+        let ph = data.height - padding * 2;
 
         if (w / h >= 1.62) {
             data.scale = pw / w;
@@ -61,18 +61,19 @@ export default class ToolboxConfiguration {
         if (!elements.length) {
             return Promise.resolve({});
         }
-        let elementWithTiles : Array<any> = elements.map(e=> {
+        let elementWithTiles: Array<any> = elements.map(e => {
+            let tileSize;
             if (e.props.tileSize === TileSize.Auto) {
-                var tileSize = ToolboxConfiguration.chooseTileType(e.width(), e.height());
+                tileSize = ToolboxConfiguration.chooseTileType(e.width(), e.height());
             } else {
                 tileSize = e.props.tileSize;
             }
-            return {tileSize: tileSize, element: e};
+            return { tileSize: tileSize, element: e };
         })
-        elementWithTiles.sort((a, b)=> {
+        elementWithTiles.sort((a, b) => {
             return b.tileSize - a.tileSize;
         });
-        let x : number = 0;
+        let x: number = 0;
         let y: number = 0;
         let height: number = 0;
         let i: number = 0;
@@ -81,10 +82,10 @@ export default class ToolboxConfiguration {
         let prevTileSize: number = -1;
 
         while (i < elementWithTiles.length && elementWithTiles[i].tileSize === TileSize.XLarge) {
-            var element = elementWithTiles[i].element;
-            var tileSize = elementWithTiles[i].tileSize;
-            var data = ToolboxConfiguration.fitToTile(element.width(), element.height(), tileSize, PADDING);
-            renderTasks.push({x, y, data: data});
+            let element = elementWithTiles[i].element;
+            let tileSize = elementWithTiles[i].tileSize;
+            let data = ToolboxConfiguration.fitToTile(element.width(), element.height(), tileSize, PADDING);
+            renderTasks.push({ x, y, data: data });
             x += data.width;
             height = Math.max(height, data.height);
             ++i;
@@ -92,8 +93,8 @@ export default class ToolboxConfiguration {
             prevTileSize = tileSize;
         }
 
-        var counter = 0;
-        var lastX = x;
+        let counter = 0;
+        let lastX = x;
 
         while (i < elementWithTiles.length) {
             let element = elementWithTiles[i].element;
@@ -105,8 +106,8 @@ export default class ToolboxConfiguration {
                 y = 0;
             }
 
-            var data = ToolboxConfiguration.fitToTile(element.width(), element.height(), tileSize, PADDING);
-            renderTasks.push({x, y, data: data});
+            let data = ToolboxConfiguration.fitToTile(element.width(), element.height(), tileSize, PADDING);
+            renderTasks.push({ x, y, data: data });
             height = Math.max(height, data.height);
             if ((counter + 1) % countOnLine === 1) {
                 y += data.height;
@@ -121,36 +122,36 @@ export default class ToolboxConfiguration {
             prevTileSize = tileSize;
         }
 
-        var width: number = lastX;
-        var context  = ContextPool.getContext(width, height, contextScale, true);
-        context.clearRect(0,0, context.width, context.height);
-        var env = {finalRender: true,  setupContext:()=>{}, contextScale:contextScale, offscreen:true, view:{scale:()=>1, contextScale, focused:()=>false}};
-        var elementsMap = {};
-        var taskPromises = [];
+        let width: number = lastX;
+        let context = ContextPool.getContext(width, height, contextScale, true);
+        context.clearRect(0, 0, context.width, context.height);
+        let env = { finalRender: true, setupContext: () => { }, contextScale: contextScale, offscreen: true, view: { scale: () => 1, contextScale, focused: () => false } };
+        let elementsMap = {};
+        let taskPromises = [];
         for (i = 0; i < renderTasks.length; ++i) {
             taskPromises.push(ToolboxConfiguration._performRenderTask(renderTasks[i], elementWithTiles[i].element, elementsMap, context, contextScale, env));
         }
 
         return Promise.all(taskPromises)
             .then(() => {
-                if(outConfig) {
+                if (outConfig) {
                     for (i = elements.length - 1; i >= 0; --i) {
                         outConfig.push(elementsMap[elements[i].id()]);
                     }
                 }
 
-                return {imageData: context.canvas.toDataURL("image/png"), size: {width, height}};
+                return { imageData: context.canvas.toDataURL("image/png"), size: { width, height } };
             })
             .finally(() => {
                 ContextPool.releaseContext(context);
             });
     }
 
-    static _performRenderTask(t, element, elementsMap, context, contextScale, env): Promise<any>{
-        var w = element.width();
-        var h = element.height();
-        var scale = t.data.scale;
-        var matrix = Matrix.Identity.clone();
+    static _performRenderTask(t, element, elementsMap, context, contextScale, env): Promise<any> {
+        let w = element.width();
+        let h = element.height();
+        let scale = t.data.scale;
+        let matrix = Matrix.Identity.clone();
         context.save();
         context.scale(contextScale, contextScale);
         context.beginPath();
@@ -158,7 +159,7 @@ export default class ToolboxConfiguration {
         context.rect(t.x, t.y, t.data.width, t.data.height);
         context.clip();
 
-        env.setupContext=(context) => {
+        env.setupContext = (context) => {
             context.scale(contextScale, contextScale);
             env.pageMatrix.applyToContext(context);
         }
@@ -188,8 +189,8 @@ export default class ToolboxConfiguration {
             "title": element.name()
         };
 
-        var fontTasks = App.Current.fontManager.getPendingTasks();
-        if (!fontTasks.length){
+        let fontTasks = App.Current.fontManager.getPendingTasks();
+        if (!fontTasks.length) {
             return Promise.resolve();
         }
 
@@ -197,13 +198,13 @@ export default class ToolboxConfiguration {
             .then(() => ToolboxConfiguration._performRenderTask(t, element, elementsMap, context, contextScale, env));
     }
 
-    static getConfigForPage(page){
-        if(page.props.toolboxConfigUrl && page.props.toolboxConfigUrl !== '#'){
-            var config = _configCache[page.props.toolboxConfigUrl];
-            if(config){
+    static getConfigForPage(page) {
+        if (page.props.toolboxConfigUrl && page.props.toolboxConfigUrl !== '#') {
+            let config = _configCache[page.props.toolboxConfigUrl];
+            if (config) {
                 return Promise.resolve(config);
             }
-            return fetch(page.props.toolboxConfigUrl).then(r=>r.json()).then(function(config){
+            return fetch(page.props.toolboxConfigUrl).then(r => r.json()).then(function (config) {
                 _configCache[page.props.toolboxConfigUrl] = config;
                 return config;
             });
@@ -212,36 +213,36 @@ export default class ToolboxConfiguration {
         return ToolboxConfiguration.buildToolboxConfig(page)
     }
 
-    static buildToolboxConfig(page){
-        var elements = page.getAllArtboards().filter(x=>x.props.type === ArtboardType.Symbol);
+    static buildToolboxConfig(page) {
+        let elements = page.getAllArtboards().filter(x => x.props.type === ArtboardType.Symbol);
 
-        if(!elements.length) {
-            page.setProps({toolboxConfigUrl:null});
-            return Promise.resolve({groups:[]});
+        if (!elements.length) {
+            page.setProps({ toolboxConfigUrl: null });
+            return Promise.resolve({ groups: [] });
         }
 
-        var configId = createUUID();
+        let configId = createUUID();
 
-        var groupedElements = {};
-        for(var i = 0; i < elements.length; ++i){
-            var e = elements[i];
-            var group = groupedElements[e.props.toolboxGroup] || [];
+        let groupedElements = {};
+        for (let i = 0; i < elements.length; ++i) {
+            let e = elements[i];
+            let group = groupedElements[e.props.toolboxGroup] || [];
             group.push(e);
             groupedElements[e.props.toolboxGroup] = group;
         }
-        var groups = [];
-        function makeGroup(groupName, elements): Promise<any>{
-            var config = [];
-            var spriteUrlPromise = ToolboxConfiguration.renderElementsToSprite(elements, config);
+        let groups = [];
+        function makeGroup(groupName, elements): Promise<any> {
+            let config = [];
+            let spriteUrlPromise = ToolboxConfiguration.renderElementsToSprite(elements, config);
 
-            var spriteUrl2xPromise = ToolboxConfiguration.renderElementsToSprite(elements, null, 2);
+            let spriteUrl2xPromise = ToolboxConfiguration.renderElementsToSprite(elements, null, 2);
             let group: any = {
-                name:groupName,
-                templates:config
+                name: groupName,
+                templates: config
             };
             groups.push(group);
 
-            if(App.Current.serverless()){
+            if (App.Current.serverless()) {
                 return Promise.all([spriteUrlPromise, spriteUrl2xPromise])
                     .then(sprites => {
                         group.spriteUrl = sprites[0].imageData;
@@ -250,38 +251,38 @@ export default class ToolboxConfiguration {
                     });
             }
 
-            spriteUrlPromise = spriteUrlPromise.then(sprite =>{
-                return backend.fileProxy.uploadPublicImage({content: sprite.imageData})
-                    .then((data)=>{
+            spriteUrlPromise = spriteUrlPromise.then(sprite => {
+                return backend.fileProxy.uploadPublicImage({ content: sprite.imageData })
+                    .then((data) => {
                         group.spriteUrl = data.url;
                         group.size = sprite.size;
                     })
             });
 
-            spriteUrl2xPromise = spriteUrl2xPromise.then(sprite =>{
-                return backend.fileProxy.uploadPublicImage({content: sprite.imageData})
-                    .then((data)=>{
+            spriteUrl2xPromise = spriteUrl2xPromise.then(sprite => {
+                return backend.fileProxy.uploadPublicImage({ content: sprite.imageData })
+                    .then((data) => {
                         group.spriteUrl2x = data.url;
                     })
             });
 
             return Promise.all([spriteUrlPromise, spriteUrl2xPromise]);
         }
-        var promises = [];
-        for(let group in groupedElements) {
+        let promises = [];
+        for (let group in groupedElements) {
             promises.push(makeGroup(group, groupedElements[group]));
         }
 
-        var config = {groups:groups, id:configId};
+        let config = { groups: groups, id: configId };
         return Promise.all(promises)
-            .then(()=>{
-                if(App.Current.serverless()){
-                    return {url:'#', configId:createUUID()};
+            .then(() => {
+                if (App.Current.serverless()) {
+                    return { url: '#', configId: createUUID() };
                 }
-                return backend.fileProxy.uploadPublicFile({content: JSON.stringify(config)});
+                return backend.fileProxy.uploadPublicFile({ content: JSON.stringify(config) });
             })
-            .then((data)=>{
-                page.setProps({toolboxConfigUrl:data.url, toolboxConfigId:configId});
+            .then((data) => {
+                page.setProps({ toolboxConfigUrl: data.url, toolboxConfigId: configId });
                 return config;
             })
     }

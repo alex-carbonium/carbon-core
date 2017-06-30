@@ -1,10 +1,11 @@
 //TODO: change all enum to const enum when all files are migrated
 
 export enum TileSize {
-    Auto,
-    Small,
-    Large,
-    XLarge
+    Auto = 0,
+    Small = 1,
+    Large = 2,
+    XLarge = 3,
+    Icon = -1
 }
 
 export enum DockStyle {

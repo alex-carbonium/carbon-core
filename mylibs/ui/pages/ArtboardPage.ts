@@ -279,12 +279,12 @@ class ArtboardPage extends Page {
         return res;
     }
 
-    getAllPalettes() {
+    getAllResourceArtboards(resourceType) {
         let res = [];
         let artboards = this.getAllArtboards();
         for (let j = 0; j < artboards.length; ++j) {
             let a = artboards[j];
-            if (a.props.type === ArtboardType.Palette) {
+            if (a.props.type === resourceType) {
                 res.push(a);
             }
         }

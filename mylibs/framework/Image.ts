@@ -163,14 +163,14 @@ export default class Image extends Container<IImageProps> implements IImage {
             this.drawWithMask(context, this.runtimeProps.mask, 0, environment);
         }
         else {
-            ImageSourceHelper.draw(source, context, w, h, this.props, this.runtimeProps.sourceProps);
+            ImageSourceHelper.draw(source, context, w, h, this.props, this.runtimeProps.sourceProps, environment);
         }
 
         context.restore();
     }
 
-    renderAfterMask(context) {
-        ImageSourceHelper.draw(this.source(), context, this.width(), this.height(), this.props, this.runtimeProps.sourceProps);
+    renderAfterMask(context, items, i, environment) {
+        ImageSourceHelper.draw(this.source(), context, this.width(), this.height(), this.props, this.runtimeProps.sourceProps, environment);
     }
 
     autoResize(source: ImageSource, origin: OriginType){
@@ -304,8 +304,13 @@ export default class Image extends Container<IImageProps> implements IImage {
     static createUrlSource(url: string): ImageSource{
         return ImageSourceHelper.createUrlSource(url);
     }
+
     static createFontSource(iconName: string): ImageSource{
         return ImageSourceHelper.createFontSource(iconName);
+    }
+
+    static createElementSource(pageId: string, artboardId:string, elementId:string): ImageSource{
+        return ImageSourceHelper.createElementSource(pageId, artboardId, elementId);
     }
 
     static tryCreateFromUrl(string: string): Image | null{

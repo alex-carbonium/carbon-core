@@ -5,18 +5,23 @@ import IconsInfo from "../ui/IconsInfo";
 import Rect from "../math/rect";
 import { ContentSizing, ImageSource, ImageSourceType } from "carbon-model";
 import { IRect } from "carbon-geometry";
+import DataNode from "./DataNode";
+import { ChangeMode } from "carbon-core";
 
 const iconProps = { fill: Brush.createFromColor("#ABABAB"), stroke: Brush.Empty };
 const iconRuntimeProps = { glyph: IconsInfo.findGlyphString(IconsInfo.defaultFontFamily, "image") };
 
 export default class ImageSourceHelper {
-    static draw(source: ImageSource, context, w, h, props, runtimeProps) {
+    static draw(source: ImageSource, context, w, h, props, runtimeProps, environment) {
         switch (source.type) {
             case ImageSourceType.Font:
                 ImageSourceHelper.drawFont(IconsInfo.defaultFontFamily, context, w, h, props, runtimeProps);
                 return;
             case ImageSourceType.Url:
                 ImageSourceHelper.drawURL(context, runtimeProps);
+                return;
+            case ImageSourceType.Element:
+                ImageSourceHelper.drawElement(context, w, h, props, runtimeProps, environment)
                 return;
             case ImageSourceType.None:
                 ImageSourceHelper.drawEmpty(context, w, h);
@@ -81,6 +86,8 @@ export default class ImageSourceHelper {
                 return source.icon;
             case ImageSourceType.Url:
                 return source.url;
+            case ImageSourceType.Element:
+                return source.elementId;
 
             default:
                 return false;
@@ -140,6 +147,7 @@ export default class ImageSourceHelper {
             image.src = url;
         });
     }
+
     private static drawURL(context, runtimeProps) {
         if (!runtimeProps) {
             return;
@@ -151,6 +159,37 @@ export default class ImageSourceHelper {
             context.drawImage(image, sr.x, sr.y, sr.width, sr.height, dr.x, dr.y, dr.width, dr.height);
         }
     }
+
+    private static drawElement(context, w, h, props, runtimeProps, environment) {
+        if (!runtimeProps || !runtimeProps.element) {
+            return;
+        }
+
+        var element = runtimeProps.element;
+
+        context.save();
+        var scaleX = w / element.width();
+        var scaleY = h / element.height();
+
+        context.scale(scaleX, scaleY);
+        var box = element.getBoundingBox();
+        context.translate(-box.x, -box.y);
+        element.parent().globalViewMatrixInverted().applyToContext(context);
+
+        try {
+            var oldFill = element.props.fill;
+            var oldStroke = element.props.stroke;
+            var oldStrokeWidth = element.props.strokeWidth;
+            element.setDisplayProps({fill:props.fill, stroke:props.stroke, strokeWidth:props.strokeWidth}, ChangeMode.Self);
+            element.drawSelf.call(element, context, element.width(), element.height(), environment);
+        } finally {
+            element.setDisplayProps({fill:oldFill, stroke:oldStroke, strokeWidth:oldStrokeWidth}, ChangeMode.Self);
+        }
+        context.restore();
+    }
+
+
+
     private static resizeUrlImage(sizing: ContentSizing, newRect, runtimeProps) {
         if (runtimeProps.image) {
             switch (sizing) {
@@ -202,8 +241,8 @@ export default class ImageSourceHelper {
                 case ContentSizing.fixed:
                     const dw = newRect.x + newRect.width - runtimeProps.dr.x - runtimeProps.dr.width;
                     const dh = newRect.y + newRect.height - runtimeProps.dr.y - runtimeProps.dr.height;
-                    const sx = 1 + dw/runtimeProps.dr.width;
-                    const sy = 1 + dh/runtimeProps.dr.height;
+                    const sx = 1 + dw / runtimeProps.dr.width;
+                    const sy = 1 + dh / runtimeProps.dr.height;
                     const ndr = Object.assign({}, runtimeProps.dr, {
                         width: runtimeProps.dr.width * sx,
                         height: runtimeProps.dr.height * sy
@@ -247,12 +286,26 @@ export default class ImageSourceHelper {
         }
     };
 
+    static findElementById(pageId: string, artboardId: string, elementId: string) {
+        var page = DataNode.getImmediateChildById(App.Current, pageId, false);
+        if (page) {
+            let artboard = DataNode.getImmediateChildById(page, artboardId, true);
+            if (artboard) {
+                return artboard.findNodeByIdBreadthFirst(elementId);
+            }
+        }
+
+        return null;
+    }
+
     static load(source: ImageSource, sourceProps): Promise<any> | null {
         switch (source.type) {
             case ImageSourceType.Font:
                 return Promise.resolve({ glyph: IconsInfo.findGlyphString(IconsInfo.defaultFontFamily, source.icon) });
             case ImageSourceType.Url:
                 return ImageSourceHelper.loadUrl(source, sourceProps);
+            case ImageSourceType.Element:
+                return Promise.resolve({ element: ImageSourceHelper.findElementById(source.pageId, source.artboardId, source.elementId) });
             default:
                 return null;
         }
@@ -293,10 +346,15 @@ export default class ImageSourceHelper {
         return source.type === ImageSourceType.Font;
     }
 
-    static createUrlSource(url: string): ImageSource{
-        return {type: ImageSourceType.Url, url: url};
+    static createUrlSource(url: string): ImageSource {
+        return { type: ImageSourceType.Url, url: url };
     }
-    static createFontSource(iconName: string): ImageSource{
-        return {type: ImageSourceType.Font, icon: iconName};
+
+    static createFontSource(iconName: string): ImageSource {
+        return { type: ImageSourceType.Font, icon: iconName };
+    }
+
+    static createElementSource(pageId: string, artboardId: string, elementId: string): ImageSource {
+        return { type: ImageSourceType.Element, pageId, artboardId, elementId };
     }
 }

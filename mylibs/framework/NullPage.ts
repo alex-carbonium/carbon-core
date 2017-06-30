@@ -113,7 +113,7 @@ class NullPage extends UIElement implements IPage {
     isInitialized() {
         return true;
     }
-    getAllPalettes() {
+    getAllResourceArtboards(resourceType) {
         return [];
     }
     getAllArtboards() {

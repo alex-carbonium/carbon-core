@@ -8,7 +8,7 @@ import GroupContainer from "../framework/GroupContainer";
 import Matrix from "../math/matrix";
 import Rect from "../math/rect";
 
-export default class PaletteActions extends CarbonExtension {
+export default class ResourceActions extends CarbonExtension {
     initialize(contributions: IContributions) {
         //TODO: add label registrations
         contributions.addActions([
@@ -16,13 +16,29 @@ export default class PaletteActions extends CarbonExtension {
                 id: "palette.addItem",
                 name: "@resources.markAsPaletteItem",
                 callback: this.markAsPaletteItem,
-                condition: selection => PaletteActions.isInPalette(selection)
+                condition: selection => ResourceActions.isInPalette(selection) &&
+                            selection.elements.length &&
+                            selection.elements.every(x => !x.hasFlags(UIElementFlags.PaletteItem))
             },
             {
                 id: "palette.removeItem",
                 name: "@resources.removeFromPalette",
                 callback: this.removeFromPalette,
                 condition: selection =>selection.elements.length && selection.elements.some(x => x.hasFlags(UIElementFlags.PaletteItem))
+            },
+            {
+                id: "iconset.addItem",
+                name: "@resources.markAsIcon",
+                callback: this.markAsIconItem,
+                condition: selection => ResourceActions.isInIconSet(selection) &&
+                            selection.elements.length &&
+                            selection.elements.every(x => !x.hasFlags(UIElementFlags.Icon))
+            },
+            {
+                id: "iconset.removeItem",
+                name: "@resources.removeFromIconSet",
+                callback: this.removeFromIcon,
+                condition: selection =>selection.elements.length && selection.elements.some(x => x.hasFlags(UIElementFlags.Icon))
             }
         ]);
 
@@ -31,6 +47,15 @@ export default class PaletteActions extends CarbonExtension {
             [
                 "palette.addItem",
                 "palette.removeItem"
+            ],
+            ContextBarPosition.Right
+        );
+
+        contributions.addContextMenuGroup(
+            "@iconset",
+            [
+                "iconset.addItem",
+                "iconset.removeItem"
             ],
             ContextBarPosition.Right
         );
@@ -56,6 +81,17 @@ export default class PaletteActions extends CarbonExtension {
         });
     }
 
+    static isInIconSet(selection: ISelection): boolean{
+        return selection.elements.length && selection.elements.every(x => {
+            let artboard = x.findAncestorOfType(Artboard);
+            if (!artboard){
+                return false;
+            }
+
+            return (artboard.props.type === ArtboardType.IconSet);
+        });
+    }
+
     markAsPaletteItem = (selection: ISelection) => {
         var newSelection: string[] = [];
 
@@ -69,6 +105,22 @@ export default class PaletteActions extends CarbonExtension {
 
         for (var element of selection.elements) {
             element.removeFlags(UIElementFlags.PaletteItem);
+        }
+    }
+
+    markAsIconItem = (selection: ISelection) => {
+        var newSelection: string[] = [];
+
+        for (var element of selection.elements) {
+            element.addFlags(UIElementFlags.Icon);
+        }
+    }
+
+    removeFromIcon = (selection: ISelection) => {
+        var newSelection: string[] = [];
+
+        for (var element of selection.elements) {
+            element.removeFlags(UIElementFlags.Icon);
         }
     }
 }

@@ -14,7 +14,7 @@ export default {
             height = Math.min(size.height * scale, height * scale);
         }
         if (contextPool.length === 0) {
-            var context = new Context();
+            let context = new Context();
             context.width = width;
             context.height = height;
             context.relativeOffsetX = 0;
@@ -23,7 +23,7 @@ export default {
             return context;
         } else {
             for (var i = 0; i < contextPool.length; ++i) {
-                var context = contextPool[i];
+                let context = contextPool[i];
                 if (context.width >= width && context.height >= height) {
                     contextPool.splice(i, 1);
                     context.relativeOffsetX = 0;

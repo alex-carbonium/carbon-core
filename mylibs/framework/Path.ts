@@ -449,6 +449,10 @@ class Path extends Shape {
         Selection.reselect();
     }
 
+    commitMatrixChanges() {
+        scalePointsToNewSize.call(this);
+    }
+
     _initPoint(point) {
         this._roundPoint(point);
         if (point.type === undefined) {

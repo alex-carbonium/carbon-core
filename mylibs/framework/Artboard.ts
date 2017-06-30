@@ -185,6 +185,8 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
                 return "type.a_symbol";
             case ArtboardType.Template:
                 return "type.a_template";
+            case ArtboardType.IconSet:
+                return "type.a_iconset";
             default:
                 return super.displayType();
         }
@@ -906,11 +908,12 @@ PropertyMetadata.registerForType(Artboard, {
         defaultValue: null,
         options: {
             items: [
-                { name: "Regular", value: null },
-                { name: "Symbol", value: ArtboardType.Symbol },
-                { name: "Template", value: ArtboardType.Template },
-                { name: "Frame", value: ArtboardType.Frame },
-                { name: "Palette", value: ArtboardType.Palette },
+                { name: "@regular", value: null },
+                { name: "@symbol", value: ArtboardType.Symbol },
+                { name: "@template", value: ArtboardType.Template },
+                { name: "@frame", value: ArtboardType.Frame },
+                { name: "@palette", value: ArtboardType.Palette },
+                { name: "@iconset", value: ArtboardType.IconSet },
             ]
         }
     },
