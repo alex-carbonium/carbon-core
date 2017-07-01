@@ -71,7 +71,18 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
         }
     }
 
-    patchProps(patchType, propName, item, mode = ChangeMode.Model) {
+    getArrayPropValue(propName:string, id:string):any {
+        let array = this.props[propName];
+        for (let i = 0; i < array.length; i++) {
+            if (array[i].id === id) {
+                return array[i]
+            }
+        }
+
+        return null;
+    }
+
+    patchProps(patchType:PatchType, propName:string, item:any, mode:ChangeMode = ChangeMode.Model) {
         //first track to capture old item for PatchType.Change
         if (mode !== ChangeMode.Self) {
             this.trackPatchProps(patchType, propName, item, mode);

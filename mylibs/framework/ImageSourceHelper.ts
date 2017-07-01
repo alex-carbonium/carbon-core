@@ -177,9 +177,9 @@ export default class ImageSourceHelper {
         element.parent().globalViewMatrixInverted().applyToContext(context);
 
         try {
-            var oldFill = element.props.fill;
-            var oldStroke = element.props.stroke;
-            var oldStrokeWidth = element.props.strokeWidth;
+            var oldFill = element.getDisplayPropValue('fill');
+            var oldStroke = element.getDisplayPropValue('stroke');
+            var oldStrokeWidth = element.getDisplayPropValue('strokeWidth');
             element.setDisplayProps({fill:props.fill, stroke:props.stroke, strokeWidth:props.strokeWidth}, ChangeMode.Self);
             element.drawSelf.call(element, context, element.width(), element.height(), environment);
         } finally {

@@ -103,6 +103,9 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
     deferredChange: IEvent<any>;
     restoredLocally: IEvent<void>;
 
+    resourceChanged: IEvent2<any, any>;
+    resourceDeleted: IEvent2<any, any>;
+
     currentToolChanged: IEvent<string>;
     _currentTool: string;
 
@@ -146,8 +149,8 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
 
         this.modeChanged = EventHelper.createEvent();
 
-        this.resourceChanged = EventHelper.createEvent();
-        this.resourceDeleted = EventHelper.createEvent();
+        this.resourceChanged = EventHelper.createEvent2();
+        this.resourceDeleted = EventHelper.createEvent2();
 
         this.changed = EventHelper.createEvent();
         this.deferredChange = EventHelper.createEvent();
@@ -240,7 +243,7 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
             this._activeStory = value;
             this.activeStoryChanged.raise(value);
             Invalidate.requestInteractionOnly();
-            if(value) {
+            if (value) {
                 var page = this.findNodeByIdBreadthFirst(value.props.pageId);
                 this.setActivePage(page);
             }
@@ -501,7 +504,7 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
         //     this.initPage(element);
         // } else
         if (element instanceof Story) {
-            if(!this.activeStory()) {
+            if (!this.activeStory()) {
                 this.activeStory(element);
             }
         }
@@ -876,7 +879,7 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
         return (this.children as any).filter(p => p instanceof Page);
     }
 
-    pagesWithSymbols(){
+    pagesWithSymbols() {
         return this.pages.filter(p => p.children.some(a => {
             if (a instanceof Artboard) {
                 return a.props.type === ArtboardType.Symbol;
@@ -1014,10 +1017,10 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
     }
 
     private filterPrimitives(primitives: IPrimitive[], locals: IPrimitive[], externals: IPrimitive[]) {
-        if (primitives){
+        if (primitives) {
             for (var i = 0; i < primitives.length; i++) {
                 var p = primitives[i];
-                if (p.sessionId === backend.sessionId){
+                if (p.sessionId === backend.sessionId) {
                     locals.push(p);
                 }
                 else {

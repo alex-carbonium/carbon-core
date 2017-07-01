@@ -84,7 +84,7 @@ class Event<T> implements IEvent<T>, IEvent2<any, any>, IEvent3<any, any, any>{
         }
 
         var f;
-        if (arguments.length == 1) {
+        if (arguments.length === 1) {
             f = arguments[0];
         } else {
             f = new EventHandler(arguments[0], arguments[1]);

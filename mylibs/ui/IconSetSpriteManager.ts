@@ -9,8 +9,8 @@ import { ArtboardType, UIElementFlags } from "carbon-core";
 let PADDING = 5;
 let _configCache = {};
 const IconSize = 36;
-export default class IconSetSpriteManager {
 
+export default class IconSetSpriteManager {
     static fitToSize(w, h, iconSize) {
         let data: any = {};
         data.width = iconSize;
