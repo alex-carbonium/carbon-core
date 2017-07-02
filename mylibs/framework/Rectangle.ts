@@ -4,7 +4,7 @@ import QuadAndLock from "framework/QuadAndLock";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Brush from "framework/Brush";
 import Shadow from "framework/Shadow";
-import {PointDirection, Types, StrokePosition, FrameCursors} from "framework/Defs";
+import { PointDirection, Types, StrokePosition, FrameCursors } from "framework/Defs";
 import nearestPoint from "math/NearestPoint";
 import commandManager from "framework/commands/CommandManager";
 import Path from "framework/Path";
@@ -18,22 +18,22 @@ const PointSize = 4;
 const PointOffset = 10;
 
 function getOffsetForPoint(w, h, scale, value) {
-    var d = ((!value)?PointOffset:0) / scale;
+    var d = ((!value) ? PointOffset : 0) / scale;
     var rx = (w - d) / 2;
     var ry = (h - d) / 2;
 
     var maxRadius = Math.min(rx, ry);
     var posPercent = Math.min(value, maxRadius) / maxRadius;
-    return {x: d + maxRadius * posPercent, y: d + maxRadius * posPercent};
+    return { x: d + maxRadius * posPercent, y: d + maxRadius * posPercent };
 }
 
 var CornerRadiusPoint = {
     cursorSet: FrameCursors,
-    hitTest (frame, mousePoint, pt, elementPoint, scale) {
+    hitTest(frame, mousePoint, pt, elementPoint, scale) {
         return Math.abs(mousePoint.x - pt.x) < PointSize / scale && Math.abs(mousePoint.y - pt.y) < PointSize / scale;
     },
 
-    draw (p, frame, scale, context, matrix) {
+    draw(p, frame, scale, context, matrix) {
         context.fillStyle = '#fff';
         context.strokeStyle = '#22c1ff';
         context.beginPath();
@@ -42,7 +42,7 @@ var CornerRadiusPoint = {
         context.fill();
         context.stroke();
     },
-    capture (frame) {
+    capture(frame) {
         var resizingElement = UIElement.construct(Types.ResizeRotateElement, frame.element);
         resizingElement.stroke(Brush.None);
         resizingElement.strokeFrame = false;
@@ -52,7 +52,7 @@ var CornerRadiusPoint = {
         Environment.view.interactionLayer.add(resizingElement);
         //App.Current.view.startRotatingEvent.raise();
     },
-    release (frame) {
+    release(frame) {
         if (frame.resizingElement) {
             delete frame.onlyCurrentVisible;
             var newRadius = frame.resizingElement.children[0].cornerRadius();
@@ -61,7 +61,7 @@ var CornerRadiusPoint = {
             frame.resizingElement.detach();
         }
     },
-    rotateCursorPointer (index, angle) {
+    rotateCursorPointer(index, angle) {
         var dc = ~~(((360 - angle + 23) % 360) / 45);
         return (index + dc) % 8;
     },
@@ -74,7 +74,7 @@ var CornerRadiusPoint = {
         p.x = x + w * rv[0] + rv[1] * offset.x;
         p.y = y + h * rv[2] + rv[3] * offset.y;
     },
-    change (frame, dx, dy, point, mousePoint, keys) {
+    change(frame, dx, dy, point, mousePoint, keys) {
         if (!frame.resizingElement) {
             return;
         }
@@ -86,16 +86,16 @@ var CornerRadiusPoint = {
         var mousePosition = frame.element.globalViewMatrixInverted().transformPoint(mousePoint);
 
         // p1, p2, gives us line equation
-        var p1 = {x: rect.width * rv[0], y: rect.height * rv[2]};
+        var p1 = { x: rect.width * rv[0], y: rect.height * rv[2] };
 
         var dw = 0, dh = 0;
-        if(w2 > h2){
+        if (w2 > h2) {
             dw = h2 - w2;
         } else {
             dh = w2 - h2;
         }
 
-        var p2 = {x: w2 + dw * rv[1], y: h2 + dh * rv[3]};
+        var p2 = { x: w2 + dw * rv[1], y: h2 + dh * rv[3] };
         var pr: any = {};
         // pr - closest point to the line
         nearestPoint.onLine(p1, p2, mousePosition, pr);
@@ -116,12 +116,12 @@ var CornerRadiusPoint = {
         }
 
         var maxRadius = Math.min(w2, h2);
-        var newRadius = 0|parameter * maxRadius;
+        var newRadius = 0 | parameter * maxRadius;
 
         var r = clone(frame.resizingElement.children[0].cornerRadius());
         r.locked = !keys.alt;
 
-        if(!r.locked) {
+        if (!r.locked) {
             r[point.prop] = newRadius;
         } else {
             r.upperLeft = newRadius;
@@ -139,7 +139,7 @@ class Rectangle extends Shape {
         super();
     }
 
-    canConvertToPath(){
+    canConvertToPath() {
         return true;
     }
     convertToPath(): Path {
@@ -150,37 +150,37 @@ class Rectangle extends Shape {
             , x2 = br.width
             , y2 = br.height
             , cr = this.cornerRadius();
-        path.setProps({pointRounding:0});
+        path.setProps({ pointRounding: 0 });
 
-        var mr = Math.min(br.width/2, br.height/2);
+        var mr = Math.min(br.width / 2, br.height / 2);
 
         if (cr.upperLeft === 0) {
-            path.addPoint({x: x1, y: y1});
+            path.addPoint({ x: x1, y: y1 });
         } else {
             var r = Math.min(mr, cr.upperLeft);
-            path.addPoint({x: x1, y: y1 + r, cp2x: x1, cp2y: y1 + 0.45 * r});
-            path.addPoint({x: x1 + r, y: y1, cp1x: x1 + 0.45 * r, cp1y: y1});
+            path.addPoint({ x: x1, y: y1 + r, cp2x: x1, cp2y: y1 + 0.45 * r });
+            path.addPoint({ x: x1 + r, y: y1, cp1x: x1 + 0.45 * r, cp1y: y1 });
         }
         if (cr.upperRight === 0) {
-            path.addPoint({x: x2, y: y1});
+            path.addPoint({ x: x2, y: y1 });
         } else {
             r = Math.min(mr, cr.upperRight);
-            path.addPoint({x: x2 - r, y: y1, cp2x: x2 - 0.45 * r, cp2y: y1});
-            path.addPoint({x: x2, y: y1 + r, cp1x: x2, cp1y: y1 + 0.45 * r});
+            path.addPoint({ x: x2 - r, y: y1, cp2x: x2 - 0.45 * r, cp2y: y1 });
+            path.addPoint({ x: x2, y: y1 + r, cp1x: x2, cp1y: y1 + 0.45 * r });
         }
         if (cr.bottomRight === 0) {
-            path.addPoint({x: x2, y: y2});
+            path.addPoint({ x: x2, y: y2 });
         } else {
             r = Math.min(mr, cr.bottomRight);
-            path.addPoint({x: x2, y: y2 - r, cp2x: x2, cp2y: y2 - 0.45 * r});
-            path.addPoint({x: x2 - r, y: y2, cp1x: x2 - 0.45 * r, cp1y: y2});
+            path.addPoint({ x: x2, y: y2 - r, cp2x: x2, cp2y: y2 - 0.45 * r });
+            path.addPoint({ x: x2 - r, y: y2, cp1x: x2 - 0.45 * r, cp1y: y2 });
         }
         if (cr.bottomLeft === 0) {
-            path.addPoint({x: x1, y: y2});
+            path.addPoint({ x: x1, y: y2 });
         } else {
             r = Math.min(mr, cr.bottomLeft);
-            path.addPoint({x: x1 + r, y: y2, cp2x: x1 + 0.45 * r, cp2y: y2});
-            path.addPoint({x: x1, y: y2 - r, cp1x: x1, cp1y: y2 - 0.45 * r});
+            path.addPoint({ x: x1 + r, y: y2, cp2x: x1 + 0.45 * r, cp2y: y2 });
+            path.addPoint({ x: x1, y: y2 - r, cp1x: x1, cp1y: y2 - 0.45 * r });
         }
         path.closed(true);
         path.fill(this.fill());
@@ -196,7 +196,7 @@ class Rectangle extends Shape {
 
     cornerRadius(value?) {
         if (value !== undefined) {
-            this.setProps({cornerRadius: value})
+            this.setProps({ cornerRadius: value })
         }
         return this.props.cornerRadius;
     }
@@ -284,10 +284,10 @@ class Rectangle extends Shape {
         var r1 = cornerRadius.upperLeft;
 
         if (!cornerRadius.locked || r1) {
-            var mr = Math.min(w/2, h/2);
-            var r2 = cornerRadius.locked?r1:cornerRadius.upperRight,
-                r3 = cornerRadius.locked?r1:cornerRadius.bottomLeft,
-                r4 = cornerRadius.locked?r1:cornerRadius.bottomRight;
+            var mr = Math.min(w / 2, h / 2);
+            var r2 = cornerRadius.locked ? r1 : cornerRadius.upperRight,
+                r3 = cornerRadius.locked ? r1 : cornerRadius.bottomLeft,
+                r4 = cornerRadius.locked ? r1 : cornerRadius.bottomRight;
             context.roundedRectDifferentRadiusesPath(0, 0, w, h,
                 Math.min(mr, r1),
                 Math.min(mr, r2),
@@ -305,7 +305,7 @@ class Rectangle extends Shape {
             return frame;
         }
 
-        if (this.resizeDimensions() === ResizeDimension.None){
+        if (this.resizeDimensions() === ResizeDimension.None) {
             return frame;
         }
 
@@ -316,7 +316,10 @@ class Rectangle extends Shape {
             y: 0,
             cursor: 3,
             rv: [0, 1, 0, 1],
-            prop: 'upperLeft'
+            prop: 'upperLeft',
+            visible: function (p, frame, w, h, scale) {
+                return (w * scale > 100 && h * scale > 100);
+            }
         });
 
         frame.points.push({
@@ -326,7 +329,10 @@ class Rectangle extends Shape {
             y: 0,
             cursor: 5,
             rv: [1, -1, 0, 1],
-            prop: 'upperRight'
+            prop: 'upperRight',
+            visible: function (p, frame, w, h, scale) {
+                return (w * scale > 100 && h * scale > 100);
+            }
         });
 
         frame.points.push({
@@ -336,7 +342,10 @@ class Rectangle extends Shape {
             y: 0,
             cursor: 7,
             rv: [1, -1, 1, -1],
-            prop: 'bottomRight'
+            prop: 'bottomRight',
+            visible: function (p, frame, w, h, scale) {
+                return (w * scale > 100 && h * scale > 100);
+            }
         });
 
         frame.points.push({
@@ -346,7 +355,10 @@ class Rectangle extends Shape {
             y: 0,
             cursor: 1,
             rv: [0, 1, 1, -1],
-            prop: 'bottomLeft'
+            prop: 'bottomLeft',
+            visible: function (p, frame, w, h, scale) {
+                return (w * scale > 100 && h * scale > 100);
+            }
         });
 
         return frame;
@@ -365,13 +377,13 @@ class Rectangle extends Shape {
             rect.height(parsedAttributes.height);
         }
 
-        if(parsedAttributes.id){
+        if (parsedAttributes.id) {
             rect.name(parsedAttributes.id);
         }
 
-        rect.setProps({pointRounding: 0});
+        rect.setProps({ pointRounding: 0 });
 
-        if(parsedAttributes.rx !== undefined && parsedAttributes.rx == parsedAttributes.ry){
+        if (parsedAttributes.rx !== undefined && parsedAttributes.rx == parsedAttributes.ry) {
             var r = parseFloat(parsedAttributes.rx);
             rect.cornerRadius({
                 bottomLeft: r,
@@ -383,7 +395,7 @@ class Rectangle extends Shape {
         }
 
         if (parsedAttributes.fill !== undefined) {
-            if(!parsedAttributes.fill || parsedAttributes.fill == "none"){
+            if (!parsedAttributes.fill || parsedAttributes.fill == "none") {
                 rect.fill(Brush.Empty);
             } else {
                 rect.fill(Brush.createFromColor(parsedAttributes.fill));
@@ -396,7 +408,7 @@ class Rectangle extends Shape {
             rect.stroke(Brush.Empty);
         }
 
-        if(parsedAttributes.opacity){
+        if (parsedAttributes.opacity) {
             rect.opacity(parsedAttributes.opacity);
         }
 
@@ -410,7 +422,7 @@ class Rectangle extends Shape {
 
         rect.applyTranslation(pos);
 
-        var path =  rect.convertToPath();
+        var path = rect.convertToPath();
         path.transform(matrix);
         return path;
     }
@@ -423,7 +435,7 @@ PropertyMetadata.registerForType(Rectangle, {
         defaultValue: QuadAndLock.Default,
         type: "corners"
     },
-    groups: function(){
+    groups: function () {
         var baseGroups = PropertyMetadata.findAll(Types.Shape).groups();
 
         return [

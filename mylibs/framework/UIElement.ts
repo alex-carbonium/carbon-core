@@ -46,6 +46,8 @@ export interface IUIElementRuntimeProps {
     primitiveRootKey: string;
 }
 
+const PointDistanceVisible = 30;
+
 // constructor
 export default class UIElement<TProps extends IUIElementProps = IUIElementProps> extends DataNode<TProps> implements IUIElement<TProps> {
     [name: string]: any;
@@ -147,7 +149,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         delete this.runtimeProps.minHeight;
 
         var parent = this.parent();
-        if(parent && parent !== NullContainer) {
+        if (parent && parent !== NullContainer) {
             parent.refreshMinSizeConstraints();
         }
     }
@@ -160,7 +162,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             }
         }
 
-        if(newProps.hasOwnProperty("constraints")) {
+        if (newProps.hasOwnProperty("constraints")) {
             this.refreshMinSizeConstraints();
         }
 
@@ -1721,6 +1723,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                     update: function (p, x, y, w, h, element, scale) {
                         p.x = x;
                         p.y = y;
+                    },
+                    visible: function (p, frame, w, h, scale) {
+                        return (w * scale > PointDistanceVisible || h * scale > PointDistanceVisible);
                     }
                 },
                 {
@@ -1734,6 +1739,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                     update: function (p, x, y, w, h, element, scale) {
                         p.x = x + w;
                         p.y = y;
+                    },
+                    visible: function (p, frame, w, h, scale) {
+                        return (w * scale > PointDistanceVisible && h * scale > PointDistanceVisible);
                     }
                 },
                 {
@@ -1747,6 +1755,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                     update: function (p, x, y, w, h, element, scale) {
                         p.x = x + w;
                         p.y = y + h;
+                    },
+                    visible: function (p, frame, w, h, scale) {
+                        return true;
                     }
                 },
                 {
@@ -1760,6 +1771,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                     update: function (p, x, y, w, h, element, scale) {
                         p.x = x;
                         p.y = y + h;
+                    },
+                    visible: function (p, frame, w, h, scale) {
+                        return (w * scale > PointDistanceVisible && h * scale > PointDistanceVisible);
                     }
                 }
             );
@@ -1778,6 +1792,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                         update: function (p, x, y, w, h) {
                             p.x = x + w;
                             p.y = y + h;
+                        },
+                        visible: function (p, frame, w, h, scale) {
+                            return true;
                         }
                     },
                     {
@@ -1790,6 +1807,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                         update: function (p, x, y, w, h) {
                             p.x = x;
                             p.y = y;
+                        },
+                        visible: function (p, frame, w, h, scale) {
+                            return (w * scale > PointDistanceVisible || h * scale > PointDistanceVisible)
                         }
                     },
                     {
@@ -1802,9 +1822,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                         update: function (p, x, y, w, h) {
                             p.x = x + w;
                             p.y = y;
+                        },
+                        visible: function (p, frame, w, h, scale) {
+                            return (w * scale > PointDistanceVisible && h * scale > PointDistanceVisible)
                         }
                     },
-
                     {
                         type: ResizeFramePoint,
                         moveDirection: PointDirection.Any,
@@ -1815,6 +1837,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                         update: function (p, x, y, w, h) {
                             p.x = x;
                             p.y = y + h;
+                        },
+                        visible: function (p, frame, w, h, scale) {
+                            return (w * scale > PointDistanceVisible && h * scale > PointDistanceVisible)
                         }
                     },
                     {
@@ -1827,6 +1852,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                         update: function (p, x, y, w, h) {
                             p.x = x + w / 2;
                             p.y = y;
+                        },
+                        visible: function (p, frame, w, h, scale) {
+                            return (w * scale > PointDistanceVisible * 3 && h * scale > PointDistanceVisible);
                         }
                     },
                     {
@@ -1839,6 +1867,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                         update: function (p, x, y, w, h) {
                             p.x = x + w;
                             p.y = y + h / 2;
+                        },
+                        visible: function (p, frame, w, h, scale) {
+                            return (w * scale > PointDistanceVisible && h * scale > PointDistanceVisible * 3);
                         }
                     },
                     {
@@ -1851,6 +1882,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                         update: function (p, x, y, w, h) {
                             p.x = x + w / 2;
                             p.y = y + h;
+                        },
+                        visible: function (p, frame, w, h, scale) {
+                            return (w * scale > PointDistanceVisible * 3 && h * scale > PointDistanceVisible);
                         }
                     },
                     {
@@ -1863,6 +1897,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                         update: function (p, x, y, w, h) {
                             p.x = x;
                             p.y = y + h / 2;
+                        },
+                        visible: function (p, frame, w, h, scale) {
+                            return (w * scale > PointDistanceVisible && h * scale > PointDistanceVisible * 3);
                         }
                     }
                 );
@@ -1880,6 +1917,10 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                             p.x = x + w / 2;
                             p.y = y;
                         }
+                        ,
+                        visible: function (p, frame, w, h, scale) {
+                            return (w * scale > PointDistanceVisible * 3 && h * scale > PointDistanceVisible);
+                        }
                     },
                     {
                         type: ResizeFramePoint,
@@ -1891,6 +1932,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                         update: function (p, x, y, w, h) {
                             p.x = x + w / 2;
                             p.y = y + h;
+                        },
+                        visible: function (p, frame, w, h, scale) {
+                            return (w * scale > PointDistanceVisible * 3 && h * scale > PointDistanceVisible);
                         }
                     }
                 );
@@ -1907,6 +1951,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                         update: function (p, x, y, w, h) {
                             p.x = x + w;
                             p.y = y + h / 2;
+                        },
+                        visible: function (p, frame, w, h, scale) {
+                            return (w * scale > PointDistanceVisible && h * scale > PointDistanceVisible * 3);
                         }
                     },
                     {
@@ -1919,6 +1966,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                         update: function (p, x, y, w, h) {
                             p.x = x;
                             p.y = y + h / 2;
+                        },
+                        visible: function (p, frame, w, h, scale) {
+                            return (w * scale > PointDistanceVisible && h * scale > PointDistanceVisible * 3);
                         }
                     }
                 );

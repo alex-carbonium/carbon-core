@@ -10,7 +10,7 @@ export default {
     strokeStyle: UserSettings.frame.stroke,
     fillStyle: UserSettings.frame.prototypingFill,
     hitPointIndex: function (frame, mousePoint) {
-        if (frame.hasBadTransform){
+        if (frame.hasBadTransform) {
             return -1;
         }
 
@@ -20,9 +20,13 @@ export default {
         var elementPoint = gmi.transformPoint(mousePoint);
 
         for (var i = frame.points.length - 1; i >= 0; --i) {
-            var framePoint = frame.points[i];
-            var pt = gm.transformPoint(framePoint);
-            if (framePoint.type.hitTest(frame, mousePoint, pt, elementPoint, scale)) {
+            let p = frame.points[i];
+            if (p.visible && !p.visible(p, frame, frame.element.width(), frame.element.height(), scale)) {
+                continue;
+            }
+
+            let pt = gm.transformPoint(p);
+            if (p.type.hitTest(frame, mousePoint, pt, elementPoint, scale)) {
                 return i;
             }
         }
@@ -32,7 +36,7 @@ export default {
 
     updateFromElement: function (frame) {
         frame.hasBadTransform = frame.element.hasBadTransform();
-        if (frame.hasBadTransform){
+        if (frame.hasBadTransform) {
             return;
         }
 
@@ -119,7 +123,7 @@ export default {
                     finally {
                         GlobalMatrixModifier.pop();
                     }
-                    if(frame.fill && this.fillStyle) {
+                    if (frame.fill && this.fillStyle) {
                         context.fillStyle = this.fillStyle;
                         context.fill();
                     }
@@ -128,10 +132,12 @@ export default {
                 }
             }
 
-            if (!frame.hasBadTransform){
+            if (!frame.hasBadTransform) {
                 for (var i = frame.points.length - 1; i >= 0; --i) {
                     var p = frame.points[i];
-                    p.type.draw(p, frame, scale, context, matrix);
+                    if (!p.visible || p.visible(p, frame, frame.element.width(), frame.element.height(), scale)) {
+                        p.type.draw(p, frame, scale, context, matrix);
+                    }
                 }
             }
         }
