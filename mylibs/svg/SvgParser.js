@@ -250,10 +250,10 @@ define(function () {
         }
 
         function translateMatrix(matrix, args) {
-            if(args.length == 2) {
+            if(args.length === 2) {
                 matrix.translate(args[0], args[1]);
-            } else if(args.length == 1){
-                matrix.translate(args[0], args[0]);
+            } else if(args.length === 1){
+                matrix.translate(args[0], 0);
             }
         }
 

@@ -50,7 +50,7 @@ class PathPoint extends UIElement<any> {
     constructor(public px: number, public py: number) {
         super();
         this.applyTranslation({ x: px, y: py });
-        this.setProps({br:new Rect(0,0,1,1)});
+        this.setProps({ br: new Rect(0, 0, 1, 1) });
     }
 }
 
@@ -1095,7 +1095,7 @@ class Path extends Shape {
         let path = d.match(/[mzlhvcsqta][^mzlhvcsqta]*/gi);
         let svgCommands = this._parsePath(path);
         this._renderSvgCommands(svgCommands, matrix);
-        this.setProps({m:matrix});
+        this.setProps({ m: matrix });
         this.adjustBoundaries();
         this.save();
     }
@@ -1192,7 +1192,7 @@ class Path extends Shape {
         let m = this.globalViewMatrix();
 
         var points = this.points;
-        return points.map(p=>{
+        return points.map(p => {
             var pt = m.transformPoint(p);
             return new PathPoint(pt.x, pt.y);
         });
@@ -1241,6 +1241,8 @@ class Path extends Shape {
             l = 0,//this.x(),//-((this.width() / 2) + this.pathOffset.x),
             t = 0;//this.y();//-((this.height() / 2) + this.pathOffset.y);
 
+        let startX, startY, segmentStarted = false;
+
         for (let i = 0, len = commands.length; i < len; ++i) {
 
             current = commands[i];
@@ -1250,7 +1252,7 @@ class Path extends Shape {
                 case 'l': // lineto, relative
                     x += current[1] * scaleX;
                     y += current[2] * scaleY;
-                    this.lineToPoint({x:x + l,y:y + t});
+                    this.lineToPoint({ x: x + l, y: y + t });
                     controlX = null;
                     controlY = null;
                     break;
@@ -1258,35 +1260,35 @@ class Path extends Shape {
                 case 'L': // lineto, absolute
                     x = current[1] * scaleX;
                     y = current[2] * scaleY;
-                    this.lineToPoint({x:x + l, y:y + t});
+                    this.lineToPoint({ x: x + l, y: y + t });
                     controlX = null;
                     controlY = null;
                     break;
 
                 case 'h': // horizontal lineto, relative
                     x += current[1] * scaleX;
-                    this.lineToPoint({x:x + l, y:y + t});
+                    this.lineToPoint({ x: x + l, y: y + t });
                     controlX = null;
                     controlY = null;
                     break;
 
                 case 'H': // horizontal lineto, absolute
                     x = current[1] * scaleX;
-                    this.lineToPoint({x:x + l, y:y + t});
+                    this.lineToPoint({ x: x + l, y: y + t });
                     controlX = null;
                     controlY = null;
                     break;
 
                 case 'v': // vertical lineto, relative
                     y += current[1] * scaleY;
-                    this.lineToPoint({x:x + l, y:y + t});
+                    this.lineToPoint({ x: x + l, y: y + t });
                     controlX = null;
                     controlY = null;
                     break;
 
                 case 'V': // verical lineto, absolute
                     y = current[1] * scaleY;
-                    this.lineToPoint({x:x + l, y:y + t});
+                    this.lineToPoint({ x: x + l, y: y + t });
                     controlX = null;
                     controlY = null;
                     break;
@@ -1295,7 +1297,7 @@ class Path extends Shape {
                     x += current[1] * scaleX;
                     y += current[2] * scaleY;
                     // draw a line if previous command was moveTo as well (otherwise, it will have no effect)
-                    this[(previous && (previous[0] === 'm' || previous[0] === 'M')) ? 'lineToPoint' : 'moveToPoint']({x:x + l, y:y + t});
+                    this[(previous && (previous[0] === 'm' || previous[0] === 'M')) ? 'lineToPoint' : 'moveToPoint']({ x: x + l, y: y + t });
                     controlX = null;
                     controlY = null;
                     break;
@@ -1304,7 +1306,7 @@ class Path extends Shape {
                     x = current[1] * scaleX;
                     y = current[2] * scaleY;
                     // draw a line if previous command was moveTo as well (otherwise, it will have no effect)
-                    this[(previous && (previous[0] === 'm' || previous[0] === 'M')) ? 'lineToPoint' : 'moveToPoint']({x:x + l, y:y + t});
+                    this[(previous && (previous[0] === 'm' || previous[0] === 'M')) ? 'lineToPoint' : 'moveToPoint']({ x: x + l, y: y + t });
                     controlX = null;
                     controlY = null;
                     break;
@@ -1315,12 +1317,18 @@ class Path extends Shape {
                     controlX = x + current[3] * scaleX;
                     controlY = y + current[4] * scaleY;
                     this.curveToPoint(
-                        {x:tempX + l,
-                            y:tempY + t},
-                        {x:x + current[1] * scaleX + l, // x1
-                            y:y + current[2] * scaleY + t}, // y1
-                        {x:controlX + l, // x2
-                            y:controlY + t}
+                        {
+                            x: tempX + l,
+                            y: tempY + t
+                        },
+                        {
+                            x: x + current[1] * scaleX + l, // x1
+                            y: y + current[2] * scaleY + t
+                        }, // y1
+                        {
+                            x: controlX + l, // x2
+                            y: controlY + t
+                        }
                     );
                     x = tempX;
                     y = tempY;
@@ -1332,9 +1340,9 @@ class Path extends Shape {
                     controlX = current[3] * scaleX;
                     controlY = current[4] * scaleY;
                     this.curveToPoint(
-                        {x:x + l, y:y + t},
-                        {x:current[1] * scaleX + l, y:current[2] * scaleY + t},
-                        {x:controlX + l, y:controlY + t}
+                        { x: x + l, y: y + t },
+                        { x: current[1] * scaleX + l, y: current[2] * scaleY + t },
+                        { x: controlX + l, y: controlY + t }
                     );
                     break;
 
@@ -1349,9 +1357,9 @@ class Path extends Shape {
                     controlY = controlY ? (2 * y - controlY) : y;
 
                     this.curveToPoint(
-                        {x:tempX + l, y:tempY + t},
-                        {x:controlX + l, y:controlY + t},
-                        {x:x + current[1] * scaleX + l, y:y + current[2] * scaleY + t}
+                        { x: tempX + l, y: tempY + t },
+                        { x: controlX + l, y: controlY + t },
+                        { x: x + current[1] * scaleX + l, y: y + current[2] * scaleY + t }
                     );
                     // set control point to 2nd one of this command
                     // "... the first control point is assumed to be the reflection of the second control point on the previous command relative to the current point."
@@ -1370,9 +1378,9 @@ class Path extends Shape {
                     controlY = controlY ? (2 * y - controlY) : y;
 
                     this.curveToPoint(
-                        {x:tempX + l, y:tempY + t},
-                        {x:controlX + l, y:controlY + t},
-                        {x:current[1] * scaleX + l, y:current[2] * scaleY + t}
+                        { x: tempX + l, y: tempY + t },
+                        { x: controlX + l, y: controlY + t },
+                        { x: current[1] * scaleX + l, y: current[2] * scaleY + t }
                     );
                     x = tempX;
                     y = tempY;
@@ -1393,8 +1401,8 @@ class Path extends Shape {
                     controlY = y + current[2] * scaleY;
 
                     this.quadraticCurveToPoint(
-                        {x:controlX + l, y:controlY + t},
-                        {x:tempX + l, y:tempY + t}
+                        { x: controlX + l, y: controlY + t },
+                        { x: tempX + l, y: tempY + t }
                     );
                     x = tempX;
                     y = tempY;
@@ -1405,8 +1413,8 @@ class Path extends Shape {
                     tempY = current[4] * scaleY;
 
                     this.quadraticCurveToPoint(
-                        {x:current[1] * scaleX + l, y:current[2] * scaleY + t},
-                        {x:tempX + l, y:tempY + t}
+                        { x: current[1] * scaleX + l, y: current[2] * scaleY + t },
+                        { x: tempX + l, y: tempY + t }
                     );
                     x = tempX;
                     y = tempY;
@@ -1442,8 +1450,8 @@ class Path extends Shape {
                     tempControlY = controlY;
 
                     this.quadraticCurveToPoint(
-                        {x:controlX + l, y:controlY + t},
-                        {x:tempX + l, y:tempY + t}
+                        { x: controlX + l, y: controlY + t },
+                        { x: tempX + l, y: tempY + t }
                     );
                     x = tempX;
                     y = tempY;
@@ -1459,8 +1467,8 @@ class Path extends Shape {
                     controlX = 2 * x - controlX;
                     controlY = 2 * y - controlY;
                     this.quadraticCurveToPoint(
-                        {x:controlX + l, y:controlY + t},
-                        {x:tempX + l, y:tempY + t}
+                        { x: controlX + l, y: controlY + t },
+                        { x: tempX + l, y: tempY + t }
                     );
                     x = tempX;
                     y = tempY;
@@ -1505,9 +1513,17 @@ class Path extends Shape {
                     this.closeAtPoint();
                     controlX = null;
                     controlY = null;
+                    x = startX;
+                    y = startY;
+                    segmentStarted = false;
                     break;
             }
             previous = current;
+            if(!segmentStarted) {
+                segmentStarted = true;
+                startX = x;
+                startY = y;
+            }
         }
     }
 
