@@ -875,6 +875,13 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             w = br.width,
             h = br.height;
 
+        if (environment.viewportRect && !areRectsIntersecting(environment.viewportRect, this.getBoundingBoxGlobal(true))) {
+            if (params.perf) {
+                performance.measure(markName, markName);
+            }
+            return;
+        }
+
         context.save();
         context.globalAlpha = context.globalAlpha * this.opacity();
 

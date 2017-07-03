@@ -34,10 +34,10 @@ var settings = {
         enabled: true,
         pixels: true,
         columns: true,
+        grid:true,
         guides: true,
-        objectCorners: true,
-        objectCenters: true,
-        lockedObjects: false
+        lockedObjects: false,
+        onlyVisibleObjects: true
     },
 
     shapes: {
@@ -62,6 +62,10 @@ var settings = {
 
     internal: {
         showRotateAreas: false
+    },
+
+    save() {
+        // TODO: save setting changes
     }
 };
 

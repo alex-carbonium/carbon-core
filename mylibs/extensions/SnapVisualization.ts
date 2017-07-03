@@ -13,7 +13,7 @@ function drawSnapLines(context, environment) {
 
     var scale = environment.view.scale();
     context.scale(1 / scale, 1 / scale);
-    context.setLineDash([4, 2]);
+    //context.setLineDash([4, 2]);
 
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
@@ -33,7 +33,7 @@ function drawSnapLines(context, environment) {
             y2 += p;
         }
 
-        context.strokeLine(x1, y1, x2, y2, 'red');
+        context.strokeLine(x1, y1, x2, y2, 'magenta');
     }
 
     context.restore();

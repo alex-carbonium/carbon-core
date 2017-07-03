@@ -2,6 +2,8 @@ import Environment from "environment";
 import Invalidate from "framework/Invalidate";
 import Point from "math/point";
 import { ICoordinate } from "carbon-core";
+import UserSettings from "UserSettings";
+import { areRectsIntersecting } from "../math/math";
 
 var debug = require("DebugUtil")("carb:snapController");
 
@@ -69,8 +71,12 @@ function buildVertical(snap, ys) {
     return line;
 }
 
-function collectPoints(data, element) {
+function collectPoints(data, viewportRect, element) {
     if (element.hitVisible() && !element.hitTransparent()) {
+        if (UserSettings.snapTo.onlyVisibleObjects && !areRectsIntersecting(viewportRect, element.getBoundingBoxGlobal(false))) {
+            return;
+        }
+
         var snapData = element.getSnapPoints();
         if (snapData) {
             var xs = snapData.xs;
@@ -114,7 +120,11 @@ class SnapController {
             return x1.value - x2.value;
         });
 
-        this.snapGuides.forEach(x => collectPoints(data, x));
+        let viewportRect = Environment.view.viewportRect();
+
+        if (UserSettings.snapTo.guides) {
+            this.snapGuides.forEach(x => collectPoints(data, viewportRect, x));
+        }
 
         this.currentSnappingData = data;
     }
@@ -125,16 +135,18 @@ class SnapController {
         data._snapY = [];
         data._snapXCenter = [];
         data._snapYCenter = [];
-
+        let viewportRect = Environment.view.viewportRect()
 
         this.currentSnappingData = data;
-        this.snapGuides.forEach(x => collectPoints(data, x));
+        if (UserSettings.snapTo.guides) {
+            this.snapGuides.forEach(x => collectPoints(data, viewportRect, x));
+        }
 
         if (!parent) {
             return;
         }
 
-        parent.applyVisitor(collectPoints.bind(null, data), true);
+        parent.applyVisitor(collectPoints.bind(null, data, viewportRect), true);
 
         data._snapX.sort(function (x1, x2) {
             return x1.value - x2.value;
@@ -253,6 +265,10 @@ class SnapController {
     }
 
     applySnappingForPoint(pos: ICoordinate, disableVertical?, disableHorizontal?) {
+        if (!UserSettings.snapTo.enabled) {
+            return pos;
+        }
+
         var data = this.currentSnappingData;
         if (!data) {
             return pos;

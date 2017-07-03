@@ -44,6 +44,7 @@ export default {
     "Clipboard": require("./framework/Clipboard"),
     "Environment": require("./environment"),
     "Workspace": require("./environment"),
+    "UserSettings": require("./UserSettings"),
     "backend": backend,
     "imageCache": require("./imageCache"),
     "util": require("./util"),

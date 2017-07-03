@@ -380,4 +380,6 @@ export interface IAreaConstraint {
     export const ActionManager: IActionManager;
     export const Selection: ISelection;
     export const Invalidate: IInvalidate;
+
+    export const UserSettings:any;
 }

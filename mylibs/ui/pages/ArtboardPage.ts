@@ -113,7 +113,7 @@ class ArtboardPage extends Page {
     }
 
     draw(context, environment) {
-        this._viewport = environment.view.viewportRect();
+        environment.viewportRect = environment.view.viewportRect();
 
         super.draw.apply(this, arguments);
 
@@ -122,7 +122,7 @@ class ArtboardPage extends Page {
 
     drawChildSafe(child, context, environment) {
         let frame = null;
-        if (areRectsIntersecting(this._viewport, child.getBoundaryRectGlobal())) {
+        if (!environment.viewportRect || areRectsIntersecting(environment.viewportRect, child.getBoundaryRectGlobal())) {
             if(environment.showFrames && child.frame){
                 frame = child.frame;
                 if (frame) {
