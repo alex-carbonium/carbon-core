@@ -1519,7 +1519,7 @@ class Path extends Shape {
                     break;
             }
             previous = current;
-            if(!segmentStarted) {
+            if (!segmentStarted && current[0] !== 'z' && current[0] !== 'Z') {
                 segmentStarted = true;
                 startX = x;
                 startY = y;
