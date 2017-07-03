@@ -4,7 +4,6 @@ import SnapController from "framework/SnapController";
 import {LayerTypes} from "carbon-app";
 
 function drawSnapLines(context, environment) {
-
     var lines = SnapController.snapLines;
     if(!lines.length){
         return;
@@ -13,7 +12,6 @@ function drawSnapLines(context, environment) {
 
     var scale = environment.view.scale();
     context.scale(1 / scale, 1 / scale);
-    //context.setLineDash([4, 2]);
 
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i];

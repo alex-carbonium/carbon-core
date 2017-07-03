@@ -11,10 +11,31 @@ var SNAP_DELTA = 4;
 var LINE_OFFSET = 10;
 
 function findSnap(snaps, value, delta) {
+    var res = [];
+    var min = Number.MAX_VALUE;
     for (var j = 0, len2 = snaps.length; j < len2; ++j) {
-        if (Math.abs(value - snaps[j].value) <= delta) {
-            return snaps[j];
+        var m = Math.abs(value - snaps[j].value);
+
+        if (m <= delta) {
+            res.push({
+                idx: j,
+                value: m
+            });
         }
+    }
+
+    if (res.length) {
+        res.sort((a, b) => a.value - b.value);
+        var ret = [];
+        let v = res[0].value;
+        for (let i = 0; i < res.length; ++i) {
+            if (res[i].value > v) {
+                break;
+            }
+            ret.push(snaps[res[i].idx]);
+        }
+
+        return ret;
     }
 
     return null;
@@ -38,6 +59,7 @@ function buildHorizontal(snap, xs): any {
     if (exs.noLine) {
         return null;
     }
+
     var arr = xs.concat(exs.xs);
 
     arr.sort((a, b) => a - b);
@@ -47,6 +69,7 @@ function buildHorizontal(snap, xs): any {
         x1: arr[0] - LINE_OFFSET / scale,
         x2: arr[arr.length - 1] + LINE_OFFSET / scale,
     }
+
     debug("horizontal: x1=%d, y1=%d  x2=%d,y2=%d", line.x1, line.y1, line.x2, line.y2);
     return line;
 }
@@ -88,11 +111,6 @@ function collectPoints(data, viewportRect, element) {
             for (i = 0, length = ys.length; i < length; ++i) {
                 data._snapY.push({ value: ys[i], element: element });
             }
-            if (snapData.center) {
-                data._snapXCenter.push({ value: snapData.center.x, element: element });
-                data._snapYCenter.push({ value: snapData.center.y, element: element });
-            }
-
         }
     }
 }
@@ -163,6 +181,13 @@ class SnapController {
         var x = rect.x;
         var y = rect.y;
         var data: any = {};
+        if (snapData.center) {
+            snapData.xs.push(snapData.center.x);
+        }
+
+        if (snapData.center) {
+            snapData.ys.push(snapData.center.y);
+        }
         if (snapData !== null) {
             if (holdPcnt < 20) {
                 snapData.xs.sort((a, b) => a - b);
@@ -178,8 +203,6 @@ class SnapController {
             data._ys = snapData.ys.map(function (v) {
                 return v - y;
             });
-            data._xCenter = snapData.center.x - x;
-            data._yCenter = snapData.center.y - y;
         } else {
             return null;
         }
@@ -202,61 +225,52 @@ class SnapController {
             snapY = data._snapY,
             snapXCenter = data._snapXCenter,
             snapYCenter = data._snapYCenter;
-        var snap = null;
+        var snaps = null;
         var snappedPoint = null;
         this.clearActiveSnapLines();
 
         var scale = Environment.view.scale();
         var SNAP_DELTA_SCALE = SNAP_DELTA / scale;
         var delta = SNAP_DELTA_SCALE;
-        if (target) {
-            snap = findSnap(snapXCenter, target._xCenter + pos.x, delta);
-        }
-        if (snap !== null) {
-            snappedPoint = new Point(snap.value - target._xCenter, pos.y);
-            let snapLine = buildVertical(snap, ys.map(v => v + pos.y));
-            if (snapLine) {
-                this.snapLines.push(snapLine);
-            }
-        } else {
-            for (var i = 0, len = xs.length; i < len; ++i) {
-                snap = findSnap(snapX, xs[i] + pos.x, delta);
-                if (snap !== null) {
-                    snappedPoint = new Point(snap.value - xs[i], pos.y);
+
+        for (var i = 0, len = xs.length; i < len; ++i) {
+            snaps = findSnap(snapX, xs[i] + pos.x, delta);
+            if (snaps !== null) {
+                let snap = snaps[0];
+                snappedPoint = snappedPoint || new Point(snap.value - xs[i], pos.y);
+                for (snap of snaps) {
                     let snapLine = buildVertical(snap, ys.map(v => v + pos.y));
                     if (snapLine) {
                         this.snapLines.push(snapLine);
                     }
+                }
+                if (delta !== 0) {
+                    let d = snap.value - (xs[i] + pos.x);
                     delta = 0;
-                    break;
+                    pos.x += d;
                 }
             }
         }
 
         delta = SNAP_DELTA_SCALE;
-        snap = null;
-        if (target) {
-            snap = findSnap(snapYCenter, target._yCenter + pos.y, delta);
-        }
-        if (snap !== null) {
-            snappedPoint = snappedPoint || new Point(pos.x, pos.y);
-            snappedPoint.y = snap.value - target._yCenter;
-            let snapLine = buildHorizontal(snap, xs.map(v => v + pos.x));
-            if (snapLine) {
-                this.snapLines.push(snapLine);
-            }
-        } else {
-            for (i = 0, len = ys.length; i < len; ++i) {
-                snap = findSnap(snapY, ys[i] + pos.y, delta);
-                if (snap !== null) {
-                    snappedPoint = snappedPoint || new Point(pos.x, pos.y);
-                    snappedPoint.y = snap.value - ys[i];
+        snaps = null;
+
+        for (i = 0, len = ys.length; i < len; ++i) {
+            snaps = findSnap(snapY, ys[i] + pos.y, delta);
+            if (snaps !== null) {
+                let snap = snaps[0];
+                snappedPoint = snappedPoint || new Point(pos.x, pos.y);
+                snappedPoint.y = snap.value - ys[i];
+                for (snap of snaps) {
                     let snapLine = buildHorizontal(snap, xs.map(v => v + pos.x));
                     if (snapLine) {
                         this.snapLines.push(snapLine);
                     }
+                }
+                if (delta !== 0) {
+                    let d = snap.value - (ys[i] + pos.y);
                     delta = 0;
-                    break;
+                    pos.y += d;
                 }
             }
         }
@@ -285,6 +299,7 @@ class SnapController {
         var scale = Environment.view.scale();
         var SNAP_DELTA_SCALE = SNAP_DELTA / scale;
         var delta = SNAP_DELTA_SCALE;
+
         if (!disableVertical) {
             var snap = findSnap(snapX, pos.x, delta);
             if (snap !== null) {

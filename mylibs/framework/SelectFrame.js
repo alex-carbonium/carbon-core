@@ -51,7 +51,7 @@ class SelectFrame extends UIElement {
     }
 
     getSnapPoints() {
-        return {xs: [], ys: [], center: {}};
+        return {xs: [], ys: []};
     }
 
     canMultiSelect() {
