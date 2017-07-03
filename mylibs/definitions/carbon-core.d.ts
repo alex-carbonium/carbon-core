@@ -47,6 +47,7 @@ declare module "carbon-core" {
     export var IconsInfo: any;
     export var ToolboxConfiguration: any;
     export var IconSetSpriteManager: any;
+    export var UserSettings:any;
     export class Shape{}
     export function createUUID(): string;
 }
