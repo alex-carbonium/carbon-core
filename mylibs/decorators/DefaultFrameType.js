@@ -52,9 +52,11 @@ export default {
 
     capturePoint: function (frame, point, event) {
         frame._mousePoint = new Point(event.x, event.y);
+        var scale = Environment.view.scale();
 
         var matrix = frame.element.globalViewMatrixInverted();
         frame._capturedPt = matrix.transformPoint(frame._mousePoint);
+        frame._offsetPt = new Point(point.x - frame._capturedPt.x, point.y - frame._capturedPt.y);
 
         point.type.capture(frame, point, frame._mousePoint);
 
@@ -65,8 +67,13 @@ export default {
         frame._mousePoint.set(event.x, event.y);
 
         var pos = frame._mousePoint;
+        var snapPos;
+        var px = 0, py = 0;
+        var scale = Environment.view.scale();
         if (frame.allowSnapping && !keys.ctrl) {
-            pos = SnapController.applySnappingForPoint(frame._mousePoint);
+            px = frame._offsetPt.x;
+            py = frame._offsetPt.y;
+            pos = SnapController.applySnappingForPoint({ x: frame._mousePoint.x + px, y: frame._mousePoint.y + py });
         }
         else {
             SnapController.clearActiveSnapLines();
@@ -78,10 +85,10 @@ export default {
         var dx = 0;
         var dy = 0;
         if (point.moveDirection & PointDirection.Vertical) {
-            dy = -frame._capturedPt.y + pt.y;
+            dy = -frame._capturedPt.y + pt.y - py;
         }
         if (point.moveDirection & PointDirection.Horizontal) {
-            dx = -frame._capturedPt.x + pt.x;
+            dx = -frame._capturedPt.x + pt.x - px;
         }
 
         point.type.change(frame, dx, dy, point, frame._mousePoint, keys, event);
