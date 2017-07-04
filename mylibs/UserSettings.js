@@ -31,6 +31,8 @@ var settings = {
         prototypingFill: 'rgba(17, 117, 186, 0.2)'
     },
     snapTo: {
+        distanceColor: 'magenta',
+        snapColor: 'cyan',
         enabled: true,
         pixels: true,
         columns: true,

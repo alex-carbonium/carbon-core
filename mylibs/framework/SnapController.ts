@@ -55,12 +55,12 @@ function compareSnapLines(lines1, lines2) {
 
 function buildHorizontal(snap, xs): any {
     var scale = Environment.view.scale();
-    var exs = snap.element.getSnapPoints();
-    if (exs.noLine) {
+    let snapData = snap.element.getSnapPoints();
+    if (snapData.noLine) {
         return null;
     }
 
-    var arr = xs.concat(exs.xs);
+    var arr = xs.concat(snapData.xs);
 
     arr.sort((a, b) => a - b);
     var line = {
@@ -76,12 +76,13 @@ function buildHorizontal(snap, xs): any {
 
 function buildVertical(snap, ys) {
     var scale = Environment.view.scale();
-    var eys = snap.element.getSnapPoints();
-    if (eys.noLine) {
+    let snapData = snap.element.getSnapPoints();
+    if (snapData.noLine) {
         return null;
     }
-    var arr = ys.concat(eys.ys);
+    var arr = ys.concat(snapData.ys);
     arr.sort((a, b) => a - b);
+
     var line = {
         x1: snap.value,
         x2: snap.value,
@@ -92,6 +93,182 @@ function buildVertical(snap, ys) {
     debug("vertical: x1=%d, y1=%d  x2=%d,y2=%d", line.x1, line.y1, line.x2, line.y2);
 
     return line;
+}
+
+function buildVerticalDistances(distances, snap, b) {
+    var scale = Environment.view.scale();
+    let snapData = snap.element.getSnapPoints();
+    if (snapData.noLine) {
+        return;
+    }
+
+    var a = snapData.ys;
+    var amin = a[0];
+    var amax = a[a.length - 1];
+    var bmin = b[0];
+    var bmax = b[b.length - 1];
+
+    if (bmax < amin) {
+        distances.push({
+            x1: snap.value,
+            x2: snap.value,
+            y1: bmax,
+            y2: amin,
+            value: Math.abs(bmax - amin),
+            vertical: true,
+            id: 'v' + snap.element.id()
+        });
+    } else if (bmin > amax) {
+        distances.push({
+            x1: snap.value,
+            x2: snap.value,
+            y2: amax,
+            y1: bmin,
+            value: Math.abs(amax - bmin),
+            vertical: true,
+            id: 'v' + snap.element.id()
+        });
+    } else if (bmax > amin && bmin < amin) {
+        distances.push({
+            x1: snap.value,
+            x2: snap.value,
+            y1: bmax,
+            y2: amax,
+            value: Math.abs(bmax - amax),
+            vertical: true,
+            id: 'v' + snap.element.id()
+        });
+    } else if (bmin > amin && bmax > amax) {
+        distances.push({
+            x1: snap.value,
+            x2: snap.value,
+            y1: bmin,
+            y2: amin,
+            value: Math.abs(bmin - amin),
+            vertical: true,
+            id: 'v' + snap.element.id()
+        });
+    } else if (bmin >= amin && bmax <= amax) {
+        distances.push({
+            x1: snap.value,
+            x2: snap.value,
+            y1: bmin,
+            y2: amin,
+            value: Math.abs(bmin - amin),
+            vertical: true,
+            id: 'v1' + snap.element.id()
+        });
+
+        distances.push({
+            x1: snap.value,
+            x2: snap.value,
+            y1: bmax,
+            y2: amax,
+            value: Math.abs(bmax - amax),
+            vertical: true,
+            id: 'v2' + snap.element.id()
+        });
+    } else if (bmax = amin) {
+        distances.push({
+            x1: snap.value,
+            x2: snap.value,
+            y1: bmax,
+            y2: amax,
+            value: Math.abs(amax - amin),
+            vertical: true,
+            id: 'v' + snap.element.id()
+        });
+    }
+
+    return;
+}
+
+function buildHorizontalDistances(distances, snap, b) {
+    var scale = Environment.view.scale();
+    let snapData = snap.element.getSnapPoints();
+    if (snapData.noLine) {
+        return null;
+    }
+
+    var a = snapData.xs;
+    var amin = a[0];
+    var amax = a[a.length - 1];
+    var bmin = b[0];
+    var bmax = b[b.length - 1];
+
+    if (bmin > amax) {
+        distances.push({
+            y1: snap.value,
+            y2: snap.value,
+            x2: amax,
+            x1: bmin,
+            value: Math.abs(amax - bmin),
+            vertical: false,
+            id: 'h' + snap.element.id()
+        });
+    } else if (bmax < amin) {
+        distances.push({
+            y1: snap.value,
+            y2: snap.value,
+            x1: bmax,
+            x2: amin,
+            value: Math.abs(bmax - amin),
+            vertical: false,
+            id: 'h' + snap.element.id()
+        });
+    } else if (bmax > amin && bmin < amin) {
+        distances.push({
+            y1: snap.value,
+            y2: snap.value,
+            x1: bmax,
+            x2: amax,
+            value: Math.abs(bmax - amax),
+            vertical: false,
+            id: 'h' + snap.element.id()
+        });
+    } else if (bmin > amin && bmax > amax) {
+        distances.push({
+            y1: snap.value,
+            y2: snap.value,
+            x1: bmin,
+            x2: amin,
+            value: Math.abs(bmin - amin),
+            vertical: false,
+            id: 'h' + snap.element.id()
+        });
+    } else if (bmin >= amin && bmax <= amax) {
+        distances.push({
+            y1: snap.value,
+            y2: snap.value,
+            x1: bmin,
+            x2: amin,
+            value: Math.abs(bmin - amin),
+            vertical: false,
+            id: 'h1' + snap.element.id()
+        });
+
+        distances.push({
+            y1: snap.value,
+            y2: snap.value,
+            x1: bmax,
+            x2: amax,
+            value: Math.abs(bmax - amax),
+            vertical: false,
+            id: 'h2' + snap.element.id()
+        });
+    } else if (bmax = amin) {
+        distances.push({
+            y1: snap.value,
+            y2: snap.value,
+            x1: bmax,
+            x2: amax,
+            value: Math.abs(amax - amin),
+            vertical: false,
+            id: 'h' + snap.element.id()
+        });
+    }
+
+    return { value: 0 }
 }
 
 function collectPoints(data, viewportRect, element) {
@@ -217,10 +394,13 @@ class SnapController {
         if (target) {
             var xs = target._xs,
                 ys = target._ys;
+            xs.sort((a, b) => a - b);
+            ys.sort((a, b) => a - b);
         } else {
             xs = [pos.x];
             ys = [pos.y];
         }
+
         var snapX = data._snapX,
             snapY = data._snapY,
             snapXCenter = data._snapXCenter,
@@ -233,17 +413,24 @@ class SnapController {
         var SNAP_DELTA_SCALE = SNAP_DELTA / scale;
         var delta = SNAP_DELTA_SCALE;
 
+        let verticalSnaps = [];
+        let horizontalSnaps = [];
+
+        let offsetYs = ys.map(v => v + pos.y);
         for (var i = 0, len = xs.length; i < len; ++i) {
             snaps = findSnap(snapX, xs[i] + pos.x, delta);
             if (snaps !== null) {
                 let snap = snaps[0];
                 snappedPoint = snappedPoint || new Point(snap.value - xs[i], pos.y);
+
                 for (snap of snaps) {
-                    let snapLine = buildVertical(snap, ys.map(v => v + pos.y));
+                    let snapLine = buildVertical(snap, offsetYs);
                     if (snapLine) {
                         this.snapLines.push(snapLine);
+                        verticalSnaps.push(snap);
                     }
                 }
+
                 if (delta !== 0) {
                     let d = snap.value - (xs[i] + pos.x);
                     delta = 0;
@@ -255,6 +442,7 @@ class SnapController {
         delta = SNAP_DELTA_SCALE;
         snaps = null;
 
+        let offsetXs = xs.map(v => v + pos.x);
         for (i = 0, len = ys.length; i < len; ++i) {
             snaps = findSnap(snapY, ys[i] + pos.y, delta);
             if (snaps !== null) {
@@ -262,16 +450,33 @@ class SnapController {
                 snappedPoint = snappedPoint || new Point(pos.x, pos.y);
                 snappedPoint.y = snap.value - ys[i];
                 for (snap of snaps) {
-                    let snapLine = buildHorizontal(snap, xs.map(v => v + pos.x));
+                    let snapLine = buildHorizontal(snap, offsetXs);
                     if (snapLine) {
                         this.snapLines.push(snapLine);
+                        horizontalSnaps.push(snap);
                     }
                 }
+
                 if (delta !== 0) {
                     let d = snap.value - (ys[i] + pos.y);
                     delta = 0;
                     pos.y += d;
                 }
+            }
+        }
+
+        // build distances
+        if (verticalSnaps.length) {
+            let ysv = ys.map(v => v + snappedPoint.y);
+            for (let snap of verticalSnaps) {
+                buildVerticalDistances(this.distances, snap, ysv);
+            }
+        }
+
+        if (horizontalSnaps.length) {
+            let xsv = xs.map(v => v + snappedPoint.x);
+            for (let snap of horizontalSnaps) {
+                buildHorizontalDistances(this.distances, snap, xsv);
             }
         }
 
@@ -289,43 +494,68 @@ class SnapController {
         }
         var xs = [pos.x];
         var ys = [pos.y];
+
         var snapX = data._snapX,
             snapY = data._snapY;
 
         var oldSnapLines = this.snapLines;
-        var snappedPoint = null;
+        let snappedPoint = null;
 
         this.clearActiveSnapLines();
         var scale = Environment.view.scale();
         var SNAP_DELTA_SCALE = SNAP_DELTA / scale;
         var delta = SNAP_DELTA_SCALE;
+        let verticalSnaps = [];
+        let horizontalSnaps = [];
 
         if (!disableVertical) {
-            var snap = findSnap(snapX, pos.x, delta);
-            if (snap !== null) {
-                snappedPoint = new Point(snap.value, pos.y);
-                let snapLine = buildVertical(snap, ys);
-                if (snapLine) {
-                    this.snapLines.push(snapLine);
+            var snaps = findSnap(snapX, pos.x, delta);
+            if (snaps !== null) {
+                let snap = snaps[0];
+                snappedPoint = snappedPoint || new Point(snap.value, pos.y);
+
+                for (snap of snaps) {
+                    let snapLine = buildVertical(snap, ys);
+                    if (snapLine) {
+                        this.snapLines.push(snapLine);
+                        verticalSnaps.push(snap);
+                    }
                 }
             }
         }
 
         if (!disableHorizontal) {
             delta = SNAP_DELTA_SCALE;
-            snap = findSnap(snapY, pos.y, delta);
-            if (snap !== null) {
+            snaps = findSnap(snapY, pos.y, delta);
+            if (snaps !== null) {
+                let snap = snaps[0];
                 snappedPoint = snappedPoint || new Point(pos.x, pos.y);
                 snappedPoint.y = snap.value;
-                let snapLine = buildHorizontal(snap, xs);
-                if (snapLine) {
-                    this.snapLines.push(snapLine);
+                for (snap of snaps) {
+                    let snapLine = buildHorizontal(snap, xs);
+                    if (snapLine) {
+                        this.snapLines.push(snapLine);
+                        horizontalSnaps.push(snap);
+                    }
                 }
             }
         }
 
-        if (!compareSnapLines(oldSnapLines, this.snapLines)) {
-            Invalidate.requestInteractionOnly();
+        // if (!compareSnapLines(oldSnapLines, this.snapLines)) {
+        Invalidate.requestInteractionOnly();
+        // }
+
+        // build distances
+        if (verticalSnaps.length) {
+            for (let snap of verticalSnaps) {
+                buildVerticalDistances(this.distances, snap, [snappedPoint.y]);
+            }
+        }
+
+        if (horizontalSnaps.length) {
+            for (let snap of horizontalSnaps) {
+                buildHorizontalDistances(this.distances, snap, [snappedPoint.x]);
+            }
         }
 
         return snappedPoint || pos;
@@ -333,6 +563,7 @@ class SnapController {
 
     clearActiveSnapLines() {
         this.snapLines = [];
+        this.distances = [];
         debug("clear");
     }
 

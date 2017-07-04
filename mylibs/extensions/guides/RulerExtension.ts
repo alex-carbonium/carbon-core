@@ -37,6 +37,7 @@ export default class RulerExtension extends RuntimeExtension {
         if (!(view instanceof DesignerView)) {
             return;
         }
+
         super.attach.apply(this, arguments);
 
         this._rulerGuides = new RulerGuides(app, view, controller);
@@ -483,7 +484,9 @@ function calculateOffset(origin, length, settings): IOffset {
     var rounder = major > 0 ? 1 : major < 0 ? -1 : 0;
     major = major + rounder | 0;
     //if origin is on the left, step one major back to ensure filling the width
-    if (origin > 0)--major;
+    if (origin > 0) {
+        --major
+    };
     var translate = Math.round(major * settings.minorStepPixels * 10 - origin);
 
     //draw one major more to fill the width
