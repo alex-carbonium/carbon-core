@@ -541,9 +541,7 @@ class SnapController {
             }
         }
 
-        // if (!compareSnapLines(oldSnapLines, this.snapLines)) {
         Invalidate.requestInteractionOnly();
-        // }
 
         // build distances
         if (verticalSnaps.length) {
