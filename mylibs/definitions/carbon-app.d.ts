@@ -50,6 +50,8 @@ declare module "carbon-app" {
         setActiveStoryById(id);
         removeStory(story);
 
+        isolationActive():boolean;
+
         currentTool: string;
         currentToolChanged: IEvent<string>;
 

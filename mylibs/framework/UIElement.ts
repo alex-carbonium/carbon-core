@@ -1212,6 +1212,20 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
         return this.props.visible;
     }
+
+    visibleInChain() {
+        var e:any = this;
+        while(e && e !== NullContainer) {
+            if(! e.visible()) {
+                return false;
+            }
+
+            e = e.parent();
+        }
+
+        return true;
+    }
+
     autoPosition(value?: string) {
         return this.field("_autoPosition", value, "center");
     }

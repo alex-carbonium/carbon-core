@@ -176,6 +176,9 @@ export default class PathManipulationObject extends UIElementDecorator implement
     }
 
     attach(element: Path) {
+        if(!element.visibleInChain()) {
+            return; // need it for isolation layer
+        }
         super.attach(element);
         Environment.view.registerForLayerDraw(LayerTypes.Interaction, this);
         Environment.controller.captureMouse(this);
@@ -200,6 +203,10 @@ export default class PathManipulationObject extends UIElementDecorator implement
     }
 
     detach() {
+        if(!this.path) {
+            return;
+        }
+
         if (this._cancelBinding) {
             this._cancelBinding.dispose();
             this._cancelBinding = null;
