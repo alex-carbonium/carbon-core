@@ -15,6 +15,7 @@ import { Types, ViewTool } from "../../framework/Defs";
 import Rect from "../../math/rect";
 import { IArtboard } from "carbon-model";
 import { ArtboardType } from "carbon-core";
+var debug = require<any>("DebugUtil")("carb:artboardPage");
 
 const ARTBOARD_SPACE = 100;
 
@@ -122,7 +123,7 @@ class ArtboardPage extends Page {
 
     drawChildSafe(child, context, environment) {
         let frame = null;
-        if (!environment.viewportRect || areRectsIntersecting(environment.viewportRect, child.getBoundaryRectGlobal())) {
+        if (!environment.viewportRect || areRectsIntersecting(environment.viewportRect, child.getBoundingBoxGlobal(true))) {
             if(environment.showFrames && child.frame){
                 frame = child.frame;
                 if (frame) {
@@ -136,7 +137,17 @@ class ArtboardPage extends Page {
                 }
                 child.drawExtras(context, environment);
             }
+        } else {
+            debug("Skip artboard not in the viewport: %s", this.name());
         }
+    }
+
+    getBoundingBoxGlobal() {
+        return Rect.Max;
+    }
+
+    getBoundingBox() {
+        return Rect.Max;
     }
 
     insertArtboards(screens) {

@@ -418,8 +418,6 @@ class Path extends Shape {
 
     mode(value?) {
         if (arguments.length > 0) {
-            let oldMode = this.mode();
-
             this.setProps({ mode: value });
         }
 

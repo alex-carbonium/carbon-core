@@ -573,8 +573,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
 
         return this.runtimeProps.snapPoints = {
-            xs: [x, origin.x, x + width],
-            ys: [y, origin.y, y + height],
+            xs: [Math.round(x), Math.round(origin.x), Math.round(x + width)],
+            ys: [Math.round(y), Math.round(origin.y), Math.round(y + height)],
         };
     }
 

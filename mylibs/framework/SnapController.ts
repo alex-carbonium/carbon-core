@@ -10,17 +10,21 @@ var debug = require("DebugUtil")("carb:snapController");
 var SNAP_DELTA = 4;
 var LINE_OFFSET = 10;
 
-function findSnap(snaps, value, delta) {
+function findSnap(snaps, values, pos, delta, snappedPoint, axe: string) {
     var res = [];
     var min = Number.MAX_VALUE;
-    for (var j = 0, len2 = snaps.length; j < len2; ++j) {
-        var m = Math.abs(value - snaps[j].value);
+    for (let i = 0; i < values.length; ++i) {
+        let value = values[i] + pos;
+        for (var j = 0, len2 = snaps.length; j < len2; ++j) {
+            var m = Math.abs(value - snaps[j].value);
 
-        if (m <= delta) {
-            res.push({
-                idx: j,
-                value: m
-            });
+            if (m <= delta) {
+                res.push({
+                    idx: j,
+                    value: m,
+                    snappedPoint: snaps[j].value - values[i]
+                });
+            }
         }
     }
 
@@ -28,6 +32,7 @@ function findSnap(snaps, value, delta) {
         res.sort((a, b) => a.value - b.value);
         var ret = [];
         let v = res[0].value;
+        snappedPoint[axe] = res[0].snappedPoint;
         for (let i = 0; i < res.length; ++i) {
             if (res[i].value > v) {
                 break;
@@ -406,7 +411,7 @@ class SnapController {
             snapXCenter = data._snapXCenter,
             snapYCenter = data._snapYCenter;
         var snaps = null;
-        var snappedPoint = null;
+        var snappedPoint = new Point(pos.x, pos.y);
         this.clearActiveSnapLines();
 
         var scale = Environment.view.scale();
@@ -417,53 +422,53 @@ class SnapController {
         let horizontalSnaps = [];
 
         let offsetYs = ys.map(v => v + pos.y);
-        for (var i = 0, len = xs.length; i < len; ++i) {
-            snaps = findSnap(snapX, xs[i] + pos.x, delta);
-            if (snaps !== null) {
-                let snap = snaps[0];
-                snappedPoint = snappedPoint || new Point(snap.value - xs[i], pos.y);
+        //for (var i = 0, len = xs.length; i < len; ++i) {
+        snaps = findSnap(snapX, xs, pos.x, delta, snappedPoint, 'x');
+        if (snaps !== null) {
+            let snap = snaps[0];
+            // snappedPoint = snappedPoint || new Point(snap.value - 0/*xs[i]*/, pos.y);
 
-                for (snap of snaps) {
-                    let snapLine = buildVertical(snap, offsetYs);
-                    if (snapLine) {
-                        this.snapLines.push(snapLine);
-                        verticalSnaps.push(snap);
-                    }
-                }
-
-                if (delta !== 0) {
-                    let d = snap.value - (xs[i] + pos.x);
-                    delta = 0;
-                    pos.x += d;
+            for (snap of snaps) {
+                let snapLine = buildVertical(snap, offsetYs);
+                if (snapLine) {
+                    this.snapLines.push(snapLine);
+                    verticalSnaps.push(snap);
                 }
             }
+
+            // if (delta !== 0) {
+            //     let d = snap.value - (xs[i] + pos.x);
+            //     delta = 0;
+            //     pos.x += d;
+            // }
         }
+        // }
 
         delta = SNAP_DELTA_SCALE;
         snaps = null;
 
         let offsetXs = xs.map(v => v + pos.x);
-        for (i = 0, len = ys.length; i < len; ++i) {
-            snaps = findSnap(snapY, ys[i] + pos.y, delta);
-            if (snaps !== null) {
-                let snap = snaps[0];
-                snappedPoint = snappedPoint || new Point(pos.x, pos.y);
-                snappedPoint.y = snap.value - ys[i];
-                for (snap of snaps) {
-                    let snapLine = buildHorizontal(snap, offsetXs);
-                    if (snapLine) {
-                        this.snapLines.push(snapLine);
-                        horizontalSnaps.push(snap);
-                    }
-                }
-
-                if (delta !== 0) {
-                    let d = snap.value - (ys[i] + pos.y);
-                    delta = 0;
-                    pos.y += d;
+        // for (i = 0, len = ys.length; i < len; ++i) {
+        snaps = findSnap(snapY, ys, pos.y, delta, snappedPoint, 'y');
+        if (snaps !== null) {
+            let snap = snaps[0];
+            // snappedPoint = snappedPoint || new Point(pos.x, pos.y);
+            // snappedPoint.y = snap.value - 0;//ys[i];
+            for (snap of snaps) {
+                let snapLine = buildHorizontal(snap, offsetXs);
+                if (snapLine) {
+                    this.snapLines.push(snapLine);
+                    horizontalSnaps.push(snap);
                 }
             }
+
+            // if (delta !== 0) {
+            //     let d = snap.value - (ys[i] + pos.y);
+            //     delta = 0;
+            //     pos.y += d;
+            // }
         }
+        // }
 
         // build distances
         if (verticalSnaps.length) {
@@ -499,7 +504,7 @@ class SnapController {
             snapY = data._snapY;
 
         var oldSnapLines = this.snapLines;
-        let snappedPoint = null;
+        let snappedPoint = new Point(pos.x, pos.y);;
 
         this.clearActiveSnapLines();
         var scale = Environment.view.scale();
@@ -509,10 +514,10 @@ class SnapController {
         let horizontalSnaps = [];
 
         if (!disableVertical) {
-            var snaps = findSnap(snapX, pos.x, delta);
+            var snaps = findSnap(snapX, [pos.x], 0, delta, snappedPoint, 'x');
             if (snaps !== null) {
                 let snap = snaps[0];
-                snappedPoint = snappedPoint || new Point(snap.value, pos.y);
+                snappedPoint = new Point(snap.value, pos.y);
 
                 for (snap of snaps) {
                     let snapLine = buildVertical(snap, ys);
@@ -526,10 +531,10 @@ class SnapController {
 
         if (!disableHorizontal) {
             delta = SNAP_DELTA_SCALE;
-            snaps = findSnap(snapY, pos.y, delta);
+            snaps = findSnap(snapY, [pos.y], 0, delta, snappedPoint, 'y');
             if (snaps !== null) {
                 let snap = snaps[0];
-                snappedPoint = snappedPoint || new Point(pos.x, pos.y);
+
                 snappedPoint.y = snap.value;
                 for (snap of snaps) {
                     let snapLine = buildHorizontal(snap, xs);

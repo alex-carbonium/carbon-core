@@ -56,12 +56,18 @@ function drawSnapDistances(context, environment) {
 
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
-        if (!line.value || ids[line.id]) {
+        if (!line.value) {
             continue;
         }
-        ids[line.id] = true;
+        // ids[line.id] = true;
 
-        var posKey = line.x1 + ':' + line.y1 + line.vertical.toString();
+        var posKey;//line.x1 + ':' + line.y1 + line.vertical.toString();
+        if(line.vertical) {
+            posKey = 'v' + Math.sign(line.y1 - line.y2);
+        } else {
+            posKey = 'h' + Math.sign(line.x1 - line.x2);
+        }
+
         if(poss[posKey]) {
             continue;
         }

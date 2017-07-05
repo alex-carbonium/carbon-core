@@ -108,7 +108,7 @@ export default class IconSetSpriteManager {
         var elements = [];
         artboard.applyVisitor(e => {
             if (e.hasFlags(UIElementFlags.Icon)) {
-                elements.push(e);
+                elements.unshift(e);
             }
         })
 
