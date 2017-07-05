@@ -1,3 +1,5 @@
+import { ICoordinate } from "carbon-geometry";
+
 declare module "carbon-basics" {
     export interface IConstructor<T> {
         new (): T;
@@ -11,7 +13,7 @@ declare module "carbon-basics" {
         handled: boolean;
     }
 
-    export interface IMouseEventData extends IEventData {
+    export interface IMouseEventData extends IEventData, ICoordinate {
         x: number;
         y: number;
         isDragging: boolean;

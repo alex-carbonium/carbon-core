@@ -10,7 +10,7 @@ import Brush from "../../framework/Brush";
 import Point from "../../math/point";
 import Environment from "../../environment";
 import UserSettings from "UserSettings";
-import {IKeyboardState, IMouseEventData} from "carbon-core";
+import { IKeyboardState, IMouseEventData, ICoordinate } from "carbon-core";
 import Cursors from "Cursors";
 
 function update(x1, y1, x2, y2) {
@@ -59,7 +59,7 @@ export default class LineCreator extends Tool {
         this._mousepressed = true;
 
         if (keys.ctrl) {
-            var pos = event;
+            var pos:ICoordinate = event;
         }
         else {
             pos = SnapController.applySnappingForPoint(event);
@@ -117,7 +117,7 @@ export default class LineCreator extends Tool {
         }
 
         if (keys.ctrl) {
-            var pos = event;
+            var pos:ICoordinate = event;
         }
         else {
             pos = SnapController.applySnappingForPoint(event);
