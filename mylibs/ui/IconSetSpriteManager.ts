@@ -67,6 +67,13 @@ export default class IconSetSpriteManager {
                 .then(() => IconSetSpriteManager._performRenderTask(t, element, context, contextScale, env));
         }
 
+        if (!element.shouldApplyViewMatrix() && element.commitMatrixChanges) {
+            let clone = element.clone();
+            clone.commitMatrixChanges();
+            clone.parent(element.parent());
+            element = clone;
+        }
+
         let w = element.width();
         let h = element.height();
         let scale = t.data.scale;
@@ -85,6 +92,9 @@ export default class IconSetSpriteManager {
 
         matrix.translate(t.x + (0 | (t.data.width - w * scale) / 2) - element.props.br.x * scale, t.y + (0 | t.data.height - h * scale) / 2 - element.props.br.y * scale);
         matrix.scale(scale, scale);
+
+
+
         matrix.append(element.globalViewMatrix().clone().invert());
         env.pageMatrix = matrix;
         matrix.applyToContext(context);

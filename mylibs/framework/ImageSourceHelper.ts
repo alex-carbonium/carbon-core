@@ -12,7 +12,10 @@ const iconProps = { fill: Brush.createFromColor("#ABABAB"), stroke: Brush.Empty 
 const iconRuntimeProps = { glyph: IconsInfo.findGlyphString(IconsInfo.defaultFontFamily, "image") };
 
 export default class ImageSourceHelper {
-    static draw(source: ImageSource, context, w, h, props, runtimeProps, environment) {
+    static draw(source: ImageSource, context, w, h, sourceElement, environment) {
+        let props = sourceElement.props;
+        let runtimeProps = sourceElement.runtimeProps.sourceProps;
+
         switch (source.type) {
             case ImageSourceType.Font:
                 ImageSourceHelper.drawFont(IconsInfo.defaultFontFamily, context, w, h, props, runtimeProps);
@@ -21,7 +24,7 @@ export default class ImageSourceHelper {
                 ImageSourceHelper.drawURL(context, runtimeProps);
                 return;
             case ImageSourceType.Element:
-                ImageSourceHelper.drawElement(context, w, h, props, runtimeProps, environment)
+                ImageSourceHelper.drawElement(context, w, h, sourceElement, props, runtimeProps, environment)
                 return;
             case ImageSourceType.None:
                 ImageSourceHelper.drawEmpty(context, w, h);
@@ -160,7 +163,7 @@ export default class ImageSourceHelper {
         }
     }
 
-    private static drawElement(context, w, h, props, runtimeProps, environment) {
+    private static drawElement(context, w, h, sourceElement, props, runtimeProps, environment) {
         if (!runtimeProps || !runtimeProps.element) {
             return;
         }
@@ -172,18 +175,25 @@ export default class ImageSourceHelper {
         var scaleY = h / element.height();
 
         context.scale(scaleX, scaleY);
-        var box = element.getBoundingBox();
-        context.translate(-box.x, -box.y);
-        element.parent().globalViewMatrixInverted().applyToContext(context);
+
+        //context.translate(-box.x, -box.y);
+        if (element.shouldApplyViewMatrix()) {
+            element.globalViewMatrixInverted().applyToContext(context);
+        } else {
+            var box = element.getBoundingBox();
+            context.translate(-box.x, -box.y);
+            element.parent().globalViewMatrixInverted().applyToContext(context);
+        }
+        //sourceElement.viewMatrix().applyToContext(context);
 
         try {
             var oldFill = element.getDisplayPropValue('fill');
             var oldStroke = element.getDisplayPropValue('stroke');
             var oldStrokeWidth = element.getDisplayPropValue('strokeWidth');
-            element.setDisplayProps({fill:props.fill, stroke:props.stroke, strokeWidth:props.strokeWidth}, ChangeMode.Self);
-            element.drawSelf.call(element, context, element.width(), element.height(), environment);
+            element.setDisplayProps({ fill: props.fill, stroke: props.stroke, strokeWidth: props.strokeWidth }, ChangeMode.Self);
+            element.draw.call(element, context, Object.assign({}, environment, { viewportRect: null }));
         } finally {
-            element.setDisplayProps({fill:oldFill, stroke:oldStroke, strokeWidth:oldStrokeWidth}, ChangeMode.Self);
+            element.setDisplayProps({ fill: oldFill, stroke: oldStroke, strokeWidth: oldStrokeWidth }, ChangeMode.Self);
         }
         context.restore();
     }

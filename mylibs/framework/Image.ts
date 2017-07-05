@@ -163,14 +163,14 @@ export default class Image extends Container<IImageProps> implements IImage {
             this.drawWithMask(context, this.runtimeProps.mask, 0, environment);
         }
         else {
-            ImageSourceHelper.draw(source, context, w, h, this.props, this.runtimeProps.sourceProps, environment);
+            ImageSourceHelper.draw(source, context, w, h, this, environment);
         }
 
         context.restore();
     }
 
     renderAfterMask(context, items, i, environment) {
-        ImageSourceHelper.draw(this.source(), context, this.width(), this.height(), this.props, this.runtimeProps.sourceProps, environment);
+        ImageSourceHelper.draw(this.source(), context, this.width(), this.height(), this, environment);
     }
 
     autoResize(source: ImageSource, origin: OriginType){

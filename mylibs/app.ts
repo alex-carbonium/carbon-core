@@ -48,6 +48,7 @@ import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, Chan
 import { Contributions } from "./extensions/Contributions";
 import { getBuiltInExtensions } from "./extensions/BuiltInExtensions";
 import Command from "./framework/commands/Command";
+import UIElement from "./framework/UIElement";
 
 window['env'] = Environment;
 window['Selection'] = Selection;
@@ -398,6 +399,10 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
         }
 
         return this._getUserSetting("mirroringCode")
+    }
+
+    _pasteArtboardFromString(s) {
+        this.activePage.add(UIElement.fromJSON(JSON.parse(s)));
     }
 
     loadFont(family, style, weight): Promise<void> {
