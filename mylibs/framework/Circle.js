@@ -177,13 +177,11 @@ Circle.fromSvgElement = function (element, parsedAttributes, matrix) {
     App.Current.activePage.nameProvider.assignNewName(circle);
 
     var rx = parsedAttributes.rx || parsedAttributes.r;
-    if (rx) {
-        circle.width(rx * 2);
-    }
-
     var ry = parsedAttributes.ry || parsedAttributes.r;
-    if (ry) {
-        circle.height(ry * 2);
+    if (rx || ry) {
+        if (parsedAttributes.width || parsedAttributes.height) {
+            rect.setProps({br:new Rect(0, 0, rx*2||1, ry*2||1)})
+        }
     }
 
     if (parsedAttributes.opacity) {

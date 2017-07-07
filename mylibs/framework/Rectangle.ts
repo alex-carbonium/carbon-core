@@ -13,6 +13,7 @@ import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import Point from "../math/point";
 import { ResizeDimension } from "carbon-core";
+import Rect from "../math/rect";
 
 const PointSize = 4;
 const PointOffset = 10;
@@ -369,12 +370,8 @@ class Rectangle extends Shape {
         var rect = new Rectangle();
 
         App.Current.activePage.nameProvider.assignNewName(rect);
-        if (parsedAttributes.width) {
-            rect.width(parsedAttributes.width);
-        }
-
-        if (parsedAttributes.height) {
-            rect.height(parsedAttributes.height);
+        if (parsedAttributes.width || parsedAttributes.height) {
+            rect.setProps({br:new Rect(0, 0, parsedAttributes.width||1, parsedAttributes.height||1)})
         }
 
         if (parsedAttributes.id) {

@@ -116,9 +116,9 @@ class ResizeHint extends UIElement {
     }
 
     updatePositionText() {
-        var x = this._roundDecimal(this._transformationElement.x());
-        var y = this._roundDecimal(this._transformationElement.y());
-        this.updateText("(" + this._formatDecimal(x) + "; " + this._formatDecimal(y) + ")");
+        // var x = this._roundDecimal(this._transformationElement.x());
+        // var y = this._roundDecimal(this._transformationElement.y());
+        // this.updateText("(" + this._formatDecimal(x) + "; " + this._formatDecimal(y) + ")");
     }
 
     updateAngleText() {

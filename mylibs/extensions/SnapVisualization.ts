@@ -52,24 +52,22 @@ function drawSnapDistances(context, environment) {
     var ids = {};
     var poss = {};
 
-    lines.sort((a,b)=>a.value - b.value);
+    lines.sort((a, b) => a.value - b.value);
 
-    for (var i = 0; i < lines.length; i++) {
-        var line = lines[i];
+    function drawLine(line) {
         if (!line.value) {
-            continue;
+            return;
         }
-        // ids[line.id] = true;
 
-        var posKey;//line.x1 + ':' + line.y1 + line.vertical.toString();
-        if(line.vertical) {
+        var posKey;
+        if (line.vertical) {
             posKey = 'v' + Math.sign(line.y1 - line.y2);
         } else {
             posKey = 'h' + Math.sign(line.x1 - line.x2);
         }
 
-        if(poss[posKey]) {
-            continue;
+        if (poss[posKey]) {
+            return;
         }
         poss[posKey] = true;
 
@@ -89,8 +87,42 @@ function drawSnapDistances(context, environment) {
             y2 += p;
         }
 
-        context.strokeLine(x1, y1, x2, y2, UserSettings.snapTo.distanceColor);
+
+        context.beginPath();
+        context.moveTo(x1, y1);
+        context.lineTo(x2, y2);
+        if (line.d) {
+            context.moveTo(x2 + .5, y2 + .5);
+            if (line.vertical) {
+                context.lineTo(x2 + line.d, y2 + .5);
+            } else {
+                context.lineTo(x2, y2 + line.d);
+            }
+        }
+
+        context.stroke();
         textDistance(context, line);
+    }
+
+    context.strokeStyle = UserSettings.snapTo.distanceColor;
+    var fontStyle = '9px Arial';
+    context.font = fontStyle;
+    context.fillStyle = UserSettings.snapTo.distanceColor;
+
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+        if (!line.temp) {
+            drawLine(line);
+        }
+    }
+    context.strokeStyle = UserSettings.frame.stroke;
+    context.fillStyle = UserSettings.frame.stroke;
+    context.setLineDash([1, 2]);
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+        if (line.temp) {
+            drawLine(line);
+        }
     }
 
     context.restore();
@@ -98,23 +130,20 @@ function drawSnapDistances(context, environment) {
 
 function textDistance(context, distance) {
     var scale = Environment.view.scale();
-    var fontStyle = '9px Arial';
 
     GlobalMatrixModifier.pushPrependScale();
 
     context.save();
 
-    context.font = fontStyle;
-    context.fillStyle = UserSettings.snapTo.distanceColor;
     let text = Math.round(distance.value).toString();
 
-    let textWidth = context.measureText(text, fontStyle).width;
+    let textWidth = context.measureText(text, context.font).width;
     if (distance.vertical) {
         context.textBaseline = 'middle';
-        context.fillText(text, Math.round((distance.x1* scale - textWidth - 4) ), Math.round((Math.min(distance.y1, distance.y2) + distance.value / 2) * scale));
+        context.fillText(text, Math.round((distance.x1 * scale - textWidth - 4)), Math.round((Math.min(distance.y1, distance.y2) + distance.value / 2) * scale));
     } else {
         context.textBaseline = 'bottom';
-        context.fillText(text, Math.round((Math.min(distance.x1, distance.x2) + distance.value / 2) * scale - textWidth/2), Math.round((distance.y1* scale - 4) ));
+        context.fillText(text, Math.round((Math.min(distance.x1, distance.x2) + distance.value / 2) * scale - textWidth / 2), Math.round((distance.y1 * scale - 4)));
     }
 
     context.restore();
