@@ -319,7 +319,7 @@ class Rectangle extends Shape {
             rv: [0, 1, 0, 1],
             prop: 'upperLeft',
             visible: function (p, frame, w, h, scale) {
-                return (w * scale > 100 && h * scale > 100);
+                return (w * scale > 50  && h * scale > 50);
             }
         });
 
@@ -332,7 +332,7 @@ class Rectangle extends Shape {
             rv: [1, -1, 0, 1],
             prop: 'upperRight',
             visible: function (p, frame, w, h, scale) {
-                return (w * scale > 100 && h * scale > 100);
+                return (w * scale > 50 && h * scale > 50);
             }
         });
 
@@ -345,7 +345,7 @@ class Rectangle extends Shape {
             rv: [1, -1, 1, -1],
             prop: 'bottomRight',
             visible: function (p, frame, w, h, scale) {
-                return (w * scale > 100 && h * scale > 100);
+                return (w * scale > 50 && h * scale > 50);
             }
         });
 
@@ -358,7 +358,7 @@ class Rectangle extends Shape {
             rv: [0, 1, 1, -1],
             prop: 'bottomLeft',
             visible: function (p, frame, w, h, scale) {
-                return (w * scale > 100 && h * scale > 100);
+                return (w * scale > 50 && h * scale > 50);
             }
         });
 

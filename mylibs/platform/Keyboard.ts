@@ -10,12 +10,12 @@ class Keyboard {
         this.changed = EventHelper.createEvent();
     }
     attach(element) {
-        element.addEventListener('keydown', this._onKey);
-        element.addEventListener('keyup', this._onKey);
+        document.addEventListener('keydown', this._onKey);
+        document.addEventListener('keyup', this._onKey);
     }
     detach(element) {
-        element.removeEventListener('keydown', this._onKey);
-        element.removeEventListener('keyup', this._onKey);
+        document.removeEventListener('keydown', this._onKey);
+        document.removeEventListener('keyup', this._onKey);
     }
     reset() {
         this._change(false, false, false);

@@ -38,7 +38,7 @@ var settings = {
         columns: true,
         grid:true,
         guides: true,
-        lockedObjects: false,
+        lockedObjects: true,
         onlyVisibleObjects: true
     },
 

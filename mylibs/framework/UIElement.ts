@@ -46,7 +46,8 @@ export interface IUIElementRuntimeProps {
     primitiveRootKey: string;
 }
 
-const PointDistanceVisible = 30;
+const PointDistanceVisibleLevel2 = 15;
+const PointDistanceVisibleLevel1 = 30;
 
 // constructor
 export default class UIElement<TProps extends IUIElementProps = IUIElementProps> extends DataNode<TProps> implements IUIElement<TProps> {
@@ -1187,8 +1188,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     isTemporary(value?) {
         return this.field("_isTemporary", value, false);
     }
-    hitVisible(directSelection: boolean) {
-        if (this.locked() || !this.visible() || this.hasBadTransform()) {
+    hitVisible(directSelection?: boolean, forceLocked?:boolean) {
+        if ((this.locked() && !forceLocked) || !this.visible() || this.hasBadTransform()) {
             return false;
         }
         let parent = this.parent();
@@ -1745,7 +1746,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                         p.y = y;
                     },
                     visible: function (p, frame, w, h, scale) {
-                        return (w * scale > PointDistanceVisible || h * scale > PointDistanceVisible);
+                        return (w * scale > PointDistanceVisibleLevel2 || h * scale > PointDistanceVisibleLevel2);
                     }
                 },
                 {
@@ -1761,7 +1762,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                         p.y = y;
                     },
                     visible: function (p, frame, w, h, scale) {
-                        return (w * scale > PointDistanceVisible && h * scale > PointDistanceVisible);
+                        return (w * scale > PointDistanceVisibleLevel2 && h * scale > PointDistanceVisibleLevel2);
                     }
                 },
                 {
@@ -1793,7 +1794,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                         p.y = y + h;
                     },
                     visible: function (p, frame, w, h, scale) {
-                        return (w * scale > PointDistanceVisible && h * scale > PointDistanceVisible);
+                        return (w * scale > PointDistanceVisibleLevel2 && h * scale > PointDistanceVisibleLevel2);
                     }
                 }
             );
@@ -1829,7 +1830,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                             p.y = y;
                         },
                         visible: function (p, frame, w, h, scale) {
-                            return (w * scale > PointDistanceVisible || h * scale > PointDistanceVisible)
+                            return (w * scale > PointDistanceVisibleLevel2 || h * scale > PointDistanceVisibleLevel2)
                         }
                     },
                     {
@@ -1844,7 +1845,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                             p.y = y;
                         },
                         visible: function (p, frame, w, h, scale) {
-                            return (w * scale > PointDistanceVisible && h * scale > PointDistanceVisible)
+                            return (w * scale > PointDistanceVisibleLevel2 && h * scale > PointDistanceVisibleLevel2)
                         }
                     },
                     {
@@ -1859,7 +1860,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                             p.y = y + h;
                         },
                         visible: function (p, frame, w, h, scale) {
-                            return (w * scale > PointDistanceVisible && h * scale > PointDistanceVisible)
+                            return (w * scale > PointDistanceVisibleLevel2 && h * scale > PointDistanceVisibleLevel2)
                         }
                     },
                     {
@@ -1874,7 +1875,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                             p.y = y;
                         },
                         visible: function (p, frame, w, h, scale) {
-                            return (w * scale > PointDistanceVisible * 3 && h * scale > PointDistanceVisible);
+                            return (w * scale > PointDistanceVisibleLevel1 && h * scale > PointDistanceVisibleLevel2);
                         }
                     },
                     {
@@ -1889,7 +1890,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                             p.y = y + h / 2;
                         },
                         visible: function (p, frame, w, h, scale) {
-                            return (w * scale > PointDistanceVisible && h * scale > PointDistanceVisible * 3);
+                            return (w * scale > PointDistanceVisibleLevel2 && h * scale > PointDistanceVisibleLevel1);
                         }
                     },
                     {
@@ -1904,7 +1905,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                             p.y = y + h;
                         },
                         visible: function (p, frame, w, h, scale) {
-                            return (w * scale > PointDistanceVisible * 3 && h * scale > PointDistanceVisible);
+                            return (w * scale > PointDistanceVisibleLevel1 && h * scale > PointDistanceVisibleLevel2);
                         }
                     },
                     {
@@ -1919,7 +1920,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                             p.y = y + h / 2;
                         },
                         visible: function (p, frame, w, h, scale) {
-                            return (w * scale > PointDistanceVisible && h * scale > PointDistanceVisible * 3);
+                            return (w * scale > PointDistanceVisibleLevel2 && h * scale > PointDistanceVisibleLevel1);
                         }
                     }
                 );
@@ -1939,7 +1940,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                         }
                         ,
                         visible: function (p, frame, w, h, scale) {
-                            return (w * scale > PointDistanceVisible * 3 && h * scale > PointDistanceVisible);
+                            return (w * scale > PointDistanceVisibleLevel1 && h * scale > PointDistanceVisibleLevel2);
                         }
                     },
                     {
@@ -1954,7 +1955,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                             p.y = y + h;
                         },
                         visible: function (p, frame, w, h, scale) {
-                            return (w * scale > PointDistanceVisible * 3 && h * scale > PointDistanceVisible);
+                            return (w * scale > PointDistanceVisibleLevel1 && h * scale > PointDistanceVisibleLevel2);
                         }
                     }
                 );
@@ -1973,7 +1974,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                             p.y = y + h / 2;
                         },
                         visible: function (p, frame, w, h, scale) {
-                            return (w * scale > PointDistanceVisible && h * scale > PointDistanceVisible * 3);
+                            return (w * scale > PointDistanceVisibleLevel2 && h * scale > PointDistanceVisibleLevel1);
                         }
                     },
                     {
@@ -1988,7 +1989,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                             p.y = y + h / 2;
                         },
                         visible: function (p, frame, w, h, scale) {
-                            return (w * scale > PointDistanceVisible && h * scale > PointDistanceVisible * 3);
+                            return (w * scale > PointDistanceVisibleLevel2 && h * scale > PointDistanceVisibleLevel1);
                         }
                     }
                 );

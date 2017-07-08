@@ -28,8 +28,8 @@ class DraggingElement extends TransformationElement {
         this._initialPosition = this.getBoundingBoxGlobal().topLeft();
 
         let snappingTarget = elementOrComposite.first().parent().primitiveRoot() || Environment.view.page.getActiveArtboard();
-
-        SnapController.calculateSnappingPoints(snappingTarget);
+        this._snappingTarget = snappingTarget;
+        this._altPressed = undefined;
 
         var holdPcnt = Math.round((event.x - this.x()) * 100 / this.width());
         this._ownSnapPoints = SnapController.prepareOwnSnapPoints(this, holdPcnt);
@@ -130,6 +130,12 @@ class DraggingElement extends TransformationElement {
     dragTo(event) {
         debug("Drag to x=%d y=%d", event.x, event.y);
         this._translation.set(event.x, event.y);
+
+        if(event.event.altKey !== this._altPressed) {
+            SnapController.clearActiveSnapLines();
+            SnapController.calculateSnappingPoints(this._snappingTarget);
+            this._altPressed = event.event.altKey;
+        }
 
         if (event.event.shiftKey) {
             applyOrthogonalMove.call(this, this._translation);

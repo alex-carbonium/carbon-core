@@ -475,7 +475,7 @@ function buildHorizontalDistances(distances, snap, b) {
 }
 
 function collectPoints(data, elements, viewportRect, root, element) {
-    if (element.hitVisible() && !element.hitTransparent()) {
+    if (element.hitVisible(false, UserSettings.snapTo.lockedObjects) && !element.hitTransparent()) {
         if (UserSettings.snapTo.onlyVisibleObjects && !areRectsIntersecting(viewportRect, element.getBoundingBoxGlobal(false))) {
             return;
         }
@@ -540,6 +540,7 @@ class SnapController {
         data._snapY = [];
         data._snapXCenter = [];
         data._snapYCenter = [];
+        this._parent = parent;
         let viewportRect = Environment.view.viewportRect()
 
         this.currentSnappingData = data;
