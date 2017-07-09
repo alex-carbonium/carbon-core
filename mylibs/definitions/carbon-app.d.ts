@@ -177,8 +177,8 @@ declare module "carbon-app" {
         pointToScreen(point: ICoordinate): ICoordinate;
         logicalCoordinateToScreen(point: ICoordinate) : ICoordinate;
 
-        ensureScale(element: IUIElement);
-        ensureVisible(element: IUIElement);
+        ensureScale(elements: IUIElement[]);
+        ensureVisible(elements: IUIElement[]);
         scrollToCenter(): void;
 
         getLayer(layerType: LayerTypes) : ILayer;

@@ -436,7 +436,7 @@ export default class LinkingTool extends Tool {
                 if (page) {
                     var artboard = page.findNodeByIdBreadthFirst(this._activeStory.props.homeScreen[1]);
                     if (artboard) {
-                        Environment.view.ensureVisible(artboard);
+                        Environment.view.ensureVisible([artboard]);
                     }
                 }
             }

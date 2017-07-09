@@ -15,6 +15,7 @@ import { Types, ViewTool } from "../../framework/Defs";
 import Rect from "../../math/rect";
 import { IArtboard } from "carbon-model";
 import { ArtboardType } from "carbon-core";
+import DataNode from "../../framework/DataNode";
 var debug = require<any>("DebugUtil")("carb:artboardPage");
 
 const ARTBOARD_SPACE = 100;
@@ -163,7 +164,7 @@ class ArtboardPage extends Page {
             artboard.setProps({
                 width: screen.w,
                 height: screen.h,
-                toolboxGroup:null
+                type:null
             });
             artboard.resetTransform();
             artboard.applyTranslation(pos);
@@ -177,6 +178,14 @@ class ArtboardPage extends Page {
 
         if(SystemConfiguration.ResetActiveToolToDefault) {
             App.Current.resetCurrentTool();
+        }
+    }
+
+    setActiveArtboardById (id:string) {
+        var artboard = DataNode.getImmediateChildById(this, id, true);
+        if(artboard && artboard instanceof Artboard) {
+            this.setActiveArtboard(artboard);
+            Invalidate.request();
         }
     }
 

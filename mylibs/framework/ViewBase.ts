@@ -1,5 +1,5 @@
 import AnimationController from "framework/animation/AnimationController";
-import { areRectsIntersecting } from "math/math";
+import { areRectsIntersecting, combineRects } from "math/math";
 import Matrix from "math/matrix";
 import ContextPool from "framework/render/ContextPool";
 import EventHelper from "framework/EventHelper";
@@ -579,9 +579,13 @@ export default class ViewBase { //TODO: implement IView
         }
     }
 
-    ensureVisible(element) {
-        var pt = element.getBoundaryRectGlobal();
-        pt = { x: pt.x + pt.width / 2, y: pt.y + pt.height / 2 };
+    ensureVisible(elements:IUIElement[]) {
+        var rect = elements[0].getBoundingBoxGlobal();
+        for(let element of elements) {
+            rect  = combineRects(rect, element.getBoundingBoxGlobal());
+        }
+
+        let pt = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
         var scroll = this.page.pointToScroll(pt, this.app.viewportSize());
         if (scroll.scrollX) {
             this.scrollX(scroll.scrollX);
@@ -592,11 +596,15 @@ export default class ViewBase { //TODO: implement IView
         }
     }
 
-    ensureScale(element) {
-        var rect = element.getBoundaryRectGlobal();
+    ensureScale(elements:IUIElement[]) {
+        var rect = elements[0].getBoundingBoxGlobal();
+        for(let element of elements) {
+            rect  = combineRects(rect, element.getBoundingBoxGlobal());
+        }
+
         var size = this.app.viewportSize();
-        var w = rect.width * 2;
-        var h = rect.height * 2;
+        var w = rect.width * 1.32;
+        var h = rect.height * 1.32;
         var sx = size.width / w;
         var sy = size.height / h;
         this.scale(Math.min(sx, sy));

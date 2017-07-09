@@ -446,10 +446,10 @@ export function isRectInRect(child: IRectData, parent: IRectData): boolean {
         && child.y >= parent.y && child.y + child.height <= parent.y + parent.height;
 }
 
-export function combineRects(...rects: Rect[]): Rect {
+export function combineRects(...rects: IRect[]): IRect {
     return combineRectArray(rects);
 }
-export function combineRectArray(rects: Rect[]): Rect {
+export function combineRectArray(rects: IRect[]): IRect {
     if (rects.length === 0) {
         return Rect.Zero;
     }

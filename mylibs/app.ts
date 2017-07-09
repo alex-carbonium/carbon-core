@@ -306,7 +306,7 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
             for (var j = 0; j < artboards.length; ++j) {
                 var a = artboards[j];
                 if (a.props.type === ArtboardType.Template) {
-                    children.push(a);
+                    children.unshift(a); // artboards coming in reversed order, so put it in front
                 }
             }
             if (children.length > 0) {

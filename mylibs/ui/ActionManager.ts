@@ -456,8 +456,8 @@ export default class ActionManager implements IActionManager {
         this.registerAction("zoomSelection", "Zoom selection", "Zoom", function () {
             let element = Selection.selectedElement() as IUIElement;
             element = element || (that.app.activePage.getActiveArtboard() as IUIElement);
-            Environment.view.ensureScale(element);
-            Environment.view.ensureVisible(element);
+            Environment.view.ensureScale([element]);
+            Environment.view.ensureVisible([element]);
         });
 
         this.registerAction("pageCenter", "Page center", "Zoom", function () {
