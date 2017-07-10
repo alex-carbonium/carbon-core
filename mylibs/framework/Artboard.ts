@@ -418,7 +418,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             return [
                 {
                     label: "Layout",
-                    properties: ["width", "height", "x", "y", "angle"]
+                    properties: ["x", "y","width", "height", "angle"]
                 },
                 {
                     label: element.name(),
