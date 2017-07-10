@@ -30,7 +30,7 @@ declare module "carbon-app" {
         pageChanged: IEvent2<IPage, IPage>;
         pageAdded: IEvent<IPage>;
         pageRemoved: IEvent<IPage>;
-        changeToolboxPage: IEvent<void>;
+        changeToolboxPage: IEvent<IPage>;
 
         pages: IPage[];
         addPage(page: IPage);
@@ -58,6 +58,7 @@ declare module "carbon-app" {
         onBuildMenu: any;
         shortcutManager: IShortcutManager;
         actionManager: IActionManager;
+        dataManager: IDataManager;
 
         modelSyncProxy: any;
         platform: IPlatform;
@@ -99,10 +100,15 @@ declare module "carbon-app" {
         defaultStroke(stroke?: Brush, mode?: any): Brush;
         useRecentColor(color: Brush);
         recentColors(): string[];
+        getUserSetting<T>(name: string, defaultValue?: T): T;
+        setUserSetting(name: string, value: null | string | number | boolean): void;
 
         assignNewName(element: IUIElement);
 
         resetCurrentTool();
+
+        exportPage(page: IPage): Promise<object>;
+        importPage(data: object): IPage;
 
         isElectron(): boolean;
     }
@@ -145,8 +151,6 @@ declare module "carbon-app" {
         activated(): void;
 
         insertArtboards(artboards: IArtboard[]);
-
-        export(): Promise<object>;
     }
 
     export const Page: IConstructor<IPage>;
@@ -377,6 +381,30 @@ export interface IAreaConstraint {
         viewContainer: HTMLElement;
     }
     export const RenderLoop: IConstructor<IRenderLoop>;
+
+    export interface IDataProviderConfig {
+    }
+    export interface IDataProvider {
+        id: string;
+        name: string;
+
+        fetch(fields: string[], rowCount: number);
+        getConfig(): IDataProviderConfig;
+        createElement(app: IApp, field: string, templateId?: string): IUIElement;
+    }
+    export interface ICustomDataProvider extends IDataProvider {
+        format: string;
+    }
+
+    export interface IDataManager {
+        getProvider(id: string) : IDataProvider;
+        getBuiltInProvider() : IDataProvider;
+
+        createCustomProvider(name: string, text: string): IDataProvider;
+        getCustomProviders(): ICustomDataProvider[];
+
+        generateForSelection(): void;
+    }
 
     export const app: IApp;
     export const ActionManager: IActionManager;

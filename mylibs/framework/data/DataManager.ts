@@ -5,19 +5,20 @@ import BuiltInDataProvider from "./BuiltInDataProvider";
 import CustomDataProvider from "./CustomDataProvider";
 import { createUUID } from "../../util";
 import Selection from "../SelectionModel";
-import { IDisposable, PatchType } from "carbon-core";
+import { IDisposable, PatchType, IDataManager, IApp } from "carbon-core";
 import Promise from "bluebird";
 
-export default class DataManager implements IDisposable {
+export default class DataManager implements IDataManager, IDisposable {
     [name: string]: any;
 
-    constructor() {
+    constructor(app: IApp) {
         this._providers = {};
         this._disposables = [];
         this._refreshTimer = 0;
         this._newCells = [];
+        this._app = app;
 
-        this.registerProvider("builtin", new BuiltInDataProvider());
+        this.registerProvider("builtin", new BuiltInDataProvider("builtin", "builtin"));
 
         this._disposables.push(PropertyTracker.elementInserted.bind(this, this._onElementInserted));
     }
@@ -34,10 +35,11 @@ export default class DataManager implements IDisposable {
     unregisterProvider(id) {
         delete this._providers[id];
     }
-    createCustomProvider(app, name, text) {
+    createCustomProvider(name, text) {
         var data = text.split('\n');
         var provider = new CustomDataProvider(createUUID(), name, data, "list");
-        app.patchProps(PatchType.Insert, "dataProviders", provider.toJSON());
+        this._app.patchProps(PatchType.Insert, "dataProviders", provider.toJSON());
+        return provider;
     }
     getCustomProviders() {
         var result = [];

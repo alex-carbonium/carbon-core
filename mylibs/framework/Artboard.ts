@@ -905,10 +905,10 @@ PropertyMetadata.registerForType(Artboard, {
     type: {
         displayName: "@artboardType",
         type: "dropdown",
-        defaultValue: null,
+        defaultValue: ArtboardType.Regular,
         options: {
             items: [
-                { name: "@regular", value: null },
+                { name: "@regular", value: ArtboardType.Regular },
                 { name: "@symbol", value: ArtboardType.Symbol },
                 { name: "@template", value: ArtboardType.Template },
                 { name: "@frame", value: ArtboardType.Frame },

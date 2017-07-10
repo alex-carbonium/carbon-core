@@ -1,12 +1,14 @@
 import Text from "../text/Text";
 import DataProvider from "./DataProvider";
+import { IDataProvider, ICustomDataProvider } from "carbon-core";
 
-export default class CustomDataProvider extends DataProvider{
-    constructor(id, name, data, format){
-        super();
+export default class CustomDataProvider extends DataProvider implements ICustomDataProvider {
+    data: any;
+    format: string;
 
-        this.id = id;
-        this.name = name;
+    constructor(id, name, data, format) {
+        super(id, name);
+
         this.data = data;
         this.format = format;
     }

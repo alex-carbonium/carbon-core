@@ -7,13 +7,20 @@ class Environment implements IEnvironment {
     view: IView;
     controller: IController;
 
+    loaded: Promise<void>;
+    resolveLoaded: () => void;
+
     constructor(){
         this.detaching = EventHelper.createEvent();
         this.attached = EventHelper.createEvent();
+        this.loaded = new Promise<void>(resolve => this.resolveLoaded = resolve);
     }
 
     set(view: IView, controller: IController){
-        if(this.view){
+        if (!this.view){
+            this.resolveLoaded();
+        }
+        else {
             this.detaching.raise(this.view, this.controller);
         }
         this.view = view;

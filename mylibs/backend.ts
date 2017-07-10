@@ -5,7 +5,7 @@ import EventHelper from "./framework/EventHelper";
 import UserManager from "oidc-client/src/UserManager";
 import Log from "oidc-client/src/Log";
 import params from "./params";
-import { IBackend, ILogger, IAccountProxy, Response, ILoginModel, ILoginResult, ConnectionState, ResponsePromise, IShareProxy, IFileProxy } from "carbon-api";
+import { IBackend, ILogger, IAccountProxy, Response, ILoginModel, ILoginResult, ConnectionState, ResponsePromise, IShareProxy, IFileProxy, IStaticResourcesProxy, IFontsProxy, IGalleryProxy } from "carbon-api";
 import { IEvent, IDisposable, LoginProvider } from "carbon-basics";
 import { IApp } from "carbon-app";
 import ActivityMonitor from "./ActivityMonitor";
@@ -54,7 +54,10 @@ class Backend implements IBackend {
     requestEnded: IEvent<string>;
     accountProxy: IAccountProxy;
     shareProxy: IShareProxy;
+    staticResourcesProxy: IStaticResourcesProxy;
     fileProxy: IFileProxy;
+    fontsProxy: IFontsProxy;
+    galleryProxy: IGalleryProxy;
 
     LoginProvider: LoginProvider;
 

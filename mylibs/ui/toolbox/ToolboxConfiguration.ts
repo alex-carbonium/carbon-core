@@ -164,7 +164,7 @@ export default class ToolboxConfiguration {
             env.pageMatrix.applyToContext(context);
         }
 
-        matrix.translate(t.x + 0 | (t.data.width - w * scale) / 2, t.y + 0 | (t.data.height - h * scale) / 2);
+        matrix.translate(t.x + (0 | (t.data.width - w * scale) / 2), t.y + (0 | (t.data.height - h * scale) / 2));
         matrix.scale(scale, scale);
         matrix.append(element.viewMatrix().clone().invert());
         env.pageMatrix = matrix;

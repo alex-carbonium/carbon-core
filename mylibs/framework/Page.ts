@@ -10,7 +10,6 @@ import EventHelper from "./EventHelper";
 import Brush from "./Brush";
 import NameProvider from "ui/NameProvider";
 import { IContainer, IRect, IPage, IArtboard, ChangeMode, IPrimitiveRoot } from "carbon-core";
-import PageExporter from "./share/PageExporter";
 
 function findNextPageName() {
     var maxId = 0;
@@ -39,15 +38,11 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
         this.app = App.Current;
         this.initId();
         this.setProps({name: findNextPageName()}, ChangeMode.Self);
-        this._scale = 1;
 
         this._scale = 1;
         this._scrollX = 0;
         this._scrollY = 0;
         this.updatePageMatrix();
-
-
-        this.nativeElements = [];
 
         this.onActivated = EventHelper.createEvent();
         this.onDeactivated = EventHelper.createEvent();
@@ -229,10 +224,6 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
     }
 
     autoInsert(/*UIElement*/element) {
-    }
-
-    export(): Promise<object>{
-        return PageExporter.prepareShareData(this);
     }
 
     renderContentTile(context, x, y, zoom, contextScale?) {

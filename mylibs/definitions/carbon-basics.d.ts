@@ -175,6 +175,14 @@ declare module "carbon-basics" {
         static Default: Box;
     }
 
+    export interface IJsonNode {
+        props: {
+            id: string;
+            name: string;
+        }
+        children?: IJsonNode[];
+    }
+
     export const enum PrimitiveType {
         None = 0,
         DataNodeAdd = 1,
@@ -199,11 +207,11 @@ declare module "carbon-basics" {
     }
 
     export type PrimitiveKind =
-        IPrimitive & { type: PrimitiveType.DataNodeAdd, node: object, index: number } |
-        IPrimitive & { type: PrimitiveType.DataNodeRemove, childId: number } |
+        IPrimitive & { type: PrimitiveType.DataNodeAdd, node: IJsonNode, index: number } |
+        IPrimitive & { type: PrimitiveType.DataNodeRemove, childId: string } |
         IPrimitive & { type: PrimitiveType.DataNodeSetProps, props: object } |
         IPrimitive & { type: PrimitiveType.DataNodePatchProps, patchType: PatchType, propName: string, item: object } |
-        IPrimitive & { type: PrimitiveType.DataNodeChange, node: object } |
+        IPrimitive & { type: PrimitiveType.DataNodeChange, node: IJsonNode } |
         IPrimitive & { type: PrimitiveType.DataNodeChangePosition, childId: string, newPosition: number } |
         IPrimitive & { type: PrimitiveType.Selection, userId: string, selection: string[] } |
         IPrimitive & { type: PrimitiveType.View, oldState: ViewState, newState: ViewState };
@@ -234,6 +242,7 @@ declare module "carbon-basics" {
     }
 
     export const enum ArtboardType {
+        Regular = 0,
         Symbol = 1,
         Template = 2,
         Frame = 3,
