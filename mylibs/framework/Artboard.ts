@@ -17,7 +17,7 @@ import Environment from "environment";
 import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
-import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol } from "carbon-core";
+import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
 
 
@@ -312,7 +312,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             stateboards = this._linkRelatedStateBoards();
         }
 
-        let rect = this.getBoundaryRectGlobal();
+        let rect: IRect = this.getBoundaryRectGlobal();
         for (let i = 0; i < stateboards.length; ++i) {
             rect = math.combineRects(rect, stateboards[i].getBoundaryRectGlobal());
         }
