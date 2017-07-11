@@ -19,7 +19,7 @@ import { pointToLineDistance } from "../math/geometry";
 //TODO: when changing with shift, calculate final angle, not local
 
 var PointSize = 6
-    , PointSize2 = 3;
+    , PointSize2 = 3.5;
 
 var LinePoint = {
     cursorSet: FrameCursors,

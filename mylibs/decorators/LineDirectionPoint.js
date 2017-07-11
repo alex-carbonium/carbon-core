@@ -18,6 +18,7 @@ export default  {
         context.strokeStyle = '#22c1ff';
         context.beginPath();
         var pt = matrix.transformPoint2(p.x, p.y, true);
+        pt.roundToNearestHalf();
         context.circle(pt.x, pt.y, PointSize);
         context.fill();
         context.stroke();
