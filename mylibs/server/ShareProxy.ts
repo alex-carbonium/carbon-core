@@ -25,14 +25,8 @@ var proxy = {
     publishPage(model) {
         return backend.post(backend.servicesEndpoint + "/api/share/publishPage", {model});
     },
-    resources(search) {
-        return backend.get(backend.servicesEndpoint + "/api/share/resources", {
-            search: search || ''
-        });
-    },
-    staticResources(search) {
-        return backend.get(backend.cdnEndpoint + "/target/reslist.json", {
-        });
+    resources(from, to, search = '') {
+        return backend.get(backend.servicesEndpoint + "/api/share/resources", { from, to, search });
     }
 }
 

@@ -95,8 +95,6 @@ export default class ShortcutManager implements IShortcutManager {
         { key: "ctrl+n", action: "newPagePortrait" },
         { key: "ctrl+shift+n", action: "newPageLandscape" },
 
-        { key: "ctrl+f", action: "showNavigationPane" },
-
         { key: "left", action: "moveLeft" },
         { key: "right", action: "moveRight" },
         { key: "up", action: "moveUp" },
@@ -210,17 +208,15 @@ export default class ShortcutManager implements IShortcutManager {
         { key: "meta+n", action: "newPagePortrait" },
         { key: "meta+shift+n", action: "newPageLandscape" },
 
-        { key: "meta+f", action: "showNavigationPane" },
-
         { key: "left", action: "moveLeft" },
         { key: "right", action: "moveRight" },
         { key: "up", action: "moveUp" },
         { key: "down", action: "moveDown" },
 
-        { key: "alt+meta+u", action: "pathUnion" },
-        { key: "alt+meta+s", action: "pathSubtract" },
-        { key: "alt+meta+i", action: "pathIntersect" },
-        { key: "alt+meta+x", action: "pathDifference" },
+        { key: "alt+ctrl+u", action: "pathUnion" },
+        { key: "alt+ctrl+s", action: "pathSubtract" },
+        { key: "alt+ctrl+i", action: "pathIntersect" },
+        { key: "alt+ctrl+x", action: "pathDifference" },
 
         { key: "/", action: "transparentColor" },
 

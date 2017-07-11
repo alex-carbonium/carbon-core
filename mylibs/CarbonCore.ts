@@ -107,10 +107,7 @@ export default {
     "Layer": require("./framework/Layer"),
 
     "domUtil": domUtil,
-    "ShareProxy": require("./server/ShareProxy"),
     "ActivityProxy": require("./server/ActivityProxy"),
-    "AccountProxy": require("./server/AccountProxy"),
-    "FileProxy": require("./server/FileProxy"),
     "Cursors": require("Cursors"),
 
     "LayoutGridLines": require("./extensions/guides/LayoutGridLines"),
@@ -125,7 +122,6 @@ export default {
     "CoreIntl": require("./CoreIntl"),
 
     "DebugUtil": require("./DebugUtil"),
-    "FontsProxy": require("./server/FontsProxy"),
 
     "SvgParser": require("svg/SvgParser"),
 

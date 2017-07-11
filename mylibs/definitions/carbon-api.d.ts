@@ -52,7 +52,10 @@ declare module "carbon-api" {
 
         accountProxy: IAccountProxy;
         shareProxy: IShareProxy;
+        staticResourcesProxy: IStaticResourcesProxy;
         fileProxy: IFileProxy;
+        fontsProxy: IFontsProxy;
+        galleryProxy: IGalleryProxy;
     }
 
     export type Response<TModel, TResult> =
@@ -146,28 +149,44 @@ declare module "carbon-api" {
         validateEmail(model: IEmailValidationModel): ResponsePromise<IEmailValidationModel, void>;
     }
 
-    export const enum PublishScope {
+    export interface IPaginatedResult<T> {
+        pageData: T[];
+        totalCount: number;
+    }
+
+    export const enum ResourceScope {
         Company,
         Public
     }
     export interface IValidatePageNameModel {
         name: string;
-        scope: PublishScope;
+        scope: ResourceScope;
     }
     export interface IValidatePageNameResult {
         exists: boolean
     }
-    export interface IPublishPageModel {
+    export interface ISharedPage {
         name: string;
         description: string;
         tags: string;
-        pageData: string;
         coverUrl: string;
-        scope: PublishScope;
     }
-    export interface IPublishPageResult {
+    export interface IPublishPageModel extends ISharedPage {
+        pageData: string;
+        scope: ResourceScope;
+    }
+    export interface IPublishPageResult extends ISharedPage {
         galleryId: string;
-        name: string;
+    }
+    export interface ISharedPageSetup extends ISharedPage {
+        scope: ResourceScope;
+    }
+    export interface ISharedResource extends ISharedPage {
+        dataUrl: string;
+        downloads?: number;
+        authorId: string;
+        authorName: string;
+        authorAvatar?: string;
     }
     export interface IUseCodeResult {
         companyName: string;
@@ -175,18 +194,24 @@ declare module "carbon-api" {
         userId: string;
         projectId: number;
     }
-    export interface ISharedPageSetup {
-        name: string;
-        description: string;
-        tags: string;
-        coverUrl: string;
-        scope: PublishScope;
-    }
     export interface IShareProxy {
         use(code: string): Promise<IUseCodeResult>;
         getPageSetup(pageId: string): Promise<ISharedPageSetup>;
         validatePageName(model: IValidatePageNameModel): ResponsePromise<IValidatePageNameModel, IValidatePageNameResult>;
         publishPage(model: IPublishPageModel): ResponsePromise<IPublishPageModel, IPublishPageResult>;
+
+        resources(from: number, to: number, search?: string): Promise<IPaginatedResult<ISharedResource>>;
+    }
+    export interface IStaticResourcesProxy {
+        staticResources(from: number, to: number, search?: string): Promise<IPaginatedResult<ISharedResource>>;
+    }
+    export interface IGalleryProxy {
+        resources(from: number, to: number, search?: string): Promise<IPaginatedResult<ISharedResource>>;
+    }
+
+    export interface IFontsProxy{
+        search(query: string, page: number): Promise<any>;
+        system(page: number): Promise<any>;
     }
 
     export const logger: ILogger;

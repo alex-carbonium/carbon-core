@@ -61,7 +61,7 @@ export default class ObjectFactory {
 
         return res;
     }
-    static fromJSON(data){
+    static fromJSON<T>(data){
         if (data.t === null) {
             throw 'Invalid data, type is not specified';
         }
@@ -90,13 +90,13 @@ export default class ObjectFactory {
     static isMaterialized(object) {
         return (Object.getPrototypeOf(object) !== Object.prototype);
     }
-    static getObject(data) {
+    static getObject<T>(data: object) {
         if(!data) {
             return data;
         }
 
         if(!ObjectFactory.isMaterialized(data)) {
-            return ObjectFactory.fromJSON(data);
+            return ObjectFactory.fromJSON<T>(data);
         }
 
         return data;

@@ -10,5 +10,10 @@ import DashboardProxy from "./server/DashboardProxy";
 
 require("./PromiseConfig");
 require("./server/AccountProxy");
+require("./server/StaticResourcesProxy");
+require("./server/ShareProxy");
+require("./server/FileProxy");
+require("./server/fontsProxy");
+require("./server/GalleryProxy");
 
 export {backend, logger, DashboardProxy}

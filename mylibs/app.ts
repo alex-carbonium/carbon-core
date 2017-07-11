@@ -44,18 +44,20 @@ import backend from "./backend";
 import logger from "./logger";
 import params from "./params";
 import ArtboardFrame from "framework/ArtboardFrame";
-import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitive, IPrimitiveRoot, ViewState } from "carbon-core";
+import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitive, IPrimitiveRoot, ViewState, IJsonNode } from "carbon-core";
 import { Contributions } from "./extensions/Contributions";
 import { getBuiltInExtensions } from "./extensions/BuiltInExtensions";
 import Command from "./framework/commands/Command";
+import PageExporter from "./framework/share/PageExporter";
+import Primitive from "./framework/sync/Primitive";
 import UIElement from "./framework/UIElement";
 
-window['env'] = Environment;
-window['Selection'] = Selection;
-ArtboardFrame.toString();
+if (DEBUG) {
+    window['env'] = Environment;
+    window['Selection'] = Selection;
+}
 
 var platform = require("platform/Platform");
-var Primitive = require("framework/sync/Primitive");
 var Layer = require("framework/Layer");
 var SelectComposite = require("framework/SelectComposite");
 var SelectFrame = require("framework/SelectFrame");
@@ -80,7 +82,7 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
     pageChanged: IEvent2<IPage, IPage>;
     pageAdded: IEvent<IPage>;
     pageRemoved: IEvent<IPage>;
-    changeToolboxPage: IEvent<void>;
+    changeToolboxPage: IEvent<IPage>;
 
     activeStoryChanged: IEvent<any>;
     storyInserted: IEvent<any>;
@@ -97,6 +99,7 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
     shortcutManager: ShortcutManager;
     actionManager: ActionManager;
     fontManager: OpenTypeFontManager;
+    dataManager: DataManager;
 
     onBuildMenu: any;
     changed: IEvent<any>;
@@ -140,7 +143,7 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
         this.savedToJson = EventHelper.createEvent();
         this.relayoutFinished = EventHelper.createEvent<void>();
 
-        this.changeToolboxPage = EventHelper.createEvent<void>();
+        this.changeToolboxPage = EventHelper.createEvent<IPage>();
 
         this.reloaded = EventHelper.createEvent();
         this.restoredLocally = EventHelper.createEvent<void>();
@@ -199,7 +202,7 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
         this.fontManager = new OpenTypeFontManager();
         this.fontManager.registerAsDefault();
 
-        this.dataManager = new DataManager();
+        this.dataManager = new DataManager(this);
 
         token = Environment.detaching.bind(this, this.detachExtensions);
         this.registerForDisposal(token);
@@ -365,7 +368,7 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
                     this.dataManager.registerProvider(item.id, CustomDataProvider.fromJSON(item));
                     break;
                 case PatchType.Remove:
-                    this.dataManager.registerProvider(item.id);
+                    this.dataManager.registerProvider(item.id, null);
                     break;
             }
         }
@@ -389,16 +392,16 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
     }
 
     setMirrorArtboardId(pageId, artboardId) {
-        this._setUserSetting("mirrorPageId", pageId);
-        this._setUserSetting("mirrorArtboardId", artboardId);
+        this.setUserSetting("mirrorPageId", pageId);
+        this.setUserSetting("mirrorArtboardId", artboardId);
     }
 
     mirroringCode(value) {
         if (arguments.length !== 0) {
-            this._setUserSetting("mirroringCode", value);
+            this.setUserSetting("mirroringCode", value);
         }
 
-        return this._getUserSetting("mirroringCode")
+        return this.getUserSetting("mirroringCode")
     }
 
     _pasteArtboardFromString(s) {
@@ -711,19 +714,15 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
 
     snapSettings(value) {
         if (arguments.length === 1) {
-            this._setUserSetting("snapTo", value);
+            this.setUserSetting("snapTo", value);
             return value;
         }
-        return this._getUserSetting("snapTo", UserSettings.snapTo);
+        return this.getUserSetting("snapTo", UserSettings.snapTo);
     }
 
-    _getUserSetting(name, defaultValue?: any) {
+    getUserSetting(name: string, defaultValue?: any) {
         var userId = backend.getUserId();
 
-        return this._getSpecificUserSetting(userId, name, defaultValue);
-    }
-
-    _getSpecificUserSetting(userId, name, defaultValue) {
         for (var i = 0; i < this.props.userSettings.length; i++) {
             var s = this.props.userSettings[i];
             if (s.id.startsWith(userId) && s.id.split(":")[1] === name) {
@@ -733,9 +732,10 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
 
         return defaultValue;
     }
-    _setUserSetting(name, value) {
+
+    setUserSetting(name: string, value: null | string | number | boolean) {
         var fullName = backend.getUserId() + ":" + name;
-        var oldValue = this._getUserSetting(name);
+        var oldValue = this.getUserSetting(name);
         if (value === null) {
             this.patchProps(PatchType.Remove, "userSettings", { id: fullName });
         } else {
@@ -815,17 +815,21 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
         }
     }
 
-    //TODO: rethink the concept of run method for better testability
     run() {
         params.perf && performance.mark("App.run");
         this.clear();
 
         this.platform.run(this);
 
+        let loggedIn = Promise.resolve();
         var stopwatch = new Stopwatch("AppLoad", true);
         if (!this.serverless()) {
             params.perf && performance.mark("App.setupConnection");
             backend.setupConnection(this);
+            //for new apps ensure that the token is not stale, for existing app this will be checked when data is loaded
+            if (!this.id()) {
+                loggedIn = backend.ensureLoggedIn(true);
+            }
             params.perf && performance.measure("App.setupConnection", "App.setupConnection");
         }
 
@@ -833,16 +837,13 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
         var defaultFontLoaded = this.fontManager.loadDefaultFont();
         var dataLoaded = this.loadData();
 
-        return Promise.all([dataLoaded, iconFontsLoaded, defaultFontLoaded]).then(result => {
+        return Promise.all([dataLoaded, iconFontsLoaded, defaultFontLoaded, Environment.loaded, loggedIn]).then(result => {
             var data = result[0];
-            stopwatch.checkpoint("DataProjectFonts");
-            if (this.platform.richUI()) {
-                this.resetCurrentTool();
-            }
+            stopwatch.checkpoint("env");
 
             if (data) {
                 this.fromJSON(data);
-                stopwatch.checkpoint("FromJson");
+                stopwatch.checkpoint("parsing");
             }
 
             this.fontManager.appendMetadata(this.props.fontMetadata);
@@ -1162,9 +1163,12 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
         })
     }
 
+    exportPage(page: IPage): Promise<object>{
+        return PageExporter.prepareShareData(page);
+    }
     importPage(data) {
-        var pageJson = data.page;
-        var name = ' (' + pageJson.name + ')';
+        var pageJson = data.page as IJsonNode;
+        var name = ' (' + pageJson.props.name + ')';
         if (data.styles) {
             for (let style of data.styles) {
                 style.name += name;
@@ -1185,18 +1189,44 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
             }
         }
 
-        var i = this.children.length;
-        this.children.push(pageJson);
+        let page = this.pages.find(x => x.id() === pageJson.props.id);
+        if (!page) {
+            page = this.importNewPage(pageJson);
+        }
+        else {
+            this.importUpdatedPage(page, pageJson);
+        }
 
-        var page = ObjectFactory.getObject(pageJson);
+        return page;
+    }
+
+    private importNewPage(pageJson: object) {
+        var i = this.children.length;
+        this.children.push(pageJson as any); //TODO: why?
+
+        var page = ObjectFactory.getObject<IPage>(pageJson);
 
         this.children[i] = page;
         this.initPage(page);
-        this.setActivePage(page);
 
         ModelStateListener.trackInsert(this, this, page, i);
-
         return page;
+    }
+    private importUpdatedPage(existingPage: IPage, pageJson: IJsonNode) {
+        let elementsAdded = 0;
+        for (let i = 0; i < pageJson.children.length; i++) {
+            let elementJson = pageJson.children[i];
+            let element = existingPage.children.find(x => x.id() === elementJson.props.id);
+            let primitive: IPrimitive;
+            if (element) {
+                primitive = Primitive.dataNodeChange(element, element.toJSON());
+            }
+            else {
+                element = ObjectFactory.fromJSON(elementJson);
+                primitive = Primitive.dataNodeAdd(existingPage, element, existingPage.children.length + elementsAdded++);
+            }
+            RelayoutQueue.enqueue(primitive);
+        }
     }
 
     createNewPage(type?) {

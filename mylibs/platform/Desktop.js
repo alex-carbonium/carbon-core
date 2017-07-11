@@ -222,8 +222,8 @@ var onViewBlurred = function () {
 };
 
 var onWindowBlur = function () {
-   // Keyboard.reset();
-   // App.Current.actionManager.invoke("cancel");
+    Keyboard.reset();
+    App.Current.actionManager.invoke("cancel");
 }
 
 var onWindowResize = function () {

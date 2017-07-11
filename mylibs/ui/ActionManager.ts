@@ -532,10 +532,6 @@ export default class ActionManager implements IActionManager {
         });
 
 
-        // this.registerAction("showNavigationPane", "Expand pane", "Navigation pane", function () {
-        //     that.app.viewModel.navigationModel.expandAndFocusOnSearch();
-        // });
-
         this.registerAction("enter", "Enter", "", function () {
         });
     }
