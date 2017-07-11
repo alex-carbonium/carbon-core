@@ -17,6 +17,7 @@ declare module "carbon-internal" {
 declare module "carbon-geometry"{
     export interface IPoint{
         roundMutableBy(factor: number): IPoint;
+        roundToNearestHalf(factor: number): IPoint;
     }
 
     export interface IMatrix{

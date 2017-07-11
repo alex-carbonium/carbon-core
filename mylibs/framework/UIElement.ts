@@ -906,28 +906,39 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         var matrix = this.globalViewMatrix();
         var r = this.boundaryRect();
         const roundFactor = 2;
+        var strokePos = this.strokePosition();
+        var w = 0;
+        var d = 0;
+        if (Environment.view.scale() < 1.5) {
+            if (strokePos === StrokePosition.Inside) {
+                w = 1;
+            } else if (strokePos === StrokePosition.Outside) {
+                d = 1;
+                w = -1;
+            }
+        }
 
-        let p = matrix.transformPoint2(r.x, r.y);
+        let p = matrix.transformPoint2(r.x + d, r.y + d);
         if (round) {
-            p.roundMutableBy(roundFactor);
+            p.roundToNearestHalf(roundFactor);
         }
         context.moveTo(p.x, p.y);
 
-        p = matrix.transformPoint2(r.x + r.width, r.y);
+        p = matrix.transformPoint2(r.x + r.width + w + d, r.y + d);
         if (round) {
-            p.roundMutableBy(roundFactor);
+            p.roundToNearestHalf(roundFactor);
         }
         context.lineTo(p.x, p.y);
 
-        p = matrix.transformPoint2(r.x + r.width, r.y + r.height);
+        p = matrix.transformPoint2(r.x + r.width + w + d, r.y + r.height + w + d);
         if (round) {
-            p.roundMutableBy(roundFactor);
+            p.roundToNearestHalf(roundFactor);
         }
         context.lineTo(p.x, p.y);
 
-        p = matrix.transformPoint2(r.x, r.y + r.height);
+        p = matrix.transformPoint2(r.x + d, r.y + r.height + w + d);
         if (round) {
-            p.roundMutableBy(roundFactor);
+            p.roundToNearestHalf(roundFactor);
         }
         context.lineTo(p.x, p.y);
 
@@ -1188,7 +1199,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     isTemporary(value?) {
         return this.field("_isTemporary", value, false);
     }
-    hitVisible(directSelection?: boolean, forceLocked?:boolean) {
+    hitVisible(directSelection?: boolean, forceLocked?: boolean) {
         if ((this.locked() && !forceLocked) || !this.visible() || this.hasBadTransform()) {
             return false;
         }
@@ -1215,9 +1226,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     visibleInChain() {
-        var e:any = this;
-        while(e && e !== NullContainer) {
-            if(! e.visible()) {
+        var e: any = this;
+        while (e && e !== NullContainer) {
+            if (!e.visible()) {
                 return false;
             }
 

@@ -858,6 +858,12 @@ export default class Point implements IPoint {
         return this;
     }
 
+    roundToNearestHalf() {
+        this.x = Math.round(this.x) -.5;
+        this.y = Math.round(this.y) -.5;
+        return this;
+    }
+
     ceil() {
         return new Point(Math.ceil(this.x), Math.ceil(this.y));
     }

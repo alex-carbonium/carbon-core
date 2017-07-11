@@ -10,7 +10,7 @@ import UserSettings from "../UserSettings";
 var debug = require("DebugUtil")("carb:resizeFramePoint");
 
 const PointSize = 6
-    , PointSize2 = 3;
+    , PointSize2 = 3.5;
 
 export default {
     cursorSet: FrameCursors,
