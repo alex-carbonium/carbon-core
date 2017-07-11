@@ -450,12 +450,12 @@ PropertyMetadata.registerForType(Text, {
 
         var ownGroups = [
             baseGroups.find(x => x.label === "Layout"),
+            baseGroups.find(x => x.label === "@constraints"),
             {
                 label: UIElement.displayType(Types.Text),
                 properties: [/*"textStyleId",*/ "autoWidth", "font"]
             },
-            baseGroups.find(x => x.label === "Appearance"),
-            baseGroups.find(x => x.label === "@constraints")
+            baseGroups.find(x => x.label === "Appearance")
         ];
 
         return ownGroups;

@@ -87,7 +87,11 @@ function drawSnapDistances(context, environment) {
             y2 += p;
         }
 
-
+        if(line.temp && !line.solid) {
+            context.setLineDash([1, 2]);
+        } else {
+            context.setLineDash([]);
+        }
         context.beginPath();
         context.moveTo(x1, y1);
         context.lineTo(x2, y2);
@@ -117,7 +121,7 @@ function drawSnapDistances(context, environment) {
     }
     context.strokeStyle = UserSettings.frame.stroke;
     context.fillStyle = UserSettings.frame.stroke;
-    context.setLineDash([1, 2]);
+
     for (let i = 0; i < lines.length; i++) {
         let line = lines[i];
         if (line.temp) {

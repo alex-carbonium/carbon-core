@@ -2336,6 +2336,10 @@ PropertyMetadata.registerForType(UIElement, {
                 label: "Layout",
                 properties: ["x", "y", "width", "height", "angle"]
             },
+            {
+                label: "@constraints",
+                properties: ["constraints"]
+            },
             // {
             //     label: "Style",
             //     properties: ["styleId"]
@@ -2344,10 +2348,7 @@ PropertyMetadata.registerForType(UIElement, {
                 label: "Appearance",
                 properties: ["fill", "stroke", "opacity"]
             },
-            {
-                label: "@constraints",
-                properties: ["constraints"]
-            },
+
             // {
             //     label: "@advanced",
             //     properties: ["clipMask"]

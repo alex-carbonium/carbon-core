@@ -188,6 +188,14 @@ class DraggingElement extends TransformationElement {
         }
     }
 
+    constraints() {
+        if(this._elements.length !== 1) {
+            return null;
+        }
+
+        return this._elements[0].constraints();
+    }
+
     parentAllowSnapping(pos) {
         return this._elements.every(x => x.parent() === this || x.parent().getDropData(x, pos) === null);
     }

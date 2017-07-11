@@ -377,6 +377,7 @@ PropertyMetadata.registerForType(Shape, {
 
         return [
             baseGroups.find(x => x.label === "Layout"),
+            baseGroups.find(x => x.label === "@constraints"),
             {
                 label: "Appearance",
                 properties: ["fill", "stroke", "strokeWidth", "strokePosition", "dashPattern", "miterLimit", "lineCap", "lineJoin", "opacity"]
@@ -385,7 +386,6 @@ PropertyMetadata.registerForType(Shape, {
                 label: "@shadow",
                 properties: ["shadows"]
             },
-            baseGroups.find(x => x.label === "@constraints"),
             {
                 label: "@advanced",
                 properties: ["clipMask"]

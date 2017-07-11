@@ -430,10 +430,10 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
                 //     label: "Actions",
                 //     properties: ["actions"]
                 // },
-                {
-                    label: "@constraints",
-                    properties: ["constraints"]
-                }
+                // {
+                //     label: "@constraints",
+                //     properties: ["constraints"]
+                // }
             ];
         }
 

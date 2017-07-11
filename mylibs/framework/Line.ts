@@ -360,13 +360,13 @@ PropertyMetadata.registerForType(Line, {
                 expanded: true
             },
             {
+                label: "@constraints",
+                properties: ["constraints"]
+            },
+            {
                 label: "Appearance",
                 expanded: false,
                 properties: ["fill", "stroke", "strokeWidth", "dashPattern", "lineCap", "opacity"]
-            },
-            {
-                label: "@constraints",
-                properties: ["constraints"]
             }
         ];
     }
