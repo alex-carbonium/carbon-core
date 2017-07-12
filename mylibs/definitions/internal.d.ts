@@ -29,6 +29,7 @@ declare module "carbon-geometry"{
 }
 
 declare module "carbon-model"{
+    import { ChangeMode } from "carbon-basics";
     import { IRect, IMatrix, ISize } from "carbon-geometry";
 
     export interface IDataNode {
@@ -37,6 +38,9 @@ declare module "carbon-model"{
     }
 
     export interface IUIElement{
+        removing(): boolean;
+        removed(mode: ChangeMode);
+
         systemType(): string;
         canSelect(): boolean;
         flatten?():void;
@@ -65,23 +69,26 @@ declare module "carbon-model"{
 }
 
 declare module "carbon-app"{
-    import { IUIElement } from 'carbon-model';
+    import { IUIElement, IPrimitiveRoot } from 'carbon-model';
     import { IContext } from "carbon-rendering";
-    import { IEvent, ViewState } from "carbon-basics";
+    import { IEvent, ViewState, IPrimitive } from "carbon-basics";
     import { ISize } from "carbon-geometry";
 
     export interface IPage{
         nameProvider: any;
 
         findDropToPageData(x, y, element);
+
+        incrementVersion();
     }
 
-    export interface IApp{
+    export interface IApp extends IPrimitiveRoot{
         offlineModel: any;
         modelSyncProxy: any;
         defaultShapeSettings: any;
         deferredChange: IEvent<any>;
         relayoutFinished: IEvent<void>;
+        changedLocally: IEvent<IPrimitive[]>;
         state: any;
         fontManager: any;
 

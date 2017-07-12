@@ -644,12 +644,12 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         Invalidate.requestInteractionOnly();
     }
 
-    removed() {
+    removed(mode: ChangeMode) {
         this.removeAllDecorators();
     }
 
     removing() {
-
+        return true;
     }
     autoSelectOnPaste() {
         return true;
@@ -1436,9 +1436,6 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     getType() {
         return "UIElement";
-    }
-    getDescription() {
-        return _(this.t);
     }
     applyVisitor(callback, useLogicalChildren?: boolean, parent?: any) {
         return callback(this);

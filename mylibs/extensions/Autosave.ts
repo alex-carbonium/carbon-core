@@ -11,6 +11,8 @@ export default class AutoSave extends ExtensionBase {
 
     private restoreUnsaved(backup) {
         var app = this._app;
+        app.updating.raise();
+
         app.state.setExternalChange(true);
 
         if (!backup.appVersion) {
@@ -26,7 +28,7 @@ export default class AutoSave extends ExtensionBase {
 
         app.state.setExternalChange(false);
         app.relayout();
-        app.restoredLocally.raise();
+        app.updated.raise();
     }
 
     private loadLocalChanges(viewModel, primitives) {

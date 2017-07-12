@@ -32,7 +32,7 @@ class CommandManager {
     }
 
     undoPrevious() {
-        if (this.index === 0) {
+        if (this.index < 0) {
             return;
         }
         debug("command undo");

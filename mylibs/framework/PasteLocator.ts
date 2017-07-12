@@ -15,9 +15,13 @@ export function choosePasteLocation(elements, rootRelativeBoundingBox = null, al
     var tolerance = allowMoveIn ? 0 : bufferRect.width * bufferRect.height * .5;
 
     var viewport = Environment.view.viewportRect();
-    var fallbackParent = Environment.view.isolationLayer.isActive ?
+    var fallbackParent: IContainer = Environment.view.isolationLayer.isActive ?
         Environment.view.isolationLayer :
         Environment.view.page.getActiveArtboard();
+
+    if (!fallbackParent) {
+        fallbackParent = Environment.view.page;
+    }
 
     var candidates = [];
     var selection = Selection.selectedElements();

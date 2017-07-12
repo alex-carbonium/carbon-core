@@ -9,7 +9,8 @@ import ContextPool from "framework/render/ContextPool";
 import EventHelper from "./EventHelper";
 import Brush from "./Brush";
 import NameProvider from "ui/NameProvider";
-import { IContainer, IRect, IPage, IArtboard, ChangeMode, IPrimitiveRoot } from "carbon-core";
+import { IContainer, IRect, IPage, IArtboard, ChangeMode, IPrimitiveRoot, IApp } from "carbon-core";
+import { createUUID } from "../util";
 
 function findNextPageName() {
     var maxId = 0;
@@ -32,6 +33,7 @@ var pageNameSlugRegex = /[^\wа-яА-Я]/g;
 
 class Page extends Layer implements IPage, IPrimitiveRoot {
     [name: string]: any;
+    app: IApp;
 
     constructor() {
         super();
@@ -153,7 +155,7 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
     }
 
     initId() {
-        this.id(this.app.nextPageId());
+        this.id(createUUID());
     }
 
     status(value) {

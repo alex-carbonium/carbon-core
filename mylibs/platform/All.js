@@ -31,28 +31,6 @@ var restoreViewState = function () {
     }
 };
 
-var registerUIActions = function (app) {
-    app.actionManager.registerAction("focusToolboxSearch", "Focus on toolbox search", "Focus", function () {
-        var model = ko.dataFor($(".toolboxSearchDiv .search-input")[0]);
-        if (model) {
-            model.focus();
-        }
-    });
-};
-
-function findFirstSharedPage(app) {
-    return null;
-    //var a =1;
-    // var sharedStatuses = app.viewModel.getSharedPageStatuses();
-    // for (var i = 0; i < app.pages.length; i++) {
-    //     var page = app.pages[i];
-    //     if (sharedStatuses.indexOf(page.status()) !== -1) {
-    //         return page;
-    //     }
-    // }
-    // return null;
-}
-
 export default class PlatformAll {
 
 
@@ -84,24 +62,6 @@ export default class PlatformAll {
     }
 
     dispose() {
-    }
-
-    //this method depends on comments model being initialized.
-    //therefore it cannot subscribe to app.loaded to avoid the implicit dependency on events order
-    postLoad(app) {
-        registerUIActions(app);
-        this.setStartupPage();
-    }
-
-    setStartupPage() {
-        var app = App.Current;
-        var page;
-        if (!page) {
-            page = findFirstSharedPage(app);
-        }
-        if (page) {
-            app.setActivePage(page);
-        }
     }
 
     platformSpecificRunCode() {

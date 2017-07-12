@@ -1,5 +1,3 @@
-import {PrimitiveType, PatchType} from "./framework/Defs";
-
 export var isBrowser = !!(typeof window !== 'undefined' && (typeof navigator !== 'undefined') && window.document);
 
 export function debounce(func, wait, immediate){
@@ -51,7 +49,7 @@ if (DEBUG){
 }
 
 export var createUUID = (typeof(window.crypto) != 'undefined' && typeof(window.crypto.getRandomValues) != 'undefined') ?
-    function(debugPrefix){
+    function(debugPrefix?){
         if (DEBUG){
             if (useIntegerIds){
                 ++idCounter;
@@ -96,7 +94,7 @@ export function leaveCommonProps(target, source){
     }
 }
 
-export var deepEquals = function(o1, o2, path) {
+export var deepEquals = function(o1, o2, path?) {
     path = path || "";
     if (o1 === o2){
         return true;
@@ -185,3 +183,9 @@ export function arrayBufferToBase64(arrayBuffer){
 
     return base64;
 };
+
+export function pushAll(target: any[], source: any[]) {
+    for (var i = 0; i < source.length; i++) {
+        target.push(source[i]);
+    }
+}

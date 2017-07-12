@@ -19,7 +19,7 @@ import { IContainerProps, IUIElement, IContainer } from "carbon-model";
 import { IMatrix } from "carbon-geometry";
 import ExtensionPoint from "./ExtensionPoint";
 
-export default class Container<TProps extends IContainerProps  = IContainerProps> extends UIElement<TProps> implements IContainer<IContainerProps> {
+export default class Container<TProps extends IContainerProps = IContainerProps> extends UIElement<TProps> implements IContainer<IContainerProps> {
     props: TProps;
     children: UIElement[];
 
@@ -496,7 +496,7 @@ export default class Container<TProps extends IContainerProps  = IContainerProps
         this.releasingChild(element);
         let idx = this.removeChild(element, mode);
 
-        element.removed();
+        element.removed(mode);
 
         this.invalidate();
 

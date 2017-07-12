@@ -1,24 +1,28 @@
 import Primitive from "../sync/Primitive";
-import { PatchType } from "carbon-core";
+import { PatchType, IDataNode, IPrimitive } from "carbon-core";
 
 let lastSelection = {};
 
 class ModelStateListener {
     elementsPropsCache: {};
-    roots: any[];
-    rootsWithAffectedLayout: any[];
+    roots: string[];
+    rootsWithAffectedLayout: IDataNode[];
+    primitives: IPrimitive[];
 
     private _stopCounter: number;
 
     constructor(){
-        this.clear();
         this._stopCounter = 0;
         this.rootsWithAffectedLayout = [];
         this.roots = [];
+        this.primitives = [];
+        this.elementsPropsCache = {};
     }
 
     clear(){
-        this.roots = [];
+        this.roots.length = 0;
+        this.rootsWithAffectedLayout.length = 0;
+        this.primitives.length = 0;
         this.elementsPropsCache = {};
     }
 
@@ -32,23 +36,14 @@ class ModelStateListener {
         }
     }
 
-    _getOrCreateRootData(key){
-        let root = this.roots.find(x => x.key === key);
-        if (!root){
-            root = {key, data: []};
-            this.roots.push(root);
-        }
-        return root.data;
-    }
-
     trackSetProps(primitiveRoot, element, props, oldProps){
         if (this._stopCounter > 0){
             return;
         }
-        let root = this._getOrCreateRootData(primitiveRoot.primitiveRootKey());
+        this.touchRoot(primitiveRoot.primitiveRootKey());
 
         let primitive = Primitive.dataNodeSetProps(element, props, oldProps);
-        root.push(primitive);
+        this.primitives.push(primitive);
 
         let elementId = element.id();
         let oldPrimitive = this.elementsPropsCache[elementId];
@@ -76,9 +71,9 @@ class ModelStateListener {
         if (this._stopCounter > 0){
             return;
         }
-        let root = this._getOrCreateRootData(primitiveRoot.primitiveRootKey());
+        this.touchRoot(primitiveRoot.primitiveRootKey());
 
-        root.push(Primitive.dataNodeRemove(parent, element, index));
+        this.primitives.push(Primitive.dataNodeRemove(parent, element, index));
 
         this._markForRelayout(primitiveRoot);
     }
@@ -87,9 +82,9 @@ class ModelStateListener {
         if (this._stopCounter > 0){
             return;
         }
-        let root = this._getOrCreateRootData(primitiveRoot.primitiveRootKey());
+        this.touchRoot(primitiveRoot.primitiveRootKey());
 
-        root.push(Primitive.dataNodeAdd(parent, element, index));
+        this.primitives.push(Primitive.dataNodeAdd(parent, element, index));
 
         this._markForRelayout(primitiveRoot);
     }
@@ -99,9 +94,9 @@ class ModelStateListener {
             return;
         }
         var p = Primitive.selection(page, selection, oldSelection, userId);
-        let root = this._getOrCreateRootData(page.primitiveRootKey());
+        this.touchRoot(page.primitiveRootKey());
 
-        root.push(p);
+        this.primitives.push(p);
     }
 
     createViewPrimitive(page, newState, oldState){
@@ -116,9 +111,9 @@ class ModelStateListener {
         if (this._stopCounter > 0){
             return;
         }
-        let root = this._getOrCreateRootData(primitiveRoot.primitiveRootKey());
+        this.touchRoot(primitiveRoot.primitiveRootKey());
 
-        root.push(Primitive.dataNodeChangePosition(parent, element, index, oldIndex));
+        this.primitives.push(Primitive.dataNodeChangePosition(parent, element, index, oldIndex));
     }
 
     trackPatchProps(primitiveRoot, element, patchType, propName, item){
@@ -154,13 +149,16 @@ class ModelStateListener {
                 throw new Error("Unknown patch type " + patchType);
         }
 
-        let root = this._getOrCreateRootData(primitiveRoot.primitiveRootKey());
-        root.push(primitive);
+        this.touchRoot(primitiveRoot.primitiveRootKey());
+        this.primitives.push(primitive);
     }
 
     //mark root for relayout
     touchRoot(key){
-        this._getOrCreateRootData(key);
+        let idx = this.roots.indexOf(key);
+        if (idx === -1) {
+            this.roots.push(key);
+        }
     }
 
     _markForRelayout(root){
@@ -171,10 +169,6 @@ class ModelStateListener {
 
     isRelayoutNeeded(root): boolean{
         return this.rootsWithAffectedLayout.indexOf(root) !== -1;
-    }
-
-    markRelayoutCompleted(){
-        this.rootsWithAffectedLayout.length = 0;
     }
 }
 

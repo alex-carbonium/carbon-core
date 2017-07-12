@@ -23,6 +23,7 @@ declare module "carbon-model" {
 
         getImmediateChildById<T extends IDataNode>(id: string, materialize?: boolean): T | null;
         findAllNodesDepthFirst<T extends IDataNode>(predicate: (node: T) => boolean): T[];
+        findNodeBreadthFirst<T extends IDataNode>(predicate: (node: T) => boolean): T | null;
         findNodeByIdBreadthFirst<T extends IDataNode>(id: string): T | null;
         findAncestorOfType<T extends IDataNode>(type: IConstructor<T>): T | null;
 
@@ -143,7 +144,7 @@ declare module "carbon-model" {
 
         changePosition(element: IUIElement, index: number, mode?: ChangeMode);
 
-        hitElement<T extends IUIElement>(event, scale: number, predicate?, directSelection?): T;
+        hitElement(event, scale: number, predicate?, directSelection?): IUIElement;
 
         autoPositionChildren(): boolean;
 
