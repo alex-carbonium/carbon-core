@@ -124,7 +124,7 @@ export default class IconSetSpriteManager {
 
         if (!elements.length) {
             artboard.setProps({ iconSetSpriteUrl: null });
-            return Promise.resolve({ groups: [] });
+            return Promise.resolve({ groups: [], size: { width: 0, height: 0 } });
         }
 
         let spriteUrlPromise = IconSetSpriteManager.renderElementsToSprite(elements, iconsSize);
