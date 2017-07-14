@@ -17,7 +17,7 @@ import Environment from "environment";
 import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
-import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect } from "carbon-core";
+import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, IPage, IArtboardPage } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
 
 
@@ -440,16 +440,18 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return res;
     }
 
-    propsUpdated(props, oldProps) {
+    propsUpdated(props: Partial<IArtboardProps>, oldProps: Partial<IArtboardProps>, mode: ChangeMode) {
         super.propsUpdated.apply(this, arguments);
+
+        let parent = this.parent() as IPage;
         if (props.state !== undefined) {
             if (this._recorder && this._recorder.hasState(props.state)) {
                 this._recorder.changeState(props.state);
             }
         }
 
-        if(oldProps.type !== props.type && oldProps.type) {
-            App.Current.resourceDeleted.raise(oldProps.type, this);
+        if (oldProps.type !== props.type && oldProps.type !== ArtboardType.Regular) {
+            App.Current.resourceDeleted.raise(oldProps.type, this, parent);
         }
 
         if (oldProps.name !== undefined) {
@@ -462,16 +464,12 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             this._refreshMetadata();
         }
 
-        if (props.type !== undefined && Selection.isOnlyElementSelected(this)) {
-            Selection.refreshSelection();
-            if (props.type === ArtboardType.Symbol) {
-                this.runtimeProps.refreshToolbox = true;
-            } else if (oldProps.type === ArtboardType.Symbol) {
-                let parent = this.parent();
-                if (parent) {
-                    parent.makeToolboxConfigDirty(true);
-                }
+        if (oldProps.type !== props.type && props.type !== ArtboardType.Regular) {
+            if (Selection.isOnlyElementSelected(this)) {
+                Selection.refreshSelection();
             }
+
+            App.Current.resourceAdded.raise(props.type, this);
         }
 
         if (props.frame === null) {
@@ -570,15 +568,11 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     incrementVersion() {
         this.runtimeProps.version++;
 
-        let parent = this.parent();
+        let parent = this.parent() as IPage;
         if (parent) {
             parent.incrementVersion();
-            if (this.props.type === ArtboardType.Symbol) {
-                parent.makeToolboxConfigDirty(this.runtimeProps.refreshToolbox, this.id());
-                delete this.runtimeProps.refreshToolbox;
-            }
 
-            if (this.props.type !== undefined) {
+            if (this.props.type !== ArtboardType.Regular) {
                 App.Current.resourceChanged.raise(this.props.type, this);
             }
         }
@@ -730,8 +724,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         super.trackInserted.apply(this, arguments);
     }
 
-    // this on is called when somebody is deleting artboard
-    trackDeleted(parent) {
+    trackDeleted(parent: IArtboardPage) {
         delete this.runtimeProps.primitivePath;
         delete this.runtimeProps.primitiveRootKey;
 
@@ -743,8 +736,11 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         }
 
         if (this.props.type === ArtboardType.Symbol) {
-            this.flattenRelatedSymbols(parent);
-            parent.makeToolboxConfigDirty(this.runtimeProps.refreshToolbox, this.id());
+            this.flattenSymbolInstances(parent);
+        }
+
+        if (this.props.type !== ArtboardType.Regular) {
+            App.Current.resourceDeleted.raise(this.props.type, this, parent);
         }
 
         super.trackDeleted.apply(this, arguments);
@@ -865,7 +861,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     onIsolationExited() {
     }
 
-    private flattenRelatedSymbols(page) {
+    private flattenSymbolInstances(page) {
         let pageId = page.id();
         let artboardId = this.id();
         let app = page.app;

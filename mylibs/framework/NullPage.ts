@@ -11,6 +11,7 @@ class NullPage extends UIElement implements IPage {
     nameProvider: any;
     type: LayerTypes = LayerTypes.Content;
     isActive: boolean = false;
+    app = null;
 
     constructor() {
         super();
@@ -23,6 +24,9 @@ class NullPage extends UIElement implements IPage {
     removeDecorator(decorator) { }
     removeAllDecorators():any[] { return null; }
     removeDecoratorByType(type) { }
+
+    incrementVersion() {
+    }
 
     activate() {
     }
@@ -129,6 +133,9 @@ class NullPage extends UIElement implements IPage {
     }
     add(element) {
         return element;
+    }
+    removing() {
+        return true;
     }
     remove(element) {
         return -1;

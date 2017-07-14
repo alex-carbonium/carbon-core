@@ -693,9 +693,9 @@ class Path extends Shape {
         return false;
     }
 
-    removed() {
+    removed(mode: ChangeMode) {
         this.switchToEditMode(false);
-        super.removed();
+        super.removed(mode);
     }
 
     propsUpdated(newProps, oldProps, mode?) {

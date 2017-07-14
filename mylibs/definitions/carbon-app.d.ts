@@ -1,6 +1,6 @@
 declare module "carbon-app" {
     import { IDataNode, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IElementEventData, IIsolatable, IMouseEventHandler, IContainerProps } from "carbon-model";
-    import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable } from "carbon-basics";
+    import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable, ArtboardType, IPrimitive } from "carbon-basics";
     import { IRect, ICoordinate, ISize } from "carbon-geometry";
     import { IContext } from "carbon-rendering";
 
@@ -23,14 +23,12 @@ declare module "carbon-app" {
         isLoaded: boolean;
         props:IAppProps;
 
-        changed: IEvent<any>;
-        restoredLocally: IEvent<void>;
+        changed: IEvent<IPrimitive[]>;
 
         activePage: IPage;
         pageChanged: IEvent2<IPage, IPage>;
         pageAdded: IEvent<IPage>;
         pageRemoved: IEvent<IPage>;
-        changeToolboxPage: IEvent<IPage>;
 
         pages: IPage[];
         addPage(page: IPage);
@@ -39,14 +37,17 @@ declare module "carbon-app" {
         setActivePage(page: IPage);
         setActivePageById(id: string);
         pagesWithSymbols(): IPage[];
+        getAllResourceArtboards(type: ArtboardType): IArtboard[];
 
         activeStory: any;
         stories: any[];
         activeStoryChanged: IEvent<any>;
         storyInserted: IEvent<any>;
         storyRemoved: IEvent<any>;
-        resourceChanged: IEvent2<any, any>;
-        resourceDeleted: IEvent2<any, any>;
+        resourceAdded: IEvent2<ArtboardType, IArtboard>;
+        resourceChanged: IEvent2<ArtboardType, IArtboard>;
+        resourceDeleted: IEvent3<ArtboardType, IArtboard, IPage>;
+
         setActiveStoryById(id);
         removeStory(story);
 
@@ -66,10 +67,20 @@ declare module "carbon-app" {
 
         init(): void;
         run(): Promise<void>;
-        onLoad(callback: () => void): void;
-        unload(): void;
-        serverless(value?: boolean): boolean;
 
+        onLoad(callback: () => void): void;
+        /**
+         * Notifies that the app will perform a heavy update, for example, an import of the page, or a restore of the specific version.
+         * The typical reaction should be to unsubscribe from frequent events (like resourceAdded, etc).
+         */
+        updating: IEvent<void>;
+        /**
+         * Notifies that the app has been heavily updated. The required data needs to be fully re-read from the app.
+         */
+        updated: IEvent<void>;
+        unload(): void;
+
+        serverless(value?: boolean): boolean;
         isDirty(): boolean;
 
         companyId(value?: string): string;
@@ -100,8 +111,8 @@ declare module "carbon-app" {
         defaultStroke(stroke?: Brush, mode?: any): Brush;
         useRecentColor(color: Brush);
         recentColors(): string[];
-        getUserSetting<T>(name: string, defaultValue?: T): T;
-        setUserSetting(name: string, value: null | string | number | boolean): void;
+        getUserSetting<T>(name: string): T;
+        setUserSetting(name: string, value: null | string | number | boolean | object): void;
 
         assignNewName(element: IUIElement);
 
@@ -154,6 +165,10 @@ declare module "carbon-app" {
     }
 
     export const Page: IConstructor<IPage>;
+
+    export interface IArtboardPage extends IPage {
+        setActiveArtboard(artboard: IArtboard): void;
+    }
 
     export interface IView {
         viewContainerElement: HTMLElement;

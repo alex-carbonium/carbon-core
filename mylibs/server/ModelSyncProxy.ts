@@ -208,18 +208,19 @@ export default class ModelSyncProxy {
     }
 
     resync(data){
+        this._app.updating.raise();
         this._app.state.setExternalChange(true);
         Selection.makeSelection([]);
         this._app.isLoaded = false;
 
         var pageId = this._app.activePage.id();
         this._app.fromJSON(data);
-        this._app.reloaded.raise();
 
         this._app.isLoaded = true;
         this._app.state.setExternalChange(false);
 
         this._app.setActivePageById(pageId);
+        this._app.updated.raise();
     }
 
     clearPendingChanges(){

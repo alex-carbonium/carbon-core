@@ -244,6 +244,12 @@ class NullContainer extends DataNode implements IContainer {
         return -1;
     }
 
+    removing() {
+        return true;
+    }
+    removed() {
+    }
+
     changePosition(element, index) {
     }
 

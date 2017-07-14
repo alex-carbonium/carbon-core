@@ -41,7 +41,7 @@ class PrimitiveHandlers {
         return res;
     }
 
-    handle(element, primitive: IPrimitive) {
+    handle(element: IDataNode, primitive: IPrimitive) {
         var h = this.handlers[primitive.type];
         if (h) {
             debug('Applying %p %o', primitive, primitive);

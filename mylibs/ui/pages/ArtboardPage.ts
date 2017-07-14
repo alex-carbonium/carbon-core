@@ -14,18 +14,17 @@ import Environment from "environment";
 import { Types, ViewTool } from "../../framework/Defs";
 import Rect from "../../math/rect";
 import { IArtboard } from "carbon-model";
-import { ArtboardType } from "carbon-core";
+import { ArtboardType, IArtboardPage } from "carbon-core";
 import DataNode from "../../framework/DataNode";
 var debug = require<any>("DebugUtil")("carb:artboardPage");
 
 const ARTBOARD_SPACE = 100;
 
-class ArtboardPage extends Page {
+class ArtboardPage extends Page implements IArtboardPage {
 
     constructor() {
         super();
         this._artboardNames = {};
-        this.toolboxConfigIsDirty = EventHelper.createEvent();
     }
 
     initPage(view) {
@@ -299,12 +298,13 @@ class ArtboardPage extends Page {
         return res;
     }
 
-    getAllResourceArtboards(resourceType) {
+    getAllResourceArtboards(resourceType?) {
         let res = [];
         let artboards = this.getAllArtboards();
         for (let j = 0; j < artboards.length; ++j) {
             let a = artboards[j];
-            if (a.props.type === resourceType) {
+            let matches = resourceType === undefined ? a.props.type !== ArtboardType.Regular : a.props.type === resourceType;
+            if (matches) {
                 res.push(a);
             }
         }
@@ -355,12 +355,12 @@ class ArtboardPage extends Page {
         return primitives;
     }
 
-    makeToolboxConfigDirty(forceUpdate, changedId){
-        this.setProps({toolboxConfigId:null});
-        if(forceUpdate){
-            App.Current.changeToolboxPage.raise(this);
-        }
-        this.toolboxConfigIsDirty.raise(forceUpdate, changedId);
+    trackDeleted() {
+        //allow all resources to perform their removal logic
+        let artboards = this.getAllResourceArtboards();
+        artboards.forEach(x => this.remove(x));
+
+        super.trackDeleted.apply(this, arguments);
     }
 
     saveWorkspaceState(): any{

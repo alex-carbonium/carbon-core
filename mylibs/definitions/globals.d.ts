@@ -28,4 +28,3 @@ declare function makeRef<T>(obj?: T): IReference<T>;
 declare function emptyObject<T>() : T;
 declare function removeElement(arr, obj);
 declare function map(objects: any[], func: (item: any) => any): any;
-declare function _(value: string): string;

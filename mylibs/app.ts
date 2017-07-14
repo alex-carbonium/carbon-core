@@ -44,13 +44,14 @@ import backend from "./backend";
 import logger from "./logger";
 import params from "./params";
 import ArtboardFrame from "framework/ArtboardFrame";
-import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitive, IPrimitiveRoot, ViewState, IJsonNode } from "carbon-core";
+import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitive, IPrimitiveRoot, ViewState, IJsonNode, IArtboard } from "carbon-core";
 import { Contributions } from "./extensions/Contributions";
 import { getBuiltInExtensions } from "./extensions/BuiltInExtensions";
 import Command from "./framework/commands/Command";
 import PageExporter from "./framework/share/PageExporter";
 import Primitive from "./framework/sync/Primitive";
 import UIElement from "./framework/UIElement";
+import RelayoutEngine from "./framework/relayout/RelayoutEngine";
 
 if (DEBUG) {
     window['env'] = Environment;
@@ -69,7 +70,7 @@ var PropertyMetadata = require("framework/PropertyMetadata");
 var Path = require("framework/Path");
 var CompoundPath = require("framework/CompoundPath");
 
-class AppClass extends DataNode implements IApp, IPrimitiveRoot {
+class AppClass extends DataNode implements IApp {
     props: IAppProps;
 
     [name: string]: any;
@@ -82,7 +83,6 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
     pageChanged: IEvent2<IPage, IPage>;
     pageAdded: IEvent<IPage>;
     pageRemoved: IEvent<IPage>;
-    changeToolboxPage: IEvent<IPage>;
 
     activeStoryChanged: IEvent<any>;
     storyInserted: IEvent<any>;
@@ -102,19 +102,22 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
     dataManager: DataManager;
 
     onBuildMenu: any;
-    changed: IEvent<any>;
+    changed: IEvent<IPrimitive[]>;
+    changedLocally: IEvent<IPrimitive[]>;
     relayoutFinished: IEvent<void>;
     deferredChange: IEvent<any>;
-    restoredLocally: IEvent<void>;
 
-    resourceChanged: IEvent2<any, any>;
-    resourceDeleted: IEvent2<any, any>;
+    updating = EventHelper.createEvent<void>();
+    updated = EventHelper.createEvent<void>();
+
+    resourceAdded = EventHelper.createEvent2<ArtboardType, IArtboard>();
+    resourceChanged = EventHelper.createEvent2<ArtboardType, IArtboard>();
+    resourceDeleted = EventHelper.createEvent3<ArtboardType, IArtboard, IPage>();
 
     currentToolChanged: IEvent<string>;
     _currentTool: string;
 
     private _loaded: IEvent<void>;
-    private _lastRelayoutView: ViewState = null;
 
     constructor() {
         super(true);
@@ -143,18 +146,11 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
         this.savedToJson = EventHelper.createEvent();
         this.relayoutFinished = EventHelper.createEvent<void>();
 
-        this.changeToolboxPage = EventHelper.createEvent<IPage>();
-
-        this.reloaded = EventHelper.createEvent();
-        this.restoredLocally = EventHelper.createEvent<void>();
         this.selectionMade = EventHelper.createEvent();
         this.onBuildMenu = EventHelper.createEvent();
         this.offlineModeChanged = EventHelper.createEvent();
 
         this.modeChanged = EventHelper.createEvent();
-
-        this.resourceChanged = EventHelper.createEvent2();
-        this.resourceDeleted = EventHelper.createEvent2();
 
         this.changed = EventHelper.createEvent();
         this.deferredChange = EventHelper.createEvent();
@@ -546,6 +542,8 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
         if (!page) {
             return;
         }
+        this.updating.raise();
+
         setNewActive = (setNewActive === undefined) ? true : setNewActive;
         var indexOfRemoved = this.pages.indexOf(page);
 
@@ -559,8 +557,11 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
             }
         }
 
+        page.removing();
         this.removeChild(page);
         this.pageRemoved.raise(page);
+
+        this.updated.raise();
 
         return -1;
     }
@@ -717,10 +718,10 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
             this.setUserSetting("snapTo", value);
             return value;
         }
-        return this.getUserSetting("snapTo", UserSettings.snapTo);
+        return this.getUserSetting("snapTo") || UserSettings.snapTo;
     }
 
-    getUserSetting(name: string, defaultValue?: any) {
+    getUserSetting(name: string) {
         var userId = backend.getUserId();
 
         for (var i = 0; i < this.props.userSettings.length; i++) {
@@ -730,21 +731,20 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
             }
         }
 
-        return defaultValue;
+        return null;
     }
 
-    setUserSetting(name: string, value: null | string | number | boolean) {
+    setUserSetting(name: string, value: null | string | number | boolean | object) {
         var fullName = backend.getUserId() + ":" + name;
         var oldValue = this.getUserSetting(name);
         if (value === null) {
-            this.patchProps(PatchType.Remove, "userSettings", { id: fullName });
-        } else {
+            if (oldValue !== null) {
+                this.patchProps(PatchType.Remove, "userSettings", { id: fullName });
+            }
+        }
+        else {
             this.patchProps((oldValue === null || oldValue === undefined) ? PatchType.Insert : PatchType.Change, "userSettings", { id: fullName, value });
         }
-    }
-
-    nextPageId() {
-        return createUUID();
     }
 
     allowSelection(value) {
@@ -817,6 +817,8 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
 
     run() {
         params.perf && performance.mark("App.run");
+        this.updating.raise();
+
         this.clear();
 
         this.platform.run(this);
@@ -855,8 +857,7 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
             }
 
             this.raiseLoaded();
-            //this method depends on extensions (comments) being initialized
-            this.platform.postLoad(this);
+            this.updated.raise();
 
             this.restoreWorkspaceState();
             this.releaseLoadRef();
@@ -910,134 +911,12 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
         return this.state.isDirty();
     }
 
-    findPrimitiveRoot(key) {
-        var primitiveRootElementEntry = this.primitiveRootCache[key];
-        var primitiveRootElement;
-        if (!primitiveRootElementEntry) {
-            primitiveRootElement = this.findNodeBreadthFirst(x => x.primitiveRootKey() === key);
-            this.primitiveRootCache[key] = { element: primitiveRootElement, hitCount: 1 }
-        } else {
-            primitiveRootElement = primitiveRootElementEntry.element;
-            primitiveRootElementEntry.hitCount++;
-        }
-        return primitiveRootElement;
-    }
-
-    _trackViewPrimitive() {
-        if (!ModelStateListener.roots.length || !this.isLoaded || this.activePage === NullPage) {
-            return;
-        }
-
-        var viewState = Environment.view.viewState;
-        if (this._lastRelayoutView !== viewState) {
-            var primitive = ModelStateListener.createViewPrimitive(this.activePage, viewState, this._lastRelayoutView);
-            this._lastRelayoutView = viewState;
-            return primitive;
-        }
-
-        return null;
-    }
-
     relayout() {
-        try {
-            params.perf && performance.mark("App.Relayout");
-            this.relayoutInternal();
-            params.perf && performance.measure("App.Relayout", "App.Relayout");
-        }
-        finally {
-            ModelStateListener.clear();
-            this.primitiveRootCache = {};
-        }
+        RelayoutEngine.performAppRelayout(this);
     }
 
     relayoutInternal() {
-        var roots = ModelStateListener.roots;
-        var localPrimitives = [];
-        var externalPrimitives = [];
 
-        for (let i = 0; i < roots.length; ++i) {
-            let key = roots[i].key;
-            let primitiveRootElement = this.findPrimitiveRoot(key);
-            if (primitiveRootElement === this) {
-                var primitiveMap = RelayoutQueue.dequeue(this);
-                if (primitiveMap) {
-                    var appPrimitives = primitiveMap[this.primitiveRootKey()];
-                    for (let j = 0; j < appPrimitives.length; j++) {
-                        PrimitiveHandler.handle(this, appPrimitives[j]);
-                    }
-                    this.filterPrimitives(appPrimitives, localPrimitives, externalPrimitives);
-                }
-            }
-            else if (primitiveRootElement) { // the element can be deleted
-                let res = primitiveRootElement.relayout(ModelStateListener.elementsPropsCache);
-                this.filterPrimitives(res, localPrimitives, externalPrimitives);
-            }
-        }
-
-        ModelStateListener.markRelayoutCompleted();
-
-        var localQueued = localPrimitives.length;
-
-        // this one should be in a separate loop, because we can get more elements after relayout
-        var rollbacks = [];
-        for (let i = 0; i < roots.length; ++i) {
-            let key = roots[i].key;
-            var rootPrimitives = roots[i].data;
-            let primitiveRootElement = this.findPrimitiveRoot(key);
-
-            if (primitiveRootElement) {
-                primitiveRootElement.relayoutCompleted();
-            }
-
-            for (var j = 0; j < rootPrimitives.length; j++) {
-                var p = rootPrimitives[j];
-                localPrimitives.push(p);
-                rollbacks.push(p._rollbackData);
-                delete p._rollbackData;
-            }
-        }
-
-        //command should be produced only for new changes registered in the roots
-        if (localPrimitives.length > localQueued) {
-            var viewPrimitive = this._trackViewPrimitive();
-
-            if (viewPrimitive) {
-                localPrimitives.push(viewPrimitive);
-                rollbacks.push(viewPrimitive._rollbackData);
-                delete viewPrimitive._rollbackData;
-            }
-
-            CommandManager.registerExecutedCommand(new Command(localPrimitives, rollbacks.reverse()));
-        }
-
-        if (localPrimitives.length) {
-            this.changedLocally.raise(localPrimitives);
-        }
-
-        if (localPrimitives.length || externalPrimitives.length) {
-            let allPrimitives = localPrimitives;
-            if (externalPrimitives.length) {
-                allPrimitives = localPrimitives.concat(externalPrimitives);
-            }
-            this.changed.raise(allPrimitives);
-
-            this.relayoutFinished.raise();
-            Invalidate.request();
-        }
-    }
-
-    private filterPrimitives(primitives: IPrimitive[], locals: IPrimitive[], externals: IPrimitive[]) {
-        if (primitives) {
-            for (var i = 0; i < primitives.length; i++) {
-                var p = primitives[i];
-                if (p.sessionId === backend.sessionId) {
-                    locals.push(p);
-                }
-                else {
-                    externals.push(p);
-                }
-            }
-        }
     }
 
     relayoutCompleted() {
@@ -1108,10 +987,6 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
         return !!this.id();
     }
 
-    displayName() {
-        return _(this.t);
-    }
-
     isPreviewMode() {
         return this._mode === "preview";
     }
@@ -1167,6 +1042,8 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
         return PageExporter.prepareShareData(page);
     }
     importPage(data) {
+        this.updating.raise();
+
         var pageJson = data.page as IJsonNode;
         var name = ' (' + pageJson.props.name + ')';
         if (data.styles) {
@@ -1196,6 +1073,8 @@ class AppClass extends DataNode implements IApp, IPrimitiveRoot {
         else {
             this.importUpdatedPage(page, pageJson);
         }
+
+        this.updated.raise();
 
         return page;
     }
