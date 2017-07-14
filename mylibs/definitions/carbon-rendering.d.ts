@@ -8,6 +8,8 @@ declare module "carbon-rendering" {
         fillStyle: string;
         lineWidth: number;
         globalAlpha: number;
+        canvas: any;
+        filter: string;
 
         clearRect(x: number, y: number, width: number, height: number);
 
