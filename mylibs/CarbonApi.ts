@@ -4,11 +4,12 @@
 * This library can only be used in software components owned by Carbon Design. Any form of other use is strictly prohibited.
 */
 
-import backend from "./backend";
-import logger from "./logger";
-import DashboardProxy from "./server/DashboardProxy";
-
 require("./PromiseConfig");
+
+let backend = require("./backend");
+let logger = require("./logger");
+let DashboardProxy = require("./server/DashboardProxy");
+
 require("./server/AccountProxy");
 require("./server/StaticResourcesProxy");
 require("./server/ShareProxy");
