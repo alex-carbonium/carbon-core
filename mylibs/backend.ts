@@ -5,7 +5,7 @@ import EventHelper from "./framework/EventHelper";
 import UserManager from "oidc-client/src/UserManager";
 import Log from "oidc-client/src/Log";
 import params from "./params";
-import { IBackend, ILogger, IAccountProxy, Response, ILoginModel, ILoginResult, ConnectionState, ResponsePromise, IShareProxy, IFileProxy, IStaticResourcesProxy, IFontsProxy, IGalleryProxy } from "carbon-api";
+import { IBackend, ILogger, IAccountProxy, Response, ILoginModel, ILoginResult, ConnectionState, ResponsePromise, IShareProxy, IFileProxy, IStaticResourcesProxy, IFontsProxy, IGalleryProxy, IActivityProxy } from "carbon-api";
 import { IEvent, IDisposable, LoginProvider } from "carbon-basics";
 import { IApp } from "carbon-app";
 import ActivityMonitor from "./ActivityMonitor";
@@ -56,6 +56,7 @@ class Backend implements IBackend {
     shareProxy: IShareProxy;
     staticResourcesProxy: IStaticResourcesProxy;
     fileProxy: IFileProxy;
+    activityProxy: IActivityProxy;
     fontsProxy: IFontsProxy;
     galleryProxy: IGalleryProxy;
 
@@ -518,10 +519,10 @@ class Backend implements IBackend {
     }
 }
 
-let backend: Backend = globals.backend;
+let backend = globals.backend;
 if (!backend) {
     backend = new Backend();
     debug("created backend, session %s", backend.sessionId);
     globals.backend = backend;
 }
-export default backend;
+export default backend as Backend;

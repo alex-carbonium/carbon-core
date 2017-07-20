@@ -18,7 +18,6 @@ declare module "carbon-core" {
     export var PropertyMetadata: any;
     export var Artboard: any;
     export var StateBoard: any;
-    export var TileSize: any;
     export var PropertyTracker: any;
     export var params: any;
     export var MirroringController: any;
@@ -44,7 +43,6 @@ declare module "carbon-core" {
     export var Invalidate: any;
     export var SvgParser: any;
     export var IconsInfo: any;
-    export var ToolboxConfiguration: any;
     export var IconSetSpriteManager: any;
     export var UserSettings:any;
     export class Shape{}

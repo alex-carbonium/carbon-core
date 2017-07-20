@@ -6,10 +6,11 @@ import OpenTypeFontInfo from "./framework/text/font/opentypefontinfo";
 import { FontWeight, FontStyle } from "carbon-basics";
 import backend from "./backend";
 import bluebird from "bluebird";
+import { IFontManager } from "carbon-core";
 
 var load = bluebird.promisify(OpenType.load);
 
-export default class OpenTypeFontManager extends FontManager {
+export default class OpenTypeFontManager extends FontManager implements IFontManager {
     _metadata: any[];
     _loadQueue: any[];
 

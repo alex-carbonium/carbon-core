@@ -74,6 +74,10 @@ module.exports = function(config){
             Chrome_DevTools_Saved_Prefs: {
                 base: 'Chrome',
                 flags: ['--enable-logging --v=1 --user-data-dir=' + path.join(require('os').homedir(), 'carbon-chrome')]
+            },
+            PhantomJS_Debug: {
+                base: 'PhantomJS',
+                debug: true
             }
         },
 

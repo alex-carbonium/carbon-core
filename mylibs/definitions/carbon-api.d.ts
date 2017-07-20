@@ -56,6 +56,7 @@ declare module "carbon-api" {
         fileProxy: IFileProxy;
         fontsProxy: IFontsProxy;
         galleryProxy: IGalleryProxy;
+        activityProxy: IActivityProxy;
     }
 
     export type Response<TModel, TResult> =
@@ -90,6 +91,10 @@ declare module "carbon-api" {
         images(companyId: string): Promise<IImagesResult>;
         uploadPublicImage(model: {content: string}): Promise<{url: string}>;
         uploadPublicFile(model: {content: string}): Promise<{url: string}>;
+    }
+
+    export interface IActivityProxy {
+        subscribeForFeature(companyId, projectId, feature): Promise<void>;
     }
 
     export interface ILoginModel{
@@ -220,6 +225,15 @@ declare module "carbon-api" {
     export const FileProxy: IFileProxy;
 
     export {LoginProvider} from "carbon-basics";
+
+    export type CarbonGlobals = {
+        coreScript: string;
+        coreLoaded: boolean;
+        coreCallback: () => void;
+        resourceFile: string;
+        backend?: IBackend;
+    }
+    export const globals: CarbonGlobals;
 }
 
 declare function assertNever(t: never);

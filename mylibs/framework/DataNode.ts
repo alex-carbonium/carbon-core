@@ -73,6 +73,10 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
 
     getArrayPropValue(propName:string, id:string):any {
         let array = this.props[propName];
+        if (!array) {
+            return null;
+        }
+
         for (let i = 0; i < array.length; i++) {
             if (array[i].id === id) {
                 return array[i]

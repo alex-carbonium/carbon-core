@@ -1,11 +1,13 @@
 import EventHelper from "./framework/EventHelper";
 import {IView, IController, IEnvironment, IEvent2} from "carbon-core";
+import ContextPool from "./framework/render/ContextPool";
 
 class Environment implements IEnvironment {
     attached: any;
     detaching: any;
     view: IView;
     controller: IController;
+    contextPool = ContextPool;
 
     loaded: Promise<void>;
     resolveLoaded: () => void;

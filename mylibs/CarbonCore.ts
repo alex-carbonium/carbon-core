@@ -43,7 +43,7 @@ export default {
     "PreviewProxy": require("./framework/preview/PreviewProxy"),
     "Clipboard": require("./framework/Clipboard"),
     "Environment": require("./environment"),
-    "Workspace": require("./environment"),
+    "workspace": require("./environment"),
     "UserSettings": require("./UserSettings"),
     "backend": backend,
     "imageCache": require("./imageCache"),
@@ -52,6 +52,7 @@ export default {
     "PropertyTracker": require("./framework/PropertyTracker"),
     "UIElement": require("./framework/UIElement"),
     "CompositeElement": require("./framework/CompositeElement"),
+    "DataNode": require("./framework/DataNode"),
     "Image": require("./framework/Image"),
     "Container": require("./framework/Container"),
     "GroupContainer": require("./framework/GroupContainer"),
@@ -79,7 +80,6 @@ export default {
     "ContextBarPosition": Defs.ContextBarPosition,
     "PatchType": Defs.PatchType,
     "ChangeMode": Defs.ChangeMode,
-    "TileSize": Defs.TileSize,
     "Types": Defs.Types,
     "ViewTool": Defs.ViewTool,
     "Context": require("./framework/render/Context"),
@@ -99,15 +99,12 @@ export default {
     "createUUID": Util.createUUID,
     "choosePasteLocation": require("./framework/PasteLocator").choosePasteLocation,
 
-    "ToolboxConfiguration": require("./ui/toolbox/ToolboxConfiguration"),
-
     "SelectComposite": require("./framework/SelectComposite"),
     "DraggingElement": require("./framework/interactions/DraggingElement"),
     "SelectFrame": require("./framework/SelectFrame"),
     "Layer": require("./framework/Layer"),
 
     "domUtil": domUtil,
-    "ActivityProxy": require("./server/ActivityProxy"),
     "Cursors": require("Cursors"),
 
     "LayoutGridLines": require("./extensions/guides/LayoutGridLines"),

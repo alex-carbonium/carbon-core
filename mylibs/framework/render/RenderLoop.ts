@@ -21,9 +21,6 @@ export default class RenderLoop implements IRenderLoop {
     private _isolationContext: Context;
 
     private _viewport: HTMLElement;
-    private _htmlLayer: HTMLElement;
-    private _htmlLayerWidth = 0;
-    private _htmlLayerHeight = 0;
 
     private _renderingRequestId = 0;
     private _renderingRequestContinuous = false;
@@ -75,18 +72,6 @@ export default class RenderLoop implements IRenderLoop {
 
             this._app = app;
             this._attached = true;
-
-            // need to do it after next browser relayout
-            setTimeout(() => {
-                this._htmlLayerWidth = this._htmlLayer.clientWidth;
-                this._htmlLayerHeight = this._htmlLayer.clientHeight;
-                if (this._htmlLayerWidth !== this.viewContainer.clientWidth) {
-                    this.viewContainer.scrollLeft = this._htmlLayerWidth / 2;
-                }
-                if (this._htmlLayerHeight !== this.viewContainer.clientHeight) {
-                    this.viewContainer.scrollTop = this._htmlLayerHeight / 2;
-                }
-            }, 0);
         }
     }
 
@@ -98,27 +83,11 @@ export default class RenderLoop implements IRenderLoop {
         let viewContainer = document.createElement("div");
         viewContainer.id = "viewContainer";
         viewContainer.tabIndex = 1;
-        viewContainer.onscroll = this.onViewContainerScroll;
         viewContainer.style.position = "relative";
-        viewContainer.style.width = '150%';
-        viewContainer.style.height = '150%';
+        viewContainer.style.width = '100%';
+        viewContainer.style.height = '100%';
         viewContainer.style.overflow = "scroll";
         viewContainer.style.background = "none repeat scroll 0 0 transparent";
-
-        let htmlLayer = document.createElement("div");
-        htmlLayer.id = "htmlLayer";
-        this.setAbsolutePosition(htmlLayer);
-        htmlLayer.style.pointerEvents = "none";
-        htmlLayer.style.width = '150%';
-        htmlLayer.style.height = '150%';
-        viewContainer.appendChild(htmlLayer);
-
-        let htmlPanel = document.createElement("div");
-        htmlPanel.id = "htmlPanel";
-        htmlPanel.tabIndex = 1;
-        this.setAbsolutePosition(htmlPanel);
-        htmlPanel.style.pointerEvents = "none";
-        viewContainer.appendChild(htmlPanel);
 
         if (append) {
             viewport.appendChild(viewContainer);
@@ -129,7 +98,6 @@ export default class RenderLoop implements IRenderLoop {
 
         this.viewContainer = viewContainer;
         this._viewport = viewport;
-        this._htmlLayer = htmlLayer;
 
         this._upperContext = this.addCanvas(viewport, "app_upperCanvas", append);
         this._isolationContext = this.addCanvas(viewport, "isolation_canvas", append);
@@ -197,39 +165,6 @@ export default class RenderLoop implements IRenderLoop {
             this.ensureCanvasSize();
             this._app.relayout();
             this._view.draw();
-        }
-    }
-
-    private onViewContainerScroll = e => {
-        if (this._scale !== this._view.scale() || e.target !== this.viewContainer) {
-            return;
-        }
-        var cw = this._htmlLayer.clientWidth;
-        var ch = this._htmlLayer.clientHeight;
-        var viewportWidth = this._viewport.clientWidth;
-        var viewportHeight = this._viewport.clientHeight;
-        var view = this._view;
-
-        if (viewportWidth != (0 | (cw * 1.5)) || viewportHeight != (0 | (ch * 1.5))) {
-            return;
-        }
-
-        var width = cw / 2;
-        var height = ch / 2;
-        if (this._htmlLayerWidth === cw && this._htmlLayerHeight === ch) {
-
-            var dx = e.target.scrollLeft - width;
-            var dy = e.target.scrollTop - height;
-
-            view.scrollY(view.scrollY() + dy);
-            view.scrollX(view.scrollX() + dx);
-        }
-        var nw = e.target.scrollLeft = width;
-        var nh = e.target.scrollTop = height;
-
-        if (nw === width && nh === height) {
-            this._htmlLayerWidth = cw;
-            this._htmlLayerHeight = ch;
         }
     }
 

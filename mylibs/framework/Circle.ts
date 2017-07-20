@@ -42,7 +42,7 @@ class Circle extends Shape {
         return math.isPointInEllipse(outerRect, point) && !math.isPointInEllipse(innerRect, point);
     }
 
-    resize(/*Rect*/rect, ignoreSnapping, options) {
+    resize(/*Rect*/rect, ignoreSnapping?, options?) {
         options = options || {};
         if (options.shiftPressed) {
             var startX = rect.x - rect.width;

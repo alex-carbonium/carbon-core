@@ -1,9 +1,10 @@
 // @flow
 import Context from "./Context";
+import { IContextPool } from "carbon-core";
 
 var contextPool : Array<Context> = [];
 
-export default {
+class ContextPool implements IContextPool {
     getContext(width: number, height: number, scale: number, forceExactSize?:boolean) : Context{
         if(forceExactSize) {
             width = width * scale;
@@ -47,9 +48,11 @@ export default {
             context.resetTransform();
             return context;
         }
-    },
+    }
 
     releaseContext(contextMetadata : Context){
         contextPool.push(contextMetadata);
     }
 }
+
+export default new ContextPool();

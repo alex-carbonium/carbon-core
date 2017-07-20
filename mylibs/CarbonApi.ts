@@ -8,6 +8,7 @@ require("./PromiseConfig");
 
 let backend = require("./backend");
 let logger = require("./logger");
+let globals = require("./globals");
 let DashboardProxy = require("./server/DashboardProxy");
 
 require("./server/AccountProxy");
@@ -16,5 +17,6 @@ require("./server/ShareProxy");
 require("./server/FileProxy");
 require("./server/fontsProxy");
 require("./server/GalleryProxy");
+require("./server/ActivityProxy");
 
-export {backend, logger, DashboardProxy}
+export {backend, logger, DashboardProxy, globals}
