@@ -3,7 +3,8 @@ import Brush from "framework/Brush";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Path from "framework/Path";
 import * as math from "math/math";
-import {Types, StrokePosition} from "./Defs";
+import Rect from "math/rect";
+import { Types, StrokePosition } from "./Defs";
 
 class Circle extends Shape {
     hitTest(/*Point*/point, scale) {
@@ -41,7 +42,7 @@ class Circle extends Shape {
         return math.isPointInEllipse(outerRect, point) && !math.isPointInEllipse(innerRect, point);
     }
 
-    resize(/*Rect*/rect, ignoreSnapping, options) {
+    resize(/*Rect*/rect, ignoreSnapping?, options?) {
         options = options || {};
         if (options.shiftPressed) {
             var startX = rect.x - rect.width;
@@ -68,7 +69,7 @@ class Circle extends Shape {
             , h2 = h / 2;
         var dx = 0.55 * w / 2;
         var dy = 0.55 * h / 2;
-        path.setProps({pointRounding: 0});
+        path.setProps({ pointRounding: 0 });
 
         path.addPoint({
             x: x1 + w2,
@@ -165,62 +166,64 @@ class Circle extends Shape {
 
         context.restore();
     }
+
+    static fromSvgElement(element, parsedAttributes, matrix) {
+        // var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
+        let circle = new Circle();
+        App.Current.activePage.nameProvider.assignNewName(circle);
+
+        let rx = parsedAttributes.rx || parsedAttributes.r;
+        let ry = parsedAttributes.ry || parsedAttributes.r;
+        if (rx || ry) {
+            circle.setProps({ br: new Rect(0, 0, rx * 2 || 1, ry * 2 || 1) })
+        }
+
+        if (parsedAttributes.opacity) {
+            circle.opacity(parsedAttributes.opacity);
+        }
+
+        circle.setProps({ pointRounding: 0 });
+
+        if (parsedAttributes.id) {
+            circle.name(parsedAttributes.id);
+        }
+
+        if (parsedAttributes.fill !== undefined) {
+            if (!parsedAttributes.fill || parsedAttributes.fill === "none") {
+                circle.fill(Brush.Empty);
+            } else {
+                circle.fill(Brush.createFromColor(parsedAttributes.fill));
+            }
+        }
+
+        if (parsedAttributes.stroke) {
+            circle.stroke(Brush.createFromColor(parsedAttributes.stroke));
+        } else {
+            circle.stroke(Brush.Empty);
+        }
+
+        var pos = { x: 0, y: 0 }
+        if (parsedAttributes.x !== undefined) {
+            pos.x = parsedAttributes.x;
+        } else if (parsedAttributes.cx !== undefined) {
+            pos.x = parsedAttributes.cx - rx;
+        }
+        if (parsedAttributes.y !== undefined) {
+            pos.y = parsedAttributes.y;
+        } else if (parsedAttributes.cy !== undefined) {
+            pos.y = parsedAttributes.cy - ry;
+        }
+        circle.applyTranslation(pos);
+        var path = circle.convertToPath();
+        path.transform(matrix);
+        return path;
+    }
 }
 Circle.prototype.t = Types.Circle;
 
 PropertyMetadata.registerForType(Circle, {});
 
 
-Circle.fromSvgElement = function (element, parsedAttributes, matrix) {
-    // var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
-    var circle = new Circle();
-    App.Current.activePage.nameProvider.assignNewName(circle);
 
-    var rx = parsedAttributes.rx || parsedAttributes.r;
-    var ry = parsedAttributes.ry || parsedAttributes.r;
-    if (rx || ry) {
-        if (parsedAttributes.width || parsedAttributes.height) {
-            rect.setProps({br:new Rect(0, 0, rx*2||1, ry*2||1)})
-        }
-    }
-
-    if (parsedAttributes.opacity) {
-        circle.opacity(parsedAttributes.opacity);
-    }
-
-    circle.setProps({pointRounding: 0});
-
-    if (parsedAttributes.id) {
-        circle.name(parsedAttributes.id);
-    }
-
-    if (parsedAttributes.fill !== undefined) {
-        if (!parsedAttributes.fill || parsedAttributes.fill == "none") {
-            circle.fill(Brush.Empty);
-        } else {
-            circle.fill(Brush.createFromColor(parsedAttributes.fill));
-        }
-    }
-
-    if (parsedAttributes.stroke) {
-        circle.stroke(Brush.createFromColor(parsedAttributes.stroke));
-    } else {
-        circle.stroke(Brush.Empty);
-    }
-
-    if (parsedAttributes.x !== undefined) {
-        circle.x(parsedAttributes.x);
-    } else if (parsedAttributes.cx !== undefined) {
-        circle.x(parsedAttributes.cx - rx);
-    }
-    if (parsedAttributes.y !== undefined) {
-        circle.y(parsedAttributes.y);
-    } else if (parsedAttributes.cy !== undefined) {
-        circle.y(parsedAttributes.cy - ry);
-    }
-    var path = circle.convertToPath();
-    path.transform(matrix);
-    return path;
-};
 
 export default Circle;

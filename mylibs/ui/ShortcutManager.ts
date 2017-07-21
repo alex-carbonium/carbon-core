@@ -137,7 +137,6 @@ export default class ShortcutManager implements IShortcutManager {
 
         { key: "/", action: "transparentColor" },
 
-        { key: "ctrl+shift+d", action: "debugMode" },
         { key: "p", action: "pathTool" },
         { key: "r", action: "rectangleTool" },
         { key: "o", action: "circleTool" },
@@ -250,7 +249,6 @@ export default class ShortcutManager implements IShortcutManager {
 
         { key: "f2", action: "enter" },
 
-        { key: "meta+shift+d", action: "debugMode" },
         { key: "p", action: "pathTool" },
         { key: "r", action: "rectangleTool" },
         { key: "o", action: "circleTool" },

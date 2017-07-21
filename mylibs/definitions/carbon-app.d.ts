@@ -1,8 +1,8 @@
 declare module "carbon-app" {
     import { IDataNode, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IElementEventData, IIsolatable, IMouseEventHandler, IContainerProps } from "carbon-model";
-    import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable, ArtboardType, IPrimitive } from "carbon-basics";
+    import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable, IJsonNode, IPrimitive, ArtboardType } from "carbon-basics";
     import { IRect, ICoordinate, ISize } from "carbon-geometry";
-    import { IContext } from "carbon-rendering";
+    import { IContext, IContextPool } from "carbon-rendering";
 
     export interface IPlatform{
         attachEvents(htmlElement: HTMLElement);
@@ -60,6 +60,8 @@ declare module "carbon-app" {
         shortcutManager: IShortcutManager;
         actionManager: IActionManager;
         dataManager: IDataManager;
+        fontManager: IFontManager;
+        styleManager: IStyleManager;
 
         modelSyncProxy: any;
         platform: IPlatform;
@@ -118,8 +120,7 @@ declare module "carbon-app" {
 
         resetCurrentTool();
 
-        exportPage(page: IPage): Promise<object>;
-        importPage(data: object): IPage;
+        importPage(json: IJsonNode): IPage;
 
         isElectron(): boolean;
     }
@@ -272,10 +273,12 @@ declare module "carbon-app" {
         detaching: IEvent2<IView, IController>;
         attached: IEvent2<IView, IController>;
 
+        contextPool: IContextPool;
+
         set(view: IView, controller: IController);
     }
     export const Environment: IEnvironment;
-    export const Workspace: IEnvironment;
+    export const workspace: IEnvironment;
 
     export interface IAction {
         id: string;
@@ -324,17 +327,38 @@ declare module "carbon-app" {
         mac: IShortcut[]
     }
 
-export interface IAreaConstraint {
-    l?: number;
-    r?: number;
-    t?: number;
-    b?: number;
-    w?: number;
-    h?: number;
-}
+    export interface IFontManager {
+        getPendingTasks(): Promise<boolean>[];
+    }
+
+    export interface IAreaConstraint {
+        l?: number;
+        r?: number;
+        t?: number;
+        b?: number;
+        w?: number;
+        h?: number;
+    }
 
     export interface IMirroringProxyPage extends IPage {
         resetVersion(): void;
+    }
+
+    export interface IStyle {
+        id: string;
+        name: string;
+        props: any;
+    }
+
+    export interface IStyleManager {
+        registerStyle(style: IStyle, type: StyleType);
+        getStyle(id: string, type: StyleType): IStyle | null;
+        getStyles(type: StyleType): IStyle[];
+    }
+
+    export const enum StyleType {
+        Visual = 1,
+        Text = 2
     }
 
     export const enum LayerTypes{
@@ -398,6 +422,7 @@ export interface IAreaConstraint {
     export const RenderLoop: IConstructor<IRenderLoop>;
 
     export interface IDataProviderConfig {
+        groups: any[];
     }
     export interface IDataProvider {
         id: string;

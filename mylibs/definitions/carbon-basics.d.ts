@@ -152,6 +152,7 @@ declare module "carbon-basics" {
 
         static cssString(font: Font, scale: number): string;
         static extend(font: Font, extension: Partial<Font>): Font;
+        static Default: Font;
     }
 
     export class Shadow {
@@ -264,8 +265,9 @@ declare module "carbon-basics" {
     }
 
     export var util: {
-        debounce(func: () => any, ms: number): () => any;
+        debounce(func: (...args: any[]) => any, ms: number): () => any;
         throttle(func: (...args: any[]) => any, ms: number): () => any;
+        pushAll(target: any[], source: any[]);
     };
 
     export type LoginProvider = "Google" | "Facebook" | "Twitter" | "Microsoft";

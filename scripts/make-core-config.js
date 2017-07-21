@@ -115,9 +115,6 @@ function getPlugins(settings){
 
 function getLoaders(settings){
     var plugins = [
-        //TODO: remove when all files migrated to typescript
-        require.resolve("babel-plugin-transform-flow-strip-types"),
-
         require.resolve("babel-plugin-transform-promise-to-bluebird"),
         require.resolve("babel-plugin-transform-runtime"),
         require.resolve("babel-plugin-add-module-exports"),

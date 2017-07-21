@@ -4,7 +4,7 @@ import Text from "framework/text/Text";
 import Path from "framework/Path";
 import GroupContainer from "framework/GroupContainer";
 import Matrix from "math/matrix";
-import {combineRects} from "math/math";
+import { combineRects } from "math/math";
 
 define(function () {
     var svg = window.svgParser = {};
@@ -45,19 +45,19 @@ define(function () {
         App.Current.activePage.nameProvider.assignNewName(group);
         var parsedChildren = visitElements(element.children, options, matrix); // TODO: update matrix
 
-        if(parsedChildren.length == 0){
+        if (parsedChildren.length == 0) {
             return null;
         }
         var rect = parsedChildren[0].boundaryRect();
-        for(var i = 1; i < parsedChildren.length; ++i){
+        for (var i = 1; i < parsedChildren.length; ++i) {
             var e = parsedChildren[i];
             rect = combineRects(rect, e.boundaryRect());
         }
 
         group.setProps(rect);
-        for(var i = 0; i < parsedChildren.length; ++i){
+        for (var i = 0; i < parsedChildren.length; ++i) {
             var child = parsedChildren[i];
-            child.setProps({x:child.x() - rect.x, y:child.y() - rect.y});
+            child.setProps({ x: child.x() - rect.x, y: child.y() - rect.y });
             group.add(child);
         }
 
@@ -66,19 +66,19 @@ define(function () {
 
     function visitElements(children, options, matrix) {
         var res = [];
-        for(var i = 0; i < children.length; ++i) {
+        for (var i = 0; i < children.length; ++i) {
             var parseMethod = element2Type(children[i].tagName);
-            if(parseMethod) {
+            if (parseMethod) {
                 var child = children[i];
-                var attrs = toArray(child.attributes).map(a=>a.name);
+                var attrs = toArray(child.attributes).map(a => a.name);
                 var parsedAttributes = svgParser.parseAttributes(child, attrs);
 
                 var m = matrix;
-                if(parsedAttributes.transformMatrix){
+                if (parsedAttributes.transformMatrix) {
                     m = m.clone().append(parsedAttributes.transformMatrix);
                 }
                 var e = parseMethod(child, parsedAttributes, m);
-                if(e) {
+                if (e) {
                     res.push(e);
                 }
             }
@@ -204,7 +204,7 @@ define(function () {
                     value = (value === 'evenodd') ? 'destination-over' : value;
                 }
                 if (attr === 'transform') {
-                        value = parseTransformAttribute(value);
+                    value = parseTransformAttribute(value);
                 }
                 attr = normalizeAttr(attr);
                 memo[attr] = isNaN(parsed) ? value : parsed;
@@ -242,17 +242,17 @@ define(function () {
         }
 
         function skewXMatrix(matrix, args) {
-            matrix.skew({x: args[0], y: 1});
+            matrix.skew({ x: args[0], y: 1 });
         }
 
         function skewYMatrix(matrix, args) {
-            matrix.skew({y: args[0], x: 1});
+            matrix.skew({ y: args[0], x: 1 });
         }
 
         function translateMatrix(matrix, args) {
-            if(args.length === 2) {
+            if (args.length === 2) {
                 matrix.translate(args[0], args[1]);
-            } else if(args.length === 1){
+            } else if (args.length === 1) {
                 matrix.translate(args[0], 0);
             }
         }
@@ -264,6 +264,7 @@ define(function () {
 
             skewX = '(?:(skewX)\\s*\\(\\s*(' + number + ')\\s*\\))',
             skewY = '(?:(skewY)\\s*\\(\\s*(' + number + ')\\s*\\))',
+            //rotate = '(?:(rotate)\\s*\\(\\s*(' + number + ')\\s*\\))',
             rotate = '(?:(rotate)\\s*\\(\\s*(' + number + ')(?:' + comma_wsp + '(' + number + ')' + comma_wsp + '(' + number + '))?\\s*\\))',
             scale = '(?:(scale)\\s*\\(\\s*(' + number + ')(?:' + comma_wsp + '(' + number + '))?\\s*\\))',
             translate = '(?:(translate)\\s*\\(\\s*(' + number + ')(?:' + comma_wsp + '(' + number + '))?\\s*\\))',
@@ -307,35 +308,41 @@ define(function () {
                 return matrix;
             }
 
-            attributeValue.replace(reTransform, function (match) {
+            do {
+                var replaced = false;
 
-                var m = new RegExp(transform).exec(match).filter(function (match) {
+                attributeValue = attributeValue.replace(reTransform, function (match) {
+
+                    var m = new RegExp(transform).exec(match).filter(function (match) {
                         return (match !== '' && match != null);
                     }),
-                    operation = m[1],
-                    args = m.slice(2).map(parseFloat);
+                        operation = m[1],
+                        args = m.slice(2).map(parseFloat);
 
-                switch (operation) {
-                    case 'translate':
-                        translateMatrix(matrix, args);
-                        break;
-                    case 'rotate':
-                        rotateMatrix(matrix, args);
-                        break;
-                    case 'scale':
-                        scaleMatrix(matrix, args);
-                        break;
-                    case 'skewX':
-                        skewXMatrix(matrix, args);
-                        break;
-                    case 'skewY':
-                        skewYMatrix(matrix, args);
-                        break;
-                    case 'matrix':
-                        matrix = new Matrix(args);
-                        break;
-                }
-            });
+                    switch (operation) {
+                        case 'translate':
+                            translateMatrix(matrix, args);
+                            break;
+                        case 'rotate':
+                            rotateMatrix(matrix, args);
+                            break;
+                        case 'scale':
+                            scaleMatrix(matrix, args);
+                            break;
+                        case 'skewX':
+                            skewXMatrix(matrix, args);
+                            break;
+                        case 'skewY':
+                            skewYMatrix(matrix, args);
+                            break;
+                        case 'matrix':
+                            matrix = new Matrix(args);
+                            break;
+                    }
+                    replaced  = true;
+                    return '';
+                });
+            } while (replaced);
             return matrix;
         };
     })();
@@ -365,14 +372,14 @@ define(function () {
             len = points.length;
             for (; i < len; i++) {
                 var pair = points[i].split(',');
-                parsedPoints.push({x: parseFloat(pair[0]), y: parseFloat(pair[1])});
+                parsedPoints.push({ x: parseFloat(pair[0]), y: parseFloat(pair[1]) });
             }
         }
         else {
             i = 0;
             len = points.length;
             for (; i < len; i += 2) {
-                parsedPoints.push({x: parseFloat(points[i]), y: parseFloat(points[i + 1])});
+                parsedPoints.push({ x: parseFloat(points[i]), y: parseFloat(points[i + 1]) });
             }
         }
 
@@ -423,19 +430,19 @@ define(function () {
     }
 
     function resolveGradients(instances) {
-//        for (var i = instances.length; i--; ) {
-//          var instanceFillValue = instances[i].get('fill');
-//
-//          if (/^url\(/.test(instanceFillValue)) {
-//
-//            var gradientId = instanceFillValue.slice(5, instanceFillValue.length - 1);
-//
-//            if (gradientDefs[gradientId]) {
-//              instances[i].set('fill',
-//                fabric.Gradient.fromElement(gradientDefs[gradientId], instances[i]));
-//            }
-//          }
-//        }
+        //        for (var i = instances.length; i--; ) {
+        //          var instanceFillValue = instances[i].get('fill');
+        //
+        //          if (/^url\(/.test(instanceFillValue)) {
+        //
+        //            var gradientId = instanceFillValue.slice(5, instanceFillValue.length - 1);
+        //
+        //            if (gradientDefs[gradientId]) {
+        //              instances[i].set('fill',
+        //                fabric.Gradient.fromElement(gradientDefs[gradientId], instances[i]));
+        //            }
+        //          }
+        //        }
     }
 
     /**
@@ -662,7 +669,7 @@ define(function () {
                     }
                 }
 
-                group.setProps({width: right, height: bottom});
+                group.setProps({ width: right, height: bottom });
 
                 for (var i = 0; i < results.length; ++i) {
                     group.add(results[i]);

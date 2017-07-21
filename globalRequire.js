@@ -1,6 +1,5 @@
 window.debug = require("debug");
 
-require("./mylibs/PromiseConfig");
 require("webExtensions");
 
 require("script");

@@ -90,7 +90,6 @@ declare module "carbon-app"{
         relayoutFinished: IEvent<void>;
         changedLocally: IEvent<IPrimitive[]>;
         state: any;
-        fontManager: any;
 
         isInOfflineMode(): boolean;
         isNew(): boolean;

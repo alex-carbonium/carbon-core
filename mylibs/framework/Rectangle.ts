@@ -381,7 +381,7 @@ class Rectangle extends Shape {
 
         rect.setProps({ pointRounding: 0 });
 
-        if (parsedAttributes.rx !== undefined && parsedAttributes.rx == parsedAttributes.ry) {
+        if (parsedAttributes.rx !== undefined && parsedAttributes.rx === parsedAttributes.ry) {
             var r = parseFloat(parsedAttributes.rx);
             rect.cornerRadius({
                 bottomLeft: r,
@@ -393,7 +393,7 @@ class Rectangle extends Shape {
         }
 
         if (parsedAttributes.fill !== undefined) {
-            if (!parsedAttributes.fill || parsedAttributes.fill == "none") {
+            if (!parsedAttributes.fill || parsedAttributes.fill === "none") {
                 rect.fill(Brush.Empty);
             } else {
                 rect.fill(Brush.createFromColor(parsedAttributes.fill));
@@ -421,7 +421,7 @@ class Rectangle extends Shape {
         rect.applyTranslation(pos);
 
         var path = rect.convertToPath();
-        path.transform(matrix);
+        path.applyTransform(matrix, true);
         return path;
     }
 }

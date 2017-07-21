@@ -3,11 +3,16 @@ import { IView } from "carbon-core";
 
 declare module "carbon-rendering" {
     export interface IContext {
+        width: number;
+        height: number;
+        canvas: HTMLCanvasElement;
+
         font: string;
         strokeStyle: string;
         fillStyle: string;
         lineWidth: number;
         globalAlpha: number;
+        filter: string;
 
         clearRect(x: number, y: number, width: number, height: number);
 
@@ -46,5 +51,10 @@ declare module "carbon-rendering" {
         setupContext: (context: IContext) => void;
         showFrames: boolean;
         view: IView;
+    }
+
+    export interface IContextPool {
+        getContext(width: number, height: number, scale: number, forceExactSize?:boolean) : IContext;
+        releaseContext(context: IContext);
     }
 }

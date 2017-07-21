@@ -19,7 +19,7 @@ const ownProperties: string[] = PropertyMetadata.findForType(InteractiveContaine
     .groups()
     .find(x => x.label === "Layout")
     .properties
-    .concat(["name", "locked", "constraints", "arrangeStrategy"]);
+    .concat(["name", "opacity", "locked", "constraints", "arrangeStrategy"]);
 
 interface IGroupContainerRuntimeProps {
     cpm: CommonPropsManager;

@@ -10,7 +10,6 @@ import OpenTypeFontManager from "./OpenTypeFontManager";
 import {
     Types,
     StoryType,
-    StyleType,
     ViewTool
 } from "./framework/Defs";
 import Font from "./framework/Font";
@@ -44,11 +43,10 @@ import backend from "./backend";
 import logger from "./logger";
 import params from "./params";
 import ArtboardFrame from "framework/ArtboardFrame";
-import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitive, IPrimitiveRoot, ViewState, IJsonNode, IArtboard } from "carbon-core";
+import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitive, IPrimitiveRoot, ViewState, IJsonNode, IFontManager, IStyleManager, StyleType, IArtboard } from "carbon-core";
 import { Contributions } from "./extensions/Contributions";
 import { getBuiltInExtensions } from "./extensions/BuiltInExtensions";
 import Command from "./framework/commands/Command";
-import PageExporter from "./framework/share/PageExporter";
 import Primitive from "./framework/sync/Primitive";
 import UIElement from "./framework/UIElement";
 import RelayoutEngine from "./framework/relayout/RelayoutEngine";
@@ -100,6 +98,7 @@ class AppClass extends DataNode implements IApp {
     actionManager: ActionManager;
     fontManager: OpenTypeFontManager;
     dataManager: DataManager;
+    styleManager: IStyleManager;
 
     onBuildMenu: any;
     changed: IEvent<IPrimitive[]>;
@@ -589,8 +588,8 @@ class AppClass extends DataNode implements IApp {
             t: this.t,
             children: [],
             props: this.props,
-            styles: this.styleManager.getStyles(1),
-            textStyles: this.styleManager.getStyles(2)
+            styles: this.styleManager.getStyles(StyleType.Visual),
+            textStyles: this.styleManager.getStyles(StyleType.Text)
         };
 
         this.eachDesignerPage(function (page) {
@@ -1038,40 +1037,13 @@ class AppClass extends DataNode implements IApp {
         })
     }
 
-    exportPage(page: IPage): Promise<object>{
-        return PageExporter.prepareShareData(page);
-    }
-    importPage(data) {
-        this.updating.raise();
-
-        var pageJson = data.page as IJsonNode;
-        var name = ' (' + pageJson.props.name + ')';
-        if (data.styles) {
-            for (let style of data.styles) {
-                style.name += name;
-                StyleManager.registerStyle(style, StyleType.Visual)
-            }
-        }
-
-        if (data.textStyles) {
-            for (let style of data.textStyles) {
-                style.name += name;
-                StyleManager.registerStyle(style, StyleType.Text)
-            }
-        }
-
-        if (data.fontMetadata) {
-            for (var metadata of data.fontMetadata) {
-                this.saveFontMetadata(metadata);
-            }
-        }
-
-        let page = this.pages.find(x => x.id() === pageJson.props.id);
+    importPage(json: IJsonNode) {
+        let page = this.pages.find(x => x.id() === json.props.id);
         if (!page) {
-            page = this.importNewPage(pageJson);
+            page = this.importNewPage(json);
         }
         else {
-            this.importUpdatedPage(page, pageJson);
+            this.importUpdatedPage(page, json);
         }
 
         this.updated.raise();
