@@ -6,7 +6,7 @@ import Page from "framework/Page";
 import * as math from "math/math";
 import { isPointInRect } from "math/math";
 import SharedColors from "ui/SharedColors";
-import { TileSize, Types } from "./Defs";
+import { Types } from "./Defs";
 import RelayoutEngine from "./relayout/RelayoutEngine";
 import PropertyStateRecorder from "framework/PropertyStateRecorder";
 import ModelStateListener from "framework/relayout/ModelStateListener";
@@ -17,7 +17,7 @@ import Environment from "environment";
 import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
-import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, IPage, IArtboardPage } from "carbon-core";
+import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
 
 

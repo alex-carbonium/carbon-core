@@ -73,11 +73,15 @@ declare module "carbon-geometry" {
         tx: number;
         ty: number;
 
+        translate(x: number, y: number): IMatrix;
+        scale(sx: number, sy: number): IMatrix;
+
         applyToContext(context: IContext);
 
         transformPoint(point: ICoordinate): ICoordinate;
 
         prepended(matrix: IMatrix): IMatrix;
+        append(matrix: IMatrix): IMatrix;
         appended(matrix: IMatrix): IMatrix;
         invert(): IMatrix;
         prependedWithTranslation(tx: number, ty: number): IMatrix;

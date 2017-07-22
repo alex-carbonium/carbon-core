@@ -34,6 +34,10 @@ declare module "carbon-model" {
         fromJSON(json: any): IDataNode;
     }
 
+    export const DataNode: {
+        getImmediateChildById<T extends IDataNode>(container: any, id: string, materialize?: boolean): T | null;
+    };
+
     export interface IUIElementProps extends IDataNodeProps {
         br: IRect;
         visible: boolean;
@@ -197,6 +201,14 @@ declare module "carbon-model" {
         initFromData(content: any): void;
     }
 
+    export const enum TileSize {
+        Auto = 0,
+        Small = 1,
+        Large = 2,
+        XLarge = 3,
+        Icon = -1
+    }
+
     export interface IArtboardProps extends IContainerProps {
         type: ArtboardType | null;
         guidesX: IGuide[];
@@ -214,6 +226,7 @@ declare module "carbon-model" {
         source: SymbolSource;
     }
     export interface ISymbol extends IContainer<ISymbolProps> {
+        source(value?: SymbolSource): SymbolSource;
     }
     export const Symbol: IConstructor<ISymbol>;
 

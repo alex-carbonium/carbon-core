@@ -1,11 +1,14 @@
 import CoreIntl from "../../CoreIntl";
 import EventHelper from "framework/EventHelper";
 import {createUUID} from "../../util";
+import { IStyleManager } from "carbon-core";
 
 // TODO: test container with clip mask
 // TODO: test image element
 
-class StyleManager {
+class StyleManager implements IStyleManager {
+    [x: string]: any;
+
     constructor() {
         this._styles = {};
         this.styleChanged = EventHelper.createEvent();

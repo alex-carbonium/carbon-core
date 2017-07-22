@@ -1,10 +1,9 @@
-import { TileSize } from "framework/Defs";
 import ContextPool from "framework/render/ContextPool";
 import Environment from "environment";
 import { createUUID } from "util";
 import Matrix from "math/matrix";
 import backend from "../backend";
-import { ArtboardType, UIElementFlags } from "carbon-core";
+import { ArtboardType, UIElementFlags, TileSize } from "carbon-core";
 
 let PADDING = 5;
 let _configCache = {};
@@ -52,7 +51,7 @@ export default class IconSetSpriteManager {
 
         return Promise.all(taskPromises)
             .then(() => {
-                return { imageData: context.canvas.toDataURL("image/png"), size: { width, height } };
+                return { imageData: "url(" + context.canvas.toDataURL("image/png") + ")", size: { width, height } };
             })
             .finally(() => {
                 ContextPool.releaseContext(context);

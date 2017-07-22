@@ -1,13 +1,14 @@
 import backend from "../backend";
+import globals from "../globals";
 import { ISharedResource } from "carbon-core";
 
 var proxy = {
     staticResources(from, to, search?) {
-        return backend.get(backend.cdnEndpoint + "/target/reslist.json")
+        return backend.get(globals.resourceFile)
             .then(resources => {
                 let filtered = filter(resources, search);
                 return {
-                    pageData: filtered.slice(from, to),
+                    pageData: filtered.slice(from, to + 1),
                     totalCount: filtered.length
                 }
             });

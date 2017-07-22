@@ -42,17 +42,17 @@ class Circle extends Shape {
         return math.isPointInEllipse(outerRect, point) && !math.isPointInEllipse(innerRect, point);
     }
 
-    // resize(/*Rect*/rect/*, ignoreSnapping, options*/) {
-    //     options = options || {};
-    //     if (options.shiftPressed) {
-    //         var startX = rect.x - rect.width;
-    //         var startY = rect.y - rect.height;
-    //         var z = rect.y - startY;
-    //         var x = startX + z;
-    //         rect.x = x;
-    //     }
-    //     Shape.prototype.resize.call(this, rect/*, ignoreSnapping, options.shiftPressed*/);
-    // }
+    resize(/*Rect*/rect, ignoreSnapping?, options?) {
+        options = options || {};
+        if (options.shiftPressed) {
+            var startX = rect.x - rect.width;
+            var startY = rect.y - rect.height;
+            var z = rect.y - startY;
+            var x = startX + z;
+            rect.x = x;
+        }
+        Shape.prototype.resize.call(this, rect, ignoreSnapping, options.shiftPressed);
+    }
 
     canConvertToPath() {
         return true;

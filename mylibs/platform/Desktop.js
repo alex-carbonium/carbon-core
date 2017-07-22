@@ -48,14 +48,9 @@ var onmousewheel = function (e) {
 
         view.scrollX(scroll.scrollX);
         view.scrollY(scroll.scrollY);
-        if (e.preventDefault) e.preventDefault();
-        else e.returnValue = false;
-        return false;
     } else {
         Environment.controller.onscroll(Environment.controller.createEventData(e));
     }
-
-    e.preventDefault();
 };
 
 var onmousedown = function (event) {
@@ -72,7 +67,7 @@ var onmousemove = function (event) {
     if (this._mouseButtonPressed) {
         // It is important to disable default mouse move because otherwise browser will make a text selection
         // (if there is selectable content such as comments) and then keyboard events will be handled by those selected elements
-        // instead of htmlPanel.
+        // instead of view container.
         return false;
     }
 };
@@ -247,7 +242,7 @@ export default class Desktop extends All {
         this._onmouseleaveHandler = onmouseleave.bind(this);
         this._oncontextmenuHandler = oncontextmenu.bind(this);
 
-        parentElement.addEventListener('mousewheel', this._onmousewheelHandler);
+        parentElement.addEventListener('mousewheel', this._onmousewheelHandler, { capture: false, passive: true});
         parentElement.addEventListener('mousedown', this._onmousedownHandler);
         parentElement.addEventListener('mousemove', this._onmousemoveHandler);
         parentElement.addEventListener('dblclick', this._ondblclickHandler);
@@ -284,7 +279,7 @@ export default class Desktop extends All {
             return;
         }
 
-        parentElement.removeEventListener('mousewheel', this._onmousewheelHandler);
+        parentElement.removeEventListener('mousewheel', this._onmousewheelHandler, { capture: false, passive: true});
         parentElement.removeEventListener('mousedown', this._onmousedownHandler);
         parentElement.removeEventListener('mousemove', this._onmousemoveHandler);
         parentElement.removeEventListener('dblclick', this._ondblclickHandler);
