@@ -69,7 +69,7 @@ export default class LineCreator extends Tool {
         event.handled = true;
         this._element = new Line();
         App.Current.activePage.nameProvider.assignNewName(this._element);
-        var defaultSettings = App.Current.defaultLineSettings();
+        var defaultSettings = App.Current.defaultShapeSettings();
         if (defaultSettings) {
             this._element.setProps(defaultSettings);
         }

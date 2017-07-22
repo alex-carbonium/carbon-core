@@ -225,8 +225,7 @@ class Line extends Shape {
 
         this.drawPath(context, w, h);
 
-        Brush.fill(this.fill(), context, 0, 0, w, h);
-        Brush.stroke(this.stroke(), context, 0, 0, w, h);
+        Brush.stroke(this.fill(), context, 0, 0, w, h);
 
         context.restore();
     }
@@ -261,6 +260,14 @@ class Line extends Shape {
 
     _roundValue(v) {
         return Math.round(v);
+    }
+
+    strokeSelf(context, w, h) {
+        Brush.stroke(this.fill(), context, 0, 0, w, h);
+    }
+
+    fillSelf(context, w, h) {
+
     }
 
     prepareProps(changes) {

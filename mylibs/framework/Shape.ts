@@ -41,15 +41,16 @@ class Shape extends Container {
         if (dashPattern) {
             context.setLineDash(dashPattern);
         }
-        Brush.fill(this.fill(), context, 0, 0, w, h);
+
+        this.fillSelf(context, w, h);
         if (!stroke || !stroke.type || strokePosition === StrokePosition.Center) {
             context.lineWidth = this.strokeWidth();
-            Brush.stroke(stroke, context, 0, 0, w, h);
+            this.strokeSelf(context, w, h);
         }
         else if (strokePosition === StrokePosition.Inside) {
             context.clip();
             context.lineWidth = this.strokeWidth() * 2;
-            Brush.stroke(stroke, context, 0, 0, w, h);
+            this.strokeSelf(context, w, h);
         }
         else if (strokePosition === StrokePosition.Outside) {
             context.beginPath();
@@ -60,8 +61,16 @@ class Shape extends Container {
             context.beginPath();
             this.drawPath(context, w, h);
             context.lineWidth = this.strokeWidth() * 2;
-            Brush.stroke(stroke, context, 0, 0, w, h);
+            this.strokeSelf(context, w, h);
         }
+    }
+
+    fillSelf(context, w, h) {
+        Brush.fill(this.fill(), context, 0, 0, w, h);
+    }
+
+    strokeSelf(context, w, h) {
+        Brush.stroke(this.stroke(), context, 0, 0, w, h);
     }
 
     _renderFinal(context, w, h, environment) {
@@ -70,10 +79,10 @@ class Shape extends Container {
 
         context.beginPath();
         this.drawPath(context, w, h);
-        Brush.fill(this.fill(), context, 0, 0, w, h);
+        this.fillSelf(context, w, h);
         if (!stroke || !stroke.type || strokePosition === StrokePosition.Center || !this.closed()) {
             context.lineWidth = this.strokeWidth();
-            Brush.stroke(stroke, context, 0, 0, w, h);
+            this.strokeSelf(context, w, h);
         }
         else {
             var clippingRect = this.getBoundingBoxGlobal();
@@ -118,7 +127,7 @@ class Shape extends Container {
             this.drawPath(offContext, w, h);
 
             offContext.lineWidth = this.strokeWidth() * 2;
-            Brush.stroke(stroke, offContext, 0, 0, w, h);
+            this.strokeSelf(offContext, w, h);
             if (strokePosition === StrokePosition.Inside) {
                 offContext.globalCompositeOperation = "destination-in";
             }
