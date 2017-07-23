@@ -51,6 +51,8 @@ var onmousewheel = function (e) {
     } else {
         Environment.controller.onscroll(Environment.controller.createEventData(e));
     }
+
+    e.preventDefault();
 };
 
 var onmousedown = function (event) {
@@ -242,7 +244,7 @@ export default class Desktop extends All {
         this._onmouseleaveHandler = onmouseleave.bind(this);
         this._oncontextmenuHandler = oncontextmenu.bind(this);
 
-        parentElement.addEventListener('mousewheel', this._onmousewheelHandler, { capture: false, passive: true});
+        parentElement.addEventListener('mousewheel', this._onmousewheelHandler, { capture: false, passive: false});
         parentElement.addEventListener('mousedown', this._onmousedownHandler);
         parentElement.addEventListener('mousemove', this._onmousemoveHandler);
         parentElement.addEventListener('dblclick', this._ondblclickHandler);
@@ -279,7 +281,7 @@ export default class Desktop extends All {
             return;
         }
 
-        parentElement.removeEventListener('mousewheel', this._onmousewheelHandler, { capture: false, passive: true});
+        parentElement.removeEventListener('mousewheel', this._onmousewheelHandler, { capture: false, passive: false});
         parentElement.removeEventListener('mousedown', this._onmousedownHandler);
         parentElement.removeEventListener('mousemove', this._onmousemoveHandler);
         parentElement.removeEventListener('dblclick', this._ondblclickHandler);

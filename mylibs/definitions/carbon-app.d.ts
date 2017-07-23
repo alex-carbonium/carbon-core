@@ -1,6 +1,6 @@
 declare module "carbon-app" {
     import { IDataNode, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IElementEventData, IIsolatable, IMouseEventHandler, IContainerProps } from "carbon-model";
-    import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable, IJsonNode, IPrimitive, ArtboardType } from "carbon-basics";
+    import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable, IJsonNode, IPrimitive, ArtboardType, FontStyle, FontWeight } from "carbon-basics";
     import { IRect, ICoordinate, ISize } from "carbon-geometry";
     import { IContext, IContextPool } from "carbon-rendering";
 
@@ -9,14 +9,20 @@ declare module "carbon-app" {
         detachEvents();
     }
 
-    export interface IFontMetadata{
+    export type FontMetadata = {
         name: string;
-        weight: number;
-        style: number;
+        path: string;
+        fonts: {
+            style: FontStyle;
+            weight: FontWeight;
+            filename: string;
+        }[];
+        subsets?: string[];
     }
 
     export interface IAppProps extends IDataNodeProps{
         customGuides: any;
+        fontMetadata: FontMetadata[];
     }
 
     export interface IApp extends IDataNode<IAppProps> {
@@ -96,8 +102,8 @@ declare module "carbon-app" {
 
         relayout(): void;
 
-        getFontMetadata(family: string): IFontMetadata;
-        saveFontMetadata(metadata: IFontMetadata): void;
+        getFontMetadata(family: string): FontMetadata;
+        saveFontMetadata(metadata: FontMetadata): void;
         loadFont(family: string, style: number, weight: number): Promise<void>;
 
         updateStyle(styleType, styleId, style);

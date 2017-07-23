@@ -6,7 +6,7 @@ import EventHelper from "./framework/EventHelper";
 import PropertyTracker from "framework/PropertyTracker";
 import Page from "./framework/Page";
 import StyleManager from "framework/style/StyleManager";
-import OpenTypeFontManager from "./OpenTypeFontManager";
+import OpenTypeFontManager, { DefaultFont } from "./OpenTypeFontManager";
 import {
     Types,
     StoryType,
@@ -43,7 +43,7 @@ import backend from "./backend";
 import logger from "./logger";
 import params from "./params";
 import ArtboardFrame from "framework/ArtboardFrame";
-import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitive, IPrimitiveRoot, ViewState, IJsonNode, IFontManager, IStyleManager, StyleType, IArtboard } from "carbon-core";
+import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitive, IPrimitiveRoot, ViewState, IJsonNode, IFontManager, IStyleManager, StyleType, IArtboard, FontMetadata } from "carbon-core";
 import { Contributions } from "./extensions/Contributions";
 import { getBuiltInExtensions } from "./extensions/BuiltInExtensions";
 import Command from "./framework/commands/Command";
@@ -194,7 +194,7 @@ class AppClass extends DataNode implements IApp {
         });
         this.registerForDisposal(token);
 
-        this.fontManager = new OpenTypeFontManager();
+        this.fontManager = new OpenTypeFontManager(this);
         this.fontManager.registerAsDefault();
 
         this.dataManager = new DataManager(this);
@@ -407,10 +407,9 @@ class AppClass extends DataNode implements IApp {
         return this.fontManager.load(family, style, weight);
     }
 
-    saveFontMetadata(metadata) {
-        if (this.fontManager.tryAddMetadata(metadata)) {
-            var metadataWithId = Object.assign({}, metadata);
-            metadataWithId.id = metadata.name;
+    saveFontMetadata(metadata: FontMetadata) {
+        if (!this.props.fontMetadata.some(x => x.name === metadata.name)) {
+            let metadataWithId = Object.assign({}, metadata, {id: metadata.name});
             this.patchProps(PatchType.Insert, "fontMetadata", metadataWithId);
         }
     }
@@ -834,11 +833,10 @@ class AppClass extends DataNode implements IApp {
             params.perf && performance.measure("App.setupConnection", "App.setupConnection");
         }
 
-        var iconFontsLoaded = this.waitForWebFonts();
         var defaultFontLoaded = this.fontManager.loadDefaultFont();
         var dataLoaded = this.loadData();
 
-        return Promise.all([dataLoaded, iconFontsLoaded, defaultFontLoaded, Environment.loaded, loggedIn]).then(result => {
+        return Promise.all([dataLoaded, defaultFontLoaded, Environment.loaded, loggedIn]).then(result => {
             var data = result[0];
             stopwatch.checkpoint("env");
 
@@ -846,8 +844,6 @@ class AppClass extends DataNode implements IApp {
                 this.fromJSON(data);
                 stopwatch.checkpoint("parsing");
             }
-
-            this.fontManager.appendMetadata(this.props.fontMetadata);
 
             logger.trackEvent("AppLoaded", null, stopwatch.getMetrics());
 
@@ -1026,15 +1022,6 @@ class AppClass extends DataNode implements IApp {
         config.custom.families = config.custom.families.concat(["CarbonIcons"]);
 
         return config;
-    }
-
-    waitForWebFonts() {
-        params.perf && performance.mark("App.waitForWebFonts");
-        return new Promise((resolve, reject) => {
-            var config = this.generateWebFontConfig(resolve, reject);
-            WebFont.load(config);
-            params.perf && performance.measure("App.waitForWebFonts", "App.waitForWebFonts");
-        })
     }
 
     importPage(json: IJsonNode) {
@@ -1299,7 +1286,25 @@ PropertyMetadata.registerForType(AppClass, {
         defaultValue: []
     },
     fontMetadata: {
-        defaultValue: []
+        defaultValue: [
+            {
+                "name": DefaultFont,
+                "fonts": [
+                    { "style": 1, "weight": 300, "filename": "OpenSans-Light.ttf" },
+                    { "style": 2, "weight": 300, "filename": "OpenSans-LightItalic.ttf" },
+                    { "style": 1, "weight": 400, "filename": "OpenSans-Regular.ttf" },
+                    { "style": 2, "weight": 400, "filename": "OpenSans-Italic.ttf" },
+                    { "style": 1, "weight": 600, "filename": "OpenSans-Semibold.ttf" },
+                    { "style": 2, "weight": 600, "filename": "OpenSans-SemiboldItalic.ttf" },
+                    { "style": 1, "weight": 700, "filename": "OpenSans-Bold.ttf" },
+                    { "style": 2, "weight": 700, "filename": "OpenSans-BoldItalic.ttf" },
+                    { "style": 1, "weight": 800, "filename": "OpenSans-ExtraBold.ttf" },
+                    { "style": 2, "weight": 800, "filename": "OpenSans-ExtraBoldItalic.ttf" }
+                ],
+                "subsets": ["menu", "cyrillic", "cyrillic-ext", "devanagari", "greek", "greek-ext", "latin", "latin-ext", "vietnamese"],
+                "path": "apache/opensans"
+            }
+        ]
     }
 });
 

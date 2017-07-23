@@ -6,40 +6,24 @@ import OpenTypeFontInfo from "./framework/text/font/opentypefontinfo";
 import { FontWeight, FontStyle } from "carbon-basics";
 import backend from "./backend";
 import bluebird from "bluebird";
-import { IFontManager } from "carbon-core";
+import { IFontManager, FontMetadata, IApp } from "carbon-core";
+import params from "./params";
 
 var load = bluebird.promisify(OpenType.load);
 
-export default class OpenTypeFontManager extends FontManager implements IFontManager {
-    _metadata: any[];
-    _loadQueue: any[];
+export const DefaultFont = "Open Sans";
+export const UIFont = "Lato";
 
-    constructor() {
+export default class OpenTypeFontManager extends FontManager implements IFontManager {
+    _loadQueue: {family: string; style: FontStyle, weight: FontWeight, promise: Promise<any>}[];
+
+    constructor(private app: IApp) {
         super();
         this.clear();
     }
 
     clear(){
         this._fonts = [];
-        this._defaultFont = null;
-
-        this._metadata = [{
-            "name": "Open Sans",
-            "fonts": [
-                { "style": 1, "weight": 300, "filename": "OpenSans-Light.ttf" },
-                { "style": 2, "weight": 300, "filename": "OpenSans-LightItalic.ttf" },
-                { "style": 1, "weight": 400, "filename": "OpenSans-Regular.ttf" },
-                { "style": 2, "weight": 400, "filename": "OpenSans-Italic.ttf" },
-                { "style": 1, "weight": 600, "filename": "OpenSans-Semibold.ttf" },
-                { "style": 2, "weight": 600, "filename": "OpenSans-SemiboldItalic.ttf" },
-                { "style": 1, "weight": 700, "filename": "OpenSans-Bold.ttf" },
-                { "style": 2, "weight": 700, "filename": "OpenSans-BoldItalic.ttf" },
-                { "style": 1, "weight": 800, "filename": "OpenSans-ExtraBold.ttf" },
-                { "style": 2, "weight": 800, "filename": "OpenSans-ExtraBoldItalic.ttf" }
-            ],
-            "subsets": ["menu", "cyrillic", "cyrillic-ext", "devanagari", "greek", "greek-ext", "latin", "latin-ext", "vietnamese"],
-            "path": "apache/opensans"
-        }];
         this._loadQueue = [];
     }
 
@@ -60,9 +44,6 @@ export default class OpenTypeFontManager extends FontManager implements IFontMan
             var fontInfo = new OpenTypeFontInfo(metadata.name, style, weight, file.url, file.font);
             if (fontInfo) {
                 this.add(fontInfo);
-                if (!this._metadata.some(x => x.name === metadata.name)) {
-                    this._metadata.push(metadata);
-                }
                 return this._browserLoad(fontInfo);
             }
             throw new Error("Unsupported font " + metadata.name + " " + style + " " + weight);
@@ -82,7 +63,7 @@ export default class OpenTypeFontManager extends FontManager implements IFontMan
     }
 
     loadDefaultFont() {
-        return this._loadInternal(this._metadata[0].name, FontStyle.Normal, FontWeight.Regular);
+        return this._loadInternal(this.app.props.fontMetadata[0].name, FontStyle.Normal, FontWeight.Regular);
     }
 
     getFont(family, style, weight) {
@@ -111,19 +92,7 @@ export default class OpenTypeFontManager extends FontManager implements IFontMan
     }
 
     getMetadata(family) {
-        return this._metadata.find(x => x.name === family);
-    }
-
-    tryAddMetadata(metadata): boolean {
-        if (!this._metadata.find(x => x.name === metadata.name)) {
-            this._metadata.push(metadata);
-            return true;
-        }
-        return false;
-    }
-
-    appendMetadata(metadataList) {
-        this._metadata = this._metadata.concat(metadataList);
+        return this.app.props.fontMetadata.find(x => x.name === family);
     }
 
     _fileLoad(metadata, style, weight) {
@@ -131,12 +100,22 @@ export default class OpenTypeFontManager extends FontManager implements IFontMan
         if (!font) {
             return Promise.reject(new Error("No metadata for font " + metadata.name + " " + style + " " + weight));
         }
-        var url = backend.cdnEndpoint + "/fonts/" + metadata.path + "/" + font.filename;
+        var cdn = backend.cdnEndpoint;
+        if (DEBUG) {
+            if (metadata.name !== DefaultFont) {
+                cdn = params.realCdn;
+            }
+        }
+        var url = cdn + "/fonts/" + metadata.path + "/" + font.filename;
         return load.call(OpenType, url)
             .then(font => { return { font, url } });
     }
 
     _browserLoad(fontInfo) {
+        if (fontInfo.getFamily() === UIFont) {
+            return Promise.resolve();
+        }
+
         var fontFaceSrc = fontInfo.toFontFaceSrc();
         var newStyle = document.createElement('style');
         newStyle.appendChild(document.createTextNode("\
