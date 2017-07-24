@@ -252,8 +252,7 @@ export default class Image extends Container<IImageProps> implements IImage {
         if (elements.length !== 1) {
             return false;
         }
-        var allow = this.source() === Image.EmptySource || allowMoveInOut;
-        return elements[0] instanceof Image && allow;
+        return elements[0] instanceof Image && allowMoveInOut;
     }
 
     canConvertToPath() {
