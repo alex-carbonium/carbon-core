@@ -257,6 +257,29 @@ export default class CompositeElement extends UIElement implements IComposite {
         }
         return parents;
     }
+    ensureSorted() {
+        if (!this.elements.length) {
+            return;
+        }
+
+        let sorted = true;
+        let parent = this.elements[0].parent();
+        let index = parent.children.indexOf(this.elements[0]);
+        for (var i = 1; i < this.elements.length; i++) {
+            if (this.elements[i].parent() !== parent) {
+                return;
+            }
+            let elementIndex = parent.children.indexOf(this.elements[i]);
+            if (elementIndex < index) {
+                sorted = false;
+                break;
+            }
+            index = elementIndex;
+        }
+        if (!sorted) {
+            this.elements.sort((a, b) => parent.children.indexOf(a) - parent.children.indexOf(b));
+        }
+    }
 
     createPropertyGroups() {
         return this._commonPropsManager.createGroups(this.elements);

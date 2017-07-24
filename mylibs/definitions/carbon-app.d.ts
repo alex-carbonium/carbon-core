@@ -175,9 +175,13 @@ declare module "carbon-app" {
 
     export interface IArtboardPage extends IPage {
         setActiveArtboard(artboard: IArtboard): void;
+        setActiveArtboardById(id: string): void;
     }
 
     export interface IView {
+        //TODO encapsulate
+        _highlightTarget: any;
+
         viewContainerElement: HTMLElement;
         page: IPage;
         animationController: IAnimationController;
@@ -408,9 +412,15 @@ declare module "carbon-app" {
         makeSelection(elements: IUIElement[]);
         selectComposite(): ISelectComposite;
         clearSelection();
+        refreshSelection();
+
+        isElementSelected(element: IUIElement): boolean;
+        selectionMode(mode?: string): string;
 
         lock();
         unlock();
+        show();
+        hide();
 
         modeChangedEvent: IEvent<boolean>;
         onElementSelected: IEvent3<IUIElement, IUIElement[], boolean>;

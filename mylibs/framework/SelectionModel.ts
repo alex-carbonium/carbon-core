@@ -276,6 +276,7 @@ class SelectionModel implements ISelection {
         }
 
         if (!refreshOnly) {
+            this._selectCompositeElement.ensureSorted();
             this._fireOnElementSelected(currentSelection || [], doNotTrack);
         }
     }

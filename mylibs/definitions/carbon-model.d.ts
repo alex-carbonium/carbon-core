@@ -119,6 +119,7 @@ declare module "carbon-model" {
         removeFlags(flags: UIElementFlags): void;
 
         locked(value?: boolean): boolean;
+        visible(value?: boolean): boolean;
 
         constraints(value?: IConstraints): IConstraints;
 
@@ -157,7 +158,10 @@ declare module "carbon-model" {
         hitTransparent(value: boolean): boolean;
 
         globalMatrixToLocal(matrix: IMatrix): IMatrix;
+
+        performArrange();
     }
+    export const Container: IConstructor<IContainer>;
 
     export interface IGroupContainer extends IContainer {
         wrapSingleChild(): boolean;
@@ -169,6 +173,7 @@ declare module "carbon-model" {
     export interface IRepeatContainer extends IContainer {
         findMasterCounterpart(element: IUIElement): IUIElement;
         addDroppedElements(dropTarget: IContainer, elements: IUIElement[], e: IMouseEventData): void;
+        findSelectionTarget(element: IUIElement): IUIElement;
     }
     export interface IRepeaterProps extends IContainerProps {
     }
