@@ -264,11 +264,5 @@ declare module "carbon-basics" {
         create(h: HorizontalConstraint, v: VerticalConstraint): IConstraints;
     }
 
-    export var util: {
-        debounce(func: (...args: any[]) => any, ms: number): () => any;
-        throttle(func: (...args: any[]) => any, ms: number): () => any;
-        pushAll(target: any[], source: any[]);
-    };
-
     export type LoginProvider = "Google" | "Facebook" | "Twitter" | "Microsoft";
 }

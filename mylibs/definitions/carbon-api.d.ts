@@ -234,6 +234,12 @@ declare module "carbon-api" {
         backend?: IBackend;
     }
     export const globals: CarbonGlobals;
+
+    export var util: {
+        debounce(func: (...args: any[]) => any, ms: number): () => any;
+        throttle(func: (...args: any[]) => any, ms: number): () => any;
+        pushAll(target: any[], source: any[]);
+    }
 }
 
 declare function assertNever(t: never);

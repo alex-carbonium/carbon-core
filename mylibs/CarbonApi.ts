@@ -10,6 +10,7 @@ let backend = require("./backend");
 let logger = require("./logger");
 let globals = require("./globals");
 let DashboardProxy = require("./server/DashboardProxy");
+let util = require("./util");
 
 require("./server/AccountProxy");
 require("./server/StaticResourcesProxy");
@@ -19,4 +20,4 @@ require("./server/fontsProxy");
 require("./server/GalleryProxy");
 require("./server/ActivityProxy");
 
-export {backend, logger, DashboardProxy, globals}
+export {backend, logger, DashboardProxy, globals, util}
