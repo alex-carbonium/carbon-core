@@ -38,6 +38,7 @@ import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
 import { ChangeMode, LayerTypes, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags } from "carbon-core";
 import ExtensionPoint from "./ExtensionPoint";
+import CoreIntl from "../CoreIntl";
 
 require("../migrations/All");
 
@@ -1586,7 +1587,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return PropertyMetadata.getEditableProperties(this.systemType(), recursive);
     }
     displayName() {
-        var name = this.name() || this.displayType();
+        var name = this.name() || CoreIntl.label(this.displayType());
 
         if (this.hasFlags(UIElementFlags.SymbolBackground)) {
             name += " (background)";
