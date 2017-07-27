@@ -409,7 +409,7 @@ class AppClass extends DataNode implements IApp {
 
     saveFontMetadata(metadata: FontMetadata) {
         if (!this.props.fontMetadata.some(x => x.name === metadata.name)) {
-            let metadataWithId = Object.assign({}, metadata, {id: metadata.name});
+            let metadataWithId = Object.assign({}, metadata, { id: metadata.name });
             this.patchProps(PatchType.Insert, "fontMetadata", metadataWithId);
         }
     }
@@ -425,7 +425,7 @@ class AppClass extends DataNode implements IApp {
         return this._syncBroken;
     }
 
-    isolationActive():boolean {
+    isolationActive(): boolean {
         return Environment.view.isolationLayer.isActive;
     }
 
@@ -835,8 +835,15 @@ class AppClass extends DataNode implements IApp {
 
         var defaultFontLoaded = this.fontManager.loadDefaultFont();
         var dataLoaded = this.loadData();
+        var importInitialResource = Promise.resolve();
+        var externalPageData;
+        if (this._initializeWithResource) {
+            importInitialResource = fetch(this._initializeWithResource)
+                .then(response => response.json())
+                .then(data => externalPageData = data);
+        }
 
-        return Promise.all([dataLoaded, defaultFontLoaded, Environment.loaded, loggedIn]).then(result => {
+        return Promise.all([dataLoaded, defaultFontLoaded, Environment.loaded, loggedIn, importInitialResource]).then(result => {
             var data = result[0];
             stopwatch.checkpoint("env");
 
@@ -849,6 +856,10 @@ class AppClass extends DataNode implements IApp {
 
             if (this.serverless()) {
                 this.id("serverless");
+            }
+
+            if (externalPageData) {
+                this.importExternalPage(externalPageData);
             }
 
             this.raiseLoaded();
@@ -908,6 +919,10 @@ class AppClass extends DataNode implements IApp {
 
     relayout() {
         RelayoutEngine.performAppRelayout(this);
+    }
+
+    initializeWithResource(url: string) {
+        this._initializeWithResource = url;
     }
 
     relayoutInternal() {
@@ -1024,6 +1039,32 @@ class AppClass extends DataNode implements IApp {
         return config;
     }
 
+    importExternalPage(data) {
+        var pageJson = data.page as IJsonNode;
+        var name = ' (' + pageJson.props.name + ')';
+        if (data.styles) {
+            for (let style of data.styles) {
+                style.name += name;
+                this.styleManager.registerStyle(style, StyleType.Visual)
+            }
+        }
+
+        if (data.textStyles) {
+            for (let style of data.textStyles) {
+                style.name += name;
+                this.styleManager.registerStyle(style, StyleType.Text)
+            }
+        }
+
+        if (data.fontMetadata) {
+            for (var metadata of data.fontMetadata) {
+                this.saveFontMetadata(metadata);
+            }
+        }
+
+        return this.importPage(pageJson);
+    }
+
     importPage(json: IJsonNode) {
         let page = this.pages.find(x => x.id() === json.props.id);
         if (!page) {
@@ -1050,6 +1091,7 @@ class AppClass extends DataNode implements IApp {
         ModelStateListener.trackInsert(this, this, page, i);
         return page;
     }
+
     private importUpdatedPage(existingPage: IPage, pageJson: IJsonNode) {
         let elementsAdded = 0;
         for (let i = 0; i < pageJson.children.length; i++) {

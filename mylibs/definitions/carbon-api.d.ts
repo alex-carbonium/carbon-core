@@ -95,6 +95,7 @@ declare module "carbon-api" {
 
     export interface IActivityProxy {
         subscribeForFeature(companyId, projectId, feature): Promise<void>;
+        subscribeForBeta(email): Promise<void>;
     }
 
     export interface ILoginModel{

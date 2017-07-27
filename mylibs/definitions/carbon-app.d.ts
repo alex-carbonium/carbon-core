@@ -44,6 +44,8 @@ declare module "carbon-app" {
         setActivePageById(id: string);
         pagesWithSymbols(): IPage[];
         getAllResourceArtboards(type: ArtboardType): IArtboard[];
+        initializeWithResource(url:string);
+
 
         activeStory: any;
         stories: any[];
@@ -127,6 +129,7 @@ declare module "carbon-app" {
         resetCurrentTool();
 
         importPage(json: IJsonNode): IPage;
+        importExternalPage(data:any) : IPage;
 
         isElectron(): boolean;
     }
