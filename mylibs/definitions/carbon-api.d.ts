@@ -212,6 +212,7 @@ declare module "carbon-api" {
     }
     export interface IGalleryProxy {
         resources(from: number, to: number, search?: string): Promise<IPaginatedResult<ISharedResource>>;
+        resource(id: string): Promise<ISharedResource>;
     }
 
     export interface IFontsProxy{
