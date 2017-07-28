@@ -12,7 +12,6 @@ import params from "./params";
 var load = bluebird.promisify(OpenType.load);
 
 export const DefaultFont = "Open Sans";
-export const UIFont = "Lato";
 
 export default class OpenTypeFontManager extends FontManager implements IFontManager {
     _loadQueue: {family: string; style: FontStyle, weight: FontWeight, promise: Promise<any>}[];
@@ -112,10 +111,6 @@ export default class OpenTypeFontManager extends FontManager implements IFontMan
     }
 
     _browserLoad(fontInfo) {
-        if (fontInfo.getFamily() === UIFont) {
-            return Promise.resolve();
-        }
-
         var fontFaceSrc = fontInfo.toFontFaceSrc();
         var newStyle = document.createElement('style');
         newStyle.appendChild(document.createTextNode("\

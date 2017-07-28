@@ -274,7 +274,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             context.fillStyle = SharedColors.ArtboardText;
         }
 
-        context.font = "11 px Lato, LatoLight, Arial, Helvetica, sans-serif";
+        context.font = "11 px Arial, Helvetica, sans-serif";
 
         let width = this.width();
 
@@ -342,7 +342,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         context.stroke();
 
         if (scale >= 0.5) {
-            context.font = (0 | (10 / scale)) + "px Lato, LatoLight, Arial, Helvetica, sans-serif";
+            context.font = (0 | (10 / scale)) + "px Arial, Helvetica, sans-serif";
             context.beginPath();
             context.rectPath(x, y - 20 / scale, Math.max(150, this.width()), 20 / scale);
             context.clip();
