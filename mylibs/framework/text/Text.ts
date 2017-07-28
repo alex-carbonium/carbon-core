@@ -172,11 +172,8 @@ class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElem
             this.createEngine();
             params.perf && performance.measure("Text.createEngine", "Text.createEngine");
         }
-        else {
-            params.perf && performance.mark("Text.setDefaultFormatting");
-            TextEngine.setDefaultFormatting(this.props.font);
-            params.perf && performance.measure("Text.setDefaultFormatting", "Text.setDefaultFormatting");
-        }
+
+        TextEngine.setDefaultFormatting(this.props.font);
 
         context.beginPath();
         params.perf && performance.mark("Text.fill");
