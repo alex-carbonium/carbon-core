@@ -159,7 +159,7 @@ declare module "carbon-model" {
 
         globalMatrixToLocal(matrix: IMatrix): IMatrix;
 
-        performArrange();
+        performArrange(arrangeEvent?, mode?: ChangeMode): void;
     }
     export const Container: IConstructor<IContainer>;
 

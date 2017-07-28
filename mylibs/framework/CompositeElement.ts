@@ -305,11 +305,11 @@ export default class CompositeElement extends UIElement implements IComposite {
         return this._commonPropsManager.updateDisplayProps(this.elements, changes);
     }
 
-    previewPatchProps(elements: UIElement[], propertyName: string, patchType: PatchType, value: any) {
+    previewPatchDisplayProps(elements: UIElement[], propertyName: string, patchType: PatchType, value: any) {
         this._commonPropsManager.previewPatchProps(elements, propertyName, patchType, value);
     }
 
-    patchProps(elements: UIElement[], propertyName: string, patchType: PatchType, value: any) {
+    patchDisplayProps(elements: UIElement[], propertyName: string, patchType: PatchType, value: any) {
         this._commonPropsManager.patchProps(elements, propertyName, patchType, value);
     }
 

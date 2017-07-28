@@ -257,7 +257,7 @@ export default class RepeatContainer extends Container implements IRepeatContain
         this.runtimeProps.insertingMultiple = false;
     }
 
-    performArrange(oldRect, mode = ChangeMode.Model) {
+    performArrange(oldRect, mode: ChangeMode = ChangeMode.Model): void {
         super.performArrange(oldRect, mode);
         if (mode === ChangeMode.Model) {
             RepeatMarginTool.updateIfAttached(this);
