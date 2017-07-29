@@ -284,7 +284,7 @@ export default class Image extends Container<IImageProps> implements IImage {
         // image.resizeOnLoad(null);
         // this.parent().replace(this, image, mode);
         // return image;
-        this.setProps({source: image.source()});
+        this.setProps({source: image.source(), sourceProps: image.props.sourceProps});
         return this;
     }
 
