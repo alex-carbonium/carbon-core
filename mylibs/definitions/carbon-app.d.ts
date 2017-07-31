@@ -88,6 +88,9 @@ declare module "carbon-app" {
          * Notifies that the app has been heavily updated. The required data needs to be fully re-read from the app.
          */
         updated: IEvent<void>;
+        beginUpdate(): void;
+        endUpdate(): void;
+
         unload(): void;
 
         serverless(value?: boolean): boolean;
@@ -335,7 +338,7 @@ declare module "carbon-app" {
         };
     }
 
-    export interface IShortcutScheme{
+    export interface IShortcutScheme {
         windows: IShortcut[],
         mac: IShortcut[]
     }

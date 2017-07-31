@@ -208,7 +208,7 @@ export default class ModelSyncProxy {
     }
 
     resync(data){
-        this._app.updating.raise();
+        this._app.beginUpdate();
         this._app.state.setExternalChange(true);
         Selection.makeSelection([]);
         this._app.isLoaded = false;
@@ -220,7 +220,7 @@ export default class ModelSyncProxy {
         this._app.state.setExternalChange(false);
 
         this._app.setActivePageById(pageId);
-        this._app.updated.raise();
+        this._app.endUpdate();
     }
 
     clearPendingChanges(){

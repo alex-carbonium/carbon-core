@@ -540,7 +540,7 @@ class AppClass extends DataNode implements IApp {
         if (!page) {
             return;
         }
-        this.updating.raise();
+        this.beginUpdate();
 
         setNewActive = (setNewActive === undefined) ? true : setNewActive;
         var indexOfRemoved = this.pages.indexOf(page);
@@ -559,7 +559,7 @@ class AppClass extends DataNode implements IApp {
         this.removeChild(page);
         this.pageRemoved.raise(page);
 
-        this.updated.raise();
+        this.endUpdate();
 
         return -1;
     }
@@ -815,7 +815,7 @@ class AppClass extends DataNode implements IApp {
 
     run() {
         params.perf && performance.mark("App.run");
-        this.updating.raise();
+        this.beginUpdate();
 
         this.clear();
 
@@ -863,7 +863,7 @@ class AppClass extends DataNode implements IApp {
             }
 
             this.raiseLoaded();
-            this.updated.raise();
+            this.endUpdate();
 
             this.restoreWorkspaceState();
             this.releaseLoadRef();
@@ -1264,6 +1264,13 @@ class AppClass extends DataNode implements IApp {
 
     assignNewName(element: IUIElement) {
         this.activePage.nameProvider.assignNewName(element);
+    }
+
+    beginUpdate() {
+        this.updating.raise();
+    }
+    endUpdate() {
+        this.updated.raise();
     }
 }
 

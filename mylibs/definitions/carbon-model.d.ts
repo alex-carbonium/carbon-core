@@ -83,8 +83,9 @@ declare module "carbon-model" {
         globalViewMatrixInverted(): IMatrix;
         shouldApplyViewMatrix(): boolean;
 
-        applyScaling(vector: IPoint, origin: IPoint, options?, mode?): boolean;
-        applyTranslation(vector: IPoint, withReset?, mode?): void;
+        applyScaling(vector: IPoint, origin: IPoint, options?, mode?: ChangeMode): boolean;
+        applyTranslation(vector: IPoint, withReset?, mode?: ChangeMode): void;
+        applyDirectedTranslation(vector: IPoint, mode?: ChangeMode): void;
         setTransform(matrix: IMatrix);
         resetTransform();
 

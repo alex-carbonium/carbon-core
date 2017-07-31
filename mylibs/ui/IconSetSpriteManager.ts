@@ -51,7 +51,7 @@ export default class IconSetSpriteManager {
 
         return Promise.all(taskPromises)
             .then(() => {
-                return { imageData: "url(" + context.canvas.toDataURL("image/png") + ")", size: { width, height } };
+                return { imageData: context.canvas.toDataURL("image/png"), size: { width, height } };
             })
             .finally(() => {
                 ContextPool.releaseContext(context);
@@ -133,8 +133,8 @@ export default class IconSetSpriteManager {
             return Promise.all([spriteUrlPromise, spriteUrl2xPromise])
                 .then(sprites => {
                     return {
-                        spriteUrl: sprites[0].imageData,
-                        spriteUrl2x: sprites[1].imageData,
+                        spriteUrl: "url('" + sprites[0].imageData + "')",
+                        spriteUrl2x: "url('" + sprites[1].imageData + "')",
                         size: sprites[0].size
                     }
                 });
@@ -147,7 +147,7 @@ export default class IconSetSpriteManager {
         spriteUrlPromise = spriteUrlPromise.then(sprite => {
             return backend.fileProxy.uploadPublicImage({ content: sprite.imageData })
                 .then((data) => {
-                    iconSetSpriteUrl = data.url;
+                    iconSetSpriteUrl = "url('" + data.url + "')";
                     iconSetSpriteSize = sprite.size;
                 })
         });
@@ -155,7 +155,7 @@ export default class IconSetSpriteManager {
         spriteUrl2xPromise = spriteUrl2xPromise.then(sprite => {
             return backend.fileProxy.uploadPublicImage({ content: sprite.imageData })
                 .then((data) => {
-                    iconSetSpriteUrl2x = data.url;
+                    iconSetSpriteUrl2x = "url('" + data.url + "')";
                 })
         });
 
