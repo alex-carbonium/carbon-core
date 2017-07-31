@@ -12,7 +12,6 @@ import params from "./params";
 var load = bluebird.promisify(OpenType.load);
 
 export const DefaultFont = "Open Sans";
-export const UIFont = "Lato";
 
 export default class OpenTypeFontManager extends FontManager implements IFontManager {
     _loadQueue: {family: string; style: FontStyle, weight: FontWeight, promise: Promise<any>}[];
@@ -58,7 +57,7 @@ export default class OpenTypeFontManager extends FontManager implements IFontMan
         if (!metadata.fonts.find(x => x.style === style && x.weight === weight)) {
             return Promise.resolve(false);
         }
-        return this.load(metadata, style, weight)
+        return this.load(family, style, weight)
             .then(() => true);
     }
 
@@ -112,10 +111,6 @@ export default class OpenTypeFontManager extends FontManager implements IFontMan
     }
 
     _browserLoad(fontInfo) {
-        if (fontInfo.getFamily() === UIFont) {
-            return Promise.resolve();
-        }
-
         var fontFaceSrc = fontInfo.toFontFaceSrc();
         var newStyle = document.createElement('style');
         newStyle.appendChild(document.createTextNode("\
@@ -131,7 +126,7 @@ export default class OpenTypeFontManager extends FontManager implements IFontMan
         return new Promise((resolve, reject) => {
             WebFontLoader.load({
                 custom: {
-                    families: [fontInfo.getFamily()]
+                    families: [fontInfo.getFamily() + ":" + this.getFontVariationDescription(fontInfo.getWeight(), fontInfo.getStyle())]
                 },
                 timeout: 60 * 1000,
                 active: function () {
@@ -142,5 +137,10 @@ export default class OpenTypeFontManager extends FontManager implements IFontMan
                 }
             });
         });
+    }
+
+    private getFontVariationDescription(weight: FontWeight, style: FontStyle) {
+        let s = style === FontStyle.Italic ? "i" : "n";
+        return s + (weight/100);
     }
 }

@@ -6,6 +6,9 @@
 
 require("./PromiseConfig");
 
+require("jquery/jquery.min");
+require("../libs/jquery.signalR-2.1.1");
+
 let backend = require("./backend");
 let logger = require("./logger");
 let globals = require("./globals");

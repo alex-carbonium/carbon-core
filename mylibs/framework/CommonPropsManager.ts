@@ -3,7 +3,7 @@ import UIElement from "./UIElement";
 import Environment from "../environment";
 import PropertyTracker from "./PropertyTracker";
 import { leaveCommonProps } from "../util";
-import { ChangeMode } from "carbon-core";
+import { ChangeMode, PatchType } from "carbon-core";
 import Font from "./Font";
 
 export default class CommonPropsManager {
@@ -158,6 +158,52 @@ export default class CommonPropsManager {
         this._origPropValues.length = 0;
         this._affectingLayout = false;
         this._inPreview = false;
+    }
+
+    previewPatchProps(elements: UIElement[], propertyName: string, patchType: PatchType, value: any) {
+        for (var i = 0; i < elements.length; i++){
+            var element = elements[i];
+            if (!this._origPropValues[i]){
+                this._origPropValues[i] = {[propertyName]:element.props[propertyName]};
+            }
+
+            element.patchProps(patchType, propertyName, value, ChangeMode.Root);
+        }
+
+        this._inPreview = true;
+    }
+
+    patchProps(elements: UIElement[], propertyName: string, patchType: PatchType, value: any) {
+        for (var i = 0; i < elements.length; i++){
+            var element = elements[i];
+            //element.props might be changed by preview, but the command should have original values as oldProps
+            if (this._origPropValues && this._origPropValues.length) {
+                var origProps = this._origPropValues[i];
+                Object.assign(element.props, origProps);
+            }
+            element.patchProps(patchType, propertyName, value, ChangeMode.Model);
+        }
+
+        if (this._inPreview) {
+            if (PropertyTracker.resume()) {
+                PropertyTracker.flush();
+            }
+        }
+
+        this._origPropValues.length = 0;
+        this._inPreview = false;
+    }
+
+    cancelEdit(elements: UIElement[]) {
+        for (var i = 0; i < elements.length; i++){
+            var element = elements[i];
+            if (this._origPropValues.length) {
+                var origProps = this._origPropValues[i];
+                Object.assign(element.props, origProps);
+                element.invalidate();
+            }
+        }
+        this._origPropValues.length = 0;
     }
 
     onChildPropsChanged(newProps: any, callback: (mergedProps: any) => void){

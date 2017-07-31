@@ -523,7 +523,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
     arrange() {
     }
-    performArrange(oldRect) {
+    performArrange(event?, mode?: ChangeMode) {
     }
     _init() {
 

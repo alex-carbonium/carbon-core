@@ -7,8 +7,6 @@ require("seedrandom");
 require("framework/EventHelper");
 
 require("webExtensions");
-require("jquery/jquery.min");
-require("./libs/jquery.signalR-2.1.1");
 
 require("commands/Move");
 

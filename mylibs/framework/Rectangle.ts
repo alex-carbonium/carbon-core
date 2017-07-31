@@ -441,7 +441,7 @@ PropertyMetadata.registerForType(Rectangle, {
             baseGroups.find(x => x.label === "@constraints"),
             {
                 label: "Appearance",
-                properties: ["fill", "stroke", "strokeWidth", "strokePosition", "dashPattern", "miterLimit", "lineCap", "lineJoin", "cornerRadius", "opacity"]
+                properties: ["fill", "stroke", "strokeWidth", "opacity", "strokePosition", "dashPattern", "miterLimit", "lineCap", "lineJoin", "cornerRadius"]
             },
             baseGroups.find(x => x.label === "@shadow"),
             baseGroups.find(x => x.label === "@advanced")

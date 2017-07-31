@@ -11,7 +11,7 @@ import Rect from "../math/rect";
 import Phantom from "./Phantom";
 import Environment from "../environment";
 import Selection from "./SelectionModel";
-import { IUIElementProps, IPoint, IRect, IComposite, ChangeMode } from "carbon-core";
+import { IUIElementProps, IPoint, IRect, IComposite, ChangeMode, PatchType } from "carbon-core";
 import CommonPropsManager from "./CommonPropsManager";
 
 export default class CompositeElement extends UIElement implements IComposite {
@@ -303,6 +303,18 @@ export default class CompositeElement extends UIElement implements IComposite {
 
     updateDisplayProps(changes: any) {
         return this._commonPropsManager.updateDisplayProps(this.elements, changes);
+    }
+
+    previewPatchDisplayProps(elements: UIElement[], propertyName: string, patchType: PatchType, value: any) {
+        this._commonPropsManager.previewPatchProps(elements, propertyName, patchType, value);
+    }
+
+    patchDisplayProps(elements: UIElement[], propertyName: string, patchType: PatchType, value: any) {
+        this._commonPropsManager.patchProps(elements, propertyName, patchType, value);
+    }
+
+    cancelEdit(elements: UIElement[]) {
+        this._commonPropsManager.cancelEdit(elements);
     }
 
     _onPropsChanged(element: UIElement, newProps: IUIElementProps) {

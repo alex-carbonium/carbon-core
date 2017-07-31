@@ -226,7 +226,7 @@ class Shape extends Container {
         if (elements.length !== 1) {
             return false;
         }
-        return this.primitiveRoot().isEditable() && (elements[0] instanceof Image || elements[0] instanceof Shape) && allowMoveInOut;
+        return this.primitiveRoot().isEditable() && (elements[0] instanceof Image) && allowMoveInOut;
     }
 
     lineCap(value?) {
@@ -300,18 +300,25 @@ class Shape extends Container {
 
     insert(element: IUIElement) {
         this.setProps({ clipMask: true });
-        element.prepareAndSetProps(this.selectLayoutProps());
+
+        var parent = this.parent();
+        var idx = parent.children.indexOf(this);
+        var group = new GroupContainer();
+
+        group.prepareAndSetProps(this.selectLayoutProps());
+        element.resetTransform();
+        this.resetTransform();
+
+        //first insert, so that group does not delete itself if this is a last child
+        parent.insert(group, idx + 1);
+
+        group.add(this);
+        group.add(element);
+
         if (element instanceof Image) {
             element.resizeOnLoad(null);
         }
 
-        var parent = this.parent();
-        var idx = parent.remove(this);
-
-        var group = new GroupContainer();
-        group.add(this);
-        group.add(element);
-        parent.insert(group, idx);
         return group;
     }
 
