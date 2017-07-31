@@ -6,7 +6,7 @@ import BezierCurve from "math/bezierCurve";
 import Point from "math/point";
 import PropertyMetadata from "framework/PropertyMetadata";
 import PropertyTracker from "framework/PropertyTracker";
-import { Overflow, Types, LineCap, LineJoin } from "framework/Defs";
+import { Overflow, Types, LineCap, LineJoin, StrokePosition } from "framework/Defs";
 import Path from "framework/Path";
 import GroupArrangeStrategy from "framework/arrangeStrategy/GroupArrangeStrategy";
 import { combineRectArray } from "math/math";
@@ -17,6 +17,7 @@ import UserSettings from "UserSettings";
 import Selection from "framework/SelectionModel";
 import Isolate from "commands/Isolate";
 import Environment from "environment";
+import ContextPool from "./render/ContextPool";
 
 function propertyChanged(element, newProps) {
     if (!this._internalChange && this._itemIds && this._itemIds[element.id()]) {
@@ -108,6 +109,123 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
         }
     }
 
+    _renderDraft(context, w, h) {
+        var stroke = this.stroke();
+        var strokePosition = this.strokePosition();
+
+        context.beginPath();
+        this.drawPath(context, w, h);
+        var dashPattern = this.dashPattern();
+        if (dashPattern) {
+            context.setLineDash(dashPattern);
+        }
+
+        this.fillSelf(context, w, h);
+        if (!stroke || !stroke.type || strokePosition === StrokePosition.Center) {
+            context.lineWidth = this.strokeWidth();
+            this.strokeSelf(context, w, h);
+        }
+        else if (strokePosition === StrokePosition.Inside) {
+            context.clip();
+            context.lineWidth = this.strokeWidth() * 2;
+            this.strokeSelf(context, w, h);
+        }
+        else if (strokePosition === StrokePosition.Outside) {
+            context.beginPath();
+            var bb = this.getBoundingBoxGlobal();
+            context.rect(bb.x + 2 * bb.width, bb.y - bb.height, -3 * bb.width, 3 * bb.height);
+            this.drawPath(context, w, h);
+            context.clip();
+            context.beginPath();
+            this.drawPath(context, w, h);
+            context.lineWidth = this.strokeWidth() * 2;
+            this.strokeSelf(context, w, h);
+        }
+    }
+
+    fillSelf(context, w, h) {
+        Brush.fill(this.fill(), context, 0, 0, w, h);
+    }
+
+    strokeSelf(context, w, h) {
+        Brush.stroke(this.stroke(), context, 0, 0, w, h);
+    }
+
+    _renderFinal(context, w, h, environment) {
+        var stroke = this.stroke();
+        var strokePosition = this.strokePosition();
+
+        context.beginPath();
+        this.drawPath(context, w, h);
+        this.fillSelf(context, w, h);
+        if (!stroke || !stroke.type || strokePosition === StrokePosition.Center) {
+            context.lineWidth = this.strokeWidth();
+            this.strokeSelf(context, w, h);
+        }
+        else {
+            var clippingRect = this.getBoundingBoxGlobal();
+            clippingRect = this.expandRectWithBorder(clippingRect);
+            if (true || !environment.offscreen) {
+                var p1 = environment.pageMatrix.transformPoint2(clippingRect.x, clippingRect.y);
+                var p2 = environment.pageMatrix.transformPoint2(clippingRect.x + clippingRect.width, clippingRect.y + clippingRect.height);
+                p1.x = Math.max(0, 0 | p1.x * environment.contextScale);
+                p1.y = Math.max(0, 0 | p1.y * environment.contextScale);
+                p2.x = 0 | p2.x * environment.contextScale + .5;
+                p2.y = 0 | p2.y * environment.contextScale + .5;
+                var sw = (p2.x - p1.x);
+                var sh = (p2.y - p1.y);
+            }
+            // else {
+            //     sw = 0 | clippingRect.width * environment.contextScale + .5;
+            //     sh = 0 | clippingRect.height * environment.contextScale + .5;
+            //     p1 = {x:0, y:0};
+            // }
+            sw = Math.max(sw, 1);
+            sh = Math.max(sh, 1);
+
+            var offContext = ContextPool.getContext(sw, sh, environment.contextScale);
+            offContext.clearRect(0, 0, sw, sh);
+            offContext.relativeOffsetX = -p1.x;
+            offContext.relativeOffsetY = -p1.y;
+
+            offContext.save();
+            offContext.translate(-p1.x, -p1.y);
+            environment.setupContext(offContext);
+
+            var dashPattern = this.dashPattern();
+            if (dashPattern) {
+                offContext.setLineDash(dashPattern);
+            }
+
+            // if(!environment.offscreen) {
+            this.applyViewMatrix(offContext);
+            // }
+
+            offContext.beginPath();
+            this.drawPath(offContext, w, h);
+
+            offContext.lineWidth = this.strokeWidth() * 2;
+            this.strokeSelf(offContext, w, h);
+            if (strokePosition === StrokePosition.Inside) {
+                offContext.globalCompositeOperation = "destination-in";
+            }
+            else {
+                offContext.globalCompositeOperation = "destination-out";
+            }
+            offContext.fillStyle = "black";
+            offContext.fill();
+
+            // if(!environment.offscreen) {
+            context.resetTransform();
+            // }
+
+            context.drawImage(offContext.canvas, p1.x, p1.y);
+
+            offContext.restore();
+
+            ContextPool.releaseContext(offContext);
+        }
+    }
 
     propsUpdated(newProps, oldProps) {
         super.propsUpdated.apply(this, arguments);
@@ -379,6 +497,15 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
             context.lineWidth = this.strokeWidth();
             Brush.stroke(this.stroke(), context, 0, 0, w, h);
         }
+
+        // if(this.result) {
+        //     if (environment.finalRender) {
+        //         this._renderFinal(context, w, h, environment);
+        //     } else {
+        //         this._renderDraft(context, w, h);
+        //     }
+
+        // }
         context.restore();
     }
 
