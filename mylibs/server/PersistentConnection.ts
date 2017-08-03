@@ -53,7 +53,7 @@ export default class PersistentConnection extends StateMachine<ConnectionState> 
 
         return this._startPromise
             .then(proxy => {
-                this.changeState({type: "connected"});
+                this.changeState({type: "connected", connectionTime: new Date()});
                 return proxy;
             })
             .catch(e => {
@@ -203,7 +203,9 @@ export default class PersistentConnection extends StateMachine<ConnectionState> 
                 this.start(this.backOffConnectionTimeout());
             });
 
-        this.changeState({type: "waiting", timeout: timeout, startTime: new Date()});
+        if (timeout) {
+            this.changeState({type: "waiting", timeout: timeout, startTime: new Date()});
+        }
 
         return this._restartPromise;
     }

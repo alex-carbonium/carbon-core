@@ -8,7 +8,7 @@ declare module "carbon-api" {
     export type ConnectionState =
         {type: "notStarted"} |
         {type: "connecting"} |
-        {type: "connected"} |
+        {type: "connected", connectionTime: Date} |
         {type: "reconnecting"} |
         {type: "goingIdle"} |
         {type: "shuttingDown"} |
