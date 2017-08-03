@@ -38,7 +38,6 @@ import ActionManager from "./ui/ActionManager";
 import ShortcutManager from "./ui/ShortcutManager";
 import ArtboardPage from "./ui/pages/ArtboardPage";
 import Artboard from "./framework/Artboard";
-import IconsInfo from "./ui/IconsInfo";
 import backend from "./backend";
 import logger from "./logger";
 import params from "./params";

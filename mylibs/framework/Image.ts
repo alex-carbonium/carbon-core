@@ -304,10 +304,6 @@ export default class Image extends Container<IImageProps> implements IImage {
         return ImageSourceHelper.createUrlSource(url);
     }
 
-    static createFontSource(iconName: string): ImageSource{
-        return ImageSourceHelper.createFontSource(iconName);
-    }
-
     static createElementSource(pageId: string, artboardId:string, elementId:string): ImageSource{
         return ImageSourceHelper.createElementSource(pageId, artboardId, elementId);
     }

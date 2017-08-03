@@ -1,15 +1,12 @@
 import Brush from "./Brush";
 import backend from "../backend";
-import { Types } from "./Defs";
-import IconsInfo from "../ui/IconsInfo";
+import { Types, FloatingPointPrecision } from "./Defs";
 import Rect from "../math/rect";
 import { ContentSizing, ImageSource, ImageSourceType } from "carbon-model";
 import { IRect } from "carbon-geometry";
 import DataNode from "./DataNode";
 import { ChangeMode } from "carbon-core";
-
-const iconProps = { fill: Brush.createFromColor("#ABABAB"), stroke: Brush.Empty };
-const iconRuntimeProps = { glyph: IconsInfo.findGlyphString(IconsInfo.defaultFontFamily, "image") };
+import UserSettings from "../UserSettings";
 
 export default class ImageSourceHelper {
     static draw(source: ImageSource, context, w, h, sourceElement, environment) {
@@ -17,9 +14,6 @@ export default class ImageSourceHelper {
         let runtimeProps = sourceElement.runtimeProps.sourceProps;
 
         switch (source.type) {
-            case ImageSourceType.Font:
-                ImageSourceHelper.drawFont(IconsInfo.defaultFontFamily, context, w, h, props, runtimeProps);
-                return;
             case ImageSourceType.Url:
                 ImageSourceHelper.drawURL(context, runtimeProps);
                 return;
@@ -34,30 +28,29 @@ export default class ImageSourceHelper {
         assertNever(source);
     }
 
+    private static round(value: number) {
+        return Math.round(value * FloatingPointPrecision) / FloatingPointPrecision;
+    }
+
     private static drawEmpty(context, w, h) {
         context.save();
-        context.fillStyle = "#DEDEDE";
+        context.fillStyle = UserSettings.image.emptyFill;
         context.fillRect(0, 0, w, h);
 
-        let iw = w;
-        let ih = h;
-        if (w > 64) {
-            iw = Math.min(128, w / 2 + .5 | 0);
-        }
-        else if (w > 32) {
-            iw = 32;
-        }
-        if (h > 64) {
-            ih = Math.min(128, h / 2 + .5 | 0);
-        }
-        else if (h > 32) {
-            ih = 32;
-        }
-        if (iw !== w || ih !== h) {
-            context.translate((w - iw) / 2 + .5 | 0, (h - ih) / 2 + .5 | 0);
+        let text = ImageSourceHelper.round(w) + "x" + ImageSourceHelper.round(h);
+        let fontSize = Math.min(h - 8, 24);
+        context.font = fontSize + "px Arial";
+
+        let width = context.measureText(text).width + .5 | 0;
+        if (width > w) {
+            fontSize *= (w - 8)/width;
+            context.font = (fontSize | 0) + "px Arial";
+            width = context.measureText(text).width + .5 | 0;
         }
 
-        ImageSourceHelper.drawFont(IconsInfo.defaultFontFamily, context, iw, ih, iconProps, iconRuntimeProps);
+        context.fillStyle = UserSettings.image.emptyTextFill;
+        context.textBaseline = "middle";
+        context.fillText(text, w/2 - width/2 + .5 | 0, h/2 + .5 | 0);
 
         context.restore();
     }
@@ -85,8 +78,6 @@ export default class ImageSourceHelper {
 
     static hasValue(source: ImageSource) {
         switch (source.type) {
-            case ImageSourceType.Font:
-                return source.icon;
             case ImageSourceType.Url:
                 return source.url;
             case ImageSourceType.Element:
@@ -310,8 +301,6 @@ export default class ImageSourceHelper {
 
     static load(source: ImageSource, sourceProps): Promise<any> | null {
         switch (source.type) {
-            case ImageSourceType.Font:
-                return Promise.resolve({ glyph: IconsInfo.findGlyphString(IconsInfo.defaultFontFamily, source.icon) });
             case ImageSourceType.Url:
                 return ImageSourceHelper.loadUrl(source, sourceProps);
             case ImageSourceType.Element:
@@ -353,15 +342,12 @@ export default class ImageSourceHelper {
         if (!source) {
             return false;
         }
-        return source.type === ImageSourceType.Font;
+        //TODO: should fill be supported for
+        return false;
     }
 
     static createUrlSource(url: string): ImageSource {
         return { type: ImageSourceType.Url, url: url };
-    }
-
-    static createFontSource(iconName: string): ImageSource {
-        return { type: ImageSourceType.Font, icon: iconName };
     }
 
     static createElementSource(pageId: string, artboardId: string, elementId: string): ImageSource {

@@ -252,7 +252,6 @@ declare module "carbon-model" {
 
     export const enum ImageSourceType {
         None = 0,
-        Font = 1,
         Url = 5,
         Element = 8
     }
@@ -260,7 +259,6 @@ declare module "carbon-model" {
     export type ImageSource =
         { type: ImageSourceType.None } |
         { type: ImageSourceType.Url, url: string } |
-        { type: ImageSourceType.Font, icon: string } |
         { type: ImageSourceType.Element, pageId: string, artboardId: string, elementId: string };
 
     export const enum ContentSizing {
