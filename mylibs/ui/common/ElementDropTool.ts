@@ -152,7 +152,7 @@ export default class ElementDropTool extends Tool {
         var round = true;
         if (!keys.ctrl) {
             var snapped = SnapController.applySnappingForPoint(this._point);
-            if (snapped === this._point) {
+            if (snapped.x === this._point.x && snapped.y === this._point.y) {
                 round = true;
             }
             else {
