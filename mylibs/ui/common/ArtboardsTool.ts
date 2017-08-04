@@ -9,7 +9,7 @@ import ObjectFactory from "../../framework/ObjectFactory";
 import {ViewTool} from "../../framework/Defs";
 import Rect from "../../math/rect";
 import Point from "../../math/point";
-import {IKeyboardState, IMouseEventData} from "carbon-core";
+import { IKeyboardState, IMouseEventData, IArtboard } from "carbon-core";
 import Cursors from "Cursors";
 
 export default class ArtboardsTool extends Tool {
@@ -38,6 +38,33 @@ export default class ArtboardsTool extends Tool {
 
     _enableArtboardSelection(value: boolean){
         this._app.activePage.getAllArtboards().forEach(x => x.allowArtboardSelection(value));
+    }
+
+    private artboardAdded(artboard: Artboard) {
+        this.suckOverlappingElements(artboard);
+
+        Selection.makeSelection([artboard]);
+        SnapController.calculateSnappingPoints(this._app.activePage);
+    }
+
+    private suckOverlappingElements(artboard: Artboard) {
+        let artboardBox = artboard.getBoundingBoxGlobal();
+        let page = artboard.parent();
+
+        for (var i = page.children.length - 1; i >= 0; --i) {
+            var child = page.children[i];
+            if (child instanceof Artboard) {
+                continue;
+            }
+            if (!artboardBox.intersect(child.getBoundingBoxGlobal())) {
+                continue;
+            }
+
+            let gm = child.globalViewMatrix();
+            page.remove(child);
+            child.setTransform(artboard.globalMatrixToLocal(gm));
+            artboard.insert(child, 0);
+        }
     }
 
     mousedown(event: IMouseEventData, keys: IKeyboardState) {
@@ -87,8 +114,7 @@ export default class ArtboardsTool extends Tool {
             if (w > 0 && h > 0) {
                 var pos = element.position();
                 this._view.activeLayer.dropToLayer(pos.x, pos.y, element);
-                Selection.makeSelection([element]);
-                SnapController.calculateSnappingPoints(this._app.activePage);
+                this.artboardAdded(element);
             }
 
             if (SystemConfiguration.ResetActiveToolToDefault) {
@@ -196,10 +222,6 @@ export default class ArtboardsTool extends Tool {
             this._element.applyTranslation(new Point(x, y));
 
             this._element.applyViewMatrix(context);
-            // if (this._element.clipSelf()) {
-            //     context.rectPath(0, 0, props.width, props.height);
-            //     context.clip();
-            // }
 
             this._element.drawSelf(context, props.width, props.height, environment);
 

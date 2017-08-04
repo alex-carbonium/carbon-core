@@ -16,6 +16,7 @@ import Rect from "../../math/rect";
 import { IArtboard } from "carbon-model";
 import { ArtboardType, IArtboardPage } from "carbon-core";
 import DataNode from "../../framework/DataNode";
+import Container from "../../framework/Container";
 var debug = require<any>("DebugUtil")("carb:artboardPage");
 
 const ARTBOARD_SPACE = 100;
@@ -322,8 +323,9 @@ class ArtboardPage extends Page implements IArtboardPage {
     }
 
     getArtboardAtPoint(point) {
+        let scale = Environment.view.scale();
         for (let artboard of this.getAllArtboards()) {
-            if (artboard.hitTest(point)) {
+            if (artboard.hitTestBoundingBox(point, scale)) {
                 return artboard;
             }
         }

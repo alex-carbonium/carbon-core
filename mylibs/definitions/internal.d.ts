@@ -1,4 +1,4 @@
-declare module "carbon-basics"{
+declare module "carbon-basics" {
     export const enum ResizeDimension {
         None,
         Vertical,
@@ -148,6 +148,12 @@ declare module "carbon-app"{
 }
 
 declare module "carbon-model"{
+    import { IRectData } from "carbon-core";
+
+    export interface IArtboardProps extends IContainerProps {
+        hitTestBox: IRectData | null;
+    }
+
     export interface IArtboard{
         allowArtboardSelection(value?): boolean;
     }

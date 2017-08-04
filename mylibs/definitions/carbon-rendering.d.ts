@@ -14,6 +14,7 @@ declare module "carbon-rendering" {
         globalAlpha: number;
         filter: string;
 
+        rect(x: number, y: number, width: number, height: number);
         clearRect(x: number, y: number, width: number, height: number);
 
         translate(x: number, y: number): void;
@@ -32,6 +33,8 @@ declare module "carbon-rendering" {
         fillText(text: string, x: number, y: number): void;
         stroke(): void;
         fill(): void;
+
+        clip(): void;
 
         save(): void;
         restore(): void;

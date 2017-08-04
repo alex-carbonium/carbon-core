@@ -769,10 +769,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return false;
         }
         let rect = this.getHitTestBox(scale, false);
-
+        return this.hitTestLocalRect(rect, point, scale);
+    }
+    protected hitTestLocalRect(rect: IRect, point: IPoint, scale: number) {
         let matrix = this.globalViewMatrixInverted();
         point = matrix.transformPoint(point);
-
         return point.x >= rect.x && point.x < rect.x + rect.width && point.y >= rect.y && point.y < rect.y + rect.height;
     }
     hitTestGlobalRect(rect: Rect, directSelection: boolean) {

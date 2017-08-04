@@ -57,6 +57,8 @@ declare module "carbon-geometry" {
         withHeight(width: number): IRect;
         withSize(width: number, height: number): IRect;
         clone(): IRect;
+
+        containsPoint(point: IPoint): boolean;
     }
     interface IRectConstructor {
         new (x: number, y: number, width: number, height: number): IRect;

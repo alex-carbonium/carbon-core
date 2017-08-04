@@ -206,7 +206,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
             this.setProps({ m: this.ownerElement.globalViewMatrix(), br: this.ownerElement.props.br }, ChangeMode.Self);
             this.ownerElement.applyVisitor(source => {
                 let target = this.getElementById(source.id());
-                if (target) {
+                if (target && target !== this) {
                     target.setProps({ m: source.props.m, br: source.props.br }, ChangeMode.Self);
                 }
             });

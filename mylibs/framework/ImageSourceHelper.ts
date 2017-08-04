@@ -44,13 +44,17 @@ export default class ImageSourceHelper {
         let width = context.measureText(text).width + .5 | 0;
         if (width > w) {
             fontSize *= (w - 8)/width;
-            context.font = (fontSize | 0) + "px Arial";
-            width = context.measureText(text).width + .5 | 0;
+            if (fontSize > 4) {
+                context.font = (fontSize | 0) + "px Arial";
+                width = context.measureText(text).width + .5 | 0;
+            }
         }
 
-        context.fillStyle = UserSettings.image.emptyTextFill;
-        context.textBaseline = "middle";
-        context.fillText(text, w/2 - width/2 + .5 | 0, h/2 + .5 | 0);
+        if (fontSize > 4) {
+            context.fillStyle = UserSettings.image.emptyTextFill;
+            context.textBaseline = "middle";
+            context.fillText(text, w/2 - width/2 + .5 | 0, h/2 + .5 | 0);
+        }
 
         context.restore();
     }

@@ -219,7 +219,9 @@ var onViewBlurred = function () {
 
 var onWindowBlur = function () {
     Keyboard.reset();
-    App.Current.actionManager.invoke("cancel");
+    if (!DEBUG) {
+        App.Current.actionManager.invoke("cancel");
+    }
 }
 
 var onWindowResize = function () {

@@ -25,8 +25,8 @@ export default class PowerToys extends CarbonExtension {
         ]);
 
         contributions.addShortcuts([
-            { key: "t g", action: "toys.gridArrange" },
-            { key: "t a", action: "toys.fitParentToChildren" }
+            { key: "w g", action: "toys.gridArrange" },
+            { key: "w a", action: "toys.fitParentToChildren" }
         ])
     }
 

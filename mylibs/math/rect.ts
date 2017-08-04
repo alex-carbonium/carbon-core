@@ -82,7 +82,7 @@ export default class Rect implements IRect {
         this.height = Math.round(this.height);
     }
 
-    containsRect(other) {
+    containsRect(other: IRect) {
         return isRectInRect(other, this);
     }
 
@@ -92,6 +92,14 @@ export default class Rect implements IRect {
 
     equals(other) {
         return other === this || this.x === other.x && this.y === other.y && this.width === other.width && this.height === other.height;
+    }
+
+    combine(rect: IRect) {
+        let x = Math.min(this.x, rect.x);
+        let y = Math.min(this.y, rect.y);
+        let r = Math.max(this.x + this.width, rect.x + rect.width);
+        let b = Math.max(this.y + this.height, rect.y + rect.height);
+        return new Rect(x, y, r - x, b - y);
     }
 
     combineMutable(rect) {

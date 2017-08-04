@@ -124,6 +124,7 @@ declare module "carbon-app" {
         defaultStroke(stroke?: Brush, mode?: any): Brush;
         useRecentColor(color: Brush);
         recentColors(): string[];
+        clipArtboards(value?: boolean): boolean;
         getUserSetting<T>(name: string): T;
         setUserSetting(name: string, value: null | string | number | boolean | object): void;
 

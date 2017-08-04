@@ -179,10 +179,6 @@ export default class ElementDropTool extends Tool {
             context.save();
 
             this._element.applyViewMatrix(context);
-            // if (this._element.clipSelf()) {
-            //     context.rectPath(0, 0, props.width, props.height);
-            //     context.clip();
-            // }
 
             var br = this._element.boundaryRect();
             this._element.drawSelf(context, br.width, br.height, environment);

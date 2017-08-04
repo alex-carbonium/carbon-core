@@ -10,7 +10,7 @@ import EventHelper from "./EventHelper";
 import RectMask from "./RectMask";
 import { ContentSizing, ImageSource, ImageSourceType, IImage, IImageProps } from "carbon-model";
 import { IRect, OriginType } from "carbon-geometry";
-import { ChangeMode } from "carbon-core";
+import { ChangeMode, IContext } from "carbon-core";
 
 const DefaultSizing = ContentSizing.fill;
 
@@ -198,10 +198,13 @@ export default class Image extends Container<IImageProps> implements IImage {
         }
     }
 
-    clipSelf() {
-        return true;
+    clip(context: IContext) {
         //TODO: add back if necessary
-        //return this.globalViewMatrix().isTranslatedOnly();
+        //if (this.globalViewMatrix().isTranslatedOnly())
+        context.beginPath();
+        let br = this.boundaryRect();
+        context.rect(br.x, br.y, br.width, br.height);
+        context.clip();
     }
 
     //TODO: add back if necessary
