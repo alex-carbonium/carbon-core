@@ -11,7 +11,7 @@ export default class PixelGrid {
         }
         var scale = view.scale();
         if (scale !== this.scale || view.scrollX() !== this.scrollX || view.scrollY() !== this.scrollY) {
-            if (scale >= 4) {
+            if (scale >= 6) {
                 this.render();
             } else if (!this.clean) {
                 this.clear();

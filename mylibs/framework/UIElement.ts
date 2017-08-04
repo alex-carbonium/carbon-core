@@ -907,40 +907,33 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     drawBoundaryPath(context, round = true) {
         var matrix = this.globalViewMatrix();
         var r = this.boundaryRect();
-        const roundFactor = 2;
         var strokePos = this.strokePosition();
-        var w = 0;
-        var d = 0;
-        if (Environment.view.scale() < 1.5) {
-            if (strokePos === StrokePosition.Inside) {
-                w = 1;
-            } else if (strokePos === StrokePosition.Outside) {
-                d = 1;
-                w = -1;
-            }
-        }
 
-        let p = matrix.transformPoint2(r.x + d, r.y + d);
+        let p = matrix.transformPoint2(r.x, r.y);
         if (round) {
-            p.roundToNearestHalf(roundFactor);
+            p.x = Math.round(p.x) - .5;
+            p.y = Math.round(p.y) - .5;
         }
         context.moveTo(p.x, p.y);
 
-        p = matrix.transformPoint2(r.x + r.width + w + d, r.y + d);
+        p = matrix.transformPoint2(r.x + r.width, r.y);
         if (round) {
-            p.roundToNearestHalf(roundFactor);
+            p.x = Math.round(p.x) + .5;
+            p.y = Math.round(p.y) - .5;
         }
         context.lineTo(p.x, p.y);
 
-        p = matrix.transformPoint2(r.x + r.width + w + d, r.y + r.height + w + d);
+        p = matrix.transformPoint2(r.x + r.width, r.y + r.height);
         if (round) {
-            p.roundToNearestHalf(roundFactor);
+            p.x = Math.round(p.x) + .5;
+            p.y = Math.round(p.y) + .5;
         }
         context.lineTo(p.x, p.y);
 
-        p = matrix.transformPoint2(r.x + d, r.y + r.height + w + d);
+        p = matrix.transformPoint2(r.x, r.y + r.height);
         if (round) {
-            p.roundToNearestHalf(roundFactor);
+            p.x = Math.round(p.x) - .5;
+            p.y = Math.round(p.y) + .5;
         }
         context.lineTo(p.x, p.y);
 
