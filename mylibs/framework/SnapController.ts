@@ -486,7 +486,16 @@ function buildHorizontalDistances(distances, snap, b) {
     return { value: 0 }
 }
 
-function collectPoints(data, elements, viewportRect, root, element) {
+function collectPoints(data, elements, viewportRect, root, excludeElement, element) {
+    if(excludeElement) {
+        if(excludeElement === element) {
+            return;
+        }
+
+        if(excludeElement.contains && excludeElement.contains(element)) {
+            return;
+        }
+    }
     if (element.hitVisible(false, UserSettings.snapTo.lockedObjects) && !element.hitTransparent()) {
         if (UserSettings.snapTo.onlyVisibleObjects && !areRectsIntersecting(viewportRect, element.getBoundingBoxGlobal(false))) {
             return;
@@ -538,14 +547,14 @@ class SnapController {
         let viewportRect = Environment.view.viewportRect();
 
         if (UserSettings.snapTo.guides) {
-            this.snapGuides.forEach(x => collectPoints(data, elements, viewportRect, null, x));
+            this.snapGuides.forEach(x => collectPoints(data, elements, viewportRect, null, null, x));
         }
 
         this.currentSnappingData = data;
         this.currentSnappingElements = elements;
     }
 
-    calculateSnappingPoints(parent) {
+    calculateSnappingPoints(parent, excludeElement?) {
         var data: any = {};
         var elements = [];
         data._snapX = [];
@@ -558,14 +567,14 @@ class SnapController {
         this.currentSnappingData = data;
         this.currentSnappingElements = elements;
         if (UserSettings.snapTo.guides) {
-            this.snapGuides.forEach(x => collectPoints(data, elements, viewportRect, null, x));
+            this.snapGuides.forEach(x => collectPoints(data, elements, viewportRect, null, null, x));
         }
 
         if (!parent) {
             return;
         }
 
-        parent.applyVisitor(collectPoints.bind(null, data, elements, viewportRect, parent), true);
+        parent.applyVisitor(collectPoints.bind(null, data, elements, viewportRect, parent, excludeElement), true);
 
         data._snapX.sort(function (x1, x2) {
             return x1.value - x2.value;

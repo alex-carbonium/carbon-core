@@ -184,17 +184,21 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             m
         };
     }
-    saveOrResetLayoutProps(): boolean {
+    saveOrResetLayoutProps(mode): boolean {
         //this happens only for clones, so no need to clear origLayout
         if (!this.runtimeProps.origLayout) {
             this.runtimeProps.origLayout = this.selectLayoutProps();
             return true;
         }
         if (this.hasBadTransform()) {
-            this.setProps({ bad: false, lgbr: null, lgm: null });
+            this.setProps({ bad: false, lgbr: null, lgm: null }, mode);
         }
-        this.setProps(this.runtimeProps.origLayout);
+        this.setProps(this.runtimeProps.origLayout, mode);
         return false;
+    }
+
+    clearSavedLayoutProps() {
+        delete this.runtimeProps.origLayout;
     }
 
     selectDisplayProps(names, metadata = this.findMetadata()): any {
@@ -304,7 +308,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     applyTranslation(t: ICoordinate, withReset?: boolean, mode?: ChangeMode) {
         if (withReset) {
-            this.saveOrResetLayoutProps();
+            this.saveOrResetLayoutProps(mode);
         }
         this.applyTransform(Matrix.create().translate(t.x, t.y), false, mode);
     }
@@ -325,7 +329,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     applyRotation(angle, o, withReset?: boolean, mode?: ChangeMode) {
         if (withReset) {
-            this.saveOrResetLayoutProps();
+            this.saveOrResetLayoutProps(mode);
         }
         this.applyTransform(Matrix.create().rotate(-angle, o.x, o.y), false, mode);
     }
@@ -345,7 +349,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
     applyScaling(s, o, options?, changeMode?: ChangeMode) {
         if (options && options.reset) {
-            this.saveOrResetLayoutProps();
+            this.saveOrResetLayoutProps(changeMode);
         }
 
         if ((options && options.sameDirection) || !this.isRotated()) {
@@ -1386,7 +1390,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     scalableY(value) {
         return this.field("_scalableY", value, true);
     }
-    isDropSupported(value) {
+    isDropSupported(value?) {
         return true;
     }
     showResizeHint() {

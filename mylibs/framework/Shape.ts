@@ -9,6 +9,7 @@ import Image from "./Image";
 import Constraints from "./Constraints";
 import { IImage, IUIElement } from "carbon-model";
 import { ResizeDimension, ElementState } from "carbon-core";
+import RenderPipeline from "./render/RenderPipeline";
 
 class Shape extends Container {
     convertToPath() {
@@ -77,76 +78,107 @@ class Shape extends Container {
         var stroke = this.stroke();
         var strokePosition = this.strokePosition();
 
-        context.beginPath();
-        this.drawPath(context, w, h);
-        this.fillSelf(context, w, h);
-        if (!stroke || !stroke.type || strokePosition === StrokePosition.Center || !this.closed()) {
-            context.lineWidth = this.strokeWidth();
-            this.strokeSelf(context, w, h);
+        var pipeline = RenderPipeline.createFor(this, context, environment);
+        pipeline.out((context)=>{
+            context.beginPath();
+            this.drawPath(context, w, h);
+            this.fillSelf(context, w, h);
+        });
+
+        if (!stroke || !stroke.type || strokePosition === StrokePosition.Center) {
+            pipeline.out(context=>{
+                context.lineWidth = this.strokeWidth();
+                this.strokeSelf(context, w, h);
+            })
+        } else {
+            pipeline.outBuffered(context=>{
+                context.beginPath();
+                this.drawPath(context, w, h);
+
+                context.lineWidth = this.strokeWidth() * 2;
+                this.strokeSelf(context, w, h);
+                if (strokePosition === StrokePosition.Inside) {
+                    context.globalCompositeOperation = "destination-in";
+                }
+                else {
+                    context.globalCompositeOperation = "destination-out";
+                }
+                context.fillStyle = "black";
+                context.fill();
+            });
         }
-        else {
-            var clippingRect = this.getBoundingBoxGlobal();
-            clippingRect = this.expandRectWithBorder(clippingRect);
-            if (true || !environment.offscreen) {
-                var p1 = environment.pageMatrix.transformPoint2(clippingRect.x, clippingRect.y);
-                var p2 = environment.pageMatrix.transformPoint2(clippingRect.x + clippingRect.width, clippingRect.y + clippingRect.height);
-                p1.x = Math.max(0, 0 | p1.x * environment.contextScale);
-                p1.y = Math.max(0, 0 | p1.y * environment.contextScale);
-                p2.x = 0 | p2.x * environment.contextScale + .5;
-                p2.y = 0 | p2.y * environment.contextScale + .5;
-                var sw = (p2.x - p1.x);
-                var sh = (p2.y - p1.y);
-            }
-            // else {
-            //     sw = 0 | clippingRect.width * environment.contextScale + .5;
-            //     sh = 0 | clippingRect.height * environment.contextScale + .5;
-            //     p1 = {x:0, y:0};
-            // }
-            sw = Math.max(sw, 1);
-            sh = Math.max(sh, 1);
+        pipeline.done();
+        // context.beginPath();
+        // this.drawPath(context, w, h);
+        // this.fillSelf(context, w, h);
 
-            var offContext = ContextPool.getContext(sw, sh, environment.contextScale);
-            offContext.clearRect(0, 0, sw, sh);
-            offContext.relativeOffsetX = -p1.x;
-            offContext.relativeOffsetY = -p1.y;
+        // if (!stroke || !stroke.type || strokePosition === StrokePosition.Center || !this.closed()) {
+        //     context.lineWidth = this.strokeWidth();
+        //     this.strokeSelf(context, w, h);
+        // }
+        // else {
+        //     var clippingRect = this.getBoundingBoxGlobal();
+        //     clippingRect = this.expandRectWithBorder(clippingRect);
+        //     if (true || !environment.offscreen) {
+        //         var p1 = environment.pageMatrix.transformPoint2(clippingRect.x, clippingRect.y);
+        //         var p2 = environment.pageMatrix.transformPoint2(clippingRect.x + clippingRect.width, clippingRect.y + clippingRect.height);
+        //         p1.x = Math.max(0, 0 | p1.x * environment.contextScale);
+        //         p1.y = Math.max(0, 0 | p1.y * environment.contextScale);
+        //         p2.x = 0 | p2.x * environment.contextScale + .5;
+        //         p2.y = 0 | p2.y * environment.contextScale + .5;
+        //         var sw = (p2.x - p1.x);
+        //         var sh = (p2.y - p1.y);
+        //     }
+        //     // else {
+        //     //     sw = 0 | clippingRect.width * environment.contextScale + .5;
+        //     //     sh = 0 | clippingRect.height * environment.contextScale + .5;
+        //     //     p1 = {x:0, y:0};
+        //     // }
+        //     sw = Math.max(sw, 1);
+        //     sh = Math.max(sh, 1);
 
-            offContext.save();
-            offContext.translate(-p1.x, -p1.y);
-            environment.setupContext(offContext);
+        //     var offContext = ContextPool.getContext(sw, sh, environment.contextScale);
+        //     offContext.clearRect(0, 0, sw, sh);
+        //     offContext.relativeOffsetX = -p1.x;
+        //     offContext.relativeOffsetY = -p1.y;
 
-            var dashPattern = this.dashPattern();
-            if (dashPattern) {
-                offContext.setLineDash(dashPattern);
-            }
+        //     offContext.save();
+        //     offContext.translate(-p1.x, -p1.y);
+        //     environment.setupContext(offContext);
 
-            // if(!environment.offscreen) {
-            this.applyViewMatrix(offContext);
-            // }
+        //     // if(!environment.offscreen) {
+        //     this.applyViewMatrix(offContext);
+        //     // }
 
-            offContext.beginPath();
-            this.drawPath(offContext, w, h);
+        //     var dashPattern = this.dashPattern();
+        //     if (dashPattern) {
+        //         offContext.setLineDash(dashPattern);
+        //     }
 
-            offContext.lineWidth = this.strokeWidth() * 2;
-            this.strokeSelf(offContext, w, h);
-            if (strokePosition === StrokePosition.Inside) {
-                offContext.globalCompositeOperation = "destination-in";
-            }
-            else {
-                offContext.globalCompositeOperation = "destination-out";
-            }
-            offContext.fillStyle = "black";
-            offContext.fill();
+        //     offContext.beginPath();
+        //     this.drawPath(offContext, w, h);
 
-            // if(!environment.offscreen) {
-            context.resetTransform();
-            // }
+        //     offContext.lineWidth = this.strokeWidth() * 2;
+        //     this.strokeSelf(offContext, w, h);
+        //     if (strokePosition === StrokePosition.Inside) {
+        //         offContext.globalCompositeOperation = "destination-in";
+        //     }
+        //     else {
+        //         offContext.globalCompositeOperation = "destination-out";
+        //     }
+        //     offContext.fillStyle = "black";
+        //     offContext.fill();
 
-            context.drawImage(offContext.canvas, p1.x, p1.y);
+        //     // if(!environment.offscreen) {
+        //     context.resetTransform();
+        //     // }
 
-            offContext.restore();
+        //     context.drawImage(offContext.canvas, p1.x, p1.y);
 
-            ContextPool.releaseContext(offContext);
-        }
+        //     offContext.restore();
+
+        //     ContextPool.releaseContext(offContext);
+        // }
     }
 
     shouldApplyViewMatrix() {

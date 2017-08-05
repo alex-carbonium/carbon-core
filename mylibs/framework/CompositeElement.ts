@@ -8,7 +8,7 @@ import UIElement from "./UIElement";
 import { IGroupContainer } from "carbon-core";
 import Box from "./Box";
 import Rect from "../math/rect";
-import Phantom from "./Phantom";
+import Matrix from "../math/matrix";
 import Environment from "../environment";
 import Selection from "./SelectionModel";
 import { IUIElementProps, IPoint, IRect, IComposite, ChangeMode, PatchType } from "carbon-core";
@@ -36,6 +36,10 @@ export default class CompositeElement extends UIElement implements IComposite {
         return this.children as any;
     }
 
+    contains(element) {
+        return this.children.indexOf(element) !== -1;
+    }
+
     register(element: UIElement) {
         var systemType = element.systemType();
         if (this._types.indexOf(systemType) === -1) {
@@ -44,6 +48,7 @@ export default class CompositeElement extends UIElement implements IComposite {
         element.enablePropsTracking();
         this.children.push(element);
     }
+
     unregister(element: UIElement) {
         element.disablePropsTracking();
 
@@ -68,7 +73,7 @@ export default class CompositeElement extends UIElement implements IComposite {
         }
     }
 
-    autoPositionChildren(): boolean{
+    autoPositionChildren(): boolean {
         return true;
     }
 
@@ -79,10 +84,11 @@ export default class CompositeElement extends UIElement implements IComposite {
         return true;
     }
 
-    hasBadTransform(): boolean{
+    hasBadTransform(): boolean {
         return this.elements.some(x => x.hasBadTransform());
     }
-    restoreLastGoodTransformIfNeeded(){
+
+    restoreLastGoodTransformIfNeeded() {
         this.elements.forEach(x => x.restoreLastGoodTransformIfNeeded());
     }
 
@@ -107,8 +113,12 @@ export default class CompositeElement extends UIElement implements IComposite {
 
             var w = xMax - xMin;
             var h = yMax - yMin;
-            this.prepareAndSetProps({ br: new Rect(xMin, yMin, w, h) });
+            this.prepareAndSetProps({ br: new Rect(0, 0, w, h), m: new Matrix(1, 0, 0, 1, xMin, yMin) });
         }
+    }
+
+    draw(context, environment) {
+        return;
     }
 
     getBoundingBoxGlobal(includeMargin?: boolean): Rect {
@@ -118,15 +128,88 @@ export default class CompositeElement extends UIElement implements IComposite {
         return super.getBoundingBoxGlobal(includeMargin);
     }
 
+    dm() {
+        if (this.count() === 1) {
+            return this.elements[0].dm();
+        }
+        return super.dm();
+    }
+
+    getBoundingBox(includeMargin?: boolean) {
+        if (this.count() === 1) {
+            return this.elements[0].getBoundingBox();
+        }
+        return super.getBoundingBox(includeMargin);
+    }
+
+    boundaryRect(value?) {
+        if (this.count() === 1) {
+            return this.elements[0].boundaryRect();
+        }
+        return super.boundaryRect(value);
+    }
+
+    gdm() {
+        if (this.count() === 1) {
+            return this.elements[0].gdm();
+        }
+        return super.gdm();
+    }
+
+    globalViewMatrix() {
+        if (this.count() === 1) {
+            return this.elements[0].globalViewMatrix();
+        }
+        return super.globalViewMatrix();
+    }
+
+    width() {
+        if (this.count() === 1) {
+            return this.elements[0].width();
+        }
+        return super.width();
+    }
+
+    height() {
+        if (this.count() === 1) {
+            return this.elements[0].height();
+        }
+        return super.height();
+    }
+
+    x() {
+        if (this.count() === 1) {
+            return this.elements[0].x();
+        }
+        return super.x();
+    }
+
+    y() {
+        if (this.count() === 1) {
+            return this.elements[0].y();
+        }
+        return super.y();
+    }
+
+    rotationOrigin(global) {
+        if (this.count() === 1) {
+            return this.elements[0].rotationOrigin(global);
+        }
+        return super.rotationOrigin(global);
+    }
+
     elementAt(index: number) {
         return this.elements[index];
     }
+
     singleOrDefault() {
         return this.count() === 1 ? this.elements[0] : null;
     }
+
     singleOrSelf() {
         return this.count() === 1 ? this.elements[0] : this;
     }
+
     has(element: UIElement) {
         for (var i = 0, j = this.elements.length; i < j; ++i) {
             if (this.elements[i] === element) {
@@ -135,6 +218,7 @@ export default class CompositeElement extends UIElement implements IComposite {
         }
         return false;
     }
+
     unregisterAll() {
         this.each(x => x.disablePropsTracking());
         this._types = [];
@@ -157,13 +241,31 @@ export default class CompositeElement extends UIElement implements IComposite {
         }
     }
 
+    getPropSnapshot() {
+        var snapshot = {};
+        for (var e of this.children) {
+            snapshot[e.id()] = extend({}, e.selectLayoutProps());
+        }
+
+        return snapshot;
+    }
+
+    applySnapshot(snapshot, mode) {
+        for (var e of this.children) {
+            let props = snapshot[e.id()];
+            if (props) {
+                e.setProps(props, mode);
+            }
+        }
+    }
+
     hitTest(point: IPoint, scale: number, boundaryRectOnly: boolean = false) {
         var count = this.count();
         if (count === 0) {
             return false;
         }
 
-        if (boundaryRectOnly && count > 1){
+        if (boundaryRectOnly && count > 1) {
             return super.hitTest(point, scale, boundaryRectOnly);
         }
 
@@ -187,12 +289,15 @@ export default class CompositeElement extends UIElement implements IComposite {
     map(callback: (e: UIElement) => any) {
         return this.elements.map(callback);
     }
+
     first() {
         return this.elements[0];
     }
+
     resizeDimensions() {
         return 0;
     }
+
     canDrag(): boolean {
         var canDrag = true;
         this.each(function (element) {
@@ -224,7 +329,7 @@ export default class CompositeElement extends UIElement implements IComposite {
         return "";
     }
     findPropertyDescriptor(propName: string) {
-        if (this._types.length === 1){
+        if (this._types.length === 1) {
             return this.elements[0].findPropertyDescriptor(propName);
         }
 
@@ -293,7 +398,7 @@ export default class CompositeElement extends UIElement implements IComposite {
         return this._commonPropsManager.prepareDisplayPropsVisibility(this.elements, this.systemType());
     }
 
-    getAffectedDisplayProperties(changes): string[]{
+    getAffectedDisplayProperties(changes): string[] {
         return this._commonPropsManager.getAffectedDisplayProperties(this.elements, changes);
     }
 

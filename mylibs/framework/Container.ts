@@ -2,7 +2,7 @@ import { Types, ArrangeStrategies, Overflow, DropPositioning } from "./Defs";
 import ArrangeStrategy from "./arrangeStrategy/ArrangeStrategy";
 import ContextPool from "./render/ContextPool";
 import CorruptedElement from "./CorruptedElement";
-import { areRectsEqual } from "../math/math";
+import { areRectsEqual, areRectsIntersecting } from "../math/math";
 import Environment from "../environment";
 import PropertyMetadata from "./PropertyMetadata";
 import UIElement from './UIElement';
@@ -18,6 +18,8 @@ import { IKeyboardState, ChangeMode, HorizontalConstraint, VerticalConstraint } 
 import { IContainerProps, IUIElement, IContainer } from "carbon-model";
 import { IMatrix } from "carbon-geometry";
 import ExtensionPoint from "./ExtensionPoint";
+import RenderPipeline from "./render/RenderPipeline";
+import params from "params";
 
 export default class Container<TProps extends IContainerProps = IContainerProps> extends UIElement<TProps> implements IContainer<IContainerProps> {
     props: TProps;
@@ -102,9 +104,9 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     shouldApplyViewMatrix() {
         return false;
     }
-    saveOrResetLayoutProps(): boolean {
+    saveOrResetLayoutProps(changeMode?): boolean {
         let res = UIElement.prototype.saveOrResetLayoutProps.apply(this, arguments);
-        this.children.forEach(e => e.saveOrResetLayoutProps());
+        this.children.forEach(e => e.saveOrResetLayoutProps(changeMode));
         return res;
     }
 
@@ -115,9 +117,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
     drawSelf(context, w, h, environment) {
         this.fillBackground(context, 0, 0, w, h);
-
         this.drawChildren(context, w, h, environment);
-
         this.strokeBorder(context, w, h);
     }
 
@@ -257,6 +257,52 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         context.resetTransform();
         context.drawImage(offContext.canvas, 0, 0, sw, sh, p1.x, p1.y, sw, sh);
         ContextPool.releaseContext(offContext)
+    }
+
+    draw(context, environment) {
+        if (this.hasBadTransform()) {
+            return;
+        }
+
+        let markName;
+        if (params.perf) {
+            markName = "draw " + this.displayName() + " - " + this.id();
+            performance.mark(markName);
+        }
+
+        var br = this.boundaryRect(),
+            w = br.width,
+            h = br.height;
+
+        if (environment && environment.viewportRect && !areRectsIntersecting(environment.viewportRect, this.getBoundingBoxGlobal(true))) {
+            if (params.perf) {
+                performance.measure(markName, markName);
+            }
+            return;
+        }
+
+        context.save();
+        context.globalAlpha = context.globalAlpha * this.opacity();
+
+        this.applyViewMatrix(context);
+
+        var pipeline = RenderPipeline.createFor(this, context, environment);
+
+        if(this.opacity() !== 1) {
+            pipeline.bufferOutput();
+        }
+
+        pipeline.out((context)=>{
+            this.clip(context);
+            this.drawSelf(context, w, h, environment);
+        });
+        pipeline.done();
+
+        context.restore();
+
+        if (params.perf) {
+            performance.measure(markName, markName);
+        }
     }
     renderAfterMask(context, items, i, environment) {
         for (; i < items.length; ++i) {
@@ -765,7 +811,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
                     continue;
                 }
 
-                if (_element !== element) {
+                if (_element !== element && element.contains && !element.contains(_element)) {
                     let gr = _element.getBoundingBox();
                     intervals.push((last + gr.y) / 2);
                     last = gr.y + gr.height;
@@ -792,7 +838,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
                     continue;
                 }
 
-                if (_element !== element) {
+                if (_element !== element && element.contains && !element.contains(_element)) {
                     let gr = _element.getBoundingBox();
                     intervals.push((last + gr.x) / 2);
                     last = gr.x + gr.width;
@@ -811,7 +857,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
                 x2: pt2.x,
                 y2: pt2.y,
                 index: baseLine.insertIndex,
-                angle: 0//this.angle()
+                angle: 0
             }
         }
 

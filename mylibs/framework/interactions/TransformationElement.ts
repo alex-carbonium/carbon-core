@@ -18,7 +18,7 @@ export default class TransformationElement extends GroupContainer implements ICo
         this._elements = [];
 
         var elements = element instanceof CompositeElement ? element.elements : [element];
-
+        this.children = [];
         for (var i = 0; i < elements.length; i++) {
             var e = elements[i];
             this._saveDecorators(e);
@@ -83,15 +83,15 @@ export default class TransformationElement extends GroupContainer implements ICo
     }
 
     createClone(element) {
-        return new Phantom(element, element.selectLayoutProps(true));
+        return element;//new Phantom(element, element.selectLayoutProps(true));
     }
 
     showOriginal(value) {
-        this._elements.forEach(x => x.setProps({ visible: value }, ChangeMode.Self));
+        // this._elements.forEach(x => x.setProps({ visible: value }, ChangeMode.Self));
 
-        if (this._decorators) {
-            this._decorators.forEach(x => x.visible(value));
-        }
+        // if (this._decorators) {
+        //     this._decorators.forEach(x => x.visible(value));
+        // }
     }
 
     saveChanges() {

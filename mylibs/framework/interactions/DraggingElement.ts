@@ -10,6 +10,10 @@ import Brush from "../Brush";
 import Environment from "../../environment";
 import UserSettings from "../../UserSettings";
 import Matrix from "../../math/matrix";
+import { ChangeMode } from "carbon-core";
+import Selection from "framework/SelectionModel";
+import CompositeElement from "../CompositeElement";
+import Duplicate from "commands/Duplicate";
 
 var debug = require("DebugUtil")("carb:draggingElement");
 
@@ -21,15 +25,23 @@ function applyOrthogonalMove(pos) {
     }
 }
 
-class DraggingElement extends TransformationElement {
+class DraggingElement extends CompositeElement {
     constructor(elementOrComposite, event) {
-        super(elementOrComposite);
+        super();
 
-        this._initialPosition = this.getBoundingBoxGlobal().topLeft();
+        var elements = elementOrComposite instanceof CompositeElement ? elementOrComposite.elements : [elementOrComposite];
+        this.children = [];
+        for (var e of elements) {
+            this.register(e);
+        }
+        this.performArrange();
+
+        this._initialPosition = null;
+
+        this._initialPosition = this.getBoundingBox();
 
         let snappingTarget = elementOrComposite.first().parent().primitiveRoot() || Environment.view.page.getActiveArtboard();
         this._snappingTarget = snappingTarget;
-        this._altPressed = undefined;
 
         var holdPcnt = Math.round((event.x - this.x()) * 100 / this.width());
         this._ownSnapPoints = SnapController.prepareOwnSnapPoints(this, holdPcnt);
@@ -38,6 +50,9 @@ class DraggingElement extends TransformationElement {
         this._currentPosition = new Point(0, 0);
 
         this.translationMatrix = Matrix.create();
+        this._propSnapshot = this.getPropSnapshot();
+
+        this.altChanged(event.event.altKey);// it will also update snapping
     }
 
     wrapSingleChild() {
@@ -56,22 +71,24 @@ class DraggingElement extends TransformationElement {
     }
 
     detach() {
-        super.detach();
+      //  super.detach();
 
         debug("Detached");
         SnapController.clearActiveSnapLines();
+
+        this.parent().remove(this, ChangeMode.Self);
     }
 
     stopDragging(event, draggingOverElement, page) {
-        this.saveChanges();
-        this.showOriginal(true);
+        // this.saveChanges();
+        // this.showOriginal(true);
 
         var artboards = page.getAllArtboards();
         var elements = [];
 
         for (var i = 0; i < this.children.length; ++i) {
             var phantom = this.children[i];
-            var element = phantom.original;
+            var element = phantom.original || phantom;
 
             var phantomTarget = artboards.find(a => areRectsIntersecting(phantom.getBoundingBoxGlobal(), a.getBoundaryRectGlobal()));
             if (!phantomTarget) {
@@ -101,15 +118,39 @@ class DraggingElement extends TransformationElement {
                 index = parent.positionOf(element) + 1 || parent.count();
             }
 
-            var target = event.altKey ? element.clone() : element;
-            this.dropElementOn(event, parent, target, phantom, index);
+            this.dropElementOn(event, parent, element, phantom, index);
 
-            elements.push(target);
+            elements.push(element);
         }
 
-        this.refreshSelection();
+        Selection.refreshSelection();
+
+        for(var e of this.children) {
+            e.clearSavedLayoutProps();
+        }
+
+        var newSnapshot = this.getPropSnapshot();
+        this.applySnapshot(this._propSnapshot, ChangeMode.Self);
+
+        var copyClones = this._clones;
+        if(copyClones) {
+            copyClones.forEach(e=>{
+                var parent = e.parent();
+                var index = parent.positionOf(e);
+                parent.remove(e, ChangeMode.Self);
+                if(e.visible()) {
+                    parent.insert(e, index);
+                }
+            })
+        }
+
+        this.applySnapshot(newSnapshot, ChangeMode.Model);
 
         return elements;
+    }
+
+    propsUpdated(newProps, oldProps, mode) {
+        super.propsUpdated(newProps, oldProps, ChangeMode.Self);
     }
 
     dropElementOn(event, newParent, element, phantom, index) {
@@ -121,21 +162,33 @@ class DraggingElement extends TransformationElement {
             newParent.changePosition(element, index);
         }
 
-        if (!newParent.autoPositionChildren()) {
-            //must set new coordinates after parent is changed so that global caches are updated properly
-            element.setTransform(newParent.globalMatrixToLocal(phantom.globalViewMatrix()));
+        // if (!newParent.autoPositionChildren()) {
+        //     //must set new coordinates after parent is changed so that global caches are updated properly
+        //     element.setTransform(newParent.globalMatrixToLocal(phantom.globalViewMatrix()));
+        // }
+    }
+
+    altChanged(alt) {
+        if(alt){
+            if(!this._clones) {
+                var shanpshot = this.getPropSnapshot();
+                this.applySnapshot(this._propSnapshot, ChangeMode.Self);
+                this._clones = Duplicate.run(this.elements, ChangeMode.Self, true);
+                this.applySnapshot(shanpshot, ChangeMode.Self);
+            }
         }
+
+        if(this._clones) {
+            this._clones.forEach(e=>e.visible(alt));
+        }
+
+        SnapController.clearActiveSnapLines();
+        SnapController.calculateSnappingPoints(this._snappingTarget, this);
     }
 
     dragTo(event) {
         debug("Drag to x=%d y=%d", event.x, event.y);
         this._translation.set(event.x, event.y);
-
-        if(event.event.altKey !== this._altPressed) {
-            SnapController.clearActiveSnapLines();
-            SnapController.calculateSnappingPoints(this._snappingTarget);
-            this._altPressed = event.event.altKey;
-        }
 
         if (event.event.shiftKey) {
             applyOrthogonalMove.call(this, this._translation);
@@ -165,8 +218,9 @@ class DraggingElement extends TransformationElement {
         this.translationMatrix.tx = this._translation.x;
         this.translationMatrix.ty = this._translation.y;
 
-        this.applyTranslation(this._translation, true);
-        Invalidate.requestInteractionOnly();
+        for(var e of this.children) {
+            e.applyTranslation(this._translation, true, ChangeMode.Self);
+        }
     }
 
     strokeBorder(context, w, h) {
@@ -189,25 +243,26 @@ class DraggingElement extends TransformationElement {
     }
 
     constraints() {
-        if(this._elements.length !== 1) {
+        if(this.children.length !== 1) {
             return null;
         }
 
-        return this._elements[0].constraints();
+        return this.children[0].constraints();
     }
 
     parentAllowSnapping(pos) {
-        return this._elements.every(x => x.parent() === this || x.parent().getDropData(x, pos) === null);
+        return this.children.every(x => x.parent() === this || x.parent().getDropData(x, pos) === null);
     }
 
     isDropSupported() {
-        return this._elements.every(x => x.isDropSupported());
+        return this.children.every(x => x.isDropSupported());
     }
 
     allowMoveOutChildren(event) {
-        return this._elements.every(x => x.parent() === this || x.parent().allowMoveOutChildren(undefined, event));
+        return this.children.every(x => x.parent() === this || x.parent().allowMoveOutChildren(undefined, event));
     }
 }
+
 DraggingElement.prototype.t = Types.DraggingElement;
 
 PropertyMetadata.registerForType(DraggingElement, {});

@@ -1,7 +1,8 @@
 import Selection from "../framework/SelectionModel";
+import { ChangeMode } from "carbon-core";
 
 export default {
-    run: function (selection) {
+    run: function (selection, changeMode = ChangeMode.Model, doNotUpdateSelection = false) {
         if (!selection || selection.length === 0) {
             return;
         }
@@ -20,14 +21,19 @@ export default {
             }
 
             if (current === originalParent){
-                current.insert(clone, element.zOrder() + 1);
+                current.insert(clone, element.zOrder() + 1, changeMode);
             }
             else {
-                clone.setTransform(current.globalMatrixToLocal(element.globalViewMatrix()));
-                current.add(clone);
+                clone.setTransform(current.globalMatrixToLocal(element.globalViewMatrix()), changeMode);
+                current.add(clone, changeMode);
             }
             newSelection.push(clone);
         }
-        Selection.makeSelection(newSelection);
+
+        if(!doNotUpdateSelection) {
+            Selection.makeSelection(newSelection);
+        }
+
+        return newSelection;
     }
 }

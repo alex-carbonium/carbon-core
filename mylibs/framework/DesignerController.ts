@@ -9,7 +9,6 @@ import TouchHelper from "./TouchHelper";
 import Artboard from "./Artboard";
 import Page from "./Page";
 import Keyboard from "../platform/Keyboard";
-import Phantom from "./Phantom";
 import ObjectFactory from "./ObjectFactory";
 import { Types, ViewTool } from "./Defs";
 import { IApp, IController, IEvent, IEvent2, IMouseEventData, IKeyboardState, IUIElement, IContainer, IElementEventData, ITransformationEventData } from "carbon-core";
@@ -342,10 +341,10 @@ export default class DesignerController implements IController {
         }
 
         this._draggingElement = ObjectFactory.construct(Types.DraggingElement, element, event);
-        this._draggingElement.showOriginal(event.altKey);
+        // this._draggingElement.showOriginal(event.altKey);
 
         this.view.interactionLayer.add(this._draggingElement);
-        var translation = this._draggingElement.getTranslation();
+        var translation = this._draggingElement.getBoundingBox().topLeft();
         this._draggingOffset = {
             x: event.x - translation.x,
             y: event.y - translation.y
@@ -645,7 +644,7 @@ export default class DesignerController implements IController {
             }
 
             if (this._draggingElement) {
-                this._draggingElement.showOriginal(newKeys.alt);
+                this._draggingElement.altChanged(newKeys.alt);
                 Invalidate.request();
             }
         }
