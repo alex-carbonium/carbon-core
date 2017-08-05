@@ -19,7 +19,7 @@ declare module "carbon-contrib" {
         /**
          * Registers the shortcuts for the extension for all supported platforms.
          */
-        addShortcuts(scheme: IShortcutScheme);
+        addShortcuts(scheme: IShortcutScheme | IShortcut[]);
     }
 
     export const enum ContextBarPosition {

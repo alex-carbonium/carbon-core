@@ -2,7 +2,7 @@ import EventHelper from "./framework/EventHelper";
 import logger from "./logger";
 import { IEvent2, IEvent } from "carbon-basics";
 
-export default class StateMachine<TState extends {type: string}> {
+export default class StateMachine<TState> {
     stateChanged: IEvent<TState>;
 
     constructor(public state: TState){
@@ -10,7 +10,7 @@ export default class StateMachine<TState extends {type: string}> {
     }
 
     changeState(newState: TState){
-        var changed = newState.type !== this.state.type;
+        var changed = newState !== this.state;
         this.state = newState;
         if (changed){
             logger.info(this.constructor.name + ": " + JSON.stringify(newState));

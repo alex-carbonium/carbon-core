@@ -17,8 +17,9 @@ import Environment from "environment";
 import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
-import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage } from "carbon-core";
+import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
+import Rect from "../math/rect";
 
 
 //TODO: fix name of artboard on zoom
@@ -371,6 +372,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     deactivate() {
         this._active = false;
+        this.collapseHitTestBoxIfNeeded();
         this.resetGlobalViewCache();
         this._recorder && this._recorder.stop();
     }
@@ -380,8 +382,9 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         this.onBackgroundDrawn && this.onBackgroundDrawn(this, context);
     }
 
-    drawSelf(context, w, h, environment) {
+    drawSelf(context: IContext, w, h, environment) {
         context.save();
+
         let frame = this.frame;
         if (frame && environment.showFrames) {
             context.beginPath();
@@ -389,13 +392,16 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             context.rect(pos.x, pos.y, frame.runtimeProps.cloneScreenWidth, frame.runtimeProps.cloneScreenHeight);
             context.clip();
         }
+        else if (App.Current.clipArtboards()) {
+            context.beginPath();
+            let br = this.getBoundingBoxGlobal();
+            context.rect(br.x, br.y, br.width, br.height);
+            context.clip();
+        }
+
         super.drawSelf(context, w, h, environment);
         this.onContentDrawn && this.onContentDrawn(this, context);
         context.restore();
-    }
-
-    clipSelf() {
-        return true;
     }
 
     buildMetadata(properties) {
@@ -477,6 +483,19 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         }
     }
 
+    getHitTestBox() {
+        if (this.props.hitTestBox) {
+            return this.props.hitTestBox;
+        }
+        return super.getHitTestBox.apply(this, arguments);;
+    }
+
+    /**
+     * Hit-testing strategy:
+     * - Artboard response to hit-testing using extended hit-test box, if any.
+     * - When hitting elements inside the artboard, it is further refined if an element is really hit.
+     * - Artboard tool still uses hit testing by bounding box only.
+     */
     hitTest(point, scale) {
         let res = super.hitTest(point, scale);
         if (res) {
@@ -485,8 +504,77 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         if (this.hasBadTransform()) {
             return false;
         }
+        return this.hitTestHeader(point, scale);
+    }
+
+    hitTestBoundingBox(point, scale) {
+        let rect = super.getHitTestBox(scale);
+        return this.hitTestLocalRect(rect, point, scale);
+    }
+
+    private hitTestHeader(point, scale) {
         let bb = this.getBoundingBoxGlobal();
         return isPointInRect({ x: bb.x, y: bb.y - 20 / scale, width: bb.width, height: 20 / scale }, point);
+    }
+
+    /**
+     * If an artboard hits itself and has an extended hit test box, it has to be validated
+     * if the artboard is "really" hit by checking the boundary rect.
+     */
+    hitElement(position, scale, predicate?, directSelection?) {
+        let element = super.hitElement.apply(this, arguments);
+
+        if (element === this && this.props.hitTestBox) {
+            if (!this.hitTestBoundingBox(position, scale) && !this.hitTestHeader(position, scale)) {
+                return null;
+            }
+        }
+
+        return element;
+    }
+
+    private extendHitTestBoxIfNeeded(changedElement: IUIElement) {
+        if (changedElement === this) {
+            return;
+        }
+        let elementBox = changedElement.getBoundingBoxGlobal();
+        let artboardGlobalBox = this.getBoundingBoxGlobal();
+        let hitTestBoxGlobal = artboardGlobalBox;
+        if (this.props.hitTestBox) {
+            let gm = this.globalViewMatrix();
+            let r = this.props.hitTestBox;
+            hitTestBoxGlobal = new Rect(r.x + gm.tx, r.y + gm.ty, r.width, r.height);
+        }
+        if (!hitTestBoxGlobal.containsRect(elementBox)) {
+            this.setProps({ hitTestBox: hitTestBoxGlobal.combine(elementBox).translate(-artboardGlobalBox.x, -artboardGlobalBox.y) });
+        }
+    }
+
+    private collapseHitTestBoxIfNeeded() {
+        if (!this.props.hitTestBox) {
+            return;
+        }
+
+        let artboardBox = this.getBoundingBoxGlobal();
+        let hitTestBox = artboardBox;
+        this.applyVisitor(element => {
+            if (element !== this) {
+                let elementBox = element.getBoundingBoxGlobal();
+                if (!artboardBox.containsRect(elementBox)) {
+                    hitTestBox = hitTestBox.combine(elementBox);
+                }
+            }
+        });
+
+        if (!artboardBox.containsRect(hitTestBox)) {
+            let newHitTestBox = hitTestBox.translate(-artboardBox.x, -artboardBox.y);
+            if (!newHitTestBox.equals(this.props.hitTestBox)) {
+                this.setProps({ hitTestBox: newHitTestBox });
+            }
+        }
+        else {
+            this.setProps({ hitTestBox: null });
+        }
     }
 
     primitiveRoot(): IPrimitiveRoot & UIElement {
@@ -646,6 +734,9 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     registerSetProps(element, props, oldProps, mode) {
         super.registerSetProps(element, props, oldProps, mode);
+
+        this.extendHitTestBoxIfNeeded(element);
+
         if (this.props.states.length !== 0) {
             this._recorder.trackSetProps("default", element.id(), props, oldProps);
         }
@@ -689,6 +780,9 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     registerInsert(parent, element, index, mode) {
         super.registerInsert(parent, element, index, mode);
+
+        this.extendHitTestBoxIfNeeded(element);
+
         if (this.props.states.length !== 0) {
             this._recorder.trackInsert(parent, element, index);
         }
@@ -792,6 +886,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         if (this._recorder) {
             this._recorder.initFromJSON(this.props.states);
         }
+
         return this;
     }
 
@@ -963,6 +1058,9 @@ PropertyMetadata.registerForType(Artboard, {
         options: {
             size: 3 / 4
         }
+    },
+    hitTestBox: {
+        defaultValue: null
     },
     prepareVisibility(element: Artboard) {
         let showAsStencil = element.props.type === ArtboardType.Symbol;

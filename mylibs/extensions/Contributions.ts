@@ -15,7 +15,10 @@ export class Contributions implements IContributions {
     addActions(actions: IAction[]) {
         actions.forEach(action => this.actionManager.registerActionInstance(action));
     }
-    addShortcuts(scheme: IShortcutScheme){
+    addShortcuts(scheme: IShortcutScheme | IShortcut[]){
+        if (Array.isArray(scheme)) {
+            scheme = { windows: scheme, mac: scheme };
+        }
         this.shortcutManager.mapScheme(scheme);
     }
     addContextMenuGroup(groupName: string, actionIds: string[], contextBarPosition?: ContextBarPosition) {

@@ -38,7 +38,6 @@ import ActionManager from "./ui/ActionManager";
 import ShortcutManager from "./ui/ShortcutManager";
 import ArtboardPage from "./ui/pages/ArtboardPage";
 import Artboard from "./framework/Artboard";
-import IconsInfo from "./ui/IconsInfo";
 import backend from "./backend";
 import logger from "./logger";
 import params from "./params";
@@ -117,6 +116,7 @@ class AppClass extends DataNode implements IApp {
     _currentTool: string;
 
     private _loaded: IEvent<void>;
+    private _clipArtboards: boolean = false;
 
     constructor() {
         super(true);
@@ -369,6 +369,10 @@ class AppClass extends DataNode implements IApp {
         }
 
         DataNode.prototype.propsPatched.apply(this, arguments);
+
+        if (propName === "userSettings") {
+            this._clipArtboards = this.getUserSetting("clipArtboards") || false;
+        }
     }
 
     updateStyle(type, styleId, props) {
@@ -540,7 +544,7 @@ class AppClass extends DataNode implements IApp {
         if (!page) {
             return;
         }
-        this.updating.raise();
+        this.beginUpdate();
 
         setNewActive = (setNewActive === undefined) ? true : setNewActive;
         var indexOfRemoved = this.pages.indexOf(page);
@@ -559,7 +563,7 @@ class AppClass extends DataNode implements IApp {
         this.removeChild(page);
         this.pageRemoved.raise(page);
 
-        this.updated.raise();
+        this.endUpdate();
 
         return -1;
     }
@@ -719,6 +723,14 @@ class AppClass extends DataNode implements IApp {
         return this.getUserSetting("snapTo") || UserSettings.snapTo;
     }
 
+    clipArtboards(value?: boolean) {
+        if (arguments.length !== 0) {
+            this.setUserSetting("clipArtboards", value);
+        }
+
+        return this._clipArtboards;
+    }
+
     getUserSetting(name: string) {
         var userId = backend.getUserId();
 
@@ -815,7 +827,7 @@ class AppClass extends DataNode implements IApp {
 
     run() {
         params.perf && performance.mark("App.run");
-        this.updating.raise();
+        this.beginUpdate();
 
         this.clear();
 
@@ -863,7 +875,7 @@ class AppClass extends DataNode implements IApp {
             }
 
             this.raiseLoaded();
-            this.updated.raise();
+            this.endUpdate();
 
             this.restoreWorkspaceState();
             this.releaseLoadRef();
@@ -1264,6 +1276,13 @@ class AppClass extends DataNode implements IApp {
 
     assignNewName(element: IUIElement) {
         this.activePage.nameProvider.assignNewName(element);
+    }
+
+    beginUpdate() {
+        this.updating.raise();
+    }
+    endUpdate() {
+        this.updated.raise();
     }
 }
 

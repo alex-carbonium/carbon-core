@@ -2,7 +2,6 @@ import All from "platform/All";
 import ActivityMonitor from "ActivityMonitor";
 import AutoSaveTimer from "AutoSaveTimer";
 import PersistentConnection from "server/PersistentConnection";
-//TODO: circular dependency Shape -> Frame -> FrameSource -> IconsInfo -> Platform -> Desktop -> svgParser -> Shape
 //import svgParser from "svg/SvgParser";
 import domUtil from "utils/dom";
 import AnimationGroup from "framework/animation/AnimationGroup";
@@ -220,7 +219,9 @@ var onViewBlurred = function () {
 
 var onWindowBlur = function () {
     Keyboard.reset();
-    App.Current.actionManager.invoke("cancel");
+    if (!DEBUG) {
+        App.Current.actionManager.invoke("cancel");
+    }
 }
 
 var onWindowResize = function () {

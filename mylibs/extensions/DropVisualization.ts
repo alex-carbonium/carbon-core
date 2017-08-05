@@ -504,17 +504,27 @@ export default class DropVisualization extends ExtensionBase {
     }
 
     static highlightElement(view, context, element, boundaryPath = false, highlighBrush = HighlightBrush) {
+        let scale = view.scale();
         context.save();
 
         context.beginPath();
         if (element.hasPath() && !boundaryPath) {
             element.applyViewMatrix(context);
             element.drawPath(context, element.width(), element.height());
-        } else {
-            element.drawBoundaryPath(context);
+            context.lineWidth = 2 / scale;
+        }
+        else {
+            GlobalMatrixModifier.pushPrependScale();
+            try {
+                context.scale(1 / scale, 1 / scale);
+                element.drawBoundaryPath(context);
+                context.lineWidth = 2;
+            }
+            finally {
+                GlobalMatrixModifier.pop();
+            }
         }
 
-        context.lineWidth = 2 / view.scale();
         Brush.stroke(highlighBrush, context);
         context.restore();
     }

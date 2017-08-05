@@ -15,6 +15,7 @@ declare module "carbon-rendering" {
         filter: string;
         globalCompositeOperation:string;
 
+        rect(x: number, y: number, width: number, height: number);
         clearRect(x: number, y: number, width: number, height: number);
 
         translate(x: number, y: number): void;
@@ -36,6 +37,8 @@ declare module "carbon-rendering" {
 
         resetTransform():void;
         drawImage(img_elem, dx_or_sx?:number, dy_or_sy?:number, dw_or_sw?:number, dh_or_sh?:number, dx?:number, dy?:number, dw?:number, dh?:number);
+
+        clip(): void;
 
         save(): void;
         restore(): void;

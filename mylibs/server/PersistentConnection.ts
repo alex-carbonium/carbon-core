@@ -3,6 +3,7 @@
  - notStarted: initial value
  - connecting: connection.start() called, must wait for result
  - connected: connected to server
+ - reconnecting: connection lost, reconnecting
  - stopping: requested to stop manually (due to idle timeout)
  - stopped: stopped (manually or connection lost)
  - waiting: waiting to reconnect after timeout
@@ -52,7 +53,7 @@ export default class PersistentConnection extends StateMachine<ConnectionState> 
 
         return this._startPromise
             .then(proxy => {
-                this.changeState({type: "connected"});
+                this.changeState({type: "connected", connectionTime: new Date()});
                 return proxy;
             })
             .catch(e => {
@@ -84,6 +85,7 @@ export default class PersistentConnection extends StateMachine<ConnectionState> 
             case "goingIdle":
             case "shuttingDown":
             case "stopped":
+            case "reconnecting":
                 return this.start();
             case "connecting":
                 return this._startPromise;
@@ -140,11 +142,12 @@ export default class PersistentConnection extends StateMachine<ConnectionState> 
             }
         });
 
-        connection.connectionSlow(function () {
+        connection.connectionSlow(() => {
             logger.trackEvent("ConnectionSlow");
         });
-        connection.reconnecting(function () {
+        connection.reconnecting(() => {
             logger.info("Reconnecting");
+            this.changeState({ type: "reconnecting" });
         });
 
         app.offlineModeChanged.bind(this, function () {
@@ -194,9 +197,15 @@ export default class PersistentConnection extends StateMachine<ConnectionState> 
                         }
                     });
             })
-            .then(() => this._hub);
+            .then(() => this._hub)
+            .catch(e => {
+                logger.error("Connection error", e);
+                this.start(this.backOffConnectionTimeout());
+            });
 
-        this.changeState({type: "waiting", timeout: timeout});
+        if (timeout) {
+            this.changeState({type: "waiting", timeout: timeout, startTime: new Date()});
+        }
 
         return this._restartPromise;
     }

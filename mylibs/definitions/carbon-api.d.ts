@@ -8,11 +8,12 @@ declare module "carbon-api" {
     export type ConnectionState =
         {type: "notStarted"} |
         {type: "connecting"} |
-        {type: "connected"} |
+        {type: "connected", connectionTime: Date} |
+        {type: "reconnecting"} |
         {type: "goingIdle"} |
         {type: "shuttingDown"} |
         {type: "stopped", idle: boolean} |
-        {type: "waiting", timeout: number};
+        {type: "waiting", timeout: number, startTime: Date};
 
     export interface IBackend {
         addUrlPath(...pathes: string[]): string;

@@ -42,7 +42,6 @@ declare module "carbon-core" {
     export var CommandManager:any;
     export var Invalidate: any;
     export var SvgParser: any;
-    export var IconsInfo: any;
     export var IconSetSpriteManager: any;
     export var UserSettings:any;
     export class Shape{}

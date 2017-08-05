@@ -153,20 +153,29 @@ class DraggingElement extends CompositeElement {
         super.propsUpdated(newProps, oldProps, ChangeMode.Self);
     }
 
+    /**
+     * Dropping between parents ensures that the matrix is changed while element is detached.
+     * This is needed for the both old and new parent to know "correct" element matrix.
+     * Used for extended artboard hit-test box.
+     */
     dropElementOn(event, newParent, element, phantom, index) {
         debug("drop %s on %s[%d]", element.displayName(), newParent.displayName(), index);
 
+        let gm = phantom.globalViewMatrix();
+
         if (newParent !== element.parent()) {
-            newParent.insert(element, index);
-        } else if(newParent.allowRearrange() && element.zOrder() !== index) {
-            newParent.changePosition(element, index);
+            element.parent().remove(element);
         }
 
-        // if (!newParent.autoPositionChildren()) {
-        //     //must set new coordinates after parent is changed so that global caches are updated properly
-        //     element.setTransform(newParent.globalMatrixToLocal(phantom.globalViewMatrix()));
-        // }
-    }
+        if (!newParent.autoPositionChildren()) {
+            element.setTransform(newParent.globalMatrixToLocal(gm));
+		}
+ 		if (newParent !== element.parent()) {
+            newParent.insert(element, index);
+        }
+        else if (newParent.allowRearrange() && element.zOrder() !== index) {
+            newParent.changePosition(element, index);
+        }    }
 
     altChanged(alt) {
         if(alt){

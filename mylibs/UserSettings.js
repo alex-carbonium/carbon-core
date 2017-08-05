@@ -53,6 +53,11 @@ var settings = {
         insertNewOnClickOutside: false
     },
 
+    image: {
+        emptyFill: "#DEDEDE",
+        emptyTextFill: "#444"
+    },
+
     path: {
         pointStroke: "#1592E6",
         editPathStroke: "rgba(100,100,255,0.5)",
