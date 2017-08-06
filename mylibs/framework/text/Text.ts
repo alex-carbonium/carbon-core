@@ -239,6 +239,9 @@ class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElem
         this.runtimeProps.engine = engine;
         return engine;
     }
+    resetEngine() {
+        delete this.runtimeProps.engine;
+    }
 
     minWidth() {
         if (this.runtimeProps.minWidth === undefined) {

@@ -2,6 +2,8 @@ import OpenType from "opentype.js";
 import WebFontLoader from "webfontloader";
 import FontManager from "./framework/text/font/fontmanager";
 import Invalidate from "./framework/Invalidate";
+import Text from "./framework/text/Text";
+import TextRender from "./framework/text/static/textrender";
 import OpenTypeFontInfo from "./framework/text/font/opentypefontinfo";
 import { FontWeight, FontStyle } from "carbon-basics";
 import backend from "./backend";
@@ -41,11 +43,8 @@ export default class OpenTypeFontManager extends FontManager implements IFontMan
                 throw new Error("Unsupported font " + metadata.name + " " + style + " " + weight);
             }
             var fontInfo = new OpenTypeFontInfo(metadata.name, style, weight, file.url, file.font);
-            if (fontInfo) {
-                this.add(fontInfo);
-                return this._browserLoad(fontInfo);
-            }
-            throw new Error("Unsupported font " + metadata.name + " " + style + " " + weight);
+            this.add(fontInfo);
+            return this._browserLoad(fontInfo);
         });
     }
 
@@ -74,7 +73,7 @@ export default class OpenTypeFontManager extends FontManager implements IFontMan
             if (metadata && !this._loadQueue.find(x => x.family === family && x.style === style && x.weight === weight)) {
                 var promise = this._loadInternal(family, style, weight)
                     .then(() => {
-                        Invalidate.request();
+                        this.resetTexts(family, style, weight);
                         var i = this._loadQueue.findIndex(x => x.family === family && x.style === style && x.weight === weight);
                         this._loadQueue.splice(i, 1);
                     });
@@ -84,6 +83,19 @@ export default class OpenTypeFontManager extends FontManager implements IFontMan
         }
 
         return font;
+    }
+
+    private resetTexts(family: string, style: FontStyle, weight: FontWeight) {
+        this.app.applyVisitorDepthFirst(element => {
+            if (element instanceof Text && element.props.font.family == family
+                && element.props.font.style === style
+                && element.props.font.weight === weight
+            ) {
+                element.resetEngine();
+            }
+        });
+        TextRender.clearCache();
+        Invalidate.request();
     }
 
     getPendingTasks(): Promise<boolean>[] {

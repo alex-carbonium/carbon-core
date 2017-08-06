@@ -62,7 +62,6 @@ var SelectFrame = require("framework/SelectFrame");
 var extensions = require("extensions/All");
 var domUtil = require("utils/dom");
 var Stopwatch = require("./Stopwatch");
-var WebFont = require("webfontloader");
 var PropertyMetadata = require("framework/PropertyMetadata");
 var Path = require("framework/Path");
 var CompoundPath = require("framework/CompoundPath");
@@ -420,6 +419,26 @@ class AppClass extends DataNode implements IApp {
 
     getFontMetadata(family) {
         return this.fontManager.getMetadata(family);
+    }
+
+    addDefaultFont() {
+        this.saveFontMetadata({
+            name: DefaultFont,
+            fonts: [
+                { style: 1, weight: 300, filename: "OpenSans-Light.ttf" },
+                { style: 2, weight: 300, filename: "OpenSans-LightItalic.ttf" },
+                { style: 1, weight: 400, filename: "OpenSans-Regular.ttf" },
+                { style: 2, weight: 400, filename: "OpenSans-Italic.ttf" },
+                { style: 1, weight: 600, filename: "OpenSans-Semibold.ttf" },
+                { style: 2, weight: 600, filename: "OpenSans-SemiboldItalic.ttf" },
+                { style: 1, weight: 700, filename: "OpenSans-Bold.ttf" },
+                { style: 2, weight: 700, filename: "OpenSans-BoldItalic.ttf" },
+                { style: 1, weight: 800, filename: "OpenSans-ExtraBold.ttf" },
+                { style: 2, weight: 800, filename: "OpenSans-ExtraBoldItalic.ttf" }
+            ],
+            subsets: ["menu", "cyrillic", "cyrillic-ext", "devanagari", "greek", "greek-ext", "latin", "latin-ext", "vietnamese"],
+            path: "apache/opensans"
+        });
     }
 
     syncBroken(value?) {
@@ -845,6 +864,8 @@ class AppClass extends DataNode implements IApp {
             params.perf && performance.measure("App.setupConnection", "App.setupConnection");
         }
 
+        this.addDefaultFont();
+
         var defaultFontLoaded = this.fontManager.loadDefaultFont();
         var dataLoaded = this.loadData();
         var importInitialResource = Promise.resolve();
@@ -1019,36 +1040,6 @@ class AppClass extends DataNode implements IApp {
 
             this.modeChanged.raise(value);
         }
-    }
-
-    //these should be in platform, but ImageRenderer does not have any platform
-    generateWebFontConfig(resolve, reject) {
-        var config = {
-            custom: {
-                families: []
-            },
-            timeout: 60 * 1000,
-            active() {
-                resolve();
-            },
-            inactive() {
-                var failedFonts = this._inactiveFonts;
-                if (!failedFonts) {
-                    failedFonts = this.custom.families;
-                }
-                reject(new Error("Could not load fonts: " + failedFonts.join(", ")));
-            },
-            fontinactive(familyName, fvd) {
-                if (!this._inactiveFonts) {
-                    this._inactiveFonts = [];
-                }
-                this._inactiveFonts.push(familyName + ":" + fvd);
-            }
-        };
-
-        config.custom.families = config.custom.families.concat(["CarbonIcons"]);
-
-        return config;
     }
 
     importExternalPage(data) {
@@ -1347,25 +1338,7 @@ PropertyMetadata.registerForType(AppClass, {
         defaultValue: []
     },
     fontMetadata: {
-        defaultValue: [
-            {
-                "name": DefaultFont,
-                "fonts": [
-                    { "style": 1, "weight": 300, "filename": "OpenSans-Light.ttf" },
-                    { "style": 2, "weight": 300, "filename": "OpenSans-LightItalic.ttf" },
-                    { "style": 1, "weight": 400, "filename": "OpenSans-Regular.ttf" },
-                    { "style": 2, "weight": 400, "filename": "OpenSans-Italic.ttf" },
-                    { "style": 1, "weight": 600, "filename": "OpenSans-Semibold.ttf" },
-                    { "style": 2, "weight": 600, "filename": "OpenSans-SemiboldItalic.ttf" },
-                    { "style": 1, "weight": 700, "filename": "OpenSans-Bold.ttf" },
-                    { "style": 2, "weight": 700, "filename": "OpenSans-BoldItalic.ttf" },
-                    { "style": 1, "weight": 800, "filename": "OpenSans-ExtraBold.ttf" },
-                    { "style": 2, "weight": 800, "filename": "OpenSans-ExtraBoldItalic.ttf" }
-                ],
-                "subsets": ["menu", "cyrillic", "cyrillic-ext", "devanagari", "greek", "greek-ext", "latin", "latin-ext", "vietnamese"],
-                "path": "apache/opensans"
-            }
-        ]
+        defaultValue: []
     }
 });
 
