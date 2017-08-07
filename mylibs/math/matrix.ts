@@ -1,7 +1,7 @@
 import Point from "./point";
 import LineSegment from "./lineSegment";
-import { IMatrix } from "carbon-geometry";
-import { ICoordinate } from "carbon-core";
+import { ICoordinate, IPooledObject, IMatrix } from "carbon-core";
+import ObjectPool from "../framework/ObjectPool";
 
 /**
  * @name Matrix
@@ -26,13 +26,15 @@ import { ICoordinate } from "carbon-core";
  * knowledge of the underlying matrix (as opposed to say simply performing
  * matrix multiplication).
  */
-class Matrix implements IMatrix {
+class Matrix implements IMatrix, IPooledObject {
     private _a: number;
     private _b: number;
     private _c: number;
     private _d: number;
     private _tx: number;
     private _ty: number;
+
+    private static pool = new ObjectPool<Matrix>(() => Matrix.create(), 50);
 
     /**
      * Creates a 2D affine transform.
@@ -110,6 +112,9 @@ class Matrix implements IMatrix {
         return this;
     }
 
+    free() {
+        Matrix.pool.free(this);
+    }
 
     /**
      * Concatenates this transform with a translate transformation.
@@ -696,6 +701,10 @@ class Matrix implements IMatrix {
 
     static create() {
         return new Matrix(1, 0, 0, 1, 0, 0);
+    }
+
+    static createPooled() {
+        return Matrix.pool.allocate();
     }
 
     get a() {

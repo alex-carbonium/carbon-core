@@ -2,11 +2,13 @@ import Brush from "./Brush";
 import backend from "../backend";
 import { Types, FloatingPointPrecision } from "./Defs";
 import Rect from "../math/rect";
+import Matrix from "../math/matrix";
 import { ContentSizing, ImageSource, ImageSourceType } from "carbon-model";
 import { IRect } from "carbon-geometry";
 import DataNode from "./DataNode";
 import { ChangeMode } from "carbon-core";
 import UserSettings from "../UserSettings";
+import GlobalMatrixModifier from "./GlobalMatrixModifier";
 
 export default class ImageSourceHelper {
     static draw(source: ImageSource, context, w, h, sourceElement, environment) {
@@ -166,34 +168,36 @@ export default class ImageSourceHelper {
         var element = runtimeProps.element;
 
         context.save();
-        var scaleX = w / element.width();
-        var scaleY = h / element.height();
 
-        context.scale(scaleX, scaleY);
+        var box = element.getBoundingBoxGlobal();
+        var scaleX = w / box.width;
+        var scaleY = h / box.height;
 
-        //context.translate(-box.x, -box.y);
-        if (element.shouldApplyViewMatrix()) {
-            element.globalViewMatrixInverted().applyToContext(context);
-        } else {
-            var box = element.getBoundingBox();
-            context.translate(-box.x, -box.y);
-            element.parent().globalViewMatrixInverted().applyToContext(context);
-        }
-        //sourceElement.viewMatrix().applyToContext(context);
+        var iconMatrix = Matrix.createPooled();
+        iconMatrix.scale(scaleX, scaleY);
+        iconMatrix.translate(-box.x, -box.y);
 
         try {
+            var box = element.getBoundingBoxGlobal();
+            //The global context needs to be replaced. Scenario:
+            // - export is made and global context already modified by offsetting the exported element
+            // - now we draw element from some arbitrary artboard and need to apply the transformation logic,
+            // but with different values
+            GlobalMatrixModifier.replace(m => m.prepended(iconMatrix));
+
             var oldFill = element.getDisplayPropValue('fill');
             var oldStroke = element.getDisplayPropValue('stroke');
             var oldStrokeWidth = element.getDisplayPropValue('strokeWidth');
             element.setDisplayProps({ fill: props.fill, stroke: props.stroke, strokeWidth: props.strokeWidth }, ChangeMode.Self);
-            element.draw.call(element, context, Object.assign({}, environment, { viewportRect: null }));
-        } finally {
+            element.draw(context, Object.assign({}, environment, { viewportRect: null }));
+        }
+        finally {
             element.setDisplayProps({ fill: oldFill, stroke: oldStroke, strokeWidth: oldStrokeWidth }, ChangeMode.Self);
+            GlobalMatrixModifier.restore();
+            iconMatrix.free();
         }
         context.restore();
     }
-
-
 
     private static resizeUrlImage(sizing: ContentSizing, newRect, runtimeProps) {
         if (runtimeProps.image) {

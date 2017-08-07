@@ -9,6 +9,11 @@ declare module "carbon-basics" {
         dispose(): void;
     }
 
+    export interface IPooledObject {
+        reset();
+        free();
+    }
+
     export interface IEventData {
         handled: boolean;
     }
