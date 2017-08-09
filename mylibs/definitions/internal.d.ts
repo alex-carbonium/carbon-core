@@ -66,6 +66,10 @@ declare module "carbon-model"{
         globalMatrixToLocal(m: any): any;
         getElementById(id:string):IUIElement|IContainer|null;
     }
+
+    export interface IText {
+        resetEngine(): void;
+    }
 }
 
 declare module "carbon-app"{

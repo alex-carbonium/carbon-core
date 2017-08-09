@@ -86,27 +86,29 @@ import { FontStyle, FontScript, UnderlineStyle } from "carbon-basics";
         return OpenTypeMeasure(text, style, additional);
     };
 
-    TextRender.createCachedMeasureText = function() {
-        var cache = {};
-        return function(text, style, additional) {
-            var key = style + '<>!&%' + text;
-            if (additional) {
-                key += '<>!&%' + JSON.stringify(additional);
-            }
-            var result = cache[key];
-            if (!result) {
-                result = TextRender.measureText(text, style, additional);
-                if (result) {
-                    cache[key] = result;
-                } else {
-                    result = null;
-                }
-            }
-            return result;
-        };
-    };
+    TextRender.cache = {};
 
-    TextRender.cachedMeasureText = TextRender.createCachedMeasureText();
+    TextRender.clearCache = function() {
+        TextRender.cache = {};
+    }
+
+    TextRender.cachedMeasureText = function(text, style, additional) {
+        var key = style + '<>!&%' + text;
+        if (additional) {
+            key += '<>!&%' + JSON.stringify(additional);
+        }
+        var result = TextRender.cache[key];
+        if (!result) {
+            result = TextRender.measureText(text, style, additional);
+            if (result) {
+                TextRender.cache[key] = result;
+            }
+            else {
+                result = null;
+            }
+        }
+        return result;
+    };
 
     TextRender.measure = function(str, formatting) {
         return TextRender.cachedMeasureText(str, TextRender.getRunStyle(formatting, true), TextRender.getAdditionalProps(formatting));
