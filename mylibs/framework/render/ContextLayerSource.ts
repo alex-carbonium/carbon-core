@@ -3,6 +3,7 @@ import { IContext } from "carbon-core";
 import Selection from "framework/SelectionModel";
 import Context from "./Context";
 import Invalidate from "framework/Invalidate";
+import NullContainer from "framework/NullContainer";
 
 export default class ContextLayerSource extends Context {
     constructor(private contexts: IContext[]) {
@@ -15,7 +16,7 @@ export default class ContextLayerSource extends Context {
         this.contextsStack = [];
         this.rootElement = null;
 
-        for(var i = 0; i < contexts.length; ++i) {
+        for (var i = 0; i < contexts.length; ++i) {
             (contexts[i] as any)._mask = 1 << i;
         }
 
@@ -25,13 +26,26 @@ export default class ContextLayerSource extends Context {
     onSelectionChanged() {
         let count = 0;
         let max = Selection.elements.length;
-        App.Current.activePage.applyVisitorTLR(e=>{
-            if(count && count === max) {
+        App.Current.activePage.applyVisitorTLR(e => {
+            if (count && count === max) {
                 e.runtimeProps.ctxl = 1 << 2;
             }
-            else if(Selection.isElementSelected(e)) {
-                e.runtimeProps.ctxl = 1 << 1;
+            else if (Selection.isElementSelected(e)) {
+                var parent = e.parent();
+                do {
+                    if (parent.opacity() < 1 || parent.runtimeProps.mask) {
+                        e = parent;
+                        break;
+                    }
+                    parent = parent.parent();
+                } while (parent && parent !== NullContainer);
+
+                e.applyVisitorTLR(c => {
+                    c.runtimeProps.ctxl = 1 << 1;
+                });
+
                 count++;
+                return true;
             } else {
                 e.runtimeProps.ctxl = 1 << 0;
             }
@@ -41,7 +55,7 @@ export default class ContextLayerSource extends Context {
     }
 
     dispose() {
-        if(this._selectionBinding) {
+        if (this._selectionBinding) {
             this._selectionBinding.dispose();
             this._selectionBinding = null;
         }
@@ -54,14 +68,14 @@ export default class ContextLayerSource extends Context {
         var ctxl = element.runtimeProps.ctxl;
         if (ctxl !== undefined) {
             this.contextsStack.push(this._context);
-            for(var i = 0; i < 3; ++ i) {
-                if(1<<i === ctxl){
+            for (var i = 0; i < 3; ++i) {
+                if (1 << i === ctxl) {
                     this._context = this._contexts[i];
                     break;
                 }
             }
         }
-        if((this._context._mask & this.layerRedrawMask) === 0) {
+        if ((this._context._mask & this.layerRedrawMask) === 0) {
             console.log(`element: ${element.name()} ignored`);
             return false;
         }

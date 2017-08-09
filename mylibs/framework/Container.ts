@@ -698,9 +698,12 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     }
     applyVisitorTLR(/*Visitor*/callback, useLogicalChildren?: boolean, parent?: any) {
         let stop = callback(this, parent);;
-        if (stop) {
+        if (stop === false) {
             return false;
+        } else if (stop === true) {
+            return;
         }
+
         for (let l = this.children.length, i = 0; i <l; ++i) {
             let item = this.children[i];
             if (item.applyVisitorTLR(callback, useLogicalChildren, this) === false) {
