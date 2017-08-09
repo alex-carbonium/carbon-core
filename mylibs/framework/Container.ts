@@ -281,8 +281,23 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
             return;
         }
 
+        if(!context.beginElement(this)) {
+            context.save();
+
+            if (this.children) {
+                let items = this.children;
+                for (let i = 0; i < items.length; ++i) {
+                    let child = items[i];
+                    ExtensionPoint.invoke(child, 'draw', [context, environment]);
+                }
+            }
+
+            context.restore();
+            context.endElement(this)
+            return;
+        }
         context.save();
-        context.globalAlpha = context.globalAlpha * this.opacity();
+        context.globalAlpha = this.opacity();
 
         this.applyViewMatrix(context);
 
@@ -296,9 +311,11 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
             this.clip(context);
             this.drawSelf(context, w, h, environment);
         });
+
         pipeline.done();
 
         context.restore();
+        context.endElement(this);
 
         if (params.perf) {
             performance.measure(markName, markName);
@@ -502,7 +519,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
         child.parent(this);
 
-        this.invalidate();
+        this.invalidate(this.runtimeProps.ctxl);
     }
 
     flatten() {
@@ -532,7 +549,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     }
     changePosition(/*UIElement*/element, /*int*/index, mode) {
         this.changeChildPosition(element, index, mode);
-        this.invalidate();
+        this.invalidate(this.runtimeProps.ctxl);
     }
     remove(/*UIElement*/element, mode?: ChangeMode) {
         if (element.removing() === false) {
@@ -544,7 +561,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
         element.removed(mode);
 
-        this.invalidate();
+        this.invalidate(this.runtimeProps.ctxl);
 
         return idx;
     }
@@ -678,6 +695,21 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
             return callback(this, parent);
         }
         return false;
+    }
+    applyVisitorTLR(/*Visitor*/callback, useLogicalChildren?: boolean, parent?: any) {
+        let stop = callback(this, parent);;
+        if (stop) {
+            return false;
+        }
+        for (let l = this.children.length, i = 0; i <l; ++i) {
+            let item = this.children[i];
+            if (item.applyVisitorTLR(callback, useLogicalChildren, this) === false) {
+                stop = true;
+                break;
+            }
+        }
+
+        return !stop;
     }
     findActualParentForAncestorById(elementId) {
         let realParrent = null;

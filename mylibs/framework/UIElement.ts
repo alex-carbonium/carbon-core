@@ -69,10 +69,14 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
         this.parent(NullContainer);
     }
-    invalidate() {
+    invalidate(layerMask?) {
+        if(layerMask === undefined) {
+            layerMask = this.runtimeProps.ctxl;
+        }
+
         let parent = this.parent();
         if (parent) {
-            parent.invalidate();
+            parent.invalidate(layerMask);
         }
     }
     resetRuntimeProps() {
@@ -170,11 +174,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
         //raise events after all caches are updated
         super.propsUpdated.apply(this, arguments);
-        this.invalidate();
+        this.invalidate(this.runtimeProps.ctxl);
     }
     propsPatched(patchType, propName, item) {
         super.propsPatched.apply(this, arguments);
-        this.invalidate();
+        this.invalidate(this.runtimeProps.ctxl);
     }
 
     selectLayoutProps(global?: boolean): Partial<IUIElementProps> {
@@ -888,8 +892,13 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return;
         }
 
+        if(!context.beginElement(this)) {
+            context.endElement(this);
+            return;
+        }
+
         context.save();
-        context.globalAlpha = context.globalAlpha * this.opacity();
+        context.globalAlpha = this.opacity();
 
         this.applyViewMatrix(context);
 
@@ -898,6 +907,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
         context.restore();
 
+        context.endElement(this);
         // this.drawDecorators(context, w, h, environment);
 
         if (params.perf) {
@@ -1020,6 +1030,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     trackPropertyState(name) {
         return null;
     }
+
     clip(context) {
         if (this.clipSelf()) {
             GlobalMatrixModifier.push(m => this.shouldApplyViewMatrix() ? Matrix.Identity : m);
@@ -1437,6 +1448,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return "UIElement";
     }
     applyVisitor(callback, useLogicalChildren?: boolean, parent?: any) {
+        return callback(this);
+    }
+    applyVisitorTLR(callback, useLogicalChildren?: boolean, parent?: any) {
         return callback(this);
     }
     canAccept(elements, autoInsert, allowMoveInOut?: boolean) {

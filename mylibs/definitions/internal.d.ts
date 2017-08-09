@@ -124,7 +124,7 @@ declare module "carbon-app"{
         ensureViewState(viewState: ViewState);
 
         setup(params: any);
-        attachToDOM(context, upperContext, isolationContext, container, redrawCallback, cancelCallback, scheduledCallback);
+        attachToDOM(contexts:IContext[], upperContext:IContext, isolationContext:IContext, container, redrawCallback, cancelCallback, scheduledCallback);
         detach();
 
         viewportSizeChanged(size: ISize);

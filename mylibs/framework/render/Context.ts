@@ -24,6 +24,18 @@ export default class Context implements IContext {
         this._relativeOffsetY = value;
     }
 
+    beginElement(element) {
+        return true;
+    }
+
+    endElement(element) {
+
+    }
+
+    done() {
+
+    }
+
     resetTransform() {
         this._context.setTransform(1, 0, 0, 1, this._relativeOffsetX || 0, this._relativeOffsetY || 0);
     }
@@ -787,6 +799,10 @@ export default class Context implements IContext {
 
     createPattern(image, repetition) {
         this._context.createPattern.apply(this._context, arguments);
+    }
+
+    clear() {
+        this.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
     clearRect(x, y, w, h) {

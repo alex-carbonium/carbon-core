@@ -1,6 +1,5 @@
 import EventHelper from "./EventHelper";
 import SelectComposite from "./SelectComposite";
-import Invalidate from "./Invalidate";
 import { ViewTool } from "./Defs";
 import UserSettings from "../UserSettings";
 import Environment from "../environment";
@@ -10,7 +9,6 @@ let debug = require("DebugUtil")("carb:selection");
 
 function lockUnlockGroups(newSelectedElements) {
     let newUnlocked = [];
-    let invalidate = false;
 
     //unlock parents
     for (let i = 0; i < newSelectedElements.length; i++) {
@@ -19,10 +17,10 @@ function lockUnlockGroups(newSelectedElements) {
             let unlocked = this._unlockedContainers.indexOf(el) !== -1;
             if (!unlocked) {
                 unlocked = el.unlockGroup();
-                invalidate = true;
             }
             if (unlocked) {
                 newUnlocked.push(el);
+                el.invalidate();
             }
 
             el = el.parent();
@@ -40,7 +38,7 @@ function lockUnlockGroups(newSelectedElements) {
         let c = this._unlockedContainers[i];
         if (c.lockGroup && newUnlocked.indexOf(c) === -1) {
             c.lockGroup();
-            invalidate = true;
+            c.invalidate();
         }
     }
     this._unlockedContainers = newUnlocked;
@@ -48,10 +46,6 @@ function lockUnlockGroups(newSelectedElements) {
     if (newSelectedElements.length === 1 && newSelectedElements[0].activeGroup) {
         newSelectedElements[0].activeGroup(!UserSettings.group.editInIsolationMode);
         this._activeGroup = newSelectedElements[0];
-    }
-
-    if (invalidate) {
-        Invalidate.request();
     }
 }
 function onselect(rect) {

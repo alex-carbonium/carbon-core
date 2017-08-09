@@ -200,7 +200,7 @@ export default class CommonPropsManager {
             if (this._origPropValues.length) {
                 var origProps = this._origPropValues[i];
                 Object.assign(element.props, origProps);
-                element.invalidate();
+                element.invalidate(element.runtimeProps.ctxl);
             }
         }
         this._origPropValues.length = 0;

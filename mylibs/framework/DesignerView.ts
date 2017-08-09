@@ -1,4 +1,4 @@
-import {areRectsIntersecting} from "math/math";
+import { areRectsIntersecting } from "math/math";
 import Font from "./Font";
 import Brush from "./Brush";
 import ViewBase from "framework/ViewBase";
@@ -8,6 +8,7 @@ import Invalidate from "framework/Invalidate";
 import PixelGrid from "framework/render/PixelGrid"
 import { IsolationLayer } from "framework/IsolationLayer";
 import { LayerTypes } from "carbon-app";
+import { IContext } from "carbon-core";
 
 function setupLayers(Layer) {
     this.interactionLayer = new Layer();
@@ -45,12 +46,12 @@ class DesignerView extends ViewBase {
         setupLayers.call(this, deps.Layer);
     }
 
-    attachToDOM(context, upperContext, isolationContext, viewContainerElement, requestRedrawCallback, cancelRedrawCallback, renderingScheduledCallback) {
+    attachToDOM(contexts:IContext[], upperContext:IContext, isolationContext:IContext,viewContainerElement, requestRedrawCallback, cancelRedrawCallback, renderingScheduledCallback) {
         this.viewContainerElement = viewContainerElement; // parent div element
         this.upperContext = upperContext;
         this.isolationContext = isolationContext;
 
-        this.setupRendering(context, requestRedrawCallback, cancelRedrawCallback, renderingScheduledCallback);
+        this.setupRendering(contexts, requestRedrawCallback, cancelRedrawCallback, renderingScheduledCallback);
 
         this._cursorChangedToken = Cursor.changed.bind(this, this.updateCursor);
         this._invalidateRequestedToken = Invalidate.requested.bind(this, this.invalidate);
@@ -72,16 +73,16 @@ class DesignerView extends ViewBase {
         }
     }
 
-    draw(){
+    draw() {
         super.draw.apply(this, arguments);
-        if(this.showPixelGrid()) {
+        if (this.showPixelGrid()) {
             this.pixelGrid.updateGrid();
         }
     }
 
     showPixelGrid(value?) {
         if (value !== undefined) {
-            if(this._pixelGrid !== value && !value){
+            if (this._pixelGrid !== value && !value) {
                 this.pixelGrid.clear();
             }
             this._pixelGrid = value;
@@ -118,10 +119,10 @@ class DesignerView extends ViewBase {
 
     updateCursor(value, oldValue) {
         if (this.viewContainerElement) {
-            if (oldValue){
+            if (oldValue) {
                 this.viewContainerElement.classList.remove("c-" + oldValue);
             }
-            if (value){
+            if (value) {
                 this.viewContainerElement.classList.add("c-" + value);
             }
         }

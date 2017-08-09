@@ -189,6 +189,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         Environment.view.interactionLayer.add(this._selectFrame);
         this._selectFrame.setProps({ visible: false });
         this.path.invalidate();
+        Invalidate.requestInteractionOnly();
     }
 
     _finalizePath() {
@@ -215,6 +216,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         Environment.view.unregisterForLayerDraw(LayerTypes.Interaction, this);
         Environment.controller.releaseMouse(this);
         this.path.invalidate();
+        Invalidate.requestInteractionOnly();
 
         this._clearShortSegments();
 
@@ -377,6 +379,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
 
                 this._pointOnPath = null;
                 this.path.invalidate();
+                Invalidate.requestInteractionOnly();
             }
             else {
                 this._bendingData = path.calculateOriginalBendingData(this._pointOnPath);
@@ -500,7 +503,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
                 }
             }
             this._saveOnMouseUp = true;
-            Invalidate.request();
+            path.invalidate();
             event.handled = true;
         }
 
@@ -635,7 +638,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
             this.path.runtimeProps.currentPointType = pt.type;
             this.path._refreshComputedProps();
 
-            Invalidate.request();
+            this.path.invalidate();
 
             return;
         }
@@ -818,7 +821,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         this.path.insertPointAtIndex(pt, this.path.points.length);
 
         SnapController.calculateSnappingPointsForPath(this.path);
-        Invalidate.request();
+        this.path.invalidate();
 
         if (!this._startSegmentPoint) {
             this._startSegmentPoint = pt;
@@ -841,7 +844,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
             this._originalPointBeforeMove = clone(pt);
         }
 
-        Invalidate.request();
+        this.path.invalidate();
     }
 
     _closeCurrentPath(pt) {

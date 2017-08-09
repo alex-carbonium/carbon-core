@@ -11,6 +11,7 @@ import AnimationGroup from "./animation/AnimationGroup";
 import Context from "./render/Context";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
 import ExtensionPoint from "./ExtensionPoint";
+import ContextLayerSource from "framework/render/ContextLayerSource";
 
 var Stopwatch = require("../Stopwatch");
 var debug = require("DebugUtil")("carb:view");
@@ -99,10 +100,10 @@ export default class ViewBase { //TODO: implement IView
         }
     }
 
-    _drawLayer(layer, context, environment) {
+    _drawLayer(layer, context, environment, skipSetup = false) {
         this.stopwatch.start();
         context.save();
-        setupLayer.call(this, layer, context);
+        !skipSetup && setupLayer.call(this, layer, context);
 
         ExtensionPoint.invoke(layer, 'draw', [context, environment]);
 
@@ -203,8 +204,9 @@ export default class ViewBase { //TODO: implement IView
         return this._renderingScheduledCallback && this._renderingScheduledCallback();
     }
 
-    setupRendering(context, requestRedrawCallback, cancelRedrawCallback, renderingScheduledCallback) {
-        this.context = context;
+    setupRendering(contexts, requestRedrawCallback, cancelRedrawCallback, renderingScheduledCallback) {
+        this.context = new ContextLayerSource(contexts);
+        this.contexts = contexts;
 
         this._requestRedrawCallback = requestRedrawCallback;
         this._renderingScheduledCallback = renderingScheduledCallback;
@@ -262,12 +264,23 @@ export default class ViewBase { //TODO: implement IView
                 this.setInitialPagePlace(this._page);
             }
 
+            for(let i = 0; i < 3; ++i) {
+                this.contexts[i].save();
+                if(this._page.layerRedrawMask === null || this._page.layerRedrawMask & (1 << i)) {
+                    setupLayer.call(this, this._page, this.contexts[i]);
+                }
+            }
+
             var scale = this.scale();
             if (scale > 1 && this.showPixels()) {
                 this._drawLayerPixelsVisible(scale);
             } else {
                 let env = this._getEnv(this._page, true);
-                this._drawLayer(this._page, this.context, env);
+                this._drawLayer(this._page, this.context, env, true);
+            }
+
+            for(let i = 0; i < 3; ++i) {
+                this.contexts[i].restore();
             }
         }
 
@@ -500,17 +513,16 @@ export default class ViewBase { //TODO: implement IView
         };
     }
 
-    invalidate(layerType?, rect?) {
-        //rect = rect || this.viewportRect();
+    invalidate(layerType?) {
         if (layerType === undefined) {
             for (var i = 0; i < this._layers.length; i++) {
-                this._layers[i].invalidate(false, rect);
+                this._layers[i].invalidate(0xffff);
             }
         }
         else {
             var layer = this._layers.find(l => l.type === layerType);
             if (layer) {
-                layer.invalidate(false, rect);
+                layer.invalidate(0xffff);
             }
         }
         this.requestRedraw();

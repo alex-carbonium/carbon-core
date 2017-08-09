@@ -40,7 +40,7 @@ export default class Node extends All {
     //this method is no longer called from the app
     createView() {
         this.view = view;
-        this.view.attachToDOM(this.context, this.upperContext, null, null, dummy, dummy);
+        this.view.attachToDOM([this.context], this.upperContext, null, null, dummy, dummy);
         this.view.resize({ x: 0, y: 0, width: 1024, height: 768 });
         return this.view;
     }

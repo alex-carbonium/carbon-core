@@ -12,9 +12,11 @@ import Context from "../render/Context";
 import ExtensionPoint from "../ExtensionPoint";
 import { IApp, IView, IRenderLoop } from "carbon-core";
 
+
 export default class RenderLoop implements IRenderLoop {
     private _contextScale: number;
 
+    private _contexts: Context[];
     private _context: Context;
     private _upperContext: Context;
     private _gridContext: Context;
@@ -59,13 +61,13 @@ export default class RenderLoop implements IRenderLoop {
             app.platform.attachEvents(this.viewContainer);
             Keyboard.attach(document.body);
 
-            this._view.attachToDOM(this._context, this._upperContext, this._isolationContext, this.viewContainer, this.redrawCallback, this.cancelRedrawCallback, this.renderingScheduledCallback);
-            this._view.setup({Layer, SelectComposite, DraggingElement, SelectFrame});
+            this._view.attachToDOM(this._contexts, this._upperContext, this._isolationContext, this.viewContainer, this.redrawCallback, this.cancelRedrawCallback, this.renderingScheduledCallback);
+            this._view.setup({ Layer, SelectComposite, DraggingElement, SelectFrame });
             this._view.setActivePage(app.activePage);
             this._view.gridContext = this._gridContext;
             this._view.contextScale = this._contextScale;
 
-            var controller = new DesignerController(app, this._view, {SelectComposite, DraggingElement, SelectFrame});
+            var controller = new DesignerController(app, this._view, { SelectComposite, DraggingElement, SelectFrame });
 
             Environment.set(this._view, controller);
             Clipboard.attach(app);
@@ -102,7 +104,17 @@ export default class RenderLoop implements IRenderLoop {
         this._upperContext = this.addCanvas(viewport, "app_upperCanvas", append);
         this._isolationContext = this.addCanvas(viewport, "isolation_canvas", append);
         this._gridContext = this.addCanvas(viewport, "grid_canvas", append);
-        this._context = this.addCanvas(viewport, "app_canvas", append);
+        this._contexts = [];
+        var c3 = this.addCanvas(viewport, "app_canvas3", append);
+        var c2 = this.addCanvas(viewport, "app_canvas2", append);
+
+        this._context = this.addCanvas(viewport, "app_canvas1", append);
+        this._contexts.push(this._context);
+        this._contexts.push(c2);
+        this._contexts.push(c3);
+        this._contexts.push(this._upperContext);
+        this._contexts.push(this._isolationContext);
+        this._contexts.push(this._gridContext);
     }
 
     private addCanvas(parent: HTMLElement, id: string, append: boolean) {
@@ -192,10 +204,8 @@ export default class RenderLoop implements IRenderLoop {
         }
         var view = this._view;
         var viewport = this._viewport;
-        var canvas = this._context.canvas;
-        var upperCanvas = this._upperContext.canvas;
-        var gridCanvas = this._gridContext.canvas;
-        var isolationCanvas = this._isolationContext.canvas;
+        var context = this._contexts[0];
+        var canvas = context.canvas;
 
         this._recalculateContextScale();
 
@@ -205,25 +215,21 @@ export default class RenderLoop implements IRenderLoop {
             , resized = false;
 
         if (canvas.width !== (0 | (viewWidth * this._contextScale))) {
-            canvas.width = viewWidth * this._contextScale;
-            canvas.style.width = viewWidth + "px";
-            upperCanvas.width = viewWidth * this._contextScale;
-            upperCanvas.style.width = viewWidth + "px";
-            gridCanvas.width = viewWidth * this._contextScale;
-            gridCanvas.style.width = viewWidth + "px";
-            isolationCanvas.width = viewWidth * this._contextScale;
-            isolationCanvas.style.width = viewWidth + "px";
+            for (let ctx of this._contexts) {
+                let canvas = ctx.canvas;
+                ctx.width = viewWidth * this._contextScale;
+                canvas.style.width = viewWidth + "px";
+            }
+
             resized = true;
         }
+
         if (canvas.height !== (0 | (viewHeight * this._contextScale))) {
-            canvas.height = viewHeight * this._contextScale;
-            canvas.style.height = viewHeight + "px";
-            upperCanvas.height = viewHeight * this._contextScale;
-            upperCanvas.style.height = viewHeight + "px";
-            gridCanvas.height = viewHeight * this._contextScale;
-            gridCanvas.style.height = viewHeight + "px";
-            isolationCanvas.height = viewHeight * this._contextScale;
-            isolationCanvas.style.height = viewHeight + "px";
+            for (let ctx of this._contexts) {
+                let canvas = ctx.canvas;
+                ctx.height = viewHeight * this._contextScale;
+                canvas.style.height = viewHeight + "px";
+            }
             resized = true;
         }
 
@@ -231,7 +237,7 @@ export default class RenderLoop implements IRenderLoop {
 
         if (resized) {
             if (viewWidth && viewHeight) {
-                view.viewportSizeChanged({width: viewWidth, height: viewHeight});
+                view.viewportSizeChanged({ width: viewWidth, height: viewHeight });
             }
 
             view.invalidate();

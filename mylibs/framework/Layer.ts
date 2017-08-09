@@ -24,7 +24,7 @@ var clearChangedAreas = function (context) {
     //             context.clearRect(rect.x - 1, rect.y - 1, rect.width + 2, rect.height + 2);
     //         });
     //     } else {
-             context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+    context.clear();
     //     }
     // }
 
@@ -70,6 +70,7 @@ class Layer extends Container implements ILayer {
         this.canDrag(false);
 
         this._hitFirstElements = [];
+        this.layerRedrawMask = null;
     }
 
     registerHitFirstElement(element) {
@@ -127,28 +128,35 @@ class Layer extends Container implements ILayer {
         return null;
     }
 
+    draw(context, environment) {
+        context.layerRedrawMask = this.layerRedrawMask;
+        super.draw(context, environment);
+        this.invalidateRequired = false;
+        this._invalidateAreas = [];
+        this.layerRedrawMask = null;
+    }
+
     drawSelf(context, w, h, environment) {
         if (this.invalidateRequired) {
             super.drawSelf.apply(this, arguments);
             this.ondraw.raise(context, environment);
-            this.invalidateRequired = false;
-            this._invalidateAreas = [];
         }
     }
 
-    invalidate(all?, rect?) {
+    invalidate(layerMask?) {
         this.invalidateRequired = true;
-        if (false && rect) {
-            //addInvalidateRect.call(this, rect);
-        }
+
         var view = this._view;
         if (view) {
-            if (all) {
-                view.invalidate(undefined, rect);
+            if (layerMask !== undefined) {
+                if (this.layerRedrawMask === null) {
+                    this.layerRedrawMask = layerMask;
+                } else {
+                    this.layerRedrawMask = this.layerRedrawMask | (layerMask);
+                }
             }
-            else {
-                view.requestRedraw();
-            }
+
+            view.requestRedraw();
         }
     }
 
@@ -190,7 +198,7 @@ class Layer extends Container implements ILayer {
         var pos = el.global2local(eventData);
         pos.roundMutable();
 
-        return {target: el, position: pos};
+        return { target: el, position: pos };
     }
 
     getElementsInRect(rect) {
@@ -201,14 +209,14 @@ class Layer extends Container implements ILayer {
         return selection;
     }
 
-    _collectDescendantsInRect(container: IContainer, rect: IRect, selection){
-        for (var i = 0; i < container.children.length; i++){
+    _collectDescendantsInRect(container: IContainer, rect: IRect, selection) {
+        for (var i = 0; i < container.children.length; i++) {
             var element = container.children[i];
-            if (element.hitTestGlobalRect(rect)){
-                if (!element['multiselectTransparent']){
+            if (element.hitTestGlobalRect(rect)) {
+                if (!element['multiselectTransparent']) {
                     selection.push(element);
                 }
-                else if (element instanceof Container){
+                else if (element instanceof Container) {
                     this._collectDescendantsInRect(element as IContainer, rect, selection);
                 }
             }
@@ -237,15 +245,15 @@ class Layer extends Container implements ILayer {
         return [];
     }
 
-    activate(){
+    activate() {
     }
 
-    deactivate(){
+    deactivate() {
     }
 
-    canChangeNodeTree(){
+    canChangeNodeTree() {
         return false;
     }
 }
 
-export default  Layer;
+export default Layer;

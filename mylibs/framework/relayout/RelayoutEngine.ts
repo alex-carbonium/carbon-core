@@ -116,7 +116,7 @@ class RelayoutEngine {
             app.changed.raise(this.allPrimitives.slice());
 
             app.relayoutFinished.raise();
-            Invalidate.request();
+          //  Invalidate.request();
         }
     }
 
