@@ -1,6 +1,7 @@
-import { ICoordinate } from "carbon-geometry";
-
 declare module "carbon-basics" {
+    import { ICoordinate } from "carbon-geometry";
+    import { AppSettings } from "carbon-core";
+
     export interface IConstructor<T> {
         new (): T;
     }
@@ -191,6 +192,7 @@ declare module "carbon-basics" {
 
     export const enum PrimitiveType {
         None = 0,
+        //deferred
         DataNodeAdd = 1,
         DataNodeRemove = 2,
         DataNodeChange = 3,
@@ -198,7 +200,10 @@ declare module "carbon-basics" {
         DataNodeChangePosition = 5,
         DataNodePatchProps = 6,
         Selection = 7,
-        View = 8
+        View = 8,
+
+        //immediate
+        ProjectSettingsChange = 100
     }
 
     export interface IPrimitive {
@@ -220,7 +225,9 @@ declare module "carbon-basics" {
         IPrimitive & { type: PrimitiveType.DataNodeChange, node: IJsonNode } |
         IPrimitive & { type: PrimitiveType.DataNodeChangePosition, childId: string, newPosition: number } |
         IPrimitive & { type: PrimitiveType.Selection, userId: string, selection: string[] } |
-        IPrimitive & { type: PrimitiveType.View, oldState: ViewState, newState: ViewState };
+        IPrimitive & { type: PrimitiveType.View, oldState: ViewState, newState: ViewState } |
+
+        IPrimitive & { type: PrimitiveType.ProjectSettingsChange, companyId: string, projectId: string, settings: AppSettings };
 
 
     export type NodePrimitivesMap = { [nodeId: string]: IPrimitive[] };

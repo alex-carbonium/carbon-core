@@ -1,6 +1,6 @@
 import DataNode from "../DataNode";
 import backend from "../../backend";
-import { PrimitiveType, IPrimitive, PrimitiveKind, IJsonNode, IDataNode } from "carbon-core";
+import { PrimitiveType, IPrimitive, PrimitiveKind, IJsonNode, IDataNode, AppSettings } from "carbon-core";
 import { createUUID } from "../../util";
 
 class Primitive {
@@ -204,6 +204,21 @@ class Primitive {
                 childId: element.id(),
                 newPosition: oldPosition
             }
+        }
+
+        return res;
+    }
+
+    projectSettingsChange(companyId: string, projectId: string, settings: AppSettings) {
+        var res: PrimitiveKind = {
+            id: createUUID(),
+            sessionId: backend.sessionId,
+            time: new Date().getTime(),
+            type: PrimitiveType.ProjectSettingsChange,
+            path: [],
+            companyId: companyId,
+            projectId: projectId,
+            settings
         }
 
         return res;

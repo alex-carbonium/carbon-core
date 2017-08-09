@@ -54,7 +54,6 @@ export default class AutoSave extends ExtensionBase {
 
     private initIfEmptyProject() {
         if (this._app.isEmpty()) {
-            this._app.name("My awesome app"); //initial name should be in sync with actor code
             this._app.addNewPage();
             this._app.state.isDirty(false);
         }

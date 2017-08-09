@@ -12,6 +12,7 @@ declare module "carbon-model" {
         props: TProps;
 
         parent(value?: IDataNode): IDataNode;
+        primitiveRootKey(): string;
 
         prepareProps(changes: Partial<TProps>);
         prepareAndSetProps(props: Partial<TProps>, mode?);

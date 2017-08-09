@@ -112,7 +112,7 @@ export default class ContextMenuBuilder {
             } else {
                 items.push({
                     name: "@repeater.group",
-                    icon: "ico--repeater",
+                    icon: "ico-repeater",
                     contextBar: ContextBarPosition.Left,
                     callback: () => {
                         actionManager.invoke("groupInRepeater")

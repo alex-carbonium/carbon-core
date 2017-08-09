@@ -42,7 +42,7 @@ import backend from "./backend";
 import logger from "./logger";
 import params from "./params";
 import ArtboardFrame from "framework/ArtboardFrame";
-import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitive, IPrimitiveRoot, ViewState, IJsonNode, IFontManager, IStyleManager, StyleType, IArtboard, FontMetadata } from "carbon-core";
+import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitive, IPrimitiveRoot, ViewState, IJsonNode, IFontManager, IStyleManager, StyleType, IArtboard, FontMetadata, AppSettings } from "carbon-core";
 import { Contributions } from "./extensions/Contributions";
 import { getBuiltInExtensions } from "./extensions/BuiltInExtensions";
 import Command from "./framework/commands/Command";
@@ -103,6 +103,7 @@ class AppClass extends DataNode implements IApp {
     changedLocally: IEvent<IPrimitive[]>;
     relayoutFinished: IEvent<void>;
     deferredChange: IEvent<any>;
+    settingsChanged = EventHelper.createEvent<AppSettings>();
 
     updating = EventHelper.createEvent<void>();
     updated = EventHelper.createEvent<void>();
@@ -318,7 +319,7 @@ class AppClass extends DataNode implements IApp {
         this.runtimeProps = {};
     }
 
-    propsUpdated(props, oldProps, mode) {
+    propsUpdated(props: Readonly<IAppProps>, oldProps, mode) {
         if (props.layoutGridStyle) {
             LayoutGridLines.setDefaultStrokeHsl(props.layoutGridStyle.hsl);
             LayoutGridLines.setDefaultOpacity(props.layoutGridStyle.opacity);
@@ -334,6 +335,22 @@ class AppClass extends DataNode implements IApp {
         if (mode === ChangeMode.Self && props.defaultShapeSettings) {
             //if restoring from primitives or from server data
             ObjectFactory.updatePropsWithPrototype(props.defaultShapeSettings);
+        }
+
+        let settingsChanged = props.hasOwnProperty("name") || props.hasOwnProperty("avatar");
+        if (settingsChanged) {
+            let settings = {
+                name: this.props.name, //important to use this.props to have a full object
+                avatar: this.props.avatar
+            };
+
+            if (mode !== ChangeMode.Self) {
+                let primitive = Primitive.projectSettingsChange(this.companyId(), this.id(), settings);
+                ModelStateListener.track(this, primitive);
+                Invalidate.request();
+            }
+
+            this.settingsChanged.raise(settings);
         }
 
         DataNode.prototype.propsUpdated.apply(this, arguments);
@@ -797,7 +814,7 @@ class AppClass extends DataNode implements IApp {
         return this.props.showFrames;
     }
 
-    companyId(value) {
+    companyId(value?) {
         if (arguments.length === 1) {
             this._companyId = value;
         }
@@ -1339,6 +1356,12 @@ PropertyMetadata.registerForType(AppClass, {
     },
     fontMetadata: {
         defaultValue: []
+    },
+    name: {
+        defaultValue: "My carbon design"
+    },
+    avatar: {
+        defaultValue: null
     }
 });
 

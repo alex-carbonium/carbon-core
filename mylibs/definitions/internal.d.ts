@@ -34,7 +34,6 @@ declare module "carbon-model"{
 
     export interface IDataNode {
         primitivePath():any;
-        primitiveRootKey(): string;
     }
 
     export interface IUIElement{
@@ -162,7 +161,7 @@ declare module "carbon-model"{
         allowArtboardSelection(value?): boolean;
     }
 
-    export interface IPrimitiveRoot{
+    export interface IPrimitiveRoot {
         registerSetProps(element, props, oldProps, mode);
         registerPatchProps(element, patchType, propName, item, mode);
         registerDelete(parent, element, index, mode)

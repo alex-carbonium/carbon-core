@@ -1,7 +1,7 @@
 import RelayoutQueue from "./RelayoutQueue";
 import ModelStateListener from "./ModelStateListener";
 import PrimitiveHandler from "../sync/Primitive_Handlers";
-import { NodePrimitivesMap, IApp, IPrimitive, ViewState } from "carbon-core";
+import { NodePrimitivesMap, IApp, IPrimitive, ViewState, IPrimitiveRoot } from "carbon-core";
 import backend from "../../backend";
 import params from "../../params";
 import CommandManager from "../commands/CommandManager";
