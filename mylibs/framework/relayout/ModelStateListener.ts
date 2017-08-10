@@ -1,5 +1,5 @@
 import Primitive from "../sync/Primitive";
-import { PatchType, IDataNode, IPrimitive } from "carbon-core";
+import { PatchType, IDataNode, IPrimitive, IPrimitiveRoot } from "carbon-core";
 
 let lastSelection = {};
 
@@ -150,6 +150,15 @@ class ModelStateListener {
         }
 
         this.touchRoot(primitiveRoot.primitiveRootKey());
+        this.primitives.push(primitive);
+    }
+
+    track(primitiveRoot: IDataNode & IPrimitiveRoot, primitive: IPrimitive){
+        if (this._stopCounter > 0){
+            return;
+        }
+        this.touchRoot(primitiveRoot.primitiveRootKey());
+
         this.primitives.push(primitive);
     }
 

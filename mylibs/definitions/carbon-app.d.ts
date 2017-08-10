@@ -20,7 +20,12 @@ declare module "carbon-app" {
         subsets?: string[];
     }
 
-    export interface IAppProps extends IDataNodeProps{
+    export interface AppSettings {
+        name: string;
+        avatar?: string;
+    }
+
+    export interface IAppProps extends IDataNodeProps, AppSettings {
         customGuides: any;
         fontMetadata: FontMetadata[];
     }
@@ -97,6 +102,12 @@ declare module "carbon-app" {
         isDirty(): boolean;
 
         companyId(value?: string): string;
+        name(value?: string): string;
+        /**
+         * An event is raised when the name is changed to avoid listening to all changes
+         * just to update the UI.
+         */
+        settingsChanged: IEvent<AppSettings>;
 
         saveWorkspaceState(): void;
         restoreWorkspaceState(): void;
@@ -323,6 +334,10 @@ declare module "carbon-app" {
     }
 
     export interface IShortcutManager {
+        actionShortcuts: {
+            [action: string]: IShortcut[]
+        };
+
         mapDefaultScheme(): void;
         mapScheme(scheme: IShortcutScheme): void;
 
