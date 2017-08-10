@@ -34,6 +34,11 @@ class DraggingElement extends CompositeElement {
         for (var e of elements) {
             this.register(e);
         }
+
+        if(!Selection.isElementSelected(e)) {
+            Selection.makeSelection(this.children);
+        }
+
         this.performArrange();
 
         var initialPosition = this.getBoundingBox();
