@@ -36,9 +36,12 @@ class DraggingElement extends CompositeElement {
         }
         this.performArrange();
 
-        this._initialPosition = null;
+        var initialPosition = this.getBoundingBox();
+        var initialPositionGlobal = this.getBoundingBoxGlobal();
 
-        this._initialPosition = this.getBoundingBox();
+        this._globalOffsetX = initialPositionGlobal.x - initialPosition.x;
+        this._globalOffsetY = initialPositionGlobal.y - initialPosition.y;
+        this._initialPosition = initialPositionGlobal;
 
         let snappingTarget = elementOrComposite.first().parent().primitiveRoot() || Environment.view.page.getActiveArtboard();
         this._snappingTarget = snappingTarget;
@@ -49,7 +52,6 @@ class DraggingElement extends CompositeElement {
         this._translation = new Point(0, 0);
         this._currentPosition = new Point(0, 0);
 
-        this.translationMatrix = Matrix.create();
         this._propSnapshot = this.getPropSnapshot();
 
         this.altChanged(event.event.altKey);// it will also update snapping
@@ -71,7 +73,7 @@ class DraggingElement extends CompositeElement {
     }
 
     detach() {
-      //  super.detach();
+        //  super.detach();
 
         debug("Detached");
         SnapController.clearActiveSnapLines();
@@ -80,9 +82,6 @@ class DraggingElement extends CompositeElement {
     }
 
     stopDragging(event, draggingOverElement, page) {
-        // this.saveChanges();
-        // this.showOriginal(true);
-
         var artboards = page.getAllArtboards();
         var elements = [];
 
@@ -125,7 +124,7 @@ class DraggingElement extends CompositeElement {
 
         Selection.refreshSelection();
 
-        for(var e of this.children) {
+        for (var e of this.children) {
             e.clearSavedLayoutProps();
         }
 
@@ -133,12 +132,12 @@ class DraggingElement extends CompositeElement {
         this.applySnapshot(this._propSnapshot, ChangeMode.Self);
 
         var copyClones = this._clones;
-        if(copyClones) {
-            copyClones.forEach(e=>{
+        if (copyClones) {
+            copyClones.forEach(e => {
                 var parent = e.parent();
                 var index = parent.positionOf(e);
                 parent.remove(e, ChangeMode.Self);
-                if(e.visible()) {
+                if (e.visible()) {
                     parent.insert(e, index);
                 }
             })
@@ -169,17 +168,19 @@ class DraggingElement extends CompositeElement {
 
         if (!newParent.autoPositionChildren()) {
             element.setTransform(newParent.globalMatrixToLocal(gm));
-		}
- 		if (newParent !== element.parent()) {
+        }
+
+        if (newParent !== element.parent()) {
             newParent.insert(element, index);
         }
         else if (newParent.allowRearrange() && element.zOrder() !== index) {
             newParent.changePosition(element, index);
-        }    }
+        }
+    }
 
     altChanged(alt) {
-        if(alt){
-            if(!this._clones) {
+        if (alt) {
+            if (!this._clones) {
                 var shanpshot = this.getPropSnapshot();
                 this.applySnapshot(this._propSnapshot, ChangeMode.Self);
                 this._clones = Duplicate.run(this.elements, ChangeMode.Self, true);
@@ -187,8 +188,8 @@ class DraggingElement extends CompositeElement {
             }
         }
 
-        if(this._clones) {
-            this._clones.forEach(e=>e.visible(alt));
+        if (this._clones) {
+            this._clones.forEach(e => e.visible(alt));
         }
 
         SnapController.clearActiveSnapLines();
@@ -197,13 +198,13 @@ class DraggingElement extends CompositeElement {
 
     dragTo(event) {
         debug("Drag to x=%d y=%d", event.x, event.y);
-        this._translation.set(event.x, event.y);
+        this._translation.set(event.x+ this._globalOffsetX, event.y + this._globalOffsetY);
 
         if (event.event.shiftKey) {
             applyOrthogonalMove.call(this, this._translation);
         }
 
-        this._currentPosition.set(this._translation.x, this._translation.y);
+        this._currentPosition.set(this._translation.x , this._translation.y);
 
         var roundToPixels = !event.event.ctrlKey && UserSettings.snapTo.enabled && UserSettings.snapTo.pixels;
         if (roundToPixels) {
@@ -224,10 +225,8 @@ class DraggingElement extends CompositeElement {
         }
 
         this._translation.set(this._currentPosition.x - this._initialPosition.x, this._currentPosition.y - this._initialPosition.y);
-        this.translationMatrix.tx = this._translation.x;
-        this.translationMatrix.ty = this._translation.y;
 
-        for(var e of this.children) {
+        for (var e of this.children) {
             e.applyTranslation(this._translation, true, ChangeMode.Self);
         }
     }
@@ -252,7 +251,7 @@ class DraggingElement extends CompositeElement {
     }
 
     constraints() {
-        if(this.children.length !== 1) {
+        if (this.children.length !== 1) {
             return null;
         }
 

@@ -593,13 +593,13 @@ class SnapController {
         var x = rect.x;
         var y = rect.y;
         var data: any = {};
-        if (snapData.center) {
-            snapData.xs.push(snapData.center.x);
-        }
+        // if (snapData.center) {
+        //     snapData.xs.push(snapData.center.x);
+        // }
 
-        if (snapData.center) {
-            snapData.ys.push(snapData.center.y);
-        }
+        // if (snapData.center) {
+        //     snapData.ys.push(snapData.center.y);
+        // }
         if (snapData !== null) {
             if (holdPcnt < 20) {
                 snapData.xs.sort((a, b) => a - b);
