@@ -35,5 +35,6 @@ export default class ChangeZOrder {
                 });
                 break;
         }
+        App.Current.mapElementsToLayerMask();
     }
 }

@@ -55,6 +55,9 @@ declare module "carbon-model"{
         sourceId(value?: string): string;
 
         runtimeProps: any;
+
+        applyVisitorTLR(callback:(e:IUIElement)=>boolean|void);
+        opacity(value?:number):number;
     }
 
     export interface IUIElementProps extends IDataNodeProps {
@@ -84,6 +87,8 @@ declare module "carbon-app"{
         findDropToPageData(x, y, element);
 
         incrementVersion();
+
+        applyVisitorTLR(callback:(e:IUIElement)=>boolean|void);
     }
 
     export interface IApp extends IPrimitiveRoot{

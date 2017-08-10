@@ -49,6 +49,7 @@ import Command from "./framework/commands/Command";
 import Primitive from "./framework/sync/Primitive";
 import UIElement from "./framework/UIElement";
 import RelayoutEngine from "./framework/relayout/RelayoutEngine";
+import NullContainer from "framework/NullContainer";
 
 if (DEBUG) {
     window['env'] = Environment;
@@ -842,6 +843,63 @@ class AppClass extends DataNode implements IApp {
 
             this._extensions.push(new Extension(this, Environment.view, Environment.controller));
         }
+    }
+
+    mapElementsToLayerMask() {
+        let count = 0;
+        let max = Selection.elements.length;
+        let activeArtboard = this.activePage.getActiveArtboard();
+        let mainElement;
+
+        if (activeArtboard) {
+            mainElement = activeArtboard;
+        } else {
+            mainElement = this.activePage;
+        }
+
+        mainElement.applyVisitorTLR(e => {
+
+            if (count && count === max) {
+                e.runtimeProps.ctxl = 1 << 2;
+                return;
+            }
+
+            let isSelected = Selection.isElementSelected(e);
+            if (isSelected || count > 0) {
+                var parent = e.parent();
+                do {
+                    if (parent.opacity() < 1 || parent.runtimeProps.mask) {
+                        e = parent;
+                        break;
+                    }
+                    parent = parent.parent();
+                } while (parent && parent !== NullContainer);
+
+                e.applyVisitorTLR(c => {
+                    c.runtimeProps.ctxl = 1 << 1;
+                });
+
+                if (isSelected) {
+                    count++;
+                }
+
+                return true;
+            } else {
+                e.runtimeProps.ctxl = 1 << 0;
+            }
+        })
+
+        if (activeArtboard) {
+            for (let artboard of this.activePage.getAllArtboards()) {
+                if (artboard !== activeArtboard) {
+                    artboard.applyVisitorTLR(c => {
+                        c.runtimeProps.ctxl = 1 << 0;
+                    });
+                }
+            }
+        }
+
+        Invalidate.request();
     }
 
     run() {

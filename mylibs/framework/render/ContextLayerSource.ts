@@ -3,7 +3,6 @@ import { IContext } from "carbon-core";
 import Selection from "framework/SelectionModel";
 import Context from "./Context";
 import Invalidate from "framework/Invalidate";
-import NullContainer from "framework/NullContainer";
 
 export default class ContextLayerSource extends Context {
     constructor(private contexts: IContext[]) {
@@ -24,34 +23,7 @@ export default class ContextLayerSource extends Context {
     }
 
     onSelectionChanged() {
-        let count = 0;
-        let max = Selection.elements.length;
-        App.Current.activePage.applyVisitorTLR(e => {
-            if (count && count === max) {
-                e.runtimeProps.ctxl = 1 << 2;
-            }
-            else if (Selection.isElementSelected(e)) {
-                var parent = e.parent();
-                do {
-                    if (parent.opacity() < 1 || parent.runtimeProps.mask) {
-                        e = parent;
-                        break;
-                    }
-                    parent = parent.parent();
-                } while (parent && parent !== NullContainer);
-
-                e.applyVisitorTLR(c => {
-                    c.runtimeProps.ctxl = 1 << 1;
-                });
-
-                count++;
-                return true;
-            } else {
-                e.runtimeProps.ctxl = 1 << 0;
-            }
-        })
-
-        Invalidate.request();
+        App.Current.mapElementsToLayerMask();
     }
 
     dispose() {

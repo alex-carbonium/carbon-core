@@ -25,6 +25,7 @@ class NullContainer extends DataNode implements IContainer {
     removeDecoratorByType(type) { }
 
     performArrange() { }
+    applyVisitorTLR(callback:(e:IUIElement)=>boolean|void) {}
     allowRearrange() { return false; }
     autoGrow(dw, dh) { }
 
@@ -324,6 +325,10 @@ class NullContainer extends DataNode implements IContainer {
     draw() {
     }
     drawSelf() {
+    }
+
+    opacity(value?:number) {
+        return 0;
     }
 }
 
