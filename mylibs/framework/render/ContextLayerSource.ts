@@ -48,11 +48,11 @@ export default class ContextLayerSource extends Context {
             }
         }
         if ((this._context._mask & this.layerRedrawMask) === 0) {
-            console.log(`element: ${element.name()} ignored`);
+          //  console.log(`element: ${element.name()} ignored`);
             return false;
         }
 
-        console.log(`element: ${element.name()} on ${this._context._mask}`);
+       // console.log(`element: ${element.name()} on ${this._context._mask}`);
 
         return true;
     }
