@@ -19,6 +19,7 @@ import Layer from "framework/Layer";
 import SelectComposite from "framework/SelectComposite";
 import SelectFrame from "framework/SelectFrame";
 import DraggingElement from "framework/interactions/DraggingElement";
+import Context from "framework/render/Context";
 import Environment from "environment";
 import backend from "backend";
 import logger from "logger";
@@ -45,11 +46,10 @@ Util.setupApp = function(options){
     app.fontManager.registerAsDefault();
 
     var c = document.createElement("canvas");
-    var context = c.getContext("2d");
 
     var view = new DesignerView(app);
     view.setup({Layer, SelectComposite, DraggingElement, SelectFrame});
-    view.attachToDOM(context, context, c, x => {}, x => {}, x=> {});
+    view.attachToDOM([new Context(c)], new Context(c), c, x => {}, x => {}, x=> {});
     var controller = new DesignerController(app, view, {SelectComposite, DraggingElement, SelectFrame});
     Environment.set(view, controller);
 
