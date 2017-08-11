@@ -1040,11 +1040,11 @@ class Path extends Shape {
     curveToPoint(point, cp1, cp2) {
         this._lastPoint.cp2x = cp1.x;
         this._lastPoint.cp2y = cp1.y;
-        this._lastPoint.type = PointType.Assymetric;
+        this._lastPoint.type = PointType.Disconnected;
         this._lastPoint = this.addPoint(point);
         this._lastPoint.cp1x = cp2.x;
         this._lastPoint.cp1y = cp2.y;
-        this._lastPoint.type = PointType.Assymetric;
+        this._lastPoint.type = PointType.Disconnected;
     }
 
     bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y) {
@@ -1058,7 +1058,23 @@ class Path extends Shape {
     }
 
     quadraticCurveToPoint(c, p) {
-        this.curveToPoint(p, c, c);
+        var x0 = this._lastPoint.x;
+        var y0 = this._lastPoint.y;
+        var x1 = c.x;
+        var y1 = c.y;
+        var x2 = p.x;
+        var y2 = p.y;
+        var c1 = {
+            x: x0 + 2 * (x1 - x0) / 3,
+            y: y0 + 2 * (y1 - y0) / 3
+        }
+
+        var c2 = {
+            x: x1 + (x2 - x1) / 3,
+            y: y1 + (y2 - y1) / 3
+        }
+
+        this.curveToPoint(p, c1, c2);
     }
 
     currentPointX(value: number, changeMode: ChangeMode): number {
