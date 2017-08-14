@@ -519,7 +519,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         return false;
     }
 
-    draw(context) {
+    draw(context, environment?) {
         if (this._artboard && this.runtimeProps.artboardVersion !== this._artboard.runtimeProps.version) {
             this._initFromArtboard();
         }
