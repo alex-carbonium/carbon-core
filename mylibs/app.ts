@@ -875,7 +875,6 @@ class AppClass extends DataNode implements IApp {
         }
 
         mainElement.applyVisitorTLR(e => {
-
             if (count && count === max) {
                 e.runtimeProps.ctxl = 1 << 2;
                 return;
@@ -913,6 +912,12 @@ class AppClass extends DataNode implements IApp {
                         c.runtimeProps.ctxl = 1 << 0;
                     });
                 }
+            }
+        }
+
+        if(count !== max) {
+            for(var e of Selection.selectedElements()) {
+                e.runtimeProps.ctxl = 1 << 0;
             }
         }
 
