@@ -118,8 +118,6 @@ class ArtboardPage extends Page implements IArtboardPage {
         environment.viewportRect = environment.view.viewportRect();
 
         super.draw.apply(this, arguments);
-
-        context.restore();
     }
 
     drawChildSafe(child, context, environment) {

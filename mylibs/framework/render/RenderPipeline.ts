@@ -1,6 +1,7 @@
 import { IUIElement } from "carbon-model";
 import { IContext } from "carbon-core";
 import ContextPool from "./ContextPool";
+import Matrix from "math/Matrix";
 
 export default class RenderPipeline {
 
@@ -23,53 +24,88 @@ export default class RenderPipeline {
         this.useTempBuffer = true;
     }
 
+    private mergeContexts(dest, source) {
+        var sx = -(source._relativeOffsetX || 0);
+        var sy = -(source._relativeOffsetY || 0);
+
+        dest.save();
+        // resetTransform set relativeOffset on destinantion context
+        dest.resetTransform();
+        dest.drawImage(source.canvas, sx, sy);
+        dest.restore();
+    }
+
     done() {
-        var context:any = this.context;
         this.context.save();
+        var context: any = this.context;
         if (this.useTempBuffer) {
-            context = this.getBufferedContext();
+            context = RenderPipeline.getBufferedContext(this.element, this.environment);
         }
 
         for (var operation of this.operations) {
-            this.context.save();
             if (operation.type === 'out') {
+                context.save();
                 operation.callback(context);
+                context.restore();
             } else if (operation.type === 'outBuffered') {
-                var tmpContext = this.getBufferedContext();
+                var tmpContext = RenderPipeline.getBufferedContext(this.element, this.environment);
                 tmpContext.save();
                 operation.callback(tmpContext);
 
-                context.resetTransform();
-
-                if (this.useTempBuffer) {
-                    context.drawImage(tmpContext.canvas, 0, 0);
-                } else {
-                    context.drawImage(tmpContext.canvas, -tmpContext._relativeOffsetX, -tmpContext._relativeOffsetY);
-                }
+                this.mergeContexts(context, tmpContext);
 
                 tmpContext.restore();
                 ContextPool.releaseContext(tmpContext);
             }
-            this.context.restore();
         }
 
         if (this.useTempBuffer) {
-            this.context.resetTransform();
-            var x = (this.context as any)._relativeOffsetX || 0;
-            var y = (this.context as any)._relativeOffsetY || 0;
-            this.context.drawImage(context.canvas, x-context._relativeOffsetX, y-context._relativeOffsetY);
+            this.mergeContexts(this.context, context);
             ContextPool.releaseContext(context);
         }
         this.context.restore();
         this.operations = [];
     }
 
-    private getBufferedContext() {
-        let element = this.element;
-        let environment = this.environment;
+    static elementToDataUrl(element, contextScale = 1) {
+        let box = element.getBoundingBoxGlobal();
+        box = element.expandRectWithBorder(box);
+        let pageMatrix = new Matrix(1, 0, 0, 1, -box.x, -box.y);
+        let env = {
+            finalRender: true, setupContext: (ctx) => {
+                ctx.scale(contextScale, contextScale);
+                ctx.clear();
+                pageMatrix.applyToContext(ctx);
+            }, pageMatrix: pageMatrix, contextScale: contextScale, offscreen: true, view: { scale: () => 1, contextScale, focused: () => false }
+        };
+
+        box.width = Math.max(1, box.width) | 0;
+        box.height = Math.max(1, box.height) | 0;
+
+        let context = ContextPool.getContext(box.width, box.height, contextScale, true);
+        context.relativeOffsetX = 0;
+        context.relativeOffsetY = 0;
+
+        context.scale(contextScale, contextScale);
+
+        context.clear();
+        pageMatrix.applyToContext(context);
+
+        var pipeline = RenderPipeline.createFor(element, context, env);
+        pipeline.out(c => {
+            element.draw(c, env);
+        });
+        pipeline.done();
+        var data = context.canvas.toDataURL("image/png");
+
+        ContextPool.releaseContext(context);
+
+        return data;
+    }
+
+    private static getContextDimensions(element, environment) {
         let clippingRect = element.getBoundingBoxGlobal();
         clippingRect = element.expandRectWithBorder(clippingRect);
-
         var p1 = environment.pageMatrix.transformPoint2(clippingRect.x, clippingRect.y);
         var p2 = environment.pageMatrix.transformPoint2(clippingRect.x + clippingRect.width, clippingRect.y + clippingRect.height);
         p1.x = Math.max(0, 0 | p1.x * environment.contextScale);
@@ -82,16 +118,24 @@ export default class RenderPipeline {
         sw = Math.max(sw, 1);
         sh = Math.max(sh, 1);
 
-        var offContext = ContextPool.getContext(sw, sh, environment.contextScale);
-        offContext.clearRect(0, 0, sw, sh);
-        offContext.relativeOffsetX = -p1.x;
-        offContext.relativeOffsetY = -p1.y;
+        return { x: p1.x, y: p1.y, w: sw, h: sh, sx: clippingRect.x, sy:clippingRect.y }
+    }
 
-        offContext.save();
-        offContext.translate(-p1.x, -p1.y);
+    private static getBufferedContext(element, environment, forceSize = false) {
+        var box = RenderPipeline.getContextDimensions(element, environment);
+
+        var offContext = ContextPool.getContext(box.w, box.h, environment.contextScale, forceSize);
+        offContext.clear();
+        offContext.relativeOffsetX = -box.x;
+        offContext.relativeOffsetY = -box.y;
+
+        offContext.translate(-box.x, -box.y);
+
         environment.setupContext(offContext);
 
-        element.applyViewMatrix(offContext);
+        if(element.shouldApplyViewMatrix()) {
+            element.applyViewMatrix(offContext);
+        }
 
         return offContext;
     }

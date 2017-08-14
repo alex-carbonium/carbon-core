@@ -897,6 +897,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return;
         }
 
+        var saveCount = context.saveCount;
+
         context.save();
         context.globalAlpha = this.opacity();
 
@@ -912,6 +914,10 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
         if (params.perf) {
             performance.measure(markName, markName);
+        }
+
+        if(context.saveCount !== saveCount) {
+            throw "Unbalanced save/restore";
         }
     }
 

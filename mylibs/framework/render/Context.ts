@@ -1,6 +1,7 @@
 import CrazyScope from "../CrazyManager";
 import Point from "../../math/point";
-import {IContext} from "carbon-core";
+import { IContext } from "carbon-core";
+import Matrix from "math/Matrix";
 
 export default class Context implements IContext {
     [name: string]: any;
@@ -14,6 +15,9 @@ export default class Context implements IContext {
         this._context = canvas.getContext("2d");
         this._width = canvas.width;
         this._height = canvas.height;
+        this._saveCount = 0;
+        this._currentMatrix = Matrix.Identity;
+        this._matrixStack = [];
     }
 
     set relativeOffsetX(value) {
@@ -37,16 +41,17 @@ export default class Context implements IContext {
     }
 
     resetTransform() {
+        this._currentMatrix = new Matrix(1, 0, 0, 1, this._relativeOffsetX || 0, this._relativeOffsetY || 0);
         this._context.setTransform(1, 0, 0, 1, this._relativeOffsetX || 0, this._relativeOffsetY || 0);
     }
 
     get contextScale() {
         var devicePixelRatio = window.devicePixelRatio || 1;
         var backingStoreRatio = this._context.backingStorePixelRatio
-        || this._context.webkitBackingStorePixelRatio
-        || this._context.mozBackingStorePixelRatio
-        || this._context.msBackingStorePixelRatio
-        || this._context.oBackingStorePixelRatio || 1;
+            || this._context.webkitBackingStorePixelRatio
+            || this._context.mozBackingStorePixelRatio
+            || this._context.msBackingStorePixelRatio
+            || this._context.oBackingStorePixelRatio || 1;
 
         // on some machines it is non integer, it affects rendering
         // browser zoom is also changing this value, so need to make sure it is never 0
@@ -577,8 +582,8 @@ export default class Context implements IContext {
         // This offset determines how sloppy the line is drawn. It depends on the
         // length, but maxes out at 20.
         var offset = length / CrazyScope.offset;
-        if (offset < 3) offset = length * 0.01;
-        else if (offset > CrazyScope.offset) offset = CrazyScope.offset;
+        if (offset < 3) { offset = length * 0.01; }
+        else if (offset > CrazyScope.offset) { offset = CrazyScope.offset; }
 
         // Overshoot the destination a little, as one might if drawing with a pen.
         //toX += Math.random()*offset/4;
@@ -619,6 +624,9 @@ export default class Context implements IContext {
         this.bezierCurveTo(~~control1x, ~~control1y, ~~control2x, ~~control2y, ~~toX, ~~toY);
     }
 
+    get currentMatrix (){
+        return this._currentMatrix;
+    }
 
     // standard context methods
     get globalAlpha() {
@@ -761,31 +769,48 @@ export default class Context implements IContext {
         this._context.filter = value;
     }
 
+    get isBalancedSaveRestore() {
+        return this._saveCount === 0;
+    }
+
+    get saveCount() {
+        return this._saveCount;
+    }
+
     save() {
+        this._saveCount++;
+        this._matrixStack.push(this._currentMatrix);
         this._context.save.apply(this._context, arguments);
     }
 
     restore() {
+        this._saveCount--;
+        this._currentMatrix = this._matrixStack.pop();
         this._context.restore.apply(this._context, arguments);
     }
 
     scale(x: number, y: number) {
+        this._currentMatrix = this._currentMatrix.clone().scale(x, y);
         this._context.scale.apply(this._context, arguments);
     }
 
     rotate(angle) {
+        this._currentMatrix = this._currentMatrix.clone().rotate(angle);
         this._context.rotate.apply(this._context, arguments);
     }
 
     translate(x, y) {
+        this._currentMatrix = this._currentMatrix.clone().translate(x, y);
         this._context.translate.apply(this._context, arguments);
     }
 
     transform(m11, m12, m21, m22, dx, dy) {
+        this._currentMatrix = this._currentMatrix.appended(new Matrix(m11, m12, m21, m22, dx, dy));
         this._context.transform.apply(this._context, arguments);
     }
 
     setTransform(m11, m12, m21, m22, dx, dy) {
+        this._currentMatrix = new Matrix(m11, m12, m21, m22, dx, dy);
         this._context.setTransform.apply(this._context, arguments);
     }
 
@@ -905,10 +930,10 @@ export default class Context implements IContext {
         this._context.setLineDash.apply(this._context, arguments);
     }
 
-    set lineDashOffset(value){
+    set lineDashOffset(value) {
         this._context.lineDashOffset = value;
     }
-    get lineDashOffset(){
+    get lineDashOffset() {
         return this._context.lineDashOffset;
     }
 }

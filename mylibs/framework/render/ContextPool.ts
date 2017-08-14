@@ -21,6 +21,7 @@ class ContextPool implements IContextPool {
             context.relativeOffsetX = 0;
             context.relativeOffsetY = 0;
             context.resetTransform();
+            context.save();
             return context;
         } else {
             for (var i = 0; i < contextPool.length; ++i) {
@@ -36,6 +37,7 @@ class ContextPool implements IContextPool {
                     }
 
                     context.resetTransform();
+                    context.save();
                     return context;
                 }
             }
@@ -46,11 +48,16 @@ class ContextPool implements IContextPool {
             context.relativeOffsetX = 0;
             context.relativeOffsetY = 0;
             context.resetTransform();
+            context.save();
             return context;
         }
     }
 
     releaseContext(contextMetadata : Context){
+        contextMetadata.restore();
+        if(!contextMetadata.isBalancedSaveRestore) {
+            throw "Unbalanced save/restore on context"
+        }
         contextPool.push(contextMetadata);
     }
 }
