@@ -288,7 +288,9 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
                 let items = this.children;
                 for (let i = 0; i < items.length; ++i) {
                     let child = items[i];
-                    ExtensionPoint.invoke(child, 'draw', [context, environment]);
+                    if(child.visible()){
+                        ExtensionPoint.invoke(child, 'draw', [context, environment]);
+                    }
                 }
             }
 
