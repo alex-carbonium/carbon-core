@@ -12,7 +12,7 @@ import Selection from "framework/SelectionModel";
 import Point from "../../../math/point";
 import Rect from "../../../math/rect";
 import {assert} from "chai";
-import { TextAutoWidth } from "carbon-core";
+import { TextMode } from "carbon-core";
 
 describe("Repeater tests", function(){
     before(function(){
@@ -337,7 +337,8 @@ describe("Repeater tests", function(){
 
             label.prepareAndSetProps({
                 id: "master",
-                content: "text 1"
+                content: "text 1",
+                mode: TextMode.Label
             });
 
             this.app.activePage.add(label);
@@ -409,7 +410,7 @@ describe("Repeater tests", function(){
             this.app.relayout();
 
             //act
-            slave.prepareAndSetProps({autoWidth: TextAutoWidth.Wrap, br: slave.boundaryRect().withWidth(6)});
+            slave.prepareAndSetProps({mode: TextMode.Block, br: slave.boundaryRect().withWidth(6)});
             this.app.relayout();
 
             //assert

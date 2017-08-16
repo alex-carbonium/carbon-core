@@ -1,7 +1,7 @@
 import { IUIElement } from "carbon-model";
 import { IContext } from "carbon-core";
 import ContextPool from "./ContextPool";
-import Matrix from "math/Matrix";
+import Matrix from "math/matrix";
 
 export default class RenderPipeline {
 

@@ -5,6 +5,7 @@ import GlobalMatrixModifier from "../../framework/GlobalMatrixModifier";
 import Point from "../../math/point";
 import Matrix from "../../math/matrix";
 import UserSettings from "../../UserSettings";
+import { ChangeMode } from "carbon-core";
 
 export default class PolygonTool extends ElementDropTool{
     updateElement(element: Polygon, startPoint: Point, endPoint: Point){
@@ -14,7 +15,7 @@ export default class PolygonTool extends ElementDropTool{
         let fy = endPoint.y < startPoint.y ? 1 : 0;
 
         let newRaidus = Math.round(Math.min(w, h)/2);
-        element.saveOrResetLayoutProps();
+        element.saveOrResetLayoutProps(ChangeMode.Self);
         element.prepareAndSetProps({radius: newRaidus});
 
         let bb = element.getBoundingBox();

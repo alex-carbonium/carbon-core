@@ -73,8 +73,8 @@ export default class Star extends Polygon {
         }
     }
 
-    saveOrResetLayoutProps(): boolean {
-        if (super.saveOrResetLayoutProps()) {
+    saveOrResetLayoutProps(mode): boolean {
+        if (super.saveOrResetLayoutProps(mode)) {
             this.runtimeProps.origLayout.internalRadius = this.internalRadius();
             return true;
         }

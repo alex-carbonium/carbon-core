@@ -14,6 +14,7 @@ import { ChangeMode } from "carbon-core";
 import Selection from "framework/SelectionModel";
 import CompositeElement from "../CompositeElement";
 import Duplicate from "commands/Duplicate";
+import UIElement from "../UIElement";
 
 var debug = require("DebugUtil")("carb:draggingElement");
 
@@ -29,9 +30,11 @@ class DraggingElement extends CompositeElement {
     constructor(elementOrComposite, event) {
         super();
 
-        var elements = elementOrComposite instanceof CompositeElement ? elementOrComposite.elements : [elementOrComposite];
+        var elements: UIElement[] = elementOrComposite instanceof CompositeElement ? elementOrComposite.elements : [elementOrComposite];
         this.children = [];
+
         for (var e of elements) {
+            e.clearSavedLayoutProps();
             this.register(e);
         }
 
@@ -128,10 +131,6 @@ class DraggingElement extends CompositeElement {
         }
 
         Selection.refreshSelection();
-
-        for (var e of this.children) {
-            e.clearSavedLayoutProps();
-        }
 
         var newSnapshot = this.getPropSnapshot();
         this.applySnapshot(this._propSnapshot, ChangeMode.Self);

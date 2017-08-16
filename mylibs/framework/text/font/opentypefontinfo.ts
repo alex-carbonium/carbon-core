@@ -112,6 +112,10 @@ import {inherit} from "../util/util";
         return 1 / this._openTypeFont.unitsPerEm * size;
     }
 
+    OpenTypeFontInfo.prototype.getUnitsPerEm = function(){
+        return this._openTypeFont.unitsPerEm;
+    }
+
     OpenTypeFontInfo.prototype.getAdvance = function(size, nextGlyph, prevGlyph) {
         var scale = this.getScale(size);
         var glyph = this._openTypeFont.charToGlyph(nextGlyph);

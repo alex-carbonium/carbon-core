@@ -20,7 +20,7 @@ import Invalidate from "../../../framework/Invalidate";
 import Environment from "../../../environment";
 import { getAverageLuminance } from "../../../math/color";
 import Rect from "../../../math/rect";
-import { ChangeMode, IMouseEventData, IElementEventData, VerticalConstraint, HorizontalConstraint, TextAutoWidth, IDisposable } from "carbon-core";
+import { ChangeMode, IMouseEventData, IElementEventData, VerticalConstraint, HorizontalConstraint, IDisposable, TextMode } from "carbon-core";
 import UserSettings from "../../../UserSettings";
 import Point from "../../../math/point";
 import Symbol from "../../../framework/Symbol";
@@ -193,7 +193,7 @@ export default class TextTool extends Tool {
         else if (this._dragZone) {
             var rect = this._getDrawRect(this._dragZone);
             var props: any = { br: rect.withPosition(0, 0).roundMutable() };
-            props.autoWidth = TextAutoWidth.Wrap;
+            props.mode = TextMode.Block;
             this.insertText({ x: rect.x, y: rect.y }, props, true);
             this._dragZone = null;
         }
@@ -214,7 +214,7 @@ export default class TextTool extends Tool {
                 this._editor.deactivate(UserSettings.text.insertNewOnClickOutside);
             }
             else if (UserSettings.text.insertNewOnClickOutside || !this._detaching) { //tool can be changed by mouse down
-                this.insertText(e);
+                this.insertText(e, { mode: TextMode.Label });
             }
         }
         e.handled = true;
@@ -261,7 +261,7 @@ export default class TextTool extends Tool {
             text.prepareAndSetProps(props);
             var y = dropData.position.y;
             if (!fixedSize) {
-                var engine = text.createFixedSizeEngine();
+                var engine = text.createEngine(text.props);
                 var height = engine.getActualHeight();
                 y -= height / 2;
             }
@@ -288,10 +288,9 @@ export default class TextTool extends Tool {
         text.runtimeProps.sampleBackground = this.sampleBackground;
         Invalidate.request(0);
 
-        var engine = clone.createEngine();
-        this._fixedEngine = clone.createFixedSizeEngine();
-
+        var engine = clone.createEngine(clone.props);
         engine.contentChanged(this.contentChanged);
+
         this._editor = this._createEditor(engine, clone);
         this._editedElement = text;
         this._originalBr = text.props.br;
@@ -320,18 +319,9 @@ export default class TextTool extends Tool {
         this._next = null;
     }
     contentChanged = () => {
-        if (this._updatingContent) {
-            return;
-        }
-
-        this._updatingContent = true;
         var engine = this._editor.engine;
-        var calcEngine = (this._editClone.props.autoWidth === TextAutoWidth.Wrap) ? engine : this._fixedEngine;
-        if (calcEngine === this._fixedEngine) {
-            this._fixedEngine.setText(engine.save());
-        }
-        var w = calcEngine.getActualWidth() + .5 | 0;
-        var h = calcEngine.getActualHeight() + .5 | 0;
+        var w = engine.getActualWidth() + .5 | 0;
+        var h = engine.getActualHeight() + .5 | 0;
         var props = null;
         var dx = 0;
         var dy = 0;
@@ -339,7 +329,7 @@ export default class TextTool extends Tool {
         var dh = 0;
         var constraints = this._editClone.constraints();
         var br = this._editClone.props.br;
-        if (w > this._editClone.width() || (this._editClone.props.autoWidth === TextAutoWidth.Fit)) {
+        if (w > this._editClone.width()) {
             props = props || {};
             props.width = w;
 
@@ -351,7 +341,7 @@ export default class TextTool extends Tool {
                 dw = (w - br.width);
             }
         }
-        if (h >= this._editClone.runtimeProps.originalHeight) {
+        if (h >= this._editClone.runtimeProps.originalHeight || this._editClone.props.mode === TextMode.Label) {
             props = props || {};
             props.height = h;
 
@@ -365,15 +355,10 @@ export default class TextTool extends Tool {
         }
 
         if (props) {
-            if (calcEngine === this._fixedEngine) {
-                engine.updateSize(props.width || this._editClone.width(), props.height || this._editClone.height());
-                engine.setText(engine.save());
-                engine.getActualWidth();
-            }
-
             if (dw || dh) {
                 this._editedElement.parent().autoGrow(dw, dh);
-            } else {
+            }
+            else {
                 // this is for scenario when text is growing inside stack container for example
                 let br = this._editedElement.props.br;
                 this._editedElement.setProps(props, ChangeMode.Self);
@@ -385,8 +370,11 @@ export default class TextTool extends Tool {
             this._resizeBackgroundIfNeeded();
         }
 
+        //the engine must keep current width (for example, for right alignment)
+        //and update the actual height so that the lines added below are not clipped
+        engine.updateSize(engine.getWidth(), h);
+
         this._changed = true;
-        this._updatingContent = false;
     };
     endEdit(finalEdit: boolean) {
         if (this._changed) {
@@ -435,7 +423,9 @@ export default class TextTool extends Tool {
         this._editedElement.setProps({ br: this._originalBr }, ChangeMode.Self);
         this._editedElement.parent().performArrange(undefined, ChangeMode.Self);
 
-        this._editedElement.prepareAndSetProps(props); //no validation, save from clone as is
+        //do not call prepareProps, all validation is already made on the clone
+        //otherwise, transformations such as auto-growing font size will be applied twice
+        this._editedElement.setProps(props);
     }
 
     _createEditor(engine, element) {

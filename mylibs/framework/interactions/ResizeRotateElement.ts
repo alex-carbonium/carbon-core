@@ -8,6 +8,7 @@ export default class ResizeRotateElement extends TransformationElement{
 
         this._lastScaling = null;
         this._lastRotation = null;
+        this._lastTranslation = null;
     }
 
     createClone(element){
@@ -21,6 +22,11 @@ export default class ResizeRotateElement extends TransformationElement{
         super.applySizeScaling(s, o, options);
         this.performArrange();
         this._lastScaling = {s, o, options};
+    }
+
+    applyTranslation(t, withReset, mode){
+        super.applyTranslation(t, withReset, mode);
+        this._lastTranslation = t;
     }
 
     applyRotation(angle, o, withReset, mode){
@@ -43,6 +49,9 @@ export default class ResizeRotateElement extends TransformationElement{
                 var resizeOptions = this._lastScaling.options.withSameDirection(sameDirection);
                 resizeOptions = resizeOptions.withReset(false).withRounding(round).withFinal(true);
                 element.applyScaling(this._lastScaling.s, localOrigin, resizeOptions);
+            }
+            if (this._lastTranslation){
+                element.applyTranslation(this._lastTranslation);
             }
             if (this._lastRotation){
                 element.setTransform(element.parent().globalViewMatrixInverted().appended(clone.globalViewMatrix()));

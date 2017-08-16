@@ -130,6 +130,17 @@ export default {
         var resizeOptions = frame.resizeOptions.withRounding(round && frame.globalViewMatrix.isTranslatedOnly());
         frame.resizingElement.applyScaling(s, origin, resizeOptions);
 
+        if (keys.alt) {
+            // When resizing (for example) text, it can change its width and get misplaced.
+            // Therefore, it is checked whether the center is still the same after scaling.
+            let br = frame.resizingElement.boundaryRect();
+            let c = frame.resizingElement.globalViewMatrix().transformPoint(br.center());
+            let d = frame.centerOrigin.subtract(c).roundMutable();
+            if (d.x || d.y) {
+                frame.resizingElement.applyTranslation(d);
+            }
+        }
+
         Environment.controller.resizingEvent.raise({
             element: frame.element,
             transformationElement: frame.resizingElement,

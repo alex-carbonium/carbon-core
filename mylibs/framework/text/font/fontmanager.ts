@@ -1,3 +1,5 @@
+import FontInfo from "./fontinfo";
+
 class FontManager {
     _defaultFont: any;
     _fonts: any[];

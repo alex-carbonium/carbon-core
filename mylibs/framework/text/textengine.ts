@@ -410,6 +410,10 @@ TextEngine.prototype.contentChanged = function (callback, removeOthers) {
 	}.bind(this));
 }
 
+TextEngine.prototype.getDocument = function () {
+	return this._doc;
+}
+
 TextEngine.prototype.getDocumentRange = function () {
 	return this._doc.documentRange();
 }
