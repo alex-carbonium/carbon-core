@@ -329,7 +329,7 @@ export default class TextTool extends Tool {
         var dh = 0;
         var constraints = this._editClone.constraints();
         var br = this._editClone.props.br;
-        if (w > this._editClone.width()) {
+        if (w > this._editClone.width() || this._editClone.props.mode === TextMode.Label) {
             props = props || {};
             props.width = w;
 

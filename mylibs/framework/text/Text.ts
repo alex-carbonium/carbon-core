@@ -440,7 +440,16 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
         return this.props.content;
     }
 
-    resizeDimensions() {
+    resizeDimensions(value?) {
+        if (arguments.length) {
+            return super.resizeDimensions(value);
+        }
+
+        let result = super.resizeDimensions();
+        if (result === ResizeDimension.None) {
+            return result;
+        }
+
         if (this.props.mode === TextMode.Label) {
             return ResizeDimension.Vertical;
         }
