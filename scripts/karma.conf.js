@@ -32,7 +32,7 @@ module.exports = function(config){
         frameworks: ['mocha', /*'chai-as-promised',*/ 'chai'],
         // list of files / patterns to load in the browser
         files: [
-            //'../node_modules/babel-polyfill/dist/polyfill.js',
+            '../node_modules/babel-polyfill/dist/polyfill.js',
             '../mylibs/test/ut/TestBootloader.js'
             // {pattern: 'fonts/**/*', included: false}
         ],

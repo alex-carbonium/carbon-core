@@ -15,6 +15,9 @@ declare module "carbon-rendering" {
         filter: string;
         globalCompositeOperation:string;
 
+        beginElement(element): boolean;
+        endElement(element): void;
+
         rect(x: number, y: number, width: number, height: number);
         clearRect(x: number, y: number, width: number, height: number);
 
@@ -26,6 +29,8 @@ declare module "carbon-rendering" {
         lineTo(x: number, y: number): void;
         circle(xc: number, yc: number, r: number): void;
         circlePath(xc: number, yc: number, r: number): void;
+        rectPath(x, y, width, height, crazySupported, reverse): void;
+        linePath(x1, y1, x2, y2): void;
 
         beginPath(): void;
         closePath(): void;
