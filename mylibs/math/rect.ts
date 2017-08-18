@@ -1,9 +1,12 @@
 import Point from "./point";
 import LineSegment from "./lineSegment";
 import { isRectInRect, isPointInRect } from "./math";
-import { IRect, ICoordinate, OriginType } from "carbon-geometry";
+import { IRect, ICoordinate, OriginType, IPooledObject } from "carbon-core";
+import ObjectPool from "../framework/ObjectPool";
 
-export default class Rect implements IRect {
+export default class Rect implements IRect, IPooledObject {
+    private static pool = new ObjectPool(() => Rect.create(), 50);
+
     x: number;
     y: number;
     width: number;
@@ -236,6 +239,17 @@ export default class Rect implements IRect {
         return this.fitOrFill(bounds, noScaleUp, false);
     }
 
+    reset() {
+        this.x = 0;
+        this.y = 0;
+        this.width = 0;
+        this.height = 0;
+    }
+
+    free() {
+        Rect.pool.free(this);
+    }
+
     private fitOrFill(target: IRect, noScaleUp, fit): Rect {
         let pw = target.width / this.width;
         let ph = target.height / this.height;
@@ -278,6 +292,19 @@ export default class Rect implements IRect {
 
     static fromSize(width: number, height: number) {
         return new Rect(0, 0, width, height);
+    }
+
+    static allocate() {
+        return Rect.pool.allocate();
+    }
+
+    static allocateFromRect(rect: IRect) {
+        let result = Rect.allocate();
+        result.x = rect.x;
+        result.y = rect.y;
+        result.width = rect.width;
+        result.height = rect.height;
+        return result;
     }
 
     static Zero: Rect;

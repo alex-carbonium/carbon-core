@@ -274,12 +274,6 @@ declare module "carbon-model" {
         fixed = 6
     }
 
-    export const enum TextAutoWidth {
-        Wrap = 0,
-        Fit = 1,
-        Grow = 2
-    }
-
     export interface IImageProps extends IContainerProps {
         source: ImageSource;
         sizing: ContentSizing;
@@ -301,10 +295,16 @@ declare module "carbon-model" {
         readonly NewImageSize: number;
     };
 
+    export const enum TextMode {
+        Label = 1,
+        Block
+    }
     export type TextContent = string | any[];//TODO: specify range format
     export interface ITextProps extends IUIElementProps {
         font: Font;
         content: TextContent;
+        mode: TextMode;
+        wrap: boolean;
     }
     export interface IText extends IContainer<ITextProps> {
         font(value?: Font): Font;

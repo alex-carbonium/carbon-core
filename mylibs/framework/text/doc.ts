@@ -13,6 +13,8 @@ import {inherit, event, deCRLFify} from "./util/util";
 import {TextAlign} from "carbon-basics";
 import Environment from "../../environment";
 
+const EmptyContents = [];
+
     function Doc () {
         this._width = 0;
         this.selection = { start: 0, end: 0, direction: "right" };
@@ -25,7 +27,7 @@ import Environment from "../../environment";
         this.selectionChanged = event();
         this.contentChanged = event();
         this.editFilters = [Codes.editFilter];
-        this.load([]);
+        this.load(EmptyContents);
     }
 
     inherit(Doc, Node);
@@ -125,6 +127,13 @@ import Environment from "../../environment";
             delete this._nextSelection;
             this.select(next.start, next.end);
         }
+    };
+
+    Doc.prototype.wrap = function(value) {
+        if (arguments.length === 1) {
+            this._noWrap = !value;
+        }
+        return !this._noWrap;
     };
 
     Doc.prototype.range = function(start, end) {

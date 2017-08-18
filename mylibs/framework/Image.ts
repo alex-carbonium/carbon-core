@@ -66,14 +66,18 @@ export default class Image extends Container<IImageProps> implements IImage {
         //this.createOrUpdateClippingMask(source, newProps);
     }
 
-    saveOrResetLayoutProps() {
+    saveOrResetLayoutProps(mode: ChangeMode) {
         if (!this.runtimeProps.origSource) {
             this.runtimeProps.origSource = this.selectProps(["sourceProps"]);
         }
         else {
             this.setProps(this.runtimeProps.origSource);
         }
-        return super.saveOrResetLayoutProps();
+        return super.saveOrResetLayoutProps(mode);
+    }
+    clearSavedLayoutProps() {
+        super.clearSavedLayoutProps();
+        delete this.runtimeProps.origSource;
     }
 
     clone() {

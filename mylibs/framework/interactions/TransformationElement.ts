@@ -9,6 +9,7 @@ import Selection from "../SelectionModel";
 import Environment from "../../environment";
 import GlobalMatrixModifier from "../../framework/GlobalMatrixModifier";
 import { IComposite, IUIElement, ChangeMode } from "carbon-core";
+import UIElement from "../UIElement";
 
 export default class TransformationElement extends GroupContainer implements IComposite {
     constructor(element) {
@@ -17,10 +18,11 @@ export default class TransformationElement extends GroupContainer implements ICo
         this._decorators = [];
         this._elements = [];
 
-        var elements = element instanceof CompositeElement ? element.elements : [element];
+        var elements: UIElement[] = element instanceof CompositeElement ? element.elements : [element];
 
         for (var i = 0; i < elements.length; i++) {
             var e = elements[i];
+            e.clearSavedLayoutProps();
             this._saveDecorators(e);
             this.add(this.createClone(e));
 

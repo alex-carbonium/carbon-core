@@ -54,6 +54,12 @@ export default class ContextCommandCache implements IContext {
         }
     }
 
+    beginElement(element: any): boolean {
+        return true;
+    }
+    endElement(element: any): void {
+    }
+
     set relativeOffsetX(value) {
         this._context && (this._context.relativeOffsetX = value);
         this._commands.push({type:EntryType.prop, prop:'relativeOffsetX', value});

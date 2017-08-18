@@ -1548,9 +1548,6 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return null;
     }
     resizeDimensions(value?: any) {
-        if (value) {
-            value = +value; // convert from string, to make it work with property editor
-        }
         return this.field("_resizeDimensions", value, ResizeDimension.Both);
     }
     init(values, isDefault?, selector?) {

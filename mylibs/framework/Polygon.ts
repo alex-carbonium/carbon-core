@@ -102,8 +102,8 @@ export default class Polygon extends Shape {
         changes.m.translate(dr, dr);
     }
 
-    saveOrResetLayoutProps(): boolean {
-        if (super.saveOrResetLayoutProps()) {
+    saveOrResetLayoutProps(mode): boolean {
+        if (super.saveOrResetLayoutProps(mode)) {
             this.runtimeProps.origLayout.radius = this.radius();
             return true;
         }

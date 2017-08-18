@@ -119,8 +119,8 @@ class Line extends Shape {
         this.applyMatrixScaling(s, o, options, changeMode);
     }
 
-    saveOrResetLayoutProps(): boolean{
-        if (super.saveOrResetLayoutProps()){
+    saveOrResetLayoutProps(mode): boolean{
+        if (super.saveOrResetLayoutProps(mode)){
             this.runtimeProps.origLayout.x1 = this.x1();
             this.runtimeProps.origLayout.x2 = this.x2();
             this.runtimeProps.origLayout.y1 = this.y1();

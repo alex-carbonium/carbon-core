@@ -104,10 +104,14 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     shouldApplyViewMatrix() {
         return false;
     }
-    saveOrResetLayoutProps(changeMode?): boolean {
+    saveOrResetLayoutProps(changeMode): boolean {
         let res = UIElement.prototype.saveOrResetLayoutProps.apply(this, arguments);
         this.children.forEach(e => e.saveOrResetLayoutProps(changeMode));
         return res;
+    }
+    clearSavedLayoutProps() {
+        super.clearSavedLayoutProps();
+        this.children.forEach(e => e.clearSavedLayoutProps());
     }
 
     restoreLastGoodTransformIfNeeded() {

@@ -16,6 +16,7 @@ import Matrix from "../../../math/matrix";
 import Symbol from "framework/Symbol";
 import Environment from "environment";
 import { assert } from "chai";
+import ContextStub from "../ContextStub";
 
 describe("Symbol tests", function () {
     beforeEach(function (done) {
@@ -78,7 +79,7 @@ describe("Symbol tests", function () {
         this.app.relayout();
         atc.setProps({ width: atc.width() * 2, height: atc.height() * 2 })
         this.app.relayout();
-        atc.draw(new Context(), this.drawContext);
+        atc.draw(new ContextStub(), this.drawContext);
 
         // assert
         assert.equal(210, atc.children[0].width());
@@ -101,13 +102,13 @@ describe("Symbol tests", function () {
         clone.boundaryRect(new Rect(0, 0, 80, 80));
 
         this.app.relayout();
-        symbol.draw(new Context(), this.drawContext);
+        symbol.draw(new ContextStub(), this.drawContext);
 
         symbol.applyScaling(new Point(1.2, 1), Point.Zero);
         symbol.opacity(.5); //anything to trigger custom properties update
 
         this.app.relayout();
-        symbol.draw(new Context(), this.drawContext);
+        symbol.draw(new ContextStub(), this.drawContext);
 
         // assert
         assert.equal(symbol.findClone(child.id()).width(), 80 * 1.2);
@@ -130,7 +131,7 @@ describe("Symbol tests", function () {
             Selection.makeSelection([child]);
             actions.markAsBackground(Selection);
             this.app.relayout();
-            symbol.draw(new Context(), this.drawContext);
+            symbol.draw(new ContextStub(), this.drawContext);
 
             // assert
             assert.equal(symbol.props.fill.value, "red");
@@ -152,7 +153,7 @@ describe("Symbol tests", function () {
             Selection.makeSelection([child]);
             actions.markAsBackground(Selection);
             this.app.relayout();
-            symbol.draw(new Context(), this.drawContext);
+            symbol.draw(new ContextStub(), this.drawContext);
 
             symbol.setProps({ fill: Brush.createFromColor("red"), stroke: Brush.createFromColor("green") });
 
@@ -175,13 +176,13 @@ describe("Symbol tests", function () {
             Selection.makeSelection([child]);
             actions.markAsBackground(Selection);
             this.app.relayout();
-            symbol.draw(new Context(), this.drawContext);
+            symbol.draw(new ContextStub(), this.drawContext);
 
             // act
             symbol.setProps({ fill: Brush.createFromColor("red") });
             child.setProps({ fill: Brush.createFromColor("green") });
             this.app.relayout();
-            symbol.draw(new Context(), this.drawContext);
+            symbol.draw(new ContextStub(), this.drawContext);
 
             // assert
             var clone = symbol.findClone(child.id());
@@ -208,7 +209,7 @@ describe("Symbol tests", function () {
             Selection.makeSelection([child]);
             actions.markAsBackground(Selection);
             this.app.relayout();
-            symbol.draw(new Context(), this.drawContext);
+            symbol.draw(new ContextStub(), this.drawContext);
 
             // act
             symbol.setProps({ fill: Brush.createFromColor("green") });
@@ -234,12 +235,12 @@ describe("Symbol tests", function () {
             Selection.makeSelection([child]);
             actions.markAsBackground(Selection);
             this.app.relayout();
-            symbol.draw(new Context(), this.drawContext);
+            symbol.draw(new ContextStub(), this.drawContext);
 
             // act
             child.setProps({ fill: Brush.createFromColor("green") });
             this.app.relayout();
-            symbol.draw(new Context(), this.drawContext);
+            symbol.draw(new ContextStub(), this.drawContext);
 
             // assert
             var clone = symbol.findClone(child.id());
@@ -261,13 +262,13 @@ describe("Symbol tests", function () {
             Selection.makeSelection([child1, child2]);
             actions.markAsBackground(Selection);
             this.app.relayout();
-            symbol.draw(new Context(), this.drawContext);
+            symbol.draw(new ContextStub(), this.drawContext);
 
             // act
             var clone1 = symbol.findClone(child1.id());
             clone1.setProps({ fill: Brush.createFromColor("green") });
             this.app.relayout();
-            symbol.draw(new Context(), this.drawContext);
+            symbol.draw(new ContextStub(), this.drawContext);
 
             // assert
             clone1 = symbol.findClone(child1.id());
@@ -296,7 +297,7 @@ describe("Symbol tests", function () {
             Selection.makeSelection([child1, child2]);
             actions.markAsBackground(Selection);
             this.app.relayout();
-            symbol.draw(new Context(), this.drawContext);
+            symbol.draw(new ContextStub(), this.drawContext);
 
             // assert
             assert.equal(child1.props.fill.value, "red", "Color on children should be the same");
@@ -326,7 +327,7 @@ describe("Symbol tests", function () {
             actions.markAsText(Selection);
 
             this.app.relayout();
-            symbol.draw(new Context(), this.drawContext);
+            symbol.draw(new ContextStub(), this.drawContext);
 
             // assert
             var clone = symbol.findClone(text.id());
@@ -350,13 +351,13 @@ describe("Symbol tests", function () {
             Selection.makeSelection([child1, child2]);
             actions.markAsText(Selection);
             this.app.relayout();
-            symbol.draw(new Context(), this.drawContext);
+            symbol.draw(new ContextStub(), this.drawContext);
 
             // act
             var clone1 = symbol.findClone(child1.id());
             clone1.setProps({ font: Font.createFromObject({ "color": "green" }) });
             this.app.relayout();
-            symbol.draw(new Context(), this.drawContext);
+            symbol.draw(new ContextStub(), this.drawContext);
 
             // assert
             clone1 = symbol.findClone(child1.id());
@@ -381,14 +382,14 @@ describe("Symbol tests", function () {
             actions.markAsText(Selection);
 
             this.app.relayout();
-            symbol.draw(new Context(), this.drawContext);
+            symbol.draw(new ContextStub(), this.drawContext);
 
             // act
             symbol.setProps({ font: Font.createFromObject({ color: "red" }) });
             text.font(Font.createFromObject({ size: 30 }));
 
             this.app.relayout();
-            symbol.draw(new Context(), this.drawContext);
+            symbol.draw(new ContextStub(), this.drawContext);
 
             // assert
             assert.equal(symbol.props.font.size, 30);
