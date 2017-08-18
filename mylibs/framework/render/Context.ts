@@ -815,15 +815,15 @@ export default class Context implements IContext {
     }
 
     createLinearGradient(x0, y0, x1, y1) {
-        this._context.createLinearGradient.apply(this._context, arguments);
+        return this._context.createLinearGradient.apply(this._context, arguments);
     }
 
     createRadialGradient(x0, y0, r0, x1, y1, r1) {
-        this._context.createRadialGradient.apply(this._context, arguments);
+        return this._context.createRadialGradient.apply(this._context, arguments);
     }
 
     createPattern(image, repetition) {
-        this._context.createPattern.apply(this._context, arguments);
+        return this._context.createPattern.apply(this._context, arguments);
     }
 
     clear() {

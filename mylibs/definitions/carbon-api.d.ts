@@ -242,6 +242,7 @@ declare module "carbon-api" {
         debounce(func: (...args: any[]) => any, ms: number): () => any;
         throttle(func: (...args: any[]) => any, ms: number): () => any;
         pushAll(target: any[], source: any[]);
+        imageDataPointToCssColor(data:{data:number[]}, index:number):string;
     }
 }
 

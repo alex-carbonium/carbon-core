@@ -7,6 +7,14 @@ var brushDefault = TypeDefaults[Types.Brush] = function () {
     return new Brush("black");
 }
 
+function gradientToCss(gradient) {
+    var res = 'linear-gradient(to right';
+    for(var s of gradient.stops) {
+        res += `, ${s[1]} ${s[0]*100}%`
+    }
+    return res + ")";
+}
+
 export default class Brush {
     public t: string;
 
@@ -33,32 +41,28 @@ export default class Brush {
                 case BrushType.color:
                     brush = value;
                     break;
-                case BrushType.gradient:
-                    var d = value.direction || "down";
-                    var lingrad = context.createLinearGradient(l, t, l, t + h); //down
-                    if (d === "up") {
-                        lingrad = context.createLinearGradient(l, t + h, l, t);
-                    }
-                    if (d === "left") {
-                        lingrad = context.createLinearGradient(l, t, l + w, t);
-                    }
-                    if (d === "right") {
-                        lingrad = context.createLinearGradient(l + w, t, l, t);
-                    }
-                    if (d === "radial") {
-                        var radius = Math.max(w, h) / 2 + (Math.max(w, h) / 20);
-                        lingrad = context.createRadialGradient(l + w / 2, t + h / 2, 0, l + w / 2, t + h / 2, radius);
-                    }
-                    if (value.sliders) {
-                        for (var i = 0, length = value.sliders.length; i < length; ++i) {
-                            var pos = value.sliders[i][0] / 100;
+                case BrushType.lineargradient:
+                    let x1 = value.x1;
+                    let y1 = value.y1;
+                    let x2 = value.x2;
+                    let y2 = value.y2;
+
+                    var lingrad = context.createLinearGradient(l + x1*w, t + y1*h, l +x2*w, t + y2*h); //down
+
+                    // if (d === "radial") {
+                    //     var radius = Math.max(w, h) / 2 + (Math.max(w, h) / 20);
+                    //     lingrad = context.createRadialGradient(l + w / 2, t + h / 2, 0, l + w / 2, t + h / 2, radius);
+                    // }
+                    if (value.stops) {
+                        for (var i = 0, length = value.stops.length; i < length; ++i) {
+                            var pos = value.stops[i][0];
                             if (pos > 1) {
                                 pos = 1;
                             }
                             if (pos < 0) {
                                 pos = 0;
                             }
-                            lingrad.addColorStop(pos, value.sliders[i][1]);
+                            lingrad.addColorStop(pos, value.stops[i][1]);
                         }
                     }
                     brush = lingrad;
@@ -160,6 +164,9 @@ export default class Brush {
                 case BrushType.color:
                     style.backgroundColor = brush.value;
                     break;
+                case BrushType.lineargradient:
+                    style.background = gradientToCss(brush.value);
+                    break;
                 // case BrushType.resource:
                 //     var r = Resources.getSystemResource(brush.value);
                 //     if (!r) {
@@ -188,8 +195,8 @@ export default class Brush {
         return this.createFromObject({ type: BrushType.empty });
     }
 
-    static createFromGradientPoints(points): Brush {
-        return this.createFromObject({ type: BrushType.gradient, value: points });
+    static createFromLinearGradientObject(value): Brush {
+        return this.createFromObject({ type: BrushType.lineargradient, value: value });
     }
 
     static createFromResource(resourceId): Brush {

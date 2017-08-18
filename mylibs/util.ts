@@ -6,12 +6,12 @@ export function debounce(func, wait, immediate){
         var context = this, args = arguments;
         var later = function(){
             timeout = null;
-            if (!immediate) func.apply(context, args);
+            if (!immediate) {func.apply(context, args);}
         };
         var callNow = immediate && !timeout;
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
-        if (callNow) func.apply(context, args);
+        if (callNow) {func.apply(context, args);}
     };
 }
 
@@ -27,6 +27,18 @@ export function throttle(func, limit){
             }, limit);
         }
     }
+}
+
+export function imageDataPointToCssColor(imageData, x) {
+    var r = imageData[x*4 + 0];
+    var g = imageData[x*4 + 1];
+    var b = imageData[x*4 + 2];
+    var a = imageData[x*4 + 3];
+    if(a !== 255) {
+        return `rgba(${r},${g},${b},${a/255})`;
+    }
+
+    return `rgb(${r},${g},${b})`;
 }
 
 export function contextScale(context){
@@ -48,7 +60,7 @@ if (DEBUG){
     useIntegerIds = !!localStorage.getItem("useIntegerIds");
 }
 
-export var createUUID = (typeof(window.crypto) != 'undefined' && typeof(window.crypto.getRandomValues) != 'undefined') ?
+export var createUUID = (typeof(window.crypto) !== 'undefined' && typeof(window.crypto.getRandomValues) !== 'undefined') ?
     function(debugPrefix?){
         if (DEBUG){
             if (useIntegerIds){
@@ -72,7 +84,7 @@ export var createUUID = (typeof(window.crypto) != 'undefined' && typeof(window.c
     var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
         var r = (d + Math.random()*16)%16 | 0;
         d = Math.floor(d/16);
-        return (c == 'x' ? r : (r & 0x7 | 0x8)).toString(16);
+        return (c === 'x' ? r : (r & 0x7 | 0x8)).toString(16);
     });
     return uuid;
 };

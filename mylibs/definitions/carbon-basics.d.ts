@@ -86,9 +86,17 @@ declare module "carbon-basics" {
     export const enum BrushType {
         empty,
         color,
-        gradient,
+        lineargradient,
         resource,
         pattern
+    }
+
+    export interface LinearGradientData {
+        x1:number;
+        y1:number;
+        x2:number;
+        y2:number;
+        stops:any[];
     }
 
     export class Brush {
@@ -96,6 +104,7 @@ declare module "carbon-basics" {
         value: any;
 
         static createFromColor(color: string): Brush;
+        static createFromLinearGradientObject(value: LinearGradientData): Brush;
         static toCss(brush: Brush): any;
 
         static Empty: Brush;
