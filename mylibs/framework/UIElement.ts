@@ -1314,7 +1314,15 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
         return this.props.dashPattern;
     }
-    selectFrameVisible() {
+    selectFrameVisible(value?) {
+        if(value !== undefined) {
+            this.runtimeProps.frameVisible = value;
+        }
+
+        if(this.runtimeProps.hasOwnProperty("frameVisible")) {
+            return this.runtimeProps.frameVisible;
+        }
+
         return true;
     }
     field(name, value, defaultValue?: any) {

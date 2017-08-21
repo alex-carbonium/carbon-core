@@ -24,6 +24,7 @@ declare module "carbon-basics" {
         y: number;
         isDragging: boolean;
         cursor?: string;
+        event:MouseEvent;
     }
 
     export interface IEvent<T> {

@@ -114,8 +114,7 @@ declare module "carbon-app"{
         scaleMatrix: any;
         context: any;
 
-        registerForLayerDraw(layerType:number, element:{onLayerDraw:(layer: ILayer, context: IContext, environment: IEnvironment)=>void}, index?);
-        unregisterForLayerDraw(layerType:number, element:any);
+
         focused(value?: boolean): boolean;
 
         activateLayer(layerType: LayerTypes, silent?: boolean);

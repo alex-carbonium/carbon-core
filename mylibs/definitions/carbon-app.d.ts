@@ -196,6 +196,10 @@ declare module "carbon-app" {
         setActiveArtboardById(id: string): void;
     }
 
+    export interface ILayerDrawHandlerOject {
+        onLayerDraw(layer: ILayer, context: IContext, environment: IEnvironment):void;
+    }
+
     export interface IView {
         //TODO encapsulate
         _highlightTarget: any;
@@ -240,6 +244,9 @@ declare module "carbon-app" {
 
         showPixels(value?: boolean): boolean;
         showPixelGrid(value?: boolean): boolean;
+
+        registerForLayerDraw(layerType:number, element:ILayerDrawHandlerObject, index?);
+        unregisterForLayerDraw(layerType:number, element:ILayerDrawHandlerObject);
     }
 
     export interface IDropElementData{

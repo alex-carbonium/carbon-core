@@ -34,6 +34,7 @@ export default {
     "Rect": require("./math/rect"),
     "Point": require("./math/point"),
     "Matrix": require("./math/matrix"),
+    "AngleAdjuster": require("./math/AngleAdjuster"),
     "ObjectFactory": require("./framework/ObjectFactory"),
     "DesignerView": require("./framework/DesignerView"),
     "ViewBase": require("./framework/ViewBase"),
@@ -68,6 +69,7 @@ export default {
     "Shape": require("./framework/Shape"),
     "Rectangle": require("./framework/Rectangle"),
     "Circle": require("./framework/Circle"),
+    "UIElementDecorator": require("./framework/UIElementDecorator"),
 
     "MirroringController": require("./framework/MirroringController"),
     "MirroringView": require("./framework/MirroringView"),

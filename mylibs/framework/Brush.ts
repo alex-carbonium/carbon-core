@@ -47,7 +47,7 @@ export default class Brush {
                     let x2 = value.x2;
                     let y2 = value.y2;
 
-                    var lingrad = context.createLinearGradient(l + x1*w, t + y1*h, l +x2*w, t + y2*h); //down
+                    var lingrad = context.createLinearGradient(x1*w, y1*h, x2*w, y2*h); //down
 
                     // if (d === "radial") {
                     //     var radius = Math.max(w, h) / 2 + (Math.max(w, h) / 20);

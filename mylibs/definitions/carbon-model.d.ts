@@ -93,6 +93,8 @@ declare module "carbon-model" {
         setTransform(matrix: IMatrix);
         resetTransform();
 
+        selectFrameVisible(value?:boolean):boolean;
+
         boundaryRect(value?: IRect): IRect;
         getBoundingBox(): IRect;
         getBoundingBoxGlobal(): IRect;
@@ -294,6 +296,16 @@ declare module "carbon-model" {
         readonly EmptySource: ImageSource;
         readonly NewImageSize: number;
     };
+
+    export class UIElementDecorator {
+        protected element:IUIElement;
+        attach(element:IUIElement);
+        detach();
+        beforeInvoke(method:string, args:any[]):boolean|void;
+        afterInvoke(method:string, args:any[]):boolean|void ;
+        parent(value):any;
+        visible(value:boolean):boolean;
+    }
 
     export const enum TextMode {
         Label = 1,

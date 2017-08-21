@@ -124,4 +124,8 @@ declare module "carbon-geometry" {
         cp2y?: number;
         idx?:number;
     }
+
+    export const AngleAdjuster: {
+        adjust (startPoint:ICoordinate, endPoint:ICoordinate):ICoordinate;
+    }
 }

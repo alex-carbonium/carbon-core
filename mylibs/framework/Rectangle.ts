@@ -311,6 +311,10 @@ class Rectangle extends Shape {
             return frame;
         }
 
+        if(!this.selectFrameVisible()) {
+            return frame;
+        }
+
         frame.points.push({
             type: CornerRadiusPoint,
             moveDirection: PointDirection.Any,

@@ -17,7 +17,7 @@ AngleAdjuster.prototype.getAngle = function (startPoint, endPoint) {
 
     var inDegrees = radiantsToDegrees(atan);
 
-    if (inDegrees == 360) {
+    if (inDegrees === 360) {
         return 0;
     }
     return inDegrees;
