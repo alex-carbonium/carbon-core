@@ -27,7 +27,8 @@ export default class BoundaryPathDecorator extends UIElementDecorator {
         context.beginPath();
         if (element.hasPath() && !boundaryPath) {
             element.applyViewMatrix(context);
-            element.drawPath(context, element.width(), element.height());
+            let br = element.boundaryRect();
+            element.drawPath(context, br.width, br.height);
             context.lineWidth = highlightKind / scale;
         }
         else {
