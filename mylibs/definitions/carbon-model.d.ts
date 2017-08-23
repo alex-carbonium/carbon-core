@@ -1,6 +1,6 @@
 declare module "carbon-model" {
     import { IPoint, IRect, ICoordinate, IMatrix, ISize, OriginType } from "carbon-geometry";
-    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable, ChangeMode, ArtboardType, Font, IKeyboardState } from "carbon-basics";
+    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable, ChangeMode, ArtboardType, Font, IKeyboardState, Brush } from "carbon-basics";
     import { IContext } from "carbon-rendering";
 
     export interface IDataNodeProps {
@@ -88,6 +88,7 @@ declare module "carbon-model" {
         shouldApplyViewMatrix(): boolean;
 
         applyScaling(vector: IPoint, origin: IPoint, options?, mode?: ChangeMode): boolean;
+        applyMatrixScaling(vector: IPoint, origin: IPoint, options?, mode?: ChangeMode): void;
         applyTranslation(vector: IPoint, withReset?, mode?: ChangeMode): void;
         applyDirectedTranslation(vector: IPoint, mode?: ChangeMode): void;
         setTransform(matrix: IMatrix);

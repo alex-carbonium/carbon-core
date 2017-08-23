@@ -1065,6 +1065,7 @@ PropertyMetadata.registerForType(Artboard, {
     prepareVisibility(element: Artboard) {
         let showAsStencil = element.props.type === ArtboardType.Symbol;
         return {
+            stroke: false,
             tileSize: showAsStencil,
             insertAsContent: showAsStencil,
             toolboxGroup: showAsStencil,

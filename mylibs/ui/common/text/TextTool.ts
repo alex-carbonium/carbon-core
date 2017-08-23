@@ -6,6 +6,7 @@ import Tool from "../Tool";
 import DropVisualization from "../../../extensions/DropVisualization";
 import DragController from "../../../framework/DragController";
 import Text from "../../../framework/text/Text";
+import TextEngine from "../../../framework/text/textengine";
 import Font from "../../../framework/Font";
 import Brush from "../../../framework/Brush";
 import NameProvider from "../../NameProvider";
@@ -20,16 +21,24 @@ import Invalidate from "../../../framework/Invalidate";
 import Environment from "../../../environment";
 import { getAverageLuminance } from "../../../math/color";
 import Rect from "../../../math/rect";
-import { ChangeMode, IMouseEventData, IElementEventData, VerticalConstraint, HorizontalConstraint, IDisposable, TextMode } from "carbon-core";
+import { ChangeMode, IMouseEventData, IElementEventData, VerticalConstraint, HorizontalConstraint, IDisposable, TextMode, IRect } from "carbon-core";
 import UserSettings from "../../../UserSettings";
 import Point from "../../../math/point";
 import Symbol from "../../../framework/Symbol";
+import BoundaryPathDecorator from "../../../decorators/BoundaryPathDecorator";
 
 const CursorInvertThreshold = .4;
+const UpdateTimeout = 1000;
 
 export default class TextTool extends Tool {
     [name: string]: any;
     private globalTokens: IDisposable[] = [];
+    private text: Text;
+    /**
+     * Contains the most recent boundary rect since content is not always immediately updated.
+     */
+    private boundaryRect: IRect = Rect.Zero;
+    private updateTimer: number = 0;
 
     constructor(app) {
         super(ViewTool.Text);
@@ -37,8 +46,7 @@ export default class TextTool extends Tool {
         this._view = Environment.view;
         this._controller = Environment.controller;
         this._editor = null;
-        this._editedElement = null;
-        this._editClone = null;
+        this.text = null;
         this._dragZone = null;
         this._next = null;
         this._detaching = false;
@@ -97,7 +105,7 @@ export default class TextTool extends Tool {
 
         this._dragController.unbind();
         if (this._editor) {
-            Selection.makeSelection([this._editedElement]);
+            Selection.makeSelection([this.text]);
             this._editor.deactivate(false);
         }
 
@@ -137,7 +145,7 @@ export default class TextTool extends Tool {
             return;
         }
         var hit = this._hitNewElement(e);
-        if (hit instanceof Text && hit !== this._editedElement) {
+        if (hit instanceof Text && hit !== this.text) {
             this._next = { element: hit, event: e };
             Cursor.setGlobalCursor("text");
             Invalidate.requestInteractionOnly();
@@ -210,7 +218,7 @@ export default class TextTool extends Tool {
                 this.beginEdit(hit, e);
             }
             else if (this._editor) {
-                Selection.makeSelection([this._editedElement]);
+                Selection.makeSelection([this.text]);
                 this._editor.deactivate(UserSettings.text.insertNewOnClickOutside);
             }
             else if (UserSettings.text.insertNewOnClickOutside || !this._detaching) { //tool can be changed by mouse down
@@ -232,7 +240,7 @@ export default class TextTool extends Tool {
     onDblClickElement = (e: IElementEventData) => {
         var hit = e.element;
         if (hit instanceof Text && this._app.currentTool !== ViewTool.Text) {
-            this._onAttached = () => { this.beginEdit(hit, e); };
+            this._onAttached = () => { this.beginEdit(hit as Text, e); };
             this._app.actionManager.invoke("textTool");
             e.handled = true;
         }
@@ -261,7 +269,7 @@ export default class TextTool extends Tool {
             text.prepareAndSetProps(props);
             var y = dropData.position.y;
             if (!fixedSize) {
-                var engine = text.createEngine(text.props);
+                var engine = text.engine();
                 var height = engine.getActualHeight();
                 y -= height / 2;
             }
@@ -274,32 +282,26 @@ export default class TextTool extends Tool {
         this.beginEdit(text);
     }
 
-    beginEdit(text, e?, selectText = UserSettings.text.selectOnDblClick) {
+    beginEdit(text: Text, e?, selectText = UserSettings.text.selectOnDblClick) {
         if (this._editor) {
             this._editor.deactivate(false);
         }
 
-        var clone = text.clone();
-        clone.setProps(text.selectLayoutProps(true), ChangeMode.Self);
-        clone.runtimeProps.drawSelection = true;
-        clone.runtimeProps.originalHeight = text.height();
+        this.text = text;
 
-        text.runtimeProps.drawText = false;
-        text.runtimeProps.sampleBackground = this.sampleBackground;
-        Invalidate.request(0);
-
-        var engine = clone.createEngine(clone.props);
+        var engine = text.engine();
         engine.contentChanged(this.contentChanged);
 
-        this._editor = this._createEditor(engine, clone);
-        this._editedElement = text;
-        this._originalBr = text.props.br;
-        this._editClone = clone;
-        this._editClone.runtimeProps.keepEngine = true;
+        this._editor = this._createEditor(engine, text);
+        this.boundaryRect = text.boundaryRect();
 
         this._rangeFormatter = new RangeFormatter();
-        this._rangeFormatter.initFormatter(this._app, engine, this._editClone, () => this._changed = true);
+        this._rangeFormatter.initFormatter(this._app, engine, text);
         Selection.makeSelection([this._rangeFormatter]);
+
+        text.runtimeProps.editing = true;
+        text.runtimeProps.drawSelection = true;
+        text.runtimeProps.ctxl = 2;
 
         if (e && !selectText) {
             e.y -= text.getVerticalOffset(engine);
@@ -310,88 +312,77 @@ export default class TextTool extends Tool {
             engine.select(0, engine.getLength() - 1);
         }
 
-        this._view.interactionLayer.add(clone);
         Cursor.setGlobalCursor("text");
-        Invalidate.request();
+        this.invalidateLayers();
         Environment.controller.inlineEditModeChanged.raise(true, this._editor);
 
-        this._changed = false;
         this._next = null;
     }
     contentChanged = () => {
         var engine = this._editor.engine;
         var w = engine.getActualWidth() + .5 | 0;
         var h = engine.getActualHeight() + .5 | 0;
-        var props = null;
-        var dx = 0;
-        var dy = 0;
-        var dw = 0;
-        var dh = 0;
-        var constraints = this._editClone.constraints();
-        var br = this._editClone.props.br;
-        if (w > this._editClone.width() || this._editClone.props.mode === TextMode.Label) {
-            props = props || {};
-            props.width = w;
+        var constraints = this.text.constraints();
+        var br = this.text.boundaryRect();
 
-            if (constraints.h === HorizontalConstraint.Right) {
-                dx = br.width - w;
-            } else if (constraints.h === HorizontalConstraint.Center) {
-                dx = (br.width - w) / 2;
-            } else if (constraints.h === HorizontalConstraint.LeftRight) {
-                dw = (w - br.width);
+        let canMove = constraints.h === HorizontalConstraint.Right
+            || constraints.h === HorizontalConstraint.Center
+            || constraints.v === VerticalConstraint.Bottom
+            || constraints.v === VerticalConstraint.Center;
+        let canAutoGrow = constraints.h === HorizontalConstraint.LeftRight
+            || constraints.v === VerticalConstraint.TopBottom;
+
+        let expanding = (w > br.width || h > br.height) && (canAutoGrow || canMove);
+        let changingMatrix = this.text.props.mode === TextMode.Label && canMove;
+
+        if (expanding || changingMatrix) {
+            this.text.prepareAndSetProps({ content: engine.save() });
+            if (this.updateTimer) {
+                clearTimeout(this.updateTimer);
+                this.updateTimer = 0;
             }
         }
-        if (h >= this._editClone.runtimeProps.originalHeight || this._editClone.props.mode === TextMode.Label) {
-            props = props || {};
-            props.height = h;
-
-            if (constraints.v === VerticalConstraint.Bottom) {
-                dy = br.height - h;
-            } else if (constraints.v === VerticalConstraint.Center) {
-                dy = (br.height - h) / 2;
-            } else if (constraints.v === VerticalConstraint.TopBottom) {
-                dh = (h - br.height);
+        else {
+            if (this.updateTimer) {
+                clearTimeout(this.updateTimer);
             }
-        }
-
-        if (props) {
-            if (dw || dh) {
-                this._editedElement.parent().autoGrow(dw, dh);
-            }
-            else {
-                // this is for scenario when text is growing inside stack container for example
-                let br = this._editedElement.props.br;
-                this._editedElement.setProps(props, ChangeMode.Self);
-                this._editedElement.parent().performArrange(undefined, ChangeMode.Self);
-            }
-
-            this._editClone.setProps(props, ChangeMode.Self);
-            this._editClone.applyTranslation({ x: dx, y: dy });
-            this._resizeBackgroundIfNeeded();
+            this.updateTimer = setTimeout(this.updateOriginalDebounced, UpdateTimeout);
         }
 
         //the engine must keep current width (for example, for right alignment)
         //and update the actual height so that the lines added below are not clipped
         engine.updateSize(engine.getWidth(), h);
 
-        this._changed = true;
-    };
-    endEdit(finalEdit: boolean) {
-        if (this._changed) {
-            this._updateOriginal();
+        if (this.text.props.mode === TextMode.Label) {
+            this.boundaryRect = this.boundaryRect.withSize(w, h);
         }
-        delete this._editedElement.runtimeProps.engine;
-        delete this._editedElement.runtimeProps.drawText;
+        else {
+            this.boundaryRect = this.boundaryRect.withSize(Math.max(w, br.width), Math.max(h, br.height));
+        }
+    }
+    updateOriginalDebounced = () => {
+        this.text.prepareAndSetProps({ content: this._editor.engine.save() });
+        this.updateTimer = 0;
+    }
+    endEdit(finalEdit: boolean) {
+        if (this.updateTimer) {
+            clearTimeout(this.updateTimer);
+            this.updateTimer = 0;
+            this.updateOriginalDebounced();
+        }
 
-        Selection.makeSelection([this._editedElement]);
+        this.text.runtimeProps.engine.unsubscribe();
+        this.text.runtimeProps.editing = false;
+        this.text.runtimeProps.drawSelection = false;
+        this.text.runtimeProps.ctxl = undefined;
+        this.text.resetEngine();
+
+        Selection.makeSelection([this.text]);
 
         this._editor = null;
-        this._editedElement = null;
-        this._view.interactionLayer.remove(this._editClone);
-        this._editClone = null;
+        this.text = null;
         this._rangeFormatter = null;
         this._backgroundCache = null;
-        this._changed = false;
 
         var next = this._next;
         if (next) {
@@ -406,48 +397,28 @@ export default class TextTool extends Tool {
             Environment.controller.inlineEditModeChanged.raise(false, null);
         }
     }
-    _updateOriginal() {
-        var props = Object.assign({}, this._editClone.selectLayoutProps(true));
-        props.m = this._editedElement.parent().globalViewMatrixInverted().appended(props.m);
-        if (props.m.equals(this._editedElement.viewMatrix())) {
-            delete props.m;
-        }
-
-        props.content = this._editor.engine.save();
-        props.font = this._rangeFormatter.getFirstFont();
-
-        if (this._editClone.props.font.valign !== this._editedElement.props.font.valign) {
-            props.font = Font.extend(props.font, { valign: this._editClone.props.font.valign });
-        }
-
-        this._editedElement.setProps({ br: this._originalBr }, ChangeMode.Self);
-        this._editedElement.parent().performArrange(undefined, ChangeMode.Self);
-
-        //do not call prepareProps, all validation is already made on the clone
-        //otherwise, transformations such as auto-growing font size will be applied twice
-        this._editedElement.setProps(props);
-    }
 
     _createEditor(engine, element) {
         var inlineEditor = new InlineTextEditor();
-        inlineEditor.onInvalidate = this._onInvalidateEditor;
+        inlineEditor.onInvalidate = this.invalidateLayers;
         inlineEditor.onSelectionChanged = this._onSelectionChanged;
         inlineEditor.onDeactivated = finalEdit => this.endEdit(finalEdit);
         inlineEditor.activate(element.viewMatrix(), engine, element.props.font, this._app.fontManager);
         return inlineEditor;
     }
-    _onInvalidateEditor = () => {
+    private invalidateLayers = () => {
         Invalidate.requestInteractionOnly();
+        this.text.invalidate();
     };
 
     _hitNewElement(e) {
         return this._view.hitElementDirect(e)
     }
     _hittingEdited(e) {
-        if (!this._editClone) {
+        if (!this._editor) {
             return false;
         }
-        return this._editClone.hitTest(e, this._view.scale());
+        return this.text.hitTest(e, this._view.scale());
     }
     private tryGetSupportedElement() {
         var selection = Selection.elements;
@@ -459,7 +430,7 @@ export default class TextTool extends Tool {
             if (element instanceof Symbol) {
                 var texts = element.findTexts();
                 if (texts.length) {
-                    return texts[0];
+                    return texts[0] as Text;
                 }
             }
         }
@@ -484,7 +455,7 @@ export default class TextTool extends Tool {
     //does not support rotation, can be added later if needed
     _pickCaretColor(engine, selection) {
         var coords = engine.getCaretCoords(selection.start);
-        var global = this._editedElement.getBoundaryRectGlobal();
+        var global = this.text.getBoundaryRectGlobal();
         var x = (coords.l + global.x) * this._view.scale() - this._view.scrollX() + .5 | 0;
         var y = (coords.t + global.y) * this._view.scale() - this._view.scrollY() + .5 | 0;
         var contextScale = this._view.contextScale;
@@ -500,16 +471,6 @@ export default class TextTool extends Tool {
         }
         return "black";
     }
-    _resizeBackgroundIfNeeded() {
-        if (this._editedElement.fill() === Brush.Empty && this._editedElement.stroke() === Brush.Empty) {
-            return;
-        }
-        if (this._editedElement.width() === this._editClone.width() && this._editedElement.height() === this._editClone.height()) {
-            return;
-        }
-        this._editedElement.setProps({ width: this._editClone.width(), height: this._editClone.height() });
-        Invalidate.request();
-    }
 
     layerdraw(context) {
         if (this._dragZone && this._dragZone.width > 1) {
@@ -521,18 +482,16 @@ export default class TextTool extends Tool {
             context.strokeRect(r.x + .5, r.y + .5, r.width - 1, r.height - 1);
             context.restore();
         }
-        if (this._editClone) {
+        if (this.text) {
             context.save();
-            this._editClone.viewMatrix().applyToContext(context);
-            context.lineWidth = 1 / this._view.scale();
+            context.beginPath();
+            BoundaryPathDecorator.drawRectAsPath(context, this.boundaryRect, this.text.globalViewMatrix());
             context.strokeStyle = SharedColors.Highlight;
-
-            //-.5 to show the text cursor if it is at position 0, maybe can be done better...
-            context.strokeRect(-.5, -.5, this._editClone.width() + 1, this._editClone.height() + 1);
+            context.stroke();
             context.restore();
         }
         if (this._next) {
-            DropVisualization.highlightElement(this._view, context, this._next.element);
+            BoundaryPathDecorator.draw(context, this._next.element);
         }
     }
     _getDrawRect(zone) {

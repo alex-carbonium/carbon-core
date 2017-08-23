@@ -28,6 +28,9 @@ class NullContainer extends DataNode implements IContainer {
     applyVisitorTLR(callback:(e:IUIElement)=>boolean|void) {}
     allowRearrange() { return false; }
     autoGrow(dw, dh) { }
+    selectFrameVisible() {
+        return false;
+    }
 
     mousemove(event: IMouseEventData, keys: IKeyboardState) { }
     mouseup(event: IMouseEventData, keys: IKeyboardState) { }
@@ -75,6 +78,8 @@ class NullContainer extends DataNode implements IContainer {
     }
     applyScaling(vector: IPoint, origin: IPoint, options?: any, mode?: any): boolean {
         return false;
+    }
+    applyMatrixScaling(vector: IPoint, origin: IPoint, options?: any, mode?: any): void {
     }
     applyTranslation(vector: IPoint, withReset?: any, mode?: any): void {
     }

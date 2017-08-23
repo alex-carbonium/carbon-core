@@ -39,7 +39,9 @@ declare module "carbon-rendering" {
         fillText(text: string, x: number, y: number): void;
         stroke(): void;
         fill(): void;
+        fill2(): void;
 
+        transform(m11, m12, m21, m22, dx, dy);
         resetTransform():void;
         drawImage(img_elem, dx_or_sx?:number, dy_or_sy?:number, dw_or_sw?:number, dh_or_sh?:number, dx?:number, dy?:number, dw?:number, dh?:number);
 

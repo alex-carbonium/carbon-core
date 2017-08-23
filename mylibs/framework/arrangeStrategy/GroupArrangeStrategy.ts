@@ -52,7 +52,11 @@ var GroupArrangeStrategy = {
             if (xMin !== 0 || yMin !== 0) {
                 var translate = new Point(-xMin, -yMin);
                 for (let i = 0, l = items.length; i < l; ++i) {
-                    items[i].applyTranslation(translate, false, changeMode);
+                    let item = items[i];
+                    if (event && item === event.exclude) {
+                        continue;
+                    }
+                    item.applyTranslation(translate, false, changeMode);
                 }
                 container.applyDirectedTranslation(translate.negate(), changeMode);
             }

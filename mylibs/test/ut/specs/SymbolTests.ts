@@ -28,7 +28,7 @@ describe("Symbol tests", function () {
         var that = this;
         this.createArtboard = function () {
             var artboard = new Artboard();
-            artboard.setProps({ width: 200, height: 100, name: "template" });
+            artboard.prepareAndSetProps({ width: 200, height: 100, name: "template" });
             this.app.activePage.add(artboard);
             return artboard;
         }
@@ -36,12 +36,12 @@ describe("Symbol tests", function () {
         this.drawContext = {
             finalRender: true,
             pageMatrix: Matrix.create(),
-            setupContext: (context) => {},
+            setupContext: (context) => { },
             view: {
-                scale: () =>1,
-                focused:()=>false,
+                scale: () => 1,
+                focused: () => false,
                 contextScale: 1,
-                viewportRect: ()=> Rect.Max
+                viewportRect: () => Rect.Max
             }
         }
     });
@@ -54,7 +54,7 @@ describe("Symbol tests", function () {
         var atc = new Symbol();
         var artboard = this.createArtboard();
         // act
-        atc.setProps({ source: { pageId: this.app.activePage.id(), artboardId: artboard.id() } });
+        atc.prepareAndSetProps({ source: { pageId: this.app.activePage.id(), artboardId: artboard.id() } });
 
         // assert
         assert.equal(atc.width(), artboard.width());
@@ -68,16 +68,16 @@ describe("Symbol tests", function () {
 
         var artboard = this.createArtboard();
         var child = new UIElement();
-        artboard.setProps({ allowHorizontalResize: true, allowVerticalResize: true });
-        child.setProps({
+        artboard.prepareAndSetProps({ allowHorizontalResize: true, allowVerticalResize: true });
+        child.prepareAndSetProps({
             width: 10, height: 20, constraints: Constraints.All
         });
         artboard.add(child);
 
         // act
-        atc.setProps({ source: { pageId: this.app.activePage.id(), artboardId: artboard.id() }, width: 200, height: 100 });
+        atc.prepareAndSetProps({ source: { pageId: this.app.activePage.id(), artboardId: artboard.id() }, width: 200, height: 100 });
         this.app.relayout();
-        atc.setProps({ width: atc.width() * 2, height: atc.height() * 2 })
+        atc.prepareAndSetProps({ width: atc.width() * 2, height: atc.height() * 2 })
         this.app.relayout();
         atc.draw(new ContextStub(), this.drawContext);
 
@@ -112,6 +112,31 @@ describe("Symbol tests", function () {
 
         // assert
         assert.equal(symbol.findClone(child.id()).width(), 80 * 1.2);
+    });
+
+    it("Must support undo for changing inner elements", function () {
+        // arrange
+        var child = new UIElement();
+        child.prepareAndSetProps({ fill: Brush.createFromColor("red") });
+        this.app.activePage.add(child);
+
+        Selection.makeSelection([child]);
+        var actions = new SymbolActions(this.app, this.drawContext);
+        var symbol = actions.createSymbolFromSelection(Selection);
+        this.app.relayout();
+
+        // act
+        var clone = symbol.findClone(child.id());
+        clone.prepareAndSetProps({ fill: Brush.createFromColor("green") });
+        this.app.relayout();
+        symbol.draw(new ContextStub(), this.drawContext);
+
+        CommandManager.undoPrevious();
+        this.app.relayout();
+
+        // assert
+        clone = symbol.findClone(child.id());
+        assert.equal(clone.props.fill.value, "red", "Clone must have original values");
     });
 
     describe("Fill/stroke support", function () {
@@ -155,7 +180,7 @@ describe("Symbol tests", function () {
             this.app.relayout();
             symbol.draw(new ContextStub(), this.drawContext);
 
-            symbol.setProps({ fill: Brush.createFromColor("red"), stroke: Brush.createFromColor("green") });
+            symbol.prepareAndSetProps({ fill: Brush.createFromColor("red"), stroke: Brush.createFromColor("green") });
 
             // assert
             var clone = symbol.findClone(child.id());
@@ -179,8 +204,8 @@ describe("Symbol tests", function () {
             symbol.draw(new ContextStub(), this.drawContext);
 
             // act
-            symbol.setProps({ fill: Brush.createFromColor("red") });
-            child.setProps({ fill: Brush.createFromColor("green") });
+            symbol.prepareAndSetProps({ fill: Brush.createFromColor("red") });
+            child.prepareAndSetProps({ fill: Brush.createFromColor("green") });
             this.app.relayout();
             symbol.draw(new ContextStub(), this.drawContext);
 
@@ -199,7 +224,7 @@ describe("Symbol tests", function () {
         function testUndo(container) {
             // arrange
             var child = new UIElement();
-            child.setProps({ fill: Brush.createFromColor("red") });
+            child.prepareAndSetProps({ fill: Brush.createFromColor("red") });
             container.add(child);
 
             Selection.makeSelection([child]);
@@ -212,7 +237,7 @@ describe("Symbol tests", function () {
             symbol.draw(new ContextStub(), this.drawContext);
 
             // act
-            symbol.setProps({ fill: Brush.createFromColor("green") });
+            symbol.prepareAndSetProps({ fill: Brush.createFromColor("green") });
             this.app.relayout();
 
             CommandManager.undoPrevious();
@@ -238,7 +263,7 @@ describe("Symbol tests", function () {
             symbol.draw(new ContextStub(), this.drawContext);
 
             // act
-            child.setProps({ fill: Brush.createFromColor("green") });
+            child.prepareAndSetProps({ fill: Brush.createFromColor("green") });
             this.app.relayout();
             symbol.draw(new ContextStub(), this.drawContext);
 
@@ -266,7 +291,7 @@ describe("Symbol tests", function () {
 
             // act
             var clone1 = symbol.findClone(child1.id());
-            clone1.setProps({ fill: Brush.createFromColor("green") });
+            clone1.prepareAndSetProps({ fill: Brush.createFromColor("green") });
             this.app.relayout();
             symbol.draw(new ContextStub(), this.drawContext);
 
@@ -307,93 +332,6 @@ describe("Symbol tests", function () {
             var clone2 = symbol.findClone(child2.id());
             assert.equal(clone1.props.fill.value, "red", "Color on clones should be the same");
             assert.equal(clone1.props.fill.value, "red", "Color on clones should be the same");
-        });
-    });
-
-    describe("Text support", function () {
-        it("Should initialize font from child", function () {
-            // arrange
-            var text = new Text();
-            text.content(["hello"]);
-            text.font(Font.createFromObject({ size: 20 }));
-
-            Selection.makeSelection([text]);
-
-            var actions = new SymbolActions(this.app, this.drawContext);
-            var symbol = actions.createSymbolFromSelection(Selection);
-
-            // act
-            Selection.makeSelection([text]);
-            actions.markAsText(Selection);
-
-            this.app.relayout();
-            symbol.draw(new ContextStub(), this.drawContext);
-
-            // assert
-            var clone = symbol.findClone(text.id());
-            assert.equal(symbol.props.font.size, 20);
-            assert.equal(clone.props.font.size, 20);
-        });
-
-        it("Should handle font change on a child", function () {
-            // arrange
-            var child1 = new Text();
-            var child2 = new Text();
-            child1.content("Hello");
-            child2.content("World");
-            this.app.activePage.add(child1);
-            this.app.activePage.add(child2);
-
-            Selection.makeSelection([child1, child2]);
-            var actions = new SymbolActions(this.app, this.drawContext);
-            var symbol = actions.createSymbolFromSelection(Selection);
-
-            Selection.makeSelection([child1, child2]);
-            actions.markAsText(Selection);
-            this.app.relayout();
-            symbol.draw(new ContextStub(), this.drawContext);
-
-            // act
-            var clone1 = symbol.findClone(child1.id());
-            clone1.setProps({ font: Font.createFromObject({ "color": "green" }) });
-            this.app.relayout();
-            symbol.draw(new ContextStub(), this.drawContext);
-
-            // assert
-            clone1 = symbol.findClone(child1.id());
-            var clone2 = symbol.findClone(child2.id());
-            assert.equal(clone1.props.font.color, "green", "Child1 must change");
-            assert.equal(clone2.props.font.color, "green", "Child2 must change");
-            assert.equal(symbol.props.font.color, "green", "Symbol must change");
-        });
-
-        it("Should extend overriden font", function () {
-            // arrange
-            var text = new Text();
-            text.content(["hello"]);
-            text.font(Font.createFromObject({ size: 20 }));
-
-            Selection.makeSelection([text]);
-
-            var actions = new SymbolActions(this.app, this.drawContext);
-            var symbol = actions.createSymbolFromSelection(Selection);
-
-            Selection.makeSelection([text]);
-            actions.markAsText(Selection);
-
-            this.app.relayout();
-            symbol.draw(new ContextStub(), this.drawContext);
-
-            // act
-            symbol.setProps({ font: Font.createFromObject({ color: "red" }) });
-            text.font(Font.createFromObject({ size: 30 }));
-
-            this.app.relayout();
-            symbol.draw(new ContextStub(), this.drawContext);
-
-            // assert
-            assert.equal(symbol.props.font.size, 30);
-            assert.equal(symbol.props.font.color, "red");
         });
     });
 });

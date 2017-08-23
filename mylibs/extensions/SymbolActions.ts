@@ -121,7 +121,7 @@ export default class SymbolActions extends CarbonExtension {
             let e: any = sorted[i];
             let vm = group.children[i].viewMatrix();
             e.setTransform(vm);
-            e.setProps({
+            e.prepareAndSetProps({
                 constraints: Constraints.StretchAll
             });
             artboard.insert(e, i);

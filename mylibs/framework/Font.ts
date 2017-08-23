@@ -23,16 +23,6 @@ var fontDefault = TypeDefaults[Types.Font] = function () {
     return new Font();
 }
 
-// function getSizeForFamily(fromFamily, toFamily, size) {
-//     var newSize = size;
-//     if (fromFamily !== toFamily) {
-//         var currentHeight = FontInfo.getFontHeight(fromFamily, size);
-//         return FontInfo.getFontSize(toFamily, currentHeight);
-//     }
-//
-//     return newSize;
-// }
-
 export default class Font {
     t: string;
     family: string;
@@ -78,25 +68,8 @@ export default class Font {
             + " " + font.lineHeight;
     }
 
-
-    static resizeIfFamilyChanged(font, oldOne, newOne) {
-        // if (font.family && font.hasOwnProperty("size")){
-        //     font.size = getSizeForFamily(oldOne.family, newOne.family, font.size);
-        // }
-        //else if (font.hasOwnProperty("defaultSize")) {  // this else if
-        //    font.size = getSizeForFamily(defaults.family, font.family, font.size);
-        //}
-        //
-        //if (font.hasOwnProperty("defaultSize")) {
-        //    delete font.defaultSize;
-        //}
-    }
-
     static extend(...fonts) {
-        var font = Font.createFromObject(Object.assign({}, ...fonts));
-        // if (newOne.family && newOne.family != oldOne.family)
-        //     resizeIfFamilyChanged(font, oldOne, newOne);
-        return font;
+        return Font.createFromObject(Object.assign({}, ...fonts));
     }
 
     static createFromObject(values?) {

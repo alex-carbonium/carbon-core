@@ -9,7 +9,8 @@ import { deCRLFify } from "./util/util";
  * @class GTextCore
  * @constructor
  */
-var TextEngine: any = function () {
+var TextEngine: any = function (defaultFormatting) {
+	this.setDefaultFormatting(defaultFormatting);
 	this._doc = new Doc();
 
 	/*
@@ -211,6 +212,7 @@ TextEngine.prototype._focused = true;
 // 	//this._canvasContext.canvas.style.imageRendering="pixelated"; //??
 // };
 TextEngine.prototype.updateSize = function (w, h) {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	this._width = w || 1;
 	this._doc.width(this._width);
 	this._height = h || 1;
@@ -234,6 +236,7 @@ TextEngine.prototype.ensureContext = function (context) {
 // }
 
 TextEngine.prototype.setText = function (txt) {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	var runs = null;
 	if (typeof txt === "string") {
 		var prevFormatting = this.getDocumentRange().getFormatting();
@@ -259,6 +262,7 @@ TextEngine.prototype.setText = function (txt) {
 };
 
 TextEngine.prototype.save = function () {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	return this._doc.save();
 };
 
@@ -267,14 +271,17 @@ TextEngine.prototype.save = function () {
 // }
 
 TextEngine.prototype.insert = function (ch) {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	this._doc.insert(ch);
 }
 
 TextEngine.prototype.setWrap = function (enable) {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	this._doc.wrap(enable);
 }
 
 TextEngine.prototype.setWidth = function (width) {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	this._width = width;
 	if (width === undefined) {
 		this._doc.width(this.getWidth() || this._maxWidth); // if doc width small, text wraps in auto mode
@@ -284,11 +291,13 @@ TextEngine.prototype.setWidth = function (width) {
 }
 
 TextEngine.prototype.getRealBounds = function () {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	var bounds = this._doc.frame.realBounds();
 	return bounds;
 }
 
 TextEngine.prototype.getTopMargin = function () {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	var margin = this._doc.frame.topMargin();
 	if (Number.isNaN(margin)) {
 		return 0;
@@ -297,6 +306,7 @@ TextEngine.prototype.getTopMargin = function () {
 }
 
 TextEngine.prototype.getBottomMargin = function () {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	var margin = this._doc.frame.bottomMargin();
 	if (Number.isNaN(margin)) {
 		return 0;
@@ -309,6 +319,7 @@ TextEngine.prototype.setHeight = function (height) {
 }
 
 TextEngine.prototype.getActualWidth = function () {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	if (!this._doc.frame) {
 		return 0;
 	}
@@ -320,6 +331,7 @@ TextEngine.prototype.getWidth = function () {
 }
 
 TextEngine.prototype.getActualHeight = function () {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	if (!this._doc.frame) {
 		return 0;
 	}
@@ -339,6 +351,7 @@ TextEngine.prototype.getLength = function () {
 }
 
 TextEngine.prototype.getCaretCoords = function (ord) {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	return this._doc.getCaretCoords(ord);
 }
 
@@ -351,39 +364,48 @@ TextEngine.prototype.getSelection = function () {
 }
 
 TextEngine.prototype.wordContainingOrdinal = function (ord) {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	return this._doc.wordContainingOrdinal(ord);
 }
 
 TextEngine.prototype.wordOrdinal = function (ord) {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	return this._doc.wordOrdinal(ord);
 }
 
 TextEngine.prototype.select = function (start, end, direction) {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	return this._doc.select(start, end, false, direction);
 }
 
 TextEngine.prototype.undo = function () {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	return this._doc.performUndo();
 }
 
 TextEngine.prototype.redo = function () {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	return this._doc.performUndo(true);
 }
 
 TextEngine.prototype.getRange = function (start, end) {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	return this._doc.range(start, end);
 }
 
 TextEngine.prototype.selectedRange = function () {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	return this._doc.selectedRange();
 }
 
 TextEngine.prototype.selectedParagraphRange = function () {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	var sel = this._doc.selectedRange();
 	return this._doc.paragraphRange(sel.start, sel.end);
 }
 
 TextEngine.prototype.selectAll = function () {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	return this.select(0, this.getLength() - 1);
 }
 
@@ -411,18 +433,22 @@ TextEngine.prototype.contentChanged = function (callback, removeOthers) {
 }
 
 TextEngine.prototype.getDocument = function () {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	return this._doc;
 }
 
 TextEngine.prototype.getDocumentRange = function () {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	return this._doc.documentRange();
 }
 
 TextEngine.prototype.byCoordinate = function (x, y) {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	return this._doc.byCoordinate(x, y + this._verticalShift);
 }
 
 TextEngine.prototype.toggleCaret = function () {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	return this._doc.toggleCaret();
 }
 
@@ -445,6 +471,7 @@ TextEngine.prototype.nextInsertFormatting = function () {
 };
 
 TextEngine.prototype.render = function (context, drawSelection, vtrans, focused) {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	this.ensureContext(context);
 
 	this._verticalShift = -vtrans;
@@ -457,6 +484,7 @@ TextEngine.prototype.render = function (context, drawSelection, vtrans, focused)
 };
 
 TextEngine.prototype.drawSelection = function (context, focused) {
+	Runs.setDefaultFormatting(this._defaultFormatting);
 	this._doc.drawSelection(context, focused, this._lastFormatting);
 }
 
@@ -469,9 +497,11 @@ TextEngine.prototype.unsubscribe = function () {
 	this._doc.contentChanged.clearHandlers();
 };
 
-TextEngine.setDefaultFormatting = function (formatting) {
+TextEngine.prototype.setDefaultFormatting = function (formatting) {
+	this._defaultFormatting = formatting;
 	Runs.setDefaultFormatting(formatting);
 };
+
 TextEngine.prototype.lastFormatting = function (value) {
 	if (arguments.length === 1) {
 		this._lastFormatting = value;

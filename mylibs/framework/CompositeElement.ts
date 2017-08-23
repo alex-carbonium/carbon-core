@@ -452,6 +452,10 @@ export default class CompositeElement extends UIElement implements IComposite {
     padding() {
         return Box.Default;
     }
+
+    get types() {
+        return this._types;
+    }
 }
 
 CompositeElement.prototype.t = Types.CompositeElement;

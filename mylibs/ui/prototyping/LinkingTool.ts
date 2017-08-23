@@ -31,8 +31,6 @@ const DefaultLinkColor = "#1592E6";
 const HoverLinkColor = "#662d8f";
 const InactiveLinkColor = '#808284';
 
-var HoverLinkColorBrush = Brush.createFromColor(HoverLinkColor);
-
 function hasLocationProperty(props) {
     return props.x !== undefined
         || props.y !== undefined
@@ -939,9 +937,9 @@ export default class LinkingTool extends Tool {
         if (this._mousepressed && this._currentPoint) {
             // render new (dragging) arrow
             this._renderNewArrow(context, scale);
-            this._target && DropVisualization.highlightElement(view, context, this._target, null, HoverLinkColorBrush);
+            this._target && DropVisualization.highlightElement(context, this._target, null, HoverLinkColor);
         } else if (this._target) {
-            DropVisualization.highlightElement(view, context, this._target);
+            DropVisualization.highlightElement(context, this._target);
         }
 
         if (this.connections.length) {
