@@ -181,7 +181,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         return { width: mw, height: mh };
     }
 
-    autoGrow(dw, dh) {
+    autoGrow(dw, dh, mode: ChangeMode, exclude?: IUIElement) {
         let br = this.props.br;
         let nbr = br.withSize(br.width + dw, br.height + dh);
         var c = this.constraints();
@@ -194,11 +194,11 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         }
 
         if (dw || dh) {
-            this.parent().autoGrow(dw, dh);
+            this.parent().autoGrow(dw, dh, mode, this);
         }
 
-        this.setProps({ br: nbr });
-        this.performArrange({ newRect: nbr, oldRect: br });
+        this.setProps({ br: nbr }, mode);
+        this.performArrange({ newRect: nbr, oldRect: br, exclude, autoGrow: true }, mode);
     }
 
     modifyContextBeforeDrawChildren(context) {

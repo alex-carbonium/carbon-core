@@ -7,12 +7,11 @@ import { ChangeMode } from "carbon-core";
 var debug = require("DebugUtil")("carb:rangeFormatter");
 
 export default class RangeFormatter extends UIElement {
-    initFormatter(app, engine, element, onChanged?){
+    initFormatter(app, engine, element){
         this._app = app;
         this._engine = engine;
         this._engine.selectionChanged(this.selectionChanged);
         this._element = element;
-        this._onChanged = onChanged;
     }
     getFirstFont(){
         var range = this._engine.getRange(0, 0);
@@ -32,7 +31,6 @@ export default class RangeFormatter extends UIElement {
     setProps(changes, mode){
         if (mode === ChangeMode.Model && changes.font !== undefined){
             this._fontChanged(changes.font);
-            this._onChanged();
         }
         super.setProps.apply(this, arguments);
     }
@@ -135,10 +133,6 @@ export default class RangeFormatter extends UIElement {
     }
     displayName(){
         return this._element.displayName();
-    }
-
-    isPhantom(): boolean{
-        return true;
     }
 }
 RangeFormatter.prototype.t = Types.RangeFormatter;

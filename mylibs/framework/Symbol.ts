@@ -6,7 +6,7 @@ import { Overflow, Types } from "./Defs";
 import Selection from "framework/SelectionModel";
 import DataNode from "framework/DataNode";
 import ObjectFactory from "framework/ObjectFactory";
-import { ChangeMode, IArtboard, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp, IUIElement, IUIElementProps, IText, UIElementFlags, ResizeDimension } from "carbon-core";
+import { ChangeMode, IArtboard, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp, IUIElement, IUIElementProps, IText, UIElementFlags, ResizeDimension, IContext, ISelection } from "carbon-core";
 import { createUUID } from "../util";
 import Isolate from "../commands/Isolate";
 import Environment from "../environment";
@@ -18,7 +18,7 @@ import Font from "./Font";
 interface ISymbolRuntimeProps extends IUIElementProps {
     artboardVersion: number;
     hasBg?: boolean;
-    hasText?: boolean;
+    intUpd?: number;
 }
 
 interface ICustomPropertyDefinition {
@@ -32,32 +32,6 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
     private static flattening = false;
 
-    constructor() {
-        super();
-    }
-
-    unwrapToParent() {
-        var parent = this.parent();
-        var children = this.children;
-        var box = this.getBoundingBox();
-        var x = box.x;
-        var y = box.y;
-        var selection = [];
-        for (var i = 0; i < children.length; ++i) {
-            var child = children[i].clone();
-            parent.add(child);
-            child.initId();
-            App.Current.activePage.nameProvider.assignNewName(child);
-            var childBox = child.getBoundingBox();
-            child.x(childBox.x + x);
-            child.y(childBox.y + y);
-            selection.push(child);
-        }
-        parent.remove(this);
-
-        return selection;
-    }
-
     allowNameTranslation() {
         return false;
     }
@@ -68,17 +42,14 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
             return;
         }
 
-        this._initializing = true;
+        this.beginInternalUpdate();
 
         this._allowHResize = this._artboard.props.allowHorizontalResize;
         this._allowVResize = this._artboard.props.allowVerticalResize;
 
         var currentSize = this.boundaryRect();
 
-        this.prepareAndSetProps({
-            br: artboard.boundaryRect(),
-            _unwrapContent: artboard.props.insertAsContent
-        }, ChangeMode.Self);
+        this.prepareAndSetProps({ br: artboard.boundaryRect() }, ChangeMode.Self);
 
         this._cloneFromArtboard(artboard);
 
@@ -110,7 +81,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         //     this.setProps({width: this._artboard.width(), height: this._artboard.height()});
         // }
 
-        this._initializing = false;
+        this.endInternalUpdate();
     }
 
     toJSON() {
@@ -143,15 +114,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
             res.fill = backgrounds[0].fill();
             res.stroke = backgrounds[0].stroke();
         }
-        var texts = this.findTexts();
-        if (texts.length) {
-            res.font = Font.extend(this.props.font, texts[0].font());
-            if (this.props.hasOwnProperty("custom:self:font")) {
-                res["custom:self:font"] = res.font;
-            }
-        }
         this.runtimeProps.hasBg = !!backgrounds.length;
-        this.runtimeProps.hasText = !!texts.length;
 
         this.setProps(res, ChangeMode.Self);
     }
@@ -192,9 +155,9 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         return clone;
     }
 
-    systemType() {
-        return this._artboard ? 'user:' + this._artboard.name() : super.systemType();
-    }
+    // systemType() {
+    //     return this._artboard ? 'user:' + this._artboard.name() : super.systemType();
+    // }
 
     onArtboardChanged() {
         this._initFromArtboard();
@@ -233,33 +196,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
             return;
         }
 
-        if (mode !== ChangeMode.Self) {
-            var changes = null;
-            if (props.fill !== oldProps.fill) {
-                let newName = "self:fill";
-                changes = {};
-                changes["custom:" + newName] = props.fill;
-                changes["owt:" + newName] = true;
-            }
-            if (props.stroke !== oldProps.stroke) {
-                let newName = "self:stroke";
-                changes = changes || {};
-                changes["custom:" + newName] = props.stroke;
-                changes["owt:" + newName] = true;
-            }
-            if (props.font !== oldProps.font) {
-                let newName = "self:font";
-                changes = changes || {};
-                changes["custom:" + newName] = props.font;
-                changes["owt:" + newName] = true;
-            }
-            if (changes) {
-                this.setProps(changes);
-            }
-            this.updateCustomProperties(props);
-        }
-
-        this.updateMarkedElements();
+        this.updateCustomProperties(props);
     }
 
     findSourceArtboard(app: IApp): IArtboard | null {
@@ -283,13 +220,24 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     }
 
     arrange(resizeEvent?, mode?) {
-        this._arranging = true;
+        let autoGrow = resizeEvent && resizeEvent.autoGrow;
+        if (!autoGrow) {
+            this.beginInternalUpdate();
+        }
+
         super.arrange(resizeEvent, mode);
-        this._arranging = false;
+
+        if (!autoGrow) {
+            this.endInternalUpdate();
+        }
     }
 
     _changeState(stateId) {
         var defaultState = this._artboard._recorder.getStateById('default');
+        if (!defaultState) {
+            //it can happen that primitives for changing state are applied before the source artboard is initialized
+            return;
+        }
 
         PropertyStateRecorder.applyState(this, defaultState);
         if (stateId !== 'default') {
@@ -333,6 +281,10 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
             if (propName.startsWith('custom:')) {
                 var prop = this._getCustomPropertyDefinition(propName);
                 var element = this._findElementWithCustomProperty(prop);
+                if (!element) {
+                    //can happen if symbol is restored from json before artboard
+                    continue;
+                }
 
                 var value = props[propName];
                 if (value === undefined) { // custom property was deleted, i.e by undo or reset property action
@@ -357,20 +309,43 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         if (backgrounds.length) {
             backgrounds.forEach(x => x.prepareAndSetProps({ fill: this.fill(), stroke: this.stroke() }, ChangeMode.Self));
         }
-        var texts = this.findTexts();
-        if (texts.length) {
-            texts.forEach(x => x.prepareAndSetProps({ font: this.props.font }, ChangeMode.Self));
+    }
+
+    prepareProps(changes) {
+        super.prepareProps(changes);
+
+        if (changes.fill && changes.fill !== this.props.fill) {
+            let newName = "self:fill";
+            changes["custom:" + newName] = changes.fill;
+        }
+        if (changes.stroke && changes.stroke !== this.props.stroke) {
+            let newName = "self:stroke";
+            changes["custom:" + newName] = changes.stroke;
+        }
+
+        for (var propName in changes) {
+            if (propName.startsWith('custom:')) {
+                var prop = this._getCustomPropertyDefinition(propName);
+                changes['owt:' + prop.controlId + ':' + prop.propertyName] = true;
+            }
         }
     }
 
-    prepareProps(props) {
-        super.prepareProps(props);
-        for (var propName in props) {
-            if (propName.startsWith('custom:')) {
-                var prop = this._getCustomPropertyDefinition(propName);
-                props['owt:' + prop.controlId + ':' + prop.propertyName] = true;
+    /**
+     * For undo to work, the symbol must pretend that it had old custom properties when new ones are set.
+     */
+    setProps(props, mode = ChangeMode.Model) {
+        for (let propName in props) {
+            if (propName.startsWith('custom:') && !this.props.hasOwnProperty(propName)) {
+                let def = this._getCustomPropertyDefinition(propName);
+                let element = this._findElementWithCustomProperty(def);
+                if (element) {
+                    this.props[propName] = element.props[def.propertyName];
+                }
             }
         }
+
+        super.setProps(props, mode);
     }
 
     getStates() {
@@ -440,6 +415,13 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     trackInserted() {
         delete this.runtimeProps.primitivePath;
         super.trackInserted.apply(this, arguments);
+
+        if (this._artboard && this._artboard.props.insertAsContent) {
+            let children = this.children.slice();
+            children.forEach(x => App.Current.activePage.nameProvider.assignNewName(x));
+            this.flatten();
+            setTimeout(() => Selection.makeSelection(children), 1);
+        }
     }
     trackDeleted(parent) {
         delete this.runtimeProps.primitivePath;
@@ -447,25 +429,22 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     }
 
     registerSetProps(element, props, oldProps, mode) {
-        if (element.id() === this.id()) {
-            var realRoot = this.findNextRoot();
-            if (!realRoot) {
-                return;
-            }
-            realRoot.registerSetProps(element, props, oldProps, mode);
+        if (this.runtimeProps.intUpd) {
             return;
         }
 
-        if (this._registerSetProps || this._initializing || this._arranging) {
+        var nextRoot = this.findNextRoot();
+
+        if (element.id() === this.id() && nextRoot) {
+            nextRoot.registerSetProps(element, props, oldProps, mode);
             return;
         }
 
         var propNames = Object.keys(props);
-        var newProps = {};
+        var newSymbolProps = {};
+        var oldSymbolProps = null;
         var fillStroke = null;
-        var fontProps = null;
         var isBackground = element.hasFlags(UIElementFlags.SymbolBackground);
-        var isText = element.hasFlags(UIElementFlags.SymbolText);
 
         for (var i = 0; i < propNames.length; ++i) {
             var propName = propNames[i];
@@ -475,40 +454,49 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
             var newName = element.sourceId() + ":" + propName;
             var customPropName = "custom:" + newName;
 
-            newProps[customPropName] = props[propName];
-            newProps["owt:" + newName] = true;
+            newSymbolProps[customPropName] = props[propName];
+            newSymbolProps["owt:" + newName] = true;
+            oldSymbolProps = oldSymbolProps || {};
+            oldSymbolProps[customPropName] = oldProps[propName];
 
             if (isBackground) {
                 if (propName === "fill" || propName === "stroke") {
                     fillStroke = fillStroke || {};
                     fillStroke[propName] = props[propName]
-                    newProps[propName] = props[propName];
+                    newSymbolProps[propName] = props[propName];
+                    oldSymbolProps[propName] = oldProps[propName];
                 }
             }
-            if (isText && propName === "font") {
-                fontProps = fontProps || {};
-                fontProps.font = props[propName];
-                newProps[propName] = props[propName];
-            }
         }
 
-        this._registerSetProps = true;
+        this.beginInternalUpdate();
 
         if (isBackground && fillStroke) {
-            this.findBackgrounds().forEach(x => x.setProps(fillStroke));
-        }
-        if (isText && fontProps) {
-            this.findTexts().forEach(x => x.setProps(fontProps));
+            this.findBackgrounds().forEach(x => x.setProps(fillStroke, ChangeMode.Self));
         }
 
-        this.setProps(newProps);
-        this._registerSetProps = false;
+        this.setProps(newSymbolProps);
+        if (nextRoot) {
+            nextRoot.registerSetProps(this, newSymbolProps, oldSymbolProps, mode);
+        }
+
+        this.endInternalUpdate();
     }
 
     registerDelete(parent: Container, element: UIElement, index: number, mode: ChangeMode = ChangeMode.Model) {
         if (mode === ChangeMode.Model && !Symbol.flattening) {
             element.setProps({ visible: false }, mode);
         }
+    }
+
+    private beginInternalUpdate() {
+        if (!this.runtimeProps.intUpd) {
+            this.runtimeProps.intUpd = 0;
+        }
+        ++this.runtimeProps.intUpd;
+    }
+    private endInternalUpdate() {
+        --this.runtimeProps.intUpd;
     }
 
     isEditable() {
@@ -532,6 +520,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
     getNonRepeatableProps(newProps) {
         var result = super.getNonRepeatableProps(newProps);
+        result.push("stateId");
         if (!this._artboard) {
             return result;
         }
@@ -603,7 +592,26 @@ PropertyMetadata.registerForType(Symbol, {
     },
     stateId: {
         displayName: "State",
-        type: "state"
+        type: "dropdown",
+        options: {
+            items: function(selection: ISelection) {
+                let symbols = selection.elements.filter(x => x instanceof Symbol) as Symbol[];
+                if (!symbols.length) {
+                    return [];
+                }
+                let source = symbols[0].source();
+                let states = [];
+                if (symbols.every(x => x.props.source.pageId === source.pageId && x.props.source.artboardId === source.artboardId)) {
+                    states = symbols[0].getStates();
+                }
+                return states.map(x => {
+                    return {
+                        name: x.name,
+                        value: x.id
+                    }
+                });
+            }
+        }
     },
     overflow: {
         defaultValue: Overflow.Clip
@@ -614,15 +622,8 @@ PropertyMetadata.registerForType(Symbol, {
     enableGroupLocking: {
         defaultValue: true
     },
-    font: {
-        displayName: "Font",
-        type: "font",
-        defaultValue: Font.Default,
-        style: 2
-    },
     prepareVisibility: function (element: Symbol) {
         return {
-            font: !!element.runtimeProps.hasText,
             stateId: element._artboard && element._artboard.props
                 && element._artboard.props.states
                 && element._artboard.props.states.length > 1
@@ -632,9 +633,6 @@ PropertyMetadata.registerForType(Symbol, {
         var groups = PropertyMetadata.findForType(Container).groups();
         groups = groups.slice();
         groups.splice(1, 0, {
-            label: "@font",
-            properties: ["font"]
-        }, {
             label: "@symbol",
             properties: ["stateId"]
         });

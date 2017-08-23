@@ -19,6 +19,7 @@ import Matrix from "../math/matrix";
 import { FloatingPointPrecision, ArrangeStrategies } from "../framework/Defs";
 import { LayerTypes } from "carbon-app";
 import { IUIElement, ChangeMode } from "carbon-core";
+import BoundaryPathDecorator, { HighlightKind } from "../decorators/BoundaryPathDecorator";
 
 var HighlightBrush = Brush.createFromColor(SharedColors.Highlight);
 
@@ -499,34 +500,12 @@ export default class DropVisualization extends ExtensionBase {
     onLayerDraw(layer, context) {
         var target = this._target || this.view['_highlightTarget'];
         if (target) {
-            DropVisualization.highlightElement(this.view, context, target, this._isDropTarget);
+            DropVisualization.highlightElement(context, target, this._isDropTarget, SharedColors.Highlight);
         }
     }
 
-    static highlightElement(view, context, element, boundaryPath = false, highlighBrush = HighlightBrush) {
-        let scale = view.scale();
-        context.save();
-
-        context.beginPath();
-        if (element.hasPath() && !boundaryPath) {
-            element.applyViewMatrix(context);
-            element.drawPath(context, element.width(), element.height());
-            context.lineWidth = 2 / scale;
-        }
-        else {
-            GlobalMatrixModifier.pushPrependScale();
-            try {
-                context.scale(1 / scale, 1 / scale);
-                element.drawBoundaryPath(context);
-                context.lineWidth = 2;
-            }
-            finally {
-                GlobalMatrixModifier.pop();
-            }
-        }
-
-        Brush.stroke(highlighBrush, context);
-        context.restore();
+    static highlightElement(context, element, boundaryPath = false, strokeStyle: string = null) {
+        BoundaryPathDecorator.draw(context, element, boundaryPath, HighlightKind.Thick, strokeStyle);
     }
 }
 

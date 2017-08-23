@@ -70,6 +70,12 @@ export default class ContextStub implements IContext {
     fill(): void {
 
     }
+    fill2(): void {
+
+    }
+    transform(m11, m12, m21, m22, dx, dy) {
+
+    }
     resetTransform(): void {
 
     }

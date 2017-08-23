@@ -7,7 +7,7 @@ import PropertyMetadata from "../PropertyMetadata";
 import TextEngine from "./textengine";
 import FontManager from "./font/fontmanager";
 import styleManager from "../style/StyleManager";
-import { IContainer, IDataElement, IText, TextAlign, IUIElement, ITextProps, TextContent, HorizontalConstraint, VerticalConstraint, TextMode, IPooledObject, IMatrix, ChangeMode, ResizeDimension } from "carbon-core";
+import { IContainer, IDataElement, IText, TextAlign, IUIElement, ITextProps, TextContent, HorizontalConstraint, VerticalConstraint, TextMode, IPooledObject, IMatrix, ChangeMode, ResizeDimension, IRect } from "carbon-core";
 import params from "params";
 import ContextCommandCache from "framework/render/ContextCommandCache";
 import Environment from "../../environment";
@@ -15,6 +15,7 @@ import Rect from "../../math/rect";
 import Matrix from "../../math/matrix";
 import ObjectPool from "../ObjectPool";
 import Selection from "../SelectionModel";
+import Constraints from "../Constraints";
 
 export default class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElement {
     prepareProps(changes) {
@@ -22,13 +23,14 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
 
         super.prepareProps(changes);
 
-        let textChanges = TextChanges.allocate();
-        textChanges.content = changes.content || this.props.content;
-        textChanges.font = changes.font || this.props.font;
-        textChanges.br = changes.br || this.props.br;
-        textChanges.m = changes.m || this.props.m;
-        textChanges.mode = changes.mode || this.props.mode;
-        textChanges.wrap = changes.hasOwnProperty("wrap") ? changes.wrap : this.props.wrap;
+        let textChanges = this.allocateTextChanges(changes);
+
+        if (textChanges.fill !== this.props.fill) {
+            textChanges.font = Font.extend(textChanges.font, { color: textChanges.fill.value });
+        }
+        else if (textChanges.font.color !== this.props.font.color) {
+            textChanges.fill = Brush.createFromColor(textChanges.font.color);
+        }
 
         let dimensionsAffected = textChanges.content !== this.props.content
             || textChanges.br !== this.props.br
@@ -41,6 +43,11 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
         }
         else if (textChanges.mode === TextMode.Label) {
             textChanges.wrap = false;
+        }
+
+        let isStretchConstraint = textChanges.constraints.h === HorizontalConstraint.LeftRight || textChanges.constraints.v === VerticalConstraint.TopBottom;
+        if (textChanges.mode === TextMode.Label && isStretchConstraint) {
+            textChanges.mode = TextMode.Block;
         }
 
         if (dimensionsAffected) {
@@ -75,27 +82,26 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
 
         textChanges.free();
     }
-    propsUpdated(newProps, oldProps) {
-        if (!this.runtimeProps.keepEngine //to avoid disposal when editing inline
-            && (newProps.br !== undefined
-                || newProps.autoWidth !== undefined
-                || newProps.mode !== undefined
-                || newProps.font !== undefined
-                || newProps.content !== undefined)) {
-            delete this.runtimeProps.engine;
-            this.refreshMinSizeConstraints();
-        }
-
+    propsUpdated(newProps, oldProps, mode) {
         if (newProps.br !== undefined
-            || newProps.autoWidth !== undefined
             || newProps.mode !== undefined
             || newProps.font !== undefined
             || newProps.content !== undefined
-            || newProps.visible !== undefined) {
+            || newProps.visible !== undefined
+        ) {
+            if (!this.runtimeProps.editing) {
+                delete this.runtimeProps.engine;
+            }
+
+            this.refreshMinSizeConstraints();
 
             delete this.runtimeProps.commandCache;
         }
         super.propsUpdated.apply(this, arguments);
+
+        if ((newProps.font || newProps.content) && mode !== ChangeMode.Self) {
+            this.autoGrowParent(newProps.br || this.props.br, oldProps.br || this.props.br);
+        }
 
         if (newProps.mode !== oldProps.mode && Selection.isOnlyElementSelected(this)) {
             Selection.refreshSelection();
@@ -117,9 +123,27 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
         delete this.runtimeProps.origFont;
     }
 
+    autoGrowParent(newBr: IRect, oldBr: IRect) {
+        let constraints = this.constraints();
+        let dw = 0;
+        let dh = 0;
+
+        if (constraints.h === HorizontalConstraint.LeftRight) {
+            dw = (newBr.width - oldBr.width);
+        }
+        if (constraints.v === VerticalConstraint.TopBottom) {
+            dh = (newBr.height - oldBr.height);
+        }
+
+        if (dw || dh) {
+            // Parent auto grow specifically uses ChangeMode.Model for immediate sync.
+            this.parent().autoGrow(dw, dh, ChangeMode.Model, this);
+        }
+    }
+
     private fitFontSizeToHeight(textChanges: TextChanges) {
         let lineHeight = textChanges.br.height;
-        let lineCount = this.getOrCreateEngine(this.props).getDocument().frame.lines.length;
+        let lineCount = this.engine().getDocument().frame.lines.length;
         if (lineCount > 1) {
             lineHeight = textChanges.br.height / (1 + (lineCount - 1) * textChanges.font.lineSpacing);
         }
@@ -133,36 +157,78 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
             textChanges.font = Font.extend(textChanges.font, { size: newFontSize });
         }
 
-        let engine = this.createEngine(textChanges);
+        let engine = this.getOrCreateEngine(textChanges);
         let actualWidth = engine.getActualWidth() + .5 | 0;
         textChanges.br = textChanges.br.withWidth(actualWidth);
     }
 
     private fitBrToFont(textChanges: TextChanges) {
-        let engine = this.createEngine(textChanges);
+        let engine = this.getOrCreateEngine(textChanges);
         let actualWidth = engine.getActualWidth() + .5 | 0;
         let actualHeight = engine.getActualHeight() + .5 | 0;
         textChanges.br = textChanges.br.withSize(actualWidth, actualHeight);
     }
 
+    private allocateTextChanges(changes) {
+        let textChanges = TextChanges.allocate();
+        textChanges.content = changes.content || this.props.content;
+        textChanges.fill = changes.fill || this.props.fill;
+        textChanges.font = changes.font || this.props.font;
+        textChanges.br = changes.br || this.props.br;
+        textChanges.m = changes.m || this.props.m;
+        textChanges.mode = changes.mode || this.props.mode;
+        textChanges.wrap = changes.hasOwnProperty("wrap") ? changes.wrap : this.props.wrap;
+        textChanges.constraints = changes.constraints || this.props.constraints;
+        return textChanges;
+    }
     private copyTextChanges(textChanges: TextChanges, changes: Partial<ITextProps>) {
         if (textChanges.br !== this.props.br) {
             changes.br = textChanges.br;
         }
+        else {
+            delete changes.br;
+        }
         if (textChanges.m !== this.props.m) {
             changes.m = textChanges.m;
+        }
+        else {
+            delete changes.m;
         }
         if (textChanges.font !== this.props.font) {
             changes.font = textChanges.font;
         }
+        else {
+            delete changes.font;
+        }
         if (textChanges.content !== this.props.content) {
             changes.content = textChanges.content;
+        }
+        else {
+            delete changes.content;
         }
         if (textChanges.mode !== this.props.mode) {
             changes.mode = textChanges.mode;
         }
+        else {
+            delete changes.mode;
+        }
         if (textChanges.wrap !== this.props.wrap) {
             changes.wrap = textChanges.wrap;
+        }
+        else {
+            delete changes.wrap;
+        }
+        if (textChanges.constraints !== this.props.constraints) {
+            changes.constraints = textChanges.constraints;
+        }
+        else {
+            delete changes.constraints;
+        }
+        if (textChanges.fill !== this.props.fill) {
+            changes.fill = textChanges.fill;
+        }
+        else {
+            delete changes.fill;
         }
     }
 
@@ -173,7 +239,7 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
     }
 
     private ensureNotSmallerThanText(textChanges: TextChanges) {
-        let engine = this.createEngine(textChanges);
+        let engine = this.getOrCreateEngine(textChanges);
 
         var actualWidth = engine.getActualWidth();
         var actualHeight = engine.getActualHeight();
@@ -234,7 +300,7 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
     }
 
     drawSelf(context, w, h) {
-        // if(false && !this.runtimeProps.keepEngine) {
+        // if(false && !this.runtimeProps.editing) {
         //     if (!this.runtimeProps.commandCache) {
         //         context = new ContextCommandCache(context);
         //     } else {
@@ -245,30 +311,14 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
 
         context.save();
 
-        this.getOrCreateEngine(this.props);
-
-        TextEngine.setDefaultFormatting(this.props.font);
-
-        context.beginPath();
-        params.perf && performance.mark("Text.fill");
-        context.rectPath(0, 0, w, h);
-        Brush.fill(this.fill(), context, 0, 0, w, h);
-        params.perf && performance.measure("Text.fill", "Text.fill");
-        if (this.runtimeProps.drawText === false) {
-            context.restore();
-            return;
-        }
-        context.lineWidth = this.strokeWidth();
-        params.perf && performance.mark("Text.stroke");
-        Brush.stroke(this.stroke(), context, 0, 0, w, h);
-        params.perf && performance.measure("Text.stroke", "Text.stroke");
+        let engine = this.engine();
 
         var verticalOffset = this.getVerticalOffset(this.runtimeProps.engine);
         if (verticalOffset !== 0) {
             context.translate(0, verticalOffset);
         }
         params.perf && performance.mark("Text.render");
-        this.runtimeProps.engine.render(context, this.runtimeProps.drawSelection, verticalOffset, Environment.view ? Environment.view.focused() : false);
+        engine.render(context, this.runtimeProps.drawSelection, verticalOffset, Environment.view ? Environment.view.focused() : false);
         params.perf && performance.measure("Text.render", "Text.render");
 
         context.restore();
@@ -290,25 +340,26 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
         return offset;
     }
 
-    private getOrCreateEngine(props: EngineProps) {
-        if (this.runtimeProps.engine === undefined) {
+    engine() {
+        if (!this.runtimeProps.engine) {
             params.perf && performance.mark("Text.createEngine");
-            this.createEngine(props);
+            this.runtimeProps.engine = this.getOrCreateEngine(this.props);
             params.perf && performance.measure("Text.createEngine", "Text.createEngine");
         }
 
         return this.runtimeProps.engine;
     }
 
-    createEngine(props: EngineProps) {
-        TextEngine.setDefaultFormatting(props.font);
+    private getOrCreateEngine(props: EngineProps) {
+        if (this.runtimeProps.editing && this.runtimeProps.engine) {
+            return this.runtimeProps.engine;
+        }
 
-        var engine = new TextEngine();
+        var engine = new TextEngine(props.font);
         engine.updateSize(props.br.width, props.br.height);
         engine.setWrap(props.wrap);
         engine.setText(props.content);
 
-        this.runtimeProps.engine = engine;
         return engine;
     }
     resetEngine() {
@@ -373,7 +424,7 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
 
     getNonRepeatableProps(newProps) {
         var base = super.getNonRepeatableProps();
-        var props = newProps && newProps.autoWidth !== undefined ? newProps : this.props;
+        var props = newProps && newProps.mode !== undefined ? newProps : this.props;
         if (props.mode === TextMode.Label) {
             return base.concat(["br", "content"]);
         }
@@ -519,7 +570,7 @@ PropertyMetadata.registerForType(Text, {
                 { label: "@textMode.label", value: TextMode.Label, icon: "type-icon_line-text" }
             ],
             hasLabels: true,
-            size: 3/4
+            size: 3 / 4
         },
         defaultValue: TextMode.Block
     },
@@ -527,7 +578,7 @@ PropertyMetadata.registerForType(Text, {
         displayName: "@wrap",
         type: "checkbox",
         options: {
-            size: 1/4,
+            size: 1 / 4,
             label: false
         },
         defaultValue: true,
@@ -536,12 +587,16 @@ PropertyMetadata.registerForType(Text, {
         displayName: "Text style",
         type: "textStyleName"
     },
+    fill: {
+        defaultValue: Brush.createFromColor(Font.Default.color)
+    },
     font: {
         displayName: "Font",
         type: "font",
         defaultValue: Font.Default,
         style: 2
     },
+
     groups: function (element) {
         var baseGroups = PropertyMetadata.findForType(UIElement).groups();
 
@@ -556,6 +611,12 @@ PropertyMetadata.registerForType(Text, {
         ];
 
         return ownGroups;
+    },
+    prepareVisibility: function (element: UIElement) {
+        return {
+            fill: false,
+            stroke: false
+        };
     }
 });
 
@@ -571,6 +632,8 @@ class TextChanges implements IPooledObject {
     public br: Rect = Rect.Zero;
     public m: IMatrix = Matrix.Identity;
     public wrap: boolean = false;
+    public constraints = Constraints.All;
+    public fill = Brush.Empty;
 
     reset() {
         //always fully initialized

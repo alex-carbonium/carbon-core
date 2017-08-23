@@ -93,6 +93,8 @@ declare module "carbon-geometry" {
 
         isTranslatedOnly(): boolean;
         isSingular(): boolean;
+
+        equals(other: IMatrix): boolean;
     }
     export const Matrix: IMatrix & {
         createTranslationMatrix(tx: number, ty: number): IMatrix;

@@ -61,7 +61,7 @@ import { TextAlign, UnderlineStyle, FontScript } from "carbon-basics";
         return result;
     };
 
-    Runs.multipleValues = {};
+    Runs.multipleValues = undefined;
 
     Runs.merge = function(run1, run2) {
         if (arguments.length === 1) {

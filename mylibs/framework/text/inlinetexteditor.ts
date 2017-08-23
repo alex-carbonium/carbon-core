@@ -403,11 +403,6 @@ deserunt mollit anim id est laborum.");
                 this.engine.insert("   ");
                 handled = true;
                 break;
-            case 67: // C
-                if (ctrlKey || metaKey){
-                    handled = true;
-                }
-                break;
             case 90: // Z undo
                 if (ctrlKey || (metaKey && !shiftKey)) {
                     handled = true;

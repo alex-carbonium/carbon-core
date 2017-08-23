@@ -2,6 +2,7 @@ let debug = require("DebugUtil")("carb:canvasArrangeStrategy");
 import {HorizontalConstraint, VerticalConstraint} from "carbon-basics";
 import Point from "math/point";
 import { IContainer } from "carbon-model";
+import ResizeOptions from "../../decorators/ResizeOptions";
 
 export default  {
     arrange: function(container: IContainer, event, changeMode){
@@ -19,7 +20,12 @@ export default  {
 
         for (let i = 0, l = items.length; i < l; ++i) {
             let child = items[i];
+            if (child === event.exclude) {
+                continue;
+            }
+
             let constraints = child.constraints();
+            let matrixScale = false;
 
             let scaleX = false;
             let scaleY = false;
@@ -40,6 +46,7 @@ export default  {
             }
             else if (constraints.h === HorizontalConstraint.Scale){
                 scaleX = true;
+                matrixScale = true;
             }
 
             if (constraints.v === VerticalConstraint.TopBottom) { // stretch element vertically
@@ -54,6 +61,7 @@ export default  {
             }
             else if (constraints.v === VerticalConstraint.Scale) {
                 scaleY = true;
+                matrixScale = true;
             }
 
             if (scaleX || scaleY) {
@@ -76,7 +84,12 @@ export default  {
 
                 if (sx !== 1 || sy !== 1){
                     v.set(sx, sy);
-                    child.applyScaling(v, new Point(ox, oy), event.options, changeMode);
+                    if (matrixScale) {
+                        child.applyMatrixScaling(v, new Point(ox, oy), event.options, changeMode);
+                    }
+                    else {
+                        child.applyScaling(v, new Point(ox, oy), event.options, changeMode);
+                    }
                 }
             }
             if (translateX || translateY){

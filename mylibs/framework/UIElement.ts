@@ -39,6 +39,7 @@ import { ICoordinate, ISize } from "carbon-geometry";
 import { ChangeMode, LayerTypes, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags } from "carbon-core";
 import ExtensionPoint from "./ExtensionPoint";
 import CoreIntl from "../CoreIntl";
+import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
 
 require("../migrations/All");
 
@@ -925,39 +926,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     drawBoundaryPath(context, round = true) {
-        var matrix = this.globalViewMatrix();
-        var r = this.boundaryRect();
-        var strokePos = this.strokePosition();
-
-        let p = matrix.transformPoint2(r.x, r.y);
-        if (round) {
-            p.x = Math.round(p.x) - .5;
-            p.y = Math.round(p.y) - .5;
-        }
-        context.moveTo(p.x, p.y);
-
-        p = matrix.transformPoint2(r.x + r.width, r.y);
-        if (round) {
-            p.x = Math.round(p.x) + .5;
-            p.y = Math.round(p.y) - .5;
-        }
-        context.lineTo(p.x, p.y);
-
-        p = matrix.transformPoint2(r.x + r.width, r.y + r.height);
-        if (round) {
-            p.x = Math.round(p.x) + .5;
-            p.y = Math.round(p.y) + .5;
-        }
-        context.lineTo(p.x, p.y);
-
-        p = matrix.transformPoint2(r.x, r.y + r.height);
-        if (round) {
-            p.x = Math.round(p.x) - .5;
-            p.y = Math.round(p.y) + .5;
-        }
-        context.lineTo(p.x, p.y);
-
-        context.closePath();
+        BoundaryPathDecorator.drawBoundaryPath(context, this, round);
     }
 
     primitiveRoot(): IPrimitiveRoot & UIElement {
@@ -1704,10 +1673,6 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     isOrphaned() {
         return this.parent() === NullContainer;
-    }
-    /** Defines an element which is never added to the model, but is still drawn and could have visible properties */
-    isPhantom(): boolean {
-        return false;
     }
     canBeRemoved() {
         return true;

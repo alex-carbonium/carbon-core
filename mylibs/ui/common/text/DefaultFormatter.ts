@@ -44,10 +44,6 @@ export default class DefaultFormatter extends UIElement {
     contextBarAllowed() {
         return false;
     }
-
-    isPhantom(): boolean{
-        return true;
-    }
 }
 DefaultFormatter.prototype.t = Types.DefaultFormatter;
 

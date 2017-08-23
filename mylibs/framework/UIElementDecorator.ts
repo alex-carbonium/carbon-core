@@ -1,5 +1,9 @@
+import { IUIElement } from "carbon-core";
+
 export default class UIElementDecorator {
 	[x: string]: any;
+
+	private _visible: boolean;
 
 	constructor() {
 		this.element = null;
@@ -23,7 +27,7 @@ export default class UIElementDecorator {
 	parent(value) {
 	}
 
-	visible(value) {
+	visible(value?: boolean) {
 		if (arguments.length === 1) {
 			this._visible = value;
 		}
