@@ -520,6 +520,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
     getNonRepeatableProps(newProps) {
         var result = super.getNonRepeatableProps(newProps);
+        result.push("stateId");
         if (!this._artboard) {
             return result;
         }
