@@ -196,7 +196,7 @@ declare module "carbon-app" {
         setActiveArtboardById(id: string): void;
     }
 
-    export interface ILayerDrawHandlerOject {
+    export interface ILayerDrawHandlerObject {
         onLayerDraw(layer: ILayer, context: IContext, environment: IEnvironment):void;
     }
 

@@ -107,6 +107,7 @@ declare module "carbon-basics" {
         static createFromColor(color: string): Brush;
         static createFromLinearGradientObject(value: LinearGradientData): Brush;
         static toCss(brush: Brush): any;
+        static isValid(brush: Brush): boolean;
 
         static Empty: Brush;
     }

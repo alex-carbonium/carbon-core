@@ -100,13 +100,20 @@ export function leaveCommonProps(target, source){
             leaveCommonProps(clone, sourceValue);
             target[p] = clone;
         }
+        else if (Array.isArray(targetValue)) {
+            if(!deepEquals(targetValue, sourceValue)) {
+                target[p] = undefined;
+            } else {
+                target[p] = targetValue;
+            }
+        }
         else if (targetValue !== sourceValue){
             target[p] = undefined;
         }
     }
 }
 
-export var deepEquals = function(o1, o2, path?) {
+export var deepEquals = function deepEquals(o1, o2, path?) {
     path = path || "";
     if (o1 === o2){
         return true;
@@ -131,7 +138,7 @@ export var deepEquals = function(o1, o2, path?) {
         var key = k1[i];
         var v1 = o1[key];
         var v2 = o2[key];
-        if (typeof v1 === v2 && typeof v1 === "object"){
+        if (typeof v1 === typeof v2 && typeof v1 === "object"){
             res = deepEquals(v1, v2, path + "." + key)
         }
         else {

@@ -8,9 +8,12 @@ var brushDefault = TypeDefaults[Types.Brush] = function () {
 }
 
 function gradientToCss(gradient) {
+    if (!gradient || !gradient.stops) {
+        return "transparent";
+    }
     var res = 'linear-gradient(to right';
-    for(var s of gradient.stops) {
-        res += `, ${s[1]} ${s[0]*100}%`
+    for (var s of gradient.stops) {
+        res += `, ${s[1]} ${s[0] * 100}%`
     }
     return res + ")";
 }
@@ -18,7 +21,7 @@ function gradientToCss(gradient) {
 export default class Brush {
     public t: string;
 
-    constructor(public value: any, public type:BrushType = BrushType.color){
+    constructor(public value: any, public type: BrushType = BrushType.color) {
         this.t = Types.Brush;
     }
 
@@ -47,7 +50,7 @@ export default class Brush {
                     let x2 = value.x2;
                     let y2 = value.y2;
 
-                    var lingrad = context.createLinearGradient(x1*w, y1*h, x2*w, y2*h); //down
+                    var lingrad = context.createLinearGradient(x1 * w, y1 * h, x2 * w, y2 * h); //down
 
                     // if (d === "radial") {
                     //     var radius = Math.max(w, h) / 2 + (Math.max(w, h) / 20);
@@ -152,6 +155,26 @@ export default class Brush {
 
     static equals(brush1, brush2) {
         return brush1.type === brush2.type && brush1.value === brush2.value;
+    }
+
+    static isValid(brush) {
+        if (brush) {
+            switch (brush.type) {
+                case BrushType.empty:
+                    return true;
+                case BrushType.color:
+                    return brush.value !== undefined;
+                case BrushType.lineargradient:
+                    return brush.value !== undefined &&
+                        brush.value.x1 !== undefined &&
+                        brush.value.x2 !== undefined &&
+                        brush.value.y1 !== undefined &&
+                        brush.value.y2 !== undefined &&
+                        brush.value.stops !== undefined;
+            }
+        }
+
+        return false;
     }
 
     static toCss(brush) {
