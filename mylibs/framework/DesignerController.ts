@@ -47,12 +47,6 @@ function stopDrag(event) {
     var elements = this._draggingElement.stopDragging(event, this._draggingOverElement, this.app.activePage);
     this._draggingElement.detach();
 
-    if (elements.length === 1) {
-        if (elements[0].props._unwrapContent) {
-            elements = elements[0].unwrapToParent();
-        }
-    }
-
     this.stopDraggingEvent.raise(event, elements);
 
     //could start dragging not selected object
@@ -738,11 +732,6 @@ export default class DesignerController implements IController {
                     var toInsert = k === 0 ? element : element.clone();
                     newSelection.push(parent.elements[k].add(toInsert));
                 }
-            }
-            else if (element.props._unwrapContent) {
-                parent.add(element);
-                //TODO: add more strong typing
-                newSelection = element['unwrapToParent']();
             }
             else {
                 if (!parent.autoPositionChildren()) {

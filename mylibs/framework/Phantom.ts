@@ -41,8 +41,4 @@ export default class Phantom extends UIElement {
             GlobalMatrixModifier.pop();
         }
     }
-
-    isPhantom(): boolean{
-        return true;
-    }
 }

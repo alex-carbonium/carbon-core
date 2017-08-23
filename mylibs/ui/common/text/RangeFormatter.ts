@@ -134,10 +134,6 @@ export default class RangeFormatter extends UIElement {
     displayName(){
         return this._element.displayName();
     }
-
-    isPhantom(): boolean{
-        return true;
-    }
 }
 RangeFormatter.prototype.t = Types.RangeFormatter;
 

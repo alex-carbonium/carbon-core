@@ -32,32 +32,6 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
     private static flattening = false;
 
-    constructor() {
-        super();
-    }
-
-    unwrapToParent() {
-        var parent = this.parent();
-        var children = this.children;
-        var box = this.getBoundingBox();
-        var x = box.x;
-        var y = box.y;
-        var selection = [];
-        for (var i = 0; i < children.length; ++i) {
-            var child = children[i].clone();
-            parent.add(child);
-            child.initId();
-            App.Current.activePage.nameProvider.assignNewName(child);
-            var childBox = child.getBoundingBox();
-            child.x(childBox.x + x);
-            child.y(childBox.y + y);
-            selection.push(child);
-        }
-        parent.remove(this);
-
-        return selection;
-    }
-
     allowNameTranslation() {
         return false;
     }
@@ -75,10 +49,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
         var currentSize = this.boundaryRect();
 
-        this.prepareAndSetProps({
-            br: artboard.boundaryRect(),
-            _unwrapContent: artboard.props.insertAsContent
-        }, ChangeMode.Self);
+        this.prepareAndSetProps({ br: artboard.boundaryRect() }, ChangeMode.Self);
 
         this._cloneFromArtboard(artboard);
 
@@ -444,6 +415,13 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     trackInserted() {
         delete this.runtimeProps.primitivePath;
         super.trackInserted.apply(this, arguments);
+
+        if (this._artboard && this._artboard.props.insertAsContent) {
+            let children = this.children.slice();
+            children.forEach(x => App.Current.activePage.nameProvider.assignNewName(x));
+            this.flatten();
+            setTimeout(() => Selection.makeSelection(children), 1);
+        }
     }
     trackDeleted(parent) {
         delete this.runtimeProps.primitivePath;

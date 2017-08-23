@@ -47,10 +47,6 @@ class DefaultShapeSettings extends UIElement {
             points: []
         }
     }
-
-    isPhantom(): boolean{
-        return true;
-    }
 }
 DefaultShapeSettings.prototype.t = Types.DefaultShapeSettings;
 

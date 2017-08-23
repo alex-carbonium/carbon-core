@@ -1674,10 +1674,6 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     isOrphaned() {
         return this.parent() === NullContainer;
     }
-    /** Defines an element which is never added to the model, but is still drawn and could have visible properties */
-    isPhantom(): boolean {
-        return false;
-    }
     canBeRemoved() {
         return true;
     }
