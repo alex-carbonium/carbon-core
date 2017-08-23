@@ -6,7 +6,7 @@ import { Overflow, Types } from "./Defs";
 import Selection from "framework/SelectionModel";
 import DataNode from "framework/DataNode";
 import ObjectFactory from "framework/ObjectFactory";
-import { ChangeMode, IArtboard, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp, IUIElement, IUIElementProps, IText, UIElementFlags, ResizeDimension, IContext } from "carbon-core";
+import { ChangeMode, IArtboard, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp, IUIElement, IUIElementProps, IText, UIElementFlags, ResizeDimension, IContext, ISelection } from "carbon-core";
 import { createUUID } from "../util";
 import Isolate from "../commands/Isolate";
 import Environment from "../environment";
@@ -184,9 +184,9 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         return clone;
     }
 
-    systemType() {
-        return this._artboard ? 'user:' + this._artboard.name() : super.systemType();
-    }
+    // systemType() {
+    //     return this._artboard ? 'user:' + this._artboard.name() : super.systemType();
+    // }
 
     onArtboardChanged() {
         this._initFromArtboard();
@@ -263,6 +263,10 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
     _changeState(stateId) {
         var defaultState = this._artboard._recorder.getStateById('default');
+        if (!defaultState) {
+            //it can happen that primitives for changing state are applied before the source artboard is initialized
+            return;
+        }
 
         PropertyStateRecorder.applyState(this, defaultState);
         if (stateId !== 'default') {
@@ -609,7 +613,26 @@ PropertyMetadata.registerForType(Symbol, {
     },
     stateId: {
         displayName: "State",
-        type: "state"
+        type: "dropdown",
+        options: {
+            items: function(selection: ISelection) {
+                let symbols = selection.elements.filter(x => x instanceof Symbol) as Symbol[];
+                if (!symbols.length) {
+                    return [];
+                }
+                let source = symbols[0].source();
+                let states = [];
+                if (symbols.every(x => x.props.source.pageId === source.pageId && x.props.source.artboardId === source.artboardId)) {
+                    states = symbols[0].getStates();
+                }
+                return states.map(x => {
+                    return {
+                        name: x.name,
+                        value: x.id
+                    }
+                });
+            }
+        }
     },
     overflow: {
         defaultValue: Overflow.Clip

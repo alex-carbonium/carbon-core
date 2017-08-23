@@ -50,7 +50,7 @@ export default class CommonPropsManager {
         var base = values[0];
         for (let i = 1; i < values.length; ++i) {
             let next = values[i];
-            let isComplex = typeof next === "object" || Array.isArray(next);
+            let isComplex = next && typeof next === "object" || Array.isArray(next);
             if (isComplex) {
                 base = clone(base);
                 leaveCommonProps(base, next);
