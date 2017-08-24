@@ -293,6 +293,15 @@ class Line extends Shape {
     }
 
     createSelectionFrame(view) {
+
+        if (!this.selectFrameVisible()) {
+            return {
+                element: this,
+                frame: false,
+                points: []
+            }
+        }
+
         var that = this;
         var frame = {
             element: this,

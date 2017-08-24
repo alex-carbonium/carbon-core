@@ -365,7 +365,10 @@ Shape.prototype.t = Types.Shape;
 
 PropertyMetadata.registerForType(Shape, {
     fill: {
-        defaultValue: Brush.White
+        defaultValue: Brush.White,
+        options: {
+            gradient:true
+        }
     },
     stroke: {
         defaultValue: Brush.Black

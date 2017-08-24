@@ -81,6 +81,7 @@ declare module "carbon-geometry" {
         applyToContext(context: IContext);
 
         transformPoint(point: ICoordinate): ICoordinate;
+        transformPoint2(x:number, y:number): ICoordinate;
 
         prepended(matrix: IMatrix): IMatrix;
         append(matrix: IMatrix): IMatrix;

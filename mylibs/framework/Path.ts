@@ -520,8 +520,9 @@ class Path extends Shape {
         }
     }
 
-    selectFrameVisible() {
-        return this.mode() !== ElementState.Edit;
+    selectFrameVisible(value?) {
+        var res = super.selectFrameVisible(value);
+        return res && this.mode() !== ElementState.Edit;
     }
 
     edit() {
