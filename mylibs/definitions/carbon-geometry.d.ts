@@ -149,3 +149,4 @@ declare module "carbon-geometry" {
         */
         static onLine(p1: ICoordinate, p2: ICoordinate, pa: ICoordinate, pn: ICoordinate, calclulateOutsideSegment?):number;
     }
+}
