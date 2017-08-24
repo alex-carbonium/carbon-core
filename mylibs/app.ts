@@ -50,7 +50,7 @@ import Primitive from "./framework/sync/Primitive";
 import UIElement from "./framework/UIElement";
 import RelayoutEngine from "./framework/relayout/RelayoutEngine";
 import NullContainer from "framework/NullContainer";
-import util from "util";
+import {deepEquals} from "util";
 
 if (DEBUG) {
     window['env'] = Environment;
@@ -734,7 +734,7 @@ class AppClass extends DataNode implements IApp {
     useRecentColor(color) {
         var colors = this.props.recentColors.slice();
         for (var i = 0; i < colors.length; ++i) {
-            if (util.deepEquals(colors[i], color)) {
+            if (deepEquals(colors[i], color)) {
                 colors.splice(i, 1);
             }
         }

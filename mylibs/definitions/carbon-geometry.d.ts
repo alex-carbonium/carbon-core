@@ -26,7 +26,7 @@ declare module "carbon-geometry" {
         getDistance(fromPoint: IPoint): number;
         getDirectedAngle(fromPoint: IPoint): number;
     }
-    export const Point: (new(x: number, y: number) => IPoint) & {
+    export const Point: (new (x: number, y: number) => IPoint) & {
         create(x: number, y: number): IPoint;
 
         Zero: IPoint;
@@ -61,7 +61,7 @@ declare module "carbon-geometry" {
         containsPoint(point: IPoint): boolean;
     }
     interface IRectConstructor {
-        new (x: number, y: number, width: number, height: number): IRect;
+        new(x: number, y: number, width: number, height: number): IRect;
     }
     export const Rect: IRectConstructor & {
         fromSize(width: number, height: number): IRect;
@@ -98,7 +98,7 @@ declare module "carbon-geometry" {
     }
     export const Matrix: IMatrix & {
         createTranslationMatrix(tx: number, ty: number): IMatrix;
-        Identity:IMatrix;
+        Identity: IMatrix;
     }
 
     export const enum OriginType {
@@ -124,10 +124,28 @@ declare module "carbon-geometry" {
         cp1y?: number;
         cp2x?: number;
         cp2y?: number;
-        idx?:number;
+        idx?: number;
+    }
+
+    export interface IBezierCoordinate extends ICoordinate {
+        t?:number;
     }
 
     export const AngleAdjuster: {
-        adjust (startPoint:ICoordinate, endPoint:ICoordinate):ICoordinate;
+        adjust(startPoint: ICoordinate, endPoint: ICoordinate): ICoordinate;
     }
-}
+
+    export class NearestPoint {
+        static onCurve(p1: ICoordinate, cp1: ICoordinate, cp2: ICoordinate, p2: ICoordinate, pa: ICoordinate, pn: IBezierCoordinate):number;
+        /***
+        * Returns the nearest point (pn) on line p1 - p2 nearest to point pa.
+        *
+        * @param p1 start point of line
+        * @param p2 end point of line
+        * @param pa arbitrary point
+        * @param pn nearest point (return param)
+        * @param calclulateOutsideSegment if true, then pn point can be outside of line segment [p1, p2].
+        * @return distance squared between pa and nearest point (pn)
+        */
+        static onLine(p1: ICoordinate, p2: ICoordinate, pa: ICoordinate, pn: ICoordinate, calclulateOutsideSegment?):number;
+    }

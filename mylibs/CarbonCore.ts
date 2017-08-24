@@ -34,6 +34,7 @@ export default {
     "Rect": require("./math/rect"),
     "Point": require("./math/point"),
     "Matrix": require("./math/matrix"),
+    "NearestPoint": require("math/NearestPoint"),
     "AngleAdjuster": require("./math/AngleAdjuster"),
     "ObjectFactory": require("./framework/ObjectFactory"),
     "DesignerView": require("./framework/DesignerView"),
