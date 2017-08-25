@@ -113,6 +113,7 @@ class AppClass extends DataNode implements IApp {
     resourceAdded = EventHelper.createEvent2<ArtboardType, IArtboard>();
     resourceChanged = EventHelper.createEvent2<ArtboardType, IArtboard>();
     resourceDeleted = EventHelper.createEvent3<ArtboardType, IArtboard, IPage>();
+    resourcePageChanged = EventHelper.createEvent<IPage>();
 
     currentToolChanged: IEvent<string>;
     _currentTool: string;
