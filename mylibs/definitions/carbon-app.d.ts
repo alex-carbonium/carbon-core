@@ -425,9 +425,9 @@ declare module "carbon-app" {
     }
 
     export interface IInvalidate {
-        requested:IEvent2<LayerTypes, IRect>;
-        request(layer?, rect?);
-        requestInteractionOnly(rect?);
+        requested:IEvent2<LayerTypes, number>;
+        request(layer?, mask?);
+        requestInteractionOnly(mask?);
     }
 
 

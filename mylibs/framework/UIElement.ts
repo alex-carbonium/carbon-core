@@ -69,6 +69,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             this.id(createUUID());
         }
         this.parent(NullContainer);
+        this.runtimeProps.ctxl = 2;
     }
     invalidate(layerMask?) {
         if(layerMask === undefined) {
@@ -76,7 +77,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
 
         let parent = this.parent();
-        if (parent) {
+        if(parent) {
             parent.invalidate(layerMask);
         }
     }
@@ -88,6 +89,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             globalClippingBox: null,
             primitiveRoot: null,
             snapPoints: null,
+            ctxl:2
         }
     }
     _roundValue(value) {

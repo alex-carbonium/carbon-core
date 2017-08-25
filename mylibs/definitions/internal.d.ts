@@ -36,7 +36,7 @@ declare module "carbon-model"{
         primitivePath():any;
     }
 
-    export interface IUIElement{
+    export interface IUIElement {
         removing(): boolean;
         removed(mode: ChangeMode);
 

@@ -86,7 +86,7 @@ export default class ViewBase { //TODO: implement IView
     activeLayer: ILayer = null;
     activeLayerChanged: IEvent<ILayer> = EventHelper.createEvent<ILayer>();
 
-    private _viewState: ViewState = {scale: 0, sx: 0, sy: 0};
+    private _viewState: ViewState = { scale: 0, sx: 0, sy: 0 };
 
     _registerLayer(layer) {
         this._layers.push(layer);
@@ -264,9 +264,10 @@ export default class ViewBase { //TODO: implement IView
                 this.setInitialPagePlace(this._page);
             }
 
-            for(let i = 0; i < 3; ++i) {
+            for (let i = 0; i < 3; ++i) {
                 this.contexts[i].save();
-                if(this._page.layerRedrawMask === null || this._page.layerRedrawMask & (1 << i)) {
+                if (this._page.layerRedrawMask === null || this._page.layerRedrawMask & (1 << i)) {
+                    console.log(`clear layer: ${1 << i}`)
                     setupLayer.call(this, this._page, this.contexts[i]);
                 }
             }
@@ -279,7 +280,7 @@ export default class ViewBase { //TODO: implement IView
                 this._drawLayer(this._page, this.context, env, true);
             }
 
-            for(let i = 0; i < 3; ++i) {
+            for (let i = 0; i < 3; ++i) {
                 this.contexts[i].restore();
             }
         }
@@ -305,7 +306,7 @@ export default class ViewBase { //TODO: implement IView
         var context = ContextPool.getContext(tr.width, tr.height, dpr, true);
         context.fillStyle = '#b7babd';
         context.fillRect(0, 0, tr.width * dpr, tr.height * dpr);
-        this.renderElementToContext(element, context, sr.x, sr.y, tr.width/sr.width, dpr);
+        this.renderElementToContext(element, context, sr.x, sr.y, tr.width / sr.width, dpr);
 
         var res = context.canvas.toDataURL("image/png");
         ContextPool.releaseContext(context);
@@ -334,10 +335,10 @@ export default class ViewBase { //TODO: implement IView
                     matrix.applyToContext(context);
                 },
                 view: {
-                    scale: () =>1,
-                    focused:()=>false,
+                    scale: () => 1,
+                    focused: () => false,
                     contextScale: dpr,
-                    viewportRect: ()=> Rect.Max
+                    viewportRect: () => Rect.Max
                 }
             });
             context.restore();
@@ -420,25 +421,25 @@ export default class ViewBase { //TODO: implement IView
         return this._layers.find(l => l.type === layerType);
     }
 
-    activateLayer(layerType: LayerTypes, silent?: boolean){
+    activateLayer(layerType: LayerTypes, silent?: boolean) {
         var layer = this.getLayer(layerType);
 
-        if (layer !== this.activeLayer){
-            if (this.activeLayer){
+        if (layer !== this.activeLayer) {
+            if (this.activeLayer) {
                 this.activeLayer.deactivate();
                 this.activeLayer.isActive = false;
             }
             layer.isActive = true;
             this.activeLayer = layer;
-            if (!silent){
+            if (!silent) {
                 this.activeLayerChanged.raise(layer);
             }
         }
     }
 
-    deactivateLayer(layerType: LayerTypes, silent?: boolean){
+    deactivateLayer(layerType: LayerTypes, silent?: boolean) {
         var i = this._layers.findIndex(x => x.type === layerType);
-        if (i){
+        if (i) {
             this.activateLayer(this._layers[i - 1].type, silent);
         }
     }
@@ -460,7 +461,7 @@ export default class ViewBase { //TODO: implement IView
         var scale = this.scale();
 
         if (sx !== this._viewState.sx || sy !== this._viewState.sy || scale !== this._viewState.scale) {
-            this._viewState = {sx, sy, scale};
+            this._viewState = { sx, sy, scale };
         }
 
         return this._viewState;
@@ -472,31 +473,37 @@ export default class ViewBase { //TODO: implement IView
         }
 
         var animationValues = [];
-        var options = {duration:180};
+        var options = { duration: 180 };
 
-        animationValues.push({ from: this.scrollX(), to: newState.sx, accessor: value => {
-            if(arguments.length === 1) {
-                return this.scrollX(value);
+        animationValues.push({
+            from: this.scrollX(), to: newState.sx, accessor: value => {
+                if (arguments.length === 1) {
+                    return this.scrollX(value);
+                }
+
+                return this.scrollX();
             }
+        });
 
-            return this.scrollX();
-        } });
+        animationValues.push({
+            from: this.scrollY(), to: newState.sy, accessor: value => {
+                if (arguments.length === 1) {
+                    return this.scrollY(value);
+                }
 
-        animationValues.push({ from: this.scrollY(), to: newState.sy, accessor: value => {
-            if(arguments.length === 1) {
-                return this.scrollY(value);
+                return this.scrollY();
             }
+        });
 
-            return this.scrollY();
-        } });
+        animationValues.push({
+            from: this.scale(), to: newState.scale, accessor: value => {
+                if (arguments.length === 1) {
+                    return this.scale(value);
+                }
 
-        animationValues.push({ from: this.scale(), to: newState.scale, accessor: value => {
-            if(arguments.length === 1) {
-                return this.scale(value);
+                return this.scale();
             }
-
-            return this.scale();
-        } });
+        });
 
         var group = new AnimationGroup(animationValues, options, () => {
             Invalidate.request();
@@ -513,7 +520,7 @@ export default class ViewBase { //TODO: implement IView
         };
     }
 
-    invalidate(layerType?) {
+    invalidate(layerType?, mask?) {
         if (layerType === undefined) {
             for (var i = 0; i < this._layers.length; i++) {
                 this._layers[i].invalidate(0xffff);
@@ -522,7 +529,7 @@ export default class ViewBase { //TODO: implement IView
         else {
             var layer = this._layers.find(l => l.type === layerType);
             if (layer) {
-                layer.invalidate(0xffff);
+                layer.invalidate(mask || 0xffff);
             }
         }
         this.requestRedraw();
@@ -591,10 +598,10 @@ export default class ViewBase { //TODO: implement IView
         }
     }
 
-    ensureVisible(elements:IUIElement[]) {
+    ensureVisible(elements: IUIElement[]) {
         var rect = elements[0].getBoundingBoxGlobal();
-        for(let element of elements) {
-            rect  = combineRects(rect, element.getBoundingBoxGlobal());
+        for (let element of elements) {
+            rect = combineRects(rect, element.getBoundingBoxGlobal());
         }
 
         let pt = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
@@ -608,10 +615,10 @@ export default class ViewBase { //TODO: implement IView
         }
     }
 
-    ensureScale(elements:IUIElement[]) {
+    ensureScale(elements: IUIElement[]) {
         var rect = elements[0].getBoundingBoxGlobal();
-        for(let element of elements) {
-            rect  = combineRects(rect, element.getBoundingBoxGlobal());
+        for (let element of elements) {
+            rect = combineRects(rect, element.getBoundingBoxGlobal());
         }
 
         var size = this.app.viewportSize();

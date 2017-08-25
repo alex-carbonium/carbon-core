@@ -918,7 +918,7 @@ class AppClass extends DataNode implements IApp {
 
         if(count !== max) {
             for(var e of Selection.selectedElements()) {
-                e.runtimeProps.ctxl = 1 << 0;
+                e.runtimeProps.ctxl = 1 << 1;
             }
         }
 
