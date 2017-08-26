@@ -25,32 +25,20 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
 
         let textChanges = this.allocateTextChanges(changes);
 
-        if (textChanges.fill !== this.props.fill) {
-            textChanges.font = Font.extend(textChanges.font, { color: textChanges.fill.value });
-        }
-        else if (textChanges.font.color !== this.props.font.color) {
-            textChanges.fill = Brush.createFromColor(textChanges.font.color);
-        }
+        this.prepareTextMode(textChanges);
+        this.prepareFill(textChanges);
 
-        let dimensionsAffected = textChanges.content !== this.props.content
-            || textChanges.br !== this.props.br
+        let contentAffected = textChanges.content !== this.props.content
             || textChanges.mode !== this.props.mode
             || textChanges.wrap !== this.props.wrap
             || textChanges.font !== this.props.font;
-
-        if (textChanges.wrap && textChanges.wrap !== this.props.wrap) {
-            textChanges.mode = TextMode.Block;
-        }
-        else if (textChanges.mode === TextMode.Label) {
-            textChanges.wrap = false;
-        }
 
         let isStretchConstraint = textChanges.constraints.h === HorizontalConstraint.LeftRight || textChanges.constraints.v === VerticalConstraint.TopBottom;
         if (textChanges.mode === TextMode.Label && isStretchConstraint) {
             textChanges.mode = TextMode.Block;
         }
 
-        if (dimensionsAffected) {
+        if (contentAffected || textChanges.br !== this.props.br) {
             if (textChanges.mode === TextMode.Label) {
                 if (textChanges.br.height !== this.props.br.height) {
                     this.fitFontSizeToHeight(textChanges);
@@ -63,7 +51,9 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
                 this.ensureNotSmallerThanText(textChanges);
             }
 
-            this.adjustWithConstraints(textChanges);
+            if (contentAffected) {
+                this.adjustWithConstraints(textChanges);
+            }
         }
 
         if (textChanges.font !== this.props.font) {
@@ -107,6 +97,11 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
             Selection.refreshSelection();
         }
     }
+    rangeFontChanged(rangeFont: Font) {
+        if (this.props.mode === TextMode.Label && (rangeFont.align !== TextAlign.left || rangeFont.valign !== TextAlign.top)) {
+            this.setProps({ mode: TextMode.Block });
+        }
+    }
 
     saveOrResetLayoutProps(mode: ChangeMode): boolean {
         if (super.saveOrResetLayoutProps(mode)) {
@@ -138,6 +133,33 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
         if (dw || dh) {
             // Parent auto grow specifically uses ChangeMode.Model for immediate sync.
             this.parent().autoGrow(dw, dh, ChangeMode.Model, this);
+        }
+    }
+
+    private prepareTextMode(textChanges: TextChanges) {
+        if (textChanges.wrap && textChanges.wrap !== this.props.wrap) {
+            textChanges.mode = TextMode.Block;
+        }
+
+        let fontAlignChanged = textChanges.font.align !== TextAlign.left || textChanges.font.valign !== TextAlign.top;
+        if (textChanges.font !== this.props.font && fontAlignChanged) {
+            textChanges.mode = TextMode.Block;
+        }
+
+        if (textChanges.mode === TextMode.Label) {
+            textChanges.wrap = false;
+            if (fontAlignChanged) {
+                textChanges.font = Font.extend(textChanges.font, { align: TextAlign.left, valign: TextAlign.top });
+            }
+        }
+    }
+
+    private prepareFill(textChanges: TextChanges) {
+        if (textChanges.fill !== this.props.fill) {
+            textChanges.font = Font.extend(textChanges.font, { color: textChanges.fill.value });
+        }
+        else if (textChanges.font.color !== this.props.font.color) {
+            textChanges.fill = Brush.createFromColor(textChanges.font.color);
         }
     }
 
