@@ -38,7 +38,7 @@ class DraggingElement extends CompositeElement {
             this.register(e);
         }
 
-        if(!Selection.isElementSelected(e)) {
+        if (!Selection.isElementSelected(e)) {
             Selection.makeSelection(this.children);
         }
 
@@ -166,12 +166,20 @@ class DraggingElement extends CompositeElement {
 
         let gm = phantom.globalViewMatrix();
 
+
+
         if (newParent !== element.parent()) {
             element.parent().remove(element);
         }
 
         if (!newParent.autoPositionChildren()) {
-            element.setTransform(newParent.globalMatrixToLocal(gm));
+            for (let e of this.children) {
+                e.applyTranslation(this._translation, true, ChangeMode.Model);
+            }
+        } else {
+            for (let e of this.children) {
+                this.saveOrResetLayoutProps(ChangeMode.Self);
+            }
         }
 
         if (newParent !== element.parent()) {
@@ -200,15 +208,14 @@ class DraggingElement extends CompositeElement {
         SnapController.calculateSnappingPoints(this._snappingTarget, this);
     }
 
-    dragTo(event) {
-        debug("Drag to x=%d y=%d", event.x, event.y);
-        this._translation.set(event.x+ this._globalOffsetX, event.y + this._globalOffsetY);
+    _updateCurrentPosition(event) {
+        this._translation.set(event.x + this._globalOffsetX, event.y + this._globalOffsetY);
 
         if (event.event.shiftKey) {
             applyOrthogonalMove.call(this, this._translation);
         }
 
-        this._currentPosition.set(this._translation.x , this._translation.y);
+        this._currentPosition.set(this._translation.x, this._translation.y);
 
         var roundToPixels = !event.event.ctrlKey && UserSettings.snapTo.enabled && UserSettings.snapTo.pixels;
         if (roundToPixels) {
@@ -229,6 +236,12 @@ class DraggingElement extends CompositeElement {
         }
 
         this._translation.set(this._currentPosition.x - this._initialPosition.x, this._currentPosition.y - this._initialPosition.y);
+    }
+
+    dragTo(event) {
+        debug("Drag to x=%d y=%d", event.x, event.y);
+
+        this._updateCurrentPosition(event);
 
         for (var e of this.children) {
             e.applyTranslation(this._translation, true, ChangeMode.Self);

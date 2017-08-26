@@ -315,7 +315,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     applyTranslation(t: ICoordinate, withReset?: boolean, mode?: ChangeMode) {
         if (withReset) {
-            this.saveOrResetLayoutProps(mode);
+            this.saveOrResetLayoutProps(ChangeMode.Self);
         }
         this.applyTransform(Matrix.create().translate(t.x, t.y), false, mode);
     }
