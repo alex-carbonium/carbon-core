@@ -60,6 +60,7 @@ declare module "carbon-app" {
         resourceAdded: IEvent2<ArtboardType, IArtboard>;
         resourceChanged: IEvent2<ArtboardType, IArtboard>;
         resourceDeleted: IEvent3<ArtboardType, IArtboard, IPage>;
+        resourcePageChanged: IEvent<IPage>;
 
         setActiveStoryById(id);
         removeStory(story);
@@ -170,7 +171,7 @@ declare module "carbon-app" {
     export interface IPageProps extends IContainerProps {
         galleryId?: string;
     }
-    export interface IPage extends ILayer<IPageProps> {
+    export interface IPage<TProps extends IPageProps = IPageProps> extends ILayer<IPageProps> {
         getAllArtboards(): IArtboard[];
         getActiveArtboard(): IArtboard;
         getArtboardAtPoint(point: ICoordinate): IArtboard;
@@ -191,7 +192,14 @@ declare module "carbon-app" {
 
     export const Page: IConstructor<IPage>;
 
-    export interface IArtboardPage extends IPage {
+    export type ToolboxGroup = { id: string, name: string };
+
+    export interface IArtboardPageProps extends IPageProps {
+        toolboxGroups?: ToolboxGroup[];
+    }
+    export interface IArtboardPage extends IPage<IArtboardPageProps> {
+        props: IArtboardPageProps;
+
         setActiveArtboard(artboard: IArtboard): void;
         setActiveArtboardById(id: string): void;
     }

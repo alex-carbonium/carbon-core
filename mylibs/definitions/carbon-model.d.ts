@@ -43,6 +43,7 @@ declare module "carbon-model" {
     };
 
     export interface IUIElementProps extends IDataNodeProps {
+        name: string;
         br: IRect;
         visible: boolean;
         constraints: IConstraints;
@@ -222,8 +223,15 @@ declare module "carbon-model" {
         Icon = -1
     }
 
+    export type ArtboardState = {
+        id: string;
+        name: string;
+        data: object;
+    }
+
     export interface IArtboardProps extends IContainerProps {
         type: ArtboardType | null;
+        states?: ArtboardState[];
         guidesX: IGuide[];
         guidesY: IGuide[];
     }

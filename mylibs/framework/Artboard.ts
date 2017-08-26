@@ -17,9 +17,11 @@ import Environment from "environment";
 import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
-import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext } from "carbon-core";
+import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext, IContainer } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
 import Rect from "../math/rect";
+import CoreIntl from "../CoreIntl";
+import { createUUID } from "../util";
 
 
 //TODO: fix name of artboard on zoom
@@ -449,7 +451,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     propsUpdated(props: Partial<IArtboardProps>, oldProps: Partial<IArtboardProps>, mode: ChangeMode) {
         super.propsUpdated.apply(this, arguments);
 
-        let parent = this.parent() as IPage;
+        let parent = this.parent() as IArtboardPage | IContainer;
         if (props.state !== undefined) {
             if (this._recorder && this._recorder.hasState(props.state)) {
                 this._recorder.changeState(props.state);
@@ -473,6 +475,10 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         if (oldProps.type !== props.type && props.type !== ArtboardType.Regular) {
             if (Selection.isOnlyElementSelected(this)) {
                 Selection.refreshSelection();
+            }
+
+            if (parent !== NullContainer && props.type === ArtboardType.Symbol && !parent.props.toolboxGroups.length) {
+                parent.patchProps(PatchType.Insert, "toolboxGroups", { id: "default", name: CoreIntl.label("@page.defaultToolboxGroup") });
             }
 
             App.Current.resourceAdded.raise(props.type, this);
@@ -1048,8 +1054,8 @@ PropertyMetadata.registerForType(Artboard, {
     },
     toolboxGroup: {
         displayName: "@groupname",
-        type: 'text',
-        defaultValue: 'My Symbols'
+        type: "toolboxGroup",
+        defaultValue: "default"
     },
     frame: {
         displayName: "@frame",

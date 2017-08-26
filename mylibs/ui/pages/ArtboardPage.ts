@@ -14,7 +14,7 @@ import Environment from "environment";
 import { Types, ViewTool } from "../../framework/Defs";
 import Rect from "../../math/rect";
 import { IArtboard } from "carbon-model";
-import { ArtboardType, IArtboardPage } from "carbon-core";
+import { ArtboardType, IArtboardPage, ChangeMode, IArtboardPageProps } from "carbon-core";
 import DataNode from "../../framework/DataNode";
 import Container from "../../framework/Container";
 var debug = require<any>("DebugUtil")("carb:artboardPage");
@@ -42,6 +42,22 @@ class ArtboardPage extends Page implements IArtboardPage {
 
     getContentContainer() {
         return this._activeArtboard;
+    }
+
+    propsUpdated(props: Readonly<IArtboardPageProps>, oldProps, mode: ChangeMode) {
+        super.propsUpdated(props, oldProps, mode);
+
+        if (mode === ChangeMode.Model && props.toolboxGroups) {
+            App.Current.resourcePageChanged.raise(this);
+        }
+    }
+
+    propsPatched(patchType, propName, item) {
+        super.propsPatched(patchType, propName, item);
+
+        if (propName === "toolboxGroups") {
+            App.Current.resourcePageChanged.raise(this);
+        }
     }
 
     add(child) {
@@ -383,6 +399,9 @@ PropertyMetadata.registerForType(ArtboardPage, {
         defaultValue: []
     },
     guidesY: {
+        defaultValue: []
+    },
+    toolboxGroups: {
         defaultValue: []
     }
 });
