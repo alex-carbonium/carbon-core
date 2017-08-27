@@ -29,7 +29,7 @@ declare module "carbon-geometry"{
 }
 
 declare module "carbon-model"{
-    import { ChangeMode } from "carbon-basics";
+    import { ChangeMode, Font } from "carbon-basics";
     import { IRect, IMatrix, ISize } from "carbon-geometry";
 
     export interface IDataNode {
@@ -70,6 +70,7 @@ declare module "carbon-model"{
     }
 
     export interface IText {
+        rangeFontChanged(rangeFont: Font): void;
         resetEngine(): void;
     }
 }

@@ -2,11 +2,13 @@ import UIElement from "framework/UIElement";
 import PropertyMetadata from "framework/PropertyMetadata";
 import {Types} from "framework/Defs";
 import Font from "framework/Font";
-import { ChangeMode } from "carbon-core";
+import { ChangeMode, IText } from "carbon-core";
 
 var debug = require("DebugUtil")("carb:rangeFormatter");
 
 export default class RangeFormatter extends UIElement {
+    private _element: IText;
+
     initFormatter(app, engine, element){
         this._app = app;
         this._engine = engine;
@@ -54,6 +56,8 @@ export default class RangeFormatter extends UIElement {
             var font = Font.extend(this._element.props.font, {valign: formatting.valign});
             this._element.setProps({font});
         }
+
+        this._element.rangeFontChanged(font);
     }
 
     _fontToFormatting(font){
