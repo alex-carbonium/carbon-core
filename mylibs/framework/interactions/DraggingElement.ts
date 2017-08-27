@@ -164,21 +164,29 @@ class DraggingElement extends CompositeElement {
     dropElementOn(event, newParent, element, phantom, index) {
         debug("drop %s on %s[%d]", element.displayName(), newParent.displayName(), index);
 
-        let gm = phantom.globalViewMatrix();
-
-
+        let matrixes = [];
+        if (!newParent.autoPositionChildren()) {
+            for (let e of this.children) {
+                e.applyTranslation(this._translation, true, ChangeMode.Model);
+                e.clearSavedLayoutProps();
+                matrixes.push(e.globalViewMatrix());
+            }
+        }
 
         if (newParent !== element.parent()) {
             element.parent().remove(element);
         }
 
         if (!newParent.autoPositionChildren()) {
-            for (let e of this.children) {
-                e.applyTranslation(this._translation, true, ChangeMode.Model);
+            for (let i = 0; i < this.children.length; ++i) {
+                let e = this.children[i];
+                let m = matrixes[i];
+                e.setTransform(newParent.globalMatrixToLocal(m));
             }
         } else {
             for (let e of this.children) {
                 this.saveOrResetLayoutProps(ChangeMode.Self);
+                e.clearSavedLayoutProps();
             }
         }
 
