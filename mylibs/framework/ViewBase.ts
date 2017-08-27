@@ -267,7 +267,7 @@ export default class ViewBase { //TODO: implement IView
             for (let i = 0; i < 3; ++i) {
                 this.contexts[i].save();
                 if (this._page.layerRedrawMask === null || this._page.layerRedrawMask & (1 << i)) {
-                    console.log(`clear layer: ${1 << i}`)
+                    // console.log(`clear layer: ${1 << i}`)
                     setupLayer.call(this, this._page, this.contexts[i]);
                 }
             }

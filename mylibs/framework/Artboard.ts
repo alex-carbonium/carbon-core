@@ -676,13 +676,14 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return this.runtimeProps.version;
     }
 
-    click(event) {
+    mousedown(event) {
         let scale = Environment.view.scale();
         let pos = this.position();
         if (isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width(), height: 20 / scale }, {
             x: event.x,
             y: event.y
         })) {
+            this.parent().setActiveArtboard(this);
             Selection.makeSelection([this]);
             event.handled = true;
         }

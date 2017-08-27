@@ -864,38 +864,47 @@ class AppClass extends DataNode implements IApp {
         }
     }
 
+    private _updateWithSelectionMask(e) {
+        var parent = e.parent();
+        do {
+            if (parent.opacity() < 1 || parent.runtimeProps.mask) {
+                e = parent;
+                break;
+            }
+            parent = parent.parent();
+        } while (parent && parent !== NullContainer);
+
+        e.applyVisitorTLR(c => {
+            c.runtimeProps.ctxl = 1 << 1;
+        });
+    }
+
     mapElementsToLayerMask() {
         let count = 0;
         let max = Selection.elements.length;
         let activeArtboard = this.activePage.getActiveArtboard();
         let mainElement;
+        let isActiveArtboard = false;
 
-        if (activeArtboard) {
-            mainElement = activeArtboard;
-        } else {
-            mainElement = this.activePage;
-        }
+        this.activePage.applyVisitorTLR(e => {
+            if(e instanceof Artboard) {
+                isActiveArtboard = e === activeArtboard;
+            }
 
-        mainElement.applyVisitorTLR(e => {
+            if(activeArtboard && !isActiveArtboard) {
+                e.runtimeProps.ctxl = 1 << 0;
+                return;
+            }
+
             if (count && count === max) {
+                // if we already market all selected elements, the rest goes to 1<<2 layer.
                 e.runtimeProps.ctxl = 1 << 2;
                 return;
             }
 
             let isSelected = Selection.isElementSelected(e);
             if (isSelected || count > 0) {
-                var parent = e.parent();
-                do {
-                    if (parent.opacity() < 1 || parent.runtimeProps.mask) {
-                        e = parent;
-                        break;
-                    }
-                    parent = parent.parent();
-                } while (parent && parent !== NullContainer);
-
-                e.applyVisitorTLR(c => {
-                    c.runtimeProps.ctxl = 1 << 1;
-                });
+                this._updateWithSelectionMask(e);
 
                 if (isSelected) {
                     count++;
@@ -907,19 +916,9 @@ class AppClass extends DataNode implements IApp {
             }
         })
 
-        if (activeArtboard) {
-            for (let artboard of this.activePage.getAllArtboards()) {
-                if (artboard !== activeArtboard) {
-                    artboard.applyVisitorTLR(c => {
-                        c.runtimeProps.ctxl = 1 << 0;
-                    });
-                }
-            }
-        }
-
         if(count !== max) {
             for(var e of Selection.selectedElements()) {
-                e.runtimeProps.ctxl = 1 << 1;
+                this._updateWithSelectionMask(e);
             }
         }
 
