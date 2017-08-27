@@ -15,6 +15,7 @@ import Selection from "framework/SelectionModel";
 import CompositeElement from "../CompositeElement";
 import Duplicate from "commands/Duplicate";
 import UIElement from "../UIElement";
+import GlobalMatrixModifier from "../GlobalMatrixModifier";
 
 var debug = require("DebugUtil")("carb:draggingElement");
 
@@ -27,20 +28,24 @@ function applyOrthogonalMove(pos) {
 }
 
 class DraggingElement extends CompositeElement {
+    private activeDecorators = [];
+
     constructor(elementOrComposite, event) {
         super();
 
         var elements: UIElement[] = elementOrComposite instanceof CompositeElement ? elementOrComposite.elements : [elementOrComposite];
         this.children = [];
 
+        if (!Selection.isElementSelected(e)) {
+            Selection.makeSelection(elements);
+        }
+
         for (var e of elements) {
             e.clearSavedLayoutProps();
             this.register(e);
+            this.saveDecorators(e);
         }
-
-        if (!Selection.isElementSelected(e)) {
-            Selection.makeSelection(this.children);
-        }
+        this.saveDecorators(elementOrComposite);
 
         this.performArrange();
 
@@ -78,6 +83,17 @@ class DraggingElement extends CompositeElement {
 
     displayName() {
         return "DraggingElement";
+    }
+
+    private saveDecorators(e) {
+        if (e.decorators) {
+            e.decorators.forEach(x => {
+                if (x.visible() && this.activeDecorators.indexOf(x) === -1) {
+                    this.activeDecorators.push(x);
+                    x.visible(false);
+                }
+            });
+        }
     }
 
     detach() {
@@ -148,6 +164,9 @@ class DraggingElement extends CompositeElement {
         }
 
         this.applySnapshot(newSnapshot, ChangeMode.Model);
+
+        this.activeDecorators.forEach(x => x.visible(true));
+        this.activeDecorators.length = 0;
 
         return elements;
     }
@@ -248,25 +267,6 @@ class DraggingElement extends CompositeElement {
         }
     }
 
-    strokeBorder(context, w, h) {
-        if (Brush.canApply(this.stroke())) {
-            context.save();
-
-            var scale = Environment.view.scale();
-            context.scale(1 / scale, 1 / scale);
-
-            context.beginPath();
-            for (var i = 0; i < this.children.length; i++) {
-                var child = this.children[i];
-                child.drawBoundaryPath(context);
-            }
-
-            context.lineWidth = this.strokeWidth();
-            Brush.stroke(this.stroke(), context);
-            context.restore();
-        }
-    }
-
     constraints() {
         if (this.children.length !== 1) {
             return null;
@@ -286,10 +286,34 @@ class DraggingElement extends CompositeElement {
     allowMoveOutChildren(event) {
         return this.children.every(x => x.parent() === this || x.parent().allowMoveOutChildren(undefined, event));
     }
+
+    draw(context) {
+        context.save();
+
+        var scale = Environment.view.scale();
+        context.scale(1 / scale, 1 / scale);
+
+        GlobalMatrixModifier.pushPrependScale();
+        context.beginPath();
+        for (var i = 0; i < this.children.length; i++) {
+            var child = this.children[i];
+            child.drawBoundaryPath(context);
+        }
+
+        context.lineWidth = this.strokeWidth();
+        Brush.stroke(this.stroke(), context);
+        GlobalMatrixModifier.pop();
+
+        context.restore();
+    }
 }
 
 DraggingElement.prototype.t = Types.DraggingElement;
 
-PropertyMetadata.registerForType(DraggingElement, {});
+PropertyMetadata.registerForType(DraggingElement, {
+    stroke: {
+        defaultValue: Brush.createFromColor(UserSettings.frame.stroke)
+    }
+});
 
 export default DraggingElement;
