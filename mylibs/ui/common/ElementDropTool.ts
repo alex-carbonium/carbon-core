@@ -35,6 +35,7 @@ export default class ElementDropTool extends Tool {
         Cursor.removeGlobalCursor();
 
         this._changeMode(ElementState.Resize);
+        this._hoverArtboard = null;
     }
     mousedown(event: IMouseEventData, keys: IKeyboardState) {
         var eventData = { handled: false, x: event.x, y: event.y };
