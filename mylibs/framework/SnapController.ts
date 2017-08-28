@@ -4,6 +4,7 @@ import Point from "math/point";
 import { ICoordinate, VerticalConstraint, HorizontalConstraint } from "carbon-core";
 import UserSettings from "UserSettings";
 import { areRectsIntersecting } from "../math/math";
+import NullContainer from "framework/NullContainer";
 
 var debug = require("DebugUtil")("carb:snapController");
 
@@ -71,7 +72,7 @@ function handleVerticalOverlap(xs, ys, pos) {
             overlap.push(elements[j]);
         }
 
-        if(elements[j].root) {
+        if (elements[j].root) {
             rootOverlap = elements[j];
         }
     }
@@ -83,7 +84,7 @@ function handleVerticalOverlap(xs, ys, pos) {
         let ymin = ys[0] + pos.y;
         let ymax;
 
-        var vconstraint = this._constraints?this._constraints.v:0;
+        var vconstraint = this._constraints ? this._constraints.v : 0;
         for (i = overlap.length - 1; i >= 0; --i) {
             let oys = overlap[i].snapData.ys;
             ymax = oys[oys.length - 1];
@@ -148,7 +149,7 @@ function handleVerticalOverlap(xs, ys, pos) {
                 solid: vconstraint & VerticalConstraint.Bottom,
                 d: offsetToOverlap(overlap[i].snapData.xs, x)
             })
-        } else if(rootOverlap) {
+        } else if (rootOverlap) {
             ymin = rootOverlap.snapData.ys[rootOverlap.snapData.ys.length - 1];
             this.distances.push({
                 x1: x,
@@ -177,13 +178,13 @@ function handleHorizontalOverlap(_xs, _ys, pos) {
             overlap.push(elements[j]);
         }
 
-        if(elements[j].root) {
+        if (elements[j].root) {
             rootOverlap = elements[j];
         }
     }
 
     if (overlap.length) {
-        var hconstraint = this._constraints?this._constraints.h:0;
+        var hconstraint = this._constraints ? this._constraints.h : 0;
 
         overlap.sort((a, b) => a.snapData.xs[a.snapData.xs.length - 1] - b.snapData.xs[b.snapData.xs.length - 1]);
         let i;
@@ -254,7 +255,7 @@ function handleHorizontalOverlap(_xs, _ys, pos) {
                 solid: hconstraint & HorizontalConstraint.Right,
                 d: offsetToOverlap(overlap[i].snapData.ys, _y)
             })
-        } else if(rootOverlap){
+        } else if (rootOverlap) {
             xmin = rootOverlap.snapData.xs[rootOverlap.snapData.xs.length - 1];
             this.distances.push({
                 y1: _y,
@@ -487,12 +488,12 @@ function buildHorizontalDistances(distances, snap, b) {
 }
 
 function collectPoints(data, elements, viewportRect, root, excludeElement, element) {
-    if(excludeElement) {
-        if(excludeElement === element) {
+    if (excludeElement) {
+        if (excludeElement === element) {
             return;
         }
 
-        if(excludeElement.contains && excludeElement.contains(element)) {
+        if (excludeElement.contains && excludeElement.contains(element)) {
             return;
         }
     }
@@ -514,7 +515,7 @@ function collectPoints(data, elements, viewportRect, root, excludeElement, eleme
             }
 
             if (root) {
-                elements.push({ element, snapData, root:element === root });
+                elements.push({ element, snapData, root: element === root });
             }
         }
     }
@@ -574,8 +575,11 @@ class SnapController {
             return;
         }
 
-        parent.applyVisitor(collectPoints.bind(null, data, elements, viewportRect, parent, excludeElement), true);
-
+        if (parent.parent() === NullContainer) {
+            parent.children.forEach(collectPoints.bind(null, data, elements, viewportRect, parent, excludeElement));
+        } else {
+            parent.applyVisitor(collectPoints.bind(null, data, elements, viewportRect, parent, excludeElement), true);
+        }
         data._snapX.sort(function (x1, x2) {
             return x1.value - x2.value;
         });
