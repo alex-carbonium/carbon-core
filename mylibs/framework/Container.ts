@@ -20,6 +20,8 @@ import { IMatrix } from "carbon-geometry";
 import ExtensionPoint from "./ExtensionPoint";
 import RenderPipeline from "./render/RenderPipeline";
 import params from "params";
+import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
+import GlobalMatrixModifier from "./GlobalMatrixModifier";
 
 export default class Container<TProps extends IContainerProps = IContainerProps> extends UIElement<TProps> implements IContainer<IContainerProps> {
     props: TProps;
@@ -86,13 +88,17 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         }
         else {
             if (!Brush.canApply(this.fill()) && this.showBoundaryWhenTransparent()) {
+                let scale = Environment.view.scale();
+                GlobalMatrixModifier.pushPrependScale();
                 context.save();
-                this.globalViewMatrix().applyToContext(context);
+                context.scale(1/scale, 1/scale);
                 context.setLineDash(UserSettings.general.boundaryDash);
                 context.strokeStyle = UserSettings.general.boundaryStroke;
-                let br = this.boundaryRect();
-                context.strokeRect(br.x, br.y, br.width, br.height);
+                context.beginPath();
+                BoundaryPathDecorator.drawBoundaryPath(context, this);
+                context.stroke();
                 context.restore();
+                GlobalMatrixModifier.pop();
             }
         }
     }

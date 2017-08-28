@@ -16,7 +16,7 @@ var settings = {
         "selection_fill": "rgba(89, 35, 93, 0.19)"
     },
     general: {
-        boundaryDash: [4, 2],
+        boundaryDash: [4, 4],
         boundaryStroke: "#ccc"
     },
     guides: {
@@ -65,6 +65,10 @@ var settings = {
         pointFillFirstPoint: "yellow",
         editPointSize: 4,
         editHandleSize: 3
+    },
+
+    repeater: {
+        marginFill: "pink"
     },
 
     internal: {

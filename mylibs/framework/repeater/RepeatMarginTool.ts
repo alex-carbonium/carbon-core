@@ -7,14 +7,16 @@ import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import ModelStateListener from "../relayout/ModelStateListener";
 import { LayerTypes } from "carbon-app";
+import Rect from "../../math/rect";
+import UserSettings from "../../UserSettings";
+
+const MinSize = 4;
 
 export default {
     _container: null,
     _margins: null,
     _activeMargin: null,
     _dragController: null,
-    _marginRectX: null,
-    _marginRectY: null,
     _firstDrag: true,
     attach: function(container){
         this._container = container;
@@ -64,16 +66,8 @@ export default {
         var marginX = this._strategy.getActualMarginX(container);
         var marginY = this._strategy.getActualMarginY(container);
 
-        this._marginRectX = {x: 0, y: 0, width: marginX, height: containerHeight};
-        this._marginRectY = {x: 0, y: 0, width: containerWidth, height: marginY};
-        if (this._marginRectX.width < 2){
-            this._marginRectX.x = -1;
-            this._marginRectX.width = 3;
-        }
-        if (this._marginRectY.height < 2){
-            this._marginRectY.y = -1;
-            this._marginRectY.height = 3;
-        }
+        var marginRectX = {x: 0, y: 0, width: marginX, height: containerHeight};
+        var marginRectY = {x: 0, y: 0, width: containerWidth, height: marginY};
 
         this._margins = [];
         for (let i = 1; i < cols; i++){
@@ -81,9 +75,9 @@ export default {
             if (x < containerWidth){
                 let matrix = baseMatrix.clone().translate(x, 0);
                 let x2 = x + marginX;
-                let rect = x2 < containerWidth ? this._marginRectX : adjustRectWidth(this._marginRectX, containerWidth - x2);
+                let rect = x2 < containerWidth ? marginRectX : adjustRectWidth(marginRectX, containerWidth - x2);
                 this._margins.push({
-                    rect: rect,
+                    rect,
                     vertical: false,
                     cursor: 'col-resize',
                     value: marginX,
@@ -97,9 +91,9 @@ export default {
             if (y < containerHeight){
                 let matrix = baseMatrix.clone().translate(0, y);
                 let y2 = y + marginY;
-                let rect = y2 < containerHeight ? this._marginRectY : adjustRectHeight(this._marginRectY, containerHeight - y2);
+                let rect = y2 < containerHeight ? marginRectY : adjustRectHeight(marginRectY, containerHeight - y2);
                 this._margins.push({
-                    rect: rect,
+                    rect,
                     vertical: true,
                     cursor: 'row-resize',
                     value: marginY,
@@ -111,15 +105,30 @@ export default {
     },
     onDragSearching: function(e){
         var hit = false;
+        let scale = Environment.view.scale();
         for (let i = 0, l = this._margins.length; i < l; ++i) {
             let margin = this._margins[i];
             let point = margin.matrixInverted.transformPoint(e);
-            if (isPointInRect(margin.rect, point)){
+
+            let hitRect = Rect.allocateFromRect(margin.rect);
+            if (hitRect.width * scale < MinSize) {
+                hitRect.width = MinSize / scale;
+                hitRect.x -= hitRect.width / 2;
+            }
+            if (hitRect.height * scale < MinSize) {
+                hitRect.height = MinSize / scale;
+                hitRect.y -= hitRect.height / 2;
+            }
+
+            if (isPointInRect(hitRect, point)){
                 this._activeMargin = margin;
                 Cursor.setGlobalCursor(margin.cursor);
                 hit = true;
+                hitRect.free();
                 break;
             }
+
+            hitRect.free();
         }
         if (hit || this._activeMargin !== null){
             if (!hit){
@@ -143,6 +152,9 @@ export default {
             this._originalState = this._container.toJSON();
             this._firstDrag = false;
         }
+
+        ddx = ddx > 0 ? Math.ceil(ddx) : Math.floor(ddx);
+        ddy = ddy > 0 ? Math.ceil(ddy) : Math.floor(ddy);
 
         if (this._activeMargin.vertical){
             ddx = 0;
@@ -192,14 +204,27 @@ export default {
         }
     },
     drawMargin: function(context, margin, env){
+        var scale = env.view.scale();
+
         context.save();
         context.beginPath();
 
         margin.matrix.applyToContext(context);
-        context.fillStyle = 'pink';
-        context.fillRect(margin.rect.x, margin.rect.y, margin.rect.width, margin.rect.height);
+        context.fillStyle = UserSettings.repeater.marginFill;
 
-        var scale = env.view.scale();
+        context.save();
+        if (margin.rect.width === 0) {
+            context.scale(1/scale, 1/scale);
+            context.fillRect(margin.rect.x * scale - MinSize / 2, margin.rect.y * scale, MinSize, margin.rect.height * scale);
+        }
+        else if (margin.rect.height === 0) {
+            context.scale(1/scale, 1/scale);
+            context.fillRect(margin.rect.x * scale, margin.rect.y * scale - MinSize / 2, margin.rect.width * scale, MinSize);
+        }
+        else {
+            context.fillRect(margin.rect.x, margin.rect.y, margin.rect.width, margin.rect.height);
+        }
+        context.restore();
 
         env.view.applyGuideFont(context);
         var text = margin.value + "";
