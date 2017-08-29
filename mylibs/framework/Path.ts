@@ -24,6 +24,7 @@ import Cursors from "Cursors";
 import PathManipulationDecorator from "ui/common/path/PathManipulationDecorator";
 import EditPath from "commands/EditPath";
 import ExtensionPoint from "./ExtensionPoint";
+import NullContainer from "framework/NullContainer";
 
 const CP_HANDLE_RADIUS = UserSettings.path.editHandleSize;
 const CP_HANDLE_RADIUS2 = CP_HANDLE_RADIUS * 2;
@@ -705,7 +706,7 @@ class Path extends Shape {
             this.adjustBoundaries();
         }
 
-        if (newProps.mode !== undefined && newProps.mode !== oldProps.mode) {
+        if (newProps.mode !== undefined && newProps.mode !== oldProps.mode && this.parent() !== NullContainer) {
             this.switchToEditMode(newProps.mode === ElementState.Edit);
         }
     }
