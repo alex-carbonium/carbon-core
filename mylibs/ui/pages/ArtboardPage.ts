@@ -237,11 +237,6 @@ class ArtboardPage extends Page implements IArtboardPage {
         }
     }
 
-    get isToolboxConfigDirty(){
-        return true;
-    }
-
-
     _onMouseUp(event) {
         if (event.handled){
             return;

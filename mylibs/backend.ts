@@ -25,7 +25,7 @@ var defaultOptions = {
     useCache: false,
     showProgress: true,
     ignoreError: false,
-    sendDefaultHeaders: true,
+    defaultHeaders: true,
     contentType: contentTypes.json
 };
 
@@ -94,7 +94,7 @@ class Backend implements IBackend {
             loadUserInfo: false
         });
         this._userManager.events.addUserLoaded(container => {
-            if (container.access_token){
+            if (container.access_token) {
                 this.setAccessToken(container.access_token);
             }
         });
@@ -110,8 +110,8 @@ class Backend implements IBackend {
         this.loginNeeded.raise(this.isGuest());
     }
 
-    setupConnection(app: IApp){
-        if (this._connectionToken){
+    setupConnection(app: IApp) {
+        if (this._connectionToken) {
             this._connectionToken.dispose();
         }
 
@@ -126,33 +126,33 @@ class Backend implements IBackend {
         this.consistencyMonitor.start();
 
     }
-    shutdownConnection(){
-        if (this.autoSaveTimer){
+    shutdownConnection() {
+        if (this.autoSaveTimer) {
             this.autoSaveTimer.stop();
             this.autoSaveTimer = null;
         }
-        if (this.activityMonitor){
-            this.activityMonitor.deactivate({type: "shuttingDown"});
+        if (this.activityMonitor) {
+            this.activityMonitor.deactivate({ type: "shuttingDown" });
             this.activityMonitor = null;
         }
-        if (this.consistencyMonitor){
+        if (this.consistencyMonitor) {
             this.consistencyMonitor.stop();
             this.autoSaveTimer = null;
         }
-        if (this.connection){
+        if (this.connection) {
             this.connection = null;
         }
-        if (this._connectionToken){
+        if (this._connectionToken) {
             this._connectionToken.dispose();
             this._connectionToken = null;
         }
     }
-    startConnection(){
-        if (this.connection){
+    startConnection() {
+        if (this.connection) {
             this.connection.start();
         }
     }
-    private onConnectionStateChanged(newState: ConnectionState){
+    private onConnectionStateChanged(newState: ConnectionState) {
         this.connectionStateChanged.raise(newState);
     }
 
@@ -216,7 +216,7 @@ class Backend implements IBackend {
             headers: {
                 Authorization: "Basic " + btoa("auth:nopassword")
             },
-            sendDefaultHeaders: false,
+            defaultHeaders: false,
             contentType: contentTypes.urlEncoded
         };
         return this.post(this.servicesEndpoint + "/idsrv/connect/token", data, options)
@@ -239,10 +239,10 @@ class Backend implements IBackend {
                 throw e;
             });
     }
-    loginExternal(provider: LoginProvider){
+    loginExternal(provider: LoginProvider) {
         var acr = "idp:" + provider;
         var userId = this.getUserId();
-        if (userId){
+        if (userId) {
             acr += " tenant:" + this.getUserId();
         }
 
@@ -258,18 +258,18 @@ class Backend implements IBackend {
         });
         location.href = url;
     }
-    externalCallback(){
+    externalCallback() {
         var data = this.decodeUriData(location.hash.substr(1));
-        if (data.access_token){
+        if (data.access_token) {
             this.setAccessToken(data.access_token);
             return this.postAuthenticate(false);
         }
         logger.fatal("No access token in " + location.hash);
         return Promise.reject(new Error("noAccessToken"));
     }
-    private postAuthenticate(isGuest: boolean): ResponsePromise<ILoginModel, ILoginResult>{
+    private postAuthenticate(isGuest: boolean): ResponsePromise<ILoginModel, ILoginResult> {
         return this.get(this.servicesEndpoint + "/idsrv/ext/userId", null,
-                { credentials: DEBUG ? "include" : "same-origin" })
+            { credentials: DEBUG ? "include" : "same-origin" })
             .then(data => {
                 this.setUserId(data.userId);
                 this.setIsGuest(isGuest);
@@ -363,9 +363,9 @@ class Backend implements IBackend {
     decodeUriData(uri) {
         var result: any = {};
         var split = uri.split("&");
-        for (var i = 0; i < split.length; ++i){
+        for (var i = 0; i < split.length; ++i) {
             var parts = split[i].split("=");
-            if (parts.length > 0){
+            if (parts.length > 0) {
                 result[decodeURIComponent(parts[0])] = parts[1] ? decodeURIComponent(parts[1]) : true;
             }
         }
@@ -415,7 +415,7 @@ class Backend implements IBackend {
             fetchOptions.headers["Content-Type"] = contentType;
         }
 
-        if (options.sendDefaultHeaders) {
+        if (options.defaultHeaders) {
             this.setHeaders(fetchOptions);
         }
 

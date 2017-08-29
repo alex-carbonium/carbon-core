@@ -4,7 +4,7 @@ import { ISharedResource } from "carbon-core";
 
 var proxy = {
     staticResources(from, to, search?) {
-        return backend.get(globals.resourceFile)
+        return backend.get(globals.resourceFile, null, { defaultHeaders: false })
             .then(resources => {
                 let filtered = filter(resources, search);
                 return {

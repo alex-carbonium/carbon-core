@@ -460,6 +460,10 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
         if (oldProps.type !== props.type && oldProps.type !== ArtboardType.Regular) {
             App.Current.resourceDeleted.raise(oldProps.type, this, parent);
+
+            if (props.type === ArtboardType.Regular) {
+                parent.disablePropsTracking();
+            }
         }
 
         if (oldProps.name !== undefined) {
@@ -477,8 +481,11 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
                 Selection.refreshSelection();
             }
 
-            if (parent !== NullContainer && props.type === ArtboardType.Symbol && !parent.props.toolboxGroups.length) {
-                parent.patchProps(PatchType.Insert, "toolboxGroups", { id: "default", name: CoreIntl.label("@page.defaultToolboxGroup") });
+            if (parent !== NullContainer) {
+                if (props.type === ArtboardType.Symbol && !parent.props.toolboxGroups.length) {
+                    parent.patchProps(PatchType.Insert, "toolboxGroups", { id: "default", name: CoreIntl.label("@page.defaultToolboxGroup") });
+                }
+                parent.enablePropsTracking();
             }
 
             App.Current.resourceAdded.raise(props.type, this);
