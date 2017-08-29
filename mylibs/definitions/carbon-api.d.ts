@@ -238,11 +238,12 @@ declare module "carbon-api" {
     }
     export const globals: CarbonGlobals;
 
-    export var util: {
+    export const util: {
         debounce(func: (...args: any[]) => any, ms: number): () => any;
         throttle(func: (...args: any[]) => any, ms: number): () => any;
         pushAll(target: any[], source: any[]);
         imageDataPointToCssColor(data:{data:number[]}, index:number):string;
+        deepEquals(a: object, b: object): boolean;
     }
 }
 
