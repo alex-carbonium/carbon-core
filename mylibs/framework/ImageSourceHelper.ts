@@ -176,9 +176,8 @@ export default class ImageSourceHelper {
         var iconMatrix = Matrix.createPooled();
         iconMatrix.scale(scaleX, scaleY);
         iconMatrix.translate(-box.x, -box.y);
-
+        let originalCtxl  = element.runtimeProps.ctxl;
         try {
-            var box = element.getBoundingBoxGlobal();
             //The global context needs to be replaced. Scenario:
             // - export is made and global context already modified by offsetting the exported element
             // - now we draw element from some arbitrary artboard and need to apply the transformation logic,
@@ -189,9 +188,12 @@ export default class ImageSourceHelper {
             var oldStroke = element.getDisplayPropValue('stroke');
             var oldStrokeWidth = element.getDisplayPropValue('strokeWidth');
             element.setDisplayProps({ fill: props.fill, stroke: props.stroke, strokeWidth: props.strokeWidth }, ChangeMode.Self);
+
+            element.runtimeProps.ctxl = sourceElement.runtimeProps.ctxl;
             element.draw(context, Object.assign({}, environment, { viewportRect: null }));
         }
         finally {
+            element.runtimeProps.ctxl = originalCtxl;
             element.setDisplayProps({ fill: oldFill, stroke: oldStroke, strokeWidth: oldStrokeWidth }, ChangeMode.Self);
             GlobalMatrixModifier.restore();
             iconMatrix.free();
@@ -343,7 +345,7 @@ export default class ImageSourceHelper {
         if (!source) {
             return false;
         }
-        return source.type === ImageSourceType.Url;
+        return source.type === ImageSourceType.Url && source.type === ImageSourceType.Element;
     };
 
     static isFillSupported(source) {
