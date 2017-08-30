@@ -64,6 +64,8 @@ export default class SelectComposite extends CompositeElement implements ISelect
             var multiselect = this.count() > 1;
 
             if (value) {
+                //making visible just in case
+                this._activeFrame.visible(true);
                 if (!multiselect) {
                     this.each(element => {
                         element.addDecorator(this._activeFrame);
