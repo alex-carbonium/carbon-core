@@ -97,9 +97,11 @@ class DraggingElement extends CompositeElement {
     }
 
     detach() {
-        //  super.detach();
-
         debug("Detached");
+
+        this.activeDecorators.forEach(x => x.visible(true));
+        this.activeDecorators.length = 0;
+
         SnapController.clearActiveSnapLines();
 
         this.parent().remove(this, ChangeMode.Self);
@@ -164,9 +166,6 @@ class DraggingElement extends CompositeElement {
         }
 
         this.applySnapshot(newSnapshot, ChangeMode.Model);
-
-        this.activeDecorators.forEach(x => x.visible(true));
-        this.activeDecorators.length = 0;
 
         return elements;
     }

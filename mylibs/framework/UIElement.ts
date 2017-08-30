@@ -657,7 +657,6 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     removed(mode: ChangeMode) {
-        this.removeAllDecorators();
     }
 
     removing() {
