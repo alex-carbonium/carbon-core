@@ -12,7 +12,9 @@ import Matrix from "../../math/matrix";
 import {ViewTool} from "../../framework/Defs";
 import UIElement from "../../framework/UIElement";
 import Tool from "./Tool";
+
 import { IMouseEventData, IKeyboardState, ElementState } from "carbon-core";
+require("framework/ArtboardFrame");// don't remove from here even if not used
 
 export default class ElementDropTool extends Tool {
     [name: string]: any;
