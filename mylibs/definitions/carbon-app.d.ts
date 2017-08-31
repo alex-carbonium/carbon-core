@@ -192,10 +192,10 @@ declare module "carbon-app" {
 
     export const Page: IConstructor<IPage>;
 
-    export type ToolboxGroup = { id: string, name: string };
+    export type SymbolGroup = { id: string, name: string };
 
     export interface IArtboardPageProps extends IPageProps {
-        toolboxGroups?: ToolboxGroup[];
+        symbolGroups?: SymbolGroup[];
     }
     export interface IArtboardPage extends IPage<IArtboardPageProps> {
         props: IArtboardPageProps;

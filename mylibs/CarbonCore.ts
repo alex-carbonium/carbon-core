@@ -92,7 +92,6 @@ export default {
     "StyleManager": require("./framework/style/StyleManager"),
     "Selection": require("./framework/SelectionModel"),
     "QuadAndLock": require("./framework/QuadAndLock"),
-    "IconSetSpriteManager": require("./ui/IconSetSpriteManager"),
     "AnimationType": Defs.AnimationType,
     "EasingType": Defs.EasingType,
     "ActionType": Defs.ActionType,

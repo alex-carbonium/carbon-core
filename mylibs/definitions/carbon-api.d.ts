@@ -239,6 +239,7 @@ declare module "carbon-api" {
     export const globals: CarbonGlobals;
 
     export const util: {
+        createUUID(): string;
         debounce(func: (...args: any[]) => any, ms: number): () => any;
         throttle(func: (...args: any[]) => any, ms: number): () => any;
         pushAll(target: any[], source: any[]);
