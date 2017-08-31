@@ -137,7 +137,14 @@ export default class ArtboardFrameControl extends UIElement {
     drawSelf(context, w, h, environment) {
         if (!this._artboard) {
             super.drawSelf.apply(this, arguments);
-
+            context.save();
+            context.beginPath();
+            context.rectPath(0, 0, w, h);
+            context.lineWidth = 1 * environment.view.contextScale;
+            context.setLineDash([4 * environment.view.contextScale, 2 * environment.view.contextScale]);
+            context.strokeStyle = "#000";
+            context.stroke();
+            context.restore();
             return;
         }
 
@@ -150,7 +157,14 @@ export default class ArtboardFrameControl extends UIElement {
         this._artboard.globalViewMatrixInverted().applyToContext(context);
         context.translate(this.props.offsetX, this.props.offsetY);
 
-        this._artboard.drawSelf.call(this._artboard, context, this._artboard.width(), this._artboard.height(), environment);
+        let originalCtxl = this._artboard.runtimeProps.ctxl;
+        this._artboard.applyVisitor(e=>e.runtimeProps.ctxl = null);
+        this._artboard.runtimeProps.ctxl = this.runtimeProps.ctxl;
+        try {
+            this._artboard.drawSelf.call(this._artboard, context, this._artboard.width(), this._artboard.height(), environment);
+        } finally {
+            this._artboard.runtimeProps.ctxl = originalCtxl;
+        }
         context.restore();
 
         if (this.mode() === ElementState.Edit) {
