@@ -22,5 +22,6 @@ require("./server/FileProxy");
 require("./server/fontsProxy");
 require("./server/GalleryProxy");
 require("./server/ActivityProxy");
+require("./server/DataProxy");
 
 export {backend, logger, DashboardProxy, globals, util}

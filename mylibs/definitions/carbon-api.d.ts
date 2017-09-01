@@ -78,19 +78,20 @@ declare module "carbon-api" {
         dashboard(companyId: string): Promise<any>;
     }
 
-    export interface IImagesResult {
-        images: {
-            url: string,
-            thumbUrl: string,
-            name: string,
-            width: number,
-            height: number,
-            thumbWidth: number,
-            thumbHeight: number
-        }[];
+    export type UserImage = {
+        url: string,
+        thumbUrl: string,
+        name: string,
+        width: number,
+        height: number,
+        thumbWidth: number,
+        thumbHeight: number
+    };
+    export interface ImagesResult {
+        images: UserImage[];
     }
     export interface IFileProxy {
-        images(companyId: string): Promise<IImagesResult>;
+        images(companyId: string): Promise<ImagesResult>;
         uploadPublicImage(model: {content: string}): Promise<{url: string}>;
         uploadPublicFile(model: {content: string}): Promise<{url: string}>;
     }

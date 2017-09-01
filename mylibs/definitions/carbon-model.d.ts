@@ -330,6 +330,8 @@ declare module "carbon-model" {
     export interface IText extends IContainer<ITextProps> {
         font(value?: Font): Font;
         content(value?: TextContent): TextContent;
+
+        markAsDataField(): void;
     }
     export const Text: IConstructor<IText>;
 
