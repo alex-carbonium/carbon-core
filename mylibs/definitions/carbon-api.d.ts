@@ -58,6 +58,7 @@ declare module "carbon-api" {
         fontsProxy: IFontsProxy;
         galleryProxy: IGalleryProxy;
         activityProxy: IActivityProxy;
+        dataProxy: IDataProxy;
     }
 
     export type Response<TModel, TResult> =
@@ -97,6 +98,11 @@ declare module "carbon-api" {
     export interface IActivityProxy {
         subscribeForFeature(companyId, projectId, feature): Promise<void>;
         subscribeForBeta(email): Promise<void>;
+    }
+
+    export interface IDataProxy {
+        generate(fields, rows): Promise<object[]>;
+        discover(): Promise<any>;
     }
 
     export interface ILoginModel{

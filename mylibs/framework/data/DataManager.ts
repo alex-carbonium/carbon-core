@@ -1,8 +1,6 @@
 import RepeatContainer from "../repeater/RepeatContainer";
 import RepeatCell from "../repeater/RepeatCell";
 import PropertyTracker from "../PropertyTracker";
-import BuiltInDataProvider from "./BuiltInDataProvider";
-import CustomDataProvider from "./CustomDataProvider";
 import { createUUID } from "../../util";
 import Selection from "../SelectionModel";
 import { IDisposable, PatchType, IDataManager, IApp } from "carbon-core";
@@ -18,40 +16,12 @@ export default class DataManager implements IDataManager, IDisposable {
         this._newCells = [];
         this._app = app;
 
-        this.registerProvider("builtin", new BuiltInDataProvider("builtin", "builtin"));
-
         this._disposables.push(PropertyTracker.elementInserted.bind(this, this._onElementInserted));
     }
 
     registerProvider(id, instance) {
         this._providers[id] = instance;
     }
-    getProvider(id) {
-        return this._providers[id];
-    }
-    getBuiltInProvider() {
-        return this._providers["builtin"];
-    }
-    unregisterProvider(id) {
-        delete this._providers[id];
-    }
-    createCustomProvider(name, text) {
-        var data = text.split('\n');
-        var provider = new CustomDataProvider(createUUID(), name, data, "list");
-        this._app.patchProps(PatchType.Insert, "dataProviders", provider.toJSON());
-        return provider;
-    }
-    getCustomProviders() {
-        var result = [];
-        for (var id in this._providers) {
-            var provider = this._providers[id];
-            if (provider instanceof CustomDataProvider) {
-                result.push(provider);
-            }
-        }
-        return result;
-    }
-
     generateForSelection() {
         var selection = Selection.selectedElements();
         if (selection.length === 0) {

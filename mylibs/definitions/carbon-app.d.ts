@@ -474,28 +474,16 @@ declare module "carbon-app" {
     }
     export const RenderLoop: IConstructor<IRenderLoop>;
 
-    export interface IDataProviderConfig {
-        groups: any[];
-    }
     export interface IDataProvider {
         id: string;
         name: string;
 
         fetch(fields: string[], rowCount: number);
-        getConfig(): IDataProviderConfig;
         createElement(app: IApp, field: string, templateId?: string): IUIElement;
-    }
-    export interface ICustomDataProvider extends IDataProvider {
-        format: string;
     }
 
     export interface IDataManager {
-        getProvider(id: string) : IDataProvider;
-        getBuiltInProvider() : IDataProvider;
-
-        createCustomProvider(name: string, text: string): IDataProvider;
-        getCustomProviders(): ICustomDataProvider[];
-
+        registerProvider(id: string, provider: IDataProvider): void;
         generateForSelection(): void;
     }
 

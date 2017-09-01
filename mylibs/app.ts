@@ -28,7 +28,6 @@ import Environment from "environment";
 import ModelSyncProxy from "./server/ModelSyncProxy";
 import DataNode from "./framework/DataNode";
 import DataManager from "./framework/data/DataManager";
-import CustomDataProvider from "./framework/data/CustomDataProvider";
 import AppState from "./AppState";
 import OfflineModel from "./offline/OfflineModel";
 import Story from "stories/Story";
@@ -375,18 +374,6 @@ class AppClass extends DataNode implements IApp {
             }
         }
 
-        if (propName === "dataProviders") {
-            switch (patchType) {
-                case PatchType.Insert:
-                case PatchType.Change:
-                    this.dataManager.registerProvider(item.id, CustomDataProvider.fromJSON(item));
-                    break;
-                case PatchType.Remove:
-                    this.dataManager.registerProvider(item.id, null);
-                    break;
-            }
-        }
-
         DataNode.prototype.propsPatched.apply(this, arguments);
 
         if (propName === "userSettings") {
@@ -670,13 +657,6 @@ class AppClass extends DataNode implements IApp {
             for (let i = 0; i < this.props.textStyles.length; ++i) {
                 let style = this.props.textStyles[i];
                 StyleManager.registerStyle(style, 2);
-            }
-        }
-
-        if (this.props.dataProviders) {
-            for (let i = 0; i < this.props.dataProviders.length; ++i) {
-                let provider = this.props.dataProviders[i];
-                this.dataManager.registerProvider(provider.id, CustomDataProvider.fromJSON(provider));
             }
         }
 
