@@ -472,6 +472,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             App.Current.resourceDeleted.raise(oldProps.type, this, parent);
 
             if (props.type === ArtboardType.Regular) {
+                this.disablePropsTracking();
                 parent.disablePropsTracking();
             }
         }
@@ -492,9 +493,10 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             }
 
             if (parent !== NullContainer) {
-                if (props.type === ArtboardType.Symbol && !parent.props.toolboxGroups.length) {
-                    parent.patchProps(PatchType.Insert, "toolboxGroups", { id: "default", name: CoreIntl.label("@page.defaultToolboxGroup") });
+                if (props.type === ArtboardType.Symbol && !parent.props.symbolGroups.length) {
+                    parent.patchProps(PatchType.Insert, "symbolGroups", { id: "default", name: CoreIntl.label("@page.defaultSymbolGroup") });
                 }
+                this.enablePropsTracking();
                 parent.enablePropsTracking();
             }
 
@@ -1070,9 +1072,9 @@ PropertyMetadata.registerForType(Artboard, {
         type: 'checkbox',
         defaultValue: false
     },
-    toolboxGroup: {
+    symbolGroup: {
         displayName: "@groupname",
-        type: "toolboxGroup",
+        type: "symbolGroup",
         defaultValue: "default"
     },
     frame: {
@@ -1105,7 +1107,7 @@ PropertyMetadata.registerForType(Artboard, {
             stroke: false,
             tileSize: showAsStencil,
             insertAsContent: showAsStencil,
-            toolboxGroup: showAsStencil,
+            symbolGroup: showAsStencil,
             allowVerticalResize: showAsStencil,
             allowHorizontalResize: showAsStencil
         }
@@ -1129,7 +1131,7 @@ PropertyMetadata.registerForType(Artboard, {
             },
             {
                 label: "@advanced",
-                properties: ["type", "tileSize", "toolboxGroup", "insertAsContent"],
+                properties: ["type", "tileSize", "symbolGroup", "insertAsContent"],
                 expanded: true
             }
             // ,{

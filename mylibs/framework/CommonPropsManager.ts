@@ -5,6 +5,8 @@ import PropertyTracker from "./PropertyTracker";
 import { leaveCommonProps } from "../util";
 import { ChangeMode, PatchType } from "carbon-core";
 import Font from "./Font";
+import Shadow from "./Shadow";
+import ArrayPool from "./ArrayPool";
 
 export default class CommonPropsManager {
     private _origPropValues: any[] = [];
@@ -47,7 +49,23 @@ export default class CommonPropsManager {
         }
 
         var values = elements.map(x => x.getDisplayPropValue(propertyName, descriptor));
-        var base = values[0];
+        let base = values[0];
+
+        if (propertyName === "shadows") {
+            for (let i = 1; i < values.length; ++i) {
+                let next = values[i];
+                if (next.length !== base.length) {
+                    return ArrayPool.EmptyArray;
+                }
+                for (let j = 0; j < next.length; ++j){
+                    if (!Shadow.areEqual(base[j], next[j])) {
+                        return ArrayPool.EmptyArray;
+                    }
+                }
+            }
+            return base;
+        }
+
         for (let i = 1; i < values.length; ++i) {
             let next = values[i];
             let isComplex = next && typeof next === "object" || Array.isArray(next);

@@ -79,6 +79,16 @@ Shadow.create = function (offsetX, offsetY, blur, color, inset, spread) {
     return Shadow.createFromObject({x: offsetX, y: offsetY, color: color, blur: blur, inset:inset, spread: spread || 0});
 };
 
+Shadow.areEqual = function(a, b) {
+    return a.x === b.x
+        && a.y === b.y
+        && a.blur === b.blur
+        && a.spread === b.spread
+        && a.inset === b.inset
+        && a.enabled === b.enabled
+        && a.color === b.color;
+}
+
 Shadow.None = Shadow.create(0, 0, 0, 'black', false, 0);
 Shadow.Default = Shadow.create(4, 4, 4, 'rgba(0,0,0,.25)', false, 0);
 

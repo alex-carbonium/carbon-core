@@ -47,7 +47,7 @@ class ArtboardPage extends Page implements IArtboardPage {
     propsUpdated(props: Readonly<IArtboardPageProps>, oldProps, mode: ChangeMode) {
         super.propsUpdated(props, oldProps, mode);
 
-        if (mode === ChangeMode.Model && props.toolboxGroups) {
+        if (mode === ChangeMode.Model && props.symbolGroups) {
             App.Current.resourcePageChanged.raise(this);
         }
     }
@@ -55,7 +55,7 @@ class ArtboardPage extends Page implements IArtboardPage {
     propsPatched(patchType, propName, item) {
         super.propsPatched(patchType, propName, item);
 
-        if (propName === "toolboxGroups") {
+        if (propName === "symbolGroups") {
             App.Current.resourcePageChanged.raise(this);
         }
     }
@@ -384,7 +384,7 @@ PropertyMetadata.registerForType(ArtboardPage, {
     guidesY: {
         defaultValue: []
     },
-    toolboxGroups: {
+    symbolGroups: {
         defaultValue: []
     }
 });

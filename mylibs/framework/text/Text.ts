@@ -465,6 +465,10 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
         return other instanceof Text && other.runtimeProps.isDataElement;
     }
 
+    markAsDataField() {
+        this.runtimeProps.isDataElement = true;
+    }
+
     add(text: Text, mode) {
         return this.insert(text, 0, mode);
     }

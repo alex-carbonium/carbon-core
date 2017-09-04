@@ -42,8 +42,8 @@ declare module "carbon-core" {
     export var CommandManager:any;
     export var Invalidate: any;
     export var SvgParser: any;
-    export var IconSetSpriteManager: any;
     export var UserSettings:any;
+    export var ContextPool:any;
     export class Shape{}
     export function createUUID(): string;
 }
