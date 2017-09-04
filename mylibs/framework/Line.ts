@@ -225,7 +225,7 @@ class Line extends Shape {
 
         this.drawPath(context, w, h);
 
-        Brush.stroke(this.fill(), context, 0, 0, w, h);
+        Brush.stroke(this.stroke(), context, 0, 0, w, h);
 
         context.restore();
     }
@@ -262,13 +262,13 @@ class Line extends Shape {
         return Math.round(v);
     }
 
-    strokeSelf(context, w, h) {
-        Brush.stroke(this.fill(), context, 0, 0, w, h);
-    }
+    // strokeSelf(context, w, h) {
+    //     Brush.stroke(this.fill(), context, 0, 0, w, h);
+    // }
 
-    fillSelf(context, w, h) {
+    // fillSelf(context, w, h) {
 
-    }
+    // }
 
     prepareProps(changes) {
         Shape.prototype.prepareProps.apply(this, arguments);
@@ -367,6 +367,11 @@ PropertyMetadata.registerForType(Line, {
         displayName: "end y",
         defaultValue: 0,
         useInModel: true
+    },
+    prepareVisibility: function (element) {
+        return {
+            fill: false
+        };
     },
     groups () {
         return [

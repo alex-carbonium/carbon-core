@@ -295,13 +295,14 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
             context.save();
 
             if (this.children) {
-                let items = this.children;
-                for (let i = 0; i < items.length; ++i) {
-                    let child = items[i];
-                    if(child.visible()){
-                        ExtensionPoint.invoke(child, 'draw', [context, environment]);
-                    }
-                }
+                // let items = this.children;
+                // for (let i = 0; i < items.length; ++i) {
+                //     let child = items[i];
+                //     if(child.visible()){
+                //         ExtensionPoint.invoke(child, 'draw', [context, environment]);
+                //     }
+                // }
+                this.drawChildren(context, w, h, environment);
             }
 
             context.restore();

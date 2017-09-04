@@ -142,7 +142,7 @@ export default {
             if (!frame.hasBadTransform) {
                 for (var i = frame.points.length - 1; i >= 0; --i) {
                     var p = frame.points[i];
-                    if (!p.visible || p.visible(p, frame, frame.element.width(), frame.element.height(), scale)) {
+                    if (!p.visible || p.visible(p, frame, frame.element.width(), frame.element.height(), scale * Environment.view.contextScale)) {
                         p.type.draw(p, frame, scale, context, matrix);
                     }
                 }

@@ -93,6 +93,9 @@ export default class PathTool extends Tool {
     _detach() {
         super._detach.apply(this, arguments);
         Cursor.removeGlobalCursor();
+        if(this._pathElement) {
+            this._pathElement.removeDecoratorByType(PathManipulationDecorator);
+        }
     }
 
     mousedown(event: IMouseEventData, keys: IKeyboardState) {

@@ -229,6 +229,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         context.save();
         let pos = this.position();
         context.translate(pos.x + this.frame.runtimeProps.frameX, pos.y + this.frame.runtimeProps.frameY);
+        frame.runtimeProps.ctxl = this.runtimeProps.ctxl;
         frame.draw(context, environment);
         context.restore();
     }
@@ -389,6 +390,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
         let frame = this.frame;
         if (frame && environment.showFrames) {
+            this.drawCustomFrame(context, environment);
             context.beginPath();
             let pos = this.position();
             context.rect(pos.x, pos.y, frame.runtimeProps.cloneScreenWidth, frame.runtimeProps.cloneScreenHeight);
@@ -403,7 +405,15 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
         super.drawSelf(context, w, h, environment);
         this.onContentDrawn && this.onContentDrawn(this, context);
+
+
+        if(!frame || !environment.showFrames) {
+            this.drawFrameRect(context, environment);
+        }
+
         context.restore();
+
+        this.drawExtras(context, environment);
     }
 
     buildMetadata(properties) {
@@ -426,7 +436,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             return [
                 {
                     label: "Layout",
-                    properties: ["x", "y","width", "height", "angle"]
+                    properties: ["x", "y", "width", "height", "angle"]
                 },
                 {
                     label: element.name(),
@@ -1049,9 +1059,9 @@ PropertyMetadata.registerForType(Artboard, {
         defaultValue: TileSize.Small,
         options: {
             items: [
-                {name : '@tilesize.small' , value : TileSize.Small },
-                {name : '@tilesize.large' , value : TileSize.Large },
-                {name : '@tilesize.xlarge', value : TileSize.XLarge},
+                { name: '@tilesize.small', value: TileSize.Small },
+                { name: '@tilesize.large', value: TileSize.Large },
+                { name: '@tilesize.xlarge', value: TileSize.XLarge },
             ]
         }
     },
@@ -1067,10 +1077,23 @@ PropertyMetadata.registerForType(Artboard, {
     },
     frame: {
         displayName: "@frame",
-        type: "frame",
+        type: "dropdown",
         defaultValue: null,
-        options: {
-            size: 3 / 4
+        getOptions: function (element) {
+            let empty_option_name = 'none';  //fixme - translate!
+            var items = [{ name: empty_option_name, value: null }];
+            return {
+                size: 3 / 4,
+                items: items.concat(App.Current.getAllFrames().map(framed_artboard => {
+                    return {
+                        name: framed_artboard.name(),
+                        value: {
+                            pageId: framed_artboard.parent().id(),
+                            artboardId: framed_artboard.id()
+                        }
+                    }
+                }))
+            };
         }
     },
     hitTestBox: {

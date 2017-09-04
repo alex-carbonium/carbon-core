@@ -99,7 +99,7 @@ export default class ArtboardFrameControl extends UIElement {
     propsUpdated(props, oldProps) {
         super.propsUpdated(props, oldProps);
         if (props.source !== undefined) {
-            if (!this._artboard || (props.source.pageId !== oldProps.source.pageId && props.source.artboardId !== oldProps.source.artboardId)) {
+            if (!this._artboard || (props.source.pageId !== oldProps.source.pageId || props.source.artboardId !== oldProps.source.artboardId)) {
                 var page = DataNode.getImmediateChildById(App.Current, props.source.pageId);
                 if (page) {
                     this._artboard = DataNode.getImmediateChildById(page, props.source.artboardId, true);
@@ -135,6 +135,10 @@ export default class ArtboardFrameControl extends UIElement {
     }
 
     drawSelf(context, w, h, environment) {
+        if (this._drawing) {
+            return;
+        }
+
         if (!this._artboard) {
             super.drawSelf.apply(this, arguments);
             context.save();
@@ -144,6 +148,27 @@ export default class ArtboardFrameControl extends UIElement {
             context.setLineDash([4 * environment.view.contextScale, 2 * environment.view.contextScale]);
             context.strokeStyle = "#000";
             context.stroke();
+
+
+            let text = "empty";
+            let fontSize = Math.min(h - 8, 24);
+            context.font = fontSize + "px Arial";
+
+            let width = context.measureText(text).width + .5 | 0;
+            if (width > w) {
+                fontSize *= (w - 8) / width;
+                if (fontSize > 4) {
+                    context.font = (fontSize | 0) + "px Arial";
+                    width = context.measureText(text).width + .5 | 0;
+                }
+            }
+
+            if (fontSize > 4) {
+                context.fillStyle = 'black';
+                context.textBaseline = "middle";
+                context.fillText(text, w / 2 - width / 2 + .5 | 0, h / 2 + .5 | 0);
+            }
+
             context.restore();
             return;
         }
@@ -158,12 +183,14 @@ export default class ArtboardFrameControl extends UIElement {
         context.translate(this.props.offsetX, this.props.offsetY);
 
         let originalCtxl = this._artboard.runtimeProps.ctxl;
-        this._artboard.applyVisitor(e=>e.runtimeProps.ctxl = null);
+        this._artboard.applyVisitor(e => e.runtimeProps.ctxl = null);
         this._artboard.runtimeProps.ctxl = this.runtimeProps.ctxl;
         try {
+            this._drawing = true;
             this._artboard.drawSelf.call(this._artboard, context, this._artboard.width(), this._artboard.height(), environment);
         } finally {
             this._artboard.runtimeProps.ctxl = originalCtxl;
+            this._drawing = false;
         }
         context.restore();
 
@@ -190,8 +217,22 @@ ArtboardFrameControl.prototype.t = Types.ArtboardFrame;
 PropertyMetadata.registerForType(ArtboardFrameControl, {
     source: {
         displayName: "Artboard",
-        type: "artboard",
-        defaultValue: { artboardId: null, pageId: null }
+        type: "dropdown",
+        defaultValue: { artboardId: null, pageId: null },
+        getOptions: function (element) {
+            let page = App.Current.activePage;
+            return {
+                items: page.getAllArtboards().map(artboard => {
+                    return {
+                        name: artboard.name(),
+                        value: {
+                            pageId: page.id(),
+                            artboardId: artboard.id()
+                        }
+                    }
+                })
+            }
+        }
     },
     overflow: {
         defaultValue: Overflow.Clip

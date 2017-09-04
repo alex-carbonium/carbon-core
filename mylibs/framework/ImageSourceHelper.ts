@@ -345,7 +345,7 @@ export default class ImageSourceHelper {
         if (!source) {
             return false;
         }
-        return source.type === ImageSourceType.Url && source.type === ImageSourceType.Element;
+        return source.type === ImageSourceType.Url || source.type === ImageSourceType.Element;
     };
 
     static isFillSupported(source) {

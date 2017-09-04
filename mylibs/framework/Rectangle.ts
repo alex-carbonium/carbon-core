@@ -250,12 +250,8 @@ class Rectangle extends Shape {
         var stroke = this.stroke();
         context.beginPath();
         this.drawPath(context, w, h);
-        if (w < 2 || h < 2) {
-            // if the shape is too sall we should not use fill brush, since borders are overlap anyway
-            Brush.fill(stroke, context, 0, 0, w, h);
-        } else {
-            Brush.fill(this.fill(), context, 0, 0, w, h);
-        }
+
+        Brush.fill(this.fill(), context, 0, 0, w, h);
 
         this.drawInsetShadows(context, w, h, environment);
 

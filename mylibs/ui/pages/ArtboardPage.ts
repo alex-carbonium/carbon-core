@@ -139,19 +139,7 @@ class ArtboardPage extends Page implements IArtboardPage {
     drawChildSafe(child, context, environment) {
         let frame = null;
         if (!environment.viewportRect || areRectsIntersecting(environment.viewportRect, child.getBoundingBoxGlobal(true))) {
-            if(environment.showFrames && child.frame){
-                frame = child.frame;
-                if (frame) {
-                    child.drawCustomFrame(context, environment);
-                }
-            }
             super.drawChildSafe(child, context, environment);
-            if(child instanceof Artboard){
-                if(!frame || !environment.showFrames) {
-                    child.drawFrameRect(context, environment);
-                }
-                child.drawExtras(context, environment);
-            }
         } else {
             debug("Skip artboard not in the viewport: %s", this.name());
         }

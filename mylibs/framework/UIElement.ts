@@ -1953,7 +1953,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                             p.y = y + h;
                         },
                         visible: function (p, frame, w, h, scale) {
-                            return (w * scale > PointDistanceVisibleLevel1 && h * scale > PointDistanceVisibleLevel2);
+                            return true;
                         }
                     }
                 );
@@ -1987,7 +1987,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                             p.y = y + h / 2;
                         },
                         visible: function (p, frame, w, h, scale) {
-                            return (w * scale > PointDistanceVisibleLevel2 && h * scale > PointDistanceVisibleLevel1);
+                            return true;
                         }
                     }
                 );
