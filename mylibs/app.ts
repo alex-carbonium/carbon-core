@@ -719,6 +719,10 @@ class AppClass extends DataNode implements IApp {
     }
 
     useRecentColor(color) {
+        if(!color) {
+            return;
+        }
+
         var colors = this.props.recentColors.slice();
         for (var i = 0; i < colors.length; ++i) {
             if (deepEquals(colors[i], color)) {
