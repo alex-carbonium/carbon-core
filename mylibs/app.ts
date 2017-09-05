@@ -114,6 +114,8 @@ class AppClass extends DataNode implements IApp {
     resourceDeleted = EventHelper.createEvent3<ArtboardType, IArtboard, IPage>();
     resourcePageChanged = EventHelper.createEvent<IPage>();
 
+    recentColorsChanged = EventHelper.createEvent<any[]>();
+
     currentToolChanged: IEvent<string>;
     _currentTool: string;
 
@@ -353,6 +355,10 @@ class AppClass extends DataNode implements IApp {
             }
 
             this.settingsChanged.raise(settings);
+        }
+
+        if(props.recentColors) {
+            this.recentColorsChanged.raise(props.recentColors);
         }
 
         DataNode.prototype.propsUpdated.apply(this, arguments);

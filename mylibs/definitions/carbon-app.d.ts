@@ -61,6 +61,7 @@ declare module "carbon-app" {
         resourceChanged: IEvent2<ArtboardType, IArtboard>;
         resourceDeleted: IEvent3<ArtboardType, IArtboard, IPage>;
         resourcePageChanged: IEvent<IPage>;
+        recentColorsChanged: IEvent<any[]>;
 
         setActiveStoryById(id);
         removeStory(story);
