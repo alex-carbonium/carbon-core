@@ -386,6 +386,10 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     drawSelf(context: IContext, w, h, environment) {
+        if(this._drawing) {
+            return;
+        }
+        this._drawing = true;
         context.save();
 
         let frame = this.frame;
@@ -414,6 +418,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         context.restore();
 
         this.drawExtras(context, environment);
+        this._drawing = false;
     }
 
     buildMetadata(properties) {

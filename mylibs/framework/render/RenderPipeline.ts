@@ -103,6 +103,39 @@ export default class RenderPipeline {
         return data;
     }
 
+    static elementToContextFromPool(element, contextScale = 1, scaleX = 1, scaleY = 1) {
+        let box = element.getBoundingBoxGlobal();
+        box = element.expandRectWithBorder(box);
+        let pageMatrix = new Matrix(1, 0, 0, 1, -box.x, -box.y);
+        let env = {
+            finalRender: true, setupContext: (ctx) => {
+                ctx.scale(contextScale * scaleX, contextScale * scaleY);
+                ctx.clear();
+                pageMatrix.applyToContext(ctx);
+            }, pageMatrix: pageMatrix, contextScale: contextScale, offscreen: true, view: { scale: () => 1, contextScale, focused: () => false }
+        };
+
+        box.width = Math.max(1, box.width) | 0;
+        box.height = Math.max(1, box.height) | 0;
+
+        let context = ContextPool.getContext(box.width * scaleX, box.height * scaleY, contextScale, true);
+        context.relativeOffsetX = 0;
+        context.relativeOffsetY = 0;
+
+        context.scale(contextScale * scaleX, contextScale * scaleY);
+
+        context.clear();
+        pageMatrix.applyToContext(context);
+
+        var pipeline = RenderPipeline.createFor(element, context, env);
+        pipeline.out(c => {
+            element.draw(c, env);
+        });
+        pipeline.done();
+
+        return context;
+    }
+
     private static getContextDimensions(element, environment) {
         let clippingRect = element.getBoundingBoxGlobal();
         clippingRect = element.expandRectWithBorder(clippingRect);

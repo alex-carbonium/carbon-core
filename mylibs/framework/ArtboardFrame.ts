@@ -4,6 +4,8 @@ import { Overflow, Types, ContentBehavior } from "./Defs";
 import Selection from "framework/SelectionModel";
 import DataNode from "framework/DataNode";
 import { ElementState } from "carbon-core";
+import RenderPipeline from "./render/RenderPipeline";
+import ContextPool from "./render/ContextPool";
 
 export default class ArtboardFrameControl extends UIElement {
     constructor() {
@@ -138,8 +140,8 @@ export default class ArtboardFrameControl extends UIElement {
         if (this._drawing) {
             return;
         }
-
-        if (!this._artboard) {
+        let source = this._artboard;
+        if (!source) {
             super.drawSelf.apply(this, arguments);
             context.save();
             context.beginPath();
@@ -148,7 +150,6 @@ export default class ArtboardFrameControl extends UIElement {
             context.setLineDash([4 * environment.view.contextScale, 2 * environment.view.contextScale]);
             context.strokeStyle = "#000";
             context.stroke();
-
 
             let text = "empty";
             let fontSize = Math.min(h - 8, 24);
@@ -173,26 +174,55 @@ export default class ArtboardFrameControl extends UIElement {
             return;
         }
 
-        context.save();
+        let scaleX = 1;
+        let scaleY = 1;
         if (this.props.content === ContentBehavior.Scale) {
-            var scaleX = this.width() / this._artboard.width();
-            var scaleY = this.height() / this._artboard.height();
-            context.scale(scaleX, scaleY);
+            scaleX = this.width() / source.width();
+            scaleY = this.height() / source.height();
         }
-        this._artboard.globalViewMatrixInverted().applyToContext(context);
+
+        let sourceContext = RenderPipeline.elementToContextFromPool(this._artboard, 1, scaleX, scaleY);
+
+        context.save();
+
+        // this._artboard.globalViewMatrixInverted().applyToContext(context);
         context.translate(this.props.offsetX, this.props.offsetY);
 
-        let originalCtxl = this._artboard.runtimeProps.ctxl;
-        this._artboard.applyVisitor(e => e.runtimeProps.ctxl = null);
-        this._artboard.runtimeProps.ctxl = this.runtimeProps.ctxl;
-        try {
-            this._drawing = true;
-            this._artboard.drawSelf.call(this._artboard, context, this._artboard.width(), this._artboard.height(), environment);
-        } finally {
-            this._artboard.runtimeProps.ctxl = originalCtxl;
-            this._drawing = false;
-        }
+        // let originalCtxl = this._artboard.runtimeProps.ctxl;
+        // this._artboard.applyVisitor(e => e.runtimeProps.ctxl = null);
+        // this._artboard.runtimeProps.ctxl = this.runtimeProps.ctxl;
+        // try {
+        //     this._drawing = true;
+        //     this._artboard.drawSelf.call(this._artboard, context, this._artboard.width(), this._artboard.height(), environment);
+        // } finally {
+        //     this._artboard.runtimeProps.ctxl = originalCtxl;
+        //     this._drawing = false;
+        // }
+        context.drawImage(sourceContext.canvas, 0, 0);
         context.restore();
+
+
+        ContextPool.releaseContext(sourceContext);
+        // context.save();
+        // if (this.props.content === ContentBehavior.Scale) {
+        //     var scaleX = this.width() / source.width();
+        //     var scaleY = this.height() / source.height();
+        //     context.scale(scaleX, scaleY);
+        // }
+        // this._artboard.globalViewMatrixInverted().applyToContext(context);
+        // context.translate(this.props.offsetX, this.props.offsetY);
+
+        // let originalCtxl = this._artboard.runtimeProps.ctxl;
+        // this._artboard.applyVisitor(e => e.runtimeProps.ctxl = null);
+        // this._artboard.runtimeProps.ctxl = this.runtimeProps.ctxl;
+        // try {
+        //     this._drawing = true;
+        //     this._artboard.drawSelf.call(this._artboard, context, this._artboard.width(), this._artboard.height(), environment);
+        // } finally {
+        //     this._artboard.runtimeProps.ctxl = originalCtxl;
+        //     this._drawing = false;
+        // }
+        // context.restore();
 
         if (this.mode() === ElementState.Edit) {
             context.save();
