@@ -4,6 +4,7 @@ import { ViewTool } from "./Defs";
 import UserSettings from "../UserSettings";
 import Environment from "../environment";
 import { ISelection, IEvent, IEvent2, IUIElement, IComposite, IEvent3 } from "carbon-core";
+import Rect from "../math/rect";
 
 let debug = require("DebugUtil")("carb:selection");
 
@@ -57,6 +58,7 @@ function onselect(rect) {
 class SelectionModel implements ISelection {
     [name: string]: any;
     private _activeGroup: any;
+    private _previousElements = [];
 
     modeChangedEvent: IEvent<boolean>;
     onElementSelected: IEvent3<IUIElement, IUIElement[], boolean>;
@@ -80,6 +82,10 @@ class SelectionModel implements ISelection {
 
     get elements(): IUIElement[]{
         return this._selectCompositeElement.elements;
+    }
+
+    get previousElements(): IUIElement[]{
+        return this._previousElements;
     }
 
     get selectFrame() {
@@ -295,6 +301,10 @@ class SelectionModel implements ISelection {
     }
 
     unselectAll(refreshOnly = false) {
+        if (!refreshOnly) {
+            this._previousElements = this.elements;
+        }
+
         this._selectCompositeElement.selected(false);
         let count = this._selectCompositeElement.count();
         this._selectCompositeElement.unregisterAll(refreshOnly);

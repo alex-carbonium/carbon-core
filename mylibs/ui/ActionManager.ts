@@ -1,4 +1,3 @@
-import Command from "../framework/commands/Command";
 import CommandManager from "../framework/commands/CommandManager";
 import ChangeZOrder from "../commands/ChangeZOrder";
 import Delete from "../commands/Delete";
@@ -33,6 +32,7 @@ import EventHelper from "../framework/EventHelper";
 import { IActionManager, IAction, IApp, IUIElement, IEvent, IContainer, IIsolatable } from "carbon-core";
 import { ArrangeStrategies, DropPositioning } from "../framework/Defs";
 import Rect from "../math/rect";
+import { viewStateStack } from "../framework/ViewStateStack";
 
 const debug = require("DebugUtil")("carb:actionManager");
 
@@ -457,7 +457,7 @@ export default class ActionManager implements IActionManager {
             let element = Selection.selectedElement() as IUIElement;
             element = element || (that.app.activePage.getActiveArtboard() as IUIElement);
             Environment.view.ensureScale([element]);
-            Environment.view.ensureVisible([element]);
+            Environment.view.ensureCentered([element]);
         });
 
         this.registerAction("pageCenter", "Page center", "Zoom", function () {
@@ -478,6 +478,14 @@ export default class ActionManager implements IActionManager {
 
         this.registerAction("redo", "Redo", "Project actions", function () {
             CommandManager.redoNext();
+        });
+
+        this.registerAction("undoViewport", "Undo viewport position", "Project actions", function () {
+            viewStateStack.undo();
+        });
+
+        this.registerAction("redoViewport", "Redo viewport position", "Project actions", function () {
+            viewStateStack.redo();
         });
 
         // this.registerAction("newPagePortrait", "New portrait page", "New page", function () {

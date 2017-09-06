@@ -15,7 +15,6 @@ import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import Box from "framework/Box";
 import { debounce } from "util";
-import Command from "framework/commands/Command";
 import { Types } from "framework/Defs";
 import ResizeOptions from "decorators/ResizeOptions";
 import { IMouseEventData, IKeyboardState, ChangeMode, IIntersectionRange, ResizeDimension, LayerTypes, IContainerProps, PointType, IPathPoint, IUIElementProps, ElementState } from "carbon-core";

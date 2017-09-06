@@ -105,7 +105,6 @@ declare module "carbon-app"{
         isSaved(): boolean;
         syncBroken(): boolean;
 
-        viewportSize(): any;
         resetCurrentTool();
     }
 
@@ -129,13 +128,11 @@ declare module "carbon-app"{
         zoomOutStep():void;
         zoomInStep():void;
 
-        ensureViewState(viewState: ViewState);
-
         setup(params: any);
         attachToDOM(contexts:IContext[], upperContext:IContext, isolationContext:IContext, container, redrawCallback, cancelCallback, scheduledCallback);
         detach();
 
-        viewportSizeChanged(size: ISize);
+        updateViewportSize(size: ISize);
     }
 
     export interface IController{

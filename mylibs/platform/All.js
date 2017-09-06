@@ -78,20 +78,6 @@ export default class PlatformAll {
         return $(viewId)[0];
     }
 
-    viewportSize() {
-        var viewContainer;
-        if (Environment.view && Environment.view.context) {
-            viewContainer = Environment.view.context.canvas;
-        } else {
-            viewContainer = document.getElementById('app_canvas');
-        }
-
-        return {
-            width: viewContainer.width / Environment.view.contextScale,
-            height: viewContainer.height / Environment.view.contextScale
-        }
-    }
-
     /* view manager*/
     setViewMode(value) {
         this.viewMode = value;

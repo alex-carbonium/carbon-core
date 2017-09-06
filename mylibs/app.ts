@@ -44,7 +44,6 @@ import ArtboardFrame from "framework/ArtboardFrame";
 import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitive, IPrimitiveRoot, ViewState, IJsonNode, IFontManager, IStyleManager, StyleType, IArtboard, FontMetadata, AppSettings } from "carbon-core";
 import { Contributions } from "./extensions/Contributions";
 import { getBuiltInExtensions } from "./extensions/BuiltInExtensions";
-import Command from "./framework/commands/Command";
 import Primitive from "./framework/sync/Primitive";
 import UIElement from "./framework/UIElement";
 import RelayoutEngine from "./framework/relayout/RelayoutEngine";
@@ -1087,10 +1086,6 @@ class AppClass extends DataNode implements IApp {
     setActiveStoryById(storyId) {
         var story = DataNode.getImmediateChildById(this, storyId, true);
         this.activeStory(story);
-    }
-
-    viewportSize() {
-        return this.platform.viewportSize();
     }
 
     isNew() {

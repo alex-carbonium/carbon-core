@@ -237,7 +237,7 @@ export default class RenderLoop implements IRenderLoop {
 
         if (resized) {
             if (viewWidth && viewHeight) {
-                view.viewportSizeChanged({ width: viewWidth, height: viewHeight });
+                view.updateViewportSize({ width: viewWidth, height: viewHeight });
             }
 
             view.invalidate();

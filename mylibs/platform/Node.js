@@ -47,9 +47,6 @@ export default class Node extends All {
     createImage() {
         return new Canvas.Image();
     }
-    viewportSize() {
-        return { width: 1024, height: 768 };
-    }
     createCanvas(w, h) {
         var canvas1 = new Canvas(w, h);
         var canvas2 = new Canvas(w, h);

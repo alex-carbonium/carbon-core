@@ -3,8 +3,8 @@ import {IView, IController, IEnvironment, IEvent2} from "carbon-core";
 import ContextPool from "./framework/render/ContextPool";
 
 class Environment implements IEnvironment {
-    attached: any;
-    detaching: any;
+    attached: IEvent2<IView, IController>;
+    detaching: IEvent2<IView, IController>;
     view: IView;
     controller: IController;
     contextPool = ContextPool;
@@ -13,8 +13,8 @@ class Environment implements IEnvironment {
     resolveLoaded: () => void;
 
     constructor(){
-        this.detaching = EventHelper.createEvent();
-        this.attached = EventHelper.createEvent();
+        this.detaching = EventHelper.createEvent2<IView, IController>();
+        this.attached = EventHelper.createEvent2<IView, IController>();
         this.loaded = new Promise<void>(resolve => this.resolveLoaded = resolve);
     }
 

@@ -125,6 +125,8 @@ export default class ShortcutManager implements IShortcutManager {
 
         { key: "ctrl+z", action: "undo" },
         { key: "ctrl+y", action: "redo" },
+        { key: "shift+z", action: "undoViewport" },
+        { key: "alt+shift+z", action: "redoViewport" },
 
         { key: "shift+x", action: "swapColors" },
 
@@ -244,6 +246,8 @@ export default class ShortcutManager implements IShortcutManager {
 
         { key: "meta+z", action: "undo" },
         { key: "meta+shift+z", action: "redo" },
+        { key: "shift+z", action: "undoViewport" },
+        { key: "alt+shift+z", action: "redoViewport" },
 
         { key: "shift+x", action: "swapColors" },
 

@@ -1,4 +1,3 @@
-import Command from "../framework/commands/Command";
 import CompoundPath from "framework/CompoundPath";
 import Path from "framework/Path";
 import Selection from "../framework/SelectionModel";

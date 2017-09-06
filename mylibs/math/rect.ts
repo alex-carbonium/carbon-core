@@ -217,6 +217,13 @@ export default class Rect implements IRect, IPooledObject {
         return new Rect(x, y, this.width, this.height);
     }
 
+    with(x: number, y: number, w: number, h: number) {
+        if (x === this.x && y === this.y && w === this.width && h === this.height) {
+            return this;
+        }
+        return new Rect(x, y, w, h);
+    }
+
     toArray() {
         return [this.x, this.y, this.width, this.height];
     }

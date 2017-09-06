@@ -1,6 +1,7 @@
 // @flow
 import Context from "./Context";
 import { IContextPool } from "carbon-core";
+import Environment from "../../environment";
 
 var contextPool : Array<Context> = [];
 
@@ -10,7 +11,7 @@ class ContextPool implements IContextPool {
             width = width * scale;
             height = height * scale;
         } else {
-            var size = App.Current.viewportSize();
+            var size = Environment.view.viewportSize();
             width = Math.min(size.width * scale, width * scale);
             height = Math.min(size.height * scale, height * scale);
         }
