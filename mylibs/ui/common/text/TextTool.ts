@@ -403,7 +403,7 @@ export default class TextTool extends Tool {
         inlineEditor.onInvalidate = this.invalidateLayers;
         inlineEditor.onSelectionChanged = this._onSelectionChanged;
         inlineEditor.onDeactivated = finalEdit => this.endEdit(finalEdit);
-        inlineEditor.activate(element.viewMatrix(), engine, element.props.font, this._app.fontManager);
+        inlineEditor.activate(element.globalViewMatrix(), engine, element.props.font, this._app.fontManager);
         return inlineEditor;
     }
     private invalidateLayers = () => {
