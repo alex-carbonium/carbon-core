@@ -554,8 +554,30 @@ class AppClass extends DataNode implements IApp {
     }
 
     //TODO: if primitives call dataNode.insertChild, this is not needed
-    remove(element) {
-        this.removeChild(element);
+    remove(element, mode?) {
+        if (element instanceof Page) {
+            this.removePage(element, mode);
+        }
+        else {
+            this.removeStory(element);
+        }
+    }
+
+    removePage(page, mode?) {
+        let removingActive = page === this.activePage;
+
+        if (removingActive) {
+            this.beginUpdate();
+            this.setNewActivePage(page);
+        }
+
+        page.removing();
+        super.removeChild(page, mode);
+        this.pageRemoved.raise(page);
+
+        if (removingActive) {
+            this.endUpdate();
+        }
     }
 
     primitiveRoot() {
@@ -571,16 +593,10 @@ class AppClass extends DataNode implements IApp {
         return path;
     }
 
-    removePage(page: IPage, setNewActive?: boolean) {
-        if (!page) {
-            return;
-        }
-        this.beginUpdate();
+    private setNewActivePage(pageBeingRemoved: IPage) {
+        var indexOfRemoved = this.pages.indexOf(pageBeingRemoved);
 
-        setNewActive = (setNewActive === undefined) ? true : setNewActive;
-        var indexOfRemoved = this.pages.indexOf(page);
-
-        if (setNewActive && page === this.activePage) {
+        if (pageBeingRemoved === this.activePage) {
             var newActive = this.pages[indexOfRemoved + 1];
             if (!newActive) {
                 newActive = this.pages[indexOfRemoved - 1];
@@ -589,14 +605,6 @@ class AppClass extends DataNode implements IApp {
                 this.setActivePage(newActive);
             }
         }
-
-        page.removing();
-        this.removeChild(page);
-        this.pageRemoved.raise(page);
-
-        this.endUpdate();
-
-        return -1;
     }
 
     duplicatePageById(pageId) {
@@ -1079,8 +1087,10 @@ class AppClass extends DataNode implements IApp {
     }
 
     setActivePageById(pageId) {
-        var page = DataNode.getImmediateChildById(this, pageId, true);
-        this.setActivePage(page);
+        if (this.activePage.id() !== pageId) {
+            var page = DataNode.getImmediateChildById(this, pageId, true);
+            this.setActivePage(page);
+        }
     }
 
     setActiveStoryById(storyId) {

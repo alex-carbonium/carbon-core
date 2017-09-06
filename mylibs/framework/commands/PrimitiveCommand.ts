@@ -5,7 +5,8 @@ import { createUUID } from "../../util";
 import Rect from "../../math/rect";
 
 export default class PrimitiveCommand implements ICommand {
-    constructor(public primitives: IPrimitive[], public rollbacks: IPrimitive[], public commandRect: IRect) {
+    constructor(public primitives: IPrimitive[], public rollbacks: IPrimitive[],
+        public pageId, public commandRect: IRect) {
     }
 
     flushRedoStack() {
@@ -18,6 +19,8 @@ export default class PrimitiveCommand implements ICommand {
     }
 
     execute(redo?: boolean) {
+        App.Current.setActivePageById(this.pageId);
+
         if (this.commandRect !== Rect.Zero) {
             Environment.view.ensureVisibleRect(this.commandRect);
         }
@@ -31,6 +34,8 @@ export default class PrimitiveCommand implements ICommand {
     }
 
     rollback() {
+        App.Current.setActivePageById(this.pageId);
+
         if (this.commandRect !== Rect.Zero) {
             Environment.view.ensureVisibleRect(this.commandRect);
         }

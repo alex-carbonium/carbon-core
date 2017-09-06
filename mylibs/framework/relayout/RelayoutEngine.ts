@@ -96,7 +96,8 @@ class RelayoutEngine {
 
             let elements = Selection.elements.length ? Selection.elements : Selection.previousElements;
             let commandRect = UIElement.getCombinedBoundingBoxGlobal(elements);
-            CommandManager.registerExecutedCommand(new PrimitiveCommand(this.allPrimitives.slice(), this.rollbacks.slice().reverse(), commandRect));
+            CommandManager.registerExecutedCommand(new PrimitiveCommand(this.allPrimitives.slice(), this.rollbacks.slice().reverse(),
+                app.activePage.id(), commandRect));
         }
 
         //all local changes (from queue and model) must go to server
