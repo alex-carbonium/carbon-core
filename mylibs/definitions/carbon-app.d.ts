@@ -225,6 +225,9 @@ declare module "carbon-app" {
         activeLayerChanged: IEvent<ILayer>;
 
         viewState: ViewState;
+        viewStateChanged: IEvent2<ViewState, ViewState>;
+        isAtViewState(state: ViewState): boolean;
+        changeViewState(viewState: ViewState, silent?: boolean);
 
         setActivePage(page: IPage);
 
@@ -234,12 +237,14 @@ declare module "carbon-app" {
         scrollX(value?: number): number;
         scrollY(value?: number): number;
 
+        viewportSize(): ISize;
         viewportRect(): IRect;
         pointToScreen(point: ICoordinate): ICoordinate;
         logicalCoordinateToScreen(point: ICoordinate) : ICoordinate;
 
         ensureScale(elements: IUIElement[]);
-        ensureVisible(elements: IUIElement[]);
+        ensureCentered(elements: IUIElement[]);
+        ensureVisibleRect(rect: IRect);
         scrollToCenter(): void;
 
         getLayer(layerType: LayerTypes) : ILayer;
@@ -323,6 +328,12 @@ declare module "carbon-app" {
     }
     export const Environment: IEnvironment;
     export const workspace: IEnvironment;
+
+    export interface ICommand {
+        flushRedoStack();
+        execute(redo?: boolean);
+        rollback();
+    }
 
     export interface IAction {
         id: string;
@@ -446,6 +457,7 @@ declare module "carbon-app" {
 
     export interface ISelection{
         elements: IUIElement[];
+        previousElements: IUIElement[];
 
         makeSelection(elements: IUIElement[]);
         selectComposite(): ISelectComposite;

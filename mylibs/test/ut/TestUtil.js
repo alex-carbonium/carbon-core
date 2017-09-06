@@ -11,7 +11,6 @@ import App from "app";
 
 import ArtboardPage from "ui/pages/ArtboardPage";
 import OfflineModel from "offline/OfflineModel";
-import Command from "framework/commands/Command";
 import RelayoutQueue from "framework/relayout/RelayoutQueue";
 import DesignerView from "framework/DesignerView";
 import DesignerController from "framework/DesignerController";

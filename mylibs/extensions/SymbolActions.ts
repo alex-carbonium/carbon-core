@@ -156,7 +156,7 @@ export default class SymbolActions extends CarbonExtension {
 
         let page = this.app.pages.find(x => x.id() === symbol.props.source.pageId);
         this.app.setActivePage(page);
-        this.workspace.view.ensureVisible([artboard]);
+        this.workspace.view.ensureCentered([artboard]);
         selection.makeSelection([artboard]);
     }
 

@@ -180,7 +180,7 @@ export default class RulerExtension extends RuntimeExtension {
             return;
         }
         this._viewportRect = viewportRect;
-        this._viewportSize = this.app.viewportSize();
+        this._viewportSize = this.view.viewportSize();
 
         var xRounder = viewportRect.x < 0 ? -.5 : .5;
         var yRounder = viewportRect.y < 0 ? -.5 : .5;

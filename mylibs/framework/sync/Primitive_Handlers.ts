@@ -121,7 +121,7 @@ handlers.registerHandler(PrimitiveType.View, function (page, p) {
         return;
     }
 
-    Environment.view.ensureViewState(p.newState);
+    Environment.view.changeViewState(p.newState);
 });
 
 

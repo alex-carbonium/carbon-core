@@ -1,4 +1,6 @@
 import { IPoint } from "carbon-geometry";
+import { IPooledObject } from "carbon-core";
+import ObjectPool from "../framework/ObjectPool";
 
 const EPSILON = 1e-12;
 const TRIGONOMETRIC_EPSILON = 1e-7;
@@ -19,7 +21,9 @@ function isZero(val) {
  * console.log(point.x); // 10
  * console.log(point.y); // 5
  */
-export default class Point implements IPoint {
+export default class Point implements IPoint, IPooledObject {
+    private static pool = new ObjectPool(() => Point.create(0, 0), 50);
+
     x: number;
     y: number;
 
@@ -879,11 +883,27 @@ export default class Point implements IPoint {
         return new Point(Math.abs(this.x), Math.abs(this.y));
     }
 
+    reset() {
+        this.x = 0;
+        this.y = 0;
+    }
+
+    free() {
+        Point.pool.free(this);
+    }
+
     static create(x, y) {
         if (x === 0 && y === 0) {
             return Point.Zero;
         }
         return new Point(x, y);
+    }
+
+    static allocate(x: number, y: number) {
+        let point = Point.pool.allocate();
+        point.x = x;
+        point.y = y;
+        return point;
     }
 
     static Zero: Point;

@@ -74,7 +74,7 @@ class ArtboardProxyPage extends Page implements IMirroringProxyPage {
         if(!artboard){
             return;
         }
-        let screenSize = App.Current.viewportSize();
+        let screenSize = this.view.viewportSize();
         let scale = this.view.scale();
         this.maxScrollX(Math.max(0, (artboard.width()* scale - screenSize.width) ));
         this.maxScrollY(Math.max(0, (artboard.height()* scale - screenSize.height)));
@@ -88,7 +88,7 @@ class ArtboardProxyPage extends Page implements IMirroringProxyPage {
         this.view.page.scrollX(0);
         this.view.page.scrollY(0);
         var rect = clone(artboard.boundaryRect());
-        var scale = fitRectToRect(App.Current.viewportSize(), rect);
+        var scale = fitRectToRect(this.view.viewportSize(), rect);
         this.view.scale(scale);
     }
 

@@ -1,15 +1,17 @@
 import RelayoutQueue from "./RelayoutQueue";
 import ModelStateListener from "./ModelStateListener";
 import PrimitiveHandler from "../sync/Primitive_Handlers";
-import { NodePrimitivesMap, IApp, IPrimitive, ViewState, IPrimitiveRoot } from "carbon-core";
+import { NodePrimitivesMap, IApp, IPrimitive, IPrimitiveRoot } from "carbon-core";
 import backend from "../../backend";
 import params from "../../params";
 import CommandManager from "../commands/CommandManager";
-import Command from "../commands/Command";
 import Invalidate from "../Invalidate";
 import NullPage from "../NullPage";
 import Environment from "../../environment";
 import { pushAll } from "../../util";
+import PrimitiveCommand from "../commands/PrimitiveCommand";
+import Selection from "../SelectionModel";
+import UIElement from "../UIElement";
 
 var debug = require("DebugUtil")("carb:relayoutEngine");
 
@@ -31,7 +33,6 @@ var debug = require("DebugUtil")("carb:relayoutEngine");
  */
 class RelayoutEngine {
     private primitiveRootCache = {};
-    private lastRelayoutViewState: ViewState = null;
     private localQueuedPrimitives: IPrimitive[] = [];
     private externalQueuedPrimitives: IPrimitive[] = [];
     private allPrimitives: IPrimitive[] = [];
@@ -93,15 +94,10 @@ class RelayoutEngine {
                 delete p._rollbackData;
             }
 
-            let viewPrimitive = this._trackViewPrimitive(app);
-
-            if (viewPrimitive) {
-                this.allPrimitives.push(viewPrimitive);
-                this.rollbacks.push(viewPrimitive._rollbackData);
-                delete viewPrimitive._rollbackData;
-            }
-
-            CommandManager.registerExecutedCommand(new Command(this.allPrimitives.slice(), this.rollbacks.slice().reverse()));
+            let elements = Selection.elements.length ? Selection.elements : Selection.previousElements;
+            let commandRect = UIElement.getCombinedBoundingBoxGlobal(elements);
+            CommandManager.registerExecutedCommand(new PrimitiveCommand(this.allPrimitives.slice(), this.rollbacks.slice().reverse(),
+                app.activePage.id(), commandRect));
         }
 
         //all local changes (from queue and model) must go to server
@@ -145,21 +141,6 @@ class RelayoutEngine {
             primitiveRootElementEntry.hitCount++;
         }
         return primitiveRootElement;
-    }
-
-    private _trackViewPrimitive(app: IApp) {
-        if (!ModelStateListener.roots.length || !app.isLoaded || app.activePage === NullPage) {
-            return;
-        }
-
-        var viewState = Environment.view.viewState;
-        if (this.lastRelayoutViewState !== viewState) {
-            var primitive = ModelStateListener.createViewPrimitive(app.activePage, viewState, this.lastRelayoutViewState);
-            this.lastRelayoutViewState = viewState;
-            return primitive;
-        }
-
-        return null;
     }
 
     run(root, propsHistoryMap, filter = null) {

@@ -44,7 +44,6 @@ import ArtboardFrame from "framework/ArtboardFrame";
 import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitive, IPrimitiveRoot, ViewState, IJsonNode, IFontManager, IStyleManager, StyleType, IArtboard, FontMetadata, AppSettings } from "carbon-core";
 import { Contributions } from "./extensions/Contributions";
 import { getBuiltInExtensions } from "./extensions/BuiltInExtensions";
-import Command from "./framework/commands/Command";
 import Primitive from "./framework/sync/Primitive";
 import UIElement from "./framework/UIElement";
 import RelayoutEngine from "./framework/relayout/RelayoutEngine";
@@ -423,10 +422,10 @@ class AppClass extends DataNode implements IApp {
         return this.fontManager.load(family, style, weight);
     }
 
-    saveFontMetadata(metadata: FontMetadata) {
+    saveFontMetadata(metadata: FontMetadata, mode?: ChangeMode) {
         if (!this.props.fontMetadata.some(x => x.name === metadata.name)) {
             let metadataWithId = Object.assign({}, metadata, { id: metadata.name });
-            this.patchProps(PatchType.Insert, "fontMetadata", metadataWithId);
+            this.patchProps(PatchType.Insert, "fontMetadata", metadataWithId, mode);
         }
     }
 
@@ -435,6 +434,11 @@ class AppClass extends DataNode implements IApp {
     }
 
     addDefaultFont() {
+        //existing apps with id should use ChangeMode.Self since font metadata is stored in json
+        //new apps should use ChangeMode.Model to save the initial font
+        //serverless apps always use self to avoid duplicate metadata from primitives
+        let mode = this.serverless() ? ChangeMode.Self : this.id() ? ChangeMode.Self : ChangeMode.Model;
+
         this.saveFontMetadata({
             name: DefaultFont,
             fonts: [
@@ -451,7 +455,7 @@ class AppClass extends DataNode implements IApp {
             ],
             subsets: ["menu", "cyrillic", "cyrillic-ext", "devanagari", "greek", "greek-ext", "latin", "latin-ext", "vietnamese"],
             path: "apache/opensans"
-        });
+        }, mode);
     }
 
     syncBroken(value?) {
@@ -555,8 +559,30 @@ class AppClass extends DataNode implements IApp {
     }
 
     //TODO: if primitives call dataNode.insertChild, this is not needed
-    remove(element) {
-        this.removeChild(element);
+    remove(element, mode?) {
+        if (element instanceof Page) {
+            this.removePage(element, mode);
+        }
+        else {
+            this.removeStory(element);
+        }
+    }
+
+    removePage(page, mode?) {
+        let removingActive = page === this.activePage;
+
+        if (removingActive) {
+            this.beginUpdate();
+            this.setNewActivePage(page);
+        }
+
+        page.removing();
+        super.removeChild(page, mode);
+        this.pageRemoved.raise(page);
+
+        if (removingActive) {
+            this.endUpdate();
+        }
     }
 
     primitiveRoot() {
@@ -572,16 +598,10 @@ class AppClass extends DataNode implements IApp {
         return path;
     }
 
-    removePage(page: IPage, setNewActive?: boolean) {
-        if (!page) {
-            return;
-        }
-        this.beginUpdate();
+    private setNewActivePage(pageBeingRemoved: IPage) {
+        var indexOfRemoved = this.pages.indexOf(pageBeingRemoved);
 
-        setNewActive = (setNewActive === undefined) ? true : setNewActive;
-        var indexOfRemoved = this.pages.indexOf(page);
-
-        if (setNewActive && page === this.activePage) {
+        if (pageBeingRemoved === this.activePage) {
             var newActive = this.pages[indexOfRemoved + 1];
             if (!newActive) {
                 newActive = this.pages[indexOfRemoved - 1];
@@ -590,14 +610,6 @@ class AppClass extends DataNode implements IApp {
                 this.setActivePage(newActive);
             }
         }
-
-        page.removing();
-        this.removeChild(page);
-        this.pageRemoved.raise(page);
-
-        this.endUpdate();
-
-        return -1;
     }
 
     duplicatePageById(pageId) {
@@ -1080,17 +1092,15 @@ class AppClass extends DataNode implements IApp {
     }
 
     setActivePageById(pageId) {
-        var page = DataNode.getImmediateChildById(this, pageId, true);
-        this.setActivePage(page);
+        if (this.activePage.id() !== pageId) {
+            var page = DataNode.getImmediateChildById(this, pageId, true);
+            this.setActivePage(page);
+        }
     }
 
     setActiveStoryById(storyId) {
         var story = DataNode.getImmediateChildById(this, storyId, true);
         this.activeStory(story);
-    }
-
-    viewportSize() {
-        return this.platform.viewportSize();
     }
 
     isNew() {

@@ -2079,6 +2079,21 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     static fromJSON(data) {
         return ObjectFactory.fromJSON(data);
     }
+
+    static getCombinedBoundingBoxGlobal(elements: IUIElement[]) {
+        if (elements.length === 0) {
+            return Rect.Zero;
+        }
+        if (elements.length === 1) {
+            return elements[0].getBoundingBoxGlobal();
+        }
+
+        let rect = Rect.fromObject(elements[0].getBoundingBoxGlobal());
+        for (let i = 1; i < elements.length; ++i){
+            rect.combineMutable(elements[i].getBoundingBoxGlobal());
+        }
+        return rect;
+    }
 }
 
 UIElement.prototype.t = Types.Element;
