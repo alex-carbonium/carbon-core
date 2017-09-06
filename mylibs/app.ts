@@ -422,10 +422,10 @@ class AppClass extends DataNode implements IApp {
         return this.fontManager.load(family, style, weight);
     }
 
-    saveFontMetadata(metadata: FontMetadata) {
+    saveFontMetadata(metadata: FontMetadata, mode?: ChangeMode) {
         if (!this.props.fontMetadata.some(x => x.name === metadata.name)) {
             let metadataWithId = Object.assign({}, metadata, { id: metadata.name });
-            this.patchProps(PatchType.Insert, "fontMetadata", metadataWithId);
+            this.patchProps(PatchType.Insert, "fontMetadata", metadataWithId, mode);
         }
     }
 
@@ -434,6 +434,11 @@ class AppClass extends DataNode implements IApp {
     }
 
     addDefaultFont() {
+        //existing apps with id should use ChangeMode.Self since font metadata is stored in json
+        //new apps should use ChangeMode.Model to save the initial font
+        //serverless apps always use self to avoid duplicate metadata from primitives
+        let mode = this.serverless() ? ChangeMode.Self : this.id() ? ChangeMode.Self : ChangeMode.Model;
+
         this.saveFontMetadata({
             name: DefaultFont,
             fonts: [
@@ -450,7 +455,7 @@ class AppClass extends DataNode implements IApp {
             ],
             subsets: ["menu", "cyrillic", "cyrillic-ext", "devanagari", "greek", "greek-ext", "latin", "latin-ext", "vietnamese"],
             path: "apache/opensans"
-        });
+        }, mode);
     }
 
     syncBroken(value?) {
