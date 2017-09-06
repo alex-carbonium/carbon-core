@@ -64,6 +64,9 @@ export default {
     },
 
     movePoint: function (frame, point, event, keys = Keyboard.state) {
+        if(!frame._mousePoint) {
+            return;
+        }
         frame._mousePoint.set(event.x, event.y);
 
         var pos = frame._mousePoint;

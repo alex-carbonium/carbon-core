@@ -1042,12 +1042,14 @@ PropertyMetadata.registerForType(Artboard, {
     allowHorizontalResize: {
         displayName: "Allow horizontal resize",
         type: "checkbox",
-        useInModel: true
+        useInModel: true,
+        defaultValue:true
     },
     allowVerticalResize: {
         displayName: "Allow vertical resize",
         type: "checkbox",
-        useInModel: true
+        useInModel: true,
+        defaultValue:true
     },
     states: {
         displayName: "States",
@@ -1136,7 +1138,7 @@ PropertyMetadata.registerForType(Artboard, {
             },
             {
                 label: "@advanced",
-                properties: ["type", "tileSize", "symbolGroup", "insertAsContent"],
+                properties: ["type", "tileSize", "symbolGroup", "insertAsContent", "allowHorizontalResize", "allowVerticalResize"],
                 expanded: true
             }
             // ,{
