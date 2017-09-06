@@ -31,8 +31,13 @@ export default class RangeFormatter extends UIElement {
         }
     };
     setProps(changes, mode){
-        if (mode === ChangeMode.Model && changes.font !== undefined){
-            this._fontChanged(changes.font);
+        if (mode === ChangeMode.Model && (changes.font || changes.fill)) {
+            let font = changes.font;
+            if (changes.fill) {
+                font = font || this.props.font;
+                font = Font.extend(font, { color: changes.fill.value });
+            }
+            this._fontChanged(font);
         }
         super.setProps.apply(this, arguments);
     }
