@@ -20,7 +20,7 @@ import StoryAction from "../../stories/StoryAction";
 import Link from "./Link";
 
 import DataNode from "framework/DataNode";
-import { IUIElement, IMouseEventData, IKeyboardState, PrimitiveType, IContext } from "carbon-core";
+import { IUIElement, IMouseEventData, KeyboardState, PrimitiveType, IContext } from "carbon-core";
 import Brush from "../../framework/Brush";
 
 const HandleSize = 14;
@@ -168,7 +168,7 @@ export default class LinkingTool extends Tool {
         }
     }
 
-    click(event: IMouseEventData, keys: IKeyboardState) {
+    click(event: IMouseEventData, keys: KeyboardState) {
         // this method should be empty
     }
 

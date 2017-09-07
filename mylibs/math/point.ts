@@ -22,7 +22,7 @@ function isZero(val) {
  * console.log(point.y); // 5
  */
 export default class Point implements IPoint, IPooledObject {
-    private static pool = new ObjectPool(() => Point.create(0, 0), 50);
+    private static pool = new ObjectPool(() => new Point(0, 0), 50);
 
     x: number;
     y: number;
@@ -892,7 +892,7 @@ export default class Point implements IPoint, IPooledObject {
         Point.pool.free(this);
     }
 
-    static create(x, y) {
+    static create(x, y): Readonly<Point> {
         if (x === 0 && y === 0) {
             return Point.Zero;
         }
@@ -906,9 +906,9 @@ export default class Point implements IPoint, IPooledObject {
         return point;
     }
 
-    static Zero: Point;
-    static BasisX: Point;
-    static BasisY: Point;
+    static Zero: Readonly<Point>;
+    static BasisX: Readonly<Point>;
+    static BasisY: Readonly<Point>;
 }
 
 Point.Zero = new Point(0, 0);

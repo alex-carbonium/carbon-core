@@ -78,7 +78,7 @@ export default {
         var v = new Point(mousePoint.x - frame.origin.x, mousePoint.y - frame.origin.y);
         var angle = v.getDirectedAngle(frame.captureVector);
 
-        if (keys.shift) {
+        if (keys.shiftKey) {
             var fullAngle = Math.round(frame.initialAngle + angle);
             fullAngle = Math.round(fullAngle / 15) * 15;
             angle = fullAngle - frame.initialAngle;

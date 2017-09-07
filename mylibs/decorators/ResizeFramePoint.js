@@ -72,7 +72,7 @@ export default {
     change: function (frame, dx, dy, point, mousePoint, keys) {
         var rv = point.rv;
 
-        if (keys.shift && frame.originalRect.width && frame.originalRect.height) {
+        if (keys.shiftKey && frame.originalRect.width && frame.originalRect.height) {
             var p1 = frame.localOrigin;
             var p2 = frame.capturedPoint.add2(dx, dy);
 
@@ -99,7 +99,7 @@ export default {
         dy *= rv[1];
 
         var origin;
-        if (keys.alt){
+        if (keys.altKey){
             origin = frame.centerOrigin;
             dx *= 2;
             dy *= 2;
@@ -130,7 +130,7 @@ export default {
         var resizeOptions = frame.resizeOptions.withRounding(round && frame.globalViewMatrix.isTranslatedOnly());
         frame.resizingElement.applyScaling(s, origin, resizeOptions);
 
-        if (keys.alt) {
+        if (keys.altKey) {
             // When resizing (for example) text, it can change its width and get misplaced.
             // Therefore, it is checked whether the center is still the same after scaling.
             let br = frame.resizingElement.boundaryRect();

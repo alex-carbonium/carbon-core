@@ -77,10 +77,10 @@ var LinePoint = {
 
         var oldx = Math.round(mousePoint.x);
         var oldy = Math.round(mousePoint.y);
-        if (keys.ctrl) {
+        if (keys.ctrlKey) {
             var newPoint = {x: oldx, y: oldy};
         }
-        else if (keys.shift) {
+        else if (keys.shiftKey) {
             var p;
             var oldPointLocal = frame.element.globalViewMatrixInverted().transformPoint2(mousePoint.x, mousePoint.y);
             if (point.p === 1) {

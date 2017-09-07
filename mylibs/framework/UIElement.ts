@@ -33,7 +33,7 @@ import { createUUID, deepEquals } from "../util";
 import Rect from "../math/rect";
 import ResizeOptions from "../decorators/ResizeOptions";
 import { PropertyDescriptor } from './PropertyMetadata';
-import { IKeyboardState, IConstraints } from "carbon-basics";
+import { KeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
 import { ChangeMode, LayerTypes, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags } from "carbon-core";
@@ -1020,14 +1020,14 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             }
         }
     }
-    mousemove(event, keys: IKeyboardState) {
+    mousemove(event, keys: KeyboardState) {
         if (this.editor !== null) {
             event.handled = true;
         }
     }
-    mouseup(event, keys: IKeyboardState) {
+    mouseup(event, keys: KeyboardState) {
     }
-    mousedown(event, keys: IKeyboardState) {
+    mousedown(event, keys: KeyboardState) {
     }
     dblclick(event, scale) {
     }
@@ -1468,7 +1468,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.props.margin;
     }
 
-    isDescendantOrSame(element: UIElement): boolean {
+    isDescendantOrSame(element: IUIElement): boolean {
         let current = this;
         do {
             if (current.isSameAs(element)) {
@@ -1527,39 +1527,6 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     resizeDimensions(value?: any) {
         return this.field("_resizeDimensions", value, ResizeDimension.Both);
-    }
-    init(values, isDefault?, selector?) {
-        let props = {};
-        let that = this;
-        for (let name in values) {
-            if (name[0] === "_") {
-                this.field(name, values[name]);
-            } else if (name[0] === "#") {
-                let elementName = name.substr(1);
-                this.findSingleChildOrDefault(function (e) {
-                    if (e.name() === elementName) {
-                        e.init(values[name]);
-                    }
-                })
-            } else if (name[0] === "$") {
-
-            } else {
-                let value = values[name];
-                if (value && value.t) {
-                    let type = value.t;
-                    let defaultFunc = TypeDefaults[type];
-                    let defaults = {};
-                    if (defaultFunc) {
-                        defaults = defaultFunc();
-                    }
-                    value = Object.assign(defaults, value);
-                }
-
-                props[name] = value;
-            }
-        }
-        this.setProps(props);
-        return this;
     }
     fromJSON(data) {
         //TODO: bring back migrations when necessary

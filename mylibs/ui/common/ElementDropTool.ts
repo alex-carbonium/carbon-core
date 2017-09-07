@@ -13,7 +13,7 @@ import {ViewTool} from "../../framework/Defs";
 import UIElement from "../../framework/UIElement";
 import Tool from "./Tool";
 
-import { IMouseEventData, IKeyboardState, ElementState } from "carbon-core";
+import { IMouseEventData, KeyboardState, ElementState } from "carbon-core";
 require("framework/ArtboardFrame");// don't remove from here even if not used
 
 export default class ElementDropTool extends Tool {
@@ -39,7 +39,7 @@ export default class ElementDropTool extends Tool {
         this._changeMode(ElementState.Resize);
         this._hoverArtboard = null;
     }
-    mousedown(event: IMouseEventData, keys: IKeyboardState) {
+    mousedown(event: IMouseEventData, keys: KeyboardState) {
         var eventData = { handled: false, x: event.x, y: event.y };
         Environment.controller.startDrawingEvent.raise(eventData);
         if (eventData.handled) {
@@ -101,7 +101,7 @@ export default class ElementDropTool extends Tool {
         }
         event.handled = true;
     }
-    mousemove(event: IMouseEventData, keys: IKeyboardState) {
+    mousemove(event: IMouseEventData, keys: KeyboardState) {
         if (!event.cursor){
             event.cursor = "crosshair";
         }
@@ -124,7 +124,7 @@ export default class ElementDropTool extends Tool {
             var endPoint = this._point;
 
             //if use holds shift, we must fit shape into square
-            if (keys.shift) {
+            if (keys.shiftKey) {
                 var height = Math.abs(this._point.y - this._startPoint.y);
                 var width = Math.abs(this._point.x - this._startPoint.x);
                 var ratio = Math.min(height, width);
@@ -150,10 +150,10 @@ export default class ElementDropTool extends Tool {
         element.prepareAndSetProps({ br: new Rect(0, 0, w, h) });
     }
 
-    _prepareMousePoint(event: IMouseEventData, keys: IKeyboardState) {
+    _prepareMousePoint(event: IMouseEventData, keys: KeyboardState) {
         this._point.set(event.x, event.y);
         var round = true;
-        if (!keys.ctrl) {
+        if (!keys.ctrlKey) {
             var snapped = SnapController.applySnappingForPoint(this._point);
             if (snapped.x === this._point.x && snapped.y === this._point.y) {
                 round = true;

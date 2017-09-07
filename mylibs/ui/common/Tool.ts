@@ -1,6 +1,6 @@
 import Selection from "../../framework/SelectionModel"
 import Invalidate from "../../framework/Invalidate";
-import { IApp, IView, IController, IMouseEventData, IKeyboardState, IDisposable } from "carbon-core";
+import { IApp, IView, IController, IMouseEventData, KeyboardState, IDisposable } from "carbon-core";
 
 //TODO: if selection is made in layers after tool is set, active frame starts to react to mouse events before the tool
 export default class Tool {
@@ -62,11 +62,11 @@ export default class Tool {
     view() {
         return this._view;
     }
-    mousedown(event: IMouseEventData, keys: IKeyboardState) {
+    mousedown(event: IMouseEventData, keys: KeyboardState) {
     }
-    mouseup(event: IMouseEventData, keys: IKeyboardState) {
+    mouseup(event: IMouseEventData, keys: KeyboardState) {
     }
-    mousemove(event: IMouseEventData, keys: IKeyboardState) {
+    mousemove(event: IMouseEventData, keys: KeyboardState) {
         if (!event.handled) {
             var cursor = this.defaultCursor();
             if (cursor) {
@@ -81,7 +81,7 @@ export default class Tool {
     dragElementEnded() {
     }
 
-    click(event: IMouseEventData, keys: IKeyboardState) {
+    click(event: IMouseEventData, keys: KeyboardState) {
         event.handled = true;
     }
 

@@ -121,7 +121,7 @@ var CornerRadiusPoint = {
         var newRadius = 0 | parameter * maxRadius;
 
         var r = clone(frame.resizingElement.children[0].cornerRadius());
-        r.locked = !keys.alt;
+        r.locked = !keys.altKey;
 
         if (!r.locked) {
             r[point.prop] = newRadius;

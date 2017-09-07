@@ -1,6 +1,6 @@
 declare module "carbon-model" {
     import { IPoint, IRect, ICoordinate, IMatrix, ISize, OriginType } from "carbon-geometry";
-    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable, ChangeMode, ArtboardType, Font, IKeyboardState, Brush } from "carbon-basics";
+    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable, ChangeMode, ArtboardType, Font, KeyboardState, Brush } from "carbon-basics";
     import { IContext } from "carbon-rendering";
 
     export interface IDataNodeProps {
@@ -59,9 +59,9 @@ declare module "carbon-model" {
     }
 
     export interface IMouseEventHandler {
-        mousemove(event: IMouseEventData, keys: IKeyboardState);
-        mouseup(event: IMouseEventData, keys: IKeyboardState);
-        mousedown(event: IMouseEventData, keys: IKeyboardState);
+        mousemove(event: IMouseEventData, keys: KeyboardState);
+        mouseup(event: IMouseEventData, keys: KeyboardState);
+        mousedown(event: IMouseEventData, keys: KeyboardState);
         dblclick(event: IMouseEventData, scale: number);
         click(event: IMouseEventData);
     }

@@ -22,7 +22,7 @@ function setupLayers(Layer) {
 
     this._registerLayer(this.isolationLayer);
     this._registerLayer(this.interactionLayer);
-    this.interactionLayer.add(SelectionModel._selectCompositeElement); // TODO: think how to cut this dependency
+    this.interactionLayer.add(SelectionModel.selectComposite()); // TODO: think how to cut this dependency
     this.interactionLayer.context = this.upperContext;
 }
 

@@ -42,6 +42,10 @@ var settings = {
         onlyVisibleObjects: true
     },
 
+    selection: {
+        frameColor: "rgba(150,180, 250, 0.3)"
+    },
+
     shapes: {
         defaultFill: "#B6B6B6",
         defaultStroke: "black"

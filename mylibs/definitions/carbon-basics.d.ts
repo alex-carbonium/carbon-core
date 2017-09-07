@@ -19,7 +19,7 @@ declare module "carbon-basics" {
         handled: boolean;
     }
 
-    export interface IMouseEventData extends IEventData, ICoordinate {
+    export interface IMouseEventData extends IEventData, KeyboardState {
         x: number;
         y: number;
         isDragging: boolean;
@@ -66,10 +66,10 @@ declare module "carbon-basics" {
         clearSubscribers();
     }
 
-    export interface IKeyboardState {
-        ctrl: boolean;
-        shift: boolean;
-        alt: boolean;
+    export interface KeyboardState {
+        ctrlKey: boolean;
+        shiftKey: boolean;
+        altKey: boolean;
     }
 
     export const enum ChangeMode {

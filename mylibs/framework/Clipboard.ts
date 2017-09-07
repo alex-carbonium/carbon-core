@@ -10,7 +10,7 @@ import {choosePasteLocation} from "./PasteLocator";
 import {setClipboardContent, tryGetClipboardContent} from "../utils/dom";
 import Delete from "../commands/Delete";
 import params from "../params";
-import { IApp } from "carbon-core";
+import { IApp, IMatrix } from "carbon-core";
 import { OriginType } from "carbon-geometry";
 
 class Clipboard {
@@ -18,7 +18,7 @@ class Clipboard {
     _app: IApp;
     globalBoundingBoxes: Rect[];
     rootBoundingBoxes: Rect[];
-    globalMatrices: Matrix[];
+    globalMatrices: IMatrix[];
 
     constructor(){
         this._htmlElement = null;

@@ -6,7 +6,10 @@ import { Types } from "./Defs";
 import ActiveFrame from "../decorators/ActiveFrame";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
 import { ISelectComposite } from "carbon-app";
-import { ResizeDimension } from "carbon-core";
+import { ResizeDimension, IUIElement } from "carbon-core";
+import Invalidate from "./Invalidate";
+
+let debug = require("DebugUtil")("carb:selection");
 
 var SelectCompositeFrame = {
     hitPointIndex: function (frame, point) {
@@ -49,43 +52,17 @@ var SelectCompositeFrame = {
 };
 
 export default class SelectComposite extends CompositeElement implements ISelectComposite {
-    constructor() {
-        super();
-        this._selected = false;
-        this._activeFrame = new ActiveFrame();
+    private _activeFrame = new ActiveFrame();
+    private _activeFrameElement: IUIElement = null;
+
+    displayName() {
+        return "Select composite";
     }
-    selected(value) {
-        if (arguments.length === 1) {
-            if (value === this._selected) {
-                return;
-            }
 
-            this._selected = value;
-            var multiselect = this.count() > 1;
-
-            if (value) {
-                //making visible just in case
-                this._activeFrame.visible(true);
-                if (!multiselect) {
-                    this.each(element => {
-                        element.addDecorator(this._activeFrame);
-                        element.select(multiselect);
-                    });
-                } else {
-                    this.addDecorator(this._activeFrame);
-                    this.each(element => element.select(multiselect));
-                }
-            } else {
-                this.removeDecorator(this._activeFrame);
-                this.each(element => {
-                    element.unselect();
-                    element.removeDecorator(this._activeFrame);
-                });
-            }
-        }
-
-        return this._selected;
+    showActiveFrame(show: boolean) {
+        this._activeFrame.visible(show);
     }
+
     selectionFrameType(): any {
         return SelectCompositeFrame;
     }
@@ -100,34 +77,96 @@ export default class SelectComposite extends CompositeElement implements ISelect
         });
         return canResize ? ResizeDimension.Both : ResizeDimension.None;
     }
-    register(element, multiSelect?, refreshOnly?) {
-        for (var i = this.elements.length - 1; i >= 0; --i) {
-            var e = this.elements[i];
+    register(element: IUIElement) {
+        if (!element.canSelect() && !element.runtimeProps.selectFromLayersPanel) {
+            return;
+        }
+
+        let wasMultiSelection = this.children.length > 1;
+
+        for (var i = this.children.length - 1; i >= 0; --i) {
+            var e = this.children[i];
             if (e.isDescendantOrSame(element) || element.isDescendantOrSame(e)) {
                 this.unregister(e);
             }
         }
-        if (!refreshOnly && this._selected) {
-            element.select(multiSelect);
+
+        if (!wasMultiSelection && this.children.length === 1) {
+            this.children[0].unselect();
+            this.children[0].select(true);
+            this.removeActiveFrame(this.children[0]);
         }
+
         super.register.apply(this, arguments);
-    }
-    unregister(element, refreshOnly?) {
-        if (!refreshOnly && this._selected) {
-            element.unselect();
+
+        //making visible just in case
+        this.showActiveFrame(true);
+
+        let isMultiSelection = this.children.length > 1;
+        element.select(isMultiSelection);
+
+        if (isMultiSelection) {
+            this.addActiveFrame(this);
         }
+        else {
+            this.addActiveFrame(element);
+        }
+    }
+    registerAll(elements: IUIElement[]) {
+        for (let i = 0, j = elements.length; i < j; ++i) {
+            let element = elements[i];
+            this.register(element);
+        }
+    }
+
+    unregister(element: IUIElement) {
+        element.unselect();
+        this.removeActiveFrame(element);
+
         super.unregister.apply(this, arguments);
-    }
-    unregisterAll(refreshOnly?) {
-        if (!refreshOnly && this._selected) {
-            this.each(x => x.unselect());
+
+        if (this.children.length <= 1) {
+            this.removeActiveFrame(this);
+            if (this.children.length === 1) {
+                this.addActiveFrame(this.children[0]);
+            }
         }
+    }
+    unregisterAll() {
+        for (let i = 0; i < this.children.length; ++i){
+            let element = this.children[i];
+            element.unselect();
+            this.removeActiveFrame(element);
+        }
+
         super.unregisterAll.apply(this, arguments);
+
+        this.removeActiveFrame(this);
+    }
+
+    private addActiveFrame(element: IUIElement) {
+        if (this._activeFrameElement !== element) {
+            if (this._activeFrameElement) {
+                this.removeActiveFrame(this._activeFrameElement);
+            }
+
+            debug("+ active frame: %s", element.displayName());
+            element.addDecorator(this._activeFrame);
+            this._activeFrameElement = element;
+        }
+    }
+    private removeActiveFrame(element: IUIElement) {
+        if (this._activeFrameElement === element) {
+            debug("- active frame: %s", element.displayName());
+            this._activeFrameElement = null;
+            element.removeDecorator(this._activeFrame);
+        }
     }
 
     mousemove() {
-        if (!this._selected) {
-            this.selected(true);
+        if (!this._activeFrame.visible()) {
+            this.showActiveFrame(true);
+            Invalidate.requestInteractionOnly();
         }
     }
 
@@ -135,7 +174,7 @@ export default class SelectComposite extends CompositeElement implements ISelect
         this.restoreLastGoodTransformIfNeeded();
         var affectingLayout = super.previewDisplayProps(changes);
         if (affectingLayout){
-            this.selected(false);
+            this.showActiveFrame(false);
         }
         return affectingLayout;
     }
@@ -147,8 +186,7 @@ export default class SelectComposite extends CompositeElement implements ISelect
         var hasBadTransform = this.hasBadTransform();
 
         if (hadBadTransform || hasBadTransform){
-            this.selected(false);
-            this.selected(true);
+            this.showActiveFrame(true);
         }
     }
 }

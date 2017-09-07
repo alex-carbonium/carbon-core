@@ -73,7 +73,7 @@ export default {
         var snapPos;
         var px = 0, py = 0;
         var scale = Environment.view.scale();
-        if (frame.allowSnapping && !keys.ctrl) {
+        if (frame.allowSnapping && !keys.ctrlKey) {
             px = frame._offsetPt.x;
             py = frame._offsetPt.y;
             pos = SnapController.applySnappingForPoint({ x: frame._mousePoint.x + px, y: frame._mousePoint.y + py });

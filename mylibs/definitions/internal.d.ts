@@ -57,6 +57,10 @@ declare module "carbon-model"{
 
         applyVisitorTLR(callback:(e:IUIElement)=>boolean|void);
         opacity(value?:number):number;
+
+        isDescendantOrSame(other: IUIElement): boolean;
+        select(multi?: boolean): void;
+        unselect(): void;
     }
 
     export interface IUIElementProps extends IDataNodeProps {

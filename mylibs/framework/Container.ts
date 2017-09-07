@@ -14,7 +14,7 @@ import Brush from './Brush';
 import Box from './Box';
 import NullContainer from './NullContainer';
 import UserSettings from '../UserSettings';
-import { IKeyboardState, ChangeMode, HorizontalConstraint, VerticalConstraint } from "carbon-basics";
+import { KeyboardState, ChangeMode, HorizontalConstraint, VerticalConstraint } from "carbon-basics";
 import { IContainerProps, IUIElement, IContainer } from "carbon-model";
 import { IMatrix } from "carbon-geometry";
 import ExtensionPoint from "./ExtensionPoint";
@@ -610,14 +610,14 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     canAccept(elements, autoInsert, allowMoveInOut) {
         return this.primitiveRoot().isEditable() && elements.every(x => x.canBeAccepted(this));
     }
-    mousedown(event, keys: IKeyboardState) {
+    mousedown(event, keys: KeyboardState) {
         super.mousedown.call(this, event); //to hide inplace editor
         this.delegateToChildren("mousedown", event);
     }
-    mousemove(event, keys: IKeyboardState) {
+    mousemove(event, keys: KeyboardState) {
         this.delegateToChildren("mousemove", event);
     }
-    mouseup(event, keys: IKeyboardState) {
+    mouseup(event, keys: KeyboardState) {
         this.delegateToChildren("mouseup", event);
     }
     dblclick(event, scale) {
