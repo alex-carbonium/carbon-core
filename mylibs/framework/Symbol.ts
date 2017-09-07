@@ -14,6 +14,7 @@ import UserSettings from "../UserSettings";
 import Text from "./text/Text";
 import Brush from "./Brush";
 import Font from "./Font";
+import NullContainer from "framework/NullContainer";
 
 interface ISymbolRuntimeProps extends IUIElementProps {
     artboardVersion: number;
@@ -420,7 +421,9 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
             let children = this.children.slice();
             children.forEach(x => App.Current.activePage.nameProvider.assignNewName(x));
             this.flatten();
-            setTimeout(() => Selection.makeSelection(children), 1);
+            if(this.parent() !== NullContainer) {
+                setTimeout(() => Selection.makeSelection(children), 1);
+            }
         }
     }
     trackDeleted(parent) {

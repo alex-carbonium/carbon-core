@@ -153,6 +153,10 @@ class ArtboardPage extends Page implements IArtboardPage {
         return Rect.Max;
     }
 
+    click() {
+        this.setActiveArtboard(null);
+    }
+
     insertArtboards(screens) {
         let commands = [];
         let pos = this.getNextAvailiablePosition(screens[0].w, screens[0].h);

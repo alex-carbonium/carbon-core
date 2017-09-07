@@ -37,7 +37,7 @@ export default class ResizeRotateElement extends TransformationElement{
     saveChanges(){
         super.saveChanges();
 
-        for (var i = 0; i < this.children.length; i++){
+        for (var i = 0; i < this.elements.length; i++){
             var element = this.elements[i];
             var clone = this.children[i];
 
