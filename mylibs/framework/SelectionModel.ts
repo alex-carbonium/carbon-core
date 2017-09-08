@@ -235,6 +235,7 @@ class SelectionModel implements ISelection {
 
     reselect() {
         let selection = this.selectedElements();
+        this.makeSelection(ArrayPool.EmptyArray, "new", false, true);
         this.makeSelection(selection, "new", false, true);
     }
 
