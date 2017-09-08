@@ -67,7 +67,7 @@ handlers.registerHandler(PrimitiveType.DataNodeRemove, function (container, p) {
     var element = container.getImmediateChildById(p.childId);
     if (element) {
         if (Selection.isElementSelected(element)) {
-            Selection.unselectGroup([element], true);
+            Selection.makeSelection([element], "remove");
         }
         container.remove(element, ChangeMode.Self);
     }

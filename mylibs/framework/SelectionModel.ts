@@ -254,13 +254,6 @@ class SelectionModel implements ISelection {
         return count !== 0;
     }
 
-    unselectGroup(elements, refreshOnly) {
-        this.unselectAll(refreshOnly);
-        let currentSelection = this._selectCompositeElement.elements;
-        this.removeGroupFromArray(currentSelection, elements);
-        this.registerSelection(currentSelection, refreshOnly);
-    }
-
     clearSelection() {
         if (this.unselectAll()) {
             this._fireOnElementSelected(ArrayPool.EmptyArray);
