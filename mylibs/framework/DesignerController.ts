@@ -19,11 +19,13 @@ import { IArtboard } from "carbon-model";
 import Point from "../math/point";
 import { IDropElementData } from "carbon-app";
 import Cursors from "Cursors";
+import PropertyTracker from "./PropertyTracker";
 
 function stopDrag(event) {
     if (!this._draggingElement.isDropSupported()) {
         this._draggingElement.detach();
         this.stopDraggingEvent.raise(event, null);
+        PropertyTracker.resumeAndFlush();
         //active frame could have been hidden, show it again now
         Selection.refreshSelection();
         return false;
@@ -33,6 +35,7 @@ function stopDrag(event) {
     this._draggingElement.detach();
 
     this.stopDraggingEvent.raise(event, elements);
+    PropertyTracker.resumeAndFlush();
 
     //could start dragging not selected object
     Selection.makeSelection(elements);
@@ -332,6 +335,8 @@ export default class DesignerController implements IController {
         eventData.transformationElement = this._draggingElement;
         this.startDraggingEvent.raise(eventData as any, Keyboard.state);
         this._draggingOverElement = null;
+
+        PropertyTracker.suspend();
     }
 
 
@@ -719,6 +724,9 @@ export default class DesignerController implements IController {
             .catch(e => {
                 this.cancel();
                 this.stopDraggingEvent.raise(null, null);
+            })
+            .finally(() => {
+                PropertyTracker.resumeAndFlush();
             });
     }
 
