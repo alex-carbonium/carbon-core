@@ -108,7 +108,7 @@ export default {
         SnapController.clearActiveSnapLines();
     },
 
-    draw: function (frame, context, currentPoint) {
+    draw: function (frame, context, currentPoint?) {
         var scale = Environment.view.scale();
 
         context.save();

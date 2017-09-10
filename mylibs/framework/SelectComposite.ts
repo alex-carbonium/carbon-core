@@ -25,8 +25,8 @@ var SelectCompositeFrame = {
     movePoint: function (frame, point, event) {
         return DefaultFrameType.movePoint(frame, point, event);
     },
-    releasePoint: function (frame, point) {
-        DefaultFrameType.releasePoint(frame, point);
+    releasePoint: function (frame, point, event) {
+        DefaultFrameType.releasePoint(frame, point, event);
     },
     draw: function (frame, context) {
         DefaultFrameType.draw(frame, context);
