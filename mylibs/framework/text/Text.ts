@@ -94,11 +94,6 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
             Selection.refreshSelection();
         }
     }
-    rangeFontChanged(rangeFont: Font) {
-        if (this.props.mode === TextMode.Label && (rangeFont.align !== TextAlign.left || rangeFont.valign !== TextAlign.top)) {
-            this.setProps({ mode: TextMode.Block });
-        }
-    }
 
     saveOrResetLayoutProps(mode: ChangeMode): boolean {
         if (super.saveOrResetLayoutProps(mode)) {

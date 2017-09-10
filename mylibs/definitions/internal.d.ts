@@ -74,7 +74,6 @@ declare module "carbon-model"{
     }
 
     export interface IText {
-        rangeFontChanged(rangeFont: Font): void;
         resetEngine(): void;
     }
 }
