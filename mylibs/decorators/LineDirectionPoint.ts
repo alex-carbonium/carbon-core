@@ -4,6 +4,7 @@ import Invalidate from "framework/Invalidate";
 import {Types, FrameCursors} from "../framework/Defs";
 import Brush from "../framework/Brush";
 import Environment from "environment";
+import { ChangeMode } from "carbon-core";
 
 const PointSize = 4;
 
@@ -24,19 +25,25 @@ export default  {
         context.stroke();
     },
     capture (frame) {
-        var resizingElement = UIElement.construct(Types.ResizeRotateElement, frame.element);
-        resizingElement.stroke(Brush.Empty);
-        frame.resizingElement = resizingElement;
-        frame.clone = frame.resizingElement.children[0];
-        Environment.view.interactionLayer.add(resizingElement);
-        //App.Current.view.startRotatingEvent.raise();
+        delete frame.originalValue;
+        if (frame.element.decorators) {
+            frame.element.decorators.forEach(x => x.visible(false));
+        }
     },
-    release (frame) {
-        if (frame.resizingElement) {
+    release (frame, point) {
+        if (frame.element) {
             delete frame.onlyCurrentVisible;
-            frame.element.selectionFrameType().saveChanges(frame, frame.clone);
+            let r = {};
+            r[point.prop] = frame.originalValue;
+            let currentValue = frame.element.props[point.prop];
 
-            frame.resizingElement.detach();
+            frame.element.prepareAndSetProps(r, ChangeMode.Self);
+            r = {};
+            r[point.prop] = currentValue;
+            frame.element.prepareAndSetProps(r, ChangeMode.Model);
+            if (frame.element.decorators) {
+                frame.element.decorators.forEach(x => x.visible(true));
+            }
         }
     },
     rotateCursorPointer (index, angle) {
@@ -49,14 +56,14 @@ export default  {
         p.y = h / 2;
     },
     change (frame, dx, dy, point, mousePoint, keys) {
-        if (!frame.resizingElement) {
+        if (!frame.element) {
             return;
         }
         var rect = frame.element.boundaryRect();
-        var mousePosition = frame.element.globalViewMatrixInverted().transformPoint(mousePoint);
+        var mousePosition = frame.globalViewMatrixInverted.transformPoint(mousePoint);
 
         // p1, p2, gives us line equation
-        var pr = {};
+        var pr:any = {};
         var p1 = point.from;
         var p2 = point.to;
         // pr - closest point to the line
@@ -82,8 +89,11 @@ export default  {
         var r = {};
         r[point.prop] = newRadius;
 
-        frame.clone.saveOrResetLayoutProps();
-        frame.clone.prepareAndSetProps(r);
+        if(!frame.originalValue) {
+            frame.originalValue = frame.element.props[point.prop];
+        }
+
+        frame.element.prepareAndSetProps(r, ChangeMode.Self);
 
         Invalidate.requestInteractionOnly();
     }

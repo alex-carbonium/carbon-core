@@ -11,7 +11,6 @@ require("webExtensions");
 require("commands/Move");
 
 require("framework/CorruptedElement");
-require("framework/interactions/ResizeRotateElement");
 
 require("framework/Circle");
 require("framework/Rectangle");

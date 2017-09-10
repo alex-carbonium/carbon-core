@@ -212,9 +212,7 @@ export var Types = {
     'ClickSpot': 'Y',
     'QuadAndLock': 'q',
     'Box': 'B',
-    'Shadow': 'i',
-    'TransformationElement': 'te',
-    'ResizeRotateElement': 'rr'
+    'Shadow': 'i'
 };
 
 if (DEBUG) {
