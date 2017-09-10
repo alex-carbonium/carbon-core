@@ -12,6 +12,7 @@ import { IComposite, IUIElement, ChangeMode } from "carbon-core";
 import UIElement from "../UIElement";
 
 export default class TransformationElement extends GroupContainer implements IComposite {
+
     constructor(element) {
         super();
 

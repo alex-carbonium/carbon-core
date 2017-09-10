@@ -12,10 +12,10 @@ export default class ResizeRotateElement extends TransformationElement{
     }
 
     createClone(element){
-        var clone = element.clone();
-        clone.setProps(element.selectLayoutProps(true));
-        clone.runtimeProps.isTransformationClone = true;
-        return clone;
+        //var clone = element.clone();
+       // clone.setProps(element.selectLayoutProps(true));
+      // clone.runtimeProps.isTransformationClone = true;
+        return element;
     }
 
     applySizeScaling(s, o, options){

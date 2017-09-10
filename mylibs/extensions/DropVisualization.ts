@@ -48,10 +48,10 @@ class ResizeHint extends UIElement {
 
     _updatePosition(): void {
         var anchorElement: any = this._transformationElement;
-        if (anchorElement.elements.length === 1 && !anchorElement.wrapSingleChild()) {
-            //rotated elements are not wrapped when dragging
-            anchorElement = this._transformationElement.children[0];
-        }
+        // if (anchorElement.elements.length === 1 && !anchorElement.wrapSingleChild()) {
+        //     //rotated elements are not wrapped when dragging
+        //     anchorElement = this._transformationElement.children[0];
+        // }
 
         var points = this._findBestPoints(anchorElement);
         var p0 = points[0];
@@ -102,12 +102,13 @@ class ResizeHint extends UIElement {
     }
 
     _findMaxOuterBorder(): number {
-        var border = 0;
-        for (let i = 0; i < this._transformationElement.elements.length; ++i) {
-            let element = this._transformationElement.elements[i];
-            border = Math.max(border, element.getMaxOuterBorder());
-        }
-        return border;
+        return this._transformationElement.getMaxOuterBorder();
+        // var border = 0;
+        // for (let i = 0; i < this._transformationElement.elements.length; ++i) {
+        //     let element = this._transformationElement.elements[i];
+        //     border = Math.max(border, element.getMaxOuterBorder());
+        // }
+        // return border;
     }
 
     updateSizeText() {

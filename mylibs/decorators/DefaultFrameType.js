@@ -57,6 +57,8 @@ export default {
         var matrix = frame.element.globalViewMatrixInverted();
         frame._capturedPt = matrix.transformPoint(frame._mousePoint);
         frame._offsetPt = new Point(point.x - frame._capturedPt.x, point.y - frame._capturedPt.y);
+        frame.globalViewMatrixInverted = matrix;
+        frame.globalViewMatrix = frame.element.globalViewMatrix();
 
         point.type.capture(frame, point, frame._mousePoint);
 
@@ -82,7 +84,7 @@ export default {
             SnapController.clearActiveSnapLines();
         }
 
-        var matrix = frame.element.globalViewMatrixInverted();
+        var matrix = frame.globalViewMatrixInverted;
         var pt = matrix.transformPoint(pos);
 
         var dx = 0;

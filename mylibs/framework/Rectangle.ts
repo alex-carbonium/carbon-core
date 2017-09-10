@@ -12,8 +12,9 @@ import UIElement from "framework/UIElement";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import Point from "../math/point";
-import { ResizeDimension } from "carbon-core";
+import { ResizeDimension, ChangeMode } from "carbon-core";
 import Rect from "../math/rect";
+import TransformationHelper from "../framework/interactions/TransformationHelper";
 
 const PointSize = 4;
 const PointOffset = 10;
@@ -45,22 +46,22 @@ var CornerRadiusPoint = {
         context.stroke();
     },
     capture(frame) {
-        var resizingElement = UIElement.construct(Types.ResizeRotateElement, frame.element);
-        resizingElement.stroke(Brush.None);
-        resizingElement.strokeFrame = false;
-        frame.resizingElement = resizingElement;
         frame.originalValue = frame.element.cornerRadius();
         frame.onlyCurrentVisible = true;
-        Environment.view.interactionLayer.add(resizingElement);
-        //App.Current.view.startRotatingEvent.raise();
+        if (frame.element.decorators) {
+            frame.element.decorators.forEach(x => x.visible(false));
+        }
     },
     release(frame) {
-        if (frame.resizingElement) {
+        if (frame.element) {
             delete frame.onlyCurrentVisible;
-            var newRadius = frame.resizingElement.children[0].cornerRadius();
-            frame.element.cornerRadius(newRadius);
-            frame.resizingElement.saveChanges();
-            frame.resizingElement.detach();
+            let newRadius = frame.element.cornerRadius();
+            frame.element.setProps({cornerRadius:frame.originalValue}, ChangeMode.Self);
+            frame.element.setProps({cornerRadius:newRadius}, ChangeMode.Model);
+
+            if (frame.element.decorators) {
+                frame.element.decorators.forEach(x => x.visible(true));
+            }
         }
     },
     rotateCursorPointer(index, angle) {
@@ -68,8 +69,8 @@ var CornerRadiusPoint = {
         return (index + dc) % 8;
     },
     update: function (p, x, y, w, h, element, scale) {
-        var cornderRadius = element.cornerRadius();
-        var value = cornderRadius[p.prop];
+        var cornerRadius = element.cornerRadius();
+        var value = cornerRadius[p.prop];
         var offset = getOffsetForPoint(w, h, scale, value);
 
         var rv = p.rv;
@@ -77,7 +78,7 @@ var CornerRadiusPoint = {
         p.y = y + h * rv[2] + rv[3] * offset.y;
     },
     change(frame, dx, dy, point, mousePoint, keys) {
-        if (!frame.resizingElement) {
+        if (!frame.element) {
             return;
         }
         var rect = frame.element.boundaryRect();
@@ -120,7 +121,7 @@ var CornerRadiusPoint = {
         var maxRadius = Math.min(w2, h2);
         var newRadius = 0 | parameter * maxRadius;
 
-        var r = clone(frame.resizingElement.children[0].cornerRadius());
+        var r = clone(frame.element.cornerRadius());
         r.locked = !keys.alt;
 
         if (!r.locked) {
@@ -131,7 +132,7 @@ var CornerRadiusPoint = {
             r.bottomLeft = newRadius;
             r.bottomRight = newRadius;
         }
-        frame.resizingElement.children[0].cornerRadius(r);
+        frame.element.setProps({cornerRadius:r}, ChangeMode.Self);
         Invalidate.requestInteractionOnly();
     }
 }

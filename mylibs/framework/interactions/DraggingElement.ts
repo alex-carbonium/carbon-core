@@ -5,7 +5,6 @@ import Artboard from "../Artboard";
 import Invalidate from "../Invalidate";
 import { areRectsIntersecting } from "../../math/math";
 import Point from "../../math/point";
-import TransformationElement from "./TransformationElement";
 import Brush from "../Brush";
 import Environment from "../../environment";
 import UserSettings from "../../UserSettings";

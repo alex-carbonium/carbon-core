@@ -152,12 +152,12 @@ export default class RulerExtension extends RuntimeExtension {
     }
 
     setHighlight(selection: IComposite) {
-        if (selection.elements.length === 0) {
+        if (!selection || (selection.elements && selection.elements.length === 0)) {
             this._highlight = null;
             return;
         }
 
-        if (selection.elements.length === 1 && selection.elements[0] instanceof Artboard) {
+        if ((selection.elements && selection.elements.length === 1 && selection.elements[0] instanceof Artboard) || selection instanceof Artboard) {
             this._highlight = null;
             return;
         }

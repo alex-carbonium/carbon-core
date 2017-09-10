@@ -5,11 +5,12 @@ import Environment from "../environment";
 import {Types, RotationCursors} from "../framework/Defs";
 import Point from "../math/point";
 import {isPointInRect} from "../math/math";
-import {IMouseEventData} from "carbon-core";
+import { IMouseEventData, ChangeMode } from "carbon-core";
 import UserSettings from "../UserSettings";
+import TransformationHelper from "../framework/interactions/TransformationHelper";
 
 const PointSize = 12
-    , PointSize2 = PointSize/2;
+     , PointSize2 = PointSize/2;
 
 export default {
     PointSize: PointSize,
@@ -48,8 +49,6 @@ export default {
         return (index + dc) % 8;
     },
     capture: function (frame, point, mousePoint) {
-        var resizingElement = UIElement.construct(Types.ResizeRotateElement, frame.element);
-        frame.resizingElement = resizingElement;
         frame.originalRect = frame.element.boundaryRect();
         frame.origin = frame.element.center(true);
         frame.captureVector = new Point(mousePoint.x - frame.origin.x, mousePoint.y - frame.origin.y);
@@ -58,20 +57,35 @@ export default {
             frame.initialAngle = 360 + frame.initialAngle;
         }
         frame.flipped = frame.element.isFlipped(true);
+        let elements;
+        if (frame.element.systemType() === Types.CompositeElement) {
+            elements = frame.element.children;
+        } else {
+            elements = [frame.element];
+        }
+        frame.elements = elements;
+        frame.snapshot = TransformationHelper.getPropSnapshot(elements);
 
-        Environment.view.interactionLayer.add(resizingElement);
-        Environment.controller.startRotatingEvent.raise({transformationElement: frame.resizingElement, handled: false});
+        Environment.controller.startRotatingEvent.raise({transformationElement: frame.element, handled: false});
+        if (frame.element.decorators) {
+            frame.element.decorators.forEach(x => x.visible(false));
+        }
     },
     release: function (frame, point, event) {
-        if (frame.resizingElement) {
-            frame.resizingElement.detach();
-            frame.resizingElement.saveChanges();
+        if (frame.element) {
+            var newSnapshot = TransformationHelper.getPropSnapshot(frame.elements);
+            TransformationHelper.applyPropSnapshot(frame.elements, frame.snapshot, ChangeMode.Self);
+            TransformationHelper.applyPropSnapshot(frame.elements, newSnapshot, ChangeMode.Model);
+            frame.element.clearSavedLayoutProps();
+            if (frame.element.decorators) {
+                frame.element.decorators.forEach(x => x.visible(true));
+            }
 
-            Environment.controller.stopRotatingEvent.raise({transformationElement: frame.resizingElement, handled: false});
+            Environment.controller.stopRotatingEvent.raise({transformationElement: frame.element, handled: false});
         }
     },
     change: function (frame, dx, dy, point, mousePoint, keys, event: IMouseEventData) {
-        if (!frame.resizingElement) {
+        if (!frame.element) {
             return;
         }
 
@@ -87,11 +101,11 @@ export default {
             angle = Math.round(angle);
         }
 
-        frame.resizingElement.applyRotation(angle, frame.origin, true);
+        frame.element.applyRotation(angle, frame.origin, true, ChangeMode.Self);
         Invalidate.requestInteractionOnly();
 
-        var newAngle = frame.resizingElement.angle();
-        Environment.controller.rotatingEvent.raise({element: frame.element, angle: newAngle, mouseX: mousePoint.x, mouseY: mousePoint.y, transformationElement: frame.resizingElement} as any);
+        var newAngle = frame.element.angle();
+        Environment.controller.rotatingEvent.raise({element: frame.element, angle: newAngle, mouseX: mousePoint.x, mouseY: mousePoint.y, transformationElement: frame.element} as any);
         event.cursor = this._getCursor(point, newAngle, frame.flipped);
     },
     _getCursor: function(point, angle, flipped){
