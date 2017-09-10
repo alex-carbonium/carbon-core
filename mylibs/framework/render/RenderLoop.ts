@@ -67,7 +67,7 @@ export default class RenderLoop implements IRenderLoop {
             this._view.gridContext = this._gridContext;
             this._view.contextScale = this._contextScale;
 
-            var controller = new DesignerController(app, this._view, { SelectComposite, DraggingElement, SelectFrame });
+            var controller = new DesignerController(app, this._view);
 
             Environment.set(this._view, controller);
             Clipboard.attach(app);

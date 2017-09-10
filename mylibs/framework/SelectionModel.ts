@@ -1,10 +1,12 @@
 import EventHelper from "./EventHelper";
 import SelectComposite from "./SelectComposite";
+import {SelectFrame} from "./SelectFrame";
 import { ViewTool } from "./Defs";
 import UserSettings from "../UserSettings";
 import Environment from "../environment";
-import { ISelection, IEvent, IEvent2, IUIElement, IComposite, IEvent3 } from "carbon-core";
+import { ISelection, IEvent, IEvent2, IUIElement, IComposite, IEvent3, SelectionMode, KeyboardState } from "carbon-core";
 import Rect from "../math/rect";
+import ArrayPool from "./ArrayPool";
 
 let debug = require("DebugUtil")("carb:selection");
 
@@ -58,15 +60,17 @@ function onselect(rect) {
 class SelectionModel implements ISelection {
     [name: string]: any;
     private _activeGroup: any;
-    private _previousElements = [];
+    private _previousElements: IUIElement[] = ArrayPool.EmptyArray;
+    private _selectionMode: SelectionMode = "new";
+    private _selectCompositeElement: SelectComposite;
+    private _selectFrame = new SelectFrame();
+    private _selectFrameStarted = false;
 
     modeChangedEvent: IEvent<boolean>;
     onElementSelected: IEvent3<IUIElement, IUIElement[], boolean>;
 
     constructor() {
-        this._selectionMode = "new";
-        this._selectFrame = null;
-        this._unlockedContainers = [];
+        this._unlockedContainers = ArrayPool.EmptyArray;
         this._activeGroup = null;
         this.onElementSelected = EventHelper.createEvent3<IUIElement, IUIElement[], boolean>();
         this.startSelectionFrameEvent = EventHelper.createEvent();
@@ -80,11 +84,11 @@ class SelectionModel implements ISelection {
         this._invertDirectSelection = false;
     }
 
-    get elements(): IUIElement[]{
+    get elements(): IUIElement[] {
         return this._selectCompositeElement.elements;
     }
 
-    get previousElements(): IUIElement[]{
+    get previousElements(): IUIElement[] {
         return this._previousElements;
     }
 
@@ -112,25 +116,21 @@ class SelectionModel implements ISelection {
         return this._directSelectionEnabled;
     }
 
-    setupSelectFrame(selectFrame, eventData) {
-        this._selectFrame = selectFrame;
+    startSelectFrame(eventData) {
+        this._selectFrameStarted = true;
         this.startSelectionFrameEvent.raise();
-        this.makeSelection([]);
         this._selectFrame.init(eventData);
     }
 
     updateSelectFrame(eventData) {
-        if (this.selectedElements.length) {
-            this.makeSelection([]);
-        }
         let rect = this._selectFrame.update(eventData);
         this.onSelectionFrameEvent.raise(rect);
     }
 
     completeSelectFrame(eventData) {
+        this._selectFrameStarted = false;
         this.stopSelectionFrameEvent.raise();
         this._selectFrame.complete(eventData);
-        this._selectFrame = null;
     }
 
     isElementSelected(el) {
@@ -159,140 +159,84 @@ class SelectionModel implements ISelection {
         return this._selectCompositeElement;
     }
 
-    selectionMode(value) {
-        if (arguments.length === 1) {
-            if (value !== "new" && value !== "add" && value !== "remove" && value !== 'add_or_replace') {
-                throw { name: "ArgumentException", message: "Incorrect selection mode specified" };
-            }
-            this._selectionMode = value;
-        }
-        return this._selectionMode;
-    }
-
-    addToSelection(/*Array*/elements:IUIElement[], refreshOnly:boolean) {
-        let multiSelect = elements.length > 1;
-        let selection = this._decomposeSelection(elements);
-
-        let canSelect = false;
-        for (let i = 0, j = selection.length; i < j; ++i) {
-            let element = selection[i];
-            if (element.canSelect() || element.runtimeProps.selectFromLayersPanel) {
-                this._selectCompositeElement.register(element, multiSelect, refreshOnly);
-                canSelect = true;
-            }
-        }
-
-        this.performArrange();
-
-        this._selectCompositeElement.selected(false);
-        if (canSelect) {
-            this._selectCompositeElement.selected(true);
-        }
-    }
-
-    performArrange() {
-        this._selectCompositeElement.performArrange();
-    }
-
-    getSelection() : IUIElement[] {
-        let selectedElement = this.selectedElement();
-        if (!selectedElement) {
-            return null;
-        }
-        return this._decomposeSelection([selectedElement]);
-    }
-
-    _decomposeSelection(selection) : IUIElement[] {
-        if (!selection) {
-            return [];
-        }
-
-        let newSelection = selection;
-
-        if (selection.length === 1) {
-            let selectedElement = selection[0];
-
-            if (selectedElement instanceof SelectComposite) {
-                newSelection = [];
-                selectedElement.each(function (element) {
-                    newSelection.push(element);
-                });
-            }
-        }
-        return newSelection;
+    getSelection(): IUIElement[] {
+        return this.elements;
     }
 
     selectedElements() {
         return this._selectCompositeElement.elements;
     }
 
-    makeSelection(selection, refreshOnly = false, doNotTrack = false) {
+    getSelectionMode(keys: KeyboardState, extended: boolean): SelectionMode {
+        if (extended) {
+            return keys.ctrlKey ? "add" : keys.shiftKey ? "toggle" : keys.altKey ? "remove" : "new";
+        }
+        return keys.shiftKey ? "toggle" : "new";
+    }
+
+    makeSelection(selection, mode: SelectionMode = "new", refreshOnly = false, doNotTrack = false) {
         let currentSelection = this._selectCompositeElement.elements;
 
-        let newSelection = this._decomposeSelection(selection);
-        if (this.areSameArrays(currentSelection, newSelection)) {
+        if (this.areSameArrays(currentSelection, selection) && (mode === "new" || mode === "add")) {
             return;
         }
 
-        if (this._selectionMode === "add_or_replace") {
-            if (!this.intersectArrays(currentSelection, newSelection)) {
-                this.unselectAll(refreshOnly);
-                currentSelection = [];
-            }
-            this._selectionMode = "add";
-        }
-
-
-        if (!selection || selection.length === 0) {
+        if (selection.length === 0) {
             this.unselectAll(refreshOnly);
         }
-        else if (this._selectionMode === "add") {
-            let alreadyAdded = false;
-            each(currentSelection, function (el1) {
-                each(newSelection, function (el2) {
-                    if (el1 === el2) {
-                        alreadyAdded = true;
-                        return;
+        else {
+            switch (mode) {
+                case "new":
+                    this.unselectAll(refreshOnly);
+                    this._selectCompositeElement.registerAll(selection);
+                    break;
+                case "add":
+                    this._selectCompositeElement.registerAll(selection);
+                    break;
+                case "toggle":
+                    for (let i = 0, j = selection.length; i < j; ++i) {
+                        let element = selection[i];
+                        if (this.isElementSelected(element)) {
+                            this._selectCompositeElement.unregister(element);
+                        }
+                        else {
+                            this._selectCompositeElement.register(element);
+                        }
                     }
-                });
-                if (alreadyAdded) {
-                    return;
-                }
-            });
-            if (alreadyAdded) {
-                return;
+                    break;
+                case "remove":
+                    for (let i = 0, j = selection.length; i < j; ++i) {
+                        let element = selection[i];
+                        if (this.isElementSelected(element)) {
+                            this._selectCompositeElement.unregister(element);
+                        }
+                    }
+                    break;
+                default:
+                    assertNever(mode);
             }
+        }
 
-            this.addToSelection(selection, refreshOnly);
-        }
-        else if (this._selectionMode === "new") {
-            this.unselectAll(refreshOnly);
-            this.addToSelection(selection, refreshOnly);
-        }
-        else if (this._selectionMode === "remove") {
-            this.unselectAll(refreshOnly);
-            this.removeGroupFromArray(currentSelection, newSelection);
-            this.addToSelection(currentSelection, refreshOnly);
-        }
+        this._selectCompositeElement.performArrange();
 
         if (!refreshOnly) {
             this._selectCompositeElement.ensureSorted();
-            this._fireOnElementSelected(currentSelection || [], doNotTrack);
+            this._fireOnElementSelected(currentSelection, doNotTrack);
         }
     }
 
     refreshSelection() {
         let selection = this.selectedElements();
-        this.makeSelection([], true);
-        this.makeSelection(selection, true);
+        this.makeSelection(ArrayPool.EmptyArray, "new", true);
+        this.makeSelection(selection, "new", true);
 
         lockUnlockGroups.call(this, selection);
     }
 
     reselect() {
         let selection = this.selectedElements();
-        this.makeSelection([], true);
-        this.makeSelection(selection, false, true);
+        this.makeSelection(ArrayPool.EmptyArray, "new", false, true);
+        this.makeSelection(selection, "new", false, true);
     }
 
     _fireOnElementSelected(oldSelection, doNotTrack = false) {
@@ -305,22 +249,14 @@ class SelectionModel implements ISelection {
             this._previousElements = this.elements;
         }
 
-        this._selectCompositeElement.selected(false);
         let count = this._selectCompositeElement.count();
-        this._selectCompositeElement.unregisterAll(refreshOnly);
+        this._selectCompositeElement.unregisterAll();
         return count !== 0;
-    }
-
-    unselectGroup(elements, refreshOnly) {
-        this.unselectAll(refreshOnly);
-        let currentSelection = this._selectCompositeElement.elements;
-        this.removeGroupFromArray(currentSelection, elements);
-        this.addToSelection(currentSelection, refreshOnly);
     }
 
     clearSelection() {
         if (this.unselectAll()) {
-            this._fireOnElementSelected([]);
+            this._fireOnElementSelected(ArrayPool.EmptyArray);
         }
     }
 
@@ -338,7 +274,7 @@ class SelectionModel implements ISelection {
             return;
         }
 
-        if (Environment.view.isolationLayer.isActive){
+        if (Environment.view.isolationLayer.isActive) {
             this.makeSelection(Environment.view.isolationLayer.children);
             return;
         }
@@ -354,7 +290,7 @@ class SelectionModel implements ISelection {
     }
 
     hasSelectionFrame() {
-        return !!this._selectFrame;
+        return this._selectFrameStarted;
     }
 
     lock() {
@@ -365,7 +301,7 @@ class SelectionModel implements ISelection {
                 e.locked(true);
             }
         }
-        this._selectCompositeElement.selected(false);
+        this._selectCompositeElement.showActiveFrame(false);
     }
     unlock() {
         let elements = this.selectedElements();
@@ -375,8 +311,7 @@ class SelectionModel implements ISelection {
                 e.locked(false);
             }
         }
-        this._selectCompositeElement.selected(false);
-        this._selectCompositeElement.selected(true);
+        this._selectCompositeElement.showActiveFrame(true);
     }
     hide() {
         let elements = this.selectedElements();
@@ -386,7 +321,7 @@ class SelectionModel implements ISelection {
                 e.visible(false);
             }
         }
-        this._selectCompositeElement.selected(false);
+        this._selectCompositeElement.showActiveFrame(false);
     }
     show() {
         let elements = this.selectedElements();
@@ -396,41 +331,28 @@ class SelectionModel implements ISelection {
                 e.visible(true);
             }
         }
-        this._selectCompositeElement.selected(false);
-        this._selectCompositeElement.selected(true);
+        this._selectCompositeElement.showActiveFrame(true);
     }
 
     hideFrame() {
-        this._selectCompositeElement.selected(false);
+        this._selectCompositeElement.showActiveFrame(false);
     }
 
-    private removeGroupFromArray(array, group){
-        for(let i = 0; i < group.length; ++i){
-            let idx = array.indexOf(group[i]);
-            if(idx !== -1) {
-                array.splice(idx, 1);
-            }
-        }
-    }
-
-    private areSameArrays(array1, array2){
-        if (!array1 || !array2){
-            return false;
-        }
-        if (array1.length !== array2.length){
+    private areSameArrays(array1, array2) {
+        if (array1.length !== array2.length) {
             return false;
         }
         for (let i = 0, j = array1.length; i < j; ++i) {
-            if(array1[i] !== array2[i]){
+            if (array1[i] !== array2[i]) {
                 return false;
             }
         }
         return true;
     }
 
-    private intersectArrays(array1, array2){
-        for(let i = 0; i < array2.length; ++i){
-            if(array1.indexOf(array2[i]) === -1){
+    private intersectArrays(array1, array2) {
+        for (let i = 0; i < array2.length; ++i) {
+            if (array1.indexOf(array2[i]) === -1) {
                 return false;
             }
         }

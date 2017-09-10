@@ -84,7 +84,7 @@ export default class RulerGuides {
         return false;
     }
     canCapture(): boolean {
-        return Keyboard.state.ctrl || this._app.currentTool === ViewTool.Pointer || this._app.currentTool === ViewTool.PointerDirect;
+        return Keyboard.state.ctrlKey || this._app.currentTool === ViewTool.Pointer || this._app.currentTool === ViewTool.PointerDirect;
     }
 
     onDragSearching = (e: IMouseEventData) => {
@@ -243,7 +243,7 @@ export default class RulerGuides {
             return;
         }
 
-        var react = Keyboard.state.ctrl;
+        var react = Keyboard.state.ctrlKey;
 
         if (!react) {
             let x = Math.round(e.x - this._origin.x());

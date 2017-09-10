@@ -145,7 +145,7 @@ export default class Rect implements IRect, IPooledObject {
         return this.y + this.height / 2;
     }
 
-    origin(origin: OriginType): Point {
+    origin(origin: OriginType): Readonly<Point> {
         switch (origin) {
             case OriginType.Center:
                 return this.center();
@@ -162,7 +162,7 @@ export default class Rect implements IRect, IPooledObject {
         return this.y + this.height;
     }
 
-    topLeft(): Point {
+    topLeft(): Readonly<Point> {
         if (this.x === 0 && this.y === 0) {
             return Point.Zero;
         }

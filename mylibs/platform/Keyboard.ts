@@ -1,12 +1,12 @@
 import EventHelper from "../framework/EventHelper";
-import { IKeyboardState, IEvent2 } from "carbon-core";
+import { KeyboardState, IEvent2 } from "carbon-core";
 
 class Keyboard {
-    state: IKeyboardState;
+    state: KeyboardState;
     changed: any;
 
     constructor() {
-        this.state = { ctrl: false, shift: false, alt: false };
+        this.state = { ctrlKey: false, shiftKey: false, altKey: false };
         this.changed = EventHelper.createEvent();
     }
     attach(element) {
@@ -21,9 +21,9 @@ class Keyboard {
         this._change(false, false, false);
     }
 
-    _change(ctrl, shift, alt) {
-        if (ctrl !== this.state.ctrl || alt !== this.state.alt || shift !== this.state.shift) {
-            var newState = { ctrl, alt, shift };
+    _change(ctrlKey, shiftKey, altKey) {
+        if (ctrlKey !== this.state.ctrlKey || altKey !== this.state.altKey || shiftKey !== this.state.shiftKey) {
+            var newState = { ctrlKey, altKey, shiftKey };
             var oldState = this.state;
             this.state = newState;
             this.changed.raise(newState, oldState);

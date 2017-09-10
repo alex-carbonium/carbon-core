@@ -1,5 +1,5 @@
 import Matrix from "../math/matrix";
-import { IContainer, IDataNodeProps, IMatrix, IPoint, IRect, ISize, IUIElement, IUIElementProps, IConstraints, IContext, IContainerProps, IDataNode, IMouseEventData, IKeyboardState } from "carbon-core";
+import { IContainer, IDataNodeProps, IMatrix, IPoint, IRect, ISize, IUIElement, IUIElementProps, IConstraints, IContext, IContainerProps, IDataNode, IMouseEventData, KeyboardState } from "carbon-core";
 import { emptyUuid } from "../util";
 import DataNode from "./DataNode";
 import Rect from "../math/rect";
@@ -24,6 +24,12 @@ class NullContainer extends DataNode implements IContainer {
     removeAllDecorators(): any[] { return null; }
     removeDecoratorByType(type) { }
 
+    isDescendantOrSame(el) {
+        return false;
+    }
+    select(){}
+    unselect(){}
+
     performArrange() { }
     applyVisitorTLR(callback:(e:IUIElement)=>boolean|void) {}
     allowRearrange() { return false; }
@@ -32,9 +38,9 @@ class NullContainer extends DataNode implements IContainer {
         return false;
     }
 
-    mousemove(event: IMouseEventData, keys: IKeyboardState) { }
-    mouseup(event: IMouseEventData, keys: IKeyboardState) { }
-    mousedown(event: IMouseEventData, keys: IKeyboardState) { }
+    mousemove(event: IMouseEventData, keys: KeyboardState) { }
+    mouseup(event: IMouseEventData, keys: KeyboardState) { }
+    mousedown(event: IMouseEventData, keys: KeyboardState) { }
     dblclick(event: IMouseEventData, scale: number) { }
     click(event: IMouseEventData) { }
 

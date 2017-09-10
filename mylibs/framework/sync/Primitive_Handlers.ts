@@ -7,6 +7,7 @@ import Environment from "environment";
 import AnimationGroup from "framework/animation/AnimationGroup";
 import backend from "backend";
 import { PrimitiveType, IPrimitive, IDataNode, ChangeMode } from "carbon-core";
+import ArrayPool from "../ArrayPool";
 
 var debug = require("DebugUtil")("carb:primitiveHandlers");
 
@@ -66,7 +67,7 @@ handlers.registerHandler(PrimitiveType.DataNodeRemove, function (container, p) {
     var element = container.getImmediateChildById(p.childId);
     if (element) {
         if (Selection.isElementSelected(element)) {
-            Selection.unselectGroup([element], true);
+            Selection.makeSelection([element], "remove");
         }
         container.remove(element, ChangeMode.Self);
     }
@@ -96,7 +97,7 @@ handlers.registerHandler(PrimitiveType.Selection, function (page, p) {
         return map;
     }, {})
     if (!selection.length) {
-        Selection.makeSelection([], false, true);
+        Selection.makeSelection(ArrayPool.EmptyArray, "new", false, true);
     } else {
         var elements = [];
         page.applyVisitor(e => {
@@ -108,7 +109,7 @@ handlers.registerHandler(PrimitiveType.Selection, function (page, p) {
             }
         })
 
-        Selection.makeSelection(elements, false, true);
+        Selection.makeSelection(elements, "new", false, true);
     }
 });
 

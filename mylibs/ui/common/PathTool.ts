@@ -10,7 +10,7 @@ import { ViewTool } from "../../framework/Defs";
 import SnapController from "../../framework/SnapController";
 import Environment from "../../environment";
 import UserSettings from "UserSettings";
-import { IKeyboardState, IMouseEventData, IContext, ElementState, ICoordinate, ChangeMode } from "carbon-core";
+import { KeyboardState, IMouseEventData, IContext, ElementState, ICoordinate, ChangeMode } from "carbon-core";
 import { IPathPoint } from "carbon-geometry";
 import Cursors from "Cursors";
 import PathManipulationDecorator from "ui/common/path/PathManipulationDecorator";
@@ -98,7 +98,7 @@ export default class PathTool extends Tool {
         }
     }
 
-    mousedown(event: IMouseEventData, keys: IKeyboardState) {
+    mousedown(event: IMouseEventData, keys: KeyboardState) {
         if (this._pathElement.runtimeProps.inserted && (!this._pathElement.parent() || this._pathElement.parent() === NullContainer)) {
             this._createNewPath();
         }

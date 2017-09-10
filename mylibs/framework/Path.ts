@@ -17,7 +17,7 @@ import Box from "framework/Box";
 import { debounce } from "util";
 import { Types } from "framework/Defs";
 import ResizeOptions from "decorators/ResizeOptions";
-import { IMouseEventData, IKeyboardState, ChangeMode, IIntersectionRange, ResizeDimension, LayerTypes, IContainerProps, PointType, IPathPoint, IUIElementProps, ElementState } from "carbon-core";
+import { IMouseEventData, KeyboardState, ChangeMode, IIntersectionRange, ResizeDimension, LayerTypes, IContainerProps, PointType, IPathPoint, IUIElementProps, ElementState } from "carbon-core";
 import UserSettings from "UserSettings";
 import Cursors from "Cursors";
 import PathManipulationDecorator from "ui/common/path/PathManipulationDecorator";
@@ -509,8 +509,10 @@ class Path extends Shape {
         return this.points.length;
     }
 
-    select() {
-        this._enterBinding = Environment.controller.actionManager.subscribe('enter', this.enter.bind(this));
+    select(multiSelect?: boolean) {
+        if (!multiSelect) {
+            this._enterBinding = Environment.controller.actionManager.subscribe('enter', this.enter.bind(this));
+        }
     }
 
     unselect() {

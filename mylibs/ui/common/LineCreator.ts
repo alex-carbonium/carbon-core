@@ -10,7 +10,7 @@ import Brush from "../../framework/Brush";
 import Point from "../../math/point";
 import Environment from "../../environment";
 import UserSettings from "UserSettings";
-import { IKeyboardState, IMouseEventData, ICoordinate } from "carbon-core";
+import { KeyboardState, IMouseEventData, ICoordinate } from "carbon-core";
 import Cursors from "Cursors";
 
 function update(x1, y1, x2, y2) {
@@ -49,7 +49,7 @@ export default class LineCreator extends Tool {
         super.detach.apply(this, arguments);
         SnapController.clearActiveSnapLines();
     }
-    mousedown(event: IMouseEventData, keys: IKeyboardState) {
+    mousedown(event: IMouseEventData, keys: KeyboardState) {
         var eventData = { handled: false, x: event.x, y: event.y };
         Environment.controller.startDrawingEvent.raise(eventData);
         if (eventData.handled) {
@@ -58,7 +58,7 @@ export default class LineCreator extends Tool {
 
         this._mousepressed = true;
 
-        if (keys.ctrl) {
+        if (keys.ctrlKey) {
             var pos:ICoordinate = event;
         }
         else {
@@ -101,7 +101,7 @@ export default class LineCreator extends Tool {
             App.Current.resetCurrentTool();
         }
     }
-    mousemove(event: IMouseEventData, keys: IKeyboardState) {
+    mousemove(event: IMouseEventData, keys: KeyboardState) {
         super.mousemove(event, keys);
 
         if (event.cursor !== Cursors.Pen.MovePoint){
@@ -116,7 +116,7 @@ export default class LineCreator extends Tool {
             }
         }
 
-        if (keys.ctrl) {
+        if (keys.ctrlKey) {
             var pos:ICoordinate = event;
         }
         else {
@@ -126,7 +126,7 @@ export default class LineCreator extends Tool {
         if (this._mousepressed) {
             var x = pos.x,
                 y = pos.y;
-            if (keys.shift) {
+            if (keys.shiftKey) {
                 var point = angleAdjuster.adjust(this._startPoint, { x: x, y: y });
                 x = point.x;
                 y = point.y;

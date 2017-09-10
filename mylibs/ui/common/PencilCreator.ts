@@ -6,7 +6,7 @@ import Point from "../../math/point";
 import Path from "framework/Path";
 import Environment from "../../environment";
 import Tool from "./Tool";
-import {IKeyboardState, IMouseEventData} from "carbon-core";
+import {KeyboardState, IMouseEventData} from "carbon-core";
 
 var Line = function (p1, p2) {
     return {
@@ -135,7 +135,7 @@ export default class PencilCreator extends Tool {
             App.Current.resetCurrentTool();
         }
     }
-    mousemove(event: IMouseEventData, keys: IKeyboardState) {
+    mousemove(event: IMouseEventData, keys: KeyboardState) {
         super.mousemove(event, keys);
 
         if (this._mousepressed) {

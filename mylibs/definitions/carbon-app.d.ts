@@ -1,6 +1,6 @@
 declare module "carbon-app" {
     import { IDataNode, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IElementEventData, IIsolatable, IMouseEventHandler, IContainerProps } from "carbon-model";
-    import { IEvent, IEventData, IEvent2, IMouseEventData, IKeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable, IJsonNode, IPrimitive, ArtboardType, FontStyle, FontWeight } from "carbon-basics";
+    import { IEvent, IEventData, IEvent2, IMouseEventData, KeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable, IJsonNode, IPrimitive, ArtboardType, FontStyle, FontWeight } from "carbon-basics";
     import { IRect, ICoordinate, ISize } from "carbon-geometry";
     import { IContext, IContextPool } from "carbon-rendering";
 
@@ -265,12 +265,12 @@ declare module "carbon-app" {
 
     export interface IDropElementData{
         e: MouseEvent;
-        keys: IKeyboardState;
+        keys: KeyboardState;
         elements: IUIElement[];
     }
 
     export interface IController {
-        onmousemove(eventData: IMouseEventData, keys: IKeyboardState);
+        onmousemove(eventData: IMouseEventData, keys: KeyboardState);
 
         draggingEvent: IEvent<ITransformationEventData>;
         startResizingEvent: IEvent<ITransformationEventData>;
@@ -283,16 +283,16 @@ declare module "carbon-app" {
 
         onArtboardChanged: IEvent2<IArtboard, IArtboard>;
 
-        clickEvent: IEvent2<IMouseEventData, IKeyboardState>;
-        dblclickEvent: IEvent2<IMouseEventData, IKeyboardState>;
-        mousedownEvent: IEvent2<IMouseEventData, IKeyboardState>;
-        mouseupEvent: IEvent2<IMouseEventData, IKeyboardState>;
-        mousemoveEvent: IEvent2<IMouseEventData, IKeyboardState>;
+        clickEvent: IEvent2<IMouseEventData, KeyboardState>;
+        dblclickEvent: IEvent2<IMouseEventData, KeyboardState>;
+        mousedownEvent: IEvent2<IMouseEventData, KeyboardState>;
+        mouseupEvent: IEvent2<IMouseEventData, KeyboardState>;
+        mousemoveEvent: IEvent2<IMouseEventData, KeyboardState>;
 
-        onElementDblClicked: IEvent2<IElementEventData, IKeyboardState>;
+        onElementDblClicked: IEvent2<IElementEventData, KeyboardState>;
 
-        startDraggingEvent: IEvent2<IMouseEventData, IKeyboardState>;
-        stopDraggingEvent: IEvent2<IMouseEventData, IKeyboardState>;
+        startDraggingEvent: IEvent2<IMouseEventData, KeyboardState>;
+        stopDraggingEvent: IEvent2<IMouseEventData, KeyboardState>;
 
         inlineEditModeChanged: IEvent2<boolean, any>;
 
@@ -307,12 +307,11 @@ declare module "carbon-app" {
         captureMouse(element: IMouseEventHandler): void;
         releaseMouse(element: IMouseEventHandler): void;
 
-        keyboardStateFromEvent(e: MouseEvent, mutableState?: IKeyboardState): IKeyboardState;
         beginDragElement(e: MouseEvent, element: IUIElement, dropPromise: Promise<IDropElementData>);
         choosePasteLocation(elements: IUIElement[], allowMoveIn?: boolean): {parent: IContainer, x: number, y: number}
         insertAndSelect(element: IUIElement[], parent: IContainer, x: number, y: number);
         getCurrentlyDraggedElements(): IUIElement[];
-        getCurrentDropTarget(eventData: IMouseEventData, keys: IKeyboardState): IContainer | null;
+        getCurrentDropTarget(eventData: IMouseEventData, keys: KeyboardState): IContainer | null;
     }
 
     //TODO: rename to Workspace
@@ -455,17 +454,20 @@ declare module "carbon-app" {
         updateDisplayProps(changes);
     }
 
+    export type SelectionMode = "new" | "add" | "toggle" | "remove";
+
     export interface ISelection{
         elements: IUIElement[];
         previousElements: IUIElement[];
 
-        makeSelection(elements: IUIElement[]);
+        makeSelection(elements: IUIElement[], mode?: SelectionMode);
+        getSelectionMode(keys: KeyboardState, extended: boolean): SelectionMode;
+
         selectComposite(): ISelectComposite;
         clearSelection();
         refreshSelection();
 
         isElementSelected(element: IUIElement): boolean;
-        selectionMode(mode?: string): string;
 
         lock();
         unlock();

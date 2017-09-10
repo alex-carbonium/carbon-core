@@ -9,7 +9,7 @@ import ObjectFactory from "../../framework/ObjectFactory";
 import {ViewTool} from "../../framework/Defs";
 import Rect from "../../math/rect";
 import Point from "../../math/point";
-import { IKeyboardState, IMouseEventData, IArtboard } from "carbon-core";
+import { KeyboardState, IMouseEventData, IArtboard } from "carbon-core";
 import Cursors from "Cursors";
 
 export default class ArtboardsTool extends Tool {
@@ -67,7 +67,7 @@ export default class ArtboardsTool extends Tool {
         }
     }
 
-    mousedown(event: IMouseEventData, keys: IKeyboardState) {
+    mousedown(event: IMouseEventData, keys: KeyboardState) {
         this._cursorNotMoved = true;
 
         var artboard = this._app.activePage.getArtboardAtPoint(event);
@@ -101,7 +101,7 @@ export default class ArtboardsTool extends Tool {
         return false;
     }
 
-    mouseup(event: IMouseEventData, keys: IKeyboardState) {
+    mouseup(event: IMouseEventData, keys: KeyboardState) {
         this._mousepressed = false;
         this._ratioResizeInfo = null;
 
@@ -125,7 +125,7 @@ export default class ArtboardsTool extends Tool {
         }
     }
 
-    mousemove(event: IMouseEventData, keys: IKeyboardState) {
+    mousemove(event: IMouseEventData, keys: KeyboardState) {
         if (event.cursor){ //active frame
             return true;
         }
@@ -146,7 +146,7 @@ export default class ArtboardsTool extends Tool {
                 this._cursorNotMoved = (this._point.y === this._startPoint.y) && (this._point.x === this._startPoint.x);
             }
             //if use holds shift, we must fit shape into square
-            if (keys.shift) {
+            if (keys.shiftKey) {
                 var height = Math.abs(this._point.y - this._startPoint.y);
                 var width = Math.abs(this._point.x - this._startPoint.x);
                 var ration = Math.min(height, width);
@@ -165,32 +165,26 @@ export default class ArtboardsTool extends Tool {
         }
     }
 
-    click(event: IMouseEventData, keys: IKeyboardState){
+    click(event: IMouseEventData, keys: KeyboardState){
         this._selectByClick(event, keys);
 
         event.handled = true;
     }
 
-    _selectByClick(event: IMouseEventData, keys: IKeyboardState){
+    _selectByClick(event: IMouseEventData, keys: KeyboardState){
         var artboard = this._app.activePage.getArtboardAtPoint(event);
 
         if (artboard !== null) {
-            var addToSelection = keys.shift;
-            if (addToSelection) {
-                Selection.selectionMode("add");
-            }
-            Selection.makeSelection([artboard]);
-            if (addToSelection) {
-                Selection.selectionMode("new");
-            }
+            let mode = Selection.getSelectionMode(event, false);
+            Selection.makeSelection([artboard], mode);
 
             event.cursor = Cursors.Move;
         }
     }
 
-    _prepareMousePoint(event: IMouseEventData, keys: IKeyboardState) {
+    _prepareMousePoint(event: IMouseEventData, keys: KeyboardState) {
         this._point.set(event.x, event.y);
-        if (!keys.ctrl) {
+        if (!keys.ctrlKey) {
             var snapped = SnapController.applySnappingForPoint(this._point);
             if (snapped !== this._point) {
                 this._point.set(snapped.x, snapped.y);

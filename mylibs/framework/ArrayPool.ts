@@ -1,7 +1,7 @@
 export default class ArrayPool {
     private static objects: any[][] = new Array(50);
 
-    public static EmptyArray = Object.freeze([]);
+    public static EmptyArray = Object.freeze([]) as any[];
 
     static allocate<T = any>(): T[] {
         for (let i = 0; i < ArrayPool.objects.length; i++) {

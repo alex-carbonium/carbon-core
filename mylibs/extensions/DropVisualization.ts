@@ -12,7 +12,7 @@ import Layer from "framework/Layer";
 import Container from "../framework/Container";
 import Environment from "../environment";
 import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
-import { ITransformationElement, ITransformationEventData, IPoint, IKeyboardState } from "carbon-core";
+import { ITransformationElement, ITransformationEventData, IPoint, KeyboardState } from "carbon-core";
 import UserSettings from "../UserSettings";
 import Point from "../math/point";
 import Matrix from "../math/matrix";
@@ -225,14 +225,14 @@ class SelectionRect extends UIElement {
     }
 }
 
-var onDraggingElement = function (event: any, keys: IKeyboardState) {
+var onDraggingElement = function (event: any, keys: KeyboardState) {
     if (event.transformationElement.showResizeHint()) {
         this._hint.updatePositionText();
     }
 
     if (event.transformationElement.isDropSupported()
         && event.target !== null
-        && event.target.canAccept(event.draggingElement.elements, false, keys.ctrl)
+        && event.target.canAccept(event.draggingElement.elements, false, keys.ctrlKey)
         && !(event.target instanceof Layer)
         && event.transformationElement.allHaveSameParent()
     ) {

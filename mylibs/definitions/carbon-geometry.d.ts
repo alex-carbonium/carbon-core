@@ -53,10 +53,15 @@ declare module "carbon-geometry" {
         centerX(): number;
         centerY(): number;
 
+        updateFromPointsMutable(p1: IPoint, p2: IPoint);
+        roundMutable();
+
         withWidth(width: number): IRect;
         withHeight(width: number): IRect;
         withSize(width: number, height: number): IRect;
         clone(): IRect;
+
+        reset(): void;
 
         containsPoint(point: IPoint): boolean;
     }

@@ -11,7 +11,7 @@ import Rect from "../math/rect";
 import Matrix from "../math/matrix";
 import Environment from "../environment";
 import Selection from "./SelectionModel";
-import { IUIElementProps, IPoint, IRect, IComposite, ChangeMode, PatchType } from "carbon-core";
+import { IUIElementProps, IPoint, IRect, IComposite, ChangeMode, PatchType, ICoordinate } from "carbon-core";
 import CommonPropsManager from "./CommonPropsManager";
 
 export default class CompositeElement extends UIElement implements IComposite {
@@ -33,7 +33,7 @@ export default class CompositeElement extends UIElement implements IComposite {
     }
 
     get elements(): UIElement[] {
-        return this.children as any;
+        return this.children;
     }
 
     contains(element) {
@@ -66,7 +66,9 @@ export default class CompositeElement extends UIElement implements IComposite {
             }
         }
 
-        this.children.splice(i, 1);
+        if (elementIndex !== -1) {
+            this.children.splice(elementIndex, 1);
+        }
 
         if (canRemoveType) {
             this._types.splice(this._types.indexOf(systemType), 1);
@@ -93,28 +95,26 @@ export default class CompositeElement extends UIElement implements IComposite {
     }
 
     performArrange() {
-        if (this.elements.length > 1) {
-            this.resetTransform();
+        this.resetTransform();
 
-            var items = this.children;
-            var xMax = Number.NEGATIVE_INFINITY;
-            var yMax = Number.NEGATIVE_INFINITY;
-            var xMin = Number.POSITIVE_INFINITY;
-            var yMin = Number.POSITIVE_INFINITY;
+        var items = this.children;
+        var xMax = Number.NEGATIVE_INFINITY;
+        var yMax = Number.NEGATIVE_INFINITY;
+        var xMin = Number.POSITIVE_INFINITY;
+        var yMin = Number.POSITIVE_INFINITY;
 
-            for (let i = 0, l = items.length; i < l; ++i) {
-                let child = items[i];
-                let bb = child.getBoundingBoxGlobal();
-                xMax = Math.max(xMax, bb.x + bb.width);
-                xMin = Math.min(xMin, bb.x);
-                yMax = Math.max(yMax, bb.y + bb.height);
-                yMin = Math.min(yMin, bb.y);
-            }
-
-            var w = xMax - xMin;
-            var h = yMax - yMin;
-            this.prepareAndSetProps({ br: new Rect(0, 0, w, h), m: new Matrix(1, 0, 0, 1, xMin, yMin) });
+        for (let i = 0, l = items.length; i < l; ++i) {
+            let child = items[i];
+            let bb = child.getBoundingBoxGlobal();
+            xMax = Math.max(xMax, bb.x + bb.width);
+            xMin = Math.min(xMin, bb.x);
+            yMax = Math.max(yMax, bb.y + bb.height);
+            yMin = Math.min(yMin, bb.y);
         }
+
+        var w = xMax - xMin;
+        var h = yMax - yMin;
+        this.prepareAndSetProps({ br: new Rect(0, 0, w, h), m: new Matrix(1, 0, 0, 1, xMin, yMin) });
     }
 
     draw(context, environment) {
@@ -259,7 +259,7 @@ export default class CompositeElement extends UIElement implements IComposite {
         }
     }
 
-    hitTest(point: IPoint, scale: number, boundaryRectOnly: boolean = false) {
+    hitTest(point: ICoordinate, scale: number, boundaryRectOnly: boolean = false) {
         var count = this.count();
         if (count === 0) {
             return false;
