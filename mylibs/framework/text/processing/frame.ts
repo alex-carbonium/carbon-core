@@ -98,11 +98,11 @@ import {inherit} from "../util/util"
                 var absHeight = b.t+b.h;
 
                 for (var i = this.lines.length-1; i >= 0; i--) {
-                    var line = this.lines[i];    
+                    var line = this.lines[i];
                     var maxy = line.maxY;
                     if (Number.isNaN(maxy)) {
                         console.log()
-                    } else 
+                    } else
                     if (maxy !== -Number.MAX_VALUE) {
                         this._bottomMargin = absHeight - line.baseline - maxy;
                         break;
@@ -143,6 +143,22 @@ import {inherit} from "../util/util"
             this._actualWidth = result;
         }
         return this._actualWidth;
+    };
+    Frame.prototype.actualWidthWithoutWrap = function() {
+        let result = 0;
+        let lineWidth = 0;
+        for (let i = 0; i < this.lines.length; ++i){
+            let line = this.lines[i];
+
+            lineWidth += line.actualWidth;
+            if (line.isWrapped()) {
+                continue;
+            }
+
+            result = Math.max(result, lineWidth);
+            lineWidth = 0;
+        }
+        return result;
     };
 
     Frame.prototype.children = function() {

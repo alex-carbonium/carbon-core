@@ -388,6 +388,7 @@ const EmptyContents = [];
         }
         this._width = width;
     };
+
     Doc.prototype.children = function() {
         if (!this.frame) {
             return [];
