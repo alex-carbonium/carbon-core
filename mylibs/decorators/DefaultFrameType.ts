@@ -106,6 +106,12 @@ export default {
             frame.keyboardToken = null;
         }
         SnapController.clearActiveSnapLines();
+
+        delete frame._mousePoint;
+        delete frame._capturedPt;
+        delete frame._offsetPt;
+        delete frame.globalViewMatrixInverted;
+        delete frame.globalViewMatrix;
     },
 
     draw: function (frame, context, currentPoint) {

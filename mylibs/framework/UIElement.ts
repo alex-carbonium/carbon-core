@@ -409,7 +409,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             newHeight = Math.round(newHeight);
         }
 
-        let localOrigin = this.viewMatrixInverted().transformPoint(o);
+        let localOrigin = this.globalViewMatrixInverted().transformPoint(o);
         let newX = s.x * br.x;
         let newY = s.y * br.y;
         if (options && options.round) {

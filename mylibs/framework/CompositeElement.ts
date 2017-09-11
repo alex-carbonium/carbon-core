@@ -163,6 +163,11 @@ export default class CompositeElement extends UIElement implements IComposite {
         return super.globalViewMatrix();
     }
 
+    clearSavedLayoutProps() {
+        super.clearSavedLayoutProps();
+        this.elements.forEach(e=>e.clearSavedLayoutProps());
+    }
+
     width() {
         if (this.count() === 1) {
             return this.elements[0].width();

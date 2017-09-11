@@ -44,6 +44,7 @@ class DraggingElement extends CompositeElement {
             this.register(e);
             this.saveDecorators(e);
         }
+
         this.saveDecorators(elementOrComposite);
 
         this.performArrange();
@@ -66,7 +67,7 @@ class DraggingElement extends CompositeElement {
 
         this._propSnapshot = this.getPropSnapshot();
 
-        this.altChanged(event.event.altKey);// it will also update snapping
+        this.altChanged(event.event.altKey); // it will also update snapping
     }
 
     wrapSingleChild() {

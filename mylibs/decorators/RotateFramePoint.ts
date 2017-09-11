@@ -51,6 +51,7 @@ export default {
     capture: function (frame, point, mousePoint) {
         frame.originalRect = frame.element.boundaryRect();
         frame.origin = frame.element.center(true);
+        frame.localOrigin = frame.element.center(false);
         frame.captureVector = new Point(mousePoint.x - frame.origin.x, mousePoint.y - frame.origin.y);
         frame.initialAngle = frame.element.angle();
         if (frame.initialAngle < 0){
@@ -101,7 +102,7 @@ export default {
             angle = Math.round(angle);
         }
 
-        frame.element.applyRotation(angle, frame.origin, true, ChangeMode.Self);
+        frame.element.applyRotation(angle, frame.localOrigin, true, ChangeMode.Self);
         Invalidate.requestInteractionOnly();
 
         var newAngle = frame.element.angle();

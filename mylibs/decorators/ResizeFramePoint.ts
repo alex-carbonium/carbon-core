@@ -81,6 +81,7 @@ export default {
             if (frame.element.decorators) {
                 frame.element.decorators.forEach(x => x.visible(true));
             }
+            frame.element.resetGlobalViewCache();
         }
     },
     rotateCursorPointer: function (index, angle) {
@@ -116,7 +117,7 @@ export default {
         dx *= rv[0];
         dy *= rv[1];
 
-        var origin;       
+        var origin;
         if (keys.altKey){
             origin = frame.centerOrigin;
             dx *= 2;
