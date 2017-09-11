@@ -114,7 +114,7 @@ export default {
         delete frame.globalViewMatrix;
     },
 
-    draw: function (frame, context, currentPoint) {
+    draw: function (frame, context, currentPoint?) {
         var scale = Environment.view.scale();
 
         context.save();

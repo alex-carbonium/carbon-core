@@ -33,15 +33,11 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
             || textChanges.wrap !== this.props.wrap
             || textChanges.font !== this.props.font;
 
-        let isStretchConstraint = textChanges.constraints.h === HorizontalConstraint.LeftRight || textChanges.constraints.v === VerticalConstraint.TopBottom;
-        if (textChanges.mode === TextMode.Label && isStretchConstraint) {
-            textChanges.mode = TextMode.Block;
-        }
-
         if (contentAffected || textChanges.br !== this.props.br) {
             if (textChanges.mode === TextMode.Label) {
                 if (textChanges.br.height !== this.props.br.height) {
                     this.fitFontSizeToHeight(textChanges);
+                    contentAffected = contentAffected || textChanges.font !== this.props.font;
                 }
                 else {
                     this.fitBrToFont(textChanges);
@@ -52,7 +48,7 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
             }
 
             if (contentAffected) {
-                this.adjustWithConstraints(textChanges);
+                this.adjustByFontAlign(textChanges);
             }
         }
 
@@ -78,6 +74,7 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
             || newProps.font !== undefined
             || newProps.content !== undefined
             || newProps.visible !== undefined
+            || newProps.wrap !== undefined
         ) {
             if (!this.runtimeProps.editing) {
                 delete this.runtimeProps.engine;
@@ -95,11 +92,6 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
 
         if (newProps.mode !== oldProps.mode && Selection.isOnlyElementSelected(this)) {
             Selection.refreshSelection();
-        }
-    }
-    rangeFontChanged(rangeFont: Font) {
-        if (this.props.mode === TextMode.Label && (rangeFont.align !== TextAlign.left || rangeFont.valign !== TextAlign.top)) {
-            this.setProps({ mode: TextMode.Block });
         }
     }
 
@@ -137,20 +129,20 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
     }
 
     private prepareTextMode(textChanges: TextChanges) {
-        if (textChanges.wrap && textChanges.wrap !== this.props.wrap) {
+        let isStretchConstraint = textChanges.constraints.h === HorizontalConstraint.LeftRight || textChanges.constraints.v === VerticalConstraint.TopBottom;
+        if (textChanges.mode === TextMode.Label && isStretchConstraint) {
             textChanges.mode = TextMode.Block;
         }
 
-        let fontAlignChanged = textChanges.font.align !== TextAlign.left || textChanges.font.valign !== TextAlign.top;
-        if (textChanges.font !== this.props.font && fontAlignChanged) {
+        if (textChanges.wrap && textChanges.wrap !== this.props.wrap) {
             textChanges.mode = TextMode.Block;
         }
 
         if (textChanges.mode === TextMode.Label) {
             textChanges.wrap = false;
-            if (fontAlignChanged) {
-                textChanges.font = Font.extend(textChanges.font, { align: TextAlign.left, valign: TextAlign.top });
-            }
+        }
+        else if (textChanges.mode !== this.props.mode && textChanges.wrap === this.props.wrap) {
+            textChanges.wrap = true;
         }
     }
 
@@ -280,25 +272,28 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
         textChanges.br = br.withSize(newWidth, newHeight);
     }
 
-    private adjustWithConstraints(textChanges: TextChanges) {
+    private adjustByFontAlign(textChanges: TextChanges) {
         if (textChanges.br === this.props.br) {
             return;
         }
 
-        var constraints = this.constraints();
         var dx = 0;
         var dy = 0;
 
-        if (constraints.h === HorizontalConstraint.Right) {
-            dx = this.props.br.width - textChanges.br.width;
-        } else if (constraints.h === HorizontalConstraint.Center) {
-            dx = (this.props.br.width - textChanges.br.width) / 2;
+        if (textChanges.constraints.h !== HorizontalConstraint.LeftRight) {
+            if (textChanges.font.align === TextAlign.right) {
+                dx = this.props.br.width - textChanges.br.width;
+            } else if (textChanges.font.align === TextAlign.center) {
+                dx = (this.props.br.width - textChanges.br.width) / 2;
+            }
         }
 
-        if (constraints.v === VerticalConstraint.Bottom) {
-            dy = this.props.br.height - textChanges.br.height;
-        } else if (constraints.v === VerticalConstraint.Center) {
-            dy = (this.props.br.height - textChanges.br.height) / 2;
+        if (textChanges.constraints.v !== VerticalConstraint.TopBottom) {
+            if (textChanges.font.valign === TextAlign.bottom) {
+                dy = this.props.br.height - textChanges.br.height;
+            } else if (textChanges.font.valign === TextAlign.middle) {
+                dy = (this.props.br.height - textChanges.br.height) / 2;
+            }
         }
 
         if (dx || dy) {
@@ -389,13 +384,14 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
     }
 
     minWidth() {
-        if (this.props.mode === TextMode.Block && !this.props.wrap && this.runtimeProps.minWidth === undefined) {
+        if (this.props.mode === TextMode.Block && this.runtimeProps.minWidth === undefined) {
             this.calculateMinSize();
         }
         return this.runtimeProps.minWidth;
     }
 
     minHeight() {
+        // min height is relevant only if there is no wrap
         if (this.props.mode === TextMode.Block && !this.props.wrap && this.runtimeProps.minHeight === undefined) {
             this.calculateMinSize();
         }
@@ -404,8 +400,14 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
 
     calculateMinSize() {
         var engine = this.getOrCreateEngine(this.props);
-        this.runtimeProps.minWidth = engine.getActualWidth();
-        this.runtimeProps.minHeight = engine.getActualHeight();
+        if (this.props.wrap) {
+            this.runtimeProps.minWidth = engine.calculateMaxWordWidth();
+            this.runtimeProps.minHeight = engine.calculateMinPossibleHeight();
+        }
+        else {
+            this.runtimeProps.minWidth = engine.getActualWidth();
+            this.runtimeProps.minHeight = engine.getActualHeight();
+        }
     }
 
     cursor() {

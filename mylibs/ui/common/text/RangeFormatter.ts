@@ -52,17 +52,38 @@ export default class RangeFormatter extends UIElement {
         }
     }
 
-    _fontChanged(font){
+    _fontChanged(font: Font){
         var range = this._engine.selectedRange();
+
         var formatting = this._fontToFormatting(font);
         debug("set formatting %s", JSON.stringify(formatting.keys.map((x, i) => {return {[x]: formatting.values[i]}})));
         range.setFormatting(formatting.keys, formatting.values);
+
+        let fontExtension = null;
+
         if (formatting.valign !== null){
-            var font = Font.extend(this._element.props.font, {valign: formatting.valign});
-            this._element.setProps({font});
+            fontExtension = fontExtension || {};
+            fontExtension.valign = formatting.valign;
         }
 
-        this._element.rangeFontChanged(font);
+        if (range.isDocumentRange()) {
+            let rangeFormatting = range.getFormatting();
+            for (let prop in rangeFormatting) {
+                if (prop === "text") {
+                    continue;
+                }
+                let value = rangeFormatting[prop];
+                if (value !== undefined) {
+                    fontExtension = fontExtension || {};
+                    fontExtension[prop] = value;
+                }
+            }
+        }
+
+        if (fontExtension){
+            var newFont = Font.extend(this._element.props.font, fontExtension);
+            this._element.setProps({font: newFont});
+        }
     }
 
     _fontToFormatting(font){

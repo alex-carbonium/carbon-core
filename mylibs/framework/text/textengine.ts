@@ -339,6 +339,54 @@ TextEngine.prototype.getActualHeight = function () {
 	return this._doc.frame.bounds().h;
 }
 
+TextEngine.prototype.calculateMaxWordWidth = function() {
+	let doc = this._doc;
+
+	if (!doc.words) {
+		return 0;
+	}
+
+	let result = 0;
+	for (let i = 0; i < doc.words.length; ++i){
+		let word = doc.words[i];
+		if (word.text && (word.text.width > result)) {
+			result = word.text.width;
+		}
+	}
+	return Math.ceil(result);
+};
+
+TextEngine.prototype.calculateMinPossibleHeight = function() {
+	let doc = this._doc;
+
+	if (!doc.frame) {
+		return 0;
+	}
+
+	let result = 0;
+	let lineHeight = 0;
+	for (let i = 0; i < doc.frame.lines.length; ++i){
+		let line = doc.frame.lines[i];
+
+		for (let j = 0; j < line.positionedWords.length; ++j){
+			let positionedWord = line.positionedWords[j];
+			let wordHeight = positionedWord.word.getActualHeight();
+			lineHeight = Math.max(lineHeight, wordHeight);
+		}
+
+		result += lineHeight;
+	}
+	return Math.ceil(result);
+};
+
+TextEngine.prototype.getActualWidthWithoutWrap = function() {
+	Runs.setDefaultFormatting(this._defaultFormatting);
+	if (!this._doc.frame) {
+		return 0;
+	}
+	return Math.ceil(this._doc.frame.actualWidthWithoutWrap());
+};
+
 TextEngine.prototype.getHeight = function () {
 	return this._height;
 }

@@ -21,7 +21,7 @@ import Invalidate from "../../../framework/Invalidate";
 import Environment from "../../../environment";
 import { getAverageLuminance } from "../../../math/color";
 import Rect from "../../../math/rect";
-import { ChangeMode, IMouseEventData, IElementEventData, VerticalConstraint, HorizontalConstraint, IDisposable, TextMode, IRect } from "carbon-core";
+import { ChangeMode, IMouseEventData, IElementEventData, VerticalConstraint, HorizontalConstraint, IDisposable, TextMode, IRect, TextAlign } from "carbon-core";
 import UserSettings from "../../../UserSettings";
 import Point from "../../../math/point";
 import Symbol from "../../../framework/Symbol";
@@ -319,24 +319,28 @@ export default class TextTool extends Tool {
         this._next = null;
     }
     contentChanged = () => {
-        var engine = this._editor.engine;
-        var w = engine.getActualWidth() + .5 | 0;
-        var h = engine.getActualHeight() + .5 | 0;
-        var constraints = this.text.constraints();
-        var br = this.text.boundaryRect();
+        let engine = this._editor.engine;
+        let actualWidth = engine.getActualWidth();
+        let actualHeight = engine.getActualHeight();
+        let constraints = this.text.constraints();
+        let font = this.text.font();
+        let br = this.text.boundaryRect();
 
-        let canMove = constraints.h === HorizontalConstraint.Right
-            || constraints.h === HorizontalConstraint.Center
-            || constraints.v === VerticalConstraint.Bottom
-            || constraints.v === VerticalConstraint.Center;
-        let canAutoGrow = constraints.h === HorizontalConstraint.LeftRight
-            || constraints.v === VerticalConstraint.TopBottom;
+        let canMove = font.align === TextAlign.right
+            || font.align === TextAlign.center
+            || font.valign === TextAlign.bottom
+            || font.valign === TextAlign.middle;
+        let canAutoGrow = !this.text.props.wrap && (constraints.h === HorizontalConstraint.LeftRight
+            || constraints.v === VerticalConstraint.TopBottom);
 
-        let expanding = (w > br.width || h > br.height) && (canAutoGrow || canMove);
-        let changingMatrix = this.text.props.mode === TextMode.Label && canMove;
+        let overflow = actualWidth > br.width || actualHeight > br.height;
+        let isLabel = this.text.props.mode === TextMode.Label;
+        let autoGrowing = overflow && canAutoGrow;
+        let moving = (overflow || isLabel) && canMove;
 
-        if (expanding || changingMatrix) {
+        if (autoGrowing || moving) {
             this.text.prepareAndSetProps({ content: engine.save() });
+
             if (this.updateTimer) {
                 clearTimeout(this.updateTimer);
                 this.updateTimer = 0;
@@ -349,15 +353,30 @@ export default class TextTool extends Tool {
             this.updateTimer = setTimeout(this.updateOriginalDebounced, UpdateTimeout);
         }
 
-        //the engine must keep current width (for example, for right alignment)
-        //and update the actual height so that the lines added below are not clipped
-        engine.updateSize(engine.getWidth(), h);
-
-        if (this.text.props.mode === TextMode.Label) {
-            this.boundaryRect = this.boundaryRect.withSize(w, h);
+        // Height is kept as actual since vertical offset is handled by translating the entire engine.
+        // When position is affected by the width, document layout needs to be recalculated.
+        let newBr = this.text.boundaryRect();
+        if (newBr.width !== engine.getWidth() && (autoGrowing || moving)) {
+            engine.updateSize(newBr.width, actualHeight);
+            engine.getDocument().layout();
+        }
+        else if (!this.text.props.wrap) {
+            let maxWidth = engine.getActualWidthWithoutWrap();
+            let relayout = maxWidth > engine.getWidth();
+            engine.updateSize(Math.max(maxWidth, engine.getWidth()), actualHeight);
+            if (relayout) {
+                engine.getDocument().layout();
+            }
         }
         else {
-            this.boundaryRect = this.boundaryRect.withSize(Math.max(w, br.width), Math.max(h, br.height));
+            engine.updateSize(engine.getWidth(), actualHeight);
+        }
+
+        if (this.text.props.mode === TextMode.Label) {
+            this.boundaryRect = this.boundaryRect.withSize(actualWidth, actualHeight);
+        }
+        else {
+            this.boundaryRect = this.boundaryRect.withSize(Math.max(actualWidth, br.width), Math.max(actualHeight, br.height));
         }
     }
     updateOriginalDebounced = () => {

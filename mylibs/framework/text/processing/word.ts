@@ -109,6 +109,10 @@ import Part from "../processing/part";
         return first && first.run.lineSpacing ? first.run.lineSpacing : Runs.defaultFormatting.lineSpacing;
     };
 
+    Word.prototype.getActualHeight = function() {
+        return (this.ascent + this.descent) * this.lineSpacing();
+    };
+
     Word.prototype.runs = function(emit, range) {
         var start = range && range.start || 0,
             end = range && range.end;

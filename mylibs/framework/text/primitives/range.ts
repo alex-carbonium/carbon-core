@@ -43,6 +43,10 @@ function Range(doc, start, end) {
         this.doc.runs(emit, this);
     };
 
+    Range.prototype.isDocumentRange = function() {
+        return this.start === 0 && this.end === this.doc.frame.length - 1;
+    };
+
     Range.prototype.plainText = function() {
         return Per.create(this.runs, this).map(Runs.getPlainText).all().join('');
     };
@@ -68,7 +72,7 @@ function Range(doc, start, end) {
 
     Range.prototype._setSingleFormatting = function (attribute, value) {
         var range = this;
-        
+
         if (range.start === range.end) {
             range.doc.modifyInsertFormatting(attribute, value);
         } else {

@@ -124,7 +124,6 @@ export default class ActiveFrame extends UIElementDecorator {
         Object.assign(this._frame, element.createSelectionFrame(view));
         this._frameType.updateFromElement(this._frame);
 
-        this.parentChanged = EventHandler(this, parentChanged);
         view.scaleChanged.bind(this, parentChanged);
 
         this.rect = this.element.getBoundaryRectGlobal();

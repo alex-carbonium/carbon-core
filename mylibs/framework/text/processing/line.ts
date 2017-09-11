@@ -104,6 +104,10 @@ import {TextAlign} from "carbon-basics";
         return this.positionedWords;
     };
 
+    Line.prototype.isWrapped = function() {
+        return !this.positionedWords[this.positionedWords.length - 1].word.isNewLine();
+    };
+
     Line.prototype.type = 'line';
 
     Line.prototype.doc = null;
