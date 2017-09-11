@@ -33,6 +33,10 @@ export default class RepeatCell extends Container implements IGroupContainer, II
         return "Repeat cell";
     }
 
+    canDrag(){
+        return false;
+    }
+
     canSelect(){
         return false;
     }
