@@ -128,7 +128,7 @@ function handleVerticalOverlap(xs, ys, pos) {
         ymax = ys[ys.length - 1] + pos.y;
 
         found = false;
-        for (i = overlap.length - 1; i >= 0; --i) {
+        for (i = 0; i < overlap.length; ++i) {
             let oys = overlap[i].snapData.ys;
             ymin = oys[0];
             if (ymax < ymin) {
@@ -234,7 +234,7 @@ function handleHorizontalOverlap(_xs, _ys, pos) {
         xmax = _xs[_xs.length - 1] + pos.x;
 
         found = false;
-        for (i = overlap.length - 1; i >= 0; --i) {
+        for (i = 0; i < overlap.length; ++i) {
             let _oxs = overlap[i].snapData.xs;
             xmin = _oxs[0];
             if (xmax < xmin) {
