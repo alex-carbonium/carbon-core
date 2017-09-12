@@ -60,6 +60,7 @@ export default {
         debug("Captured rect: x=%d y=%d w=%d h=%d", frame.originalRect.x, frame.originalRect.y, frame.originalRect.width, frame.originalRect.height);
 
         SnapController.calculateSnappingPoints(frame.element.parent().primitiveRoot(), frame.element);
+        frame.childrenCount = frame.element.children?frame.element.children.length:-1;
 
         //Environment.view.interactionLayer.add(resizingElement);
         frame.element.startResizing({ transformationElement: frame.element });
@@ -158,6 +159,10 @@ export default {
             if (d.x || d.y) {
                 frame.element.applyTranslation(d, false, ChangeMode.Self);
             }
+        }
+
+        if(frame.childrenCount >= 0 && frame.childrenCount !== frame.element.children.length) {
+            SnapController.calculateSnappingPoints(frame.element.parent().primitiveRoot(), frame.element);
         }
 
         Environment.controller.resizingEvent.raise({
