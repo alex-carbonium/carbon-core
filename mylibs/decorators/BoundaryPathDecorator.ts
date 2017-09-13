@@ -16,11 +16,16 @@ export default class BoundaryPathDecorator extends UIElementDecorator {
 
     afterInvoke(method, args) {
         if(method === 'draw') {
-            BoundaryPathDecorator.draw(args[0], this.element, this.boundaryPath, this.kind);
+            let context = args[0];
+            context.beginElement(this.element);
+
+            BoundaryPathDecorator.highlight(context, this.element, this.boundaryPath, this.kind);
+
+            context.endElement(this.element);
         }
     }
 
-    static draw(context, element, boundaryPath = false, highlightKind = HighlightKind.Thick, strokeStyle: string = SharedColors.Highlight) {
+    static highlight(context, element, boundaryPath = false, highlightKind = HighlightKind.Thick, strokeStyle: string = SharedColors.Highlight) {
         let scale = Environment.view.scale();
         context.save();
 

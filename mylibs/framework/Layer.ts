@@ -128,6 +128,13 @@ class Layer extends Container implements ILayer {
         return null;
     }
 
+    /**
+     * The layer global matrix must not be affected by global context modifier.
+     */
+    globalViewMatrix() {
+        return Matrix.Identity;
+    }
+
     draw(context, environment) {
         context.layerRedrawMask = this.layerRedrawMask || 0xFFFF;
         super.draw(context, environment);

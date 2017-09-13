@@ -8,12 +8,14 @@ import Rect from "../math/rect";
 import UserSettings from "../UserSettings";
 import { ChangeMode } from "carbon-core";
 import TransformationHelper from "../framework/interactions/TransformationHelper";
+import BoundaryPathDecorator from "./BoundaryPathDecorator";
 
 var debug = require("DebugUtil")("carb:resizeFramePoint");
 
 const PointSize = 6
     , PointSize2 = 3.5;
 
+const ResizeDecorator = new BoundaryPathDecorator(true);
 
 export default {
     cursorSet: FrameCursors,
@@ -33,7 +35,7 @@ export default {
         frame.globalViewMatrix = frame.element.globalViewMatrix();
         frame.isRotated = frame.element.isRotated(true);
         let elements;
-        if (frame.element.systemType() === Types.CompositeElement) {
+        if (frame.element.systemType() === Types.SelectComposite) {
             elements = frame.element.children;
         } else {
             elements = [frame.element];
@@ -67,6 +69,9 @@ export default {
         if (frame.element.decorators) {
             frame.element.decorators.forEach(x => x.visible(false));
         }
+
+        frame.element.addDecorator(ResizeDecorator);
+        frame.element.invalidate();
     },
     release: function (frame) {
         if (frame.element) {
@@ -79,6 +84,7 @@ export default {
             frame.element.stopResizing({ transformationElement: frame.element });
             frame.element.clearSavedLayoutProps();
             delete frame.globalViewMatrix;
+            frame.element.removeDecorator(ResizeDecorator);
             if (frame.element.decorators) {
                 frame.element.decorators.forEach(x => x.visible(true));
             }

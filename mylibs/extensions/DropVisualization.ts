@@ -511,7 +511,7 @@ export default class DropVisualization extends ExtensionBase {
     }
 
     static highlightElement(context, element, boundaryPath = false, strokeStyle: string = null) {
-        BoundaryPathDecorator.draw(context, element, boundaryPath, HighlightKind.Thick, strokeStyle);
+        BoundaryPathDecorator.highlight(context, element, boundaryPath, HighlightKind.Thick, strokeStyle);
     }
 }
 

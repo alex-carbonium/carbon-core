@@ -15,6 +15,7 @@ import CompositeElement from "../CompositeElement";
 import Duplicate from "commands/Duplicate";
 import UIElement from "../UIElement";
 import GlobalMatrixModifier from "../GlobalMatrixModifier";
+import BoundaryPathDecorator from "../../decorators/BoundaryPathDecorator";
 
 var debug = require("DebugUtil")("carb:draggingElement");
 
@@ -25,6 +26,8 @@ function applyOrthogonalMove(pos) {
         pos.x = this._initialPosition.x;
     }
 }
+
+const DraggingDecorator = new BoundaryPathDecorator(true);
 
 class DraggingElement extends CompositeElement {
     private activeDecorators = [];
@@ -46,6 +49,7 @@ class DraggingElement extends CompositeElement {
         }
 
         this.saveDecorators(elementOrComposite);
+        this.addDecorator(DraggingDecorator);
 
         this.performArrange();
 
@@ -104,6 +108,7 @@ class DraggingElement extends CompositeElement {
 
         SnapController.clearActiveSnapLines();
 
+        this.removeDecorator(DraggingDecorator);
         this.parent().remove(this, ChangeMode.Self);
     }
 
@@ -244,6 +249,7 @@ class DraggingElement extends CompositeElement {
 
         for (var e of this.children) {
             e.applyTranslation(this._translation, true, ChangeMode.Self);
+            this.applyTranslation(this._translation, true, ChangeMode.Self);
         }
     }
 
@@ -265,26 +271,6 @@ class DraggingElement extends CompositeElement {
 
     allowMoveOutChildren(event) {
         return this.children.every(x => x.parent() === this || x.parent().allowMoveOutChildren(undefined, event));
-    }
-
-    draw(context) {
-        context.save();
-
-        var scale = Environment.view.scale();
-        context.scale(1 / scale, 1 / scale);
-
-        GlobalMatrixModifier.pushPrependScale();
-        context.beginPath();
-        for (var i = 0; i < this.children.length; i++) {
-            var child = this.children[i];
-            child.drawBoundaryPath(context);
-        }
-
-        context.lineWidth = this.strokeWidth();
-        Brush.stroke(this.stroke(), context);
-        GlobalMatrixModifier.pop();
-
-        context.restore();
     }
 }
 
