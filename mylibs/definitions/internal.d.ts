@@ -7,7 +7,6 @@ declare module "carbon-basics" {
     }
 }
 
-
 declare module "carbon-internal" {
     export interface IHub {
         invoke(method: string, ...args: any[]): Promise<string>;
