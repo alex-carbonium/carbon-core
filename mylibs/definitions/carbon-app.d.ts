@@ -167,6 +167,7 @@ declare module "carbon-app" {
         findDropToPageData(x, y, element);
         isActivatedFor(owner: IIsolatable): boolean;
         isolateGroup(owner: IIsolatable, clippingParent?: IUIElement, e?: IMouseEventData) :void;
+        getOwner():IIsolatable;
     }
 
     export interface IPageProps extends IContainerProps {

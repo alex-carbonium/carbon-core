@@ -21,17 +21,26 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         super();
 
         App.Current.actionManager.subscribe("exitisolation", () => {
+            var element = this.ownerElement;
             Environment.view.deactivateLayer(LayerTypes.Isolation);
+            if(element) {
+                Selection.makeSelection([element]);
+            }
         })
 
         App.Current.actionManager.subscribe("cancel", () => {
             let selection = Selection.getSelection();
+            let element = this.ownerElement;
             if (selection) {
                 let editingPath = selection.length === 1 && selection[0] instanceof Path && selection[0].mode() === ElementState.Edit;
 
                 if (!editingPath) {
                     Environment.view.deactivateLayer(LayerTypes.Isolation);
                 }
+            }
+
+            if(element) {
+                Selection.makeSelection([element]);
             }
         })
     }
@@ -41,6 +50,10 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         this.trackElementIds[e.id()] = clone;
 
         return clone;
+    }
+
+    getOwner() {
+        return this.ownerElement;
     }
 
     isolateGroup(owner: IIsolatable, clippingParent: IUIElement = null): void {
@@ -66,9 +79,9 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
 
         this._onAppChangedSubscription = App.Current.deferredChange.bind(this, this.onAppChanged);
         this._onRelayoutCompleted = App.Current.relayoutFinished.bind(this, this.onRelayoutFinished);
-        Selection.clearSelection();
 
         Environment.view.activateLayer(this.type);
+        setTimeout(()=>Selection.clearSelection(), 0);
     }
 
     isolateObject(object: IIsolatable): void {
