@@ -18,7 +18,7 @@ import Point from "../math/point";
 import Matrix from "../math/matrix";
 import { FloatingPointPrecision, ArrangeStrategies } from "../framework/Defs";
 import { LayerTypes } from "carbon-app";
-import { IUIElement, ChangeMode } from "carbon-core";
+import { IUIElement, ChangeMode, IIsolationLayer } from "carbon-core";
 import BoundaryPathDecorator, { HighlightKind } from "../decorators/BoundaryPathDecorator";
 
 var HighlightBrush = Brush.createFromColor(SharedColors.Highlight);
@@ -324,7 +324,12 @@ var onElementSelected = function () {
 };
 
 function onSelectionFrame(rect) {
-    this._selection = this.app.activePage.getElementsInRect(rect);
+    var isolationLayer:any = Environment.view.getLayer(LayerTypes.Isolation) as IIsolationLayer;
+    if(isolationLayer.isActive) {
+        this._selection = isolationLayer.getElementsInRect(rect);
+    } else {
+        this._selection = this.app.activePage.getElementsInRect(rect);
+    }
 
     updateSelectionRects.call(this);
 }
