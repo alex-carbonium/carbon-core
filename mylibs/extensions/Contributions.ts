@@ -7,6 +7,7 @@ import ShortcutManager from "../ui/ShortcutManager";
 
 export class Contributions implements IContributions {
     private _contextMenuGroups: { groupName: string, actions: IAction[], contextBarPosition?: ContextBarPosition }[] = [];
+    private _contextMenuItems: { actionId: string, contextBarPosition?: ContextBarPosition }[] = [];
 
     constructor(private app: IApp, private actionManager: ActionManager, private shortcutManager: ShortcutManager) {
         app.onBuildMenu.bind(this, this.onBuildMenu);
@@ -20,6 +21,9 @@ export class Contributions implements IContributions {
             scheme = { windows: scheme, mac: scheme };
         }
         this.shortcutManager.mapScheme(scheme);
+    }
+    addContextMenuItem(actionId: string, contextBarPosition?: ContextBarPosition) {
+        this._contextMenuItems.push({actionId, contextBarPosition});
     }
     addContextMenuGroup(groupName: string, actionIds: string[], contextBarPosition?: ContextBarPosition) {
         this._contextMenuGroups.push({
@@ -45,7 +49,16 @@ export class Contributions implements IContributions {
         var items = menu.items;
         ContextMenuBuilder.build(this.app, context, menu);
 
-        for (var i = 0; i < this._contextMenuGroups.length; i++) {
+        for (let i = 0; i < this._contextMenuItems.length; i++) {
+            let item = this._contextMenuItems[i];
+            let action = this.actionManager.getAction(item.actionId);
+            let contextMenuAction = this.contextMenuAction(action, context.selectComposite, item.contextBarPosition);
+            if (!contextMenuAction.disabled) {
+                items.push(contextMenuAction);
+            }
+        }
+
+        for (let i = 0; i < this._contextMenuGroups.length; i++) {
             var group = this._contextMenuGroups[i];
             items.push("-");
             items.push({
@@ -56,13 +69,15 @@ export class Contributions implements IContributions {
         }
     }
 
-    private contextMenuAction(action: IAction, selection: ISelection) {
+    private contextMenuAction(action: IAction, selection: ISelection, contextBar?: ContextBarPosition) {
         return {
             name: CoreIntl.label(action.name),
             callback: () => {
                 this.actionManager.invoke(action.id);
             },
-            disabled: action.condition && !action.condition(selection)
+            disabled: action.condition && !action.condition(selection),
+            icon: action.icon,
+            contextBar
         }
     }
 }

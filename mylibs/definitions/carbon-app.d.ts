@@ -337,6 +337,7 @@ declare module "carbon-app" {
     export interface IAction {
         id: string;
         name: string;
+        icon?: string;
         callback: (selection: ISelection) => any; //TODO: replace with void when action do not return commands
         condition?: (selection: ISelection) => boolean;
     }

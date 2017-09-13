@@ -73,6 +73,7 @@ export default {
             var newSnapshot = TransformationHelper.getPropSnapshot(frame.elements);
             TransformationHelper.applyPropSnapshot(frame.elements, frame.snapshot, ChangeMode.Self);
             TransformationHelper.applyPropSnapshot(frame.elements, newSnapshot, ChangeMode.Model);
+
             //frame.resizingElement.saveChanges();
             // frame.resizingElement.detach();
             //ImageContent depends on event fired in the end

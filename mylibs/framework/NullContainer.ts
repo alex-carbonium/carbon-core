@@ -1,5 +1,5 @@
 import Matrix from "../math/matrix";
-import { IContainer, IDataNodeProps, IMatrix, IPoint, IRect, ISize, IUIElement, IUIElementProps, IConstraints, IContext, IContainerProps, IDataNode, IMouseEventData, KeyboardState } from "carbon-core";
+import { IContainer, IDataNodeProps, IMatrix, IPoint, IRect, ISize, IUIElement, IUIElementProps, IConstraints, IContext, IContainerProps, IDataNode, IMouseEventData, KeyboardState, ResizeDimension } from "carbon-core";
 import { emptyUuid } from "../util";
 import DataNode from "./DataNode";
 import Rect from "../math/rect";
@@ -59,8 +59,11 @@ class NullContainer extends DataNode implements IContainer {
         return Rect.Zero;
     }
 
-    hitTransparent(value: boolean): boolean {
+    hitTransparent(value?: boolean): boolean {
         return true;
+    }
+    hitVisible() {
+        return false;
     }
     globalMatrixToLocal(m: any) {
         return m;
@@ -117,6 +120,12 @@ class NullContainer extends DataNode implements IContainer {
         return false;
     }
     showResizeHint(): boolean {
+        return false;
+    }
+    resizeDimensions() {
+        return ResizeDimension.None;
+    }
+    canDrag() {
         return false;
     }
     each(callback: (e: IUIElement, index?: number) => boolean | void) {
@@ -340,6 +349,10 @@ class NullContainer extends DataNode implements IContainer {
 
     opacity(value?:number) {
         return 0;
+    }
+
+    resetGlobalViewCache() {
+
     }
 }
 

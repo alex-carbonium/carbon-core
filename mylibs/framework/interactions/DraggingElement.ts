@@ -9,7 +9,7 @@ import Brush from "../Brush";
 import Environment from "../../environment";
 import UserSettings from "../../UserSettings";
 import Matrix from "../../math/matrix";
-import { ChangeMode } from "carbon-core";
+import { ChangeMode, IMatrix, IContainer } from "carbon-core";
 import Selection from "framework/SelectionModel";
 import CompositeElement from "../CompositeElement";
 import Duplicate from "commands/Duplicate";
@@ -112,12 +112,12 @@ class DraggingElement extends CompositeElement {
         var elements = [];
 
         for (var i = 0; i < this.children.length; ++i) {
-            var phantom = this.children[i];
-            var element = phantom.original || phantom;
+            var element = this.children[i];
+            element.clearSavedLayoutProps();
 
-            var phantomTarget = artboards.find(a => areRectsIntersecting(phantom.getBoundingBoxGlobal(), a.getBoundaryRectGlobal()));
-            if (!phantomTarget) {
-                phantomTarget = page;
+            var target = artboards.find(a => areRectsIntersecting(element.getBoundingBoxGlobal(), a.getBoundaryRectGlobal()));
+            if (!target) {
+                target = page;
             }
 
             var parent = null;
@@ -132,40 +132,30 @@ class DraggingElement extends CompositeElement {
                     index = dropData.index;
                 }
             }
-            else if (draggingOverElement.primitiveRoot() === phantomTarget.primitiveRoot()) {
+            else if (draggingOverElement.primitiveRoot() === target.primitiveRoot()) {
                 parent = draggingOverElement;
             }
             else {
-                parent = phantomTarget;
+                parent = target;
             }
 
             if (index === null) {
                 index = parent.positionOf(element) + 1 || parent.count();
             }
 
-            this.dropElementOn(event, parent, element, phantom, index);
+            let source = element;
+            if (this._clones) {
+                source = this._clones[i];
+                source.parent().remove(source, ChangeMode.Self);
+            }
 
-            elements.push(element);
+            this.applyElementSnapshot(this._propSnapshot, element, ChangeMode.Self);
+            this.dropElementOn(event, parent, source, element.globalViewMatrix(), index);
+
+            elements.push(source);
         }
 
         Selection.refreshSelection();
-
-        var newSnapshot = this.getPropSnapshot();
-        this.applySnapshot(this._propSnapshot, ChangeMode.Self);
-
-        var copyClones = this._clones;
-        if (copyClones) {
-            copyClones.forEach(e => {
-                var parent = e.parent();
-                var index = parent.positionOf(e);
-                parent.remove(e, ChangeMode.Self);
-                if (e.visible()) {
-                    parent.insert(e, index);
-                }
-            })
-        }
-
-        this.applySnapshot(newSnapshot, ChangeMode.Model);
 
         return elements;
     }
@@ -179,25 +169,16 @@ class DraggingElement extends CompositeElement {
      * This is needed for the both old and new parent to know "correct" element matrix.
      * Used for extended artboard hit-test box.
      */
-    dropElementOn(event, newParent, element, phantom, index) {
+    dropElementOn(event, newParent: IContainer, element: UIElement, globalMatrix: IMatrix, index: number) {
         debug("drop %s on %s[%d]", element.displayName(), newParent.displayName(), index);
-
-        let gm;
-        if (!newParent.autoPositionChildren()) {
-            element.applyTranslation(this._translation, true, ChangeMode.Model);
-            element.clearSavedLayoutProps();
-            gm = element.globalViewMatrix();
-        }
 
         if (newParent !== element.parent()) {
             element.parent().remove(element);
         }
 
         if (!newParent.autoPositionChildren()) {
+            var gm = globalMatrix.clone().prependedWithTranslation(this._translation.x, this._translation.y);
             element.setTransform(newParent.globalMatrixToLocal(gm));
-        } else {
-            // this.saveOrResetLayoutProps(ChangeMode.Self);
-            element.clearSavedLayoutProps();
         }
 
         if (newParent !== element.parent()) {
@@ -219,7 +200,7 @@ class DraggingElement extends CompositeElement {
         }
 
         if (this._clones) {
-            this._clones.forEach(e => e.visible(alt));
+            this._clones.forEach(e => e.visible(alt, ChangeMode.Self));
         }
 
         SnapController.clearActiveSnapLines();

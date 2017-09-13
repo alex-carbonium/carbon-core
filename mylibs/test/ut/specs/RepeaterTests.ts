@@ -13,12 +13,17 @@ import Point from "../../../math/point";
 import Rect from "../../../math/rect";
 import {assert} from "chai";
 import { TextMode } from "carbon-core";
+import Brush from "../../../framework/Brush";
+import { RepeaterActions } from "../../../framework/repeater/RepeaterActions";
+import Environment from "../../../environment";
 
 describe("Repeater tests", function(){
     before(function(){
+        this.repeaterActions = new RepeaterActions(this.app, Environment);
+
         this.makeRepeater = function(elements){
             Selection.makeSelection(elements);
-            this.app.actionManager.invoke("groupInRepeater");
+            this.repeaterActions.group(Selection);
             this.app.relayout();
 
             return this.app.activePage.findSingleChildOrDefault(x => x instanceof RepeatContainer);

@@ -8,6 +8,7 @@ import Path from "framework/Path";
 import CoreIntl from "../CoreIntl";
 import { ContextBarPosition, IActionManager, IView, IApp, ElementState } from "carbon-core";
 import InteractiveContainer from "../framework/InteractiveContainer";
+import { RepeaterActions } from "../framework/repeater/RepeaterActions";
 
 function findItemsToSelect(app, eventData) {
     let items = []
@@ -98,30 +99,6 @@ export default class ContextMenuBuilder {
                 }
             })
         }
-
-        if (selection.length) {
-            if (selection.length === 1 && selection[0] instanceof RepeatContainer) {
-                items.push({
-                    name: "@repeater.ungroup",
-                    icon: "ungroup-grid",
-                    contextBar: ContextBarPosition.Left,
-                    callback: () => {
-                        actionManager.invoke("ungroupRepeater")
-                    }
-                })
-            } else {
-                items.push({
-                    name: "@repeater.group",
-                    icon: "ico-repeater",
-                    contextBar: ContextBarPosition.Left,
-                    callback: () => {
-                        actionManager.invoke("groupInRepeater")
-                    }
-                })
-            }
-            items.push('-')
-        }
-
 
         if (context.eventData) {
             let itemsToSelect = findItemsToSelect(app, context.eventData)
