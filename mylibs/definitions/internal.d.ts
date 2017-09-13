@@ -1,12 +1,3 @@
-declare module "carbon-basics" {
-    export const enum ResizeDimension {
-        None,
-        Vertical,
-        Horizontal,
-        Both
-    }
-}
-
 declare module "carbon-internal" {
     export interface IHub {
         invoke(method: string, ...args: any[]): Promise<string>;

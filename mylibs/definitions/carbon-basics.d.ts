@@ -84,6 +84,13 @@ declare module "carbon-basics" {
         Change = 3
     }
 
+    export const enum ResizeDimension {
+        None,
+        Vertical,
+        Horizontal,
+        Both
+    }
+
     export const enum BrushType {
         empty,
         color,
