@@ -1,83 +1,106 @@
 import Container from "../Container";
 import PropertyMetadata from "../PropertyMetadata";
 import Brush from "../Brush";
-import {Overflow, Types, ArrangeStrategies} from "../Defs";
-import { IGroupContainer, IIsolatable } from "carbon-core";
+import { Overflow, Types, ArrangeStrategies } from "../Defs";
+import { IGroupContainer, IIsolatable, IUIElement, ChangeMode, IRepeatCell } from "carbon-core";
 import UserSettings from "../../UserSettings";
 import Environment from "../../environment";
 import GlobalMatrixModifier from "../GlobalMatrixModifier";
+import { createUUID } from "../../util";
 
-export default class RepeatCell extends Container implements IGroupContainer, IIsolatable {
+export default class RepeatCell extends Container implements IGroupContainer, IRepeatCell, IIsolatable {
     prepareProps(changes) {
         super.prepareProps(changes);
 
-        if (changes.hasOwnProperty("br")){
+        if (changes.hasOwnProperty("br")) {
             changes.br = changes.br.round();
         }
 
-        if (changes.hasOwnProperty("m")){
+        if (changes.hasOwnProperty("m")) {
             changes.m = changes.m.withRoundedTranslation();
         }
     }
 
-    propsUpdated(newProps, oldProps, mode){
+    propsUpdated(newProps, oldProps, mode) {
         super.propsUpdated(newProps, oldProps, mode);
         //need to store last size change, but not the first one from 0 to width
-        if (newProps.hasOwnProperty("br") && oldProps.hasOwnProperty("br") && oldProps.br.width){
+        if (newProps.hasOwnProperty("br") && oldProps.hasOwnProperty("br") && oldProps.br.width) {
             this.runtimeProps.newBr = newProps.br;
             this.runtimeProps.oldBr = oldProps.br;
         }
     }
 
-    displayType(){
+    clone() {
+        let clone = this.mirrorClone();
+
+        clone.applyVisitorDepthFirst(x => {
+            let rid = x.props.rid || x.props.id;
+            x.setProps({
+                id: createUUID(),
+                rid
+            });
+        });
+
+        return clone;
+    }
+
+    insert(element: IUIElement, index: number, mode?: ChangeMode) {
+        element.applyVisitorDepthFirst(x => x.prepareAndSetProps({ rid: x.props.rid || x.id() }, mode));
+
+        super.insert(element, index, mode);
+
+        return element;
+    }
+
+    displayType() {
         return "Repeat cell";
     }
 
-    canDrag(){
+    canDrag() {
         return false;
     }
 
-    canSelect(){
+    canSelect() {
         return false;
     }
 
-    canRotate(){
+    canRotate() {
         return false;
     }
 
-    getSnapPoints(){
+    getSnapPoints() {
         return null;
     }
 
-    wrapSingleChild(){
+    wrapSingleChild() {
         return false;
     }
 
-    translateChildren(){
+    translateChildren() {
         return true;
     }
 
-    createPos(x, y): number[]{
-        if (x === this.props.pos[0] && y === this.props.pos[1]){
+    createPos(x, y): number[] {
+        if (x === this.props.pos[0] && y === this.props.pos[1]) {
             return this.props.pos;
         }
         return [x, y];
     }
 
-    activeGroup(): boolean{
+    activeGroup(): boolean {
         return this.parent().activeGroup();
     }
 
-    lockGroup(){
+    lockGroup() {
         this.runtimeProps.unlocked = false;
     }
-    unlockGroup(): boolean{
+    unlockGroup(): boolean {
         this.runtimeProps.unlocked = true;
         this.parent().runtimeProps.lastActiveCell = this;
         return true;
     }
 
-    showBoundaryWhenTransparent(): boolean{
+    showBoundaryWhenTransparent(): boolean {
         return true;
     }
 
@@ -102,7 +125,7 @@ PropertyMetadata.registerForType(RepeatCell, {
     repeatable: {
         defaultValue: true
     },
-    allowMoveOutChildren:{
+    allowMoveOutChildren: {
         defaultValue: false
     },
     hitTransparent: {

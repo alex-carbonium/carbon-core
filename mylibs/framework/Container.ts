@@ -359,7 +359,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         return clone;
     }
 
-    mirrorClone() {
+    mirrorClone() : Container {
         let clone = UIElement.prototype.mirrorClone.apply(this, arguments);
 
         for (let i = 0; i < this.children.length; i++) {
@@ -560,7 +560,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     count() {
         return this.children.length;
     }
-    changePosition(/*UIElement*/element, /*int*/index, mode) {
+    changePosition(/*UIElement*/element, /*int*/index, mode?) {
         this.changeChildPosition(element, index, mode);
         this.invalidate(this.runtimeProps.ctxl);
     }
@@ -695,7 +695,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     releaseMouse(/*UIElement*/element?: any) {
         Environment.controller.releaseMouse(element);
     }
-    applyVisitor(/*Visitor*/callback, useLogicalChildren?: boolean, parent?: any) {
+    applyVisitor(callback: (element: IUIElement, parent?: IContainer) => boolean | void, useLogicalChildren?: boolean, parent?: any) {
         let stop = false;
         for (let i = this.children.length - 1; i >= 0; --i) {
             let item = this.children[i];

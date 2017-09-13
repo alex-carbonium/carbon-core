@@ -59,6 +59,7 @@ export default {
     "Container": require("./framework/Container"),
     "GroupContainer": require("./framework/GroupContainer"),
     "RepeatContainer": require("./framework/repeater/RepeatContainer"),
+    "RepeatCell": require("./framework/repeater/RepeatCell"),
     "Page": require("./framework/Page"),
     "CommandManager": require("./framework/commands/CommandManager"),
     "Brush": require("./framework/Brush"),

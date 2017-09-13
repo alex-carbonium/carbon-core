@@ -14,14 +14,13 @@ import Point from "../../math/point";
 import Matrix from "../../math/matrix";
 import Isolate from "../../commands/Isolate";
 import Selection from "../SelectionModel";
-import { IUIElement, IContainer, IRepeatContainer } from "carbon-model";
 import { IMouseEventData } from "carbon-basics";
-import { ChangeMode, IPrimitiveRoot } from "carbon-core";
+import { IUIElement, IContainer, IRepeatContainer, ChangeMode, IPrimitiveRoot, IUIElementProps, UIElementFlags } from "carbon-core";
 
 interface IRepeatContainerRuntimeProps{
     lastActiveCell?: RepeatCell;
     primitivePath?: string[];
-    insertingMultiple?: boolean;
+    internalUpdate?: boolean;
 }
 
 export default class RepeatContainer extends Container implements IRepeatContainer, IPrimitiveRoot {
@@ -130,12 +129,12 @@ export default class RepeatContainer extends Container implements IRepeatContain
         if (!realRoot) {
             return;
         }
-        if (element === this || element instanceof RepeatCell || this.runtimeProps.insertingMultiple) {
+        if (element === this || element instanceof RepeatCell || this.runtimeProps.internalUpdate) {
             realRoot.registerSetProps(element, props, oldProps, mode);
             return;
         }
 
-        var chain = this._buildChain(element);
+        var chain = this.findRepeatedElements(element);
         for (var i = 0; i < chain.length; ++i) {
             var current = chain[i];
             var nodeProps = props;
@@ -164,12 +163,14 @@ export default class RepeatContainer extends Container implements IRepeatContain
         if (!realRoot) {
             return;
         }
-        if (parent === this || this.runtimeProps.insertingMultiple) {
+        if (parent === this || this.runtimeProps.internalUpdate) {
             realRoot.registerInsert(parent, element, index, mode);
             return;
         }
 
-        var chain = this._buildChain(parent);
+        this.checkDuplicationInCell(element);
+
+        var chain = this.findRepeatedElements(parent);
         for (var i = 0; i < chain.length; ++i) {
             var current = chain[i];
             var node = element;
@@ -189,12 +190,12 @@ export default class RepeatContainer extends Container implements IRepeatContain
         if (!realRoot) {
             return;
         }
-        if (parent === this || this.runtimeProps.insertingMultiple) {
+        if (parent === this || this.runtimeProps.internalUpdate) {
             realRoot.registerDelete(parent, element, index, mode);
             return;
         }
 
-        var chain = this._buildChain(parent);
+        var chain = this.findRepeatedElements(parent);
         for (var i = 0; i < chain.length; ++i) {
             var current = chain[i];
             var node = element;
@@ -202,6 +203,7 @@ export default class RepeatContainer extends Container implements IRepeatContain
                 node = current.children[index];
                 current.remove(node, ChangeMode.Self);
             }
+            node.setProps({ rid: null });
             realRoot.registerDelete(current, node, mode);
         }
     }
@@ -214,12 +216,12 @@ export default class RepeatContainer extends Container implements IRepeatContain
         if (!realRoot) {
             return;
         }
-        if (parent === this || this.runtimeProps.insertingMultiple) {
+        if (parent === this || this.runtimeProps.internalUpdate) {
             realRoot.registerChangePosition(parent, element, index, oldIndex, mode);
             return;
         }
 
-        var chain = this._buildChain(parent);
+        var chain = this.findRepeatedElements(parent);
         for (var i = 0; i < chain.length; ++i) {
             var current = chain[i];
             var node = element;
@@ -235,26 +237,46 @@ export default class RepeatContainer extends Container implements IRepeatContain
         return true;
     }
 
+    private checkDuplicationInCell(element: IUIElement) {
+        let updateCommonId = false;
+
+        if (element.props.rid) {
+            let cell = element.findAncestorOfType(RepeatCell);
+            let other = cell.findNodeBreadthFirst(x => x.props.rid === element.props.rid && x !== element);
+            if (other) {
+                updateCommonId = true;
+            }
+        }
+        else {
+            updateCommonId = true;
+        }
+
+        if (updateCommonId) {
+            this.runtimeProps.internalUpdate = true;
+            element.applyVisitorDepthFirst(x => x.setProps({ rid: x.id() }));
+            this.runtimeProps.internalUpdate = false;
+        }
+    }
+
     addDroppedElements(dropTarget: Container, elements: IUIElement[], e: IMouseEventData){
         if (!elements.length){
             return;
         }
 
-        this.runtimeProps.insertingMultiple = true;
+        this.runtimeProps.internalUpdate = true;
         var matrix = Matrix.createTranslationMatrix(Math.round(e.x), Math.round(e.y));
         matrix = dropTarget.globalMatrixToLocal(matrix);
 
-        var cellPath = this._getCellIndexPath(dropTarget);
         var cells = this.children;
         for (var i = 0; i < this.children.length && i < elements.length; i++) {
             var cell = this.children[i];
-            var parent = this._findByIndexPath(cell, cellPath.path) as Container;
+            var parent = this.findRepeatedElement(cell, dropTarget) as Container;
             var element = elements[i];
             element.setTransform(matrix);
             parent.add(element);
         }
 
-        this.runtimeProps.insertingMultiple = false;
+        this.runtimeProps.internalUpdate = false;
     }
 
     performArrange(oldRect, mode: ChangeMode = ChangeMode.Model): void {
@@ -264,59 +286,42 @@ export default class RepeatContainer extends Container implements IRepeatContain
         }
     }
 
+    activeCell() {
+        return this.runtimeProps.lastActiveCell || this.children[0];
+    }
+
     findMasterCounterpart(element: UIElement): UIElement {
-        var cellPath = this._getCellIndexPath(element);
-        if (cellPath.cell === this.children[0]) {
-            return element;
-        }
-        return this._findByIndexPath(this.children[0], cellPath.path);
+        return this.findRepeatedElement(this.children[0], element);
     }
 
     findSelectionTarget(element: UIElement): UIElement {
-        var cell = this.runtimeProps.lastActiveCell || this.children[0];
-        var cellPath = this._getCellIndexPath(element)
-        if (cellPath.cell === cell) {
-            return element;
-        }
-        return this._findByIndexPath(cell, cellPath.path);
+        var cell = this.activeCell();
+        return this.findRepeatedElement(cell, element);
     }
 
-    static tryFindRepeaterParent(element: UIElement): RepeatContainer | null {
+    static tryFindRepeaterParent(element: IUIElement): RepeatContainer | null {
         return element.findAncestorOfType(RepeatContainer);
     }
 
-    _buildChain(element): UIElement[] {
-        var result = [element];
-        var cellPath = this._getCellIndexPath(element);
-        var currentCell = cellPath.cell;
+    findRepeatedElements(element: IUIElement): UIElement[] {
+        if (element instanceof RepeatCell) {
+            return this.children;
+        }
+
+        let result = [];
 
         for (var i = 0; i < this.children.length; ++i) {
-            var cell = this.children[i];
-            if (cell === currentCell) {
-                continue;
-            }
-
-            result.push(this._findByIndexPath(cell, cellPath.path));
+            let clone = this.findRepeatedElement(this.children[i], element);
+            result.push(clone);
         }
 
         return result;
     }
-    _getCellIndexPath(element: UIElement): { cell: RepeatCell, path: number[] } {
-        var path = [];
-        var current = element;
-        while (current && !(current instanceof RepeatCell)) {
-            path.push(current.index());
-            current = current.parent();
+    private findRepeatedElement(cell: RepeatCell, element: IUIElement) {
+        if (element === cell) {
+            return cell;
         }
-        return { cell: current as RepeatCell, path };
-    }
-    _findByIndexPath(parent: Container, path: number[]): UIElement {
-        var current: UIElement = parent;
-        for (var k = path.length - 1; k >= 0; k--) {
-            var part = path[k];
-            current = current.children[part] as UIElement;
-        }
-        return current;
+        return cell.findNodeBreadthFirst(x => x.props.rid === element.props.rid);
     }
 
     _splitProps(element, props, oldProps) {
@@ -407,7 +412,7 @@ export default class RepeatContainer extends Container implements IRepeatContain
         }
         return this.children[0].getBoundingBox().y;
     }
-    rows(value, mode) {
+    rows(value?, mode?) {
         if (this.children.length === 0) {
             return 1;
         }
@@ -424,7 +429,7 @@ export default class RepeatContainer extends Container implements IRepeatContain
         var rows = masterHeight === 0 ? 1 : Math.ceil((this.boundaryRect().height - offsetY) / (masterHeight + margin));
         return rows < 1 ? 1 : rows;
     }
-    cols(value, mode) {
+    cols(value?, mode?) {
         if (this.children.length === 0) {
             return 1;
         }
@@ -471,7 +476,7 @@ PropertyMetadata.registerForType(RepeatContainer, {
     },
     innerMarginX: {
         displayName: "@repeater.marginX",
-        defaultValue: 50,
+        defaultValue: 20,
         type: "numeric",
         options: {
             min: 0
@@ -479,7 +484,7 @@ PropertyMetadata.registerForType(RepeatContainer, {
     },
     innerMarginY: {
         displayName: "@repeater.marginY",
-        defaultValue: 50,
+        defaultValue: 20,
         type: "numeric",
         options: {
             min: 0

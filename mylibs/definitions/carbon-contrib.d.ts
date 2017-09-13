@@ -17,6 +17,12 @@ declare module "carbon-contrib" {
         addContextMenuGroup(groupName: string, actionIds: string[], contextBarPosition?: ContextBarPosition);
 
         /**
+         * Registers the context menu item. The item always appears in the context menu trigger by right click,
+         * and optionally in the context bar if the contextBarPosition is specified.
+         */
+        addContextMenuItem(actionId: string, contextBarPosition?: ContextBarPosition);
+
+        /**
          * Registers the shortcuts for the extension for all supported platforms.
          */
         addShortcuts(scheme: IShortcutScheme | IShortcut[]);

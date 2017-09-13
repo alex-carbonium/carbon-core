@@ -1,6 +1,6 @@
 declare module "carbon-model" {
     import { IPoint, IRect, ICoordinate, IMatrix, ISize, OriginType } from "carbon-geometry";
-    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable, ChangeMode, ArtboardType, Font, KeyboardState, Brush } from "carbon-basics";
+    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable, ChangeMode, ArtboardType, Font, KeyboardState, Brush, ResizeDimension } from "carbon-basics";
     import { IContext } from "carbon-rendering";
 
     export interface IDataNodeProps {
@@ -94,6 +94,7 @@ declare module "carbon-model" {
         applyDirectedTranslation(vector: IPoint, mode?: ChangeMode): void;
         setTransform(matrix: IMatrix);
         resetTransform();
+        resizeDimensions(value?: ResizeDimension): ResizeDimension;
 
         selectFrameVisible(value?:boolean):boolean;
 
@@ -107,7 +108,7 @@ declare module "carbon-model" {
 
         invalidate();
 
-        hitTest(point: IPoint, scale: number, boundaryRectOnly: boolean): boolean;
+        hitTest(point: IPoint, scale: number, boundaryRectOnly?: boolean): boolean;
         hitTestGlobalRect(rect: IRect, directSelection?: boolean): boolean;
 
         showResizeHint(): boolean;
@@ -164,10 +165,9 @@ declare module "carbon-model" {
 
         applyVisitor(callback: (IUIElement) => boolean | void);
 
-        hitTransparent(value: boolean): boolean;
-
         globalMatrixToLocal(matrix: IMatrix): IMatrix;
 
+        allowRearrange(): boolean;
         performArrange(arrangeEvent?, mode?: ChangeMode): void;
     }
     export const Container: IConstructor<IContainer>;
@@ -179,7 +179,18 @@ declare module "carbon-model" {
 
     export const GroupContainer: IConstructor<IGroupContainer>;
 
+    export interface IUIElementProps extends IDataNodeProps {
+        /**
+         * Common ID for repeated elements.
+         */
+        rid?: string;
+    }
+
+    export interface IRepeatCell extends IContainer {}
+    export const RepeatCell: IConstructor<IRepeatCell>;
+
     export interface IRepeatContainer extends IContainer {
+        activeCell(): IRepeatCell;
         findMasterCounterpart(element: IUIElement): IUIElement;
         addDroppedElements(dropTarget: IContainer, elements: IUIElement[], e: IMouseEventData): void;
         findSelectionTarget(element: IUIElement): IUIElement;

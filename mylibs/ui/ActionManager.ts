@@ -25,8 +25,6 @@ import platform from "../platform/Platform";
 import CombinePaths from "../commands/CombinePaths";
 import GroupContainer from "../framework/GroupContainer";
 import InteractiveContainer from "../framework/InteractiveContainer";
-import GroupInRepeater from "../framework/repeater/GroupInRepeater";
-import UngroupRepeater from "../framework/repeater/UngroupRepeater";
 import Selection from "../framework/SelectionModel";
 import EventHelper from "../framework/EventHelper";
 import { IActionManager, IAction, IApp, IUIElement, IEvent, IContainer, IIsolatable } from "carbon-core";
@@ -335,14 +333,6 @@ export default class ActionManager implements IActionManager {
             });
             Selection.makeSelection(children);
 
-        });
-
-        this.registerAction("groupInRepeater", "Repeate grid", "Repeater", function () {
-            return GroupInRepeater.run(Selection.getSelection());
-        });
-
-        this.registerAction("ungroupRepeater", "Ungroup grid", "Repeater", function () {
-            return UngroupRepeater.run(Selection.getSelection());
         });
 
         this.registerAction("lock", "Lock", "Lock", function () {

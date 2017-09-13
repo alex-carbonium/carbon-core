@@ -61,6 +61,13 @@ declare module "carbon-model"{
         isDescendantOrSame(other: IUIElement): boolean;
         select(multi?: boolean): void;
         unselect(): void;
+
+        hitVisible(): boolean;
+        hitTransparent(): boolean;
+
+        canDrag(value?: boolean): boolean;
+
+        resetGlobalViewCache();
     }
 
     export interface IUIElementProps extends IDataNodeProps {
