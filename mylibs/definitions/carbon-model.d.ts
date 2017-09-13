@@ -40,7 +40,12 @@ declare module "carbon-model" {
 
     export const DataNode: {
         getImmediateChildById<T extends IDataNode>(container: any, id: string, materialize?: boolean): T | null;
-    };
+    }
+
+    export type LayoutProps = {
+        br: IRect,
+        m: IMatrix
+    }
 
     export interface IUIElementProps extends IDataNodeProps {
         name: string;
@@ -136,6 +141,10 @@ declare module "carbon-model" {
         clone(): IUIElement;
 
         drawBoundaryPath(context: IContext, round?: boolean);
+
+        selectLayoutProps(global?: boolean): LayoutProps;
+
+        performArrange(arrangeEvent?, mode?: ChangeMode): void;
     }
 
     export interface IContainerProps extends IUIElementProps {

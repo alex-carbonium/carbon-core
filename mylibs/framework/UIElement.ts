@@ -36,7 +36,7 @@ import { PropertyDescriptor } from './PropertyMetadata';
 import { KeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
-import { ChangeMode, LayerTypes, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags } from "carbon-core";
+import { ChangeMode, LayerTypes, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps } from "carbon-core";
 import ExtensionPoint from "./ExtensionPoint";
 import CoreIntl from "../CoreIntl";
 import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
@@ -184,7 +184,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         this.invalidate(this.runtimeProps.ctxl);
     }
 
-    selectLayoutProps(global?: boolean): Partial<IUIElementProps> {
+    selectLayoutProps(global?: boolean): LayoutProps {
         let m = global ? this.globalViewMatrix() : this.viewMatrix();
         return {
             br: this.boundaryRect(),

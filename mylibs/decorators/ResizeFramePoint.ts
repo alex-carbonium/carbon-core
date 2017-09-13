@@ -71,8 +71,7 @@ export default {
     release: function (frame) {
         if (frame.element) {
             var newSnapshot = TransformationHelper.getPropSnapshot(frame.elements);
-            TransformationHelper.applyPropSnapshot(frame.elements, frame.snapshot, ChangeMode.Self);
-            TransformationHelper.applyPropSnapshot(frame.elements, newSnapshot, ChangeMode.Model);
+            TransformationHelper.moveBetweenSnapshots(frame.elements, frame.snapshot, newSnapshot);
 
             //frame.resizingElement.saveChanges();
             // frame.resizingElement.detach();
