@@ -98,7 +98,7 @@ export default class PathTool extends Tool {
         }
     }
 
-    mousedown(event: IMouseEventData, keys: KeyboardState) {
+    mousedown(event: IMouseEventData) {
         if (this._pathElement.runtimeProps.inserted && (!this._pathElement.parent() || this._pathElement.parent() === NullContainer)) {
             this._createNewPath();
         }

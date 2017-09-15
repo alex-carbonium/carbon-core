@@ -794,7 +794,7 @@ export default class ViewBase { //TODO: implement IView
         var layers = this.layers
         for (var i = layers.length - 1; i >= 0; --i) {
             var layer = layers[i];
-            if (!layer.hitTransparent() && layer.canAccept(element)) {
+            if (!layer.hitTransparent() && layer.canAccept([element])) {
                 layer.dropToLayer(x, y, element);
                 return;
             }

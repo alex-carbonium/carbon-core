@@ -9,7 +9,7 @@ import Brush from "../Brush";
 import Environment from "../../environment";
 import UserSettings from "../../UserSettings";
 import Matrix from "../../math/matrix";
-import { ChangeMode, IMatrix, IContainer } from "carbon-core";
+import { ChangeMode, IMatrix, IContainer, IMouseEventData, IPoint } from "carbon-core";
 import Selection from "framework/SelectionModel";
 import CompositeElement from "../CompositeElement";
 import Duplicate from "commands/Duplicate";
@@ -19,20 +19,15 @@ import BoundaryPathDecorator from "../../decorators/BoundaryPathDecorator";
 
 var debug = require("DebugUtil")("carb:draggingElement");
 
-function applyOrthogonalMove(pos) {
-    if (Math.abs(this._initialPosition.x - pos.x) > Math.abs(this._initialPosition.y - pos.y)) {
-        pos.y = this._initialPosition.y;
-    } else {
-        pos.x = this._initialPosition.x;
-    }
-}
-
 const DraggingDecorator = new BoundaryPathDecorator(true);
 
-class DraggingElement extends CompositeElement {
+export class DraggingElement extends CompositeElement {
     private activeDecorators = [];
+    private _capturePoint: IPoint;
+    private _initialPosition: IPoint;
+    private _translation: Point;
 
-    constructor(elementOrComposite, event) {
+    constructor(elementOrComposite, event: IMouseEventData) {
         super();
 
         var elements: UIElement[] = elementOrComposite instanceof CompositeElement ? elementOrComposite.elements : [elementOrComposite];
@@ -53,36 +48,26 @@ class DraggingElement extends CompositeElement {
 
         this.performArrange();
 
-        var initialPosition = this.getBoundingBox();
-        var initialPositionGlobal = this.getBoundingBoxGlobal();
+        this._capturePoint = new Point(event.x, event.y);
+        this._initialPosition = this.getBoundingBoxGlobal().topLeft();
+        this._translation = new Point(0, 0);
 
-        this._globalOffsetX = initialPositionGlobal.x - initialPosition.x;
-        this._globalOffsetY = initialPositionGlobal.y - initialPosition.y;
-        this._initialPosition = initialPositionGlobal;
+        let snappingTarget = elementOrComposite.first().parent().primitiveRoot()
+            || Environment.view.page.getActiveArtboard()
+            || Environment.view.page;
 
-        let snappingTarget = elementOrComposite.first().parent().primitiveRoot() || Environment.view.page.getActiveArtboard();
         this._snappingTarget = snappingTarget;
 
         var holdPcnt = Math.round((event.x - this.x()) * 100 / this.width());
         this._ownSnapPoints = SnapController.prepareOwnSnapPoints(this, holdPcnt);
 
-        this._translation = new Point(0, 0);
-        this._currentPosition = new Point(0, 0);
-
         this._propSnapshot = this.getPropSnapshot();
 
-        this.altChanged(event.event.altKey); // it will also update snapping
+        this.altChanged(event.altKey); // it will also update snapping
     }
 
     wrapSingleChild() {
         return false;
-    }
-
-    createClone(element) {
-        if (element.cloneWhenDragging()) {
-            return element.clone();
-        }
-        return super.createClone(element);
     }
 
     displayName() {
@@ -114,7 +99,6 @@ class DraggingElement extends CompositeElement {
 
     stopDragging(event, draggingOverElement, page) {
         var artboards = page.getAllArtboards();
-        var elements = [];
 
         for (var i = 0; i < this.children.length; ++i) {
             var element = this.children[i];
@@ -156,13 +140,9 @@ class DraggingElement extends CompositeElement {
 
             this.applyElementSnapshot(this._propSnapshot, element, ChangeMode.Self);
             this.dropElementOn(event, parent, source, element.globalViewMatrix(), index);
-
-            elements.push(source);
         }
 
         Selection.refreshSelection();
-
-        return elements;
     }
 
     propsUpdated(newProps, oldProps, mode) {
@@ -212,26 +192,38 @@ class DraggingElement extends CompositeElement {
         SnapController.calculateSnappingPoints(this._snappingTarget, this);
     }
 
-    _updateCurrentPosition(event) {
-        this._translation.set(event.x + this._globalOffsetX, event.y + this._globalOffsetY);
+    _updateCurrentPosition(event: IMouseEventData) {
+        //this._translation.set(event.x + this._globalOffsetX, event.y + this._globalOffsetY);
+        let x = event.x;
+        let y = event.y;
 
-        if (event.event.shiftKey) {
-            applyOrthogonalMove.call(this, this._translation);
+        if (event.shiftKey) {
+            if (Math.abs(this._capturePoint.x - x) > Math.abs(this._capturePoint.y - y)) {
+                y = this._capturePoint.y;
+            }
+            else {
+                x = this._capturePoint.x;
+            }
+            //applyOrthogonalMove.call(this, this._translation);
         }
 
-        this._currentPosition.set(this._translation.x, this._translation.y);
+        //this._currentPosition.set(this._translation.x, this._translation.y);
 
-        var roundToPixels = !event.event.ctrlKey && UserSettings.snapTo.enabled && UserSettings.snapTo.pixels;
+        this._translation.set(x - this._capturePoint.x, y - this._capturePoint.y);
+
+        let roundToPixels = !event.ctrlKey && UserSettings.snapTo.enabled && UserSettings.snapTo.pixels;
         if (roundToPixels) {
-            this._currentPosition.roundMutable();
+            this._translation.roundMutable();
         }
 
-        if (this.parentAllowSnapping(event) && !(event.event.ctrlKey || event.event.metaKey)) {
-            var snapped = SnapController.applySnapping(this._currentPosition, this._ownSnapPoints);
-            if (this._currentPosition !== snapped) {
-                this._currentPosition.set(snapped.x, snapped.y);
+        let newPosition = Point.allocate(this._initialPosition.x + this._translation.x, this._initialPosition.y + this._translation.y);
+
+        if (this.parentAllowSnapping(event) && !event.ctrlKey) {
+            let snapped = SnapController.applySnapping(newPosition, this._ownSnapPoints);
+            if (!newPosition.equals(snapped)) {
+                this._translation.set(this._translation.x + snapped.x - newPosition.x, this._translation.y + snapped.y - newPosition.y);
                 if (roundToPixels) {
-                    this._currentPosition.roundMutable();
+                    this._translation.roundMutable();
                 }
             }
         }
@@ -239,7 +231,7 @@ class DraggingElement extends CompositeElement {
             SnapController.clearActiveSnapLines();
         }
 
-        this._translation.set(this._currentPosition.x - this._initialPosition.x, this._currentPosition.y - this._initialPosition.y);
+        newPosition.free();
     }
 
     dragTo(event) {
@@ -248,9 +240,9 @@ class DraggingElement extends CompositeElement {
         this._updateCurrentPosition(event);
 
         for (var e of this.children) {
-            e.applyTranslation(this._translation, true, ChangeMode.Self);
-            this.applyTranslation(this._translation, true, ChangeMode.Self);
+            e.applyGlobalTranslation(this._translation, true, ChangeMode.Self);
         }
+        this.applyGlobalTranslation(this._translation, true, ChangeMode.Self);
     }
 
     constraints() {
@@ -262,15 +254,11 @@ class DraggingElement extends CompositeElement {
     }
 
     parentAllowSnapping(pos) {
-        return this.children.every(x => x.parent() === this || x.parent().getDropData(x, pos) === null);
-    }
-
-    isDropSupported() {
-        return this.children.every(x => x.isDropSupported());
+        return this.children.every(x => x.parent().getDropData(x, pos) === null);
     }
 
     allowMoveOutChildren(event) {
-        return this.children.every(x => x.parent() === this || x.parent().allowMoveOutChildren(undefined, event));
+        return this.children.every(x => x.parent().allowMoveOutChildren(undefined, event));
     }
 }
 
@@ -281,5 +269,3 @@ PropertyMetadata.registerForType(DraggingElement, {
         defaultValue: Brush.createFromColor(UserSettings.frame.stroke)
     }
 });
-
-export default DraggingElement;

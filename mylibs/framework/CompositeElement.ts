@@ -249,7 +249,7 @@ export default class CompositeElement extends UIElement implements IComposite {
     getPropSnapshot() {
         var snapshot = {};
         for (var e of this.children) {
-            snapshot[e.id()] = extend({}, e.selectLayoutProps());
+            snapshot[e.id()] = e.selectLayoutProps();
         }
 
         return snapshot;
@@ -300,6 +300,10 @@ export default class CompositeElement extends UIElement implements IComposite {
 
     first() {
         return this.elements[0];
+    }
+
+    showResizeHint() {
+        return true;
     }
 
     resizeDimensions() {

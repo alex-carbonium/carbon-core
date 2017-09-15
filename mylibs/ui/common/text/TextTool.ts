@@ -21,7 +21,7 @@ import Invalidate from "../../../framework/Invalidate";
 import Environment from "../../../environment";
 import { getAverageLuminance } from "../../../math/color";
 import Rect from "../../../math/rect";
-import { ChangeMode, IMouseEventData, IElementEventData, VerticalConstraint, HorizontalConstraint, IDisposable, TextMode, IRect, TextAlign } from "carbon-core";
+import { ChangeMode, IMouseEventData, VerticalConstraint, HorizontalConstraint, IDisposable, TextMode, IRect, TextAlign, IUIElement } from "carbon-core";
 import UserSettings from "../../../UserSettings";
 import Point from "../../../math/point";
 import Symbol from "../../../framework/Symbol";
@@ -237,8 +237,8 @@ export default class TextTool extends Tool {
         }
     }
     //occurs in the end to start editing dblclicked element
-    onDblClickElement = (e: IElementEventData) => {
-        var hit = e.element;
+    onDblClickElement = (e: IMouseEventData, element: IUIElement) => {
+        var hit = element;
         if (hit instanceof Text && this._app.currentTool !== ViewTool.Text) {
             this._onAttached = () => { this.beginEdit(hit as Text, e); };
             this._app.actionManager.invoke("textTool");

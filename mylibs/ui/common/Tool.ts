@@ -62,11 +62,11 @@ export default class Tool {
     view() {
         return this._view;
     }
-    mousedown(event: IMouseEventData, keys: KeyboardState) {
+    mousedown(event: IMouseEventData) {
     }
-    mouseup(event: IMouseEventData, keys: KeyboardState) {
+    mouseup(event: IMouseEventData) {
     }
-    mousemove(event: IMouseEventData, keys: KeyboardState) {
+    mousemove(event: IMouseEventData) {
         if (!event.handled) {
             var cursor = this.defaultCursor();
             if (cursor) {
@@ -81,7 +81,7 @@ export default class Tool {
     dragElementEnded() {
     }
 
-    click(event: IMouseEventData, keys: KeyboardState) {
+    click(event: IMouseEventData) {
         event.handled = true;
     }
 

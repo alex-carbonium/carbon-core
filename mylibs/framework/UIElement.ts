@@ -324,7 +324,10 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         this.applyTransform(Matrix.create().translate(t.x, t.y), true, mode);
     }
 
-    applyGlobalTranslation(t, changeMode?: ChangeMode) {
+    applyGlobalTranslation(t, withReset?: boolean, changeMode?: ChangeMode) {
+        if (withReset) {
+            this.saveOrResetLayoutProps(changeMode);
+        }
         let m = this.globalViewMatrix().prependedWithTranslation(t.x, t.y);
         m = this.parent().globalViewMatrixInverted().appended(m);
         this.setTransform(m, changeMode);
@@ -546,18 +549,12 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     //
     //     return this._lastDrawnRect;
     // },
-    draggingEnter(event) {
-    }
-    draggingLeft(event) {
-    }
+    // draggingEnter(event) {
+    // }
+    // draggingLeft(event) {
+    // }
     getDropData(pos, element) {
         return null;
-    }
-    startResizing(eventData) {
-        Environment.controller.startResizingEvent.raise(eventData);
-    }
-    stopResizing(eventData) {
-        Environment.controller.stopResizingEvent.raise(eventData);
     }
     canHandleCorruption() {
         return false;
@@ -1020,14 +1017,14 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             }
         }
     }
-    mousemove(event, keys: KeyboardState) {
+    mousemove(event) {
         if (this.editor !== null) {
             event.handled = true;
         }
     }
-    mouseup(event, keys: KeyboardState) {
+    mouseup(event) {
     }
-    mousedown(event, keys: KeyboardState) {
+    mousedown(event) {
     }
     dblclick(event, scale) {
     }
@@ -1082,7 +1079,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     x(value?: number, changeMode?: ChangeMode) {
         if (arguments.length !== 0) {
             let t = Point.create(value - this.x(), 0);
-            this.applyGlobalTranslation(t, changeMode);
+            this.applyGlobalTranslation(t, false, changeMode);
 
             return;
         }
@@ -1097,7 +1094,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     y(value?: number, changeMode?: ChangeMode) {
         if (arguments.length !== 0) {
             let t = Point.create(0, value - this.y());
-            this.applyGlobalTranslation(t, changeMode);
+            this.applyGlobalTranslation(t, false, changeMode);
 
             return;
         }
@@ -1379,20 +1376,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     scalableY(value) {
         return this.field("_scalableY", value, true);
     }
-    isDropSupported(value?) {
-        return true;
-    }
     showResizeHint() {
-        return true;
-    }
-    showDropTarget() {
         return true;
     }
     activeInPreview(value) {
         return this.field("_activeInPreview", value, false);
-    }
-    cloneWhenDragging() {
-        return false;
     }
     visibleWhenDrag(value) {
         if (value !== undefined) {

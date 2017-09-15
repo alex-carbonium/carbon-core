@@ -168,7 +168,7 @@ export default class LinkingTool extends Tool {
         }
     }
 
-    click(event: IMouseEventData, keys: KeyboardState) {
+    click(event: IMouseEventData) {
         // this method should be empty
     }
 

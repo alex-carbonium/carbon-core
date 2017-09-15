@@ -279,7 +279,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         this.path.invalidate();
     }
 
-    mouseup(event: IMouseEventData, keys: KeyboardState) {
+    mouseup(event: IMouseEventData) {
         delete this._altPressed;
         let path: Path = this.element;
 
@@ -318,7 +318,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         SnapController.calculateSnappingPointsForPath(this.path);
     }
 
-    mousedown(event: IMouseEventData, keys: KeyboardState) {
+    mousedown(event: IMouseEventData) {
         let x = event.x,
             y = event.y;
 
@@ -328,7 +328,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
 
         let pt = path.controlPointForPosition(event);
 
-        if (pt && keys.shiftKey) {
+        if (pt && event.shiftKey) {
             this.addToSelectedPoints(pt);
         } else if (!pt || !this._selectedPoints[pt.idx]) {
             this.clearSelectedPoints();
@@ -341,7 +341,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         if (!event.handled && pt) {
             if (!event.handled && this.constructMode && (!this.path.closed() && pt === this._startSegmentPoint)) {
                 this._closeCurrentPath(pt);
-            } else if (keys.altKey) {
+            } else if (event.altKey) {
                 this._altPressed = true;
                 this._handlePoint = pt;
                 this._handlePoint._selectedHandle = 0;
@@ -363,7 +363,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         }
 
         if (!event.handled && this._pointOnPath) {
-            if (keys.shiftKey) {
+            if (event.shiftKey) {
                 let data = path.getInsertPointData(this._pointOnPath);
                 let newPoint = null;
                 if (data.length === 1) {
@@ -399,7 +399,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
             }
 
             this._mousepressed = true;
-            this._addNewPathPoint(event, keys);
+            this._addNewPathPoint(event);
             event.handled = true;
         }
 
@@ -413,7 +413,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         }
     }
 
-    mousemove(event: IMouseEventData, keys: KeyboardState) {
+    mousemove(event: IMouseEventData) {
         let pos = { x: event.x, y: event.y };
         let path: Path = this.element;
         let view = Environment.view;
@@ -425,7 +425,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
             return;
         }
 
-        if (!keys.ctrlKey) {
+        if (!event.ctrlKey) {
             pos = SnapController.applySnappingForPoint(pos);
         }
         pos = path.globalViewMatrixInverted().transformPoint(pos);
@@ -462,7 +462,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
                 y = pt.y;
             let x2, y2;
 
-            if (keys.shiftKey) {
+            if (event.shiftKey) {
                 let point = angleAdjuster.adjust({ x: pt.x, y: pt.y }, { x: newX, y: newY });
                 newX = point.x;
                 newY = point.y;
@@ -528,7 +528,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
             }
         }
 
-        this._updateCursor(event, keys);
+        this._updateCursor(event);
     }
 
     beforeInvoke(method:string, args:any[]) {
@@ -576,7 +576,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         return true;
     }
 
-    _updateCursor(event, keys) {
+    _updateCursor(event: IMouseEventData) {
         let x = event.x, y = event.y;
         let path = this.path;
         let pt = path.controlPointForPosition(event);
@@ -589,7 +589,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         if (this.constructMode && !this.path.closed() && (this.hoverPoint === this._startSegmentPoint)) {
             event.cursor = Cursors.Pen.ClosePath;
         }
-        else if (this.isHoveringOverHandle() || (this.isHoveringOverPoint() && keys.altKey)) {
+        else if (this.isHoveringOverHandle() || (this.isHoveringOverPoint() && event.altKey)) {
             event.cursor = Cursors.Pen.MoveHandle;
             this.nextPoint = null;
             this._startPoint = null;
@@ -600,7 +600,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
             this._startPoint = null;
         }
         else if (this.isHoveringOverSegment()) {
-            event.cursor = keys.shift ? Cursors.Pen.AddPoint : Cursors.Pen.MoveSegment;
+            event.cursor = event.shiftKey ? Cursors.Pen.AddPoint : Cursors.Pen.MoveSegment;
             this.nextPoint = null;
             this._startPoint = null;
         }
@@ -808,10 +808,10 @@ export default class PathManipulationObject extends UIElementDecorator implement
         }
     }
 
-    _addNewPathPoint(event: IMouseEventData, keys: KeyboardState) {
+    _addNewPathPoint(event: IMouseEventData) {
         let pos;
 
-        if (!keys.ctrlKey) {
+        if (!event.ctrlKey) {
             pos = SnapController.applySnappingForPoint(event);
         } else {
             pos = event;

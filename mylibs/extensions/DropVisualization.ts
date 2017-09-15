@@ -12,19 +12,19 @@ import Layer from "framework/Layer";
 import Container from "../framework/Container";
 import Environment from "../environment";
 import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
-import { ITransformationElement, ITransformationEventData, IPoint, KeyboardState } from "carbon-core";
+import { IPoint, KeyboardState } from "carbon-core";
 import UserSettings from "../UserSettings";
 import Point from "../math/point";
 import Matrix from "../math/matrix";
 import { FloatingPointPrecision, ArrangeStrategies } from "../framework/Defs";
 import { LayerTypes } from "carbon-app";
-import { IUIElement, ChangeMode, IIsolationLayer } from "carbon-core";
+import { IUIElement, ChangeMode, IIsolationLayer, IMouseEventData, IController, IComposite, IContainer } from "carbon-core";
 import BoundaryPathDecorator, { HighlightKind } from "../decorators/BoundaryPathDecorator";
 
 var HighlightBrush = Brush.createFromColor(SharedColors.Highlight);
 
 class ResizeHint extends UIElement {
-    _transformationElement: ITransformationElement;
+    _transformationElement: IUIElement;
 
     constructor() {
         super();
@@ -35,7 +35,7 @@ class ResizeHint extends UIElement {
         this._transformationElement = null;
     }
 
-    start(transformationElement: ITransformationElement) {
+    start(transformationElement: IUIElement) {
         this._transformationElement = transformationElement;
 
     }
@@ -47,7 +47,7 @@ class ResizeHint extends UIElement {
     }
 
     _updatePosition(): void {
-        var anchorElement: any = this._transformationElement;
+        var anchorElement = this._transformationElement;
         // if (anchorElement.elements.length === 1 && !anchorElement.wrapSingleChild()) {
         //     //rotated elements are not wrapped when dragging
         //     anchorElement = this._transformationElement.children[0];
@@ -65,7 +65,7 @@ class ResizeHint extends UIElement {
         this.setProps({ width: p1.getDistance(p0), m: matrix }, ChangeMode.Self);
     }
 
-    _findBestPoints(element: UIElement): Point[] {
+    _findBestPoints(element: IUIElement): Point[] {
         var result = [];
 
         var gm = element.globalViewMatrix();
@@ -225,45 +225,38 @@ class SelectionRect extends UIElement {
     }
 }
 
-var onDraggingElement = function (event: any, keys: KeyboardState) {
-    if (event.transformationElement.showResizeHint()) {
+var onDraggingElement = function (event: IMouseEventData, draggingElement: IComposite, target: IContainer) {
+    if (draggingElement.showResizeHint()) {
         this._hint.updatePositionText();
     }
 
-    if (event.transformationElement.isDropSupported()
-        && event.target !== null
-        && event.target.canAccept(event.draggingElement.elements, false, keys.ctrlKey)
-        && !(event.target instanceof Layer)
-        && event.transformationElement.allHaveSameParent()
-    ) {
-        this._target = event.target !== event.transformationElement.elements[0].parent() ? event.target : null;
-        this._dropData = event.target.getDropData({ x: event.mouseX, y: event.mouseY }, event.transformationElement);
-        this._isDropTarget = true;
-    } else {
-        var parent = event.draggingElement.elements[0].parent();
-        if (parent.allowRearrange()) {
-            this._target = null;
-            this._dropData = parent.getDropData({ x: event.mouseX, y: event.mouseY }, event.transformationElement);
+    this._target = null;
+    this._dropData = null;
+
+    if (target) {
+        let targetIsParent = draggingElement.elements.some(x => x.parent() === target);
+        if (!targetIsParent) {
+            this._target = target;
             this._isDropTarget = true;
-        } else {
-            this._target = null;
-            this._dropData = null;
+        }
+        if (target.allowRearrange()) {
+            this._dropData = target.getDropData(event, draggingElement);
         }
     }
 
     updateVisualizations.call(this);
 };
 
-var onStartDragging = function (event: ITransformationEventData) {
+var onStartDragging = function (event: IMouseEventData, element: IUIElement) {
     this._dragging = true;
     this._target = null;
-    if (event.transformationElement.showResizeHint()) {
-        this._hint.start(event.transformationElement);
+    if (element.showResizeHint()) {
+        this._hint.start(element);
         this._hint.updatePositionText();
     }
 };
 
-var onStopDragging = function (event) {
+var onStopDragging = function (event: IMouseEventData) {
     this._dropData = null;
     this._target = null;
     this._isDropTarget = false;
@@ -273,7 +266,7 @@ var onStopDragging = function (event) {
     Invalidate.requestInteractionOnly();
 };
 
-var onMouseMove = function (event) {
+var onMouseMove = function (event: IMouseEventData) {
     if (this._dragging || this._resizing || this._rotating || !App.Current.allowSelection() || this._selection !== undefined) {
         return;
     }
@@ -380,10 +373,10 @@ function onSelectionFrameStop() {
     delete this._selectionControls;
 }
 
-function onStartResizing(event: ITransformationEventData) {
+function onStartResizing(event: IMouseEventData, element: IUIElement) {
     this._resizing = true;
-    if (event.transformationElement.showResizeHint()) {
-        this._hint.start(event.transformationElement);
+    if (element.showResizeHint()) {
+        this._hint.start(element);
         this._hint.updateSizeText();
     }
     updateVisualizations.call(this);
@@ -395,15 +388,15 @@ function onStopResizing() {
     updateVisualizations.call(this);
 }
 
-function onResizing(event: any) {
-    if (event.transformationElement.showResizeHint()) {
+function onResizing(event: IMouseEventData, element: IUIElement) {
+    if (element.showResizeHint()) {
         this._hint.updateSizeText();
     }
 }
 
-function onStartRotating(event: ITransformationEventData) {
+function onStartRotating(event: IMouseEventData, element: IUIElement) {
     this._rotating = true;
-    this._hint.start(event.transformationElement);
+    this._hint.start(element);
     this._hint.updateAngleText();
     updateVisualizations.call(this);
 }
@@ -414,14 +407,14 @@ function onStopRotating() {
     updateVisualizations.call(this);
 }
 
-function onRotating(event: any) {
-    if (event.transformationElement.showResizeHint()) {
+function onRotating(event: IMouseEventData, element: IUIElement) {
+    if (element.showResizeHint()) {
         this._hint.updateAngleText();
     }
 }
 
 var appLoaded = function () {
-    var controller = this.controller;
+    var controller = this.controller as IController;
     if (!controller) {
         return;
     }

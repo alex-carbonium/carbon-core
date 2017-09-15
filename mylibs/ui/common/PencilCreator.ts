@@ -135,8 +135,8 @@ export default class PencilCreator extends Tool {
             App.Current.resetCurrentTool();
         }
     }
-    mousemove(event: IMouseEventData, keys: KeyboardState) {
-        super.mousemove(event, keys);
+    mousemove(event: IMouseEventData) {
+        super.mousemove(event);
 
         if (this._mousepressed) {
             var x = event.x

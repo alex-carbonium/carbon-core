@@ -64,9 +64,9 @@ declare module "carbon-model" {
     }
 
     export interface IMouseEventHandler {
-        mousemove(event: IMouseEventData, keys: KeyboardState);
-        mouseup(event: IMouseEventData, keys: KeyboardState);
-        mousedown(event: IMouseEventData, keys: KeyboardState);
+        mousemove(event: IMouseEventData);
+        mouseup(event: IMouseEventData);
+        mousedown(event: IMouseEventData);
         dblclick(event: IMouseEventData, scale: number);
         click(event: IMouseEventData);
     }
@@ -178,7 +178,18 @@ declare module "carbon-model" {
 
         allowRearrange(): boolean;
         performArrange(arrangeEvent?, mode?: ChangeMode): void;
+
+        getDropData(event: IMouseEventData, element: IUIElement): DropData;
     }
+
+    export type DropData = {
+        x1: number;
+        x2: number;
+        y1: number;
+        y2: number;
+        index: number;
+    }
+
     export const Container: IConstructor<IContainer>;
 
     export interface IGroupContainer extends IContainer {
@@ -219,12 +230,6 @@ declare module "carbon-model" {
 
         allHaveSameParent(): boolean;
         autoPositionChildren(): boolean;
-    }
-
-    export interface ITransformationElement extends IComposite, IGroupContainer {
-        angle(): number;
-        x(): number;
-        y(): number;
     }
 
     export interface IIsolatable extends IContainer {
@@ -274,15 +279,6 @@ declare module "carbon-model" {
     export interface IGuide {
         id: string;
         pos: number;
-    }
-
-    export interface ITransformationEventData extends IEventData {
-        transformationElement: ITransformationElement;
-        element?: IUIElement;
-    }
-
-    export interface IElementEventData extends IMouseEventData {
-        element: IUIElement;
     }
 
     export const enum ImageSourceType {

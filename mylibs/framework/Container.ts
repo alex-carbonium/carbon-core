@@ -610,14 +610,14 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     canAccept(elements, autoInsert, allowMoveInOut) {
         return this.primitiveRoot().isEditable() && elements.every(x => x.canBeAccepted(this));
     }
-    mousedown(event, keys: KeyboardState) {
+    mousedown(event) {
         super.mousedown.call(this, event); //to hide inplace editor
         this.delegateToChildren("mousedown", event);
     }
-    mousemove(event, keys: KeyboardState) {
+    mousemove(event) {
         this.delegateToChildren("mousemove", event);
     }
-    mouseup(event, keys: KeyboardState) {
+    mouseup(event) {
         this.delegateToChildren("mouseup", event);
     }
     dblclick(event, scale) {
@@ -631,7 +631,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     delegateToChildren(name, event) {
         for (let i = this.children.length - 1; i >= 0; --i) {
             let element = this.children[i];
-            if (element.hitTest(event.x, event.y, event._scale)) {
+            if (element.hitTest(event, Environment.view.scale())) {
                 element[name](event);
                 if (event.handled) {
                     break;

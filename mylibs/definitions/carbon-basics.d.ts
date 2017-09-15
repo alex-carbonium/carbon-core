@@ -22,7 +22,6 @@ declare module "carbon-basics" {
     export interface IMouseEventData extends IEventData, KeyboardState {
         x: number;
         y: number;
-        isDragging: boolean;
         cursor?: string;
         event?:MouseEvent;
     }

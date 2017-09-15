@@ -102,7 +102,6 @@ export default {
     "choosePasteLocation": require("./framework/PasteLocator").choosePasteLocation,
 
     "SelectComposite": require("./framework/SelectComposite"),
-    "DraggingElement": require("./framework/interactions/DraggingElement"),
     "SelectFrame": require("./framework/SelectFrame"),
     "Layer": require("./framework/Layer"),
 

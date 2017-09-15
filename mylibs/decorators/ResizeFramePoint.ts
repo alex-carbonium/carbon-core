@@ -6,7 +6,7 @@ import { Types, FrameCursors } from "../framework/Defs";
 import Point from "../math/point";
 import Rect from "../math/rect";
 import UserSettings from "../UserSettings";
-import { ChangeMode } from "carbon-core";
+import { ChangeMode, IMouseEventData } from "carbon-core";
 import TransformationHelper from "../framework/interactions/TransformationHelper";
 import BoundaryPathDecorator from "./BoundaryPathDecorator";
 
@@ -31,7 +31,7 @@ export default {
         context.fill();
         context.stroke();
     },
-    capture: function (frame, point) {
+    capture: function (frame, point, event: IMouseEventData) {
         frame.globalViewMatrix = frame.element.globalViewMatrix();
         frame.isRotated = frame.element.isRotated(true);
         let elements;
@@ -65,7 +65,7 @@ export default {
         frame.childrenCount = frame.element.children?frame.element.children.length:-1;
 
         //Environment.view.interactionLayer.add(resizingElement);
-        frame.element.startResizing({ transformationElement: frame.element });
+        Environment.controller.startResizingEvent.raise(event, frame.element);
         if (frame.element.decorators) {
             frame.element.decorators.forEach(x => x.visible(false));
         }
@@ -73,7 +73,7 @@ export default {
         frame.element.addDecorator(ResizeDecorator);
         frame.element.invalidate();
     },
-    release: function (frame) {
+    release: function (frame, point, event: IMouseEventData) {
         if (frame.element) {
             var newSnapshot = TransformationHelper.getPropSnapshot(frame.elements);
             TransformationHelper.moveBetweenSnapshots(frame.elements, frame.snapshot, newSnapshot);
@@ -81,7 +81,8 @@ export default {
             //frame.resizingElement.saveChanges();
             // frame.resizingElement.detach();
             //ImageContent depends on event fired in the end
-            frame.element.stopResizing({ transformationElement: frame.element });
+            //frame.element.stopResizing({ transformationElement: frame.element });
+            Environment.controller.stopResizingEvent.raise(event, frame.element);
             frame.element.clearSavedLayoutProps();
             delete frame.globalViewMatrix;
             frame.element.removeDecorator(ResizeDecorator);
@@ -95,7 +96,7 @@ export default {
         var dc = ~~(((360 - angle + 23) % 360) / 45);
         return (index + dc) % 8;
     },
-    change: function (frame, dx, dy, point, mousePoint, keys) {
+    change: function (frame, dx, dy, point, mousePoint, keys, event: IMouseEventData) {
         var rv = point.rv;
 
         if (keys.shiftKey && frame.originalRect.width && frame.originalRect.height) {
@@ -171,10 +172,6 @@ export default {
             SnapController.calculateSnappingPoints(frame.element.parent().primitiveRoot(), frame.element);
         }
 
-        Environment.controller.resizingEvent.raise({
-            element: frame.element,
-            transformationElement: frame.element,
-            handled: false
-        });
+        Environment.controller.resizingEvent.raise(event, frame.element);
     }
 }

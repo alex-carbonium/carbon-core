@@ -67,19 +67,19 @@ export default class ArtboardsTool extends Tool {
         }
     }
 
-    mousedown(event: IMouseEventData, keys: KeyboardState) {
+    mousedown(event: IMouseEventData) {
         this._cursorNotMoved = true;
 
         var artboard = this._app.activePage.getArtboardAtPoint(event);
         if (artboard){
             if (!Selection.isElementSelected(artboard)){
-                this._selectByClick(event, keys);
+                this._selectByClick(event);
             }
             return true;
         }
 
         this._mousepressed = true;
-        this._prepareMousePoint(event, keys);
+        this._prepareMousePoint(event);
 
         this._startPoint = {x: this._point.x, y: this._point.y};
         this._nextPoint = {x: this._point.x, y: this._point.y};
@@ -101,7 +101,7 @@ export default class ArtboardsTool extends Tool {
         return false;
     }
 
-    mouseup(event: IMouseEventData, keys: KeyboardState) {
+    mouseup(event: IMouseEventData) {
         this._mousepressed = false;
         this._ratioResizeInfo = null;
 
@@ -125,7 +125,7 @@ export default class ArtboardsTool extends Tool {
         }
     }
 
-    mousemove(event: IMouseEventData, keys: KeyboardState) {
+    mousemove(event: IMouseEventData) {
         if (event.cursor){ //active frame
             return true;
         }
@@ -139,14 +139,14 @@ export default class ArtboardsTool extends Tool {
             return true;
         }
 
-        this._prepareMousePoint(event, keys);
+        this._prepareMousePoint(event);
 
         if (this._mousepressed) {
             if (this._cursorNotMoved) {
                 this._cursorNotMoved = (this._point.y === this._startPoint.y) && (this._point.x === this._startPoint.x);
             }
             //if use holds shift, we must fit shape into square
-            if (keys.shiftKey) {
+            if (event.shiftKey) {
                 var height = Math.abs(this._point.y - this._startPoint.y);
                 var width = Math.abs(this._point.x - this._startPoint.x);
                 var ration = Math.min(height, width);
@@ -165,13 +165,13 @@ export default class ArtboardsTool extends Tool {
         }
     }
 
-    click(event: IMouseEventData, keys: KeyboardState){
-        this._selectByClick(event, keys);
+    click(event: IMouseEventData){
+        this._selectByClick(event);
 
         event.handled = true;
     }
 
-    _selectByClick(event: IMouseEventData, keys: KeyboardState){
+    _selectByClick(event: IMouseEventData){
         var artboard = this._app.activePage.getArtboardAtPoint(event);
 
         if (artboard !== null) {
@@ -182,9 +182,9 @@ export default class ArtboardsTool extends Tool {
         }
     }
 
-    _prepareMousePoint(event: IMouseEventData, keys: KeyboardState) {
+    _prepareMousePoint(event: IMouseEventData) {
         this._point.set(event.x, event.y);
-        if (!keys.ctrlKey) {
+        if (!event.ctrlKey) {
             var snapped = SnapController.applySnappingForPoint(this._point);
             if (snapped !== this._point) {
                 this._point.set(snapped.x, snapped.y);

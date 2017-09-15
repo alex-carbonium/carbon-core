@@ -3,6 +3,7 @@ import math from "math/math";
 import Matrix from "math/matrix";
 import PropertyMetadata from "framework/PropertyMetadata";
 import EventHelper from "framework/EventHelper";
+import UIElement from "./UIElement";
 import { Types } from "./Defs";
 import { IContainer, IRect, LayerTypes, IView, ILayer } from "carbon-core";
 
@@ -100,8 +101,8 @@ class Layer extends Container implements ILayer {
         return this._hitTransparent;
     }
 
-    canAccept() {
-        return true;
+    canAccept(elements: UIElement[]) {
+        return elements.every(x => x.canBeAccepted(this));
     }
 
     clearContext(context) {
@@ -190,10 +191,6 @@ class Layer extends Container implements ILayer {
             x: x,
             y: y
         };
-
-        if (!element.isDropSupported()) {
-            return null;
-        }
 
         var el = this.hitElement(eventData, this.scale());
 

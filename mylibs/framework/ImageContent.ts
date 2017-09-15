@@ -5,9 +5,9 @@ import ActiveFrame from "../decorators/ActiveFrame";
 import PropertyMetadata from "../framework/PropertyMetadata";
 import {Types} from "../framework/Defs";
 import {ContentSizing} from "carbon-model";
-import { ITransformationEventData } from "carbon-core";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
 import CoreIntl from "../CoreIntl";
+import { IMouseEventData, IUIElement } from "carbon-core";
 
 var ContentFrameType = Object.create(DefaultFrameType);
 ContentFrameType.strokeStyle = null;
@@ -74,10 +74,9 @@ export default class ImageContent extends UIElement{
     drawBoundaryPath(context, round) {
     }
 
-    _onStopDragging(event: ITransformationEventData){
-        if (event.transformationElement.elements.length === 1 && event.transformationElement.elements[0] === this){
-            var child: any = event.transformationElement.children[0];
-            this.setProps(child.selectLayoutProps(true));
+    _onStopDragging(event: IMouseEventData, element: IUIElement){
+        if (element === this){
+            this.setProps(element.selectLayoutProps(true));
         }
     }
 
@@ -87,17 +86,11 @@ export default class ImageContent extends UIElement{
     canRotate(){
         return false;
     }
-    isDropSupported(){
-        return false;
-    }
-    showDropTarget(){
+    canBeAccepted() {
         return false;
     }
     showResizeHint(){
         return false;
-    }
-    cloneWhenDragging(){
-        return true;
     }
 }
 
