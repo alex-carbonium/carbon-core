@@ -516,7 +516,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         return this.insert(element, this.children.length, mode);
     }
 
-    insert(/*UIElement*/element, /*int*/index, mode?: ChangeMode): IUIElement {
+    insert(/*UIElement*/element, /*int*/index, mode?: ChangeMode): UIElement {
         this.acquiredChild(element, mode);
 
         this.insertChild(element, index, mode);

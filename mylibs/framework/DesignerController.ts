@@ -236,8 +236,6 @@ export default class DesignerController implements IController {
 
         this.startDraggingEvent.raise(event, this._draggingElement);
         this._draggingOverElement = null;
-
-        PropertyTracker.suspend();
     }
 
     dragging(event: IMouseEventData) {
@@ -290,7 +288,6 @@ export default class DesignerController implements IController {
         if (!this._draggingOverElement) {
             this._draggingElement.detach();
             this.stopDraggingEvent.raise(event, null);
-            PropertyTracker.resumeAndFlush();
             //active frame could have been hidden, show it again now
             Selection.refreshSelection();
             return false;
@@ -300,8 +297,6 @@ export default class DesignerController implements IController {
 
         this.stopDraggingEvent.raise(event, this._draggingElement);
         this._draggingElement.detach();
-
-        PropertyTracker.resumeAndFlush();
     }
 
     isDragging() {
@@ -695,14 +690,11 @@ export default class DesignerController implements IController {
             .catch(e => {
                 this.cancel();
                 this.stopDraggingEvent.raise(null, null);
-            })
-            .finally(() => {
-                PropertyTracker.resumeAndFlush();
             });
     }
 
     insertAndSelect(elements: IUIElement[], parent: IContainer | IComposite, x: number, y: number) {
-        var newSelection = [];
+        var newSelection: UIElement[] = [];
 
         for (let i = 0; i < elements.length; i++) {
             let element = elements[i];
@@ -714,13 +706,17 @@ export default class DesignerController implements IController {
                 }
             }
             else {
-                let container = parent as IContainer;
+                let container = parent as Container;
                 if (!container.autoPositionChildren()) {
                     let newMatrix = element.viewMatrix().withTranslation(Math.round(x), Math.round(y));
                     element.setTransform(container.globalMatrixToLocal(newMatrix));
                 }
                 newSelection.push(container.add(element));
             }
+        }
+
+        for (let i = 0; i < newSelection.length; ++i){
+            newSelection[i].clearSavedLayoutProps();
         }
 
         Selection.makeSelection(newSelection);
@@ -775,9 +771,11 @@ export default class DesignerController implements IController {
     }
 
     onInteractionStarted() {
+        PropertyTracker.suspend();
         this.interactionActive = true;
     }
     onInteractionStopped() {
+        PropertyTracker.resumeAndFlush();
         this.interactionActive = false;
     }
 
