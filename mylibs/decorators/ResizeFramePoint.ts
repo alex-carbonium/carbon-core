@@ -162,8 +162,8 @@ export default {
         if (keys.altKey) {
             // When resizing (for example) text, it can change its width and get misplaced.
             // Therefore, it is checked whether the center is still the same after scaling.
-            let br = frame.originalRect;
-            let c = frame.viewMatrix.transformPoint(br.center());
+            let br = frame.element.boundaryRect();
+            let c = frame.element.viewMatrix().transformPoint(br.center());
             let d = frame.centerOrigin.subtract(c).roundMutable();
             if (d.x || d.y) {
                 frame.element.applyTranslation(d, false, ChangeMode.Self);
