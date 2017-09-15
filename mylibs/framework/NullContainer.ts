@@ -358,6 +358,10 @@ class NullContainer extends DataNode implements IContainer {
     resetGlobalViewCache() {
 
     }
+
+    clearSavedLayoutProps() {
+
+    }
 }
 
 export default new NullContainer();

@@ -694,7 +694,7 @@ export default class DesignerController implements IController {
     }
 
     insertAndSelect(elements: IUIElement[], parent: IContainer | IComposite, x: number, y: number) {
-        var newSelection: UIElement[] = [];
+        var newSelection: IUIElement[] = [];
 
         for (let i = 0; i < elements.length; i++) {
             let element = elements[i];
