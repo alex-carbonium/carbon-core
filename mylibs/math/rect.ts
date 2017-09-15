@@ -1,7 +1,7 @@
 import Point from "./point";
 import LineSegment from "./lineSegment";
 import { isRectInRect, isPointInRect } from "./math";
-import { IRect, ICoordinate, OriginType, IPooledObject } from "carbon-core";
+import { IRect, ICoordinate, OriginType, IPooledObject, IRectData } from "carbon-core";
 import ObjectPool from "../framework/ObjectPool";
 
 export default class Rect implements IRect, IPooledObject {
@@ -305,7 +305,7 @@ export default class Rect implements IRect, IPooledObject {
         return Rect.pool.allocate();
     }
 
-    static allocateFromRect(rect: IRect) {
+    static allocateFromRect(rect: IRectData) {
         let result = Rect.allocate();
         result.x = rect.x;
         result.y = rect.y;

@@ -870,6 +870,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             this.globalViewMatrix().applyToContext(context);
         }
     }
+    isInViewport(viewportRect: IRect) {
+        return areRectsIntersecting(viewportRect, this.getBoundingBoxGlobal(true));
+    }
     draw(context, environment) {
         if (this.hasBadTransform()) {
             return;
@@ -884,7 +887,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             w = br.width,
             h = br.height;
 
-        if (environment && environment.viewportRect && !areRectsIntersecting(environment.viewportRect, this.getBoundingBoxGlobal(true))) {
+        if (environment && environment.viewportRect && !this.isInViewport(environment.viewportRect)) {
             if (params.perf) {
                 performance.measure(markName, markName);
             }

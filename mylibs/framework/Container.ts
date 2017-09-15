@@ -2,7 +2,6 @@ import { Types, ArrangeStrategies, Overflow, DropPositioning } from "./Defs";
 import ArrangeStrategy from "./arrangeStrategy/ArrangeStrategy";
 import ContextPool from "./render/ContextPool";
 import CorruptedElement from "./CorruptedElement";
-import { areRectsEqual, areRectsIntersecting } from "../math/math";
 import Environment from "../environment";
 import PropertyMetadata from "./PropertyMetadata";
 import UIElement from './UIElement';
@@ -284,7 +283,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
             w = br.width,
             h = br.height;
 
-        if (environment && environment.viewportRect && !areRectsIntersecting(environment.viewportRect, this.getBoundingBoxGlobal(true))) {
+        if (environment && environment.viewportRect && !this.isInViewport(environment.viewportRect)) {
             if (params.perf) {
                 performance.measure(markName, markName);
             }
