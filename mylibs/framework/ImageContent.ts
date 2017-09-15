@@ -7,7 +7,7 @@ import {Types} from "../framework/Defs";
 import {ContentSizing} from "carbon-model";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
 import CoreIntl from "../CoreIntl";
-import { IMouseEventData, IUIElement } from "carbon-core";
+import { IMouseEventData, IUIElement, IComposite } from "carbon-core";
 
 var ContentFrameType = Object.create(DefaultFrameType);
 ContentFrameType.strokeStyle = null;
@@ -38,7 +38,7 @@ export default class ImageContent extends UIElement{
     }
 
     activate(){
-        this._tokens.push(Environment.controller.stopDraggingEvent.bind(this, this._onStopDragging as any));
+        this._tokens.push(Environment.controller.stopDraggingEvent.bind(this, this._onStopDragging));
     }
     deactivate(){
         this._tokens.forEach(x => x.dispose());
@@ -74,8 +74,8 @@ export default class ImageContent extends UIElement{
     drawBoundaryPath(context, round) {
     }
 
-    _onStopDragging(event: IMouseEventData, element: IUIElement){
-        if (element === this){
+    _onStopDragging(event: IMouseEventData, element: IComposite){
+        if (element.elements.length === 1 && element.elements[0] === this){
             this.setProps(element.selectLayoutProps(true));
         }
     }

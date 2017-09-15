@@ -9,11 +9,12 @@ import Brush from "../Brush";
 import Environment from "../../environment";
 import UserSettings from "../../UserSettings";
 import Matrix from "../../math/matrix";
-import { ChangeMode, IMatrix, IContainer, IMouseEventData, IPoint } from "carbon-core";
+import { IUIElement, ChangeMode, IMatrix, IContainer, IMouseEventData, IPoint } from "carbon-core";
 import Selection from "framework/SelectionModel";
 import CompositeElement from "../CompositeElement";
 import Duplicate from "commands/Duplicate";
 import UIElement from "../UIElement";
+import Container from "../Container";
 import GlobalMatrixModifier from "../GlobalMatrixModifier";
 import BoundaryPathDecorator from "../../decorators/BoundaryPathDecorator";
 
@@ -91,25 +92,27 @@ export class DraggingElement extends CompositeElement {
         this.activeDecorators.forEach(x => x.visible(true));
         this.activeDecorators.length = 0;
 
+        this.elements.forEach(x => x.clearSavedLayoutProps());
+
         SnapController.clearActiveSnapLines();
 
         this.removeDecorator(DraggingDecorator);
         this.parent().remove(this, ChangeMode.Self);
     }
 
-    stopDragging(event, draggingOverElement, page) {
-        var artboards = page.getAllArtboards();
+    stopDragging(event: IMouseEventData, draggingOverElement, page) {
+        let artboards = page.getAllArtboards();
+        let elements: IUIElement[] = [];
 
         for (var i = 0; i < this.children.length; ++i) {
             var element = this.children[i];
-            element.clearSavedLayoutProps();
 
-            var target = artboards.find(a => areRectsIntersecting(element.getBoundingBoxGlobal(), a.getBoundaryRectGlobal()));
-            if (!target) {
-                target = page;
+            var topIntersectingParent = artboards.find(a => areRectsIntersecting(element.getBoundingBoxGlobal(), a.getBoundaryRectGlobal()));
+            if (!topIntersectingParent) {
+                topIntersectingParent = page;
             }
 
-            var parent = null;
+            var parent: Container = null;
             let index = null;
             if (element instanceof Artboard) {
                 parent = page;
@@ -121,11 +124,17 @@ export class DraggingElement extends CompositeElement {
                     index = dropData.index;
                 }
             }
-            else if (draggingOverElement.primitiveRoot() === target.primitiveRoot()) {
+            else if (draggingOverElement.primitiveRoot() === topIntersectingParent.primitiveRoot()) {
                 parent = draggingOverElement;
             }
             else {
-                parent = target;
+                parent = topIntersectingParent;
+            }
+
+            //the case for elements which cannot be dropped - e.g., ImageContent
+            if (parent !== element.parent() && !parent.canAccept([element], false, event.ctrlKey)) {
+                elements.push(element);
+                continue;
             }
 
             if (index === null) {
@@ -140,9 +149,11 @@ export class DraggingElement extends CompositeElement {
 
             this.applyElementSnapshot(this._propSnapshot, element, ChangeMode.Self);
             this.dropElementOn(event, parent, source, element.globalViewMatrix(), index);
+
+            elements.push(source);
         }
 
-        Selection.refreshSelection();
+        return elements;
     }
 
     propsUpdated(newProps, oldProps, mode) {

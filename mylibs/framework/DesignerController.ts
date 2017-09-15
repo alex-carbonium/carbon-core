@@ -240,7 +240,7 @@ export default class DesignerController implements IController {
 
     dragging(event: IMouseEventData) {
         if (this._draggingElement.allowMoveOutChildren(event)) {
-            this.handleDraggingOver(event);
+            this.draggingOver(event);
         }
 
         this._draggingElement.dragTo(event);
@@ -248,13 +248,12 @@ export default class DesignerController implements IController {
         this.draggingEvent.raise(event, this._draggingElement, this._draggingOverElement);
     }
 
-    handleDraggingOver(eventData: IMouseEventData) {
+    draggingOver(eventData: IMouseEventData) {
         var scale = this.view.scale();
         var dragOverElement = null;
-
-        var element = this.view.hitElementDirect(eventData, (element: UIElement, position, scale) => {
-            var descendantOrSelf = this._draggingElement.elements.some(x => element.isDescendantOrSame(x));
-            if (!descendantOrSelf && element.hitTest(position, scale, true)) {
+        var element = this.view.hitElementDirect(eventData, (e: UIElement, position, scale) => {
+            var descendantOrSelf = this._draggingElement.elements.some(x => e.isDescendantOrSame(x));
+            if (!descendantOrSelf && e.hitTest(position, scale, true)) {
                 return true;
             }
 
@@ -270,30 +269,19 @@ export default class DesignerController implements IController {
         }
 
         if (this._draggingOverElement !== null && this._draggingOverElement !== dragOverElement) {
-            //this._draggingOverElement.draggingLeft(eventData);
             this.draggingLeftEvent.raise(eventData);
-            this._draggingOverElement = null;
         }
 
         if (dragOverElement !== this._draggingOverElement) {
-            this._draggingOverElement = dragOverElement;
-            // if (this._draggingOverElement) {
-            //     this._draggingOverElement.draggingEnter(eventData);
-            // }
             this.draggingEnterEvent.raise(eventData);
         }
+
+        this._draggingOverElement = dragOverElement;
     }
 
     stopDrag(event) {
-        if (!this._draggingOverElement) {
-            this._draggingElement.detach();
-            this.stopDraggingEvent.raise(event, null);
-            //active frame could have been hidden, show it again now
-            Selection.refreshSelection();
-            return false;
-        }
-
         var elements = this._draggingElement.stopDragging(event, this._draggingOverElement, this.app.activePage);
+        Selection.refreshSelection(elements);
 
         this.stopDraggingEvent.raise(event, this._draggingElement);
         this._draggingElement.detach();

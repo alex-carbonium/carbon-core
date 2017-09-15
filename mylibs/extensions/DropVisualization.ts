@@ -10,6 +10,7 @@ import ExtensionBase from "./ExtensionBase";
 import DesignerView from "framework/DesignerView";
 import Layer from "framework/Layer";
 import Container from "../framework/Container";
+import Page from "../framework/Page";
 import Environment from "../environment";
 import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
 import { IPoint, KeyboardState } from "carbon-core";
@@ -233,7 +234,7 @@ var onDraggingElement = function (event: IMouseEventData, draggingElement: IComp
     this._target = null;
     this._dropData = null;
 
-    if (target) {
+    if (target && !(target instanceof Page)) {
         let targetIsParent = draggingElement.elements.some(x => x.parent() === target);
         if (!targetIsParent) {
             this._target = target;

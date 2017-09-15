@@ -32,6 +32,7 @@ export default {
         context.stroke();
     },
     capture: function (frame, point, event: IMouseEventData) {
+        frame.viewMatrix = frame.element.viewMatrix();
         frame.globalViewMatrix = frame.element.globalViewMatrix();
         frame.isRotated = frame.element.isRotated(true);
         let elements;
@@ -53,8 +54,8 @@ export default {
 
         var c = br.center();
         frame.localOrigin = c.subtract(new Point(br.width / 2 * point.rv[0], br.height / 2 * point.rv[1]));
-        frame.centerOrigin = frame.element.globalViewMatrix().transformPoint(c);
-        frame.pointOrigin = frame.element.globalViewMatrix().transformPoint(frame.localOrigin);
+        frame.centerOrigin = frame.viewMatrix.transformPoint(c);
+        frame.pointOrigin = frame.viewMatrix.transformPoint(frame.localOrigin);
         frame.capturedPoint = Point.create(point.x, point.y);
         frame.resizeOptions = ResizeOptions.Default;
         frame.allowSnapping = true;
@@ -85,6 +86,7 @@ export default {
             Environment.controller.stopResizingEvent.raise(event, frame.element);
             frame.element.clearSavedLayoutProps();
             delete frame.globalViewMatrix;
+            delete frame.viewMatrix;
             frame.element.removeDecorator(ResizeDecorator);
             if (frame.element.decorators) {
                 frame.element.decorators.forEach(x => x.visible(true));
@@ -161,7 +163,7 @@ export default {
             // When resizing (for example) text, it can change its width and get misplaced.
             // Therefore, it is checked whether the center is still the same after scaling.
             let br = frame.originalRect;
-            let c = frame.globalViewMatrix.transformPoint(br.center());
+            let c = frame.viewMatrix.transformPoint(br.center());
             let d = frame.centerOrigin.subtract(c).roundMutable();
             if (d.x || d.y) {
                 frame.element.applyTranslation(d, false, ChangeMode.Self);
