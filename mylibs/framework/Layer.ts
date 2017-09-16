@@ -133,7 +133,7 @@ class Layer extends Container implements ILayer {
      * The layer global matrix must not be affected by global context modifier.
      */
     globalViewMatrix() {
-        return Matrix.Identity;
+        return this.props.m;
     }
 
     draw(context, environment) {
