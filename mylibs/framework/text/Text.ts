@@ -101,7 +101,9 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
             return true;
         }
 
-        this.font(this.runtimeProps.origFont);
+        this.setProps({
+            font: this.runtimeProps.origFont
+        }, mode);
         return false;
     }
 

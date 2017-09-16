@@ -16,7 +16,7 @@ export default class TransformationHelper {
         for (var e of elements) {
             let props = snapshot[e.id()];
             if (props) {
-                e.setProps(props, mode);
+                e.prepareAndSetProps(props, mode);
             }
         }
     }
