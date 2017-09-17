@@ -54,26 +54,6 @@ export enum Overflow {
     ExpandBoth
 };
 
-export var ViewTool = {
-    Pointer: "pointerTool",
-    Section: "sectionTool",
-    Text: "textTool",
-    Path: "pathTool",
-    Rectangle: "rectangleTool",
-    Star: "starTool",
-    Triangle: "triangleTool",
-    Polygon: "polygonTool",
-    Artboard: "artboardTool",
-    Circle: "circleTool",
-    Line: "lineTool",
-    Proto: "protoTool",
-    Pencil: "pencilTool",
-    Hand: "handTool",
-    PointerDirect: "pointerDirectTool",
-    Image: "imageTool",
-    ArtboardViewer: "artboardViewerTool"
-};
-
 export enum PointDirection {
     Vertical = 1,
     Horizontal = 2,

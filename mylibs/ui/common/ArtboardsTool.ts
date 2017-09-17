@@ -6,7 +6,6 @@ import Environment from "../../environment";
 import Tool from "./Tool";
 import Artboard from "../../framework/Artboard";
 import ObjectFactory from "../../framework/ObjectFactory";
-import {ViewTool} from "../../framework/Defs";
 import Rect from "../../math/rect";
 import Point from "../../math/point";
 import { KeyboardState, IMouseEventData, IArtboard } from "carbon-core";
@@ -16,7 +15,7 @@ export default class ArtboardsTool extends Tool {
     [name: string]: any;
 
     constructor(type, parameters?) {
-        super(ViewTool.Artboard);
+        super("artboardTool");
         this._type = type;
         this._parameters = parameters;
         this._point = new Point(0, 0);
@@ -118,7 +117,7 @@ export default class ArtboardsTool extends Tool {
             }
 
             if (SystemConfiguration.ResetActiveToolToDefault) {
-                this._app.resetCurrentTool();
+                this._controller.resetCurrentTool();
             }
 
             SnapController.clearActiveSnapLines();

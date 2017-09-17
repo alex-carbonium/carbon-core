@@ -32,7 +32,6 @@ declare module "carbon-core" {
     export var SelectComposite: any;
     export var SelectFrame: any;
     export var Keyboard: any;
-    export var ViewTool: any;
     export var Clipboard: any;
     export var domUtil: any;
     export var CustomGuides: any;

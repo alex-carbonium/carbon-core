@@ -14,14 +14,13 @@ import InlineTextEditor from "../../../framework/text/inlinetexteditor";
 import SharedColors from "../../SharedColors";
 import DefaultFormatter from "./DefaultFormatter";
 import RangeFormatter from "./RangeFormatter";
-import { ViewTool } from "../../../framework/Defs";
 import Selection from "../../../framework/SelectionModel";
 import Cursor from "../../../framework/Cursor";
 import Invalidate from "../../../framework/Invalidate";
 import Environment from "../../../environment";
 import { getAverageLuminance } from "../../../math/color";
 import Rect from "../../../math/rect";
-import { ChangeMode, IMouseEventData, VerticalConstraint, HorizontalConstraint, IDisposable, TextMode, IRect, TextAlign, IUIElement } from "carbon-core";
+import { IController, ChangeMode, IMouseEventData, VerticalConstraint, HorizontalConstraint, IDisposable, TextMode, IRect, TextAlign, IUIElement } from "carbon-core";
 import UserSettings from "../../../UserSettings";
 import Point from "../../../math/point";
 import Symbol from "../../../framework/Symbol";
@@ -41,7 +40,7 @@ export default class TextTool extends Tool {
     private updateTimer: number = 0;
 
     constructor(app) {
-        super(ViewTool.Text);
+        super("textTool");
         this._app = app;
         this._view = Environment.view;
         this._controller = Environment.controller;
@@ -68,7 +67,7 @@ export default class TextTool extends Tool {
         this._onAttached = null;
     }
 
-    attach(app, view, controller) {
+    attach(app, view, controller: IController) {
         this._detaching = false;
         this._dragController.bindToController(controller);
         this._onElementSelectedToken = Selection.onElementSelected.bind(this, this.onElementSelected);
@@ -87,7 +86,7 @@ export default class TextTool extends Tool {
             this._drawBinding = view.interactionLayer.ondraw.bindHighPriority(this, this.layerdraw);
         }
 
-        app.currentTool = ViewTool.Text;
+        controller.currentTool = "textTool";
     }
 
     detach() {
@@ -130,7 +129,7 @@ export default class TextTool extends Tool {
     onEditTextAction = () => {
         let text = this.tryGetSupportedElement();
         if (text) {
-            if (this._app.currentTool !== ViewTool.Text) {
+            if (Environment.controller.currentTool !== "textTool") {
                 this._onAttached = () => { this.beginEdit(text); };
                 this._app.actionManager.invoke("textTool");
             }
@@ -239,7 +238,7 @@ export default class TextTool extends Tool {
     //occurs in the end to start editing dblclicked element
     onDblClickElement = (e: IMouseEventData, element: IUIElement) => {
         var hit = element;
-        if (hit instanceof Text && this._app.currentTool !== ViewTool.Text) {
+        if (hit instanceof Text && this._controller.currentTool !== "textTool") {
             this._onAttached = () => { this.beginEdit(hit as Text, e); };
             this._app.actionManager.invoke("textTool");
             e.handled = true;
@@ -410,7 +409,7 @@ export default class TextTool extends Tool {
         }
         else if (finalEdit) {
             this._detaching = true;
-            setTimeout(() => this._app.resetCurrentTool());
+            setTimeout(() => this._controller.resetCurrentTool());
         }
         if (!next) {
             Environment.controller.inlineEditModeChanged.raise(false, null);

@@ -1,7 +1,6 @@
 import SystemConfiguration from "../../SystemConfiguration";
 import Selection from "../../framework/SelectionModel";
 import Invalidate from "../../framework/Invalidate";
-import {ViewTool} from "../../framework/Defs";
 import Point from "../../math/point";
 import Path from "framework/Path";
 import Environment from "../../environment";
@@ -59,7 +58,7 @@ export default class PencilCreator extends Tool {
     [name: string]: any;
 
     constructor() {
-        super(ViewTool.Pencil);
+        super("pencilTool");
 
         this.points = [];
         this._element = null;
@@ -132,7 +131,7 @@ export default class PencilCreator extends Tool {
         }
         this.points = [];
         if (SystemConfiguration.ResetActiveToolToDefault) {
-            App.Current.resetCurrentTool();
+            this._controller.resetCurrentTool();
         }
     }
     mousemove(event: IMouseEventData) {

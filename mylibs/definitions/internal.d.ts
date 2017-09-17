@@ -105,8 +105,6 @@ declare module "carbon-app"{
         isNew(): boolean;
         isSaved(): boolean;
         syncBroken(): boolean;
-
-        resetCurrentTool();
     }
 
     export interface IView{

@@ -1,4 +1,3 @@
-import { ViewTool } from "../framework/Defs";
 import { IShortcut, IApp, IShortcutScheme, IShortcutManager } from "carbon-core";
 import params from "../params";
 

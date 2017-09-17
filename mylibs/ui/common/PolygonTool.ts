@@ -1,5 +1,5 @@
 import ElementDropTool from "./ElementDropTool";
-import {ViewTool, Types} from "../../framework/Defs";
+import {Types} from "../../framework/Defs";
 import Polygon from "../../framework/Polygon";
 import GlobalMatrixModifier from "../../framework/GlobalMatrixModifier";
 import Point from "../../math/point";
