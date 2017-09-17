@@ -301,6 +301,10 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         context.restore();
     };
 
+    clipSelf() {
+        return App.Current.clipArtboards() || super.clipSelf();
+    }
+
     _renderStatesFrame(context, environment) {
         let stateboards = this.runtimeProps.stateBoards;
         if (!stateboards || !stateboards.length) {
