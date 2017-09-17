@@ -1,5 +1,5 @@
 declare module "carbon-app" {
-    import { IDataNode, ITransformationEventData, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IElementEventData, IIsolatable, IMouseEventHandler, IContainerProps } from "carbon-model";
+    import { IDataNode, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IIsolatable, IMouseEventHandler, IContainerProps } from "carbon-model";
     import { IEvent, IEventData, IEvent2, IMouseEventData, KeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable, IJsonNode, IPrimitive, ArtboardType, FontStyle, FontWeight } from "carbon-basics";
     import { IRect, ICoordinate, ISize } from "carbon-geometry";
     import { IContext, IContextPool } from "carbon-rendering";
@@ -266,34 +266,33 @@ declare module "carbon-app" {
 
     export interface IDropElementData{
         e: MouseEvent;
-        keys: KeyboardState;
         elements: IUIElement[];
     }
 
     export interface IController {
-        onmousemove(eventData: IMouseEventData, keys: KeyboardState);
+        onmousemove(eventData: IMouseEventData);
 
-        draggingEvent: IEvent<ITransformationEventData>;
-        startResizingEvent: IEvent<ITransformationEventData>;
-        resizingEvent: IEvent<ITransformationEventData>;
-        stopResizingEvent: IEvent<ITransformationEventData>;
-        startRotatingEvent: IEvent<ITransformationEventData>;
-        rotatingEvent: IEvent<ITransformationEventData>;
-        stopRotatingEvent: IEvent<ITransformationEventData>;
+        startResizingEvent: IEvent2<IMouseEventData, IUIElement>;
+        resizingEvent: IEvent2<IMouseEventData, IUIElement>;
+        stopResizingEvent: IEvent2<IMouseEventData, IUIElement>;
+        startRotatingEvent: IEvent2<IMouseEventData, IUIElement>;
+        rotatingEvent: IEvent2<IMouseEventData, IUIElement>;
+        stopRotatingEvent: IEvent2<IMouseEventData, IUIElement>;
         startDrawingEvent: IEvent<IEventData>;
+
+        startDraggingEvent: IEvent2<IMouseEventData, IComposite>;
+        stopDraggingEvent: IEvent2<IMouseEventData, IComposite>;
+        draggingEvent: IEvent3<IMouseEventData, IComposite, IContainer>;
 
         onArtboardChanged: IEvent2<IArtboard, IArtboard>;
 
-        clickEvent: IEvent2<IMouseEventData, KeyboardState>;
-        dblclickEvent: IEvent2<IMouseEventData, KeyboardState>;
-        mousedownEvent: IEvent2<IMouseEventData, KeyboardState>;
-        mouseupEvent: IEvent2<IMouseEventData, KeyboardState>;
-        mousemoveEvent: IEvent2<IMouseEventData, KeyboardState>;
+        clickEvent: IEvent<IMouseEventData>;
+        dblclickEvent: IEvent<IMouseEventData>;
+        mousedownEvent: IEvent<IMouseEventData>;
+        mouseupEvent: IEvent<IMouseEventData>;
+        mousemoveEvent: IEvent<IMouseEventData>;
 
-        onElementDblClicked: IEvent2<IElementEventData, KeyboardState>;
-
-        startDraggingEvent: IEvent2<IMouseEventData, KeyboardState>;
-        stopDraggingEvent: IEvent2<IMouseEventData, KeyboardState>;
+        onElementDblClicked: IEvent2<IMouseEventData, IUIElement>;
 
         inlineEditModeChanged: IEvent2<boolean, any>;
 
@@ -309,10 +308,11 @@ declare module "carbon-app" {
         releaseMouse(element: IMouseEventHandler): void;
 
         beginDragElement(e: MouseEvent, element: IUIElement, dropPromise: Promise<IDropElementData>);
+        isDragging(): boolean;
+
         choosePasteLocation(elements: IUIElement[], allowMoveIn?: boolean): {parent: IContainer, x: number, y: number}
         insertAndSelect(element: IUIElement[], parent: IContainer, x: number, y: number);
-        getCurrentlyDraggedElements(): IUIElement[];
-        getCurrentDropTarget(eventData: IMouseEventData, keys: KeyboardState): IContainer | null;
+        getCurrentDropTarget(eventData: IMouseEventData): IContainer | IComposite | null;
     }
 
     //TODO: rename to Workspace

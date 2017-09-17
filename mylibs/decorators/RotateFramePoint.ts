@@ -8,9 +8,12 @@ import {isPointInRect} from "../math/math";
 import { IMouseEventData, ChangeMode } from "carbon-core";
 import UserSettings from "../UserSettings";
 import TransformationHelper from "../framework/interactions/TransformationHelper";
+import BoundaryPathDecorator from "./BoundaryPathDecorator";
 
 const PointSize = 12
      , PointSize2 = PointSize/2;
+
+const RotateDecorator = new BoundaryPathDecorator(true);
 
 export default {
     PointSize: PointSize,
@@ -48,11 +51,11 @@ export default {
         var dc = ~~(((360 - alpha + 23) % 360) / 45);
         return (index + dc) % 8;
     },
-    capture: function (frame, point, mousePoint) {
+    capture: function (frame, point, event: IMouseEventData) {
         frame.originalRect = frame.element.boundaryRect();
         frame.origin = frame.element.center(true);
         frame.localOrigin = frame.element.center(false);
-        frame.captureVector = new Point(mousePoint.x - frame.origin.x, mousePoint.y - frame.origin.y);
+        frame.captureVector = new Point(event.x - frame.origin.x, event.y - frame.origin.y);
         frame.initialAngle = frame.element.angle();
         if (frame.initialAngle < 0){
             frame.initialAngle = 360 + frame.initialAngle;
@@ -67,10 +70,12 @@ export default {
         frame.elements = elements;
         frame.snapshot = TransformationHelper.getPropSnapshot(elements);
 
-        Environment.controller.startRotatingEvent.raise({transformationElement: frame.element, handled: false});
+        Environment.controller.startRotatingEvent.raise(event, frame.element);
         if (frame.element.decorators) {
             frame.element.decorators.forEach(x => x.visible(false));
         }
+        frame.element.addDecorator(RotateDecorator);
+        Invalidate.request();
     },
     release: function (frame, point, event) {
         if (frame.element) {
@@ -78,11 +83,12 @@ export default {
             TransformationHelper.applyPropSnapshot(frame.elements, frame.snapshot, ChangeMode.Self);
             TransformationHelper.applyPropSnapshot(frame.elements, newSnapshot, ChangeMode.Model);
             frame.element.clearSavedLayoutProps();
+            frame.element.removeDecorator(RotateDecorator);
             if (frame.element.decorators) {
                 frame.element.decorators.forEach(x => x.visible(true));
             }
 
-            Environment.controller.stopRotatingEvent.raise({transformationElement: frame.element, handled: false});
+            Environment.controller.stopRotatingEvent.raise(event, frame.element);
         }
     },
     change: function (frame, dx, dy, point, mousePoint, keys, event: IMouseEventData) {
@@ -106,7 +112,7 @@ export default {
         Invalidate.requestInteractionOnly();
 
         var newAngle = frame.element.angle();
-        Environment.controller.rotatingEvent.raise({element: frame.element, angle: newAngle, mouseX: mousePoint.x, mouseY: mousePoint.y, transformationElement: frame.element} as any);
+        Environment.controller.rotatingEvent.raise(event, frame.element);
         event.cursor = this._getCursor(point, newAngle, frame.flipped);
     },
     _getCursor: function(point, angle, flipped){

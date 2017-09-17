@@ -17,6 +17,7 @@ import { IArtboard } from "carbon-model";
 import { ArtboardType, IArtboardPage, ChangeMode, IArtboardPageProps } from "carbon-core";
 import DataNode from "../../framework/DataNode";
 import Container from "../../framework/Container";
+import UIElement from "../../framework/UIElement";
 var debug = require<any>("DebugUtil")("carb:artboardPage");
 
 const ARTBOARD_SPACE = 100;
@@ -136,9 +137,9 @@ class ArtboardPage extends Page implements IArtboardPage {
         super.draw.apply(this, arguments);
     }
 
-    drawChildSafe(child, context, environment) {
+    drawChildSafe(child: UIElement, context, environment) {
         let frame = null;
-        if (!environment.viewportRect || areRectsIntersecting(environment.viewportRect, child.getBoundingBoxGlobal(true))) {
+        if (!environment.viewportRect || child.isInViewport(environment.viewportRect)) {
             super.drawChildSafe(child, context, environment);
         } else {
             debug("Skip artboard not in the viewport: %s", this.name());

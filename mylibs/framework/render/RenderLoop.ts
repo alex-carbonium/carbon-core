@@ -2,7 +2,6 @@ import DesignerView from "../DesignerView";
 import Layer from "../Layer";
 import SelectComposite from "../SelectComposite";
 import NullPage from "../NullPage";
-import DraggingElement from "../interactions/DraggingElement";
 import SelectFrame from "../SelectFrame";
 import DesignerController from "../DesignerController";
 import Environment from "../../environment";
@@ -62,7 +61,7 @@ export default class RenderLoop implements IRenderLoop {
             Keyboard.attach(document.body);
 
             this._view.attachToDOM(this._contexts, this._upperContext, this._isolationContext, this.viewContainer, this.redrawCallback, this.cancelRedrawCallback, this.renderingScheduledCallback);
-            this._view.setup({ Layer, SelectComposite, DraggingElement, SelectFrame });
+            this._view.setup({ Layer, SelectComposite, SelectFrame });
             this._view.setActivePage(app.activePage);
             this._view.gridContext = this._gridContext;
             this._view.contextScale = this._contextScale;

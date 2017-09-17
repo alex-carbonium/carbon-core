@@ -24,6 +24,10 @@ class NullContainer extends DataNode implements IContainer {
     removeAllDecorators(): any[] { return null; }
     removeDecoratorByType(type) { }
 
+    selectLayoutProps() {
+        return null;
+    }
+
     isDescendantOrSame(el) {
         return false;
     }
@@ -38,9 +42,9 @@ class NullContainer extends DataNode implements IContainer {
         return false;
     }
 
-    mousemove(event: IMouseEventData, keys: KeyboardState) { }
-    mouseup(event: IMouseEventData, keys: KeyboardState) { }
-    mousedown(event: IMouseEventData, keys: KeyboardState) { }
+    mousemove(event: IMouseEventData) { }
+    mouseup(event: IMouseEventData) { }
+    mousedown(event: IMouseEventData) { }
     dblclick(event: IMouseEventData, scale: number) { }
     click(event: IMouseEventData) { }
 
@@ -352,6 +356,10 @@ class NullContainer extends DataNode implements IContainer {
     }
 
     resetGlobalViewCache() {
+
+    }
+
+    clearSavedLayoutProps() {
 
     }
 }

@@ -169,11 +169,7 @@ export default class Point implements IPoint, IPooledObject {
      * console.log(point != new Point(1, 1)); // true
      */
     equals(point) {
-        return this === point || point
-            && (this.x === point.x && this.y === point.y
-                || Array.isArray(point)
-                && this.x === point[0] && this.y === point[1])
-            || false;
+        return this === point || point && (this.x === point.x && this.y === point.y);
     }
 
     /**

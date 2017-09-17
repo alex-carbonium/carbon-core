@@ -17,7 +17,6 @@ import DesignerController from "framework/DesignerController";
 import Layer from "framework/Layer";
 import SelectComposite from "framework/SelectComposite";
 import SelectFrame from "framework/SelectFrame";
-import DraggingElement from "framework/interactions/DraggingElement";
 import Context from "framework/render/Context";
 import Environment from "environment";
 import backend from "backend";
@@ -47,9 +46,9 @@ Util.setupApp = function(options){
     var c = document.createElement("canvas");
 
     var view = new DesignerView(app);
-    view.setup({Layer, SelectComposite, DraggingElement, SelectFrame});
+    view.setup({Layer, SelectComposite, SelectFrame});
     view.attachToDOM([new Context(c)], new Context(c), c, x => {}, x => {}, x=> {});
-    var controller = new DesignerController(app, view, {SelectComposite, DraggingElement, SelectFrame});
+    var controller = new DesignerController(app, view, {SelectComposite, SelectFrame});
     Environment.set(view, controller);
 
     if (options.addPage){

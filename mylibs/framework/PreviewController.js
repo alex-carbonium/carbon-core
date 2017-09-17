@@ -8,8 +8,6 @@ function updateEvent(event) {
     var scale = this.view.scale();
     domUtil.layerX(event, Math.round((domUtil.layerX(event) + this.view.scrollX()) * 100 / scale) / 100);
     domUtil.layerY(event, Math.round((domUtil.layerY(event) + this.view.scrollY()) * 100 / scale) / 100);
-    event._ctrlKey = event.ctrlKey || event.metaKey;
-    event._scale = scale;
 }
 
 export default class PreviewController {
@@ -99,7 +97,7 @@ export default class PreviewController {
     onWindowResize() {
 
     }
-    
+
     onpinchmove(event) {
         this.touchHelper.onpinchmove(event);
         this.view.invalidate();
@@ -176,6 +174,10 @@ export default class PreviewController {
     cancel() {
     }
 
+    isDragging() {
+        return false;
+    }
+
     createEventData(event) {
         updateEvent.call(this, event);
         return {
@@ -183,7 +185,7 @@ export default class PreviewController {
             x: domUtil.layerX(event),
             y: domUtil.layerY(event),
             event: event,
-            ctrlKey: event._ctrlKey,
+            ctrlKey: event.ctrlKey || event.metaKey,
             shiftKey: event.shiftKey,
             altKey: event.altKey,
             view: this

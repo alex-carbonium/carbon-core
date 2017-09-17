@@ -4,7 +4,7 @@ import Brush from "framework/Brush";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Page from "framework/Page";
 import * as math from "math/math";
-import { isPointInRect } from "math/math";
+import { isPointInRect, areRectsIntersecting } from "math/math";
 import SharedColors from "ui/SharedColors";
 import { Types } from "./Defs";
 import RelayoutEngine from "./relayout/RelayoutEngine";
@@ -518,6 +518,23 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             return this.props.hitTestBox;
         }
         return super.getHitTestBox.apply(this, arguments);;
+    }
+
+    isInViewport(viewportRect: IRect) {
+        if (!this.props.hitTestBox) {
+            return super.isInViewport(viewportRect);
+        }
+
+        //artboard can be translated only
+        let gm = this.globalViewMatrix();
+        let rect = Rect.allocateFromRect(this.props.hitTestBox);
+        rect.x += gm.tx;
+        rect.y += gm.ty;
+
+        let intersects = areRectsIntersecting(rect, viewportRect);
+        rect.free();
+
+        return intersects;
     }
 
     /**

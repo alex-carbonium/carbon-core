@@ -13,7 +13,7 @@ import Environment from "../../environment";
 import DesignerView from "../../framework/DesignerView";
 import UserSettings from "../../UserSettings";
 import RulerGuides from "./RulerGuides";
-import { IArtboardProps, IApp, IView, IController, ILayer, IContext, IComposite, ITransformationEventData } from "carbon-core";
+import { IArtboardProps, IApp, IView, IController, ILayer, IContext, IComposite, IMouseEventData } from "carbon-core";
 import { IArtboard, IUIElement } from "carbon-model";
 import { LayerTypes } from "carbon-app";
 
@@ -111,8 +111,8 @@ export default class RulerExtension extends RuntimeExtension {
         this.setHighlight(selection);
     }
 
-    onDragOrTransform(eventData: ITransformationEventData) {
-        this.setHighlight(eventData.transformationElement);
+    onDragOrTransform(eventData: IMouseEventData, composite: IComposite) {
+        this.setHighlight(composite);
     }
 
     onArtboardChanged(artboard: any, prev: any) {

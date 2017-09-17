@@ -9,8 +9,6 @@ function updateEvent(event) {
     var scale = this.view.scale();
     domUtil.layerX(event, Math.round((domUtil.layerX(event) + this.view.scrollX()) * 100 / scale) / 100);
     domUtil.layerY(event, Math.round((domUtil.layerY(event) + this.view.scrollY()) * 100 / scale) / 100);
-    event._ctrlKey = event.ctrlKey || event.metaKey;
-    event._scale = scale;
 }
 
 export default class MirroringController {
@@ -27,10 +25,10 @@ export default class MirroringController {
 
     _appPropertyChanged(app, newProps, oldProps) {
         var artboardId = app._getSpecificUserSetting(this.followUserId, 'mirrorArtboardId');
-        if(artboardId != this._currentArtboardId) {        
+        if(artboardId != this._currentArtboardId) {
             var pageId = app._getSpecificUserSetting(this.followUserId, 'mirrorPageId');
             var page = DataNode.getImmediateChildById(app, pageId, true);
-            if (page) {                
+            if (page) {
                 var artboard = DataNode.getImmediateChildById(page, artboardId, true);
                 page.setActiveArtboard(artboard, true);
                 this.onArtboardChanged.raise(artboard);
@@ -163,7 +161,7 @@ export default class MirroringController {
             this._disableDblClick = false;
         }, 100);
         // end of hack
-        
+
 
         if (!this.view.mode) {
             this.view.mode = MirrorViewMode.Fit;
@@ -198,6 +196,10 @@ export default class MirroringController {
     cancel() {
     }
 
+    isDragging() {
+        return false;
+    }
+
     createEventData(event) {
         updateEvent.call(this, event);
         return {
@@ -205,7 +207,7 @@ export default class MirroringController {
             x: domUtil.layerX(event),
             y: domUtil.layerY(event),
             event: event,
-            ctrlKey: event._ctrlKey,
+            ctrlKey: event.ctrlKey || event.metaKey,
             shiftKey: event.shiftKey,
             altKey: event.altKey,
             view: this

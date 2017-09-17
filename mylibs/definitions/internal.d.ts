@@ -57,6 +57,7 @@ declare module "carbon-model"{
 
         canDrag(value?: boolean): boolean;
 
+        clearSavedLayoutProps();
         resetGlobalViewCache();
     }
 

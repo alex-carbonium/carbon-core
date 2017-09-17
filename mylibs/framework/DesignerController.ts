@@ -11,7 +11,7 @@ import Page from "./Page";
 import Keyboard from "../platform/Keyboard";
 import ObjectFactory from "./ObjectFactory";
 import { Types, ViewTool } from "./Defs";
-import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IElementEventData, ITransformationEventData } from "carbon-core";
+import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3 } from "carbon-core";
 import UIElement from "./UIElement";
 import Container from "./Container";
 import { choosePasteLocation } from "./PasteLocator";
@@ -20,88 +20,7 @@ import Point from "../math/point";
 import { IDropElementData } from "carbon-app";
 import Cursors from "Cursors";
 import PropertyTracker from "./PropertyTracker";
-
-function stopDrag(event) {
-    if (!this._draggingElement.isDropSupported()) {
-        this._draggingElement.detach();
-        this.stopDraggingEvent.raise(event, null);
-        PropertyTracker.resumeAndFlush();
-        //active frame could have been hidden, show it again now
-        Selection.refreshSelection();
-        return false;
-    }
-
-    var elements = this._draggingElement.stopDragging(event, this._draggingOverElement, this.app.activePage);
-    this._draggingElement.detach();
-
-    this.stopDraggingEvent.raise(event, elements);
-    PropertyTracker.resumeAndFlush();
-
-    //could start dragging not selected object
-    Selection.makeSelection(elements);
-}
-
-function _handleDraggingOver(mousePoint, draggingElement, eventData) {
-    var scale = this.view.scale();
-    var dragOverElement = null;
-
-    var element = this.view.hitElementDirect(mousePoint, function (element: UIElement, position, scale) {
-        var descendantOrSelf = draggingElement.elements.some(x => element.isDescendantOrSame(x));
-        if (!descendantOrSelf && element.hitTest(position, scale, true)) {
-            return true;
-        }
-
-        return false;
-    });
-
-    while (element !== null) {
-        if (element.canAccept(draggingElement.elements, undefined, eventData.event.ctrlKey)) {
-            dragOverElement = element;
-            break;
-        }
-        element = element.parent();
-    }
-
-    if (this._draggingOverElement !== null && this._draggingOverElement !== dragOverElement) {
-        this._draggingOverElement.draggingLeft(eventData);
-        this.draggingLeftEvent.raise(eventData);
-        this._draggingOverElement = null;
-    }
-    eventData.target = dragOverElement;
-
-    if (dragOverElement !== this._draggingOverElement) {
-        this._draggingOverElement = dragOverElement;
-        if (this._draggingOverElement) {
-            this._draggingOverElement.draggingEnter(eventData);
-        }
-        this.draggingEnterEvent.raise(eventData);
-    }
-}
-
-function dragging(event, keys: KeyboardState) {
-    var draggingElement = this._draggingElement;
-    var eventData = {
-        handled: false,
-        draggingElement: this._draggingElement,
-        transformationElement: this._draggingElement,
-        x: event.x,
-        y: event.y,
-        mouseX: event.mouseX,
-        mouseY: event.mouseY,
-        target: this._draggingOverElement,
-        event: event
-    };
-
-    var mousePoint = { x: eventData.mouseX, y: eventData.mouseY };
-
-    if (this._draggingElement.allowMoveOutChildren(event)) {
-        _handleDraggingOver.call(this, mousePoint, draggingElement, eventData);
-    }
-
-    this._draggingElement.dragTo(eventData);
-
-    this.draggingEvent.raise(eventData, keys);
-}
+import { DraggingElement } from "./interactions/DraggingElement";
 
 export default class DesignerController implements IController {
     [name: string]: any;
@@ -112,31 +31,33 @@ export default class DesignerController implements IController {
 
     startDrawingEvent: IEvent<any>;
     interactionActive: boolean;
-    clickEvent: IEvent2<IMouseEventData, KeyboardState>;
-    dblclickEvent: IEvent2<IMouseEventData, KeyboardState>;
-    mousedownEvent: IEvent2<IMouseEventData, KeyboardState>;
-    mousemoveEvent: IEvent2<IMouseEventData, KeyboardState>;
-    mouseupEvent: IEvent2<IMouseEventData, KeyboardState>;
+    clickEvent: IEvent<IMouseEventData>;
+    dblclickEvent: IEvent<IMouseEventData>;
+    mousedownEvent: IEvent<IMouseEventData>;
+    mousemoveEvent: IEvent<IMouseEventData>;
+    mouseupEvent: IEvent<IMouseEventData>;
 
-    onElementDblClicked: IEvent2<IElementEventData, KeyboardState>;
+    onElementDblClicked: IEvent2<IMouseEventData, IUIElement>;
 
-    startDraggingEvent: IEvent2<IMouseEventData, KeyboardState>;
-    draggingEvent: IEvent<ITransformationEventData>;
-    stopDraggingEvent: IEvent2<IMouseEventData, KeyboardState>;
+    startDraggingEvent: IEvent2<IMouseEventData, IComposite>;
+    draggingEvent: IEvent3<IMouseEventData, IComposite, IContainer>;
+    stopDraggingEvent: IEvent2<IMouseEventData, IComposite>;
 
-    startResizingEvent: IEvent<ITransformationEventData>;
-    resizingEvent: IEvent<ITransformationEventData>;
-    stopResizingEvent: IEvent<ITransformationEventData>;
+    startResizingEvent: IEvent2<IMouseEventData, IUIElement>;
+    resizingEvent: IEvent2<IMouseEventData, IUIElement>;
+    stopResizingEvent: IEvent2<IMouseEventData, IUIElement>;
 
-    startRotatingEvent: IEvent<ITransformationEventData>;
-    rotatingEvent: IEvent<ITransformationEventData>;
-    stopRotatingEvent: IEvent<ITransformationEventData>;
+    startRotatingEvent: IEvent2<IMouseEventData, IUIElement>;
+    rotatingEvent: IEvent2<IMouseEventData, IUIElement>;
+    stopRotatingEvent: IEvent2<IMouseEventData, IUIElement>;
 
     inlineEditModeChanged: IEvent2<boolean, any>;
 
-    _lastMouseMove: IMouseEventData;
+    _lastMouseMove: IMouseEventData = null;
     _startDraggingData: any;
     _startDraggingElement: IUIElement;
+    _draggingElement: DraggingElement = null;
+    _draggingOverElement: Container = null;
 
     updateCursor(eventData?) {
         if (eventData) {
@@ -205,22 +126,18 @@ export default class DesignerController implements IController {
         }
     }
 
-    createEventData(event): IMouseEventData {
+    createEventData(event: MouseEvent): IMouseEventData {
         var scale = this.view.scale();
-
-        event._ctrlKey = event.ctrlKey || event.metaKey;
-        event._scale = scale;
 
         return {
             handled: false,
             x: Math.round((domUtil.layerX(event) + this.view.scrollX()) * 100 / scale) / 100,
             y: Math.round((domUtil.layerY(event) + this.view.scrollY()) * 100 / scale) / 100,
             event: event,
-            ctrlKey: event._ctrlKey,
+            ctrlKey: event.ctrlKey || event.metaKey,
             altKey: event.altKey,
-            shiftKey: event.shiftKey,
-            view: this
-        } as any;
+            shiftKey: event.shiftKey
+        };
     }
 
 
@@ -234,22 +151,22 @@ export default class DesignerController implements IController {
         this._noActionsBeforeClick = false;
         this.touchHelper = new TouchHelper(view);
 
-        this.draggingEvent = EventHelper.createEvent();
+        this.stopDraggingEvent = EventHelper.createEvent2<IMouseEventData, IComposite>();
+        this.startDraggingEvent = EventHelper.createEvent2<IMouseEventData, IComposite>();
+        this.draggingEvent = EventHelper.createEvent3<IMouseEventData, IComposite, IContainer>();
         this.draggingEnterEvent = EventHelper.createEvent();
         this.draggingLeftEvent = EventHelper.createEvent();
-        this.stopDraggingEvent = EventHelper.createEvent2<IMouseEventData, KeyboardState>();
-        this.startDraggingEvent = EventHelper.createEvent2<IMouseEventData, KeyboardState>();
-        this.startResizingEvent = EventHelper.createEvent();
-        this.resizingEvent = EventHelper.createEvent();
-        this.stopResizingEvent = EventHelper.createEvent();
-        this.startRotatingEvent = EventHelper.createEvent();
-        this.rotatingEvent = EventHelper.createEvent();
-        this.stopRotatingEvent = EventHelper.createEvent();
-        this.mousemoveEvent = EventHelper.createEvent2<IMouseEventData, KeyboardState>();
-        this.mousedownEvent = EventHelper.createEvent2<IMouseEventData, KeyboardState>();
-        this.mouseupEvent = EventHelper.createEvent2<IMouseEventData, KeyboardState>();
-        this.dblclickEvent = EventHelper.createEvent2<IMouseEventData, KeyboardState>();
-        this.clickEvent = EventHelper.createEvent2<IMouseEventData, KeyboardState>();
+        this.startResizingEvent = EventHelper.createEvent2<IMouseEventData, IUIElement>();
+        this.resizingEvent = EventHelper.createEvent2<IMouseEventData, IUIElement>();
+        this.stopResizingEvent = EventHelper.createEvent2<IMouseEventData, IUIElement>();
+        this.startRotatingEvent = EventHelper.createEvent2<IMouseEventData, IUIElement>();
+        this.rotatingEvent = EventHelper.createEvent2<IMouseEventData, IUIElement>();
+        this.stopRotatingEvent = EventHelper.createEvent2<IMouseEventData, IUIElement>();
+        this.mousemoveEvent = EventHelper.createEvent<IMouseEventData>();
+        this.mousedownEvent = EventHelper.createEvent<IMouseEventData>();
+        this.mouseupEvent = EventHelper.createEvent<IMouseEventData>();
+        this.dblclickEvent = EventHelper.createEvent<IMouseEventData>();
+        this.clickEvent = EventHelper.createEvent<IMouseEventData>();
 
 
         this.mouseenterEvent = EventHelper.createEvent();
@@ -257,7 +174,7 @@ export default class DesignerController implements IController {
 
 
         this.onElementClicked = EventHelper.createEvent();
-        this.onElementDblClicked = EventHelper.createEvent2<IElementEventData, KeyboardState>();
+        this.onElementDblClicked = EventHelper.createEvent2<IMouseEventData, IUIElement>();
         this.onArtboardChanged = EventHelper.createEvent2<IArtboard, IArtboard>();
         this.inlineEditModeChanged = EventHelper.createEvent2<boolean, any>();
         this.inlineEditModeChanged.bind(this, this.onInlineEditModeChanged);
@@ -281,8 +198,6 @@ export default class DesignerController implements IController {
         this.stopDraggingEvent.bind(this, this.onInteractionStopped);
         this.stopRotatingEvent.bind(this, this.onInteractionStopped);
         this.stopResizingEvent.bind(this, this.onInteractionStopped);
-
-        this._lastMouseMove = null;
     }
 
     onpanstart(event) {
@@ -310,41 +225,77 @@ export default class DesignerController implements IController {
     }
 
 
-    beginDrag(event, element: IUIElement, hideFrame: boolean = true) {
-        var eventData: any = {
-            mouseX: event.x,
-            mouseY: event.y,
-            x: event.x,
-            y: event.y
-        };
-
+    beginDrag(event: IMouseEventData, element: IUIElement, hideFrame: boolean = true) {
         if (hideFrame) {
             Selection.hideFrame();
         }
 
-        this._draggingElement = ObjectFactory.construct(Types.DraggingElement, element, event);
-        // this._draggingElement.showOriginal(event.altKey);
+        this._draggingElement = new DraggingElement(element, event);
 
         this.view.interactionLayer.add(this._draggingElement);
-        var translation = this._draggingElement.getBoundingBox().topLeft();
-        this._draggingOffset = {
-            x: event.x - translation.x,
-            y: event.y - translation.y
-        };
 
-        eventData.transformationElement = this._draggingElement;
-        this.startDraggingEvent.raise(eventData as any, Keyboard.state);
+        this.startDraggingEvent.raise(event, this._draggingElement);
         this._draggingOverElement = null;
-
-        PropertyTracker.suspend();
     }
 
+    dragging(event: IMouseEventData) {
+        if (this._draggingElement.allowMoveOutChildren(event)) {
+            this.draggingOver(event);
+        }
+
+        this._draggingElement.dragTo(event);
+
+        this.draggingEvent.raise(event, this._draggingElement, this._draggingOverElement);
+    }
+
+    draggingOver(eventData: IMouseEventData) {
+        var scale = this.view.scale();
+        var dragOverElement = null;
+        var element = this.view.hitElementDirect(eventData, (e: UIElement, position, scale) => {
+            var descendantOrSelf = this._draggingElement.elements.some(x => e.isDescendantOrSame(x));
+            if (!descendantOrSelf && e.hitTest(position, scale, true)) {
+                return true;
+            }
+
+            return false;
+        });
+
+        while (element !== null) {
+            if (element.canAccept(this._draggingElement.elements, undefined, eventData.ctrlKey)) {
+                dragOverElement = element;
+                break;
+            }
+            element = element.parent();
+        }
+
+        if (this._draggingOverElement !== null && this._draggingOverElement !== dragOverElement) {
+            this.draggingLeftEvent.raise(eventData);
+        }
+
+        if (dragOverElement !== this._draggingOverElement) {
+            this.draggingEnterEvent.raise(eventData);
+        }
+
+        this._draggingOverElement = dragOverElement;
+    }
+
+    stopDrag(event) {
+        var elements = this._draggingElement.stopDragging(event, this._draggingOverElement, this.app.activePage);
+        Selection.refreshSelection(elements);
+
+        this.stopDraggingEvent.raise(event, this._draggingElement);
+        this._draggingElement.detach();
+    }
+
+    isDragging() {
+        return this._draggingElement !== null;
+    }
 
     onmousedown(eventData) {
         this._noActionsBeforeClick = true;
         this._mouseDownData = eventData;
 
-        this.mousedownEvent.raise(eventData, Keyboard.state);
+        this.mousedownEvent.raise(eventData);
         if (eventData.handled) {
             if (eventData.cursor) {
                 this.updateCursor(eventData);
@@ -353,7 +304,7 @@ export default class DesignerController implements IController {
         }
 
         if (this._captureElement) {
-            this._captureElement.mousedown(eventData, Keyboard.state);
+            this._captureElement.mousedown(eventData);
             if (eventData.cursor) {
                 this.updateCursor(eventData);
             }
@@ -407,25 +358,34 @@ export default class DesignerController implements IController {
         }
     }
 
-    onmousemove(eventData, keys: KeyboardState = Keyboard.state) {
+    onmousemove(eventData: IMouseEventData) {
         if (!this._lastMouseMove && this._mouseDownData &&
             this._mouseDownData.x === eventData.x &&
             this._mouseDownData.y === eventData.y) {
             return; // do not realy rise mouse move if not movent after mouse down happened (bug on my laptop :) )
         }
 
-        this._lastMouseMove = {
-            x: eventData.x,
-            y: eventData.y,
-            isDragging: false,
-            handled: false,
-            cursor: null,
-            altKey: keys.altKey,
-            ctrlKey: keys.ctrlKey,
-            shiftKey: keys.shiftKey
-        };
+        if (this._lastMouseMove) {
+            this._lastMouseMove.x = eventData.x;
+            this._lastMouseMove.y = eventData.y;
+            this._lastMouseMove.handled = false;
+            this._lastMouseMove.cursor = null;
+            this._lastMouseMove.altKey = eventData.altKey;
+            this._lastMouseMove.shiftKey = eventData.shiftKey;
+            this._lastMouseMove.ctrlKey = eventData.ctrlKey;
+        }
+        else {
+            this._lastMouseMove = {
+                x: eventData.x,
+                y: eventData.y,
+                handled: false,
+                cursor: null,
+                altKey: eventData.altKey,
+                ctrlKey: eventData.ctrlKey,
+                shiftKey: eventData.shiftKey
+            };
+        }
 
-        eventData.isDragging = this._draggingElement !== null;
         if (this._mouseDownData) {
             if (eventData.x === this._mouseDownData.x && eventData.y === this._mouseDownData.y) {
                 return;
@@ -433,7 +393,7 @@ export default class DesignerController implements IController {
             delete this._mouseDownData;
         }
 
-        this.mousemoveEvent.raise(eventData, keys);
+        this.mousemoveEvent.raise(eventData);
         if (eventData.handled) {
             this._noActionsBeforeClick = false;
             this.updateCursor(eventData);
@@ -441,14 +401,14 @@ export default class DesignerController implements IController {
         }
 
         if (this._captureElement) {
-            this._captureElement.mousemove(eventData, keys);
+            this._captureElement.mousemove(eventData);
             this.updateCursor(eventData);
             this._noActionsBeforeClick = false;
             return;
         }
 
         // if (!eventData.handled) {
-        //     Selection.directSelectionEnabled(eventData.event.ctrlKey);
+        //     Selection.directSelectionEnabled(eventData.ctrlKey);
         //     var element = this.app.activePage.hitElement(eventData, this.view.scale());
         //     Selection.directSelectionEnabled(false);
         //     if (element != this._mouseOverElement) {
@@ -479,16 +439,7 @@ export default class DesignerController implements IController {
         }
 
         if (this._draggingElement) {
-            dragging.call(this, {
-                x: (eventData.x - this._draggingOffset.x),
-                y: (eventData.y - this._draggingOffset.y),
-                mouseX: eventData.x,
-                mouseY: eventData.y,
-                altKey: eventData.altKey,
-                shiftKey: eventData.shiftKey,
-                ctrlKey: eventData.ctrlKey
-            }, keys);
-
+            this.dragging(eventData);
             return;
         }
 
@@ -498,7 +449,10 @@ export default class DesignerController implements IController {
 
     repeatLastMouseMove(keys: KeyboardState = Keyboard.state) {
         if (this._lastMouseMove) {
-            this.onmousemove(this._lastMouseMove, keys);
+            this._lastMouseMove.altKey = keys.altKey;
+            this._lastMouseMove.ctrlKey = keys.ctrlKey;
+            this._lastMouseMove.shiftKey = keys.shiftKey;
+            this.onmousemove(this._lastMouseMove);
         }
     }
 
@@ -518,7 +472,7 @@ export default class DesignerController implements IController {
         eventData.element = this._draggingElement;
         eventData.transformationElement = this._draggingElement;
 
-        this.mouseupEvent.raise(eventData, Keyboard.state);
+        this.mouseupEvent.raise(eventData);
         if (eventData.handled) {
             if (eventData.cursor) {
                 this.updateCursor(eventData);
@@ -530,7 +484,7 @@ export default class DesignerController implements IController {
         this._startDraggingElement = null;
 
         if (this._captureElement) {
-            this._captureElement.mouseup(eventData, Keyboard.state);
+            this._captureElement.mouseup(eventData);
             if (eventData.cursor) {
                 this.updateCursor(eventData);
             }
@@ -556,14 +510,14 @@ export default class DesignerController implements IController {
         }
 
         if (this._draggingElement !== null) {
-            stopDrag.call(this, eventData);
+            this.stopDrag(eventData);
             this._draggingElement = null;
             return;
         }
     }
 
     ondblclick(eventData) {
-        this.dblclickEvent.raise(eventData as any, Keyboard.state);
+        this.dblclickEvent.raise(eventData);
         if (eventData.handled) {
             return;
         }
@@ -579,15 +533,15 @@ export default class DesignerController implements IController {
             var element = this.view.hitElement(eventData);
             if (element !== null) {
                 eventData.element = element;
-                this.onElementDblClicked.raise(eventData, Keyboard.state);
+                this.onElementDblClicked.raise(eventData, element);
             }
         }
     }
 
-    onclick(eventData, keys: KeyboardState) {
+    onclick(eventData) {
         if (this._noActionsBeforeClick) {
 
-            this.clickEvent.raise(eventData, keys);
+            this.clickEvent.raise(eventData);
             if (eventData.handled) {
                 if (eventData.cursor) {
                     this.updateCursor(eventData);
@@ -701,7 +655,7 @@ export default class DesignerController implements IController {
     }
 
 
-    beginDragElement(event, element: IUIElement, stopDragPromise: Promise<IDropElementData>) {
+    beginDragElement(event: MouseEvent, element: IUIElement, stopDragPromise: Promise<IDropElementData>) {
         var eventData = this.createEventData(event);
         element.resetTransform();
         element.applyTranslation(new Point(Math.round(eventData.x - element.width() / 2), Math.round(eventData.y - element.height() / 2)));
@@ -713,25 +667,22 @@ export default class DesignerController implements IController {
         stopDragPromise
             .then(result => {
                 var eventData = this.createEventData(result.e);
-                var parent = this.getCurrentDropTarget(eventData, result.keys);
+                var parent = this.getCurrentDropTarget(eventData);
                 var br = element.boundaryRect();
+
+                this.stopDraggingEvent.raise(eventData, this._draggingElement);
 
                 this.cancel();
                 this.insertAndSelect(result.elements, parent, eventData.x - br.width / 2, eventData.y - br.height / 2);
-
-                this.stopDraggingEvent.raise(eventData as any, Keyboard.state);
             })
             .catch(e => {
                 this.cancel();
                 this.stopDraggingEvent.raise(null, null);
-            })
-            .finally(() => {
-                PropertyTracker.resumeAndFlush();
             });
     }
 
-    insertAndSelect(elements: IUIElement[], parent: Container, x: number, y: number) {
-        var newSelection = [];
+    insertAndSelect(elements: IUIElement[], parent: IContainer | IComposite, x: number, y: number) {
+        var newSelection: IUIElement[] = [];
 
         for (let i = 0; i < elements.length; i++) {
             let element = elements[i];
@@ -743,34 +694,29 @@ export default class DesignerController implements IController {
                 }
             }
             else {
-                if (!parent.autoPositionChildren()) {
+                let container = parent as Container;
+                if (!container.autoPositionChildren()) {
                     let newMatrix = element.viewMatrix().withTranslation(Math.round(x), Math.round(y));
-                    element.setTransform(parent.globalMatrixToLocal(newMatrix));
+                    element.setTransform(container.globalMatrixToLocal(newMatrix));
                 }
-                newSelection.push(parent.add(element));
+                newSelection.push(container.add(element));
             }
+        }
+
+        for (let i = 0; i < newSelection.length; ++i){
+            newSelection[i].clearSavedLayoutProps();
         }
 
         Selection.makeSelection(newSelection);
     }
 
-    getCurrentlyDraggedElements(): IUIElement[] {
-        if (!this._startDraggingElement) {
-            return [];
-        }
-        if (this._startDraggingElement instanceof CompositeElement) {
-            return this._startDraggingElement.elements;
-        }
-        return [this._startDraggingElement];
-    }
-
-    getCurrentDropTarget(eventData: IMouseEventData, keys: KeyboardState): Container | null {
+    getCurrentDropTarget(eventData: IMouseEventData): IContainer | IComposite | null {
         var parent = this._draggingOverElement;
         var selectComposite = Selection.selectComposite();
-        if (selectComposite.canAccept([this._startDraggingElement], undefined, keys.ctrlKey)
+        if (selectComposite.canAccept([this._startDraggingElement], undefined, eventData.ctrlKey)
             && selectComposite.hitTest(eventData, this.view.scale(), true)
         ) {
-            parent = Selection.selectComposite();
+            return Selection.selectComposite();
         }
         return parent;
     }
@@ -813,9 +759,11 @@ export default class DesignerController implements IController {
     }
 
     onInteractionStarted() {
+        PropertyTracker.suspend();
         this.interactionActive = true;
     }
     onInteractionStopped() {
+        PropertyTracker.resumeAndFlush();
         this.interactionActive = false;
     }
 

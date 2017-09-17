@@ -6,14 +6,16 @@ import { Types, FrameCursors } from "../framework/Defs";
 import Point from "../math/point";
 import Rect from "../math/rect";
 import UserSettings from "../UserSettings";
-import { ChangeMode } from "carbon-core";
+import { ChangeMode, IMouseEventData } from "carbon-core";
 import TransformationHelper from "../framework/interactions/TransformationHelper";
+import BoundaryPathDecorator from "./BoundaryPathDecorator";
 
 var debug = require("DebugUtil")("carb:resizeFramePoint");
 
 const PointSize = 6
     , PointSize2 = 3.5;
 
+const ResizeDecorator = new BoundaryPathDecorator(true);
 
 export default {
     cursorSet: FrameCursors,
@@ -29,11 +31,12 @@ export default {
         context.fill();
         context.stroke();
     },
-    capture: function (frame, point) {
+    capture: function (frame, point, event: IMouseEventData) {
+        frame.viewMatrix = frame.element.viewMatrix();
         frame.globalViewMatrix = frame.element.globalViewMatrix();
         frame.isRotated = frame.element.isRotated(true);
         let elements;
-        if (frame.element.systemType() === Types.CompositeElement) {
+        if (frame.element.systemType() === Types.SelectComposite) {
             elements = frame.element.children;
         } else {
             elements = [frame.element];
@@ -51,8 +54,8 @@ export default {
 
         var c = br.center();
         frame.localOrigin = c.subtract(new Point(br.width / 2 * point.rv[0], br.height / 2 * point.rv[1]));
-        frame.centerOrigin = frame.element.globalViewMatrix().transformPoint(c);
-        frame.pointOrigin = frame.element.globalViewMatrix().transformPoint(frame.localOrigin);
+        frame.centerOrigin = frame.viewMatrix.transformPoint(c);
+        frame.pointOrigin = frame.viewMatrix.transformPoint(frame.localOrigin);
         frame.capturedPoint = Point.create(point.x, point.y);
         frame.resizeOptions = ResizeOptions.Default;
         frame.allowSnapping = true;
@@ -63,12 +66,15 @@ export default {
         frame.childrenCount = frame.element.children?frame.element.children.length:-1;
 
         //Environment.view.interactionLayer.add(resizingElement);
-        frame.element.startResizing({ transformationElement: frame.element });
+        Environment.controller.startResizingEvent.raise(event, frame.element);
         if (frame.element.decorators) {
             frame.element.decorators.forEach(x => x.visible(false));
         }
+
+        frame.element.addDecorator(ResizeDecorator);
+        frame.element.invalidate();
     },
-    release: function (frame) {
+    release: function (frame, point, event: IMouseEventData) {
         if (frame.element) {
             var newSnapshot = TransformationHelper.getPropSnapshot(frame.elements);
             TransformationHelper.moveBetweenSnapshots(frame.elements, frame.snapshot, newSnapshot);
@@ -76,9 +82,12 @@ export default {
             //frame.resizingElement.saveChanges();
             // frame.resizingElement.detach();
             //ImageContent depends on event fired in the end
-            frame.element.stopResizing({ transformationElement: frame.element });
+            //frame.element.stopResizing({ transformationElement: frame.element });
+            Environment.controller.stopResizingEvent.raise(event, frame.element);
             frame.element.clearSavedLayoutProps();
             delete frame.globalViewMatrix;
+            delete frame.viewMatrix;
+            frame.element.removeDecorator(ResizeDecorator);
             if (frame.element.decorators) {
                 frame.element.decorators.forEach(x => x.visible(true));
             }
@@ -89,7 +98,7 @@ export default {
         var dc = ~~(((360 - angle + 23) % 360) / 45);
         return (index + dc) % 8;
     },
-    change: function (frame, dx, dy, point, mousePoint, keys) {
+    change: function (frame, dx, dy, point, mousePoint, keys, event: IMouseEventData) {
         var rv = point.rv;
 
         if (keys.shiftKey && frame.originalRect.width && frame.originalRect.height) {
@@ -153,8 +162,8 @@ export default {
         if (keys.altKey) {
             // When resizing (for example) text, it can change its width and get misplaced.
             // Therefore, it is checked whether the center is still the same after scaling.
-            let br = frame.originalRect;
-            let c = frame.globalViewMatrix.transformPoint(br.center());
+            let br = frame.element.boundaryRect();
+            let c = frame.element.viewMatrix().transformPoint(br.center());
             let d = frame.centerOrigin.subtract(c).roundMutable();
             if (d.x || d.y) {
                 frame.element.applyTranslation(d, false, ChangeMode.Self);
@@ -165,10 +174,6 @@ export default {
             SnapController.calculateSnappingPoints(frame.element.parent().primitiveRoot(), frame.element);
         }
 
-        Environment.controller.resizingEvent.raise({
-            element: frame.element,
-            transformationElement: frame.element,
-            handled: false
-        });
+        Environment.controller.resizingEvent.raise(event, frame.element);
     }
 }

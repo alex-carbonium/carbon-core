@@ -225,8 +225,8 @@ class SelectionModel implements ISelection {
         }
     }
 
-    refreshSelection() {
-        let selection = this.selectedElements();
+    refreshSelection(elements?: IUIElement[]) {
+        let selection = elements || this.selectedElements();
         this.makeSelection(ArrayPool.EmptyArray, "new", true);
         this.makeSelection(selection, "new", true);
 

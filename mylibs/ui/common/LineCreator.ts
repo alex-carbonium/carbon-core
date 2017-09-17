@@ -49,7 +49,7 @@ export default class LineCreator extends Tool {
         super.detach.apply(this, arguments);
         SnapController.clearActiveSnapLines();
     }
-    mousedown(event: IMouseEventData, keys: KeyboardState) {
+    mousedown(event: IMouseEventData) {
         var eventData = { handled: false, x: event.x, y: event.y };
         Environment.controller.startDrawingEvent.raise(eventData);
         if (eventData.handled) {
@@ -58,7 +58,7 @@ export default class LineCreator extends Tool {
 
         this._mousepressed = true;
 
-        if (keys.ctrlKey) {
+        if (event.ctrlKey) {
             var pos:ICoordinate = event;
         }
         else {
@@ -101,8 +101,8 @@ export default class LineCreator extends Tool {
             App.Current.resetCurrentTool();
         }
     }
-    mousemove(event: IMouseEventData, keys: KeyboardState) {
-        super.mousemove(event, keys);
+    mousemove(event: IMouseEventData) {
+        super.mousemove(event);
 
         if (event.cursor !== Cursors.Pen.MovePoint){
             event.cursor = Cursors.Pen.Line;
@@ -116,7 +116,7 @@ export default class LineCreator extends Tool {
             }
         }
 
-        if (keys.ctrlKey) {
+        if (event.ctrlKey) {
             var pos:ICoordinate = event;
         }
         else {
@@ -126,7 +126,7 @@ export default class LineCreator extends Tool {
         if (this._mousepressed) {
             var x = pos.x,
                 y = pos.y;
-            if (keys.shiftKey) {
+            if (event.shiftKey) {
                 var point = angleAdjuster.adjust(this._startPoint, { x: x, y: y });
                 x = point.x;
                 y = point.y;

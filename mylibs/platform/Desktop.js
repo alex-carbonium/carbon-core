@@ -64,7 +64,7 @@ var onmousedown = function (event) {
 
 
 var onmousemove = function (event) {
-    Environment.controller.onmousemove(Environment.controller.createEventData(event), Keyboard.state);
+    Environment.controller.onmousemove(Environment.controller.createEventData(event));
     if (this._mouseButtonPressed) {
         // It is important to disable default mouse move because otherwise browser will make a text selection
         // (if there is selectable content such as comments) and then keyboard events will be handled by those selected elements
