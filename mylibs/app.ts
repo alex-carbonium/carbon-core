@@ -869,7 +869,7 @@ class AppClass extends DataNode implements IApp {
     private _updateWithSelectionMask(e) {
         var parent = e.parent();
         do {
-            if (parent.opacity() < 1 || parent.runtimeProps.mask) {
+            if (parent.opacity() < 1 || parent.runtimeProps.mask || parent.clipSelf()) {
                 e = parent;
                 break;
             }

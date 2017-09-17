@@ -1,12 +1,35 @@
 import ContextPool from "./ContextPool";
-import { IContext } from "carbon-core";
+import { IContext, IPooledObject } from "carbon-core";
 import Selection from "framework/SelectionModel";
 import Context from "./Context";
 import Invalidate from "framework/Invalidate";
+import ObjectPool from "../ObjectPool";
+import NullContainer from "framework/NullContainer";
+
+class ClipReference implements IPooledObject {
+
+    constructor(public id:string, public context:any) {
+
+    }
+    reset() {
+        this.id = null;
+        this.context = null;
+    }
+
+    free() {
+
+    }
+}
+
+let objectPool = new ObjectPool(()=>{
+    return new ClipReference(null, null);
+}, 10);
 
 export default class ContextLayerSource extends Context {
+    private _relativeClippingStack: any[];
     constructor(private contexts: IContext[]) {
         super();
+
         this._contexts = contexts;
         this._context = contexts[0];
         this._canvas = this._context.canvas;
@@ -14,6 +37,7 @@ export default class ContextLayerSource extends Context {
         this._height = this._canvas.height;
         this.contextsStack = [];
         this.rootElement = null;
+        this._relativeClippingStack = [];
 
         for (var i = 0; i < contexts.length; ++i) {
             (contexts[i] as any)._mask = 1 << i;
@@ -21,6 +45,7 @@ export default class ContextLayerSource extends Context {
 
         this._selectionBinding = Selection.onElementSelected.bind(this, this.onSelectionChanged);
     }
+
 
     onSelectionChanged() {
         App.Current.mapElementsToLayerMask();
@@ -30,6 +55,19 @@ export default class ContextLayerSource extends Context {
         if (this._selectionBinding) {
             this._selectionBinding.dispose();
             this._selectionBinding = null;
+        }
+    }
+
+    _clipCurrentContext(element) {
+        this._context.save();
+        let ref = objectPool.allocate();
+        ref.id = element.id();
+        ref.context = this._context;
+        this._relativeClippingStack.push(ref);
+
+        while(element && element !== NullContainer) {
+            element.clip(this._context);
+            element = element.parent();
         }
     }
 
@@ -54,6 +92,15 @@ export default class ContextLayerSource extends Context {
 
         // console.log(`element: ${element.name()} on ${this._context._mask}`);
 
+        let parent = element.parent();
+        if (parent && parent.runtimeProps && parent.runtimeProps.ctxl !== ctxl) {
+            // potentially we need to clip this element
+            let relativeClip = this._relativeClippingStack[this._relativeClippingStack.length - 1];
+            if (this._relativeClippingStack.length === 0 || relativeClip.id !== parent.id() || relativeClip.context._mask !== ctxl) {
+                this._clipCurrentContext(parent);
+            }
+        }
+
         return true;
     }
 
@@ -61,6 +108,19 @@ export default class ContextLayerSource extends Context {
         var ctxl = element.runtimeProps.ctxl;
         if (ctxl !== undefined) {
             this._context = this.contextsStack.pop();
+        }
+
+        if (this._relativeClippingStack.length) {
+            var relativeClipContext = this._relativeClippingStack[this._relativeClippingStack.length - 1];
+            while (relativeClipContext.id === element.id()) {
+                relativeClipContext.context.restore();
+                let ref = this._relativeClippingStack.pop();
+                objectPool.free(ref);
+                if(this._relativeClippingStack.length === 0) {
+                    break;
+                }
+                relativeClipContext = this._relativeClippingStack[this._relativeClippingStack.length - 1];
+            }
         }
     }
 }
