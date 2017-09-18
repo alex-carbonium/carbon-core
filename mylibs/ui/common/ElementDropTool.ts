@@ -158,7 +158,15 @@ export default class ElementDropTool extends Tool {
                 round = true;
             }
             else {
-                this._point.set(snapped.x, snapped.y);
+                let x = snapped.x;
+                let y = snapped.y;
+                if (snapped.x === this._point.x) {
+                    x = Math.round(x);
+                }
+                if (snapped.y === this._point.y) {
+                    y = Math.round(y);
+                }
+                this._point.set(x, y);
                 round = false;
             }
         }
@@ -173,7 +181,7 @@ export default class ElementDropTool extends Tool {
     }
 
     canDraw(): boolean{
-        return this._mousepressed;
+        return this._mousepressed && !this._cursorNotMoved;
     }
 
     layerdraw(context, environment) {

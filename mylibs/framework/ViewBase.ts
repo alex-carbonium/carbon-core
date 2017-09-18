@@ -796,6 +796,7 @@ export default class ViewBase { //TODO: implement IView
             var layer = layers[i];
             if (!layer.hitTransparent() && layer.canAccept([element])) {
                 layer.dropToLayer(x, y, element);
+                element.clearSavedLayoutProps();
                 return;
             }
         }

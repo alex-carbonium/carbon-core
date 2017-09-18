@@ -79,7 +79,7 @@ export default class Star extends Polygon {
             return true;
         }
 
-        this.internalRadius(this.runtimeProps.origLayout.internalRadius);
+        this.setProps({internalRadius: this.runtimeProps.origLayout.internalRadius}, mode);
         return false;
     }
 
