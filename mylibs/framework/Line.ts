@@ -36,20 +36,23 @@ var LinePoint = {
         context.fill();
         context.stroke();
     },
-    capture (frame, point) {
+    capture (frame, point, mousePoint) {
         var resizingElement = frame.element.clone();
         resizingElement.setProps(frame.element.selectLayoutProps(true));
         frame.resizingElement = resizingElement;
         frame.globalViewMatrix = frame.element.globalViewMatrix();
         frame.origPointX = point.x;
         frame.origPointY = point.y;
+        let box = frame.element.getBoundaryRectGlobal();
+        frame._offsetX = box.x + point.x - mousePoint.x;
+        frame._offsetY = box.y + point.y - mousePoint.y;
 
         var container = frame.element.primitiveRoot();
         if (!container && frame.element instanceof SelectComposite) {
             container = frame.element.first().primitiveRoot();
         }
 
-        SnapController.calculateSnappingPoints(container);
+        SnapController.calculateSnappingPoints(container, this);
         frame.element.visible(false, ChangeMode.Self)
 
         Environment.view.interactionLayer.add(resizingElement);
@@ -57,6 +60,7 @@ var LinePoint = {
     release (frame) {
         var e = frame.resizingElement;
         SnapController.clearActiveSnapLines();
+
         if (e) {
             var props = e.selectProps(["x1", "x2", "y1", "y2"]);
             frame.element.prepareAndSetProps(props);
@@ -75,8 +79,8 @@ var LinePoint = {
             return;
         }
 
-        var oldx = Math.round(mousePoint.x);
-        var oldy = Math.round(mousePoint.y);
+        var oldx = mousePoint.x + frame._offsetX;
+        var oldy = mousePoint.y + frame._offsetY;
         if (keys.ctrlKey) {
             var newPoint = {x: oldx, y: oldy};
         }
@@ -99,8 +103,8 @@ var LinePoint = {
             dy += newPoint.y - oldy;
         }
 
-        point.x = frame.origPointX + dx;
-        point.y = frame.origPointY + dy;
+        point.x = Math.round(frame.origPointX + dx);
+        point.y = Math.round(frame.origPointY + dy);
 
         frame.resizingElement.saveOrResetLayoutProps();
         point.updateElement(frame.resizingElement, dx, dy);
@@ -135,6 +139,10 @@ class Line extends Shape {
         return false;
     }
 
+    isBadBoundaryRect(br) {
+        return false;
+    }
+
     hitTest(/*Point*/point, scale) {
         if (!this.visible() || this.hasBadTransform()){
             return false;
@@ -154,9 +162,39 @@ class Line extends Shape {
         return Math.abs(distance) < d;
     }
 
+    getSnapPoints(local) {
+        if (!this.allowSnapping()) {
+            return null;
+        }
+
+        if (this.runtimeProps.snapPoints) {
+            return this.runtimeProps.snapPoints;
+        }
+
+        let rect = this.getBoundaryRectGlobal();
+        let x = rect.x,
+            y = rect.y,
+            width = rect.width,
+            height = rect.height;
+        let origin = this.rotationOrigin(true);
+
+        if (local) {
+            x = 0;
+            y = 0;
+            origin.x -= rect.x;
+            origin.y -= rect.y;
+        }
+
+        return this.runtimeProps.snapPoints = {
+            xs: [Math.round(x), Math.round(x + width)],
+            ys: [Math.round(y), Math.round(y + height)],
+        };
+    }
+
     canConvertToPath(){
         return true;
     }
+
     convertToPath() {
         var path = new Path();
         var l = this.x(),
@@ -288,7 +326,7 @@ class Line extends Shape {
             var maxX = Math.max(changes.x1, changes.x2);
             var minY = Math.min(changes.y1, changes.y2);
             var maxY = Math.max(changes.y1, changes.y2);
-            changes.br = new Rect(minX, minY, maxX - minX || 1, maxY - minY || 1)
+            changes.br = new Rect(minX, minY, maxX - minX || 0, maxY - minY || 0)
         }
     }
 
