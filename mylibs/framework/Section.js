@@ -2,9 +2,9 @@ import Container from "./Container";
 import Box from "./Box";
 import Brush from "./Brush";
 import PropertyMetadata from "./PropertyMetadata";
-import {Overflow, ViewTool, Types} from "./Defs";
+import {Overflow, Types} from "./Defs";
 import {isRectInRect, calculateRectIntersectionArea} from "math/math";
-import app from "app";
+import Environment from "../environment";
 
 export default class Section extends Container {
     trackDeleted(parent, index, mode) {
@@ -154,7 +154,7 @@ export default class Section extends Container {
     }
 
     _isSectionToolActive(){
-        return app.currentTool === ViewTool.Section;
+        return Environment.controller.currentTool === "sectionTool";
     }
 
 

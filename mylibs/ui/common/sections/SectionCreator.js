@@ -3,7 +3,6 @@ import SectionDecorator from "./SectionDecorator";
 import Section from "../../../framework/Section";
 import Artboard from "../../../framework/Artboard";
 import NullArtboard from "../../../framework/NullArtboard";
-import {ViewTool} from "../../../framework/Defs";
 import Selection from "../../../framework/SelectionModel"
 import Cursor from "../../../framework/Cursor";
 import Invalidate from "../../../framework/Invalidate";
@@ -13,7 +12,7 @@ var decorator = null;
 
 export default class SectionCreator extends Tool {
     constructor(){
-        super(ViewTool.Section);
+        super("sectionTool");
     }
 
     attach(app, view, controller) {

@@ -6,7 +6,6 @@ import SystemConfiguration from "../../SystemConfiguration";
 import Selection from "../../framework/SelectionModel";
 import Cursor from "../../framework/Cursor";
 import Invalidate from "../../framework/Invalidate";
-import { ViewTool } from "../../framework/Defs";
 import SnapController from "../../framework/SnapController";
 import Environment from "../../environment";
 import UserSettings from "UserSettings";
@@ -25,7 +24,7 @@ export default class PathTool extends Tool {
     _cancelBinding: any;
 
     constructor(app, type, parameters?) {
-        super(ViewTool.Path);
+        super("pathTool");
 
         this._type = type;
         this._parameters = parameters;
@@ -63,9 +62,9 @@ export default class PathTool extends Tool {
             this._cancelBinding = null;
         }
 
-        setTimeout(function () {
+        setTimeout(() => {
             if (SystemConfiguration.ResetActiveToolToDefault) {
-                this._app.resetCurrentTool();
+                this._controller.resetCurrentTool();
             }
         }, 0);
     }

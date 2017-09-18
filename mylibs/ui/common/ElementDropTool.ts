@@ -9,17 +9,16 @@ import Brush from "../../framework/Brush";
 import Rect from "../../math/rect";
 import Point from "../../math/point";
 import Matrix from "../../math/matrix";
-import {ViewTool} from "../../framework/Defs";
 import UIElement from "../../framework/UIElement";
 import Tool from "./Tool";
 
-import { IMouseEventData, KeyboardState, ElementState } from "carbon-core";
+import { IMouseEventData, KeyboardState, ElementState, WorkspaceTool } from "carbon-core";
 require("framework/ArtboardFrame");// don't remove from here even if not used
 
 export default class ElementDropTool extends Tool {
     [name: string]: any;
 
-    constructor(toolId: string, type, parameters?) {
+    constructor(toolId: WorkspaceTool, type, parameters?) {
         super(toolId);
 
         this._type = type;
@@ -83,7 +82,7 @@ export default class ElementDropTool extends Tool {
             Invalidate.requestInteractionOnly();
             if (this._cursorNotMoved) {
                 Environment.controller.selectByClick(event);
-                App.Current.resetCurrentTool();
+                Environment.controller.resetCurrentTool();
                 event.handled = true;
                 return;
             }
@@ -97,7 +96,7 @@ export default class ElementDropTool extends Tool {
             this._hoverArtboard = null;// need to rebuild snapping data TODO: consider to just add data for a new element
         }
         if (SystemConfiguration.ResetActiveToolToDefault) {
-            App.Current.resetCurrentTool();
+            Environment.controller.resetCurrentTool();
         }
         event.handled = true;
     }
@@ -159,7 +158,15 @@ export default class ElementDropTool extends Tool {
                 round = true;
             }
             else {
-                this._point.set(snapped.x, snapped.y);
+                let x = snapped.x;
+                let y = snapped.y;
+                if (snapped.x === this._point.x) {
+                    x = Math.round(x);
+                }
+                if (snapped.y === this._point.y) {
+                    y = Math.round(y);
+                }
+                this._point.set(x, y);
                 round = false;
             }
         }
@@ -174,7 +181,7 @@ export default class ElementDropTool extends Tool {
     }
 
     canDraw(): boolean{
-        return this._mousepressed;
+        return this._mousepressed && !this._cursorNotMoved;
     }
 
     layerdraw(context, environment) {

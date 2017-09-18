@@ -1,26 +1,26 @@
 import Selection from "../../framework/SelectionModel"
 import Invalidate from "../../framework/Invalidate";
-import { IApp, IView, IController, IMouseEventData, KeyboardState, IDisposable } from "carbon-core";
+import { IApp, IView, IController, IMouseEventData, KeyboardState, IDisposable, WorkspaceTool } from "carbon-core";
 
 //TODO: if selection is made in layers after tool is set, active frame starts to react to mouse events before the tool
 export default class Tool {
-    _app: IApp;
-    _view: IView;
-    _controller: IController;
-    _toolId: string;
+    protected _app: IApp;
+    protected _view: IView;
+    protected _controller: IController;
+    _toolId: WorkspaceTool;
     _disposables: IDisposable[];
 
-    constructor(toolId: string) {
+    constructor(toolId: WorkspaceTool) {
         this._toolId = toolId;
         this._disposables = [];
     }
 
-    attach(app, view, controller, mousePressed) {
+    attach(app, view, controller: IController, mousePressed) {
         this._app = app;
         this._view = view;
         this._controller = controller;
         this._attach();
-        this._app.currentTool = this._toolId;
+        this._controller.currentTool = this._toolId;
     }
     detach() {
         this._detach();
@@ -30,7 +30,7 @@ export default class Tool {
     }
     resume() {
         this._attach();
-        this._app.currentTool = this._toolId;
+        this._controller.currentTool = this._toolId;
     }
     _attach() {
         var controller = this._controller;

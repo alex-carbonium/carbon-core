@@ -5,9 +5,9 @@ import SnapController from "../../framework/SnapController";
 import CustomGuides from "./CustomGuides";
 import UserSettings from "../../UserSettings";
 import { isPointInRect } from "../../math/math";
-import { ViewTool } from "../../framework/Defs";
 import { createUUID } from "../../util";
 import NullArtboard from "../../framework/NullArtboard";
+import Environment from "../../environment";
 import Artboard from "../../framework/Artboard";
 import Keyboard from "../../platform/Keyboard";
 import { IApp, IView, IController, IDisposable, IRect, IMouseEventData, PatchType } from "carbon-core";
@@ -84,7 +84,7 @@ export default class RulerGuides {
         return false;
     }
     canCapture(): boolean {
-        return Keyboard.state.ctrlKey || this._app.currentTool === ViewTool.Pointer || this._app.currentTool === ViewTool.PointerDirect;
+        return Keyboard.state.ctrlKey || Environment.controller.currentTool === "pointerTool" || Environment.controller.currentTool === "pointerDirectTool";
     }
 
     onDragSearching = (e: IMouseEventData) => {

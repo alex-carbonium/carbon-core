@@ -17,7 +17,7 @@ import Environment from "environment";
 import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
-import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext, IContainer } from "carbon-core";
+import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext, IContainer, WorkspaceTool } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
 import Rect from "../math/rect";
 import CoreIntl from "../CoreIntl";
@@ -107,6 +107,13 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     select() {
         this.allowArtboardSelection(true);
+        if (Environment.controller.currentTool !== "artboardTool") {
+            Environment.controller.actionManager.invoke("artboardTool" as WorkspaceTool);
+            setTimeout(() => {
+                Selection.makeSelection([this]);
+                Environment.controller.repeatLastMouseMove();
+            }, 0);
+        }
     }
 
     unselect() {
@@ -560,7 +567,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     hitTestBoundingBox(point, scale) {
         let rect = super.getHitTestBox(scale);
-        return this.hitTestLocalRect(rect, point, scale);
+        return this.hitTestLocalRect(rect, point, scale) || this.hitTestHeader(point, scale);
     }
 
     private hitTestHeader(point, scale) {
@@ -576,7 +583,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         let element = super.hitElement.apply(this, arguments);
 
         if (element === this && this.props.hitTestBox) {
-            if (!this.hitTestBoundingBox(position, scale) && !this.hitTestHeader(position, scale)) {
+            if (!this.hitTestBoundingBox(position, scale)) {
                 return null;
             }
         }
@@ -724,7 +731,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     mousedown(event) {
         let scale = Environment.view.scale();
         let pos = this.position();
-        if (isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width(), height: 20 / scale }, {
+        if (!Selection.isElementSelected(this) && isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width(), height: 20 / scale }, {
             x: event.x,
             y: event.y
         })) {

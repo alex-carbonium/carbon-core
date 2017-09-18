@@ -9,8 +9,7 @@ import StyleManager from "framework/style/StyleManager";
 import OpenTypeFontManager, { DefaultFont } from "./OpenTypeFontManager";
 import {
     Types,
-    StoryType,
-    ViewTool
+    StoryType
 } from "./framework/Defs";
 import Font from "./framework/Font";
 import GroupContainer from "./framework/GroupContainer";
@@ -115,9 +114,6 @@ class AppClass extends DataNode implements IApp {
 
     recentColorsChanged = EventHelper.createEvent<any[]>();
 
-    currentToolChanged: IEvent<string>;
-    _currentTool: string;
-
     private _loaded: IEvent<void>;
     private _clipArtboards: boolean = false;
 
@@ -181,8 +177,7 @@ class AppClass extends DataNode implements IApp {
         this.shortcutManager = new ShortcutManager();
         this.shortcutManager.mapDefaultScheme();
 
-        this._currentTool = ViewTool.Pointer;
-        this.currentToolChanged = EventHelper.createEvent();
+
 
         var token = Selection.onElementSelected.bind((selection, oldSelection, doNotTrack) => {
             let selectionIds = Selection.selectedElements().map(e => e.id());
@@ -1328,22 +1323,6 @@ class AppClass extends DataNode implements IApp {
         finally {
             this._lastRelayoutView = Environment.view.viewState;
         }
-    }
-
-    get currentTool(): string {
-        return this._currentTool;
-    }
-
-    set currentTool(tool: string) {
-        var old = this._currentTool;
-        this._currentTool = tool;
-        if (old !== tool) {
-            this.currentToolChanged.raise(tool);
-        }
-    }
-
-    resetCurrentTool() {
-        this.actionManager.invoke(ViewTool.Pointer);
     }
 
     assignNewName(element: IUIElement) {

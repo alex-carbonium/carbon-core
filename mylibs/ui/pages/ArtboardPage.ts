@@ -11,7 +11,7 @@ import RelayoutEngine from "framework/relayout/RelayoutEngine";
 import SystemConfiguration from "SystemConfiguration";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
-import { Types, ViewTool } from "../../framework/Defs";
+import { Types } from "../../framework/Defs";
 import Rect from "../../math/rect";
 import { IArtboard } from "carbon-model";
 import { ArtboardType, IArtboardPage, ChangeMode, IArtboardPageProps } from "carbon-core";
@@ -184,7 +184,7 @@ class ArtboardPage extends Page implements IArtboardPage {
         }
 
         if(SystemConfiguration.ResetActiveToolToDefault) {
-            App.Current.resetCurrentTool();
+            Environment.controller.resetCurrentTool();
         }
     }
 

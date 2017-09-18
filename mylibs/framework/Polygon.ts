@@ -108,7 +108,7 @@ export default class Polygon extends Shape {
             return true;
         }
 
-        this.radius(this.runtimeProps.origLayout.radius);
+        this.setProps({radius: this.runtimeProps.origLayout.radius}, mode);
         return false;
     }
 

@@ -68,9 +68,6 @@ declare module "carbon-app" {
 
         isolationActive():boolean;
 
-        currentTool: string;
-        currentToolChanged: IEvent<string>;
-
         onBuildMenu: any;
         shortcutManager: IShortcutManager;
         actionManager: IActionManager;
@@ -143,8 +140,6 @@ declare module "carbon-app" {
 
         assignNewName(element: IUIElement);
 
-        resetCurrentTool();
-
         importPage(json: IJsonNode): IPage;
         importExternalPage(data:any) : IPage;
 
@@ -209,6 +204,25 @@ declare module "carbon-app" {
     export interface ILayerDrawHandlerObject {
         onLayerDraw(layer: ILayer, context: IContext, environment: IEnvironment):void;
     }
+
+    export type WorkspaceTool =
+        "pointerTool" |
+        "sectionTool" |
+        "textTool" |
+        "pathTool" |
+        "rectangleTool" |
+        "starTool" |
+        "triangleTool" |
+        "polygonTool" |
+        "artboardTool" |
+        "circleTool" |
+        "lineTool" |
+        "protoTool" |
+        "pencilTool" |
+        "handTool" |
+        "pointerDirectTool" |
+        "imageTool" |
+        "artboardViewerTool";
 
     export interface IView {
         //TODO encapsulate
@@ -313,6 +327,10 @@ declare module "carbon-app" {
         choosePasteLocation(elements: IUIElement[], allowMoveIn?: boolean): {parent: IContainer, x: number, y: number}
         insertAndSelect(element: IUIElement[], parent: IContainer, x: number, y: number);
         getCurrentDropTarget(eventData: IMouseEventData): IContainer | IComposite | null;
+
+        currentTool: WorkspaceTool;
+        currentToolChanged: IEvent<WorkspaceTool>;
+        resetCurrentTool();
     }
 
     //TODO: rename to Workspace

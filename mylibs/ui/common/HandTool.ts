@@ -1,5 +1,4 @@
 import Cursor from "../../framework/Cursor";
-import {ViewTool} from "../../framework/Defs";
 import Environment from "../../environment";
 import Tool from "./Tool";
 import {IMouseEventData} from "carbon-core";
@@ -22,7 +21,7 @@ export default class HandTool extends Tool {
     [name: string]: any;
 
     constructor(parameters?) {
-        super(ViewTool.Hand);
+        super("handTool");
         this._parameters = parameters;
     }
     pause() {
@@ -36,7 +35,7 @@ export default class HandTool extends Tool {
         this._attach();
         this._mousepressed = mousePressed;
 
-        app.currentTool = ViewTool.Hand;
+        this._controller.currentTool = "handTool";
     }
     detach() {
         this._detach();

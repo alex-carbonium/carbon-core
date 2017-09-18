@@ -6,8 +6,7 @@ import {
     AnimationType,
     EasingType,
     ActionEvents,
-    StoryType,
-    ViewTool
+    StoryType
 } from "framework/Defs";
 import * as ActionHelper from "./ActionHelper";
 import Matrix from "../../math/matrix";
@@ -55,7 +54,7 @@ export default class LinkingTool extends Tool {
     [name: string]: any;
 
     constructor() {
-        super(ViewTool.Proto);
+        super("protoTool");
     }
 
     _pointToHomeScreenArtboard(event, scale) {

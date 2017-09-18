@@ -10,8 +10,8 @@ import Artboard from "./Artboard";
 import Page from "./Page";
 import Keyboard from "../platform/Keyboard";
 import ObjectFactory from "./ObjectFactory";
-import { Types, ViewTool } from "./Defs";
-import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3 } from "carbon-core";
+import { Types } from "./Defs";
+import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3, WorkspaceTool } from "carbon-core";
 import UIElement from "./UIElement";
 import Container from "./Container";
 import { choosePasteLocation } from "./PasteLocator";
@@ -58,6 +58,9 @@ export default class DesignerController implements IController {
     _startDraggingElement: IUIElement;
     _draggingElement: DraggingElement = null;
     _draggingOverElement: Container = null;
+
+    private _currentTool: WorkspaceTool;
+    currentToolChanged = EventHelper.createEvent<WorkspaceTool>();
 
     updateCursor(eventData?) {
         if (eventData) {
@@ -571,7 +574,7 @@ export default class DesignerController implements IController {
     }
 
     _onKeyChanged(newKeys: KeyboardState, oldKeys: KeyboardState) {
-        if ((this.app.currentTool === ViewTool.Pointer || this.app.currentTool === ViewTool.PointerDirect) && !this.interactionActive) {
+        if ((this.currentTool === "pointerTool" || this.currentTool === "pointerDirectTool") && !this.interactionActive) {
             Selection.directSelectionEnabled(newKeys.ctrlKey);
         }
 
@@ -769,5 +772,21 @@ export default class DesignerController implements IController {
 
     choosePasteLocation(elements: IUIElement[], allowMoveIn?: boolean) {
         return choosePasteLocation(elements, null, allowMoveIn);
+    }
+
+    get currentTool(): WorkspaceTool {
+        return this._currentTool;
+    }
+
+    set currentTool(tool: WorkspaceTool) {
+        var old = this._currentTool;
+        this._currentTool = tool;
+        if (old !== tool) {
+            this.currentToolChanged.raise(tool);
+        }
+    }
+
+    resetCurrentTool() {
+        this.actionManager.invoke("pointerTool" as WorkspaceTool);
     }
 }

@@ -1,7 +1,6 @@
 import EventHelper from "./EventHelper";
 import SelectComposite from "./SelectComposite";
 import {SelectFrame} from "./SelectFrame";
-import { ViewTool } from "./Defs";
 import UserSettings from "../UserSettings";
 import Environment from "../environment";
 import { ISelection, IEvent, IEvent2, IUIElement, IComposite, IEvent3, SelectionMode, KeyboardState } from "carbon-core";
@@ -269,7 +268,7 @@ class SelectionModel implements ISelection {
     selectAll() {
         let page = App.Current.activePage;
 
-        if (App.Current.currentTool === ViewTool.Artboard) {
+        if (Environment.controller.currentTool === "artboardTool") {
             this.makeSelection(page.getAllArtboards());
             return;
         }

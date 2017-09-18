@@ -1,7 +1,6 @@
 import Tool from "./Tool";
 import angleAdjuster from "../../math/AngleAdjuster";
 import Line from "../../framework/Line";
-import { ViewTool } from "../../framework/Defs";
 import SystemConfiguration from "../../SystemConfiguration";
 import Selection from "../../framework/SelectionModel";
 import Invalidate from "../../framework/Invalidate";
@@ -42,7 +41,7 @@ export default class LineCreator extends Tool {
     [name: string]: any;
 
     constructor() {
-        super(ViewTool.Line);
+        super("lineTool");
     }
 
     detach() {
@@ -98,7 +97,7 @@ export default class LineCreator extends Tool {
             Selection.makeSelection([element]);
         }
         if (SystemConfiguration.ResetActiveToolToDefault) {
-            App.Current.resetCurrentTool();
+            Environment.controller.resetCurrentTool();
         }
     }
     mousemove(event: IMouseEventData) {

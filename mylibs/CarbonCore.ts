@@ -84,7 +84,6 @@ export default {
     "PatchType": Defs.PatchType,
     "ChangeMode": Defs.ChangeMode,
     "Types": Defs.Types,
-    "ViewTool": Defs.ViewTool,
     "Context": require("./framework/render/Context"),
     "ContextPool": require("./framework/render/ContextPool"),
     "RenderLoop": require("./framework/render/RenderLoop"),
