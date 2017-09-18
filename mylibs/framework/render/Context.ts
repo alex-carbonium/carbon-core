@@ -316,7 +316,6 @@ export default class Context implements IContext {
             xm = x + w / 2,// x-middle
             ym = y + h / 2;       // y-middle
 
-        this.beginPath();
         this.moveTo(x, ym);
         this.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
         this.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);

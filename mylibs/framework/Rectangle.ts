@@ -186,10 +186,13 @@ class Rectangle extends Shape {
             path.addPoint({ x: x1, y: y2 - r, cp1x: x1, cp1y: y2 - 0.45 * r });
         }
         path.closed(true);
-        path.fill(this.fill());
-        path.stroke(this.stroke());
-        path.styleId(this.styleId());
-        path.name(this.name());
+        path.setProps({
+            shadows:this.props.shadows,
+            fill:this.fill(),
+            stroke:this.stroke(),
+            styleId:this.styleId(),
+            name:this.name()
+        });
 
         path.setTransform(this.viewMatrix());
         path.adjustBoundaries();
@@ -293,7 +296,7 @@ class Rectangle extends Shape {
                 Math.min(mr, r3),
                 Math.min(mr, r4));
         } else {
-            context.rectPath(0, 0, w, h, true);
+            context.rectPath(0, 0, w, h);
         }
     }
 

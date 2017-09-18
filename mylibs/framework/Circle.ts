@@ -109,17 +109,19 @@ class Circle extends Shape {
         });
 
         path.closed(true);
-        path.fill(this.fill());
-        path.stroke(this.stroke());
-        path.styleId(this.styleId());
-        path.name(this.name());
+        path.setProps({
+            shadows:this.props.shadows,
+            fill:this.fill(),
+            stroke:this.stroke(),
+            styleId:this.styleId(),
+            name:this.name()
+        });
 
         path.setTransform(this.viewMatrix());
         path.adjustBoundaries();
 
         return path;
     }
-
 
     drawPath(context, w, h) {
         context.ellipse(0, 0, w, h);
@@ -135,6 +137,7 @@ class Circle extends Shape {
             context.setLineDash(dashPattern);
         }
 
+        context.beginPath();
         this.drawPath(context, w, h);
         var stroke = this.stroke();
 

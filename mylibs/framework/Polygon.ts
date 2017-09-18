@@ -196,7 +196,6 @@ export default class Polygon extends Shape {
         let x = cx + r * Math.sin(Math.PI),
             y = cy + r * Math.cos(Math.PI);
 
-        context.beginPath();
         let p = gm.transformPoint2(x, y, true);
         context.moveTo(p.x, p.y);
         for (let i = 1; i < this.pointsCount(); i++) {
@@ -233,10 +232,13 @@ export default class Polygon extends Shape {
         }
 
         path.closed(true);
-        path.fill(this.fill());
-        path.stroke(this.stroke());
-        path.styleId(this.styleId());
-        path.name(this.name());
+        path.setProps({
+            shadows:this.props.shadows,
+            fill:this.fill(),
+            stroke:this.stroke(),
+            styleId:this.styleId(),
+            name:this.name()
+        });
 
         path.setTransform(this.viewMatrix());
         path.adjustBoundaries();

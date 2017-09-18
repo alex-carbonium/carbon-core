@@ -32,7 +32,7 @@ class Shape extends Container {
     performArrange() {
     }
 
-    _renderDraft(context, w, h) {
+    _renderDraft(context, w, h, environment) {
         var stroke = this.stroke();
         var strokePosition = this.strokePosition();
 
@@ -44,6 +44,8 @@ class Shape extends Container {
         }
 
         this.fillSelf(context, w, h);
+        this.drawInsetShadows(context, w, h, environment);
+
         if (!stroke || !stroke.type || strokePosition === StrokePosition.Center) {
             context.lineWidth = this.strokeWidth();
             this.strokeSelf(context, w, h);
@@ -83,6 +85,11 @@ class Shape extends Container {
             context.beginPath();
             this.drawPath(context, w, h);
             this.fillSelf(context, w, h);
+
+            if(this.drawInsetShadows(context, w, h, environment)) {
+                context.beginPath();
+                this.drawPath(context, w, h);
+            }
         });
 
         if (!stroke || !stroke.type || strokePosition === StrokePosition.Center) {
@@ -202,7 +209,7 @@ class Shape extends Container {
         if (environment.finalRender) {
             this._renderFinal(context, w, h, environment);
         } else {
-            this._renderDraft(context, w, h);
+            this._renderDraft(context, w, h, environment);
         }
 
         context.restore();
@@ -225,14 +232,18 @@ class Shape extends Container {
     }
     drawInsetShadows(context, w, h, environment) {
         var shadows = this.props.shadows;
+        var hasShadow = false;
         if (shadows && shadows.length) {
             for (var i = 0; i < shadows.length; ++i) {
                 var shadow = shadows[i];
                 if (shadow.inset) {
                     Shadow.apply(this, shadow, context, w, h, environment);
+                    hasShadow = true;
                 }
             }
         }
+
+        return hasShadow;
     }
 
     drawPath(context, w, h) {

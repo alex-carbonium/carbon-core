@@ -1,4 +1,4 @@
-import {Types} from "./Defs";
+import { Types } from "./Defs";
 import Matrix from "math/matrix";
 
 // var onAngleDistanceChanged = function (angle) {
@@ -13,7 +13,7 @@ import Matrix from "math/matrix";
 var Shadow: any = {};
 var matrix = Matrix.create();
 Shadow.apply = function (element, shadowObject, context, w, h, environment) {
-    if (!shadowObject.enabled || shadowObject.color == null) {
+    if (!shadowObject.enabled || !shadowObject.color) {
         return;
     }
 
@@ -22,7 +22,7 @@ Shadow.apply = function (element, shadowObject, context, w, h, environment) {
     var box = element.getBoundingBox(true);
 
     context.fillStyle = shadowObject.color;
-    context.filter = "blur("+ (shadowObject.blur/2) + "px)";
+    context.filter = "blur(" + (shadowObject.blur * environment.view.scale() / 2) + "px)";
 
     if (shadowObject.inset) {
         context.beginPath();
@@ -31,14 +31,20 @@ Shadow.apply = function (element, shadowObject, context, w, h, environment) {
 
         context.translate(shadowObject.x, shadowObject.y);
 
-        if(shadowObject.spread !== 0) {
+        if (shadowObject.spread !== 0) {
             matrix.reset();
             matrix.scale((w - shadowObject.spread / 2) / w, (h - shadowObject.spread / 2) / h, w / 2 + shadowObject.x, h / 2 + shadowObject.y);
             matrix.applyToContext(context);
         }
-        context.beginPath()
-        var x = (element.props.x || 0) - 2 * Math.abs(shadowObject.x) - box.width;
-        var y = (element.props.y || 0) - 2 * Math.abs(shadowObject.y) - box.height;
+        context.beginPath();
+        var pos;
+        if(element.shouldApplyViewMatrix()) {
+            pos = {x:0, y:0};
+        } else {
+            pos = element.getBoundingBoxGlobal().topLeft();
+        }
+        var x = (pos.x || 0) - 2 * Math.abs(shadowObject.x) - box.width;
+        var y = (pos.y || 0) - 2 * Math.abs(shadowObject.y) - box.height;
         var w2 = box.width * 3 + 4 * Math.abs(shadowObject.x);
         var h2 = box.height * 3 + 4 * Math.abs(shadowObject.y);
         context.rect(x + w2, y + h2, -w2, -h2);
@@ -46,7 +52,7 @@ Shadow.apply = function (element, shadowObject, context, w, h, environment) {
     } else {
         context.translate(shadowObject.x, shadowObject.y);
 
-        if(shadowObject.spread !== 0) {
+        if (shadowObject.spread !== 0) {
             matrix.reset();
             matrix.scale((w + shadowObject.spread / 2) / w, (h + shadowObject.spread / 2) / h, w / 2 + shadowObject.x, h / 2 + shadowObject.y);
             matrix.applyToContext(context);
@@ -76,10 +82,10 @@ Shadow.createFromObject = function (obj) {
 };
 
 Shadow.create = function (offsetX, offsetY, blur, color, inset, spread) {
-    return Shadow.createFromObject({x: offsetX, y: offsetY, color: color, blur: blur, inset:inset, spread: spread || 0});
+    return Shadow.createFromObject({ x: offsetX, y: offsetY, color: color, blur: blur, inset: inset, spread: spread || 0 });
 };
 
-Shadow.areEqual = function(a, b) {
+Shadow.areEqual = function (a, b) {
     return a.x === b.x
         && a.y === b.y
         && a.blur === b.blur
