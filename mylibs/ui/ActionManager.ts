@@ -151,16 +151,16 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("bringToFront", "@bring to front", "Layering", function () {
-            ChangeZOrder.run(Selection.getSelection(), "front");
+            ChangeZOrder.run(that.app, Selection.getSelection(), "front");
         });
         this.registerAction("sendToBack", "@send to back", "Layering", function () {
-            ChangeZOrder.run(Selection.getSelection(), "back");
+            ChangeZOrder.run(that.app, Selection.getSelection(), "back");
         });
         this.registerAction("bringForward", "@bring forward", "Layering", function () {
-            ChangeZOrder.run(Selection.getSelection(), "forward");
+            ChangeZOrder.run(that.app, Selection.getSelection(), "forward");
         });
         this.registerAction("sendBackward", "@send backward", "Layering", function () {
-            ChangeZOrder.run(Selection.getSelection(), "backward");
+            ChangeZOrder.run(that.app, Selection.getSelection(), "backward");
         });
 
         this.registerAction("moveLeft", "Left", "Positioning", function () {

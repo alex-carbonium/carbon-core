@@ -2,7 +2,7 @@ import OpenTypeFontInfo from "../../framework/text/font/opentypefontinfo";
 import Rect from "../../framework/text/primitives/rect";
 import Font from "../../framework/Font";
 
-export default class TestFontInfo extends OpenTypeFontInfo {
+export default class TestFontInfo  {
     toFontFaceSrc() {
         return '';
     }

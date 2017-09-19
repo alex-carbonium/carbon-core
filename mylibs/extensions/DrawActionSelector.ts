@@ -24,6 +24,7 @@ import Environment from "environment";
 import DesignerController from "framework/DesignerController";
 import Invalidate from "framework/Invalidate";
 import { IController, WorkspaceTool } from "carbon-core";
+import Tool from "../ui/common/Tool";
 
 var mousedown = function () {
     this.mousePressed = true;
@@ -221,6 +222,8 @@ var registerCommands = function () {
 };
 
 export default class DrawActionSelector extends ExtensionBase {
+    private _tools: Tool[] = [];
+
     attach(app, view, controller: IController) {
         super.attach.apply(this, arguments);
 
@@ -230,21 +233,51 @@ export default class DrawActionSelector extends ExtensionBase {
 
         this._currentAction = null;
         registerCommands.call(this);
+
         this._rectCreator = new ElementDropTool("rectangleTool", Types.Rectangle);
-        this._artboardCreator = new ArtboardsTool(Artboard);
+        this._tools.push(this._rectCreator);
+
+        this._artboardCreator = new ArtboardsTool();
+        this._tools.push(this._artboardCreator);
+
         this._sectionCreator = new SectionCreator();
+        this._tools.push(this._sectionCreator);
+
         this._circleCreator = new ElementDropTool("circleTool", Types.Circle);
+        this._tools.push(this._circleCreator);
+
         this._polylineCreator = new PathTool(app, Types.Path);
+        this._tools.push(this._polylineCreator);
+
         this._starCreator = new PolygonTool("starTool", Types.Star);
+        this._tools.push(this._starCreator);
+
         this._polygonCreator = new PolygonTool("polygonTool", Types.Polygon);
+        this._tools.push(this._polygonCreator);
+
         this._triangleCreator = new PolygonTool("triangleTool", Types.Polygon, {pointsCount: 3});
+        this._tools.push(this._triangleCreator);
+
         this._artboardViewer = new ElementDropTool("artboardViewerTool", Types.ArtboardFrame);
+        this._tools.push(this._artboardViewer);
+
         this._lineCreator = new LineCreator();
+        this._tools.push(this._lineCreator);
+
         this._prototypingTool = new LinkingTool();
+        this._tools.push(this._prototypingTool);
+
         this._pencilCreator = new PencilCreator();
+        this._tools.push(this._pencilCreator);
+
         this._handTool = new HandTool();
+        this._tools.push(this._handTool);
+
         this._textTool = new TextTool(app);
+        this._tools.push(this._textTool);
+
         this._imageCreator = new ElementDropTool("imageTool", Types.Image);
+        this._tools.push(this._imageCreator);
 
         this._defaultShapeSettings = new DefaultShapeSettings(app);
         this._artboardToolSettings = new ArtboardToolSettings(app);
@@ -266,7 +299,23 @@ export default class DrawActionSelector extends ExtensionBase {
 
     detach(){
         super.detach();
-        this.dispose();
+
+        this.detachAll();
+
+        if(this._pageChangedToken) {
+            this._pageChangedToken.dispose();
+        }
+
+        if(this._mouseDownSubscription) {
+            this._mouseDownSubscription.dispose();
+        }
+
+        if(this._mouseUpSubscription) {
+            this._mouseUpSubscription.dispose();
+        }
+
+        this._tools.forEach(x => x.dispose());
+        this._tools.length = 0;
     }
 
     load() {
@@ -294,22 +343,7 @@ export default class DrawActionSelector extends ExtensionBase {
     }
 
     dispose() {
-        this.detachAll();
 
-        if(this._pageChangedToken) {
-            this._pageChangedToken.dispose();
-        }
-
-        if(this._mouseDownSubscription) {
-            this._mouseDownSubscription.dispose();
-        }
-
-        if(this._mouseUpSubscription) {
-            this._mouseUpSubscription.dispose();
-        }
-        if (this._textTool){
-            this._textTool.dispose();
-        }
     }
 }
 

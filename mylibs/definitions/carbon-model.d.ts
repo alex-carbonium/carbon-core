@@ -147,6 +147,8 @@ declare module "carbon-model" {
         performArrange(arrangeEvent?, mode?: ChangeMode): void;
     }
 
+    export const UIElement: IConstructor<IUIElement>;
+
     export interface IContainerProps extends IUIElementProps {
     }
 

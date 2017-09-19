@@ -3,6 +3,7 @@ import LineSegment from "./lineSegment";
 import { isRectInRect, isPointInRect } from "./math";
 import { IRect, ICoordinate, OriginType, IPooledObject, IRectData } from "carbon-core";
 import ObjectPool from "../framework/ObjectPool";
+import { PooledPair } from "../framework/PooledPair";
 
 export default class Rect implements IRect, IPooledObject {
     private static pool = new ObjectPool(() => Rect.create(), 50);
@@ -312,6 +313,10 @@ export default class Rect implements IRect, IPooledObject {
         result.width = rect.width;
         result.height = rect.height;
         return result;
+    }
+
+    static createPair() {
+        return new PooledPair(() => new Rect(0, 0, 0, 0));
     }
 
     static Zero: Rect;

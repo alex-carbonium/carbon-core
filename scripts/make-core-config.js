@@ -18,7 +18,11 @@ var defaults = {
     verbose: false,
     showConfig: false,
     trace: true,
-    errors: true
+    errors: true,
+    /**
+     * Maps carbon-core, carbon-api, etc to corresponding implementation files
+     */
+    mapImpl: false
 };
 
 function getEntry(settings){
@@ -62,12 +66,30 @@ function getOutput(settings){
 
     return output;
 }
+function getExternals(settings) {
+    var result = {
+        "carbon-geometry": "window.c.ignore",
+        "carbon-rendering": "window.c.ignore",
+        "carbon-app": "window.c.ignore",
+        "carbon-basics": "window.c.ignore"
+    };
+    if (!settings.mapImpl) {
+        result["carbon-core"] = "window.c.ignore";
+        result["carbon-api"] = "window.c.ignore";
+    }
+    return result;
+}
 function getResolve(settings){
     var resolves = {
         root: [fullPath("../mylibs")],
         alias: {},
         extensions: ["", ".js", ".jsx", ".less", ".html", ".ts"]
     };
+
+    if (settings.mapImpl) {
+        resolves.alias["carbon-core"] = fullPath("../mylibs/CarbonCore");
+        resolves.alias["carbon-api"] = fullPath("../mylibs/CarbonApi");
+    }
 
     return resolves;
 }
@@ -175,14 +197,7 @@ module.exports = function(settings){
         context: fullPath("../mylibs"),
         entry: getEntry(settings),
         output: getOutput(settings),
-        externals: {
-            "carbon-core": "window.c.ignore",
-            "carbon-api": "window.c.ignore",
-            "carbon-geometry": "window.c.ignore",
-            "carbon-rendering": "window.c.ignore",
-            "carbon-app": "window.c.ignore",
-            "carbon-basics": "window.c.ignore"
-        },
+        externals: getExternals(settings),
         resolve: getResolve(settings),
         resolveLoader: {
             root: fullPath("../node_modules")

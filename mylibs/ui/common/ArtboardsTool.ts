@@ -6,19 +6,26 @@ import Environment from "../../environment";
 import Tool from "./Tool";
 import Artboard from "../../framework/Artboard";
 import ObjectFactory from "../../framework/ObjectFactory";
+import PropertyTracker from "../../framework/PropertyTracker";
 import Rect from "../../math/rect";
 import Point from "../../math/point";
-import { KeyboardState, IMouseEventData, IArtboard } from "carbon-core";
+import { KeyboardState, IMouseEventData, IArtboard, ChangeMode, IContainer, IComposite, WorkspaceTool } from "carbon-core";
 import Cursors from "Cursors";
+import { PooledPair } from "../../framework/PooledPair";
 
 export default class ArtboardsTool extends Tool {
     [name: string]: any;
+    private _pointPair: PooledPair<Point>;
+    private _rectPair: PooledPair<Rect>;
+    private _element: Artboard;;
 
-    constructor(type, parameters?) {
+    constructor(parameters?) {
         super("artboardTool");
-        this._type = type;
         this._parameters = parameters;
         this._point = new Point(0, 0);
+
+        //not disposed
+        Selection.onElementSelected.bind(this, this.onSelection);
     }
 
     attach(app, view, controller, mousePressed) {
@@ -35,43 +42,22 @@ export default class ArtboardsTool extends Tool {
         this._enableArtboardSelection(false);
     }
 
-    _enableArtboardSelection(value: boolean){
+    _enableArtboardSelection(value: boolean) {
         this._app.activePage.getAllArtboards().forEach(x => x.allowArtboardSelection(value));
     }
 
     private artboardAdded(artboard: Artboard) {
-        this.suckOverlappingElements(artboard);
-
-        Selection.makeSelection([artboard]);
+        artboard.suck();
+        Selection.reselect();
         SnapController.calculateSnappingPoints(this._app.activePage);
-    }
-
-    private suckOverlappingElements(artboard: Artboard) {
-        let artboardBox = artboard.getBoundingBoxGlobal();
-        let page = artboard.parent();
-
-        for (var i = page.children.length - 1; i >= 0; --i) {
-            var child = page.children[i];
-            if (child instanceof Artboard) {
-                continue;
-            }
-            if (!artboardBox.intersect(child.getBoundingBoxGlobal())) {
-                continue;
-            }
-
-            let gm = child.globalViewMatrix();
-            page.remove(child);
-            child.setTransform(artboard.globalMatrixToLocal(gm));
-            artboard.insert(child, 0);
-        }
     }
 
     mousedown(event: IMouseEventData) {
         this._cursorNotMoved = true;
 
         var artboard = this._app.activePage.getArtboardAtPoint(event);
-        if (artboard){
-            if (!Selection.isElementSelected(artboard)){
+        if (artboard) {
+            if (!Selection.isElementSelected(artboard)) {
                 this._selectByClick(event);
             }
             return true;
@@ -80,11 +66,11 @@ export default class ArtboardsTool extends Tool {
         this._mousepressed = true;
         this._prepareMousePoint(event);
 
-        this._startPoint = {x: this._point.x, y: this._point.y};
-        this._nextPoint = {x: this._point.x, y: this._point.y};
-        this._element = ObjectFactory.fromType(this._type);
+        this._startPoint = { x: this._point.x, y: this._point.y };
+        this._element = new Artboard();
         this._element.allowArtboardSelection(true);
         this._app.activePage.nameProvider.assignNewName(this._element);
+
         this._cursorNotMoved = true;
 
         var defaultSettings = this._app.defaultShapeSettings();
@@ -92,11 +78,15 @@ export default class ArtboardsTool extends Tool {
             this._element.setProps(defaultSettings);
         }
 
-        if (this._parameters){
+        if (this._parameters) {
             this._element.setProps(this._parameters);
         }
 
+        this._pointPair = Point.createPair();
+        this._rectPair = Rect.createPair();
+
         event.handled = true;
+        PropertyTracker.suspend();
         return false;
     }
 
@@ -105,15 +95,33 @@ export default class ArtboardsTool extends Tool {
         this._ratioResizeInfo = null;
 
         if (this._element) {
-            var element = this._element;
-            this._element = null;
-            Invalidate.requestInteractionOnly();
-            var w = element.width()
-                , h = element.height();
-            if (w > 0 && h > 0) {
-                var pos = element.position();
-                this._view.activeLayer.dropToLayer(pos.x, pos.y, element);
-                this.artboardAdded(element);
+            var br = this._element.boundaryRect();
+            var gm = this._element.globalViewMatrix();
+
+            if (br.width > 0 && br.height > 0) {
+                let rect = this._rectPair.swap();
+                rect.x = br.x;
+                rect.y = br.y;
+                rect.width = br.width;
+                rect.height = br.height;
+
+                let t = this._pointPair.swap();
+                t.x = gm.tx;
+                t.y = gm.ty;
+
+                this._element.resetTransform(ChangeMode.Self);
+                this._element.applyTranslation(t);
+                this._element.boundaryRect(rect);
+
+                let parent = this._element.parent() as IContainer;
+                parent.remove(this._element, ChangeMode.Self);
+                parent.insert(this._element, this.findNewIndex());
+                Selection.refreshSelection([this._element]);
+
+                this.artboardAdded(this._element);
+            }
+            else if (!this._element.isOrphaned()) {
+                this._element.parent().remove(this._element);
             }
 
             if (SystemConfiguration.ResetActiveToolToDefault) {
@@ -121,58 +129,78 @@ export default class ArtboardsTool extends Tool {
             }
 
             SnapController.clearActiveSnapLines();
+            Invalidate.requestInteractionOnly();
+            PropertyTracker.resumeAndFlush();
+            this._element = null;
         }
     }
 
     mousemove(event: IMouseEventData) {
-        if (event.cursor){ //active frame
+        if (event.cursor) { //active frame
             return true;
         }
 
         var artboard = this._app.activePage.getArtboardAtPoint(event);
-        if (!artboard){
+        if (!artboard || artboard === this._element) {
             event.cursor = Cursors.ArtboardTool;
         }
 
-        if (!this._mousepressed){
+        if (!this._mousepressed) {
             return true;
+        }
+
+        if (this._element.isOrphaned()) {
+            this._app.activePage.insert(this._element, this.findNewIndex(), ChangeMode.Self);
+            Selection.makeSelection([this._element], "new", false, true);
         }
 
         this._prepareMousePoint(event);
 
-        if (this._mousepressed) {
-            if (this._cursorNotMoved) {
-                this._cursorNotMoved = (this._point.y === this._startPoint.y) && (this._point.x === this._startPoint.x);
-            }
-            //if use holds shift, we must fit shape into square
-            if (event.shiftKey) {
-                var height = Math.abs(this._point.y - this._startPoint.y);
-                var width = Math.abs(this._point.x - this._startPoint.x);
-                var ration = Math.min(height, width);
-
-                var x = this._startPoint.x + ration;
-                var y = this._startPoint.y + ration;
-
-                this._nextPoint = {x: x, y: y};
-            } else {
-                this._nextPoint = {x: this._point.x, y: this._point.y};
-            }
-
-            Invalidate.requestInteractionOnly();
-            event.handled = true;
-            return false;
+        if (this._cursorNotMoved) {
+            this._cursorNotMoved = (this._point.y === this._startPoint.y) && (this._point.x === this._startPoint.x);
         }
-    }
 
-    click(event: IMouseEventData){
-        this._selectByClick(event);
+        var x2, y2;
 
+        //if use holds shift, we must fit shape into square
+        if (event.shiftKey) {
+            var height = Math.abs(this._point.y - this._startPoint.y);
+            var width = Math.abs(this._point.x - this._startPoint.x);
+            var ratio = Math.min(height, width);
+
+            x2 = this._startPoint.x + ratio;
+            y2 = this._startPoint.y + ratio;
+        }
+        else {
+            x2 = this._point.x;
+            y2 = this._point.y;
+        }
+
+        var x1 = this._startPoint.x, y1 = this._startPoint.y
+            , x = Math.min(x1, x2)
+            , y = Math.min(y1, y2)
+            , w = Math.abs(x1 - x2)
+            , h = Math.abs(y1 - y2);
+
+        let br = this._rectPair.swap();
+        br.width = w;
+        br.height = h;
+
+        let t = this._pointPair.swap();
+        t.x = x;
+        t.y = y;
+
+        this._element.resetTransform(ChangeMode.Self);
+        this._element.prepareAndSetProps({ br }, ChangeMode.Self);
+        this._element.applyTranslation(t, false, ChangeMode.Self);
+
+        Invalidate.requestInteractionOnly();
         event.handled = true;
+        return false;
     }
 
-    _selectByClick(event: IMouseEventData){
+    _selectByClick(event: IMouseEventData) {
         var artboard = this._app.activePage.getArtboardAtPoint(event);
-
         if (artboard !== null) {
             let mode = Selection.getSelectionMode(event, false);
             Selection.makeSelection([artboard], mode);
@@ -185,41 +213,46 @@ export default class ArtboardsTool extends Tool {
         this._point.set(event.x, event.y);
         if (!event.ctrlKey) {
             var snapped = SnapController.applySnappingForPoint(this._point);
-            if (snapped !== this._point) {
-                this._point.set(snapped.x, snapped.y);
-            }
+            this._point.set(snapped.x, snapped.y);
         }
         this._point.roundMutable();
     }
 
-    layerdraw(context, environment) {
-        if (this._mousepressed) {
-            var x1 = this._startPoint.x
-                , y1 = this._startPoint.y
-                , x2 = this._nextPoint.x
-                , y2 = this._nextPoint.y
-                , x = Math.min(x1, x2)
-                , y = Math.min(y1, y2)
-                , w = Math.abs(x1 - x2)
-                , h = Math.abs(y1 - y2);
+    private findNewIndex() {
+        for (let i = this._app.activePage.children.length - 1; i >= 0; --i) {
+            let child = this._app.activePage.children[i];
+            if (child instanceof Artboard) {
+                return i + 1;
+            }
+        }
+        return 0;
+    }
 
-            if (w === 0 || h === 0){
-                return;
+    private onSelection(composite: IComposite) {
+        if (Environment.controller.currentTool !== "artboardTool") {
+            let reselect = false;
+            let hasArtboards = false;
+            for (let i = 0; i < composite.elements.length; ++i) {
+                let isArtboard = composite.elements[i] instanceof Artboard;
+                hasArtboards = hasArtboards || isArtboard;
+                if (hasArtboards && !isArtboard) {
+                    reselect = true;
+                    break;
+                }
             }
 
-            context.save();
-
-            var props = {x: x, y: y, width: w, height: h};
-            this._element.resetTransform();
-            this._element.prepareAndSetProps({br: new Rect(0, 0, w, h)});
-            this._element.applyTranslation(new Point(x, y));
-
-            this._element.applyViewMatrix(context);
-
-            this._element.drawSelf(context, props.width, props.height, environment);
-
-            context.restore();
+            if (reselect || hasArtboards) {
+                let artboards = composite.elements.filter(x => x instanceof Artboard);
+                Environment.controller.actionManager.invoke("artboardTool" as WorkspaceTool);
+                Selection.makeSelection(artboards);
+            }
         }
+    }
+
+    dispose() {
+        Selection.onElementSelected.unbind(this, this.onSelection);
+
+        super.dispose();
     }
 }
 

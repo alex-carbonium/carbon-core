@@ -541,6 +541,16 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         parent.remove(this);
     }
 
+    /**
+     * Moves element from its parent by keeping the global matrix so that element is visually in the same position.
+     */
+    transferElement(element: IUIElement, index: number, mode?: ChangeMode) {
+        let gm = element.globalViewMatrix();
+        element.parent().remove(element);
+        element.setTransform(this.globalMatrixToLocal(gm));
+        this.insert(element, index, mode);
+    }
+
     contains(element) {
         return this.positionOf(element) !== -1;
     }

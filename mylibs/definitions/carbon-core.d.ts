@@ -42,6 +42,7 @@ declare module "carbon-core" {
     export var SvgParser: any;
     export var UserSettings:any;
     export var ContextPool:any;
+    export var CoreIntl:any;
     export class Shape{}
     export function createUUID(): string;
 }

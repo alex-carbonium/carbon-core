@@ -3,8 +3,8 @@ import RelayoutQueue from "../framework/relayout/RelayoutQueue";
 import CommandManager from "../framework/commands/CommandManager";
 
 export default class AutoSave extends ExtensionBase {
-    constructor(app, view, controller) {
-        super(app, view, controller);
+    constructor(app) {
+        super(app);
         this._app = app;
         this._app.onLoad(this.checkBackups);
     }
