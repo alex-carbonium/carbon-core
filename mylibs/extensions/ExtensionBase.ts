@@ -7,9 +7,8 @@ export default class ExtensionBase {
     view: IView;
     controller: IController;
 
-    constructor(app, view, controller){
+    constructor(app){
         this._subscriptions = [];
-        this.attach(app, view, controller);
     }
 
     attach(app, view, controller){

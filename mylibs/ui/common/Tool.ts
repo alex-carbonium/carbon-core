@@ -96,4 +96,7 @@ export default class Tool {
     defaultCursor(): string {
         return null;
     }
+
+    dispose() {
+    }
 }

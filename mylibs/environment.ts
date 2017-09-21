@@ -29,6 +29,12 @@ class Environment implements IEnvironment {
         this.controller = controller;
         this.attached.raise(view, controller);
     }
+
+    dispose() {
+        if (this.view) {
+            this.view.dispose();
+        }
+    }
 }
 
 export default new Environment();

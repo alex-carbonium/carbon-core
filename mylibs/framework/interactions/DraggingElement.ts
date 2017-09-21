@@ -34,9 +34,7 @@ export class DraggingElement extends CompositeElement {
         var elements: UIElement[] = elementOrComposite instanceof CompositeElement ? elementOrComposite.elements : [elementOrComposite];
         this.children = [];
 
-        if (!Selection.isElementSelected(e)) {
-            Selection.makeSelection(elements);
-        }
+        Selection.makeSelection(elements);
 
         for (var e of elements) {
             e.clearSavedLayoutProps();

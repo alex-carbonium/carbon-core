@@ -276,6 +276,8 @@ declare module "carbon-app" {
 
         registerForLayerDraw(layerType:number, element:ILayerDrawHandlerObject, index?);
         unregisterForLayerDraw(layerType:number, element:ILayerDrawHandlerObject);
+
+        dispose();
     }
 
     export interface IDropElementData{

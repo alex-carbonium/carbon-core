@@ -66,12 +66,12 @@ class SelectionModel implements ISelection {
     private _selectFrameStarted = false;
 
     modeChangedEvent: IEvent<boolean>;
-    onElementSelected: IEvent3<IUIElement, IUIElement[], boolean>;
+    onElementSelected: IEvent3<IComposite, IUIElement[], boolean>;
 
     constructor() {
         this._unlockedContainers = ArrayPool.EmptyArray;
         this._activeGroup = null;
-        this.onElementSelected = EventHelper.createEvent3<IUIElement, IUIElement[], boolean>();
+        this.onElementSelected = EventHelper.createEvent3<IComposite, IUIElement[], boolean>();
         this.startSelectionFrameEvent = EventHelper.createEvent();
         this.onSelectionFrameEvent = EventHelper.createEvent();
         this.stopSelectionFrameEvent = EventHelper.createEvent();

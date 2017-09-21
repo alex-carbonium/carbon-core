@@ -898,6 +898,12 @@ export default class ViewBase { //TODO: implement IView
     }
 
     detach() {
+    }
 
+    dispose() {
+        if (this.context) {
+            this.context.dispose();
+            this.context = null;
+        }
     }
 }

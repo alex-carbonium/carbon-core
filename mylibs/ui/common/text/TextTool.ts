@@ -117,6 +117,8 @@ export default class TextTool extends Tool {
     dispose() {
         this.globalTokens.forEach(x => x.dispose());
         this.globalTokens.length = 0;
+
+        super.dispose();
     }
 
     onElementSelected(selection) {

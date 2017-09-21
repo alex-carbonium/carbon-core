@@ -1,6 +1,7 @@
 import { IPoint } from "carbon-geometry";
 import { IPooledObject } from "carbon-core";
 import ObjectPool from "../framework/ObjectPool";
+import { PooledPair } from "../framework/PooledPair";
 
 const EPSILON = 1e-12;
 const TRIGONOMETRIC_EPSILON = 1e-7;
@@ -900,6 +901,10 @@ export default class Point implements IPoint, IPooledObject {
         point.x = x;
         point.y = y;
         return point;
+    }
+
+    static createPair() {
+        return new PooledPair(() => new Point(0, 0));
     }
 
     static Zero: Readonly<Point>;

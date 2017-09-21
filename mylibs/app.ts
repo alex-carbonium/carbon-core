@@ -856,8 +856,13 @@ class AppClass extends DataNode implements IApp {
         this._extensions = [];
         for (var i = 0, l = extensions.length; i < l; ++i) {
             var Extension = extensions[i];
+            var extension = new Extension(this);
+            //TODO: refactor somehow
+            if (extension.attach) {
+                extension.attach(this, Environment.view, Environment.controller);
+            }
 
-            this._extensions.push(new Extension(this, Environment.view, Environment.controller));
+            this._extensions.push(extension);
         }
     }
 
@@ -884,22 +889,24 @@ class AppClass extends DataNode implements IApp {
         let isActiveArtboard = false;
 
         this.activePage.applyVisitorTLR(e => {
-            if(e instanceof Artboard) {
+            let isSelected = Selection.isElementSelected(e);
+            let isArtboard = e instanceof Artboard;
+
+            if (isArtboard) {
                 isActiveArtboard = e === activeArtboard;
             }
 
-            if(activeArtboard && !isActiveArtboard) {
-                e.runtimeProps.ctxl = 1 << 0;
-                return;
-            }
-
-            if (count && count === max) {
-                // if we already market all selected elements, the rest goes to 1<<2 layer.
+            if (count && count === max && !isArtboard) {
+                // if we already marked all selected elements, the rest goes to 1<<2 layer.
                 e.runtimeProps.ctxl = 1 << 2;
                 return;
             }
 
-            let isSelected = Selection.isElementSelected(e);
+            if (activeArtboard && !isActiveArtboard) {
+                e.runtimeProps.ctxl = 1 << 0;
+                return;
+            }
+
             if (isSelected || count > 0) {
                 this._updateWithSelectionMask(e);
 
@@ -1214,6 +1221,8 @@ class AppClass extends DataNode implements IApp {
 
     unload() {
         this.clear();
+        this.detachExtensions();
+
         this.isLoaded = false;
 
         this.state.isDirty(false);
@@ -1224,6 +1233,7 @@ class AppClass extends DataNode implements IApp {
 
     dispose() {
         this.unload();
+        Environment.dispose();
 
         if (this.platform) {
             this.platform.dispose();

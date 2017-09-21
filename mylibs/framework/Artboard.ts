@@ -17,7 +17,7 @@ import Environment from "environment";
 import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
-import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext, IContainer, WorkspaceTool } from "carbon-core";
+import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext, IContainer, WorkspaceTool, IMouseEventData } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
 import Rect from "../math/rect";
 import CoreIntl from "../CoreIntl";
@@ -105,14 +105,10 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return this._frame.runtimeProps.clone;
     }
 
-    select() {
+    select(multi?: boolean) {
         this.allowArtboardSelection(true);
-        if (Environment.controller.currentTool !== "artboardTool") {
-            Environment.controller.actionManager.invoke("artboardTool" as WorkspaceTool);
-            setTimeout(() => {
-                Selection.makeSelection([this]);
-                Environment.controller.repeatLastMouseMove();
-            }, 0);
+        if (!multi) {
+            this.parent().setActiveArtboard(this);
         }
     }
 
@@ -522,6 +518,15 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         if (props.frame === null) {
             delete this._frame;
         }
+
+        if (mode === ChangeMode.Model && props.br) {
+            if (props.br.width < oldProps.br.width || props.br.height < oldProps.br.height) {
+                this.spit();
+            }
+            else {
+                this.suck();
+            }
+        }
     }
 
     getHitTestBox() {
@@ -635,6 +640,32 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         }
     }
 
+    spit() {
+        let artboardBox = this.getBoundingBoxGlobal();
+        let parent = this.parent() as Container;
+        for (let i = this.children.length - 1; i >= 0; --i){
+            let child = this.children[i];
+            let childBox = child.getBoundingBoxGlobal();
+            if (!areRectsIntersecting(artboardBox, childBox)) {
+                parent.transferElement(child, parent.children.length);
+            }
+        }
+    }
+    suck() {
+        let artboardBox = this.getBoundingBoxGlobal();
+        let parent = this.parent() as IContainer;
+        for (let i = parent.children.length - 1; i >= 0; --i){
+            let child = parent.children[i];
+            if (child instanceof Artboard) {
+                continue;
+            }
+            let childBox = child.getBoundingBoxGlobal();
+            if (areRectsIntersecting(artboardBox, childBox)) {
+                this.transferElement(child, this.children.length);
+            }
+        }
+    }
+
     primitiveRoot(): IPrimitiveRoot & UIElement {
         if (!this.parent() || !this.parent().primitiveRoot()) {
             return null;
@@ -728,15 +759,14 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return this.runtimeProps.version;
     }
 
-    mousedown(event) {
+    mousedown(event: IMouseEventData) {
         let scale = Environment.view.scale();
         let pos = this.position();
-        if (!Selection.isElementSelected(this) && isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width(), height: 20 / scale }, {
-            x: event.x,
-            y: event.y
-        })) {
+        if (!Selection.isElementSelected(this) && isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width(), height: 20 / scale }, event)) {
             this.parent().setActiveArtboard(this);
-            Selection.makeSelection([this]);
+            if (!event.shiftKey) {
+                Selection.makeSelection([this]);
+            }
             event.handled = true;
         }
     }
