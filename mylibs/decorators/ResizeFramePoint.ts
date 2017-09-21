@@ -59,6 +59,7 @@ export default {
         frame.capturedPoint = Point.create(point.x, point.y);
         frame.resizeOptions = ResizeOptions.Default;
         frame.allowSnapping = true;
+        frame.element.clearSavedLayoutProps();
 
         debug("Captured rect: x=%d y=%d w=%d h=%d", frame.originalRect.x, frame.originalRect.y, frame.originalRect.width, frame.originalRect.height);
 
