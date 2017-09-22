@@ -1,8 +1,8 @@
 import Point from "math/point";
-import { ChangeMode } from "carbon-core";
+import { ChangeMode, IUIElement } from "carbon-core";
 
 export default {
-    run: function(elements, direction, offset = 1){
+    run: function(elements: IUIElement[], direction, offset = 1){
         var t = new Point(0, 0);
         switch (direction) {
             case "u":
@@ -19,6 +19,6 @@ export default {
                 break;
         }
 
-        elements.forEach(x => x.applyGlobalTranslation(t, ChangeMode.Self));
+        elements.forEach(x => x.applyGlobalTranslation(t, false, ChangeMode.Self));
     }
 }

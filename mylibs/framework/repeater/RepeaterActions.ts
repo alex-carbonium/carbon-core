@@ -26,7 +26,7 @@ export class RepeaterActions extends CarbonExtension {
             {
                 id: "repeater.ungroup",
                 name: "@repeater.ungroup",
-                icon: "ungroup-grid",
+                icon: "ico-small-ungroup",
                 callback: this.ungroup,
                 condition: selection => selection.elements.length && selection.elements.every(x => x instanceof RepeatContainer)
             },

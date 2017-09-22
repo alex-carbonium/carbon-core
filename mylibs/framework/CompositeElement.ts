@@ -430,10 +430,6 @@ export default class CompositeElement extends UIElement implements IComposite {
         this._commonPropsManager.patchProps(elements, propertyName, patchType, value);
     }
 
-    cancelEdit(elements: UIElement[]) {
-        this._commonPropsManager.cancelEdit(elements);
-    }
-
     _onPropsChanged(element: UIElement, newProps: IUIElementProps) {
         if (this.has(element)) {
             if (newProps.hasOwnProperty("m") || newProps.hasOwnProperty("br")) {

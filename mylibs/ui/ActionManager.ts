@@ -27,29 +27,13 @@ import GroupContainer from "../framework/GroupContainer";
 import InteractiveContainer from "../framework/InteractiveContainer";
 import Selection from "../framework/SelectionModel";
 import EventHelper from "../framework/EventHelper";
-import { IActionManager, IAction, IApp, IUIElement, IEvent, IContainer, IIsolatable } from "carbon-core";
+import { IActionManager, IAction, IApp, IUIElement, IEvent, IContainer, IIsolatable, IShortcutManager } from "carbon-core";
 import { ArrangeStrategies, DropPositioning } from "../framework/Defs";
 import Rect from "../math/rect";
 import { viewStateStack } from "../framework/ViewStateStack";
+import CoreIntl from "../CoreIntl";
 
 const debug = require("DebugUtil")("carb:actionManager");
-
-function formatActionDescription(action) {
-    Object.defineProperty(action, "shortcut", {
-        get: function () {
-            return this.app.shortcutManager.getActionHotkeyDisplayLabel(this.name);
-        }
-    });
-
-    // Object.defineProperty(action, "fullDescription", {
-    //     get: function () {
-    //         if (this.shortcut) {
-    //             return this.description + " (" + this.shortcut + ")";
-    //         }
-    //         return this.description;
-    //     }
-    // })
-}
 
 let actionStartProps;
 function startRepeatableAction(oldPropsSelector) {
@@ -82,7 +66,7 @@ export default class ActionManager implements IActionManager {
     public actionPerformed: IEvent<any>;
     private _visibleActionsConfig: any;
 
-    constructor(app: IApp) {
+    constructor(app: IApp, public shortcutManager: IShortcutManager) {
         this._actions = {};
         this._events = [];
         this._actionStartEvents = [];
@@ -122,8 +106,6 @@ export default class ActionManager implements IActionManager {
         if (action.condition) {
             this._actionsWithConditions[action.id] = action;
         }
-
-        formatActionDescription.call(this, action);
 
         return action;
     }
@@ -591,29 +573,6 @@ export default class ActionManager implements IActionManager {
     hasAction(name) {
         return this._actions.hasOwnProperty(name);
     }
-    getActionFullDescription(name, translate) {
-        let action = this._actions[name];
-        let shortcut = this.app.shortcutManager.getActionHotkeyDisplayLabel(name);
-
-        if (shortcut) {
-            if (translate) {
-                return translate(action.name) + " (" + shortcut + ")";
-            }
-        }
-
-        if (translate) {
-            return translate(action.name);
-
-        }
-
-        return action.name;
-    }
-    getActionDescription(name) {
-        let action = this._actions[name];
-        if (action) {
-            return action.name;
-        }
-    }
     subscribe(action, handler) {
         let event = this._events[action];
         if (!event) {
@@ -638,10 +597,17 @@ export default class ActionManager implements IActionManager {
         }
         return event.bind.apply(event, Array.prototype.slice.call(arguments, 1));
     }
-    showActions(config) {
-        this._visibleActionsConfig = config;
-    }
-    getVisibleActionsConfig() {
-        return this._visibleActionsConfig;
+
+    getActionLabel(actionId: string) {
+        let action = this.getAction(actionId);
+        if (!action) {
+            throw new Error("Unknown action " + actionId);
+        }
+        let hotkey = this.shortcutManager.getActionHotkey(actionId);
+        let label = CoreIntl.label(action.name);
+        if (hotkey) {
+            label += " (" + hotkey + ")";
+        }
+        return label;
     }
 }

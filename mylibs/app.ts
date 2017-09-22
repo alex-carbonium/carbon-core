@@ -171,12 +171,8 @@ class AppClass extends DataNode implements IApp {
         this.state = new AppState(this);
         this.offlineModel = new OfflineModel();
 
-        this.actionManager = new ActionManager(this as IApp);
+        this.actionManager = new ActionManager(this as IApp, Environment.shortcutManager);
         this.actionManager.registerActions();
-
-        this.shortcutManager = new ShortcutManager();
-        this.shortcutManager.mapDefaultScheme();
-
 
 
         var token = Selection.onElementSelected.bind((selection, oldSelection, doNotTrack) => {
@@ -203,7 +199,7 @@ class AppClass extends DataNode implements IApp {
         token = Environment.attached.bind(this, this.initExtensions);
         this.registerForDisposal(token);
 
-        var contributions = new Contributions(this, this.actionManager, this.shortcutManager);
+        var contributions = new Contributions(this, this.actionManager, Environment.shortcutManager);
         var extensions = getBuiltInExtensions(this, Environment);
         extensions.forEach(x => x.initialize(contributions));
     }

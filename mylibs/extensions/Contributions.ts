@@ -71,10 +71,8 @@ export class Contributions implements IContributions {
 
     private contextMenuAction(action: IAction, selection: ISelection, contextBar?: ContextBarPosition) {
         return {
-            name: CoreIntl.label(action.name),
-            callback: () => {
-                this.actionManager.invoke(action.id);
-            },
+            name: action.name,
+            actionId: action.id,
             disabled: action.condition && !action.condition(selection),
             icon: action.icon,
             contextBar

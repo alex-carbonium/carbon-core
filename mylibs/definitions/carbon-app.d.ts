@@ -69,7 +69,6 @@ declare module "carbon-app" {
         isolationActive():boolean;
 
         onBuildMenu: any;
-        shortcutManager: IShortcutManager;
         actionManager: IActionManager;
         dataManager: IDataManager;
         fontManager: IFontManager;
@@ -344,6 +343,8 @@ declare module "carbon-app" {
 
         contextPool: IContextPool;
 
+        shortcutManager: IShortcutManager;
+
         set(view: IView, controller: IController);
     }
     export const Environment: IEnvironment;
@@ -374,11 +375,9 @@ declare module "carbon-app" {
         subscribe(action: string, cb: (action: string, result: any) => void):IDisposable;
         registerAction(name: string, description: string, category: string, callback: (selection?: ISelection, app?: IApp) => any): IAction;
 
-        getActionFullDescription(name: string, translate?: (value: string) => string): string;
-        getActionDescription(action: string): string;
-
         hasAction(action: string): boolean;
         getAction(action:string): IAction;
+        getActionLabel(actionId: string): string;
     }
 
     export interface IShortcutManager {
@@ -386,20 +385,18 @@ declare module "carbon-app" {
             [action: string]: IShortcut[]
         };
 
-        mapDefaultScheme(): void;
         mapScheme(scheme: IShortcutScheme): void;
+        clear(): void;
 
-        getActionHotkey(actionName: string): string;
-        getActionHotkeyDisplayLabel(actionName: string): string;
+        getActionHotkey(actionId: string): string;
     }
 
     export interface IShortcut {
         key: string;
         action: string;
-        options?: {
-            type?: string,
-            repeatable?: boolean
-        };
+        display?: string;
+        type?: string;
+        repeatable?: boolean;
     }
 
     export interface IShortcutScheme {

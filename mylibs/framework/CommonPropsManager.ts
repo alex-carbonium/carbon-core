@@ -212,18 +212,6 @@ export default class CommonPropsManager {
         this._inPreview = false;
     }
 
-    cancelEdit(elements: UIElement[]) {
-        for (var i = 0; i < elements.length; i++){
-            var element = elements[i];
-            if (this._origPropValues.length) {
-                var origProps = this._origPropValues[i];
-                Object.assign(element.props, origProps);
-                element.invalidate(element.runtimeProps.ctxl);
-            }
-        }
-        this._origPropValues.length = 0;
-    }
-
     onChildPropsChanged(newProps: any, callback: (mergedProps: any) => void){
         if (!this._nextTickProps) {
             this._nextTickProps = {};
