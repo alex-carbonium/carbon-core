@@ -2022,6 +2022,33 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return true;
     }
 
+    enableGroupLocking() {
+        return false;
+    }
+    unlockGroup() {
+        if (this.enableGroupLocking()) {
+            this.activeGroup(false);
+            this.runtimeProps.unlocked = true;
+            return true;
+        }
+        return false;
+    }
+    lockGroup() {
+        if (this.enableGroupLocking()) {
+            this.activeGroup(false);
+            this.runtimeProps.unlocked = false;
+        }
+    }
+    activeGroup(value?) {
+        if (arguments.length === 1) {
+            this.runtimeProps.activeGroup = value;
+        }
+        return this.runtimeProps.activeGroup;
+    }
+    lockedGroup() {
+        return this.enableGroupLocking() && !this.runtimeProps.unlocked;
+    }
+
     static fromTypeString(type, parameters) {
         return ObjectFactory.fromType(type, parameters);
     }

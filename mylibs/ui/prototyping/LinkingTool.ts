@@ -19,7 +19,7 @@ import StoryAction from "../../stories/StoryAction";
 import Link from "./Link";
 
 import DataNode from "framework/DataNode";
-import { IUIElement, IMouseEventData, KeyboardState, PrimitiveType, IContext } from "carbon-core";
+import { IUIElement, IMouseEventData, KeyboardState, PrimitiveType, IContext, InteractionType } from "carbon-core";
 import Brush from "../../framework/Brush";
 
 const HandleSize = 14;
@@ -618,14 +618,18 @@ export default class LinkingTool extends Tool {
         Invalidate.requestInteractionOnly();
     }
 
-    dragElementStarted() {
-        this._draggingElement = true;
-        Invalidate.requestInteractionOnly();
+    onInteractionStarted(type: InteractionType) {
+        if (type === InteractionType.Dragging) {
+            this._draggingElement = true;
+            Invalidate.requestInteractionOnly();
+        }
     }
-    dragElementEnded() {
-        this._draggingElement = false;
-        this._handles = [];
-        Invalidate.requestInteractionOnly();
+    onInteractionStopped(type: InteractionType) {
+        if (type === InteractionType.Dragging) {
+            this._draggingElement = false;
+            this._handles = [];
+            Invalidate.requestInteractionOnly();
+        }
     }
 
     _onAppChanged(primitives) {

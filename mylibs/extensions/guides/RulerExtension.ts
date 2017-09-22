@@ -13,7 +13,7 @@ import Environment from "../../environment";
 import DesignerView from "../../framework/DesignerView";
 import UserSettings from "../../UserSettings";
 import RulerGuides from "./RulerGuides";
-import { IArtboardProps, IApp, IView, IController, ILayer, IContext, IComposite, IMouseEventData } from "carbon-core";
+import { IArtboardProps, IApp, IView, IController, ILayer, IContext, IComposite, IMouseEventData, InteractionType } from "carbon-core";
 import { IArtboard, IUIElement } from "carbon-model";
 import { LayerTypes } from "carbon-app";
 
@@ -73,9 +73,7 @@ export default class RulerExtension extends RuntimeExtension {
         this.registerForDispose(controller.onArtboardChanged.bind(this, this.onArtboardChanged));
         this.registerForDispose(Selection.onElementSelected.bind(this, this.onSelection));
 
-        this.registerForDispose(this.controller.draggingEvent.bind(this, this.onDragOrTransform));
-        this.registerForDispose(this.controller.resizingEvent.bind(this, this.onDragOrTransform));
-        this.registerForDispose(this.controller.rotatingEvent.bind(this, this.onDragOrTransform));
+        this.registerForDispose(this.controller.interactionProgress.bind(this, this.onInteractionProgress));
 
         this.registerForDispose(this.app.pageChanged.bind(this, this.onPageChanged));
 
@@ -111,8 +109,10 @@ export default class RulerExtension extends RuntimeExtension {
         this.setHighlight(selection);
     }
 
-    onDragOrTransform(eventData: IMouseEventData, composite: IComposite) {
-        this.setHighlight(composite);
+    onInteractionProgress(type: InteractionType, eventData: IMouseEventData, composite: IComposite) {
+        if (type === InteractionType.Dragging || type === InteractionType.Resizing || type === InteractionType.Rotation) {
+            this.setHighlight(composite);
+        }
     }
 
     onArtboardChanged(artboard: any, prev: any) {

@@ -285,6 +285,13 @@ class NullPage extends UIElement implements IPage {
     export(): Promise<object>{
         return Promise.reject(new Error());
     }
+
+    activeGroup() {
+        return false;
+    }
+    lockedGroup() {
+        return false;
+    }
 }
 
 NullPage.prototype.t = Types.NullPage;

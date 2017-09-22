@@ -122,7 +122,6 @@ declare module "carbon-app"{
         dropToLayer(x:number, y:number, element:IUIElement):void;
 
         prototyping(value?:boolean): boolean;
-        hitElementDirect(e?, cb?, includeInteractionLayer?: boolean);
 
         zoomOutStep():void;
         zoomInStep():void;

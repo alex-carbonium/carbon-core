@@ -11,7 +11,7 @@ import Page from "./Page";
 import Keyboard from "../platform/Keyboard";
 import ObjectFactory from "./ObjectFactory";
 import { Types } from "./Defs";
-import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3, WorkspaceTool } from "carbon-core";
+import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3, WorkspaceTool, InteractionType } from "carbon-core";
 import UIElement from "./UIElement";
 import Container from "./Container";
 import { choosePasteLocation } from "./PasteLocator";
@@ -39,17 +39,9 @@ export default class DesignerController implements IController {
 
     onElementDblClicked: IEvent2<IMouseEventData, IUIElement>;
 
-    startDraggingEvent: IEvent2<IMouseEventData, IComposite>;
-    draggingEvent: IEvent3<IMouseEventData, IComposite, IContainer>;
-    stopDraggingEvent: IEvent2<IMouseEventData, IComposite>;
-
-    startResizingEvent: IEvent2<IMouseEventData, IUIElement>;
-    resizingEvent: IEvent2<IMouseEventData, IUIElement>;
-    stopResizingEvent: IEvent2<IMouseEventData, IUIElement>;
-
-    startRotatingEvent: IEvent2<IMouseEventData, IUIElement>;
-    rotatingEvent: IEvent2<IMouseEventData, IUIElement>;
-    stopRotatingEvent: IEvent2<IMouseEventData, IUIElement>;
+    interactionStarted = EventHelper.createEvent3<InteractionType, IMouseEventData, IComposite>();
+    interactionProgress = EventHelper.createEvent3<InteractionType, IMouseEventData, IComposite>();
+    interactionStopped = EventHelper.createEvent3<InteractionType, IMouseEventData, IComposite>();
 
     inlineEditModeChanged: IEvent2<boolean, any>;
 
@@ -59,7 +51,7 @@ export default class DesignerController implements IController {
     _draggingElement: DraggingElement = null;
     _draggingOverElement: Container = null;
 
-    private _currentTool: WorkspaceTool;
+    private _currentTool: WorkspaceTool = "pointerTool";
     currentToolChanged = EventHelper.createEvent<WorkspaceTool>();
 
     updateCursor(eventData?) {
@@ -154,9 +146,6 @@ export default class DesignerController implements IController {
         this._noActionsBeforeClick = false;
         this.touchHelper = new TouchHelper(view);
 
-        this.stopDraggingEvent = EventHelper.createEvent2<IMouseEventData, IComposite>();
-        this.startDraggingEvent = EventHelper.createEvent2<IMouseEventData, IComposite>();
-        this.draggingEvent = EventHelper.createEvent3<IMouseEventData, IComposite, IContainer>();
         this.draggingEnterEvent = EventHelper.createEvent();
         this.draggingLeftEvent = EventHelper.createEvent();
         this.startResizingEvent = EventHelper.createEvent2<IMouseEventData, IUIElement>();
@@ -194,13 +183,8 @@ export default class DesignerController implements IController {
         this.actionManager = this.app.actionManager;
 
         this.interactionActive = false;
-        this.startDraggingEvent.bind(this, this.onInteractionStarted);
-        this.startRotatingEvent.bind(this, this.onInteractionStarted);
-        this.startResizingEvent.bind(this, this.onInteractionStarted);
-
-        this.stopDraggingEvent.bind(this, this.onInteractionStopped);
-        this.stopRotatingEvent.bind(this, this.onInteractionStopped);
-        this.stopResizingEvent.bind(this, this.onInteractionStopped);
+        this.interactionStarted.bind(this, this.onInteractionStarted);
+        this.interactionStopped.bind(this, this.onInteractionStopped);
     }
 
     onpanstart(event) {
@@ -237,7 +221,7 @@ export default class DesignerController implements IController {
 
         this.view.interactionLayer.add(this._draggingElement);
 
-        this.startDraggingEvent.raise(event, this._draggingElement);
+        this.raiseInteractionStarted(InteractionType.Dragging, event);
         this._draggingOverElement = null;
     }
 
@@ -248,7 +232,7 @@ export default class DesignerController implements IController {
 
         this._draggingElement.dragTo(event);
 
-        this.draggingEvent.raise(event, this._draggingElement, this._draggingOverElement);
+        this.raiseInteractionProgress(InteractionType.Dragging, event);
     }
 
     draggingOver(eventData: IMouseEventData) {
@@ -286,7 +270,7 @@ export default class DesignerController implements IController {
         var elements = this._draggingElement.stopDragging(event, this._draggingOverElement, this.app.activePage);
         Selection.refreshSelection(elements);
 
-        this.stopDraggingEvent.raise(event, this._draggingElement);
+        this.raiseInteractionStopped(InteractionType.Dragging, event);
         this._draggingElement.detach();
     }
 
@@ -673,14 +657,14 @@ export default class DesignerController implements IController {
                 var parent = this.getCurrentDropTarget(eventData);
                 var br = element.boundaryRect();
 
-                this.stopDraggingEvent.raise(eventData, this._draggingElement);
+                this.raiseInteractionStopped(InteractionType.Dragging, eventData);
 
                 this.cancel();
                 this.insertAndSelect(result.elements, parent, eventData.x - br.width / 2, eventData.y - br.height / 2);
             })
             .catch(e => {
                 this.cancel();
-                this.stopDraggingEvent.raise(null, null);
+                this.raiseInteractionStopped(null, null);
             });
     }
 
@@ -716,7 +700,7 @@ export default class DesignerController implements IController {
     getCurrentDropTarget(eventData: IMouseEventData): IContainer | IComposite | null {
         var parent = this._draggingOverElement;
         var selectComposite = Selection.selectComposite();
-        if (selectComposite.canAccept([this._startDraggingElement], undefined, eventData.ctrlKey)
+        if (selectComposite.canAccept([this._draggingElement], undefined, eventData.ctrlKey)
             && selectComposite.hitTest(eventData, this.view.scale(), true)
         ) {
             return Selection.selectComposite();
@@ -759,6 +743,16 @@ export default class DesignerController implements IController {
             this._draggingElement.detach();
             this._draggingElement = null;
         }
+    }
+
+    raiseInteractionStarted(type: InteractionType, event: IMouseEventData) {
+        this.interactionStarted.raise(type, event, Selection.selectComposite());
+    }
+    raiseInteractionProgress(type: InteractionType, event: IMouseEventData) {
+        this.interactionProgress.raise(type, event, Selection.selectComposite());
+    }
+    raiseInteractionStopped(type: InteractionType, event: IMouseEventData) {
+        this.interactionStopped.raise(type, event, Selection.selectComposite());
     }
 
     onInteractionStarted() {

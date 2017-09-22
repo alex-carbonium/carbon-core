@@ -5,7 +5,7 @@ import Environment from "../environment";
 import {Types, RotationCursors} from "../framework/Defs";
 import Point from "../math/point";
 import {isPointInRect} from "../math/math";
-import { IMouseEventData, ChangeMode } from "carbon-core";
+import { IMouseEventData, ChangeMode, InteractionType } from "carbon-core";
 import UserSettings from "../UserSettings";
 import TransformationHelper from "../framework/interactions/TransformationHelper";
 import BoundaryPathDecorator from "./BoundaryPathDecorator";
@@ -70,7 +70,7 @@ export default {
         frame.elements = elements;
         frame.snapshot = TransformationHelper.getPropSnapshot(elements);
 
-        Environment.controller.startRotatingEvent.raise(event, frame.element);
+        Environment.controller.raiseInteractionStarted(InteractionType.Rotation, event);
         if (frame.element.decorators) {
             frame.element.decorators.forEach(x => x.visible(false));
         }
@@ -88,7 +88,7 @@ export default {
                 frame.element.decorators.forEach(x => x.visible(true));
             }
 
-            Environment.controller.stopRotatingEvent.raise(event, frame.element);
+            Environment.controller.raiseInteractionStopped(InteractionType.Rotation, event);
         }
     },
     change: function (frame, dx, dy, point, mousePoint, keys, event: IMouseEventData) {
@@ -112,7 +112,7 @@ export default {
         Invalidate.requestInteractionOnly();
 
         var newAngle = frame.element.angle();
-        Environment.controller.rotatingEvent.raise(event, frame.element);
+        Environment.controller.interactionProgress.raise(InteractionType.Rotation, event, frame.element);
         event.cursor = this._getCursor(point, newAngle, frame.flipped);
     },
     _getCursor: function(point, angle, flipped){

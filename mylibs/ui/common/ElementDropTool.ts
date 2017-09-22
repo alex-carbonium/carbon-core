@@ -12,7 +12,8 @@ import Matrix from "../../math/matrix";
 import UIElement from "../../framework/UIElement";
 import Tool from "./Tool";
 
-import { IMouseEventData, KeyboardState, ElementState, WorkspaceTool } from "carbon-core";
+import { IMouseEventData, KeyboardState, ElementState, WorkspaceTool, InteractionType } from "carbon-core";
+import BoundaryPathDecorator from "../../decorators/BoundaryPathDecorator";
 require("framework/ArtboardFrame");// don't remove from here even if not used
 
 export default class ElementDropTool extends Tool {
@@ -35,7 +36,7 @@ export default class ElementDropTool extends Tool {
         SnapController.clearActiveSnapLines();
         Cursor.removeGlobalCursor();
 
-        this._changeMode(ElementState.Resize);
+        this.changeMode(ElementState.Resize);
         this._hoverArtboard = null;
     }
     mousedown(event: IMouseEventData) {
@@ -46,7 +47,7 @@ export default class ElementDropTool extends Tool {
         }
 
         if (this._element){
-            this._changeMode(ElementState.Resize);
+            this.changeMode(ElementState.Resize);
         }
 
         this._mousepressed = true;
@@ -68,8 +69,9 @@ export default class ElementDropTool extends Tool {
             this._element.setProps(this._parameters);
         }
 
-        this._changeMode(ElementState.Edit);
-        Environment.controller.startResizingEvent.raise(event, this._element);
+        Selection.makeSelection([this._element]);
+        Selection.hideFrame();
+
         return false;
     }
     mouseup(event) {
@@ -80,6 +82,8 @@ export default class ElementDropTool extends Tool {
         this._mousepressed = false;
 
         if (this._element) {
+            Selection.showFrame();
+
             Invalidate.requestInteractionOnly();
             if (this._cursorNotMoved) {
                 Environment.controller.selectByClick(event);
@@ -88,13 +92,15 @@ export default class ElementDropTool extends Tool {
                 return;
             }
 
+            Environment.controller.raiseInteractionStopped(InteractionType.Resizing, event);
+
             var pos = this._element.position();
 
             Environment.view.dropToLayer(pos.x, pos.y, this._element);
 
-            var element = this._element;
-            Selection.makeSelection([element]);
-            Environment.controller.stopResizingEvent.raise(event, this._element);
+            this.changeMode(ElementState.Edit);
+            Selection.reselect();
+
             this._hoverArtboard = null;// need to rebuild snapping data TODO: consider to just add data for a new element
         }
         if (SystemConfiguration.ResetActiveToolToDefault) {
@@ -120,6 +126,13 @@ export default class ElementDropTool extends Tool {
         if (this._mousepressed) {
             if (this._cursorNotMoved) {
                 this._cursorNotMoved = (this._point.y === this._startPoint.y) && (this._point.x === this._startPoint.x);
+
+                if (this._cursorNotMoved) {
+                    event.handled = true;
+                    return false;
+                }
+
+                Environment.controller.raiseInteractionStarted(InteractionType.Resizing, event);
             }
 
             var endPoint = this._point;
@@ -133,7 +146,7 @@ export default class ElementDropTool extends Tool {
             }
 
             this.updateElement(this._element, this._startPoint, endPoint);
-            Environment.controller.resizingEvent.raise(event, this._element);
+            Environment.controller.raiseInteractionProgress(InteractionType.Resizing, event);
 
             Invalidate.requestInteractionOnly();
             event.handled = true;
@@ -177,7 +190,8 @@ export default class ElementDropTool extends Tool {
             this._point.roundMutable();
         }
     }
-    _changeMode(mode: ElementState): void{
+
+    changeMode(mode: ElementState): void{
         if (this._element && typeof this._element.mode === "function") {
             this._element.mode(mode);
         }

@@ -6,7 +6,7 @@ import { Types, FrameCursors } from "../framework/Defs";
 import Point from "../math/point";
 import Rect from "../math/rect";
 import UserSettings from "../UserSettings";
-import { ChangeMode, IMouseEventData } from "carbon-core";
+import { ChangeMode, IMouseEventData, InteractionType } from "carbon-core";
 import TransformationHelper from "../framework/interactions/TransformationHelper";
 import BoundaryPathDecorator from "./BoundaryPathDecorator";
 
@@ -67,7 +67,7 @@ export default {
         frame.childrenCount = frame.element.children?frame.element.children.length:-1;
 
         //Environment.view.interactionLayer.add(resizingElement);
-        Environment.controller.startResizingEvent.raise(event, frame.element);
+        Environment.controller.raiseInteractionStarted(InteractionType.Resizing, event);
         if (frame.element.decorators) {
             frame.element.decorators.forEach(x => x.visible(false));
         }
@@ -84,7 +84,7 @@ export default {
             // frame.resizingElement.detach();
             //ImageContent depends on event fired in the end
             //frame.element.stopResizing({ transformationElement: frame.element });
-            Environment.controller.stopResizingEvent.raise(event, frame.element);
+            Environment.controller.raiseInteractionStopped(InteractionType.Resizing, event);
             frame.element.clearSavedLayoutProps();
             delete frame.globalViewMatrix;
             delete frame.viewMatrix;
@@ -175,6 +175,6 @@ export default {
             SnapController.calculateSnappingPoints(frame.element.parent().primitiveRoot(), frame.element);
         }
 
-        Environment.controller.resizingEvent.raise(event, frame.element);
+        Environment.controller.raiseInteractionProgress(InteractionType.Resizing, event);
     }
 }

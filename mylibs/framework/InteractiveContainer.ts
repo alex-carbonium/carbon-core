@@ -72,6 +72,10 @@ export default class InteractiveContainer extends Container implements IIsolatab
             this.parent().remove(this);
         }
     }
+
+    enableGroupLocking() {
+        return true;
+    }
 }
 
 InteractiveContainer.prototype.t = Types.InteractiveContainer;
@@ -82,8 +86,5 @@ PropertyMetadata.registerForType(InteractiveContainer, {
     },
     arrangeStrategy: {
         defaultValue: ArrangeStrategies.Canvas
-    },
-    enableGroupLocking: {
-        defaultValue: true
     }
 });

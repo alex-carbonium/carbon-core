@@ -685,9 +685,6 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         let result = this.hitElement(position, scale, predicate, true);
         return result;
     }
-    lockedGroup() {
-        return this.enableGroupLocking() && !this.runtimeProps.unlocked;
-    }
     select(multiselect?) {
     }
     captureMouse(/*UIElement*/element?: any) {
@@ -798,34 +795,6 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
             this.setProps({ dropPositioning: value })
         }
         return this.props.dropPositioning;
-    }
-    enableGroupLocking(value?: boolean) {
-        if (value !== undefined) {
-            this.setProps({ enableGroupLocking: value })
-        }
-        return this.props.enableGroupLocking;
-    }
-    unlockGroup() {
-        if (this.enableGroupLocking()) {
-            this.activeGroup(false);
-            this.runtimeProps.unlocked = true;
-            return true;
-        }
-        return false;
-    }
-
-    lockGroup() {
-        if (this.enableGroupLocking()) {
-            this.activeGroup(false);
-            this.runtimeProps.unlocked = false;
-        }
-    }
-
-    activeGroup(value) {
-        if (arguments.length === 1) {
-            this.runtimeProps.activeGroup = value;
-        }
-        return this.runtimeProps.activeGroup;
     }
 
     getDropData(pos, element) {
@@ -1029,13 +998,6 @@ PropertyMetadata.registerForType(Container, {
         useInModel: true,
         editable: false,
         defaultValue: "none"
-    },
-    enableGroupLocking: {
-        displayName: "Group locking",
-        type: "trueFalse",
-        useInModel: true,
-        editable: false,
-        defaultValue: false
     },
     overflow: {
         defaultValue: Overflow.Visible,

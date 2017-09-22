@@ -557,15 +557,16 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
     translateChildren() {
         return false;
     }
+
+    enableGroupLocking() {
+        return true;
+    }
 }
 CompoundPath.prototype.t = Types.CompoundPath;
 
 PropertyMetadata.registerForType(CompoundPath, {
     allowMoveOutChildren: {
         defaultValue: false,
-    },
-    enableGroupLocking: {
-        defaultValue: true
     },
     overflow: {
         defaultValue: Overflow.Visible

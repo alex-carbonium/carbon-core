@@ -86,6 +86,21 @@ export default class CompositeElement extends UIElement implements IComposite {
         return true;
     }
 
+    getMaxOuterBorder() {
+        let border = this.children[0].getMaxOuterBorder();
+        for (let i = 1; i < this.children.length; ++i){
+            border = Math.max(border, this.children[i].getMaxOuterBorder());
+        }
+        return border;
+    }
+
+    angle() {
+        if (this.elements.length === 1) {
+            return this.elements[0].angle();
+        }
+        return super.angle();
+    }
+
     hasBadTransform(): boolean {
         return this.elements.some(x => x.hasBadTransform());
     }

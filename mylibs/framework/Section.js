@@ -171,9 +171,6 @@ PropertyMetadata.registerForType(Section, {
     overflow: {
         defaultValue: Overflow.ExpandVertical
     },
-    enableGroupLocking: {
-        defaultValue: false
-    },
     dashPattern: {
         defaultValue: [5, 5]
     },
