@@ -69,6 +69,7 @@ export default class ElementDropTool extends Tool {
         }
 
         this._changeMode(ElementState.Edit);
+        Environment.controller.startResizingEvent.raise(event, this._element);
         return false;
     }
     mouseup(event) {
@@ -93,6 +94,7 @@ export default class ElementDropTool extends Tool {
 
             var element = this._element;
             Selection.makeSelection([element]);
+            Environment.controller.stopResizingEvent.raise(event, this._element);
             this._hoverArtboard = null;// need to rebuild snapping data TODO: consider to just add data for a new element
         }
         if (SystemConfiguration.ResetActiveToolToDefault) {
@@ -131,6 +133,7 @@ export default class ElementDropTool extends Tool {
             }
 
             this.updateElement(this._element, this._startPoint, endPoint);
+            Environment.controller.resizingEvent.raise(event, this._element);
 
             Invalidate.requestInteractionOnly();
             event.handled = true;
