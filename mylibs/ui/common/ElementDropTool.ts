@@ -11,9 +11,8 @@ import Point from "../../math/point";
 import Matrix from "../../math/matrix";
 import UIElement from "../../framework/UIElement";
 import Tool from "./Tool";
-
 import { IMouseEventData, KeyboardState, ElementState, WorkspaceTool, InteractionType } from "carbon-core";
-import BoundaryPathDecorator from "../../decorators/BoundaryPathDecorator";
+
 require("framework/ArtboardFrame");// don't remove from here even if not used
 
 export default class ElementDropTool extends Tool {
