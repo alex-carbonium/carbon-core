@@ -98,6 +98,8 @@ class NullContainer extends DataNode implements IContainer {
     }
     applyDirectedTranslation(vector: IPoint, mode?: any): void {
     }
+    applyGlobalTranslation(vector: IPoint, withReset?: boolean, mode?: any): void {
+    }
     setTransform(matrix: IMatrix) {
     }
     resetTransform() {
