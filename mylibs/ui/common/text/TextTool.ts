@@ -39,6 +39,9 @@ export default class TextTool extends Tool {
     private boundaryRect: IRect = Rect.Zero;
     private updateTimer: number = 0;
 
+    private _rangeFormatter: RangeFormatter = null;
+    private _defaultFormatter: DefaultFormatter = null;
+
     constructor(app) {
         super("textTool");
         this._app = app;
@@ -293,12 +296,12 @@ export default class TextTool extends Tool {
         var engine = text.engine();
         engine.contentChanged(this.contentChanged);
 
-        this._editor = this._createEditor(engine, text);
-        this.boundaryRect = text.boundaryRect();
-
         this._rangeFormatter = new RangeFormatter();
         this._rangeFormatter.initFormatter(this._app, engine, text);
         Selection.makeSelection([this._rangeFormatter]);
+
+        this._editor = this._createEditor(engine, text);
+        this.boundaryRect = text.boundaryRect();
 
         text.runtimeProps.editing = true;
         text.runtimeProps.drawSelection = true;
@@ -421,6 +424,7 @@ export default class TextTool extends Tool {
     _createEditor(engine, element) {
         var inlineEditor = new InlineTextEditor();
         inlineEditor.onInvalidate = this.invalidateLayers;
+        inlineEditor.onRangeFormattingChanged = this._rangeFormatter.onRangeFormattingChanged;
         inlineEditor.onSelectionChanged = this._onSelectionChanged;
         inlineEditor.onDeactivated = finalEdit => this.endEdit(finalEdit);
         inlineEditor.activate(element.globalViewMatrix(), engine, element.props.font, this._app.fontManager);
@@ -429,7 +433,7 @@ export default class TextTool extends Tool {
     private invalidateLayers = () => {
         Invalidate.requestInteractionOnly();
         this.text.invalidate();
-    };
+    }
 
     _hitNewElement(e) {
         return this._view.hitElementDirect(e)

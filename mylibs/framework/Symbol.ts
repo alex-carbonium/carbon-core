@@ -583,6 +583,10 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         super.flatten();
         Symbol.flattening = false;
     }
+
+    enableGroupLocking() {
+        return true;
+    }
 }
 Symbol.prototype.t = Types.Symbol;
 
@@ -621,9 +625,6 @@ PropertyMetadata.registerForType(Symbol, {
     },
     allowMoveOutChildren: {
         defaultValue: false
-    },
-    enableGroupLocking: {
-        defaultValue: true
     },
     prepareVisibility: function (element: Symbol) {
         return {

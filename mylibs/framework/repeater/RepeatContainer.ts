@@ -371,6 +371,10 @@ export default class RepeatContainer extends Container implements IRepeatContain
         return this.selectProps(["innerMarginX", "innerMarginY"]);
     }
 
+    enableGroupLocking() {
+        return true;
+    }
+
     strokeBorder(context, w, h) {
         if (Brush.canApply(this.stroke())) {
             super.strokeBorder(context, w, h);
@@ -492,9 +496,6 @@ PropertyMetadata.registerForType(RepeatContainer, {
     },
     overflow: {
         defaultValue: Overflow.Clip
-    },
-    enableGroupLocking: {
-        defaultValue: true
     },
     arrangeStrategy: {
         defaultValue: ArrangeStrategies.Repeat

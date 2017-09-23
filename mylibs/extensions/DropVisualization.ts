@@ -11,6 +11,7 @@ import DesignerView from "framework/DesignerView";
 import Layer from "framework/Layer";
 import Container from "../framework/Container";
 import Page from "../framework/Page";
+import Text from "../framework/text/Text";
 import Environment from "../environment";
 import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
 import { IPoint, KeyboardState } from "carbon-core";
@@ -19,13 +20,14 @@ import Point from "../math/point";
 import Matrix from "../math/matrix";
 import { FloatingPointPrecision, ArrangeStrategies } from "../framework/Defs";
 import { LayerTypes } from "carbon-app";
-import { IUIElement, ChangeMode, IIsolationLayer, IMouseEventData, IController, IComposite, IContainer } from "carbon-core";
+import { InteractionType, IUIElement, ChangeMode, IIsolationLayer, IMouseEventData, IController, IComposite, IContainer, TextMode } from "carbon-core";
 import BoundaryPathDecorator, { HighlightKind } from "../decorators/BoundaryPathDecorator";
 
 var HighlightBrush = Brush.createFromColor(SharedColors.Highlight);
 
 class ResizeHint extends UIElement {
-    _transformationElement: IUIElement;
+    private _transformationElement: IComposite;
+    private _label: Text = null;
 
     constructor() {
         super();
@@ -36,8 +38,14 @@ class ResizeHint extends UIElement {
         this._transformationElement = null;
     }
 
-    start(transformationElement: IUIElement) {
+    start(transformationElement: IComposite) {
         this._transformationElement = transformationElement;
+        if (this._transformationElement.elements.length === 1) {
+            let element = this._transformationElement.elements[0];
+            if (element instanceof Text && element.props.mode === TextMode.Label) {
+                this._label = element;
+            }
+        }
 
     }
     stop() {
@@ -45,6 +53,7 @@ class ResizeHint extends UIElement {
         this._transformationElement = null;
         this._text = "";
         this._textWidth = -1;
+        this._label = null;
     }
 
     _updatePosition(): void {
@@ -115,7 +124,13 @@ class ResizeHint extends UIElement {
     updateSizeText() {
         var w = this._roundDecimal(this._transformationElement.width());
         var h = this._roundDecimal(this._transformationElement.height());
-        this.updateText(this._formatDecimal(w) + " x " + this._formatDecimal(h));
+        var text = this._formatDecimal(w) + " x " + this._formatDecimal(h);
+
+        if (this._label) {
+            text += ", font " + this._label.props.font.size + "px";
+        }
+
+        this.updateText(text);
     }
 
     updatePositionText() {
@@ -127,6 +142,10 @@ class ResizeHint extends UIElement {
     updateAngleText() {
         var angle = this._roundDecimal(this._transformationElement.angle());
         this.updateText(angle + "°");
+    }
+
+    updateRadiusText() {
+        this.updateText("radius " + this._transformationElement.elements[0].props.cornerRadius.upperLeft + "px");
     }
 
     _formatDecimal(number: number): string {
@@ -226,258 +245,16 @@ class SelectionRect extends UIElement {
     }
 }
 
-var onDraggingElement = function (event: IMouseEventData, draggingElement: IComposite, target: IContainer) {
-    if (draggingElement.showResizeHint()) {
-        this._hint.updatePositionText();
-    }
-
-    this._target = null;
-    this._dropData = null;
-
-    if (target && !(target instanceof Page)) {
-        let targetIsParent = draggingElement.elements.some(x => x.parent() === target);
-        if (!targetIsParent) {
-            this._target = target;
-            this._isDropTarget = true;
-        }
-        if (target.allowRearrange()) {
-            this._dropData = target.getDropData(event, draggingElement);
-        }
-    }
-
-    updateVisualizations.call(this);
-};
-
-var onStartDragging = function (event: IMouseEventData, element: IUIElement) {
-    this._dragging = true;
-    this._target = null;
-    if (element.showResizeHint()) {
-        this._hint.start(element);
-        this._hint.updatePositionText();
-    }
-};
-
-var onStopDragging = function (event: IMouseEventData) {
-    this._dropData = null;
-    this._target = null;
-    this._isDropTarget = false;
-    this._dragging = false;
-    this._hint.stop();
-    updateVisualizations.call(this);
-    Invalidate.requestInteractionOnly();
-};
-
-var onMouseMove = function (event: IMouseEventData) {
-    if (this._dragging || this._resizing || this._rotating || !App.Current.allowSelection() || this._selection !== undefined) {
-        return;
-    }
-
-    var target = this.view.hitElement(event);
-    if (target === Selection.selectComposite()) {
-        if (this._target) {
-            this._target = null;
-            this._isDropTarget = false;
-            updateVisualizations.call(this);
-        }
-        return;
-    }
-
-    if (this._target !== target) {
-        //special case - do not highlight children of active group even though they are hit visible
-        if (target && !event.ctrlKey && target.parent() instanceof Container && target.parent().activeGroup()) {
-            target = target.parent();
-        }
-
-        if (target) {
-            if (!Selection.isElementSelected(target)) {
-                if (target.canSelect() && !target.locked() && (!target.lockedGroup || target.lockedGroup())) {
-                    this._target = target;
-                    this._isDropTarget = false;
-                    updateVisualizations.call(this);
-                } else {
-                    if (this._target !== null) {
-                        this._target = null;
-                        updateVisualizations.call(this);
-                    }
-                }
-
-            }
-            else if (this._target) {
-                this._target = null;
-                updateVisualizations.call(this);
-            }
-        }
-    }
-};
-
-var onElementSelected = function () {
-    if (this._target && Selection.isElementSelected(this._target)) {
-        this._target = null;
-        updateVisualizations.call(this);
-    }
-};
-
-function onSelectionFrame(rect) {
-    var isolationLayer:any = Environment.view.getLayer(LayerTypes.Isolation) as IIsolationLayer;
-    if(isolationLayer.isActive) {
-        this._selection = isolationLayer.getElementsInRect(rect);
-    } else {
-        this._selection = this.app.activePage.getElementsInRect(rect);
-    }
-
-    updateSelectionRects.call(this);
-}
-
-function updateSelectionRects() {
-    this._selectionIteration++;
-    if (!this._selectionControls) {
-        this._selectionControls = {};
-    }
-
-    for (var i = 0; i < this._selection.length; ++i) {
-        let element = this._selection[i];
-        let controlData = this._selectionControls[element.id()];
-        if (controlData) {
-            controlData.iteration = this._selectionIteration;
-        } else {
-            var control = new SelectionRect(element);
-
-            this._selectionControls[element.id()] = {
-                iteration: this._selectionIteration,
-                control: control
-            };
-
-            this.view.interactionLayer.add(control);
-        }
-    }
-
-    // clear elements which are not selected any more
-    for (var id in this._selectionControls) {
-        var controlData = this._selectionControls[id];
-        if (controlData.iteration !== this._selectionIteration) {
-            controlData.control.parent().remove(controlData.control);
-            delete this._selectionControls[id];
-        }
-    }
-}
-
-function onSelectionFrameStart() {
-    this._selection = [];
-    this._selectionIteration = 0;
-}
-
-function onSelectionFrameStop() {
-    this._selection = [];
-    updateSelectionRects.call(this);
-    delete this._selection;
-    delete this._selectionIteration;
-    delete this._selectionControls;
-}
-
-function onStartResizing(event: IMouseEventData, element: IUIElement) {
-    this._resizing = true;
-    if (element.showResizeHint()) {
-        this._hint.start(element);
-        this._hint.updateSizeText();
-    }
-    updateVisualizations.call(this);
-}
-
-function onStopResizing() {
-    delete this._resizing;
-    this._hint.stop();
-    updateVisualizations.call(this);
-}
-
-function onResizing(event: IMouseEventData, element: IUIElement) {
-    if (element.showResizeHint()) {
-        this._hint.updateSizeText();
-    }
-}
-
-function onStartRotating(event: IMouseEventData, element: IUIElement) {
-    this._rotating = true;
-    this._hint.start(element);
-    this._hint.updateAngleText();
-    updateVisualizations.call(this);
-}
-
-function onStopRotating() {
-    delete this._rotating;
-    this._hint.stop();
-    updateVisualizations.call(this);
-}
-
-function onRotating(event: IMouseEventData, element: IUIElement) {
-    if (element.showResizeHint()) {
-        this._hint.updateAngleText();
-    }
-}
-
-var appLoaded = function () {
-    var controller = this.controller as IController;
-    if (!controller) {
-        return;
-    }
-    this.registerForDispose(controller.draggingEvent.bind(this, onDraggingElement));
-    this.registerForDispose(controller.stopDraggingEvent.bind(this, onStopDragging));
-    this.registerForDispose(controller.startResizingEvent.bind(this, onStartResizing));
-    this.registerForDispose(controller.stopResizingEvent.bind(this, onStopResizing));
-    this.registerForDispose(controller.resizingEvent.bind(this, onResizing));
-    this.registerForDispose(controller.startRotatingEvent.bind(this, onStartRotating));
-    this.registerForDispose(controller.stopRotatingEvent.bind(this, onStopRotating));
-    this.registerForDispose(controller.rotatingEvent.bind(this, onRotating));
-    this.registerForDispose(controller.startDraggingEvent.bind(this, onStartDragging));
-    this.registerForDispose(controller.mousemoveEvent.bind(this, onMouseMove));
-    this.registerForDispose(Selection.onElementSelected.bind(this, onElementSelected));
-    this.registerForDispose(Selection.onSelectionFrameEvent.bind(this, onSelectionFrame));
-    this.registerForDispose(Selection.startSelectionFrameEvent.bind(this, onSelectionFrameStart));
-    this.registerForDispose(Selection.stopSelectionFrameEvent.bind(this, onSelectionFrameStop));
-    this.registerForDispose(this.app.actionManager.subscribe('cancel', onCancel.bind(this)));
-    this.app.releaseLoadRef();
-};
-
-var onCancel = function () {
-    if (this._target) {
-        this._target = null;
-        updateVisualizations.call(this);
-    }
-};
-
-function updateVisualizations() {
-    var data = this._dropData;
-    if (data) {
-        if (this._dropLine.parent() === NullContainer) {
-            this.view.interactionLayer.add(this._dropLine);
-        }
-        this._dropLine.x1(data.x1);
-        this._dropLine.x2(data.x2);
-        this._dropLine.y1(data.y1);
-        this._dropLine.y2(data.y2);
-    } else if (!(this._dropLine.parent() === NullContainer)) {
-        this._dropLine.parent().remove(this._dropLine);
-    }
-
-    if (this._dragging || this._resizing || this._rotating) {
-        if (this._hint.parent() === NullContainer) {
-            this.view.interactionLayer.add(this._hint);
-        }
-    } else if (!(this._hint.parent() === NullContainer)) {
-        this._hint.parent().remove(this._hint);
-    }
-
-    Invalidate.requestInteractionOnly();
-}
-
-
 export default class DropVisualization extends ExtensionBase {
+    private _hint: ResizeHint = null;
+
     attach(app, view, controller) {
         if (!(view instanceof DesignerView)) {
             return;
         }
         super.attach.apply(this, arguments);
-        app.onLoad(appLoaded.bind(this));
-        this.registerForDispose(view.scaleChanged.bind(updateVisualizations.bind(this)));
+        app.onLoad(this.appLoaded);
+        this.registerForDispose(view.scaleChanged.bind(this, this.updateVisualizations));
         app.addLoadRef();
         this._dropLine = new DropLine();
         this._dropLine.setProps({
@@ -506,6 +283,301 @@ export default class DropVisualization extends ExtensionBase {
 
     static highlightElement(context, element, boundaryPath = false, strokeStyle: string = null) {
         BoundaryPathDecorator.highlight(context, element, boundaryPath, HighlightKind.Thick, strokeStyle);
+    }
+
+    onDraggingElement(event: IMouseEventData, draggingElement: IComposite) {
+        let target = Environment.controller.getCurrentDropTarget(event);
+
+        if (draggingElement.showResizeHint()) {
+            this._hint.updatePositionText();
+        }
+
+        this._target = null;
+        this._dropData = null;
+
+        if (target && !(target instanceof Page)) {
+            let targetIsParent = draggingElement.elements.some(x => x.parent() === target);
+            if (!targetIsParent) {
+                this._target = target;
+                this._isDropTarget = true;
+            }
+            let container = target as IContainer;
+            if (container.allowRearrange()) {
+                this._dropData = container.getDropData(event, draggingElement);
+            }
+        }
+
+        this.updateVisualizations();
+    }
+
+    onStartDragging(event: IMouseEventData, element: IComposite) {
+        this._dragging = true;
+        this._target = null;
+        if (element.showResizeHint()) {
+            this._hint.start(element);
+            this._hint.updatePositionText();
+        }
+    }
+
+    onStopDragging(event: IMouseEventData) {
+        this._dropData = null;
+        this._target = null;
+        this._isDropTarget = false;
+        this._dragging = false;
+        this._hint.stop();
+        this.updateVisualizations();
+        Invalidate.requestInteractionOnly();
+    };
+
+    onMouseMove(event: IMouseEventData) {
+        if (Environment.controller.interactionActive || !App.Current.allowSelection() || this._selection !== undefined) {
+            return;
+        }
+
+        var target = this.view.hitElement(event);
+        if (target === Selection.selectComposite()) {
+            if (this._target) {
+                this._target = null;
+                this._isDropTarget = false;
+                this.updateVisualizations();
+            }
+            return;
+        }
+
+        if (this._target !== target) {
+            //special case - do not highlight children of active group even though they are hit visible
+            if (target && !event.ctrlKey && target.parent() instanceof Container && target.parent().activeGroup()) {
+                target = target.parent();
+            }
+
+            if (target) {
+                if (!Selection.isElementSelected(target)) {
+                    if (target.canSelect() && !target.locked() && (!(target instanceof Container) || target.lockedGroup())) {
+                        this._target = target;
+                        this._isDropTarget = false;
+                        this.updateVisualizations();
+                    } else {
+                        if (this._target !== null) {
+                            this._target = null;
+                            this.updateVisualizations();
+                        }
+                    }
+
+                }
+                else if (this._target) {
+                    this._target = null;
+                    this.updateVisualizations();
+                }
+            }
+        }
+    };
+
+    onElementSelected() {
+        if (this._target && Selection.isElementSelected(this._target)) {
+            this._target = null;
+            this.updateVisualizations();
+        }
+    }
+
+    onSelectionFrame(rect) {
+        var isolationLayer:any = Environment.view.getLayer(LayerTypes.Isolation) as IIsolationLayer;
+        if(isolationLayer.isActive) {
+            this._selection = isolationLayer.getElementsInRect(rect);
+        } else {
+            this._selection = this.app.activePage.getElementsInRect(rect);
+        }
+
+        this.updateSelectionRects();
+    }
+
+    updateSelectionRects() {
+        this._selectionIteration++;
+        if (!this._selectionControls) {
+            this._selectionControls = {};
+        }
+
+        for (var i = 0; i < this._selection.length; ++i) {
+            let element = this._selection[i];
+            let controlData = this._selectionControls[element.id()];
+            if (controlData) {
+                controlData.iteration = this._selectionIteration;
+            } else {
+                var control = new SelectionRect(element);
+
+                this._selectionControls[element.id()] = {
+                    iteration: this._selectionIteration,
+                    control: control
+                };
+
+                this.view.interactionLayer.add(control);
+            }
+        }
+
+        // clear elements which are not selected any more
+        for (var id in this._selectionControls) {
+            var controlData = this._selectionControls[id];
+            if (controlData.iteration !== this._selectionIteration) {
+                controlData.control.parent().remove(controlData.control);
+                delete this._selectionControls[id];
+            }
+        }
+    }
+
+    onSelectionFrameStart() {
+        this._selection = [];
+        this._selectionIteration = 0;
+    }
+
+    onSelectionFrameStop() {
+        this._selection = [];
+        this.updateSelectionRects();
+        delete this._selection;
+        delete this._selectionIteration;
+        delete this._selectionControls;
+    }
+
+    onStartResizing(event: IMouseEventData, element: IComposite) {
+        if (element.showResizeHint()) {
+            this._hint.start(element);
+            this._hint.updateSizeText();
+        }
+        this.updateVisualizations();
+    }
+
+    onStopResizing() {
+        this._hint.stop();
+        this.updateVisualizations();
+    }
+
+    onResizing(event: IMouseEventData, element: IUIElement) {
+        if (element.showResizeHint()) {
+            this._hint.updateSizeText();
+        }
+    }
+
+    onStartRotating(event: IMouseEventData, element: IComposite) {
+        this._hint.start(element);
+        this._hint.updateAngleText();
+        this.updateVisualizations();
+    }
+
+    onStopRotating() {
+        this._hint.stop();
+        this.updateVisualizations();
+    }
+
+    onRotating(event: IMouseEventData, element: IUIElement) {
+        if (element.showResizeHint()) {
+            this._hint.updateAngleText();
+        }
+    }
+
+    onInteractionStarted(type: InteractionType, event: IMouseEventData, composite: IComposite) {
+        switch (type) {
+            case InteractionType.Dragging:
+                this.onStartDragging(event, composite);
+                break;
+            case InteractionType.Resizing:
+                this.onStartResizing(event, composite);
+                break;
+            case InteractionType.Rotation:
+                this.onStartRotating(event, composite);
+                break;
+            case InteractionType.RadiusChange:
+                if (composite.showResizeHint()) {
+                    this._hint.start(composite);
+                    this._hint.updateRadiusText();
+                    this.updateVisualizations();
+                }
+                break;
+        }
+    }
+    onInteractionProgress(type: InteractionType, event: IMouseEventData, composite: IComposite) {
+        switch (type) {
+            case InteractionType.Dragging:
+                this.onDraggingElement(event, composite);
+                break;
+            case InteractionType.Resizing:
+                this.onResizing(event, composite);
+                break;
+            case InteractionType.Rotation:
+                this.onRotating(event, composite);
+                break;
+            case InteractionType.RadiusChange:
+                if (composite.showResizeHint()) {
+                    this._hint.updateRadiusText();
+                    this.updateVisualizations();
+                }
+                break;
+        }
+    }
+    onInteractionStopped(type: InteractionType, event: IMouseEventData, composite: IComposite) {
+        switch (type) {
+            case InteractionType.Dragging:
+                this.onStopDragging(event);
+                break;
+            case InteractionType.Resizing:
+                this.onStopResizing();
+                break;
+            case InteractionType.Rotation:
+                this.onStopRotating();
+                break;
+            case InteractionType.RadiusChange:
+                if (composite.showResizeHint()) {
+                    this._hint.stop();
+                }
+                break;
+        }
+    }
+
+    appLoaded = () => {
+        var controller = this.controller as IController;
+        if (!controller) {
+            return;
+        }
+
+        this.registerForDispose(controller.interactionStarted.bind(this, this.onInteractionStarted));
+        this.registerForDispose(controller.interactionProgress.bind(this, this.onInteractionProgress));
+        this.registerForDispose(controller.interactionStopped.bind(this, this.onInteractionStopped));
+
+        this.registerForDispose(controller.mousemoveEvent.bind(this, this.onMouseMove));
+        this.registerForDispose(Selection.onElementSelected.bind(this, this.onElementSelected));
+        this.registerForDispose(Selection.onSelectionFrameEvent.bind(this, this.onSelectionFrame));
+        this.registerForDispose(Selection.startSelectionFrameEvent.bind(this, this.onSelectionFrameStart));
+        this.registerForDispose(Selection.stopSelectionFrameEvent.bind(this, this.onSelectionFrameStop));
+        this.registerForDispose(this.app.actionManager.subscribe('cancel', this.onCancel));
+    }
+
+    onCancel = () => {
+        if (this._target) {
+            this._target = null;
+            this.updateVisualizations();
+        }
+    };
+
+    updateVisualizations() {
+        var data = this._dropData;
+        if (data) {
+            if (this._dropLine.parent() === NullContainer) {
+                this.view.interactionLayer.add(this._dropLine);
+            }
+            this._dropLine.x1(data.x1);
+            this._dropLine.x2(data.x2);
+            this._dropLine.y1(data.y1);
+            this._dropLine.y2(data.y2);
+        } else if (!(this._dropLine.parent() === NullContainer)) {
+            this._dropLine.parent().remove(this._dropLine);
+        }
+
+        if (Environment.controller.interactionActive) {
+            if (this._hint.parent() === NullContainer) {
+                this.view.interactionLayer.add(this._hint);
+            }
+        } else if (!(this._hint.parent() === NullContainer)) {
+            this._hint.parent().remove(this._hint);
+        }
+
+        Invalidate.requestInteractionOnly();
     }
 }
 

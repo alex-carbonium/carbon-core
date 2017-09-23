@@ -1,6 +1,6 @@
 import Selection from "../../framework/SelectionModel"
 import Invalidate from "../../framework/Invalidate";
-import { IApp, IView, IController, IMouseEventData, KeyboardState, IDisposable, WorkspaceTool } from "carbon-core";
+import { IApp, IView, IController, IMouseEventData, KeyboardState, IDisposable, WorkspaceTool, InteractionType, IComposite } from "carbon-core";
 
 //TODO: if selection is made in layers after tool is set, active frame starts to react to mouse events before the tool
 export default class Tool {
@@ -40,8 +40,8 @@ export default class Tool {
             this.registerForDisposal(controller.mousemoveEvent.bindHighPriority(this, this.mousemove));
             this.registerForDisposal(controller.clickEvent.bindHighPriority(this, this.click));
             this.registerForDisposal(controller.dblclickEvent.bindHighPriority(this, this.dblclick));
-            this.registerForDisposal(controller.startDraggingEvent.bindHighPriority(this, this.dragElementStarted));
-            this.registerForDisposal(controller.stopDraggingEvent.bindHighPriority(this, this.dragElementEnded));
+            this.registerForDisposal(controller.interactionStarted.bindHighPriority(this, this.onInteractionStarted));
+            this.registerForDisposal(controller.interactionStopped.bindHighPriority(this, this.onInteractionStopped));
         }
         if (this._view.interactionLayer) {
             this.registerForDisposal(this._view.interactionLayer.ondraw.bind(this, this.layerdraw));
@@ -75,10 +75,10 @@ export default class Tool {
         }
     }
 
-    dragElementStarted() {
+    onInteractionStarted(type: InteractionType, event: IMouseEventData, composite: IComposite) {
     }
 
-    dragElementEnded() {
+    onInteractionStopped(type: InteractionType, event: IMouseEventData, composite: IComposite) {
     }
 
     click(event: IMouseEventData) {

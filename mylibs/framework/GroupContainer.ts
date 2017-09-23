@@ -224,6 +224,10 @@ export default class GroupContainer extends InteractiveContainer implements IGro
             this.parent().remove(this);
         }
     }
+
+    enableGroupLocking() {
+        return true;
+    }
 }
 
 GroupContainer.prototype.t = Types.GroupContainer;
@@ -234,9 +238,6 @@ PropertyMetadata.registerForType(GroupContainer, {
     },
     arrangeStrategy: {
         defaultValue: ArrangeStrategies.Group
-    },
-    enableGroupLocking: {
-        defaultValue: true
     },
     groups(group: GroupContainer) {
         return group.commonPropsManager().createGroups(group.children);

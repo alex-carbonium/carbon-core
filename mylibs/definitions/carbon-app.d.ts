@@ -154,6 +154,8 @@ declare module "carbon-app" {
 
         dropToLayer(x, y, element);
 
+        getElementsInRect(rect: IRect) : IUIElement[];
+
         canChangeNodeTree(): boolean;
     }
 
@@ -265,6 +267,9 @@ declare module "carbon-app" {
 
         setActivePage(page: IPage);
 
+        hitElement(eventData, includeInteractionLayer?: boolean): IUIElement | null;
+        hitElementDirect(e?, cb?, includeInteractionLayer?: boolean);
+
         draw();
         renderElementToContext(element: IUIElement, context: IContext, x?: number, y?: number, zoom?: number, dpr?: number);
         renderElementToDataUrl(element: IUIElement, bounds?: IRect, dpr?: number): string;
@@ -284,20 +289,24 @@ declare module "carbon-app" {
         elements: IUIElement[];
     }
 
+    export const enum InteractionType {
+        Dragging,
+        Resizing,
+        Rotation,
+        RadiusChange
+    }
+
     export interface IController {
         onmousemove(eventData: IMouseEventData);
 
-        startResizingEvent: IEvent2<IMouseEventData, IUIElement>;
-        resizingEvent: IEvent2<IMouseEventData, IUIElement>;
-        stopResizingEvent: IEvent2<IMouseEventData, IUIElement>;
-        startRotatingEvent: IEvent2<IMouseEventData, IUIElement>;
-        rotatingEvent: IEvent2<IMouseEventData, IUIElement>;
-        stopRotatingEvent: IEvent2<IMouseEventData, IUIElement>;
         startDrawingEvent: IEvent<IEventData>;
 
-        startDraggingEvent: IEvent2<IMouseEventData, IComposite>;
-        stopDraggingEvent: IEvent2<IMouseEventData, IComposite>;
-        draggingEvent: IEvent3<IMouseEventData, IComposite, IContainer>;
+        interactionStarted: IEvent3<InteractionType, IMouseEventData, IComposite>;
+        interactionProgress: IEvent3<InteractionType, IMouseEventData, IComposite>;
+        interactionStopped: IEvent3<InteractionType, IMouseEventData, IComposite>;
+        raiseInteractionStarted(type: InteractionType, event: IMouseEventData);
+        raiseInteractionProgress(type: InteractionType, event: IMouseEventData);
+        raiseInteractionStopped(type: InteractionType, event: IMouseEventData);
 
         onArtboardChanged: IEvent2<IArtboard, IArtboard>;
 

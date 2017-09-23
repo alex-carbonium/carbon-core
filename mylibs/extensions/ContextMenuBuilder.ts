@@ -92,7 +92,7 @@ export default class ContextMenuBuilder {
             items.push({
                 name: "@action.exitisolation",
                 contextBar: ContextBarPosition.Left | ContextBarPosition.Only,
-                actionId: "exitIsolation"
+                actionId: "exitisolation"
             })
         }
 

@@ -336,6 +336,9 @@ class SelectionModel implements ISelection {
     hideFrame() {
         this._selectCompositeElement.showActiveFrame(false);
     }
+    showFrame() {
+        this._selectCompositeElement.showActiveFrame(true);
+    }
 
     private areSameArrays(array1, array2) {
         if (array1.length !== array2.length) {

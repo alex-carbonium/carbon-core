@@ -465,7 +465,9 @@ deserunt mollit anim id est laborum.");
             this._fontManager.tryLoad(family, style, weight)
                 .then(res => {
                     if (res){
-                        this.engine.getRange(selection.start, selection.end).setFormatting(["family", "style", "weight", "underline"], [family, style, weight, underline])
+                        let range = this.engine.getRange(selection.start, selection.end);
+                        range.setFormatting(["family", "style", "weight", "underline"], [family, style, weight, underline]);
+                        this.onRangeFormattingChanged(range);
                     }
                     else{
                         console.log("//TODO: notify that font does not have selected style")

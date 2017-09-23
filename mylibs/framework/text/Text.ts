@@ -33,6 +33,10 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
             || textChanges.wrap !== this.props.wrap
             || textChanges.font !== this.props.font;
 
+        if (textChanges.font !== this.props.font) {
+            this.updateContentWithFont(textChanges);
+        }
+
         if (contentAffected || textChanges.br !== this.props.br) {
             if (textChanges.mode === TextMode.Label) {
                 if (textChanges.br.height !== this.props.br.height) {
@@ -50,10 +54,6 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
             if (contentAffected) {
                 this.adjustByFontAlign(textChanges);
             }
-        }
-
-        if (textChanges.font !== this.props.font) {
-            this.updateContentWithFont(textChanges);
         }
 
         if (changes.textStyleId !== undefined) {
@@ -535,6 +535,16 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
             return ResizeDimension.Vertical;
         }
         return ResizeDimension.Both;
+    }
+
+    cloneProps() {
+        let props = super.cloneProps();
+
+        if (Array.isArray(props.content)) {
+            props.content = props.content.map(x => Object.assign({}, x));
+        }
+
+        return props;
     }
 
     static fromSvgElement(element, parsedAttributes, matrix) {

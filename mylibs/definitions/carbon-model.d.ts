@@ -146,6 +146,9 @@ declare module "carbon-model" {
         selectLayoutProps(global?: boolean): LayoutProps;
 
         performArrange(arrangeEvent?, mode?: ChangeMode): void;
+
+        activeGroup(): boolean;
+        lockedGroup(): boolean;
     }
 
     export const UIElement: IConstructor<IUIElement>;
