@@ -194,6 +194,8 @@ define(function () {
             value = element.getAttribute(attr);
             if (attr !== 'points') {
                 parsed = parseFloat(value);
+            } else if (attr === 'points') {
+                parsed = parsePointsAttribute(value);
             }
             if (value) {
                 // "normalize" attribute values
@@ -207,7 +209,7 @@ define(function () {
                     value = parseTransformAttribute(value);
                 }
                 attr = normalizeAttr(attr);
-                memo[attr] = isNaN(parsed) ? value : parsed;
+                memo[attr] = (!parsed || isNaN(parsed)) ? value : parsed;
             }
             return memo;
         }, {});

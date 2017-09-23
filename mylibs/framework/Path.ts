@@ -1570,15 +1570,11 @@ class Path extends Shape {
 
         // polygon
         if (parsedAttributes.points) {
-            let pairs = parsedAttributes.points.replace('\n', ' ').replace('\r', ' ').split(' ');
-            for (let i = 0; i < pairs.length; ++i) {
-                let pair = pairs[i];
-                if (pair) {
-                    let xy = pair.split(',');
-                    let point = { x: parseFloat(xy[0]), y: parseFloat(xy[1]) };
-                    point = matrix.transformPoint(point);
-                    path.addPoint(point);
-                }
+            let values = parsedAttributes.points.replace('\n', ' ').replace('\r', ' ').replace(',', ' ').split(' ');
+            for (let i = 0; i < values.length; i+=2) {
+                let point = { x: parseFloat(values[i+0]), y: parseFloat(values[i+1]) };
+                point = matrix.transformPoint(point);
+                path.addPoint(point);
             }
             path.closed(true);
         }
@@ -1619,13 +1615,9 @@ class Path extends Shape {
         setElementPropertiesFromAttributes(path, parsedAttributes);
 
         if (parsedAttributes.points) {
-            let pairs = parsedAttributes.points.replace('\n', ' ').replace('\r', ' ').split(' ');
-            for (let i = 0; i < pairs.length; ++i) {
-                let pair = pairs[i];
-                if (pair) {
-                    let xy = pair.split(',');
-                    path.addPoint(matrix.transformPoint({ x: parseFloat(xy[0]), y: parseFloat(xy[1]) }));
-                }
+            let pairs = parsedAttributes.points.replace('\n', ' ').replace('\r', ' ').replace(',', ' ').split(' ');
+            for (let i = 0; i < pairs.length; i+=2) {
+                path.addPoint(matrix.transformPoint({ x: parseFloat(pairs[i+0]), y: parseFloat(pairs[i+1]) }));
             }
         }
 

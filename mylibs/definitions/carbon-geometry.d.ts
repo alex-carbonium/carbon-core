@@ -63,6 +63,8 @@ declare module "carbon-geometry" {
 
         reset(): void;
 
+        isValid(): boolean;
+
         containsPoint(point: IPoint): boolean;
     }
     interface IRectConstructor {

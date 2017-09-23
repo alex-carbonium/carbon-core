@@ -601,6 +601,9 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             return;
         }
         let elementBox = changedElement.getBoundingBoxGlobal();
+        if(!elementBox.isValid()) {
+            return;
+        }
         let artboardGlobalBox = this.getBoundingBoxGlobal();
         let hitTestBoxGlobal = artboardGlobalBox;
         if (this.props.hitTestBox) {

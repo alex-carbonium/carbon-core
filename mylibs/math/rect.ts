@@ -99,6 +99,10 @@ export default class Rect implements IRect, IPooledObject {
     }
 
     combine(rect: IRect) {
+        if(!rect.isValid()) {
+            return this;
+        }
+
         let x = Math.min(this.x, rect.x);
         let y = Math.min(this.y, rect.y);
         let r = Math.max(this.x + this.width, rect.x + rect.width);
@@ -256,6 +260,10 @@ export default class Rect implements IRect, IPooledObject {
 
     free() {
         Rect.pool.free(this);
+    }
+
+    isValid() {
+        return !isNaN(this.x) && !isNaN(this.y) && !isNaN(this.width) && !isNaN(this.height);
     }
 
     private fitOrFill(target: IRect, noScaleUp, fit): Rect {
