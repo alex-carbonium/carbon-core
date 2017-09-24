@@ -146,9 +146,9 @@ export class DraggingElement extends CompositeElement {
             }
 
             this.applyElementSnapshot(this._propSnapshot, element, ChangeMode.Self);
-            this.dropElementOn(event, parent, source, element.globalViewMatrix(), index);
+            let droppedElement = this.dropElementOn(event, parent, source, element.globalViewMatrix(), index);
 
-            elements.push(source);
+            elements.push(droppedElement);
         }
 
         return elements;
@@ -176,11 +176,13 @@ export class DraggingElement extends CompositeElement {
         }
 
         if (newParent !== element.parent()) {
-            newParent.insert(element, index);
+            return newParent.insert(element, index);
         }
-        else if (newParent.allowRearrange() && element.zOrder() !== index) {
+
+        if (newParent.allowRearrange() && element.zOrder() !== index) {
             newParent.changePosition(element, index);
         }
+        return element;
     }
 
     altChanged(alt) {
