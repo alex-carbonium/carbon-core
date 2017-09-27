@@ -208,8 +208,22 @@ declare module "carbon-api" {
         userId: string;
         projectId: number;
     }
+    export const enum ShareRole {
+        ViewOnly,
+        Comment,
+        Edit
+    }
+    export type ShareCode = {
+        code: string;
+        role: ShareRole;
+    }
     export interface IShareProxy {
+        getCodes(companyId: string, projectId: string) : Promise<{codes: ShareCode[]}>;
+        addCode(companyId: string, projectId: string, role: ShareRole) : Promise<ShareCode>;
+        deleteCode(companyId: string, projectId: string, code: string) : Promise<{}>;
+        deleteAllCodes(companyId: string, projectId: string) : Promise<{}>;
         use(code: string): Promise<IUseCodeResult>;
+
         getPageSetup(pageId: string): Promise<ISharedPageSetup>;
         validatePageName(model: IValidatePageNameModel): ResponsePromise<IValidatePageNameModel, IValidatePageNameResult>;
         publishPage(model: IPublishPageModel): ResponsePromise<IPublishPageModel, IPublishPageResult>;
@@ -258,6 +272,7 @@ declare module "carbon-api" {
 declare function assertNever(t: never);
 
 declare interface Promise<T>{
+    delay(ms: number): Promise<T>;
     finally<U>(handler: () => U): Promise<T>;
     cancel(): void;
 }
