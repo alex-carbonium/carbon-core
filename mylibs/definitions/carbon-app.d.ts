@@ -143,6 +143,7 @@ declare module "carbon-app" {
         importExternalPage(data:any) : IPage;
 
         isElectron(): boolean;
+        mirroringCode(code?: string) : string;
     }
 
     export interface ILayer<TProps extends IContainerProps = IContainerProps> extends IContainer<TProps> {

@@ -217,12 +217,18 @@ declare module "carbon-api" {
         code: string;
         role: ShareRole;
     }
+    export type MirrorCode = {
+        code: string;
+    }
     export interface IShareProxy {
         getCodes(companyId: string, projectId: string) : Promise<{codes: ShareCode[]}>;
         addCode(companyId: string, projectId: string, role: ShareRole) : Promise<ShareCode>;
         deleteCode(companyId: string, projectId: string, code: string) : Promise<{}>;
         deleteAllCodes(companyId: string, projectId: string) : Promise<{}>;
         use(code: string): Promise<IUseCodeResult>;
+
+        mirrorCode(companyId: string, projectId: string, enable: boolean): Promise<MirrorCode>;
+        disableMirroring(companyId: string, projectId: string): Promise<{}>;
 
         getPageSetup(pageId: string): Promise<ISharedPageSetup>;
         validatePageName(model: IValidatePageNameModel): ResponsePromise<IValidatePageNameModel, IValidatePageNameResult>;
