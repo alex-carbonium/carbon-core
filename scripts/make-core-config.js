@@ -18,11 +18,7 @@ var defaults = {
     verbose: false,
     showConfig: false,
     trace: true,
-    errors: true,
-    /**
-     * Maps carbon-core, carbon-api, etc to corresponding implementation files
-     */
-    mapImpl: false
+    errors: true
 };
 
 function getEntry(settings){
@@ -71,12 +67,10 @@ function getExternals(settings) {
         "carbon-geometry": "window.c.ignore",
         "carbon-rendering": "window.c.ignore",
         "carbon-app": "window.c.ignore",
-        "carbon-basics": "window.c.ignore"
+        "carbon-basics": "window.c.ignore",
+        "carbon-core": "window.c.ignore",
+        "carbon-api": "window.c.ignore"
     };
-    if (!settings.mapImpl) {
-        result["carbon-core"] = "window.c.ignore";
-        result["carbon-api"] = "window.c.ignore";
-    }
     return result;
 }
 function getResolve(settings){
@@ -85,11 +79,6 @@ function getResolve(settings){
         alias: {},
         extensions: ["", ".js", ".jsx", ".less", ".html", ".ts"]
     };
-
-    if (settings.mapImpl) {
-        resolves.alias["carbon-core"] = fullPath("../mylibs/CarbonCore");
-        resolves.alias["carbon-api"] = fullPath("../mylibs/CarbonApi");
-    }
 
     return resolves;
 }
@@ -216,6 +205,11 @@ module.exports = function(settings){
             port               : settings.port,
             https              : settings.https,
             hot                : true,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+                "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization, X-SessionId"
+            },
             stats: {
                 colors: true,
                 timings: true,
