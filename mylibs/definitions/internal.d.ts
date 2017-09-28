@@ -59,6 +59,8 @@ declare module "carbon-model"{
 
         clearSavedLayoutProps();
         resetGlobalViewCache();
+
+        contextBarAllowed(): boolean;
     }
 
     export interface IUIElementProps extends IDataNodeProps {
@@ -79,7 +81,7 @@ declare module "carbon-model"{
 declare module "carbon-app"{
     import { IUIElement, IPrimitiveRoot } from 'carbon-model';
     import { IContext } from "carbon-rendering";
-    import { IEvent, ViewState, IPrimitive } from "carbon-basics";
+    import { IEvent, ViewState, IPrimitive, IConstructor } from "carbon-basics";
     import { ISize } from "carbon-geometry";
 
     export interface IPage{
@@ -105,7 +107,11 @@ declare module "carbon-app"{
         isNew(): boolean;
         isSaved(): boolean;
         syncBroken(): boolean;
+
+        mapElementsToLayerMask();
     }
+
+    export const AppClass: IConstructor<IApp>;
 
     export interface IView{
         gridContext: IContext;
@@ -147,7 +153,27 @@ declare module "carbon-app"{
 
     export const MirroringController: any;
     export const Layer: any;
+    export const ArtboardPage: any;
     export const MirroringView: any;
+    export const RelayoutQueue: any;
+
+    //TODO: move to UI
+    export const RepeaterActions: any;
+    export const SymbolActions: any;
+
+    //TODO: replace with math/rect
+    export const TextRect: any;
+
+    //TODO: remove
+    export const BasePlatform: any;
+
+    export interface IFontManager {
+        add(fontInfo: any);
+    }
+    export interface IFontManagerConstructor {
+        new (app): IFontManager;
+    }
+    export const OpenTypeFontManager: IFontManagerConstructor;
 }
 
 declare module "carbon-model"{

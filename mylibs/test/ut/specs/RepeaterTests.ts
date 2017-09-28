@@ -1,21 +1,9 @@
 import TestUtil from "../TestUtil";
-import UIElement from "framework/UIElement";
-import Text from "framework/text/Text";
-import Container from "framework/Container";
-import GroupContainer from "framework/GroupContainer";
-import Rectangle from "framework/Rectangle";
-import PropertyMetadata from "framework/PropertyMetadata";
-import Circle from "framework/Circle";
-import RepeatContainer from "framework/repeater/RepeatContainer";
-import {ArrangeStrategies, DockStyle, Overflow} from "framework/Defs";
-import Selection from "framework/SelectionModel";
-import Point from "../../../math/point";
-import Rect from "../../../math/rect";
 import {assert} from "chai";
-import { TextMode } from "carbon-core";
-import Brush from "../../../framework/Brush";
-import { RepeaterActions } from "../../../framework/repeater/RepeaterActions";
-import Environment from "../../../environment";
+import {
+    TextMode, Selection, Environment, RepeatContainer, PropertyMetadata, UIElement, RepeaterActions,
+    Rectangle, Circle, Container, Point, Rect, IUIElement, Text, GroupContainer
+} from "carbon-core";
 
 describe("Repeater tests", function(){
     before(function(){
@@ -324,7 +312,7 @@ describe("Repeater tests", function(){
 
             //act
             container = repeater.children[0].getImmediateChildById(container.id());
-            element = container.getImmediateChildById(element.id());
+            element = container.getImmediateChildById<IUIElement>(element.id());
 
             element.prepareAndSetProps({width: 50});
             this.app.relayout();

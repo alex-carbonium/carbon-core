@@ -175,6 +175,10 @@ class Backend implements IBackend {
         options = Object.assign({}, defaultOptions, options);
         return this.ajax("post", url, data, options);
     }
+    delete(url, data?, options?) {
+        options = Object.assign({}, defaultOptions, options);
+        return this.ajax("delete", url, data, options);
+    }
     ensureLoggedIn(renewToken = false): Promise<void> {
         if (this.isLoggedIn()) {
             if (renewToken) {
