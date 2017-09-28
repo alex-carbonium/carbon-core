@@ -364,6 +364,10 @@ class NullContainer extends DataNode implements IContainer {
     clearSavedLayoutProps() {
 
     }
+
+    contextBarAllowed() {
+        return false;
+    }
 }
 
 export default new NullContainer();

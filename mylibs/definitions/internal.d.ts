@@ -59,6 +59,8 @@ declare module "carbon-model"{
 
         clearSavedLayoutProps();
         resetGlobalViewCache();
+
+        contextBarAllowed(): boolean;
     }
 
     export interface IUIElementProps extends IDataNodeProps {
@@ -105,6 +107,8 @@ declare module "carbon-app"{
         isNew(): boolean;
         isSaved(): boolean;
         syncBroken(): boolean;
+
+        mapElementsToLayerMask();
     }
 
     export interface IView{
