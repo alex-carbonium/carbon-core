@@ -76,6 +76,7 @@ declare module "carbon-api" {
 
     export interface IDashboardProxy {
         dashboard(companyId: string): Promise<any>;
+        deleteProject(companyId:string, projectId:string): Promise<any>;
     }
 
     export type UserImage = {
