@@ -361,4 +361,23 @@ declare module "carbon-model" {
         Resize = 0,
         Edit = 1
     }
+
+    export interface IShape extends IContainer {
+    }
+
+    export interface IRectangle extends IShape {
+    }
+    export const Rectangle: IConstructor<IRectangle>;
+
+    export interface ICircle extends IShape {
+    }
+    export const Circle: IConstructor<ICircle>;
+
+    export interface IStar extends IShape {
+    }
+    export const Star: IConstructor<IStar>;
+
+    export interface IPolygon extends IShape {
+    }
+    export const Polygon: IConstructor<IPolygon>;
 }

@@ -1,8 +1,6 @@
-import OpenTypeFontInfo from "../../framework/text/font/opentypefontinfo";
-import Rect from "../../framework/text/primitives/rect";
-import Font from "../../framework/Font";
+import { Font, TextRect } from "carbon-core";
 
-export default class TestFontInfo  {
+export default class TestFontInfo {
     toFontFaceSrc() {
         return '';
     }
@@ -32,7 +30,7 @@ export default class TestFontInfo  {
     }
 
     getGlyphBoundingRect(size, glyph) {
-        return new Rect(1, 1, 1, 1);
+        return new TextRect(1, 1, 1, 1);
     }
 
     getGlyphOutline(size, x, y, char) {

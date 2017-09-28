@@ -1,5 +1,3 @@
-import CrazyScope from "framework/CrazyManager";
-import Context from "../../framework/render/Context";
 import { IContext } from "carbon-core";
 
 export default class ContextStub implements IContext {

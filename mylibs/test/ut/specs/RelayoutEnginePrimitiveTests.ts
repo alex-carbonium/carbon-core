@@ -1,6 +1,6 @@
 import TestUtil from "../TestUtil";
-import UIElement from "framework/UIElement";
-import Container from "framework/Container";
+import { Container, UIElement } from "carbon-core";
+import { assert } from "chai";
 
 describe("Relayout engine primitive tests", function () {
     beforeEach(function (done) {

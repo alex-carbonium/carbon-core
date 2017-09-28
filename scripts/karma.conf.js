@@ -1,56 +1,68 @@
 var path = require("path");
 var fs = require("fs");
 var webpack = require("webpack");
-var webpackConfig = require('./make-core-config')({
-    devServer: false,
-    host: "",
-    //devtool: "#inline-source-map"
-    devtool: "eval",
-    mapImpl: true
-});
 
-var testfolder = path.join(path.dirname(fs.realpathSync(__filename)), '..');
+var testfolder = path.join(path.dirname(fs.realpathSync(__filename)), "..");
 process.chdir(testfolder);
 
-webpackConfig.entry = {};
-webpackConfig.output.library = "test";
-delete webpackConfig.output.libraryTarget;
-
-for (var i = 0; i < webpackConfig.plugins.length; i++){
-    var plugin = webpackConfig.plugins[i];
-    if (plugin instanceof webpack.optimize.CommonsChunkPlugin){
-        webpackConfig.plugins.splice(i, 1);
-        --i;
+function resolveCodeModule(root, dir, moduleFileName){
+    var fullDir = path.join(root, dir);
+    var files = fs.readdirSync(fullDir);
+    var modules = files.filter(x => x.startsWith(moduleFileName) && x.endsWith(".js"));
+    if (modules.length === 0){
+        throw new Error("No core modules found: " + dir);
     }
+    if (modules.length > 1){
+        throw new Error("Multiple core modules found, clean and download again.\r\n" + modules.join("\r\n"));
+    }
+    return path.join(fullDir, modules[0]);
 }
 
-module.exports = function(config){
+module.exports = function (config) {
+    var webpackConfig = require("./make-test-config")({
+        coreLoader: config.coreLoader
+    });
+
+    var files = ["../node_modules/babel-polyfill/dist/polyfill.js"];
+    if (config.coreLoader === "url") {
+        files.push(
+            "../mylibs/test/ut/TestCoreLoader.js",
+            "http://localhost:8090/target/carbon-api.js",
+            "http://localhost:8090/target/carbon-core.js"
+        );
+    }
+    else if (config.coreLoader === "target") {
+        files.push(
+            "../mylibs/test/ut/TestCoreLoader.js",
+            resolveCodeModule(testfolder, "target", "carbon-api"),
+            resolveCodeModule(testfolder, "target", "carbon-core")
+        );
+    }
+
+    files.push("../mylibs/test/ut/TestBootloader.js");
+
     config.set({
         // base path that will be used to resolve all patterns (eg. files, exclude)
-        basePath: '../mylibs',
+        basePath: "../mylibs",
         // frameworks to use
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-        frameworks: ['mocha', /*'chai-as-promised',*/ 'chai'],
+        frameworks: ["mocha", /*"chai-as-promised",*/ "chai"],
         // list of files / patterns to load in the browser
-        files: [
-            '../node_modules/babel-polyfill/dist/polyfill.js',
-            '../mylibs/test/ut/TestBootloader.js'
-            // {pattern: 'fonts/**/*', included: false}
-        ],
+        files: files,
         // proxies: {
-        //     '/fonts/': '/base/fonts/'
+        //     "/fonts/": "/base/fonts/"
         // },
         // list of files to exclude
         exclude: [],
         // preprocess matching files before serving them to the browser
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
         preprocessors: {
-            '../mylibs/test/ut/TestBootloader.js': ['webpack', 'sourcemap']
+            "../mylibs/test/ut/TestBootloader.js": ["webpack", "sourcemap"]
         },
         // test results reporter to use
-        // possible values: 'dots', 'progress'
+        // possible values: "dots", "progress"
         // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-        reporters: ['progress'],
+        reporters: ["progress"],
         // web server port
         port: 9876,
         // enable / disable colors in the output (reporters and logs)
@@ -62,7 +74,7 @@ module.exports = function(config){
         autoWatch: true,
         // start these browsers
         // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-        browsers: ['Chrome_DevTools_Saved_Prefs'],
+        browsers: ["Chrome_DevTools_Saved_Prefs"],
         // Continuous Integration mode
         // if true, Karma captures browsers, runs the tests and exits
         singleRun: false,
@@ -73,21 +85,21 @@ module.exports = function(config){
 
         customLaunchers: {
             Chrome_DevTools_Saved_Prefs: {
-                base: 'Chrome',
-                flags: ['--enable-logging --v=1 --user-data-dir=' + path.join(require('os').homedir(), 'carbon-chrome')]
+                base: "Chrome",
+                flags: ["--enable-logging --v=1 --user-data-dir=" + path.join(require("os").homedir(), "carbon-chrome")]
             },
             PhantomJS_Debug: {
-                base: 'PhantomJS',
+                base: "PhantomJS",
                 debug: true
             }
         },
 
         client: {
             mocha: {
-                timeout : 30 * 60 * 1000
+                timeout: 30 * 60 * 1000
             }
         },
 
-        trxReporter: { outputFile: 'core-tests.trx', shortTestName: false }
+        trxReporter: { outputFile: "core-tests.trx", shortTestName: false }
     })
 };

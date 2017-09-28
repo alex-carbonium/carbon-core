@@ -29,6 +29,7 @@ if (ext) {
 export default {
     "jquery": require("jquery/jquery.min"),
     "app": app,
+    "AppClass": App,
     "params": params,
     "logger": logger,
     "Rect": require("./math/rect"),
@@ -61,9 +62,11 @@ export default {
     "RepeatContainer": require("./framework/repeater/RepeatContainer"),
     "RepeatCell": require("./framework/repeater/RepeatCell"),
     "Page": require("./framework/Page"),
+    "ArtboardPage": require("./ui/pages/ArtboardPage"),
     "CommandManager": require("./framework/commands/CommandManager"),
     "Brush": require("./framework/Brush"),
     "Font": require("./framework/Font"),
+    "OpenTypeFontManager": require("./OpenTypeFontManager").default,
     "Shadow": require("./framework/Shadow"),
     "Constraints": require("./framework/Constraints"),
     "NullPage": require("./framework/NullPage"),
@@ -71,6 +74,8 @@ export default {
     "Shape": require("./framework/Shape"),
     "Rectangle": require("./framework/Rectangle"),
     "Circle": require("./framework/Circle"),
+    "Polygon": require("./framework/Polygon"),
+    "Star": require("./framework/Star"),
     "UIElementDecorator": require("./framework/UIElementDecorator"),
 
     "MirroringController": require("./framework/MirroringController"),
@@ -87,8 +92,11 @@ export default {
     "Context": require("./framework/render/Context"),
     "ContextPool": require("./framework/render/ContextPool"),
     "RenderLoop": require("./framework/render/RenderLoop"),
+    "RelayoutQueue": require("./framework/relayout/RelayoutQueue"),
     "Keyboard": require("./platform/Keyboard"),
     "Platform": require("./platform/Platform"),
+    //TODO: remove
+    "BasePlatform": require("./platform/All"),
     "StyleManager": require("./framework/style/StyleManager"),
     "Selection": require("./framework/SelectionModel"),
     "QuadAndLock": require("./framework/QuadAndLock"),
@@ -127,5 +135,12 @@ export default {
     "StoryType": Defs.StoryType,
 
     "Invalidate": require("./framework/Invalidate"),
-    "NameProvider": require("./ui/NameProvider")
+    "NameProvider": require("./ui/NameProvider"),
+
+    //TODO: replace with math/rect
+    "TextRect": require("./framework/text/primitives/rect"),
+
+    //TODO: move to UI
+    "RepeaterActions": require("./framework/repeater/RepeaterActions").RepeaterActions,
+    "SymbolActions": require("./extensions/SymbolActions")
 };

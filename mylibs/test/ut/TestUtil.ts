@@ -1,21 +1,7 @@
-import * as params from "../../params";
-import * as globals from "../../../globalRequire";
-import {Artboard, app, CoreIntl, backend, SelectFrame, SelectComposite, Container, UIElement} from "carbon-core";
+import {app, Artboard, Layer, Context, Environment, logger, RelayoutQueue, ArtboardPage, AppClass, CoreIntl, backend, SelectFrame, SelectComposite, Container, UIElement, DesignerView, DesignerController} from "carbon-core";
 
 import TestPlatform from "./TestPlatform";
 import TestFontManager from "./TestFontManager";
-
-import NullContainer from "../../framework/NullContainer";
-import AppClass from "app";
-import ArtboardPage from "ui/pages/ArtboardPage";
-import OfflineModel from "offline/OfflineModel";
-import RelayoutQueue from "framework/relayout/RelayoutQueue";
-import DesignerView from "framework/DesignerView";
-import DesignerController from "framework/DesignerController";
-import Layer from "framework/Layer";
-import Context from "framework/render/Context";
-import Environment from "environment";
-import logger from "logger";
 
 var defaults = {
     offlineEnabled: false,
@@ -30,7 +16,7 @@ var Util: any = {};
 Util.setupApp = function(options){
     options = extend({}, defaults, options);
 
-    var app = new AppClass();
+    var app = new AppClass() as any;
     App.Current = app;
     app.id("10");
 
@@ -53,8 +39,6 @@ Util.setupApp = function(options){
         app.setActivePage(page);
         page.children[0].id("Artboard");
     }
-
-    app.offlineModel = new OfflineModel();
 
     app.reload = function(){
         var json = this.toJSON();

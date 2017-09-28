@@ -71,6 +71,7 @@ declare module "carbon-geometry" {
         new(x: number, y: number, width: number, height: number): IRect;
     }
     export const Rect: IRectConstructor & {
+        readonly Max: IRect;
         fromSize(width: number, height: number): IRect;
     };
 
@@ -105,6 +106,7 @@ declare module "carbon-geometry" {
         equals(other: IMatrix): boolean;
     }
     export const Matrix: IMatrix & {
+        create(): IMatrix;
         createTranslationMatrix(tx: number, ty: number): IMatrix;
         Identity: IMatrix;
     }
