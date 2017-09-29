@@ -892,9 +892,14 @@ class AppClass extends DataNode implements IApp {
                 isActiveArtboard = e === activeArtboard;
             }
 
-            if (count && count === max && !isArtboard) {
-                // if we already marked all selected elements, the rest goes to 1<<2 layer.
-                e.runtimeProps.ctxl = 1 << 2;
+            if (count && count === max) {
+                if (isArtboard) {
+                    e.runtimeProps.ctxl = 1 << 0;
+                }
+                else {
+                    // if we already marked all selected elements, the rest goes to 1<<2 layer.
+                    e.runtimeProps.ctxl = 1 << 2;
+                }
                 return;
             }
 
@@ -911,9 +916,9 @@ class AppClass extends DataNode implements IApp {
                 }
 
                 return true;
-            } else {
-                e.runtimeProps.ctxl = 1 << 0;
             }
+
+            e.runtimeProps.ctxl = 1 << 0;
         })
 
         if(count !== max) {
