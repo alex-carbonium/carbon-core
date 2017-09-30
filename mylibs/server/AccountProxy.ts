@@ -4,6 +4,9 @@ var proxy = {
     overview(){
         return backend.get(backend.servicesEndpoint + "/api/account/overview");
     },
+    recentProjects() {
+        return backend.get(backend.servicesEndpoint + "/api/account/recentProjects");
+    },
     updateAccountInfo(model){
         return backend.post(backend.servicesEndpoint + "/api/account/info", { model });
     },
