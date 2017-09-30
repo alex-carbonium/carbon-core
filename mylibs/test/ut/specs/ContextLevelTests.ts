@@ -1,6 +1,6 @@
 import TestUtil, { createArtboard, createElement } from "../TestUtil";
 import { assert } from "chai";
-import { IApp, IUIElement, UIElement, Selection, Artboard } from "carbon-core";
+import { IApp, IUIElement, UIElement, Selection, Artboard, ArtboardPage, IArtboardPage } from "carbon-core";
 
 describe("Context level tests", function () {
     let app: IApp = null;
@@ -164,6 +164,25 @@ describe("Context level tests", function () {
 
         // assert
         assert.deepEqual(mapLevels([artboard1, artboard2, artboard3, element1, element2]), [1, 2, 1, 4, 4]);
+    });
+
+    it("Must also work when selected elements are lower than artboard", function () {
+        // arrange
+        let artboard1 = app.activePage.getActiveArtboard();
+        let artboard2 = createArtboard("artboard2");
+
+        let element1 = createElement("element1");
+        let element2 = createElement("element2");
+        app.activePage.insert(element1, 0);
+        app.activePage.add(artboard2);
+        app.activePage.add(element2, 0);
+
+        // act
+        (app.activePage as IArtboardPage).setActiveArtboard(null)
+        Selection.makeSelection([element1]);
+
+        // assert
+        assert.deepEqual(mapLevels([element1, artboard1, artboard2, element2]), [2, 1, 1, 4]);
     });
 
     function mapLevels(elements: IUIElement[]) {
