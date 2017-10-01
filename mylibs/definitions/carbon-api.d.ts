@@ -33,6 +33,9 @@ declare module "carbon-api" {
         logout(): Promise<void>;
 
         getUserId(): string;
+        getUserName(): string;
+        getUserAvatar(): string;
+        getCompanyName() : string;
         getAuthorizationHeaders(): any;
 
         renewTokenCallback();

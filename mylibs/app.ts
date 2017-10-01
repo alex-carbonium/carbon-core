@@ -1224,6 +1224,9 @@ class AppClass extends DataNode implements IApp {
         this.clear();
         this.detachExtensions();
 
+        this.props = PropertyMetadata.getDefaultProps(this.t) as IAppProps;
+        this.resetRuntimeProps();
+
         this.isLoaded = false;
 
         this.state.isDirty(false);
