@@ -1,7 +1,6 @@
 import TestUtil, { createArtboard, createElement } from "../TestUtil";
 import { assert } from "chai";
-import Selection from "../../../framework/SelectionModel";
-import { IApp, IUIElement, UIElement, workspace } from "carbon-core";
+import { IApp, IUIElement, UIElement, workspace, Selection } from "carbon-core";
 
 describe("Selection tests", function () {
     let app: IApp = null;

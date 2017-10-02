@@ -277,6 +277,9 @@ class Backend implements IBackend {
             { credentials: DEBUG ? "include" : "same-origin" })
             .then(data => {
                 this.setUserId(data.userId);
+                this.setUserName(data.userName);
+                this.setUserAvatar(data.avatar);
+                this.setCompanyName(data.companyName);
                 this.setIsGuest(isGuest);
                 return <Response<ILoginModel, ILoginResult>>{
                     ok: true,
@@ -301,6 +304,18 @@ class Backend implements IBackend {
     }
     getUserId() {
         return localStorage.getItem("userId");
+    }
+    getUserName() {
+        return localStorage.getItem("userName");
+    }
+    getUserAvatar() {
+        var avatar = localStorage.getItem("userAvatar");
+        if(avatar === "null") {
+            return undefined;
+        }
+    }
+    getCompanyName() {
+        return localStorage.getItem("companyName");
     }
     isGuest() {
         return localStorage.getItem("isGuest") === "1";
@@ -335,8 +350,17 @@ class Backend implements IBackend {
     setUserId(userId) {
         localStorage.setItem("userId", userId);
     }
+    setUserName(userName) {
+        localStorage.setItem("userName", userName||undefined);
+    }
+    setUserAvatar(userAvatar) {
+        localStorage.setItem("userAvatar", userAvatar||undefined);
+    }
     setIsGuest(value) {
         localStorage.setItem("isGuest", value ? "1" : "0");
+    }
+    setCompanyName(value) {
+        localStorage.setItem("companyName", value);
     }
     decorateUrl(url) {
         var accessToken = this.getAccessToken();

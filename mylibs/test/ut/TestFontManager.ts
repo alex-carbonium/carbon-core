@@ -1,6 +1,5 @@
-import FontManager from "../../framework/text/font/fontmanager";
 import TestFontInfo from "./TestFontInfo";
-import OpenTypeFontManager from "../../OpenTypeFontManager";
+import { OpenTypeFontManager } from "carbon-core";
 
 export default class TestFontManager extends OpenTypeFontManager {
     constructor(app){

@@ -272,6 +272,8 @@ export default class DesignerController implements IController {
 
         this.raiseInteractionStopped(InteractionType.Dragging, event);
         this._draggingElement.detach();
+        this._draggingElement.dispose();
+        this._draggingElement = null;
     }
 
     isDragging() {
@@ -498,7 +500,6 @@ export default class DesignerController implements IController {
 
         if (this._draggingElement !== null) {
             this.stopDrag(eventData);
-            this._draggingElement = null;
             return;
         }
     }

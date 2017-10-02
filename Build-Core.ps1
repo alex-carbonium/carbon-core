@@ -56,11 +56,6 @@ try
     if (-not $Debug)
     {
         npm install --loglevel=error
-        npm test
-        if ($LASTEXITCODE)
-        {
-            throw "Tests failed with exit code $LASTEXITCODE"
-        }
     }
 
     $params = @("run", "packCore", "--", "--noColors")
@@ -72,6 +67,15 @@ try
     if ($LASTEXITCODE)
     {
         throw "Packaging failed with exit code $LASTEXITCODE"
+    }
+
+    if (-not $Debug)
+    {
+        npm test -- --singleRun --coreLoader target
+        if ($LASTEXITCODE)
+        {
+            throw "Tests failed with exit code $LASTEXITCODE"
+        }
     }
 
     Copy-Item .\mylibs\definitions\carbon-*.d.ts .\target

@@ -1,22 +1,10 @@
-import UIElement from "framework/UIElement";
-import Text from "framework/text/Text";
 import TestUtil from "../TestUtil";
-import Artboard from "framework/Artboard";
-import Constraints from "../../../framework/Constraints";
-import CommandManager from "../../../framework/commands/CommandManager";
-import Brush from "../../../framework/Brush";
-import Font from "../../../framework/Font";
-import GroupContainer from "../../../framework/GroupContainer";
-import Context from "../../../framework/render/Context";
-import Selection from "../../../framework/SelectionModel";
-import SymbolActions from "../../../extensions/SymbolActions";
-import Rect from "../../../math/rect";
-import Point from "../../../math/point";
-import Matrix from "../../../math/matrix";
-import Symbol from "framework/Symbol";
-import Environment from "environment";
 import { assert } from "chai";
 import ContextStub from "../ContextStub";
+import {
+    Artboard, Matrix, Brush, Rect, Point, Symbol, UIElement, Constraints, Selection,
+    SymbolActions, CommandManager, GroupContainer
+} from "carbon-core";
 
 describe("Symbol tests", function () {
     beforeEach(function (done) {

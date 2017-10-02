@@ -33,6 +33,9 @@ declare module "carbon-api" {
         logout(): Promise<void>;
 
         getUserId(): string;
+        getUserName(): string;
+        getUserAvatar(): string;
+        getCompanyName() : string;
         getAuthorizationHeaders(): any;
 
         renewTokenCallback();
@@ -76,6 +79,7 @@ declare module "carbon-api" {
 
     export interface IDashboardProxy {
         dashboard(companyId: string): Promise<any>;
+        deleteProject(companyId:string, projectId:string): Promise<any>;
     }
 
     export type UserImage = {
@@ -145,8 +149,17 @@ declare module "carbon-api" {
         newPassword: string;
     }
 
+    export interface IRecentProject
+    {
+        projectId:string;
+        projectName:string;
+        companyId:string;
+        companyName:string;
+    }
+
     export interface IAccountProxy {
         overview(): Promise<IAccountOverview>;
+        recentProjects(): Promise<{projects:IRecentProject[]}>;
 
         updateAccountInfo(info: IAccountInfo): ResponsePromise<IAccountInfo, void>;
         addPassword(model: IAddPasswordModel): ResponsePromise<IAddPasswordModel, void>;

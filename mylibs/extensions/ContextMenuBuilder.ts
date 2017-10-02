@@ -2,11 +2,12 @@ import RepeatContainer from "framework/repeater/RepeatContainer";
 import Selection from "framework/SelectionModel";
 import GroupContainer from "framework/GroupContainer";
 import Symbol from "../framework/Symbol";
+import Artboard from "../framework/Artboard";
 import CompoundPath from "framework/CompoundPath";
 import Environment from "environment";
 import Path from "framework/Path";
 import CoreIntl from "../CoreIntl";
-import { ContextBarPosition, IActionManager, IView, IApp, ElementState } from "carbon-core";
+import { ContextBarPosition, IActionManager, IView, IApp, ElementState, IComposite } from "carbon-core";
 import InteractiveContainer from "../framework/InteractiveContainer";
 import { RepeaterActions } from "../framework/repeater/RepeaterActions";
 
@@ -67,9 +68,9 @@ function canConvertToPath(selection) {
 
 export default class ContextMenuBuilder {
     static build(app: IApp, context, menu) {
-        let selectComposite = context.selectComposite
-        let selection = selectComposite.elements
-        let actionManager = app.actionManager
+        let selectComposite = context.selectComposite as IComposite;
+        let selection = selectComposite.elements;
+        let actionManager = app.actionManager;
 
         if (selection && selection.length && !selection[0].contextBarAllowed()) {
             return
@@ -319,25 +320,25 @@ export default class ContextMenuBuilder {
                     name: "@bring.to.front",
                     icon: "ico-small-send-to-foreground",
                     actionId: "bringToFront",
-                    disabled: !selection || !selection.length
+                    disabled: !selection.length || selection.some(x => x instanceof Artboard)
                 },
                 {
                     name: "@send.to.back",
                     icon: "ico-small-send-to-background",
                     actionId: "sendToBack",
-                    disabled: !selection || !selection.length
+                    disabled: !selection.length || selection.some(x => x instanceof Artboard)
                 },
                 {
                     name: "@bring.forward",
                     icon: "ico-small-move-upper",
                     actionId: "bringForward",
-                    disabled: !selection || !selection.length
+                    disabled: !selection.length || selection.some(x => x instanceof Artboard)
                 },
                 {
                     name: "@send.backward",
                     icon: "ico-small-move-lower",
                     actionId: "sendBackward",
-                    disabled: !selection || !selection.length
+                    disabled: !selection.length || selection.some(x => x instanceof Artboard)
                 }
             ]
         })
