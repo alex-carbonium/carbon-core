@@ -12,7 +12,7 @@ import Selection from "framework/SelectionModel";
 import Point from "../../../math/point";
 import Rect from "../../../math/rect";
 import {assert} from "chai";
-import { TextMode } from "carbon-core";
+import { TextMode, ChangeMode } from "carbon-core";
 import Brush from "../../../framework/Brush";
 import { RepeaterActions } from "../../../framework/repeater/RepeaterActions";
 import Environment from "../../../environment";
@@ -926,6 +926,86 @@ describe("Repeater tests", function(){
             //assert
             var counts = this.mapChildren(repeater, x => x.name());
             assert.deepEqual(counts, ["element2", "element1", "element2", "element1"]);
+        });
+        it("Should have symmetric arrange (increase size)", function(){
+            //arrange
+            var element = new UIElement();
+            element.setProps({
+                id: "element",
+                br: new Rect(0, 0, 100, 100)
+            });
+
+            this.app.activePage.add(element);
+            var repeater = this.makeRepeater([element]);
+            repeater.cols(2);
+            repeater.rows(2);
+            this.app.relayout();
+
+            var savepoint = this.app.createSavePoint();
+
+            var oldBr = repeater.boundaryRect();
+            var newBr = new Rect(0, 0, 400, 400)
+
+            //resize manually
+            repeater.prepareAndSetProps({br: newBr}, ChangeMode.Self);
+            repeater.performArrange({oldRect: oldBr}, ChangeMode.Self);
+
+            //rollback state for recording
+            repeater.prepareAndSetProps({br: oldBr}, ChangeMode.Self);
+            repeater.performArrange({oldRect: newBr}, ChangeMode.Self);
+
+            //resize again and record
+            repeater.prepareAndSetProps({br: newBr}, ChangeMode.Model);
+            repeater.performArrange({oldRect: oldBr}, ChangeMode.Model);
+
+            this.app.relayout();
+
+            //act
+            this.app.replayFromSavePoint(savepoint);
+
+            //assert
+            repeater = this.app.activePage.getElementById(repeater.id());
+            assert.deepEqual(repeater.children.length, 16);
+        });
+        it("Should have symmetric arrange (decrease size)", function(){
+            //arrange
+            var element = new UIElement();
+            element.setProps({
+                id: "element",
+                br: new Rect(0, 0, 100, 100)
+            });
+
+            this.app.activePage.add(element);
+            var repeater = this.makeRepeater([element]);
+            repeater.cols(4);
+            repeater.rows(4);
+            this.app.relayout();
+
+            var savepoint = this.app.createSavePoint();
+
+            var oldBr = repeater.boundaryRect();
+            var newBr = new Rect(0, 0, 200, 200)
+
+            //resize manually
+            repeater.prepareAndSetProps({br: newBr}, ChangeMode.Self);
+            repeater.performArrange({oldRect: oldBr}, ChangeMode.Self);
+
+            //rollback state for recording
+            repeater.prepareAndSetProps({br: oldBr}, ChangeMode.Self);
+            repeater.performArrange({oldRect: newBr}, ChangeMode.Self);
+
+            //resize again and record
+            repeater.prepareAndSetProps({br: newBr}, ChangeMode.Model);
+            repeater.performArrange({oldRect: oldBr}, ChangeMode.Model);
+
+            this.app.relayout();
+
+            //act
+            this.app.replayFromSavePoint(savepoint);
+
+            //assert
+            repeater = this.app.activePage.getElementById(repeater.id());
+            assert.deepEqual(repeater.children.length, 4);
         });
     });
 

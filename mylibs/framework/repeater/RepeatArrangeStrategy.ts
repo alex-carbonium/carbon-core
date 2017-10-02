@@ -6,7 +6,7 @@ import { IContainer, ChangeMode } from "carbon-core";
 var debug = require("DebugUtil")("carb:repeatArrangeStrategy");
 
 var Strategy = {
-    arrange: function (container: any, e, changeMode) {
+    arrange: function (container: any, e, changeMode: ChangeMode) {
         var items = container.children;
         if (!items.length) {
             return;
@@ -52,21 +52,32 @@ var Strategy = {
 
         if (rowDiff > 0) {
             for (let i = rowSize - 1; i < items.length; i += rowSize) {
-                var item = items[i];
-                for (var j = 0; j < rowDiff; ++j) {
-                    let slave: any = items[0].clone();
+                for (let j = 0; j < rowDiff; ++j) {
+                    let item = items[i + j];
+                    let slave = item.clone();
                     slave.setProps({
                         pos: [item.props.pos[0], item.props.pos[1] + 1]
                     }, changeMode);
-                    container.insert(slave, i + 1, changeMode);
+                    slave.id(container.id() + "_" + slave.props.pos[0] + "_" + slave.props.pos[1]);
+                    container.insert(slave, i + j + 1, changeMode);
                 }
                 i += rowDiff;
             }
         }
 
-        var total = cols * rows;
+        let total = cols * rows;
         while (items.length < total) {
+            let last = items[items.length - 1];
+            let i = last.props.pos[0];
+            let j = last.props.pos[1] + 1;
+            if (j >= cols) {
+                i += 1;
+                j = 0;
+            }
+
             let slave = items[0].clone();
+            slave.id(container.id() + "_" + i + "_" + j);
+            slave.setProps({pos: [i, j]});
             container.insert(slave, items.length, changeMode);
         }
     },

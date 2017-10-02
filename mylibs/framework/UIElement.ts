@@ -191,8 +191,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             m
         };
     }
-    saveOrResetLayoutProps(mode): boolean {
-        //this happens only for clones, so no need to clear origLayout
+    saveOrResetLayoutProps(mode: ChangeMode): boolean {
         if (!this.runtimeProps.origLayout) {
             this.runtimeProps.origLayout = this.selectLayoutProps();
             return true;
