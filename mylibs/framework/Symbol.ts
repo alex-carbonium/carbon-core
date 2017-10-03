@@ -129,7 +129,13 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     }
 
     mirrorClone() {
+        if (this._cloning) {
+            throw new Error("Can't clone, chain contains recursive references");
+        }
+        this._cloning = true;
         var clone = UIElement.prototype.mirrorClone.apply(this, arguments);
+
+        delete this._cloning;
         return clone;
     }
 
