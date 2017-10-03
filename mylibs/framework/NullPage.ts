@@ -2,14 +2,14 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import { Types } from "./Defs";
 import Rect from "../math/rect";
 import UIElement from "./UIElement";
-import { IUIElement, IContainerProps, IDataNode, IArtboard, IPage, IRect, IPoint, LayerTypes } from "carbon-core";
+import { IUIElement, IContainerProps, IDataNode, IArtboard, IPage, IRect, IPoint, LayerType } from "carbon-core";
 
 class NullPage extends UIElement implements IPage {
     t: string;
     props: IContainerProps;
     children: any[];
     nameProvider: any;
-    type: LayerTypes = LayerTypes.Content;
+    type: LayerType = LayerType.Content;
     isActive: boolean = false;
     app = null;
 

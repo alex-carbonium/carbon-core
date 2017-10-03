@@ -1,12 +1,12 @@
 import CrazyScope from "../CrazyManager";
 import Point from "../../math/point";
-import { IContext } from "carbon-core";
+import { IContext, LayerType, ContextType } from "carbon-core";
 import Matrix from "math/matrix";
 
 export default class Context implements IContext {
     [name: string]: any;
 
-    constructor(canvas?) {
+    constructor(public type: ContextType, canvas?) {
         if (!canvas) {
             canvas = document.createElement("canvas");
         }

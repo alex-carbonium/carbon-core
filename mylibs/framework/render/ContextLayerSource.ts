@@ -1,5 +1,5 @@
 import ContextPool from "./ContextPool";
-import { IContext, IPooledObject } from "carbon-core";
+import { IContext, IPooledObject, ContextType } from "carbon-core";
 import Selection from "framework/SelectionModel";
 import Context from "./Context";
 import Invalidate from "framework/Invalidate";
@@ -26,9 +26,14 @@ let objectPool = new ObjectPool(()=>{
 }, 10);
 
 export default class ContextLayerSource extends Context {
+    contentContextCount: number;
+
     private _relativeClippingStack: any[];
+
     constructor(private contexts: IContext[]) {
-        super();
+        super(ContextType.Content);
+
+        this.contentContextCount = contexts.filter(x => x.type === ContextType.Content).length;
 
         this._contexts = contexts;
         this._context = contexts[0];
@@ -78,7 +83,7 @@ export default class ContextLayerSource extends Context {
         var ctxl = element.runtimeProps.ctxl;
         if (ctxl !== undefined) {
             this.contextsStack.push(this._context);
-            for (var i = 0; i < 3; ++i) {
+            for (var i = 0; i < this.contentContextCount; ++i) {
                 if (1 << i === ctxl) {
                     this._context = this._contexts[i];
                     break;

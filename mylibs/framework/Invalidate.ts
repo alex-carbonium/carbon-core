@@ -1,12 +1,12 @@
 import EventHelper from "framework/EventHelper";
 import { IEvent2, IRect, IInvalidate } from "carbon-core";
-import { LayerTypes } from "carbon-app";
+import { LayerType } from "carbon-app";
 
 class Invalidate implements IInvalidate{
-    requested:IEvent2<LayerTypes, number>;
+    requested:IEvent2<LayerType, number>;
 
     constructor(){
-        this.requested = EventHelper.createEvent2<LayerTypes, number>();
+        this.requested = EventHelper.createEvent2<LayerType, number>();
     }
 
     request(layer?, mask?){
@@ -14,7 +14,7 @@ class Invalidate implements IInvalidate{
     }
 
     requestInteractionOnly(){
-        this.requested.raise(LayerTypes.Interaction, null);
+        this.requested.raise(LayerType.Interaction, null);
     }
 }
 

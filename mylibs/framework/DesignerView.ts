@@ -7,16 +7,16 @@ import Cursor from "framework/Cursor";
 import Invalidate from "framework/Invalidate";
 import PixelGrid from "framework/render/PixelGrid"
 import { IsolationLayer } from "framework/IsolationLayer";
-import { LayerTypes } from "carbon-app";
-import { IContext } from "carbon-core";
+import { LayerType } from "carbon-app";
+import { IContext, ContextType } from "carbon-core";
 
 function setupLayers(Layer) {
     this.interactionLayer = new Layer();
-    this.interactionLayer.type = LayerTypes.Interaction;
+    this.interactionLayer.type = LayerType.Interaction;
     this.interactionLayer.hitTransparent(true);
 
     this.isolationLayer = new IsolationLayer();
-    this.isolationLayer.type = LayerTypes.Isolation;
+    this.isolationLayer.type = LayerType.Isolation;
     this.isolationLayer.hitTransparent(true);
     this.isolationLayer.context = this.isolationContext;
 
@@ -46,10 +46,10 @@ class DesignerView extends ViewBase {
         setupLayers.call(this, deps.Layer);
     }
 
-    attachToDOM(contexts:IContext[], upperContext:IContext, isolationContext:IContext,viewContainerElement, requestRedrawCallback, cancelRedrawCallback, renderingScheduledCallback) {
+    attachToDOM(contexts: IContext[], viewContainerElement, requestRedrawCallback, cancelRedrawCallback, renderingScheduledCallback) {
         this.viewContainerElement = viewContainerElement; // parent div element
-        this.upperContext = upperContext;
-        this.isolationContext = isolationContext;
+        this.upperContext = contexts.find(x => x.type === ContextType.Interaction);
+        this.isolationContext = contexts.find(x => x.type === ContextType.Isolation);
 
         this.setupRendering(contexts, requestRedrawCallback, cancelRedrawCallback, renderingScheduledCallback);
 
@@ -95,7 +95,7 @@ class DesignerView extends ViewBase {
         this.invalidate();
     }
 
-    prototyping(value) {
+    prototyping(value?) {
         if (value !== undefined) {
             this._prototyping = value;
         }

@@ -15,7 +15,7 @@ import UserSettings from "../../UserSettings";
 import RulerGuides from "./RulerGuides";
 import { IArtboardProps, IApp, IView, IController, ILayer, IContext, IComposite, IMouseEventData, InteractionType } from "carbon-core";
 import { IArtboard, IUIElement } from "carbon-model";
-import { LayerTypes } from "carbon-app";
+import { LayerType } from "carbon-app";
 
 const config = UserSettings.ruler;
 const selectionSize = 3;
@@ -46,7 +46,7 @@ export default class RulerExtension extends RuntimeExtension {
 
     detach() {
         super.detach();
-        this.view && this.view.unregisterForLayerDraw(LayerTypes.Interaction, this);
+        this.view && this.view.unregisterForLayerDraw(LayerType.Interaction, this);
 
         if (this._rulerGuides) {
             this._rulerGuides.dispose();
@@ -64,7 +64,7 @@ export default class RulerExtension extends RuntimeExtension {
         var view = this.view;
         var controller = this.controller;
 
-        view.registerForLayerDraw(LayerTypes.Interaction, this);
+        view.registerForLayerDraw(LayerType.Interaction, this);
 
         this.registerForDispose(view.scaleChanged.bind(scale => {
             this._onScaleChange(scale);

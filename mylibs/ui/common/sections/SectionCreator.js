@@ -6,7 +6,7 @@ import NullArtboard from "../../../framework/NullArtboard";
 import Selection from "../../../framework/SelectionModel"
 import Cursor from "../../../framework/Cursor";
 import Invalidate from "../../../framework/Invalidate";
-import {LayerTypes} from "carbon-app";
+import {LayerType} from "carbon-app";
 
 var decorator = null;
 
@@ -25,7 +25,7 @@ export default class SectionCreator extends Tool {
         controller.stopResizingEvent.bind(this, this.onStopResizing);
         view.scaleChanged.bind(this, this.onScaleChanged);
         Selection.onElementSelected.bind(this, this.onSelection);
-        view.registerForLayerDraw(LayerTypes.Interaction, this);
+        view.registerForLayerDraw(LayerType.Interaction, this);
         Invalidate.request();
     }
 
@@ -37,7 +37,7 @@ export default class SectionCreator extends Tool {
         this._controller.stopResizingEvent.unbind(this, this.onStopResizing);
         this._view.scaleChanged.unbind(this, this.onScaleChanged);
         Selection.onElementSelected.unbind(this, this.onSelection);
-        this._view.unregisterForLayerDraw(LayerTypes.Interaction, this);
+        this._view.unregisterForLayerDraw(LayerType.Interaction, this);
         Invalidate.request();
         this.suckContent();
     }

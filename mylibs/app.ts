@@ -373,7 +373,7 @@ class AppClass extends DataNode implements IApp {
         DataNode.prototype.propsPatched.apply(this, arguments);
 
         if (propName === "userSettings") {
-            this._clipArtboards = this.getUserSetting("clipArtboards") || false;
+            this._clipArtboards = this.getCurrentUserSetting("clipArtboards") || false;
         }
     }
 
@@ -402,7 +402,7 @@ class AppClass extends DataNode implements IApp {
             this.setUserSetting("mirroringCode", value);
         }
 
-        return this.getUserSetting("mirroringCode")
+        return this.getCurrentUserSetting("mirroringCode")
     }
 
     _pasteArtboardFromString(s) {
@@ -752,7 +752,7 @@ class AppClass extends DataNode implements IApp {
             this.setUserSetting("snapTo", value);
             return value;
         }
-        return this.getUserSetting("snapTo") || UserSettings.snapTo;
+        return this.getCurrentUserSetting("snapTo") || UserSettings.snapTo;
     }
 
     clipArtboards(value?: boolean) {
@@ -763,9 +763,12 @@ class AppClass extends DataNode implements IApp {
         return this._clipArtboards;
     }
 
-    getUserSetting(name: string) {
+    getCurrentUserSetting(name: string) {
         var userId = backend.getUserId();
+        return this.getUserSetting(userId, name);
+    }
 
+    getUserSetting(userId: string, name: string) {
         for (var i = 0; i < this.props.userSettings.length; i++) {
             var s = this.props.userSettings[i];
             if (s.id.startsWith(userId) && s.id.split(":")[1] === name) {
@@ -778,7 +781,7 @@ class AppClass extends DataNode implements IApp {
 
     setUserSetting(name: string, value: null | string | number | boolean | object) {
         var fullName = backend.getUserId() + ":" + name;
-        var oldValue = this.getUserSetting(name);
+        var oldValue = this.getCurrentUserSetting(name);
         if (value === null) {
             if (oldValue !== null) {
                 this.patchProps(PatchType.Remove, "userSettings", { id: fullName });

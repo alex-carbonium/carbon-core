@@ -122,8 +122,8 @@ declare module "carbon-app"{
 
         focused(value?: boolean): boolean;
 
-        activateLayer(layerType: LayerTypes, silent?: boolean);
-        deactivateLayer(layerType: LayerTypes, silent?: boolean);
+        activateLayer(layerType: LayerType, silent?: boolean);
+        deactivateLayer(layerType: LayerType, silent?: boolean);
 
         dropToLayer(x:number, y:number, element:IUIElement):void;
 
@@ -133,7 +133,7 @@ declare module "carbon-app"{
         zoomInStep():void;
 
         setup(params: any);
-        attachToDOM(contexts:IContext[], upperContext:IContext, isolationContext:IContext, container, redrawCallback, cancelCallback, scheduledCallback);
+        attachToDOM(contexts: IContext[], container, redrawCallback, cancelCallback, scheduledCallback);
         detach();
 
         updateViewportSize(size: ISize);

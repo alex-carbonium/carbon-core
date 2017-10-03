@@ -1,7 +1,7 @@
 import ExtensionBase from "./ExtensionBase";
 import DesignerView from "framework/DesignerView";
 import SnapController from "framework/SnapController";
-import { LayerTypes } from "carbon-app";
+import { LayerType } from "carbon-app";
 import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
 import Environment from "environment";
 import UserSettings from "UserSettings";
@@ -159,13 +159,13 @@ export default class SnapVisualization extends ExtensionBase {
     attach(app, view, controller) {
         super.attach.apply(this, arguments);
         if (view instanceof DesignerView) {
-            view.registerForLayerDraw(LayerTypes.Interaction, this);
+            view.registerForLayerDraw(LayerType.Interaction, this);
         }
     }
 
     detach() {
         super.detach.apply(this, arguments);
-        this.view.unregisterForLayerDraw(LayerTypes.Interaction, this);
+        this.view.unregisterForLayerDraw(LayerType.Interaction, this);
     }
 
     onLayerDraw(layer, context, environment) {

@@ -6,7 +6,7 @@ import Cursor from "framework/Cursor";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import ModelStateListener from "../relayout/ModelStateListener";
-import { LayerTypes } from "carbon-app";
+import { LayerType } from "carbon-app";
 import Rect from "../../math/rect";
 import UserSettings from "../../UserSettings";
 
@@ -33,7 +33,7 @@ export default {
         this.createVisualizations();
 
         var view = Environment.view;
-        view.registerForLayerDraw(LayerTypes.Interaction, this, 0);
+        view.registerForLayerDraw(LayerType.Interaction, this, 0);
         this._dragController.bindToController(Environment.controller);
     },
     detach: function(container){
@@ -45,7 +45,7 @@ export default {
         this._activeMargin = null;
 
         var view = Environment.view;
-        view.unregisterForLayerDraw(LayerTypes.Interaction, this);
+        view.unregisterForLayerDraw(LayerType.Interaction, this);
         if (this._dragController){
             this._dragController.unbind();
             this._dragController = null;

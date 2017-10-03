@@ -2,7 +2,17 @@ import { IMatrix } from "carbon-geometry";
 import { IView } from "carbon-core";
 
 declare module "carbon-rendering" {
+    export const enum ContextType {
+        Content,
+        Isolation,
+        Interaction,
+        Grid,
+        Cache
+    }
+
     export interface IContext {
+        type: ContextType;
+
         width: number;
         height: number;
         canvas: HTMLCanvasElement;
@@ -52,7 +62,7 @@ declare module "carbon-rendering" {
     }
 
     interface IContextConstructor {
-        new(canvas: HTMLCanvasElement): IContext;
+        new(type: ContextType, canvas: HTMLCanvasElement): IContext;
     }
 
     export const Context: IContextConstructor;

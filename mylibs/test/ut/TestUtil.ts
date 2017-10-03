@@ -1,4 +1,4 @@
-import {app, Artboard, Layer, Context, Environment, logger, RelayoutQueue, ArtboardPage, AppClass, CoreIntl, backend, SelectFrame, SelectComposite, Container, UIElement, DesignerView, DesignerController} from "carbon-core";
+import { app, Artboard, Layer, Context, Environment, logger, RelayoutQueue, ArtboardPage, AppClass, CoreIntl, backend, SelectFrame, SelectComposite, Container, UIElement, DesignerView, DesignerController, ContextType } from "carbon-core";
 
 import TestPlatform from "./TestPlatform";
 import TestFontManager from "./TestFontManager";
@@ -25,10 +25,13 @@ Util.setupApp = function(options){
     app.fontManager.registerAsDefault();
 
     var c = document.createElement("canvas");
+    var mainContext = new Context(ContextType.Content, c);
+    var interactionContext = new Context(ContextType.Interaction, c);
+    var isolationContext = new Context(ContextType.Isolation, c);
 
     var view: any = new DesignerView(app);
     view.setup({Layer, SelectComposite, SelectFrame});
-    view.attachToDOM([new Context(c)], new Context(c), c, x => {}, x => {}, x=> {});
+    view.attachToDOM([mainContext, isolationContext, interactionContext], x => {}, x => {}, x=> {});
     var controller = new DesignerController(app, view);
     Environment.set(view, controller);
 

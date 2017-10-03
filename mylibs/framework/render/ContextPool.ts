@@ -1,6 +1,6 @@
 // @flow
 import Context from "./Context";
-import { IContextPool } from "carbon-core";
+import { IContextPool, ContextType } from "carbon-core";
 import Environment from "../../environment";
 
 var contextPool : Array<Context> = [];
@@ -16,7 +16,7 @@ class ContextPool implements IContextPool {
             height = Math.min(size.height * scale, height * scale);
         }
         if (contextPool.length === 0) {
-            let context = new Context();
+            let context = new Context(ContextType.Cache);
             context.width = width;
             context.height = height;
             context.relativeOffsetX = 0;

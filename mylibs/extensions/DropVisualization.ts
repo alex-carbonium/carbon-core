@@ -19,7 +19,7 @@ import UserSettings from "../UserSettings";
 import Point from "../math/point";
 import Matrix from "../math/matrix";
 import { FloatingPointPrecision, ArrangeStrategies } from "../framework/Defs";
-import { LayerTypes } from "carbon-app";
+import { LayerType } from "carbon-app";
 import { InteractionType, IUIElement, ChangeMode, IIsolationLayer, IMouseEventData, IController, IComposite, IContainer, TextMode } from "carbon-core";
 import BoundaryPathDecorator, { HighlightKind } from "../decorators/BoundaryPathDecorator";
 
@@ -266,11 +266,11 @@ export default class DropVisualization extends ExtensionBase {
         this._hint = new ResizeHint();
         this._hint.crazySupported(false);
 
-        view.registerForLayerDraw(LayerTypes.Interaction, this);
+        view.registerForLayerDraw(LayerType.Interaction, this);
     }
 
     detach() {
-        this.view && this.view.unregisterForLayerDraw(LayerTypes.Interaction, this);
+        this.view && this.view.unregisterForLayerDraw(LayerType.Interaction, this);
         super.detach();
     }
 
@@ -380,7 +380,7 @@ export default class DropVisualization extends ExtensionBase {
     }
 
     onSelectionFrame(rect) {
-        var isolationLayer:any = Environment.view.getLayer(LayerTypes.Isolation) as IIsolationLayer;
+        var isolationLayer:any = Environment.view.getLayer(LayerType.Isolation) as IIsolationLayer;
         if(isolationLayer.isActive) {
             this._selection = isolationLayer.getElementsInRect(rect);
         } else {

@@ -1,6 +1,6 @@
 import Layer from './Layer';
 import Context from "./render/Context";
-import { IContainer, IUIElement, IIsolationLayer, ChangeMode, IIsolatable, LayerTypes, ElementState } from "carbon-core";
+import { IContainer, IUIElement, IIsolationLayer, ChangeMode, IIsolatable, LayerType, ElementState } from "carbon-core";
 import DataNode from "./DataNode";
 import Selection from "framework/SelectionModel";
 import RelayoutEngine from "framework/relayout/RelayoutEngine";
@@ -22,7 +22,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
 
         App.Current.actionManager.subscribe("exitisolation", () => {
             var element = this.ownerElement;
-            Environment.view.deactivateLayer(LayerTypes.Isolation);
+            Environment.view.deactivateLayer(LayerType.Isolation);
             if(element) {
                 Selection.makeSelection([element]);
             }
@@ -35,7 +35,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
                 let editingPath = selection.length === 1 && selection[0] instanceof Path && selection[0].mode() === ElementState.Edit;
 
                 if (!editingPath) {
-                    Environment.view.deactivateLayer(LayerTypes.Isolation);
+                    Environment.view.deactivateLayer(LayerType.Isolation);
                 }
             }
 

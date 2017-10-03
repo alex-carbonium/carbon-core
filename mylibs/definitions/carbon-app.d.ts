@@ -134,7 +134,8 @@ declare module "carbon-app" {
         useRecentColor(color: Brush);
         recentColors(): string[];
         clipArtboards(value?: boolean): boolean;
-        getUserSetting<T>(name: string): T;
+        getCurrentUserSetting<T>(name: string): T;
+        getUserSetting<T>(userId: string, name: string): T;
         setUserSetting(name: string, value: null | string | number | boolean | object): void;
 
         assignNewName(element: IUIElement);
@@ -147,7 +148,7 @@ declare module "carbon-app" {
     }
 
     export interface ILayer<TProps extends IContainerProps = IContainerProps> extends IContainer<TProps> {
-        type: LayerTypes;
+        type: LayerType;
         isActive: boolean;
 
         activate();
@@ -264,7 +265,7 @@ declare module "carbon-app" {
         ensureVisibleRect(rect: IRect);
         scrollToCenter(): void;
 
-        getLayer(layerType: LayerTypes) : ILayer;
+        getLayer(layerType: LayerType) : ILayer;
 
         setActivePage(page: IPage);
 
@@ -448,7 +449,7 @@ declare module "carbon-app" {
         Text = 2
     }
 
-    export const enum LayerTypes{
+    export const enum LayerType {
         Content = 0,
         Isolation = 1,
         Interaction = 2
@@ -473,7 +474,7 @@ declare module "carbon-app" {
     }
 
     export interface IInvalidate {
-        requested:IEvent2<LayerTypes, number>;
+        requested:IEvent2<LayerType, number>;
         request(layer?, mask?);
         requestInteractionOnly(mask?);
     }
@@ -508,9 +509,9 @@ declare module "carbon-app" {
     }
 
     export interface IRenderLoop {
-        mount(element: HTMLElement);
+        mountDesignerView(app: IApp, element: HTMLElement);
+
         unmount();
-        attachDesignerView(app: IApp);
 
         isAttached(): boolean;
 

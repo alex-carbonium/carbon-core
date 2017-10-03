@@ -17,7 +17,7 @@ import Environment from "environment";
 import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
-import { ChangeMode, PatchType, IPrimitiveRoot, LayerTypes, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext, IContainer, WorkspaceTool, IMouseEventData } from "carbon-core";
+import { ChangeMode, PatchType, IPrimitiveRoot, LayerType, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext, IContainer, WorkspaceTool, IMouseEventData } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
 import Rect from "../math/rect";
 import CoreIntl from "../CoreIntl";
@@ -728,7 +728,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     relayoutCompleted() {
         //isolation hides original controls, which would be cloned in symbols
-        if (Environment.view.activeLayer.type !== LayerTypes.Isolation) {
+        if (Environment.view.activeLayer.type !== LayerType.Isolation) {
             this.incrementVersion();
         }
         else if (!this.runtimeProps.layerChangedToken) {
@@ -737,7 +737,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     private activeLayerChanged(layer: ILayer) {
-        if (layer.type !== LayerTypes.Isolation) {
+        if (layer.type !== LayerType.Isolation) {
             this.incrementVersion();
 
             this.runtimeProps.layerChangedToken.dispose();
