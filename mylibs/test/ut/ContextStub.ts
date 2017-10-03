@@ -1,6 +1,8 @@
-import { IContext } from "carbon-core";
+import { IContext, ContextType } from "carbon-core";
 
 export default class ContextStub implements IContext {
+    type = ContextType.Content;
+
     width: number;
     height: number;
     canvas: HTMLCanvasElement;

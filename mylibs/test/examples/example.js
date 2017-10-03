@@ -13,8 +13,7 @@ app.setProps({noConfirmOnClose: true});
 
 var viewport = document.getElementById("viewport");
 var renderLoop = new RenderLoop();
-renderLoop.mount(viewport);
-renderLoop.attachDesignerView(app);
+renderLoop.mountDesignerView(app, viewport);
 
 CoreIntl.registerTestInstance();
 

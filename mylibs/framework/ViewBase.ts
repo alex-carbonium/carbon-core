@@ -5,7 +5,7 @@ import ContextPool from "framework/render/ContextPool";
 import EventHelper from "framework/EventHelper";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
-import { LayerTypes, IView, IAnimationController, ILayer, IUIElement, ViewState, IEvent, ICoordinate, IContext, ISize, IRect, IPoint } from "carbon-core";
+import { LayerType, IView, IAnimationController, ILayer, IUIElement, ViewState, IEvent, ICoordinate, IContext, ISize, IRect, IPoint } from "carbon-core";
 import Rect from "../math/rect";
 import AnimationGroup from "./animation/AnimationGroup";
 import Context from "./render/Context";
@@ -262,6 +262,11 @@ export default class ViewBase { //TODO: implement IView
         this.app.actionManager.invoke("refreshZoom");
     }
 
+    //TODO: encapsulate or rename to something else
+    prototyping() {
+        return false;
+    }
+
     draw() {
         this.animationController.update();
 
@@ -270,7 +275,7 @@ export default class ViewBase { //TODO: implement IView
                 this.setInitialPagePlace(this._page);
             }
 
-            for (let i = 0; i < 3; ++i) {
+            for (let i = 0; i < this.context.contentContextCount; ++i) {
                 this.contexts[i].save();
                 if (this._page.layerRedrawMask === null || this._page.layerRedrawMask & (1 << i)) {
                     // console.log(`clear layer: ${1 << i}`)
@@ -286,7 +291,7 @@ export default class ViewBase { //TODO: implement IView
                 this._drawLayer(this._page, this.context, env, true);
             }
 
-            for (let i = 0; i < 3; ++i) {
+            for (let i = 0; i < this.context.contentContextCount; ++i) {
                 this.contexts[i].restore();
             }
         }
@@ -413,7 +418,7 @@ export default class ViewBase { //TODO: implement IView
         this._page = page;
         page._view = this;
         this._layers[0] = page;
-        page.type = LayerTypes.Content;
+        page.type = LayerType.Content;
         this.activateLayer(page.type);
 
         this.scale(page.scale());
@@ -427,11 +432,11 @@ export default class ViewBase { //TODO: implement IView
         return pos;
     }
 
-    getLayer(layerType: LayerTypes): ILayer {
+    getLayer(layerType: LayerType): ILayer {
         return this._layers.find(l => l.type === layerType);
     }
 
-    activateLayer(layerType: LayerTypes, silent?: boolean) {
+    activateLayer(layerType: LayerType, silent?: boolean) {
         var layer = this.getLayer(layerType);
 
         if (layer !== this.activeLayer) {
@@ -447,7 +452,7 @@ export default class ViewBase { //TODO: implement IView
         }
     }
 
-    deactivateLayer(layerType: LayerTypes, silent?: boolean) {
+    deactivateLayer(layerType: LayerType, silent?: boolean) {
         var i = this._layers.findIndex(x => x.type === layerType);
         if (i) {
             this.activateLayer(this._layers[i - 1].type, silent);

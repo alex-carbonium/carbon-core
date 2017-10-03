@@ -368,6 +368,10 @@ class NullContainer extends DataNode implements IContainer {
     contextBarAllowed() {
         return false;
     }
+
+    animate(properties, duration, options, progressCallback) {
+        return Promise.resolve();
+    }
 }
 
 export default new NullContainer();

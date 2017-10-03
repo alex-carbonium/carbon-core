@@ -36,7 +36,7 @@ import { PropertyDescriptor } from './PropertyMetadata';
 import { KeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
-import { ChangeMode, LayerTypes, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps } from "carbon-core";
+import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps } from "carbon-core";
 import ExtensionPoint from "./ExtensionPoint";
 import CoreIntl from "../CoreIntl";
 import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
@@ -69,7 +69,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             this.id(createUUID());
         }
         this.parent(NullContainer);
-        this.runtimeProps.ctxl = 2;
+        this.runtimeProps.ctxl = 1;
     }
     invalidate(layerMask?) {
         if(layerMask === undefined) {
@@ -89,7 +89,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             globalClippingBox: null,
             primitiveRoot: null,
             snapPoints: null,
-            ctxl:2
+            ctxl: 1
         }
     }
     _roundValue(value) {
@@ -1445,10 +1445,10 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     onLayerDraw(layer, context, environment) {
 
     }
-    registerForLayerDraw(layerNum: LayerTypes) {
+    registerForLayerDraw(layerNum: LayerType) {
         Environment.view.registerForLayerDraw(layerNum, this);
     }
-    unregisterForLayerDraw(layerNum: LayerTypes) {
+    unregisterForLayerDraw(layerNum: LayerType) {
         Environment.view.unregisterForLayerDraw(layerNum, this);
     }
     margin(value?: Box) {

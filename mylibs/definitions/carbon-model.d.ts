@@ -149,6 +149,8 @@ declare module "carbon-model" {
 
         activeGroup(): boolean;
         lockedGroup(): boolean;
+
+        animate(props: object, duration: number, options: object, progress: () => void): Promise<void>;
     }
 
     export const UIElement: IConstructor<IUIElement>;

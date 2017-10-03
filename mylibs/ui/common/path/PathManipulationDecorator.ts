@@ -1,6 +1,6 @@
 import Container from "framework/Container";
 import Path from "framework/Path";
-import { IIsolatable, ChangeMode, LayerTypes, ElementState, PointType, IMouseEventHandler, KeyboardState, IMouseEventData, IPathPoint, IDisposable } from "carbon-core";
+import { IIsolatable, ChangeMode, LayerType, ElementState, PointType, IMouseEventHandler, KeyboardState, IMouseEventData, IPathPoint, IDisposable } from "carbon-core";
 import UIElementDecorator from "framework/UIElementDecorator";
 import Environment from "environment";
 import Selection from "framework/SelectionModel";
@@ -180,7 +180,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
             return; // need it for isolation layer
         }
         super.attach(element);
-        Environment.view.registerForLayerDraw(LayerTypes.Interaction, this);
+        Environment.view.registerForLayerDraw(LayerType.Interaction, this);
         Environment.controller.captureMouse(this);
         SnapController.calculateSnappingPointsForPath(this.path);
         this._cancelBinding = Environment.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
@@ -214,7 +214,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
             this._cancelBinding = null;
         }
 
-        Environment.view.unregisterForLayerDraw(LayerTypes.Interaction, this);
+        Environment.view.unregisterForLayerDraw(LayerType.Interaction, this);
         Environment.controller.releaseMouse(this);
         this.path.invalidate();
         Invalidate.requestInteractionOnly();

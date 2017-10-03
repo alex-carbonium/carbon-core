@@ -5,7 +5,7 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import EventHelper from "framework/EventHelper";
 import UIElement from "./UIElement";
 import { Types } from "./Defs";
-import { IContainer, IRect, LayerTypes, IView, ILayer } from "carbon-core";
+import { IContainer, IRect, LayerType, IView, ILayer } from "carbon-core";
 
 var clearChangedAreas = function (context) {
     // var fillStyle = this.fillStyle();
@@ -59,7 +59,7 @@ var addInvalidateRect = function (newRect) {
 };
 
 class Layer extends Container implements ILayer {
-    type: LayerTypes;
+    type: LayerType;
     isActive: boolean;
 
     constructor() {

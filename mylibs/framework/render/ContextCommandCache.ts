@@ -1,6 +1,6 @@
 import CrazyScope from "../CrazyManager";
 import Point from "../../math/point";
-import { IContext } from "carbon-core";
+import { IContext, ContextType } from "carbon-core";
 
 enum EntryType {
     method = 1,
@@ -23,6 +23,8 @@ type ICacheEntry = ICacheMethodEntry | ICachePropEntry;
 
 export default class ContextCommandCache implements IContext {
     [name: string]: any;
+    type = ContextType.Cache;
+
     private _commands: ICacheEntry[];
     private _context:any;
 

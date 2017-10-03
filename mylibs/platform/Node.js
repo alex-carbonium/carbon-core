@@ -6,7 +6,7 @@ import Context from "framework/render/Context";
 var Canvas = null;
 
 function createContext(canvas) {
-    var context = new Context(canvas);;
+    var context = new Context(0, canvas);
     if (Canvas.Font) {
         addFont(context, 'CarbonIcons', '/img/fonts/Basic2/Basic2.ttf');
     }

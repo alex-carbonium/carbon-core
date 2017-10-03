@@ -9,34 +9,54 @@ import Clipboard from "../Clipboard";
 import Keyboard from "../../platform/Keyboard";
 import Context from "../render/Context";
 import ExtensionPoint from "../ExtensionPoint";
-import { IApp, IView, IRenderLoop } from "carbon-core";
+import { IApp, IView, IRenderLoop, IController, ContextType } from "carbon-core";
+import MirroringView from "../MirroringView";
+import MirroringController from "../MirroringController";
 
 
 export default class RenderLoop implements IRenderLoop {
-    private _contextScale: number;
-
-    private _contexts: Context[];
-    private _context: Context;
-    private _upperContext: Context;
-    private _gridContext: Context;
-    private _isolationContext: Context;
-
-    private _viewport: HTMLElement;
+    private _contextScale: number = 1;
+    private _contexts: Context[] = null;
+    private _viewport: HTMLElement = null;
 
     private _renderingRequestId = 0;
     private _renderingRequestContinuous = false;
 
     private _attached = false;
-    private _app: IApp;
-    private _view: IView;
+    private _app: IApp = null;
+    private _view: IView = null;
     private _scale = 0;
 
     public viewContainer: HTMLElement;
 
-    mount(viewport: HTMLElement, append = false) {
-        this.addHtml(viewport, append);
+    mountDesignerView(app: IApp, viewport: HTMLElement, append = false) {
+        let html = this.addDesignerHtml(viewport, append);
 
-        this._recalculateContextScale();
+        let view = new DesignerView(app) as any;
+
+        view.attachToDOM(this._contexts, this.viewContainer, this.redrawCallback, this.cancelRedrawCallback, this.renderingScheduledCallback);
+        view.setup({ Layer, SelectComposite, SelectFrame });
+        view.setActivePage(app.activePage);
+        view.gridContext = html.gridContext;
+
+        var controller = new DesignerController(app, view);
+
+        this.finishMounting(app, view, controller);
+    }
+
+    private finishMounting(app: IApp, view: IView, controller: IController) {
+        Environment.set(view, controller);
+        Clipboard.attach(app);
+
+        app.platform.detachEvents();
+        app.platform.attachEvents(this.viewContainer);
+        Keyboard.attach(document.body);
+
+        this._app = app;
+        this._view = view;
+        this._attached = true;
+
+        this.ensureCanvasSize();
     }
 
     unmount() {
@@ -49,38 +69,11 @@ export default class RenderLoop implements IRenderLoop {
         Clipboard.dispose();
     }
 
-    attachDesignerView(app) {
-        if (this._context && !this._attached && this.viewContainer) {
-            this._view = new DesignerView(app) as any;
-            this._view.contextScale = this._contextScale;
-
-            this.ensureCanvasSize();
-
-            app.platform.detachEvents();
-            app.platform.attachEvents(this.viewContainer);
-            Keyboard.attach(document.body);
-
-            this._view.attachToDOM(this._contexts, this._upperContext, this._isolationContext, this.viewContainer, this.redrawCallback, this.cancelRedrawCallback, this.renderingScheduledCallback);
-            this._view.setup({ Layer, SelectComposite, SelectFrame });
-            this._view.setActivePage(app.activePage);
-            this._view.gridContext = this._gridContext;
-            this._view.contextScale = this._contextScale;
-
-            var controller = new DesignerController(app, this._view);
-
-            Environment.set(this._view, controller);
-            Clipboard.attach(app);
-
-            this._app = app;
-            this._attached = true;
-        }
-    }
-
     isAttached() {
         return this._attached;
     }
 
-    private addHtml(viewport: HTMLElement, append: boolean) {
+    private addDesignerHtml(viewport: HTMLElement, append: boolean) {
         let viewContainer = document.createElement("div");
         viewContainer.id = "viewContainer";
         viewContainer.tabIndex = 1;
@@ -100,23 +93,25 @@ export default class RenderLoop implements IRenderLoop {
         this.viewContainer = viewContainer;
         this._viewport = viewport;
 
-        this._upperContext = this.addCanvas(viewport, "app_upperCanvas", append);
-        this._isolationContext = this.addCanvas(viewport, "isolation_canvas", append);
-        this._gridContext = this.addCanvas(viewport, "grid_canvas", append);
+        let upperContext = this.addCanvas(ContextType.Interaction, viewport, "app_upperCanvas", append);
+        let isolationContext = this.addCanvas(ContextType.Isolation, viewport, "isolation_canvas", append);
+        let gridContext = this.addCanvas(ContextType.Grid, viewport, "grid_canvas", append);
         this._contexts = [];
-        var c3 = this.addCanvas(viewport, "app_canvas3", append);
-        var c2 = this.addCanvas(viewport, "app_canvas2", append);
+        var c3 = this.addCanvas(ContextType.Content, viewport, "app_canvas3", append);
+        var c2 = this.addCanvas(ContextType.Content, viewport, "app_canvas2", append);
 
-        this._context = this.addCanvas(viewport, "app_canvas1", append);
-        this._contexts.push(this._context);
+        let context = this.addCanvas(ContextType.Content, viewport, "app_canvas1", append);
+        this._contexts.push(context);
         this._contexts.push(c2);
         this._contexts.push(c3);
-        this._contexts.push(this._upperContext);
-        this._contexts.push(this._isolationContext);
-        this._contexts.push(this._gridContext);
+        this._contexts.push(upperContext);
+        this._contexts.push(isolationContext);
+        this._contexts.push(gridContext);
+
+        return {context, upperContext, gridContext, isolationContext};
     }
 
-    private addCanvas(parent: HTMLElement, id: string, append: boolean) {
+    private addCanvas(type: ContextType, parent: HTMLElement, id: string, append: boolean) {
         let canvas = document.createElement("canvas");
         canvas.id = id;
         this.setAbsolutePosition(canvas);
@@ -128,7 +123,7 @@ export default class RenderLoop implements IRenderLoop {
             parent.insertBefore(canvas, parent.firstChild);
         }
 
-        return new Context(canvas);
+        return new Context(type, canvas);
     }
 
     private setAbsolutePosition(node: HTMLElement) {
@@ -179,14 +174,14 @@ export default class RenderLoop implements IRenderLoop {
         }
     }
 
-    private _recalculateContextScale() {
+    private recalculateContextScale(context) {
         var devicePixelRatio = window.devicePixelRatio || 1;
         var backingStoreRatio =
-            this._context.backingStorePixelRatio ||
-            this._context.webkitBackingStorePixelRatio ||
-            this._context.mozBackingStorePixelRatio ||
-            this._context.msBackingStorePixelRatio ||
-            this._context.oBackingStorePixelRatio ||
+            context.backingStorePixelRatio ||
+            context.webkitBackingStorePixelRatio ||
+            context.mozBackingStorePixelRatio ||
+            context.msBackingStorePixelRatio ||
+            context.oBackingStorePixelRatio ||
             1;
 
         // on some machines it is non integer, it affects rendering
@@ -198,7 +193,7 @@ export default class RenderLoop implements IRenderLoop {
     }
 
     private ensureCanvasSize() {
-        if (!this._view || !this._context || !this._attached) {
+        if (!this._view || !this._contexts || !this._attached) {
             return;
         }
         var view = this._view;
@@ -206,7 +201,7 @@ export default class RenderLoop implements IRenderLoop {
         var context = this._contexts[0];
         var canvas = context.canvas;
 
-        this._recalculateContextScale();
+        this.recalculateContextScale(context);
 
         var scale = view.scale()
             , viewWidth = viewport.clientWidth

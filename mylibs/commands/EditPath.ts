@@ -2,7 +2,7 @@ import Selection from "framework/SelectionModel";
 import Path from "framework/Path";
 import Environment from "environment";
 import { ILayer, IUIElement, IContainer, IIsolationLayer, IIsolatable } from "carbon-core";
-import { LayerTypes } from "carbon-app";
+import { LayerType } from "carbon-app";
 
 
 const EditPath = {
