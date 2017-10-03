@@ -128,6 +128,11 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         return super.displayType();
     }
 
+    mirrorClone() {
+        var clone = UIElement.prototype.mirrorClone.apply(this, arguments);
+        return clone;
+    }
+
     _cloneFromArtboard(artboard) {
         this.clear(ChangeMode.Self);
         var baseId = this.id();
