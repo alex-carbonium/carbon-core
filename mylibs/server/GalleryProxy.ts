@@ -6,6 +6,12 @@ var proxy = {
     },
     resource(id) {
         return backend.get(backend.servicesEndpoint + "/api/gallery/resource", { id });
+    },
+    trackPrivateResourceUsed(companyId: string, resourceId: string) {
+        return backend.post(backend.servicesEndpoint + "/api/gallery/trackPrivateResourceUsed", { companyId, resourceId });
+    },
+    trackPublicResourceUsed(resourceId: string) {
+        return backend.post(backend.servicesEndpoint + "/api/gallery/trackPublicResourceUsed", { resourceId });
     }
 }
 

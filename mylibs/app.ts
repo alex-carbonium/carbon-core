@@ -958,15 +958,18 @@ class AppClass extends DataNode implements IApp {
         var defaultFontLoaded = this.fontManager.loadDefaultFont();
         var dataLoaded = this.loadData();
         var importInitialResource = Promise.resolve();
-        var externalPageData;
         if (this._initializeWithResource) {
-            importInitialResource = fetch(this._initializeWithResource)
-                .then(response => response.json())
-                .then(data => externalPageData = data);
+            backend.galleryProxy.trackPublicResourceUsed(this._initializeWithResource);
+
+            importInitialResource = backend.shareProxy.getPageSetup(this._initializeWithResource)
+                .then(page => fetch(page.dataUrl))
+                .then(response => response.json());
+                //TODO: handle error for non-existing resources
         }
 
-        return Promise.all([dataLoaded, defaultFontLoaded, Environment.loaded, loggedIn, importInitialResource]).then(result => {
+        return Promise.all([dataLoaded, importInitialResource, defaultFontLoaded, Environment.loaded, loggedIn]).then(result => {
             var data = result[0];
+            var externalPageData = result[1];
             stopwatch.checkpoint("env");
 
             if (data) {
@@ -1043,8 +1046,8 @@ class AppClass extends DataNode implements IApp {
         RelayoutEngine.performAppRelayout(this);
     }
 
-    initializeWithResource(url: string) {
-        this._initializeWithResource = url;
+    initializeWithResource(resourceId: string) {
+        this._initializeWithResource = resourceId;
     }
 
     relayoutInternal() {
