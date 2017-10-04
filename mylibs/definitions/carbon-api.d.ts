@@ -214,6 +214,7 @@ declare module "carbon-api" {
         authorId: string;
         authorName: string;
         authorAvatar?: string;
+        scope: ResourceScope;
     }
     export interface IUseCodeResult {
         companyName: string;
@@ -243,7 +244,7 @@ declare module "carbon-api" {
         mirrorCode(companyId: string, projectId: string, enable: boolean): Promise<MirrorCode>;
         disableMirroring(companyId: string, projectId: string): Promise<{}>;
 
-        getPageSetup(pageId: string): Promise<ISharedPageSetup>;
+        getPageSetup(pageId: string): Promise<ISharedResource>;
         validatePageName(model: IValidatePageNameModel): ResponsePromise<IValidatePageNameModel, IValidatePageNameResult>;
         publishPage(model: IPublishPageModel): ResponsePromise<IPublishPageModel, IPublishPageResult>;
 
@@ -255,6 +256,8 @@ declare module "carbon-api" {
     export interface IGalleryProxy {
         resources(from: number, to: number, search?: string): Promise<IPaginatedResult<ISharedResource>>;
         resource(id: string): Promise<ISharedResource>;
+        trackPrivateResourceUsed(companyId: string, resourceId: string): Promise<void>;
+        trackPublicResourceUsed(resourceId: string): Promise<void>;
     }
 
     export interface IFontsProxy{

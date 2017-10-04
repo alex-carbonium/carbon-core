@@ -49,7 +49,7 @@ declare module "carbon-app" {
         setActivePageById(id: string);
         pagesWithSymbols(): IPage[];
         getAllResourceArtboards(type: ArtboardType): IArtboard[];
-        initializeWithResource(url:string);
+        initializeWithResource(resourceId: string);
 
 
         activeStory: any;
