@@ -30,7 +30,7 @@ export default class TestFontInfo {
     }
 
     getGlyphBoundingRect(size, glyph) {
-        return new TextRect(1, 1, 1, 1);
+        return new TextRect(1, 1, 10, size);
     }
 
     getGlyphOutline(size, x, y, char) {

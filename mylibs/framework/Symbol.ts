@@ -70,11 +70,13 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
                 br = br.withHeight(Math.max(currentSize.height || artboard.height(), artboard.minHeight()));
             }
 
+            this.updateCustomProperties(this.props);
+            let oldRect = this.boundaryRect();
             this.setProps({ br }, ChangeMode.Self);
-            this.performArrange({ oldRect: artboard.boundaryRect(), newRect: br }, ChangeMode.Self);
+            this.performArrange({ oldRect: oldRect, newRect: br }, ChangeMode.Self);
+        } else {
+            this.updateCustomProperties(this.props);
         }
-
-        this.updateCustomProperties(this.props);
 
         this.runtimeProps.artboardVersion = artboard.runtimeProps.version;
 
@@ -242,6 +244,33 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         if (!autoGrow) {
             this.endInternalUpdate();
         }
+
+        this._updateChildrenCustomProps(mode);
+    }
+
+    _updateChildrenCustomProps(mode) {
+        let propNames = Object.keys(this.props);
+        let changes = {};
+        let found = false;
+        for (let propName of propNames) {
+            if (propName.startsWith("custom:")) {
+                let propDef = this._getCustomPropertyDefinition(propName);
+                if ((propDef.propertyName !== 'br') && (propDef.propertyName !== 'm')) {
+                    continue;
+                }
+
+                let element = this._findElementWithCustomProperty(propDef);
+                if (element) {
+                    var value = element.props[propDef.propertyName];
+                    changes[propName] = value;
+                    found = true;
+                }
+            }
+        }
+
+        if (found) {
+            this.setProps(changes, mode);
+        }
     }
 
     _changeState(stateId) {
@@ -306,7 +335,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
                 }
 
                 if (value && element) {
-                    element.prepareAndSetProps({ [prop.propertyName]: value }, ChangeMode.Self);
+                    element.prepareAndSetProps({ [prop.propertyName]: value }, ChangeMode.Root);
                 }
             } else if (props[propName] === undefined) {
                 delete this.props[propName];
@@ -432,7 +461,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
             let children = this.children.slice();
             children.forEach(x => App.Current.activePage.nameProvider.assignNewName(x));
             this.flatten();
-            if(this.parent() !== NullContainer) {
+            if (this.parent() !== NullContainer) {
                 setTimeout(() => Selection.makeSelection(children), 1);
             }
         }
@@ -462,7 +491,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
         for (var i = 0; i < propNames.length; ++i) {
             var propName = propNames[i];
-            if (propName.startsWith("custom:")) {
+            if (propName.startsWith("custom:") || propName === 'br' || propName === 'm') {
                 continue;
             }
             var newName = element.sourceId() + ":" + propName;
@@ -612,7 +641,7 @@ PropertyMetadata.registerForType(Symbol, {
         displayName: "State",
         type: "dropdown",
         options: {
-            items: function(selection: ISelection) {
+            items: function (selection: ISelection) {
                 let symbols = selection.elements.filter(x => x instanceof Symbol) as Symbol[];
                 if (!symbols.length) {
                     return [];
@@ -640,8 +669,8 @@ PropertyMetadata.registerForType(Symbol, {
     prepareVisibility: function (element: Symbol) {
         return {
             stateId: element._artboard && element._artboard.props
-                && element._artboard.props.states
-                && element._artboard.props.states.length > 1
+            && element._artboard.props.states
+            && element._artboard.props.states.length > 1
         }
     },
     groups() {

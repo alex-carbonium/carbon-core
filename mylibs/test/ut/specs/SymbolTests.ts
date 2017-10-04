@@ -3,8 +3,9 @@ import { assert } from "chai";
 import ContextStub from "../ContextStub";
 import {
     Artboard, Matrix, Brush, Rect, Point, Symbol, UIElement, Constraints, Selection,
-    SymbolActions, CommandManager, GroupContainer
+    SymbolActions, CommandManager, GroupContainer, Text, Font
 } from "carbon-core";
+import { HorizontalConstraint, VerticalConstraint } from "carbon-basics";
 
 describe("Symbol tests", function () {
     beforeEach(function (done) {
@@ -74,7 +75,7 @@ describe("Symbol tests", function () {
         assert.equal(120, atc.children[0].height());
     });
 
-    it("Should respect child constraints after child resize", function () {
+    it("Should ignore child resize inside symbol", function () {
         // arrange
         var child = new UIElement();
         this.app.activePage.add(child)
@@ -99,7 +100,7 @@ describe("Symbol tests", function () {
         symbol.draw(new ContextStub(), this.drawContext);
 
         // assert
-        assert.equal(symbol.findClone(child.id()).width(), 80 * 1.2);
+        assert.equal(symbol.findClone(child.id()).width(), 100 * 1.2);
     });
 
     it("Must support undo for changing inner elements", function () {
@@ -320,6 +321,59 @@ describe("Symbol tests", function () {
             var clone2 = symbol.findClone(child2.id());
             assert.equal(clone1.props.fill.value, "red", "Color on clones should be the same");
             assert.equal(clone1.props.fill.value, "red", "Color on clones should be the same");
+        });
+
+        it("Symbol respects custom properties after reload", function () {
+            // arrange
+            var child1 = new UIElement();
+            var child2 = new Text();
+            child2.prepareAndSetProps({font:Font.Default, content:[{text:`text`}]});
+            this.app.activePage.add(child1);
+            this.app.activePage.add(child2);
+
+            Selection.makeSelection([child1, child2]);
+            var actions = new SymbolActions(this.app, this.drawContext);
+            var symbol = actions.createSymbolFromSelection(Selection);
+
+            var artboard = child1.parent();
+            var originalHeight = child2.height();
+            artboard.prepareAndSetProps({width: 100, height: originalHeight+2});
+            child1.prepareAndSetProps({
+                width: 100, height: 2
+            });
+            child1.applyTranslation(new Point(0, originalHeight));
+
+            child2.prepareAndSetProps({
+                width: 100
+            });
+
+            child1.constraints({h:HorizontalConstraint.LeftRight, v:VerticalConstraint.Bottom});
+            child2.constraints(Constraints.All);
+
+            symbol.prepareAndSetProps({
+                width: 100, height: originalHeight+2
+            });
+
+            this.app.relayout();
+            symbol.draw(new ContextStub(), this.drawContext);
+
+            // act
+            var clone2 = symbol.findClone(child2.id());
+            var newContent = [{text:`fasdfasdfjas
+
+                        kdl;jfadskjf`}];
+            clone2.prepareAndSetProps({content:newContent});
+
+            var cloneHeight = clone2.height();
+            var dh = cloneHeight - originalHeight;
+            assert.notEqual(0, dh, "label content should change label height");
+            assert.equal(100, symbol.width(), "initial symbol width");
+            assert.equal(originalHeight+2 + dh, symbol.height(), "initial symbol height");
+
+            symbol.onArtboardChanged(); // should trigger refresh
+            clone2 = symbol.findClone(child2.id());
+            assert.equal(newContent, clone2.content(), "content should restore from custom props");
+            assert.equal(cloneHeight, clone2.height(), "result text height");
         });
     });
 });
