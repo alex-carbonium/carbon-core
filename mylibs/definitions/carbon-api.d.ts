@@ -210,7 +210,7 @@ declare module "carbon-api" {
     }
     export interface ISharedResource extends ISharedPage {
         dataUrl: string;
-        downloads?: number;
+        timesUsed: number;
         authorId: string;
         authorName: string;
         authorAvatar?: string;
