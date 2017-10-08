@@ -14,6 +14,8 @@ let logger = require("./logger");
 let globals = require("./globals");
 let DashboardProxy = require("./server/DashboardProxy");
 let util = require("./util");
+//TODO: split platform
+let platform = require("./params");
 
 require("./server/AccountProxy");
 require("./server/StaticResourcesProxy");
@@ -24,4 +26,4 @@ require("./server/GalleryProxy");
 require("./server/ActivityProxy");
 require("./server/DataProxy");
 
-export {backend, logger, DashboardProxy, globals, util}
+export {backend, logger, DashboardProxy, globals, util, platform}

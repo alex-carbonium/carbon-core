@@ -1,4 +1,5 @@
 import {UAParser} from "ua-parser-js";
+import { Platform, StartupParams, DeviceType, DeviceOS, Browser } from "carbon-api";
 
 //TODO: platform should parse userAgent and queryString, params should use platform
 interface IQueryStringParams{
@@ -47,14 +48,19 @@ if (DEBUG){
     }
 }
 
+let browser = parser.getBrowser();
 export default {
-    deviceType: parser.getDevice().type || "Computer",
-    deviceOS: parser.getOS().name,
-    browser: parser.getBrowser(),
+    deviceType: parser.getDevice().type as DeviceType,
+    deviceOS: parser.getOS().name as DeviceOS,
+    browser: {
+        name: browser.name as Browser,
+        version: browser.version,
+        major: browser.major
+    },
     transport: "auto",
     endpoints: endpoints,
     serveless: qs.serverless,
     clearStorage: qs.cls,
     perf: qs.perf,
     realCdn: RealCdn
-};
+} as Platform & StartupParams; //TODO: split platform
