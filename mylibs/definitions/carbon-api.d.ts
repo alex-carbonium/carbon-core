@@ -295,6 +295,37 @@ declare module "carbon-api" {
         imageDataPointToCssColor(data:{data:number[]}, index:number):string;
         deepEquals(a: object, b: object): boolean;
     }
+
+    /**
+     * Check more possible values at https://github.com/faisalman/ua-parser-js
+     */
+    export type DeviceType = "console" | "mobile" | "tablet" | "smarttv" | "wearable" | "embedded";
+    export type DeviceOS = "Windows" | "Mac OS" | "Linux" | "iOS" | "Android";
+    export type Browser = "Chrome" | "Chromium" | "Edge" | "IE" | "Mozilla" | "Firefox" | "Safari";
+    export interface Platform {
+        deviceType: DeviceType;
+        deviceOS: DeviceOS;
+        browser: {
+            name: Browser;
+            version: string;
+            major: string;
+        };
+    }
+    export const platform: Platform;
+
+    export interface StartupParams {
+        endpoints: {
+            services: string;
+            storage: string;
+            cdn: string;
+            file: string;
+        };
+        transport: "auto" | "nows";
+        serveless: boolean;
+        clearStorage: boolean;
+        perf: boolean;
+        realCdn: string;
+    }
 }
 
 declare function assertNever(t: never);
