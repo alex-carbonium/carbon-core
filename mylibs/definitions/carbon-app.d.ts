@@ -345,6 +345,14 @@ declare module "carbon-app" {
         resetCurrentTool();
     }
 
+    export type WorkspaceSettings = {
+        general: {
+            pageFill: string;
+            boundaryDash: number[];
+            boundaryStroke: string;
+        }
+    }
+
     //TODO: rename to Workspace
     export interface IEnvironment {
         view: IView;
@@ -355,6 +363,7 @@ declare module "carbon-app" {
         contextPool: IContextPool;
 
         shortcutManager: IShortcutManager;
+        settings: WorkspaceSettings;
 
         set(view: IView, controller: IController);
     }

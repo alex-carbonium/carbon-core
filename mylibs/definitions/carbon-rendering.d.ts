@@ -1,7 +1,7 @@
-import { IMatrix } from "carbon-geometry";
-import { IView } from "carbon-core";
-
 declare module "carbon-rendering" {
+    import { IMatrix } from "carbon-geometry";
+    import { IView, IUIElement } from "carbon-core";
+
     export const enum ContextType {
         Content,
         Isolation,
@@ -80,5 +80,9 @@ declare module "carbon-rendering" {
     export interface IContextPool {
         getContext(width: number, height: number, scale: number, forceExactSize?:boolean) : IContext;
         releaseContext(context: IContext);
+    }
+
+    export const RenderPipeline: {
+        elementToDataUrl(element: IUIElement, contextScale: number);
     }
 }

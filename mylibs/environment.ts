@@ -2,6 +2,7 @@ import EventHelper from "./framework/EventHelper";
 import {IView, IController, IEnvironment, IEvent2} from "carbon-core";
 import ContextPool from "./framework/render/ContextPool";
 import ShortcutManager from "./ui/ShortcutManager";
+import UserSettings from "./UserSettings";
 
 class Environment implements IEnvironment {
     attached: IEvent2<IView, IController>;
@@ -10,6 +11,7 @@ class Environment implements IEnvironment {
     controller: IController;
     contextPool = ContextPool;
     shortcutManager = new ShortcutManager();
+    settings = UserSettings;
 
     loaded: Promise<void>;
     resolveLoaded: () => void;

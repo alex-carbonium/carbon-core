@@ -192,11 +192,17 @@ declare module "carbon-api" {
     export interface IValidatePageNameResult {
         exists: boolean
     }
+    export type Screenshot = {
+        id: string;
+        name: string;
+        url: string;
+    }
     export interface ISharedPage {
         name: string;
         description: string;
         tags: string;
         coverUrl: string;
+        screenshots: Screenshot[];
     }
     export interface IPublishPageModel extends ISharedPage {
         pageData: string;

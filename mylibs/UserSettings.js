@@ -16,8 +16,10 @@ var settings = {
         "selection_fill": "rgba(89, 35, 93, 0.19)"
     },
     general: {
+        // set in css
+        pageFill: "#b7babd",
         boundaryDash: [4, 4],
-        boundaryStroke: "#ccc"
+        boundaryStroke: "#ccc",
     },
     guides: {
         stroke: "#9918ff"
