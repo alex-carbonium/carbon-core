@@ -32,6 +32,7 @@ import { ArrangeStrategies, DropPositioning } from "../framework/Defs";
 import Rect from "../math/rect";
 import { viewStateStack } from "../framework/ViewStateStack";
 import CoreIntl from "../CoreIntl";
+import { ResolvedPromise } from "../framework/ObjectPool";
 
 const debug = require("DebugUtil")("carb:actionManager");
 
@@ -520,11 +521,8 @@ export default class ActionManager implements IActionManager {
             callback(this._actions[name]);
         }
     }
-    invokeAsync(actionName: string, callback?: (success: boolean, result?: any) => void): void {
-        setTimeout(() => this.invoke(actionName, callback), 100);
-    }
 
-    invoke(actionName: string, callback?: (success: boolean, result?: any) => void): void {
+    invoke(actionName: string, actionArg?: string): Promise<void> {
         debug("Invoking %s", actionName);
         let that = this;
         let action = this._actions[actionName];
@@ -543,29 +541,22 @@ export default class ActionManager implements IActionManager {
             return;
         }
 
-        let res = action.callback(Selection);
+        let res = action.callback(Selection, actionArg);
 
-        if (res) {
-            if (res.then) {
-                res.then(res => {
-                    this.notifyActionCompleted(actionName, true, res);
-                    if (callback) {
-                        callback(true, res);
-                    }
-                });
-                res.catch(e => {
+        if (res && res.then) {
+            res = res.then(() => this.notifyActionCompleted(actionName, true, res))
+                .catch(e => {
                     this.notifyActionCompleted(actionName, false, e);
-                    if (callback) {
-                        callback(false, e);
-                    }
+                    throw e;
                 });
-            }
         }
         else {
             this.notifyActionCompleted(actionName, true);
         }
 
         Invalidate.request();
+
+        return res || ResolvedPromise;
     }
     getAction(name) {
         return this._actions[name];
