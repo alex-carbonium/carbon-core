@@ -46,10 +46,10 @@ export default class RenderLoop implements IRenderLoop {
 
     private finishMounting(app: IApp, view: IView, controller: IController) {
         Environment.set(view, controller);
-        Clipboard.attach(app);
-
         app.platform.detachEvents();
         app.platform.attachEvents(this.viewContainer);
+
+        Clipboard.attach(app);
         Keyboard.attach(document.body);
 
         this._app = app;

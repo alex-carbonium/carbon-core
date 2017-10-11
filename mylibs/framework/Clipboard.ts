@@ -52,7 +52,7 @@ class Clipboard {
         }
     }
 
-    onCopy=(e) => {
+    onCopy=(e?) => {
         if (e && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")){
             return;
         }
@@ -98,7 +98,7 @@ class Clipboard {
         }
     };
 
-    onPaste = (e) => {
+    onPaste = (e?) => {
         if (e && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")){
             return;
         }
@@ -201,7 +201,7 @@ class Clipboard {
         this.pastingContent = false;
     };
 
-    onCut = e => {
+    onCut = (e?) => {
         if (e && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")){
             return;
         }
@@ -210,7 +210,7 @@ class Clipboard {
         Delete.run(Selection.selectedElements());
     };
 
-    /** The only reliable check is to use known browser versions. This is github does it. */
+    /** The only reliable check is to use known browser versions. This is how github does it. */
     testNativeSupport(){
         return (params.browser.name === "Chrome" && parseInt(params.browser.major) > 43)
             || (params.browser.name === "Firefox" && parseInt(params.browser.major) > 41);
