@@ -89,21 +89,21 @@ export default class AutoSaveTimer extends StateMachine<TimerState> {
 
                 if ((timeLeft <= 0 && isDirty) || app.syncBroken()) {
                     this.saveInProgress = true;
-                    app.actionManager.invoke("save", (success, e) => {
-                        if (DEBUG) {
-                            if (success) {
+                    app.actionManager.invoke("save")
+                        .then(() => {
+                            if (DEBUG) {
                                 logger.trace("Autosave successful");
                             }
-                        }
-                        if (!success) {
+                        })
+                        .catch(e => {
                             logger.warn("Autosave failed", e);
-                        }
-
-                        this.saveInProgress = false;
-                        if (this.state.type === "started"){
-                            this.autoSave(TickInterval);
-                        }
-                    });
+                        })
+                        .finally(() => {
+                            this.saveInProgress = false;
+                            if (this.state.type === "started"){
+                                this.autoSave(TickInterval);
+                            }
+                        });
 
                     saved = true;
                     this.lastSaveTime = new Date().getTime();

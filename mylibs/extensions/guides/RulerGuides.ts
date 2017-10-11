@@ -22,6 +22,10 @@ export default class RulerGuides {
     _menuToken: IDisposable;
     _rectHorizontal: IRect;
     _rectVertical: IRect;
+    _app: IApp;
+
+    //TODO: move out ruler to extension
+    private static registered = false;
 
     constructor(app: IApp, view: IView, controller: IController) {
         this._dragController = new DragController();
@@ -51,6 +55,13 @@ export default class RulerGuides {
 
         this._hoverArtboard = null;
         this._removingGuide = false;
+
+        //TODO: move out ruler to extension
+        if (!RulerGuides.registered) {
+            app.actionManager.registerAction("ruler.deleteGuide", "", "", this.deleteGuideById);
+            app.actionManager.registerAction("ruler.deleteGuidesOnArtboard", "", "", this.deleteGuidesOnArtboard);
+            app.actionManager.registerAction("ruler.deleteGuidesOnPage", "", "", this.deleteGuidesOnPage);
+        }
     }
 
     setOrigin(origin) {
@@ -321,8 +332,9 @@ export default class RulerGuides {
         var gx = this._customGuides.tryCaptureX(x);
         if (gx !== null) {
             items.push({
-                name: "Delete guide",
-                callback: this.deleteGuideX.bind(this, gx)
+                name: "@guides.deleteOne",
+                actionId: "ruler.deleteGuide",
+                actionArg: gx.id
             });
 
             hit = true;
@@ -332,8 +344,9 @@ export default class RulerGuides {
             var gy = this._customGuides.tryCaptureY(y);
             if (gy !== null) {
                 items.push({
-                    name: "Delete guide",
-                    callback: this.deleteGuideY.bind(this, gy)
+                    name: "@guides.deleteOne",
+                    actionId: "ruler.deleteGuide",
+                    actionArg: gy.id
                 });
 
                 hit = true;
@@ -348,18 +361,17 @@ export default class RulerGuides {
             menu.items = items;
 
             menu.items.push({
-                name: "Delete all guides",
+                name: "@guides.deleteAll",
                 items: [
                     {
-                        name: "On current artboard",
-                        callback: () => this.deleteGuidesOnArtboard()
+                        name: "@guides.onArtboard",
+                        actionId: "ruler.deleteGuidesOnArtboard"
                     },
                     {
-                        name: "On current page",
-                        callback: () => this.deleteGuidesOnPage()
+                        name: "@guides.onPage",
+                        actionId: "ruler.deleteGuidesOnPage"
                     }
-                ],
-                callback: () => this.deleteAllGuides()
+                ]
             });
 
             this._customGuides.releaseCaptured();
@@ -375,12 +387,24 @@ export default class RulerGuides {
         this._origin.patchProps(PatchType.Remove, "guidesY", gy);
         Invalidate.requestInteractionOnly();
     }
-    deleteGuidesOnArtboard() {
-        this._origin.setProps({ guidesX: [], guidesY: [] });
+    deleteGuideById = (selection, id: string) => {
+        let artboard = this._app.activePage.getActiveArtboard();
+        let guide = artboard.props.guidesX.find(x => x.id === id);
+        if (guide) {
+            this._origin.patchProps(PatchType.Remove, "guidesX", guide);
+        }
+        guide = artboard.props.guidesY.find(x => x.id === id);
+        if (guide) {
+            this._origin.patchProps(PatchType.Remove, "guidesY", guide);
+        }
+    }
+    deleteGuidesOnArtboard = () => {
+        let artboard = this._app.activePage.getActiveArtboard();
+        artboard.setProps({ guidesX: [], guidesY: [] });
         Invalidate.requestInteractionOnly();
     }
-    deleteGuidesOnPage() {
-        var artboards = this._view.page.getAllArtboards();
+    deleteGuidesOnPage = () => {
+        var artboards = this._app.activePage.getAllArtboards();
         for (var i = 0; i < artboards.length; i++) {
             artboards[i].setProps({ guidesX: [], guidesY: [] });
         }

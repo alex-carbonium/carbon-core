@@ -30,3 +30,5 @@ export default class ObjectPool<T extends IPooledObject> {
         }
     }
 }
+
+export const ResolvedPromise = Promise.resolve();

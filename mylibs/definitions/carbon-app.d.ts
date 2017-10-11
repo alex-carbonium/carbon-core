@@ -345,6 +345,14 @@ declare module "carbon-app" {
         resetCurrentTool();
     }
 
+    export type WorkspaceSettings = {
+        general: {
+            pageFill: string;
+            boundaryDash: number[];
+            boundaryStroke: string;
+        }
+    }
+
     //TODO: rename to Workspace
     export interface IEnvironment {
         view: IView;
@@ -355,6 +363,7 @@ declare module "carbon-app" {
         contextPool: IContextPool;
 
         shortcutManager: IShortcutManager;
+        settings: WorkspaceSettings;
 
         set(view: IView, controller: IController);
     }
@@ -371,7 +380,7 @@ declare module "carbon-app" {
         id: string;
         name: string;
         icon?: string;
-        callback: (selection: ISelection) => any; //TODO: replace with void when action do not return commands
+        callback: (selection: ISelection, arg?: string) => any; //TODO: replace with void when action do not return commands
         condition?: (selection: ISelection) => boolean;
     }
 
@@ -382,9 +391,9 @@ declare module "carbon-app" {
     export interface IActionManager {
         actionPerformed: IEvent<any>;
 
-        invoke(action: string, callback?: (success: boolean, result?: any) => void): void | Promise<void>;
+        invoke(action: string, actionArg?: string): Promise<void>;
         subscribe(action: string, cb: (action: string, result: any) => void):IDisposable;
-        registerAction(name: string, description: string, category: string, callback: (selection?: ISelection, app?: IApp) => any): IAction;
+        registerAction(name: string, description: string, category: string, callback: (selection?: ISelection, arg?: string) => any): IAction;
 
         hasAction(action: string): boolean;
         getAction(action:string): IAction;
