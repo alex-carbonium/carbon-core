@@ -1174,7 +1174,7 @@ PropertyMetadata.registerForType(Artboard, {
         return {
             stroke: false,
             tileSize: showAsStencil,
-            insertAsContent: showAsStencil,
+            insertAsContent: showAsStencil && element.children.length === 1,
             symbolGroup: showAsStencil,
             allowVerticalResize: showAsStencil,
             allowHorizontalResize: showAsStencil

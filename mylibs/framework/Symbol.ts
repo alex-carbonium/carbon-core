@@ -456,15 +456,6 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     trackInserted() {
         delete this.runtimeProps.primitivePath;
         super.trackInserted.apply(this, arguments);
-
-        if (this._artboard && this._artboard.props.insertAsContent) {
-            let children = this.children.slice();
-            children.forEach(x => App.Current.activePage.nameProvider.assignNewName(x));
-            this.flatten();
-            if (this.parent() !== NullContainer) {
-                setTimeout(() => Selection.makeSelection(children), 1);
-            }
-        }
     }
     trackDeleted(parent) {
         delete this.runtimeProps.primitivePath;

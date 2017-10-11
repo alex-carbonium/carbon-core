@@ -357,19 +357,20 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return root && root.isEditable();
     }
 
-    applyScaling(s, o, options?, changeMode?: ChangeMode) {
-        if (options && options.reset) {
+    applyScaling(s, o, options?: ResizeOptions, changeMode?: ChangeMode) {
+        options = options || ResizeOptions.Once;
+        if (options.reset) {
             this.saveOrResetLayoutProps(changeMode);
         }
 
-        if ((options && options.sameDirection) || !this.isRotated()) {
+        if (options.sameDirection || !this.isRotated()) {
             this.applySizeScaling(s, o, options, changeMode);
             return true;
         }
 
         this.applyMatrixScaling(s, o, options, changeMode);
 
-        if (!options || options.final) {
+        if (options.final) {
             this.skew();
         }
 
