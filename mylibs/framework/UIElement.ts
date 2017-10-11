@@ -40,6 +40,7 @@ import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension,
 import ExtensionPoint from "./ExtensionPoint";
 import CoreIntl from "../CoreIntl";
 import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
+import RenderPipeline from "./render/RenderPipeline";
 
 require("../migrations/All");
 
@@ -72,12 +73,12 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         this.runtimeProps.ctxl = 1;
     }
     invalidate(layerMask?) {
-        if(layerMask === undefined) {
+        if (layerMask === undefined) {
             layerMask = this.runtimeProps.ctxl;
         }
 
         let parent = this.parent();
-        if(parent) {
+        if (parent) {
             parent.invalidate(layerMask);
         }
     }
@@ -893,7 +894,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return;
         }
 
-        if(!context.beginElement(this)) {
+        if (!context.beginElement(this)) {
             context.endElement(this);
             return;
         }
@@ -905,8 +906,14 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
         this.applyViewMatrix(context);
 
+        // var pipeline = RenderPipeline.createFor(this, context, environment);
+
+        // pipeline.out(context => {
         this.clip(context);
         this.drawSelf(context, w, h, environment);
+        // });
+
+        // pipeline.done();
 
         context.restore();
 
@@ -917,7 +924,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             performance.measure(markName, markName);
         }
 
-        if(context.saveCount !== saveCount) {
+        if (context.saveCount !== saveCount) {
             throw "Unbalanced save/restore";
         }
     }
@@ -1284,11 +1291,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.props.dashPattern;
     }
     selectFrameVisible(value?) {
-        if(value !== undefined) {
+        if (value !== undefined) {
             this.runtimeProps.frameVisible = value;
         }
 
-        if(this.runtimeProps.hasOwnProperty("frameVisible")) {
+        if (this.runtimeProps.hasOwnProperty("frameVisible")) {
             return this.runtimeProps.frameVisible;
         }
 
@@ -2073,7 +2080,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
 
         let rect = Rect.fromObject(elements[0].getBoundingBoxGlobal());
-        for (let i = 1; i < elements.length; ++i){
+        for (let i = 1; i < elements.length; ++i) {
             rect.combineMutable(elements[i].getBoundingBoxGlobal());
         }
         return rect;

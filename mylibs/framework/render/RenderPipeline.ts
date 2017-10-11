@@ -2,8 +2,14 @@ import { IUIElement } from "carbon-model";
 import { IContext } from "carbon-core";
 import ContextPool from "./ContextPool";
 import Matrix from "math/matrix";
+import { IPooledObject } from "carbon-basics";
+import ObjectPool from "../ObjectPool";
 
-export default class RenderPipeline {
+let objectPool = new ObjectPool(()=>{
+    return new RenderPipeline();
+}, 10);
+
+export default class RenderPipeline implements IPooledObject {
 
     private element: any;
     private context: IContext;
@@ -11,6 +17,21 @@ export default class RenderPipeline {
 
     private operations: any[] = [];
     private useTempBuffer: boolean = false;
+
+    private startTime: number;
+
+    reset() {
+        this.element = null;
+        this.context = null;
+        this.environment = null;
+        this.startTime = 0;
+        this.operations = [];
+        this.useTempBuffer = false;
+    }
+
+    free() {
+        this.reset();
+    }
 
     out(callback: (context: IContext) => void) {
         this.operations.push({ type: 'out', callback });
@@ -36,6 +57,8 @@ export default class RenderPipeline {
     }
 
     done() {
+        var ellapsedTime = performance.now() - this.startTime;
+
         this.context.save();
         var context: any = this.context;
         if (this.useTempBuffer) {
@@ -64,7 +87,8 @@ export default class RenderPipeline {
             ContextPool.releaseContext(context);
         }
         this.context.restore();
-        this.operations = [];
+
+        objectPool.free(this);
     }
 
     static elementToDataUrl(element, contextScale = 1) {
@@ -174,11 +198,13 @@ export default class RenderPipeline {
     }
 
     static createFor(element, context, environment): RenderPipeline {
-        var pipeline = new RenderPipeline();
+        var pipeline = objectPool.allocate();
+
         pipeline.element = element;
         pipeline.context = context;
         pipeline.environment = environment;
-        // TODO: use object pool
+        pipeline.startTime = performance.now();
+
         return pipeline;
     }
 }
