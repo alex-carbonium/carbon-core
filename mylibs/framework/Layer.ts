@@ -140,7 +140,7 @@ class Layer extends Container implements ILayer {
         context.layerRedrawMask = this.layerRedrawMask || 0xFFFF;
         super.draw(context, environment);
         this.invalidateRequired = false;
-        this._invalidateAreas = [];
+        //this._invalidateAreas = [];
         this.layerRedrawMask = null;
     }
 

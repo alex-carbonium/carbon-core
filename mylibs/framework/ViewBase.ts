@@ -304,6 +304,14 @@ export default class ViewBase { //TODO: implement IView
                 this._drawLayer(layer, layer.context, env);
             }
         }
+
+        if (DEBUG) {
+            for (let i = 0; i < this.contexts.length; ++i) {
+                if (!this.contexts[i].isBalancedSaveRestore) {
+                    throw new Error(`Unbalanced context ${i} saveCount ${this.contexts[i].saveCount}`);
+                }
+            }
+        }
     }
 
     renderElementToDataUrl(element: IUIElement, bounds?: IRect, dpr = this.contextScale) {
