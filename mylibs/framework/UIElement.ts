@@ -1507,7 +1507,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     clone() {
         let newProps = this.cloneProps();
         newProps.id = createUUID();
-        return ObjectFactory.fromType(this.t, newProps);
+        let clone = ObjectFactory.fromType(this.t, newProps);
+        clone.runtimeProps.ctxl = this.runtimeProps.ctxl;
+        return clone;
     }
     sourceId(id?) {
         if (arguments.length > 0) {
@@ -1518,6 +1520,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     mirrorClone() {
         let clone = ObjectFactory.fromType(this.t, this.cloneProps());
+        clone.runtimeProps.ctxl = this.runtimeProps.ctxl;
         return clone;
     }
     cursor() {
