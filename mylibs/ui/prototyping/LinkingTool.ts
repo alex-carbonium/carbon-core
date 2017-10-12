@@ -19,7 +19,7 @@ import StoryAction from "../../stories/StoryAction";
 import Link from "./Link";
 
 import DataNode from "framework/DataNode";
-import { IUIElement, IMouseEventData, KeyboardState, PrimitiveType, IContext, InteractionType } from "carbon-core";
+import { IUIElement, IMouseEventData, KeyboardState, PrimitiveType, IContext, InteractionType, RenderEnvironment } from "carbon-core";
 import Brush from "../../framework/Brush";
 
 const HandleSize = 14;
@@ -927,7 +927,7 @@ export default class LinkingTool extends Tool {
         context.restore();
     };
 
-    layerdraw(context, environment) {
+    layerdraw(context, environment: RenderEnvironment) {
         if (!this._activeStory || this._draggingElement) {
             return;
         }

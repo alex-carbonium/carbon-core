@@ -5,7 +5,7 @@ import GlobalMatrixModifier from "../../framework/GlobalMatrixModifier";
 import Point from "../../math/point";
 import Matrix from "../../math/matrix";
 import UserSettings from "../../UserSettings";
-import { ChangeMode } from "carbon-core";
+import { ChangeMode, RenderEnvironment } from "carbon-core";
 
 export default class PolygonTool extends ElementDropTool {
     updateElement(element: Polygon, startPoint: Point, endPoint: Point) {
@@ -24,11 +24,11 @@ export default class PolygonTool extends ElementDropTool {
         element.applyScaling(new Point(w / bb.width, h / bb.height), startPoint);
     }
 
-    layerdraw(context, environment) {
+    layerdraw(context, environment: RenderEnvironment) {
         super.layerdraw(context, environment);
         if (this.canDraw()) {
             context.save();
-            let scale = environment.view.scale();
+            let scale = environment.scale;
             context.scale(1 / scale, 1 / scale);
 
             context.beginPath();

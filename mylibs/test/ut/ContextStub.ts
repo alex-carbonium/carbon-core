@@ -23,6 +23,8 @@ export default class ContextStub implements IContext {
     rect(x: number, y: number, width: number, height: number) {
 
     }
+    clear() {
+    }
     clearRect(x: number, y: number, width: number, height: number) {
 
     }

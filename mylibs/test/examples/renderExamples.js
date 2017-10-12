@@ -1,6 +1,7 @@
 import {registerExample} from "./example";
 import Rectangle from "../../framework/Rectangle";
 import Selection from "../../framework/SelectionModel";
+import {renderer} from "../../framework/render/Renderer";
 import Brush from "../../framework/Brush";
 import Rect from "../../math/rect";
 import Environment from "../../environment";
@@ -22,8 +23,8 @@ registerExample("dataUrl: artboard zoomed out", function(app, artboard){
 
     Environment.view.draw();
 
-    var dataUrl = Environment.view.renderElementToDataUrl(artboard, Rect.fromSize(300, 300));
-    window.open(dataUrl, "_blank");
+    //var dataUrl = renderer.renderElementToDataUrl(artboard, Rect.fromSize(300, 300));
+    //window.open(dataUrl, "_blank");
 });
 
 registerExample("dataUrl: page", function(app, artboard){
@@ -38,8 +39,8 @@ registerExample("dataUrl: page", function(app, artboard){
 
     Environment.view.draw();
 
-    var dataUrl = Environment.view.renderElementToDataUrl(app.activePage, Rect.fromSize(300, 300));
-    window.open(dataUrl, "_blank");
+    //var dataUrl = renderer.elementToDataUrl(app.activePage, Rect.fromSize(300, 300));
+    //window.open(dataUrl, "_blank");
 });
 
 registerExample("dataUrl: detached element", function(app, artboard){
@@ -53,6 +54,6 @@ registerExample("dataUrl: detached element", function(app, artboard){
 
     Environment.view.draw();
 
-    var dataUrl = Environment.view.renderElementToDataUrl(rect1, Rect.fromSize(300, 300));
-    window.open(dataUrl, "_blank");
+    //var dataUrl = Environment.view.renderElementToDataUrl(rect1, Rect.fromSize(300, 300));
+    //window.open(dataUrl, "_blank");
 });

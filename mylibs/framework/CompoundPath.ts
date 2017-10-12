@@ -11,7 +11,7 @@ import Path from "framework/Path";
 import GroupArrangeStrategy from "framework/arrangeStrategy/GroupArrangeStrategy";
 import { combineRectArray } from "math/math";
 import Rect from "math/rect";
-import { IGroupContainer, ChangeMode, IMouseEventData, IIsolatable } from "carbon-core";
+import { IGroupContainer, ChangeMode, IMouseEventData, IIsolatable, RenderFlags, RenderEnvironment } from "carbon-core";
 import Shape from "framework/Shape";
 import UserSettings from "UserSettings";
 import Selection from "framework/SelectionModel";
@@ -151,7 +151,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
         Brush.stroke(this.stroke(), context, 0, 0, w, h);
     }
 
-    _renderFinal(context, w, h, environment) {
+    _renderFinal(context, w, h, environment: RenderEnvironment) {
         var stroke = this.stroke();
         var strokePosition = this.strokePosition();
 
@@ -165,7 +165,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
         else {
             var clippingRect = this.getBoundingBoxGlobal();
             clippingRect = this.expandRectWithBorder(clippingRect);
-            if (true || !environment.offscreen) {
+            if (true || !(environment.flags & RenderFlags.Offscreen)) {
                 var p1 = environment.pageMatrix.transformPoint2(clippingRect.x, clippingRect.y);
                 var p2 = environment.pageMatrix.transformPoint2(clippingRect.x + clippingRect.width, clippingRect.y + clippingRect.height);
                 p1.x = Math.max(0, 0 | p1.x * environment.contextScale);
@@ -197,7 +197,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
                 offContext.setLineDash(dashPattern);
             }
 
-            // if(!environment.offscreen) {
+            // if(!(environment.flags & RenderFlags.Offscreen)) {
             this.applyViewMatrix(offContext);
             // }
 
@@ -215,7 +215,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
             offContext.fillStyle = "black";
             offContext.fill();
 
-            // if(!environment.offscreen) {
+            // if(!(environment.flags & RenderFlags.Offscreen)) {
             context.resetTransform();
             // }
 
@@ -465,7 +465,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
         }
     }
 
-    drawSelf(context, w, h, environment) {
+    drawSelf(context, w, h, environment: RenderEnvironment) {
         if (!this.result) {
             this.recalculate(ChangeMode.Self);
         }
@@ -499,7 +499,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
         }
 
         // if(this.result) {
-        //     if (environment.finalRender) {
+        //     if (environment.flags & RenderFlags.Final) {
         //         this._renderFinal(context, w, h, environment);
         //     } else {
         //         this._renderDraft(context, w, h);

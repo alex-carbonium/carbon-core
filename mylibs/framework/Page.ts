@@ -228,38 +228,6 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
     autoInsert(/*UIElement*/element) {
     }
 
-    renderContentTile(context, x, y, zoom, contextScale?) {
-        var rect = this.getContentOuterSize();
-
-        context.save();
-        context.scale(contextScale, contextScale);
-        var matrix = Matrix.create();
-        matrix.scale(zoom, zoom);
-        matrix.translate(x - rect.x, y - rect.y);
-        matrix.applyToContext(context)
-        this.invalidate();
-        this.draw(context, {
-            finalRender: true, pageMatrix: matrix, setupContext: (context) => {
-                context.scale(contextScale, contextScale);
-                matrix.applyToContext(context);
-            },
-            view: {
-                scale: () =>1,
-                focused:()=>false,
-                contextScale: contextScale,
-                viewportRect: ()=>{
-                    return {
-                        x:-Number.MAX_VALUE/2,
-                        y:-Number.MAX_VALUE/2,
-                        width:Number.MAX_VALUE,
-                        height:Number.MAX_VALUE
-                    }
-                }
-            }
-        });
-        context.restore();
-    }
-
     name(value?) {
         if (value !== undefined) {
             this.setProps({name: value});

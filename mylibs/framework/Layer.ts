@@ -5,7 +5,7 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import EventHelper from "framework/EventHelper";
 import UIElement from "./UIElement";
 import { Types } from "./Defs";
-import { IContainer, IRect, LayerType, IView, ILayer } from "carbon-core";
+import { IContainer, IRect, LayerType, IView, ILayer, RenderEnvironment } from "carbon-core";
 
 var clearChangedAreas = function (context) {
     // var fillStyle = this.fillStyle();
@@ -136,7 +136,11 @@ class Layer extends Container implements ILayer {
         return this.props.m;
     }
 
-    draw(context, environment) {
+    isInViewport(viewportRect: IRect) {
+        return true;
+    }
+
+    draw(context, environment: RenderEnvironment) {
         context.layerRedrawMask = this.layerRedrawMask || 0xFFFF;
         super.draw(context, environment);
         this.invalidateRequired = false;
@@ -144,7 +148,7 @@ class Layer extends Container implements ILayer {
         this.layerRedrawMask = null;
     }
 
-    drawSelf(context, w, h, environment) {
+    drawSelf(context, w, h, environment: RenderEnvironment) {
         if (this.invalidateRequired) {
             super.drawSelf.apply(this, arguments);
             this.ondraw.raise(context, environment);
@@ -241,7 +245,7 @@ class Layer extends Container implements ILayer {
         return null;
     }
 
-    renderToContext(context, environment) {
+    renderToContext(context, environment: RenderEnvironment) {
         super.drawSelf.call(this, context, environment);
     }
 

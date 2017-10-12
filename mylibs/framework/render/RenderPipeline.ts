@@ -1,5 +1,5 @@
 import { IUIElement } from "carbon-model";
-import { IContext } from "carbon-core";
+import { IContext, RenderEnvironment, RenderFlags } from "carbon-core";
 import ContextPool from "./ContextPool";
 import Matrix from "math/matrix";
 import { IPooledObject } from "carbon-basics";
@@ -13,7 +13,7 @@ export default class RenderPipeline implements IPooledObject {
 
     private element: any;
     private context: IContext;
-    private environment: any;
+    private environment: RenderEnvironment;
 
     private operations: any[] = [];
     private useTempBuffer: boolean = false;
@@ -91,76 +91,7 @@ export default class RenderPipeline implements IPooledObject {
         objectPool.free(this);
     }
 
-    static elementToDataUrl(element, contextScale = 1) {
-        let box = element.getBoundingBoxGlobal();
-        box = element.expandRectWithBorder(box);
-        let pageMatrix = new Matrix(1, 0, 0, 1, -box.x, -box.y);
-        let env = {
-            finalRender: true, setupContext: (ctx) => {
-                ctx.scale(contextScale, contextScale);
-                ctx.clear();
-                pageMatrix.applyToContext(ctx);
-            }, pageMatrix: pageMatrix, contextScale: contextScale, offscreen: true, view: { scale: () => 1, contextScale, focused: () => false }
-        };
-
-        box.width = Math.max(1, box.width) | 0;
-        box.height = Math.max(1, box.height) | 0;
-
-        let context = ContextPool.getContext(box.width, box.height, contextScale, true);
-        context.relativeOffsetX = 0;
-        context.relativeOffsetY = 0;
-
-        context.scale(contextScale, contextScale);
-
-        context.clear();
-        pageMatrix.applyToContext(context);
-
-        var pipeline = RenderPipeline.createFor(element, context, env);
-        pipeline.out(c => {
-            element.draw(c, env);
-        });
-        pipeline.done();
-        var data = context.canvas.toDataURL("image/png");
-
-        ContextPool.releaseContext(context);
-
-        return data;
-    }
-
-    static elementToContextFromPool(element, contextScale = 1, scaleX = 1, scaleY = 1) {
-        let box = element.getBoundingBoxGlobal();
-        box = element.expandRectWithBorder(box);
-        let pageMatrix = new Matrix(1, 0, 0, 1, -box.x, -box.y);
-        let env = {
-            finalRender: true, setupContext: (ctx) => {
-                ctx.scale(contextScale * scaleX, contextScale * scaleY);
-                ctx.clear();
-                pageMatrix.applyToContext(ctx);
-            }, pageMatrix: pageMatrix, contextScale: contextScale, offscreen: true, view: { scale: () => 1, contextScale, focused: () => false }
-        };
-
-        box.width = Math.max(1, box.width) | 0;
-        box.height = Math.max(1, box.height) | 0;
-
-        let context = ContextPool.getContext(box.width * scaleX, box.height * scaleY, contextScale, true);
-        context.relativeOffsetX = 0;
-        context.relativeOffsetY = 0;
-
-        context.scale(contextScale * scaleX, contextScale * scaleY);
-
-        context.clear();
-        pageMatrix.applyToContext(context);
-
-        var pipeline = RenderPipeline.createFor(element, context, env);
-        pipeline.out(c => {
-            element.draw(c, env);
-        });
-        pipeline.done();
-
-        return context;
-    }
-
-    private static getContextDimensions(element, environment) {
+    private static getContextDimensions(element, environment: RenderEnvironment) {
         let clippingRect = element.getBoundingBoxGlobal();
         clippingRect = element.expandRectWithBorder(clippingRect);
         var p1 = environment.pageMatrix.transformPoint2(clippingRect.x, clippingRect.y);
@@ -178,7 +109,7 @@ export default class RenderPipeline implements IPooledObject {
         return { x: p1.x, y: p1.y, w: sw, h: sh, sx: clippingRect.x, sy:clippingRect.y }
     }
 
-    private static getBufferedContext(element, environment, forceSize = false) {
+    private static getBufferedContext(element, environment: RenderEnvironment, forceSize = false) {
         var box = RenderPipeline.getContextDimensions(element, environment);
 
         var offContext = ContextPool.getContext(box.w, box.h, environment.contextScale, forceSize);
@@ -197,7 +128,7 @@ export default class RenderPipeline implements IPooledObject {
         return offContext;
     }
 
-    static createFor(element, context, environment): RenderPipeline {
+    static createFor(element, context, environment: RenderEnvironment): RenderPipeline {
         var pipeline = objectPool.allocate();
 
         pipeline.element = element;

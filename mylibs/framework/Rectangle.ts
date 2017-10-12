@@ -12,7 +12,7 @@ import UIElement from "framework/UIElement";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import Point from "../math/point";
-import { ResizeDimension, ChangeMode, InteractionType, IMouseEventData } from "carbon-core";
+import { ResizeDimension, ChangeMode, InteractionType, IMouseEventData, RenderEnvironment } from "carbon-core";
 import Rect from "../math/rect";
 import TransformationHelper from "../framework/interactions/TransformationHelper";
 
@@ -245,7 +245,7 @@ class Rectangle extends Shape {
         return rectmath.isPointInRect(outerRect, point) && !rectmath.isPointInRect(innerRect, point);
     }
 
-    drawSelf(context, w, h, environment) {
+    drawSelf(context, w, h, environment: RenderEnvironment) {
         this.drawOutsetShadows(context, w, h, environment);
 
         context.save();

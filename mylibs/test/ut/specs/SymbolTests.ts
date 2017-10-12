@@ -3,7 +3,7 @@ import { assert } from "chai";
 import ContextStub from "../ContextStub";
 import {
     Artboard, Matrix, Brush, Rect, Point, Symbol, UIElement, Constraints, Selection,
-    SymbolActions, CommandManager, GroupContainer, Text, Font
+    SymbolActions, CommandManager, GroupContainer, Text, Font, RenderEnvironment, RenderFlags
 } from "carbon-core";
 import { HorizontalConstraint, VerticalConstraint } from "carbon-basics";
 
@@ -23,16 +23,12 @@ describe("Symbol tests", function () {
         }
 
         this.drawContext = {
-            finalRender: true,
+            flags: RenderFlags.Final,
             pageMatrix: Matrix.create(),
             setupContext: (context) => { },
-            view: {
-                scale: () => 1,
-                focused: () => false,
-                contextScale: 1,
-                viewportRect: () => Rect.Max
-            }
-        }
+            scale: 1,
+            contextScale: 1
+        } as RenderEnvironment;
     });
     afterEach(function () {
         this.app.dispose();

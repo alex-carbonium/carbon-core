@@ -117,7 +117,7 @@ export default class ContextLayerSource extends Context {
 
         if (this._relativeClippingStack.length) {
             var relativeClipContext = this._relativeClippingStack[this._relativeClippingStack.length - 1];
-            while (relativeClipContext.id === element.parent().id()) {
+            while (relativeClipContext.id === element.id()) {
                 relativeClipContext.context.restore();
                 let ref = this._relativeClippingStack.pop();
                 objectPool.free(ref);

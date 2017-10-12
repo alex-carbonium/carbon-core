@@ -2,7 +2,7 @@ declare module "carbon-app" {
     import { IDataNode, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IIsolatable, IMouseEventHandler, IContainerProps } from "carbon-model";
     import { IEvent, IEventData, IEvent2, IMouseEventData, KeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable, IJsonNode, IPrimitive, ArtboardType, FontStyle, FontWeight } from "carbon-basics";
     import { IRect, ICoordinate, ISize } from "carbon-geometry";
-    import { IContext, IContextPool } from "carbon-rendering";
+    import { IContext, IContextPool, RenderEnvironment } from "carbon-rendering";
 
     export interface IPlatform{
         attachEvents(htmlElement: HTMLElement);
@@ -205,7 +205,7 @@ declare module "carbon-app" {
     }
 
     export interface ILayerDrawHandlerObject {
-        onLayerDraw(layer: ILayer, context: IContext, environment: IEnvironment):void;
+        onLayerDraw(layer: ILayer, context: IContext, environment: RenderEnvironment):void;
     }
 
     export type WorkspaceTool =
@@ -273,8 +273,6 @@ declare module "carbon-app" {
         hitElementDirect(e?, cb?, includeInteractionLayer?: boolean);
 
         draw();
-        renderElementToContext(element: IUIElement, context: IContext, x?: number, y?: number, zoom?: number, dpr?: number);
-        renderElementToDataUrl(element: IUIElement, bounds?: IRect, dpr?: number): string;
         invalidate();
 
         showPixels(value?: boolean): boolean;
@@ -359,8 +357,6 @@ declare module "carbon-app" {
         controller: IController;
         detaching: IEvent2<IView, IController>;
         attached: IEvent2<IView, IController>;
-
-        contextPool: IContextPool;
 
         shortcutManager: IShortcutManager;
         settings: WorkspaceSettings;

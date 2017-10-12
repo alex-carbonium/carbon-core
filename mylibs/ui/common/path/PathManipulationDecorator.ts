@@ -1,6 +1,6 @@
 import Container from "framework/Container";
 import Path from "framework/Path";
-import { IIsolatable, ChangeMode, LayerType, ElementState, PointType, IMouseEventHandler, KeyboardState, IMouseEventData, IPathPoint, IDisposable } from "carbon-core";
+import { IIsolatable, ChangeMode, LayerType, ElementState, PointType, IMouseEventHandler, KeyboardState, IMouseEventData, IPathPoint, IDisposable, RenderEnvironment } from "carbon-core";
 import UIElementDecorator from "framework/UIElementDecorator";
 import Environment from "environment";
 import Selection from "framework/SelectionModel";
@@ -667,9 +667,9 @@ export default class PathManipulationObject extends UIElementDecorator implement
         return this._nextPoint;
     }
 
-    onLayerDraw(layer, context, environment) {
+    onLayerDraw(layer, context, environment: RenderEnvironment) {
         let path = this.element;
-        let scale = environment.view.scale();
+        let scale = environment.scale;
 
         if (Selection.selectedElement() === path && path.mode() === ElementState.Edit) {
             context.save();

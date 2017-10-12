@@ -1,6 +1,6 @@
 import Selection from "../../framework/SelectionModel"
 import Invalidate from "../../framework/Invalidate";
-import { IApp, IView, IController, IMouseEventData, KeyboardState, IDisposable, WorkspaceTool, InteractionType, IComposite } from "carbon-core";
+import { IApp, IView, IController, IMouseEventData, KeyboardState, IDisposable, WorkspaceTool, InteractionType, IComposite, RenderEnvironment } from "carbon-core";
 
 //TODO: if selection is made in layers after tool is set, active frame starts to react to mouse events before the tool
 export default class Tool {
@@ -90,7 +90,7 @@ export default class Tool {
         event.handled = true;
     }
 
-    layerdraw(context, environment) {
+    layerdraw(context, environment: RenderEnvironment) {
     }
 
     defaultCursor(): string {

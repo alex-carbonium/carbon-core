@@ -5,15 +5,16 @@ import { LayerType } from "carbon-app";
 import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
 import Environment from "environment";
 import UserSettings from "UserSettings";
+import { RenderEnvironment } from "carbon-core";
 
-function drawSnapLines(context, environment) {
+function drawSnapLines(context, environment: RenderEnvironment) {
     var lines = SnapController.snapLines;
     if (!lines.length) {
         return;
     }
     context.save();
 
-    var scale = environment.view.scale();
+    var scale = environment.scale;
     context.scale(1 / scale, 1 / scale);
 
     for (var i = 0; i < lines.length; i++) {
@@ -40,14 +41,14 @@ function drawSnapLines(context, environment) {
     context.restore();
 };
 
-function drawSnapDistances(context, environment) {
+function drawSnapDistances(context, environment: RenderEnvironment) {
     var lines = SnapController.distances;
     if (!lines.length) {
         return;
     }
     context.save();
 
-    var scale = environment.view.scale();
+    var scale = environment.scale;
     context.scale(1 / scale, 1 / scale);
     var ids = {};
     var poss = {};
@@ -168,7 +169,7 @@ export default class SnapVisualization extends ExtensionBase {
         this.view.unregisterForLayerDraw(LayerType.Interaction, this);
     }
 
-    onLayerDraw(layer, context, environment) {
+    onLayerDraw(layer, context, environment: RenderEnvironment) {
         drawSnapLines(context, environment);
         drawSnapDistances(context, environment);
     }

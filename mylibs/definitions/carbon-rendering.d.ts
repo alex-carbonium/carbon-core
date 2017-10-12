@@ -1,5 +1,5 @@
 declare module "carbon-rendering" {
-    import { IMatrix } from "carbon-geometry";
+    import { IMatrix, IRect } from "carbon-geometry";
     import { IView, IUIElement } from "carbon-core";
 
     export const enum ContextType {
@@ -30,6 +30,7 @@ declare module "carbon-rendering" {
 
         rect(x: number, y: number, width: number, height: number);
         clearRect(x: number, y: number, width: number, height: number);
+        clear();
 
         translate(x: number, y: number): void;
         scale(x: number, y: number);
@@ -67,14 +68,24 @@ declare module "carbon-rendering" {
 
     export const Context: IContextConstructor;
 
-    export interface IRenderingEnvironment {
+    export const enum RenderFlags {
+        None = 0,
+        Final = 1 << 0,
+        Clipping = 1 << 1,
+        Fill = 1 << 2,
+        ShowFrames = 1 << 3,
+        Offscreen = 1 << 4,
+        CheckViewport = 1 << 5,
+        Default = Final | Clipping | Fill | CheckViewport
+    }
+
+    export type RenderEnvironment = {
         contextScale: number;
-        finalRender: boolean;
-        layer: any;
+        scale: number;
         pageMatrix: IMatrix;
+        flags: RenderFlags;
+        //TODO: check if this can be removed or called on some other class
         setupContext: (context: IContext) => void;
-        showFrames: boolean;
-        view: IView;
     }
 
     export interface IContextPool {
@@ -82,7 +93,12 @@ declare module "carbon-rendering" {
         releaseContext(context: IContext);
     }
 
-    export const RenderPipeline: {
-        elementToDataUrl(element: IUIElement, contextScale: number);
+    export interface IRenderer {
+        readonly contextPool: IContextPool;
+        elementToDataUrl(element: IUIElement, contextScale: number): string;
+        elementToDataUrlScaled(element: IUIElement, bounds: IRect, contextScale: number): string;
+        elementToContext(element: IUIElement, context, contextScale: number, scaleX?: number, scaleY?: number)
     }
+
+    export const renderer: IRenderer;
 }

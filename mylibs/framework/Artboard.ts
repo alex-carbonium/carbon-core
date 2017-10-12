@@ -17,7 +17,7 @@ import Environment from "environment";
 import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
-import { ChangeMode, PatchType, IPrimitiveRoot, LayerType, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext, IContainer, WorkspaceTool, IMouseEventData } from "carbon-core";
+import { ChangeMode, PatchType, IPrimitiveRoot, LayerType, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext, IContainer, WorkspaceTool, IMouseEventData, RenderEnvironment, RenderFlags } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
 import Rect from "../math/rect";
 import CoreIntl from "../CoreIntl";
@@ -198,26 +198,26 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         }
     }
 
-    drawShadowPath(context, environment) {
-        if (environment.offscreen) {
+    drawShadowPath(context, environment: RenderEnvironment) {
+        if (environment.flags & RenderFlags.Offscreen) {
             return;
         }
 
-        let scale = environment.view.scale() * environment.view.contextScale;
+        let scale = environment.scale * environment.contextScale;
         let s4 = 4 / scale;
         let bb = this.getBoundingBoxGlobal();
         context.rect(bb.x + bb.width, bb.y + s4, s4, bb.height);
         context.rect(bb.x + s4, bb.y + bb.height, bb.width, s4);
     }
 
-    drawFrameRect(context, environment) {
-        if (environment.offscreen) {
+    drawFrameRect(context, environment: RenderEnvironment) {
+        if (environment.flags & RenderFlags.Offscreen) {
             return;
         }
         context.save();
         context.beginPath();
         context.strokeStyle = "#999";
-        let scale = environment.view.scale();
+        let scale = environment.scale;
         context.lineWidth = 1 / scale;
 
         let bb = this.getBoundingBoxGlobal();
@@ -226,7 +226,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         context.restore();
     }
 
-    drawCustomFrame(context, environment) {
+    drawCustomFrame(context, environment: RenderEnvironment) {
         let frame = this.frame;
 
         context.save();
@@ -237,8 +237,8 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         context.restore();
     }
 
-    drawExtras(context, environment) {
-        if (environment.offscreen) {
+    drawExtras(context, environment: RenderEnvironment) {
+        if (environment.flags & RenderFlags.Offscreen) {
             return;
         }
 
@@ -308,7 +308,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return App.Current.clipArtboards() || super.clipSelf();
     }
 
-    _renderStatesFrame(context, environment) {
+    _renderStatesFrame(context, environment: RenderEnvironment) {
         let stateboards = this.runtimeProps.stateBoards;
         if (!stateboards || !stateboards.length) {
             return;
@@ -328,7 +328,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             rect = math.combineRects(rect, stateboards[i].getBoundaryRectGlobal());
         }
 
-        let scale = environment.view.scale();
+        let scale = environment.scale;
         let d = Math.max(1, scale);
         let x = rect.x - 20 / d;
         rect.width += 40 / d;
@@ -392,7 +392,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         this.onBackgroundDrawn && this.onBackgroundDrawn(this, context);
     }
 
-    drawSelf(context: IContext, w, h, environment) {
+    drawSelf(context: IContext, w, h, environment: RenderEnvironment) {
         if(this._drawing) {
             return;
         }
@@ -400,7 +400,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         context.save();
 
         let frame = this.frame;
-        if (frame && environment.showFrames) {
+        if (frame && (environment.flags & RenderFlags.ShowFrames)) {
             this.drawCustomFrame(context, environment);
             context.beginPath();
             let pos = this.position();
@@ -418,7 +418,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         this.onContentDrawn && this.onContentDrawn(this, context);
 
 
-        if(!frame || !environment.showFrames) {
+        if(!frame || !(environment.flags & RenderFlags.ShowFrames)) {
             this.drawFrameRect(context, environment);
         }
 

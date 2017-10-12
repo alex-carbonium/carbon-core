@@ -14,7 +14,7 @@ import Environment from "environment";
 import { Types } from "../../framework/Defs";
 import Rect from "../../math/rect";
 import { IArtboard } from "carbon-model";
-import { ArtboardType, IArtboardPage, ChangeMode, IArtboardPageProps } from "carbon-core";
+import { ArtboardType, IArtboardPage, ChangeMode, IArtboardPageProps, RenderEnvironment, RenderFlags } from "carbon-core";
 import DataNode from "../../framework/DataNode";
 import Container from "../../framework/Container";
 import UIElement from "../../framework/UIElement";
@@ -131,15 +131,9 @@ class ArtboardPage extends Page implements IArtboardPage {
         return Matrix.Identity;
     }
 
-    draw(context, environment) {
-        environment.viewportRect = environment.view.viewportRect();
-
-        super.draw.apply(this, arguments);
-    }
-
-    drawChildSafe(child: UIElement, context, environment) {
+    drawChildSafe(child: UIElement, context, environment: RenderEnvironment) {
         let frame = null;
-        if (!environment.viewportRect || child.isInViewport(environment.viewportRect)) {
+        if (!(environment.flags & RenderFlags.CheckViewport) || child.isInViewport(Environment.view.viewportRect())) {
             super.drawChildSafe(child, context, environment);
         } else {
             debug("Skip artboard not in the viewport: %s", this.name());

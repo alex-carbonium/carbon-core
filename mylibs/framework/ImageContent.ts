@@ -7,7 +7,7 @@ import {Types} from "../framework/Defs";
 import {ContentSizing} from "carbon-model";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
 import CoreIntl from "../CoreIntl";
-import { IMouseEventData, IUIElement, IComposite, InteractionType } from "carbon-core";
+import { IMouseEventData, IUIElement, IComposite, InteractionType, RenderEnvironment } from "carbon-core";
 
 var ContentFrameType = Object.create(DefaultFrameType);
 ContentFrameType.strokeStyle = null;
@@ -53,7 +53,7 @@ export default class ImageContent extends UIElement{
         }
     }
 
-    drawSelf(context, w, h, environment){
+    drawSelf(context, w, h, environment: RenderEnvironment){
         context.save();
         context.globalAlpha *= .2;
         this._clone.drawSelf(context, w, h, environment);
