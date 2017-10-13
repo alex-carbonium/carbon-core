@@ -1,4 +1,5 @@
 import Primitive from "../sync/Primitive";
+import logger from "../../logger";
 import { PatchType, IDataNode, IPrimitive, IPrimitiveRoot } from "carbon-core";
 
 let lastSelection = {};
@@ -54,10 +55,15 @@ class ModelStateListener {
         else{
             let initialOldProps = oldPrimitive.props;
 
-            // we need to keep original property in this frame, in case setProps called many times for the same property
-            for (let p in oldProps){
-                if (initialOldProps[p] === undefined){
-                    initialOldProps[p] = oldProps[p];
+            if (!initialOldProps || !oldProps) {
+                logger.error("BUG: ModelStateListener trackSetProps", {oldPrimitive: oldPrimitive.type, hasOldProps: !!oldProps});
+            }
+            else {
+                // we need to keep original property in this frame, in case setProps called many times for the same property
+                for (let p in oldProps){
+                    if (initialOldProps[p] === undefined){
+                        initialOldProps[p] = oldProps[p];
+                    }
                 }
             }
         }
