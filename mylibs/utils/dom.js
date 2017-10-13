@@ -1,7 +1,5 @@
 import Environment from "../environment";
 
-var transitionEvents = ["transitionend", "webkitTransitionEnd", "oTransitionEnd", "otransitionend", "MSTransitionEnd"];
-
 export default {
     offset: function (elem) {
         var docElem, win,
@@ -50,7 +48,7 @@ export default {
                 else if (original.layerX !== undefined) {
                     event.__layerX = original.layerX;
                 }
-                else {                    
+                else {
                     event.__layerX = original.clientX - Environment.view.viewContainerElement.getBoundingClientRect().left;
                 }
             }
@@ -83,7 +81,7 @@ export default {
                 else if (original.layerY !== undefined) {
                     event.__layerY = original.layerY;
                 }
-                else {                    
+                else {
                     event.__layerY = original.clientY - Environment.view.viewContainerElement.getBoundingClientRect().top;
                 }
                 return event.__layerY;
@@ -96,27 +94,6 @@ export default {
         var offset = $('#viewContainer').offset();
         return {x: center.x - offset.left, y: center.y - offset.top};
 
-    },
-
-    onCssTransitionEnd: function (element, func, maxDelay) {
-        var timer = 0;
-        var onEnd = function () {
-            if (timer) {
-                clearTimeout(timer);
-            }
-            for (var i = 0; i < transitionEvents.length; i++) {
-                var event = transitionEvents[i];
-                element.removeEventListener(event, onEnd);
-            }
-            func();
-        };
-        for (var i = 0; i < transitionEvents.length; i++) {
-            var event = transitionEvents[i];
-            element.addEventListener(event, onEnd);
-        }
-        if (maxDelay) {
-            timer = setTimeout(onEnd, maxDelay);
-        }
     }
 }
 
@@ -127,7 +104,6 @@ export function getClipboardData(e){
 export function setClipboardContent(e, type, content){
     getClipboardData(e).setData(type, content);
 }
-
 
 export function tryGetClipboardContent(types, e){
     var result;

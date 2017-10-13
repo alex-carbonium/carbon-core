@@ -116,14 +116,13 @@ export default class SymbolActions extends CarbonExtension {
         });
         App.Current.activePage.nameProvider.assignNewName(artboard, "");
 
-        // find where to place artboard
         for (let i = 0, l = sorted.length; i < l; ++i) {
             let e: any = sorted[i];
             let vm = group.children[i].viewMatrix();
             e.setTransform(vm);
-            e.prepareAndSetProps({
-                constraints: Constraints.StretchAll
-            });
+            // e.prepareAndSetProps({
+            //     constraints: Constraints.StretchAll
+            // });
             artboard.insert(e, i);
         }
 

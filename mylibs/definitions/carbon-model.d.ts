@@ -264,6 +264,7 @@ declare module "carbon-model" {
 
     export interface IArtboardProps extends IContainerProps {
         type: ArtboardType | null;
+        insertAsContent?: boolean;
         states?: ArtboardState[];
         guidesX: IGuide[];
         guidesY: IGuide[];

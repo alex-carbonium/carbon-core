@@ -11,7 +11,7 @@ import Rect from "../math/rect";
 import Matrix from "../math/matrix";
 import Environment from "../environment";
 import Selection from "./SelectionModel";
-import { IUIElementProps, IPoint, IRect, IComposite, ChangeMode, PatchType, ICoordinate } from "carbon-core";
+import { IUIElementProps, IPoint, IRect, IComposite, ChangeMode, PatchType, ICoordinate, RenderEnvironment } from "carbon-core";
 import CommonPropsManager from "./CommonPropsManager";
 
 export default class CompositeElement extends UIElement implements IComposite {
@@ -132,7 +132,7 @@ export default class CompositeElement extends UIElement implements IComposite {
         this.prepareAndSetProps({ br: new Rect(0, 0, w, h), m: new Matrix(1, 0, 0, 1, xMin, yMin) });
     }
 
-    draw(context, environment) {
+    draw(context, environment: RenderEnvironment) {
         return;
     }
 

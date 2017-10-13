@@ -9,7 +9,7 @@ import Brush from "../../framework/Brush";
 import Point from "../../math/point";
 import Environment from "../../environment";
 import UserSettings from "UserSettings";
-import { KeyboardState, IMouseEventData, ICoordinate } from "carbon-core";
+import { KeyboardState, IMouseEventData, ICoordinate, RenderEnvironment } from "carbon-core";
 import Cursors from "Cursors";
 
 function update(x1, y1, x2, y2) {
@@ -138,7 +138,7 @@ export default class LineCreator extends Tool {
 
         Invalidate.requestInteractionOnly();
     }
-    layerdraw(context, environment) {
+    layerdraw(context, environment: RenderEnvironment) {
         if (this._mousepressed) {
             context.save();
             var e = this._element;

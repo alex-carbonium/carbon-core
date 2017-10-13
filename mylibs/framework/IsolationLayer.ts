@@ -1,6 +1,6 @@
 import Layer from './Layer';
 import Context from "./render/Context";
-import { IContainer, IUIElement, IIsolationLayer, ChangeMode, IIsolatable, LayerType, ElementState } from "carbon-core";
+import { IContainer, IUIElement, IIsolationLayer, ChangeMode, IIsolatable, LayerType, ElementState, RenderEnvironment } from "carbon-core";
 import DataNode from "./DataNode";
 import Selection from "framework/SelectionModel";
 import RelayoutEngine from "framework/relayout/RelayoutEngine";
@@ -164,7 +164,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         return element || this;
     }
 
-    draw(context: Context, environment: any) {
+    draw(context: Context, environment: RenderEnvironment) {
         if (this.isActive) {
             context.save();
             context.beginPath();

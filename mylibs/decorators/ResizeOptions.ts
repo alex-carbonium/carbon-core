@@ -34,6 +34,8 @@ export default class ResizeOptions {
     }
 
     static Default: ResizeOptions;
+    static Once: ResizeOptions;
 }
 
 ResizeOptions.Default = new ResizeOptions(true, true, true, false);
+ResizeOptions.Once = new ResizeOptions(true, false, true, true);

@@ -9,6 +9,7 @@ import ModelStateListener from "../relayout/ModelStateListener";
 import { LayerType } from "carbon-app";
 import Rect from "../../math/rect";
 import UserSettings from "../../UserSettings";
+import { RenderEnvironment, ChangeMode } from "carbon-core";
 
 const MinSize = 4;
 
@@ -148,8 +149,7 @@ export default {
     onDragging: function(e, dx, dy, ddx, ddy){
         if (this._firstDrag){
             PropertyTracker.suspend();
-            ModelStateListener.stop();
-            this._originalState = this._container.toJSON();
+            this._originalProps = this._container.selectGridProps();
             this._firstDrag = false;
         }
 
@@ -168,17 +168,13 @@ export default {
     },
     onDragStopped: function(e){
         var newProps = this._container.selectGridProps();
-
-        //container needs to be completely restored to fire primitives for original cells
-        this._container.fromJSON(this._originalState);
-
-        ModelStateListener.start();
+        this._container.setProps(this._originalProps, ChangeMode.Self);
+        this._container.performArrange(null, ChangeMode.Self);
 
         this._container.setProps(newProps);
         this._container.performArrange();
 
-        PropertyTracker.resume();
-        PropertyTracker.flush();
+        PropertyTracker.resumeAndFlush();
 
         this.onDragSearching(e);
 
@@ -203,8 +199,8 @@ export default {
             this.drawMargin(context, this._activeMargin, env);
         }
     },
-    drawMargin: function(context, margin, env){
-        var scale = env.view.scale();
+    drawMargin: function(context, margin, env: RenderEnvironment){
+        var scale = env.scale;
 
         context.save();
         context.beginPath();
@@ -226,7 +222,7 @@ export default {
         }
         context.restore();
 
-        env.view.applyGuideFont(context);
+        Environment.view.applyGuideFont(context);
         var text = margin.value + "";
         var w = context.measureText(text).width;
         if (margin.vertical){

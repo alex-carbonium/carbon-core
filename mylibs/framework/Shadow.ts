@@ -1,5 +1,6 @@
 import { Types } from "./Defs";
 import Matrix from "math/matrix";
+import { RenderEnvironment } from "carbon-core";
 
 // var onAngleDistanceChanged = function (angle) {
 //     var angle = this._angle.value() * (Math.PI / 180);
@@ -12,7 +13,7 @@ import Matrix from "math/matrix";
 
 var Shadow: any = {};
 var matrix = Matrix.create();
-Shadow.apply = function (element, shadowObject, context, w, h, environment) {
+Shadow.apply = function (element, shadowObject, context, w, h, environment: RenderEnvironment) {
     if (!shadowObject.enabled || !shadowObject.color) {
         return;
     }
@@ -22,7 +23,7 @@ Shadow.apply = function (element, shadowObject, context, w, h, environment) {
     var box = element.getBoundingBox(true);
 
     context.fillStyle = shadowObject.color;
-    context.filter = "blur(" + (shadowObject.blur * environment.view.scale() / 2) + "px)";
+    context.filter = "blur(" + (shadowObject.blur * environment.scale / 2) + "px)";
 
     if (shadowObject.inset) {
         context.beginPath();

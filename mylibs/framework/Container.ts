@@ -21,6 +21,7 @@ import RenderPipeline from "./render/RenderPipeline";
 import params from "params";
 import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
+import { RenderEnvironment, RenderFlags } from "carbon-core";
 
 export default class Container<TProps extends IContainerProps = IContainerProps> extends UIElement<TProps> implements IContainer<IContainerProps> {
     props: TProps;
@@ -124,7 +125,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         this.children.forEach(x => x.restoreLastGoodTransformIfNeeded());
     }
 
-    drawSelf(context, w, h, environment) {
+    drawSelf(context, w, h, environment: RenderEnvironment) {
         this.fillBackground(context, 0, 0, w, h);
         this.drawChildren(context, w, h, environment);
         this.strokeBorder(context, w, h);
@@ -210,8 +211,8 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
     }
 
-    renderMaskedElements(context, mask, i, items, environment) {
-        if (!environment.finalRender && mask.drawPath) {
+    renderMaskedElements(context, mask, i, items, environment: RenderEnvironment) {
+        if (!(environment.flags && RenderFlags.Final) && mask.drawPath) {
             context.beginPath();
             if (mask.shouldApplyViewMatrix()) {
                 mask.globalViewMatrix().applyToContext(context);
@@ -271,8 +272,8 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     allowCaching() {
         return this.runtimeProps.allowCache;
     }
-
-    draw(context, environment) {
+    
+    draw(context, environment: RenderEnvironment) {
         if (this.hasBadTransform()) {
             return;
         }
@@ -287,7 +288,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
             w = br.width,
             h = br.height;
 
-        if (environment && environment.viewportRect && !this.isInViewport(environment.viewportRect)) {
+        if (environment && (environment.flags & RenderFlags.CheckViewport) && !this.isInViewport(Environment.view.viewportRect())) {
             if (params.perf) {
                 performance.measure(markName, markName);
             }
@@ -333,7 +334,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
             performance.measure(markName, markName);
         }
     }
-    renderAfterMask(context, items, i, environment) {
+    renderAfterMask(context, items, i, environment: RenderEnvironment) {
         for (; i < items.length; ++i) {
             let child = items[i];
 
@@ -369,7 +370,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         return clone;
     }
 
-    drawChildren(context, w, h, environment) {
+    drawChildren(context, w, h, environment: RenderEnvironment) {
         this.modifyContextBeforeDrawChildren(context);
         this.runtimeProps.mask = null;
         if (this.children) {
@@ -423,7 +424,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     //     return super.boundaryRect(includeMargin);
     // }
 
-    drawWithMask(context, mask, i, environment) {
+    drawWithMask(context, mask, i, environment: RenderEnvironment) {
         if (mask.visible()) {
             let b = mask.props.stroke;
             mask.props.stroke = null;
@@ -442,7 +443,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     }
 
 
-    drawChildSafe(child, context, environment) {
+    drawChildSafe(child, context, environment: RenderEnvironment) {
         try {
             ExtensionPoint.invoke(child, 'draw', [context, environment]);
         } catch (e) {

@@ -6,7 +6,7 @@ import SnapController from "./SnapController";
 import Rect from "../math/rect";
 import Selection from "./SelectionModel";
 import { ContentSizing, IImage, ImageSource } from "carbon-model";
-import { ChangeMode } from "carbon-core";
+import { ChangeMode, RenderEnvironment } from "carbon-core";
 
 export class ImageEditTool {
     [name: string]: any;
@@ -144,7 +144,7 @@ export class ImageEditTool {
         }
     };
 
-    layerdraw(context, environment){
+    layerdraw(context, environment: RenderEnvironment){
         context.save();
         context.setLineDash([20, 10]);
         context.strokeStyle = "#444";

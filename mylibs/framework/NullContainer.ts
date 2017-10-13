@@ -375,6 +375,10 @@ class NullContainer extends DataNode implements IContainer {
     animate(properties, duration, options, progressCallback) {
         return Promise.resolve();
     }
+
+    expandRectWithBorder(box) {
+        return box;
+    }
 }
 
 export default new NullContainer();

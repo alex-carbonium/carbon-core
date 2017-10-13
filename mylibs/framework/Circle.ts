@@ -5,6 +5,7 @@ import Path from "framework/Path";
 import * as math from "math/math";
 import Rect from "math/rect";
 import { Types, StrokePosition } from "./Defs";
+import { RenderEnvironment } from "carbon-core";
 
 class Circle extends Shape {
     hitTest(/*Point*/point, scale) {
@@ -127,7 +128,7 @@ class Circle extends Shape {
         context.ellipse(0, 0, w, h);
     }
 
-    drawSelf(context, w, h, environment) {
+    drawSelf(context, w, h, environment: RenderEnvironment) {
         this.drawOutsetShadows(context, w, h, environment);
 
         context.save();

@@ -402,6 +402,11 @@ export default class ContextCommandCache implements IContext {
         this._commands.push({type:EntryType.method, method:'clearRect', args:arguments});
     }
 
+    clear() {
+        this._context && this._context.clear.apply(this, arguments);
+        this._commands.push({type:EntryType.method, method:'clear', args:arguments});
+    }
+
     fillRect(x, y, w, h) {
         this._context && this._context.fillRect.apply(this, arguments);
         this._commands.push({type:EntryType.method, method:'fillRect', args:arguments});

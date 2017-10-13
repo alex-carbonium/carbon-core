@@ -162,8 +162,6 @@ class NullPage extends UIElement implements IPage {
     getActiveArtboard(): IArtboard {
         return null;
     }
-    renderContentTile(context, x, y, zoom) {
-    }
     resize(rect) {
     }
     id() {

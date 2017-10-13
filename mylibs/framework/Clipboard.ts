@@ -10,6 +10,7 @@ import {choosePasteLocation} from "./PasteLocator";
 import {setClipboardContent, tryGetClipboardContent} from "../utils/dom";
 import Delete from "../commands/Delete";
 import params from "../params";
+import backend from "../backend";
 import { IApp, IMatrix } from "carbon-core";
 import { OriginType } from "carbon-geometry";
 
@@ -52,7 +53,7 @@ class Clipboard {
         }
     }
 
-    onCopy=(e) => {
+    onCopy=(e?) => {
         if (e && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")){
             return;
         }
@@ -98,12 +99,13 @@ class Clipboard {
         }
     };
 
-    onPaste = (e) => {
+    onPaste = (e?) => {
         if (e && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")){
             return;
         }
 
-        var textData = null;
+        let textData = null;
+        let imageData = null;
 
         if (e){
             e.preventDefault();
@@ -124,18 +126,38 @@ class Clipboard {
                 this.buffer = null;
                 return;
             }
+
+            imageData = tryGetClipboardContent(["image/png", "image/jpeg", "image/jpg"], e);
         }
 
         var bufferElements: UIElement[] = null;
         var globalBoundingBoxes = null;
         var globalMatrices = null;
         var rootBoundingBoxes = null;
-        if (textData){
-            var image = Image.tryCreateFromUrl(textData);
+
+        if (imageData) {
+            let image = new Image();
+            image.resizeOnLoad(OriginType.Center);
+            let br = new Rect(0, 0, Image.NewImageSize, Image.NewImageSize);
+            image.boundaryRect(br);
+
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                backend.fileProxy.uploadUrl({content: this.result, name: imageData.lastModifiedDate.toLocaleString()})
+                    .then(response => image.source(Image.createUrlSource(response.url)));
+            };
+            reader.readAsDataURL(imageData);
+
+            bufferElements = [image];
+            globalBoundingBoxes = [{x: 0, y: 0, width: br.width, height: br.height}];
+            globalMatrices = [image.viewMatrix()];
+        }
+        else if (textData){
+            let image = Image.tryCreateFromUrl(textData);
             if (image){
                 image.resizeOnLoad(OriginType.Center);
             }
-            var newElement: UIElement = image;
+            let newElement: UIElement = image;
             if (newElement === null){
                 newElement = new Text();
                 newElement.prepareAndSetProps({
@@ -201,7 +223,7 @@ class Clipboard {
         this.pastingContent = false;
     };
 
-    onCut = e => {
+    onCut = (e?) => {
         if (e && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")){
             return;
         }
@@ -210,7 +232,7 @@ class Clipboard {
         Delete.run(Selection.selectedElements());
     };
 
-    /** The only reliable check is to use known browser versions. This is github does it. */
+    /** The only reliable check is to use known browser versions. This is how github does it. */
     testNativeSupport(){
         return (params.browser.name === "Chrome" && parseInt(params.browser.major) > 43)
             || (params.browser.name === "Firefox" && parseInt(params.browser.major) > 41);

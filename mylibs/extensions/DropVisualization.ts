@@ -20,7 +20,7 @@ import Point from "../math/point";
 import Matrix from "../math/matrix";
 import { FloatingPointPrecision, ArrangeStrategies } from "../framework/Defs";
 import { LayerType } from "carbon-app";
-import { InteractionType, IUIElement, ChangeMode, IIsolationLayer, IMouseEventData, IController, IComposite, IContainer, TextMode } from "carbon-core";
+import { InteractionType, IUIElement, ChangeMode, IIsolationLayer, IMouseEventData, IController, IComposite, IContainer, TextMode, RenderEnvironment } from "carbon-core";
 import BoundaryPathDecorator, { HighlightKind } from "../decorators/BoundaryPathDecorator";
 
 var HighlightBrush = Brush.createFromColor(SharedColors.Highlight);
@@ -172,12 +172,12 @@ class ResizeHint extends UIElement {
         Invalidate.requestInteractionOnly();
     }
 
-    drawSelf(context, w, h, environment) {
+    drawSelf(context, w, h, environment: RenderEnvironment) {
         if (!this._text) {
             return;
         }
 
-        var scale = environment.view.scale();
+        var scale = environment.scale;
         var fontStyle = '10px Arial';
 
         GlobalMatrixModifier.pushPrependScale();

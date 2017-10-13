@@ -92,7 +92,7 @@ export default {
     "Context": require("./framework/render/Context"),
     "ContextPool": require("./framework/render/ContextPool"),
     "RenderLoop": require("./framework/render/RenderLoop"),
-    "RenderPipeline": require("./framework/render/RenderPipeline"),
+    "renderer": require("./framework/render/Renderer").renderer,
     "RelayoutQueue": require("./framework/relayout/RelayoutQueue"),
     "Keyboard": require("./platform/Keyboard"),
     "Platform": require("./platform/Platform"),

@@ -92,7 +92,7 @@ export default class ActionManager implements IActionManager {
     }
 
 
-    registerAction(name: string, description: string, category: string, callback: (option?: any) => void): IAction {
+    registerAction(name: string, description: string, category: string, callback: (selection?: any, arg?: string) => void): IAction {
         let action: IAction = {
             id: name,
             name: description,
@@ -514,6 +514,23 @@ export default class ActionManager implements IActionManager {
 
 
         this.registerAction("enter", "Enter", "", function () {
+        });
+
+        this.registerAction("copy", "", "", function () {
+            clipboard.onCopy();
+        });
+        this.registerAction("paste", "", "", function () {
+            clipboard.onPaste();
+        });
+        this.registerAction("cut", "", "", function () {
+            clipboard.onCut();
+        });
+
+        this.registerAction("selectElement", "", "", function (selection, id: string) {
+            let element = that.app.activePage.findNodeByIdBreadthFirst(id);
+            if (element) {
+                Selection.makeSelection([element]);
+            }
         });
     }
     iterate(callback) {

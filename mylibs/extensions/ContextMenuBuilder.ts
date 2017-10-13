@@ -12,19 +12,15 @@ import InteractiveContainer from "../framework/InteractiveContainer";
 import { RepeaterActions } from "../framework/repeater/RepeaterActions";
 
 function findItemsToSelect(app, eventData) {
-    let items = []
-
     let elements = app.activePage.hitElements(eventData, Environment.view.scale())
-
-    return items.map(itemSelector)
+    return elements.map(itemSelector)
 };
 
 function itemSelector(e){
     return {
-        name: e.displayName(),
-        callback: function (e) {
-            Selection.makeSelection([e])
-        }
+        label: e.displayName(),
+        actionId: "selectElement",
+        actionArg: e.id()
     }
 }
 
@@ -113,9 +109,7 @@ export default class ContextMenuBuilder {
             name: "@copy",
             icon: "ico-small-copy",
             contextBar: ContextBarPosition.None,
-            callback: function () {
-                //showClipboardDialog();
-            },
+            actionId: "copy",
             disabled: !(selection && selection.length > 0)
         })
 
@@ -123,9 +117,7 @@ export default class ContextMenuBuilder {
             name: "@cut",
             icon: "ico-small-cut",
             contextBar: ContextBarPosition.None,
-            callback: function () {
-                //showClipboardDialog();
-            },
+            actionId: "cut",
             disabled: !(selection && selection.length > 0)
         })
 
@@ -133,9 +125,7 @@ export default class ContextMenuBuilder {
             name: "@paste",
             icon: "ico-small-paste",
             contextBar: ContextBarPosition.None,
-            callback: function () {
-                //showClipboardDialog();
-            }
+            actionId: "paste"
         })
 
         items.push({

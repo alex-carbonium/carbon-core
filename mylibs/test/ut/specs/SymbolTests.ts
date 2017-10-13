@@ -3,7 +3,7 @@ import { assert } from "chai";
 import ContextStub from "../ContextStub";
 import {
     Artboard, Matrix, Brush, Rect, Point, Symbol, UIElement, Constraints, Selection,
-    SymbolActions, CommandManager, GroupContainer, Text, Font
+    SymbolActions, CommandManager, GroupContainer, Text, Font, RenderEnvironment, RenderFlags, workspace
 } from "carbon-core";
 import { HorizontalConstraint, VerticalConstraint } from "carbon-basics";
 
@@ -23,16 +23,12 @@ describe("Symbol tests", function () {
         }
 
         this.drawContext = {
-            finalRender: true,
+            flags: RenderFlags.Final,
             pageMatrix: Matrix.create(),
             setupContext: (context) => { },
-            view: {
-                scale: () => 1,
-                focused: () => false,
-                contextScale: 1,
-                viewportRect: () => Rect.Max
-            }
-        }
+            scale: 1,
+            contextScale: 1
+        } as RenderEnvironment;
     });
     afterEach(function () {
         this.app.dispose();
@@ -83,8 +79,11 @@ describe("Symbol tests", function () {
 
         Selection.makeSelection([child]);
 
-        var actions = new SymbolActions(this.app, this.drawContext);
+        var actions = new SymbolActions(this.app, workspace);
         var symbol = actions.createSymbolFromSelection(Selection);
+
+        var artboard = symbol.findSourceArtboard(this.app);
+        artboard.children[0].constraints(Constraints.StretchAll);
 
         // act
         var clone = symbol.findClone(child.id());
@@ -110,7 +109,7 @@ describe("Symbol tests", function () {
         this.app.activePage.add(child);
 
         Selection.makeSelection([child]);
-        var actions = new SymbolActions(this.app, this.drawContext);
+        var actions = new SymbolActions(this.app, workspace);
         var symbol = actions.createSymbolFromSelection(Selection);
         this.app.relayout();
 
@@ -138,7 +137,7 @@ describe("Symbol tests", function () {
 
             Selection.makeSelection([child]);
 
-            var actions = new SymbolActions(this.app, this.drawContext);
+            var actions = new SymbolActions(this.app, workspace);
             var symbol = actions.createSymbolFromSelection(Selection);
 
             // act
@@ -160,7 +159,7 @@ describe("Symbol tests", function () {
             group.add(child);
             Selection.makeSelection([group]);
 
-            var actions = new SymbolActions(this.app, this.drawContext);
+            var actions = new SymbolActions(this.app, workspace);
             var symbol = actions.createSymbolFromSelection(Selection);
 
             // act
@@ -184,7 +183,7 @@ describe("Symbol tests", function () {
             var child = new UIElement();
 
             Selection.makeSelection([child]);
-            var actions = new SymbolActions(this.app, this.drawContext);
+            var actions = new SymbolActions(this.app, workspace);
             var symbol = actions.createSymbolFromSelection(Selection);
 
             Selection.makeSelection([child]);
@@ -217,7 +216,7 @@ describe("Symbol tests", function () {
             container.add(child);
 
             Selection.makeSelection([child]);
-            var actions = new SymbolActions(this.app, this.drawContext);
+            var actions = new SymbolActions(this.app, workspace);
             var symbol = actions.createSymbolFromSelection(Selection);
 
             Selection.makeSelection([child]);
@@ -243,7 +242,7 @@ describe("Symbol tests", function () {
             var child = new UIElement();
 
             Selection.makeSelection([child]);
-            var actions = new SymbolActions(this.app, this.drawContext);
+            var actions = new SymbolActions(this.app, workspace);
             var symbol = actions.createSymbolFromSelection(Selection);
 
             Selection.makeSelection([child]);
@@ -270,7 +269,7 @@ describe("Symbol tests", function () {
             this.app.activePage.add(child2);
 
             Selection.makeSelection([child1, child2]);
-            var actions = new SymbolActions(this.app, this.drawContext);
+            var actions = new SymbolActions(this.app, workspace);
             var symbol = actions.createSymbolFromSelection(Selection);
 
             Selection.makeSelection([child1, child2]);
@@ -304,7 +303,7 @@ describe("Symbol tests", function () {
             child2.fill(Brush.createFromColor("green"));
 
             Selection.makeSelection([child1, child2]);
-            var actions = new SymbolActions(this.app, this.drawContext);
+            var actions = new SymbolActions(this.app, workspace);
             var symbol = actions.createSymbolFromSelection(Selection);
 
             // act
@@ -332,7 +331,7 @@ describe("Symbol tests", function () {
             this.app.activePage.add(child2);
 
             Selection.makeSelection([child1, child2]);
-            var actions = new SymbolActions(this.app, this.drawContext);
+            var actions = new SymbolActions(this.app, workspace);
             var symbol = actions.createSymbolFromSelection(Selection);
 
             var artboard = child1.parent();

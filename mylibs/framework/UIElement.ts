@@ -36,7 +36,7 @@ import { PropertyDescriptor } from './PropertyMetadata';
 import { KeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
-import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps } from "carbon-core";
+import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps, RenderFlags, RenderEnvironment } from "carbon-core";
 import ExtensionPoint from "./ExtensionPoint";
 import CoreIntl from "../CoreIntl";
 import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
@@ -368,19 +368,20 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return root && root.isEditable();
     }
 
-    applyScaling(s, o, options?, changeMode?: ChangeMode) {
-        if (options && options.reset) {
+    applyScaling(s, o, options?: ResizeOptions, changeMode?: ChangeMode) {
+        options = options || ResizeOptions.Once;
+        if (options.reset) {
             this.saveOrResetLayoutProps(changeMode);
         }
 
-        if ((options && options.sameDirection) || !this.isRotated()) {
+        if (options.sameDirection || !this.isRotated()) {
             this.applySizeScaling(s, o, options, changeMode);
             return true;
         }
 
         this.applyMatrixScaling(s, o, options, changeMode);
 
-        if (!options || options.final) {
+        if (options.final) {
             this.skew();
         }
 
@@ -884,7 +885,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     isInViewport(viewportRect: IRect) {
         return areRectsIntersecting(viewportRect, this.getBoundingBoxGlobal(true));
     }
-    draw(context, environment) {
+    draw(context, environment: RenderEnvironment) {
         if (this.hasBadTransform()) {
             return;
         }
@@ -898,7 +899,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             w = br.width,
             h = br.height;
 
-        if (environment && environment.viewportRect && !this.isInViewport(environment.viewportRect)) {
+        if (environment && (environment.flags & RenderFlags.CheckViewport) && !this.isInViewport(Environment.view.viewportRect())) {
             if (params.perf) {
                 performance.measure(markName, markName);
             }
@@ -944,7 +945,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
     }
 
-    drawSelf(context, w, h, environment) {
+    drawSelf(context, w, h, environment: RenderEnvironment) {
     }
 
     drawBoundaryPath(context, round = true) {
@@ -1467,7 +1468,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             height: this.props.height
         };
     }
-    onLayerDraw(layer, context, environment) {
+    onLayerDraw(layer, context, environment: RenderEnvironment) {
 
     }
     registerForLayerDraw(layerNum: LayerType) {
@@ -1524,7 +1525,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     clone() {
         let newProps = this.cloneProps();
         newProps.id = createUUID();
-        return ObjectFactory.fromType(this.t, newProps);
+        let clone = ObjectFactory.fromType(this.t, newProps);
+        clone.runtimeProps.ctxl = this.runtimeProps.ctxl;
+        return clone;
     }
     sourceId(id?) {
         if (arguments.length > 0) {
@@ -1535,6 +1538,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     mirrorClone() {
         let clone = ObjectFactory.fromType(this.t, this.cloneProps());
+        clone.runtimeProps.ctxl = this.runtimeProps.ctxl;
         return clone;
     }
     cursor() {

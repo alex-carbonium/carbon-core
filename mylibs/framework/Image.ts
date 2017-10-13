@@ -10,7 +10,7 @@ import EventHelper from "./EventHelper";
 import RectMask from "./RectMask";
 import { ContentSizing, ImageSource, ImageSourceType, IImage, IImageProps } from "carbon-model";
 import { IRect, OriginType } from "carbon-geometry";
-import { ChangeMode, IContext } from "carbon-core";
+import { ChangeMode, IContext, RenderEnvironment } from "carbon-core";
 
 const DefaultSizing = ContentSizing.fill;
 
@@ -123,7 +123,7 @@ export default class Image extends Container<IImageProps> implements IImage {
         return true;
     }
 
-    drawSelf(context, w, h, environment) {
+    drawSelf(context, w, h, environment: RenderEnvironment) {
         var source = this.source();
         if (!source) {
             return;
@@ -173,7 +173,7 @@ export default class Image extends Container<IImageProps> implements IImage {
         context.restore();
     }
 
-    renderAfterMask(context, items, i, environment) {
+    renderAfterMask(context, items, i, environment: RenderEnvironment) {
         ImageSourceHelper.draw(this.source(), context, this.width(), this.height(), this, environment);
     }
 

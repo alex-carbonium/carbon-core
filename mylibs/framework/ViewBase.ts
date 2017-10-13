@@ -5,7 +5,7 @@ import ContextPool from "framework/render/ContextPool";
 import EventHelper from "framework/EventHelper";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
-import { LayerType, IView, IAnimationController, ILayer, IUIElement, ViewState, IEvent, ICoordinate, IContext, ISize, IRect, IPoint } from "carbon-core";
+import { LayerType, IView, IAnimationController, ILayer, IUIElement, ViewState, IEvent, ICoordinate, IContext, ISize, IRect, IPoint, RenderEnvironment, RenderFlags } from "carbon-core";
 import Rect from "../math/rect";
 import AnimationGroup from "./animation/AnimationGroup";
 import Context from "./render/Context";
@@ -32,13 +32,8 @@ function setupLayer(layer, context) {
 
     layer.clearContext(context);
 
-    if (this._globalContextModifier) {
-        this._globalContextModifier(context);
-    }
-    else {
-        if (layer.pageMatrix) {
-            layer.pageMatrix.applyToContext(context);
-        }
+    if (layer.pageMatrix) {
+        layer.pageMatrix.applyToContext(context);
     }
 }
 
@@ -94,6 +89,26 @@ export default class ViewBase { //TODO: implement IView
     private _viewportRect = Rect.Zero;
     private _viewportSize = Rect.Zero;
 
+    constructor(app) {
+        this._registredForLayerDraw = [[], [], []];
+
+        this.stopwatch = new Stopwatch("view", false);
+        this._captureElement = null;
+        this._width = 0;
+        this._height = 0;
+
+        this.viewMatrix = Matrix.create();
+
+        this.contextScale = 1;
+        this._focused = true;
+
+        this.scaleChanged = EventHelper.createEvent();
+        this.scaleMatrix = Matrix.create();
+
+        this._layers = [];
+        this.app = app;
+    }
+
     _registerLayer(layer) {
         this._layers.push(layer);
         layer._view = this;
@@ -106,7 +121,7 @@ export default class ViewBase { //TODO: implement IView
         }
     }
 
-    _drawLayer(layer, context, environment, skipSetup = false) {
+    _drawLayer(layer, context, environment: RenderEnvironment, skipSetup = false) {
         this.stopwatch.start();
         context.save();
         !skipSetup && setupLayer.call(this, layer, context);
@@ -160,45 +175,38 @@ export default class ViewBase { //TODO: implement IView
     }
 
     _getEnv(layer: any, final: boolean) {
-        let env: any = layer.env;
+        let env: RenderEnvironment = layer.env;
 
         if (!env) {
-            let setupLayerHandler = setupLayer.bind(this);
+            let setupLayerHandler = setupLayer.bind(this, layer);
             env = layer.env = {
-                layer: layer,
+                scale: this.scale(),
+                contextScale: this.contextScale,
+                flags: RenderFlags.Default,
+                pageMatrix: layer.pageMatrix,
                 setupContext: function (context) {
-                    setupLayerHandler(this.layer, context);
+                    setupLayerHandler(context);
                 }
             };
         }
 
         env.pageMatrix = layer.pageMatrix;
-        env.finalRender = final;
-        env.view = this;
+        env.scale = this.scale();
         env.contextScale = this.contextScale;
-        env.showFrames = this.app.showFrames();
+
+        this.updateFlag(env, RenderFlags.ShowFrames, this.app.showFrames());
+        this.updateFlag(env, RenderFlags.Final, final);
+
         return env;
     }
 
-
-    constructor(app) {
-        this._registredForLayerDraw = [[], [], []];
-
-        this.stopwatch = new Stopwatch("view", false);
-        this._captureElement = null;
-        this._width = 0;
-        this._height = 0;
-
-        this.viewMatrix = Matrix.create();
-
-        this.contextScale = 1;
-        this._focused = true;
-
-        this.scaleChanged = EventHelper.createEvent();
-        this.scaleMatrix = Matrix.create();
-
-        this._layers = [];
-        this.app = app;
+    private updateFlag(env: RenderEnvironment, flag: number, condition: boolean) {
+        if (condition) {
+            env.flags |= flag;
+        }
+        else {
+            env.flags &= ~flag;
+        }
     }
 
     setup(deps) {
@@ -223,10 +231,6 @@ export default class ViewBase { //TODO: implement IView
         }
 
         this.requestRedraw();
-    }
-
-    registerGlobalContextModifier(modifier) {
-        this._globalContextModifier = modifier;
     }
 
     registerForLayerDraw(layer, element, index?: number) {
@@ -304,58 +308,13 @@ export default class ViewBase { //TODO: implement IView
                 this._drawLayer(layer, layer.context, env);
             }
         }
-    }
 
-    renderElementToDataUrl(element: IUIElement, bounds?: IRect, dpr = this.contextScale) {
-        let sr = element.boundaryRect();
-        let tr = sr;
-
-        if (bounds) {
-            tr = sr.fit(bounds);
-        }
-
-        var context = ContextPool.getContext(tr.width, tr.height, dpr, true);
-        context.fillStyle = '#b7babd';
-        context.fillRect(0, 0, tr.width * dpr, tr.height * dpr);
-        this.renderElementToContext(element, context, sr.x, sr.y, tr.width / sr.width, dpr);
-
-        var res = context.canvas.toDataURL("image/png");
-        ContextPool.releaseContext(context);
-        return res;
-    }
-
-    private renderElementToContext(element: IUIElement, context: IContext, x = 0, y = 0, zoom = 1, dpr = this.contextScale) {
-        var rect = element.boundaryRect();
-        let bb = element.getBoundingBoxGlobal();
-        let normalizationMatrix = Matrix.createTranslationMatrix(-bb.x, -bb.y);
-
-        try {
-            GlobalMatrixModifier.push(m => m.prepended(normalizationMatrix));
-
-            context.save();
-            context.scale(dpr, dpr);
-
-            var matrix = Matrix.create();
-            matrix.translate(x - rect.x, y - rect.y);
-            matrix.scale(zoom, zoom);
-            matrix.applyToContext(context)
-            element.invalidate();
-            element.drawSelf(context, rect.width, rect.height, {
-                finalRender: true, pageMatrix: matrix, setupContext: (context) => {
-                    context.scale(dpr, dpr);
-                    matrix.applyToContext(context);
-                },
-                view: {
-                    scale: () => 1,
-                    focused: () => false,
-                    contextScale: dpr,
-                    viewportRect: () => Rect.Max
+        if (DEBUG) {
+            for (let i = 0; i < this.contexts.length; ++i) {
+                if (!this.contexts[i].isBalancedSaveRestore) {
+                    throw new Error(`Unbalanced context ${i} saveCount ${this.contexts[i].saveCount}`);
                 }
-            });
-            context.restore();
-        }
-        finally {
-            GlobalMatrixModifier.pop();
+            }
         }
     }
 

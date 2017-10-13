@@ -3,9 +3,10 @@ import UIElement from "framework/UIElement";
 import { Overflow, Types, ContentBehavior } from "./Defs";
 import Selection from "framework/SelectionModel";
 import DataNode from "framework/DataNode";
-import { ElementState } from "carbon-core";
+import { ElementState, RenderEnvironment } from "carbon-core";
 import RenderPipeline from "./render/RenderPipeline";
 import ContextPool from "./render/ContextPool";
+import { renderer } from "./render/Renderer";
 
 export default class ArtboardFrameControl extends UIElement {
     constructor() {
@@ -136,7 +137,7 @@ export default class ArtboardFrameControl extends UIElement {
         return null;
     }
 
-    drawSelf(context, w, h, environment) {
+    drawSelf(context, w, h, environment: RenderEnvironment) {
         if (this._drawing) {
             return;
         }
@@ -146,8 +147,8 @@ export default class ArtboardFrameControl extends UIElement {
             context.save();
             context.beginPath();
             context.rectPath(0, 0, w, h);
-            context.lineWidth = 1 * environment.view.contextScale;
-            context.setLineDash([4 * environment.view.contextScale, 2 * environment.view.contextScale]);
+            context.lineWidth = 1 * environment.contextScale;
+            context.setLineDash([4 * environment.contextScale, 2 * environment.contextScale]);
             context.strokeStyle = "#000";
             context.stroke();
 
@@ -181,7 +182,7 @@ export default class ArtboardFrameControl extends UIElement {
             scaleY = this.height() / source.height();
         }
 
-        let sourceContext = RenderPipeline.elementToContextFromPool(this._artboard, 1, scaleX, scaleY);
+        let sourceContext = renderer.elementToContextFromPool(this._artboard, 1, scaleX, scaleY);
 
         context.save();
 
@@ -228,8 +229,8 @@ export default class ArtboardFrameControl extends UIElement {
             context.save();
             context.beginPath();
             context.rectPath(0, 0, w, h);
-            context.lineWidth = 4 * environment.view.contextScale;
-            context.setLineDash([10 * environment.view.contextScale, 5 * environment.view.contextScale]);
+            context.lineWidth = 4 * environment.contextScale;
+            context.setLineDash([10 * environment.contextScale, 5 * environment.contextScale]);
             context.strokeStyle = "#000";
             context.stroke();
             context.restore();

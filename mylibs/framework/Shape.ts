@@ -8,7 +8,7 @@ import { Types, StrokePosition, LineCap, LineJoin } from "./Defs";
 import Image from "./Image";
 import Constraints from "./Constraints";
 import { IImage, IUIElement } from "carbon-model";
-import { ResizeDimension, ElementState } from "carbon-core";
+import { ResizeDimension, ElementState, RenderEnvironment, RenderFlags } from "carbon-core";
 import RenderPipeline from "./render/RenderPipeline";
 
 class Shape extends Container {
@@ -32,7 +32,7 @@ class Shape extends Container {
     performArrange() {
     }
 
-    _renderDraft(context, w, h, environment) {
+    _renderDraft(context, w, h, environment: RenderEnvironment) {
         var stroke = this.stroke();
         var strokePosition = this.strokePosition();
 
@@ -76,7 +76,7 @@ class Shape extends Container {
         Brush.stroke(this.stroke(), context, 0, 0, w, h);
     }
 
-    _renderFinal(context, w, h, environment) {
+    _renderFinal(context, w, h, environment: RenderEnvironment) {
         var stroke = this.stroke();
         var strokePosition = this.strokePosition();
 
@@ -129,7 +129,7 @@ class Shape extends Container {
         // else {
         //     var clippingRect = this.getBoundingBoxGlobal();
         //     clippingRect = this.expandRectWithBorder(clippingRect);
-        //     if (true || !environment.offscreen) {
+        //     if (true || !(environment.flags & RenderFlags.Offscreen)) {
         //         var p1 = environment.pageMatrix.transformPoint2(clippingRect.x, clippingRect.y);
         //         var p2 = environment.pageMatrix.transformPoint2(clippingRect.x + clippingRect.width, clippingRect.y + clippingRect.height);
         //         p1.x = Math.max(0, 0 | p1.x * environment.contextScale);
@@ -156,7 +156,7 @@ class Shape extends Container {
         //     offContext.translate(-p1.x, -p1.y);
         //     environment.setupContext(offContext);
 
-        //     // if(!environment.offscreen) {
+        //     // if(!(environment.flags & RenderFlags.Offscreen)) {
         //     this.applyViewMatrix(offContext);
         //     // }
 
@@ -179,7 +179,7 @@ class Shape extends Container {
         //     offContext.fillStyle = "black";
         //     offContext.fill();
 
-        //     // if(!environment.offscreen) {
+        //     // if(!(environment.flags & RenderFlags.Offscreen)) {
         //     context.resetTransform();
         //     // }
 
@@ -195,7 +195,7 @@ class Shape extends Container {
         return true;
     }
 
-    drawSelf(context, w, h, environment) {
+    drawSelf(context, w, h, environment: RenderEnvironment) {
         this.drawOutsetShadows(context, w, h, environment);
 
         context.save();
@@ -209,7 +209,7 @@ class Shape extends Container {
             context.setLineDash(dashPattern);
         }
 
-        if (environment.finalRender) {
+        if (environment.flags & RenderFlags.Final) {
             this._renderFinal(context, w, h, environment);
         } else {
             this._renderDraft(context, w, h, environment);
@@ -218,7 +218,7 @@ class Shape extends Container {
         context.restore();
     }
 
-    drawOutsetShadows(context, w, h, environment) {
+    drawOutsetShadows(context, w, h, environment: RenderEnvironment) {
         var shadows = this.props.shadows;
         var hasShadow = false;
         if (shadows && shadows.length) {
@@ -233,7 +233,7 @@ class Shape extends Container {
 
         return hasShadow;
     }
-    drawInsetShadows(context, w, h, environment) {
+    drawInsetShadows(context, w, h, environment: RenderEnvironment) {
         var shadows = this.props.shadows;
         var hasShadow = false;
         if (shadows && shadows.length) {

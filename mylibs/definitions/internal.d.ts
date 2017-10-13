@@ -21,6 +21,7 @@ declare module "carbon-geometry"{
 declare module "carbon-model"{
     import { ChangeMode, Font } from "carbon-basics";
     import { IRect, IMatrix, ISize } from "carbon-geometry";
+    import { RenderEnvironment } from "carbon-rendering";
 
     export interface IDataNode {
         primitivePath():any;
@@ -38,8 +39,8 @@ declare module "carbon-model"{
 
         primitiveRoot(): IPrimitiveRoot;
 
-        draw(context, environment);
-        drawSelf(context, w, h, environment);
+        draw(context, environment: RenderEnvironment);
+        drawSelf(context, w, h, environment: RenderEnvironment);
         //TODO: think how not to expose this on UIElement
         sourceId(value?: string): string;
 
@@ -61,6 +62,8 @@ declare module "carbon-model"{
         resetGlobalViewCache();
 
         contextBarAllowed(): boolean;
+
+        expandRectWithBorder(box: IRect): IRect;
     }
 
     export interface IUIElementProps extends IDataNodeProps {
@@ -80,7 +83,7 @@ declare module "carbon-model"{
 
 declare module "carbon-app"{
     import { IUIElement, IPrimitiveRoot } from 'carbon-model';
-    import { IContext } from "carbon-rendering";
+    import { IContext, RenderEnvironment } from "carbon-rendering";
     import { IEvent, ViewState, IPrimitive, IConstructor } from "carbon-basics";
     import { ISize } from "carbon-geometry";
 
@@ -137,6 +140,8 @@ declare module "carbon-app"{
         detach();
 
         updateViewportSize(size: ISize);
+
+        applyGuideFont(context: IContext): void;
     }
 
     export interface IController{

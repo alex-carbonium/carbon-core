@@ -11,7 +11,7 @@ import angleAdjuster from "math/AngleAdjuster";
 import PropertyMetadata from "./PropertyMetadata";
 import Rect from "../math/rect";
 import Point from "../math/point";
-import { ChangeMode } from "carbon-core";
+import { ChangeMode, RenderEnvironment } from "carbon-core";
 import { pointToLineDistance } from "../math/geometry";
 
 //TODO: add line width property
@@ -248,7 +248,7 @@ class Line extends Shape {
         context.linePath(p1.x, p1.y, p2.x, p2.y);
     }
 
-    drawSelf(context, w, h, environment) {
+    drawSelf(context, w, h, environment: RenderEnvironment) {
         context.save();
 
         var dashPattern = this.dashPattern();

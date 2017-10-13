@@ -7,6 +7,9 @@ let proxy = {
     upload(){
         return backend.post(backend.servicesEndpoint + "/api/file/upload");
     },
+    uploadUrl(model) {
+        return backend.post(backend.servicesEndpoint + "/api/file/uploadUrl", { model });
+    },
     delete(companyId, name){
         return backend.post(backend.servicesEndpoint + "/api/file/delete", { companyId, name });
     },
