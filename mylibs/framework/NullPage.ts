@@ -114,6 +114,9 @@ class NullPage extends UIElement implements IPage {
     parent() {
         return null;
     }
+    allowCaching() {
+        return false;
+    }
     isInitialized() {
         return true;
     }

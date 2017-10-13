@@ -41,6 +41,7 @@ import ExtensionPoint from "./ExtensionPoint";
 import CoreIntl from "../CoreIntl";
 import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
 import RenderPipeline from "./render/RenderPipeline";
+import ContextCacheManager from "./render/ContextCacheManager";
 
 require("../migrations/All");
 
@@ -176,13 +177,23 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             this.refreshMinSizeConstraints();
         }
 
+        this.clearRenderingCache();
+
         //raise events after all caches are updated
         super.propsUpdated.apply(this, arguments);
         this.invalidate(this.runtimeProps.ctxl);
     }
     propsPatched(patchType, propName, item) {
         super.propsPatched.apply(this, arguments);
+        this.clearRenderingCache();
         this.invalidate(this.runtimeProps.ctxl);
+    }
+
+    clearRenderingCache() {
+        if(this.runtimeProps.rc) {
+            ContextCacheManager.free(this.runtimeProps.rc);
+            delete this.runtimeProps.rc;
+        }
     }
 
     selectLayoutProps(global?: boolean): LayoutProps {
@@ -906,14 +917,18 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
         this.applyViewMatrix(context);
 
-        // var pipeline = RenderPipeline.createFor(this, context, environment);
+        var pipeline = RenderPipeline.createFor(this, context, environment);
 
-        // pipeline.out(context => {
-        this.clip(context);
-        this.drawSelf(context, w, h, environment);
-        // });
+        if(environment.disableCache) {
+            pipeline.disableCache();
+        }
 
-        // pipeline.done();
+        pipeline.out((context, environment) => {
+            this.clip(context);
+            this.drawSelf(context, w, h, environment);
+        });
+
+        pipeline.done();
 
         context.restore();
 
@@ -1038,6 +1053,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     dblclick(event, scale) {
     }
     click(event) {
+    }
+    allowCaching() {
+        return true;
     }
     // mouseLeaveElement(event) {
     // },

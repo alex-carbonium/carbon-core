@@ -268,6 +268,10 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         ContextPool.releaseContext(offContext)
     }
 
+    allowCaching() {
+        return this.runtimeProps.allowCache;
+    }
+
     draw(context, environment) {
         if (this.hasBadTransform()) {
             return;
@@ -311,7 +315,11 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
             pipeline.bufferOutput();
         }
 
-        pipeline.out((context)=>{
+        if(environment.disableCache) {
+            pipeline.disableCache();
+        }
+
+        pipeline.out((context, environment)=>{
             this.clip(context);
             this.drawSelf(context, w, h, environment);
         });
@@ -707,6 +715,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         }
         return false;
     }
+
     applyVisitorTLR(/*Visitor*/callback, useLogicalChildren?: boolean, parent?: any) {
         let stop = callback(this, parent);;
         if (stop === false) {
@@ -725,6 +734,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
         return !stop;
     }
+
     findActualParentForAncestorById(elementId) {
         let realParrent = null;
         this.applyVisitor(function (e, p) {

@@ -101,6 +101,10 @@ class Layer extends Container implements ILayer {
         return this._hitTransparent;
     }
 
+    allowCaching() {
+        return false;
+    }
+
     canAccept(elements: UIElement[]) {
         return elements.every(x => x.canBeAccepted(this));
     }

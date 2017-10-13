@@ -33,6 +33,9 @@ class NullContainer extends DataNode implements IContainer {
     }
     select(){}
     unselect(){}
+    allowCaching() {
+        return false;
+    }
 
     performArrange() { }
     applyVisitorTLR(callback:(e:IUIElement)=>boolean|void) {}

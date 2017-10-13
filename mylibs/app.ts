@@ -930,6 +930,19 @@ class AppClass extends DataNode implements IApp {
             }
         }
 
+        // updated all elements to see if caching is allowed for them
+        this.activePage.applyVisitor(e=>{
+            if(!e.children || !e.children.length) {
+                e.runtimeProps.allowCache = true;
+            } else {
+                let ctxl = e.runtimeProps.ctxl;
+                e.runtimeProps.allowCache = (e.children as any[]).every(child=>(child.runtimeProps.ctxl === ctxl) && child.allowCaching());
+                if(!e.runtimeProps.allowCache && e.runtimeProps.rc) {
+                    e.clearRenderingCache();
+                }
+            }
+        });
+
         Invalidate.request();
     }
 

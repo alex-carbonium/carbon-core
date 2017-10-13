@@ -81,7 +81,10 @@ class Shape extends Container {
         var strokePosition = this.strokePosition();
 
         var pipeline = RenderPipeline.createFor(this, context, environment);
-        pipeline.out((context)=>{
+        if(environment.disableCache) {
+            pipeline.disableCache();
+        }
+        pipeline.out((context, environment)=>{
             context.beginPath();
             this.drawPath(context, w, h);
             this.fillSelf(context, w, h);
@@ -93,12 +96,12 @@ class Shape extends Container {
         });
 
         if (!stroke || !stroke.type || strokePosition === StrokePosition.Center) {
-            pipeline.out(context=>{
+            pipeline.out((context, environment)=>{
                 context.lineWidth = this.strokeWidth();
                 this.strokeSelf(context, w, h);
             })
         } else {
-            pipeline.outBuffered(context=>{
+            pipeline.outBuffered((context, environment)=>{
                 context.beginPath();
                 this.drawPath(context, w, h);
 

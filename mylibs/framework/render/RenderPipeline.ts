@@ -4,8 +4,9 @@ import ContextPool from "./ContextPool";
 import Matrix from "math/matrix";
 import { IPooledObject } from "carbon-basics";
 import ObjectPool from "../ObjectPool";
+import ContextCacheManager from "./ContextCacheManager";
 
-let objectPool = new ObjectPool(()=>{
+let objectPool = new ObjectPool(() => {
     return new RenderPipeline();
 }, 10);
 
@@ -19,6 +20,7 @@ export default class RenderPipeline implements IPooledObject {
     private useTempBuffer: boolean = false;
 
     private startTime: number;
+    private useCache: boolean = false;
 
     reset() {
         this.element = null;
@@ -27,17 +29,18 @@ export default class RenderPipeline implements IPooledObject {
         this.startTime = 0;
         this.operations = [];
         this.useTempBuffer = false;
+        this.useCache = false;
     }
 
     free() {
         this.reset();
     }
 
-    out(callback: (context: IContext) => void) {
+    out(callback: (context: IContext, environment:any) => void) {
         this.operations.push({ type: 'out', callback });
     }
 
-    outBuffered(callback: (context: IContext) => void) {
+    outBuffered(callback: (context: IContext, environment:any) => void) {
         this.operations.push({ type: 'outBuffered', callback });
     }
 
@@ -56,35 +59,56 @@ export default class RenderPipeline implements IPooledObject {
         dest.restore();
     }
 
+    disableCache() {
+        this.useCache = false;
+    }
+
     done() {
         var ellapsedTime = performance.now() - this.startTime;
+        this.element.runtimeProps.lrt = ellapsedTime;
 
         this.context.save();
         var context: any = this.context;
-        if (this.useTempBuffer) {
-            context = RenderPipeline.getBufferedContext(this.element, this.environment);
-        }
 
-        for (var operation of this.operations) {
-            if (operation.type === 'out') {
-                context.save();
-                operation.callback(context);
-                context.restore();
-            } else if (operation.type === 'outBuffered') {
-                var tmpContext = RenderPipeline.getBufferedContext(this.element, this.environment);
-                tmpContext.save();
-                operation.callback(tmpContext);
-
-                this.mergeContexts(context, tmpContext);
-
-                tmpContext.restore();
-                ContextPool.releaseContext(tmpContext);
+        if (!this.element.runtimeProps.rc) {
+            if (this.useTempBuffer || this.useCache) {
+                context = RenderPipeline.getBufferedContext(this.element, this.environment);
             }
+
+            var environment = this.environment;
+            if(this.useCache) {
+                environment = Object.assign({}, environment, {disableCache:true});
+            }
+
+            for (var operation of this.operations) {
+                if (operation.type === 'out') {
+                    context.save();
+                    operation.callback(context, environment);
+                    context.restore();
+                } else if (operation.type === 'outBuffered') {
+                    var tmpContext = RenderPipeline.getBufferedContext(this.element, this.environment);
+                    tmpContext.save();
+                    operation.callback(tmpContext, environment);
+
+                    this.mergeContexts(context, tmpContext);
+
+                    tmpContext.restore();
+                    ContextPool.releaseContext(tmpContext);
+                }
+            }
+
+            if(this.useCache) {
+                this.element.runtimeProps.rc = context;
+            }
+        } else {
+            context = this.element.runtimeProps.rc;
         }
 
-        if (this.useTempBuffer) {
+        if (this.useTempBuffer || this.useCache) {
             this.mergeContexts(this.context, context);
-            ContextPool.releaseContext(context);
+            if(!this.useCache) {
+                ContextPool.releaseContext(context);
+            }
         }
         this.context.restore();
 
@@ -175,7 +199,7 @@ export default class RenderPipeline implements IPooledObject {
         sw = Math.max(sw, 1);
         sh = Math.max(sh, 1);
 
-        return { x: p1.x, y: p1.y, w: sw, h: sh, sx: clippingRect.x, sy:clippingRect.y }
+        return { x: p1.x, y: p1.y, w: sw, h: sh, sx: clippingRect.x, sy: clippingRect.y }
     }
 
     private static getBufferedContext(element, environment, forceSize = false) {
@@ -190,7 +214,7 @@ export default class RenderPipeline implements IPooledObject {
 
         environment.setupContext(offContext);
 
-        if(element.shouldApplyViewMatrix()) {
+        if (element.shouldApplyViewMatrix()) {
             element.applyViewMatrix(offContext);
         }
 
@@ -204,6 +228,9 @@ export default class RenderPipeline implements IPooledObject {
         pipeline.context = context;
         pipeline.environment = environment;
         pipeline.startTime = performance.now();
+        let box = element.getBoundingBox();
+
+        pipeline.useCache = (element.allowCaching() && ContextCacheManager.shouldCache(box.width * box.height, element.runtimeProps.lrt));
 
         return pipeline;
     }
