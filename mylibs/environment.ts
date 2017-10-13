@@ -2,6 +2,7 @@ import EventHelper from "./framework/EventHelper";
 import {IView, IController, IEnvironment, IEvent2} from "carbon-core";
 import ShortcutManager from "./ui/ShortcutManager";
 import UserSettings from "./UserSettings";
+import logger from "./logger";
 
 class Environment implements IEnvironment {
     attached: IEvent2<IView, IController>;
@@ -10,6 +11,7 @@ class Environment implements IEnvironment {
     controller: IController;
     shortcutManager = new ShortcutManager();
     settings = UserSettings;
+    fatalErrorOccurred = EventHelper.createEvent<void>();
 
     loaded: Promise<void>;
     resolveLoaded: () => void;
@@ -36,6 +38,11 @@ class Environment implements IEnvironment {
         if (this.view) {
             this.view.dispose();
         }
+    }
+
+    reportFatalError() {
+        logger.fatal("fatality");
+        this.fatalErrorOccurred.raise();
     }
 }
 

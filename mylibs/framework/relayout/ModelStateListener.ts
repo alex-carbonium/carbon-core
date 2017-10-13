@@ -56,7 +56,7 @@ class ModelStateListener {
             let initialOldProps = oldPrimitive.props;
 
             if (!initialOldProps || !oldProps) {
-                logger.error("BUG: ModelStateListener trackSetProps", {oldPrimitive: oldPrimitive.type, hasOldProps: !!oldProps});
+                logger.error("BUG: ModelStateListener trackSetProps", {oldPrimitiveType: oldPrimitive.type, oldPrimitivePath: oldPrimitive.path, hasOldProps: !!oldProps});
             }
             else {
                 // we need to keep original property in this frame, in case setProps called many times for the same property

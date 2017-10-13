@@ -939,8 +939,6 @@ class AppClass extends DataNode implements IApp {
 
         this.clear();
 
-        this.platform.run(this);
-
         let loggedIn = Promise.resolve();
         var stopwatch = new Stopwatch("AppLoad", true);
         if (!this.serverless()) {

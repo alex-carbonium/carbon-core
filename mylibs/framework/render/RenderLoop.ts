@@ -27,6 +27,8 @@ export default class RenderLoop implements IRenderLoop {
     private _view: IView = null;
     private _scale = 0;
 
+    private _suspended = false;
+
     public viewContainer: HTMLElement;
 
     mountDesignerView(app: IApp, viewport: HTMLElement, append = false) {
@@ -167,10 +169,21 @@ export default class RenderLoop implements IRenderLoop {
     }
 
     private draw() {
-        if (this._attached && this._app.isLoaded && this._view && this._view.page && this._view.page !== NullPage) {
-            this.ensureCanvasSize();
-            this._app.relayout();
-            this._view.draw();
+        if (this._suspended) {
+            return;
+        }
+
+        try {
+            if (this._attached && this._app.isLoaded && this._view && this._view.page && this._view.page !== NullPage) {
+                this.ensureCanvasSize();
+                this._app.relayout();
+                this._view.draw();
+            }
+        }
+        catch (e) {
+            Environment.reportFatalError();
+            this._suspended = true;
+            throw e;
         }
     }
 
