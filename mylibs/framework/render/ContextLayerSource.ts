@@ -1,5 +1,5 @@
 import ContextPool from "./ContextPool";
-import { IContext, IPooledObject, ContextType } from "carbon-core";
+import { IContext, IPooledObject, ContextType, RenderEnvironment, RenderFlags } from "carbon-core";
 import Selection from "framework/SelectionModel";
 import Context from "./Context";
 import Invalidate from "framework/Invalidate";
@@ -76,7 +76,7 @@ export default class ContextLayerSource extends Context {
         }
     }
 
-    beginElement(element) {
+    beginElement(element, environment: RenderEnvironment) {
         if (!this.rootElement) {
             this.rootElement = element;
         }
@@ -97,12 +97,14 @@ export default class ContextLayerSource extends Context {
 
         // console.log(`element: ${element.name()} on ${this._context._mask}`);
 
-        let parent = element.parent();
-        if (parent && parent.runtimeProps && parent.runtimeProps.ctxl !== ctxl) {
-            // potentially we need to clip this element
-            let relativeClip = this._relativeClippingStack[this._relativeClippingStack.length - 1];
-            if (this._relativeClippingStack.length === 0 || relativeClip.id !== parent.id() || relativeClip.context._mask !== ctxl) {
-                this._clipCurrentContext(parent);
+        if (environment.flags & RenderFlags.UseParentClipping) {
+            let parent = element.parent();
+            if (parent && parent.runtimeProps && parent.runtimeProps.ctxl !== ctxl) {
+                // potentially we need to clip this element
+                let relativeClip = this._relativeClippingStack[this._relativeClippingStack.length - 1];
+                if (this._relativeClippingStack.length === 0 || relativeClip.id !== parent.id() || relativeClip.context._mask !== ctxl) {
+                    this._clipCurrentContext(parent);
+                }
             }
         }
 

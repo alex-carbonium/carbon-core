@@ -1,6 +1,6 @@
 declare module "carbon-rendering" {
     import { IMatrix, IRect } from "carbon-geometry";
-    import { IView, IUIElement } from "carbon-core";
+    import { IView, IUIElement, Brush } from "carbon-core";
 
     export const enum ContextType {
         Content,
@@ -25,7 +25,9 @@ declare module "carbon-rendering" {
         filter: string;
         globalCompositeOperation:string;
 
-        beginElement(element): boolean;
+        readonly saveCount: number;
+
+        beginElement(element, environment: RenderEnvironment): boolean;
         endElement(element): void;
 
         rect(x: number, y: number, width: number, height: number);
@@ -71,12 +73,12 @@ declare module "carbon-rendering" {
     export const enum RenderFlags {
         None = 0,
         Final = 1 << 0,
-        Clipping = 1 << 1,
-        Fill = 1 << 2,
+        UseParentClipping = 1 << 1,
+        ArtboardFill = 1 << 2,
         ShowFrames = 1 << 3,
         Offscreen = 1 << 4,
         CheckViewport = 1 << 5,
-        Default = Final | Clipping | Fill | CheckViewport
+        Default = Final | ArtboardFill | UseParentClipping | CheckViewport
     }
 
     export type RenderEnvironment = {
@@ -84,6 +86,8 @@ declare module "carbon-rendering" {
         scale: number;
         pageMatrix: IMatrix;
         flags: RenderFlags;
+        fill: Brush | null;
+        stroke: Brush | null;
         //TODO: check if this can be removed or called on some other class
         setupContext: (context: IContext) => void;
     }

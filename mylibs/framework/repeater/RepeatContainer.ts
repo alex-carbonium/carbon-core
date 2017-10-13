@@ -375,9 +375,9 @@ export default class RepeatContainer extends Container implements IRepeatContain
         return true;
     }
 
-    strokeBorder(context, w, h) {
+    strokeBorder(context, w, h, environment) {
         if (Brush.canApply(this.stroke())) {
-            super.strokeBorder(context, w, h);
+            super.strokeBorder(context, w, h, environment);
             return;
         }
         if (!this.lockedGroup()) {

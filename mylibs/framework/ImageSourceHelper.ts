@@ -6,12 +6,12 @@ import Matrix from "../math/matrix";
 import { ContentSizing, ImageSource, ImageSourceType } from "carbon-model";
 import { IRect } from "carbon-geometry";
 import DataNode from "./DataNode";
-import { ChangeMode } from "carbon-core";
+import { ChangeMode, RenderEnvironment, RenderFlags } from "carbon-core";
 import UserSettings from "../UserSettings";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
 
 export default class ImageSourceHelper {
-    static draw(source: ImageSource, context, w, h, sourceElement, environment) {
+    static draw(source: ImageSource, context, w, h, sourceElement, environment: RenderEnvironment) {
         let props = sourceElement.props;
         let runtimeProps = sourceElement.runtimeProps.sourceProps;
 
@@ -160,7 +160,7 @@ export default class ImageSourceHelper {
         }
     }
 
-    private static drawElement(context, w, h, sourceElement, props, runtimeProps, environment) {
+    private static drawElement(context, w, h, sourceElement, props, runtimeProps, environment: RenderEnvironment) {
         if (!runtimeProps || !runtimeProps.element) {
             return;
         }
@@ -169,34 +169,38 @@ export default class ImageSourceHelper {
 
         context.save();
 
-        var box = element.getBoundingBoxGlobal();
+        var box = element.getBoundingBox();
         var scaleX = w / box.width;
         var scaleY = h / box.height;
 
-        var iconMatrix = Matrix.createPooled();
-        iconMatrix.scale(scaleX, scaleY);
-        iconMatrix.translate(-box.x, -box.y);
-        let originalCtxl  = element.runtimeProps.ctxl;
+        context.scale(scaleX, scaleY);
+
+        if (element.shouldApplyViewMatrix()) {
+            element.globalViewMatrixInverted().applyToContext(context);
+        }
+        else {
+            context.translate(-box.x, -box.y);
+            element.parent().globalViewMatrixInverted().applyToContext(context);
+        }
+
+        let originalCtxl = element.runtimeProps.ctxl;
+        let originalFlags = environment.flags;
+        let oldFill = environment.fill;
+        let oldStroke = environment.stroke;
         try {
-            //The global context needs to be replaced. Scenario:
-            // - export is made and global context already modified by offsetting the exported element
-            // - now we draw element from some arbitrary artboard and need to apply the transformation logic,
-            // but with different values
-            GlobalMatrixModifier.replace(m => m.prepended(iconMatrix));
-
-            var oldFill = element.getDisplayPropValue('fill');
-            var oldStroke = element.getDisplayPropValue('stroke');
-            var oldStrokeWidth = element.getDisplayPropValue('strokeWidth');
-            element.setDisplayProps({ fill: props.fill, stroke: props.stroke, strokeWidth: props.strokeWidth }, ChangeMode.Self);
-
             element.runtimeProps.ctxl = sourceElement.runtimeProps.ctxl;
-            element.draw(context, Object.assign({}, environment, { viewportRect: null }));
+            environment.flags &= ~RenderFlags.UseParentClipping;
+            environment.flags &= ~RenderFlags.CheckViewport;
+            environment.fill = props.fill;
+            environment.stroke = props.stroke;
+
+            element.draw(context, environment);
         }
         finally {
             element.runtimeProps.ctxl = originalCtxl;
-            element.setDisplayProps({ fill: oldFill, stroke: oldStroke, strokeWidth: oldStrokeWidth }, ChangeMode.Self);
-            GlobalMatrixModifier.restore();
-            iconMatrix.free();
+            environment.flags = originalFlags;
+            environment.fill = oldFill;
+            environment.stroke = oldStroke;
         }
         context.restore();
     }

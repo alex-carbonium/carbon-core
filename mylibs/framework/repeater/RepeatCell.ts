@@ -104,9 +104,9 @@ export default class RepeatCell extends Container implements IGroupContainer, IR
         return true;
     }
 
-    strokeBorder(context, w, h) {
+    strokeBorder(context, w, h, environment) {
         if (this.runtimeProps.unlocked) {
-            super.strokeBorder(context, w, h);
+            super.strokeBorder(context, w, h, environment);
         }
     }
 

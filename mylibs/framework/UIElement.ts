@@ -36,7 +36,7 @@ import { PropertyDescriptor } from './PropertyMetadata';
 import { KeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
-import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps, RenderFlags, RenderEnvironment } from "carbon-core";
+import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps, RenderFlags, RenderEnvironment, IContext } from "carbon-core";
 import ExtensionPoint from "./ExtensionPoint";
 import CoreIntl from "../CoreIntl";
 import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
@@ -874,7 +874,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     isInViewport(viewportRect: IRect) {
         return areRectsIntersecting(viewportRect, this.getBoundingBoxGlobal(true));
     }
-    draw(context, environment: RenderEnvironment) {
+    draw(context: IContext, environment: RenderEnvironment) {
         if (this.hasBadTransform()) {
             return;
         }
@@ -895,12 +895,21 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return;
         }
 
-        if (!context.beginElement(this)) {
+        if (!context.beginElement(this, environment)) {
             context.endElement(this);
             return;
         }
 
         var saveCount = context.saveCount;
+
+        let oldFill = this.props.fill;
+        let oldStroke = this.props.stroke;
+        if (environment.fill) {
+            this.props.fill = environment.fill;
+        }
+        if (environment.stroke) {
+            this.props.stroke = environment.stroke;
+        }
 
         context.save();
         context.globalAlpha = this.opacity();
@@ -917,6 +926,13 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         // pipeline.done();
 
         context.restore();
+
+        if (environment.fill) {
+            this.props.fill = oldFill;
+        }
+        if (environment.stroke) {
+            this.props.stroke = oldStroke;
+        }
 
         context.endElement(this);
         // this.drawDecorators(context, w, h, environment);
@@ -1397,9 +1413,6 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             this.setProps({ visibleWhenDrag: value });
         }
         return this.props.visibleWhenDrag;
-    }
-    standardBackground(value?: boolean) {
-        return this.field("_standardBackground", value, true);
     }
     name(value?: string) {
         if (value !== undefined) {
