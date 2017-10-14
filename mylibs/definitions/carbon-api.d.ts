@@ -55,6 +55,7 @@ declare module "carbon-api" {
         requestEnded: IEvent<string>;
 
         accountProxy: IAccountProxy;
+        projectProxy: IProjectProxy;
         shareProxy: IShareProxy;
         staticResourcesProxy: IStaticResourcesProxy;
         fileProxy: IFileProxy;
@@ -62,6 +63,7 @@ declare module "carbon-api" {
         galleryProxy: IGalleryProxy;
         activityProxy: IActivityProxy;
         dataProxy: IDataProxy;
+        dashboardProxy: IDashboardProxy;
     }
 
     export type Response<TModel, TResult> =
@@ -80,6 +82,11 @@ declare module "carbon-api" {
     export interface IDashboardProxy {
         dashboard(companyId: string): Promise<any>;
         deleteProject(companyId:string, projectId:string): Promise<any>;
+        duplicateProject(companyId:string, projectId:string): Promise<any>;
+    }
+
+    export interface IProjectProxy {
+        getModel(companyId: string, modelId: string): Promise<{}>;
     }
 
     export type UserImage = {
@@ -274,7 +281,6 @@ declare module "carbon-api" {
 
     export const logger: ILogger;
     export const backend: IBackend;
-    export const DashboardProxy: IDashboardProxy;
     export const FileProxy: IFileProxy;
 
     export {LoginProvider} from "carbon-basics";
