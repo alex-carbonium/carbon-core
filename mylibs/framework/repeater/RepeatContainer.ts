@@ -93,9 +93,11 @@ export default class RepeatContainer extends Container implements IRepeatContain
     }
 
     saveOrResetLayoutProps(mode: ChangeMode) {
-        if (!super.saveOrResetLayoutProps(mode)) {
+        let res = super.saveOrResetLayoutProps(mode);
+        if (!res) {
             this.performArrange(null, mode);
         }
+        return res;
     }
 
     seed(): string {
