@@ -106,7 +106,7 @@ var LinePoint = {
         point.x = Math.round(frame.origPointX + dx);
         point.y = Math.round(frame.origPointY + dy);
 
-        frame.resizingElement.saveOrResetLayoutProps();
+        frame.resizingElement.saveOrResetLayoutProps(ChangeMode.Self);
         point.updateElement(frame.resizingElement, dx, dy);
         Invalidate.requestInteractionOnly();
     }
@@ -211,6 +211,7 @@ class Line extends Shape {
         path.adjustBoundaries();
         path.name(this.name());
         path.setProps(this.selectLayoutProps());
+        path.runtimeProps.ctxl = this.runtimeProps.ctxl;
 
         return path;
     }

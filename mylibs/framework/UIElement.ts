@@ -45,6 +45,7 @@ import RenderPipeline from "./render/RenderPipeline";
 require("../migrations/All");
 
 export interface IUIElementRuntimeProps {
+    ctxl: number;
     primitivePath: string[];
     primitiveRootKey: string;
 }
@@ -326,7 +327,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
     applyGlobalTranslation(t, withReset?: boolean, changeMode?: ChangeMode) {
         if (withReset) {
-            this.saveOrResetLayoutProps(changeMode);
+            this.saveOrResetLayoutProps(ChangeMode.Self);
         }
         let m = this.globalViewMatrix().prependedWithTranslation(t.x, t.y);
         m = this.parent().globalViewMatrixInverted().appended(m);
@@ -339,7 +340,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     applyRotation(angle, o, withReset?: boolean, mode?: ChangeMode) {
         if (withReset) {
-            this.saveOrResetLayoutProps(mode);
+            this.saveOrResetLayoutProps(ChangeMode.Self);
         }
         this.applyTransform(Matrix.create().rotate(-angle, o.x, o.y), false, mode);
     }
@@ -360,7 +361,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     applyScaling(s, o, options?: ResizeOptions, changeMode?: ChangeMode) {
         options = options || ResizeOptions.Once;
         if (options.reset) {
-            this.saveOrResetLayoutProps(changeMode);
+            this.saveOrResetLayoutProps(ChangeMode.Self);
         }
 
         if (options.sameDirection || !this.isRotated()) {

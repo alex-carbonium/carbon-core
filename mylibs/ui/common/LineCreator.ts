@@ -145,7 +145,8 @@ export default class LineCreator extends Tool {
             e.applyViewMatrix(context);
             e.drawSelf(context, e.width(), e.height(), environment);
             context.restore();
-        } else  {
+        }
+        else if (this._startPoint) {
             context.save();
             var scale = Environment.view.scale();
             context.fillStyle = UserSettings.path.pointFill;

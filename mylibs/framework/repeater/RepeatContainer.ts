@@ -92,6 +92,12 @@ export default class RepeatContainer extends Container implements IRepeatContain
         return changes.hasOwnProperty("innerMarginX") || changes.hasOwnProperty("innerMarginY");
     }
 
+    saveOrResetLayoutProps(mode: ChangeMode) {
+        if (!super.saveOrResetLayoutProps(mode)) {
+            this.performArrange(null, mode);
+        }
+    }
+
     seed(): string {
         return this.id();
     }
@@ -279,8 +285,8 @@ export default class RepeatContainer extends Container implements IRepeatContain
         this.runtimeProps.internalUpdate = false;
     }
 
-    performArrange(oldRect, mode: ChangeMode = ChangeMode.Model): void {
-        super.performArrange(oldRect, mode);
+    performArrange(e?, mode: ChangeMode = ChangeMode.Model): void {
+        super.performArrange(e, mode);
         if (mode === ChangeMode.Model) {
             RepeatMarginTool.updateIfAttached(this);
         }
