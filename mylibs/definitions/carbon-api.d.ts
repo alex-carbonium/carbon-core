@@ -291,6 +291,7 @@ declare module "carbon-api" {
         coreCallback: () => void;
         resourceFile: string;
         backend?: IBackend;
+        appInsights?: Microsoft.ApplicationInsights.IAppInsights;
     }
     export const globals: CarbonGlobals;
 

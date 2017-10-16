@@ -1,7 +1,6 @@
-import appInsights from "./appInsights";
+import {appInsights, appInsightsEnabled} from "./appInsights";
 import { ILogger } from "carbon-api";
 
-var appInsightsEnabled = !!appInsights;
 var tracingEnabled = !!localStorage.getItem("trace");
 
 function ErrorCounter(){
@@ -137,7 +136,7 @@ export class Logger implements ILogger {
         appInsightsEnabled && appInsights.trackEvent(name, properties, metrics);
     }
     trackMetric(name, value){
-        appInsightsEnabled && appInsights.trackeMetric(name, value);
+        appInsightsEnabled && appInsights.trackMetric(name, value);
     }
 }
 
