@@ -76,6 +76,7 @@ declare module "carbon-rendering" {
         ShowFrames = 1 << 3,
         Offscreen = 1 << 4,
         CheckViewport = 1 << 5,
+        DisableCaching = 1 << 6,
         Default = Final | Clipping | Fill | CheckViewport
     }
 

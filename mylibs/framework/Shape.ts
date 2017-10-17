@@ -81,7 +81,7 @@ class Shape extends Container {
         var strokePosition = this.strokePosition();
 
         var pipeline = RenderPipeline.createFor(this, context, environment);
-        if(environment.disableCache) {
+        if(environment.flags & RenderFlags.DisableCaching) {
             pipeline.disableCache();
         }
         pipeline.out((context, environment)=>{

@@ -935,4 +935,9 @@ export default class Context implements IContext {
     get lineDashOffset() {
         return this._context.lineDashOffset;
     }
+
+    logToConsole() {
+        let data = this._context.canvas.toDataURL("image/png");
+        console.log("%c                                                             ",`font-size:128px;display:block;width:240px;height:240px;background-repeat:no-repeat;background-size:contain;background-image:url('${data}');`);
+    }
 }

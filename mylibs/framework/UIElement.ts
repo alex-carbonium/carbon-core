@@ -196,6 +196,10 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
     }
 
+    hasCachedRender() {
+        return !!this.runtimeProps.rc;
+    }
+
     selectLayoutProps(global?: boolean): LayoutProps {
         let m = global ? this.globalViewMatrix() : this.viewMatrix();
         return {
@@ -908,6 +912,10 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
         if (!context.beginElement(this)) {
             context.endElement(this);
+
+            if (params.perf) {
+                performance.measure(markName, markName);
+            }
             return;
         }
 
@@ -920,7 +928,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
         var pipeline = RenderPipeline.createFor(this, context, environment);
 
-        if(environment.disableCache) {
+        if(environment.flags & RenderFlags.DisableCaching) {
             pipeline.disableCache();
         }
 
@@ -1056,7 +1064,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     click(event) {
     }
     allowCaching() {
-        return true;
+        return this.runtimeProps.ctxl !== 2;
     }
     // mouseLeaveElement(event) {
     // },

@@ -109,6 +109,14 @@ export default class ContextLayerSource extends Context {
         return true;
     }
 
+    logAllToConsole() {
+        for(var i = 0; i < this._contexts.length; ++i) {
+            let ctx = this._contexts[i];
+            console.log(`${i}: mask: ${ctx._mask}`);
+            ctx.logToConsole();
+        }
+    }
+
     endElement(element) {
         var ctxl = element.runtimeProps.ctxl;
         if (ctxl !== undefined) {

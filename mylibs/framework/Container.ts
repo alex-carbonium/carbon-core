@@ -270,9 +270,9 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     }
 
     allowCaching() {
-        return this.runtimeProps.allowCache;
+        return !!this.runtimeProps.allowCache && super.allowCaching();
     }
-    
+
     draw(context, environment: RenderEnvironment) {
         if (this.hasBadTransform()) {
             return;
@@ -303,6 +303,10 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
             context.restore();
             context.endElement(this)
+
+            if (params.perf) {
+                performance.measure(markName, markName);
+            }
             return;
         }
         context.save();
@@ -316,7 +320,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
             pipeline.bufferOutput();
         }
 
-        if(environment.disableCache) {
+        if(environment.flags & RenderFlags.DisableCaching) {
             pipeline.disableCache();
         }
 
