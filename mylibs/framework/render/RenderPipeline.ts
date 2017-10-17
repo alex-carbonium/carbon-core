@@ -5,6 +5,7 @@ import Matrix from "math/matrix";
 import { IPooledObject } from "carbon-basics";
 import ObjectPool from "../ObjectPool";
 import ContextCacheManager from "./ContextCacheManager";
+import Rect from "../../math/rect";
 
 var debug = require("../../DebugUtil")("carb:rendercache");
 
@@ -74,9 +75,9 @@ export default class RenderPipeline implements IPooledObject {
         var justCached = false;
         if (!this.element.runtimeProps.rc) {
             if (this.useTempBuffer || this.useCache) {
-                context = RenderPipeline.getBufferedContext(this.element, this.environment, this.useCache);
+                context = RenderPipeline.getBufferedContext(this.element, this.environment, this.useCache || (environment.flags & RenderFlags.DisableCaching));
                 // debug("caching %s", this.element.name());
-                justCached = true;
+                justCached = this.useCache;
             }
 
             if (this.useCache) {
@@ -142,6 +143,17 @@ export default class RenderPipeline implements IPooledObject {
     private static getContextDimensions(element, environment: RenderEnvironment, forCache: boolean) {
         let clippingRect = element.getBoundingBoxGlobal();
         clippingRect = element.expandRectWithBorder(clippingRect);
+
+        if (element.props.hitTestBox) {
+            let gm = element.globalViewMatrix();
+            var rect = Rect.allocateFromRect(element.props.hitTestBox);
+            rect.x += gm.tx;
+            rect.y += gm.ty;
+
+            clippingRect = rect.combine(clippingRect);
+            rect.free();
+        }
+
         var p1 = environment.pageMatrix.transformPoint2(clippingRect.x, clippingRect.y);
         var p2 = environment.pageMatrix.transformPoint2(clippingRect.x + clippingRect.width, clippingRect.y + clippingRect.height);
         p1.x = 0 | p1.x * environment.contextScale;
@@ -160,7 +172,9 @@ export default class RenderPipeline implements IPooledObject {
         sw = Math.max(sw, 1);
         sh = Math.max(sh, 1);
 
-        return { x: p1.x, y: p1.y, w: sw, h: sh, sx: clippingRect.x, sy: clippingRect.y }
+        var res = { x: p1.x, y: p1.y, w: sw, h: sh, sx: clippingRect.x, sy: clippingRect.y }
+
+        return res;
     }
 
     private static getBufferedContext(element, environment: RenderEnvironment, forceSize) {
