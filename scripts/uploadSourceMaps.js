@@ -15,15 +15,17 @@ service.createContainerIfNotExists(container, function () {
     var tasks = [];
     for (var i = 0; i < files.length; ++i) {
         var file = path.join(dir, files[i]);
-        tasks.push(
-            gzipFile(file)
-                .then(zipped => uploadFile(zipped, path.basename(file)))
-        );
+        tasks.push(gzipAndUploadFile(file));
     }
     Promise.all(tasks)
         .then(() => console.log("Files uploaded"))
         .catch(e => console.log(e));
 });
+
+function gzipAndUploadFile(file) {
+    return gzipFile(file)
+        .then(zipped => uploadFile(zipped, path.basename(file)))
+}
 
 function uploadFile(file, blobName) {
     return new Promise((resolve, reject) => {
