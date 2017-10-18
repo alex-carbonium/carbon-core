@@ -285,13 +285,12 @@ declare module "carbon-api" {
 
     export {LoginProvider} from "carbon-basics";
 
-    export type CarbonGlobals = {
+    export interface CarbonGlobals {
         coreScript: string;
         coreLoaded: boolean;
         coreCallback: () => void;
         resourceFile: string;
         backend?: IBackend;
-        appInsights?: Microsoft.ApplicationInsights.IAppInsights;
     }
     export const globals: CarbonGlobals;
 
@@ -327,6 +326,7 @@ declare module "carbon-api" {
             storage: string;
             cdn: string;
             file: string;
+            error: string;
         };
         transport: "auto" | "nows";
         serveless: boolean;

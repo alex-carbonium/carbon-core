@@ -35,7 +35,8 @@ if (DEBUG){
             services: '//dev.carbonium.io',
             storage: '//dev.carbonium.io:9100',
             cdn: RealCdn,
-            file: '//carbonstorageqa1.blob.core.windows.net/'
+            file: '//carbonstorageqa1.blob.core.windows.net/',
+            error: 'https://carbon-functions-qa1.azurewebsites.net/api/trackError'
         }
     }
     else{
@@ -45,6 +46,7 @@ if (DEBUG){
         endpoints.services = endpoints.services || "//"+ window.location.hostname + ":9000";
         endpoints.storage = endpoints.storage || "//"+ window.location.hostname + ":9100";
         endpoints.file = endpoints.file || "//127.0.0.1:10000/devstoreaccount1";
+        endpoints.error = "";
     }
 }
 
