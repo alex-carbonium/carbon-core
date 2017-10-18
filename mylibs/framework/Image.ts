@@ -1,4 +1,4 @@
-import UIElement from "./UIElement";
+import UIElement, { IUIElementRuntimeProps } from "./UIElement";
 import Container from "./Container";
 import ImageSourceHelper from "./ImageSourceHelper";
 import PropertyMetadata from "./PropertyMetadata";
@@ -14,7 +14,7 @@ import { ChangeMode, IContext, RenderEnvironment } from "carbon-core";
 
 const DefaultSizing = ContentSizing.fill;
 
-interface IImageRuntimeProps{
+interface IImageRuntimeProps extends IUIElementRuntimeProps {
     loaded: boolean;
     resizeOnLoad?: OriginType|null;
     sourceProps?: any;
@@ -277,6 +277,7 @@ export default class Image extends Container<IImageProps> implements IImage {
             .then(svg => {
                 return window['svgParser'].loadSVGFromString(svg).then((result) => {
                     result.setProps({ x: this.x(), y: this.y() });
+                    result.runtimeProps.ctxl = this.runtimeProps.ctxl;
                     return result;
                 });
             });

@@ -21,7 +21,7 @@ import RenderPipeline from "./render/RenderPipeline";
 import params from "params";
 import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
-import { RenderEnvironment, RenderFlags } from "carbon-core";
+import { RenderEnvironment, RenderFlags, IContext } from "carbon-core";
 
 export default class Container<TProps extends IContainerProps = IContainerProps> extends UIElement<TProps> implements IContainer<IContainerProps> {
     props: TProps;
@@ -56,8 +56,8 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         this.children.forEach(x => x.skew());
     }
 
-    fillBackground(context, l, t, w, h) {
-        if (Brush.canApply(this.fill()) && this.standardBackground()) {
+    fillBackground(context, l, t, w, h, environment: RenderEnvironment) {
+        if (Brush.canApply(this.fill())) {
             context.save();
             this.globalViewMatrix().applyToContext(context);
             context.beginPath();
@@ -66,11 +66,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
             context.restore();
         }
     }
-    strokeBorder(context, w, h) {
-        if (!this.standardBackground()) {
-            return;
-        }
-
+    strokeBorder(context, w, h, environment: RenderEnvironment) {
         let stroke = this.stroke();
         if (Brush.canApply(stroke)) {
             context.save();
@@ -126,9 +122,9 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     }
 
     drawSelf(context, w, h, environment: RenderEnvironment) {
-        this.fillBackground(context, 0, 0, w, h);
+        this.fillBackground(context, 0, 0, w, h, environment);
         this.drawChildren(context, w, h, environment);
-        this.strokeBorder(context, w, h);
+        this.strokeBorder(context, w, h, environment);
     }
 
     minWidth() {
@@ -272,8 +268,8 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     allowCaching() {
         return !!this.runtimeProps.allowCache && super.allowCaching();
     }
-
-    draw(context, environment: RenderEnvironment) {
+    
+    draw(context: IContext, environment: RenderEnvironment) {
         if (this.hasBadTransform()) {
             return;
         }
@@ -295,7 +291,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
             return;
         }
 
-        if(!context.beginElement(this)) {
+        if(!context.beginElement(this, environment)) {
             context.save();
             if (this.children) {
                 this.drawChildren(context, w, h, environment);
@@ -309,6 +305,16 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
             }
             return;
         }
+
+        let oldFill = this.props.fill;
+        let oldStroke = this.props.stroke;
+        if (environment.fill) {
+            this.props.fill = environment.fill;
+        }
+        if (environment.stroke) {
+            this.props.stroke = environment.stroke;
+        }
+
         context.save();
         context.globalAlpha = this.opacity();
 
@@ -332,6 +338,14 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         pipeline.done();
 
         context.restore();
+
+        if (environment.fill) {
+            this.props.fill = oldFill;
+        }
+        if (environment.stroke) {
+            this.props.stroke = oldStroke;
+        }
+
         context.endElement(this);
 
         if (params.perf) {

@@ -1,4 +1,4 @@
-import { IContext, ContextType } from "carbon-core";
+import { IContext, ContextType, RenderEnvironment } from "carbon-core";
 
 export default class ContextStub implements IContext {
     type = ContextType.Content;
@@ -13,8 +13,9 @@ export default class ContextStub implements IContext {
     globalAlpha: number;
     filter: string;
     globalCompositeOperation: string;
+    saveCount = 0;
 
-    beginElement(element: any): boolean {
+    beginElement(element: any, environment: RenderEnvironment): boolean {
         return true;
     }
     endElement(element: any): void {

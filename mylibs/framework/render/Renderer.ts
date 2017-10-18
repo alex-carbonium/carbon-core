@@ -58,7 +58,9 @@ export class Renderer implements IRenderer {
             },
             pageMatrix: pageMatrix,
             contextScale: contextScale,
-            scale: 1
+            scale: 1,
+            fill: null,
+            stroke: null
         };
 
         context.save();

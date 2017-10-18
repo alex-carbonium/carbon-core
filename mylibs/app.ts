@@ -962,8 +962,6 @@ class AppClass extends DataNode implements IApp {
 
         this.clear();
 
-        this.platform.run(this);
-
         let loggedIn = Promise.resolve();
         var stopwatch = new Stopwatch("AppLoad", true);
         if (!this.serverless()) {
@@ -1036,9 +1034,9 @@ class AppClass extends DataNode implements IApp {
 
     loadData() {
         if (!this.id()) {
-            return Promise.resolve();
+            return Promise.resolve(null);
         }
-        return this.modelSyncProxy.getLatest();
+        return backend.projectProxy.getModel(this.companyId(), this.id());
     }
 
     get pages(): IPage[] {

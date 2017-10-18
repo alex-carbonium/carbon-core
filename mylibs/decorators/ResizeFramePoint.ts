@@ -60,6 +60,7 @@ export default {
         frame.resizeOptions = ResizeOptions.Default;
         frame.allowSnapping = true;
         frame.element.clearSavedLayoutProps();
+        frame.scalingVector = new Point(1, 1);
 
         debug("Captured rect: x=%d y=%d w=%d h=%d", frame.originalRect.x, frame.originalRect.y, frame.originalRect.width, frame.originalRect.height);
 
@@ -77,8 +78,14 @@ export default {
     },
     release: function (frame, point, event: IMouseEventData) {
         if (frame.element) {
-            var newSnapshot = TransformationHelper.getPropSnapshot(frame.elements);
-            TransformationHelper.moveBetweenSnapshots(frame.elements, frame.snapshot, newSnapshot);
+            //var newSnapshot = TransformationHelper.getPropSnapshot(frame.elements);
+            //TransformationHelper.moveBetweenSnapshots(frame.elements, frame.snapshot, newSnapshot);
+            //let oppositeVector = Point.allocate(1 / frame.scalingVector.x, 1 / frame.scalingVector.y);
+            // /frame.element.applyScaling(oppositeVector, frame.origin, frame.resizeOptions, ChangeMode.Self);
+            // /oppositeVector.free();
+
+            let finalOptions = frame.resizeOptions.withFinal(true);
+            frame.element.applyScaling(frame.scalingVector, frame.origin, finalOptions, ChangeMode.Model);
 
             //frame.resizingElement.saveChanges();
             // frame.resizingElement.detach();
@@ -128,22 +135,21 @@ export default {
         dx *= rv[0];
         dy *= rv[1];
 
-        var origin;
         if (keys.altKey){
-            origin = frame.centerOrigin;
+            frame.origin = frame.centerOrigin;
             dx *= 2;
             dy *= 2;
         }
         else {
-            origin = frame.pointOrigin;
+            frame.origin = frame.pointOrigin;
         }
 
-        var s = new Point(1 + dx / frame.originalRect.width, 1 + dy / frame.originalRect.height);
+        frame.scalingVector.set(1 + dx / frame.originalRect.width, 1 + dy / frame.originalRect.height);
 
         var round = !frame.isRotated && UserSettings.snapTo.enabled && UserSettings.snapTo.pixels;
         if (round) {
             var oldRect = frame.originalBoundingBox;
-            var newRect = oldRect.scale(s, origin).roundMutable();
+            var newRect = oldRect.scale(frame.scalingVector, frame.origin).roundMutable();
             var minWidth = frame.element.minWidth();
             var minHeight = frame.element.minHeight();
 
@@ -154,11 +160,11 @@ export default {
             if (minHeight && newRect.height < minHeight) {
                 newRect.height = minHeight;
             }
-            s.set(newRect.width / oldRect.width, newRect.height / oldRect.height);
+            frame.scalingVector.set(newRect.width / oldRect.width, newRect.height / oldRect.height);
         }
 
-        var resizeOptions = frame.resizeOptions.withRounding(round && frame.globalViewMatrix.isTranslatedOnly());
-        frame.element.applyScaling(s, origin, resizeOptions, ChangeMode.Self);
+        frame.resizeOptions = ResizeOptions.Default.withRounding(round && frame.globalViewMatrix.isTranslatedOnly());
+        frame.element.applyScaling(frame.scalingVector, frame.origin, frame.resizeOptions, ChangeMode.Self);
 
         if (keys.altKey) {
             // When resizing (for example) text, it can change its width and get misplaced.

@@ -12,12 +12,12 @@ require("../libs/jquery.signalR-2.1.1");
 let backend = require("./backend");
 let logger = require("./logger");
 let globals = require("./globals");
-let DashboardProxy = require("./server/DashboardProxy");
 let util = require("./util");
 //TODO: split platform
 let platform = require("./params");
 
 require("./server/AccountProxy");
+require("./server/DashboardProxy");
 require("./server/StaticResourcesProxy");
 require("./server/ShareProxy");
 require("./server/FileProxy");
@@ -25,5 +25,6 @@ require("./server/fontsProxy");
 require("./server/GalleryProxy");
 require("./server/ActivityProxy");
 require("./server/DataProxy");
+require("./server/ProjectProxy");
 
-export {backend, logger, DashboardProxy, globals, util, platform}
+export {backend, logger, globals, util, platform}

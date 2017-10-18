@@ -370,6 +370,7 @@ class Shape extends Container {
 
     skew(): void {
         var path = this.convertToPath();
+        path.runtimeProps.ctxl = this.runtimeProps.ctxl;
         if (path) {
             this.parent().replace(this, path);
         }

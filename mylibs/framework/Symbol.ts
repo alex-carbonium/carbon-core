@@ -548,8 +548,15 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         super.draw.apply(this, arguments);
     }
 
-    standardBackground() {
-        return !this.runtimeProps.hasBg;
+    fillBackground() {
+        if (!this.runtimeProps.hasBg) {
+            super.fillBackground.apply(this, arguments);
+        }
+    }
+    strokeBorder() {
+        if (!this.runtimeProps.hasBg) {
+            super.strokeBorder.apply(this, arguments);
+        }
     }
 
     getNonRepeatableProps(newProps) {

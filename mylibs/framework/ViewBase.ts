@@ -186,7 +186,9 @@ export default class ViewBase { //TODO: implement IView
                 pageMatrix: layer.pageMatrix,
                 setupContext: function (context) {
                     setupLayerHandler(context);
-                }
+                },
+                fill: null,
+                stroke: null
             };
         }
 

@@ -358,6 +358,8 @@ declare module "carbon-app" {
         detaching: IEvent2<IView, IController>;
         attached: IEvent2<IView, IController>;
 
+        fatalErrorOccurred: IEvent<void>;
+
         shortcutManager: IShortcutManager;
         settings: WorkspaceSettings;
 

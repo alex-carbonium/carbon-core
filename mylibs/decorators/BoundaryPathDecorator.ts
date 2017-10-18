@@ -1,7 +1,7 @@
 import UIElementDecorator from "../framework/UIElementDecorator";
 import SharedColors from "../ui/SharedColors";
 import Environment from "../environment";
-import { IContext, IRect, IMatrix, IUIElement } from "carbon-core";
+import { IContext, IRect, IMatrix, IUIElement, RenderEnvironment } from "carbon-core";
 import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
 
 export const enum HighlightKind {
@@ -15,9 +15,10 @@ export default class BoundaryPathDecorator extends UIElementDecorator {
     }
 
     afterInvoke(method, args) {
+        //TODO: use switch by int and don't invoke methods dynamically
         if(method === 'draw') {
-            let context = args[0];
-            context.beginElement(this.element);
+            let context = args[0] as IContext;
+            context.beginElement(this.element, args[1] as RenderEnvironment);
 
             BoundaryPathDecorator.highlight(context, this.element, this.boundaryPath, this.kind);
 

@@ -387,9 +387,16 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         this._recorder && this._recorder.stop();
     }
 
-    fillBackground(context, l, t, w, h) {
-        super.fillBackground(context, l, t, w, h);
-        this.onBackgroundDrawn && this.onBackgroundDrawn(this, context);
+    fillBackground(context, l, t, w, h, environment: RenderEnvironment) {
+        if (environment.flags & RenderFlags.ArtboardFill) {
+            super.fillBackground(context, l, t, w, h, environment);
+            this.onBackgroundDrawn && this.onBackgroundDrawn(this, context);
+        }
+    }
+    strokeBorder(context, w, h, environment: RenderEnvironment) {
+        if (environment.flags & RenderFlags.ArtboardFill) {
+            super.strokeBorder(context, w, h, environment);
+        }
     }
 
     drawSelf(context: IContext, w, h, environment: RenderEnvironment) {

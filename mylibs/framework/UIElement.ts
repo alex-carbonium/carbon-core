@@ -36,7 +36,7 @@ import { PropertyDescriptor } from './PropertyMetadata';
 import { KeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
-import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps, RenderFlags, RenderEnvironment } from "carbon-core";
+import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps, RenderFlags, RenderEnvironment, IContext } from "carbon-core";
 import ExtensionPoint from "./ExtensionPoint";
 import CoreIntl from "../CoreIntl";
 import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
@@ -46,6 +46,7 @@ import ContextCacheManager from "./render/ContextCacheManager";
 require("../migrations/All");
 
 export interface IUIElementRuntimeProps {
+    ctxl: number;
     primitivePath: string[];
     primitiveRootKey: string;
 }
@@ -340,7 +341,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
     applyGlobalTranslation(t, withReset?: boolean, changeMode?: ChangeMode) {
         if (withReset) {
-            this.saveOrResetLayoutProps(changeMode);
+            this.saveOrResetLayoutProps(ChangeMode.Self);
         }
         let m = this.globalViewMatrix().prependedWithTranslation(t.x, t.y);
         m = this.parent().globalViewMatrixInverted().appended(m);
@@ -353,7 +354,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     applyRotation(angle, o, withReset?: boolean, mode?: ChangeMode) {
         if (withReset) {
-            this.saveOrResetLayoutProps(mode);
+            this.saveOrResetLayoutProps(ChangeMode.Self);
         }
         this.applyTransform(Matrix.create().rotate(-angle, o.x, o.y), false, mode);
     }
@@ -374,7 +375,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     applyScaling(s, o, options?: ResizeOptions, changeMode?: ChangeMode) {
         options = options || ResizeOptions.Once;
         if (options.reset) {
-            this.saveOrResetLayoutProps(changeMode);
+            this.saveOrResetLayoutProps(ChangeMode.Self);
         }
 
         if (options.sameDirection || !this.isRotated()) {
@@ -888,7 +889,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     isInViewport(viewportRect: IRect) {
         return areRectsIntersecting(viewportRect, this.getBoundingBoxGlobal(true));
     }
-    draw(context, environment: RenderEnvironment) {
+    draw(context: IContext, environment: RenderEnvironment) {
         if (this.hasBadTransform()) {
             return;
         }
@@ -909,7 +910,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return;
         }
 
-        if (!context.beginElement(this)) {
+        if (!context.beginElement(this, environment)) {
             context.endElement(this);
 
             if (params.perf) {
@@ -919,6 +920,15 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
 
         var saveCount = context.saveCount;
+
+        let oldFill = this.props.fill;
+        let oldStroke = this.props.stroke;
+        if (environment.fill) {
+            this.props.fill = environment.fill;
+        }
+        if (environment.stroke) {
+            this.props.stroke = environment.stroke;
+        }
 
         context.save();
         context.globalAlpha = this.opacity();
@@ -939,6 +949,13 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         pipeline.done();
 
         context.restore();
+
+        if (environment.fill) {
+            this.props.fill = oldFill;
+        }
+        if (environment.stroke) {
+            this.props.stroke = oldStroke;
+        }
 
         context.endElement(this);
         // this.drawDecorators(context, w, h, environment);
@@ -1422,9 +1439,6 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             this.setProps({ visibleWhenDrag: value });
         }
         return this.props.visibleWhenDrag;
-    }
-    standardBackground(value?: boolean) {
-        return this.field("_standardBackground", value, true);
     }
     name(value?: string) {
         if (value !== undefined) {
