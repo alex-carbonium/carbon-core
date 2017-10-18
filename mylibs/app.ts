@@ -128,7 +128,7 @@ class AppClass extends DataNode implements IApp {
         this._syncBroken = false;
         this._folderId = 0;
         this.isLoaded = false;
-        this._enableRenderCache = true;
+        this._enableRenderCache = false;
         this._allowSelection = true;
         this._isOffline = false;
         this._mode = "edit";
@@ -1030,6 +1030,7 @@ class AppClass extends DataNode implements IApp {
 
     raiseLoaded() {
         this.isLoaded = true;
+        this.mapElementsToLayerMask();
         this._loaded.raise();
     }
 
@@ -1118,7 +1119,7 @@ class AppClass extends DataNode implements IApp {
         }
 
         page.activated(oldPage);
-
+        this.mapElementsToLayerMask();
         this.pageChanged.raise(oldPage, page);
         return true;
     }

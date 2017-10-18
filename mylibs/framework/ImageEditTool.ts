@@ -1,5 +1,5 @@
 import Environment from "../environment";
-import {intersectRects} from "../math/math";
+import { intersectRects } from "../math/math";
 import ImageSourceHelper from "./ImageSourceHelper";
 import ImageContent from "./ImageContent";
 import SnapController from "./SnapController";
@@ -11,14 +11,14 @@ import { ChangeMode, RenderEnvironment } from "carbon-core";
 export class ImageEditTool {
     [name: string]: any;
 
-    constructor(){
+    constructor() {
         this._frame = null;
         this._tokens = null;
         this._origLayoutProps = null;
         this._snapClone = null;
         this._content = null;
     }
-    attach(frame: IImage, emptySource: ImageSource){
+    attach(frame: IImage, emptySource: ImageSource) {
         this._tokens = [];
         this._frame = frame;
 
@@ -26,13 +26,13 @@ export class ImageEditTool {
         var fsr = ImageSourceHelper.boundaryRect(frame.source(), frame.runtimeProps.sourceProps);
         var sr = frame.runtimeProps.sourceProps.sr;
         var dr = frame.runtimeProps.sourceProps.dr;
-        var sh = dr.width/sr.width;
-        var sv = dr.height/sr.height;
-        if (sr && dr){
+        var sh = dr.width / sr.width;
+        var sv = dr.height / sr.height;
+        if (sr && dr) {
             fsr.x = Math.round(dr.x - sr.x * sh);
             fsr.y = Math.round(dr.y - sr.y * sv);
-            fsr.width = fsr.width*sh + .5|0;
-            fsr.height = fsr.height*sv + .5|0;
+            fsr.width = fsr.width * sh + .5 | 0;
+            fsr.height = fsr.height * sv + .5 | 0;
         }
 
         var contentProps = {
@@ -46,20 +46,22 @@ export class ImageEditTool {
         this._content = content;
 
         //TODO: add snapping inside rotated containers
-        if (this._frame.globalViewMatrix().isTranslatedOnly()){
+        if (this._frame.globalViewMatrix().isTranslatedOnly()) {
             this._snapClone = this._frame.clone();
         }
         this._origLayoutProps = this._content.selectLayoutProps(true);
 
         //original frame is hidden, so it does not take part in snapping
-        this._frame.setProps({visible: false}, ChangeMode.Self);
+        this._frame.setProps({ visible: false }, ChangeMode.Self);
         //leave the selection, but remove action frame
-        this._frame.decorators.forEach(x => this._frame.removeDecorator(x));
+        if (this._frame.decorators && this._frame.decorators.length) {
+            this._frame.decorators.forEach(x => this._frame.removeDecorator(x));
+        }
         this._tokens.push(Environment.controller.clickEvent.bind(this.onClicked));
         this._tokens.push(Environment.view.interactionLayer.ondraw.bindHighPriority(this, this.layerdraw));
 
         Environment.view.interactionLayer.add(this._content);
-        if (this._snapClone){
+        if (this._snapClone) {
             SnapController.snapGuides.push(this._content, this._snapClone);
         }
 
@@ -71,49 +73,49 @@ export class ImageEditTool {
         }));
         this._tokens.push(Environment.controller.actionManager.subscribeToActionStart("delete", (a, e) => {
             this.detach(false);
-            this._frame.setProps({source: emptySource});
+            this._frame.setProps({ source: emptySource });
             e.handled = true;
         }));
 
         Selection.makeSelection([this._content]);
     }
-    detach(saveChanges = true){
-        if (saveChanges){
+    detach(saveChanges = true) {
+        if (saveChanges) {
             this._saveChanges();
         }
 
-        if (this._snapClone){
+        if (this._snapClone) {
             SnapController.removeGuides(this._content, this._snapClone);
         }
 
-        if (this._tokens){
+        if (this._tokens) {
             this._tokens.forEach(x => x.dispose());
             this._tokens = null;
         }
-        if (this._content){
+        if (this._content) {
             this._content.deactivate();
             Environment.view.interactionLayer.remove(this._content);
             //disposed content sometimes is still in the old selection...
             //this._content.dispose();
             this._content = null;
         }
-        if (this._snapClone){
+        if (this._snapClone) {
             this._snapClone.dispose();
             this._snapClone = null;
         }
-        if (this._clipClone){
+        if (this._clipClone) {
             this._clipClone.dispose();
             this._clipClone = null;
         }
 
-        this._frame.setProps({visible: true}, ChangeMode.Self);
+        this._frame.setProps({ visible: true }, ChangeMode.Self);
 
         Selection.makeSelection([this._frame]);
     }
 
-    _saveChanges(){
+    _saveChanges() {
         var layoutProps = this._content.selectLayoutProps(true);
-        if (this._areSameLayoutProps(layoutProps, this._origLayoutProps)){
+        if (this._areSameLayoutProps(layoutProps, this._origLayoutProps)) {
             return;
         }
 
@@ -130,21 +132,21 @@ export class ImageEditTool {
 
         this._frame.prepareAndSetProps({
             sourceProps: Object.assign({}, this._frame.props.sourceProps, {
-                sr: {x: (ir.x - cr.x) / sh + .5|0, y: (ir.y - cr.y) / sv + .5|0, width: ir.width / sh + .5|0, height: ir.height / sv + .5|0},
-                dr: {x: ir.x - fr.x, y: ir.y - fr.y, width: ir.width, height: ir.height}
+                sr: { x: (ir.x - cr.x) / sh + .5 | 0, y: (ir.y - cr.y) / sv + .5 | 0, width: ir.width / sh + .5 | 0, height: ir.height / sv + .5 | 0 },
+                dr: { x: ir.x - fr.x, y: ir.y - fr.y, width: ir.width, height: ir.height }
             }),
             sizing: ContentSizing.fixed
         });
     }
 
     onClicked = e => {
-        if (!this._content.hitTest(e, Environment.view.scale())){
+        if (!this._content.hitTest(e, Environment.view.scale())) {
             this.detach();
             e.handled = true;
         }
     };
 
-    layerdraw(context, environment: RenderEnvironment){
+    layerdraw(context, environment: RenderEnvironment) {
         context.save();
         context.setLineDash([20, 10]);
         context.strokeStyle = "#444";
@@ -154,7 +156,7 @@ export class ImageEditTool {
         context.restore();
     }
 
-    _areSameLayoutProps(props1, props2){
+    _areSameLayoutProps(props1, props2) {
         return props1.m.equals(props2.m) && props1.br.equals(props2.br);
     }
 }

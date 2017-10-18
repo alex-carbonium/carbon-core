@@ -191,8 +191,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
     clearRenderingCache() {
         if(this.runtimeProps.rc) {
-            ContextCacheManager.free(this.runtimeProps.rc);
-            delete this.runtimeProps.rc;
+            ContextCacheManager.free(this);
         }
     }
 

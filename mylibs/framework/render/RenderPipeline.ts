@@ -73,7 +73,12 @@ export default class RenderPipeline implements IPooledObject {
 
         var environment = this.environment;
         var justCached = false;
-        if (!this.element.runtimeProps.rc) {
+        var cacheItem;
+        if(this.useCache) {
+            cacheItem = ContextCacheManager.getCacheItem(this.element, this.environment.scale);
+        }
+
+        if (!cacheItem) {
             if (this.useTempBuffer || this.useCache) {
                 context = RenderPipeline.getBufferedContext(this.element, this.environment, this.useCache || (environment.flags & RenderFlags.DisableCaching));
                 // debug("caching %s", this.element.name());
@@ -105,10 +110,10 @@ export default class RenderPipeline implements IPooledObject {
             }
 
             if (this.useCache) {
-                this.element.runtimeProps.rc = context;
+                ContextCacheManager.addCacheItem(this.element, context, this.environment.scale);
             }
         } else {
-            context = this.element.runtimeProps.rc;
+            context = cacheItem;
             this.useCache = true;
         }
 
