@@ -56,6 +56,7 @@ try
 
     if (-not $Debug)
     {
+        npm config set registry "http://registry.npmjs.org/"
         npm install --loglevel=error
     }
 
