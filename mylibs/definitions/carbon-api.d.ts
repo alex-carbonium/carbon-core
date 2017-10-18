@@ -2,7 +2,16 @@ declare module "carbon-api" {
     import { IEvent, LoginProvider } from "carbon-basics";
 
     export interface ILogger {
+        trace(message: string): void;
+        info(message: string): void;
+        warn(message: string): void;
+        error(message: string, error?: Error): void;
         fatal(message: string, error?: Error): void;
+
+        trackEvent(name: string, properties?: object, metrics?: object);
+        trackMetric(name: string, value: number): void;
+
+        flush(): void;
     }
 
     export type ConnectionState =

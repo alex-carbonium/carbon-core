@@ -41,7 +41,8 @@ class Environment implements IEnvironment {
     }
 
     reportFatalError() {
-        logger.fatal("fatality");
+        logger.trackMetric("fatality", 1);
+        logger.flush();
         this.fatalErrorOccurred.raise();
     }
 }

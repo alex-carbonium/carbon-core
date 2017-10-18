@@ -24,8 +24,15 @@ if (!globals.appInsights) {
                 url: globals.appInsights.config.endpointUrl,
                 envelope: ApplicationInsights.Serializer.serialize(envelope)
             };
-            fetch(params.endpoints.error, { body: JSON.stringify(payload), method: "POST", mode: "cors" });
-            return true; //TODO: return false after testing
+            fetch(params.endpoints.error, {
+                body: JSON.stringify(payload),
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                method: "POST",
+                mode: "cors"
+            });
+            return false;
         }
         return true;
     });

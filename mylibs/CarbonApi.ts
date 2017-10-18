@@ -10,7 +10,7 @@ require("jquery/jquery.min");
 require("../libs/jquery.signalR-2.1.1");
 
 let backend = require("./backend");
-let logger = require("./logger");
+let logger = require("./logger").default;
 let globals = require("./globals");
 let util = require("./util");
 //TODO: split platform
