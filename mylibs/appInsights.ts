@@ -4,7 +4,7 @@ import params from "./params";
 export const appInsightsEnabled = !!window['telemetryKey'];
 
 if (!globals.appInsights) {
-    let { ApplicationInsights } = require("exports?Microsoft!applicationinsights-js/dist/ai.0");
+    let { ApplicationInsights } = require("exports?Microsoft!applicationinsights-js/dist/ai");
     let serializer = new ApplicationInsights.Serializer();
 
     let snippet = {
