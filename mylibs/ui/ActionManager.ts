@@ -540,40 +540,45 @@ export default class ActionManager implements IActionManager {
     }
 
     invoke(actionName: string, actionArg?: string): Promise<void> {
-        debug("Invoking %s", actionName);
-        let that = this;
-        let action = this._actions[actionName];
+        try {
+            debug("Invoking %s", actionName);
+            let that = this;
+            let action = this._actions[actionName];
 
-        if (!action) {
-            throw "Unknown action " + actionName;
+            if (!action) {
+                throw "Unknown action " + actionName;
+            }
+
+            if (action.condition && !action.condition(Selection)) {
+                return;
+            }
+
+            let e = { handled: false };
+            this.notifyActionStart(actionName, e);
+            if (e.handled) {
+                return;
+            }
+
+            let res = action.callback(Selection, actionArg);
+
+            if (res && res.then) {
+                res = res.then(() => this.notifyActionCompleted(actionName, true, res))
+                    .catch(e => {
+                        this.notifyActionCompleted(actionName, false, e);
+                        throw e;
+                    });
+            }
+            else {
+                this.notifyActionCompleted(actionName, true);
+            }
+
+            Invalidate.request();
+
+            return res || ResolvedPromise;
         }
-
-        if (action.condition && !action.condition(Selection)) {
-            return;
+        catch (e) {
+            Environment.reportFatalErrorAndRethrow(e);
         }
-
-        let e = { handled: false };
-        this.notifyActionStart(actionName, e);
-        if (e.handled) {
-            return;
-        }
-
-        let res = action.callback(Selection, actionArg);
-
-        if (res && res.then) {
-            res = res.then(() => this.notifyActionCompleted(actionName, true, res))
-                .catch(e => {
-                    this.notifyActionCompleted(actionName, false, e);
-                    throw e;
-                });
-        }
-        else {
-            this.notifyActionCompleted(actionName, true);
-        }
-
-        Invalidate.request();
-
-        return res || ResolvedPromise;
     }
     getAction(name) {
         return this._actions[name];

@@ -2,7 +2,8 @@
     [switch] $Debug = $false,
     [string] $Branch,
     [int] $BuildNumber = 0,
-    [string] $NpmToken
+    [string] $NpmToken,
+    [string] $CdnKey
 )
 
 $ErrorActionPreference = "Stop"
@@ -19,7 +20,7 @@ function PublishPackage($Library)
     New-Item ".\target\$Library\types" -ItemType Directory -ErrorAction Ignore
     New-Item ".\target\$Library\lib" -ItemType Directory -ErrorAction Ignore
     Copy-Item ".\mylibs\definitions\carbon-*.d.ts" ".\target\$Library\types"
-    Copy-Item ".\target\$Main" ".\target\$Library\lib"
+    Copy-Item ".\target\$main" ".\target\$Library\lib"
     Copy-Item ".\LICENSE" ".\target\$Library"
 
     $package = (gc .\package.json) -replace '-main-',$main -replace '-library-',$Library | ConvertFrom-Json
@@ -55,6 +56,7 @@ try
 
     if (-not $Debug)
     {
+        npm config set registry "http://registry.npmjs.org/"
         npm install --loglevel=error
     }
 
@@ -79,10 +81,10 @@ try
     }
 
     Copy-Item .\mylibs\definitions\carbon-*.d.ts .\target
-    Remove-Item .\target\*.map
 
     if ($Branch -eq "master" -or $Branch.StartsWith("releases"))
     {
+        node .\scripts\uploadSourceMaps.js --accountName carbonstatic --accountKey $CdnKey
         PublishPackage -Library "carbon-core"
         PublishPackage -Library "carbon-api"
     }

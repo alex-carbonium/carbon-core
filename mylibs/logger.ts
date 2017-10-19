@@ -1,32 +1,7 @@
-import appInsights from "./appInsights";
+import {appInsights, appInsightsEnabled} from "./appInsights";
 import { ILogger } from "carbon-api";
 
-var appInsightsEnabled = !!appInsights;
 var tracingEnabled = !!localStorage.getItem("trace");
-
-function ErrorCounter(){
-    var self = this;
-    self._start = new Date();
-    self._sameMesssages = 0;
-    self._lastMessage = "";
-
-    self.update = function(message){
-        if (message !== self._lastMessage){
-            self._start = new Date();
-            self._sameMesssages = 0;
-        }
-        self._lastMessage = message;
-        ++self._sameMesssages;
-    };
-    self.isSameErrorRepeating = function(){
-        if (self._sameMesssages < 10){
-            return false;
-        }
-        var now = new Date();
-        return now.getTime() - this._start.getTime() < 3000;
-    }
-}
-var errorCounter = new ErrorCounter();
 
 function log(type, message, args){
     if (appInsightsEnabled && appInsights.context && !appInsights.context.user.authenticatedId){
@@ -69,21 +44,19 @@ function log(type, message, args){
             break;
         case "info":
             method = "info";
-            appInsightsEnabled && appInsights.trackTrace(message, context);
+            appInsights.trackTrace(message, context);
             break;
         case "warn":
             method = "warn";
-            appInsightsEnabled && appInsights.trackTrace(message, context);
+            appInsights.trackTrace(message, context);
             break;
         case "error":
             method = "error";
-            errorCounter.update(message);
-            appInsightsEnabled && appInsights.trackException(messageOrException, null, context);
+            appInsights.trackException(messageOrException, null, context);
             break;
         case "fatal":
             method = "error";
-            errorCounter.update(message);
-            appInsightsEnabled && appInsights.trackException(messageOrException, null, context);
+            appInsights.trackException(messageOrException, null, context);
             break;
     }
     if (tracingEnabled && method){
@@ -93,9 +66,6 @@ function log(type, message, args){
         else{
             console[method](message);
         }
-    }
-    if (errorCounter.isSameErrorRepeating()){
-        console.log("//TODO: add handling of repeating error");
     }
 }
 
@@ -134,10 +104,16 @@ export class Logger implements ILogger {
         if (properties && properties.logLevel){
             log(properties.logLevel, name, properties);
         }
-        appInsightsEnabled && appInsights.trackEvent(name, properties, metrics);
+        appInsights.trackEvent(name, properties, metrics);
     }
     trackMetric(name, value){
-        appInsightsEnabled && appInsights.trackeMetric(name, value);
+        appInsights.trackMetric(name, value);
+    }
+    trackPageView() {
+        appInsights.trackPageView();
+    }
+    flush() {
+        appInsights.flush();
     }
 }
 

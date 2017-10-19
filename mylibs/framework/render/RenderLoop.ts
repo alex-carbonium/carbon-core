@@ -181,9 +181,8 @@ export default class RenderLoop implements IRenderLoop {
             }
         }
         catch (e) {
-            Environment.reportFatalError();
             this._suspended = true;
-            throw e;
+            Environment.reportFatalErrorAndRethrow(e);
         }
     }
 

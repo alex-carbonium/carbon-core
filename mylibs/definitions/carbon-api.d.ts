@@ -2,7 +2,17 @@ declare module "carbon-api" {
     import { IEvent, LoginProvider } from "carbon-basics";
 
     export interface ILogger {
+        trace(message: string): void;
+        info(message: string): void;
+        warn(message: string): void;
+        error(message: string, error?: Error): void;
         fatal(message: string, error?: Error): void;
+
+        trackPageView();
+        trackEvent(name: string, properties?: object, metrics?: object);
+        trackMetric(name: string, value: number): void;
+
+        flush(): void;
     }
 
     export type ConnectionState =
@@ -285,7 +295,7 @@ declare module "carbon-api" {
 
     export {LoginProvider} from "carbon-basics";
 
-    export type CarbonGlobals = {
+    export interface CarbonGlobals {
         coreScript: string;
         coreLoaded: boolean;
         coreCallback: () => void;
@@ -326,6 +336,7 @@ declare module "carbon-api" {
             storage: string;
             cdn: string;
             file: string;
+            error: string;
         };
         transport: "auto" | "nows";
         serveless: boolean;

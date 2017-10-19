@@ -55,8 +55,7 @@ var onmousewheel = function (e) {
         e.preventDefault();
     }
     catch (e) {
-        Environment.reportFatalError();
-        throw e;
+        Environment.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -69,8 +68,7 @@ var onmousedown = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalError();
-        throw e;
+        Environment.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -86,8 +84,7 @@ var onmousemove = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalError();
-        throw e;
+        Environment.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -101,8 +98,7 @@ var onmouseup = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalError();
-        throw e;
+        Environment.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -111,8 +107,7 @@ var ondblclick = function (event) {
         Environment.controller.ondblclick(Environment.controller.createEventData(event));
     }
     catch (e) {
-        Environment.reportFatalError();
-        throw e;
+        Environment.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -123,8 +118,7 @@ var onpanstart = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalError();
-        throw e;
+        Environment.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -136,8 +130,7 @@ var onpanend = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalError();
-        throw e;
+        Environment.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -148,8 +141,7 @@ var onpanmove = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalError();
-        throw e;
+        Environment.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -160,8 +152,7 @@ var onpinchstart = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalError();
-        throw e;
+        Environment.reportFatalErrorAndRethrow(e);
     }
 };
 var onpinchend = function (event) {
@@ -171,8 +162,7 @@ var onpinchend = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalError();
-        throw e;
+        Environment.reportFatalErrorAndRethrow(e);
     }
 };
 var onpinchmove = function (event) {
@@ -182,8 +172,7 @@ var onpinchmove = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalError();
-        throw e;
+        Environment.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -192,8 +181,7 @@ var onclick = function (event) {
         Environment.controller.onclick(Environment.controller.createEventData(event), Keyboard.state);
     }
     catch (e) {
-        Environment.reportFatalError();
-        throw e;
+        Environment.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -202,8 +190,7 @@ var ondoubletap = function (event) {
         Environment.controller.ondoubletap(Environment.controller.createEventData(event));
     }
     catch (e) {
-        Environment.reportFatalError();
-        throw e;
+        Environment.reportFatalErrorAndRethrow(e);
     }
 }
 
@@ -219,8 +206,7 @@ var onDocumentMouseMove = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalError();
-        throw e;
+        Environment.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -276,8 +262,7 @@ var onmouseleave = function (event) {
         Environment.controller.onmouseleave(Environment.controller.createEventData(event));
     }
     catch (e) {
-        Environment.reportFatalError();
-        throw e;
+        Environment.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -295,8 +280,7 @@ var onmouseenter = function (event) {
         Environment.controller.onmouseenter(Environment.controller.createEventData(event));
     }
     catch (e) {
-        Environment.reportFatalError();
-        throw e;
+        Environment.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -305,8 +289,7 @@ var oncontextmenu = function (event) {
         Environment.controller.showContextMenu(Environment.controller.createEventData(event));
     }
     catch (e) {
-        Environment.reportFatalError();
-        throw e;
+        Environment.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -331,8 +314,7 @@ var onWindowResize = function () {
         Environment.controller.onWindowResize();
     }
     catch (e) {
-        Environment.reportFatalError();
-        throw e;
+        Environment.reportFatalErrorAndRethrow(e);
     }
 }
 

@@ -244,3 +244,9 @@ declare module "oidc-client/src/Log" {
     }
     export = Log;
 }
+
+declare module "carbon-api" {
+    interface CarbonGlobals {
+        appInsights?: Microsoft.ApplicationInsights.IAppInsights;
+    }
+}
