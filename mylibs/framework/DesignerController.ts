@@ -639,7 +639,7 @@ export default class DesignerController implements IController {
     onscroll(event) {
         this.view.scrollX(this.view.scrollX() + event.event.deltaX);
         this.view.scrollY(this.view.scrollY() + event.event.deltaY);
-        Invalidate.request();
+        Invalidate.requestDraftWithDebounce();
     }
 
 

@@ -4,8 +4,7 @@ import { LRUCache } from "../collections/LRUCache";
 
 interface IRenderCacheItem {
     scale: number;
-    context: IContext;
-    key: number;
+    ref: { value: { value: IContext } };
 }
 
 
@@ -14,7 +13,8 @@ class ContextCacheManager {
     experiments: number[] = [64, 128, 256, 512, 1024, 2048];
     observations: number[] = [];
     totalSize: number = 0;
-    cache: LRUCache<IContext> = new LRUCache<IContext>(100 * 1024 * 1024, this._releaseContext);
+    cache: LRUCache<IContext> = new LRUCache<IContext>(100 * 1024 * 1024);
+    maxCacheItemSize = 16 * 1024 * 1024;
 
     constructor() {
         setTimeout(() => this.buildCacheModel(), 1000);
@@ -26,6 +26,10 @@ class ContextCacheManager {
         }
 
         if (!time || !this._cacheModelCompleted) {
+            return false;
+        }
+
+        if(size > this.maxCacheItemSize) {
             return false;
         }
 
@@ -48,27 +52,46 @@ class ContextCacheManager {
     }
 
     free(element) {
-        if (element.runtimeProps.rc) {
-            this.cache.remove(element.runtimeProps.rc);
+        let rc : IRenderCacheItem[] = element.runtimeProps.rc;
+        if (rc) {
+            for(var i = 0; i < rc.length; ++i) {
+                this.cache.remove(rc[i].ref as any);
+            }
             delete element.runtimeProps.rc;
         }
     }
 
-    getCacheItem(element, scale:number): IContext {
-        var rc = element.runtimeProps.rc;
-        if (rc) {
-            let item = this.cache.get(rc);
-            if (!item) {
-                element.runtimeProps.rc = null;
-            } else {
-                return item;
+    getCacheItem(element, scale: number): IRenderCacheItem {
+        var rc: IRenderCacheItem[] = element.runtimeProps.rc;
+        var minrci = null;
+        var mindist = Number.MAX_VALUE;
+        if (rc && rc.length) {
+            for (let i = rc.length - 1; i >= 0; --i) {
+                let rci = rc[i];
+                if (rci.ref.value === null) {
+                    rc.splice(i, 1);
+                    continue;
+                }
+                if (rci.scale === scale) {
+                    this.cache.use(rci.ref as any);
+                    return rci;
+                } else {
+                    let dist = Math.abs(rci.scale - scale);
+                    if (dist < mindist) {
+                        mindist = dist;
+                        minrci = rci;
+                    }
+                }
             }
         }
+
+        return minrci;
     }
 
-    addCacheItem(element, context: IContext, scale:number) {
-        var key = this.cache.add(context, context.width * context.height * 4);
-        element.runtimeProps.rc = key;
+    addCacheItem(element, context: IContext, scale: number) {
+        var node: any = this.cache.add({ value: context, size: context.width * context.height * 4 });
+        let rc: IRenderCacheItem[] = element.runtimeProps.rc = element.runtimeProps.rc || [];
+        rc.splice(0, 0, { ref: node, scale });
     }
 
     private buildCacheModel() {
@@ -89,7 +112,7 @@ class ContextCacheManager {
             expContext.rect(0, 0, size, size);
             expContext.fillStyle = 'red';
             expContext.fill();
-            this.experiments[i] = size * size;
+            this.experiments[i] = size * size * 4;
 
             let data = destContext.getImageData(0, 0, 1, 1);
             var startTime = performance.now();

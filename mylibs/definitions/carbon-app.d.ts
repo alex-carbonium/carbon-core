@@ -2,7 +2,7 @@ declare module "carbon-app" {
     import { IDataNode, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IIsolatable, IMouseEventHandler, IContainerProps } from "carbon-model";
     import { IEvent, IEventData, IEvent2, IMouseEventData, KeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable, IJsonNode, IPrimitive, ArtboardType, FontStyle, FontWeight } from "carbon-basics";
     import { IRect, ICoordinate, ISize } from "carbon-geometry";
-    import { IContext, IContextPool, RenderEnvironment } from "carbon-rendering";
+    import { IContext, IContextPool, RenderEnvironment, RenderFlags } from "carbon-rendering";
 
     export interface IPlatform{
         attachEvents(htmlElement: HTMLElement);
@@ -482,8 +482,10 @@ declare module "carbon-app" {
 
     export interface IInvalidate {
         requested:IEvent2<LayerType, number>;
+        draftMode:boolean;
         request(layer?, mask?);
         requestInteractionOnly(mask?);
+        requestDraftWithDebounce();
     }
 
 

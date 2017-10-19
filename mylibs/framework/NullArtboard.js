@@ -50,6 +50,8 @@ class NullArtboard {
 
     }
 
+    clearRenderingCache() {}
+
     unlockGroup() {
 
     }

@@ -7,6 +7,10 @@ export default class Guide extends UIElement{
         return this.props.snapPoints;
     }
 
+    allowCaching() {
+        return false;
+    }
+
 }
 Guide.prototype.t = Types.Guide;
 

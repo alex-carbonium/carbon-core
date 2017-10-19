@@ -37,6 +37,10 @@ class CorruptedElement extends UIElement {
 
     }
 
+    allowCaching() {
+        return false;
+    }
+
     drawSelf(context, w, h) {
         context.save();
         Brush.setStroke(this.stroke(), context, 0, 0, w, h);

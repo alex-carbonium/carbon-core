@@ -128,7 +128,7 @@ class AppClass extends DataNode implements IApp {
         this._syncBroken = false;
         this._folderId = 0;
         this.isLoaded = false;
-        this._enableRenderCache = false;
+        this._enableRenderCache = true;
         this._allowSelection = true;
         this._isOffline = false;
         this._mode = "edit";

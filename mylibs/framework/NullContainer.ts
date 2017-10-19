@@ -31,6 +31,8 @@ class NullContainer extends DataNode implements IContainer {
     isDescendantOrSame(el) {
         return false;
     }
+
+    clearRenderingCache() {}
     select(){}
     unselect(){}
     allowCaching() {

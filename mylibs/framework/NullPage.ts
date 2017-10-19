@@ -110,7 +110,7 @@ class NullPage extends UIElement implements IPage {
     findDropToPageData(x, y, element) {
         return null;
     }
-
+    clearRenderingCache(){}
     parent() {
         return null;
     }

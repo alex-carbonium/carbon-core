@@ -67,7 +67,7 @@ function onZoomChanged(value, oldValue) {
         view.scrollY(scroll.scrollY);
     }
 
-    Invalidate.request();
+    Invalidate.requestDraftWithDebounce();
 }
 
 
@@ -293,7 +293,7 @@ export default class ViewBase { //TODO: implement IView
             if (scale > 1 && this.showPixels()) {
                 this._drawLayerPixelsVisible(scale);
             } else {
-                let env = this._getEnv(this._page, true);
+                let env = this._getEnv(this._page, !Invalidate.draftMode);
                 this._drawLayer(this._page, this.context, env, true);
             }
 

@@ -25,6 +25,10 @@ export class SelectFrame extends UIElement {
         this.startPoint.set(event.x, event.y);
     }
 
+    allowCaching() {
+        return false;
+    }
+
     update(event){
         this.props.br.updateFromPointsMutable(this.startPoint, event);
         this.props.br.roundMutable();

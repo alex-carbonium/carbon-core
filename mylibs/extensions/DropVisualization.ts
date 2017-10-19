@@ -38,6 +38,10 @@ class ResizeHint extends UIElement {
         this._transformationElement = null;
     }
 
+    allowCaching() {
+        return false;
+    }
+
     start(transformationElement: IComposite) {
         this._transformationElement = transformationElement;
         if (this._transformationElement.elements.length === 1) {
@@ -217,6 +221,10 @@ class SelectionRect extends UIElement {
     constructor(element) {
         super();
         this._element = element;
+    }
+
+    allowCaching() {
+        return false;
     }
 
     drawSelf(context) {

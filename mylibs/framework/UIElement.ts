@@ -194,6 +194,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if(this.runtimeProps.rc) {
             ContextCacheManager.free(this);
         }
+        var parent = this.parent();
+        parent && parent.clearRenderingCache();
     }
 
     hasCachedRender() {

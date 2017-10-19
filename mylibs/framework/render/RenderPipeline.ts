@@ -1,5 +1,5 @@
 import { IUIElement } from "carbon-model";
-import { IContext, RenderEnvironment, RenderFlags } from "carbon-core";
+import { IContext, RenderEnvironment, RenderFlags, IRect } from "carbon-core";
 import ContextPool from "./ContextPool";
 import Matrix from "math/matrix";
 import { IPooledObject } from "carbon-basics";
@@ -24,6 +24,8 @@ export default class RenderPipeline implements IPooledObject {
 
     private startTime: number;
     private useCache: boolean = false;
+
+    private _contextDimensions:any;
 
     reset() {
         this.element = null;
@@ -74,13 +76,24 @@ export default class RenderPipeline implements IPooledObject {
         var environment = this.environment;
         var justCached = false;
         var cacheItem;
-        if(this.useCache) {
+        var draftApproximation = false;
+        if (this.useCache) {
             cacheItem = ContextCacheManager.getCacheItem(this.element, this.environment.scale);
+
+            if (cacheItem && cacheItem.scale !== this.environment.scale && !(this.environment.flags & RenderFlags.Final)) {
+                draftApproximation = true;
+            } else {
+                cacheItem = null;
+            }
         }
 
         if (!cacheItem) {
-            if (this.useTempBuffer || this.useCache) {
-                context = RenderPipeline.getBufferedContext(this.element, this.environment, this.useCache || (environment.flags & RenderFlags.DisableCaching));
+            if (this.useTempBuffer) {
+                context = RenderPipeline.getBufferedContext(this.element, this.environment, (environment.flags & RenderFlags.DisableCaching));
+                // debug("caching %s", this.element.name());
+                justCached = this.useCache;
+            } else if ( this.useCache) {
+                context = RenderPipeline.getBufferedContext(this.element, this.environment, true);
                 // debug("caching %s", this.element.name());
                 justCached = this.useCache;
             }
@@ -113,21 +126,28 @@ export default class RenderPipeline implements IPooledObject {
                 ContextCacheManager.addCacheItem(this.element, context, this.environment.scale);
             }
         } else {
-            context = cacheItem;
+            context = cacheItem.ref.value.value;
             this.useCache = true;
         }
 
         if (this.useTempBuffer || this.useCache) {
             if (this.useCache) {
-                var box = RenderPipeline.getContextDimensions(this.element, environment, true);
+                var box = this._contextDimensions;
                 context.relativeOffsetX = -box.x;
                 context.relativeOffsetY = -box.y;
             }
+            if (draftApproximation) {
+                let box = RenderPipeline.getCacheRectGlobal(this.element);
+                let w = box.width
+                let h = box.height;
+                this.context.drawImage(context.canvas, 0, 0, context.width, context.height, box.x, box.y, w, h);
+            }
+            else {
+                this.mergeContexts(this.context, context);
+            }
 
-            this.mergeContexts(this.context, context);
             if (!this.useCache) {
                 ContextPool.releaseContext(context);
-                this.element.runtimeProps.rc = null;
             }
         }
         this.context.restore();
@@ -145,19 +165,39 @@ export default class RenderPipeline implements IPooledObject {
         objectPool.free(this);
     }
 
-    private static getContextDimensions(element, environment: RenderEnvironment, forCache: boolean) {
-        let clippingRect = element.getBoundingBoxGlobal();
+    private static getCacheRectGlobal(element) {
+        let bbox = element.getBoundingBox();
+        let clippingRect = bbox;
         clippingRect = element.expandRectWithBorder(clippingRect);
 
         if (element.props.hitTestBox) {
-            let gm = element.globalViewMatrix();
-            var rect = Rect.allocateFromRect(element.props.hitTestBox);
-            rect.x += gm.tx;
-            rect.y += gm.ty;
+            var rect = element.props.hitTestBox;
+            clippingRect = rect.combine(clippingRect);
+            rect.free();
+        }
+
+        clippingRect.x -= bbox.x;
+        clippingRect.y -= bbox.y;
+
+        return clippingRect;
+    }
+
+    private static getCacheRect(element) {
+        let clippingRect = element.getBoundingBox();
+        clippingRect = element.expandRectWithBorder(clippingRect);
+
+        if (element.props.hitTestBox) {
+            var rect = element.props.hitTestBox;
 
             clippingRect = rect.combine(clippingRect);
             rect.free();
         }
+
+        return clippingRect;
+    }
+
+    private static getContextDimensions(element, environment: RenderEnvironment, forCache: boolean) {
+        let clippingRect = RenderPipeline.getCacheRect(element);
 
         var p1 = environment.pageMatrix.transformPoint2(clippingRect.x, clippingRect.y);
         var p2 = environment.pageMatrix.transformPoint2(clippingRect.x + clippingRect.width, clippingRect.y + clippingRect.height);
@@ -185,7 +225,7 @@ export default class RenderPipeline implements IPooledObject {
     private static getBufferedContext(element, environment: RenderEnvironment, forceSize) {
         var box = RenderPipeline.getContextDimensions(element, environment, forceSize);
 
-        var offContext = ContextPool.getContext(box.w, box.h, environment.contextScale, forceSize);
+        var offContext = ContextPool.getContext(box.w, box.h, 1, forceSize);
         offContext.clear();
         offContext.relativeOffsetX = -box.x;
         offContext.relativeOffsetY = -box.y;
@@ -208,9 +248,9 @@ export default class RenderPipeline implements IPooledObject {
         pipeline.context = context;
         pipeline.environment = environment;
         pipeline.startTime = performance.now();
-        let box = element.getBoundingBox();
+        let box = pipeline._contextDimensions = RenderPipeline.getContextDimensions(element, environment, true);
 
-        pipeline.useCache = element.hasCachedRender() || (element.allowCaching() && ContextCacheManager.shouldCache(element, box.width * box.height, element.runtimeProps.lrt));
+        pipeline.useCache = (element.allowCaching() && ContextCacheManager.shouldCache(element, box.w * box.h * 4, element.runtimeProps.lrt));
 
         return pipeline;
     }
