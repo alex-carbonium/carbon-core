@@ -8,6 +8,7 @@ declare module "carbon-api" {
         error(message: string, error?: Error): void;
         fatal(message: string, error?: Error): void;
 
+        trackPageView();
         trackEvent(name: string, properties?: object, metrics?: object);
         trackMetric(name: string, value: number): void;
 

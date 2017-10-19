@@ -41,7 +41,24 @@ if (!globals.appInsights) {
         globals.appInsights.config.disableTelemetry = true;
     }
 
-    globals.appInsights.trackPageView();
+    window.onerror = function(message: string, filename?: string, lineno?: number, colno?: number, error?:Error) {
+        if (error && error.message !== "carbon-handled") {
+            globals.appInsights.trackException(error);
+            return;
+        }
+
+        //already handled or completely useless
+        if (message == "carbon-handled" || message === "Script error." && !filename) {
+            return;
+        }
+
+        //best effort for parsing
+        let e = new Error(message);
+        if (filename) {
+            e.stack = `at ${filename}:${lineno}:${colno}`;
+        }
+        globals.appInsights.trackException(e);
+    }
 }
 
 export const appInsights = globals.appInsights;

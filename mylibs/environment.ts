@@ -40,10 +40,15 @@ class Environment implements IEnvironment {
         }
     }
 
-    reportFatalError() {
+    reportFatalErrorAndRethrow(e: Error) {
+        logger.fatal("fatality", e);
         logger.trackMetric("fatality", 1);
         logger.flush();
         this.fatalErrorOccurred.raise();
+
+        let newError = new Error("carbon-handled");
+        newError['innerError'] = e;
+        throw newError;
     }
 }
 

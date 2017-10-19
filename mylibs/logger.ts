@@ -109,6 +109,9 @@ export class Logger implements ILogger {
     trackMetric(name, value){
         appInsights.trackMetric(name, value);
     }
+    trackPageView() {
+        appInsights.trackPageView();
+    }
     flush() {
         appInsights.flush();
     }
