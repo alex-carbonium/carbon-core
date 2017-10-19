@@ -61,6 +61,8 @@ export default {
         frame.allowSnapping = true;
         frame.element.clearSavedLayoutProps();
         frame.scalingVector = new Point(1, 1);
+        //not yet determined
+        frame.origin = null;
 
         debug("Captured rect: x=%d y=%d w=%d h=%d", frame.originalRect.x, frame.originalRect.y, frame.originalRect.width, frame.originalRect.height);
 
@@ -78,20 +80,13 @@ export default {
     },
     release: function (frame, point, event: IMouseEventData) {
         if (frame.element) {
-            //var newSnapshot = TransformationHelper.getPropSnapshot(frame.elements);
-            //TransformationHelper.moveBetweenSnapshots(frame.elements, frame.snapshot, newSnapshot);
-            //let oppositeVector = Point.allocate(1 / frame.scalingVector.x, 1 / frame.scalingVector.y);
-            // /frame.element.applyScaling(oppositeVector, frame.origin, frame.resizeOptions, ChangeMode.Self);
-            // /oppositeVector.free();
+            if (frame.origin) {
+                let finalOptions = frame.resizeOptions.withFinal(true);
+                frame.element.applyScaling(frame.scalingVector, frame.origin, finalOptions, ChangeMode.Model);
+            }
 
-            let finalOptions = frame.resizeOptions.withFinal(true);
-            frame.element.applyScaling(frame.scalingVector, frame.origin, finalOptions, ChangeMode.Model);
-
-            //frame.resizingElement.saveChanges();
-            // frame.resizingElement.detach();
-            //ImageContent depends on event fired in the end
-            //frame.element.stopResizing({ transformationElement: frame.element });
             Environment.controller.raiseInteractionStopped(InteractionType.Resizing, event);
+
             frame.element.clearSavedLayoutProps();
             delete frame.globalViewMatrix;
             delete frame.viewMatrix;
