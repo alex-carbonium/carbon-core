@@ -211,7 +211,6 @@ export default class RepeatContainer extends Container implements IRepeatContain
                 node = current.children[index];
                 current.remove(node, ChangeMode.Self);
             }
-            node.applyVisitor(x => x.setProps({ rid: null }));
             realRoot.registerDelete(current, node, index, mode);
         }
     }

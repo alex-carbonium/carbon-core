@@ -53,6 +53,7 @@ export default {
     "util": require("./util"),
     "PropertyMetadata": require("./framework/PropertyMetadata"),
     "PropertyTracker": require("./framework/PropertyTracker"),
+    "model": require("./framework/Model").model,
     "UIElement": require("./framework/UIElement"),
     "CompositeElement": require("./framework/CompositeElement"),
     "DataNode": require("./framework/DataNode"),
