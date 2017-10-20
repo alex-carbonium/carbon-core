@@ -268,7 +268,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     allowCaching() {
         return !!this.runtimeProps.allowCache && super.allowCaching();
     }
-    
+
     draw(context: IContext, environment: RenderEnvironment) {
         if (this.hasBadTransform()) {
             return;
@@ -317,7 +317,6 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
         context.save();
         context.globalAlpha = this.opacity();
-
         this.applyViewMatrix(context);
 
         var pipeline = RenderPipeline.createFor(this, context, environment);

@@ -191,7 +191,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     clearRenderingCache() {
-        if(this.runtimeProps.rc) {
+        if (this.runtimeProps.rc) {
             ContextCacheManager.free(this);
         }
         var parent = this.parent();
@@ -937,18 +937,18 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
         this.applyViewMatrix(context);
 
-        var pipeline = RenderPipeline.createFor(this, context, environment);
+        // var pipeline = RenderPipeline.createFor(this, context, environment);
 
-        if(environment.flags & RenderFlags.DisableCaching) {
-            pipeline.disableCache();
-        }
+        // if(environment.flags & RenderFlags.DisableCaching) {
+        //     pipeline.disableCache();
+        // }
 
-        pipeline.out((context, environment) => {
-            this.clip(context);
-            this.drawSelf(context, w, h, environment);
-        });
+        // pipeline.out((context, environment) => {
+        this.clip(context);
+        this.drawSelf(context, w, h, environment);
+        // });
 
-        pipeline.done();
+        // pipeline.done();
 
         context.restore();
 
