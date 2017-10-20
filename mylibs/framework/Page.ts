@@ -284,7 +284,7 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
     }
 
     deactivated() {
-        Selection.unselectAll();
+        Selection.clearSelection();
         this.onDeactivated.raise();
     }
 

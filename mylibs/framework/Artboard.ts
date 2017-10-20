@@ -54,14 +54,19 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     allowArtboardSelection(value: boolean) {
         this.canMultiselectChildren = !value;
         this.multiselectTransparent = !value;
-
-        this.canSelect(value);
-        this.canDrag(value);
         return value;
     }
 
     canRotate(): boolean {
         return false;
+    }
+
+    canSelect() {
+        return Environment.controller.currentTool === "artboardTool";
+    }
+
+    canDrag() {
+        return Environment.controller.currentTool === "artboardTool";
     }
 
     get frame() {
@@ -774,9 +779,16 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         let pos = this.position();
         if (!Selection.isElementSelected(this) && isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width(), height: 20 / scale }, event)) {
             this.parent().setActiveArtboard(this);
-            if (!event.shiftKey) {
-                Selection.makeSelection([this]);
-            }
+            // if (!event.shiftKey) {
+            //     Selection.makeSelection([this]);
+            // }
+            event.handled = true;
+        }
+    }
+
+    dblclick(event: IMouseEventData) {
+        if (this.hitTestHeader(event, Environment.view.scale())) {
+            Selection.makeSelection([this]);
             event.handled = true;
         }
     }

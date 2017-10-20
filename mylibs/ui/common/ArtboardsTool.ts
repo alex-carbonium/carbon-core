@@ -38,7 +38,7 @@ export default class ArtboardsTool extends Tool {
     detach() {
         super.detach.apply(this, arguments);
         SnapController.clearActiveSnapLines();
-        Selection.unselectAll();
+        Selection.clearSelection();
         this._enableArtboardSelection(false);
     }
 

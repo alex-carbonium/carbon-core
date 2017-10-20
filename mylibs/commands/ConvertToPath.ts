@@ -3,7 +3,7 @@ import UIElement from "../framework/UIElement";
 
 export default {
     run: function(elements){
-        Selection.unselectAll();
+        Selection.clearSelection();
 
         if(!elements || !elements.length){
             return;
