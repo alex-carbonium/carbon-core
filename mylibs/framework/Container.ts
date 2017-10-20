@@ -453,9 +453,9 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         context.restore();
         if (mask.visible()) {
             let b = mask.fill();
-            mask.setProps({ fill: null }, ChangeMode.Self);
+            mask.props.fill = null;//({ fill: null }, ChangeMode.Self);
             this.drawChildSafe(mask, context, environment);
-            mask.setProps({ fill: b }, ChangeMode.Self);
+            mask.props.fill = b;
         }
     }
 
