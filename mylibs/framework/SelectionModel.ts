@@ -243,7 +243,7 @@ class SelectionModel implements ISelection {
         this.onElementSelected.raise(this._selectCompositeElement, oldSelection, doNotTrack);
     }
 
-    unselectAll(refreshOnly = false) {
+    private unselectAll(refreshOnly = false) {
         if (!refreshOnly) {
             this._previousElements = this.elements;
         }

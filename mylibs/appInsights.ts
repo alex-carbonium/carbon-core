@@ -42,13 +42,14 @@ if (!globals.appInsights) {
     }
 
     window.onerror = function(message: string, filename?: string, lineno?: number, colno?: number, error?:Error) {
-        if (error && error.message !== "carbon-handled") {
+        if (error && !error.message.includes("carbon-handled")) {
             globals.appInsights.trackException(error);
+            globals.appInsights.flush();
             return;
         }
 
         //already handled or completely useless
-        if (message == "carbon-handled" || message === "Script error." && !filename) {
+        if (!message || message.includes("carbon-handled") || message.includes("Script error.") || !filename) {
             return;
         }
 
@@ -58,6 +59,7 @@ if (!globals.appInsights) {
             e.stack = `at ${filename}:${lineno}:${colno}`;
         }
         globals.appInsights.trackException(e);
+        globals.appInsights.flush();
     }
 }
 

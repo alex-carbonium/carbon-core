@@ -112,7 +112,10 @@ var registerCommands = function () {
         that._artboardCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._artboardCreator;
         that.app.allowSelection(false);
-        Selection.makeSelection([that._artboardToolSettings], "new", false, true);
+
+        if (Selection.elements.length === 0 || !(Selection.elements[0] instanceof Artboard)) {
+            Selection.makeSelection([that._artboardToolSettings], "new", false, true);
+        }
 
     }, "ui-rectangle");
 

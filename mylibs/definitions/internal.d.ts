@@ -79,6 +79,10 @@ declare module "carbon-model"{
     export interface IText {
         resetEngine(): void;
     }
+
+    interface IModel {
+        createElement(size?: ISize, props?: Partial<IUIElementProps>): IUIElement;
+    }
 }
 
 declare module "carbon-app"{

@@ -2,7 +2,7 @@ import bluebird from "bluebird";
 
 bluebird.config({
     warnings: false,
-    longStackTraces: DEBUG,
+    longStackTraces: true,
     cancellation: true
 });
 

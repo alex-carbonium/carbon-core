@@ -383,4 +383,9 @@ declare module "carbon-model" {
     export interface IPolygon extends IShape {
     }
     export const Polygon: IConstructor<IPolygon>;
+
+    export interface IModel {
+        createText(size?: ISize, props?: Partial<ITextProps>): IText;
+    }
+    export const model: IModel;
 }

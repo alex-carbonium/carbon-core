@@ -1077,7 +1077,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     mousedown(event) {
     }
-    dblclick(event, scale) {
+    dblclick(event, scale: number) {
     }
     click(event) {
     }

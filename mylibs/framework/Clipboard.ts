@@ -216,7 +216,7 @@ class Clipboard {
                     newSelection = bufferElements;
                 }
                 //cause a little blink if new element was added into the same position
-                setTimeout(() => Selection.makeSelection(newSelection), 50);
+                setTimeout(() => Selection.makeSelection(newSelection, "new", false, true), 50);
             }
         }
 

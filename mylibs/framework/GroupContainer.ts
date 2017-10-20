@@ -19,7 +19,7 @@ const ownProperties: string[] = PropertyMetadata.findForType(InteractiveContaine
     .groups()
     .find(x => x.label === "Layout")
     .properties
-    .concat(["name", "opacity", "locked", "constraints", "arrangeStrategy"]);
+    .concat(["name", "opacity", "locked", "constraints", "arrangeStrategy", "shadows"]);
 
 interface IGroupContainerRuntimeProps {
     cpm: CommonPropsManager;
@@ -146,15 +146,16 @@ export default class GroupContainer extends InteractiveContainer implements IGro
             return super.findPropertyDescriptor(propName);
         }
 
+        let descriptor = null;
         for (var i = 0; i < this.children.length; i++) {
             var element = this.children[i];
-            var descriptor = element.findPropertyDescriptor(propName);
-            if (descriptor) {
-                return descriptor;
+            descriptor = element.findPropertyDescriptor(propName);
+            if (!descriptor) {
+                break;
             }
         }
 
-        return null;
+        return descriptor;
     }
 
     select(multi: boolean) {

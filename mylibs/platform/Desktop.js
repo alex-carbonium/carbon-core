@@ -178,7 +178,7 @@ var onpinchmove = function (event) {
 
 var onclick = function (event) {
     try {
-        Environment.controller.onclick(Environment.controller.createEventData(event), Keyboard.state);
+        Environment.controller.onclick(Environment.controller.createEventData(event));
     }
     catch (e) {
         Environment.reportFatalErrorAndRethrow(e);
