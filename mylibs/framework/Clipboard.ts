@@ -229,7 +229,19 @@ class Clipboard {
         }
 
         this.onCopy(e);
-        Delete.run(Selection.selectedElements());
+
+        if (Environment.controller.isInlineEditMode){
+            var engine = Environment.controller.inlineEditor.engine;
+            var selection = engine.getSelection();
+            if (selection.end !== selection.start){
+                var range = engine.getRange(selection.start, selection.end);
+                range.clear();
+                engine.select(selection.start, selection.start);
+            }
+        }
+        else {
+            Delete.run(Selection.selectedElements());
+        }
     };
 
     /** The only reliable check is to use known browser versions. This is how github does it. */
