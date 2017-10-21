@@ -707,6 +707,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
         var rect = this.boundaryRect();
         var bb = this.transformBoundingRect(rect, this.globalViewMatrix());
+
         this.runtimeProps.globalClippingBox = bb;
         return bb;
     }
@@ -891,6 +892,10 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     isInViewport(viewportRect: IRect) {
         return areRectsIntersecting(viewportRect, this.getBoundingBoxGlobal(true));
     }
+
+    drawExtras(context: IContext, environment: RenderEnvironment) {
+    }
+
     draw(context: IContext, environment: RenderEnvironment) {
         if (this.hasBadTransform()) {
             return;

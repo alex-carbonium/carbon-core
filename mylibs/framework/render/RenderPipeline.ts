@@ -69,7 +69,6 @@ export default class RenderPipeline implements IPooledObject {
     }
 
     done() {
-
         this.context.save();
         var context: any = this.context;
 
@@ -81,7 +80,6 @@ export default class RenderPipeline implements IPooledObject {
             cacheItem = ContextCacheManager.getCacheItem(this.element, this.environment.scale);
 
             if (cacheItem && cacheItem.scale !== this.environment.scale) {
-
                 if (!(this.environment.flags & RenderFlags.Final)) {
                     draftApproximation = true;
                 } else {
@@ -107,6 +105,7 @@ export default class RenderPipeline implements IPooledObject {
             }
 
             this.startTime = performance.now();
+            this.element.applyViewMatrix(this.context);
             for (var operation of this.operations) {
                 if (operation.type === 'out') {
                     context.save();
@@ -142,13 +141,8 @@ export default class RenderPipeline implements IPooledObject {
                 let box = RenderPipeline.getCacheRectGlobal(this.element);
                 let w = box.width
                 let h = box.height;
-                let x = 0;
-                let y = 0;
-                if(!this.element.shouldApplyViewMatrix()) {
-                    x = box.x;
-                    y = box.y;
-                }
-                this.context.drawImage(context.canvas, 0, 0, context.width, context.height, x, y, w, h);
+
+                this.context.drawImage(context.canvas, 0, 0, context.width, context.height, box.x, box.y, w, h);
             }
             else {
                 this.mergeContexts(this.context, context);
@@ -244,14 +238,9 @@ export default class RenderPipeline implements IPooledObject {
         offContext.relativeOffsetX = -box.x;
         offContext.relativeOffsetY = -box.y;
 
-        if (!element.shouldApplyViewMatrix()) {
-            offContext.translate(-box.x, -box.y);
-            environment.setupContext(offContext);
-        } else {
-            environment.setupContext(offContext);
-            let m = offContext.currentMatrix;
-            offContext.setTransform(m.a, m.b, m.c, m.d, 0, 0);
-        }
+        offContext.translate(-box.x, -box.y);
+        environment.setupContext(offContext);
+        element.applyViewMatrix(offContext);
 
         return offContext;
     }

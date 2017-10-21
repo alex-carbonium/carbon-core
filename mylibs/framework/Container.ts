@@ -317,7 +317,6 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
         context.save();
         context.globalAlpha = this.opacity();
-        this.applyViewMatrix(context);
 
         var pipeline = RenderPipeline.createFor(this, context, environment);
 
@@ -344,6 +343,8 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         if (environment.stroke) {
             this.props.stroke = oldStroke;
         }
+
+        this.drawExtras(context, environment);
 
         context.endElement(this);
 

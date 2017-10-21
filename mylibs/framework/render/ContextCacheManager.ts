@@ -29,7 +29,7 @@ class ContextCacheManager {
             return false;
         }
 
-        if(size > this.maxCacheItemSize) {
+        if (size > this.maxCacheItemSize) {
             return false;
         }
 
@@ -52,9 +52,9 @@ class ContextCacheManager {
     }
 
     free(element) {
-        let rc : IRenderCacheItem[] = element.runtimeProps.rc;
+        let rc: IRenderCacheItem[] = element.runtimeProps.rc;
         if (rc) {
-            for(var i = 0; i < rc.length; ++i) {
+            for (var i = 0; i < rc.length; ++i) {
                 this.cache.remove(rc[i].ref as any);
             }
             delete element.runtimeProps.rc;
@@ -95,6 +95,15 @@ class ContextCacheManager {
     }
 
     private buildCacheModel() {
+        var exp = localStorage["render:exp"];
+        if (exp) {
+            let obs = localStorage["render:obs"];
+            this.experiments = JSON.parse(exp);
+            this.observations = JSON.parse(obs);
+            this._cacheModelCompleted = true;
+            return;
+        }
+
         let destinationCanvas = document.createElement("canvas");
         let sw = this.experiments[this.experiments.length - 1];
         let sh = sw;
@@ -116,13 +125,16 @@ class ContextCacheManager {
 
             let data = destContext.getImageData(0, 0, 1, 1);
             var startTime = performance.now();
-            const TestCount = 100;
+            const TestCount = 50;
             for (var j = 0; j < TestCount; ++j) {
                 destContext.drawImage(expCanvas, 64, 128);
             }
             var elapsed = (performance.now() - startTime) / TestCount;
             this.observations.push(elapsed * 1.2);
         }
+
+        localStorage["render:exp"] = JSON.stringify(this.experiments);
+        localStorage["render:obs"] = JSON.stringify(this.observations);
         this._cacheModelCompleted = true;
     }
 }

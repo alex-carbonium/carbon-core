@@ -157,6 +157,7 @@ export default class Image extends Container<IImageProps> implements IImage {
                     }
 
                     ImageSourceHelper.resize(source, this.sizing(), this.boundaryRect(), this.runtimeProps.sourceProps);
+                    this.clearRenderingCache();
                     Invalidate.request();
                 });
             }

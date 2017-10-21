@@ -436,7 +436,6 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
         context.restore();
 
-        this.drawExtras(context, environment);
         this._drawing = false;
     }
 
@@ -545,7 +544,9 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         if (this.props.hitTestBox) {
             return this.props.hitTestBox;
         }
-        return super.getHitTestBox.apply(this, arguments);;
+        var box = super.getHitTestBox.apply(this, arguments);;
+        this.props.hitTestBox = box;
+        return box;
     }
 
     isInViewport(viewportRect: IRect) {
