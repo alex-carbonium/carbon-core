@@ -84,6 +84,10 @@ export class DraggingElement extends CompositeElement {
         }
     }
 
+    cancel() {
+        this.applySnapshot(this._propSnapshot, ChangeMode.Self);
+    }
+
     detach() {
         debug("Detached");
 
@@ -96,6 +100,15 @@ export class DraggingElement extends CompositeElement {
 
         this.removeDecorator(DraggingDecorator);
         this.parent().remove(this, ChangeMode.Self);
+
+        if (this._clones) {
+            for (let i = 0; i < this._clones.length; ++i){
+                let clone = this._clones[i];
+                if (clone) {
+                    clone.parent().remove(clone, ChangeMode.Self);
+                }
+            }
+        }
     }
 
     stopDragging(event: IMouseEventData, draggingOverElement, page) {
@@ -140,9 +153,10 @@ export class DraggingElement extends CompositeElement {
             }
 
             let source = element;
-            if (this._clones) {
+            if (event.altKey) {
                 source = this._clones[i];
                 source.parent().remove(source, ChangeMode.Self);
+                this._clones[i] = null;
             }
 
             this.applyElementSnapshot(this._propSnapshot, element, ChangeMode.Self);
@@ -204,7 +218,6 @@ export class DraggingElement extends CompositeElement {
     }
 
     _updateCurrentPosition(event: IMouseEventData) {
-        //this._translation.set(event.x + this._globalOffsetX, event.y + this._globalOffsetY);
         let x = event.x;
         let y = event.y;
 
@@ -215,10 +228,7 @@ export class DraggingElement extends CompositeElement {
             else {
                 x = this._capturePoint.x;
             }
-            //applyOrthogonalMove.call(this, this._translation);
         }
-
-        //this._currentPosition.set(this._translation.x, this._translation.y);
 
         this._translation.set(x - this._capturePoint.x, y - this._capturePoint.y);
 
