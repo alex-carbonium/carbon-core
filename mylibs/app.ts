@@ -166,7 +166,6 @@ class AppClass extends DataNode implements IApp {
 
         this.platform = platform;
 
-        this.primitiveRootCache = {};
         this.modelSyncProxy = new ModelSyncProxy(this);
 
         this.state = new AppState(this);

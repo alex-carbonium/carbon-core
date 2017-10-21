@@ -701,7 +701,7 @@ export default class DesignerController implements IController {
     getCurrentDropTarget(eventData: IMouseEventData): IContainer | IComposite | null {
         var parent = this._draggingOverElement;
         var selectComposite = Selection.selectComposite();
-        if (selectComposite.canAccept([this._draggingElement], undefined, eventData.ctrlKey)
+        if (selectComposite.canAccept(this._draggingElement.children, undefined, eventData.ctrlKey)
             && selectComposite.hitTest(eventData, this.view.scale(), true)
         ) {
             return Selection.selectComposite();
