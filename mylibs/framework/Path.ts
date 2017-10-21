@@ -483,7 +483,9 @@ class Path extends Shape {
         this._initPoint(point);
         this.points.push(point);
 
-        this.save();
+        if (!this.runtimeProps.importing) {
+            this.save();
+        }
 
         return point;
     }
@@ -1566,6 +1568,7 @@ class Path extends Shape {
 
         App.Current.activePage.nameProvider.assignNewName(path);
 
+        path.runtimeProps.importing = true;
         setElementPropertiesFromAttributes(path, parsedAttributes);
 
         // polygon
@@ -1583,7 +1586,7 @@ class Path extends Shape {
             path.fromSvgString(parsedAttributes.d, matrix);
         }
 
-
+        path.runtimeProps.importing = false;
         path.adjustBoundaries();
         path.save();
 
@@ -1596,11 +1599,13 @@ class Path extends Shape {
 
         App.Current.activePage.nameProvider.assignNewName(path);
 
+        path.runtimeProps.importing = true;
         setElementPropertiesFromAttributes(path, parsedAttributes);
 
         path.addPoint(matrix.transformPoint({ x: parsedAttributes.x1 || 0, y: parsedAttributes.y1 || 0 }));
         path.addPoint(matrix.transformPoint({ x: parsedAttributes.x2 || 0, y: parsedAttributes.y2 || 0 }));
 
+        path.runtimeProps.importing = false;
         path.adjustBoundaries();
         path.save();
 
@@ -1612,6 +1617,7 @@ class Path extends Shape {
         let path = new Path();
         App.Current.activePage.nameProvider.assignNewName(path);
 
+        path.runtimeProps.importing = true;
         setElementPropertiesFromAttributes(path, parsedAttributes);
 
         if (parsedAttributes.points) {
@@ -1621,6 +1627,7 @@ class Path extends Shape {
             }
         }
 
+        path.runtimeProps.importing = false;
         path.adjustBoundaries();
         path.save();
 
