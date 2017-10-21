@@ -33,18 +33,19 @@ class ContextCacheManager {
             return false;
         }
 
-        for (var i = 0; i < this.experiments.length; ++i) {
-            if (size < this.experiments[i]) {
-                var k = size / this.experiments[i];
-                if (this.observations[i] * k < time) {
-                    return true;
-                }
+        return true;
+        // for (var i = 0; i < this.experiments.length; ++i) {
+        //     if (size < this.experiments[i]) {
+        //         var k = size / this.experiments[i];
+        //         if (this.observations[i] * k < time) {
+        //             return true;
+        //         }
 
-                return false;
-            }
-        }
+        //         return false;
+        //     }
+        // }
 
-        return false;
+        // return false;
     }
 
     _releaseContext(context) {

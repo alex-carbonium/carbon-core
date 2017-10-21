@@ -83,7 +83,7 @@ export default class RenderPipeline implements IPooledObject {
                 if (!(this.environment.flags & RenderFlags.Final)) {
                     draftApproximation = true;
                 } else {
-                    this.useCache = false;
+                    // this.useCache = false;
                     cacheItem = null;
                 }
             }
@@ -93,11 +93,10 @@ export default class RenderPipeline implements IPooledObject {
             if (this.useTempBuffer) {
                 context = RenderPipeline.getBufferedContext(this.element, this.environment, (environment.flags & RenderFlags.DisableCaching));
                 // debug("caching %s", this.element.name());
-                justCached = this.useCache;
             } else if (this.useCache) {
                 context = RenderPipeline.getBufferedContext(this.element, this.environment, true);
                 // debug("caching %s", this.element.name());
-                justCached = this.useCache;
+                justCached = true;
 
                 environment = Object.assign({}, environment, {
                     flags: (environment.flags | RenderFlags.DisableCaching) & ~RenderFlags.CheckViewport
@@ -128,7 +127,6 @@ export default class RenderPipeline implements IPooledObject {
             }
         } else {
             context = cacheItem.ref.value.value;
-            this.useCache = true;
         }
 
         if (this.useTempBuffer || this.useCache) {
