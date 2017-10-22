@@ -1087,7 +1087,14 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     click(event) {
     }
     allowCaching() {
-        return this.runtimeProps.ctxl !== 2;
+        return this.runtimeProps.ctxl !== 2 && !this.disableRenderCaching();
+    }
+    disableRenderCaching(value?:boolean) {
+        if(arguments.length) {
+            this.runtimeProps.disableRenderCaching = value;
+        }
+
+        return this.runtimeProps.disableRenderCaching;
     }
     // mouseLeaveElement(event) {
     // },

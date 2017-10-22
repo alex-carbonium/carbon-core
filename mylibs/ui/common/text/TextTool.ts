@@ -134,6 +134,7 @@ export default class TextTool extends Tool {
     onEditTextAction = () => {
         let text = this.tryGetSupportedElement();
         if (text) {
+            text.disableRenderCaching(true);
             if (Environment.controller.currentTool !== "textTool") {
                 this._onAttached = () => { this.beginEdit(text); };
                 this._app.actionManager.invoke("textTool");
@@ -292,6 +293,7 @@ export default class TextTool extends Tool {
         }
 
         this.text = text;
+        this.text.disableRenderCaching(true);
 
         var engine = text.engine();
         engine.contentChanged(this.contentChanged);
@@ -394,6 +396,7 @@ export default class TextTool extends Tool {
             this.updateOriginalDebounced();
         }
 
+        this.text.disableRenderCaching(false);
         this.text.runtimeProps.engine.unsubscribe();
         this.text.runtimeProps.editing = false;
         this.text.runtimeProps.drawSelection = false;
