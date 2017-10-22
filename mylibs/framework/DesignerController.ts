@@ -576,6 +576,9 @@ export default class DesignerController implements IController {
                 this._draggingElement.altChanged(newKeys.altKey);
                 Invalidate.request();
             }
+            else if (this._startDraggingData) {
+                this._startDraggingData.altKey = newKeys.altKey;
+            }
         }
 
         this.repeatLastMouseMove(newKeys);
