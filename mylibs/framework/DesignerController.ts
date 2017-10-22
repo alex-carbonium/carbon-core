@@ -741,7 +741,11 @@ export default class DesignerController implements IController {
 
     cancel() {
         if (this._draggingElement) {
+            this.raiseInteractionStopped(InteractionType.Dragging, this._lastMouseMove);
+            this._draggingElement.cancel();
             this._draggingElement.detach();
+            this._draggingElement.dispose();
+            Selection.refreshSelection();
             this._draggingElement = null;
         }
     }
