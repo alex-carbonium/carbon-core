@@ -227,7 +227,7 @@ class ArtboardPage extends Page implements IArtboardPage {
     }
 
     _onMouseUp(event) {
-        if (event.handled){
+        if (event.handled || Environment.controller.currentTool === "artboardTool") {
             return;
         }
         this._activateArtboard(event);

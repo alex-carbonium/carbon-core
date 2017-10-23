@@ -9,7 +9,7 @@ import ObjectFactory from "../../framework/ObjectFactory";
 import PropertyTracker from "../../framework/PropertyTracker";
 import Rect from "../../math/rect";
 import Point from "../../math/point";
-import { KeyboardState, IMouseEventData, IArtboard, ChangeMode, IContainer, IComposite, WorkspaceTool } from "carbon-core";
+import { KeyboardState, IMouseEventData, IArtboard, ChangeMode, IContainer, IComposite, WorkspaceTool, IArtboardPage } from "carbon-core";
 import Cursors from "Cursors";
 import { PooledPair } from "../../framework/PooledPair";
 
@@ -33,6 +33,7 @@ export default class ArtboardsTool extends Tool {
         SnapController.calculateSnappingPoints(app.activePage);
 
         this._enableArtboardSelection(true);
+        (this._app.activePage as IArtboardPage).setActiveArtboard(null);
     }
 
     detach() {
@@ -54,6 +55,10 @@ export default class ArtboardsTool extends Tool {
 
     mousedown(event: IMouseEventData) {
         this._cursorNotMoved = true;
+
+        if (event.shiftKey || event.ctrlKey || event.altKey) {
+            return true;
+        }
 
         var artboard = this._app.activePage.getArtboardAtPoint(event);
         if (artboard) {
@@ -136,11 +141,17 @@ export default class ArtboardsTool extends Tool {
         let artboard = this._app.activePage.getArtboardAtPoint(event);
         if (!Selection.isElementSelected(artboard)) {
             this._selectByClick(event);
+            event.handled = true;
         }
     }
 
     mousemove(event: IMouseEventData) {
         if (event.cursor) { //active frame
+            return true;
+        }
+
+        if (event.shiftKey || event.ctrlKey || event.altKey) {
+            event.cursor = "default_cursor";
             return true;
         }
 
