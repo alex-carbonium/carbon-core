@@ -139,6 +139,7 @@ describe("Context level tests", function () {
         app.activePage.add(element2);
 
         // act
+        app.actionManager.invoke("artboardTool");
         Selection.makeSelection([artboard2]);
 
         // assert
@@ -160,6 +161,7 @@ describe("Context level tests", function () {
         app.activePage.add(element2);
 
         // act
+        app.actionManager.invoke("artboardTool");
         Selection.makeSelection([artboard2]);
 
         // assert

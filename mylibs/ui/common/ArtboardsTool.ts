@@ -141,8 +141,8 @@ export default class ArtboardsTool extends Tool {
         let artboard = this._app.activePage.getArtboardAtPoint(event);
         if (!Selection.isElementSelected(artboard)) {
             this._selectByClick(event);
-            event.handled = true;
         }
+        event.handled = true;
     }
 
     mousemove(event: IMouseEventData) {
