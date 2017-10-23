@@ -32,10 +32,10 @@ class ContextPool implements IContextPool {
                     context.relativeOffsetX = 0;
                     context.relativeOffsetY = 0;
 
-                    if(forceExactSize){
+                    //if(forceExactSize){
                         context.width = width;
                         context.height = height;
-                    }
+                    //}
 
                     context.resetTransform();
                     context.save();

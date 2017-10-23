@@ -14,7 +14,7 @@ class ContextCacheManager {
     observations: number[] = [];
     totalSize: number = 0;
     cache: LRUCache<IContext> = new LRUCache<IContext>(100 * 1024 * 1024);
-    maxCacheItemSize = 16 * 1024 * 1024;
+    maxCacheItemSize = 8 * 1024 * 1024;
 
     constructor() {
         setTimeout(() => this.buildCacheModel(), 1000);
