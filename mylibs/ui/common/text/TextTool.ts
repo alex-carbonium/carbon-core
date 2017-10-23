@@ -396,6 +396,7 @@ export default class TextTool extends Tool {
             this.updateOriginalDebounced();
         }
 
+        this.copyDocumentRangeFont();
         this.text.disableRenderCaching(false);
         this.text.runtimeProps.engine.unsubscribe();
         this.text.runtimeProps.editing = false;
@@ -421,6 +422,26 @@ export default class TextTool extends Tool {
         }
         if (!next) {
             Environment.controller.inlineEditModeChanged.raise(false, null);
+        }
+    }
+    copyDocumentRangeFont() {
+        let range = this._editor.engine.getDocumentRange();
+        let fontExtension = null;
+        let rangeFormatting = range.getFormatting();
+        for (let prop in rangeFormatting) {
+            if (prop === "text") {
+                continue;
+            }
+            let value = rangeFormatting[prop];
+            if (value !== undefined && value !== this.text.props.font[prop]) {
+                fontExtension = fontExtension || {};
+                fontExtension[prop] = value;
+            }
+        }
+
+        if (fontExtension) {
+            var newFont = Font.extend(this.text.props.font, fontExtension);
+            this.text.prepareAndSetProps({font: newFont});
         }
     }
 

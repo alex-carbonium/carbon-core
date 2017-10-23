@@ -406,9 +406,8 @@ deserunt mollit anim id est laborum.");
             case 90: // Z undo
                 if (ctrlKey || (metaKey && !shiftKey)) {
                     handled = true;
-                    if (!this.engine.undo()){
-                        this.deactivate(false);
-                    }
+                    this.undo();
+
                     // if (editor.hasUndoState()){
                     //     editor.undoState();
                     // }
@@ -421,7 +420,7 @@ deserunt mollit anim id est laborum.");
             case 89: // Y redo
                 if (ctrlKey) {
                     handled = true;
-                    this.engine.redo();
+                    this.redo();
                     // if (editor.hasRedoState()){
                     //     editor.redoState();
                     // }
@@ -714,6 +713,16 @@ deserunt mollit anim id est laborum.");
                 }
         }
     };
+
+    InlineTextEditor.prototype.undo = function() {
+        if (!this.engine.undo()){
+            this.deactivate(false);
+        }
+    }
+
+    InlineTextEditor.prototype.redo = function() {
+        this.engine.redo();
+    }
 
     InlineTextEditor.onActivated = function(engine){
     };
