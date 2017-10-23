@@ -184,33 +184,9 @@ class Layer extends Container implements ILayer {
         return true;
     }
 
-    dropToLayer(x, y, element) {
-        var data = this.findDropToPageData(x, y, element);
-        element.applyTranslation(data.position.subtract(element.position()));
-        data.target.add(element);
-
-        return data.target;
-    }
-
-    findDropToPageData(x, y, element) {
-        var eventData = {
-            handled: false,
-            element: element,
-            x: x,
-            y: y
-        };
-
-        var el = this.hitElement(eventData, this.scale());
-
-
-        while (!(el.canAccept([element]) && element.canBeAccepted(el))) {
-            el = el.parent();
-        }
-
-        var pos = el.global2local(eventData);
-        pos.roundMutable();
-
-        return { target: el, position: pos };
+    dropElement(element) {
+        element.setTransform(this.globalMatrixToLocal(element.globalViewMatrix()));
+        this.add(element);
     }
 
     getElementsInRect(rect) {

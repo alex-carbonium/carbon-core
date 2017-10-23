@@ -797,7 +797,8 @@ class Path extends Shape {
 
     getGlobalBoundingBox() {
         if (this.points.length <= 1) {
-            return Rect.Zero;
+            let gm = this.globalViewMatrix();
+            return new Rect(gm.tx, gm.ty, 0, 0);
         }
         let graph = new BezierGraph();
         graph.initWithBezierPath(this, this.globalViewMatrix());

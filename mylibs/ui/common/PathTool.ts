@@ -14,6 +14,7 @@ import { IPathPoint } from "carbon-geometry";
 import Cursors from "Cursors";
 import PathManipulationDecorator from "ui/common/path/PathManipulationDecorator";
 import NullContainer from "framework/NullContainer";
+import Point from "../../math/point";
 
 
 export default class PathTool extends Tool {
@@ -103,7 +104,8 @@ export default class PathTool extends Tool {
         }
 
         if (!this._pathElement.runtimeProps.inserted) {
-            Environment.view.dropToLayer(event.x, event.y, this._pathElement);
+            this._pathElement.applyGlobalTranslation(new Point(event.x, event.y));
+            Environment.view.dropElement(this._pathElement);
             Selection.makeSelection([this._pathElement]);
             this._pathElement.runtimeProps.inserted = true;
         }

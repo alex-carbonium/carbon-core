@@ -107,9 +107,6 @@ class NullPage extends UIElement implements IPage {
     fill(value?: any) {
     }
 
-    findDropToPageData(x, y, element) {
-        return null;
-    }
     clearRenderingCache(){}
     parent() {
         return null;
@@ -119,6 +116,10 @@ class NullPage extends UIElement implements IPage {
     }
     isInitialized() {
         return true;
+    }
+    setActiveArtboard() {
+    }
+    setActiveArtboardById() {
     }
     getAllResourceArtboards(resourceType) {
         return [];
@@ -277,7 +278,7 @@ class NullPage extends UIElement implements IPage {
         return 0;
     }
 
-    dropToLayer(x, y, element) {
+    dropElement(element) {
     }
 
     flatten() {

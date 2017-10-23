@@ -446,11 +446,21 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("undo", "Undo", "Project actions", function () {
-            CommandManager.undoPrevious();
+            if (Environment.controller.isInlineEditMode) {
+                Environment.controller.inlineEditor.undo();
+            }
+            else {
+                CommandManager.undoPrevious();
+            }
         });
 
         this.registerAction("redo", "Redo", "Project actions", function () {
-            CommandManager.redoNext();
+            if (Environment.controller.isInlineEditMode) {
+                Environment.controller.inlineEditor.redo();
+            }
+            else {
+                CommandManager.redoNext();
+            }
         });
 
         this.registerAction("undoViewport", "Undo viewport position", "Project actions", function () {

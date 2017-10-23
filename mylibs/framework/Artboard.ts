@@ -110,17 +110,6 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return this._frame.runtimeProps.clone;
     }
 
-    select(multi?: boolean) {
-        this.allowArtboardSelection(true);
-        if (!multi) {
-            this.parent().setActiveArtboard(this);
-        }
-    }
-
-    unselect() {
-        this.allowArtboardSelection(false);
-    }
-
     layoutGridSettings(value) {
         if (value !== undefined) {
             this.setProps({ layoutGridSettings: value });
@@ -778,7 +767,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     mousedown(event: IMouseEventData) {
         let scale = Environment.view.scale();
         let pos = this.position();
-        if (!Selection.isElementSelected(this) && isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width(), height: 20 / scale }, event)) {
+        if (Environment.controller.currentTool !== "artboardTool" && !Selection.isElementSelected(this) && isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width(), height: 20 / scale }, event)) {
             this.parent().setActiveArtboard(this);
             // if (!event.shiftKey) {
             //     Selection.makeSelection([this]);

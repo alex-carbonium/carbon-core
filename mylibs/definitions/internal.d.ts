@@ -56,6 +56,7 @@ declare module "carbon-model"{
         hitVisible(): boolean;
         hitTransparent(): boolean;
 
+        canBeAccepted(container: IContainer): boolean;
         canDrag(value?: boolean): boolean;
 
         clearSavedLayoutProps();
@@ -94,8 +95,6 @@ declare module "carbon-app"{
     export interface IPage{
         nameProvider: any;
 
-        findDropToPageData(x, y, element);
-
         incrementVersion();
 
         applyVisitorTLR(callback:(e:IUIElement)=>boolean|void);
@@ -132,7 +131,7 @@ declare module "carbon-app"{
         activateLayer(layerType: LayerType, silent?: boolean);
         deactivateLayer(layerType: LayerType, silent?: boolean);
 
-        dropToLayer(x:number, y:number, element:IUIElement):void;
+        dropElement(element:IUIElement): void;
 
         prototyping(value?:boolean): boolean;
 

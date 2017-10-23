@@ -1,6 +1,6 @@
 import Point from "./point";
 import LineSegment from "./lineSegment";
-import { isRectInRect, isPointInRect } from "./math";
+import { isRectInRect, isPointInRect, areRectsIntersecting } from "./math";
 import { IRect, ICoordinate, OriginType, IPooledObject, IRectData } from "carbon-core";
 import ObjectPool from "../framework/ObjectPool";
 import { PooledPair } from "../framework/PooledPair";
@@ -242,6 +242,10 @@ export default class Rect implements IRect, IPooledObject {
             return new Rect(l, t, r - l, b - t);
         }
         return null;
+    }
+
+    isIntersecting(other: IRect): boolean {
+        return areRectsIntersecting(this, other);
     }
 
     fit(bounds: IRect, noScaleUp?: boolean): Rect {

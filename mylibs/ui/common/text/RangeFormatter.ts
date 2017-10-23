@@ -65,30 +65,6 @@ export default class RangeFormatter extends UIElement {
             var newFont = Font.extend(this._element.props.font, {valign: formatting.valign});
             this._element.setProps({font: newFont});
         }
-
-        this.onRangeFormattingChanged(range);
-    }
-
-    onRangeFormattingChanged = (range) => {
-        if (range.isDocumentRange()) {
-            let fontExtension = null;
-            let rangeFormatting = range.getFormatting();
-            for (let prop in rangeFormatting) {
-                if (prop === "text") {
-                    continue;
-                }
-                let value = rangeFormatting[prop];
-                if (value !== undefined) {
-                    fontExtension = fontExtension || {};
-                    fontExtension[prop] = value;
-                }
-            }
-
-            if (fontExtension) {
-                var newFont = Font.extend(this._element.props.font, fontExtension);
-                this._element.setProps({font: newFont});
-            }
-        }
     }
 
     _fontToFormatting(font){
