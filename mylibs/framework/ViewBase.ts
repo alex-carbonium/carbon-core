@@ -756,12 +756,12 @@ export default class ViewBase { //TODO: implement IView
         return this._layers;
     }
 
-    dropToLayer(x: number, y: number, element: IUIElement): void {
+    dropElement(element: IUIElement): void {
         var layers = this.layers
         for (var i = layers.length - 1; i >= 0; --i) {
             var layer = layers[i];
             if (!layer.hitTransparent() && layer.canAccept([element])) {
-                layer.dropToLayer(x, y, element);
+                layer.dropElement(element);
                 element.clearSavedLayoutProps();
                 return;
             }

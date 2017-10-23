@@ -5,7 +5,7 @@ import Point from "../../math/point";
 import Path from "framework/Path";
 import Environment from "../../environment";
 import Tool from "./Tool";
-import {KeyboardState, IMouseEventData} from "carbon-core";
+import {KeyboardState, IMouseEventData, ChangeMode} from "carbon-core";
 
 var Line = function (p1, p2) {
     return {
@@ -56,6 +56,7 @@ function DouglasPeucker(PointList, epsilon) {
 
 export default class PencilCreator extends Tool {
     [name: string]: any;
+    _element: Path;
 
     constructor() {
         super("pencilTool");
@@ -75,6 +76,7 @@ export default class PencilCreator extends Tool {
         if (eventData.handled) {
             return true;
         }
+        this._position = new Point(event.x, event.y);
 
         this._mousepressed = true;
         this.points.push({ x: event.x, y: event.y });
@@ -82,9 +84,9 @@ export default class PencilCreator extends Tool {
 
         var element = new Path();
         this._app.activePage.nameProvider.assignNewName(element);
-        Environment.view.dropToLayer(event.x, event.y, element);
+        this._app.activePage.add(element, ChangeMode.Self);
+
         this._element = element;
-        this._position = new Point(event.x, event.y);
 
         return false;
     }
@@ -103,12 +105,15 @@ export default class PencilCreator extends Tool {
             element.setProps(defaultSettings);
         }
 
+        element.parent().remove(element, ChangeMode.Self);
+
         var points = DouglasPeucker(this.points, 1.5 / scale);
 
         if (points.length > 1) {
             var elementX = this._position.x;
             var elementY = this._position.y;
 
+            element.applyGlobalTranslation(this._position, false, ChangeMode.Self);
             element.addPoint({ x: points[0].x - elementX, y: points[0].y - elementY });
 
             for (var i = 1; i < points.length - 1; ++i) {
@@ -123,12 +128,11 @@ export default class PencilCreator extends Tool {
             element.addPoint({ x: points[points.length - 1].x - elementX, y: points[points.length - 1].y - elementY });
 
             element.adjustBoundaries();
+            Environment.view.dropElement(element);
             Invalidate.requestInteractionOnly();
             Selection.makeSelection([element]);
         }
-        else {
-            element.parent().remove(element);
-        }
+
         this.points = [];
         if (SystemConfiguration.ResetActiveToolToDefault) {
             this._controller.resetCurrentTool();

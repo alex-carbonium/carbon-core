@@ -14,7 +14,7 @@ import Environment from "environment";
 import { Types } from "../../framework/Defs";
 import Rect from "../../math/rect";
 import { IArtboard } from "carbon-model";
-import { ArtboardType, IArtboardPage, ChangeMode, IArtboardPageProps, RenderEnvironment, RenderFlags } from "carbon-core";
+import { ArtboardType, IArtboardPage, ChangeMode, IArtboardPageProps, RenderEnvironment, RenderFlags, IUIElement, IContainer } from "carbon-core";
 import DataNode from "../../framework/DataNode";
 import Container from "../../framework/Container";
 import UIElement from "../../framework/UIElement";
@@ -374,6 +374,27 @@ class ArtboardPage extends Page implements IArtboardPage {
                 this.setActiveArtboard(artboard);
             }
         }
+    }
+
+    dropElement(element: IUIElement) {
+        let parent: Container = null;
+        let elementBox = element.getBoundingBoxGlobal();
+        for (let i = 0; i < this.children.length; ++i){
+            if (this.children[i].getBoundingBoxGlobal().isIntersecting(elementBox)) {
+                if (parent) {
+                    parent = this;
+                    break;
+                }
+                parent = this.children[i] as Container;
+            }
+        }
+
+        if (!parent) {
+            parent = this;
+        }
+
+        element.setTransform(parent.globalMatrixToLocal(element.globalViewMatrix()));
+        parent.add(element);
     }
 }
 ArtboardPage.prototype.t = Types.ArtboardPage;

@@ -9,7 +9,7 @@ import Brush from "../Brush";
 import Environment from "../../environment";
 import UserSettings from "../../UserSettings";
 import Matrix from "../../math/matrix";
-import { IUIElement, ChangeMode, IMatrix, IContainer, IMouseEventData, IPoint } from "carbon-core";
+import { IUIElement, ChangeMode, IMatrix, IContainer, IMouseEventData, IPoint, IArtboard, IArtboardPage } from "carbon-core";
 import Selection from "framework/SelectionModel";
 import CompositeElement from "../CompositeElement";
 import Duplicate from "commands/Duplicate";
@@ -115,15 +115,12 @@ export class DraggingElement extends CompositeElement {
         let artboards = page.getAllArtboards();
         let elements: IUIElement[] = [];
 
-        for (var i = 0; i < this.children.length; ++i) {
-            var element = this.children[i];
+        for (let i = 0; i < this.children.length; ++i) {
+            let element = this.children[i];
 
-            var topIntersectingParent = artboards.find(a => areRectsIntersecting(element.getBoundingBoxGlobal(), a.getBoundaryRectGlobal()));
-            if (!topIntersectingParent) {
-                topIntersectingParent = page;
-            }
+            let topParent = this.findTargetArtboardOrPage(page, artboards, element) as Container;
 
-            var parent: Container = null;
+            let parent: Container = null;
             let index = null;
             if (element instanceof Artboard) {
                 parent = page;
@@ -135,11 +132,11 @@ export class DraggingElement extends CompositeElement {
                     index = dropData.index;
                 }
             }
-            else if (draggingOverElement.primitiveRoot() === topIntersectingParent.primitiveRoot()) {
+            else if (draggingOverElement.primitiveRoot() === topParent.primitiveRoot()) {
                 parent = draggingOverElement;
             }
             else {
-                parent = topIntersectingParent;
+                parent = topParent;
             }
 
             //the case for elements which cannot be dropped - e.g., ImageContent
@@ -166,6 +163,26 @@ export class DraggingElement extends CompositeElement {
         }
 
         return elements;
+    }
+
+    private findTargetArtboardOrPage(page: IArtboardPage, artboards: IArtboard[], element: IUIElement) {
+        let parent: IContainer = null;
+        let elementBox = element.getBoundingBoxGlobal();
+        for (let i = 0; i < artboards.length; ++i){
+            if (artboards[i].getBoundingBoxGlobal().isIntersecting(elementBox)) {
+                if (parent) {
+                    parent = page;
+                    break;
+                }
+                parent = artboards[i];
+            }
+        }
+
+        if (!parent) {
+            parent = page;
+        }
+
+        return parent;
     }
 
     propsUpdated(newProps, oldProps, mode) {

@@ -5,6 +5,7 @@ import ObjectFactory from "../../framework/ObjectFactory";
 import SnapController from "../../framework/SnapController";
 import Environment from "../../environment";
 import Cursor from "../../framework/Cursor";
+import Artboard from "../../framework/Artboard";
 import Brush from "../../framework/Brush";
 import Rect from "../../math/rect";
 import Point from "../../math/point";
@@ -93,9 +94,12 @@ export default class ElementDropTool extends Tool {
 
             Environment.controller.raiseInteractionStopped(InteractionType.Resizing, event);
 
-            var pos = this._element.position();
+            Environment.view.dropElement(this._element);
 
-            Environment.view.dropToLayer(pos.x, pos.y, this._element);
+            let artboard = this._element.findAncestorOfType(Artboard);
+            if (artboard) {
+                this._app.activePage.setActiveArtboard(artboard);
+            }
 
             this.changeMode(ElementState.Edit);
             Selection.reselect();

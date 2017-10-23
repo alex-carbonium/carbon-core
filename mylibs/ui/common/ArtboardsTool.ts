@@ -31,9 +31,10 @@ export default class ArtboardsTool extends Tool {
     attach(app, view, controller, mousePressed) {
         super.attach(app, view, controller, mousePressed);
         SnapController.calculateSnappingPoints(app.activePage);
+        this.registerForDisposal(this._app.actionManager.subscribe('cancel', this.onCancelled));
 
         this._enableArtboardSelection(true);
-        (this._app.activePage as IArtboardPage).setActiveArtboard(null);
+        this._app.activePage.setActiveArtboard(null);
     }
 
     detach() {
@@ -262,6 +263,10 @@ export default class ArtboardsTool extends Tool {
                 Selection.makeSelection(artboards);
             }
         }
+    }
+
+    private onCancelled = () => {
+        Environment.controller.resetCurrentTool();
     }
 
     dispose() {

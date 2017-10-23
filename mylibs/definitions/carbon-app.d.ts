@@ -154,7 +154,7 @@ declare module "carbon-app" {
         activate();
         deactivate();
 
-        dropToLayer(x, y, element);
+        dropElement(element);
 
         getElementsInRect(rect: IRect) : IUIElement[];
 
@@ -162,7 +162,6 @@ declare module "carbon-app" {
     }
 
     export interface IIsolationLayer extends ILayer {
-        findDropToPageData(x, y, element);
         isActivatedFor(owner: IIsolatable): boolean;
         isolateGroup(owner: IIsolatable, clippingParent?: IUIElement, e?: IMouseEventData) :void;
         getOwner():IIsolatable;
@@ -175,6 +174,8 @@ declare module "carbon-app" {
         getAllArtboards(): IArtboard[];
         getActiveArtboard(): IArtboard;
         getArtboardAtPoint(point: ICoordinate): IArtboard;
+        setActiveArtboard(artboard: IArtboard): void;
+        setActiveArtboardById(id: string): void;
 
         saveWorkspaceState(): any;
         restoreWorkspaceState(data: any): void;
@@ -199,9 +200,6 @@ declare module "carbon-app" {
     }
     export interface IArtboardPage extends IPage<IArtboardPageProps> {
         props: IArtboardPageProps;
-
-        setActiveArtboard(artboard: IArtboard): void;
-        setActiveArtboardById(id: string): void;
     }
 
     export interface ILayerDrawHandlerObject {

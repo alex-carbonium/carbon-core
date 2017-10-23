@@ -66,6 +66,7 @@ declare module "carbon-geometry" {
         isValid(): boolean;
 
         containsPoint(point: IPoint): boolean;
+        isIntersecting(other: IRect): boolean;
     }
     interface IRectConstructor {
         new(x: number, y: number, width: number, height: number): IRect;

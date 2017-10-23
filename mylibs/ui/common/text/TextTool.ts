@@ -263,24 +263,15 @@ export default class TextTool extends Tool {
             Object.assign(props, p);
         }
 
-        var dropData;
-        if (this._view.isolationLayer.isActive) {
-            dropData = this._view.isolationLayer.findDropToPageData(e.x, e.y, text);
+        text.prepareAndSetProps(props);
+        var y = e.y;
+        if (!fixedSize) {
+            var engine = text.engine();
+            var height = engine.getActualHeight();
+            y -= height / 2;
         }
-        else {
-            dropData = this._app.activePage.findDropToPageData(e.x, e.y, text);
-        }
-        if (dropData) {
-            text.prepareAndSetProps(props);
-            var y = dropData.position.y;
-            if (!fixedSize) {
-                var engine = text.engine();
-                var height = engine.getActualHeight();
-                y -= height / 2;
-            }
-            text.applyTranslation(Point.create(dropData.position.x, y).roundMutable());
-            dropData.target.add(text);
-        }
+        text.applyTranslation(Point.create(e.x, y).roundMutable());
+        Environment.view.dropElement(text);
 
         this._app.activePage.nameProvider.assignNewName(text);
 

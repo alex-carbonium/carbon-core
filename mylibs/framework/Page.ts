@@ -296,6 +296,16 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
         return this.getContentContainer().boundaryRect();
     }
 
+    setActiveArtboard(artboard: IArtboard) {
+        //TODO: add functionality
+        return null;
+    }
+
+    setActiveArtboardById(artboardId: string) {
+        //TODO: add functionality
+        return null;
+    }
+
     getActiveArtboard() {
         //TODO: add functionality
         return null;

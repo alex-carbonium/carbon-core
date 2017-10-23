@@ -268,6 +268,17 @@ export default class DesignerController implements IController {
 
     stopDrag(event) {
         var elements = this._draggingElement.stopDragging(event, this._draggingOverElement, this.app.activePage);
+
+        let newActiveArtboard = elements[0].findAncestorOfType(Artboard);
+        for (let i = 1; i < elements.length; ++i){
+            if (elements[i].findAncestorOfType(Artboard) !== newActiveArtboard) {
+                newActiveArtboard = null;
+                break;
+            }
+        }
+
+        this.app.activePage.setActiveArtboard(newActiveArtboard);
+
         Selection.refreshSelection(elements);
 
         this.raiseInteractionStopped(InteractionType.Dragging, event);

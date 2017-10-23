@@ -226,6 +226,9 @@ class NullContainer extends DataNode implements IContainer {
     canAccept() {
         return false;
     }
+    canBeAccepted() {
+        return false;
+    }
 
     local2global(pos) {
         return pos;
