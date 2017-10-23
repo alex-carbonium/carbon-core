@@ -57,9 +57,6 @@ export default class ArtboardsTool extends Tool {
 
         var artboard = this._app.activePage.getArtboardAtPoint(event);
         if (artboard) {
-            if (!Selection.isElementSelected(artboard)) {
-                this._selectByClick(event);
-            }
             return true;
         }
 
@@ -132,6 +129,13 @@ export default class ArtboardsTool extends Tool {
             Invalidate.requestInteractionOnly();
             PropertyTracker.resumeAndFlush();
             this._element = null;
+        }
+    }
+
+    click(event: IMouseEventData) {
+        let artboard = this._app.activePage.getArtboardAtPoint(event);
+        if (!Selection.isElementSelected(artboard)) {
+            this._selectByClick(event);
         }
     }
 
