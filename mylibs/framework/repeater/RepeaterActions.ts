@@ -78,6 +78,9 @@ export class RepeaterActions extends CarbonExtension {
         var parent = element.parent();
         var repeater = new RepeatContainer();
 
+        // calculate position upfront, before parent.children collection changed.
+        let insertIndex = parent.children.indexOf(sorted[sorted.length - 1]);
+
         var globalRect = element.getBoundingBox();
         var x1 = globalRect.x
             , y1 = globalRect.y
@@ -109,7 +112,7 @@ export class RepeaterActions extends CarbonExtension {
         var pos = { x: x1, y: y1 };
         repeater.setProps({ width: x2 - x1, height: y2 - y1 });
         repeater.applyTranslation({ x: pos.x, y: pos.y });
-        parent.insert(repeater, parent.children.indexOf(sorted[sorted.length - 1]));
+        parent.insert(repeater, insertIndex);
         repeater.insert(cell, 0);
 
         Selection.makeSelection([repeater]);
