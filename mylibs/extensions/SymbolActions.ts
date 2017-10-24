@@ -8,6 +8,7 @@ import GroupArrangeStrategy from "../framework/arrangeStrategy/GroupArrangeStrat
 import Matrix from "../math/matrix";
 import Rect from "../math/rect";
 import Container from "../framework/Container";
+import ImageContent from "../framework/ImageContent";
 
 export default class SymbolActions extends CarbonExtension {
     initialize(contributions: IContributions) {
@@ -17,7 +18,7 @@ export default class SymbolActions extends CarbonExtension {
                 id: "symbols.create",
                 name: "@symbols.create",
                 callback: this.createSymbolFromSelection,
-                condition: selection => selection.elements.length && !selection.elements.some(x => x instanceof Artboard)
+                condition: selection => selection.elements.length && !selection.elements.some(x => x instanceof Artboard || x instanceof ImageContent)
             },
             {
                 id: "symbols.markAsText",

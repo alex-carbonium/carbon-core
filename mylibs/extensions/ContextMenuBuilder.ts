@@ -10,6 +10,7 @@ import CoreIntl from "../CoreIntl";
 import { ContextBarPosition, IActionManager, IView, IApp, ElementState, IComposite } from "carbon-core";
 import InteractiveContainer from "../framework/InteractiveContainer";
 import { RepeaterActions } from "../framework/repeater/RepeaterActions";
+import ImageContent from "../framework/ImageContent";
 
 function findItemsToSelect(app, eventData) {
     let elements = app.activePage.hitElements(eventData, Environment.view.scale())
@@ -74,9 +75,10 @@ export default class ContextMenuBuilder {
 
         let items = menu.items
 
-        let editingPath = selection.length === 1 && selection[0] instanceof Path && selection[0].mode() === ElementState.Edit
+        let editingPath = selection.length === 1 && selection[0] instanceof Path && selection[0].mode() === ElementState.Edit;
+        let editingImage = selection.length === 1 && selection[0] instanceof ImageContent;
 
-        if(editingPath  && !context.eventData) {
+        if((editingPath || editingImage) && !context.eventData) {
             items.push({
                 name: "@action.done",
                 contextBar: ContextBarPosition.Left | ContextBarPosition.Only,

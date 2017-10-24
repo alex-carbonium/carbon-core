@@ -9,6 +9,7 @@ import GroupContainer from "../GroupContainer";
 import Artboard from "../Artboard";
 import CarbonExtension from "../../extensions/CarbonExtesion";
 import Container from "../Container";
+import ImageContent from "../ImageContent";
 
 require("./RepeatArrangeStrategy");
 
@@ -21,7 +22,7 @@ export class RepeaterActions extends CarbonExtension {
                 icon: "ico-repeater",
                 callback: this.group,
                 condition: selection => selection.elements.length && !RepeaterActions.isInRepeater(selection)
-                    && !selection.elements.some(x => x instanceof Artboard || x instanceof RepeatContainer)
+                    && !selection.elements.some(x => x instanceof Artboard || x instanceof RepeatContainer || x instanceof ImageContent)
             },
             {
                 id: "repeater.ungroup",
