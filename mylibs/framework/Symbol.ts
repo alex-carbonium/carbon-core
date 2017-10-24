@@ -144,7 +144,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     _cloneFromArtboard(artboard) {
         this.clear(ChangeMode.Self);
         var baseId = this.id();
-
+        let ctxl = this.runtimeProps.ctxl;
         for (var i = 0; i < artboard.children.length; i++) {
             var child = artboard.children[i];
             var clone = child.mirrorClone();
@@ -153,6 +153,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
                 x.id(baseId + x.id())
                 x.canDrag(false);
                 x.resizeDimensions(ResizeDimension.None);
+                x.runtimeProps.ctxl = ctxl;
             });
             this.add(clone, ChangeMode.Self);
         }
