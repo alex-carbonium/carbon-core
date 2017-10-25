@@ -162,6 +162,22 @@ class Line extends Shape {
         return Math.abs(distance) < d;
     }
 
+    width(value?: number, changeMode?: ChangeMode) {
+        if (arguments.length !== 0) {
+            this.x2(this.x1() + value, changeMode);
+        }
+
+        return Math.abs(this.x2() - this.x1());
+    }
+
+    height(value?: number, changeMode?: ChangeMode) {
+        if (arguments.length !== 0) {
+            this.y2(this.y1() + value, changeMode);
+        }
+
+        return Math.abs(this.y2() - this.y1());
+    }
+
     getSnapPoints(local) {
         if (!this.allowSnapping()) {
             return null;
@@ -269,30 +285,30 @@ class Line extends Shape {
         context.restore();
     }
 
-    x1(value?) {
+    x1(value?, changeMode?:ChangeMode) {
         if (value !== undefined) {
-            this.setProps({x1: value});
+            this.setProps({x1: value}, changeMode);
         }
         return this.props.x1;
     }
 
-    y1(value?) {
+    y1(value?, changeMode?:ChangeMode) {
         if (value !== undefined) {
-            this.setProps({y1: value});
+            this.setProps({y1: value}, changeMode);
         }
         return this.props.y1;
     }
 
-    x2(value?) {
+    x2(value?, changeMode?:ChangeMode) {
         if (value !== undefined) {
-            this.setProps({x2: value});
+            this.setProps({x2: value}, changeMode);
         }
         return this.props.x2;
     }
 
-    y2(value?) {
+    y2(value?, changeMode?:ChangeMode) {
         if (value !== undefined) {
-            this.setProps({y2: value});
+            this.setProps({y2: value}, changeMode);
         }
         return this.props.y2;
     }
