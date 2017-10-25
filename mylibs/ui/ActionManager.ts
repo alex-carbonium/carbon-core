@@ -14,7 +14,6 @@ import Duplicate from "../commands/Duplicate";
 // import ChangeColumnType from "../commands/ChangeColumnType";
 import ConvertToPath from "../commands/ConvertToPath";
 // import DeleteCellGroup from "../commands/DeleteCellGroup";
-import Group from "../commands/Group";
 import Isolate from "../commands/Isolate";
 import { align } from "../framework/Aligner";
 // import InsertColumn from "../commands/InsertColumn";
@@ -280,42 +279,8 @@ export default class ActionManager implements IActionManager {
             align("distributeVertically", Selection.getSelection());
         });
 
-        this.registerAction("groupElements", "Group elements", "Group", function () {
-            Group.run(Selection.getSelection(), GroupContainer);
-        });
-
-        this.registerAction("groupElementsVStack", "Group elements", "Group", function () {
-            Group.run(Selection.getSelection(), InteractiveContainer, {
-                arrangeStrategy: ArrangeStrategies.VerticalStack,
-                dropPositioning: DropPositioning.Vertical,
-            }, true);
-        });
-
-        this.registerAction("groupElementsHStack", "Group elements", "Group", function () {
-            var b = Selection.selectedElement().getBoundingBox();
-            Group.run(Selection.getSelection(), InteractiveContainer, {
-                arrangeStrategy: ArrangeStrategies.HorizontalStack,
-                dropPositioning: DropPositioning.Horizontal
-            }, true);
-        });
-
-        this.registerAction("groupElementsCanvas", "Group elements", "Group", function () {
-            Group.run(Selection.getSelection(), InteractiveContainer, undefined, true);
-        });
-
         this.registerAction("isolateSelection", "Isolate selection", "Isolation", function () {
             Isolate.run(Selection.getSelection() as IIsolatable[]);
-        });
-
-        this.registerAction("ungroupElements", "Ungroup elements", "Ungroup", function () {
-            let elements = Selection.elements as IContainer[];
-            let children = [];
-            elements.forEach(e => {
-                children = children.concat(e.children);
-                e.flatten();
-            });
-            Selection.makeSelection(children);
-
         });
 
         this.registerAction("lock", "Lock", "Lock", function () {
@@ -498,14 +463,6 @@ export default class ActionManager implements IActionManager {
             let elements = Selection.getSelection();
             for (let i = 0; i < elements.length; ++i) {
                 elements[i].flatten();
-            }
-        });
-
-        this.registerAction("groupWithMask", "Create mask", "Group", function () {
-            let selection = Selection.getSelection();
-            if (typeof selection[0].drawPath === 'function') {
-                let group = Group.run(selection, GroupContainer);
-                group.children[0].setProps({ clipMask: true });
             }
         });
 

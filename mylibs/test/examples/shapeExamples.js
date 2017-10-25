@@ -22,7 +22,7 @@ registerExample("shape: lines", function(app, artboard){
     artboard.add(line3);
 
     Selection.makeSelection([line2, line3]);
-    app.actionManager.invoke("groupElements");
+    app.actionManager.invoke("group");
 
     window.line1 = line1;
 });

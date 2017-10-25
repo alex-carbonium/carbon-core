@@ -384,8 +384,9 @@ class ArtboardPage extends Page implements IArtboardPage {
     dropElement(element: IUIElement) {
         let parent: Container = null;
         let elementBox = element.getBoundingBoxGlobal();
+        let toAccept = [element];
         for (let i = 0; i < this.children.length; ++i){
-            if (this.children[i].getBoundingBoxGlobal().isIntersecting(elementBox)) {
+            if (this.children[i].canAccept(toAccept, false, false) && this.children[i].getBoundingBoxGlobal().isIntersecting(elementBox)) {
                 if (parent) {
                     parent = this;
                     break;

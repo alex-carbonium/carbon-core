@@ -54,5 +54,5 @@ registerExample("zoom in: group", function(app, artboard){
     Environment.view.scrollY(1098);
 
     Selection.makeSelection([rect1, rect2]);
-    app.actionManager.invoke("groupElements");
+    app.actionManager.invoke("group");
 });

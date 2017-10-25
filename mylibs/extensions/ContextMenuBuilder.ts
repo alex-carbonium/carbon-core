@@ -215,50 +215,6 @@ export default class ContextMenuBuilder {
         })
 
         items.push('-')
-
-        items.push({
-            name: "@grouping",
-            contextBar: ContextBarPosition.Right,
-            items: [
-                {
-                    name: "@group",
-                    icon: "group",
-                    actionId: "groupElements",
-                    disabled: !selection || selection.length <= 1
-                },
-                {
-                    name: "@group.vstack",
-                    icon: "group",
-                    actionId: "groupElementsVStack",
-                    disabled: !selection || selection.length <= 1
-                },
-                {
-                    name: "@group.hstack",
-                    icon: "group",
-                    actionId: "groupElementsHStack",
-                    disabled: !selection || selection.length <= 1
-                },
-                {
-                    name: "@group.canvas",
-                    icon: "group",
-                    actionId: "groupElementsCanvas",
-                    disabled: !selection || selection.length <= 1
-                },
-                {
-                    name: "@ungroup",
-                    icon: "ungroup",
-                    actionId: "ungroupElements",
-                    disabled: !selection || selection.length !== 1 || !(selection[0] instanceof InteractiveContainer)
-                },
-                {
-                    name: "@group.mask",
-                    icon: "mask",
-                    actionId: "groupWithMask",
-                    disabled: !selection || selection.length < 2 || (typeof selection[0].drawPath !== 'function')
-                }
-            ]
-        })
-        items.push('-')
         items.push({
             name: "@path",
             contextBar: (canDoPathOperations(selection) || canFlattenPath(selection) || canConvertToPath(selection)) ? ContextBarPosition.Right : ContextBarPosition.None,

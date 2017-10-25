@@ -25,11 +25,11 @@ registerExample("group: nested, multilevel", function(app, artboard){
     artboard.add(rect4);
 
     Selection.makeSelection([rect1, rect2]);
-    app.actionManager.invoke("groupElements");
+    app.actionManager.invoke("group");
     var group1 = Selection.selectedElements()[0];
 
     Selection.makeSelection([rect3, rect4]);
-    app.actionManager.invoke("groupElements");
+    app.actionManager.invoke("group");
     var group2 = Selection.selectedElements()[0];
     group2.name("group 2");
 
@@ -39,12 +39,12 @@ registerExample("group: nested, multilevel", function(app, artboard){
     artboard.add(group3);
 
     Selection.makeSelection([group2, group3]);
-    app.actionManager.invoke("groupElements");
+    app.actionManager.invoke("group");
     var group4 = Selection.selectedElements()[0];
     group4.name("group 4");
 
     Selection.makeSelection([group1, group4]);
-    app.actionManager.invoke("groupElements");
+    app.actionManager.invoke("group");
     var group5 = Selection.selectedElements()[0];
     group5.name("group 5");
 
