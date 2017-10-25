@@ -1,5 +1,5 @@
 declare module "carbon-app" {
-    import { IDataNode, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IIsolatable, IMouseEventHandler, IContainerProps } from "carbon-model";
+    import { IDataNode, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IIsolatable, IMouseEventHandler, IContainerProps, PropDescriptor } from "carbon-model";
     import { IEvent, IEventData, IEvent2, IMouseEventData, KeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable, IJsonNode, IPrimitive, ArtboardType, FontStyle, FontWeight } from "carbon-basics";
     import { IRect, ICoordinate, ISize } from "carbon-geometry";
     import { IContext, IContextPool, RenderEnvironment, RenderFlags } from "carbon-rendering";
@@ -488,6 +488,7 @@ declare module "carbon-app" {
 
 
     export interface ISelectComposite extends IComposite{
+        getDisplayPropValue(propertyName: string, descriptor?: PropDescriptor): any;
         updateDisplayProps(changes);
     }
 
@@ -512,7 +513,7 @@ declare module "carbon-app" {
         hide();
 
         modeChangedEvent: IEvent<boolean>;
-        onElementSelected: IEvent3<IUIElement, IUIElement[], boolean>;
+        onElementSelected: IEvent3<ISelectComposite, IUIElement[], boolean>;
     }
 
     export interface IRenderLoop {

@@ -1,4 +1,4 @@
-import PropertyMetadata, { PropertyDescriptor } from "./PropertyMetadata";
+import PropertyMetadata from "./PropertyMetadata";
 import PropertyTracker from "./PropertyTracker";
 import { leaveCommonProps } from "../util";
 import { Types } from "./Defs";
@@ -11,7 +11,7 @@ import Rect from "../math/rect";
 import Matrix from "../math/matrix";
 import Environment from "../environment";
 import Selection from "./SelectionModel";
-import { IUIElementProps, IPoint, IRect, IComposite, ChangeMode, PatchType, ICoordinate, RenderEnvironment } from "carbon-core";
+import { IUIElementProps, IPoint, IRect, IComposite, ChangeMode, PatchType, ICoordinate, RenderEnvironment, PropDescriptor } from "carbon-core";
 import CommonPropsManager from "./CommonPropsManager";
 
 export default class CompositeElement extends UIElement implements IComposite {
@@ -417,7 +417,7 @@ export default class CompositeElement extends UIElement implements IComposite {
         return this._commonPropsManager.createGroups(this.elements);
     }
 
-    getDisplayPropValue(propertyName: string, descriptor: PropertyDescriptor) {
+    getDisplayPropValue(propertyName: string, descriptor: PropDescriptor) {
         return this._commonPropsManager.getDisplayPropValue(this.elements, propertyName, descriptor);
     }
 
@@ -478,6 +478,13 @@ export default class CompositeElement extends UIElement implements IComposite {
 
     get types() {
         return this._types;
+    }
+
+    canFill() {
+        return this.children.every(x => x.canFill());
+    }
+    canStroke() {
+        return this.children.every(x => x.canStroke());
     }
 }
 

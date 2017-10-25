@@ -1,5 +1,5 @@
 import Matrix from "../math/matrix";
-import { IContainer, IDataNodeProps, IMatrix, IPoint, IRect, ISize, IUIElement, IUIElementProps, IConstraints, IContext, IContainerProps, IDataNode, IMouseEventData, KeyboardState, ResizeDimension } from "carbon-core";
+import { IContainer, IDataNodeProps, IMatrix, IPoint, IRect, ISize, IUIElement, IUIElementProps, IConstraints, IContext, IContainerProps, IDataNode, IMouseEventData, KeyboardState, ResizeDimension, PropDescriptor } from "carbon-core";
 import { emptyUuid } from "../util";
 import DataNode from "./DataNode";
 import Rect from "../math/rect";
@@ -383,6 +383,17 @@ class NullContainer extends DataNode implements IContainer {
 
     expandRectWithBorder(box) {
         return box;
+    }
+
+    findPropertyDescriptor(propName): PropDescriptor {
+        return null;
+    }
+
+    canFill() {
+        return false;
+    }
+    canStroke() {
+        return false;
     }
 }
 

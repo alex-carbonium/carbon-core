@@ -1,9 +1,9 @@
-import PropertyMetadata, { PropertyDescriptor } from "./PropertyMetadata";
+import PropertyMetadata from "./PropertyMetadata";
 import UIElement from "./UIElement";
 import Environment from "../environment";
 import PropertyTracker from "./PropertyTracker";
 import { leaveCommonProps } from "../util";
-import { ChangeMode, PatchType } from "carbon-core";
+import { ChangeMode, PatchType, PropDescriptor } from "carbon-core";
 import Font from "./Font";
 import Shadow from "./Shadow";
 import ArrayPool from "./ArrayPool";
@@ -43,7 +43,7 @@ export default class CommonPropsManager {
         return baseGroups;
     }
 
-    getDisplayPropValue(elements: UIElement[], propertyName: string, descriptor: PropertyDescriptor) {
+    getDisplayPropValue(elements: UIElement[], propertyName: string, descriptor: PropDescriptor) {
         if (elements.length === 1) {
             return elements[0].getDisplayPropValue(propertyName, descriptor);
         }

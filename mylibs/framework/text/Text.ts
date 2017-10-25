@@ -547,6 +547,10 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
         return props;
     }
 
+    canStroke() {
+        return false;
+    }
+
     static fromSvgElement(element, parsedAttributes, matrix) {
         //
         // :

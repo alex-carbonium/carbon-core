@@ -32,11 +32,10 @@ import DataNode from "./DataNode";
 import { createUUID, deepEquals } from "../util";
 import Rect from "../math/rect";
 import ResizeOptions from "../decorators/ResizeOptions";
-import { PropertyDescriptor } from './PropertyMetadata';
 import { KeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
-import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps, RenderFlags, RenderEnvironment, IContext } from "carbon-core";
+import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps, RenderFlags, RenderEnvironment, IContext, PropDescriptor } from "carbon-core";
 import ExtensionPoint from "./ExtensionPoint";
 import CoreIntl from "../CoreIntl";
 import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
@@ -229,7 +228,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         let values = {};
         for (let i = 0; i < names.length; i++) {
             let propertyName = names[i];
-            let descriptor: PropertyDescriptor = metadata[names[i]];
+            let descriptor: PropDescriptor = metadata[names[i]];
             if (descriptor.computed) {
                 values[propertyName] = this[propertyName]();
             }
@@ -239,7 +238,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
         return values;
     }
-    getDisplayPropValue(propertyName: string, descriptor: PropertyDescriptor = null): any {
+    getDisplayPropValue(propertyName: string, descriptor: PropDescriptor = null): any {
         if (!descriptor) {
             let metadata = this.findMetadata();
             if (metadata) {
@@ -256,7 +255,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         let names = Object.keys(changes);
         for (let i = 0; i < names.length; i++) {
             let propertyName = names[i];
-            let descriptor: PropertyDescriptor = metadata[propertyName];
+            let descriptor: PropDescriptor = metadata[propertyName];
             if (descriptor.computed) {
                 ExtensionPoint.invoke(this, propertyName, [changes[propertyName], changeMode]);
                 delete changes[propertyName];
@@ -1331,6 +1330,12 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
         return this.props.strokeWidth;
     }
+    canFill() {
+        return true;
+    }
+    canStroke() {
+        return true;
+    }
     dashPattern(value?: any) {
         if (value !== undefined) {
             this.setProps({ dashPattern: value });
@@ -1628,7 +1633,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     findMetadata() {
         return PropertyMetadata.findAll(this.systemType());
     }
-    findPropertyDescriptor(propName): PropertyDescriptor {
+    findPropertyDescriptor(propName): PropDescriptor {
         return PropertyMetadata.find(this.systemType(), propName);
     }
     quickEditProperty(value) {

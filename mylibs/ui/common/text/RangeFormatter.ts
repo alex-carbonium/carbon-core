@@ -2,12 +2,14 @@ import UIElement from "framework/UIElement";
 import PropertyMetadata from "framework/PropertyMetadata";
 import {Types} from "framework/Defs";
 import Font from "framework/Font";
-import { ChangeMode, IText } from "carbon-core";
+import { ChangeMode, IText, ITextProps } from "carbon-core";
+import Brush from "../../../framework/Brush";
 
 var debug = require("DebugUtil")("carb:rangeFormatter");
 
 export default class RangeFormatter extends UIElement {
     private _element: IText;
+    private _internalUpdate: boolean;
 
     initFormatter(app, engine, element){
         this._app = app;
@@ -26,12 +28,19 @@ export default class RangeFormatter extends UIElement {
         if (modifyingInsert || this._isFormattingChanged(f, this._engine.lastFormatting())){
             this._engine.lastFormatting(f);
             var font = this._formattingToFont(f);
-            debug("set font %s", JSON.stringify(font));
-            this.setProps({font}, ChangeMode.Root);
+            debug("set font %o", font);
+
+            this._internalUpdate = true;
+            let props: Partial<ITextProps> = { font };
+            if (font.color !== this.props.font.color) {
+                props.fill = Brush.createFromColor(font.color);
+            }
+            this.setProps(props, ChangeMode.Root);
+            this._internalUpdate = false;
         }
     };
     setProps(changes, mode){
-        if (mode === ChangeMode.Model && (changes.font || changes.fill)) {
+        if (mode === ChangeMode.Model && (changes.font || changes.fill) && !this._internalUpdate) {
             let font = changes.font;
             if (changes.fill) {
                 font = font || this.props.font;

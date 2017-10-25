@@ -3,7 +3,7 @@ import SelectComposite from "./SelectComposite";
 import {SelectFrame} from "./SelectFrame";
 import UserSettings from "../UserSettings";
 import Environment from "../environment";
-import { ISelection, IEvent, IEvent2, IUIElement, IComposite, IEvent3, SelectionMode, KeyboardState } from "carbon-core";
+import { ISelection, IEvent, IEvent2, IUIElement, IComposite, IEvent3, SelectionMode, KeyboardState, ISelectComposite } from "carbon-core";
 import Rect from "../math/rect";
 import ArrayPool from "./ArrayPool";
 
@@ -66,12 +66,12 @@ class SelectionModel implements ISelection {
     private _selectFrameStarted = false;
 
     modeChangedEvent: IEvent<boolean>;
-    onElementSelected: IEvent3<IComposite, IUIElement[], boolean>;
+    onElementSelected: IEvent3<ISelectComposite, IUIElement[], boolean>;
 
     constructor() {
         this._unlockedContainers = ArrayPool.EmptyArray;
         this._activeGroup = null;
-        this.onElementSelected = EventHelper.createEvent3<IComposite, IUIElement[], boolean>();
+        this.onElementSelected = EventHelper.createEvent3<ISelectComposite, IUIElement[], boolean>();
         this.startSelectionFrameEvent = EventHelper.createEvent();
         this.onSelectionFrameEvent = EventHelper.createEvent();
         this.stopSelectionFrameEvent = EventHelper.createEvent();
