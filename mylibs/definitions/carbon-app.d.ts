@@ -1,5 +1,5 @@
 declare module "carbon-app" {
-    import { IDataNode, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IIsolatable, IMouseEventHandler, IContainerProps } from "carbon-model";
+    import { IDataNode, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IIsolatable, IMouseEventHandler, IContainerProps, PropDescriptor } from "carbon-model";
     import { IEvent, IEventData, IEvent2, IMouseEventData, KeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable, IJsonNode, IPrimitive, ArtboardType, FontStyle, FontWeight } from "carbon-basics";
     import { IRect, ICoordinate, ISize } from "carbon-geometry";
     import { IContext, IContextPool, RenderEnvironment, RenderFlags } from "carbon-rendering";
@@ -488,14 +488,16 @@ declare module "carbon-app" {
 
 
     export interface ISelectComposite extends IComposite{
+        getDisplayPropValue(propertyName: string, descriptor?: PropDescriptor): any;
         updateDisplayProps(changes);
     }
 
     export type SelectionMode = "new" | "add" | "toggle" | "remove";
 
     export interface ISelection{
-        elements: IUIElement[];
-        previousElements: IUIElement[];
+        readonly elements: IUIElement[];
+        readonly previousElements: IUIElement[];
+        readonly latestGlobalBoundingBox: IRect;
 
         makeSelection(elements: IUIElement[], mode?: SelectionMode);
         getSelectionMode(keys: KeyboardState, extended: boolean): SelectionMode;
@@ -511,8 +513,8 @@ declare module "carbon-app" {
         show();
         hide();
 
-        modeChangedEvent: IEvent<boolean>;
-        onElementSelected: IEvent3<IUIElement, IUIElement[], boolean>;
+        readonly modeChangedEvent: IEvent<boolean>;
+        readonly onElementSelected: IEvent3<ISelectComposite, IUIElement[], boolean>;
     }
 
     export interface IRenderLoop {

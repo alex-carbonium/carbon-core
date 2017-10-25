@@ -3,9 +3,10 @@ import SelectComposite from "./SelectComposite";
 import {SelectFrame} from "./SelectFrame";
 import UserSettings from "../UserSettings";
 import Environment from "../environment";
-import { ISelection, IEvent, IEvent2, IUIElement, IComposite, IEvent3, SelectionMode, KeyboardState } from "carbon-core";
+import { ISelection, IEvent, IEvent2, IUIElement, IComposite, IEvent3, SelectionMode, KeyboardState, ISelectComposite, IRect } from "carbon-core";
 import Rect from "../math/rect";
 import ArrayPool from "./ArrayPool";
+import UIElement from "./UIElement";
 
 let debug = require("DebugUtil")("carb:selection");
 
@@ -65,13 +66,14 @@ class SelectionModel implements ISelection {
     private _selectFrame = new SelectFrame();
     private _selectFrameStarted = false;
 
+    latestGlobalBoundingBox: IRect = Rect.Zero;
     modeChangedEvent: IEvent<boolean>;
-    onElementSelected: IEvent3<IComposite, IUIElement[], boolean>;
+    onElementSelected: IEvent3<ISelectComposite, IUIElement[], boolean>;
 
     constructor() {
         this._unlockedContainers = ArrayPool.EmptyArray;
         this._activeGroup = null;
-        this.onElementSelected = EventHelper.createEvent3<IComposite, IUIElement[], boolean>();
+        this.onElementSelected = EventHelper.createEvent3<ISelectComposite, IUIElement[], boolean>();
         this.startSelectionFrameEvent = EventHelper.createEvent();
         this.onSelectionFrameEvent = EventHelper.createEvent();
         this.stopSelectionFrameEvent = EventHelper.createEvent();
@@ -220,7 +222,7 @@ class SelectionModel implements ISelection {
 
         if (!refreshOnly) {
             this._selectCompositeElement.ensureSorted();
-            this._fireOnElementSelected(currentSelection, doNotTrack);
+            this._fireOnElementSelected(doNotTrack);
         }
     }
 
@@ -238,9 +240,16 @@ class SelectionModel implements ISelection {
         this.makeSelection(selection, "new", false, true);
     }
 
-    _fireOnElementSelected(oldSelection, doNotTrack = false) {
+    _fireOnElementSelected(doNotTrack = false) {
         lockUnlockGroups.call(this, this.selectedElements());
-        this.onElementSelected.raise(this._selectCompositeElement, oldSelection, doNotTrack);
+        this.calculateGlobalBoundingBox();
+        this.onElementSelected.raise(this._selectCompositeElement, this._previousElements, doNotTrack);
+    }
+
+    private calculateGlobalBoundingBox() {
+        if (this.elements.length) {
+            this.latestGlobalBoundingBox = UIElement.getCombinedBoundingBoxGlobal(this.elements);
+        }
     }
 
     private unselectAll(refreshOnly = false) {
@@ -255,7 +264,7 @@ class SelectionModel implements ISelection {
 
     clearSelection() {
         if (this.unselectAll()) {
-            this._fireOnElementSelected(ArrayPool.EmptyArray);
+            this._fireOnElementSelected();
         }
     }
 

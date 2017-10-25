@@ -1,3 +1,5 @@
+import { PropDescriptor } from "carbon-core";
+
 var PropertyMetadata: any = {};
 PropertyMetadata._store = {};
 PropertyMetadata._defaults = {};
@@ -5,7 +7,7 @@ PropertyMetadata._cache = {
     stylePropertyNamesMap: {}
 };
 
-PropertyMetadata.find = function(type: string, propertyName: string): PropertyDescriptor{
+PropertyMetadata.find = function(type: string, propertyName: string): PropDescriptor{
     var typeData = PropertyMetadata._store[type];
     if (!typeData){
         return null;
@@ -176,12 +178,3 @@ PropertyMetadata.getStylePropertyNamesMap = function(type, styleType){
 }
 
 export default PropertyMetadata;
-
-export interface PropertyDescriptor{
-    displayName: string,
-    type: string,
-    defaultValue: any,
-    size?: number,
-    computed?: boolean,
-    options?: any
-}

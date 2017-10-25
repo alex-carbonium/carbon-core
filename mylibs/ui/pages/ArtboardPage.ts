@@ -192,6 +192,11 @@ class ArtboardPage extends Page implements IArtboardPage {
 
     setActiveArtboard(artboard, doNotTrack?) {
         let oldArtboard: IArtboard = this._activeArtboard;
+
+        if (artboard === oldArtboard) {
+            return;
+        }
+
         if (this._activeArtboard) {
             this._activeArtboard.deactivate();
         }

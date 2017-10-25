@@ -1,12 +1,12 @@
 import { Types, ArrangeStrategies, DropPositioning, Overflow, HorizontalAlignment, VerticalAlignment } from "./Defs";
-import PropertyMetadata, { PropertyDescriptor } from "./PropertyMetadata";
+import PropertyMetadata from "./PropertyMetadata";
 import PropertyTracker from "./PropertyTracker";
 import UserSettings from "../UserSettings";
 import InteractiveContainer from "./InteractiveContainer";
 import UIElement from "./UIElement";
 import Point from "../math/point";
 import Environment from "../environment";
-import { IGroupContainer, ChangeMode, IIsolatable, IMouseEventData } from "carbon-core";
+import { IGroupContainer, ChangeMode, IIsolatable, IMouseEventData, PropDescriptor } from "carbon-core";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
 import { IPoint } from "carbon-geometry";
 import CommonPropsManager from "./CommonPropsManager";
@@ -95,7 +95,7 @@ export default class GroupContainer extends InteractiveContainer implements IGro
         }
     }
 
-    getDisplayPropValue(propertyName: string, descriptor: PropertyDescriptor) {
+    getDisplayPropValue(propertyName: string, descriptor: PropDescriptor) {
         if (ownProperties.indexOf(propertyName) !== -1) {
             return super.getDisplayPropValue(propertyName, descriptor);
         }

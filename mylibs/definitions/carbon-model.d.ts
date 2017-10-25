@@ -123,6 +123,8 @@ declare module "carbon-model" {
 
         fill(value?: any): any;
         stroke(value?: any): any;
+        canFill(): boolean;
+        canStroke(): boolean;
 
         x(): number;
         y(): number;
@@ -151,6 +153,8 @@ declare module "carbon-model" {
         lockedGroup(): boolean;
 
         animate(props: object, duration: number, options: object, progress: () => void): Promise<void>;
+
+        findPropertyDescriptor(propName): PropDescriptor;
     }
 
     export const UIElement: IConstructor<IUIElement>;
@@ -383,6 +387,15 @@ declare module "carbon-model" {
     export interface IPolygon extends IShape {
     }
     export const Polygon: IConstructor<IPolygon>;
+
+    export interface PropDescriptor{
+        displayName: string,
+        type: string,
+        defaultValue: any,
+        size?: number,
+        computed?: boolean,
+        options?: any;
+    }
 
     export interface IModel {
         createText(size?: ISize, props?: Partial<ITextProps>): IText;

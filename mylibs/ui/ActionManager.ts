@@ -486,9 +486,6 @@ export default class ActionManager implements IActionManager {
             return that.app.modelSyncProxy.change();
         });
 
-        this.registerAction("transparentColor", "", "", function () {
-        });
-
         this.registerAction("saveBackup", "Save backup", "Project actions", function () {
             return that.app.offlineModel.saveBackup(that.app);
         });

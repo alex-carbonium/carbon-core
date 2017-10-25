@@ -1,5 +1,5 @@
 import { Types, ArrangeStrategies, Overflow, HorizontalAlignment, VerticalAlignment } from "./Defs";
-import PropertyMetadata, { PropertyDescriptor } from "./PropertyMetadata";
+import PropertyMetadata from "./PropertyMetadata";
 import PropertyTracker from "./PropertyTracker";
 import UserSettings from "../UserSettings";
 import Container from "./Container";
