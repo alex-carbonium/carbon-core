@@ -16,6 +16,10 @@ export default class RangeFormatter extends UIElement {
         this._engine = engine;
         this._engine.selectionChanged(this.selectionChanged);
         this._element = element;
+
+        this._internalUpdate = true;
+        this.setProps({ fill: Brush.createFromColor(element.props.font.color) }, ChangeMode.Root);
+        this._internalUpdate = false;
     }
     getFirstFont(){
         var range = this._engine.getRange(0, 0);

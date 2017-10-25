@@ -395,7 +395,7 @@ export default class TextTool extends Tool {
         this.text.runtimeProps.ctxl = undefined;
         this.text.resetEngine();
 
-        Selection.makeSelection([this.text]);
+        Selection.makeSelection([this.text], "new", false, true);
 
         this._editor = null;
         this.text = null;
