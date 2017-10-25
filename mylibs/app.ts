@@ -176,6 +176,9 @@ class AppClass extends DataNode implements IApp {
 
 
         var token = Selection.onElementSelected.bind((selection, oldSelection, doNotTrack) => {
+            if (this.activePage === NullPage) {
+                return;
+            }
             let selectionIds = Selection.selectedElements().map(e => e.id());
             let oldSelectionIds = oldSelection.map(e => e.id());
             if (!doNotTrack && (selectionIds.length || oldSelectionIds.length)) {
