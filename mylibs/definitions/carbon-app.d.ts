@@ -495,8 +495,9 @@ declare module "carbon-app" {
     export type SelectionMode = "new" | "add" | "toggle" | "remove";
 
     export interface ISelection{
-        elements: IUIElement[];
-        previousElements: IUIElement[];
+        readonly elements: IUIElement[];
+        readonly previousElements: IUIElement[];
+        readonly latestGlobalBoundingBox: IRect;
 
         makeSelection(elements: IUIElement[], mode?: SelectionMode);
         getSelectionMode(keys: KeyboardState, extended: boolean): SelectionMode;
@@ -512,8 +513,8 @@ declare module "carbon-app" {
         show();
         hide();
 
-        modeChangedEvent: IEvent<boolean>;
-        onElementSelected: IEvent3<ISelectComposite, IUIElement[], boolean>;
+        readonly modeChangedEvent: IEvent<boolean>;
+        readonly onElementSelected: IEvent3<ISelectComposite, IUIElement[], boolean>;
     }
 
     export interface IRenderLoop {
