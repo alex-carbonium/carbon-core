@@ -26,7 +26,7 @@ registerExample("skew: simple", function(app, artboard){
     artboard.add(rect4);
 
     Selection.makeSelection([rect1, rect2]);
-    app.actionManager.invoke("groupElements");
+    app.actionManager.invoke("group");
     window.group = Selection.getSelection()[0];
 
     window.rect1 = rect1;

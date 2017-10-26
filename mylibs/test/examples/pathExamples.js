@@ -34,7 +34,7 @@ registerExample("path: in a group", function(app){
     app.activePage.add(rect2);
 
     Selection.makeSelection([path1, rect2]);
-    app.actionManager.invoke("groupElements");
+    app.actionManager.invoke("group");
     var group = Selection.selectedElements()[0];
     group.applyRotation(20, group.center());
 

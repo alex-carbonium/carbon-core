@@ -48,6 +48,7 @@ export default class ShortcutManager implements IShortcutManager {
 
         if (mac) {
             shortcut.display = shortcut.display
+                .replace(/mod/, "⌘")
                 .replace(/meta/, "⌘")
                 .replace(/shift/, "⇧")
                 .replace(/ctrl/, "⌃")
@@ -61,6 +62,7 @@ export default class ShortcutManager implements IShortcutManager {
         }
         else {
             shortcut.display = shortcut.display
+                .replace(/mod/, "ctrl")
                 .replace(/backspace/, "bkspc")
                 .replace(/\+/g, " ");
         }

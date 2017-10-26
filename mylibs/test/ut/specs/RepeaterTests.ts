@@ -689,7 +689,7 @@ describe("Repeater tests", function () {
 
             //act
             Selection.makeSelection(repeater.children[1].children);
-            this.app.actionManager.invoke("groupElements");
+            this.app.actionManager.invoke("group");
             this.app.relayout();
 
             //assert
