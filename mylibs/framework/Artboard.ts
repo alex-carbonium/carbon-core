@@ -659,7 +659,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     suck() {
         let artboardBox = this.getBoundingBoxGlobal();
         let parent = this.parent() as IContainer;
-        for (let i = parent.children.length - 1; i >= 0; --i){
+        for (let i = 0; i < parent.children.length; ++i){
             let child = parent.children[i];
             if (child instanceof Artboard) {
                 continue;
@@ -769,9 +769,6 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         let pos = this.position();
         if (Environment.controller.currentTool !== "artboardTool" && !Selection.isElementSelected(this) && isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width(), height: 20 / scale }, event)) {
             this.parent().setActiveArtboard(this);
-            // if (!event.shiftKey) {
-            //     Selection.makeSelection([this]);
-            // }
             event.handled = true;
         }
     }
