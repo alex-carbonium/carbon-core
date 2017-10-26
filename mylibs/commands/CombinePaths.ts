@@ -17,6 +17,9 @@ export default class CombinePaths {
     }
 
     static run(joinMode, elements) {
+        if (!elements.length) {
+            return;
+        }
         var elements = elements.slice().sort((a, b) => a.zOrder() - b.zOrder());
         CombinePaths.convertToPaths(elements);
         var path;

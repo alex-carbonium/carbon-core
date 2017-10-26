@@ -491,7 +491,7 @@ class Matrix implements IMatrix, IPooledObject {
         return this.transformPointMutable(point, round);
     }
 
-    transformPointMutable(point:Point, round) {
+    transformPointMutable(point:Point, round?: boolean) {
         let x = point.x * this._a + point.y * this._c + this._tx;
         let y = point.x * this._b + point.y * this._d + this._ty;
 

@@ -13,6 +13,7 @@ import Environment from "../environment";
 import Selection from "./SelectionModel";
 import { IUIElementProps, IPoint, IRect, IComposite, ChangeMode, PatchType, ICoordinate, RenderEnvironment, PropDescriptor } from "carbon-core";
 import CommonPropsManager from "./CommonPropsManager";
+import Point from "../math/point";
 
 export default class CompositeElement extends UIElement implements IComposite {
     private _commonPropsManager: CommonPropsManager;
@@ -79,9 +80,15 @@ export default class CompositeElement extends UIElement implements IComposite {
         return true;
     }
 
-    applyScaling(s, o, options, changeMode) {
+    applyScaling(s: IPoint, o: IPoint, options, changeMode) {
         var resizeOptions = options && options.forChildResize(false);
-        this.elements.forEach(e => e.applyScaling(s, o, resizeOptions, changeMode));
+        for (let i = 0; i < this.elements.length; ++i){
+            let element = this.elements[i];
+            let localOrigin = Point.allocate(o.x, o.y);
+            element.parent().globalViewMatrixInverted().transformPointMutable(localOrigin);
+            element.applyScaling(s, localOrigin, resizeOptions, changeMode)
+            localOrigin.free();
+        }
         this.performArrange();
         return true;
     }
