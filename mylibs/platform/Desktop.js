@@ -307,6 +307,8 @@ var onWindowBlur = function () {
     if (!DEBUG) {
         App.Current.actionManager.invoke("cancel");
     }
+    Selection.cancelSelectFrame();
+    Invalidate.requestInteractionOnly();
 }
 
 var onWindowResize = function () {

@@ -129,9 +129,16 @@ class SelectionModel implements ISelection {
     }
 
     completeSelectFrame(eventData) {
+        Selection.selectFrame.parent().remove(Selection.selectFrame);
         this._selectFrameStarted = false;
         this.stopSelectionFrameEvent.raise();
         this._selectFrame.complete(eventData);
+    }
+
+    cancelSelectFrame() {
+        Selection.selectFrame.parent().remove(Selection.selectFrame);
+        this._selectFrameStarted = false;
+        this.stopSelectionFrameEvent.raise();
     }
 
     isElementSelected(el) {

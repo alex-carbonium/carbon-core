@@ -494,8 +494,6 @@ export default class DesignerController implements IController {
         delete this._mouseDownData;
 
         if (Selection.hasSelectionFrame()) {
-
-            this.view.interactionLayer.remove(Selection.selectFrame);
             Selection.completeSelectFrame(eventData);
 
             return;
