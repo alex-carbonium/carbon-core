@@ -73,6 +73,8 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         // set layer matrix to owner element global matrix,
         // so matrixes of the copied element should be identical to source matrices
         this.setProps(owner.selectLayoutProps(true), ChangeMode.Self);
+        //mimic the same arrange strategy for correct properties display
+        this.setProps({ arrangeStrategy: owner.props.arrangeStrategy }, ChangeMode.Self);
         this.hitTransparent(false);
 
         this.tokens.push(RelayoutEngine.rootRelayoutFinished.bind(this, this.onRootRelayoutFinished));
@@ -116,8 +118,6 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
 
         this.tokens.forEach(x => x.dispose());
         this.tokens.length = 0;
-
-        //Selection.clearSelection(true);
     }
 
     onRootRelayoutFinished(root, primitiveMap: NodePrimitivesMap) {
