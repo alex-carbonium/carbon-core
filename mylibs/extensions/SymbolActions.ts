@@ -109,7 +109,7 @@ export default class SymbolActions extends CarbonExtension {
         page.add(artboard);
 
         artboard.setProps({
-            br: new Rect(0, 0, boundingBox.width, boundingBox.height),
+            br: new Rect(0, 0, boundingBox.width || 1, boundingBox.height || 1),
             m: matrix,
             allowVerticalResize: true,
             allowHorizontalResize: true,

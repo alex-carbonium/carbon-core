@@ -573,6 +573,9 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     hitTestBoundingBox(point, scale) {
+        if (this.hasBadTransform()) {
+            return false;
+        }
         let rect = super.getHitTestBox(scale);
         return this.hitTestLocalRect(rect, point, scale) || this.hitTestHeader(point, scale);
     }
