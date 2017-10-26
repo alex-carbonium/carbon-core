@@ -152,14 +152,19 @@ class Line extends Shape {
         var pt = matrix.transformPoint(point);
         var rect = this.boundaryRect();
 
-        var d = ((4 + this.getMaxOuterBorder()) / 2) / scale;
+        let dw = 0;
+        if(scale <= 1) {
+            dw = 4;
+        }
+
+        var d = (dw + this.strokeWidth() || 1);
 
         if (!(pt.x + d > rect.x && pt.x - d < rect.x + rect.width && pt.y + d > rect.y && pt.y - d < rect.y + rect.height)) {
             return false;
         }
 
         var distance = pointToLineDistance(pt, this.x1(), this.y1(), this.x2(), this.y2());
-        return Math.abs(distance) < d;
+        return -distance < d && distance <= 0;
     }
 
     width(value?: number, changeMode?: ChangeMode) {
@@ -176,6 +181,10 @@ class Line extends Shape {
         }
 
         return Math.abs(this.y2() - this.y1());
+    }
+
+    allowCaching(){
+        return false;
     }
 
     getSnapPoints(local) {
