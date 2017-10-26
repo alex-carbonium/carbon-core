@@ -1,4 +1,5 @@
 import { IEvent, IEvent2, IEvent3 } from "carbon-core"
+import ArrayPool from "./ArrayPool";
 
 var resolvedPromise;
 
@@ -141,48 +142,29 @@ class Event<T> implements IEvent<T>, IEvent2<any, any>, IEvent3<any, any, any>{
             return;
         }
 
-        var promises;
-        var args;
-        if (arguments.length > 0) {
-            //to avoid optimization warning about passing arguments to other methods
-            args = new Array(arguments.length);
-            for (var j = 0, l = arguments.length; j < l; j++) {
-                args[j] = arguments[j];
-            }
-        }
+        let s = ArrayPool.allocateFromArray(this.subscribers);
 
-        var s = [].concat(this.subscribers);
         for (var i = 0; i < s.length; ++i) {
             var e = s[i];
             var res;
             if (e instanceof Event) {
-                if ((res = e.raise.apply(e, args)) === false) {
-                    return;
+                if ((res = e.raise.apply(e, arguments)) === false) {
+                    break;
                 }
             }
             else if (e instanceof EventHandler) {
-                if ((res = e.raise.apply(e, args)) === false) {
-                    return;
+                if ((res = e.raise.apply(e, arguments)) === false) {
+                    break;
                 }
             }
             else {
-                if ((res = e.apply(this, args)) === false) {
-                    return;
+                if ((res = e.apply(this, arguments)) === false) {
+                    break;
                 }
             }
-
-            if (res && typeof res.then === 'function') {
-                promises = promises || [];
-                promises.push(res);
-            }
         }
 
-        if (promises) {
-            return Promise.all(promises);
-        }
-
-        resolvedPromise = resolvedPromise || Promise.resolve();
-        return resolvedPromise;
+        ArrayPool.free(s);
     }
 
     enableStateTracking() {

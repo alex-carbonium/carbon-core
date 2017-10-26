@@ -279,10 +279,6 @@ export default class ActionManager implements IActionManager {
             align("distributeVertically", Selection.getSelection());
         });
 
-        this.registerAction("isolateSelection", "Isolate selection", "Isolation", function () {
-            Isolate.run(Selection.getSelection() as IIsolatable[]);
-        });
-
         this.registerAction("lock", "Lock", "Lock", function () {
             Selection.lock();
         });

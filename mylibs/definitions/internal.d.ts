@@ -104,8 +104,6 @@ declare module "carbon-app"{
         offlineModel: any;
         modelSyncProxy: any;
         defaultShapeSettings: any;
-        deferredChange: IEvent<any>;
-        relayoutFinished: IEvent<void>;
         changedLocally: IEvent<IPrimitive[]>;
         state: any;
 
