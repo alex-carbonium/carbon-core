@@ -433,6 +433,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         if (!event.handled && this._bendingData) {
             event.handled = true;
             path.bendPoints(pos, this._bendingData);
+            path.resetRuntimeProps();
             this.path.invalidate()
             event.handled = true;
         }
@@ -447,6 +448,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
 
             if (dx || dy) {
                 moveCurrentPoint.call(this, dx, dy);
+                path.resetRuntimeProps();
                 this.path.invalidate();
             }
 

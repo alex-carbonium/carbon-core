@@ -43,28 +43,32 @@ class Shape extends Container {
             context.setLineDash(dashPattern);
         }
 
+        var strokeWidth = this.strokeWidth();
+
         this.fillSelf(context, w, h);
         this.drawInsetShadows(context, w, h, environment);
 
-        if (!stroke || !stroke.type || strokePosition === StrokePosition.Center) {
-            context.lineWidth = this.strokeWidth();
-            this.strokeSelf(context, w, h);
-        }
-        else if (strokePosition === StrokePosition.Inside) {
-            context.clip();
-            context.lineWidth = this.strokeWidth() * 2;
-            this.strokeSelf(context, w, h);
-        }
-        else if (strokePosition === StrokePosition.Outside) {
-            context.beginPath();
-            var bb = this.getBoundingBoxGlobal();
-            context.rect(bb.x + 2 * bb.width, bb.y - bb.height, -3 * bb.width, 3 * bb.height);
-            this.drawPath(context, w, h);
-            context.clip();
-            context.beginPath();
-            this.drawPath(context, w, h);
-            context.lineWidth = this.strokeWidth() * 2;
-            this.strokeSelf(context, w, h);
+        if (strokeWidth) {
+            if (!stroke || !stroke.type || strokePosition === StrokePosition.Center) {
+                context.lineWidth = strokeWidth;
+                this.strokeSelf(context, w, h);
+            }
+            else if (strokePosition === StrokePosition.Inside) {
+                context.clip();
+                context.lineWidth = strokeWidth * 2;
+                this.strokeSelf(context, w, h);
+            }
+            else if (strokePosition === StrokePosition.Outside) {
+                context.beginPath();
+                var bb = this.getBoundingBoxGlobal();
+                context.rect(bb.x + 2 * bb.width, bb.y - bb.height, -3 * bb.width, 3 * bb.height);
+                this.drawPath(context, w, h);
+                context.clip();
+                context.beginPath();
+                this.drawPath(context, w, h);
+                context.lineWidth = strokeWidth * 2;
+                this.strokeSelf(context, w, h);
+            }
         }
     }
 
@@ -79,116 +83,49 @@ class Shape extends Container {
     _renderFinal(context, w, h, environment: RenderEnvironment) {
         var stroke = this.stroke();
         var strokePosition = this.strokePosition();
+        var strokeWidth = this.strokeWidth();
 
         var pipeline = RenderPipeline.createFor(this, context, environment);
-        if(environment.flags & RenderFlags.DisableCaching) {
+        if (environment.flags & RenderFlags.DisableCaching) {
             pipeline.disableCache();
         }
-        pipeline.out((context, environment)=>{
+        pipeline.applyMatrix(false);
+        pipeline.out((context, environment) => {
             context.beginPath();
             this.drawPath(context, w, h);
             this.fillSelf(context, w, h);
 
-            if(this.drawInsetShadows(context, w, h, environment)) {
+            if (this.drawInsetShadows(context, w, h, environment)) {
                 context.beginPath();
                 this.drawPath(context, w, h);
             }
         });
 
-        if (!stroke || !stroke.type || strokePosition === StrokePosition.Center) {
-            pipeline.out((context, environment)=>{
-                context.lineWidth = this.strokeWidth();
-                this.strokeSelf(context, w, h);
-            })
-        } else {
-            pipeline.outBuffered((context, environment)=>{
-                context.beginPath();
-                this.drawPath(context, w, h);
+        if (strokeWidth) {
+            if (!stroke || !stroke.type || strokePosition === StrokePosition.Center) {
+                pipeline.out((context, environment) => {
+                    context.lineWidth = strokeWidth;
+                    this.strokeSelf(context, w, h);
+                })
+            } else {
+                pipeline.outBuffered((context, environment) => {
+                    context.beginPath();
+                    this.drawPath(context, w, h);
 
-                context.lineWidth = this.strokeWidth() * 2;
-                this.strokeSelf(context, w, h);
-                if (strokePosition === StrokePosition.Inside) {
-                    context.globalCompositeOperation = "destination-in";
-                }
-                else {
-                    context.globalCompositeOperation = "destination-out";
-                }
-                context.fillStyle = "black";
-                context.fill();
-            });
+                    context.lineWidth = strokeWidth * 2;
+                    this.strokeSelf(context, w, h);
+                    if (strokePosition === StrokePosition.Inside) {
+                        context.globalCompositeOperation = "destination-in";
+                    }
+                    else {
+                        context.globalCompositeOperation = "destination-out";
+                    }
+                    context.fillStyle = "black";
+                    context.fill();
+                });
+            }
         }
         pipeline.done();
-        // context.beginPath();
-        // this.drawPath(context, w, h);
-        // this.fillSelf(context, w, h);
-
-        // if (!stroke || !stroke.type || strokePosition === StrokePosition.Center || !this.closed()) {
-        //     context.lineWidth = this.strokeWidth();
-        //     this.strokeSelf(context, w, h);
-        // }
-        // else {
-        //     var clippingRect = this.getBoundingBoxGlobal();
-        //     clippingRect = this.expandRectWithBorder(clippingRect);
-        //     if (true || !(environment.flags & RenderFlags.Offscreen)) {
-        //         var p1 = environment.pageMatrix.transformPoint2(clippingRect.x, clippingRect.y);
-        //         var p2 = environment.pageMatrix.transformPoint2(clippingRect.x + clippingRect.width, clippingRect.y + clippingRect.height);
-        //         p1.x = Math.max(0, 0 | p1.x * environment.contextScale);
-        //         p1.y = Math.max(0, 0 | p1.y * environment.contextScale);
-        //         p2.x = 0 | p2.x * environment.contextScale + .5;
-        //         p2.y = 0 | p2.y * environment.contextScale + .5;
-        //         var sw = (p2.x - p1.x);
-        //         var sh = (p2.y - p1.y);
-        //     }
-        //     // else {
-        //     //     sw = 0 | clippingRect.width * environment.contextScale + .5;
-        //     //     sh = 0 | clippingRect.height * environment.contextScale + .5;
-        //     //     p1 = {x:0, y:0};
-        //     // }
-        //     sw = Math.max(sw, 1);
-        //     sh = Math.max(sh, 1);
-
-        //     var offContext = ContextPool.getContext(sw, sh, environment.contextScale);
-        //     offContext.clearRect(0, 0, sw, sh);
-        //     offContext.relativeOffsetX = -p1.x;
-        //     offContext.relativeOffsetY = -p1.y;
-
-        //     offContext.save();
-        //     offContext.translate(-p1.x, -p1.y);
-        //     environment.setupContext(offContext);
-
-        //     // if(!(environment.flags & RenderFlags.Offscreen)) {
-        //     this.applyViewMatrix(offContext);
-        //     // }
-
-        //     var dashPattern = this.dashPattern();
-        //     if (dashPattern) {
-        //         offContext.setLineDash(dashPattern);
-        //     }
-
-        //     offContext.beginPath();
-        //     this.drawPath(offContext, w, h);
-
-        //     offContext.lineWidth = this.strokeWidth() * 2;
-        //     this.strokeSelf(offContext, w, h);
-        //     if (strokePosition === StrokePosition.Inside) {
-        //         offContext.globalCompositeOperation = "destination-in";
-        //     }
-        //     else {
-        //         offContext.globalCompositeOperation = "destination-out";
-        //     }
-        //     offContext.fillStyle = "black";
-        //     offContext.fill();
-
-        //     // if(!(environment.flags & RenderFlags.Offscreen)) {
-        //     context.resetTransform();
-        //     // }
-
-        //     context.drawImage(offContext.canvas, p1.x, p1.y);
-
-        //     offContext.restore();
-
-        //     ContextPool.releaseContext(offContext);
-        // }
     }
 
     shouldApplyViewMatrix() {
@@ -382,7 +319,7 @@ PropertyMetadata.registerForType(Shape, {
     fill: {
         defaultValue: Brush.White,
         options: {
-            gradient:true
+            gradient: true
         }
     },
     stroke: {

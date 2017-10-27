@@ -115,7 +115,8 @@ class Circle extends Shape {
             fill:this.fill(),
             stroke:this.stroke(),
             styleId:this.styleId(),
-            name:this.name()
+            name:this.name(),
+            strokeWidth:this.strokeWidth()
         });
 
         path.setTransform(this.viewMatrix());

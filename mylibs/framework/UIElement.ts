@@ -939,20 +939,20 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         context.save();
         context.globalAlpha = this.opacity();
 
-        this.applyViewMatrix(context);
+        // this.applyViewMatrix(context);
 
-        // var pipeline = RenderPipeline.createFor(this, context, environment);
+        var pipeline = RenderPipeline.createFor(this, context, environment);
 
-        // if(environment.flags & RenderFlags.DisableCaching) {
-        //     pipeline.disableCache();
-        // }
+        if (environment.flags & RenderFlags.DisableCaching) {
+            pipeline.disableCache();
+        }
 
-        // pipeline.out((context, environment) => {
-        this.clip(context);
-        this.drawSelf(context, w, h, environment);
-        // });
+        pipeline.out((context, environment) => {
+            this.clip(context);
+            this.drawSelf(context, w, h, environment);
+        });
 
-        // pipeline.done();
+        pipeline.done();
 
         context.restore();
 
@@ -1088,8 +1088,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     allowCaching() {
         return this.runtimeProps.ctxl !== 2 && !this.disableRenderCaching();
     }
-    disableRenderCaching(value?:boolean) {
-        if(arguments.length) {
+    disableRenderCaching(value?: boolean) {
+        if (arguments.length) {
             this.runtimeProps.disableRenderCaching = value;
         }
 
@@ -1566,7 +1566,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         let newProps = this.cloneProps();
         newProps.id = createUUID();
         let clone = ObjectFactory.fromType(this.t, newProps);
-        clone.applyVisitor(e=>e.runtimeProps.ctxl = this.runtimeProps.ctxl);
+        clone.applyVisitor(e => e.runtimeProps.ctxl = this.runtimeProps.ctxl);
         clone.runtimeProps.allowCache = this.runtimeProps.allowCache;
         clone.runtimeProps.rc = this.runtimeProps.rc;
         return clone;
@@ -1580,7 +1580,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     mirrorClone() {
         let clone = ObjectFactory.fromType(this.t, this.cloneProps());
-        clone.applyVisitor(e=>e.runtimeProps.ctxl = this.runtimeProps.ctxl);
+        clone.applyVisitor(e => e.runtimeProps.ctxl = this.runtimeProps.ctxl);
         clone.runtimeProps.allowCache = this.runtimeProps.allowCache;
         clone.runtimeProps.rc = this.runtimeProps.rc;
         return clone;

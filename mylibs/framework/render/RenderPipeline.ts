@@ -24,6 +24,7 @@ export default class RenderPipeline implements IPooledObject {
 
     private startTime: number;
     private useCache: boolean = false;
+    private _applyMatrix:boolean = true;
 
     private _contextDimensions: any;
 
@@ -35,6 +36,15 @@ export default class RenderPipeline implements IPooledObject {
         this.operations = [];
         this.useTempBuffer = false;
         this.useCache = false;
+        this._applyMatrix = true;
+    }
+
+    applyMatrix(value) {
+        if(arguments.length > 0) {
+            this._applyMatrix = value;
+        }
+
+        return this._applyMatrix;
     }
 
     free() {
@@ -107,7 +117,7 @@ export default class RenderPipeline implements IPooledObject {
             for (var operation of this.operations) {
                 if (operation.type === 'out') {
                     context.save();
-                    this.element.applyViewMatrix(context);
+                    this._applyMatrix && this.element.applyViewMatrix(context);
                     operation.callback(context, environment);
                     context.restore();
                 } else if (operation.type === 'outBuffered') {

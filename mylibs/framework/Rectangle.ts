@@ -57,8 +57,8 @@ var CornerRadiusPoint = {
         if (frame.element) {
             delete frame.onlyCurrentVisible;
             let newRadius = frame.element.cornerRadius();
-            frame.element.setProps({cornerRadius:frame.originalValue}, ChangeMode.Self);
-            frame.element.setProps({cornerRadius:newRadius}, ChangeMode.Model);
+            frame.element.setProps({ cornerRadius: frame.originalValue }, ChangeMode.Self);
+            frame.element.setProps({ cornerRadius: newRadius }, ChangeMode.Model);
 
             if (frame.element.decorators) {
                 frame.element.decorators.forEach(x => x.visible(true));
@@ -134,7 +134,7 @@ var CornerRadiusPoint = {
             r.bottomLeft = newRadius;
             r.bottomRight = newRadius;
         }
-        frame.element.setProps({cornerRadius:r}, ChangeMode.Self);
+        frame.element.setProps({ cornerRadius: r }, ChangeMode.Self);
         Invalidate.requestInteractionOnly();
 
         Environment.controller.raiseInteractionProgress(InteractionType.RadiusChange, event);
@@ -149,6 +149,7 @@ class Rectangle extends Shape {
     canConvertToPath() {
         return true;
     }
+
     convertToPath(): Path {
         var br = this.boundaryRect();
         var path = new Path()
@@ -191,11 +192,12 @@ class Rectangle extends Shape {
         }
         path.closed(true);
         path.setProps({
-            shadows:this.props.shadows,
-            fill:this.fill(),
-            stroke:this.stroke(),
-            styleId:this.styleId(),
-            name:this.name()
+            shadows: this.props.shadows,
+            fill: this.fill(),
+            stroke: this.stroke(),
+            styleId: this.styleId(),
+            strokeWidth: this.strokeWidth(),
+            name: this.name()
         });
 
         path.setTransform(this.viewMatrix());
@@ -245,44 +247,58 @@ class Rectangle extends Shape {
         return rectmath.isPointInRect(outerRect, point) && !rectmath.isPointInRect(innerRect, point);
     }
 
-    drawSelf(context, w, h, environment: RenderEnvironment) {
-        this.drawOutsetShadows(context, w, h, environment);
+    // shouldApplyViewMatrix() {
+    //     var strokePosition = this.strokePosition();
+    //     var lw = this.strokeWidth();
+    //     var stroke = this.stroke();
 
-        context.save();
+    //     return (stroke && stroke.type && lw && strokePosition !== StrokePosition.Center);
+    // }
 
-        var dashPattern = this.dashPattern();
-        if (dashPattern) {
-            context.setLineDash(dashPattern);
-        }
+    // drawSelf(context, w, h, environment: RenderEnvironment) {
+    //     var strokePosition = this.strokePosition();
+    //     var lw = this.strokeWidth();
+    //     var stroke = this.stroke();
 
-        var stroke = this.stroke();
-        context.beginPath();
-        this.drawPath(context, w, h);
+    //     if (stroke && stroke.type && lw && strokePosition !== StrokePosition.Center) {
+    //         return super.drawSelf(context, w, h, environment);
+    //     }
 
-        Brush.fill(this.fill(), context, 0, 0, w, h);
+    //     this.drawOutsetShadows(context, w, h, environment);
 
-        this.drawInsetShadows(context, w, h, environment);
+    //     context.save();
 
-        var strokePosition = this.strokePosition();
-        var lw = this.strokeWidth();
-        context.lineWidth = lw;
-        if (!stroke || !stroke.type || strokePosition === StrokePosition.Center) {
-            Brush.stroke(stroke, context, 0, 0, w, h);
-        }
-        else {
-            context.beginPath();
-            var db = lw / 2;
-            if (strokePosition === StrokePosition.Outside) {
-                lw = -lw;
-                db = -db;
-            }
-            context.translate(db, db);
-            this.drawPath(context, w - lw, h - lw);
-            Brush.stroke(stroke, context, 0, 0, w - lw, h - lw);
-        }
+    //     var dashPattern = this.dashPattern();
+    //     if (dashPattern) {
+    //         context.setLineDash(dashPattern);
+    //     }
+    //     context.beginPath();
+    //     this.drawPath(context, w, h);
 
-        context.restore();
-    }
+    //     Brush.fill(this.fill(), context, 0, 0, w, h);
+
+    //     this.drawInsetShadows(context, w, h, environment);
+
+    //     context.lineWidth = lw;
+    //     if (stroke && stroke.type && lw) {
+
+    //         Brush.stroke(stroke, context, 0, 0, w, h);
+    //         // }
+    //         // else {
+    //         //     context.beginPath();
+    //         //     var db = lw / 2;
+    //         //     if (strokePosition === StrokePosition.Outside) {
+    //         //         lw = -lw;
+    //         //         db = -db;
+    //         //     }
+    //         //     context.translate(db, db);
+    //         //     this.drawPath(context, w - lw, h - lw);
+    //         //     Brush.stroke(stroke, context, 0, 0, w - lw, h - lw);
+    //         // }
+    //     }
+
+    //     context.restore();
+    // }
 
     drawPath(context, w, h) {
         var cornerRadius = this.cornerRadius();
@@ -315,7 +331,7 @@ class Rectangle extends Shape {
             return frame;
         }
 
-        if(!this.selectFrameVisible()) {
+        if (!this.selectFrameVisible()) {
             return frame;
         }
 
@@ -328,7 +344,7 @@ class Rectangle extends Shape {
             rv: [0, 1, 0, 1],
             prop: 'upperLeft',
             visible: function (p, frame, w, h, scale) {
-                return (w * scale > 50  && h * scale > 50);
+                return (w * scale > 50 && h * scale > 50);
             }
         });
 
@@ -380,7 +396,7 @@ class Rectangle extends Shape {
 
         App.Current.activePage.nameProvider.assignNewName(rect);
         if (parsedAttributes.width || parsedAttributes.height) {
-            rect.setProps({br:new Rect(0, 0, parsedAttributes.width||1, parsedAttributes.height||1)})
+            rect.setProps({ br: new Rect(0, 0, parsedAttributes.width || 1, parsedAttributes.height || 1) })
         }
 
         if (parsedAttributes.id) {

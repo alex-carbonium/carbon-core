@@ -42,6 +42,7 @@ export default class CombinePaths {
             path.stroke(e0.stroke());
             path.name(e0.displayName());
             path.styleId(e0.styleId());
+            path.strokeWidth(e0.strokeWidth());
 
             parent.insert(path, parent.positionOf(e0));
 

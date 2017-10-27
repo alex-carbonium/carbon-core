@@ -236,6 +236,7 @@ class Line extends Shape {
         path.adjustBoundaries();
         path.name(this.name());
         path.setProps(this.selectLayoutProps());
+        path.strokeWidth(this.strokeWidth());
         path.runtimeProps.ctxl = this.runtimeProps.ctxl;
 
         return path;
