@@ -1,7 +1,7 @@
 import RelayoutQueue from "./RelayoutQueue";
 import ModelStateListener from "./ModelStateListener";
 import PrimitiveHandler from "../sync/Primitive_Handlers";
-import { NodePrimitivesMap, IApp, IPrimitive, IPrimitiveRoot } from "carbon-core";
+import { NodePrimitivesMap, IApp, IPrimitive, IPrimitiveRoot, LayerType } from "carbon-core";
 import backend from "../../backend";
 import params from "../../params";
 import CommandManager from "../commands/CommandManager";
@@ -12,6 +12,7 @@ import { pushAll } from "../../util";
 import PrimitiveCommand from "../commands/PrimitiveCommand";
 import Selection from "../SelectionModel";
 import UIElement from "../UIElement";
+import EventHelper from "../EventHelper";
 
 var debug = require("DebugUtil")("carb:relayoutEngine");
 
@@ -37,6 +38,9 @@ class RelayoutEngine {
     private externalQueuedPrimitives: IPrimitive[] = [];
     private allPrimitives: IPrimitive[] = [];
     private rollbacks: IPrimitive[] = [];
+
+    relayoutFinished = EventHelper.createEvent<void>();
+    rootRelayoutFinished = EventHelper.createEvent2<IPrimitiveRoot, NodePrimitivesMap>();
 
     performAppRelayout(app: IApp) {
         try {
@@ -95,8 +99,12 @@ class RelayoutEngine {
             }
 
             let elements = Selection.elements.length ? Selection.elements : Selection.previousElements;
-            CommandManager.registerExecutedCommand(new PrimitiveCommand(this.allPrimitives.slice(), this.rollbacks.slice().reverse(),
-                app.activePage.id(), Selection.latestGlobalBoundingBox));
+            CommandManager.registerExecutedCommand(new PrimitiveCommand(
+                this.allPrimitives.slice(),
+                this.rollbacks.slice().reverse(),
+                app.activePage.id(),
+                Selection.latestGlobalBoundingBox,
+                Environment.view.getLayer(LayerType.Isolation).isActive));
         }
 
         //all local changes (from queue and model) must go to server
@@ -110,7 +118,7 @@ class RelayoutEngine {
         if (this.allPrimitives.length) {
             app.changed.raise(this.allPrimitives.slice());
 
-            app.relayoutFinished.raise();
+            this.relayoutFinished.raise();
           //  Invalidate.request();
         }
     }
@@ -147,9 +155,7 @@ class RelayoutEngine {
         var shouldArrange = ModelStateListener.isRelayoutNeeded(root);
         var res = this.visitElement(root, primitiveMap, propsHistoryMap, shouldArrange, filter);
 
-        if (primitiveMap) {
-            App.Current.deferredChange.raise(primitiveMap);
-        }
+        this.rootRelayoutFinished.raise(root, primitiveMap);
 
         return res;
     }

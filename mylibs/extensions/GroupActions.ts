@@ -1,5 +1,5 @@
 import CarbonExtension from "./CarbonExtesion";
-import { IContributions, ContextBarPosition, IApp, ISelection, ChangeMode, IArtboardProps, ILayer, LayerType, IUIElement, IContainer, IRect, ArtboardType, IText, UIElementFlags, IArtboard, IGroupContainer } from "carbon-core";
+import { IContributions, ContextBarPosition, IApp, ISelection, ChangeMode, IArtboardProps, ILayer, LayerType, IUIElement, IContainer, IRect, ArtboardType, IText, UIElementFlags, IArtboard, IGroupContainer, IIsolatable } from "carbon-core";
 import Constraints from "framework/Constraints";
 import Symbol from "../framework/Symbol";
 import Artboard from "../framework/Artboard";
@@ -13,6 +13,7 @@ import { unionRect } from "../math/geometry";
 import GroupContainer from "../framework/GroupContainer";
 import InteractiveContainer from "../framework/InteractiveContainer";
 import { ArrangeStrategies, DropPositioning } from "../framework/Defs";
+import Isolate from "../commands/Isolate";
 
 export class GroupActions extends CarbonExtension {
     initialize(contributions: IContributions) {
@@ -26,11 +27,17 @@ export class GroupActions extends CarbonExtension {
                 condition: GroupActions.canGroup
             },
             {
+                id: "isolate",
+                name: "@group.isolate",
+                callback: this.isolate,
+                condition: GroupActions.isGroupContainer
+            },
+            {
                 id: "ungroup",
                 name: "@ungroup",
                 icon: "ico-small-ungroup",
                 callback: this.ungroup,
-                condition: GroupActions.canUnGroup
+                condition: GroupActions.isGroupContainer
             },
             {
                 id: "group.mask",
@@ -68,6 +75,7 @@ export class GroupActions extends CarbonExtension {
             "@grouping",
             [
                 "group",
+                "isolate",
                 "group.mask",
                 "group.vstack",
                 "group.hstack",
@@ -79,6 +87,7 @@ export class GroupActions extends CarbonExtension {
 
         contributions.addShortcuts([
             { key: "mod+g", action: "group" },
+            { key: "alt+i", action: "isolate" },
             { key: "mod+alt+m", action: "group.mask" },
             { key: "mod+shift+g", action: "ungroup" }
         ]);
@@ -87,7 +96,7 @@ export class GroupActions extends CarbonExtension {
     static canGroup(selection: ISelection): boolean{
         return selection.elements.length && !selection.elements.some(x => x instanceof Artboard);
     }
-    static canUnGroup(selection: ISelection): boolean{
+    static isGroupContainer(selection: ISelection): boolean{
         return selection.elements.length && selection.elements.every(x => x instanceof InteractiveContainer);
     }
 
@@ -146,5 +155,9 @@ export class GroupActions extends CarbonExtension {
             e.flatten();
         });
         selection.makeSelection(children);
+    }
+
+    isolate(selection: ISelection) {
+        Isolate.run(selection.elements as IIsolatable[]);
     }
 }

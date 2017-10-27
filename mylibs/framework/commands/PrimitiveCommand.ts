@@ -1,12 +1,17 @@
 import RelayoutQueue from "../relayout/RelayoutQueue";
 import Environment from "../../environment";
-import { IPrimitive, PrimitiveType, ViewState, ICommand, IRect } from "carbon-core";
+import { IPrimitive, PrimitiveType, ViewState, ICommand, IRect, LayerType } from "carbon-core";
 import { createUUID } from "../../util";
 import Rect from "../../math/rect";
 
 export default class PrimitiveCommand implements ICommand {
-    constructor(public primitives: IPrimitive[], public rollbacks: IPrimitive[],
-        public pageId, public commandRect: IRect) {
+    constructor(
+        public primitives: IPrimitive[],
+        public rollbacks: IPrimitive[],
+        public pageId,
+        public commandRect: IRect,
+        public isolation: boolean
+    ) {
     }
 
     flushRedoStack() {
@@ -35,6 +40,10 @@ export default class PrimitiveCommand implements ICommand {
 
     rollback() {
         App.Current.setActivePageById(this.pageId);
+
+        if (Environment.view.getLayer(LayerType.Isolation) && !this.isolation) {
+            App.Current.actionManager.invoke("exitisolation");
+        }
 
         if (this.commandRect !== Rect.Zero) {
             Environment.view.ensureVisibleRect(this.commandRect);

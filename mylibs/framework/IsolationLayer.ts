@@ -1,6 +1,6 @@
 import Layer from './Layer';
 import Context from "./render/Context";
-import { IContainer, IUIElement, IIsolationLayer, ChangeMode, IIsolatable, LayerType, ElementState, RenderEnvironment } from "carbon-core";
+import { IContainer, IUIElement, IIsolationLayer, ChangeMode, IIsolatable, LayerType, ElementState, RenderEnvironment, NodePrimitivesMap, IDisposable } from "carbon-core";
 import DataNode from "./DataNode";
 import Selection from "framework/SelectionModel";
 import RelayoutEngine from "framework/relayout/RelayoutEngine";
@@ -11,11 +11,11 @@ import Path from "framework/Path";
 import Matrix from "math/matrix";
 
 export class IsolationLayer extends Layer implements IIsolationLayer {
-
     private ownerElement: IIsolatable = null;
     private trackElementIds: any = {};
     private restoreMatrix: boolean = false;
     private clippingParent: IUIElement = null;
+    private tokens: IDisposable[] = [];
 
     constructor() {
         super();
@@ -23,10 +23,10 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         App.Current.actionManager.subscribe("exitisolation", () => {
             var element = this.ownerElement;
             Environment.view.deactivateLayer(LayerType.Isolation);
-            if(element) {
-                Selection.makeSelection([element]);
+            if (element) {
+                Selection.reselect([element]);
             }
-        })
+        });
 
         App.Current.actionManager.subscribe("cancel", () => {
             let selection = Selection.getSelection();
@@ -40,7 +40,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
             }
 
             if(element) {
-                Selection.makeSelection([element]);
+                Selection.reselect([element]);
             }
         })
     }
@@ -69,19 +69,19 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
             this.add(clone, ChangeMode.Self);
         }
 
-        //copy the id for applying the primitives
-        this.id(owner.id());
         owner.setProps({ visible: false }, ChangeMode.Self);
         // set layer matrix to owner element global matrix,
         // so matrixes of the copied element should be identical to source matrices
-        this.setProps({ m: owner.globalViewMatrix(), br: owner.props.br }, ChangeMode.Self);
+        this.setProps(owner.selectLayoutProps(true), ChangeMode.Self);
+        //mimic the same arrange strategy for correct properties display
+        this.setProps({ arrangeStrategy: owner.props.arrangeStrategy }, ChangeMode.Self);
         this.hitTransparent(false);
 
-        this._onAppChangedSubscription = App.Current.deferredChange.bind(this, this.onAppChanged);
-        this._onRelayoutCompleted = App.Current.relayoutFinished.bind(this, this.onRelayoutFinished);
+        this.tokens.push(RelayoutEngine.rootRelayoutFinished.bind(this, this.onRootRelayoutFinished));
+        this.tokens.push(RelayoutEngine.relayoutFinished.bind(this, this.onRelayoutFinished));
 
         Environment.view.activateLayer(this.type);
-        setTimeout(()=>Selection.clearSelection(), 0);
+        setTimeout(()=>Selection.clearSelection(true), 0);
     }
 
     isolateObject(object: IIsolatable): void {
@@ -97,9 +97,9 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         this.setProps({ m: Matrix.Identity }, ChangeMode.Self);
         this.hitTransparent(false);
 
-        this._onAppChangedSubscription = App.Current.deferredChange.bind(this, this.onAppChanged);
-        this._onRelayoutCompleted = App.Current.relayoutFinished.bind(this, this.onRelayoutFinished);
-        Selection.clearSelection();
+        this.tokens.push(App.Current.deferredChange.bind(this, this.onRootRelayoutFinished));
+        this.tokens.push(App.Current.relayoutFinished.bind(this, this.onRelayoutFinished));
+        Selection.clearSelection(true);
 
         Environment.view.activateLayer(this.type);
     }
@@ -116,30 +116,21 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
 
         this.clear();
 
-        if (this._onAppChangedSubscription) {
-            this._onAppChangedSubscription.dispose();
-            this._onAppChangedSubscription = null;
-        }
-        if (this._onRelayoutCompleted) {
-            this._onRelayoutCompleted.dispose();
-            this._onRelayoutCompleted = null;
-        }
-
-        Selection.clearSelection();
-        Selection.refreshSelection();
+        this.tokens.forEach(x => x.dispose());
+        this.tokens.length = 0;
     }
 
-    onAppChanged(primitiveMap: any) {
-        let that = this;
+    onRootRelayoutFinished(root, primitiveMap: NodePrimitivesMap) {
+        if (primitiveMap) {
+            RelayoutEngine.visitElement(this, primitiveMap, {}, true, null);
 
-        let refreshState = false;
+            this.setProps(this.ownerElement.selectLayoutProps(true), ChangeMode.Self);
 
-        RelayoutEngine.visitElement(this, primitiveMap, {}, true, null);
-
-        // owner element can be removed, we need to exit isolation mode if that happens
-        let parent = this.ownerElement.parent();
-        if (parent === NullContainer) {
-            Environment.view.deactivateLayer(this.type);
+            // owner element can be removed, we need to exit isolation mode if that happens
+            let parent = this.ownerElement.parent();
+            if (parent === NullContainer) {
+                Environment.view.deactivateLayer(this.type);
+            }
         }
     }
 
@@ -216,11 +207,11 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
     onRelayoutFinished() {
         if (this.restoreMatrix) {
             this.restoreMatrix = false;
-            this.setProps({ m: this.ownerElement.globalViewMatrix(), br: this.ownerElement.props.br }, ChangeMode.Self);
+            this.setProps(this.ownerElement.selectLayoutProps(true), ChangeMode.Self);
             this.ownerElement.applyVisitor(source => {
                 let target = this.getElementById(source.id());
                 if (target && target !== this) {
-                    target.setProps({ m: source.props.m, br: source.props.br }, ChangeMode.Self);
+                    target.setProps(source.selectLayoutProps(), ChangeMode.Self);
                 }
             });
         }

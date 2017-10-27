@@ -100,8 +100,6 @@ class AppClass extends DataNode implements IApp {
     onBuildMenu: any;
     changed: IEvent<IPrimitive[]>;
     changedLocally: IEvent<IPrimitive[]>;
-    relayoutFinished: IEvent<void>;
-    deferredChange: IEvent<any>;
     settingsChanged = EventHelper.createEvent<AppSettings>();
 
     updating = EventHelper.createEvent<void>();
@@ -143,7 +141,6 @@ class AppClass extends DataNode implements IApp {
         this.pageChanged = EventHelper.createEvent2();
         this.pageChanging = EventHelper.createEvent();
         this.savedToJson = EventHelper.createEvent();
-        this.relayoutFinished = EventHelper.createEvent<void>();
 
         this.selectionMade = EventHelper.createEvent();
         this.onBuildMenu = EventHelper.createEvent();
@@ -152,7 +149,6 @@ class AppClass extends DataNode implements IApp {
         this.modeChanged = EventHelper.createEvent();
 
         this.changed = EventHelper.createEvent();
-        this.deferredChange = EventHelper.createEvent();
         this.changedLocally = EventHelper.createEvent();
         this.changedExternally = EventHelper.createEvent();
 

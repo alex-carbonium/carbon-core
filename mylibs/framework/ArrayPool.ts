@@ -1,3 +1,5 @@
+import { pushAll } from "../util";
+
 export default class ArrayPool {
     private static objects: any[][] = new Array(50);
 
@@ -13,6 +15,12 @@ export default class ArrayPool {
         }
 
         return [];
+    }
+
+    static allocateFromArray<T = any>(array: T[]): T[] {
+        let result = ArrayPool.allocate();
+        pushAll(result, array);
+        return result;
     }
 
     static free(obj: any[]) {

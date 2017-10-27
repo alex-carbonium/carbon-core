@@ -241,8 +241,7 @@ class SelectionModel implements ISelection {
         lockUnlockGroups.call(this, selection);
     }
 
-    reselect() {
-        let selection = this.selectedElements();
+    reselect(selection: IUIElement[] = this.selectedElements()) {
         this.makeSelection(ArrayPool.EmptyArray, "new", false, true);
         this.makeSelection(selection, "new", false, true);
     }
@@ -269,9 +268,9 @@ class SelectionModel implements ISelection {
         return count !== 0;
     }
 
-    clearSelection() {
+    clearSelection(doNotTrack: boolean = false) {
         if (this.unselectAll()) {
-            this._fireOnElementSelected();
+            this._fireOnElementSelected(doNotTrack);
         }
     }
 

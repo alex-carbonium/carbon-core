@@ -11,7 +11,7 @@ import Page from "./Page";
 import Keyboard from "../platform/Keyboard";
 import ObjectFactory from "./ObjectFactory";
 import { Types } from "./Defs";
-import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3, WorkspaceTool, InteractionType } from "carbon-core";
+import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3, WorkspaceTool, InteractionType, LayerType } from "carbon-core";
 import UIElement from "./UIElement";
 import Container from "./Container";
 import { choosePasteLocation } from "./PasteLocator";
@@ -267,17 +267,11 @@ export default class DesignerController implements IController {
     }
 
     stopDrag(event) {
-        var elements = this._draggingElement.stopDragging(event, this._draggingOverElement, this.app.activePage);
+        let elements = this._draggingElement.stopDragging(event, this._draggingOverElement, this.app.activePage);
 
-        let newActiveArtboard = elements[0].findAncestorOfType(Artboard);
-        for (let i = 1; i < elements.length; ++i){
-            if (elements[i].findAncestorOfType(Artboard) !== newActiveArtboard) {
-                newActiveArtboard = null;
-                break;
-            }
+        if (!this.view.getLayer(LayerType.Isolation).isActive) {
+            this.setNewActiveArtboard(elements);
         }
-
-        this.app.activePage.setActiveArtboard(newActiveArtboard);
 
         Selection.refreshSelection(elements);
 
@@ -289,6 +283,18 @@ export default class DesignerController implements IController {
 
     isDragging() {
         return this._draggingElement !== null;
+    }
+
+    private setNewActiveArtboard(droppedElements: IUIElement[]) {
+        let newActiveArtboard = droppedElements[0].findAncestorOfType(Artboard);
+        for (let i = 1; i < droppedElements.length; ++i){
+            if (droppedElements[i].findAncestorOfType(Artboard) !== newActiveArtboard) {
+                newActiveArtboard = null;
+                break;
+            }
+        }
+
+        this.app.activePage.setActiveArtboard(newActiveArtboard);
     }
 
     onmousedown(eventData) {
