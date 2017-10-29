@@ -18,7 +18,7 @@ export default class RangeFormatter extends UIElement {
         this._element = element;
 
         this._internalUpdate = true;
-        this.setProps({ fill: Brush.createFromColor(element.props.font.color) }, ChangeMode.Root);
+        this.setProps({ fill: Brush.createFromColor(element.props.font.color), name: element.name() }, ChangeMode.Root);
         this._internalUpdate = false;
     }
     getFirstFont(){
@@ -44,13 +44,18 @@ export default class RangeFormatter extends UIElement {
         }
     };
     setProps(changes, mode){
-        if (mode === ChangeMode.Model && (changes.font || changes.fill) && !this._internalUpdate) {
-            let font = changes.font;
-            if (changes.fill) {
-                font = font || this.props.font;
-                font = Font.extend(font, { color: changes.fill.value });
+        if (mode === ChangeMode.Model && !this._internalUpdate) {
+            if (changes.font || changes.fill) {
+                let font = changes.font;
+                if (changes.fill) {
+                    font = font || this.props.font;
+                    font = Font.extend(font, { color: changes.fill.value });
+                }
+                this._fontChanged(font);
             }
-            this._fontChanged(font);
+            if (changes.name) {
+                this._element.name(changes.name);
+            }
         }
         super.setProps.apply(this, arguments);
     }

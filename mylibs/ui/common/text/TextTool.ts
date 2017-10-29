@@ -77,7 +77,7 @@ export default class TextTool extends Tool {
 
         this._defaultFormatter = new DefaultFormatter();
         this._defaultFormatter.initFormatter(this._app);
-        Selection.makeSelection([this._defaultFormatter]);
+        Selection.requestProperties([this._defaultFormatter]);
         Cursor.setGlobalCursor("text_tool");
 
         if (this._onAttached) {
@@ -107,7 +107,7 @@ export default class TextTool extends Tool {
 
         this._dragController.unbind();
         if (this._editor) {
-            Selection.makeSelection([this.text]);
+            Selection.makeSelection([this.text], "new", false, true);
             this._editor.deactivate(false);
         }
 
@@ -145,8 +145,9 @@ export default class TextTool extends Tool {
         }
     };
 
-    onDragSearching = e => {
+    onDragSearching = (e: IMouseEventData) => {
         if (this._hittingEdited(e)) {
+            e.cursor = "text";
             return;
         }
         var hit = this._hitNewElement(e);
@@ -223,7 +224,7 @@ export default class TextTool extends Tool {
                 this.beginEdit(hit, e);
             }
             else if (this._editor) {
-                Selection.makeSelection([this.text]);
+                Selection.makeSelection([this.text], "new", false, true);
                 this._editor.deactivate(UserSettings.text.insertNewOnClickOutside);
             }
             else if (UserSettings.text.insertNewOnClickOutside || !this._detaching) { //tool can be changed by mouse down
@@ -275,6 +276,7 @@ export default class TextTool extends Tool {
 
         this._app.activePage.nameProvider.assignNewName(text);
 
+        Selection.makeSelection([text], "new", false, true);
         this.beginEdit(text);
     }
 
@@ -291,7 +293,8 @@ export default class TextTool extends Tool {
 
         this._rangeFormatter = new RangeFormatter();
         this._rangeFormatter.initFormatter(this._app, engine, text);
-        Selection.makeSelection([this._rangeFormatter]);
+        Selection.requestProperties([this._rangeFormatter]);
+        Selection.hideFrame(true);
 
         this._editor = this._createEditor(engine, text);
         this.boundaryRect = text.boundaryRect();
@@ -396,6 +399,7 @@ export default class TextTool extends Tool {
         this.text.resetEngine();
 
         Selection.makeSelection([this.text], "new", false, true);
+        Selection.showFrame();
 
         this._editor = null;
         this.text = null;

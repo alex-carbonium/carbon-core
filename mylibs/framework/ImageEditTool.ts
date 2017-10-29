@@ -77,7 +77,7 @@ export class ImageEditTool {
             e.handled = true;
         }));
 
-        Selection.makeSelection([this._content]);
+        Selection.requestProperties([this._content]);
     }
     detach(saveChanges = true) {
         if (saveChanges) {
