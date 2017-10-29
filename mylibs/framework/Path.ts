@@ -1003,6 +1003,7 @@ class Path extends Shape {
             }
 
             if (pt.closed && !nomove) {
+                buildSegment(points[0], pt, matrix, true);
                 res.push({ kind: "Z" });
             }
         }
