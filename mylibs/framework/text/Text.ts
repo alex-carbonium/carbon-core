@@ -412,13 +412,6 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
         }
     }
 
-    cursor() {
-        if (this.runtimeProps.drawSelection) {
-            return "text";
-        }
-        super.cursor();
-    }
-
     textStyleId(value) {
         if (arguments.length > 0) {
             this.setProps({ textStyleId: value });

@@ -63,12 +63,14 @@ class SelectionModel implements ISelection {
     private _previousElements: IUIElement[] = ArrayPool.EmptyArray;
     private _selectionMode: SelectionMode = "new";
     private _selectCompositeElement: SelectComposite;
+    private _propertyComposite = new SelectComposite();
     private _selectFrame = new SelectFrame();
     private _selectFrameStarted = false;
 
     latestGlobalBoundingBox: IRect = Rect.Zero;
     modeChangedEvent: IEvent<boolean>;
     onElementSelected: IEvent3<ISelectComposite, IUIElement[], boolean>;
+    propertiesRequested = EventHelper.createEvent<ISelectComposite>();
 
     constructor() {
         this._unlockedContainers = ArrayPool.EmptyArray;
@@ -185,7 +187,7 @@ class SelectionModel implements ISelection {
     makeSelection(selection, mode: SelectionMode = "new", refreshOnly = false, doNotTrack = false) {
         let currentSelection = this._selectCompositeElement.elements;
 
-        if (this.areSameArrays(currentSelection, selection) && (mode === "new" || mode === "add")) {
+        if (this.areSameArrays(currentSelection, selection) && (mode === "new" || mode === "add") && this._propertyComposite.count() === 0) {
             return;
         }
 
@@ -250,6 +252,13 @@ class SelectionModel implements ISelection {
         lockUnlockGroups.call(this, this.selectedElements());
         this.calculateGlobalBoundingBox();
         this.onElementSelected.raise(this._selectCompositeElement, this._previousElements, doNotTrack);
+        this.propertiesRequested.raise(this._selectCompositeElement);
+    }
+
+    requestProperties(elements: IUIElement[]) {
+        this._propertyComposite.unregisterAll();
+        this._propertyComposite.registerAll(elements);
+        this.propertiesRequested.raise(this._propertyComposite);
     }
 
     private calculateGlobalBoundingBox() {
@@ -315,7 +324,7 @@ class SelectionModel implements ISelection {
                 e.locked(true);
             }
         }
-        this._selectCompositeElement.showActiveFrame(false);
+        this.clearSelection();
     }
     unlock() {
         let elements = this.selectedElements();
@@ -325,7 +334,7 @@ class SelectionModel implements ISelection {
                 e.locked(false);
             }
         }
-        this._selectCompositeElement.showActiveFrame(true);
+        this._selectCompositeElement.showActiveFrame();
     }
     hide() {
         let elements = this.selectedElements();
@@ -335,7 +344,7 @@ class SelectionModel implements ISelection {
                 e.visible(false);
             }
         }
-        this._selectCompositeElement.showActiveFrame(false);
+        this._selectCompositeElement.hideActiveFrame();
     }
     show() {
         let elements = this.selectedElements();
@@ -345,14 +354,14 @@ class SelectionModel implements ISelection {
                 e.visible(true);
             }
         }
-        this._selectCompositeElement.showActiveFrame(true);
+        this._selectCompositeElement.showActiveFrame();
     }
 
-    hideFrame() {
-        this._selectCompositeElement.showActiveFrame(false);
+    hideFrame(permanent = false) {
+        this._selectCompositeElement.hideActiveFrame(permanent);
     }
     showFrame() {
-        this._selectCompositeElement.showActiveFrame(true);
+        this._selectCompositeElement.showActiveFrame();
     }
 
     private areSameArrays(array1, array2) {

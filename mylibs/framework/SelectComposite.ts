@@ -54,13 +54,20 @@ var SelectCompositeFrame = {
 export default class SelectComposite extends CompositeElement implements ISelectComposite {
     private _activeFrame = new ActiveFrame();
     private _activeFrameElement: IUIElement = null;
+    private _activeFrameHiddenPermanently = false;
 
     displayName() {
         return "Select composite";
     }
 
-    showActiveFrame(show: boolean) {
-        this._activeFrame.visible(show);
+    hideActiveFrame(permanent: boolean = false) {
+        this._activeFrame.visible(false);
+        this._activeFrameHiddenPermanently = permanent;
+    }
+
+    showActiveFrame() {
+        this._activeFrame.visible(true);
+        this._activeFrameHiddenPermanently = false;
     }
 
     selectionFrameType(): any {
@@ -100,7 +107,7 @@ export default class SelectComposite extends CompositeElement implements ISelect
         super.register.apply(this, arguments);
 
         //making visible just in case
-        this.showActiveFrame(true);
+        this.showActiveFrame();
 
         let isMultiSelection = this.children.length > 1;
         element.select(isMultiSelection);
@@ -164,8 +171,8 @@ export default class SelectComposite extends CompositeElement implements ISelect
     }
 
     mousemove() {
-        if (!this._activeFrame.visible()) {
-            this.showActiveFrame(true);
+        if (!this._activeFrame.visible() && !this._activeFrameHiddenPermanently) {
+            this.showActiveFrame();
             Invalidate.requestInteractionOnly();
         }
     }
@@ -174,7 +181,7 @@ export default class SelectComposite extends CompositeElement implements ISelect
         this.restoreLastGoodTransformIfNeeded();
         var affectingLayout = super.previewDisplayProps(changes);
         if (affectingLayout){
-            this.showActiveFrame(false);
+            this.hideActiveFrame();
         }
         return affectingLayout;
     }
@@ -186,7 +193,7 @@ export default class SelectComposite extends CompositeElement implements ISelect
         var hasBadTransform = this.hasBadTransform();
 
         if (hadBadTransform || hasBadTransform){
-            this.showActiveFrame(true);
+            this.showActiveFrame();
         }
     }
 }

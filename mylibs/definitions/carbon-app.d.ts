@@ -501,6 +501,7 @@ declare module "carbon-app" {
 
         makeSelection(elements: IUIElement[], mode?: SelectionMode);
         getSelectionMode(keys: KeyboardState, extended: boolean): SelectionMode;
+        requestProperties(elements: IUIElement[]);
 
         selectComposite(): ISelectComposite;
         clearSelection();
@@ -515,6 +516,7 @@ declare module "carbon-app" {
 
         readonly modeChangedEvent: IEvent<boolean>;
         readonly onElementSelected: IEvent3<ISelectComposite, IUIElement[], boolean>;
+        readonly propertiesRequested: IEvent<ISelectComposite>;
     }
 
     export interface IRenderLoop {
