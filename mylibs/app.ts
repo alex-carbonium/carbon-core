@@ -938,6 +938,12 @@ class AppClass extends DataNode implements IApp {
             }
         }
 
+        this.updateCacheProperties();
+
+        Invalidate.request();
+    }
+
+    updateCacheProperties() {
         // updated all elements to see if caching is allowed for them
         this.activePage.applyVisitor(e=>{
             if(!e.children || !e.children.length) {
@@ -950,8 +956,6 @@ class AppClass extends DataNode implements IApp {
                 }
             }
         });
-
-        Invalidate.request();
     }
 
     run() {

@@ -550,6 +550,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
         child.parent(this);
 
+        this.clearRenderingCache();
         this.invalidate(this.runtimeProps.ctxl);
     }
 
@@ -602,6 +603,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
         element.removed(mode);
 
+        this.clearRenderingCache();
         this.invalidate(this.runtimeProps.ctxl);
 
         return idx;
