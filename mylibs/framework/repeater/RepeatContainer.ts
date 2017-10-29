@@ -154,7 +154,7 @@ export default class RepeatContainer extends Container implements IRepeatContain
                 nodeOldProps = split.oldCommon;
                 propsChanged = split.commonChanged;
                 if (propsChanged) {
-                    current.setProps(nodeProps, ChangeMode.Self);
+                    current.prepareAndSetProps(nodeProps, ChangeMode.Self);
                 }
             }
             if (propsChanged) {

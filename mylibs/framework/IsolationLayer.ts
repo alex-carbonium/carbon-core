@@ -279,4 +279,6 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         }
     }
 
+    performArrange() {
+    }
 }

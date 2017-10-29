@@ -231,7 +231,7 @@ class SelectionModel implements ISelection {
 
         if (!refreshOnly) {
             this._selectCompositeElement.ensureSorted();
-            this._fireOnElementSelected(doNotTrack);
+            this.onSelectionMade(doNotTrack);
         }
     }
 
@@ -248,10 +248,13 @@ class SelectionModel implements ISelection {
         this.makeSelection(selection, "new", false, true);
     }
 
-    _fireOnElementSelected(doNotTrack = false) {
+    private onSelectionMade(doNotTrack = false) {
         lockUnlockGroups.call(this, this.selectedElements());
         this.calculateGlobalBoundingBox();
+
         this.onElementSelected.raise(this._selectCompositeElement, this._previousElements, doNotTrack);
+
+        this._propertyComposite.unregisterAll();
         this.propertiesRequested.raise(this._selectCompositeElement);
     }
 
@@ -279,7 +282,7 @@ class SelectionModel implements ISelection {
 
     clearSelection(doNotTrack: boolean = false) {
         if (this.unselectAll()) {
-            this._fireOnElementSelected(doNotTrack);
+            this.onSelectionMade(doNotTrack);
         }
     }
 
