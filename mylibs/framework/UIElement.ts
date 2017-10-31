@@ -1422,18 +1422,18 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     canDrag(value?) {
         return this.field("_canDrag", value, true);
     }
-    flipVertical(value) {
-        if (value !== undefined) {
-            this.setProps({ flipVertical: value });
-        }
-        return this.props.flipVertical;
-    }
-    flipHorizontal(value) {
-        if (value !== undefined) {
-            this.setProps({ flipHorizontal: value });
-        }
-        return this.props.flipHorizontal;
-    }
+    // flipVertical(value) {
+    //     if (value !== undefined) {
+    //         this.setProps({ flipVertical: value });
+    //     }
+    //     return this.props.flipVertical;
+    // }
+    // flipHorizontal(value) {
+    //     if (value !== undefined) {
+    //         this.setProps({ flipHorizontal: value });
+    //     }
+    //     return this.props.flipHorizontal;
+    // }
     clipMask(value?: boolean) {
         if (value !== undefined) {
             this.setProps({ clipMask: value });
@@ -2296,12 +2296,12 @@ PropertyMetadata.registerForType(UIElement, {
         customizable: true,
         computed: true
     },
-    flipHorizontal: {
-        defaultValue: false
-    },
-    flipVertical: {
-        defaultValue: false
-    },
+    // flipHorizontal: {
+    //     defaultValue: false
+    // },
+    // flipVertical: {
+    //     defaultValue: false
+    // },
     constraints: {
         displayName: "@constraints",
         type: "constraints",
