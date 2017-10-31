@@ -221,6 +221,7 @@ declare module "carbon-app" {
         "protoTool" |
         "pencilTool" |
         "handTool" |
+        "zoomTool" |
         "pointerDirectTool" |
         "imageTool" |
         "artboardViewerTool";

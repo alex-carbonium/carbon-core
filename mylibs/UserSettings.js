@@ -48,6 +48,10 @@ var settings = {
         frameColor: "rgba(150,180, 250, 0.3)"
     },
 
+    zoom: {
+        frameColor: "rgba(150,150, 150, 0.3)"
+    },
+
     shapes: {
         defaultFill: "#B6B6B6",
         defaultStroke: "black"

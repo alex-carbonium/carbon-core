@@ -90,7 +90,7 @@ declare module "carbon-app"{
     import { IUIElement, IPrimitiveRoot } from 'carbon-model';
     import { IContext, RenderEnvironment } from "carbon-rendering";
     import { IEvent, ViewState, IPrimitive, IConstructor } from "carbon-basics";
-    import { ISize } from "carbon-geometry";
+    import { ISize, IRect, ICoordinate } from "carbon-geometry";
 
     export interface IPage{
         nameProvider: any;
@@ -135,6 +135,9 @@ declare module "carbon-app"{
 
         zoomOutStep():void;
         zoomInStep():void;
+
+        getScaleToFitRect(rect:IRect, marginFactor?:number):number;
+        scrollToPoint(point:ICoordinate):void;
 
         setup(params: any);
         attachToDOM(contexts: IContext[], container, redrawCallback, cancelCallback, scheduledCallback);

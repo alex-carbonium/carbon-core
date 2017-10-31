@@ -637,10 +637,10 @@ export default class ViewBase { //TODO: implement IView
         this.scale(scale);
     }
 
-    getScaleToFitRect(rect: IRect) {
+    getScaleToFitRect(rect: IRect, marginFactor = 1.32) {
         var size = this.viewportSize();
-        var w = rect.width * 1.32;
-        var h = rect.height * 1.32;
+        var w = rect.width * marginFactor;
+        var h = rect.height * marginFactor;
         var sx = size.width / w;
         var sy = size.height / h;
         return Math.min(sx, sy);

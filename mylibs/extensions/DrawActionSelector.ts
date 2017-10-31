@@ -6,6 +6,7 @@ import LineCreator from "ui/common/LineCreator";
 import PencilCreator from "ui/common/PencilCreator";
 import LinkingTool from "ui/prototyping/LinkingTool";
 import HandTool from "ui/common/HandTool";
+import ZoomTool from "ui/common/ZoomTool";
 import ArtboardsTool from "ui/common/ArtboardsTool";
 import TextTool from "ui/common/text/TextTool";
 import Artboard from "framework/Artboard";
@@ -190,7 +191,25 @@ var registerCommands = function () {
 
     actionManager.registerAction("handToolRelease", "@tool.handRelease", "Drawing utils", function () {
         //User released spacebar
-        if (that._currentAction == that._handTool) {
+        if (that._currentAction === that._handTool) {
+            //deattach hand tool
+            that._currentAction.detach();
+            //if it is possible to resume
+            if (that._previousAction && that._previousAction.resume){
+                that._previousAction.resume();
+            }
+            else{
+                actionManager.invoke((Selection.directSelectionEnabled() ? "pointerDirectTool" : "pointerTool") as WorkspaceTool);
+            }
+            //restore action
+            that._currentAction = that._previousAction;
+            that._previousAction = null;
+        }
+    });
+
+    actionManager.registerAction("zoomToolRelease", "@tool.zoomRelease", "Drawing utils", function () {
+        //User released spacebar
+        if (that._currentAction === that._zoomTool) {
             //deattach hand tool
             that._currentAction.detach();
             //if it is possible to resume
@@ -211,16 +230,35 @@ var registerCommands = function () {
     });
 
     var attachHandTool = function () {
-        if (that.mousePressed || that._currentAction == that._handTool) {
+        if (that.mousePressed || that._currentAction === that._handTool) {
             return;
         }
 
-        if (that._currentAction && that._currentAction.pause)
+        if (that._currentAction && that._currentAction.pause){
             that._currentAction.pause();
+        }
 
         that._previousAction = that._currentAction; // should remember previous action
         that._handTool.attach(that.app, that.view, that.controller, that.mousePressed);
         that._currentAction = that._handTool;
+    }
+
+    actionManager.registerAction("zoomTool" as WorkspaceTool, "@tool.zoom", "Drawing utils", function () {
+        attachZoomTool();
+    });
+
+    var attachZoomTool = function () {
+        if (that.mousePressed || that._currentAction === that._zoomTool) {
+            return;
+        }
+
+        if (that._currentAction && that._currentAction.pause){
+            that._currentAction.pause();
+        }
+
+        that._previousAction = that._currentAction; // should remember previous action
+        that._zoomTool.attach(that.app, that.view, that.controller, that.mousePressed);
+        that._currentAction = that._zoomTool;
     }
 };
 
@@ -275,6 +313,9 @@ export default class DrawActionSelector extends ExtensionBase {
 
         this._handTool = new HandTool();
         this._tools.push(this._handTool);
+
+        this._zoomTool = new ZoomTool();
+        this._tools.push(this._zoomTool);
 
         this._textTool = new TextTool(app);
         this._tools.push(this._textTool);
