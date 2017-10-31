@@ -191,25 +191,7 @@ var registerCommands = function () {
 
     actionManager.registerAction("handToolRelease", "@tool.handRelease", "Drawing utils", function () {
         //User released spacebar
-        if (that._currentAction === that._handTool) {
-            //deattach hand tool
-            that._currentAction.detach();
-            //if it is possible to resume
-            if (that._previousAction && that._previousAction.resume){
-                that._previousAction.resume();
-            }
-            else{
-                actionManager.invoke((Selection.directSelectionEnabled() ? "pointerDirectTool" : "pointerTool") as WorkspaceTool);
-            }
-            //restore action
-            that._currentAction = that._previousAction;
-            that._previousAction = null;
-        }
-    });
-
-    actionManager.registerAction("zoomToolRelease", "@tool.zoomRelease", "Drawing utils", function () {
-        //User released spacebar
-        if (that._currentAction === that._zoomTool) {
+        if (that._currentAction === that._handTool || that._currentAction === that._zoomTool) {
             //deattach hand tool
             that._currentAction.detach();
             //if it is possible to resume
