@@ -230,7 +230,7 @@ export default class DesignerController implements IController {
             this.draggingOver(event);
         }
 
-        this._draggingElement.dragTo(event);
+        this._draggingElement.dragTo(event, this._draggingOverElement);
 
         this.raiseInteractionProgress(InteractionType.Dragging, event);
     }

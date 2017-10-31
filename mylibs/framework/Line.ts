@@ -52,7 +52,7 @@ var LinePoint = {
             container = frame.element.first().primitiveRoot();
         }
 
-        SnapController.calculateSnappingPoints(container, this);
+        SnapController.calculateSnappingPoints(container, [this]);
         frame.element.visible(false, ChangeMode.Self)
 
         Environment.view.interactionLayer.add(resizingElement);

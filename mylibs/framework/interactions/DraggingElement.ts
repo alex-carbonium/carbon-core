@@ -231,7 +231,7 @@ export class DraggingElement extends CompositeElement {
         }
 
         SnapController.clearActiveSnapLines();
-        SnapController.calculateSnappingPoints(this._snappingTarget, this);
+        SnapController.calculateSnappingPoints(this._snappingTarget, this.children);
     }
 
     _updateCurrentPosition(event: IMouseEventData) {
@@ -272,7 +272,24 @@ export class DraggingElement extends CompositeElement {
         newPosition.free();
     }
 
-    dragTo(event) {
+    dragTo(event, draggingOverElement?) {
+        if(draggingOverElement) {
+            var newTarget = draggingOverElement;
+            if(!(draggingOverElement instanceof Artboard)) {
+                newTarget = draggingOverElement.parent().primitiveRoot()
+                    || Environment.view.page.getActiveArtboard()
+                    || Environment.view.page;
+            }
+
+            if(this._snappingTarget !== newTarget) {
+                this._snappingTarget = newTarget
+                SnapController.clearActiveSnapLines();
+                if(this._snappingTarget){
+                    SnapController.calculateSnappingPoints(this._snappingTarget, this.children);
+                }
+            }
+        }
+
         debug("Drag to x=%d y=%d", event.x, event.y);
 
         this._updateCurrentPosition(event);

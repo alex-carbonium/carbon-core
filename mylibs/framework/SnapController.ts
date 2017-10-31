@@ -487,16 +487,13 @@ function buildHorizontalDistances(distances, snap, b) {
     return { value: 0 }
 }
 
-function collectPoints(data, elements, viewportRect, root, excludeElement, element) {
-    if (excludeElement) {
-        if (excludeElement === element) {
-            return;
-        }
-
-        if (excludeElement.contains && excludeElement.contains(element)) {
-            return;
+function collectPoints(data, elements, viewportRect, root, excludeElements, element) {
+    if (excludeElements) {
+        if (excludeElements[element.id()]) {
+            return true;
         }
     }
+
     if (element.hitVisible(false, UserSettings.snapTo.lockedObjects) && !element.hitTransparent()) {
         if (UserSettings.snapTo.onlyVisibleObjects && !areRectsIntersecting(viewportRect, element.getBoundingBoxGlobal(false))) {
             return;
@@ -555,7 +552,7 @@ class SnapController {
         this.currentSnappingElements = elements;
     }
 
-    calculateSnappingPoints(parent, excludeElement?) {
+    calculateSnappingPoints(parent, excludeElements?) {
         var data: any = {};
         var elements = [];
         data._snapX = [];
@@ -564,7 +561,9 @@ class SnapController {
         data._snapYCenter = [];
         this._parent = parent;
         let viewportRect = Environment.view.viewportRect()
-
+        if(excludeElements) {
+            excludeElements = excludeElements.reduce((acc, cur)=>{acc[cur.id()] = true;return acc;}, {});
+        }
         this.currentSnappingData = data;
         this.currentSnappingElements = elements;
         if (UserSettings.snapTo.guides) {
@@ -576,9 +575,9 @@ class SnapController {
         }
 
         if (parent.parent() === NullContainer) {
-            parent.children.forEach(collectPoints.bind(null, data, elements, viewportRect, parent, excludeElement));
+            parent.children.forEach(collectPoints.bind(null, data, elements, viewportRect, parent, excludeElements));
         } else {
-            parent.applyVisitor(collectPoints.bind(null, data, elements, viewportRect, parent, excludeElement), true);
+            parent.applyVisitorTLR(collectPoints.bind(null, data, elements, viewportRect, parent, excludeElements), true);
         }
         data._snapX.sort(function (x1, x2) {
             return x1.value - x2.value;
@@ -597,13 +596,7 @@ class SnapController {
         var x = rect.x;
         var y = rect.y;
         var data: any = {};
-        // if (snapData.center) {
-        //     snapData.xs.push(snapData.center.x);
-        // }
 
-        // if (snapData.center) {
-        //     snapData.ys.push(snapData.center.y);
-        // }
         if (snapData !== null) {
             if (holdPcnt < 20) {
                 snapData.xs.sort((a, b) => a - b);
@@ -639,7 +632,6 @@ class SnapController {
             xs = [pos.x];
             ys = [pos.y];
         }
-
 
         var snapX = data._snapX,
             snapY = data._snapY,
