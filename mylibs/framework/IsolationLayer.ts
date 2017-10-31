@@ -84,6 +84,10 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         setTimeout(()=>Selection.clearSelection(true), 0);
     }
 
+    dblclick(event) {
+        event.handled = true;
+    }
+
     isolateObject(object: IIsolatable): void {
         if (this.ownerElement) {
             Environment.view.deactivateLayer(this.type, true);
