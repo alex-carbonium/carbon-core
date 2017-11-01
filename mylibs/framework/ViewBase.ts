@@ -258,8 +258,8 @@ export default class ViewBase { //TODO: implement IView
     setInitialPagePlace(page) {
         var size = this.viewportSize();
         page.zoomToFit(size);
-        var scale = page.scale();
-        page.scale(1);
+        var scale = page.pageScale();
+        page.pageScale(1);
         var scroll = page.scrollCenterPosition(size);
         page.scrollTo(scroll);
 
@@ -347,10 +347,10 @@ export default class ViewBase { //TODO: implement IView
             return 1;
         }
 
-        var pageScale = page.scale();
+        var pageScale = page.pageScale();
         if (arguments.length) {
             if (value !== pageScale) {
-                pageScale = page.scale(value);
+                pageScale = page.pageScale(value);
                 this.scaleChanged.raise(pageScale);
 
                 if (!silent) {
@@ -382,7 +382,7 @@ export default class ViewBase { //TODO: implement IView
         page.type = LayerType.Content;
         this.activateLayer(page.type);
 
-        this.scale(page.scale());
+        this.scale(page.pageScale());
     }
 
     global2local(/*Point*/pos) {

@@ -11,7 +11,7 @@ import angleAdjuster from "math/AngleAdjuster";
 import PropertyMetadata from "./PropertyMetadata";
 import Rect from "../math/rect";
 import Point from "../math/point";
-import { ChangeMode, RenderEnvironment } from "carbon-core";
+import { ChangeMode, RenderEnvironment, ILine } from "carbon-core";
 import { pointToLineDistance } from "../math/geometry";
 
 //TODO: add line width property
@@ -113,7 +113,7 @@ var LinePoint = {
 }
 
 
-class Line extends Shape {
+class Line extends Shape implements ILine {
 
     shouldApplyViewMatrix(){
         return false;

@@ -4,11 +4,11 @@ import PropertyMetadata from "./PropertyMetadata";
 import Brush from "./Brush";
 import Shadow from "./Shadow";
 import ContextPool from "./render/ContextPool";
-import { Types, StrokePosition, LineCap, LineJoin } from "./Defs";
+import { Types } from "./Defs";
 import Image from "./Image";
 import Constraints from "./Constraints";
 import { IImage, IUIElement } from "carbon-model";
-import { ResizeDimension, ElementState, RenderEnvironment, RenderFlags } from "carbon-core";
+import { ResizeDimension, ElementState, RenderEnvironment, RenderFlags, StrokePosition, LineJoin, LineCap } from "carbon-core";
 import RenderPipeline from "./render/RenderPipeline";
 
 class Shape extends Container {

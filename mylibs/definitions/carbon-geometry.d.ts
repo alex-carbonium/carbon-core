@@ -1,5 +1,5 @@
 declare module "carbon-geometry" {
-    import { IConstructor } from "carbon-basics";
+    import { IConstructor, IPooledObject } from "carbon-basics";
     import { IContext } from "carbon-rendering";
 
     export interface ICoordinate {
@@ -85,7 +85,7 @@ declare module "carbon-geometry" {
         ty: number;
 
         translate(x: number, y: number): IMatrix;
-        scale(sx: number, sy: number): IMatrix;
+        scale(sx: number, sy: number, ox?: number, oy?: number): IMatrix;
 
         applyToContext(context: IContext);
 
@@ -108,14 +108,21 @@ declare module "carbon-geometry" {
     }
     export const Matrix: IMatrix & {
         create(): IMatrix;
+        allocate(): IMatrix & IPooledObject;
         createTranslationMatrix(tx: number, ty: number): IMatrix;
         Identity: IMatrix;
     }
 
-    export const enum OriginType {
+    export const enum Origin {
         TopLeft = 1,
-        Center
-        //more
+        TopRight,
+        TopCenter,
+        MiddleLeft,
+        MiddleRight,
+        Center,
+        BottomLeft,
+        BottomRight,
+        BottomCenter
     }
 
     export const enum PointType {

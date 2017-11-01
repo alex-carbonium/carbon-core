@@ -113,6 +113,9 @@ declare module "carbon-app"{
         syncBroken(): boolean;
 
         mapElementsToLayerMask();
+
+        initExtensions();
+        raiseLoaded();
     }
 
     export const AppClass: IConstructor<IApp>;

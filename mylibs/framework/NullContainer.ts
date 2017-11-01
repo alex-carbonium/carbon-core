@@ -397,6 +397,15 @@ class NullContainer extends DataNode implements IContainer {
     canStroke() {
         return false;
     }
+
+    rotate() {
+    }
+    translate() {
+    }
+    translateInRotationDirection() {
+    }
+    translateInWorld() {
+    }
 }
 
 export default new NullContainer();

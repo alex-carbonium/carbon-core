@@ -18,8 +18,7 @@ import {
     Overflow,
     HorizontalAlignment,
     VerticalAlignment,
-    PointDirection,
-    StrokePosition
+    PointDirection
 } from "./Defs";
 import RotateFramePoint from "../decorators/RotateFramePoint";
 import ResizeFramePoint from "../decorators/ResizeFramePoint";
@@ -35,7 +34,7 @@ import ResizeOptions from "../decorators/ResizeOptions";
 import { KeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
-import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps, RenderFlags, RenderEnvironment, IContext, PropDescriptor } from "carbon-core";
+import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps, RenderFlags, RenderEnvironment, IContext, PropDescriptor, Origin, StrokePosition } from "carbon-core";
 import ExtensionPoint from "./ExtensionPoint";
 import CoreIntl from "../CoreIntl";
 import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
@@ -329,6 +328,21 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     getTranslation() {
         return this.dm().translation;
     }
+    translate(deltaX: number, deltaY: number) {
+        let vector = Point.allocate(deltaX, deltaY);
+        this.applyTranslation(vector);
+        vector.free();
+    }
+    translateInRotationDirection(deltaX: number, deltaY: number) {
+        let vector = Point.allocate(deltaX, deltaY);
+        this.applyDirectedTranslation(vector);
+        vector.free();
+    }
+    translateInWorld(deltaX: number, deltaY: number) {
+        let vector = Point.allocate(deltaX, deltaY);
+        this.applyGlobalTranslation(vector);
+        vector.free();
+    }
     applyTranslation(t: ICoordinate, withReset?: boolean, mode?: ChangeMode) {
         if (withReset) {
             this.saveOrResetLayoutProps(ChangeMode.Self);
@@ -349,6 +363,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         this.setTransform(m, changeMode);
     }
 
+    rotate(angle: number, origin: Origin) {
+        let originPoint = this.allocateOriginPoint(origin);
+        this.applyRotation(angle, originPoint);
+        originPoint.free();
+    }
     getRotation(global: boolean = false) {
         let decomposed = global ? this.gdm() : this.dm();
         return -decomposed.rotation;
@@ -373,6 +392,13 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return root && root.isEditable();
     }
 
+    scale(scaleX: number, scaleY: number, origin: Origin) {
+        let vector = Point.allocate(scaleX, scaleY);
+        let originPoint = this.allocateOriginPoint(origin);
+        this.applyScaling(vector, originPoint);
+        vector.free();
+        originPoint.free();
+    }
     applyScaling(s, o, options?: ResizeOptions, changeMode?: ChangeMode) {
         options = options || ResizeOptions.Once;
         if (options.reset) {
@@ -403,6 +429,55 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     skew(): void {
+    }
+
+    private allocateOriginPoint(origin: Origin) {
+        let br = this.boundaryRect();
+        let o = Point.allocate(0, 0);
+        switch (origin) {
+            case Origin.TopLeft:
+                o.x = br.x;
+                o.y = br.y;
+                break;
+            case Origin.TopCenter:
+                o.x = br.x + br.width / 2;
+                o.y = br.y;
+                break;
+            case Origin.TopRight:
+                o.x = br.x + br.width;
+                o.y = br.y;
+                break;
+            case Origin.MiddleLeft:
+                o.x = br.x;
+                o.y = br.y + br.height / 2;
+                break;
+            case Origin.Center:
+                o.x = br.x + br.width / 2;
+                o.y = br.y + br.height / 2;
+                break;
+            case Origin.MiddleRight:
+                o.x = br.x + br.width;
+                o.y = br.y + br.height / 2;
+                break;
+            case Origin.BottomLeft:
+                o.x = br.x;
+                o.y = br.y + br.height;
+                break;
+            case Origin.BottomCenter:
+                o.x = br.x + br.width / 2;
+                o.y = br.y + br.height;
+                break;
+            case Origin.BottomRight:
+                o.x = br.x + br.width;
+                o.y = br.y + br.height;
+                break;
+            default:
+                throw new Error("Unsupported origin " + origin);
+        }
+
+        let m = this.viewMatrix() as Matrix;
+        m.transformPointMutable(o);
+        return o;
     }
 
     first(): UIElement {
@@ -874,7 +949,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
         return this.runtimeProps.gdm;
     }
-    viewMatrixInverted() {
+    viewMatrixInverted(): Matrix {
         if (!this.runtimeProps.viewMatrixInverted) {
             this.runtimeProps.viewMatrixInverted = this.viewMatrix().clone().invert();
         }

@@ -214,6 +214,8 @@ class NullPage extends UIElement implements IPage {
         return { x: 0, y: 0, width: 0, height: 0 };
     }
     scale() {
+    }
+    pageScale() {
         return 1;
     }
     autoInsert() {

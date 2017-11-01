@@ -180,6 +180,8 @@ declare module "carbon-basics" {
 
     export class Shadow {
         static Default: Shadow;
+
+        static create(offsetX, offsetY, blur, color, inset?, spread?): Shadow;
     }
 
     export class QuadAndLock {

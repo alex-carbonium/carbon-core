@@ -62,6 +62,8 @@ declare module "carbon-rendering" {
 
         save(): void;
         restore(): void;
+
+        logToConsole();
     }
 
     interface IContextConstructor {
@@ -78,7 +80,7 @@ declare module "carbon-rendering" {
         ShowFrames = 1 << 3,
         Offscreen = 1 << 4,
         CheckViewport = 1 << 5,
-        DisableCaching = 1 << 6,        
+        DisableCaching = 1 << 6,
         Default = Final | ArtboardFill | UseParentClipping | CheckViewport
     }
 
@@ -102,7 +104,7 @@ declare module "carbon-rendering" {
         readonly contextPool: IContextPool;
         elementToDataUrl(element: IUIElement, contextScale: number): string;
         elementToDataUrlScaled(element: IUIElement, bounds: IRect, contextScale: number): string;
-        elementToContext(element: IUIElement, context, contextScale: number, scaleX?: number, scaleY?: number)
+        elementToContext(element: IUIElement, context: IContext, contextScale: number, contextMatrix?: IMatrix);
     }
 
     export const renderer: IRenderer;

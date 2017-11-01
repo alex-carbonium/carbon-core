@@ -1,5 +1,5 @@
 declare module "carbon-model" {
-    import { IPoint, IRect, ICoordinate, IMatrix, ISize, OriginType } from "carbon-geometry";
+    import { IPoint, IRect, ICoordinate, IMatrix, ISize, Origin } from "carbon-geometry";
     import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable, ChangeMode, ArtboardType, Font, KeyboardState, Brush, ResizeDimension } from "carbon-basics";
     import { IContext } from "carbon-rendering";
 
@@ -93,6 +93,12 @@ declare module "carbon-model" {
         globalViewMatrixInverted(): IMatrix;
         shouldApplyViewMatrix(): boolean;
 
+        translate(deltaX: number, deltaY: number);
+        translateInWorld(deltaX: number, deltaY: number);
+        translateInRotationDirection(deltaX: number, deltaY: number);
+        scale(scaleX: number, scaleY: number, origin: Origin);
+        rotate(angle: number, origin: Origin);
+
         applyScaling(vector: IPoint, origin: IPoint, options?, mode?: ChangeMode): boolean;
         applyMatrixScaling(vector: IPoint, origin: IPoint, options?, mode?: ChangeMode): void;
         applyTranslation(vector: IPoint, withReset?, mode?: ChangeMode): void;
@@ -101,6 +107,7 @@ declare module "carbon-model" {
         applyTransform(matrix: IMatrix, append?: boolean, mode?: ChangeMode);
         setTransform(matrix: IMatrix);
         resetTransform();
+
         resizeDimensions(value?: ResizeDimension): ResizeDimension;
 
         selectFrameVisible(value?:boolean):boolean;
@@ -323,7 +330,7 @@ declare module "carbon-model" {
     export interface IImage extends IContainer<IImageProps> {
         source(value?: ImageSource): ImageSource;
 
-        resizeOnLoad(value?: OriginType | null): OriginType | null;
+        resizeOnLoad(value?: Origin | null): Origin | null;
     }
 
     export const Image: IConstructor<IImage> & {
@@ -370,24 +377,61 @@ declare module "carbon-model" {
         Edit = 1
     }
 
-    export interface IShape extends IContainer {
+    export interface IShapeProps extends IContainerProps {
+    }
+    export interface IShape<T extends IShapeProps> extends IContainer<T> {
+        convertToPath(): IPath;
     }
 
-    export interface IRectangle extends IShape {
+    export interface IPathProps extends IShapeProps {
+
+    }
+    export interface IPath extends IShape<IPathProps> {
+    }
+
+    export interface ILineProps extends IShapeProps {
+    }
+    export interface ILine extends IShape<ILineProps> {
+    }
+
+    export interface IRectangleProps extends IShapeProps {
+    }
+    export interface IRectangle extends IShape<IRectangleProps> {
     }
     export const Rectangle: IConstructor<IRectangle>;
 
-    export interface ICircle extends IShape {
+    export interface ICircleProps extends IShapeProps {}
+    export interface ICircle extends IShape<ICircleProps> {
     }
     export const Circle: IConstructor<ICircle>;
 
-    export interface IStar extends IShape {
+    export interface IStarProps extends IShapeProps {}
+    export interface IStar extends IShape<IStarProps> {
     }
     export const Star: IConstructor<IStar>;
 
-    export interface IPolygon extends IShape {
+    export interface IPolygonProps extends IShapeProps {}
+    export interface IPolygon extends IShape<IPolygonProps> {
     }
     export const Polygon: IConstructor<IPolygon>;
+
+    export const enum StrokePosition {
+        Center = 0,
+        Inside = 1,
+        Outside = 2
+    }
+
+    export const enum LineCap {
+        Butt,
+        Round,
+        Square
+    }
+
+    export const enum LineJoin {
+        Miter,
+        Bevel,
+        Round
+    }
 
     export interface PropDescriptor{
         displayName: string,
@@ -400,6 +444,10 @@ declare module "carbon-model" {
 
     export interface IModel {
         createText(size?: ISize, props?: Partial<ITextProps>): IText;
+        createRectangle(size?: ISize, props?: Partial<IRectangleProps>): IRectangle;
+        createStar(size?: ISize, props?: Partial<IStarProps>): IStar;
+        createLine(props?: Partial<ILineProps>): ILine;
+        createCanvas(size?: ISize, props?: Partial<IUIElementProps>): IContainer;
     }
     export const model: IModel;
 }

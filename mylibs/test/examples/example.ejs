@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Carbon core examples</title>
@@ -9,13 +10,14 @@
             outline: none;
         }
 
-        html, body{
+        html,
+        body {
             width: 100%;
             height: 100%;
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
         }
 
-        #header{
+        #header {
             position: absolute;
             top: 0;
             width: 100%;
@@ -36,15 +38,43 @@
             height: 600px;
         }
     </style>
+    <script>
+        window.c = {
+            coreCallback: null,
+            coreLoaded: false,
+            apiLoaded: false,
+            api: null,
+            core: null
+        };
+        window.__carbonapi = function (api) {
+            var carbon = window.c;
+            carbon.apiLoaded = true;
+            carbon.api = api;
+        };
+        window.__carboncore = function (core) {
+            var carbon = window.c;
+            carbon.coreLoaded = true;
+            carbon.core = core;
+            if (carbon.coreCallback) {
+                carbon.coreCallback();
+            }
+        };
+    </script>
+    <script src="//localhost:8090/target/carbon-api.js"></script>
+    <script src="//localhost:8090/target/carbon-core.js"></script>
 </head>
+
 <body>
-<div id="viewport" name="viewport">
-    <div id="header">Carbon core:
-        <select id="selector"><option>-- Select example:</option></select>
-        <button id="rerun">Run again (F3)</button>
-        <!--<button id="previous">Previous (F7)</button>-->
-        <!--<button id="next">Next (F8)</button>-->
+    <div id="viewport" name="viewport">
+        <div id="header">Carbon core:
+            <select id="selector">
+                <option>-- Select example:</option>
+            </select>
+            <button id="rerun">Run again (F3)</button>
+            <!--<button id="previous">Previous (F7)</button>-->
+            <!--<button id="next">Next (F8)</button>-->
+        </div>
     </div>
-</div>
 </body>
+
 </html>

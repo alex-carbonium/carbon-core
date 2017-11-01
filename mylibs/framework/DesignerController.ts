@@ -777,7 +777,7 @@ export default class DesignerController implements IController {
             this._draggingElement.cancel();
             this._draggingElement.detach();
             this._draggingElement.dispose();
-            Selection.refreshSelection();
+            Selection.clearSelection();
             this._draggingElement = null;
         }
     }

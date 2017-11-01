@@ -1,13 +1,4 @@
-import {app, Intl, Environment, ActionManager} from "../../CarbonCore";
-import RenderLoop from "../../framework/render/RenderLoop";
-import ArtboardPage from "../../ui/pages/ArtboardPage";
-import Selection from "../../framework/SelectionModel";
-import Matrix from "../../math/matrix";
-import Point from "../../math/point";
-import ResizeOptions from "../../decorators/ResizeOptions";
-import backend from "../../backend";
-import logger from "../../logger";
-import CoreIntl from "../../CoreIntl";
+import { app, RenderLoop, CoreIntl, Selection, ArtboardPage, Matrix, Point } from "carbon-core";
 
 app.setProps({noConfirmOnClose: true});
 
@@ -19,8 +10,8 @@ CoreIntl.registerTestInstance();
 
 var examples = {};
 
-var selector = document.getElementById("selector");
-selector.addEventListener("change", e => runExample(e.target.value));
+var selector = document.getElementById("selector") as HTMLSelectElement;
+selector.addEventListener("change", e => runExample((e.currentTarget as HTMLSelectElement).value));
 
 var rerun = document.getElementById("rerun");
 rerun.addEventListener("click", e => runExample(selector.value));
@@ -67,9 +58,8 @@ function runExample(name){
     history.replaceState({}, document.title, location.pathname + "?" + encodeURIComponent(name));
 }
 
-window.Matrix = Matrix;
-window.Point = Point;
-window.ResizeOptions = ResizeOptions;
+window['Matrix'] = Matrix;
+window['Point'] = Point;
 
 window.onload = function(){
     var q = location.search.substr(1);

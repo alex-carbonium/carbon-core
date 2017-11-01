@@ -703,7 +703,7 @@ class Matrix implements IMatrix, IPooledObject {
         return new Matrix(1, 0, 0, 1, 0, 0);
     }
 
-    static createPooled() {
+    static allocate() {
         return Matrix.pool.allocate();
     }
 

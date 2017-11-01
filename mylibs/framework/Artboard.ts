@@ -510,9 +510,9 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
                 }
                 this.enablePropsTracking();
                 parent.enablePropsTracking();
-            }
 
-            App.Current.resourceAdded.raise(props.type, this);
+                App.Current.resourceAdded.raise(props.type, this);
+            }
         }
 
         if (props.frame === null) {

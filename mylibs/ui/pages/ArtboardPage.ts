@@ -141,10 +141,12 @@ class ArtboardPage extends Page implements IArtboardPage {
     }
 
     getBoundingBoxGlobal() {
+        //TODO: can it be calculated as a union rect of all artboards? for renderer.
         return Rect.Max;
     }
 
     getBoundingBox() {
+        //TODO: can it be calculated as a union rect of all artboards? for renderer.
         return Rect.Max;
     }
 

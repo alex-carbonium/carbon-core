@@ -8,6 +8,7 @@ import RotateFramePoint from "decorators/RotateFramePoint";
 import Rect from "../math/rect";
 import Point from "../math/point";
 import Environment from "environment";
+import { IStar } from "carbon-core";
 
 let StarFrameType = {
     cursorSet: FrameCursors,
@@ -63,7 +64,7 @@ let StarFrameType = {
 StarFrameType = Object.assign({}, DefaultFrameType, StarFrameType);
 
 
-export default class Star extends Polygon {
+export default class Star extends Polygon implements IStar {
     onRadiusChanged(changes) {
         super.onRadiusChanged(changes);
 
