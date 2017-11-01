@@ -66,6 +66,10 @@ var onmousedown = function (event) {
             Environment.controller.onmousedown(Environment.controller.createEventData(event));
             this._mouseButtonPressed = true;
         }
+        if (!this._mouseButton2Pressed && event.which === 2) {
+            Environment.controller.onmiddlemousedown(Environment.controller.createEventData(event));
+            this._mouseButton2Pressed = true;
+        }
     }
     catch (e) {
         Environment.reportFatalErrorAndRethrow(e);
@@ -93,6 +97,12 @@ var onmouseup = function (event) {
         if (this._mouseButtonPressed && event.which === 1) {
             Environment.controller.onmouseup(Environment.controller.createEventData(event));
             this._mouseButtonPressed = false;
+            event.preventDefault();
+            return false;
+        }
+        if (this._mouseButton2Pressed && event.which === 2) {
+            Environment.controller.onmiddlemouseup(Environment.controller.createEventData(event));
+            this._mouseButton2Pressed = false;
             event.preventDefault();
             return false;
         }

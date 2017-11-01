@@ -207,11 +207,11 @@ var registerCommands = function () {
         }
     });
 
-    actionManager.registerAction("handTool" as WorkspaceTool, "@tool.hand", "Drawing utils", function () {
-        attachHandTool();
+    actionManager.registerAction("handTool" as WorkspaceTool, "@tool.hand", "Drawing utils", function (selection, arg) {
+        attachHandTool(arg === "active");
     });
 
-    var attachHandTool = function () {
+    var attachHandTool = function (active) {
         if (that.mousePressed || that._currentAction === that._handTool) {
             return;
         }
@@ -221,7 +221,7 @@ var registerCommands = function () {
         }
 
         that._previousAction = that._currentAction; // should remember previous action
-        that._handTool.attach(that.app, that.view, that.controller, that.mousePressed);
+        that._handTool.attach(that.app, that.view, that.controller, that.mousePressed || active);
         that._currentAction = that._handTool;
     }
 

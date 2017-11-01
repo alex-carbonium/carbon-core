@@ -74,6 +74,12 @@ export default class MirroringController implements IController {
         }
     }
 
+    onmiddlemouseup(event) {
+    }
+
+    onmiddlemousedown(event) {
+    }
+
     _propagateScroll(delta, element) {
         if (delta.dx === 0 && delta.dy === 0) {
             return;

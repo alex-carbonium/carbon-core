@@ -28,12 +28,14 @@ export default class HandTool extends Tool {
     }
     resume() {
     }
+
     attach(app, view, controller, mousePressed) {
         this._app = app;
         this._view = view;
         this._controller = controller;
         this._attach();
         this._mousepressed = mousePressed;
+        setCursor.call(this, !mousePressed, event);
 
         this._controller.currentTool = "handTool";
     }

@@ -519,6 +519,16 @@ export default class DesignerController implements IController {
         }
     }
 
+    onmiddlemouseup(event) {
+        this.actionManager.invoke("handToolRelease");
+        event.handled = true;
+    }
+
+    onmiddlemousedown(event) {
+        this.actionManager.invoke("handTool" as WorkspaceTool, "active");
+        event.handled = true;
+    }
+
     ondblclick(eventData) {
         this.dblclickEvent.raise(eventData);
         if (eventData.handled) {
