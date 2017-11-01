@@ -544,6 +544,10 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
         return false;
     }
 
+    allowColorOverride() {
+        return true;
+    }
+
     static fromSvgElement(element, parsedAttributes, matrix) {
         //
         // :

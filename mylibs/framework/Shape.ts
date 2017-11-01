@@ -29,6 +29,10 @@ class Shape extends Container {
         return true;
     }
 
+    allowColorOverride() {
+        return true;
+    }
+
     performArrange() {
     }
 

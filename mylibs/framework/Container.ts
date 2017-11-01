@@ -269,6 +269,10 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         return !!this.runtimeProps.allowCache && super.allowCaching();
     }
 
+    allowColorOverride(){
+        return false;
+    }
+
     draw(context: IContext, environment: RenderEnvironment) {
         if (this.hasBadTransform()) {
             return;
@@ -308,11 +312,13 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
         let oldFill = this.props.fill;
         let oldStroke = this.props.stroke;
-        if (environment.fill) {
-            this.props.fill = environment.fill;
-        }
-        if (environment.stroke) {
-            this.props.stroke = environment.stroke;
+        if(this.allowColorOverride()){
+            if (environment.fill) {
+                this.props.fill = environment.fill;
+            }
+            if (environment.stroke) {
+                this.props.stroke = environment.stroke;
+            }
         }
 
         context.save();
@@ -337,11 +343,13 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
         context.restore();
 
-        if (environment.fill) {
-            this.props.fill = oldFill;
-        }
-        if (environment.stroke) {
-            this.props.stroke = oldStroke;
+        if(this.allowColorOverride()) {
+            if (environment.fill) {
+                this.props.fill = oldFill;
+            }
+            if (environment.stroke) {
+                this.props.stroke = oldStroke;
+            }
         }
 
         this.drawExtras(context, environment);
