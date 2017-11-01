@@ -688,12 +688,11 @@ export default class DesignerController implements IController {
             .then(result => {
                 var eventData = this.createEventData(result.e);
                 var parent = this.getCurrentDropTarget(eventData);
-                var br = element.boundaryRect();
 
                 this.raiseInteractionStopped(InteractionType.Dragging, eventData);
+                this.disposeDragging();
 
-                this.cancel();
-                this.insertAndSelect(result.elements, parent, eventData.x - br.width / 2, eventData.y - br.height / 2);
+                this.insertAndSelect(result.elements, parent);
             })
             .catch(e => {
                 this.cancel();
@@ -701,7 +700,7 @@ export default class DesignerController implements IController {
             });
     }
 
-    insertAndSelect(elements: IUIElement[], parent: IContainer | IComposite, x: number, y: number) {
+    insertAndSelect(elements: IUIElement[], parent: IContainer | IComposite) {
         var newSelection: IUIElement[] = [];
 
         for (let i = 0; i < elements.length; i++) {
@@ -716,8 +715,7 @@ export default class DesignerController implements IController {
             else {
                 let container = parent as Container;
                 if (!container.autoPositionChildren()) {
-                    let newMatrix = element.viewMatrix().withTranslation(Math.round(x), Math.round(y));
-                    element.setTransform(container.globalMatrixToLocal(newMatrix));
+                    element.setTransform(container.globalMatrixToLocal(element.viewMatrix()));
                 }
                 newSelection.push(container.add(element));
             }
@@ -775,11 +773,15 @@ export default class DesignerController implements IController {
         if (this._draggingElement) {
             this.raiseInteractionStopped(InteractionType.Dragging, this._lastMouseMove);
             this._draggingElement.cancel();
-            this._draggingElement.detach();
-            this._draggingElement.dispose();
+            this.disposeDragging();
             Selection.clearSelection();
-            this._draggingElement = null;
         }
+    }
+
+    private disposeDragging() {
+        this._draggingElement.detach();
+        this._draggingElement.dispose();
+        this._draggingElement = null;
     }
 
     raiseInteractionStarted(type: InteractionType, event: IMouseEventData) {

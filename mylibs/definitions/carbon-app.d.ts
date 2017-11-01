@@ -334,7 +334,7 @@ declare module "carbon-app" {
         isDragging(): boolean;
 
         choosePasteLocation(elements: IUIElement[], allowMoveIn?: boolean): {parent: IContainer, x: number, y: number}
-        insertAndSelect(element: IUIElement[], parent: IContainer, x: number, y: number);
+        insertAndSelect(element: IUIElement[], parent: IContainer);
         getCurrentDropTarget(eventData: IMouseEventData): IContainer | IComposite | null;
 
         currentTool: WorkspaceTool;
