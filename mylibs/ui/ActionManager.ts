@@ -32,6 +32,7 @@ import Rect from "../math/rect";
 import { viewStateStack } from "../framework/ViewStateStack";
 import CoreIntl from "../CoreIntl";
 import { ResolvedPromise } from "../framework/ObjectPool";
+import { TextAlignCommand } from "../commands/TextAlign";
 
 const debug = require("DebugUtil")("carb:actionManager");
 
@@ -143,6 +144,16 @@ export default class ActionManager implements IActionManager {
         });
         this.registerAction("sendBackward", "@send backward", "Layering", function () {
             ChangeZOrder.run(that.app, Selection.getSelection(), "backward");
+        });
+
+        this.registerAction("textAlignLeft", "@text.alignLeft", "Text", function () {
+            TextAlignCommand.run(that.app, Selection.getSelection(), "left");
+        });
+        this.registerAction("textAlignCenter", "@text.alignCenter", "Text", function () {
+            TextAlignCommand.run(that.app, Selection.getSelection(), "center");
+        });
+        this.registerAction("textAlignRight", "@text.alignRight", "Text", function () {
+            TextAlignCommand.run(that.app, Selection.getSelection(), "right");
         });
 
         this.registerAction("moveLeft", "Left", "Positioning", function () {
