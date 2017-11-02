@@ -1,4 +1,4 @@
-import { IModel, IText, ITextProps, IUIElement, IUIElementProps, ISize, ILineProps, ILine, IStarProps, IStar, IRectangle, IRectangleProps, IContainer } from "carbon-core";
+import { IModel, IText, ITextProps, IUIElement, IUIElementProps, ISize, ILineProps, ILine, IStarProps, IStar, IRectangle, IRectangleProps, IContainer, IArtboardProps, IArtboard, IStateboard, IStateboardProps } from "carbon-core";
 import UIElement from "./UIElement";
 import Text from "./text/Text";
 import Rect from "../math/rect";
@@ -6,6 +6,8 @@ import Line from "./Line";
 import Star from "./Star";
 import Rectangle from "./Rectangle";
 import Container from "./Container";
+import Artboard from "./Artboard";
+import Stateboard from "./StateBoard";
 import { ArrangeStrategies } from "./Defs";
 import InteractiveContainer from "./InteractiveContainer";
 
@@ -40,6 +42,17 @@ export class Model implements IModel {
         this.setSizeAndProps(canvas, size, props);
         this.setSizeAndProps(canvas, null, { arrangeStrategy: ArrangeStrategies.Canvas });
         return canvas;
+    }
+
+    createArtboard(size?: ISize, props?: Partial<IArtboardProps>): IArtboard {
+        let artboard = new Artboard();
+        this.setSizeAndProps(artboard, size, props);
+        return artboard;
+    }
+    createStateboard(size?: ISize, props?: Partial<IStateboardProps>): IStateboard {
+        let stateboard = new Stateboard();
+        this.setSizeAndProps(stateboard, size, props);
+        return stateboard;
     }
 
     private setSizeAndProps(element: IUIElement, size?: ISize, props?: Partial<IUIElementProps>) {

@@ -282,8 +282,20 @@ declare module "carbon-model" {
         guidesY: IGuide[];
     }
 
-    export interface IArtboard extends IContainer<IArtboardProps> {
+    export interface IArtboard<TProps extends IArtboardProps = IArtboardProps> extends IContainer<TProps> {
+        getStateboards(): IStateboard[];
     }
+
+    export interface IStateboardProps extends IArtboardProps {
+        masterId: string;
+        stateId: string;
+    }
+    //TODO: follow the same approach everywhere by defining an interface and a const with the same name.
+    // this way all consumers can both use "let a: IStateboard" and "a instanceof IStateboard"
+    export interface IStateboard extends IArtboard<IStateboardProps> {
+        readonly artboard: IArtboard;
+    }
+    export const IStateboard: IConstructor<IStateboard>;
 
     export type SymbolSource = {
         pageId: string;
@@ -291,6 +303,7 @@ declare module "carbon-model" {
     }
     export interface ISymbolProps extends IContainerProps {
         source: SymbolSource;
+        stateId?: string;
     }
     export interface ISymbol extends IContainer<ISymbolProps> {
         source(value?: SymbolSource): SymbolSource;
@@ -448,6 +461,8 @@ declare module "carbon-model" {
         createStar(size?: ISize, props?: Partial<IStarProps>): IStar;
         createLine(props?: Partial<ILineProps>): ILine;
         createCanvas(size?: ISize, props?: Partial<IUIElementProps>): IContainer;
+        createArtboard(size?: ISize, props?: Partial<IArtboardProps>): IArtboard;
+        createStateboard(size?: ISize, props?: Partial<IStateboardProps>): IStateboard;
     }
     export const model: IModel;
 }

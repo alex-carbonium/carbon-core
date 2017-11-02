@@ -54,14 +54,13 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
         this._cloneFromArtboard(artboard);
 
-        this._setupCustomProperties(artboard);
-
         if (this.props.stateId) {
             this._changeState(this.props.stateId);
         }
 
-        if (this._allowHResize || this._allowVResize) {
+        this._setupCustomProperties(artboard);
 
+        if (this._allowHResize || this._allowVResize) {
             var br = this.boundaryRect();
             if (this._allowHResize) {
                 br = br.withWidth(Math.max(currentSize.width || artboard.width(), artboard.minWidth()));

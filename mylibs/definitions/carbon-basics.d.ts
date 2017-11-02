@@ -3,6 +3,8 @@ declare module "carbon-basics" {
     import { AppSettings } from "carbon-core";
 
     export interface IConstructor<T> {
+        prototype: T;
+        //TODO: remove constructor and rename to IModelObject
         new (): T;
     }
 

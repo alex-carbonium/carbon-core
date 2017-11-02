@@ -123,7 +123,9 @@ export default {
 
     "Symbol": Symbol,
     "Artboard": require("./framework/Artboard"),
-    "StateBoard": require("./framework/StateBoard"),
+    //TODO: follow the same approach everywhere by defining an interface and a const with the same name.
+    // this way all consumers can both use "let a: IStateboard" and "a instanceof IStateboard"
+    "IStateboard": require("./framework/StateBoard"),
     "RequestAnimationSettings": require("./ui/prototyping/RequestAnimationSettings"),
 
     "CoreIntl": require("./CoreIntl"),

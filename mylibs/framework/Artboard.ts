@@ -1039,6 +1039,10 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return stateBoards;
     }
 
+    getStateboards() {
+        return this.runtimeProps.stateBoards;
+    }
+
     replaceAction(oldAction, newAction) {
         let index = this.props.actions.findIndex(a => a === oldAction);
         if (index >= 0) {
