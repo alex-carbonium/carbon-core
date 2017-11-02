@@ -1139,7 +1139,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             GlobalMatrixModifier.push(m => this.shouldApplyViewMatrix() ? Matrix.Identity : m);
             try {
                 context.beginPath();
-                this.drawBoundaryPath(context);
+                this.drawBoundaryPath(context, false);
                 context.clip();
             }
             finally {
