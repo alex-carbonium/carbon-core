@@ -189,9 +189,16 @@ declare module "carbon-app" {
         activated(): void;
 
         insertArtboards(artboards: IArtboard[]);
+
+        readonly nameProvider: INameProvider;
     }
 
     export const Page: IConstructor<IPage>;
+
+    export interface INameProvider {
+        assignNewName(element: IUIElement, separator?: string);
+        createNewName(elementName: string, separator?: string);
+    }
 
     export type SymbolGroup = { id: string, name: string };
 

@@ -93,8 +93,6 @@ declare module "carbon-app"{
     import { ISize, IRect, ICoordinate } from "carbon-geometry";
 
     export interface IPage{
-        nameProvider: any;
-
         incrementVersion();
 
         applyVisitorTLR(callback:(e:IUIElement)=>boolean|void);
