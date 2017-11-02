@@ -533,9 +533,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         if (this.props.hitTestBox) {
             return this.props.hitTestBox;
         }
-        var box = super.getHitTestBox.apply(this, arguments);;
-        this.props.hitTestBox = box;
-        return box;
+        return super.getHitTestBox.apply(this, arguments);
     }
 
     isInViewport(viewportRect: IRect) {
