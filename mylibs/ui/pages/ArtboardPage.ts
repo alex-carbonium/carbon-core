@@ -215,46 +215,6 @@ class ArtboardPage extends Page implements IArtboardPage {
         Invalidate.request();
     }
 
-    _activateArtboard(event): IArtboard {
-        let artboard = this._activeArtboard;
-        if (artboard && artboard.hitTest(event)) {
-            return;
-        }
-
-        let artboards = this.getAllArtboards();
-
-        for (let i = 0, length = artboards.length; i < length; ++i) {
-            artboard = artboards[i];
-            if (artboard.hitTest(event)) {
-                this.setActiveArtboard(artboard);
-                Invalidate.request();
-                return;
-            }
-        }
-    }
-
-    _onMouseUp(event) {
-        if (event.handled || Environment.controller.currentTool === "artboardTool") {
-            return;
-        }
-        this._activateArtboard(event);
-    }
-
-
-    activated() {
-        super.activated.apply(this, arguments);
-        if(Environment.controller && Environment.controller.mouseupEvent) {
-            Environment.controller.mouseupEvent.bind(this, this._onMouseUp);
-        }
-    }
-
-    deactivated() {
-        super.deactivated.apply(this, arguments);
-        if(Environment.controller && Environment.controller.mouseupEvent) {
-            Environment.controller.mouseupEvent.unbind(this, this._onMouseUp);
-        }
-    }
-
     getNextAvailiablePosition(width, height) {
         let maxX = 0, maxY = 0;
         for (let a of this.children) {

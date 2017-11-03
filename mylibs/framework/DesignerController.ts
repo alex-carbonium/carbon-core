@@ -185,6 +185,8 @@ export default class DesignerController implements IController {
         this.interactionActive = false;
         this.interactionStarted.bind(this, this.onInteractionStarted);
         this.interactionStopped.bind(this, this.onInteractionStopped);
+
+        Selection.onElementSelected.bind(this, this.onSelectionMade);
     }
 
     onpanstart(event) {
@@ -273,7 +275,14 @@ export default class DesignerController implements IController {
             this.setNewActiveArtboard(elements);
         }
 
-        Selection.refreshSelection(elements);
+        if (!Selection.areSelected(elements)) {
+            Selection.makeSelection(elements);
+        }
+        else {
+            this.setNewActiveArtboard(elements);
+        }
+
+        Selection.showFrame();
 
         this.raiseInteractionStopped(InteractionType.Dragging, event);
         this._draggingElement.detach();
@@ -285,10 +294,17 @@ export default class DesignerController implements IController {
         return this._draggingElement !== null;
     }
 
-    private setNewActiveArtboard(droppedElements: IUIElement[]) {
-        let newActiveArtboard = droppedElements[0].findAncestorOfType(Artboard);
-        for (let i = 1; i < droppedElements.length; ++i){
-            if (droppedElements[i].findAncestorOfType(Artboard) !== newActiveArtboard) {
+    private setNewActiveArtboard(selectedElements: IUIElement[]) {
+        if (!selectedElements.length) {
+            return;
+        }
+        if (this.view.getLayer(LayerType.Isolation).isActive) {
+            return;
+        }
+
+        let newActiveArtboard = selectedElements[0].findAncestorOfType(Artboard);
+        for (let i = 1; i < selectedElements.length; ++i){
+            if (selectedElements[i].findAncestorOfType(Artboard) !== newActiveArtboard) {
                 newActiveArtboard = null;
                 break;
             }
@@ -662,6 +678,10 @@ export default class DesignerController implements IController {
         if (mode === "new") {
             Selection.clearSelection();
         }
+    }
+
+    private onSelectionMade(composite: IComposite) {
+        this.setNewActiveArtboard(composite.elements);
     }
 
     onscroll(event) {
