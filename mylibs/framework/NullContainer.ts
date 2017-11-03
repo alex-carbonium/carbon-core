@@ -406,6 +406,10 @@ class NullContainer extends DataNode implements IContainer {
     }
     translateInWorld() {
     }
+
+    isEditable() {
+        return false;
+    }
 }
 
 export default new NullContainer();

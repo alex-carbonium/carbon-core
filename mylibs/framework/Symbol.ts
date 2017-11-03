@@ -150,7 +150,6 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
             clone.applyVisitor(x => {
                 x.sourceId(x.id());
                 x.id(baseId + x.id())
-                x.canDrag(false);
                 x.resizeDimensions(ResizeDimension.None);
                 x.runtimeProps.ctxl = ctxl;
             });
@@ -393,6 +392,11 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         return this._artboard ? this._artboard.getStates() : [];
     }
 
+    canDrag() {
+        let root = this.findNextRoot();
+        return !root || root.isEditable();
+    }
+
     canAccept() {
         return false;
     }
@@ -615,7 +619,6 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         Symbol.flattening = true;
         this.applyVisitor(x => {
             x.removeFlags(UIElementFlags.SymbolBackground | UIElementFlags.SymbolText);
-            x.canDrag(true);
             x.resizeDimensions(ResizeDimension.Both);
         })
         super.flatten();

@@ -1438,7 +1438,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
         return true;
     }
-    field(name, value, defaultValue?: any) {
+    field(name, value?, defaultValue?: any) {
         if (value !== undefined) {
             this.runtimeProps[name] = value;
         }
@@ -1495,7 +1495,15 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.props.maxHeight;
     }
     canDrag(value?) {
-        return this.field("_canDrag", value, true);
+        if (arguments.length === 1) {
+            return this.field("_canDrag", value);
+        }
+        let canDrag = this.field("_canDrag", value, true);
+        let primitiveRoot = this.primitiveRoot();
+        if (!primitiveRoot) {
+            return canDrag;
+        }
+        return primitiveRoot.isEditable() && canDrag;
     }
     // flipVertical(value) {
     //     if (value !== undefined) {

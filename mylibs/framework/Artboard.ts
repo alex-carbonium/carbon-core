@@ -589,6 +589,13 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
      */
     hitElement(position, scale, predicate?, directSelection?) {
         let element = super.hitElement.apply(this, arguments);
+        if (!element) {
+            return null;
+        }
+
+        if (Environment.controller.currentTool === "artboardTool") {
+            element = this;
+        }
 
         if (element === this && this.props.hitTestBox) {
             if (!this.hitTestBoundingBox(position, scale)) {
@@ -1053,7 +1060,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     isEditable() {
-        return true;
+        return this.multiselectTransparent;
     }
 
     onIsolationExited() {

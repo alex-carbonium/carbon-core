@@ -83,6 +83,9 @@ export default class ImageContent extends UIElement{
     selectionFrameType(){
         return ContentFrameType;
     }
+    canDrag() {
+        return true;
+    }
     canRotate(){
         return false;
     }
