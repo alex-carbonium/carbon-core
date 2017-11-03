@@ -95,6 +95,11 @@ export default class ImageContent extends UIElement{
     showResizeHint(){
         return false;
     }
+
+    click(event: IMouseEventData) {
+        //to avoid selection being reset when clicking on content
+        event.handled = true;
+    }
 }
 
 ImageContent.prototype.t = Types.ImageContent;

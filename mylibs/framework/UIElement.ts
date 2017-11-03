@@ -1057,7 +1057,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         BoundaryPathDecorator.drawBoundaryPath(context, this, round);
     }
 
-    primitiveRoot(): IPrimitiveRoot & UIElement {
+    primitiveRoot(): IPrimitiveRoot & IUIElement {
         if (this.runtimeProps.primitiveRoot) {
             return this.runtimeProps.primitiveRoot;
         }
@@ -1785,8 +1785,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
         return false;
     }
-    isOrphaned() {
-        return this.parent() === NullContainer;
+    isInTree() {
+        let primitiveRoot = this.primitiveRoot();
+        return primitiveRoot && primitiveRoot !== NullContainer;
     }
     canBeRemoved() {
         return true;

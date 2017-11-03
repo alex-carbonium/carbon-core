@@ -123,7 +123,7 @@ export default class ArtboardsTool extends Tool {
 
                 this.artboardAdded(this._element);
             }
-            else if (!this._element.isOrphaned()) {
+            else if (this._element.isInTree()) {
                 this._element.parent().remove(this._element);
             }
 
@@ -165,7 +165,7 @@ export default class ArtboardsTool extends Tool {
             return true;
         }
 
-        if (this._element.isOrphaned()) {
+        if (!this._element.isInTree()) {
             this._app.activePage.insert(this._element, this.findNewIndex(), ChangeMode.Self);
             Selection.makeSelection([this._element], "new", false, true);
         }

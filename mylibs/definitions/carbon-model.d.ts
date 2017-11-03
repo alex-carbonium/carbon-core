@@ -163,6 +163,8 @@ declare module "carbon-model" {
         animate(props: object, duration: number, options: object, progress: () => void): Promise<void>;
 
         findPropertyDescriptor(propName): PropDescriptor;
+
+        isInTree(): boolean;
     }
 
     export const UIElement: IConstructor<IUIElement>;

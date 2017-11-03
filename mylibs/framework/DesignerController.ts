@@ -301,6 +301,10 @@ export default class DesignerController implements IController {
         if (this.view.getLayer(LayerType.Isolation).isActive) {
             return;
         }
+        //when moving helper elements (ImageContent), artboard should not change
+        if (!selectedElements[0].isInTree()) {
+            return;
+        }
 
         let newActiveArtboard = selectedElements[0].findAncestorOfType(Artboard);
         for (let i = 1; i < selectedElements.length; ++i){

@@ -5,6 +5,7 @@ import ImageContent from "./ImageContent";
 import SnapController from "./SnapController";
 import Rect from "../math/rect";
 import Selection from "./SelectionModel";
+import PropertyTracker from "./PropertyTracker";
 import { ContentSizing, IImage, ImageSource } from "carbon-model";
 import { ChangeMode, RenderEnvironment } from "carbon-core";
 
@@ -77,7 +78,8 @@ export class ImageEditTool {
             e.handled = true;
         }));
 
-        Selection.requestProperties([this._content]);
+        Selection.makeSelection([this._content], "new", false, true);
+        App.Current.allowSelection(false);
     }
     detach(saveChanges = true) {
         if (saveChanges) {
@@ -110,7 +112,8 @@ export class ImageEditTool {
 
         this._frame.setProps({ visible: true }, ChangeMode.Self);
 
-        Selection.makeSelection([this._frame]);
+        App.Current.allowSelection(true);
+        Selection.makeSelection([this._frame], "new", false, true);
     }
 
     _saveChanges() {

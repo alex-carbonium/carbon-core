@@ -1,12 +1,12 @@
 import Matrix from "../math/matrix";
-import { IContainer, IDataNodeProps, IMatrix, IPoint, IRect, ISize, IUIElement, IUIElementProps, IConstraints, IContext, IContainerProps, IDataNode, IMouseEventData, KeyboardState, ResizeDimension, PropDescriptor } from "carbon-core";
+import { IContainer, IDataNodeProps, IMatrix, IPoint, IRect, ISize, IUIElement, IUIElementProps, IConstraints, IContext, IContainerProps, IDataNode, IMouseEventData, KeyboardState, ResizeDimension, PropDescriptor, IPrimitiveRoot } from "carbon-core";
 import { emptyUuid } from "../util";
 import DataNode from "./DataNode";
 import Rect from "../math/rect";
 import Point from "../math/point";
 import Constraints from "./Constraints";
 
-class NullContainer extends DataNode implements IContainer {
+class NullContainer extends DataNode implements IUIElement, IContainer, IPrimitiveRoot {
     children = [];
     props: IContainerProps = null;
 
@@ -408,6 +408,9 @@ class NullContainer extends DataNode implements IContainer {
     }
 
     isEditable() {
+        return false;
+    }
+    isInTree() {
         return false;
     }
 }

@@ -37,7 +37,7 @@ declare module "carbon-model"{
 
         mirrorClone():IUIElement;
 
-        primitiveRoot(): IPrimitiveRoot;
+        primitiveRoot(): IPrimitiveRoot & IUIElement;
 
         draw(context, environment: RenderEnvironment);
         drawSelf(context, w, h, environment: RenderEnvironment);
