@@ -174,7 +174,7 @@ declare module "carbon-app" {
         getAllArtboards(): IArtboard[];
         getActiveArtboard(): IArtboard;
         getArtboardAtPoint(point: ICoordinate): IArtboard;
-        setActiveArtboard(artboard: IArtboard): void;
+        setActiveArtboard(artboard: IArtboard, doNotTrack?: boolean): void;
         setActiveArtboardById(id: string): void;
 
         saveWorkspaceState(): any;

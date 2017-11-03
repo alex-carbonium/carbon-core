@@ -294,7 +294,7 @@ export default class DesignerController implements IController {
         return this._draggingElement !== null;
     }
 
-    private setNewActiveArtboard(selectedElements: IUIElement[]) {
+    private setNewActiveArtboard(selectedElements: IUIElement[], doNotTrack?: boolean) {
         if (!selectedElements.length) {
             return;
         }
@@ -314,7 +314,7 @@ export default class DesignerController implements IController {
             }
         }
 
-        this.app.activePage.setActiveArtboard(newActiveArtboard);
+        this.app.activePage.setActiveArtboard(newActiveArtboard, doNotTrack);
     }
 
     onmousedown(eventData) {
@@ -684,8 +684,8 @@ export default class DesignerController implements IController {
         }
     }
 
-    private onSelectionMade(composite: IComposite) {
-        this.setNewActiveArtboard(composite.elements);
+    private onSelectionMade(composite: IComposite, previous, doNotTrack: boolean) {
+        this.setNewActiveArtboard(composite.elements, doNotTrack);
     }
 
     onscroll(event) {
