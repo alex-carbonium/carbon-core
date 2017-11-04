@@ -5,7 +5,7 @@ import ContextPool from "framework/render/ContextPool";
 import EventHelper from "framework/EventHelper";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
-import { LayerType, IView, IAnimationController, ILayer, IUIElement, ViewState, IEvent, ICoordinate, IContext, ISize, IRect, IPoint, RenderEnvironment, RenderFlags } from "carbon-core";
+import { LayerType, IView, IAnimationController, ILayer, IUIElement, ViewState, IEvent, ICoordinate, IContext, ISize, IRect, IPoint, RenderEnvironment, RenderFlags, ChangeMode } from "carbon-core";
 import Rect from "../math/rect";
 import AnimationGroup from "./animation/AnimationGroup";
 import Context from "./render/Context";
@@ -756,12 +756,12 @@ export default class ViewBase { //TODO: implement IView
         return this._layers;
     }
 
-    dropElement(element: IUIElement): void {
-        var layers = this.layers
+    dropElement(element: IUIElement, mode?: ChangeMode): void {
+        var layers = this.layers;
         for (var i = layers.length - 1; i >= 0; --i) {
             var layer = layers[i];
             if (!layer.hitTransparent() && layer.canAccept([element])) {
-                layer.dropElement(element);
+                layer.dropElement(element, mode);
                 element.clearSavedLayoutProps();
                 return;
             }

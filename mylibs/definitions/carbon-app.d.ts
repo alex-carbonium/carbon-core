@@ -1,6 +1,6 @@
 declare module "carbon-app" {
     import { IDataNode, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IIsolatable, IMouseEventHandler, IContainerProps, PropDescriptor } from "carbon-model";
-    import { IEvent, IEventData, IEvent2, IMouseEventData, KeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable, IJsonNode, IPrimitive, ArtboardType, FontStyle, FontWeight } from "carbon-basics";
+    import { IEvent, IEventData, IEvent2, IMouseEventData, KeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable, IJsonNode, IPrimitive, ArtboardType, FontStyle, FontWeight, ChangeMode } from "carbon-basics";
     import { IRect, ICoordinate, ISize } from "carbon-geometry";
     import { IContext, IContextPool, RenderEnvironment, RenderFlags } from "carbon-rendering";
 
@@ -154,7 +154,7 @@ declare module "carbon-app" {
         activate();
         deactivate();
 
-        dropElement(element);
+        dropElement(element: IUIElement, mode?: ChangeMode);
 
         getElementsInRect(rect: IRect) : IUIElement[];
 

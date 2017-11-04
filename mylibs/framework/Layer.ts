@@ -5,7 +5,7 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import EventHelper from "framework/EventHelper";
 import UIElement from "./UIElement";
 import { Types } from "./Defs";
-import { IContainer, IRect, LayerType, IView, ILayer, RenderEnvironment, RenderFlags } from "carbon-core";
+import { IContainer, IRect, LayerType, IView, ILayer, RenderEnvironment, RenderFlags, ChangeMode, IUIElement } from "carbon-core";
 
 var clearChangedAreas = function (context) {
     // var fillStyle = this.fillStyle();
@@ -184,9 +184,9 @@ class Layer extends Container implements ILayer {
         return true;
     }
 
-    dropElement(element) {
+    dropElement(element: IUIElement, mode?: ChangeMode) {
         element.setTransform(this.globalMatrixToLocal(element.globalViewMatrix()));
-        this.add(element);
+        this.add(element, mode);
     }
 
     getElementsInRect(rect) {

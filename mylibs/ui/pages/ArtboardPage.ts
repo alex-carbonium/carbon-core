@@ -343,7 +343,7 @@ class ArtboardPage extends Page implements IArtboardPage {
         }
     }
 
-    dropElement(element: IUIElement) {
+    dropElement(element: IUIElement, mode?: ChangeMode) {
         let parent: Container = null;
         let elementBox = element.getBoundingBoxGlobal();
         let toAccept = [element];
@@ -362,7 +362,7 @@ class ArtboardPage extends Page implements IArtboardPage {
         }
 
         element.setTransform(parent.globalMatrixToLocal(element.globalViewMatrix()));
-        parent.add(element);
+        parent.add(element, mode);
     }
 }
 ArtboardPage.prototype.t = Types.ArtboardPage;

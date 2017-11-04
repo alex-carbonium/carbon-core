@@ -11,7 +11,7 @@ import Page from "./Page";
 import Keyboard from "../platform/Keyboard";
 import ObjectFactory from "./ObjectFactory";
 import { Types } from "./Defs";
-import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3, WorkspaceTool, InteractionType, LayerType } from "carbon-core";
+import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3, WorkspaceTool, InteractionType, LayerType, ChangeMode } from "carbon-core";
 import UIElement from "./UIElement";
 import Container from "./Container";
 import { choosePasteLocation } from "./PasteLocator";
@@ -270,10 +270,6 @@ export default class DesignerController implements IController {
 
     stopDrag(event) {
         let elements = this._draggingElement.stopDragging(event, this._draggingOverElement, this.app.activePage);
-
-        if (!this.view.getLayer(LayerType.Isolation).isActive) {
-            this.setNewActiveArtboard(elements);
-        }
 
         if (!Selection.areSelected(elements)) {
             Selection.makeSelection(elements);
@@ -703,6 +699,10 @@ export default class DesignerController implements IController {
         var eventData = this.createEventData(event);
         element.resetTransform();
         element.applyTranslation(new Point(Math.round(eventData.x - element.width() / 2), Math.round(eventData.y - element.height() / 2)));
+
+        this.view.dropElement(element, ChangeMode.Self);
+        Selection.makeSelection([element], "new", false, true);
+
         this._startDraggingElement = element;
         this.beginDrag(eventData, element, false);
 
@@ -713,12 +713,18 @@ export default class DesignerController implements IController {
                 var eventData = this.createEventData(result.e);
                 var parent = this.getCurrentDropTarget(eventData);
 
+                // remove element from parent and keep global position to generate less primitives
+                let gm = element.globalViewMatrix();
+                element.parent().remove(element, ChangeMode.Self);
+                element.setTransform(gm, ChangeMode.Self);
+
                 this.raiseInteractionStopped(InteractionType.Dragging, eventData);
                 this.disposeDragging();
 
                 this.insertAndSelect(result.elements, parent);
             })
             .catch(e => {
+                element.parent().remove(element, ChangeMode.Self);
                 this.cancel();
                 this.raiseInteractionStopped(null, null);
             });
@@ -739,7 +745,7 @@ export default class DesignerController implements IController {
             else {
                 let container = parent as Container;
                 if (!container.autoPositionChildren()) {
-                    element.setTransform(container.globalMatrixToLocal(element.viewMatrix()));
+                    element.setTransform(container.globalMatrixToLocal(element.globalViewMatrix()));
                 }
                 newSelection.push(container.add(element));
             }
@@ -760,7 +766,8 @@ export default class DesignerController implements IController {
         ) {
             return Selection.selectComposite();
         }
-        return parent;
+        //TODO: support highlighting multiple drop targets
+        return parent || this._draggingElement.children[0].parent();
     }
 
     captureMouse(/*UIElement*/element) {

@@ -105,7 +105,7 @@ declare module "carbon-model" {
         applyDirectedTranslation(vector: IPoint, mode?: ChangeMode): void;
         applyGlobalTranslation(vector: IPoint, withReset?: boolean, mode?: ChangeMode);
         applyTransform(matrix: IMatrix, append?: boolean, mode?: ChangeMode);
-        setTransform(matrix: IMatrix);
+        setTransform(matrix: IMatrix, mode?: ChangeMode);
         resetTransform();
 
         resizeDimensions(value?: ResizeDimension): ResizeDimension;
