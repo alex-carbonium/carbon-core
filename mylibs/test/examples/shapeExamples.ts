@@ -1,39 +1,38 @@
 import {registerExample} from "./example";
-import Line from "../../framework/Line";
-import Star from "../../framework/Star";
-import Rect from "../../math/rect";
-import Selection from "../../framework/SelectionModel";
+import { model, Selection } from "carbon-core";
+
+let w = window as any;
 
 registerExample("shape: lines", function(app, artboard){
-    var line1 = new Line();
+    var line1 = model.createLine();
     line1.prepareAndSetProps({x1: 0, y1: 0, x2: 100, y2: 50, name: 'line 1'});
-    line1.applyTranslation({x: 100, y: 300});
+    line1.translate(100, 300);
     artboard.add(line1);
     //Selection.makeSelection([line1]);
 
-    var line2 = new Line();
+    var line2 = model.createLine();
     line2.prepareAndSetProps({x1: 0, y1: 0, x2: 100, y2: 80, name: 'line 2'});
-    line2.applyTranslation({x: 300, y: 300});
+    line2.translate(300, 300);
     artboard.add(line2);
 
-    var line3 = new Line();
+    var line3 = model.createLine();
     line3.prepareAndSetProps({x1: 100, y1: 0, x2: 0, y2: 40, name: 'line 3'});
-    line3.applyTranslation({x: 450, y: 300});
+    line3.translate(450, 300);
     artboard.add(line3);
 
     Selection.makeSelection([line2, line3]);
     app.actionManager.invoke("group");
 
-    window.line1 = line1;
+    w.line1 = line1;
 });
 
 registerExample("shape: star, polygon", function(app, artboard){
-    var star = new Star();
+    var star = model.createStar();
     star.prepareAndSetProps({externalRadius: 50, name: 'line 1'});
-    star.applyTranslation({x: 100, y: 300});
+    star.translate(100, 300);
     artboard.add(star);
 
     Selection.makeSelection([star]);
 
-    window.star = star;
+    w.star = star;
 });

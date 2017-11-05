@@ -4,8 +4,10 @@ import ModelStateListener from "framework/relayout/ModelStateListener";
 import {Types} from "./Defs";
 import DataNode from "framework/DataNode";
 import NullContainer from "./NullContainer";
+import { IStateboard, IStateboardProps } from "carbon-core";
 
-class StateBoard extends Artboard {
+class StateBoard extends Artboard implements IStateboard {
+    props: IStateboardProps;
 
     constructor() {
         super();

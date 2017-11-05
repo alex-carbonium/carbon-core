@@ -95,4 +95,6 @@ export default class ContextStub implements IContext {
 
     }
 
+    logToConsole() {
+    }
 }

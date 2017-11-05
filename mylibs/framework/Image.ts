@@ -9,14 +9,14 @@ import ImageEditTool from "./ImageEditTool";
 import EventHelper from "./EventHelper";
 import RectMask from "./RectMask";
 import { ContentSizing, ImageSource, ImageSourceType, IImage, IImageProps } from "carbon-model";
-import { IRect, OriginType } from "carbon-geometry";
+import { IRect, Origin } from "carbon-geometry";
 import { ChangeMode, IContext, RenderEnvironment } from "carbon-core";
 
 const DefaultSizing = ContentSizing.fill;
 
 interface IImageRuntimeProps extends IUIElementRuntimeProps {
     loaded: boolean;
-    resizeOnLoad?: OriginType|null;
+    resizeOnLoad?: Origin|null;
     sourceProps?: any;
     mask?: UIElement;
     origSource?: any;
@@ -178,7 +178,7 @@ export default class Image extends Container<IImageProps> implements IImage {
         ImageSourceHelper.draw(this.source(), context, this.width(), this.height(), this, environment);
     }
 
-    autoResize(source: ImageSource, origin: OriginType){
+    autoResize(source: ImageSource, origin: Origin){
         var realRect = ImageSourceHelper.boundaryRect(source, this.runtimeProps.sourceProps);
         if (realRect === null){
             return;
@@ -294,7 +294,7 @@ export default class Image extends Container<IImageProps> implements IImage {
         return this;
     }
 
-    resizeOnLoad(value?: OriginType|null): OriginType|null{
+    resizeOnLoad(value?: Origin|null): Origin|null{
         if (arguments.length){
             this.runtimeProps.resizeOnLoad = value;
         }

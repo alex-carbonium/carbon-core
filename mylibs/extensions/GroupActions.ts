@@ -94,7 +94,7 @@ export class GroupActions extends CarbonExtension {
     }
 
     static canGroup(selection: ISelection): boolean{
-        return selection.elements.length && !selection.elements.some(x => x instanceof Artboard);
+        return selection.elements.length && !selection.elements.some(x => x instanceof Artboard || !x.isInTree());
     }
     static isGroupContainer(selection: ISelection): boolean{
         return selection.elements.length && selection.elements.every(x => x instanceof InteractiveContainer);

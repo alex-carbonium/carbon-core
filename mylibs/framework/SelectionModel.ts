@@ -147,6 +147,10 @@ class SelectionModel implements ISelection {
         return this._selectCompositeElement.has(el);
     }
 
+    areSelected(elements: IUIElement[]) {
+        return elements.length && elements.every(x => this.isElementSelected(x));
+    }
+
     isOnlyElementSelected(el) {
         return this._selectCompositeElement.count() === 1 && this._selectCompositeElement.has(el);
     }

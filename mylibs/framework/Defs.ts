@@ -207,22 +207,4 @@ if (DEBUG) {
     }
 }
 
-export enum StrokePosition {
-    Center = 0,
-    Inside = 1,
-    Outside = 2
-};
-
-export enum LineCap {
-    Butt,
-    Round,
-    Square
-};
-
-export enum LineJoin {
-    Miter,
-    Bevel,
-    Round
-};
-
 export var FloatingPointPrecision = 10;

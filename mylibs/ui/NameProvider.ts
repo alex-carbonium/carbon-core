@@ -1,6 +1,7 @@
 import CoreIntl from "../CoreIntl";
+import { INameProvider } from "carbon-core";
 
-export default class NameProvider {
+export default class NameProvider implements INameProvider {
     [name: string]: any;
 
     constructor(page) {
@@ -16,7 +17,7 @@ export default class NameProvider {
         })
     }
 
-    getNextIndex(element, label) {
+    getNextIndex(label) {
         var nextIndexes = this._nextIndexes;
         var idx = nextIndexes[label] || 1;
         nextIndexes[label] = idx + 1;
@@ -25,14 +26,18 @@ export default class NameProvider {
     }
 
     assignNewName(element, separator = " ") {
+        let newName = this.createNewName(element.displayType(), separator);
+        element.setProps({ name: newName });
+    }
+
+    createNewName(elementName: string, separator = " ") {
         let namesMap = this._namesMap;
         let lastLabel = null;
         while (true) {
-            var displayType = element.displayType();
-            var index = this.getNextIndex(element, displayType);
+            var index = this.getNextIndex(elementName);
             var label = CoreIntl.instance.formatMessage({
-                id: displayType,
-                defaultMessage: displayType
+                id: elementName,
+                defaultMessage: elementName
             }) + separator + index;
 
             if (!namesMap[label] || lastLabel === label) break;
@@ -40,6 +45,6 @@ export default class NameProvider {
         }
         namesMap[label] = true;
 
-        element.setProps({ name: label });
+        return label;
     }
 }

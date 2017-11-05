@@ -102,7 +102,7 @@ class ArtboardProxyPage extends Page implements IMirroringProxyPage {
         return this.invalidateRequired = (this._version !== artboard.version
         || this.scrollX() !== this._sX
         || this.scrollY() !== this._sY
-        || this.scale() !== this._ss);
+        || this.pageScale() !== this._ss);
     }
 
     draw(){
@@ -113,7 +113,7 @@ class ArtboardProxyPage extends Page implements IMirroringProxyPage {
         }
         this._sX = this.scrollX();
         this._sY = this.scrollY();
-        this._ss = this.scale();
+        this._ss = this.pageScale();
     }
 
     dispose(){

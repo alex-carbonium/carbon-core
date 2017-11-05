@@ -12,7 +12,7 @@ import Delete from "../commands/Delete";
 import params from "../params";
 import backend from "../backend";
 import { IApp, IMatrix } from "carbon-core";
-import { OriginType } from "carbon-geometry";
+import { Origin } from "carbon-geometry";
 
 class Clipboard {
     [name: string]: any;
@@ -137,7 +137,7 @@ class Clipboard {
 
         if (imageData) {
             let image = new Image();
-            image.resizeOnLoad(OriginType.Center);
+            image.resizeOnLoad(Origin.Center);
             let br = new Rect(0, 0, Image.NewImageSize, Image.NewImageSize);
             image.boundaryRect(br);
 
@@ -155,7 +155,7 @@ class Clipboard {
         else if (textData){
             let image = Image.tryCreateFromUrl(textData);
             if (image){
-                image.resizeOnLoad(OriginType.Center);
+                image.resizeOnLoad(Origin.Center);
             }
             let newElement: UIElement = image;
             if (newElement === null){

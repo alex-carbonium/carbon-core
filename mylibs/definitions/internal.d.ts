@@ -37,7 +37,7 @@ declare module "carbon-model"{
 
         mirrorClone():IUIElement;
 
-        primitiveRoot(): IPrimitiveRoot;
+        primitiveRoot(): IPrimitiveRoot & IUIElement;
 
         draw(context, environment: RenderEnvironment);
         drawSelf(context, w, h, environment: RenderEnvironment);
@@ -93,8 +93,6 @@ declare module "carbon-app"{
     import { ISize, IRect, ICoordinate } from "carbon-geometry";
 
     export interface IPage{
-        nameProvider: any;
-
         incrementVersion();
 
         applyVisitorTLR(callback:(e:IUIElement)=>boolean|void);
@@ -113,6 +111,9 @@ declare module "carbon-app"{
         syncBroken(): boolean;
 
         mapElementsToLayerMask();
+
+        initExtensions();
+        raiseLoaded();
     }
 
     export const AppClass: IConstructor<IApp>;

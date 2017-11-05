@@ -525,4 +525,7 @@ export default class ContextCommandCache implements IContext {
         this._context && this._context.setLineDash.apply(this, arguments);
         this._commands.push({type:EntryType.method, method:'setLineDash', args:arguments});
     }
+
+    logToConsole() {
+    }
 }

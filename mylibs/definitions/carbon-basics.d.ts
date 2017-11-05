@@ -3,6 +3,8 @@ declare module "carbon-basics" {
     import { AppSettings } from "carbon-core";
 
     export interface IConstructor<T> {
+        prototype: T;
+        //TODO: remove constructor and rename to IModelObject
         new (): T;
     }
 
@@ -180,6 +182,8 @@ declare module "carbon-basics" {
 
     export class Shadow {
         static Default: Shadow;
+
+        static create(offsetX, offsetY, blur, color, inset?, spread?): Shadow;
     }
 
     export class QuadAndLock {

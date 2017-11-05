@@ -4,8 +4,8 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import Path from "framework/Path";
 import * as math from "math/math";
 import Rect from "math/rect";
-import { Types, StrokePosition } from "./Defs";
-import { RenderEnvironment } from "carbon-core";
+import { Types } from "./Defs";
+import { RenderEnvironment, StrokePosition } from "carbon-core";
 
 class Circle extends Shape {
     hitTest(/*Point*/point, scale) {

@@ -550,12 +550,13 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
                     parent.enablePropsTracking();
                 }
 
+                if (props.rowsCount || props.colsCount || props.iconCellSize) {
+                    this._rearrangeIcons(props, oldProps);
+                }
+
                 App.Current.resourceAdded.raise(props.type, this);
             }
-        }
 
-        if (props.rowsCount || props.colsCount || props.iconCellSize) {
-            this._rearrangeIcons(props, oldProps);
         }
 
         if (props.frame === null) {
@@ -700,9 +701,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         if (this.props.hitTestBox) {
             return this.props.hitTestBox;
         }
-        var box = super.getHitTestBox.apply(this, arguments);;
-        this.props.hitTestBox = box;
-        return box;
+        return super.getHitTestBox.apply(this, arguments);
     }
 
     isInViewport(viewportRect: IRect) {
@@ -758,6 +757,13 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
      */
     hitElement(position, scale, predicate?, directSelection?) {
         let element = super.hitElement.apply(this, arguments);
+        if (!element) {
+            return null;
+        }
+
+        if (Environment.controller.currentTool === "artboardTool") {
+            element = this;
+        }
 
         if (element === this && this.props.hitTestBox) {
             if (!this.hitTestBoundingBox(position, scale)) {
@@ -1208,6 +1214,10 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return stateBoards;
     }
 
+    getStateboards() {
+        return this.runtimeProps.stateBoards;
+    }
+
     replaceAction(oldAction, newAction) {
         let index = this.props.actions.findIndex(a => a === oldAction);
         if (index >= 0) {
@@ -1218,7 +1228,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     isEditable() {
-        return true;
+        return this.multiselectTransparent;
     }
 
     onIsolationExited() {

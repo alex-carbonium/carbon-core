@@ -126,14 +126,14 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
 
     updatePageMatrix() {
         var viewMatrix = this.pageMatrix = Matrix.create();
-        var scale = this.scale();
+        var scale = this.pageScale();
         viewMatrix.translate(-(0 | this.scrollX()), -(0 | this.scrollY()));
         viewMatrix.scale(scale, scale);
     }
 
     zoomToFit(size, options) {
         var scale = this.scaleToSize(size, options);
-        this.scale(scale);
+        this.pageScale(scale);
         return scale;
     }
 
@@ -146,7 +146,7 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
         }
     }
 
-    scale(value?:any) {
+    pageScale(value?:any) {
         if (value !== undefined) {
             this._scale = value;
             this.updatePageMatrix();
@@ -323,7 +323,7 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
 
     pointToScroll(point, viewportSize, options) {
         options = extend({anchorX: "center", anchorY: "center", gutterX: 0, gutterY: 0}, options);
-        var scale = options.scale || this.scale();
+        var scale = options.scale || this.pageScale();
         //var scroll = this.getMaxScroll(viewportSize, scale);
 
         var dx, dy;

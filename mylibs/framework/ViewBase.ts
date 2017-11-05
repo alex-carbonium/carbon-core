@@ -5,7 +5,7 @@ import ContextPool from "framework/render/ContextPool";
 import EventHelper from "framework/EventHelper";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
-import { LayerType, IView, IAnimationController, ILayer, IUIElement, ViewState, IEvent, ICoordinate, IContext, ISize, IRect, IPoint, RenderEnvironment, RenderFlags } from "carbon-core";
+import { LayerType, IView, IAnimationController, ILayer, IUIElement, ViewState, IEvent, ICoordinate, IContext, ISize, IRect, IPoint, RenderEnvironment, RenderFlags, ChangeMode } from "carbon-core";
 import Rect from "../math/rect";
 import AnimationGroup from "./animation/AnimationGroup";
 import Context from "./render/Context";
@@ -258,8 +258,8 @@ export default class ViewBase { //TODO: implement IView
     setInitialPagePlace(page) {
         var size = this.viewportSize();
         page.zoomToFit(size);
-        var scale = page.scale();
-        page.scale(1);
+        var scale = page.pageScale();
+        page.pageScale(1);
         var scroll = page.scrollCenterPosition(size);
         page.scrollTo(scroll);
 
@@ -347,10 +347,10 @@ export default class ViewBase { //TODO: implement IView
             return 1;
         }
 
-        var pageScale = page.scale();
+        var pageScale = page.pageScale();
         if (arguments.length) {
             if (value !== pageScale) {
-                pageScale = page.scale(value);
+                pageScale = page.pageScale(value);
                 this.scaleChanged.raise(pageScale);
 
                 if (!silent) {
@@ -382,7 +382,7 @@ export default class ViewBase { //TODO: implement IView
         page.type = LayerType.Content;
         this.activateLayer(page.type);
 
-        this.scale(page.scale());
+        this.scale(page.pageScale());
     }
 
     global2local(/*Point*/pos) {
@@ -756,12 +756,12 @@ export default class ViewBase { //TODO: implement IView
         return this._layers;
     }
 
-    dropElement(element: IUIElement): void {
-        var layers = this.layers
+    dropElement(element: IUIElement, mode?: ChangeMode): void {
+        var layers = this.layers;
         for (var i = layers.length - 1; i >= 0; --i) {
             var layer = layers[i];
             if (!layer.hitTransparent() && layer.canAccept([element])) {
-                layer.dropElement(element);
+                layer.dropElement(element, mode);
                 element.clearSavedLayoutProps();
                 return;
             }

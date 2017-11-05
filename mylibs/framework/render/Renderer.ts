@@ -1,7 +1,9 @@
-import { IRenderer, IUIElement, RenderEnvironment, RenderFlags, IRect, IContext } from "carbon-core";
+import { IRenderer, IUIElement, RenderEnvironment, RenderFlags, IRect, IContext, IMatrix } from "carbon-core";
 import ContextPool from "./ContextPool";
 import Matrix from "math/matrix";
 import RenderPipeline from "./RenderPipeline";
+import Page from "../Page";
+import Rect from "../../math/rect";
 
 /**
  * Renderer object to expose in API.
@@ -14,7 +16,7 @@ export class Renderer implements IRenderer {
 
         let context = ContextPool.getContext(box.width, box.height, contextScale, true);
 
-        this.elementToContext(element, context, contextScale, 1, 1);
+        this.elementToContext(element, context, contextScale);
         let data = context.canvas.toDataURL();
 
         ContextPool.releaseContext(context);
@@ -28,8 +30,11 @@ export class Renderer implements IRenderer {
 
         let context = ContextPool.getContext(fit.width, fit.height, contextScale, true);
 
-        this.elementToContext(element, context, contextScale, fit.width/box.width, fit.height/box.height);
+        let matrix = Matrix.allocate();
+        matrix.scale(fit.width/box.width, fit.height/box.height);
+        this.elementToContext(element, context, contextScale, matrix);
         let data = context.canvas.toDataURL();
+        matrix.free();
 
         ContextPool.releaseContext(context);
 
@@ -41,19 +46,27 @@ export class Renderer implements IRenderer {
 
         let context = ContextPool.getContext(box.width * scaleX, box.height * scaleY, contextScale, true);
 
-        this.elementToContext(element, context, contextScale, scaleX, scaleY);
+        let matrix = Matrix.allocate();
+        matrix.scale(scaleX, scaleY);
+        this.elementToContext(element, context, contextScale, matrix);
+        matrix.free();
 
         return context;
     }
 
-    elementToContext(element: IUIElement, context: IContext, contextScale = 1, scaleX = 1, scaleY = 1) {
+    elementToContext(element: IUIElement, context: IContext, contextScale = 1, contextMatrix?: IMatrix) {
         let box = this.getBoundingBox(element);
-        let pageMatrix = new Matrix(1, 0, 0, 1, -box.x, -box.y);
+        let pageMatrix = Matrix.allocate();
+        pageMatrix.translate(-box.x, -box.y);
+
+        if (contextMatrix) {
+            pageMatrix.prepend(contextMatrix);
+        }
+
         let env: RenderEnvironment = {
-            flags: RenderFlags.Final | RenderFlags.Offscreen,
+            flags: RenderFlags.Final | RenderFlags.Offscreen | RenderFlags.DisableCaching,
             setupContext: (ctx) => {
-                ctx.scale(contextScale * scaleX, contextScale * scaleY);
-                ctx.clear();
+                ctx.scale(contextScale, contextScale);
                 pageMatrix.applyToContext(ctx);
             },
             pageMatrix: pageMatrix,
@@ -64,19 +77,27 @@ export class Renderer implements IRenderer {
         };
 
         context.save();
-        context.scale(contextScale * scaleX, contextScale * scaleY);
-        context.clear();
+        context.scale(contextScale, contextScale);
         pageMatrix.applyToContext(context);
 
         var pipeline = RenderPipeline.createFor(element, context, env);
+        pipeline.disableCache();
         pipeline.out(c => {
-            element.draw(c, env);
+            let rect = element.boundaryRect();
+            element.drawSelf(c, rect.width, rect.height, env);
         });
         pipeline.done();
+
+        pageMatrix.free();
         context.restore();
     }
 
     private getBoundingBox(element: IUIElement) {
+        if (element instanceof Page) {
+            //TODO: bounding box of page is rect.max, so taking boundary rect, this probably has to be fixed
+            let rect = element.boundaryRect();
+            return Rect.fromSize(rect.width, rect.height);
+        }
         let box = element.getBoundingBoxGlobal();
         box = element.expandRectWithBorder(box);
         box.width = Math.max(1, box.width) | 0;

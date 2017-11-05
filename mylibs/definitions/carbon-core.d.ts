@@ -17,7 +17,6 @@ declare module "carbon-core" {
     export var StyleManager: any;
     export var PropertyMetadata: any;
     export var Artboard: any;
-    export var StateBoard: any;
     export var PropertyTracker: any;
     export var params: any;
     export var MirroringController: any;

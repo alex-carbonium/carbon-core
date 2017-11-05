@@ -141,10 +141,12 @@ class ArtboardPage extends Page implements IArtboardPage {
     }
 
     getBoundingBoxGlobal() {
+        //TODO: can it be calculated as a union rect of all artboards? for renderer.
         return Rect.Max;
     }
 
     getBoundingBox() {
+        //TODO: can it be calculated as a union rect of all artboards? for renderer.
         return Rect.Max;
     }
 
@@ -211,46 +213,6 @@ class ArtboardPage extends Page implements IArtboardPage {
         Environment.controller && Environment.controller.onArtboardChanged && Environment.controller.onArtboardChanged.raise(artboard, oldArtboard);
         // redraw content to change artboard header color
         Invalidate.request();
-    }
-
-    _activateArtboard(event): IArtboard {
-        let artboard = this._activeArtboard;
-        if (artboard && artboard.hitTest(event)) {
-            return;
-        }
-
-        let artboards = this.getAllArtboards();
-
-        for (let i = 0, length = artboards.length; i < length; ++i) {
-            artboard = artboards[i];
-            if (artboard.hitTest(event)) {
-                this.setActiveArtboard(artboard);
-                Invalidate.request();
-                return;
-            }
-        }
-    }
-
-    _onMouseUp(event) {
-        if (event.handled || Environment.controller.currentTool === "artboardTool") {
-            return;
-        }
-        this._activateArtboard(event);
-    }
-
-
-    activated() {
-        super.activated.apply(this, arguments);
-        if(Environment.controller && Environment.controller.mouseupEvent) {
-            Environment.controller.mouseupEvent.bind(this, this._onMouseUp);
-        }
-    }
-
-    deactivated() {
-        super.deactivated.apply(this, arguments);
-        if(Environment.controller && Environment.controller.mouseupEvent) {
-            Environment.controller.mouseupEvent.unbind(this, this._onMouseUp);
-        }
     }
 
     getNextAvailiablePosition(width, height) {
@@ -381,7 +343,7 @@ class ArtboardPage extends Page implements IArtboardPage {
         }
     }
 
-    dropElement(element: IUIElement) {
+    dropElement(element: IUIElement, mode?: ChangeMode) {
         let parent: Container = null;
         let elementBox = element.getBoundingBoxGlobal();
         let toAccept = [element];
@@ -400,7 +362,7 @@ class ArtboardPage extends Page implements IArtboardPage {
         }
 
         element.setTransform(parent.globalMatrixToLocal(element.globalViewMatrix()));
-        parent.add(element);
+        parent.add(element, mode);
     }
 }
 ArtboardPage.prototype.t = Types.ArtboardPage;

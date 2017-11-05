@@ -257,6 +257,8 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         if (sourceElement && sourceParent) {
             sourceParent.remove(sourceElement);
         }
+
+        this.restoreMatrix = true;
     }
 
     registerInsert(parent, element, index, mode = ChangeMode.Model) {
@@ -269,6 +271,8 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
             let clone = element.mirrorClone();
             sourceParent.insert(clone, index);
         }
+
+        this.restoreMatrix = true;
     }
 
     registerChangePosition(parent, element, index, oldIndex, mode = ChangeMode.Model) {

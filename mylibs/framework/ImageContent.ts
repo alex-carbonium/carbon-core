@@ -83,6 +83,9 @@ export default class ImageContent extends UIElement{
     selectionFrameType(){
         return ContentFrameType;
     }
+    canDrag() {
+        return true;
+    }
     canRotate(){
         return false;
     }
@@ -91,6 +94,11 @@ export default class ImageContent extends UIElement{
     }
     showResizeHint(){
         return false;
+    }
+
+    click(event: IMouseEventData) {
+        //to avoid selection being reset when clicking on content
+        event.handled = true;
     }
 }
 

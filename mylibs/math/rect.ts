@@ -1,7 +1,7 @@
 import Point from "./point";
 import LineSegment from "./lineSegment";
 import { isRectInRect, isPointInRect, areRectsIntersecting } from "./math";
-import { IRect, ICoordinate, OriginType, IPooledObject, IRectData } from "carbon-core";
+import { IRect, ICoordinate, Origin, IPooledObject, IRectData } from "carbon-core";
 import ObjectPool from "../framework/ObjectPool";
 import { PooledPair } from "../framework/PooledPair";
 
@@ -60,14 +60,10 @@ export default class Rect implements IRect, IPooledObject {
     }
 
     roundMutable() {
-        let l = Math.round(this.x);
-        let r = Math.round(this.x + this.width);
-        let t = Math.round(this.y);
-        let b = Math.round(this.y + this.height);
-        this.x = l;
-        this.y = t;
-        this.width = r - l;
-        this.height = b - t;
+        this.x = Math.round(this.x);
+        this.y = Math.round(this.y);
+        this.width = Math.round(this.width);
+        this.height = Math.round(this.height);
         return this;
     }
 
@@ -150,11 +146,11 @@ export default class Rect implements IRect, IPooledObject {
         return this.y + this.height / 2;
     }
 
-    origin(origin: OriginType): Readonly<Point> {
+    origin(origin: Origin): Readonly<Point> {
         switch (origin) {
-            case OriginType.Center:
+            case Origin.Center:
                 return this.center();
-            case OriginType.TopLeft:
+            case Origin.TopLeft:
                 return this.topLeft();
         }
         throw new Error("wrong origin " + origin);

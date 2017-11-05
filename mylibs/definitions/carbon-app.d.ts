@@ -1,6 +1,6 @@
 declare module "carbon-app" {
     import { IDataNode, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IIsolatable, IMouseEventHandler, IContainerProps, PropDescriptor } from "carbon-model";
-    import { IEvent, IEventData, IEvent2, IMouseEventData, KeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable, IJsonNode, IPrimitive, ArtboardType, FontStyle, FontWeight } from "carbon-basics";
+    import { IEvent, IEventData, IEvent2, IMouseEventData, KeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable, IJsonNode, IPrimitive, ArtboardType, FontStyle, FontWeight, ChangeMode } from "carbon-basics";
     import { IRect, ICoordinate, ISize } from "carbon-geometry";
     import { IContext, IContextPool, RenderEnvironment, RenderFlags } from "carbon-rendering";
 
@@ -154,7 +154,7 @@ declare module "carbon-app" {
         activate();
         deactivate();
 
-        dropElement(element);
+        dropElement(element: IUIElement, mode?: ChangeMode);
 
         getElementsInRect(rect: IRect) : IUIElement[];
 
@@ -174,7 +174,7 @@ declare module "carbon-app" {
         getAllArtboards(): IArtboard[];
         getActiveArtboard(): IArtboard;
         getArtboardAtPoint(point: ICoordinate): IArtboard;
-        setActiveArtboard(artboard: IArtboard): void;
+        setActiveArtboard(artboard: IArtboard, doNotTrack?: boolean): void;
         setActiveArtboardById(id: string): void;
 
         saveWorkspaceState(): any;
@@ -189,9 +189,16 @@ declare module "carbon-app" {
         activated(): void;
 
         insertArtboards(artboards: IArtboard[]);
+
+        readonly nameProvider: INameProvider;
     }
 
     export const Page: IConstructor<IPage>;
+
+    export interface INameProvider {
+        assignNewName(element: IUIElement, separator?: string);
+        createNewName(elementName: string, separator?: string);
+    }
 
     export type SymbolGroup = { id: string, name: string };
 
@@ -334,7 +341,7 @@ declare module "carbon-app" {
         isDragging(): boolean;
 
         choosePasteLocation(elements: IUIElement[], allowMoveIn?: boolean): {parent: IContainer, x: number, y: number}
-        insertAndSelect(element: IUIElement[], parent: IContainer, x: number, y: number);
+        insertAndSelect(element: IUIElement[], parent: IContainer);
         getCurrentDropTarget(eventData: IMouseEventData): IContainer | IComposite | null;
 
         currentTool: WorkspaceTool;

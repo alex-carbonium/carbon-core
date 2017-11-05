@@ -1115,7 +1115,7 @@ class AppClass extends DataNode implements IApp {
         if (view) {
             view.setActivePage(page);
             //view.resize(page.viewportRect());
-            view.zoom(page.scale(), true);
+            view.zoom(page.pageScale(), true);
         }
 
         page.activated(oldPage);

@@ -4,7 +4,7 @@ import QuadAndLock from "framework/QuadAndLock";
 import PropertyMetadata from "framework/PropertyMetadata";
 import Brush from "framework/Brush";
 import Shadow from "framework/Shadow";
-import { PointDirection, Types, StrokePosition, FrameCursors } from "framework/Defs";
+import { PointDirection, Types, FrameCursors } from "framework/Defs";
 import nearestPoint from "math/NearestPoint";
 import commandManager from "framework/commands/CommandManager";
 import Path from "framework/Path";
@@ -12,7 +12,7 @@ import UIElement from "framework/UIElement";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import Point from "../math/point";
-import { ResizeDimension, ChangeMode, InteractionType, IMouseEventData, RenderEnvironment } from "carbon-core";
+import { ResizeDimension, ChangeMode, InteractionType, IMouseEventData, RenderEnvironment, StrokePosition } from "carbon-core";
 import Rect from "../math/rect";
 import TransformationHelper from "../framework/interactions/TransformationHelper";
 
