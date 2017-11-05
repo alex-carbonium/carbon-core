@@ -17,16 +17,14 @@ import Environment from "environment";
 import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
-import { ChangeMode, PatchType, IPrimitiveRoot, LayerType, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext, IContainer, WorkspaceTool, IMouseEventData, RenderEnvironment, RenderFlags } from "carbon-core";
+import { ChangeMode, PatchType, IPrimitiveRoot, LayerType, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext, IContainer, WorkspaceTool, IMouseEventData, RenderEnvironment, RenderFlags, UIElementFlags } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
 import Rect from "../math/rect";
 import CoreIntl from "../CoreIntl";
 import { createUUID } from "../util";
+import Canvas from "../ui/common/Canvas";
+import { IconsetCell } from "./IconsetCell";
 
-
-//TODO: fix name of artboard on zoom
-//TODO: measure artboard rendering time
-//TODO: cache artboard to inmemorty canvas
 
 // TODO: artboard states
 // 9. Duplicate artboard should duplicate all state boards
@@ -34,7 +32,7 @@ import { createUUID } from "../util";
 // 12. property override on viewer
 // cleanup empty states
 
-
+const IconCellsMargin = 1;
 class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiveRoot, IIsolatable {
     constructor() {
         super();
@@ -132,7 +130,19 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return super.minHeight() || 1;
     }
 
+    resizeDimensions(value?) {
+        if (this.props.type === ArtboardType.IconSet) {
+            return 0;
+        }
+
+        return super.resizeDimensions(value);
+    }
+
     canAccept(elements: UIElement[], autoInsert, allowMoveIn) {
+        if (this.props.type === ArtboardType.IconSet) {
+            return false;
+        }
+
         for (let i = 0; i < elements.length; ++i) {
             let element = elements[i];
             if (element instanceof Artboard) {
@@ -387,6 +397,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             this.onBackgroundDrawn && this.onBackgroundDrawn(this, context);
         }
     }
+
     strokeBorder(context, w, h, environment: RenderEnvironment) {
         if (environment.flags & RenderFlags.ArtboardFill) {
             super.strokeBorder(context, w, h, environment);
@@ -394,7 +405,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     drawSelf(context: IContext, w, h, environment: RenderEnvironment) {
-        if(this._drawing) {
+        if (this._drawing) {
             return;
         }
         this._drawing = true;
@@ -419,7 +430,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         this.onContentDrawn && this.onContentDrawn(this, context);
 
 
-        if(!frame || !(environment.flags & RenderFlags.ShowFrames)) {
+        if (!frame || !(environment.flags & RenderFlags.ShowFrames)) {
             this.drawFrameRect(context, environment);
         }
 
@@ -470,6 +481,24 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return res;
     }
 
+    _addIconCell(i/*col*/, j/*row*/, cols, rows, size, margin) {
+        let cell = new IconsetCell();
+        cell.setProps({
+            br: new Rect(0, 0, size, size)
+        });
+
+        let p = Point.allocate(i * (size + margin), j * (size + margin));
+        cell.applyTranslation(p);
+        p.free();
+        cell.name(`Icon(${i},${j})`);
+        cell.addFlags(UIElementFlags.Icon);
+        this.insert(cell, j * cols + i);
+
+        cell.runtimeProps.ctxl = this.runtimeProps.ctxl;
+
+        return cell;
+    }
+
     propsUpdated(props: Partial<IArtboardProps>, oldProps: Partial<IArtboardProps>, mode: ChangeMode) {
         super.propsUpdated.apply(this, arguments);
 
@@ -499,20 +528,34 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             this._refreshMetadata();
         }
 
-        if (oldProps.type !== props.type && props.type !== ArtboardType.Regular) {
-            if (Selection.isOnlyElementSelected(this)) {
-                Selection.refreshSelection();
-            }
-
-            if (parent !== NullContainer) {
-                if (props.type === ArtboardType.Symbol && !parent.props.symbolGroups.length) {
-                    parent.patchProps(PatchType.Insert, "symbolGroups", { id: "default", name: CoreIntl.label("@page.defaultSymbolGroup") });
+        if (oldProps.type !== props.type) {
+            if (props.type === ArtboardType.Regular) {
+                if (oldProps.type === ArtboardType.IconSet) {
+                    this._restoreFromIconset();
                 }
-                this.enablePropsTracking();
-                parent.enablePropsTracking();
-            }
+            } else {
+                if (Selection.isOnlyElementSelected(this)) {
+                    Selection.refreshSelection();
+                }
 
-            App.Current.resourceAdded.raise(props.type, this);
+                if (parent !== NullContainer) {
+                    if (props.type === ArtboardType.Symbol && !parent.props.symbolGroups.length) {
+                        parent.patchProps(PatchType.Insert, "symbolGroups", { id: "default", name: CoreIntl.label("@page.defaultSymbolGroup") });
+                    }
+                    else if (props.type === ArtboardType.IconSet) {
+                        this._convertToIconset();
+                    }
+
+                    this.enablePropsTracking();
+                    parent.enablePropsTracking();
+                }
+
+                App.Current.resourceAdded.raise(props.type, this);
+            }
+        }
+
+        if (props.rowsCount || props.colsCount || props.iconCellSize) {
+            this._rearrangeIcons(props, oldProps);
         }
 
         if (props.frame === null) {
@@ -527,6 +570,130 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
                 this.suck();
             }
         }
+    }
+
+    _convertToIconset() {
+        let iconCellSize = 32;// TODO: get form prop
+        let rowsCount = 0 | this.height() / iconCellSize;
+        let colsCount = 0 | this.width() / iconCellSize;
+        let margin = IconCellsMargin;
+
+        var children = this.children.slice();
+
+        if (rowsCount * colsCount < children.length) {
+            rowsCount = 0 | children.length / colsCount;
+            if (rowsCount * colsCount < children.length) {
+                rowsCount++;
+            }
+        }
+
+        for (let i = 0; i < children.length; ++i) {
+            let child = children[i];
+            iconCellSize = Math.max(iconCellSize, child.width() + 2, child.height() + 2);
+            this.remove(child);
+        }
+
+        let item = 0;
+        for (let j = 0; j < rowsCount; ++j) {
+            for (let i = 0; i < colsCount; ++i) {
+                let cell = this._addIconCell(i, j, colsCount, rowsCount, iconCellSize, margin);
+
+                if (item < children.length) {
+                    let child = children[item];
+                    let rect = child.boundaryRect();
+                    child.setTransform(Matrix.createTranslationMatrix(0 | (iconCellSize - rect.width) / 2 - rect.x, 0 | (iconCellSize - rect.height) / 2 - rect.y));
+                    cell.add(child);
+                    item++;
+                }
+            }
+        }
+
+        this.setProps({
+            rowsCount: rowsCount,
+            colsCount: colsCount,
+            iconCellSize: iconCellSize,
+            width: colsCount * (iconCellSize + margin) - margin,
+            height: rowsCount * (iconCellSize + margin) - margin,
+            fill: Brush.createFromColor('rgba(150,150,150,0.2)')
+        });
+
+        this.clearRenderingCache();
+    }
+
+    _rearrangeIcons(props, oldProps) {
+        let margin = IconCellsMargin;
+        let rows = props.rowsCount || this.props.rowsCount;
+        let oldRows = oldProps.rowsCount || this.props.rowsCount;
+        let cols = props.colsCount || this.props.colsCount;
+        let oldCols = oldProps.colsCount || this.props.colsCount;
+        let size = props.iconCellSize || this.props.iconCellSize;
+        let oldSize = oldProps.iconCellSize || this.props.iconCellSize;
+
+        if(rows === oldRows && cols === oldCols && size === oldSize) {
+            return;
+        }
+
+        if (rows < oldRows) {
+            for (let i = oldRows - 1; i >= rows; --i) {
+                for (let j = oldCols - 1; j >= 0; --j) {
+                    let index = i * oldCols + j;
+                    let cell = this.children[index];
+                    this.remove(cell);
+                }
+            }
+        }
+
+        if (cols < oldCols) {
+            for (let j = Math.min(oldRows, rows) - 1; j >= 0; --j) {
+                for (let i = oldCols - 1; i >= cols; --i) {
+                    let index = j * oldCols + i;
+                    let cell = this.children[index];
+                    this.remove(cell);
+                }
+            }
+        }
+
+        if(size !== oldSize) {
+            var c = Math.min(cols, oldCols);
+            for (var i = 0; i < c; ++i) {
+                for (var j = 0; j < Math.min(rows, oldRows); ++j) {
+                    let index = j * c + i;
+                    let child = this.children[index];
+                    child.setProps({
+                        width:size,
+                        height:size,
+                        m:Matrix.createTranslationMatrix(i * (size + margin), j * (size + margin))
+                    })
+                }
+            }
+        }
+
+        if (cols > oldCols) {
+            for (let j = 0; j < Math.min(rows, oldRows); ++j) {
+                for (let i = oldCols; i < cols; ++i) {
+                    this._addIconCell(i, j, cols, rows, size, margin);
+                }
+            }
+        }
+
+        if (rows > oldRows) {
+            for (let j = oldRows; j < rows; ++j) {
+                for (let i = 0; i < cols; ++i) {
+                    this._addIconCell(i, j, oldCols, rows, size, margin);
+                }
+            }
+        }
+
+        this.setProps({
+            width: (size + margin) * cols - margin,
+            height: (size + margin) * rows - margin
+        })
+
+        this.clearRenderingCache();
+    }
+
+    _restoreFromIconset() {
+
     }
 
     getHitTestBox() {
@@ -606,7 +773,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             return;
         }
         let elementBox = changedElement.getBoundingBoxGlobal();
-        if(!elementBox.isValid()) {
+        if (!elementBox.isValid()) {
             return;
         }
         let artboardGlobalBox = this.getBoundingBoxGlobal();
@@ -651,7 +818,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     spit() {
         let artboardBox = this.getBoundingBoxGlobal();
         let parent = this.parent() as Container;
-        for (let i = this.children.length - 1; i >= 0; --i){
+        for (let i = this.children.length - 1; i >= 0; --i) {
             let child = this.children[i];
             let childBox = child.getBoundingBoxGlobal();
             if (!areRectsIntersecting(artboardBox, childBox)) {
@@ -662,7 +829,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     suck() {
         let artboardBox = this.getBoundingBoxGlobal();
         let parent = this.parent() as IContainer;
-        for (let i = 0; i < parent.children.length; ++i){
+        for (let i = 0; i < parent.children.length; ++i) {
             let child = parent.children[i];
             if (child instanceof Artboard) {
                 continue;
@@ -1113,13 +1280,13 @@ PropertyMetadata.registerForType(Artboard, {
         displayName: "Allow horizontal resize",
         type: "checkbox",
         useInModel: true,
-        defaultValue:true
+        defaultValue: true
     },
     allowVerticalResize: {
         displayName: "Allow vertical resize",
         type: "checkbox",
         useInModel: true,
-        defaultValue:true
+        defaultValue: true
     },
     states: {
         displayName: "States",
@@ -1154,6 +1321,18 @@ PropertyMetadata.registerForType(Artboard, {
         type: "symbolGroup",
         defaultValue: "default"
     },
+    rowsCount: {
+        displayName: "@rowsCount",
+        type: 'numeric'
+    },
+    colsCount: {
+        displayName: "@colsCount",
+        type: 'numeric'
+    },
+    iconCellSize: {
+        displayName: "@iconCellSize",
+        type: 'numeric'
+    },
     frame: {
         displayName: "@frame",
         type: "dropdown",
@@ -1180,13 +1359,18 @@ PropertyMetadata.registerForType(Artboard, {
     },
     prepareVisibility(element: Artboard) {
         let showAsStencil = element.props.type === ArtboardType.Symbol;
+        let showAsIconset = element.props.type === ArtboardType.IconSet;
         return {
             stroke: false,
             tileSize: showAsStencil,
             insertAsContent: showAsStencil && element.children.length === 1,
             symbolGroup: showAsStencil,
             allowVerticalResize: showAsStencil,
-            allowHorizontalResize: showAsStencil
+            allowHorizontalResize: showAsStencil,
+            rowsCount: showAsIconset,
+            colsCount: showAsIconset,
+            iconCellSize: showAsIconset,
+            states: !showAsIconset
         }
     },
     groups: function () {
@@ -1208,7 +1392,7 @@ PropertyMetadata.registerForType(Artboard, {
             },
             {
                 label: "@advanced",
-                properties: ["type", "tileSize", "symbolGroup", "insertAsContent", "allowHorizontalResize", "allowVerticalResize"],
+                properties: ["type", "tileSize", "symbolGroup", "insertAsContent", "allowHorizontalResize", "allowVerticalResize", "rowsCount", "colsCount", "iconCellSize"],
                 expanded: true
             }
             // ,{

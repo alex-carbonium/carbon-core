@@ -45,7 +45,7 @@ export default class ImageSourceHelper {
 
         let width = context.measureText(text).width + .5 | 0;
         if (width > w) {
-            fontSize *= (w - 8)/width;
+            fontSize *= (w - 8) / width;
             if (fontSize > 4) {
                 context.font = (fontSize | 0) + "px Arial";
                 width = context.measureText(text).width + .5 | 0;
@@ -55,7 +55,7 @@ export default class ImageSourceHelper {
         if (fontSize > 4) {
             context.fillStyle = UserSettings.image.emptyTextFill;
             context.textBaseline = "middle";
-            context.fillText(text, w/2 - width/2 + .5 | 0, h/2 + .5 | 0);
+            context.fillText(text, w / 2 - width / 2 + .5 | 0, h / 2 + .5 | 0);
         }
 
         context.restore();
@@ -107,6 +107,11 @@ export default class ImageSourceHelper {
                     return null;
                 }
                 return ImageSourceHelper.getUrlImageRect(runtimeProps);
+            case ImageSourceType.Element:
+                if (!runtimeProps || !runtimeProps.element) {
+                    return null;
+                }
+                return runtimeProps.element.boundaryRect();
             default:
                 return null;
         }
@@ -172,6 +177,14 @@ export default class ImageSourceHelper {
         var box = element.getBoundingBox();
         var scaleX = w / box.width;
         var scaleY = h / box.height;
+        // if(runtimeProps.sr && runtimeProps.dr) {
+        //     scaleX = runtimeProps.dr.width / runtimeProps.sr.width;
+        //     scaleY = runtimeProps.dr.height / runtimeProps.sr.height;
+        // }
+
+        // if(runtimeProps.dr) {
+        //     context.translate(runtimeProps.dr.x, runtimeProps.dr.y);
+        // }
 
         context.scale(scaleX, scaleY);
 
@@ -182,6 +195,8 @@ export default class ImageSourceHelper {
             context.translate(-box.x, -box.y);
             element.parent().globalViewMatrixInverted().applyToContext(context);
         }
+
+
 
         let originalCtxl = element.runtimeProps.ctxl;
         let originalFlags = environment.flags;
@@ -205,46 +220,45 @@ export default class ImageSourceHelper {
         context.restore();
     }
 
-    private static resizeUrlImage(sizing: ContentSizing, newRect, runtimeProps) {
-        if (runtimeProps.image) {
-            switch (sizing) {
-                case ContentSizing.original:
-                    runtimeProps.sr = runtimeProps.dr = newRect;
-                    return;
-                case ContentSizing.fit:
-                    runtimeProps.sr = ImageSourceHelper.getUrlImageRect(runtimeProps);
-                    runtimeProps.dr = runtimeProps.sr.fit(newRect);
-                    return;
-                case ContentSizing.fill:
-                    runtimeProps.sr = ImageSourceHelper.getUrlImageRect(runtimeProps);
-                    runtimeProps.dr = runtimeProps.sr.fill(newRect);
-                    return;
-                case ContentSizing.center:
-                    const fsr = ImageSourceHelper.getUrlImageRect(runtimeProps);
-                    const sw = Math.min(fsr.width, newRect.width);
-                    const sh = Math.min(fsr.height, newRect.height);
+    private static resizeImage(sizing: ContentSizing, newRect, runtimeProps, sourceRect) {
+        switch (sizing) {
+            case ContentSizing.original:
+                runtimeProps.sr = runtimeProps.dr = newRect;
+                return;
+            case ContentSizing.fit:
+                runtimeProps.sr = sourceRect;
+                runtimeProps.dr = runtimeProps.sr.fit(newRect);
+                return;
+            case ContentSizing.fill:
+                runtimeProps.sr = sourceRect;
+                runtimeProps.dr = runtimeProps.sr.fill(newRect);
+                return;
+            case ContentSizing.center:
+                const fsr = sourceRect;
+                const sw = Math.min(fsr.width, newRect.width);
+                const sh = Math.min(fsr.height, newRect.height);
 
-                    runtimeProps.sr = {
-                        x: Math.abs(Math.min((newRect.width - fsr.width) / 2 + .5 | 0, 0)),
-                        y: Math.abs(Math.min((newRect.height - fsr.height) / 2 + .5 | 0, 0)),
-                        width: sw, height: sh
-                    };
-                    runtimeProps.dr = {
-                        x: Math.max((newRect.width - fsr.width) / 2 + .5 | 0, 0),
-                        y: Math.max((newRect.height - fsr.height) / 2 + .5 | 0, 0),
-                        width: sw, height: sh
-                    };
-                    return;
-                case ContentSizing.stretch:
-                    runtimeProps.sr = ImageSourceHelper.getUrlImageRect(runtimeProps);
-                    runtimeProps.dr = newRect;
-                    return;
-                case ContentSizing.fixed:
-                    return;
-            }
-            assertNever(sizing);
+                runtimeProps.sr = {
+                    x: Math.abs(Math.min((newRect.width - fsr.width) / 2 + .5 | 0, 0)),
+                    y: Math.abs(Math.min((newRect.height - fsr.height) / 2 + .5 | 0, 0)),
+                    width: sw, height: sh
+                };
+                runtimeProps.dr = {
+                    x: Math.max((newRect.width - fsr.width) / 2 + .5 | 0, 0),
+                    y: Math.max((newRect.height - fsr.height) / 2 + .5 | 0, 0),
+                    width: sw, height: sh
+                };
+                return;
+            case ContentSizing.stretch:
+                runtimeProps.sr = sourceRect;
+                runtimeProps.dr = newRect;
+                return;
+            case ContentSizing.fixed:
+                return;
         }
+        assertNever(sizing);
     }
+
     private static getUrlImageRect(runtimeProps) {
         return new Rect(0, 0, runtimeProps.image.width, runtimeProps.image.height);
     }
@@ -326,7 +340,11 @@ export default class ImageSourceHelper {
 
     static resize(source, sizing, newRect, runtimeProps) {
         if (runtimeProps) {
-            ImageSourceHelper.resizeUrlImage(sizing, newRect, runtimeProps); //only one supported for now
+            if (runtimeProps.image) {
+                ImageSourceHelper.resizeImage(sizing, newRect, runtimeProps, ImageSourceHelper.getUrlImageRect(runtimeProps)); //only one supported for now
+            } else if (runtimeProps.element) {
+                ImageSourceHelper.resizeImage(sizing, newRect, runtimeProps, runtimeProps.element.boundaryRect()); //only one supported for now
+            }
         }
     }
 
@@ -349,7 +367,7 @@ export default class ImageSourceHelper {
         if (!source) {
             return false;
         }
-        return source.type === ImageSourceType.Url || source.type === ImageSourceType.Element;
+        return source.type === ImageSourceType.Url;
     };
 
     static isFillSupported(source) {

@@ -26,20 +26,20 @@ export default class ResourceActions extends CarbonExtension {
                 callback: this.removeFromPalette,
                 condition: selection =>selection.elements.length && selection.elements.some(x => x.hasFlags(UIElementFlags.PaletteItem))
             },
-            {
-                id: "iconset.addItem",
-                name: "@resources.markAsIcon",
-                callback: this.markAsIconItem,
-                condition: selection => ResourceActions.isInIconSet(selection) &&
-                            selection.elements.length &&
-                            selection.elements.every(x => !x.hasFlags(UIElementFlags.Icon))
-            },
-            {
-                id: "iconset.removeItem",
-                name: "@resources.removeFromIconSet",
-                callback: this.removeFromIcon,
-                condition: selection =>selection.elements.length && selection.elements.some(x => x.hasFlags(UIElementFlags.Icon))
-            }
+            // {
+            //     id: "iconset.addItem",
+            //     name: "@resources.markAsIcon",
+            //     callback: this.markAsIconItem,
+            //     condition: selection => ResourceActions.isInIconSet(selection) &&
+            //                 selection.elements.length &&
+            //                 selection.elements.every(x => !x.hasFlags(UIElementFlags.Icon))
+            // },
+            // {
+            //     id: "iconset.removeItem",
+            //     name: "@resources.removeFromIconSet",
+            //     callback: this.removeFromIcon,
+            //     condition: selection =>selection.elements.length && selection.elements.some(x => x.hasFlags(UIElementFlags.Icon))
+            // }
         ]);
 
         contributions.addContextMenuGroup(
@@ -51,14 +51,14 @@ export default class ResourceActions extends CarbonExtension {
             ContextBarPosition.Right
         );
 
-        contributions.addContextMenuGroup(
-            "@iconset",
-            [
-                "iconset.addItem",
-                "iconset.removeItem"
-            ],
-            ContextBarPosition.Right
-        );
+        // contributions.addContextMenuGroup(
+        //     "@iconset",
+        //     [
+        //         "iconset.addItem",
+        //         "iconset.removeItem"
+        //     ],
+        //     ContextBarPosition.Right
+        // );
 
         // contributions.addShortcuts({
         //     windows: [
@@ -108,19 +108,19 @@ export default class ResourceActions extends CarbonExtension {
         }
     }
 
-    markAsIconItem = (selection: ISelection) => {
-        var newSelection: string[] = [];
+    // markAsIconItem = (selection: ISelection) => {
+    //     var newSelection: string[] = [];
 
-        for (var element of selection.elements) {
-            element.addFlags(UIElementFlags.Icon);
-        }
-    }
+    //     for (var element of selection.elements) {
+    //         element.addFlags(UIElementFlags.Icon);
+    //     }
+    // }
 
-    removeFromIcon = (selection: ISelection) => {
-        var newSelection: string[] = [];
+    // removeFromIcon = (selection: ISelection) => {
+    //     var newSelection: string[] = [];
 
-        for (var element of selection.elements) {
-            element.removeFlags(UIElementFlags.Icon);
-        }
-    }
+    //     for (var element of selection.elements) {
+    //         element.removeFlags(UIElementFlags.Icon);
+    //     }
+    // }
 }
