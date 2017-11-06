@@ -1,5 +1,4 @@
 import backend from "../backend";
-import Primitive from "../framework/sync/Primitive";
 import RelayoutQueue from "../framework/relayout/RelayoutQueue";
 import Invalidate from "../framework/Invalidate";
 import Selection from "../framework/SelectionModel";
@@ -7,6 +6,7 @@ import UIElement from "../framework/UIElement";
 import logger from "../logger";
 import { createUUID, deepEquals } from "../util";
 import { IApp, ChangeMode } from "carbon-core";
+import { primitiveFactory } from "../framework/sync/PrimitiveFactory";
 
 var debug = require("../DebugUtil")("carb:modelSync");
 
@@ -111,7 +111,7 @@ export default class ModelSyncProxy {
         }
         var primitives;
         if (primitivesStrings.length === 0){
-            primitives = [Primitive.no_op()];
+            primitives = [primitiveFactory.no_op()];
         }
         else {
             primitives = primitivesStrings.map(JSON.parse);
@@ -235,7 +235,7 @@ export default class ModelSyncProxy {
 
     _registerLocal(p){
         this._locals.push(p);
-        var i = Primitive.speculativeIndexOf(this._externals, p);
+        var i = primitiveFactory.speculativeIndexOf(this._externals, p);
         if (i !== -1){
             this._externals[i] = null;
         }
@@ -243,7 +243,7 @@ export default class ModelSyncProxy {
     _registerExternal(p){
         var ownSession = p.sessionId === backend.sessionId;
         if (!ownSession){
-            if (Primitive.speculativeIndexOf(this._locals, p) === -1){
+            if (primitiveFactory.speculativeIndexOf(this._locals, p) === -1){
                 if (DEBUG){
                     debug("Will apply primitives from %s session:", ownSession ? "OWN" : "other");
                 }

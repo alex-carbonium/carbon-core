@@ -227,21 +227,22 @@ declare module "carbon-basics" {
         ProjectSettingsChange = 100
     }
 
-    export interface IPrimitive {
-        type: PrimitiveType;
+    interface IPrimitive {
         path: string[];
         sessionId: string;
 
         id: string;
         time: number;
 
-        _rollbackData?: PrimitiveKind;
+        _rollbackData?: Primitive;
     }
 
-    export type PrimitiveKind =
+    export type SetPropsPrimitive = IPrimitive & { type: PrimitiveType.DataNodeSetProps, props: object };
+
+    export type Primitive =
         IPrimitive & { type: PrimitiveType.DataNodeAdd, node: IJsonNode, index: number } |
         IPrimitive & { type: PrimitiveType.DataNodeRemove, childId: string } |
-        IPrimitive & { type: PrimitiveType.DataNodeSetProps, props: object } |
+        SetPropsPrimitive |
         IPrimitive & { type: PrimitiveType.DataNodePatchProps, patchType: PatchType, propName: string, item: object } |
         IPrimitive & { type: PrimitiveType.DataNodeChange, node: IJsonNode } |
         IPrimitive & { type: PrimitiveType.DataNodeChangePosition, childId: string, newPosition: number } |
@@ -251,7 +252,7 @@ declare module "carbon-basics" {
         IPrimitive & { type: PrimitiveType.ProjectSettingsChange, companyId: string, projectId: string, settings: AppSettings };
 
 
-    export type NodePrimitivesMap = { [nodeId: string]: IPrimitive[] };
+    export type NodePrimitivesMap = { [nodeId: string]: Primitive[] };
 
     export type ViewState = {
         scale: number;

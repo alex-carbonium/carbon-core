@@ -1,6 +1,6 @@
-import Primitive from "../sync/Primitive";
 import logger from "../../logger";
 import { PatchType, IDataNode, IPrimitive, IPrimitiveRoot } from "carbon-core";
+import { primitiveFactory } from "../sync/PrimitiveFactory";
 
 let lastSelection = {};
 
@@ -43,7 +43,7 @@ class ModelStateListener {
         }
         this.touchRoot(primitiveRoot.primitiveRootKey());
 
-        let primitive = Primitive.dataNodeSetProps(element, props, oldProps);
+        let primitive = primitiveFactory.dataNodeSetProps(element, props, oldProps);
         this.primitives.push(primitive);
 
         let elementId = element.id();
@@ -79,7 +79,7 @@ class ModelStateListener {
         }
         this.touchRoot(primitiveRoot.primitiveRootKey());
 
-        this.primitives.push(Primitive.dataNodeRemove(parent, element, index));
+        this.primitives.push(primitiveFactory.dataNodeRemove(parent, element, index));
 
         this._markForRelayout(primitiveRoot);
     }
@@ -90,7 +90,7 @@ class ModelStateListener {
         }
         this.touchRoot(primitiveRoot.primitiveRootKey());
 
-        this.primitives.push(Primitive.dataNodeAdd(parent, element, index));
+        this.primitives.push(primitiveFactory.dataNodeAdd(parent, element, index));
 
         this._markForRelayout(primitiveRoot);
     }
@@ -99,7 +99,7 @@ class ModelStateListener {
         if (this._stopCounter > 0){
             return;
         }
-        var p = Primitive.selection(page, selection, oldSelection, userId);
+        var p = primitiveFactory.selection(page, selection, oldSelection, userId);
         this.touchRoot(page.primitiveRootKey());
 
         this.primitives.push(p);
@@ -110,7 +110,7 @@ class ModelStateListener {
             return;
         }
 
-        return Primitive.view(page, newState, oldState);
+        return primitiveFactory.view(page, newState, oldState);
     }
 
     trackChangePosition(primitiveRoot, parent, element, index, oldIndex){
@@ -119,15 +119,15 @@ class ModelStateListener {
         }
         this.touchRoot(primitiveRoot.primitiveRootKey());
 
-        this.primitives.push(Primitive.dataNodeChangePosition(parent, element, index, oldIndex));
+        this.primitives.push(primitiveFactory.dataNodeChangePosition(parent, element, index, oldIndex));
     }
 
     trackPatchProps(primitiveRoot, element, patchType, propName, item){
         if (this._stopCounter > 0){
             return;
         }
-        let primitive = Primitive.dataNodePatchProps(element, patchType, propName);
-        let rollback = Primitive.dataNodePatchProps(element, 0, propName);
+        let primitive = primitiveFactory.dataNodePatchProps(element, patchType, propName);
+        let rollback = primitiveFactory.dataNodePatchProps(element, 0, propName);
         primitive._rollbackData = rollback;
 
         switch (patchType){

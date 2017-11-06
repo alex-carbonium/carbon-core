@@ -28,11 +28,13 @@ export function choosePasteLocation(elements, rootRelativeBoundingBox = null, al
     if (bufferRect){
         if (selection.length === 1){
             var current = selection[0];
+            var allowMoveInCurrent = allowMoveIn;
             do{
-                if (current.canAccept(elements, false, allowMoveIn)){
+                if (current.canAccept(elements, false, allowMoveInCurrent)){
                     candidates.push(current);
                 }
                 current = current.parent();
+                allowMoveInCurrent = true;
             } while (current);
         }
         else if (selection.length > 1 && Selection.selectComposite().canAccept(elements, false, allowMoveIn)){

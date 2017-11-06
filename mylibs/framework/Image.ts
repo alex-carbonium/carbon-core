@@ -83,7 +83,6 @@ export default class Image extends Container<IImageProps> implements IImage {
     clone() {
         var clone = super.clone();
         //to avoid loading when dragging
-        clone.resetRuntimeProps();
         clone.runtimeProps.sourceProps = Object.assign({}, this.runtimeProps.sourceProps);
         clone.runtimeProps.loaded = this.runtimeProps.loaded;
         return clone;

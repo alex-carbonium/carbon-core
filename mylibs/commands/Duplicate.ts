@@ -2,7 +2,7 @@ import Selection from "../framework/SelectionModel";
 import { ChangeMode } from "carbon-core";
 
 export default {
-    run: function (selection, changeMode = ChangeMode.Model, doNotUpdateSelection = false) {
+    run: function (selection, changeMode = ChangeMode.Model, doNotUpdateSelection = false, zOrderDiff = 1) {
         if (!selection || selection.length === 0) {
             return;
         }
@@ -16,12 +16,12 @@ export default {
             var originalParent = element.parent();
             var current = originalParent;
             var children = [clone];
-            while (!current.canAccept(children, false, current.allowRearrange())){
+            while (!current.canAccept(children, false, true)){
                 current = current.parent();
             }
 
             if (current === originalParent){
-                current.insert(clone, element.zOrder() + 1, changeMode);
+                current.insert(clone, element.zOrder() + zOrderDiff, changeMode);
             }
             else {
                 clone.setTransform(current.globalMatrixToLocal(element.globalViewMatrix()), changeMode);

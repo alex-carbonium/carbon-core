@@ -10,6 +10,7 @@ import {choosePasteLocation} from "./PasteLocator";
 import {setClipboardContent, tryGetClipboardContent} from "../utils/dom";
 import Delete from "../commands/Delete";
 import params from "../params";
+import Shape from "./Shape";
 import backend from "../backend";
 import { IApp, IMatrix } from "carbon-core";
 import { Origin } from "carbon-geometry";
@@ -20,6 +21,7 @@ class Clipboard {
     globalBoundingBoxes: Rect[];
     rootBoundingBoxes: Rect[];
     globalMatrices: IMatrix[];
+    isCutting = false;
 
     constructor(){
         this._htmlElement = null;
@@ -91,6 +93,8 @@ class Clipboard {
                     this.zOrder = zOrder;
                 }
             }
+
+            this.isCutting = false;
 
             if (e){
                 //clearing real clipboard does not work, so setting empty text
@@ -185,11 +189,11 @@ class Clipboard {
         }
 
         if (bufferElements){
-            var rootRelativeBoundingBox = rootBoundingBoxes ? combineRectArray(rootBoundingBoxes) : null;
+            var rootRelativeBoundingBox = rootBoundingBoxes && !this.isCutting ? combineRectArray(rootBoundingBoxes) : null;
             var globalBoundingBox = combineRectArray(globalBoundingBoxes);
             var location = choosePasteLocation(bufferElements, rootRelativeBoundingBox, this.pastingContent);
             if (location){
-                Selection.makeSelection([]);
+                Selection.clearSelection();
                 for (var i = 0; i < bufferElements.length; i++){
                     var element = bufferElements[i];
 
@@ -209,7 +213,7 @@ class Clipboard {
                 }
 
                 var newSelection;
-                if (this.pastingContent && location.parent.canSelect()){
+                if (this.pastingContent && location.parent.canSelect() && location.parent instanceof Shape){
                     newSelection = [location.parent];
                 }
                 else{
@@ -241,6 +245,7 @@ class Clipboard {
         }
         else {
             Delete.run(Selection.selectedElements());
+            this.isCutting = true;
         }
     };
 

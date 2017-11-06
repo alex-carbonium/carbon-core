@@ -1,13 +1,13 @@
 import RelayoutQueue from "../relayout/RelayoutQueue";
 import Environment from "../../environment";
-import { IPrimitive, PrimitiveType, ViewState, ICommand, IRect, LayerType } from "carbon-core";
+import { IPrimitive, PrimitiveType, ViewState, ICommand, IRect, LayerType, Primitive } from "carbon-core";
 import { createUUID } from "../../util";
 import Rect from "../../math/rect";
 
 export default class PrimitiveCommand implements ICommand {
     constructor(
-        public primitives: IPrimitive[],
-        public rollbacks: IPrimitive[],
+        public primitives: Primitive[],
+        public rollbacks: Primitive[],
         public pageId,
         public commandRect: IRect,
         public isolation: boolean

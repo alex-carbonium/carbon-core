@@ -18,7 +18,7 @@ import CommandManager from "framework/commands/CommandManager";
 import NullPage from "framework/NullPage";
 import ModelStateListener from "framework/relayout/ModelStateListener";
 import RelayoutQueue from "./framework/relayout/RelayoutQueue";
-import PrimitiveHandler from "framework/sync/Primitive_Handlers";
+import PrimitiveHandler from "framework/sync/PrimitiveHandlers";
 import { createUUID } from "./util";
 import DesignerController from "framework/DesignerController";
 import Selection from "framework/SelectionModel";
@@ -40,14 +40,14 @@ import backend from "./backend";
 import logger from "./logger";
 import params from "./params";
 import ArtboardFrame from "framework/ArtboardFrame";
-import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitive, IPrimitiveRoot, ViewState, IJsonNode, IFontManager, IStyleManager, StyleType, IArtboard, FontMetadata, AppSettings } from "carbon-core";
+import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitiveRoot, ViewState, IJsonNode, IFontManager, IStyleManager, StyleType, IArtboard, FontMetadata, AppSettings, Primitive } from "carbon-core";
 import { Contributions } from "./extensions/Contributions";
 import { getBuiltInExtensions } from "./extensions/BuiltInExtensions";
-import Primitive from "./framework/sync/Primitive";
 import UIElement from "./framework/UIElement";
 import RelayoutEngine from "./framework/relayout/RelayoutEngine";
 import NullContainer from "framework/NullContainer";
 import {deepEquals} from "util";
+import { primitiveFactory } from "./framework/sync/PrimitiveFactory";
 
 if (DEBUG) {
     window['env'] = Environment;
@@ -98,8 +98,8 @@ class AppClass extends DataNode implements IApp {
     styleManager: IStyleManager;
 
     onBuildMenu: any;
-    changed: IEvent<IPrimitive[]>;
-    changedLocally: IEvent<IPrimitive[]>;
+    changed: IEvent<Primitive[]>;
+    changedLocally: IEvent<Primitive[]>;
     settingsChanged = EventHelper.createEvent<AppSettings>();
 
     updating = EventHelper.createEvent<void>();
@@ -347,7 +347,7 @@ class AppClass extends DataNode implements IApp {
             };
 
             if (mode !== ChangeMode.Self) {
-                let primitive = Primitive.projectSettingsChange(this.companyId(), this.id(), settings);
+                let primitive = primitiveFactory.projectSettingsChange(this.companyId(), this.id(), settings);
                 ModelStateListener.track(this, primitive);
                 Invalidate.request();
             }
@@ -1214,13 +1214,13 @@ class AppClass extends DataNode implements IApp {
         for (let i = 0; i < pageJson.children.length; i++) {
             let elementJson = pageJson.children[i];
             let element = existingPage.children.find(x => x.id() === elementJson.props.id);
-            let primitive: IPrimitive;
+            let primitive: Primitive;
             if (element) {
-                primitive = Primitive.dataNodeChange(element, element.toJSON());
+                primitive = primitiveFactory.dataNodeChange(element, element.toJSON());
             }
             else {
                 element = ObjectFactory.fromJSON(elementJson);
-                primitive = Primitive.dataNodeAdd(existingPage, element, existingPage.children.length + elementsAdded++);
+                primitive = primitiveFactory.dataNodeAdd(existingPage, element, existingPage.children.length + elementsAdded++);
             }
             RelayoutQueue.enqueue(primitive);
         }
