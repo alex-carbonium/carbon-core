@@ -71,7 +71,6 @@ export default {
     "Shadow": require("./framework/Shadow"),
     "Constraints": require("./framework/Constraints"),
     "NullPage": require("./framework/NullPage"),
-    "Primitive": require("./framework/sync/Primitive"),
     "Shape": require("./framework/Shape"),
     "Rectangle": require("./framework/Rectangle"),
     "Circle": require("./framework/Circle"),
@@ -85,10 +84,6 @@ export default {
     "ActionManager": app.actionManager,
     "Text": require("./framework/text/Text"),
     //expose specific defs for easier conversion to consts
-    "PrimitiveType": Defs.PrimitiveType,
-    "ContextBarPosition": Defs.ContextBarPosition,
-    "PatchType": Defs.PatchType,
-    "ChangeMode": Defs.ChangeMode,
     "Types": Defs.Types,
     "Context": require("./framework/render/Context"),
     "ContextPool": require("./framework/render/ContextPool"),

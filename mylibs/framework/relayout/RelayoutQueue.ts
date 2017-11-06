@@ -1,6 +1,6 @@
 import logger from "../../logger";
 import ModelStateListener from "./ModelStateListener";
-import { IPrimitive, NodePrimitivesMap, IPrimitiveRoot, IUIElement, IDataNode } from "carbon-core";
+import { IPrimitive, NodePrimitivesMap, IPrimitiveRoot, IUIElement, IDataNode, Primitive } from "carbon-core";
 
 /**
  * Contains primitives to be procecessed during next relayout of the corresponding root.
@@ -9,7 +9,7 @@ import { IPrimitive, NodePrimitivesMap, IPrimitiveRoot, IUIElement, IDataNode } 
 class RelayoutQueue {
     private data: {[key: string]: NodePrimitivesMap} = {};
 
-    enqueue(p: IPrimitive){
+    enqueue(p: Primitive){
         var path = p.path;
         //[] -> app
         //page id, page id
@@ -48,7 +48,7 @@ class RelayoutQueue {
         return key;
     }
 
-    enqueueAll(primitives: IPrimitive[]){
+    enqueueAll(primitives: Primitive[]){
         primitives.forEach(x => this.enqueue(x));
     }
 

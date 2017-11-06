@@ -1,12 +1,11 @@
 import ObjectFactory from "../ObjectFactory";
-import Primitive from "./Primitive";
 import UIElement from "framework/UIElement";
 import Invalidate from "framework/Invalidate";
 import Selection from "framework/SelectionModel";
 import Environment from "environment";
 import AnimationGroup from "framework/animation/AnimationGroup";
 import backend from "backend";
-import { PrimitiveType, IPrimitive, IDataNode, ChangeMode } from "carbon-core";
+import { PrimitiveType, IPrimitive, IDataNode, ChangeMode, Primitive } from "carbon-core";
 import ArrayPool from "../ArrayPool";
 
 var debug = require("DebugUtil")("carb:primitiveHandlers");
@@ -42,7 +41,7 @@ class PrimitiveHandlers {
         return res;
     }
 
-    handle(element: IDataNode, primitive: IPrimitive) {
+    handle(element: IDataNode, primitive: Primitive) {
         var h = this.handlers[primitive.type];
         if (h) {
             debug('Applying %p %o', primitive, primitive);

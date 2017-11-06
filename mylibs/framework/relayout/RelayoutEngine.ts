@@ -1,7 +1,7 @@
 import RelayoutQueue from "./RelayoutQueue";
 import ModelStateListener from "./ModelStateListener";
-import PrimitiveHandler from "../sync/Primitive_Handlers";
-import { NodePrimitivesMap, IApp, IPrimitive, IPrimitiveRoot, LayerType } from "carbon-core";
+import PrimitiveHandler from "../sync/PrimitiveHandlers";
+import { NodePrimitivesMap, IApp, IPrimitive, IPrimitiveRoot, LayerType, Primitive } from "carbon-core";
 import backend from "../../backend";
 import params from "../../params";
 import CommandManager from "../commands/CommandManager";
@@ -34,10 +34,10 @@ var debug = require("DebugUtil")("carb:relayoutEngine");
  */
 class RelayoutEngine {
     private primitiveRootCache = {};
-    private localQueuedPrimitives: IPrimitive[] = [];
-    private externalQueuedPrimitives: IPrimitive[] = [];
-    private allPrimitives: IPrimitive[] = [];
-    private rollbacks: IPrimitive[] = [];
+    private localQueuedPrimitives: Primitive[] = [];
+    private externalQueuedPrimitives: Primitive[] = [];
+    private allPrimitives: Primitive[] = [];
+    private rollbacks: Primitive[] = [];
 
     relayoutFinished = EventHelper.createEvent<void>();
     rootRelayoutFinished = EventHelper.createEvent2<IPrimitiveRoot, NodePrimitivesMap>();
@@ -123,7 +123,7 @@ class RelayoutEngine {
         }
     }
 
-    private filterQueuedPrimitives(primitives: IPrimitive[]) {
+    private filterQueuedPrimitives(primitives: Primitive[]) {
         if (primitives) {
             for (let i = 0; i < primitives.length; i++) {
                 let p = primitives[i];

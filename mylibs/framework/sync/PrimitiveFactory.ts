@@ -1,9 +1,9 @@
 import DataNode from "../DataNode";
 import backend from "../../backend";
-import { PrimitiveType, IPrimitive, PrimitiveKind, IJsonNode, IDataNode, AppSettings } from "carbon-core";
+import { PrimitiveType, IPrimitive, Primitive, IJsonNode, IDataNode, AppSettings } from "carbon-core";
 import { createUUID } from "../../util";
 
-class Primitive {
+class PrimitiveFactory {
     private _externalMap = {};
     private _localMap = {};
 
@@ -56,7 +56,7 @@ class Primitive {
     }
 
     dataNodeAdd(parent: IDataNode, element: IDataNode, index: number, norollback?: boolean) {
-        var res: PrimitiveKind = {
+        var res: Primitive = {
             id: createUUID(),
             sessionId: backend.sessionId,
             time: new Date().getTime(),
@@ -74,7 +74,7 @@ class Primitive {
     }
 
     dataNodeRemove(parent: IDataNode, element: IDataNode, index: number, norollback?: boolean) {
-        var res: PrimitiveKind = {
+        var res: Primitive = {
             id: createUUID(),
             sessionId: backend.sessionId,
             time: new Date().getTime(),
@@ -91,7 +91,7 @@ class Primitive {
     }
 
     dataNodeSetProps(element, props, oldProps, norollback?) {
-        var res: PrimitiveKind = {
+        var res: Primitive = {
             id: createUUID(),
             sessionId: backend.sessionId,
             time: new Date().getTime(),
@@ -108,7 +108,7 @@ class Primitive {
     }
 
     selection(page, selection, oldSelection, userId, norollback?) {
-        var res: PrimitiveKind = {
+        var res: Primitive = {
             id: createUUID(),
             sessionId: backend.sessionId,
             time: new Date().getTime(),
@@ -127,7 +127,7 @@ class Primitive {
 
     //TODO: view primitive should store the viewport, so that it can be synchronized between clients with different screen size
     view(page, newState, oldState, norollback?) {
-        var res: PrimitiveKind = {
+        var res: Primitive = {
             id: createUUID(),
             sessionId: backend.sessionId,
             time: new Date().getTime(),
@@ -145,7 +145,7 @@ class Primitive {
     }
 
     dataNodePatchProps(element, patchType, propName) {
-        var res: PrimitiveKind = {
+        var res: Primitive = {
             id: createUUID(),
             sessionId: backend.sessionId,
             time: new Date().getTime(),
@@ -160,7 +160,7 @@ class Primitive {
     }
 
     dataNodeChange(element, oldJson, norollback?) {
-        var res: PrimitiveKind = {
+        var res: Primitive = {
             id: createUUID(),
             sessionId: backend.sessionId,
             time: new Date().getTime(),
@@ -184,7 +184,7 @@ class Primitive {
     }
 
     dataNodeChangePosition(parent, element, newPosition, oldPosition, norollback?) {
-        var res: PrimitiveKind = {
+        var res: Primitive = {
             id: createUUID(),
             sessionId: backend.sessionId,
             time: new Date().getTime(),
@@ -210,7 +210,7 @@ class Primitive {
     }
 
     projectSettingsChange(companyId: string, projectId: string, settings: AppSettings) {
-        var res: PrimitiveKind = {
+        var res: Primitive = {
             id: createUUID(),
             sessionId: backend.sessionId,
             time: new Date().getTime(),
@@ -229,4 +229,4 @@ class Primitive {
     }
 }
 
-export default new Primitive();
+export const primitiveFactory = new PrimitiveFactory();
