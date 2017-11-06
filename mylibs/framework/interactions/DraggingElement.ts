@@ -146,7 +146,7 @@ export class DraggingElement extends CompositeElement {
             }
 
             if (index === null) {
-                index = parent.positionOf(element) || parent.count();
+                index = parent === element.parent() ? parent.positionOf(element) : parent.count();
             }
 
             let source = element;

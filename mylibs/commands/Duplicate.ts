@@ -16,7 +16,7 @@ export default {
             var originalParent = element.parent();
             var current = originalParent;
             var children = [clone];
-            while (!current.canAccept(children, false, current.allowRearrange())){
+            while (!current.canAccept(children, false, true)){
                 current = current.parent();
             }
 
