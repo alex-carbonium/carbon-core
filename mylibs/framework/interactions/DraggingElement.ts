@@ -146,7 +146,7 @@ export class DraggingElement extends CompositeElement {
             }
 
             if (index === null) {
-                index = parent.positionOf(element) + 1 || parent.count();
+                index = parent.positionOf(element) || parent.count();
             }
 
             let source = element;
@@ -221,7 +221,7 @@ export class DraggingElement extends CompositeElement {
             if (!this._clones) {
                 var shanpshot = this.getPropSnapshot();
                 this.applySnapshot(this._propSnapshot, ChangeMode.Self);
-                this._clones = Duplicate.run(this.elements, ChangeMode.Self, true);
+                this._clones = Duplicate.run(this.elements, ChangeMode.Self, true, 0);
                 this.applySnapshot(shanpshot, ChangeMode.Self);
             }
         }
