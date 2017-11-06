@@ -361,8 +361,12 @@ class ArtboardPage extends Page implements IArtboardPage {
             parent = this;
         }
 
-        element.setTransform(parent.globalMatrixToLocal(element.globalViewMatrix()));
-        parent.add(element, mode);
+        if(parent.dropElement && parent !== this) {
+            parent.dropElement(element, mode);
+        } else {
+            element.setTransform(parent.globalMatrixToLocal(element.globalViewMatrix()));
+            parent.add(element, mode);
+        }
     }
 }
 ArtboardPage.prototype.t = Types.ArtboardPage;

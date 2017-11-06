@@ -207,7 +207,9 @@ export class DraggingElement extends CompositeElement {
         }
 
         if (newParent !== element.parent()) {
-            return newParent.insert(element, index);
+            var res = newParent.insert(element, index);
+            App.Current.mapElementsToLayerMask();
+            return res;
         }
 
         if (newParent.allowRearrange() && element.zOrder() !== index) {

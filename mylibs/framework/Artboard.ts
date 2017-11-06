@@ -139,9 +139,9 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     canAccept(elements: UIElement[], autoInsert, allowMoveIn) {
-        if (this.props.type === ArtboardType.IconSet) {
-            return false;
-        }
+        // if (this.props.type === ArtboardType.IconSet) {
+        //     return false;
+        // }
 
         for (let i = 0; i < elements.length; ++i) {
             let element = elements[i];
@@ -550,13 +550,13 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
                     parent.enablePropsTracking();
                 }
 
-                if (props.rowsCount || props.colsCount || props.iconCellSize) {
-                    this._rearrangeIcons(props, oldProps);
-                }
-
                 App.Current.resourceAdded.raise(props.type, this);
             }
 
+        }
+
+        if (props.rowsCount || props.colsCount || props.iconCellSize) {
+            this._rearrangeIcons(props, oldProps);
         }
 
         if (props.frame === null) {
@@ -570,6 +570,26 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             else {
                 this.suck();
             }
+        }
+    }
+
+    dropElement(element, mode) {
+
+        if(this.props.type === ArtboardType.IconSet) {
+            let elementBox = element.getBoundingBoxGlobal();
+            let parent:IContainer = this;
+            for (let i = 0; i < this.children.length; ++i){
+                if (this.children[i].getBoundingBoxGlobal().isIntersecting(elementBox)) {
+                    parent = this.children[i] as any;
+                    break;
+                }
+            }
+
+            element.setTransform(parent.globalMatrixToLocal(element.globalViewMatrix()));
+            parent.add(element, mode);
+        } else {
+            element.setTransform(this.globalMatrixToLocal(element.globalViewMatrix()));
+            this.add(element, mode);
         }
     }
 

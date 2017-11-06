@@ -364,7 +364,7 @@ export default class DesignerController implements IController {
                             this._setMoveCursor();
                             eventData.handled = true;
                         } else if (element.canSelect() && !element.locked()) {
-                            eventData.handled = true;
+                            eventData.handled = !element.multiselectTransparent;
                         }
 
                         break;
