@@ -762,7 +762,7 @@ export default class DesignerController implements IController {
         Selection.makeSelection(newSelection);
     }
 
-    getCurrentDropTarget(eventData: IMouseEventData): IContainer | IComposite | null {
+    getCurrentDropTarget(eventData: IMouseEventData): IContainer | null {
         var parent = this._draggingOverElement;
         return parent || this._draggingElement.children[0].parent();
     }
