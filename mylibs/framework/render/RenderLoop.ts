@@ -6,7 +6,7 @@ import SelectFrame from "../SelectFrame";
 import DesignerController from "../DesignerController";
 import Environment from "../../environment";
 import Clipboard from "../Clipboard";
-import Keyboard from "../../platform/Keyboard";
+import { keyboard } from "../../platform/Keyboard";
 import Context from "../render/Context";
 import ExtensionPoint from "../ExtensionPoint";
 import { IApp, IView, IRenderLoop, IController, ContextType } from "carbon-core";
@@ -52,7 +52,7 @@ export default class RenderLoop implements IRenderLoop {
         app.platform.attachEvents(this.viewContainer);
 
         Clipboard.attach(app);
-        Keyboard.attach(document.body);
+        keyboard.attach();
 
         this._app = app;
         this._view = view;
@@ -67,7 +67,7 @@ export default class RenderLoop implements IRenderLoop {
             this._view.detach();
         }
         this._app.platform.detachEvents();
-        Keyboard.detach(this.viewContainer);
+        keyboard.detach();
         Clipboard.dispose();
     }
 
@@ -110,7 +110,7 @@ export default class RenderLoop implements IRenderLoop {
         this._contexts.push(isolationContext);
         this._contexts.push(gridContext);
 
-        return {context, upperContext, gridContext, isolationContext};
+        return { context, upperContext, gridContext, isolationContext };
     }
 
     private addCanvas(type: ContextType, parent: HTMLElement, id: string, append: boolean) {

@@ -459,7 +459,9 @@ declare module "carbon-model" {
 
     export interface IModel {
         createText(size?: ISize, props?: Partial<ITextProps>): IText;
+        createImage(size?: ISize, props?: Partial<IImageProps>): IImage;
         createRectangle(size?: ISize, props?: Partial<IRectangleProps>): IRectangle;
+        createOval(size?: ISize, props?: Partial<ICircleProps>): ICircle;
         createStar(size?: ISize, props?: Partial<IStarProps>): IStar;
         createLine(props?: Partial<ILineProps>): ILine;
         createCanvas(size?: ISize, props?: Partial<IUIElementProps>): IContainer;

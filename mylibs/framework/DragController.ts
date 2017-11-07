@@ -1,5 +1,5 @@
-import Keyboard from "../platform/Keyboard";
-import {IMouseEventData} from "carbon-core";
+import { keyboard } from "../platform/Keyboard";
+import { IMouseEventData } from "carbon-core";
 import Environment from "../environment";
 
 var debug = require("DebugUtil")("carb:dragController");
@@ -143,8 +143,8 @@ export default class DragController {
             this._tokens.push(t);
         }
 
-        let t = Keyboard.changed.bind(() => {
-            if (this._lastMouseMove){
+        let t = keyboard.changed.bind(() => {
+            if (this._lastMouseMove) {
                 this.mouseMove(this._lastMouseMove);
             }
         });

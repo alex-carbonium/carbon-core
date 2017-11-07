@@ -30,7 +30,6 @@ declare module "carbon-core" {
     export var DesignerController: any;
     export var SelectComposite: any;
     export var SelectFrame: any;
-    export var Keyboard: any;
     export var Clipboard: any;
     export var CustomGuides: any;
     export var LayoutGridLines:any;

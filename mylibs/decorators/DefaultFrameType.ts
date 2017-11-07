@@ -1,6 +1,6 @@
 import Environment from "environment";
 import UserSettings from "../UserSettings";
-import Keyboard from "../platform/Keyboard";
+import { keyboard } from "../platform/Keyboard";
 import Point from "../math/point";
 import SnapController from "../framework/SnapController";
 import { PointDirection } from "../framework/Defs";
@@ -62,10 +62,10 @@ export default {
 
         point.type.capture(frame, point, frame._mousePoint);
 
-        frame.keyboardToken = Keyboard.changed.bind(this, state => this.movePoint(frame, point, frame._mousePoint, state));
+        frame.keyboardToken = keyboard.changed.bind(this, state => this.movePoint(frame, point, frame._mousePoint, state));
     },
 
-    movePoint: function (frame, point, event, keys = Keyboard.state) {
+    movePoint: function (frame, point, event, keys = keyboard.state) {
         if(!frame._mousePoint) {
             return;
         }

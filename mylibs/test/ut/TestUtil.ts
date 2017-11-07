@@ -29,9 +29,11 @@ Util.setupApp = function(options){
     var interactionContext = new Context(ContextType.Interaction, c);
     var isolationContext = new Context(ContextType.Isolation, c);
 
+    var viewContainer = document.createElement("div");
+
     var view: any = new DesignerView(app);
     view.setup({Layer, SelectComposite, SelectFrame});
-    view.attachToDOM([mainContext, isolationContext, interactionContext], x => {}, x => {}, x=> {});
+    view.attachToDOM([mainContext, isolationContext, interactionContext], viewContainer, x => {}, x => {}, x=> {});
     var controller = new DesignerController(app, view);
     Environment.set(view, controller);
 

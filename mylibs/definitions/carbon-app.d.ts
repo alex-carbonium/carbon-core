@@ -303,7 +303,9 @@ declare module "carbon-app" {
     }
 
     export interface IController {
+        onmousedown(eventData: IMouseEventData);
         onmousemove(eventData: IMouseEventData);
+        onmouseup(eventData: IMouseEventData);
 
         startDrawingEvent: IEvent<IEventData>;
 
@@ -342,7 +344,7 @@ declare module "carbon-app" {
 
         choosePasteLocation(elements: IUIElement[], allowMoveIn?: boolean): {parent: IContainer, x: number, y: number}
         insertAndSelect(element: IUIElement[], parent: IContainer);
-        getCurrentDropTarget(eventData: IMouseEventData): IContainer | IComposite | null;
+        getCurrentDropTarget(eventData: IMouseEventData): IContainer | null;
 
         currentTool: WorkspaceTool;
         currentToolChanged: IEvent<WorkspaceTool>;
@@ -368,6 +370,7 @@ declare module "carbon-app" {
 
         shortcutManager: IShortcutManager;
         settings: WorkspaceSettings;
+        keyboard: IKeyboard;
 
         set(view: IView, controller: IController);
     }
@@ -555,4 +558,15 @@ declare module "carbon-app" {
     export const ActionManager: IActionManager;
     export const Selection: ISelection;
     export const Invalidate: IInvalidate;
+
+    export interface IKeyboard {
+        readonly state: KeyboardState;
+        readonly changed: IEvent2<KeyboardState, KeyboardState>;
+
+        attach();
+        detach();
+
+        change(ctrlKey: boolean, shiftKey: boolean, altKey: boolean);
+        reset();
+    }
 }

@@ -1,9 +1,11 @@
-import { IModel, IText, ITextProps, IUIElement, IUIElementProps, ISize, ILineProps, ILine, IStarProps, IStar, IRectangle, IRectangleProps, IContainer, IArtboardProps, IArtboard, IStateboard, IStateboardProps } from "carbon-core";
+import { IModel, IText, ITextProps, IUIElement, IUIElementProps, ISize, ILineProps, ILine, IStarProps, IStar, IRectangle, IRectangleProps, IContainer, IArtboardProps, IArtboard, IStateboard, IStateboardProps, ICircleProps, ICircle, IImageProps, IImage } from "carbon-core";
 import UIElement from "./UIElement";
 import Text from "./text/Text";
 import Rect from "../math/rect";
+import Image from "./Image";
 import Line from "./Line";
 import Star from "./Star";
+import Circle from "./Circle";
 import Rectangle from "./Rectangle";
 import Container from "./Container";
 import Artboard from "./Artboard";
@@ -22,10 +24,20 @@ export class Model implements IModel {
         this.setSizeAndProps(text, size, props);
         return text;
     }
+    createImage(size?: ISize, props?: Partial<IImageProps>): IImage {
+        let image = new Image();
+        this.setSizeAndProps(image, size, props);
+        return image;
+    }
     createRectangle(size?: ISize, props?: Partial<IRectangleProps>): IRectangle {
         let rectangle = new Rectangle();
         this.setSizeAndProps(rectangle, size, props);
         return rectangle;
+    }
+    createOval(size?: ISize, props?: Partial<ICircleProps>): ICircle {
+        let oval = new Circle();
+        this.setSizeAndProps(oval, size, props);
+        return oval;
     }
     createStar(size?: ISize, props?: Partial<IStarProps>): IStar {
         let star = new Star();
