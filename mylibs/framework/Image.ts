@@ -16,7 +16,7 @@ const DefaultSizing = ContentSizing.fill;
 
 interface IImageRuntimeProps extends IUIElementRuntimeProps {
     loaded: boolean;
-    resizeOnLoad?: Origin|null;
+    resizeOnLoad?: Origin | null;
     sourceProps?: any;
     mask?: UIElement;
     origSource?: any;
@@ -115,10 +115,10 @@ export default class Image extends Container<IImageProps> implements IImage {
     }
 
     shouldApplyViewMatrix() {
-        return true;
+        return ImageSourceHelper.shouldApplyViewMatrix(this.source());
     }
 
-    lockedGroup(): boolean{
+    lockedGroup(): boolean {
         return true;
     }
 
@@ -151,7 +151,7 @@ export default class Image extends Container<IImageProps> implements IImage {
                     }
 
                     var resizeOrigin = this.resizeOnLoad();
-                    if (resizeOrigin){
+                    if (resizeOrigin) {
                         this.autoResize(source, resizeOrigin);
                     }
 
@@ -177,27 +177,27 @@ export default class Image extends Container<IImageProps> implements IImage {
         ImageSourceHelper.draw(this.source(), context, this.width(), this.height(), this, environment);
     }
 
-    autoResize(source: ImageSource, origin: Origin){
+    autoResize(source: ImageSource, origin: Origin) {
         var realRect = ImageSourceHelper.boundaryRect(source, this.runtimeProps.sourceProps);
-        if (realRect === null){
+        if (realRect === null) {
             return;
         }
 
         var bb = this.getBoundingBox();
-        var bbNew = bb.scale({x: realRect.width/bb.width, y: realRect.height/bb.height}, bb.origin(origin));
+        var bbNew = bb.scale({ x: realRect.width / bb.width, y: realRect.height / bb.height }, bb.origin(origin));
 
         var parentBr = this.parent().boundaryRect();
         var scaledRect = bbNew.intersect(parentBr);
-        var sx = scaledRect.width/bbNew.width;
-        var sy = scaledRect.height/bbNew.height;
-        if (sx !== 1 || sy !== 1){
+        var sx = scaledRect.width / bbNew.width;
+        var sy = scaledRect.height / bbNew.height;
+        if (sx !== 1 || sy !== 1) {
             var scale = Math.min(sx, sy);
-            scaledRect = bbNew.scale({x: scale, y: scale}, bbNew.origin(origin));
+            scaledRect = bbNew.scale({ x: scale, y: scale }, bbNew.origin(origin));
         }
         scaledRect.roundMutable();
 
         this.boundaryRect(scaledRect.withPosition(0, 0));
-        if (scaledRect.x || scaledRect.y){
+        if (scaledRect.x || scaledRect.y) {
             this.applyTranslation(scaledRect.topLeft().subtract(bb.topLeft()));
         }
     }
@@ -205,10 +205,12 @@ export default class Image extends Container<IImageProps> implements IImage {
     clip(context: IContext) {
         //TODO: add back if necessary
         //if (this.globalViewMatrix().isTranslatedOnly())
-        context.beginPath();
-        let br = this.boundaryRect();
-        context.rect(br.x, br.y, br.width, br.height);
-        context.clip();
+        if (ImageSourceHelper.shouldClip(this.source, this.width(), this.height(), this.runtimeProps.sourceProps)) {
+            context.beginPath();
+            let br = this.boundaryRect();
+            context.rect(br.x, br.y, br.width, br.height);
+            context.clip();
+        }
     }
 
     //TODO: add back if necessary
@@ -283,7 +285,7 @@ export default class Image extends Container<IImageProps> implements IImage {
             });
     }
 
-    autoPositionChildren(): boolean{
+    autoPositionChildren(): boolean {
         return true;
     }
 
@@ -293,8 +295,8 @@ export default class Image extends Container<IImageProps> implements IImage {
         return this;
     }
 
-    resizeOnLoad(value?: Origin|null): Origin|null{
-        if (arguments.length){
+    resizeOnLoad(value?: Origin | null): Origin | null {
+        if (arguments.length) {
             this.runtimeProps.resizeOnLoad = value;
         }
         return this.runtimeProps.resizeOnLoad
@@ -305,21 +307,21 @@ export default class Image extends Container<IImageProps> implements IImage {
         return base.concat(["source", "sourceProps"]);
     }
 
-    static createUrlSource(url: string): ImageSource{
+    static createUrlSource(url: string): ImageSource {
         return ImageSourceHelper.createUrlSource(url);
     }
 
-    static createElementSource(pageId: string, artboardId:string, elementId:string): ImageSource{
+    static createElementSource(pageId: string, artboardId: string, elementId: string): ImageSource {
         return ImageSourceHelper.createElementSource(pageId, artboardId, elementId);
     }
 
-    static tryCreateFromUrl(string: string): Image | null{
-        if (!string){
+    static tryCreateFromUrl(string: string): Image | null {
+        if (!string) {
             return null;
         }
-        if (/https?:.*(jpe?g|png)$/gi.test(string)){
+        if (/https?:.*(jpe?g|png)$/gi.test(string)) {
             var image = new Image();
-            image.size({width: Image.NewImageSize, height: Image.NewImageSize});
+            image.size({ width: Image.NewImageSize, height: Image.NewImageSize });
             image.source(Image.createUrlSource(string));
             return image;
         }
@@ -327,7 +329,7 @@ export default class Image extends Container<IImageProps> implements IImage {
     }
 
     static uploadRequested = EventHelper.createEvent();
-    static EmptySource = Object.freeze<ImageSource>({type: ImageSourceType.None});
+    static EmptySource = Object.freeze<ImageSource>({ type: ImageSourceType.None });
     static readonly NewImageSize = 100;
 }
 Image.prototype.t = Types.Image;

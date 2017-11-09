@@ -9,6 +9,7 @@ import DataNode from "./DataNode";
 import { ChangeMode, RenderEnvironment, RenderFlags } from "carbon-core";
 import UserSettings from "../UserSettings";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
+import NullContainer from "framework/NullContainer";
 
 export default class ImageSourceHelper {
     static draw(source: ImageSource, context, w, h, sourceElement, environment: RenderEnvironment) {
@@ -183,15 +184,11 @@ export default class ImageSourceHelper {
         var scaleX = w / box.width;
         var scaleY = h / box.height;
 
-        context.scale(scaleX, scaleY);
-
-        if (element.shouldApplyViewMatrix()) {
-            element.globalViewMatrixInverted().applyToContext(context);
-        }
-        else {
-            context.translate(-box.x, -box.y);
-            element.parent().globalViewMatrixInverted().applyToContext(context);
-        }
+        let matrix = Matrix.allocate();
+        matrix.scale(scaleX, scaleY);
+        element.props.m = matrix;
+        element._parent = sourceElement;
+        element.applyVisitor(e=>e.resetRuntimeProps());
 
         let originalCtxl = element.runtimeProps.ctxl;
         let originalFlags = environment.flags;
@@ -213,6 +210,9 @@ export default class ImageSourceHelper {
             environment.flags = originalFlags;
             environment.fill = oldFill;
             environment.stroke = oldStroke;
+            element._parent = NullContainer;
+            element.props.m = Matrix.Identity;
+            matrix.free();
         }
         context.restore();
     }
@@ -365,6 +365,10 @@ export default class ImageSourceHelper {
             return false;
         }
         return source.type === ImageSourceType.Url;
+    };
+
+    static shouldApplyViewMatrix(source) {
+        return source.type !== ImageSourceType.Element;
     };
 
     static isFillSupported(source) {

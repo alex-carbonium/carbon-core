@@ -46,6 +46,7 @@ export class IconsetCell extends Canvas {
     canBeAccepted() {
         return false;
     }
+
     allowColorOverride() {
         return false;
     }

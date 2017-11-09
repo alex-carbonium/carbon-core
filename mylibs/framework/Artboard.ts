@@ -270,8 +270,6 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return text;
     }
 
-
-
     _renderHeader(context) {
         let scale = Environment.view.scale();
 
