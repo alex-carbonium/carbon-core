@@ -419,6 +419,8 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
     roundBoundingBoxToPixelEdge() {
         return false;
     }
+    transferElement() {
+    }
 }
 
 export default new NullContainer();

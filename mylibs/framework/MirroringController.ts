@@ -244,7 +244,7 @@ export default class MirroringController implements IController {
     insertAndSelect(elements: IUIElement[], parent: IContainer | IComposite) {
     }
 
-    getCurrentDropTarget(eventData: IMouseEventData): IContainer | null {
+    getCurrentDropTarget(): IContainer | null {
         return null;
     }
 

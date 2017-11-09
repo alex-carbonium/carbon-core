@@ -17,7 +17,6 @@ import Container from "./Container";
 import { choosePasteLocation } from "./PasteLocator";
 import { IArtboard } from "carbon-model";
 import Point from "../math/point";
-import { IDropElementData } from "carbon-app";
 import Cursors from "Cursors";
 import PropertyTracker from "./PropertyTracker";
 import { DraggingElement } from "./interactions/DraggingElement";

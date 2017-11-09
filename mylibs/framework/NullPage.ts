@@ -296,6 +296,9 @@ class NullPage extends UIElement implements IPage {
     lockedGroup() {
         return false;
     }
+
+    transferElement() {
+    }
 }
 
 NullPage.prototype.t = Types.NullPage;

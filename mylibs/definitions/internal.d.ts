@@ -73,8 +73,6 @@ declare module "carbon-model"{
     }
 
     export interface IContainer{
-        transferElement(element: IUIElement, index: number, mode?: ChangeMode);
-
         globalMatrixToLocal(m: any): any;
         getElementById(id:string):IUIElement|IContainer|null;
     }

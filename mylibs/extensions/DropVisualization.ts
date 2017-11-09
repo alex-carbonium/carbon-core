@@ -294,7 +294,7 @@ export default class DropVisualization extends ExtensionBase {
     }
 
     onDraggingElement(event: IMouseEventData, draggingElement: IComposite) {
-        let target = Environment.controller.getCurrentDropTarget(event);
+        let target = Environment.controller.getCurrentDropTarget();
 
         if (draggingElement.showResizeHint()) {
             this._hint.updatePositionText();

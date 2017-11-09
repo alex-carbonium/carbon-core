@@ -7,6 +7,7 @@ import Image from "./Image";
 import SvgParser from "../svg/SvgParser";
 import Environment from "../environment";
 import Selection from "./SelectionModel";
+import Container from "./Container";
 
 export class FileElement extends UIElement implements IFileElement {
     props: FileProps;
@@ -23,7 +24,7 @@ export class FileElement extends UIElement implements IFileElement {
     drop(file: File): Promise<void> {
         this.setProps({ name: file.name }, ChangeMode.Self);
 
-        let parent = Environment.controller.getCurrentDropTarget();
+        let parent = Environment.controller.getCurrentDropTarget() as Container;
 
         return new Promise<void>((resolve, reject) => {
             if (this.isSvg()) {
@@ -62,7 +63,7 @@ export class FileElement extends UIElement implements IFileElement {
         return false;
     }
 
-    private readSvg(file: File, parent: IContainer, resolve, reject) {
+    private readSvg(file: File, parent: Container, resolve, reject) {
         var reader = new FileReader();
         reader.onload = () => {
             var text = reader.result;
@@ -90,7 +91,7 @@ export class FileElement extends UIElement implements IFileElement {
         reader.readAsText(file);
     }
 
-    private readDataUrl(file: File, parent: IContainer, resolve, reject) {
+    private readDataUrl(file: File, parent: Container, resolve, reject) {
         let reader = new FileReader();
         reader.onload = (e) => {
             let dataUrl = reader.result;
