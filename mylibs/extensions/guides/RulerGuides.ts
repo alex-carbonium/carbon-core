@@ -9,7 +9,7 @@ import { createUUID } from "../../util";
 import NullArtboard from "../../framework/NullArtboard";
 import Environment from "../../environment";
 import Artboard from "../../framework/Artboard";
-import Keyboard from "../../platform/Keyboard";
+import { keyboard } from "../../platform/Keyboard";
 import { IApp, IView, IController, IDisposable, IRect, IMouseEventData, PatchType } from "carbon-core";
 import { IArtboard } from "carbon-model";
 
@@ -95,7 +95,7 @@ export default class RulerGuides {
         return false;
     }
     canCapture(): boolean {
-        return Keyboard.state.ctrlKey || Environment.controller.currentTool === "pointerTool" || Environment.controller.currentTool === "pointerDirectTool";
+        return keyboard.state.ctrlKey || Environment.controller.currentTool === "pointerTool" || Environment.controller.currentTool === "pointerDirectTool";
     }
 
     onDragSearching = (e: IMouseEventData) => {
@@ -254,7 +254,7 @@ export default class RulerGuides {
             return;
         }
 
-        var react = Keyboard.state.ctrlKey;
+        var react = keyboard.state.ctrlKey;
 
         if (!react) {
             let x = Math.round(e.x - this._origin.x());

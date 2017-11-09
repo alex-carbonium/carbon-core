@@ -21,8 +21,6 @@
     "@types/webfontloader": "1.6.28",
     "async": "2.0.1",
     "awesome-typescript-loader": "3.2.1",
-    "azure-arm-storage": "0.13.1-preview",
-    "azure-keyvault": "0.10.1",
     "azure-storage": "1.1.0",
     "babel-core": "6.26.0",
     "babel-loader": "7.1.1",

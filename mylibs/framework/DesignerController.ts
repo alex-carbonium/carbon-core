@@ -8,7 +8,7 @@ import Invalidate from "./Invalidate";
 import TouchHelper from "./TouchHelper";
 import Artboard from "./Artboard";
 import Page from "./Page";
-import Keyboard from "../platform/Keyboard";
+import { keyboard } from "../platform/Keyboard";
 import ObjectFactory from "./ObjectFactory";
 import { Types } from "./Defs";
 import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3, WorkspaceTool, InteractionType, LayerType, ChangeMode } from "carbon-core";
@@ -67,7 +67,7 @@ export default class DesignerController implements IController {
 
             var composite = Selection.selectComposite();
             if (composite.canDrag() && composite.hitTest(eventData, this.view.scale())) {
-                Cursor.setCursor(Keyboard.state.altKey ? "move_clone" : "move_cursor");
+                Cursor.setCursor(keyboard.state.altKey ? "move_clone" : "move_cursor");
                 return;
             }
 
@@ -105,7 +105,7 @@ export default class DesignerController implements IController {
     }
 
     _setMoveCursor() {
-        Cursor.setCursor(Keyboard.state.altKey ? "move_clone" : "move_cursor");
+        Cursor.setCursor(keyboard.state.altKey ? "move_clone" : "move_cursor");
     }
 
     _bubbleMouseEvent(eventData, method) {
@@ -113,7 +113,7 @@ export default class DesignerController implements IController {
             var layer = this.view._layers[i];
             var e = layer.hitElement(eventData, this.view.scale());
             if (e && e[method] /*&& e.canSelect()*/ && !e.locked()) {
-                e[method](eventData, Keyboard.state);
+                e[method](eventData, keyboard.state);
                 if (eventData.handled) {
                     return false;
                 }
@@ -176,7 +176,7 @@ export default class DesignerController implements IController {
 
         this._cancelBinding = this.app.actionManager.subscribe('cancel', this.cancel.bind(this));
 
-        Keyboard.changed.bind(this, this._onKeyChanged);
+        keyboard.changed.bind(this, this._onKeyChanged);
         Selection.modeChangedEvent.bind(this, this._onSelectionModeChanged);
         Selection.selectFrame.onComplete.bind(this, this.onSelectedWithFrame);
 
@@ -269,6 +269,10 @@ export default class DesignerController implements IController {
     }
 
     stopDrag(event) {
+        if (this._draggingElement.allowMoveOutChildren(event)) {
+            this.draggingOver(event);
+        }
+
         let elements = this._draggingElement.stopDragging(event, this._draggingOverElement, this.app.activePage);
 
         if (!Selection.areSelected(elements)) {
@@ -303,7 +307,7 @@ export default class DesignerController implements IController {
         }
 
         let newActiveArtboard = selectedElements[0].findAncestorOfType(Artboard);
-        for (let i = 1; i < selectedElements.length; ++i){
+        for (let i = 1; i < selectedElements.length; ++i) {
             if (selectedElements[i].findAncestorOfType(Artboard) !== newActiveArtboard) {
                 newActiveArtboard = null;
                 break;
@@ -469,7 +473,7 @@ export default class DesignerController implements IController {
         this.updateCursor(eventData);
     }
 
-    repeatLastMouseMove(keys: KeyboardState = Keyboard.state) {
+    repeatLastMouseMove(keys: KeyboardState = keyboard.state) {
         if (this._lastMouseMove) {
             this._lastMouseMove.altKey = keys.altKey;
             this._lastMouseMove.ctrlKey = keys.ctrlKey;
@@ -685,7 +689,7 @@ export default class DesignerController implements IController {
     }
 
     onscroll(event) {
-        if(event.shiftKey && !event.event.deltaX) {
+        if (event.shiftKey && !event.event.deltaX) {
             this.view.scrollX(this.view.scrollX() + event.event.deltaY);
         } else {
             this.view.scrollX(this.view.scrollX() + event.event.deltaX);
@@ -751,22 +755,15 @@ export default class DesignerController implements IController {
             }
         }
 
-        for (let i = 0; i < newSelection.length; ++i){
+        for (let i = 0; i < newSelection.length; ++i) {
             newSelection[i].clearSavedLayoutProps();
         }
 
         Selection.makeSelection(newSelection);
     }
 
-    getCurrentDropTarget(eventData: IMouseEventData): IContainer | IComposite | null {
+    getCurrentDropTarget(eventData: IMouseEventData): IContainer | null {
         var parent = this._draggingOverElement;
-        var selectComposite = Selection.selectComposite();
-        if (selectComposite.canAccept(this._draggingElement.children, undefined, eventData.ctrlKey)
-            && selectComposite.hitTest(eventData, this.view.scale(), true)
-        ) {
-            return Selection.selectComposite();
-        }
-        //TODO: support highlighting multiple drop targets
         return parent || this._draggingElement.children[0].parent();
     }
 

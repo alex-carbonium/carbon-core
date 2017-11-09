@@ -90,7 +90,6 @@ export default {
     "RenderLoop": require("./framework/render/RenderLoop"),
     "renderer": require("./framework/render/Renderer").renderer,
     "RelayoutQueue": require("./framework/relayout/RelayoutQueue"),
-    "Keyboard": require("./platform/Keyboard"),
     "Platform": require("./platform/Platform"),
     //TODO: remove
     "BasePlatform": require("./platform/All"),

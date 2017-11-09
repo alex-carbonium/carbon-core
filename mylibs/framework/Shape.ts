@@ -8,7 +8,7 @@ import { Types } from "./Defs";
 import Image from "./Image";
 import Constraints from "./Constraints";
 import { IImage, IUIElement } from "carbon-model";
-import { ResizeDimension, ElementState, RenderEnvironment, RenderFlags, StrokePosition, LineJoin, LineCap } from "carbon-core";
+import { ResizeDimension, ElementState, RenderEnvironment, RenderFlags, StrokePosition, LineJoin, LineCap, Origin } from "carbon-core";
 import RenderPipeline from "./render/RenderPipeline";
 
 class Shape extends Container {
@@ -293,7 +293,12 @@ class Shape extends Container {
         var group = new GroupContainer();
 
         group.prepareAndSetProps(this.selectLayoutProps());
+
         element.resetTransform();
+        let bbox1 = this.getBoundingBox();
+        let bbox2 = element.getBoundingBox();
+        element.scale(bbox1.width/bbox2.width, bbox1.height/bbox2.height, Origin.TopLeft);
+
         this.resetTransform();
 
         //first insert, so that group does not delete itself if this is a last child

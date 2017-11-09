@@ -1,6 +1,7 @@
 import EventHelper from "./framework/EventHelper";
-import {IView, IController, IEnvironment, IEvent2} from "carbon-core";
+import { IView, IController, IEnvironment, IEvent2 } from "carbon-core";
 import ShortcutManager from "./ui/ShortcutManager";
+import { keyboard } from "./platform/Keyboard";
 import UserSettings from "./UserSettings";
 import logger from "./logger";
 
@@ -10,20 +11,21 @@ class Environment implements IEnvironment {
     view: IView;
     controller: IController;
     shortcutManager = new ShortcutManager();
+    keyboard = keyboard;
     settings = UserSettings;
     fatalErrorOccurred = EventHelper.createEvent<void>();
 
     loaded: Promise<void>;
     resolveLoaded: () => void;
 
-    constructor(){
+    constructor() {
         this.detaching = EventHelper.createEvent2<IView, IController>();
         this.attached = EventHelper.createEvent2<IView, IController>();
         this.loaded = new Promise<void>(resolve => this.resolveLoaded = resolve);
     }
 
-    set(view: IView, controller: IController){
-        if (!this.view){
+    set(view: IView, controller: IController) {
+        if (!this.view) {
             this.resolveLoaded();
         }
         else {
