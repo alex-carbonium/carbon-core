@@ -11,7 +11,7 @@ import Rect from "../math/rect";
 import Matrix from "../math/matrix";
 import Environment from "../environment";
 import Selection from "./SelectionModel";
-import { IUIElementProps, IPoint, IRect, IComposite, ChangeMode, PatchType, ICoordinate, RenderEnvironment, PropDescriptor } from "carbon-core";
+import { IUIElementProps, IPoint, IRect, IComposite, ChangeMode, PatchType, ICoordinate, RenderEnvironment, PropDescriptor, IUIElement } from "carbon-core";
 import CommonPropsManager from "./CommonPropsManager";
 import Point from "../math/point";
 
@@ -34,20 +34,26 @@ export default class CompositeElement extends UIElement implements IComposite {
     }
 
     get elements(): UIElement[] {
-        return this.children;
+        return this.children as UIElement[];
     }
 
     contains(element) {
         return this.children.indexOf(element) !== -1;
     }
 
-    register(element: UIElement) {
+    register(element: IUIElement) {
         var systemType = element.systemType();
         if (this._types.indexOf(systemType) === -1) {
             this._types.push(systemType);
         }
         element.enablePropsTracking();
-        this.children.push(element);
+        this.children.push(element as UIElement);
+    }
+    registerAll(elements: IUIElement[]) {
+        for (let i = 0, j = elements.length; i < j; ++i) {
+            let element = elements[i];
+            this.register(element);
+        }
     }
 
     unregister(element: UIElement) {
@@ -74,6 +80,13 @@ export default class CompositeElement extends UIElement implements IComposite {
         if (canRemoveType) {
             this._types.splice(this._types.indexOf(systemType), 1);
         }
+    }
+    unregisterAll() {
+        this.each(x => x.disablePropsTracking());
+        this._types = [];
+        //do not clear, selection model stores this by reference
+        this.children = [];
+        this.resetTransform();
     }
 
     autoPositionChildren(): boolean {
@@ -246,13 +259,6 @@ export default class CompositeElement extends UIElement implements IComposite {
         return false;
     }
 
-    unregisterAll() {
-        this.each(x => x.disablePropsTracking());
-        this._types = [];
-        //do not clear, selection model stores this by reference
-        this.children = [];
-        this.resetTransform();
-    }
     count() {
         return this.elements.length;
     }

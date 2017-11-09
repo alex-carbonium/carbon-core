@@ -18,10 +18,10 @@ import Selection from "../SelectionModel";
 import Constraints from "../Constraints";
 
 export default class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElement {
-    prepareProps(changes) {
+    prepareProps(changes, mode?) {
         let dataProvider = changes.dp;
 
-        super.prepareProps(changes);
+        super.prepareProps(changes, mode);
 
         let textChanges = this.allocateTextChanges(changes);
 

@@ -17,6 +17,7 @@ export default class ImageSourceHelper {
 
         switch (source.type) {
             case ImageSourceType.Url:
+            case ImageSourceType.Loading:
                 ImageSourceHelper.drawURL(context, runtimeProps);
                 return;
             case ImageSourceType.Element:
@@ -86,6 +87,8 @@ export default class ImageSourceHelper {
         switch (source.type) {
             case ImageSourceType.Url:
                 return source.url;
+            case ImageSourceType.Loading:
+                return source.dataUrl;
             case ImageSourceType.Element:
                 return source.elementId;
 
@@ -103,6 +106,7 @@ export default class ImageSourceHelper {
     static boundaryRect(source, runtimeProps): Rect | null {
         switch (source.type) {
             case ImageSourceType.Url:
+            case ImageSourceType.Loading:
                 if (!runtimeProps || !runtimeProps.image) {
                     return null;
                 }
@@ -117,40 +121,55 @@ export default class ImageSourceHelper {
         }
     };
 
-    private static loadUrl(source, sourceProps) {
-        let url = source.url;
+    private static loadUrl(url: string, cors: boolean) {
         if (!url) {
             return Promise.resolve({ empty: true });
         }
 
-        let cors = sourceProps && sourceProps.cors;
-        if (!cors && url[0] !== '/' && url[0] !== '.'
-            && url.substr(0, backend.fileEndpoint.length) !== backend.fileEndpoint
-            && url.substr(0, "data:image/".length) !== "data:image/") {
-            url = backend.servicesEndpoint + "/api/proxy?" + url;
+        url = ImageSourceHelper.getImageUrl(url, cors);
+
+        return new Promise((resolve, reject) => {
+            ImageSourceHelper.loadImage(url, cors, resolve, reject);
+        });
+    }
+
+    private static loadImage(url: string, cors: boolean, resolve: (e) => void, reject: (e) => void) {
+        const image = new Image();
+
+        url = ImageSourceHelper.getImageUrl(url, cors);
+
+        //data: urls cannot be loaded in safari with crossOrigin flag
+        if (!url.startsWith("data:")) {
+            image.crossOrigin = "anonymous";
         }
 
-        return new Promise((resolve) => {
-            const image = new Image();
-
-            //data: urls cannot be loaded in safari with crossOrigin flag
-            if (url.substr(0, "data:".length) !== "data:") {
-                image.crossOrigin = "anonymous";
+        image.onload = function () {
+            const runtimeProps = { image };
+            resolve(runtimeProps);
+            image.onload = null;
+            image.onerror = null;
+        };
+        image.onerror = function () {
+            if (cors) {
+                ImageSourceHelper.loadImage(url, false, resolve, reject);
             }
-
-            image.onload = function () {
-                const runtimeProps = { image };
-                resolve(runtimeProps);
-                image.onload = null;
-                image.onerror = null;
-            };
-            image.onerror = function () {
+            else {
                 resolve({ error: true });
-                image.onload = null;
-                image.onerror = null;
-            };
-            image.src = url;
-        });
+            }
+            image.onload = null;
+            image.onerror = null;
+        };
+        image.src = url;
+    }
+
+    private static getImageUrl(url: string, cors: boolean) {
+        if (!cors && url[0] !== '/' && url[0] !== '.'
+            && !url.startsWith(backend.fileEndpoint)
+            && !url.startsWith("data:image/")
+        ) {
+            return backend.servicesEndpoint + "/api/proxy?" + url;
+        }
+        return url;
     }
 
     private static drawURL(context, runtimeProps) {
@@ -326,8 +345,10 @@ export default class ImageSourceHelper {
 
     static load(source: ImageSource, sourceProps): Promise<any> | null {
         switch (source.type) {
+            case ImageSourceType.Loading:
+                return ImageSourceHelper.loadUrl(source.dataUrl, true);
             case ImageSourceType.Url:
-                return ImageSourceHelper.loadUrl(source, sourceProps);
+                return ImageSourceHelper.loadUrl(source.url, sourceProps && sourceProps.cors);
             case ImageSourceType.Element:
                 return Promise.resolve({ element: ImageSourceHelper.findElementById(source.pageId, source.artboardId, source.elementId) });
             default:
@@ -347,6 +368,7 @@ export default class ImageSourceHelper {
 
     static shouldClip(source, w, h, runtimeProps) {
         switch (source.type) {
+            case ImageSourceType.Loading:
             case ImageSourceType.Url:
                 if (!runtimeProps) {
                     return false;
@@ -360,11 +382,11 @@ export default class ImageSourceHelper {
         return false;
     }
 
-    static isEditSupported(source) {
+    static isEditSupported(source: ImageSource) {
         if (!source) {
             return false;
         }
-        return source.type === ImageSourceType.Url;
+        return source.type === ImageSourceType.Url || source.type === ImageSourceType.Loading;
     };
 
     static isFillSupported(source) {
@@ -377,6 +399,10 @@ export default class ImageSourceHelper {
 
     static createUrlSource(url: string): ImageSource {
         return { type: ImageSourceType.Url, url: url };
+    }
+
+    static createLoadingSource(dataUrl: string): ImageSource {
+        return { type: ImageSourceType.Loading, dataUrl };
     }
 
     static createElementSource(pageId: string, artboardId: string, elementId: string): ImageSource {

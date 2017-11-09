@@ -5,7 +5,7 @@ import ContextPool from "framework/render/ContextPool";
 import EventHelper from "framework/EventHelper";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
-import { LayerType, IView, IAnimationController, ILayer, IUIElement, ViewState, IEvent, ICoordinate, IContext, ISize, IRect, IPoint, RenderEnvironment, RenderFlags, ChangeMode } from "carbon-core";
+import { LayerType, IView, IAnimationController, ILayer, IUIElement, ViewState, IEvent, ICoordinate, IContext, ISize, IRect, IPoint, RenderEnvironment, RenderFlags, ChangeMode, IArtboard, Origin } from "carbon-core";
 import Rect from "../math/rect";
 import AnimationGroup from "./animation/AnimationGroup";
 import Context from "./render/Context";
@@ -806,6 +806,23 @@ export default class ViewBase { //TODO: implement IView
             this.scrollY(scroll.scrollY);
         }
         this._viewportSize = this._viewportSize.withSize(newSize.width, newSize.height);
+    }
+
+    fitToViewportIfNeeded(element: IUIElement, origin?: Origin, mode?: ChangeMode) {
+        var viewport = this.viewportRect();
+        var bounds = new Rect(0, 0, viewport.width * .8, viewport.height * .8);
+        var current = new Rect(0, 0, element.width(), element.height());
+        var fit = current.fit(bounds, true);
+
+        var artboard = this.page.getActiveArtboard() as IArtboard;
+        if (artboard && artboard.isInViewport()) {
+            fit = fit.fit(artboard.boundaryRect(), true);
+        }
+
+        if (fit.width !== current.width || fit.height !== current.height) {
+            element.scale(fit.width/current.width, fit.height/current.height, origin || Origin.Center, mode);
+            element.roundBoundingBoxToPixelEdge(mode);
+        }
     }
 
     showContextMenu(eventData) {

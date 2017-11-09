@@ -80,7 +80,7 @@ PropertyMetadata.registerForType = function(Type, data){
         if (!Type.prototype.t){
             throw new Error("Type " + Type.name + " must have 'static t' property");
         }
-        if (Type.prototype.t.length > 2){
+        if (Type.prototype.t.length > 3){
             console.warn("Type with long name: " + Type.prototype.t);
         }
     }

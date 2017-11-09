@@ -699,38 +699,64 @@ export default class DesignerController implements IController {
     }
 
 
-    beginDragElement(event: MouseEvent, element: IUIElement, stopDragPromise: Promise<IDropElementData>) {
-        var eventData = this.createEventData(event);
-        element.resetTransform();
-        element.applyTranslation(new Point(Math.round(eventData.x - element.width() / 2), Math.round(eventData.y - element.height() / 2)));
+    beginDragElements(event: MouseEvent, elements: IUIElement[], stopDragPromise: Promise<void>) {
+        let eventData = this.createEventData(event);
 
-        this.view.dropElement(element, ChangeMode.Self);
-        Selection.makeSelection([element], "new", false, true);
+        for (let i = 0; i < elements.length; ++i){
+            let e = elements[i];
+            e.resetTransform();
+            e.applyTranslation(new Point(Math.round(eventData.x - e.width() / 2), Math.round(eventData.y - e.height() / 2)));
+            this.view.dropElement(e, ChangeMode.Self);
+        }
 
-        this._startDraggingElement = element;
-        this.beginDrag(eventData, element, false);
+        let elementForDragging: IUIElement = null;
+        if (elements.length === 1) {
+            elementForDragging = elements[0];
+        }
+        else {
+            let composite = new CompositeElement();
+            composite.registerAll(elements);
+            composite.performArrange();
+            elementForDragging = composite;
+        }
+
+        Selection.makeSelection(elements, "new", false, true);
+
+        this._startDraggingElement = elementForDragging;
+        this.beginDrag(eventData, elementForDragging, false);
 
         Cursor.setCursor("move_cursor");
 
         stopDragPromise
             .then(result => {
-                var eventData = this.createEventData(result.e);
-                var parent = this.getCurrentDropTarget(eventData);
+                var parent = this.getCurrentDropTarget();
 
-                // remove element from parent and keep global position to generate less primitives
-                let gm = element.globalViewMatrix();
-                element.parent().remove(element, ChangeMode.Self);
-                element.setTransform(gm, ChangeMode.Self);
+                for (let i = 0; i < elements.length; ++i){
+                    let e = elements[i];
 
-                this.raiseInteractionStopped(InteractionType.Dragging, eventData);
+                    // remove element from parent and keep global position to generate less primitives
+                    let gm = e.globalViewMatrix();
+                    e.parent().remove(e, ChangeMode.Self);
+                    e.setTransform(gm, ChangeMode.Self);
+                }
+
+                this.raiseInteractionStopped(InteractionType.Dragging, this._lastMouseMove);
                 this.disposeDragging();
 
-                this.insertAndSelect(result.elements, parent);
+                this.insertAndSelect(elements, parent);
             })
             .catch(e => {
-                element.parent().remove(element, ChangeMode.Self);
+                for (let i = 0; i < elements.length; ++i){
+                    let e = elements[i];
+                    e.parent().remove(e, ChangeMode.Self);
+                }
                 this.cancel();
                 this.raiseInteractionStopped(null, null);
+            })
+            .finally(() => {
+                if (elementForDragging instanceof CompositeElement) {
+                    elementForDragging.dispose();
+                }
             });
     }
 
@@ -762,7 +788,7 @@ export default class DesignerController implements IController {
         Selection.makeSelection(newSelection);
     }
 
-    getCurrentDropTarget(eventData: IMouseEventData): IContainer | null {
+    getCurrentDropTarget(): IContainer {
         var parent = this._draggingOverElement;
         return parent || this._draggingElement.children[0].parent();
     }

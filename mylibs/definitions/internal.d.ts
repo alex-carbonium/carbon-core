@@ -73,6 +73,8 @@ declare module "carbon-model"{
     }
 
     export interface IContainer{
+        transferElement(element: IUIElement, index: number, mode?: ChangeMode);
+
         globalMatrixToLocal(m: any): any;
         getElementById(id:string):IUIElement|IContainer|null;
     }
@@ -83,6 +85,10 @@ declare module "carbon-model"{
 
     interface IModel {
         createElement(size?: ISize, props?: Partial<IUIElementProps>): IUIElement;
+    }
+
+    interface IFileElement {
+        registerImageLink(image: IImage);
     }
 }
 

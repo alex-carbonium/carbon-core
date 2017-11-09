@@ -194,6 +194,7 @@ export var Types = {
     'Box': 'B',
     'Shadow': 'i',
     'IconSetCell': 'isc',
+    'File': '*'
 };
 
 if (DEBUG) {

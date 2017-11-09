@@ -156,7 +156,7 @@ export default class PreviewController {
     }
 
 
-    beginDragElement(event, element, stopDragPromise) {
+    beginDragElements(event, elements, stopDragPromise) {
     }
 
 

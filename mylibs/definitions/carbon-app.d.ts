@@ -1,7 +1,7 @@
 declare module "carbon-app" {
     import { IDataNode, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IIsolatable, IMouseEventHandler, IContainerProps, PropDescriptor } from "carbon-model";
     import { IEvent, IEventData, IEvent2, IMouseEventData, KeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable, IJsonNode, IPrimitive, ArtboardType, FontStyle, FontWeight, ChangeMode, Primitive } from "carbon-basics";
-    import { IRect, ICoordinate, ISize } from "carbon-geometry";
+    import { IRect, ICoordinate, ISize, Origin } from "carbon-geometry";
     import { IContext, IContextPool, RenderEnvironment, RenderFlags } from "carbon-rendering";
 
     export interface IPlatform{
@@ -265,6 +265,7 @@ declare module "carbon-app" {
         viewportRect(): IRect;
         pointToScreen(point: ICoordinate): ICoordinate;
         logicalCoordinateToScreen(point: ICoordinate) : ICoordinate;
+        fitToViewportIfNeeded(element: IUIElement, origin?: Origin, mode?: ChangeMode);
 
         ensureScale(elements: IUIElement[]);
         ensureCentered(elements: IUIElement[]);
@@ -288,11 +289,6 @@ declare module "carbon-app" {
         unregisterForLayerDraw(layerType:number, element:ILayerDrawHandlerObject);
 
         dispose();
-    }
-
-    export interface IDropElementData{
-        e: MouseEvent;
-        elements: IUIElement[];
     }
 
     export const enum InteractionType {
@@ -339,12 +335,12 @@ declare module "carbon-app" {
         captureMouse(element: IMouseEventHandler): void;
         releaseMouse(element: IMouseEventHandler): void;
 
-        beginDragElement(e: MouseEvent, element: IUIElement, dropPromise: Promise<IDropElementData>);
+        beginDragElements(e: MouseEvent, elements: IUIElement[], dropPromise: Promise<void>);
         isDragging(): boolean;
 
         choosePasteLocation(elements: IUIElement[], allowMoveIn?: boolean): {parent: IContainer, x: number, y: number}
         insertAndSelect(element: IUIElement[], parent: IContainer);
-        getCurrentDropTarget(eventData: IMouseEventData): IContainer | null;
+        getCurrentDropTarget(): IContainer;
 
         currentTool: WorkspaceTool;
         currentToolChanged: IEvent<WorkspaceTool>;

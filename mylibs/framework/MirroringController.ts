@@ -185,7 +185,7 @@ export default class MirroringController implements IController {
     }
 
 
-    beginDragElement(event, element, stopDragPromise) {
+    beginDragElements(event, elements, stopDragPromise) {
     }
 
 

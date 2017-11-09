@@ -1,4 +1,4 @@
-import { IModel, IText, ITextProps, IUIElement, IUIElementProps, ISize, ILineProps, ILine, IStarProps, IStar, IRectangle, IRectangleProps, IContainer, IArtboardProps, IArtboard, IStateboard, IStateboardProps, ICircleProps, ICircle, IImageProps, IImage } from "carbon-core";
+import { IModel, IText, ITextProps, IUIElement, IUIElementProps, ISize, ILineProps, ILine, IStarProps, IStar, IRectangle, IRectangleProps, IContainer, IArtboardProps, IArtboard, IStateboard, IStateboardProps, ICircleProps, ICircle, IImageProps, IImage, FileProps, IFileElement } from "carbon-core";
 import UIElement from "./UIElement";
 import Text from "./text/Text";
 import Rect from "../math/rect";
@@ -6,6 +6,7 @@ import Image from "./Image";
 import Line from "./Line";
 import Star from "./Star";
 import Circle from "./Circle";
+import { FileElement } from "./FileElement";
 import Rectangle from "./Rectangle";
 import Container from "./Container";
 import Artboard from "./Artboard";
@@ -28,6 +29,11 @@ export class Model implements IModel {
         let image = new Image();
         this.setSizeAndProps(image, size, props);
         return image;
+    }
+    createFile(props?: Partial<FileProps>): IFileElement {
+        let file = new FileElement();
+        this.setSizeAndProps(file, null, props);
+        return file;
     }
     createRectangle(size?: ISize, props?: Partial<IRectangleProps>): IRectangle {
         let rectangle = new Rectangle();

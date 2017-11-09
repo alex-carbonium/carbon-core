@@ -413,6 +413,12 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
     isInTree() {
         return false;
     }
+    isInViewport() {
+        return false;
+    }
+    roundBoundingBoxToPixelEdge() {
+        return false;
+    }
 }
 
 export default new NullContainer();

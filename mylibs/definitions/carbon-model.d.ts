@@ -14,8 +14,8 @@ declare module "carbon-model" {
         parent(value?: IDataNode): IDataNode;
         primitiveRootKey(): string;
 
-        prepareProps(changes: Partial<TProps>);
-        prepareAndSetProps(props: Partial<TProps>, mode?);
+        prepareProps(changes: Partial<TProps>, mode?: ChangeMode);
+        prepareAndSetProps(props: Partial<TProps>, mode?: ChangeMode);
         setProps(props: Partial<TProps>, mode?);
         patchProps(patchType, propName, propValue);
         selectProps(names: (keyof TProps)[]): Partial<TProps>;
@@ -93,11 +93,11 @@ declare module "carbon-model" {
         globalViewMatrixInverted(): IMatrix;
         shouldApplyViewMatrix(): boolean;
 
-        translate(deltaX: number, deltaY: number);
-        translateInWorld(deltaX: number, deltaY: number);
-        translateInRotationDirection(deltaX: number, deltaY: number);
-        scale(scaleX: number, scaleY: number, origin: Origin);
-        rotate(angle: number, origin: Origin);
+        translate(deltaX: number, deltaY: number, mode?: ChangeMode);
+        translateInWorld(deltaX: number, deltaY: number, mode?: ChangeMode);
+        translateInRotationDirection(deltaX: number, deltaY: number, mode?: ChangeMode);
+        scale(scaleX: number, scaleY: number, origin: Origin, mode?: ChangeMode);
+        rotate(angle: number, origin: Origin, mode?: ChangeMode);
 
         applyScaling(vector: IPoint, origin: IPoint, options?, mode?: ChangeMode): boolean;
         applyMatrixScaling(vector: IPoint, origin: IPoint, options?, mode?: ChangeMode): void;
@@ -110,13 +110,14 @@ declare module "carbon-model" {
 
         resizeDimensions(value?: ResizeDimension): ResizeDimension;
 
-        selectFrameVisible(value?:boolean):boolean;
+        selectFrameVisible(value?: boolean): boolean;
 
         boundaryRect(value?: IRect): IRect;
         getBoundingBox(): IRect;
         getBoundingBoxGlobal(): IRect;
         size(size?: ISize): ISize;
         center(global?: boolean): ICoordinate;
+        roundBoundingBoxToPixelEdge(mode?: ChangeMode): boolean;
 
         getMaxOuterBorder(): number;
 
@@ -165,6 +166,7 @@ declare module "carbon-model" {
         findPropertyDescriptor(propName): PropDescriptor;
 
         isInTree(): boolean;
+        isInViewport(): boolean;
     }
 
     export const UIElement: IConstructor<IUIElement>;
@@ -228,13 +230,13 @@ declare module "carbon-model" {
         rid?: string;
     }
 
-    export interface IRepeatCell extends IContainer {}
+    export interface IRepeatCell extends IContainer { }
     export const RepeatCell: IConstructor<IRepeatCell>;
 
     export interface IRepeatContainer extends IContainer {
         activeCell(): IRepeatCell;
         findMasterCounterpart(element: IUIElement): IUIElement;
-        addDroppedElements(dropTarget: IContainer, elements: IUIElement[], e: IMouseEventData): void;
+        addDroppedElements(dropTarget: IContainer, elements: IUIElement[], e: IMouseEventData): IUIElement[];
         findSelectionTarget(element: IUIElement): IUIElement;
     }
     export interface IRepeaterProps extends IContainerProps {
@@ -319,6 +321,7 @@ declare module "carbon-model" {
 
     export const enum ImageSourceType {
         None = 0,
+        Loading = 1,
         Url = 5,
         Element = 8
     }
@@ -326,6 +329,7 @@ declare module "carbon-model" {
     export type ImageSource =
         { type: ImageSourceType.None } |
         { type: ImageSourceType.Url, url: string } |
+        { type: ImageSourceType.Loading, dataUrl: string } |
         { type: ImageSourceType.Element, pageId: string, artboardId: string, elementId: string };
 
     export const enum ContentSizing {
@@ -344,6 +348,7 @@ declare module "carbon-model" {
 
     export interface IImage extends IContainer<IImageProps> {
         source(value?: ImageSource): ImageSource;
+        isEmpty(): boolean;
 
         resizeOnLoad(value?: Origin | null): Origin | null;
     }
@@ -359,13 +364,13 @@ declare module "carbon-model" {
     };
 
     export class UIElementDecorator {
-        protected element:IUIElement;
-        attach(element:IUIElement);
+        protected element: IUIElement;
+        attach(element: IUIElement);
         detach();
-        beforeInvoke(method:string, args:any[]):boolean|void;
-        afterInvoke(method:string, args:any[]):boolean|void ;
-        parent(value):any;
-        visible(value:boolean):boolean;
+        beforeInvoke(method: string, args: any[]): boolean | void;
+        afterInvoke(method: string, args: any[]): boolean | void;
+        parent(value): any;
+        visible(value: boolean): boolean;
     }
 
     export const enum TextMode {
@@ -415,20 +420,41 @@ declare module "carbon-model" {
     }
     export const Rectangle: IConstructor<IRectangle>;
 
-    export interface ICircleProps extends IShapeProps {}
+    export interface ICircleProps extends IShapeProps { }
     export interface ICircle extends IShape<ICircleProps> {
     }
     export const Circle: IConstructor<ICircle>;
 
-    export interface IStarProps extends IShapeProps {}
+    export interface IStarProps extends IShapeProps { }
     export interface IStar extends IShape<IStarProps> {
     }
     export const Star: IConstructor<IStar>;
 
-    export interface IPolygonProps extends IShapeProps {}
+    export interface IPolygonProps extends IShapeProps { }
     export interface IPolygon extends IShape<IPolygonProps> {
     }
     export const Polygon: IConstructor<IPolygon>;
+
+    export type FileType = "image/jpeg" | "image/png" | "image/svg+xml";
+    export interface FileProps extends IUIElementProps {
+        type: FileType;
+        url?: string;
+    }
+
+    /**
+    * An element which represents an external file being dropped on the canvas.
+    * The file itself cannot be added to the model, however it has a link to the actual model element
+    * created based on the file (image, path, group, etc).
+    */
+    export interface IFileElement extends IUIElement<FileProps> {
+        readonly linkedElement: IUIElement;
+
+        isImage(): boolean;
+        isSvg(): boolean;
+
+        drop(file: File): Promise<void>;
+        setExternalUrl(url: string): void;
+    }
 
     export const enum StrokePosition {
         Center = 0,
@@ -448,7 +474,7 @@ declare module "carbon-model" {
         Round
     }
 
-    export interface PropDescriptor{
+    export interface PropDescriptor {
         displayName: string,
         type: string,
         defaultValue: any,
@@ -467,6 +493,7 @@ declare module "carbon-model" {
         createCanvas(size?: ISize, props?: Partial<IUIElementProps>): IContainer;
         createArtboard(size?: ISize, props?: Partial<IArtboardProps>): IArtboard;
         createStateboard(size?: ISize, props?: Partial<IStateboardProps>): IStateboard;
+        createFile(props?: Partial<FileProps>): IFileElement;
     }
     export const model: IModel;
 }

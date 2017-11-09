@@ -724,9 +724,9 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return super.getHitTestBox.apply(this, arguments);
     }
 
-    isInViewport(viewportRect: IRect) {
+    isInViewport() {
         if (!this.props.hitTestBox) {
-            return super.isInViewport(viewportRect);
+            return super.isInViewport();
         }
 
         //artboard can be translated only
@@ -735,7 +735,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         rect.x += gm.tx;
         rect.y += gm.ty;
 
-        let intersects = areRectsIntersecting(rect, viewportRect);
+        let intersects = areRectsIntersecting(rect, Environment.view.viewportRect());
         rect.free();
 
         return intersects;

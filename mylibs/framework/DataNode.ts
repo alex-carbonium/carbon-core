@@ -10,7 +10,7 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
     t: string;
     props: TProps;
     runtimeProps: any;
-    children: DataNode[];
+    children: IDataNode[];
     protected _parent: IDataNode;
 
     constructor(hasChildren: boolean) {
@@ -28,7 +28,7 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
         return this._parent;
     }
 
-    prepareProps(changes: IDataNodeProps) {
+    prepareProps(changes: IDataNodeProps, mode?: ChangeMode) {
         for (let p in changes) {
             let oldValue = this.props[p];
             let newValue = changes[p];
@@ -63,7 +63,7 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
     }
 
     prepareAndSetProps(props, mode?: ChangeMode) {
-        this.prepareProps(props);
+        this.prepareProps(props, mode);
         this.setProps(props, mode);
     }
 
@@ -167,7 +167,7 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
     }
 
     removeChildByIndex(index, mode = ChangeMode.Model) {
-        let child = this.children.splice(index, 1)[0];
+        let child = this.children.splice(index, 1)[0] as any;
         if (mode !== ChangeMode.Self) {
             child.trackDeleted(this, index, mode);
         }

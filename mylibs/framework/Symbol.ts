@@ -351,8 +351,8 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         }
     }
 
-    prepareProps(changes) {
-        super.prepareProps(changes);
+    prepareProps(changes, mode?) {
+        super.prepareProps(changes, mode);
 
         if (changes.fill && changes.fill !== this.props.fill) {
             let newName = "self:fill";

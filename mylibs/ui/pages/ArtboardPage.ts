@@ -133,7 +133,7 @@ class ArtboardPage extends Page implements IArtboardPage {
 
     drawChildSafe(child: UIElement, context, environment: RenderEnvironment) {
         let frame = null;
-        if (!(environment.flags & RenderFlags.CheckViewport) || child.isInViewport(Environment.view.viewportRect())) {
+        if (!(environment.flags & RenderFlags.CheckViewport) || child.isInViewport()) {
             super.drawChildSafe(child, context, environment);
         } else {
             debug("Skip artboard not in the viewport: %s", this.name());
