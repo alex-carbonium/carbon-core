@@ -3,10 +3,21 @@ import Canvas from "../ui/common/Canvas";
 import PropertyMetadata from "./PropertyMetadata";
 import {Types, Overflow} from "./Defs";
 import Brush from "./Brush";
+import { RenderEnvironment, RenderFlags } from "carbon-core";
 
 export class IconsetCell extends Canvas {
     canAlign() {
         return false;
+    }
+    fillBackground(context, l, t, w, h, environment: RenderEnvironment) {
+        if((environment.flags & RenderFlags.ArtboardFill)) {
+            super.fillBackground(context, l, t, w, h, environment);
+        }
+    }
+    strokeBorder(context, w, h, environment: RenderEnvironment) {
+        if((environment.flags & RenderFlags.ArtboardFill)) {
+            super.strokeBorder(context, w, h, environment);
+        }
     }
     canGroup() {
         return false;
@@ -37,6 +48,11 @@ export class IconsetCell extends Canvas {
     }
     allowColorOverride() {
         return false;
+    }
+
+    clearRenderingCache() {
+        super.clearRenderingCache();
+        delete this.runtimeProps.refclone;
     }
 }
 

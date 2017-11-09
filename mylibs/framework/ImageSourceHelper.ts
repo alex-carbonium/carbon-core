@@ -172,19 +172,16 @@ export default class ImageSourceHelper {
 
         var element = runtimeProps.element;
 
+        if(!element.runtimeProps.refclone) {
+            element.runtimeProps.refclone = element.mirrorClone();
+        }
+        element = element.runtimeProps.refclone;
+
         context.save();
 
         var box = element.getBoundingBox();
         var scaleX = w / box.width;
         var scaleY = h / box.height;
-        // if(runtimeProps.sr && runtimeProps.dr) {
-        //     scaleX = runtimeProps.dr.width / runtimeProps.sr.width;
-        //     scaleY = runtimeProps.dr.height / runtimeProps.sr.height;
-        // }
-
-        // if(runtimeProps.dr) {
-        //     context.translate(runtimeProps.dr.x, runtimeProps.dr.y);
-        // }
 
         context.scale(scaleX, scaleY);
 
@@ -196,23 +193,23 @@ export default class ImageSourceHelper {
             element.parent().globalViewMatrixInverted().applyToContext(context);
         }
 
-
-
         let originalCtxl = element.runtimeProps.ctxl;
         let originalFlags = environment.flags;
         let oldFill = environment.fill;
         let oldStroke = environment.stroke;
         try {
-            element.runtimeProps.ctxl = sourceElement.runtimeProps.ctxl;
+            element.applyVisitor(e=>e.runtimeProps.ctxl = sourceElement.runtimeProps.ctxl);
+
             environment.flags &= ~RenderFlags.UseParentClipping;
             environment.flags &= ~RenderFlags.CheckViewport;
+            environment.flags |= RenderFlags.DisableCaching;
+            environment.flags &= ~RenderFlags.ArtboardFill;
             environment.fill = props.fill;
             environment.stroke = props.stroke;
 
             element.draw(context, environment);
         }
         finally {
-            element.runtimeProps.ctxl = originalCtxl;
             environment.flags = originalFlags;
             environment.fill = oldFill;
             environment.stroke = oldStroke;
