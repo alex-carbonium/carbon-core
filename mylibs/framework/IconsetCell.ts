@@ -9,15 +9,20 @@ export class IconsetCell extends Canvas {
     canAlign() {
         return false;
     }
-    fillBackground(context, l, t, w, h, environment: RenderEnvironment) {
-        if((environment.flags & RenderFlags.ArtboardFill)) {
-            super.fillBackground(context, l, t, w, h, environment);
+
+    draw(context, environment) {
+        if(this.children.length === 0) {
+            return;
         }
+
+        super.draw(context, environment);
+    }
+
+    fillBackground(context, l, t, w, h, environment: RenderEnvironment) {
+
     }
     strokeBorder(context, w, h, environment: RenderEnvironment) {
-        if((environment.flags & RenderFlags.ArtboardFill)) {
-            super.strokeBorder(context, w, h, environment);
-        }
+
     }
     canGroup() {
         return false;
@@ -49,6 +54,15 @@ export class IconsetCell extends Canvas {
 
     allowColorOverride() {
         return false;
+    }
+
+    clipSelf()
+    {
+        return this.children.length > 0 && super.clipSelf();
+    }
+
+    allowCaching() {
+        return this.children.length > 0 && super.allowCaching();
     }
 
     clearRenderingCache() {

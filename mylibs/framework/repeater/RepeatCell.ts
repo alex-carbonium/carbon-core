@@ -9,8 +9,8 @@ import GlobalMatrixModifier from "../GlobalMatrixModifier";
 import { createUUID } from "../../util";
 
 export default class RepeatCell extends Container implements IGroupContainer, IRepeatCell, IIsolatable {
-    prepareProps(changes) {
-        super.prepareProps(changes);
+    prepareProps(changes, mode?) {
+        super.prepareProps(changes, mode);
 
         if (changes.hasOwnProperty("br")) {
             changes.br = changes.br.round();

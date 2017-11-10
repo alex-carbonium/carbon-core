@@ -140,7 +140,7 @@ class Layer extends Container implements ILayer {
         return this.props.m;
     }
 
-    isInViewport(viewportRect: IRect) {
+    isInViewport() {
         return true;
     }
 

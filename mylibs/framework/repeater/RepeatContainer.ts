@@ -30,8 +30,8 @@ export default class RepeatContainer extends Container implements IRepeatContain
     canAccept() {
         return false;
     }
-    prepareProps(changes) {
-        super.prepareProps(changes);
+    prepareProps(changes, mode?) {
+        super.prepareProps(changes, mode);
         if (changes.innerMarginX !== undefined) {
             changes.innerMarginX = Math.max(0, changes.innerMarginX + .5 | 0);
         }
@@ -266,8 +266,9 @@ export default class RepeatContainer extends Container implements IRepeatContain
     }
 
     addDroppedElements(dropTarget: Container, elements: IUIElement[], e: IMouseEventData){
+        let result = [];
         if (!elements.length){
-            return;
+            return result;
         }
 
         this.runtimeProps.internalUpdate = true;
@@ -275,15 +276,25 @@ export default class RepeatContainer extends Container implements IRepeatContain
         matrix = dropTarget.globalMatrixToLocal(matrix);
 
         var cells = this.children;
-        for (var i = 0; i < this.children.length && i < elements.length; i++) {
+        let rid = elements[0].id();
+        let clone = false;
+        for (var i = 0, j = 0; i < this.children.length; i++) {
             var cell = this.children[i];
             var parent = this.findRepeatedElement(cell, dropTarget) as Container;
-            var element = elements[i];
+            var element = clone ? elements[j].clone() : elements[j];
             element.setTransform(matrix);
-            parent.add(element);
+            element.setProps({ rid });
+            result.push(parent.add(element));
+
+            if (++j === elements.length) {
+                j = 0;
+                clone = true;
+            }
         }
 
         this.runtimeProps.internalUpdate = false;
+
+        return result;
     }
 
     performArrange(e?, mode: ChangeMode = ChangeMode.Model): void {
@@ -325,7 +336,7 @@ export default class RepeatContainer extends Container implements IRepeatContain
         return result;
     }
     private findRepeatedElement(cell: RepeatCell, element: IUIElement) {
-        if (element === cell) {
+        if (element instanceof RepeatCell) {
             return cell;
         }
         return cell.findNodeBreadthFirst(x => x.props.rid === element.props.rid);

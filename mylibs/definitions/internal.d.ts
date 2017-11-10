@@ -84,6 +84,10 @@ declare module "carbon-model"{
     interface IModel {
         createElement(size?: ISize, props?: Partial<IUIElementProps>): IUIElement;
     }
+
+    interface IFileElement {
+        registerImageLink(image: IImage);
+    }
 }
 
 declare module "carbon-app"{

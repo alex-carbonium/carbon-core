@@ -8,9 +8,11 @@ import Invalidate from "./Invalidate";
 import ImageEditTool from "./ImageEditTool";
 import EventHelper from "./EventHelper";
 import RectMask from "./RectMask";
+import Environment from "../environment";
 import { ContentSizing, ImageSource, ImageSourceType, IImage, IImageProps } from "carbon-model";
 import { IRect, Origin } from "carbon-geometry";
-import { ChangeMode, IContext, RenderEnvironment } from "carbon-core";
+import { ChangeMode, IContext, RenderEnvironment, IUIElement, IFileElement } from "carbon-core";
+import { ResolvedPromise } from "./ObjectPool";
 
 const DefaultSizing = ContentSizing.fill;
 
@@ -20,14 +22,52 @@ interface IImageRuntimeProps extends IUIElementRuntimeProps {
     sourceProps?: any;
     mask?: UIElement;
     origSource?: any;
-    isTransformationClone?: boolean;
 }
 
 export default class Image extends Container<IImageProps> implements IImage {
     runtimeProps: IImageRuntimeProps;
 
-    prepareProps(changes) {
+    load() {
+        let source = this.source();
+        var promise = ImageSourceHelper.load(source, this.props.sourceProps);
+        if (promise) {
+            return promise.then(data => {
+                if (this.isDisposed()) {
+                    return;
+                }
+                if (data) {
+                    this.runtimeProps.sourceProps = data;
+                    if (this.props.sourceProps) {
+                        if (this.props.sourceProps.sr) {
+                            this.runtimeProps.sourceProps.sr = this.props.sourceProps.sr;
+                        }
+                        if (this.props.sourceProps.dr) {
+                            this.runtimeProps.sourceProps.dr = this.props.sourceProps.dr;
+                        }
+                    }
+                    //this.createOrUpdateClippingMask(source, this.props);
+                }
+
+                var resizeOrigin = this.resizeOnLoad();
+                if (resizeOrigin) {
+                    this.autoResize(source, resizeOrigin);
+                }
+
+                ImageSourceHelper.resize(source, this.sizing(), this.boundaryRect(), this.runtimeProps.sourceProps);
+                this.clearRenderingCache();
+                Invalidate.request();
+            });
+        }
+        return ResolvedPromise;
+    }
+
+    prepareProps(changes: Partial<IImageProps>, mode = ChangeMode.Model) {
         super.prepareProps.apply(this, arguments);
+
+        if (changes.source && this.props.sourceProps && !changes.sourceProps) {
+            changes.sourceProps = null;
+        }
+
         var source = changes.source || this.source();
         if (ImageSourceHelper.isEditSupported(source)) {
             var brChanged = changes.hasOwnProperty("br");
@@ -38,7 +78,7 @@ export default class Image extends Container<IImageProps> implements IImage {
                 var sourceProps = sourcePropsChanged ? changes.sourceProps : this.props.sourceProps;
                 var runtimeSourceProps = sourcePropsChanged ? changes.sourceProps : this.runtimeProps.sourceProps;
                 ImageSourceHelper.prepareProps(source, changes.sizing || this.sizing(), oldRect, newRect,
-                    sourceProps, runtimeSourceProps, changes, !this.runtimeProps.isTransformationClone);
+                    sourceProps, runtimeSourceProps, changes, mode === ChangeMode.Model);
             }
         }
     }
@@ -131,35 +171,7 @@ export default class Image extends Container<IImageProps> implements IImage {
         context.save();
 
         if (!this.runtimeProps.loaded) {
-            var promise = ImageSourceHelper.load(source, this.props.sourceProps);
-            if (promise) {
-                promise.then(data => {
-                    if (this.isDisposed()) {
-                        return;
-                    }
-                    if (data) {
-                        this.runtimeProps.sourceProps = data;
-                        if (this.props.sourceProps) {
-                            if (this.props.sourceProps.sr) {
-                                this.runtimeProps.sourceProps.sr = this.props.sourceProps.sr;
-                            }
-                            if (this.props.sourceProps.dr) {
-                                this.runtimeProps.sourceProps.dr = this.props.sourceProps.dr;
-                            }
-                        }
-                        //this.createOrUpdateClippingMask(source, this.props);
-                    }
-
-                    var resizeOrigin = this.resizeOnLoad();
-                    if (resizeOrigin) {
-                        this.autoResize(source, resizeOrigin);
-                    }
-
-                    ImageSourceHelper.resize(source, this.sizing(), this.boundaryRect(), this.runtimeProps.sourceProps);
-                    this.clearRenderingCache();
-                    Invalidate.request();
-                });
-            }
+            this.load();
             this.runtimeProps.loaded = true;
         }
 
@@ -178,28 +190,17 @@ export default class Image extends Container<IImageProps> implements IImage {
     }
 
     autoResize(source: ImageSource, origin: Origin) {
-        var realRect = ImageSourceHelper.boundaryRect(source, this.runtimeProps.sourceProps);
+        let realRect = ImageSourceHelper.boundaryRect(source, this.runtimeProps.sourceProps);
         if (realRect === null) {
             return;
         }
 
-        var bb = this.getBoundingBox();
-        var bbNew = bb.scale({ x: realRect.width / bb.width, y: realRect.height / bb.height }, bb.origin(origin));
-
-        var parentBr = this.parent().boundaryRect();
-        var scaledRect = bbNew.intersect(parentBr);
-        var sx = scaledRect.width / bbNew.width;
-        var sy = scaledRect.height / bbNew.height;
-        if (sx !== 1 || sy !== 1) {
-            var scale = Math.min(sx, sy);
-            scaledRect = bbNew.scale({ x: scale, y: scale }, bbNew.origin(origin));
-        }
-        scaledRect.roundMutable();
-
-        this.boundaryRect(scaledRect.withPosition(0, 0));
-        if (scaledRect.x || scaledRect.y) {
-            this.applyTranslation(scaledRect.topLeft().subtract(bb.topLeft()));
-        }
+        let bb = this.getBoundingBox();
+        let changeMode = this.props.source.type === ImageSourceType.Loading ? ChangeMode.Root : ChangeMode.Model;
+        this.scale(realRect.width / bb.width, realRect.height / bb.height, origin, changeMode);
+        Environment.view.fitToViewportIfNeeded(this, origin, changeMode);
+        this.roundBoundingBoxToPixelEdge(changeMode);
+        this.resizeOnLoad(null);
     }
 
     clip(context: IContext) {
@@ -257,11 +258,12 @@ export default class Image extends Container<IImageProps> implements IImage {
         return true;
     }
 
-    canAccept(elements, autoInsert?, allowMoveInOut?) {
+    canAccept(elements: IUIElement[], autoInsert?, allowMoveInOut?) {
         if (elements.length !== 1) {
             return false;
         }
-        return elements[0] instanceof Image && allowMoveInOut;
+        let element = elements[0];
+        return element instanceof Image && allowMoveInOut;
     }
 
     canConvertToPath() {
@@ -289,10 +291,18 @@ export default class Image extends Container<IImageProps> implements IImage {
         return true;
     }
 
-    insert(image: Image, index, mode) {
+    insert(element: Image, index, mode) {
         // Should always update the current element since it can be used in symbols
-        this.setProps(image.selectProps(["source", "sourceProps"]));
+        this.setProps(element.selectProps(["source", "sourceProps"]));
         return this;
+    }
+
+    trackDeleted(parent, index?: number, mode = ChangeMode.Model) {
+        if (this.props.source.type === ImageSourceType.Loading) {
+            // remove the loading source so that data url does not get into model
+            this.prepareAndSetProps({ source: Image.EmptySource }, ChangeMode.Self);
+        }
+        super.trackDeleted(parent, index, mode);
     }
 
     resizeOnLoad(value?: Origin | null): Origin | null {
@@ -307,8 +317,16 @@ export default class Image extends Container<IImageProps> implements IImage {
         return base.concat(["source", "sourceProps"]);
     }
 
+    isEmpty() {
+        return this.source() === Image.EmptySource;
+    }
+
     static createUrlSource(url: string): ImageSource {
         return ImageSourceHelper.createUrlSource(url);
+    }
+
+    static createLoadingSource(dataUrl: string): ImageSource {
+        return ImageSourceHelper.createLoadingSource(dataUrl);
     }
 
     static createElementSource(pageId: string, artboardId: string, elementId: string): ImageSource {

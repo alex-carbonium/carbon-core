@@ -112,8 +112,8 @@ export default class Section extends Container {
         }
     }
 
-    prepareProps(changes){
-        super.prepareProps(changes);
+    prepareProps(changes, mode){
+        super.prepareProps(changes, mode);
         if (changes.fill){
             if (Brush.equals(changes.fill, Brush.None)){
                 changes.dashPattern = [5, 5];

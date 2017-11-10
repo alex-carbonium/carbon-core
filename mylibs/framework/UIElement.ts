@@ -96,7 +96,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     _roundValue(value) {
         return Math.round(value);
     }
-    prepareProps(changes) {
+    prepareProps(changes, mode?) {
         super.prepareProps.apply(this, arguments);
         if (changes.styleId !== undefined) {
             extend(changes, styleManager.getStyle(changes.styleId, 1).props);
@@ -328,19 +328,19 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     getTranslation() {
         return this.dm().translation;
     }
-    translate(deltaX: number, deltaY: number) {
+    translate(deltaX: number, deltaY: number, mode?: ChangeMode) {
         let vector = Point.allocate(deltaX, deltaY);
-        this.applyTranslation(vector);
+        this.applyTranslation(vector, false, mode);
         vector.free();
     }
-    translateInRotationDirection(deltaX: number, deltaY: number) {
+    translateInRotationDirection(deltaX: number, deltaY: number, mode?: ChangeMode) {
         let vector = Point.allocate(deltaX, deltaY);
-        this.applyDirectedTranslation(vector);
+        this.applyDirectedTranslation(vector, mode);
         vector.free();
     }
-    translateInWorld(deltaX: number, deltaY: number) {
+    translateInWorld(deltaX: number, deltaY: number, mode?: ChangeMode) {
         let vector = Point.allocate(deltaX, deltaY);
-        this.applyGlobalTranslation(vector);
+        this.applyGlobalTranslation(vector, false, mode);
         vector.free();
     }
     applyTranslation(t: ICoordinate, withReset?: boolean, mode?: ChangeMode) {
@@ -363,9 +363,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         this.setTransform(m, changeMode);
     }
 
-    rotate(angle: number, origin: Origin) {
+    rotate(angle: number, origin: Origin, mode?: ChangeMode) {
         let originPoint = this.allocateOriginPoint(origin);
-        this.applyRotation(angle, originPoint);
+        this.applyRotation(angle, originPoint, false, mode);
         originPoint.free();
     }
     getRotation(global: boolean = false) {
@@ -392,10 +392,10 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return root && root.isEditable();
     }
 
-    scale(scaleX: number, scaleY: number, origin: Origin) {
+    scale(scaleX: number, scaleY: number, origin: Origin, mode?: ChangeMode) {
         let vector = Point.allocate(scaleX, scaleY);
         let originPoint = this.allocateOriginPoint(origin);
-        this.applyScaling(vector, originPoint);
+        this.applyScaling(vector, originPoint, null, mode);
         vector.free();
         originPoint.free();
     }
@@ -607,13 +607,13 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             });
         }
     }
-    roundBoundingBoxToPixelEdge(): boolean {
+    roundBoundingBoxToPixelEdge(mode?: ChangeMode): boolean {
         let rounded = false;
         let bb = this.getBoundingBox();
         let bb1 = bb.roundPosition();
         if (bb1 !== bb) {
             let t = bb1.topLeft().subtract(bb.topLeft());
-            this.applyTranslation(t);
+            this.applyTranslation(t, false, mode);
             bb1 = bb1.translate(t.x, t.y);
             rounded = true;
         }
@@ -621,7 +621,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (bb2 !== bb1) {
             let s = new Point(bb2.width / bb1.width, bb2.height / bb1.height);
             let canRound = this.shouldApplyViewMatrix();
-            this.applyScaling(s, bb1.topLeft(), ResizeOptions.Default.withRounding(canRound).withReset(false));
+            this.applyScaling(s, bb1.topLeft(), ResizeOptions.Default.withRounding(canRound).withReset(false), mode);
             rounded = true;
         }
         return rounded;
@@ -963,8 +963,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             this.globalViewMatrix().applyToContext(context);
         }
     }
-    isInViewport(viewportRect: IRect) {
-        return areRectsIntersecting(viewportRect, this.getBoundingBoxGlobal(true));
+    isInViewport() {
+        return areRectsIntersecting(Environment.view.viewportRect(), this.getBoundingBoxGlobal(true));
     }
 
     drawExtras(context: IContext, environment: RenderEnvironment) {
@@ -984,7 +984,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             w = br.width,
             h = br.height;
 
-        if (environment && (environment.flags & RenderFlags.CheckViewport) && !this.isInViewport(Environment.view.viewportRect())) {
+        if (environment && (environment.flags & RenderFlags.CheckViewport) && !this.isInViewport()) {
             if (params.perf) {
                 performance.measure(markName, markName);
             }

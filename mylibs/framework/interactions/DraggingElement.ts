@@ -258,7 +258,7 @@ export class DraggingElement extends CompositeElement {
 
         let newPosition = Point.allocate(this._initialPosition.x + this._translation.x, this._initialPosition.y + this._translation.y);
 
-        if (this.parentAllowSnapping(event) && !event.ctrlKey) {
+        if (this.isSnappingAllowed(event) && !event.ctrlKey) {
             let snapped = SnapController.applySnapping(newPosition, this._ownSnapPoints);
             if (!newPosition.equals(snapped)) {
                 this._translation.set(this._translation.x + snapped.x - newPosition.x, this._translation.y + snapped.y - newPosition.y);
@@ -310,8 +310,8 @@ export class DraggingElement extends CompositeElement {
         return this.children[0].constraints();
     }
 
-    parentAllowSnapping(pos) {
-        return this.children.every(x => x.parent().getDropData(x, pos) === null);
+    private isSnappingAllowed(pos) {
+        return this.children.every(x => x.allowSnapping() && x.parent().getDropData(x, pos) === null);
     }
 
     allowMoveOutChildren(event) {

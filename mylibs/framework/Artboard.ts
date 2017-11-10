@@ -24,6 +24,7 @@ import CoreIntl from "../CoreIntl";
 import { createUUID } from "../util";
 import Canvas from "../ui/common/Canvas";
 import { IconsetCell } from "./IconsetCell";
+import PropertyTracker from "framework/PropertyTracker";
 
 
 // TODO: artboard states
@@ -427,6 +428,9 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         super.drawSelf(context, w, h, environment);
         this.onContentDrawn && this.onContentDrawn(this, context);
 
+        if (this.props.type === ArtboardType.IconSet) {
+            this.drawIconsGrid(context);
+        }
 
         if (!frame || !(environment.flags & RenderFlags.ShowFrames)) {
             this.drawFrameRect(context, environment);
@@ -435,6 +439,30 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         context.restore();
 
         this._drawing = false;
+    }
+
+    drawIconsGrid(context) {
+        let c = this.props.colsCount;
+        let r = this.props.rowsCount;
+        let s = this.props.iconCellSize;
+        let v = 0;
+        let w = this.width();
+        let h = this.height();
+        context.beginPath();
+        for (let i = 1; i < c; ++i) {
+            v = (s + 1) * i - 0.5;
+            context.moveTo(v, 0);
+            context.lineTo(v, w);
+        }
+
+        for (let i = 1; i < r; ++i) {
+            v = (s + 1) * i - 0.5;
+            context.moveTo(0, v);
+            context.lineTo(w, v);
+        }
+
+        context.strokeStyle = 'rgb(180,180,180)';
+        context.stroke();
     }
 
     buildMetadata(properties) {
@@ -481,14 +509,11 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     _addIconCell(i/*col*/, j/*row*/, cols, rows, size, margin) {
         let cell = new IconsetCell();
-        cell.setProps({
-            br: new Rect(0, 0, size, size)
-        });
+        var props = cell.props;
+        props.br = new Rect(0, 0, size, size);
+        props.m = Matrix.createTranslationMatrix(i * (size + margin), j * (size + margin));
+        props.name = `Icon(${i},${j})`;
 
-        let p = Point.allocate(i * (size + margin), j * (size + margin));
-        cell.applyTranslation(p);
-        p.free();
-        cell.name(`Icon(${i},${j})`);
         cell.addFlags(UIElementFlags.Icon);
         this.insert(cell, j * cols + i);
 
@@ -541,7 +566,9 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
                         parent.patchProps(PatchType.Insert, "symbolGroups", { id: "default", name: CoreIntl.label("@page.defaultSymbolGroup") });
                     }
                     else if (props.type === ArtboardType.IconSet) {
-                        this._convertToIconset();
+                        setTimeout(() => {
+                            this._convertToIconset();
+                        }, 0);
                     }
 
                     this.enablePropsTracking();
@@ -573,10 +600,10 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     dropElement(element, mode) {
 
-        if(this.props.type === ArtboardType.IconSet) {
+        if (this.props.type === ArtboardType.IconSet) {
             let elementBox = element.getBoundingBoxGlobal();
-            let parent:IContainer = this;
-            for (let i = 0; i < this.children.length; ++i){
+            let parent: IContainer = this;
+            for (let i = 0; i < this.children.length; ++i) {
                 if (this.children[i].getBoundingBoxGlobal().isIntersecting(elementBox)) {
                     parent = this.children[i] as any;
                     break;
@@ -606,6 +633,14 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             }
         }
 
+        if (children.length === 0) {
+            rowsCount = Math.min(16, rowsCount);
+            colsCount = Math.min(16, colsCount);
+        }
+
+        App.Current.beginUpdate();
+        PropertyTracker.suspend();
+
         for (let i = 0; i < children.length; ++i) {
             let child = children[i];
             iconCellSize = Math.max(iconCellSize, child.width() + 2, child.height() + 2);
@@ -633,10 +668,11 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             iconCellSize: iconCellSize,
             width: colsCount * (iconCellSize + margin) - margin,
             height: rowsCount * (iconCellSize + margin) - margin,
-            fill: Brush.createFromColor('rgba(150,150,150,0.2)')
         });
 
         this.clearRenderingCache();
+        PropertyTracker.resumeAndFlush();
+        App.Current.endUpdate();
     }
 
     _rearrangeIcons(props, oldProps) {
@@ -648,7 +684,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         let size = props.iconCellSize || this.props.iconCellSize;
         let oldSize = oldProps.iconCellSize || this.props.iconCellSize;
 
-        if(rows === oldRows && cols === oldCols && size === oldSize) {
+        if (rows === oldRows && cols === oldCols && size === oldSize) {
             return;
         }
 
@@ -672,16 +708,16 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             }
         }
 
-        if(size !== oldSize) {
+        if (size !== oldSize) {
             var c = Math.min(cols, oldCols);
             for (var i = 0; i < c; ++i) {
                 for (var j = 0; j < Math.min(rows, oldRows); ++j) {
                     let index = j * c + i;
                     let child = this.children[index];
                     child.setProps({
-                        width:size,
-                        height:size,
-                        m:Matrix.createTranslationMatrix(i * (size + margin), j * (size + margin))
+                        width: size,
+                        height: size,
+                        m: Matrix.createTranslationMatrix(i * (size + margin), j * (size + margin))
                     })
                 }
             }
@@ -722,9 +758,9 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return super.getHitTestBox.apply(this, arguments);
     }
 
-    isInViewport(viewportRect: IRect) {
+    isInViewport() {
         if (!this.props.hitTestBox) {
-            return super.isInViewport(viewportRect);
+            return super.isInViewport();
         }
 
         //artboard can be translated only
@@ -733,7 +769,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         rect.x += gm.tx;
         rect.y += gm.ty;
 
-        let intersects = areRectsIntersecting(rect, viewportRect);
+        let intersects = areRectsIntersecting(rect, Environment.view.viewportRect());
         rect.free();
 
         return intersects;

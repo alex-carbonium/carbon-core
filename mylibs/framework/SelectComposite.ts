@@ -119,12 +119,6 @@ export default class SelectComposite extends CompositeElement implements ISelect
             this.addActiveFrame(element);
         }
     }
-    registerAll(elements: IUIElement[]) {
-        for (let i = 0, j = elements.length; i < j; ++i) {
-            let element = elements[i];
-            this.register(element);
-        }
-    }
 
     unregister(element: IUIElement) {
         element.unselect();

@@ -288,7 +288,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
             w = br.width,
             h = br.height;
 
-        if (environment && (environment.flags & RenderFlags.CheckViewport) && !this.isInViewport(Environment.view.viewportRect())) {
+        if (environment && (environment.flags & RenderFlags.CheckViewport) && !this.isInViewport()) {
             if (params.perf) {
                 performance.measure(markName, markName);
             }
