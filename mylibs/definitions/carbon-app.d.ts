@@ -57,6 +57,7 @@ declare module "carbon-app" {
         activeStoryChanged: IEvent<any>;
         storyInserted: IEvent<any>;
         storyRemoved: IEvent<any>;
+        onsplash: IEvent<any>;
         resourceAdded: IEvent2<ArtboardType, IArtboard>;
         resourceChanged: IEvent2<ArtboardType, IArtboard>;
         resourceDeleted: IEvent3<ArtboardType, IArtboard, IPage>;

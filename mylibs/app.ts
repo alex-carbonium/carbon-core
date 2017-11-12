@@ -46,7 +46,7 @@ import { getBuiltInExtensions } from "./extensions/BuiltInExtensions";
 import UIElement from "./framework/UIElement";
 import RelayoutEngine from "./framework/relayout/RelayoutEngine";
 import NullContainer from "framework/NullContainer";
-import {deepEquals} from "util";
+import { deepEquals } from "util";
 import { primitiveFactory } from "./framework/sync/PrimitiveFactory";
 
 if (DEBUG) {
@@ -73,6 +73,7 @@ class AppClass extends DataNode implements IApp {
     project: any;
 
     modeChanged: IEvent<any>;
+    onsplash: IEvent<any>;
 
     activePage: IPage;
     pageChanged: IEvent2<IPage, IPage>;
@@ -148,6 +149,8 @@ class AppClass extends DataNode implements IApp {
 
         this.modeChanged = EventHelper.createEvent();
 
+        this.onsplash = EventHelper.createEvent();
+
         this.changed = EventHelper.createEvent();
         this.changedLocally = EventHelper.createEvent();
         this.changedExternally = EventHelper.createEvent();
@@ -205,6 +208,8 @@ class AppClass extends DataNode implements IApp {
 
     init() {
         params.perf && performance.mark("App.Init");
+        this.onsplash.raise({ progress: 0, message: '@load.app' });
+
         this.fontManager.clear();
         this.isLoaded = false;
 
@@ -216,7 +221,7 @@ class AppClass extends DataNode implements IApp {
     }
 
     enableRenderCache(value) {
-        if(arguments.length) {
+        if (arguments.length) {
             this._enableRenderCache = value;
             this.mapElementsToLayerMask();
         }
@@ -355,7 +360,7 @@ class AppClass extends DataNode implements IApp {
             this.settingsChanged.raise(settings);
         }
 
-        if(props.recentColors) {
+        if (props.recentColors) {
             this.recentColorsChanged.raise(props.recentColors);
         }
 
@@ -730,7 +735,7 @@ class AppClass extends DataNode implements IApp {
     }
 
     useRecentColor(color) {
-        if(!color) {
+        if (!color) {
             return;
         }
 
@@ -932,8 +937,8 @@ class AppClass extends DataNode implements IApp {
             e.runtimeProps.ctxl = 1 << 0;
         })
 
-        if(count !== max) {
-            for(var e of Selection.selectedElements()) {
+        if (count !== max) {
+            for (var e of Selection.selectedElements()) {
                 this._updateWithSelectionMask(e);
             }
         }
@@ -945,13 +950,13 @@ class AppClass extends DataNode implements IApp {
 
     updateCacheProperties() {
         // updated all elements to see if caching is allowed for them
-        this.activePage.applyVisitor(e=>{
-            if(!e.children || !e.children.length) {
+        this.activePage.applyVisitor(e => {
+            if (!e.children || !e.children.length) {
                 e.runtimeProps.allowCache = !e.disableRenderCaching();
             } else {
                 let ctxl = e.runtimeProps.ctxl;
-                e.runtimeProps.allowCache = (!e.disableRenderCaching()) && (e.children as any[]).every(child=>(child.runtimeProps.ctxl === ctxl) && child.allowCaching());
-                if(!e.runtimeProps.allowCache && e.runtimeProps.rc) {
+                e.runtimeProps.allowCache = (!e.disableRenderCaching()) && (e.children as any[]).every(child => (child.runtimeProps.ctxl === ctxl) && child.allowCaching());
+                if (!e.runtimeProps.allowCache && e.runtimeProps.rc) {
                     e.clearRenderingCache();
                 }
             }
@@ -963,6 +968,16 @@ class AppClass extends DataNode implements IApp {
         this.beginUpdate();
 
         this.clear();
+        let progress = 10;
+
+        let progressInc = ()=>{
+            if(progress <= 50) {
+                progress+=1;
+                this.onsplash.raise({ progress: progress });
+                setTimeout(progressInc, 200)
+            }
+        }
+        setTimeout(progressInc, 200);
 
         let loggedIn = Promise.resolve();
         var stopwatch = new Stopwatch("AppLoad", true);
@@ -972,14 +987,18 @@ class AppClass extends DataNode implements IApp {
             //for new apps ensure that the token is not stale, for existing app this will be checked when data is loaded
             if (!this.id()) {
                 loggedIn = backend.ensureLoggedIn(true);
+                loggedIn.then(() => progress += 10);
             }
             params.perf && performance.measure("App.setupConnection", "App.setupConnection");
         }
 
         this.addDefaultFont();
 
+        this.onsplash.raise({ progress: progress, message: '@load.data' });
         var defaultFontLoaded = this.fontManager.loadDefaultFont();
+        defaultFontLoaded.then(() => progress += 10);
         var dataLoaded = this.loadData();
+        dataLoaded.then(() => progress += 30);
         var importInitialResource = Promise.resolve();
         if (this._initializeWithResource) {
             backend.galleryProxy.trackPublicResourceUsed(this._initializeWithResource);
@@ -987,10 +1006,12 @@ class AppClass extends DataNode implements IApp {
             importInitialResource = backend.shareProxy.getPageSetup(this._initializeWithResource)
                 .then(page => fetch(page.dataUrl))
                 .then(response => response.json());
-                //TODO: handle error for non-existing resources
+            //TODO: handle error for non-existing resources
         }
 
         return Promise.all([dataLoaded, importInitialResource, defaultFontLoaded, Environment.loaded, loggedIn]).then(result => {
+            progress += 10;
+            this.onsplash.raise({ progress: progress, message: '@load.prepareenv' });
             var data = result[0];
             var externalPageData = result[1];
             stopwatch.checkpoint("env");
@@ -999,6 +1020,9 @@ class AppClass extends DataNode implements IApp {
                 this.fromJSON(data);
                 stopwatch.checkpoint("parsing");
             }
+
+            progress += 10;
+            this.onsplash.raise({ progress: progress, message: '@load.almostthere' });
 
             logger.trackEvent("AppLoaded", null, stopwatch.getMetrics());
 
@@ -1029,9 +1053,14 @@ class AppClass extends DataNode implements IApp {
     }
 
     raiseLoaded() {
+        this.onsplash.raise({ progress: 80, message: '@load.almostdone' });
         this.isLoaded = true;
         this.mapElementsToLayerMask();
         this._loaded.raise();
+
+        setTimeout(() => {
+            this.onsplash.raise({ progress: 100, message: '@load.done' });
+        }, 1000);
     }
 
     loadData() {
