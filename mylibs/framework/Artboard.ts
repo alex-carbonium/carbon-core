@@ -446,19 +446,21 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         let r = this.props.rowsCount;
         let s = this.props.iconCellSize;
         let v = 0;
-        let w = this.width();
-        let h = this.height();
+        let box = this.getBoundaryRectGlobal();
+        let w = box.width;
+        let h = box.height;
         context.beginPath();
+
         for (let i = 1; i < c; ++i) {
             v = (s + 1) * i - 0.5;
-            context.moveTo(v, 0);
-            context.lineTo(v, w);
+            context.moveTo(box.x + v, box.y + 0);
+            context.lineTo(box.x + v, box.y + h);
         }
 
         for (let i = 1; i < r; ++i) {
             v = (s + 1) * i - 0.5;
-            context.moveTo(0, v);
-            context.lineTo(w, v);
+            context.moveTo(box.x + 0, box.y + v);
+            context.lineTo(box.x + w, box.y + v);
         }
 
         context.strokeStyle = 'rgb(180,180,180)';
