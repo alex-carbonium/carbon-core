@@ -1,5 +1,5 @@
 declare module "carbon-app" {
-    import { IDataNode, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IIsolatable, IMouseEventHandler, IContainerProps, PropDescriptor } from "carbon-model";
+    import { IDataNode, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IIsolatable, IMouseEventHandler, IContainerProps, PropDescriptor, StoryType } from "carbon-model";
     import { IEvent, IEventData, IEvent2, IMouseEventData, KeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable, IJsonNode, IPrimitive, ArtboardType, FontStyle, FontWeight, ChangeMode, Primitive } from "carbon-basics";
     import { IRect, ICoordinate, ISize, Origin } from "carbon-geometry";
     import { IContext, IContextPool, RenderEnvironment, RenderFlags } from "carbon-rendering";
@@ -30,6 +30,14 @@ declare module "carbon-app" {
         fontMetadata: FontMetadata[];
     }
 
+    export interface IStory {
+        name: string,
+        description?: string,
+        type: StoryType,
+        pageName: string,
+        pageId: string
+    }
+
     export interface IApp extends IDataNode<IAppProps> {
         isLoaded: boolean;
         props:IAppProps;
@@ -51,6 +59,8 @@ declare module "carbon-app" {
         getAllResourceArtboards(type: ArtboardType): IArtboard[];
         initializeWithResource(resourceId: string);
 
+        addStory(story: IStory);
+        removeStoryById(id:string);
 
         activeStory: any;
         stories: any[];

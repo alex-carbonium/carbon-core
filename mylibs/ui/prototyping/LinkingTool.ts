@@ -5,8 +5,7 @@ import {
     ActionType,
     AnimationType,
     EasingType,
-    ActionEvents,
-    StoryType
+    ActionEvents
 } from "framework/Defs";
 import * as ActionHelper from "./ActionHelper";
 import Matrix from "../../math/matrix";
@@ -19,7 +18,7 @@ import StoryAction from "../../stories/StoryAction";
 import Link from "./Link";
 
 import DataNode from "framework/DataNode";
-import { IUIElement, IMouseEventData, KeyboardState, PrimitiveType, IContext, InteractionType, RenderEnvironment } from "carbon-core";
+import { IUIElement, IMouseEventData, KeyboardState, PrimitiveType, IContext, InteractionType, RenderEnvironment, StoryType } from "carbon-core";
 import Brush from "../../framework/Brush";
 
 const HandleSize = 14;

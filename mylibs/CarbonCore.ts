@@ -130,7 +130,6 @@ export default {
 
     "Story": require("./stories/Story"),
     "StoryAction": require("./stories/StoryAction"),
-    "StoryType": Defs.StoryType,
 
     "Invalidate": require("./framework/Invalidate"),
     "NameProvider": require("./ui/NameProvider"),

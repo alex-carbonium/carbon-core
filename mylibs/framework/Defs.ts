@@ -126,11 +126,6 @@ export var Devices = [
     { name: "Nexus 6P (435 x 773)", w: 435, h: 773 }
 ];
 
-export enum StoryType {
-    Flow = 0,
-    Prototype = 1
-};
-
 export enum MirrorViewMode {
     OriginalSize = 0,
     Fit = 1

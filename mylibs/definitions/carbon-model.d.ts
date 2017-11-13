@@ -341,6 +341,11 @@ declare module "carbon-model" {
         fixed = 6
     }
 
+    export const enum StoryType {
+        Flow = 0,
+        Prototype = 1
+    }
+
     export interface IImageProps extends IContainerProps {
         source: ImageSource;
         sizing: ContentSizing;

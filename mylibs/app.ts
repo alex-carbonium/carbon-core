@@ -8,8 +8,7 @@ import Page from "./framework/Page";
 import StyleManager from "framework/style/StyleManager";
 import OpenTypeFontManager, { DefaultFont } from "./OpenTypeFontManager";
 import {
-    Types,
-    StoryType
+    Types
 } from "./framework/Defs";
 import Font from "./framework/Font";
 import GroupContainer from "./framework/GroupContainer";
@@ -40,7 +39,7 @@ import backend from "./backend";
 import logger from "./logger";
 import params from "./params";
 import ArtboardFrame from "framework/ArtboardFrame";
-import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitiveRoot, ViewState, IJsonNode, IFontManager, IStyleManager, StyleType, IArtboard, FontMetadata, AppSettings, Primitive } from "carbon-core";
+import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitiveRoot, ViewState, IJsonNode, IFontManager, IStyleManager, StyleType, IArtboard, FontMetadata, AppSettings, Primitive, IStory } from "carbon-core";
 import { Contributions } from "./extensions/Contributions";
 import { getBuiltInExtensions } from "./extensions/BuiltInExtensions";
 import UIElement from "./framework/UIElement";
@@ -1321,7 +1320,7 @@ class AppClass extends DataNode implements IApp {
         this.disposed = true;
     }
 
-    addStory(props) {
+    addStory(props:IStory) {
         var story = new Story();
         story.setProps(props);
         this.insertChild(story, this.children.length);
