@@ -18,6 +18,7 @@ import Selection from "framework/SelectionModel";
 import Isolate from "commands/Isolate";
 import Environment from "environment";
 import ContextPool from "./render/ContextPool";
+import GroupContainer from "./GroupContainer";
 
 function propertyChanged(element, newProps) {
     if (!this._internalChange && this._itemIds && this._itemIds[element.id()]) {
@@ -304,25 +305,31 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
         let path;
         if (this.result.length === 1) {
             path = this.result[0].clone();
+            path.fill(this.fill());
+            path.stroke(this.stroke());
+            path.setProps(this.selectLayoutProps());
         }
         else {
-            path = new CompoundPath();
+            let tmppath:any = new CompoundPath();
             for (let i = 0; i < this.result.length; ++i) {
                 let p = this.result[i].clone();
                 p.joinMode("union");
                 p.fill(this.fill());
                 p.stroke(this.stroke());
-                path.add(p);
+                tmppath.add(p);
+            }
+            tmppath.recalculate();
+
+            path = new GroupContainer();
+            for(let i = 0, len = tmppath.children.length; i < len; ++i) {
+                let child = tmppath.children[0];
+                tmppath.remove(child);
+                path.add(child);
             }
         }
-        path.fill(this.fill());
-        path.stroke(this.stroke());
         path.name(this.displayName());
         path.styleId(this.styleId());
-        path.setProps(this.selectLayoutProps());
-        if (this.result.length > 1) {
-            path.recalculate();
-        }
+
         let parent = this.parent();
         let index = parent.positionOf(this);
         parent.remove(this);
