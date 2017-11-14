@@ -231,7 +231,7 @@ export default class LinkingTool extends Tool {
                 delete this._modifyingConnection;
             }
 
-            var sourceId = this._sourceElement.id();
+            let sourceId = this._sourceElement.id();
             activeStory.removeFirst(s => s.props.sourceElementId === sourceId);
             this._removeConnection(this._sourceElement);
 
@@ -267,7 +267,7 @@ export default class LinkingTool extends Tool {
         if (this._modifyingConnection) {
             var e = this._modifyingConnection.element;
             if (e) {
-                var sourceId = e.id();
+                let sourceId = e.id();
                 activeStory.removeFirst(s => s.props.sourceElementId === sourceId)
             }
             delete this._modifyingConnection;
@@ -361,7 +361,8 @@ export default class LinkingTool extends Tool {
         if (target === this._app.activePage) {
             target = null;
         }
-        if (this._target != target) {
+
+        if (this._target !== target) {
             this._target = target;
             Invalidate.requestInteractionOnly();
         }
@@ -562,7 +563,7 @@ export default class LinkingTool extends Tool {
 
                 var startX = 0 | list[0].source.x - margin * (count - 1) / 2;
 
-                for (var i = 0; i < count; ++i) {
+                for (let i = 0; i < count; ++i) {
                     list[i].source._x = startX + i * margin;
                 }
             } else {
@@ -573,7 +574,7 @@ export default class LinkingTool extends Tool {
 
                 var startY = 0 | list[0].source.y - margin * (count - 1) / 2;
 
-                for (var i = 0; i < count; ++i) {
+                for (let i = 0; i < count; ++i) {
                     list[i].source._y = startY + i * margin;
                 }
             }
@@ -581,7 +582,7 @@ export default class LinkingTool extends Tool {
     }
 
     _removeConnection(element) {
-        var i = this.connections.findIndex(c => c.element.id() == element.id());
+        var i = this.connections.findIndex(c => c.element.id() === element.id());
         if (i === -1) {
             return;
         }
@@ -678,7 +679,7 @@ export default class LinkingTool extends Tool {
         if (connectionInfo === this._hoverConnectionTo) {
             context.strokeStyle = HoverLinkColor;
             context.fillStyle = HoverLinkColor;
-        } else if (connectionInfo.element == this._selection || (this._activeStory && this._activeStory.props.type === StoryType.Flow)) {
+        } else if (connectionInfo.element === this._selection || (this._activeStory && this._activeStory.props.type === StoryType.Flow)) {
             context.strokeStyle = DefaultLinkColor;
             context.fillStyle = DefaultLinkColor;
         } else {
@@ -941,7 +942,7 @@ export default class LinkingTool extends Tool {
             this._renderNewArrow(context, scale);
             this._target && DropVisualization.highlightElement(context, this._target, null, HoverLinkColor);
         } else if (this._target) {
-            DropVisualization.highlightElement(context, this._target);
+            DropVisualization.highlightElement(context, this._target, null, DefaultLinkColor);
         }
 
         if (this.connections.length) {

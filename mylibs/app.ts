@@ -39,7 +39,7 @@ import backend from "./backend";
 import logger from "./logger";
 import params from "./params";
 import ArtboardFrame from "framework/ArtboardFrame";
-import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitiveRoot, ViewState, IJsonNode, IFontManager, IStyleManager, StyleType, IArtboard, FontMetadata, AppSettings, Primitive, IStory } from "carbon-core";
+import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitiveRoot, ViewState, IJsonNode, IFontManager, IStyleManager, StyleType, IArtboard, FontMetadata, AppSettings, Primitive, IStory, StoryType } from "carbon-core";
 import { Contributions } from "./extensions/Contributions";
 import { getBuiltInExtensions } from "./extensions/BuiltInExtensions";
 import UIElement from "./framework/UIElement";
@@ -252,6 +252,22 @@ class AppClass extends DataNode implements IApp {
                 var page = this.findNodeByIdBreadthFirst(value.props.pageId);
                 this.setActivePage(page);
             }
+        }
+
+        let pageId = this.activePage.id();
+
+        if(this._activeStory && this._activeStory.props.pageId !== pageId) {
+            this._activeStory = this.stories.find(s=>s.props.pageId === pageId);
+        }
+
+        if(!this._activeStory){
+            this.addStory({
+                name:'default',
+                pageId:pageId,
+                type:StoryType.Prototype,
+                description:'',
+                pageName:this.activePage.name()
+            });
         }
 
         return this._activeStory;
@@ -1176,6 +1192,10 @@ class AppClass extends DataNode implements IApp {
         return this._mode === "preview";
     }
 
+    isPrototypeMode() {
+        return this._mode === "prototype";
+    }
+
     setMode(value) {
         if (this._mode !== value) {
             this._mode = value;
@@ -1324,8 +1344,8 @@ class AppClass extends DataNode implements IApp {
         var story = new Story();
         story.setProps(props);
         this.insertChild(story, this.children.length);
-        this.initStory(story);
         this.activeStory(story);
+        this.initStory(story);
     }
 
     initStory(story) {

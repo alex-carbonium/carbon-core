@@ -145,6 +145,10 @@ export default class DesignerController implements IController {
         this._noActionsBeforeClick = false;
         this.touchHelper = new TouchHelper(view);
 
+        if(this.app.isPrototypeMode()) {
+            this._currentTool = "protoTool";
+        }
+
         this.draggingEnterEvent = EventHelper.createEvent();
         this.draggingLeftEvent = EventHelper.createEvent();
         this.startResizingEvent = EventHelper.createEvent2<IMouseEventData, IUIElement>();
@@ -873,6 +877,10 @@ export default class DesignerController implements IController {
     }
 
     resetCurrentTool() {
-        this.actionManager.invoke("pointerTool" as WorkspaceTool);
+        if(this.app.isPrototypeMode()) {
+            this.actionManager.invoke("protoTool" as WorkspaceTool);
+        } else {
+            this.actionManager.invoke("pointerTool" as WorkspaceTool);
+        }
     }
 }

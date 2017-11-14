@@ -79,6 +79,8 @@ declare module "carbon-app" {
 
         isolationActive():boolean;
 
+        isPrototypeMode():boolean;
+
         onBuildMenu: any;
         actionManager: IActionManager;
         dataManager: IDataManager;
