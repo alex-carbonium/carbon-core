@@ -415,7 +415,7 @@ export default class ViewBase { //TODO: implement IView
 
     deactivateLayer(layerType: LayerType, silent?: boolean) {
         var i = this._layers.findIndex(x => x.type === layerType);
-        if (i) {
+        if (i>=0) {
             this.activateLayer(this._layers[i - 1].type, silent);
         }
     }
@@ -640,7 +640,7 @@ export default class ViewBase { //TODO: implement IView
     getScaleToFitRect(rect: IRect, marginFactor = 1.32) {
         var size = this.viewportSize();
         var w = rect.width * marginFactor;
-        var h = rect.height * marginFactor;
+        var h = rect.height * marginFactorf;
         var sx = size.width / w;
         var sy = size.height / h;
         return Math.min(sx, sy);

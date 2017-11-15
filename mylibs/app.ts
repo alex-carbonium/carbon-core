@@ -256,7 +256,7 @@ class AppClass extends DataNode implements IApp {
 
         let pageId = this.activePage.id();
 
-        if(this._activeStory && this._activeStory.props.pageId !== pageId) {
+        if(!this._activeStory || this._activeStory.props.pageId !== pageId) {
             this._activeStory = this.stories.find(s=>s.props.pageId === pageId);
         }
 
