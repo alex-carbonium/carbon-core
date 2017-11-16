@@ -38,6 +38,13 @@ export default class PreviewProxy {
         }
         var page = DataNode.getImmediateChildById(this.app, activeStory.props.homeScreen[0]);
         var artboard = DataNode.getImmediateChildById(page, activeStory.props.homeScreen[1], true);
+        if(!artboard) {
+            artboard = page.getAllArtboards()[0];
+        }
+
+        if(!artboard) {
+            return NullPage;
+        }
 
         return this._makePageFromArtboard(artboard, screenSize);
     }

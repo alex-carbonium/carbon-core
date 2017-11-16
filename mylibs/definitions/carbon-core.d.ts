@@ -43,6 +43,7 @@ declare module "carbon-core" {
     export var PreviewController:any;
     export var PreviewView:any;
     export var PreviewProxy:any;
+    export var ContextLayerSource: any;
     export class Shape{}
     export function createUUID(): string;
 }

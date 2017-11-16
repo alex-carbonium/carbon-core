@@ -134,6 +134,7 @@ export default {
     "Invalidate": require("./framework/Invalidate"),
     "NameProvider": require("./ui/NameProvider"),
 
+    "ContextLayerSource":  require("./framework/render/ContextLayerSource"),
     //TODO: replace with math/rect
     "TextRect": require("./framework/text/primitives/rect"),
 

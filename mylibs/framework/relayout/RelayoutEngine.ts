@@ -97,6 +97,8 @@ class RelayoutEngine {
                 this.rollbacks.push(p._rollbackData);
                 delete p._rollbackData;
             }
+            let isolationLayer =Environment.view.getLayer(LayerType.Isolation);
+            let inIsolation = isolationLayer && isolationLayer.isActive;
 
             let elements = Selection.elements.length ? Selection.elements : Selection.previousElements;
             CommandManager.registerExecutedCommand(new PrimitiveCommand(
@@ -104,7 +106,7 @@ class RelayoutEngine {
                 this.rollbacks.slice().reverse(),
                 app.activePage.id(),
                 Selection.latestGlobalBoundingBox,
-                Environment.view.getLayer(LayerType.Isolation).isActive));
+                inIsolation));
         }
 
         //all local changes (from queue and model) must go to server

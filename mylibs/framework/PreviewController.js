@@ -90,6 +90,10 @@ export default class PreviewController {
         this.touchHelper.onpanend(event);
     }
 
+    resetCurrentTool() {
+
+    }
+
     ondoubletap() {
 
     }
