@@ -16,16 +16,6 @@ export default class PreviewView extends ViewBase {
     attachToDOM(contexts: IContext[], viewContainerElement, requestRedrawCallback, cancelRedrawCallback, renderingScheduledCallback) {
         this.viewContainerElement = viewContainerElement; // parent div element
         this.upperContext = contexts.find(x => x.type === ContextType.Interaction);
-        // this.isolationContext = contexts.find(x => x.type === ContextType.Isolation);
-
-        // this.setupRendering(contexts, requestRedrawCallback, cancelRedrawCallback, renderingScheduledCallback);
-
-        // this._cursorChangedToken = Cursor.changed.bind(this, this.updateCursor);
-        // this._invalidateRequestedToken = Invalidate.requested.bind(this, this.invalidate);
-
-        // if (this.interactionLayer) {
-        //     this.interactionLayer.context = this.upperContext;
-        // }
     }
 
     detach() {

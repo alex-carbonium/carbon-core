@@ -420,6 +420,8 @@ export default class LinkingTool extends Tool {
 
     attach(view, controller) {
         super.attach.apply(this, arguments);
+        this._handles = [];
+
         this._view.prototyping(true);
         this._currentArtboard = null;
         this._activeStory = this._app.activeStory();
@@ -449,7 +451,7 @@ export default class LinkingTool extends Tool {
         this._elementSelected(Selection.selectComposite());
         this._elementSelectedToken = Selection.onElementSelected.bind(this, this._elementSelected);
         this._refreshConnections();
-        this._handles = [];
+
         Invalidate.request();
     }
 

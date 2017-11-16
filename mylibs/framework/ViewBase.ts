@@ -377,7 +377,6 @@ export default class ViewBase { //TODO: implement IView
     }
 
     setActivePage(page) {
-        Selection.clear();
         this._page = page;
         page._view = this;
         this._layers[0] = page;
