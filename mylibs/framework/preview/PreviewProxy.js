@@ -14,13 +14,12 @@ export default class PreviewProxy {
         var page = new Page();
         var previewClone = artboard.mirrorClone();
         var oldRect = previewClone.boundaryRect();
+        previewClone.setTransform(Matrix.Identity);
         if (artboard.props.allowVerticalResize || artboard.props.allowHorizontalResize) {
-            previewClone.setTransform(Matrix.Identity);
-            previewClone.width(artboard.props.allowHorizontalResize ? screenSize.width : artboard.width());
-            previewClone.height(artboard.props.allowVerticalResize ? screenSize.height : artboard.height());
-            previewClone.performArrange({oldRect});
-        } else {
-            previewClone.setTransform(Matrix.Identity);
+
+            // previewClone.width(artboard.props.allowHorizontalResize ? screenSize.width : artboard.width());
+            // previewClone.height(artboard.props.allowVerticalResize ? screenSize.height : artboard.height());
+            // previewClone.performArrange({oldRect});
         }
 
         page.add(previewClone);
@@ -96,6 +95,7 @@ export default class PreviewProxy {
             artboard.setProps({x: 0, y: 0, width: width, height: height});
             artboard.performArrange({oldRect});
         }
+        artboard.props.m = Matrix.Identity;
 
 
         page.maxScrollX(Math.max(0, (artboard.width() - screenSize.width) * scale));

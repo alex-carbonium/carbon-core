@@ -493,6 +493,13 @@ declare module "carbon-app" {
         Column = 0
     }
 
+    export const enum PreviewDisplayMode {
+        OriginalSize = 0,
+        Fit = 1,
+        Fill = 2,
+        Responsive = 3
+    }
+
     export const enum AlignMode {
         Selection,
         Parent

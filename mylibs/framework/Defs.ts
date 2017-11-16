@@ -117,9 +117,9 @@ export enum ActionEvents {
 
 export var Devices = [
     { name: "Responsive" },
-    { name: "iPhone 6 (375 x 667)", w: 375, h: 667 },
-    { name: "iPhone 6 Plus (414 x 736)", w: 414, h: 736 },
-    { name: "iPhone 5 (320 x 568)", w: 320, h: 568 },
+    { name: "iPhone 8 (375 x 667)", w: 375, h: 667 },
+    { name: "iPhone 8 Plus (414 x 736)", w: 414, h: 736 },
+    { name: "iPhone SE (320 x 568)", w: 320, h: 568 },
     { name: "iPad (768 x 1024)", w: 768, h: 1024 },
     { name: "Galaxy S5 (360 x 640)", w: 360, h: 640 },
     { name: "Nexus 5X (411 x 731)", w: 411, h: 731 },

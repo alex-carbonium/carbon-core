@@ -421,9 +421,9 @@ export default class LinkingTool extends Tool {
     attach(view, controller) {
         super.attach.apply(this, arguments);
         this._handles = [];
-
         this._view.prototyping(true);
         this._currentArtboard = null;
+
         this._activeStory = this._app.activeStory();
         this._activeStoryChangedToken = this._app.activeStoryChanged.bind(this, () => {
             this._activeStory = this._app.activeStory();
