@@ -183,6 +183,7 @@ declare module "carbon-app" {
     export interface IPageProps extends IContainerProps {
         galleryId?: string;
     }
+
     export interface IPage<TProps extends IPageProps = IPageProps> extends ILayer<IPageProps> {
         getAllArtboards(): IArtboard[];
         getActiveArtboard(): IArtboard;
@@ -195,6 +196,9 @@ declare module "carbon-app" {
 
         scrollX(): number;
         scrollY(): number;
+
+        maxScrollX(value?:number):number;
+        maxScrollY(value?:number):number;
 
         deactivating(nextPage: IPage): boolean;
         deactivated(): void;

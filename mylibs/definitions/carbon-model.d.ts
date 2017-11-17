@@ -93,6 +93,8 @@ declare module "carbon-model" {
         globalViewMatrixInverted(): IMatrix;
         shouldApplyViewMatrix(): boolean;
 
+        applyVisitor(callback: (IUIElement) => boolean | void);
+
         translate(deltaX: number, deltaY: number, mode?: ChangeMode);
         translateInWorld(deltaX: number, deltaY: number, mode?: ChangeMode);
         translateInRotationDirection(deltaX: number, deltaY: number, mode?: ChangeMode);

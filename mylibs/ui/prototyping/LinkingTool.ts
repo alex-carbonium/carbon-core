@@ -172,7 +172,7 @@ export default class LinkingTool extends Tool {
 
     onclick(event) {
         delete this._onFirstMove;
-        if(!this._activeStory) {
+        if (!this._activeStory) {
             return;
         }
         var scale = this._view.scale();
@@ -532,7 +532,7 @@ export default class LinkingTool extends Tool {
         list.push({
             target: target,
             source: source,
-            size: (target.type & 1)?element.width():element.height()
+            size: (target.type & 1) ? element.width() : element.height()
         });
     }
 
@@ -554,7 +554,7 @@ export default class LinkingTool extends Tool {
             }
 
             var size = list[0].size;
-            list.forEach(x=>{size=Math.max(size, x.size)});
+            list.forEach(x => { size = Math.max(size, x.size) });
 
             var margin = size / (count + 1);
 
@@ -607,6 +607,12 @@ export default class LinkingTool extends Tool {
             this._refreshConnections();
         }
 
+        this._addHandleToSelectedElement();
+
+        Invalidate.requestInteractionOnly();
+    }
+
+    _addHandleToSelectedElement() {
         this._handles = [];
         var scale = this._view.scale();
         if (this._selection && this._activeStory) {
@@ -616,8 +622,6 @@ export default class LinkingTool extends Tool {
                 this._addHandleOnElement(this._selection, scale);
             }
         }
-
-        Invalidate.requestInteractionOnly();
     }
 
     onInteractionStarted(type: InteractionType) {
@@ -629,7 +633,7 @@ export default class LinkingTool extends Tool {
     onInteractionStopped(type: InteractionType) {
         if (type === InteractionType.Dragging) {
             this._draggingElement = false;
-            this._handles = [];
+            this._addHandleToSelectedElement();
             Invalidate.requestInteractionOnly();
         }
     }
@@ -954,7 +958,7 @@ export default class LinkingTool extends Tool {
         }
 
         // do not render handle if we are hovering over other elements
-        if(!this._hoverConnectionTo) {
+        if (!this._hoverConnectionTo) {
             for (var i = 0; i < this._handles.length; ++i) {
                 this._renderHandle(context, this._handles[i], scale);
             }

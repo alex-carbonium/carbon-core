@@ -91,12 +91,12 @@ declare module "carbon-model"{
 }
 
 declare module "carbon-app"{
-    import { IUIElement, IPrimitiveRoot } from 'carbon-model';
+    import { IUIElement, IPrimitiveRoot, IContainer, IUIElementProps } from 'carbon-model';
     import { IContext, RenderEnvironment } from "carbon-rendering";
     import { IEvent, ViewState, IPrimitive, IConstructor } from "carbon-basics";
     import { ISize, IRect, ICoordinate } from "carbon-geometry";
 
-    export interface IPage{
+    export interface IPage<TProps extends IPageProps = IPageProps> extends ILayer<IPageProps> {
         incrementVersion();
 
         applyVisitorTLR(callback:(e:IUIElement)=>boolean|void);

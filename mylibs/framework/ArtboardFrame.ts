@@ -90,6 +90,23 @@ export default class ArtboardFrameControl extends UIElement {
         this.runtimeProps.artboardVersion = artboard.runtimeProps.version;
     }
 
+    scrollX(value?:number):number {
+        if(arguments.length > 0) {
+            this.setProps({offsetX:-value});
+        }
+
+        return -this.props.offsetX;
+    }
+
+
+    scrollY(value?:number):number {
+        if(arguments.length > 0) {
+            this.setProps({offsetY:-value});
+        }
+
+        return -this.props.offsetY;
+    }
+
     resetGlobalViewCache() {
         super.resetGlobalViewCache();
         this._container && this._container.resetGlobalViewCache();

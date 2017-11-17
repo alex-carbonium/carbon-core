@@ -3,8 +3,13 @@ import NullPage from "framework/NullPage";
 import EventHelper from "framework/EventHelper";
 import DataNode from "framework/DataNode";
 import Matrix from "math/matrix";
+import { IApp, IEvent, IPage, PreviewDisplayMode, ISize, IPageProps, ChangeMode } from "carbon-core";
 
 export default class PreviewProxy {
+    app:IApp;
+    navigateToPage:IEvent<any>;
+    activePage:IPage<IPageProps> & {originalSize:ISize};
+
     constructor(app) {
         this.app = app;
         this.navigateToPage = EventHelper.createEvent();
@@ -15,12 +20,12 @@ export default class PreviewProxy {
         var previewClone = artboard.mirrorClone();
         var oldRect = previewClone.boundaryRect();
         previewClone.setTransform(Matrix.Identity);
-        if (artboard.props.allowVerticalResize || artboard.props.allowHorizontalResize) {
+        // if (artboard.props.allowVerticalResize || artboard.props.allowHorizontalResize) {
 
             // previewClone.width(artboard.props.allowHorizontalResize ? screenSize.width : artboard.width());
             // previewClone.height(artboard.props.allowVerticalResize ? screenSize.height : artboard.height());
             // previewClone.performArrange({oldRect});
-        }
+        // }
 
         page.add(previewClone);
         page.originalSize = oldRect;
@@ -31,14 +36,18 @@ export default class PreviewProxy {
 
     getCurrentScreen(screenSize) {
         var activeStory = this.app.activeStory();
-        if(!activeStory || !activeStory.props.homeScreen){
+        if(!activeStory){
             // TODO: return special page with instruction that you need to create at least on artboard
             return NullPage;
         }
-        var page = DataNode.getImmediateChildById(this.app, activeStory.props.homeScreen[0]);
-        var artboard = DataNode.getImmediateChildById(page, activeStory.props.homeScreen[1], true);
-        if(!artboard) {
-            artboard = page.getAllArtboards()[0];
+        if(activeStory.props.homeScreen) {
+            var page = DataNode.getImmediateChildById(this.app, activeStory.props.homeScreen[0]);
+            var artboard = DataNode.getImmediateChildById(page, activeStory.props.homeScreen[1], true);
+            if(!artboard) {
+                artboard = page.getAllArtboards()[0];
+            }
+        } else {
+            artboard = this.app.activePage.getActiveArtboard();
         }
 
         if(!artboard) {
@@ -55,7 +64,7 @@ export default class PreviewProxy {
     }
 
     allElementsWithActions() {
-        var page = this.activePage;
+        let page = this.activePage;
         var artboard = page.children[0];
         var elementsMap = {};
         var activeStory = this.app.activeStory();
@@ -82,21 +91,27 @@ export default class PreviewProxy {
         return res;
     }
 
-    resizeActiveScreen(screenSize, scale) {
+    resizeActiveScreen(screenSize:ISize, scale:number, previewDisplayMode:PreviewDisplayMode) {
         var page = this.activePage;
-        if(page === NullPage){
+        if((page as any) === NullPage){
             return;
         }
         var artboard = page.children[0];
-        if (artboard && (artboard.props.allowVerticalResize || artboard.props.allowHorizontalResize)) {
-            var oldRect = artboard.boundaryRect();
-            var width = artboard.props.allowHorizontalResize ? screenSize.width : this.activePage.originalSize.width;
-            var height = artboard.props.allowVerticalResize ? screenSize.height : this.activePage.originalSize.height;
-            artboard.setProps({x: 0, y: 0, width: width, height: height});
-            artboard.performArrange({oldRect});
+        if(!artboard) {
+            return;
         }
-        artboard.props.m = Matrix.Identity;
 
+        let oldRect = artboard.boundaryRect();
+        let width = this.activePage.originalSize.width;
+        let height = this.activePage.originalSize.height;
+        if (previewDisplayMode === PreviewDisplayMode.Responsive) {
+            width = screenSize.width;
+            height = Math.max(screenSize.height, height);
+        }
+
+        artboard.setProps({width: width, height: height}, ChangeMode.Self);
+        artboard.performArrange({oldRect}, ChangeMode.Self);
+        artboard.props.m = Matrix.Identity;
 
         page.maxScrollX(Math.max(0, (artboard.width() - screenSize.width) * scale));
         page.maxScrollY(Math.max(0, (artboard.height() - screenSize.height) * scale));

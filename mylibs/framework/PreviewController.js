@@ -3,6 +3,7 @@ import {ActionType, ActionEvents} from "framework/Defs";
 import TouchHelper from "./TouchHelper";
 import Selection from "framework/SelectionModel";
 import EventHelper from "framework/EventHelper";
+import Invalidate from "framework/Invalidate";
 
 function updateEvent(event) {
     var scale = this.view.scale();
@@ -59,6 +60,7 @@ export default class PreviewController {
         if (!element || element === this.view) {
             this.view.scrollX(this.view.scrollX() + delta.dx);
             this.view.scrollY(this.view.scrollY() + delta.dy);
+            Invalidate.request();
             return;
         }
 
@@ -69,7 +71,9 @@ export default class PreviewController {
 
             var oldY = element.scrollY();
             element.scrollY(oldY + delta.dy);
-            delta.dY -= (oldY - element.scrollY());
+            delta.dy -= (oldY - element.scrollY());
+            element.invalidate();
+            Invalidate.request();
         }
 
         var parent = element.parent();
