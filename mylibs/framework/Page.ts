@@ -60,7 +60,7 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
         return this._nameProvider;
     }
 
-    scrollX(value?:number) {
+    scrollX(value?:number):number {
         if (arguments.length === 1) {
             this._scrollX = arguments[0];
 
@@ -95,6 +95,9 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
     minScrollX(value) {
         if (arguments.length > 0) {
             this._minScrollX = value;
+            if(this.scrollX() < value) {
+                this.scrollX(value);
+            }
         }
 
         return this._minScrollX;
@@ -103,6 +106,9 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
     maxScrollX(value) {
         if (arguments.length > 0) {
             this._maxScrollX = value;
+            if(this.scrollX() > value) {
+                this.scrollX(value);
+            }
         }
 
         return this._maxScrollX;
@@ -111,6 +117,9 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
     maxScrollY(value) {
         if (arguments.length > 0) {
             this._maxScrollY = value;
+            if(this.scrollY() > value) {
+                this.scrollY(value);
+            }
         }
 
         return this._maxScrollY;
@@ -119,6 +128,9 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
     minScrollY(value) {
         if (arguments.length > 0) {
             this._minScrollY = value;
+            if(this.scrollY() < value) {
+                this.scrollY(value);
+            }
         }
 
         return this._minScrollY;

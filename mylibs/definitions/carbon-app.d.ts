@@ -194,8 +194,8 @@ declare module "carbon-app" {
         saveWorkspaceState(): any;
         restoreWorkspaceState(data: any): void;
 
-        scrollX(): number;
-        scrollY(): number;
+        scrollX(value?:number): number;
+        scrollY(value?:number): number;
 
         maxScrollX(value?:number):number;
         maxScrollY(value?:number):number;
