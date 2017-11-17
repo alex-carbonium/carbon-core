@@ -16,7 +16,7 @@ class NullPage extends UIElement implements IPage {
     constructor() {
         super();
         this.children = [];
-        this.props = {};
+        this.props = {} as any;
     }
 
     decorators: any[];
@@ -27,7 +27,12 @@ class NullPage extends UIElement implements IPage {
 
     incrementVersion() {
     }
-
+    maxScrollX(value?:number):number {
+        return 0;
+    }
+    maxScrollY(value?:number):number {
+        return 0;
+    }
     activate() {
     }
     deactivate() {
