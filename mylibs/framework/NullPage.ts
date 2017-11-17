@@ -6,7 +6,7 @@ import { IUIElement, IContainerProps, IDataNode, IArtboard, IPage, IRect, IPoint
 
 class NullPage extends UIElement implements IPage {
     t: string;
-    props: IContainerProps;
+    props: any = {};
     children: any[];
     nameProvider: any;
     type: LayerType = LayerType.Content;
@@ -16,7 +16,7 @@ class NullPage extends UIElement implements IPage {
     constructor() {
         super();
         this.children = [];
-        this.props = null;
+        this.props = {};
     }
 
     decorators: any[];

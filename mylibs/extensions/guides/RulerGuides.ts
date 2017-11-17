@@ -388,7 +388,8 @@ export default class RulerGuides {
         Invalidate.requestInteractionOnly();
     }
     deleteGuideById = (selection, id: string) => {
-        let artboard = this._app.activePage.getActiveArtboard();
+        let artboard = this._app.activePage.getActiveArtboard() || this._app.activePage;
+
         let guide = artboard.props.guidesX.find(x => x.id === id);
         if (guide) {
             this._origin.patchProps(PatchType.Remove, "guidesX", guide);

@@ -11,9 +11,10 @@ import Matrix from "../../math/matrix";
 import { areRectsEqual } from "../../math/math";
 import Environment from "../../environment";
 import DesignerView from "../../framework/DesignerView";
+import NullPage from "../../framework/NullPage";
 import UserSettings from "../../UserSettings";
 import RulerGuides from "./RulerGuides";
-import { IArtboardProps, IApp, IView, IController, ILayer, IContext, IComposite, IMouseEventData, InteractionType } from "carbon-core";
+import { IArtboardProps, IApp, IView, IController, ILayer, IContext, IComposite, IMouseEventData, InteractionType, IPage } from "carbon-core";
 import { IArtboard, IUIElement } from "carbon-model";
 import { LayerType } from "carbon-app";
 
@@ -55,7 +56,7 @@ export default class RulerExtension extends RuntimeExtension {
 
     _onScaleChange(scale: number) {
         calculateSettings.call(this, scale);
-        this.setOrigin(this.app.activePage.getActiveArtboard() as any);
+        this.setOrigin((this.app.activePage.getActiveArtboard()) as any || this.app.activePage);
         this.setHighlight(this._selectComposite);
     }
     onLoaded() {
@@ -116,8 +117,12 @@ export default class RulerExtension extends RuntimeExtension {
     }
 
     onArtboardChanged(artboard: any, prev: any) {
-        this.setOrigin(artboard);
-        this._rulerGuides.setGuides(artboard);
+        let origin = artboard;
+        if(!origin) {
+            origin = this.app.activePage;
+        }
+        this.setOrigin(origin);
+        this._rulerGuides.setGuides(origin);
     }
 
     onPageChanged() {
@@ -125,14 +130,15 @@ export default class RulerExtension extends RuntimeExtension {
         this.onArtboardChanged(this.app.activePage.getActiveArtboard() as any, null);
     }
 
-    setOrigin(artboard: Artboard) {
+    setOrigin(artboard: Artboard | IPage) {
         this._artboardActive = !!artboard;
 
-        if (!this._artboardActive) {
+        if (!this._artboardActive || artboard === NullPage) {
             this._originX = 0;
             this._originY = 0;
             this._originWidth = 0;
             this._originHeight = 0;
+            // this._rulerGuides.setOrigin(this.app.activePage);
             return;
         }
         if (this._origin) {
