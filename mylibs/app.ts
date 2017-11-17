@@ -908,19 +908,49 @@ class AppClass extends DataNode implements IApp {
         });
     }
 
+    _getArtboardForElement(e:IUIElement) {
+        if(!e) {
+            return null;
+        }
+
+        if(e instanceof Artboard) {
+            return e;
+        }
+
+        var root:IUIElement = e.primitiveRoot();
+        if(root === e) {
+            root = e.parent();
+        }
+
+        if(root instanceof Artboard) {
+            return root;
+        }
+
+        return this._getArtboardForElement(root);
+    }
+
     mapElementsToLayerMask() {
         let count = 0;
         let max = Selection.elements.length;
-        let activeArtboard = this.activePage.getActiveArtboard();
         let mainElement;
-        let isActiveArtboard = false;
+        let isArtboardWithSelection = false;
+
+        let artboardsMap = Selection.selectedElements()
+            .map(e=>this._getArtboardForElement(e))
+            .reduce((bag, value, index, array)=>{
+                if(value) {
+                    bag[value.id()] = true;
+                }
+
+                return bag;
+            }, {});
 
         this.activePage.applyVisitorTLR(e => {
             let isSelected = Selection.isElementSelected(e);
             let isArtboard = e instanceof Artboard;
 
             if (isArtboard) {
-                isActiveArtboard = e === activeArtboard;
+                isArtboardWithSelection = !!artboardsMap[e.id()];
             }
 
             if (count && count === max) {
@@ -934,9 +964,9 @@ class AppClass extends DataNode implements IApp {
                 return;
             }
 
-            if (activeArtboard && !isActiveArtboard) {
-                e.runtimeProps.ctxl = 1 << 0;
-                return;
+            if (isArtboard && !isArtboardWithSelection) {
+                e.applyVisitor(child=>{child.runtimeProps.ctxl = 1 << 0})
+                return true;
             }
 
             if (isSelected || count > 0) {
