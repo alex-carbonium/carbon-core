@@ -290,6 +290,8 @@ declare module "carbon-model" {
 
     export interface IArtboard<TProps extends IArtboardProps = IArtboardProps> extends IContainer<TProps> {
         getStateboards(): IStateboard[];
+        version:number;
+        code():string;
     }
 
     export interface IStateboardProps extends IArtboardProps {

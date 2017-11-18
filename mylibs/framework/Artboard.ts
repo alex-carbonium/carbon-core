@@ -1290,6 +1290,10 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     onIsolationExited() {
     }
 
+    code():string {
+        return "";
+    }
+
     private flattenSymbolInstances(page) {
         let pageId = page.id();
         let artboardId = this.id();
