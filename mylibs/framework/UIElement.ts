@@ -40,6 +40,7 @@ import CoreIntl from "../CoreIntl";
 import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
 import RenderPipeline from "./render/RenderPipeline";
 import ContextCacheManager from "./render/ContextCacheManager";
+import { ControlProxy } from "../code/ControlProxy";
 
 require("../migrations/All");
 
@@ -2120,10 +2121,18 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         let animationValues = [];
         options = extend({}, options);
         options.duration = duration || 0;
-        let that = this;
+        let that = ControlProxy.unwrap(this);
         for (let propName in properties) {
             let newValue = properties[propName];
             let accessor = (function (name) {
+                if(typeof that[name] === 'function'){
+                    return function prop_accessor(value?: any) {
+                        if (arguments.length > 0) {
+                            that[name](value);
+                        }
+                        return that[name]();
+                    }
+                }
                 return function prop_accessor(value?: any) {
                     if (arguments.length > 0) {
                         that.setProps({ [name]: value });
@@ -2472,6 +2481,13 @@ PropertyMetadata.registerForType(UIElement, {
     },
     flags: {
         defaultValue: 0
+    },
+    proxyDefinition() {
+        return {
+            rprops:["x", "y", "name", "id"], // readonly props
+            props:["width", "height", "angle", "visible"], // read/write props
+            methods:["animate", "setProps", "boundaryRect"]
+        }
     },
     groups: function () {
         return [

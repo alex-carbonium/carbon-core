@@ -348,7 +348,7 @@ declare module "carbon-api" {
 
 declare function assertNever(t: never);
 
-declare interface Promise<T>{
+interface Promise<T>{
     delay(ms: number): Promise<T>;
     finally<U>(handler: () => U): Promise<T>;
     cancel(): void;

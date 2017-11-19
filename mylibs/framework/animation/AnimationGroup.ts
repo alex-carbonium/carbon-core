@@ -152,7 +152,7 @@ export default class AnimationGroup {
             var newValue = this._easing(t, value.from, value.to - value.from, duration);
             value.accessor(newValue);
         }
-        this._progressCallback();
+        this._progressCallback && this._progressCallback();
         if (this._completed) {
             this._resolve();
         }

@@ -130,7 +130,8 @@ export default {
 
     "Story": require("./stories/Story"),
     "StoryAction": require("./stories/StoryAction"),
-
+    "ArtboardProxyGenerator" : require("./code/ProxyGenerator").ArtboardProxyGenerator,
+    "Sandbox" : require("./code/Sandbox").Sandbox,
     "Invalidate": require("./framework/Invalidate"),
     "NameProvider": require("./ui/NameProvider"),
 

@@ -4,10 +4,11 @@ declare module "carbon-core" {
     export * from "carbon-api";
     export * from "carbon-model";
     export * from "carbon-app";
-    export * from "carbon-basics";
+    // export * from "carbon-basics";
     export * from "carbon-rendering";
     export * from "carbon-contrib";
     export * from "carbon-bezier";
+    export * from "carbon-code";
 
     //TODO: encapsulate or describe
     export var RequestAnimationSettings: any;
