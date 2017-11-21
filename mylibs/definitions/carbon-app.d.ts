@@ -293,7 +293,7 @@ declare module "carbon-app" {
 
         setActivePage(page: IPage);
 
-        hitElement(eventData, includeInteractionLayer?: boolean): IUIElement | null;
+        hitElement(eventData, includeInteractionLayer?: boolean): IUIElement;
         hitElementDirect(e?, cb?, includeInteractionLayer?: boolean);
 
         draw();
@@ -588,5 +588,11 @@ declare module "carbon-app" {
 
         change(ctrlKey: boolean, shiftKey: boolean, altKey: boolean);
         reset();
+    }
+
+    export interface IPreviewModelProxy {
+        onPageChanged:IEvent<IPage>;
+        activePage:IPage;
+        readonly activeArtboard:IArtboard;
     }
 }

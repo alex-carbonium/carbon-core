@@ -57,7 +57,7 @@ export class DraggingElement extends CompositeElement {
 
         this._snappingTarget = snappingTarget;
 
-        var holdPcnt = Math.round((event.x - this.x()) * 100 / this.width());
+        var holdPcnt = Math.round((event.x - this.x) * 100 / this.width);
         this._ownSnapPoints = SnapController.prepareOwnSnapPoints(this, holdPcnt);
 
         this._propSnapshot = this.getPropSnapshot();
@@ -76,9 +76,9 @@ export class DraggingElement extends CompositeElement {
     private saveDecorators(e) {
         if (e.decorators) {
             e.decorators.forEach(x => {
-                if (x.visible() && this.activeDecorators.indexOf(x) === -1) {
+                if (x.visible && this.activeDecorators.indexOf(x) === -1) {
                     this.activeDecorators.push(x);
-                    x.visible(false);
+                    x.visible = (false);
                 }
             });
         }
@@ -91,7 +91,7 @@ export class DraggingElement extends CompositeElement {
     detach() {
         debug("Detached");
 
-        this.activeDecorators.forEach(x => x.visible(true));
+        this.activeDecorators.forEach(x => x.visible = (true));
         this.activeDecorators.length = 0;
 
         this.elements.forEach(x => x.clearSavedLayoutProps());
@@ -229,7 +229,7 @@ export class DraggingElement extends CompositeElement {
         }
 
         if (this._clones) {
-            this._clones.forEach(e => e.visible(alt, ChangeMode.Self));
+            this._clones.forEach(e => e.setProps({visible: alt}, ChangeMode.Self));
         }
 
         SnapController.clearActiveSnapLines();

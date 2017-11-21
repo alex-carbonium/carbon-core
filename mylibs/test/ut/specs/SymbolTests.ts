@@ -42,8 +42,8 @@ describe("Symbol tests", function () {
         atc.prepareAndSetProps({ source: { pageId: this.app.activePage.id(), artboardId: artboard.id() } });
 
         // assert
-        assert.equal(atc.width(), artboard.width());
-        assert.equal(atc.height(), artboard.height());
+        assert.equal(atc.width, artboard.width);
+        assert.equal(atc.height, artboard.height);
     })
 
     it("Should respect child constraints", function () {
@@ -62,13 +62,13 @@ describe("Symbol tests", function () {
         // act
         atc.prepareAndSetProps({ source: { pageId: this.app.activePage.id(), artboardId: artboard.id() }, width: 200, height: 100 });
         this.app.relayout();
-        atc.prepareAndSetProps({ width: atc.width() * 2, height: atc.height() * 2 })
+        atc.prepareAndSetProps({ width: atc.width * 2, height: atc.height * 2 })
         this.app.relayout();
         atc.draw(new ContextStub(), this.drawContext);
 
         // assert
-        assert.equal(210, atc.children[0].width());
-        assert.equal(120, atc.children[0].height());
+        assert.equal(210, atc.children[0].width);
+        assert.equal(120, atc.children[0].height);
     });
 
     it("Should ignore child resize inside symbol", function () {
@@ -99,7 +99,7 @@ describe("Symbol tests", function () {
         symbol.draw(new ContextStub(), this.drawContext);
 
         // assert
-        assert.equal(symbol.findClone(child.id()).width(), 100 * 1.2);
+        assert.equal(symbol.findClone(child.id()).width, 100 * 1.2);
     });
 
     it("Must support undo for changing inner elements", function () {
@@ -335,7 +335,7 @@ describe("Symbol tests", function () {
             var symbol = actions.createSymbolFromSelection(Selection);
 
             var artboard = child1.parent();
-            var originalHeight = child2.height();
+            var originalHeight = child2.height;
             artboard.prepareAndSetProps({width: 100, height: originalHeight+2});
             child1.prepareAndSetProps({
                 width: 100, height: 2
@@ -363,16 +363,16 @@ describe("Symbol tests", function () {
                         kdl;jfadskjf`}];
             clone2.prepareAndSetProps({content:newContent});
 
-            var cloneHeight = clone2.height();
+            var cloneHeight = clone2.height;
             var dh = cloneHeight - originalHeight;
             assert.notEqual(0, dh, "label content should change label height");
-            assert.equal(100, symbol.width(), "initial symbol width");
-            assert.equal(originalHeight+2 + dh, symbol.height(), "initial symbol height");
+            assert.equal(100, symbol.width, "initial symbol width");
+            assert.equal(originalHeight+2 + dh, symbol.height, "initial symbol height");
 
             symbol.onArtboardChanged(); // should trigger refresh
             clone2 = symbol.findClone(child2.id());
             assert.equal(newContent, clone2.content(), "content should restore from custom props");
-            assert.equal(cloneHeight, clone2.height(), "result text height");
+            assert.equal(cloneHeight, clone2.height, "result text height");
         });
     });
 });

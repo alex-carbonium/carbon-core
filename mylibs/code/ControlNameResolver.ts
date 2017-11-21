@@ -24,7 +24,7 @@ export class ControlNameResolver {
                 // but expectation is that only small amount of controlls
                 // will be used in code, so don't want to build map of all controls
                 // but should be change later if needed
-                if (name === NameProvider.escapeName(e.name())) {
+                if (name === NameProvider.escapeName(e.name)) {
                     result = e;
                     return false;
                 }

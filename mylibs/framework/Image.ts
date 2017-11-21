@@ -186,7 +186,7 @@ export default class Image extends Container<IImageProps> implements IImage {
     }
 
     renderAfterMask(context, items, i, environment: RenderEnvironment) {
-        ImageSourceHelper.draw(this.source(), context, this.width(), this.height(), this, environment);
+        ImageSourceHelper.draw(this.source(), context, this.width, this.height, this, environment);
     }
 
     autoResize(source: ImageSource, origin: Origin) {
@@ -206,7 +206,7 @@ export default class Image extends Container<IImageProps> implements IImage {
     clip(context: IContext) {
         //TODO: add back if necessary
         //if (this.globalViewMatrix().isTranslatedOnly())
-        if (ImageSourceHelper.shouldClip(this.source, this.width(), this.height(), this.runtimeProps.sourceProps)) {
+        if (ImageSourceHelper.shouldClip(this.source, this.width, this.height, this.runtimeProps.sourceProps)) {
             context.beginPath();
             let br = this.boundaryRect();
             context.rect(br.x, br.y, br.width, br.height);
@@ -220,8 +220,8 @@ export default class Image extends Container<IImageProps> implements IImage {
             return;
         }
         if (newProps.hasOwnProperty("angle") || newProps.hasOwnProperty("sourceProps")) {
-            var shouldClip = ImageSourceHelper.shouldClip(source, this.width(), this.height(), this.runtimeProps.sourceProps);
-            if (this.angle() % 360 === 0 || !shouldClip) {
+            var shouldClip = ImageSourceHelper.shouldClip(source, this.width, this.height, this.runtimeProps.sourceProps);
+            if (this.angle % 360 === 0 || !shouldClip) {
                 delete this.runtimeProps.mask;
             }
             else if (!this.runtimeProps.mask) {
@@ -232,7 +232,7 @@ export default class Image extends Container<IImageProps> implements IImage {
             }
         }
         if (this.runtimeProps.mask && (newProps.hasOwnProperty("width") || newProps.hasOwnProperty("height"))) {
-            this.runtimeProps.mask.setProps({ width: this.width(), height: this.height() }, ChangeMode.Self);
+            this.runtimeProps.mask.setProps({ width: this.width, height: this.height }, ChangeMode.Self);
         }
     }
 
@@ -280,7 +280,7 @@ export default class Image extends Container<IImageProps> implements IImage {
             })
             .then(svg => {
                 return window['svgParser'].loadSVGFromString(svg).then((result) => {
-                    result.setProps({ x: this.x(), y: this.y() });
+                    result.setProps({ x: this.x, y: this.y });
                     result.runtimeProps.ctxl = this.runtimeProps.ctxl;
                     return result;
                 });

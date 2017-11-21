@@ -92,10 +92,10 @@ export class RepeaterActions extends CarbonExtension {
             let element = elements[i];
             let globalRect = element.getBoundingBox();
 
-            if (globalRect.x < x1) x1 = globalRect.x;
-            if (globalRect.y < y1) y1 = globalRect.y;
-            if (globalRect.x + globalRect.width > x2) x2 = globalRect.x + globalRect.width;
-            if (globalRect.y + globalRect.height > y2) y2 = globalRect.y + globalRect.height;
+            if (globalRect.x < x1) {x1 = globalRect.x;}
+            if (globalRect.y < y1) {y1 = globalRect.y;}
+            if (globalRect.x + globalRect.width > x2) {x2 = globalRect.x + globalRect.width;}
+            if (globalRect.y + globalRect.height > y2) {y2 = globalRect.y + globalRect.height;}
         }
 
         var cell = new RepeatCell();
@@ -122,13 +122,13 @@ export class RepeaterActions extends CarbonExtension {
     ungroup = (selection: ISelection) => {
         var elements = selection.elements;
 
-        let container = elements[0] as RepeatContainer;
+        let container = elements[0] as any as RepeatContainer;
         let parent = container.parent();
         let items = container.children;
         let index = container.index();
         let allChildren = [];
-        let cols = container.cols();
-        let rows = container.rows();
+        let cols = container.cols;
+        let rows = container.rows;
 
         for (let x = 0; x < rows; ++x) {
             for (let y = 0; y < cols; ++y) {
@@ -168,7 +168,7 @@ export class RepeaterActions extends CarbonExtension {
             let allRepeated = repeater.findRepeatedElements(element);
             for (let j = 0; j < allRepeated.length; ++j) {
                 if (!selection.isElementSelected(allRepeated[j])) {
-                    allRepeated[j].visible(show);
+                    allRepeated[j].visible = (show);
                 }
             }
         }

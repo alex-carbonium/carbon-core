@@ -63,10 +63,10 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         if (this._allowHResize || this._allowVResize) {
             var br = this.boundaryRect();
             if (this._allowHResize) {
-                br = br.withWidth(Math.max(currentSize.width || artboard.width(), artboard.minWidth()));
+                br = br.withWidth(Math.max(currentSize.width || artboard.width, artboard.minWidth()));
             }
             if (this._allowVResize) {
-                br = br.withHeight(Math.max(currentSize.height || artboard.height(), artboard.minHeight()));
+                br = br.withHeight(Math.max(currentSize.height || artboard.height, artboard.minHeight()));
             }
 
             this.updateCustomProperties(this.props);
@@ -80,7 +80,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         this.runtimeProps.artboardVersion = artboard.runtimeProps.version;
 
         // if (!this.props.width || !this.props.height) {
-        //     this.setProps({width: this._artboard.width(), height: this._artboard.height()});
+        //     this.setProps({width: this._artboard.width, height: this._artboard.height});
         // }
 
         this.endInternalUpdate();
@@ -123,7 +123,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
     displayType() {
         if (this._artboard) {
-            return this._artboard.name();
+            return this._artboard.name;
         }
 
         return super.displayType();
@@ -169,7 +169,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     }
 
     // systemType() {
-    //     return this._artboard ? 'user:' + this._artboard.name() : super.systemType();
+    //     return this._artboard ? 'user:' + this._artboard.name : super.systemType();
     // }
 
     onArtboardChanged() {

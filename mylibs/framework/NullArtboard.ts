@@ -1,6 +1,9 @@
+declare const emptyUuid:string;
 class NullArtboard {
+    props:Readonly<any>;
+
     constructor(){
-        this.props = {};
+        this.props = {} as any;
     }
 
     getCustomProperties(value) {
@@ -76,21 +79,26 @@ class NullArtboard {
 
     }
 
-    x(){
+    get x(){
        return 0;
     }
 
-    y(){
-        return 0;
-    }
+    set x(value){}
 
-    width(){
+    get y(){
         return 0;
     }
+    set y(value){}
 
-    height() {
+    get width(){
         return 0;
     }
+    set width(value){}
+
+    get height() {
+        return 0;
+    }
+    set height(value){}
 
     registerForLayerDraw() {
 

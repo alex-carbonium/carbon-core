@@ -10,6 +10,7 @@ import Constraints from "./Constraints";
 import { IImage, IUIElement } from "carbon-model";
 import { ResizeDimension, ElementState, RenderEnvironment, RenderFlags, StrokePosition, LineJoin, LineCap, Origin } from "carbon-core";
 import RenderPipeline from "./render/RenderPipeline";
+import { ChangeMode } from "carbon-basics";
 
 class Shape extends Container {
     convertToPath() {
@@ -285,7 +286,7 @@ class Shape extends Container {
         return true;
     }
 
-    insert(element: IUIElement) {
+    insert(element: IUIElement, index: number, mode?: ChangeMode): IUIElement {
         this.setProps({ clipMask: true });
 
         var parent = this.parent();
@@ -297,7 +298,7 @@ class Shape extends Container {
         element.resetTransform();
         let bbox1 = this.getBoundingBox();
         let bbox2 = element.getBoundingBox();
-        element.scale(bbox1.width/bbox2.width, bbox1.height/bbox2.height, Origin.TopLeft);
+        element.scale(bbox1.width / bbox2.width, bbox1.height / bbox2.height, Origin.TopLeft);
 
         this.resetTransform();
 

@@ -72,8 +72,9 @@ export class ControlProxy {
             throw new TypeError(`Unknown property ${name}`);
         }
 
-        if (typeof this.element[name] === 'function') {
-            this.element[name](value);
+        let setter = `_${name}`;
+        if (typeof this.element[setter] === 'function') {
+            this.element[setter](value);
         }
         else {
             this.element.setProps({ [name]: value });

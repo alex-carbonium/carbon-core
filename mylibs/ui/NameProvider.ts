@@ -13,7 +13,7 @@ export default class NameProvider implements INameProvider {
     initForPage(page) {
         var namesMap = this._namesMap;
         page.applyVisitor(e => {
-            namesMap[e.name()] = true;
+            namesMap[e.name] = true;
         })
     }
 

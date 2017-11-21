@@ -24,7 +24,7 @@ export default class ImageContent extends UIElement{
             id: this.displayType(),
             defaultMessage: this.displayType()
         });
-        this.name(name);
+        this.name = (name);
 
         this._frame = frame;
         this._clone = clone;

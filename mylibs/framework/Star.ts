@@ -168,7 +168,7 @@ export default class Star extends Polygon implements IStar {
             fill:this.fill(),
             stroke:this.stroke(),
             styleId:this.styleId(),
-            name:this.name(),
+            name:this.name,
             strokeWidth:this.strokeWidth()
         });
 

@@ -32,15 +32,15 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
         return false;
     }
 
-    clearRenderingCache() {}
-    select(){}
-    unselect(){}
+    clearRenderingCache() { }
+    select() { }
+    unselect() { }
     allowCaching() {
         return false;
     }
 
     performArrange() { }
-    applyVisitorTLR(callback:(e:IUIElement)=>boolean|void) {}
+    applyVisitorTLR(callback: (e: IUIElement) => boolean | void) { }
     allowRearrange() { return false; }
     autoGrow(dw, dh) { }
     selectFrameVisible() {
@@ -53,7 +53,7 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
     dblclick(event: IMouseEventData, scale: number) { }
     click(event: IMouseEventData) { }
 
-    hasFlags(){
+    hasFlags() {
         return false;
     }
     addFlags() {
@@ -80,9 +80,10 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
     getElementById() {
         return null;
     }
-    name() {
+    get name() {
         return '';
     }
+    set name(v) { }
     flatten(): void {
     }
     displayName(): string {
@@ -149,19 +150,37 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
     stroke(value?: any) {
         throw new Error("Method not implemented.");
     }
-    x(): number {
+
+    set x(v) {
         throw new Error("Method not implemented.");
     }
-    y(): number {
+
+    get x(): number {
         throw new Error("Method not implemented.");
     }
-    width(): number {
+
+    set y(v) {
         throw new Error("Method not implemented.");
     }
-    height(): number {
+    get y(): number {
         throw new Error("Method not implemented.");
     }
-    angle(): number {
+    set width(v) {
+        throw new Error("Method not implemented.");
+    }
+    get width(): number {
+        throw new Error("Method not implemented.");
+    }
+    set height(v) {
+        throw new Error("Method not implemented.");
+    }
+    get height(): number {
+        throw new Error("Method not implemented.");
+    }
+    set angle(v) {
+        throw new Error("Method not implemented.");
+    }
+    get angle(): number {
         throw new Error("Method not implemented.");
     }
     constraints(value?: IConstraints): IConstraints {
@@ -327,7 +346,7 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
         return false;
     }
 
-    hitElement() {
+    hitElement(a, b, c?, d?): IUIElement {
         return null;
     }
 
@@ -354,16 +373,17 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
     locked() {
         return true;
     }
-    visible() {
+    get visible() {
         return false;
     }
+    set visible(v) { }
 
     draw() {
     }
     drawSelf() {
     }
 
-    opacity(value?:number) {
+    opacity(value?: number) {
         return 0;
     }
 

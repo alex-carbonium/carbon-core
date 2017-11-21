@@ -284,8 +284,8 @@ export default class PathManipulationObject extends UIElementDecorator implement
         let path: Path = this.element;
 
 
-        if (this._selectFrame.visible()) {
-            this._selectFrame.visible(false);
+        if (this._selectFrame.visible) {
+            this._selectFrame.visible = (false);
             this._selectFrame.complete(event);
             return;
         }
@@ -408,7 +408,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         }
 
         if (!this.constructMode && !event.handled) {
-            this._selectFrame.visible(true);
+            this._selectFrame.visible = (true);
             this._selectFrame.init(event);
         }
     }
@@ -418,7 +418,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         let path: Path = this.element;
         let view = Environment.view;
 
-        if (this._selectFrame.visible()) {
+        if (this._selectFrame.visible) {
             this._selectFrame.update(event);
             this._selectFrame.onComplete.raise(this._selectFrame.props.br, event);
             event.handled = true;

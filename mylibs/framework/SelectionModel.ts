@@ -347,8 +347,8 @@ class SelectionModel implements ISelection {
         let elements = this.selectedElements();
         for (let i = 0; i < elements.length; i++) {
             let e = elements[i];
-            if (e.visible()) {
-                e.visible(false);
+            if (e.visible) {
+                e.visible = (false);
             }
         }
         this._selectCompositeElement.hideActiveFrame();
@@ -357,8 +357,8 @@ class SelectionModel implements ISelection {
         let elements = this.selectedElements();
         for (let i = 0; i < elements.length; i++) {
             let e = elements[i];
-            if (!e.visible()) {
-                e.visible(true);
+            if (!e.visible) {
+                e.visible = (true);
             }
         }
         this._selectCompositeElement.showActiveFrame();

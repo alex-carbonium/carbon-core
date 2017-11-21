@@ -2,14 +2,14 @@ import {HorizontalAlignment, VerticalAlignment} from "framework/Defs";
 
 export default {
     arrange: function(container, event, changeMode){
-        var l = container.x(),
-            t = container.y(),
-            w = container.width(),
-            h = container.height();
+        var l = container.x,
+            t = container.y,
+            w = container.width,
+            h = container.height;
         var padding = container.padding();
 
         container.children.each(function(i, child){
-            if (!child.visible()){
+            if (!child.visible){
                 return; // continue
             }
 
@@ -25,10 +25,10 @@ export default {
                     x = leftSpace;
                     break;
                 case HorizontalAlignment.Center:
-                    x = ~~(w / 2 - child.width() / 2);
+                    x = ~~(w / 2 - child.width / 2);
                     break;
                 case HorizontalAlignment.Right:
-                    x = w - child.width() - rightSpace;
+                    x = w - child.width - rightSpace;
                     break;
                 case HorizontalAlignment.Stretch:
                     x = leftSpace;
@@ -41,10 +41,10 @@ export default {
                     y = topSpace;
                     break;
                 case VerticalAlignment.Middle:
-                    y = ~~(h / 2 - child.height() / 2);
+                    y = ~~(h / 2 - child.height / 2);
                     break;
                 case VerticalAlignment.Bottom:
-                    y = h - child.height() - bottomSpace;
+                    y = h - child.height - bottomSpace;
                     break;
                 case VerticalAlignment.Stretch:
                     y = topSpace;
@@ -53,10 +53,10 @@ export default {
             }
 
             if (width === undefined){
-                width = child.width();
+                width = child.width;
             }
             if (height === undefined){
-                height = child.height();
+                height = child.height;
             }
 
             if(r.width !== width || r.height !== height || r.x !== x || r.y !== y) {

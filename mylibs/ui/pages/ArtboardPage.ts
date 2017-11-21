@@ -18,6 +18,7 @@ import { ArtboardType, IArtboardPage, ChangeMode, IArtboardPageProps, RenderEnvi
 import DataNode from "../../framework/DataNode";
 import Container from "../../framework/Container";
 import UIElement from "../../framework/UIElement";
+import { IView } from "carbon-app";
 var debug = require<any>("DebugUtil")("carb:artboardPage");
 
 const ARTBOARD_SPACE = 100;
@@ -64,7 +65,7 @@ class ArtboardPage extends Page implements IArtboardPage {
     add(child) {
         super.add.apply(this, arguments);
         if (child instanceof Artboard) {
-            this._artboardNames[child.name()] = true;
+            this._artboardNames[child.name] = true;
         }
         return child;
     }
@@ -136,7 +137,7 @@ class ArtboardPage extends Page implements IArtboardPage {
         if (!(environment.flags & RenderFlags.CheckViewport) || child.isInViewport()) {
             super.drawChildSafe(child, context, environment);
         } else {
-            debug("Skip artboard not in the viewport: %s", this.name());
+            debug("Skip artboard not in the viewport: %s", this.name);
         }
     }
 
@@ -221,7 +222,7 @@ class ArtboardPage extends Page implements IArtboardPage {
             let right = a.right();
             if (right > maxX) {
                 maxX = right;
-                maxY = a.y();
+                maxY = a.y;
             }
         }
 
@@ -344,7 +345,7 @@ class ArtboardPage extends Page implements IArtboardPage {
     }
 
     dropElement(element: IUIElement, mode?: ChangeMode) {
-        let parent: Container = null;
+        let parent: any = null;
         let elementBox = element.getBoundingBoxGlobal();
         let toAccept = [element];
         for (let i = 0; i < this.children.length; ++i){
@@ -353,7 +354,7 @@ class ArtboardPage extends Page implements IArtboardPage {
                     parent = this;
                     break;
                 }
-                parent = this.children[i] as Container;
+                parent = this.children[i] as any;
             }
         }
 

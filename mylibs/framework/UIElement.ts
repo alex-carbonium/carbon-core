@@ -230,7 +230,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             let propertyName = names[i];
             let descriptor: PropDescriptor = metadata[names[i]];
             if (descriptor.computed) {
-                values[propertyName] = this[propertyName]();
+                values[propertyName] = this[propertyName];
             }
             else {
                 values[propertyName] = this.props[propertyName];
@@ -246,7 +246,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             }
         }
         if (descriptor && descriptor.computed) {
-            return this[propertyName]();
+            return this[propertyName];
         }
 
         return this.props[propertyName];
@@ -257,7 +257,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             let propertyName = names[i];
             let descriptor: PropDescriptor = metadata[propertyName];
             if (descriptor.computed) {
-                ExtensionPoint.invoke(this, propertyName, [changes[propertyName], changeMode]);
+                ExtensionPoint.invoke(this, "_" + propertyName, [changes[propertyName], changeMode]);
                 delete changes[propertyName];
             }
         }
@@ -762,8 +762,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             this.boundaryRect(this.boundaryRect().withSize(value.width, value.height));
         }
         return {
-            width: this.width(),
-            height: this.height()
+            width: this.width,
+            height: this.height
         }
     }
     getBoundaryRectGlobal(includeMargin = false) {
@@ -866,7 +866,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     hitTest(/*Point*/point, scale, boundaryRectOnly = false) {
-        if (!this.visible() || this.hasBadTransform()) {
+        if (!this.visible || this.hasBadTransform()) {
             return false;
         }
         let rect = this.getHitTestBox(scale, false);
@@ -1217,14 +1217,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
     }
 
-    x(value?: number, changeMode?: ChangeMode) {
-        if (arguments.length !== 0) {
-            let t = Point.create(value - this.x(), 0);
-            this.applyGlobalTranslation(t, false, changeMode);
-
-            return;
-        }
-
+    get x() {
         let root = this._findFinalRoot();
         if (!root || root === this) {
             return this.getBoundingBox().x;
@@ -1232,14 +1225,17 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         let m = root.globalViewMatrixInverted().appended(this.globalViewMatrix());
         return this.transformBoundingRect(this.boundaryRect(), m).x;
     }
-    y(value?: number, changeMode?: ChangeMode) {
-        if (arguments.length !== 0) {
-            let t = Point.create(0, value - this.y());
-            this.applyGlobalTranslation(t, false, changeMode);
 
-            return;
-        }
+    set x(value: number) {
+        this._x(value);
+    }
 
+    _x(value?: number, changeMode?: ChangeMode) {
+        let t = Point.create(value - this.x, 0);
+        this.applyGlobalTranslation(t, false, changeMode);
+    }
+
+    get y() {
         let root = this._findFinalRoot();
         if (!root || root === this) {
             return this.getBoundingBox().y;
@@ -1247,14 +1243,28 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         let m = root.globalViewMatrixInverted().appended(this.globalViewMatrix());
         return this.transformBoundingRect(this.boundaryRect(), m).y;
     }
-    width(value?: number, changeMode?: ChangeMode) {
-        if (arguments.length !== 0) {
-            var s = new Point(value / this.width(), 1);
-            var o = this.viewMatrix().transformPoint(this.boundaryRect().centerLeft());
-            var resizeOptions = new ResizeOptions(true, false, false, true);
-            this.applyScaling(s, o, resizeOptions, changeMode);
-        }
 
+    set y(value: number) {
+        this._y(value);
+    }
+
+    _y(value: number, changeMode?: ChangeMode) {
+        let t = Point.create(0, value - this.y);
+        this.applyGlobalTranslation(t, false, changeMode);
+    }
+
+    set width(value: number) {
+        this._width(value);
+    }
+
+    _width(value: number, changeMode?: ChangeMode) {
+        var s = new Point(value / this.width, 1);
+        var o = this.viewMatrix().transformPoint(this.boundaryRect().centerLeft());
+        var resizeOptions = new ResizeOptions(true, false, false, true);
+        this.applyScaling(s, o, resizeOptions, changeMode);
+    }
+
+    get width(): number {
         if (this.hasBadTransform()) {
             return 0;
         }
@@ -1266,14 +1276,19 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
         return Math.abs(this.boundaryRect().width * scaling);
     }
-    height(value?: number, changeMode?: ChangeMode) {
-        if (arguments.length !== 0) {
-            var s = new Point(1, value / this.height());
-            var o = this.viewMatrix().transformPoint(this.boundaryRect().centerTop());
-            var resizeOptions = new ResizeOptions(true, false, false, true);
-            this.applyScaling(s, o, resizeOptions, changeMode);
-        }
 
+    set height(value: number) {
+        this._height(value);
+    }
+
+    _height(value: number, changeMode?: ChangeMode) {
+        var s = new Point(1, value / this.height);
+        var o = this.viewMatrix().transformPoint(this.boundaryRect().centerTop());
+        var resizeOptions = new ResizeOptions(true, false, false, true);
+        this.applyScaling(s, o, resizeOptions, changeMode);
+    }
+
+    get height() {
         if (this.hasBadTransform()) {
             return 0;
         }
@@ -1285,12 +1300,19 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
         return Math.abs(this.boundaryRect().height * scaling);
     }
-    angle(value?: number, changeMode?: ChangeMode) {
-        if (arguments.length !== 0) {
-            this.applyRotation(value - this.angle(), this.center(), false, changeMode);
-        }
+
+    get angle() {
         return this.getRotation(true);
     }
+
+    set angle(value: number) {
+        this._angle(value);
+    }
+
+    _angle(value?: number, changeMode?: ChangeMode) {
+        this.applyRotation(value - this.angle, this.center(), false, changeMode);
+    }
+
     boundaryRect(value?: IRect): IRect {
         if (value !== undefined) {
             this.setProps({ br: value });
@@ -1298,18 +1320,18 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.props.br;
     }
     right() {
-        return this.position().x + this.width();
+        return this.position().x + this.width;
     }
     bottom() {
-        return this.position().y + this.height();
+        return this.position().y + this.height;
     }
     outerHeight() {
         let margin = this.margin();
-        return this.height() + margin.top + margin.bottom;
+        return this.height + margin.top + margin.bottom;
     }
     outerWidth() {
         let margin = this.margin();
-        return this.width() + margin.left + margin.right;
+        return this.width + margin.left + margin.right;
     }
     locked(value?: boolean) {
         if (value !== undefined) {
@@ -1324,7 +1346,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.field("_isTemporary", value, false);
     }
     hitVisible(directSelection?: boolean, forceLocked?: boolean) {
-        if ((this.locked() && !forceLocked) || !this.visible() || this.hasBadTransform()) {
+        if ((this.locked() && !forceLocked) || !this.visible || this.hasBadTransform()) {
             return false;
         }
         let parent = this.parent();
@@ -1342,17 +1364,23 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     canSelect(value?: boolean) {
         return this.field("_canSelect", value, true);
     }
-    visible(value?: boolean, mode?: ChangeMode) {
-        if (arguments.length) {
-            this.setProps({ visible: value }, mode);
-        }
+
+    get visible():boolean {
         return this.props.visible;
+    }
+
+    set visible(value:boolean) {
+        this._visible(value)
+    }
+
+    _visible(value?: boolean, mode?: ChangeMode) {
+        this.setProps({ visible: value }, mode);
     }
 
     visibleInChain() {
         var e: any = this;
         while (e && e !== NullContainer) {
-            if (!e.visible()) {
+            if (!e.visible) {
                 return false;
             }
 
@@ -1543,10 +1571,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
         return this.props.visibleWhenDrag;
     }
-    name(value?: string) {
-        if (value !== undefined) {
-            this.setProps({ name: value });
-        }
+    set name(value: string) {
+        this.setProps({ name: value });
+    }
+
+    get name(): string {
         return this.props.name;
     }
     constraints(value?: IConstraints): IConstraints {
@@ -1564,7 +1593,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             case "bottom":
             case "middle":
             case "fill":
-                this.width(parent.width());
+                this.width = parent.width;
                 break;
         }
     }
@@ -1694,7 +1723,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return PropertyMetadata.getEditableProperties(this.systemType(), recursive);
     }
     displayName() {
-        var name = this.name() || CoreIntl.label(this.displayType());
+        var name = this.name || CoreIntl.label(this.displayType());
 
         if (this.hasFlags(UIElementFlags.SymbolBackground)) {
             name += " (background)";
@@ -1759,7 +1788,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         let m = global ? this.globalViewMatrix() : this.viewMatrix();
         return m.transformPoint(this.boundaryRect().center());
     }
-    hitElement(position, scale, predicate?, directSelection?): UIElement {
+
+    hitElement(position, scale, predicate?, directSelection?): IUIElement {
         if (!this.hitVisible(directSelection)) {
             return null;
         }
@@ -2125,7 +2155,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         for (let propName in properties) {
             let newValue = properties[propName];
             let accessor = (function (name) {
-                if(typeof that[name] === 'function'){
+                if (typeof that[name] === 'function') {
                     return function prop_accessor(value?: any) {
                         if (arguments.length > 0) {
                             that[name](value);
@@ -2178,7 +2208,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     toSVG() {
-        // let ctx = new C2S(this.width(), this.height());
+        // let ctx = new C2S(this.width, this.height);
         // this.draw(ctx);
         // return ctx.getSerializedSvg();
     }
@@ -2484,9 +2514,9 @@ PropertyMetadata.registerForType(UIElement, {
     },
     proxyDefinition() {
         return {
-            rprops:["x", "y", "name", "id"], // readonly props
-            props:["width", "height", "angle", "visible"], // read/write props
-            methods:["animate", "setProps", "boundaryRect"]
+            rprops: ["x", "y", "name", "id"], // readonly props
+            props: ["width", "height", "angle", "visible"], // read/write props
+            methods: ["animate", "boundaryRect"]
         }
     },
     groups: function () {

@@ -65,7 +65,7 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //assert
-            assert.deepEqual(repeater.children.map(x => x.x()), [0, 100, 200]);
+            assert.deepEqual(repeater.children.map(x => x.x), [0, 100, 200]);
         });
         it("Should repeat vertically", function () {
             //arrange
@@ -83,7 +83,7 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //assert
-            assert.deepEqual(repeater.children.map(x => x.y()), [0, 100, 200]);
+            assert.deepEqual(repeater.children.map(x => x.y), [0, 100, 200]);
         });
         it("Should repeat vertically, increase twice", function () {
             //arrange
@@ -104,7 +104,7 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //assert
-            assert.deepEqual(repeater.children.map(x => x.y()), [0, 100, 200, 300]);
+            assert.deepEqual(repeater.children.map(x => x.y), [0, 100, 200, 300]);
         });
         it("Should repeat horizontally and vertically", function () {
             //arrange
@@ -206,8 +206,8 @@ describe("Repeater tests", function () {
             var points = [];
             for (var i = 0; i < 4; i++) {
                 points.push({
-                    x: repeater.x() + element.width() / 2 + (element.width()) * i,
-                    y: repeater.y() + element.height() / 2
+                    x: repeater.x + element.width / 2 + (element.width) * i,
+                    y: repeater.y + element.height / 2
                 });
             }
             assert.deepEqual(this.mapChildren(repeater, (x, i) => x.hitTest(points[i], 1)), [true, true, true, true], "All elements should be hit testable");
@@ -233,7 +233,7 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //assert
-            assert.deepEqual(repeater.children.map(x => x.width()), [100, 100]);
+            assert.deepEqual(repeater.children.map(x => x.width), [100, 100]);
         });
 
         it("Should react to updating master elements", function () {
@@ -260,7 +260,7 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //assert
-            assert.deepEqual(this.mapChildren(repeater, x => x.width()), [50, 50], "Elements not repeated");
+            assert.deepEqual(this.mapChildren(repeater, x => x.width), [50, 50], "Elements not repeated");
         });
         it("Should react to updating slave elements", function () {
             //arrange
@@ -286,7 +286,7 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //assert
-            assert.deepEqual(this.mapChildren(repeater, x => x.width()), [50, 50], "Elements not repeated");
+            assert.deepEqual(this.mapChildren(repeater, x => x.width), [50, 50], "Elements not repeated");
         });
         it("Should react to updating inner elements", function () {
             //arrange
@@ -319,9 +319,9 @@ describe("Repeater tests", function () {
 
             //assert
             var items = this.getChildren(repeater);
-            assert.deepEqual(items.map(x => x.width()), [100, 100], "Parent containers must not be changed");
-            assert.equal(items[0].children[0].width(), 50, "Master inner element must be updated");
-            assert.equal(items[1].children[0].width(), 50, "Slave inner element must be updated");
+            assert.deepEqual(items.map(x => x.width), [100, 100], "Parent containers must not be changed");
+            assert.equal(items[0].children[0].width, 50, "Master inner element must be updated");
+            assert.equal(items[1].children[0].width, 50, "Slave inner element must be updated");
         });
 
         it("Should respect different text, width and height for autosize labels", function () {
@@ -337,7 +337,7 @@ describe("Repeater tests", function () {
             this.app.activePage.add(label);
 
             var repeater = this.makeRepeater([label]);
-            repeater.setProps({ width: label.width() * 2 });
+            repeater.setProps({ width: label.width * 2 });
             this.app.relayout();
 
             //act
@@ -349,7 +349,7 @@ describe("Repeater tests", function () {
             var texts = this.mapChildren(repeater, x => x.props.content);
             assert.deepEqual(texts, ["text 1", "text 222"], "Text must be different");
 
-            var widths = this.mapChildren(repeater, x => x.width());
+            var widths = this.mapChildren(repeater, x => x.width);
             assert.isAbove(widths[1], widths[0], "Label2 should be expanded")
         });
         it("Should sync width and height, but have different text not non-autosize labels", function () {
@@ -366,7 +366,7 @@ describe("Repeater tests", function () {
 
             var repeater = this.makeRepeater([label]);
 
-            repeater.prepareAndSetProps({ width: label.width() * 2 });
+            repeater.prepareAndSetProps({ width: label.width * 2 });
             this.app.relayout();
 
             //act
@@ -378,7 +378,7 @@ describe("Repeater tests", function () {
             var texts = this.mapChildren(repeater, x => x.props.content);
             assert.deepEqual(texts, ["text 1", "text 222"], "Text must be different");
 
-            var widths = this.mapChildren(repeater, x => x.width());
+            var widths = this.mapChildren(repeater, x => x.width);
             assert.equal(widths[1], widths[0], "Labels should have the same width")
         });
         //TODO: ensure that text area split is reset when changing text style properties in repeater
@@ -395,7 +395,7 @@ describe("Repeater tests", function () {
 
             var repeater = this.makeRepeater([label]);
 
-            repeater.prepareAndSetProps({ width: label.width() * 2 });
+            repeater.prepareAndSetProps({ width: label.width * 2 });
             this.app.relayout();
 
             var slave = repeater.findSingleChildOrDefault(x => x.id() !== label.id() && x instanceof Text);
@@ -410,7 +410,7 @@ describe("Repeater tests", function () {
             var texts = this.mapChildren(repeater, x => x.props.content);
             assert.deepEqual(texts, ["text 1", "text 222"], "Text must be different");
 
-            var widths = this.mapChildren(repeater, x => x.width());
+            var widths = this.mapChildren(repeater, x => x.width);
             assert.deepEqual(widths, [6, 6], "Labels should have the same width")
         });
 
@@ -509,7 +509,7 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //assert
-            assert.deepEqual(repeater.children.map(x => x.width()), [110, 110, 110]);
+            assert.deepEqual(repeater.children.map(x => x.width), [110, 110, 110]);
         });
     });
 
@@ -541,7 +541,7 @@ describe("Repeater tests", function () {
 
             //assert
             assert.deepEqual(repeater.children.map(x => x.children.length), [2, 2], "Inserted element not repeated");
-            assert.deepEqual(repeater.children.map(x => x.children.map(e => e.name())),
+            assert.deepEqual(repeater.children.map(x => x.children.map(e => e.name)),
                 [["new", "old"], ["new", "old"]], "Wrong position for repeated elements");
         });
         it("Insertions should re-arrange cells", function () {
@@ -570,7 +570,7 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //assert
-            assert.deepEqual(repeater.children.map(x => x.width()), [110, 110]);
+            assert.deepEqual(repeater.children.map(x => x.width), [110, 110]);
         });
         it("Should repeat insertions into nested containers", function () {
             //arrange
@@ -609,7 +609,7 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //assert
-            var names = repeater.children.map(x => x.children[2].children[0].children[1].name());
+            var names = repeater.children.map(x => x.children[2].children[0].children[1].name);
             assert.deepEqual(names, ["circle", "circle", "circle"], "Wrong position for repeated elements");
         });
         it("Should sync deletions", function () {
@@ -633,13 +633,13 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //act
-            var clone2 = repeater.children[1].findElementByName(element2.name());
+            var clone2 = repeater.children[1].findElementByName(element2.name);
 
             repeater.children[1].remove(clone2);
             this.app.relayout();
 
             //assert
-            var names = repeater.children.map(x => x.children.map(e => e.name()));
+            var names = repeater.children.map(x => x.children.map(e => e.name));
             assert.deepEqual(names, [["element1", "element3"], ["element1", "element3"]]);
         });
         it("Should sync z-order changes", function () {
@@ -663,12 +663,12 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //act
-            var clone3 = repeater.children[1].findElementByName(element3.name());
+            var clone3 = repeater.children[1].findElementByName(element3.name);
             clone3.parent().changePosition(clone3, 1);
             this.app.relayout();
 
             //assert
-            var names = repeater.children.map(x => x.children.map(e => e.name()));
+            var names = repeater.children.map(x => x.children.map(e => e.name));
             assert.deepEqual(names, [["element1", "element3", "element2"], ["element1", "element3", "element2"]]);
         });
         it("Should handle creation of inner groups", function () {
@@ -727,7 +727,7 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //assert
-            var names = repeater.children.map(x => x.children[0].children[0].name());
+            var names = repeater.children.map(x => x.children[0].children[0].name);
             assert.deepEqual(names, ["circle", "circle"], "Element must change parent in all cells");
         });
     });
@@ -758,8 +758,8 @@ describe("Repeater tests", function () {
 
             //assert
             repeater = this.app.activePage.getElementById(repeater.id());
-            assert.deepEqual(repeater.children.map(x => x.x()), [0, 100, 200], "Wrong cell positions");
-            assert.deepEqual(this.mapChildren(repeater, x => x.width()), [50, 50, 50], "Wrong element width");
+            assert.deepEqual(repeater.children.map(x => x.x), [0, 100, 200], "Wrong cell positions");
+            assert.deepEqual(this.mapChildren(repeater, x => x.width), [50, 50, 50], "Wrong element width");
         });
         it("Should restore elements with custom properties", function () {
             //arrange
@@ -787,7 +787,7 @@ describe("Repeater tests", function () {
 
             //assert
             repeater = this.app.activePage.getElementById(repeater.id());
-            assert.deepEqual(this.mapChildren(repeater, x => x.name()), ["master", "slave"]);
+            assert.deepEqual(this.mapChildren(repeater, x => x.name), ["master", "slave"]);
         });
         it("Should correctly restore repeater from scratch", function () {
             //arrange
@@ -912,7 +912,7 @@ describe("Repeater tests", function () {
             repeater = this.app.activePage.getElementById(repeater.id());
 
             //assert
-            var counts = this.mapChildren(repeater, x => x.name());
+            var counts = this.mapChildren(repeater, x => x.name);
             assert.deepEqual(counts, ["element2", "element1", "element2", "element1"]);
         });
         it("Should have symmetric arrange (increase size)", function () {
@@ -1051,7 +1051,7 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //assert
-            assert.deepEqual(this.mapChildren(repeater, x => x.width()), [50, 100, 50, 100], "Elements not resized after undo");
+            assert.deepEqual(this.mapChildren(repeater, x => x.width), [50, 100, 50, 100], "Elements not resized after undo");
         });
     });
 });

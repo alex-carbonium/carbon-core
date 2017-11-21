@@ -12,16 +12,16 @@ export default {
         }
         var size = getTotalSize(container, autoWidth, autoHeight);
         if (container.autoExpandWidth()){
-            size.width = Math.max(container.width(), size.width);
+            size.width = Math.max(container.width, size.width);
         }
         else if (!autoWidth){
-            size.width = container.width();
+            size.width = container.width;
         }
         if (container.autoExpandHeight()){
-            size.height = Math.max(container.height(), size.height);
+            size.height = Math.max(container.height, size.height);
         }
         else if (!autoHeight){
-            size.height = container.height();
+            size.height = container.height;
         }
 
         var padding = container.padding();
@@ -34,7 +34,7 @@ export default {
         var items = container.children;
         for (let i = 0, l = items.length; i < l; ++i) {
             let child = items[i];
-            if (!child.visible()){
+            if (!child.visible){
                 continue;
             }
 
@@ -139,7 +139,7 @@ function alignChildVertically(posTop, posBottom, child, props, outerBox, rect){
 
 function getTotalSize(container, autoWidth, autoHeight){
     if (!autoWidth && !autoHeight){
-        return {width: container.width(), height: container.height()};
+        return {width: container.width, height: container.height};
     }
     var padding = container.padding();
     var size = {width: padding.top + padding.bottom, height: padding.left + padding.right};
@@ -147,7 +147,7 @@ function getTotalSize(container, autoWidth, autoHeight){
     var items = container.children;
     for (let i = 0, l = items.length; i < l; ++i) {
         let child = items[i];
-        if (!child.visible()){
+        if (!child.visible){
             continue;
         }
         var dockStyle = child.dockStyle();

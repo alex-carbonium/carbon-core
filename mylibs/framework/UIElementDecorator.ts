@@ -3,11 +3,11 @@ import { IUIElement } from "carbon-core";
 export default class UIElementDecorator {
 	[x: string]: any;
 
-	private _visible: boolean;
+	public visible: boolean;
 
 	constructor() {
 		this.element = null;
-		this._visible = true;
+		this.visible = true;
 	}
 
 	attach(element) {
@@ -25,12 +25,5 @@ export default class UIElementDecorator {
 	}
 
 	parent(value) {
-	}
-
-	visible(value?: boolean) {
-		if (arguments.length === 1) {
-			this._visible = value;
-		}
-		return this._visible;
 	}
 }

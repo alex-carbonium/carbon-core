@@ -56,7 +56,7 @@ export default {
         frame.origin = frame.element.center(true);
         frame.localOrigin = frame.element.center(false);
         frame.captureVector = new Point(event.x - frame.origin.x, event.y - frame.origin.y);
-        frame.initialAngle = frame.element.angle();
+        frame.initialAngle = frame.element.angle;
         if (frame.initialAngle < 0){
             frame.initialAngle = 360 + frame.initialAngle;
         }
@@ -72,7 +72,7 @@ export default {
 
         Environment.controller.raiseInteractionStarted(InteractionType.Rotation, event);
         if (frame.element.decorators) {
-            frame.element.decorators.forEach(x => x.visible(false));
+            frame.element.decorators.forEach(x => x.visible = (false));
         }
         frame.element.addDecorator(RotateDecorator);
         Invalidate.request();
@@ -85,7 +85,7 @@ export default {
             frame.element.clearSavedLayoutProps();
             frame.element.removeDecorator(RotateDecorator);
             if (frame.element.decorators) {
-                frame.element.decorators.forEach(x => x.visible(true));
+                frame.element.decorators.forEach(x => x.visible = (true));
             }
 
             Environment.controller.raiseInteractionStopped(InteractionType.Rotation, event);
@@ -111,7 +111,7 @@ export default {
         frame.element.applyRotation(angle, frame.localOrigin, true, ChangeMode.Self);
         Invalidate.requestInteractionOnly();
 
-        var newAngle = frame.element.angle();
+        var newAngle = frame.element.angle;
         Environment.controller.interactionProgress.raise(InteractionType.Rotation, event, frame.element);
         event.cursor = this._getCursor(point, newAngle, frame.flipped);
     },

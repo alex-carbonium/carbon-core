@@ -17,7 +17,7 @@ import Selection from "../SelectionModel";
 import { IMouseEventData } from "carbon-basics";
 import { IUIElement, IContainer, IRepeatContainer, ChangeMode, IPrimitiveRoot, IUIElementProps, UIElementFlags } from "carbon-core";
 
-interface IRepeatContainerRuntimeProps{
+interface IRepeatContainerRuntimeProps {
     lastActiveCell?: RepeatCell;
     primitivePath?: string[];
     internalUpdate?: boolean;
@@ -42,7 +42,7 @@ export default class RepeatContainer extends Container implements IRepeatContain
     primitiveRoot() {
         return this;
     }
-    isFinalRoot(): boolean{
+    isFinalRoot(): boolean {
         return false;
     }
     primitivePath() {
@@ -108,9 +108,9 @@ export default class RepeatContainer extends Container implements IRepeatContain
         var scale = Environment.view.scale();
         for (var i = 0; i < this.children.length; i++) {
             var cell = this.children[i];
-            if (cell.hitTest(event, scale)){
+            if (cell.hitTest(event, scale)) {
                 var element = cell.hitElementDirect(event, scale);
-                if (element && element !== cell){
+                if (element && element !== cell) {
                     Selection.makeSelection([element]);
                 }
                 //do not handle for text tool
@@ -240,7 +240,7 @@ export default class RepeatContainer extends Container implements IRepeatContain
         }
     }
 
-    isEditable(){
+    isEditable() {
         return true;
     }
 
@@ -265,9 +265,9 @@ export default class RepeatContainer extends Container implements IRepeatContain
         }
     }
 
-    addDroppedElements(dropTarget: Container, elements: IUIElement[], e: IMouseEventData){
+    addDroppedElements(dropTarget: Container, elements: IUIElement[], e: IMouseEventData) {
         let result = [];
-        if (!elements.length){
+        if (!elements.length) {
             return result;
         }
 
@@ -418,55 +418,83 @@ export default class RepeatContainer extends Container implements IRepeatContain
         }
     }
 
-    offsetX(value?, mode?) {
-        if (arguments.length) {
-            var diff = value - this.offsetX();
-            var t = new Point(diff, 0)
-            this.children[0].applyTranslation(t, false, mode);
-        }
+    get offsetX() {
         return this.children[0].getBoundingBox().x;
     }
-    offsetY(value?, mode?) {
-        if (arguments.length) {
-            var diff = value - this.offsetY();
-            var t = new Point(0, diff)
-            this.children[0].applyTranslation(t, false, mode);
-        }
+
+    set offsetX(value) {
+        this._offsetX(value);
+    }
+
+    _offsetX(value?, mode?) {
+        var diff = value - this.offsetX;
+        var t = new Point(diff, 0)
+        this.children[0].applyTranslation(t, false, mode);
+    }
+
+    get offsetY() {
         return this.children[0].getBoundingBox().y;
     }
-    rows(value?, mode?) {
+
+    set offsetY(value) {
+        this._offsetY(value);
+    }
+
+    _offsetY(value?, mode?) {
+        var diff = value - this.offsetY;
+        var t = new Point(0, diff)
+        this.children[0].applyTranslation(t, false, mode);
+    }
+
+    get rows() {
         if (this.children.length === 0) {
             return 1;
         }
         var masterHeight = this.children[0].boundaryRect().height;
         var margin = this.props.innerMarginY;
-        var offsetY = this.offsetY();
-
-        if (arguments.length) {
-            var newHeight = offsetY + value * masterHeight + (value - 1) * margin;
-            this.setProps({ br: this.boundaryRect().withHeight(newHeight) }, mode);
-            return value;
-        }
+        var offsetY = this.offsetY;
 
         var rows = masterHeight === 0 ? 1 : Math.ceil((this.boundaryRect().height - offsetY) / (masterHeight + margin));
         return rows < 1 ? 1 : rows;
     }
-    cols(value?, mode?) {
+
+    set rows(value) {
+        this._rows(value);
+    }
+
+    _rows(value?, mode?) {
+        var masterHeight = this.children[0].boundaryRect().height;
+        var margin = this.props.innerMarginY;
+        var offsetY = this.offsetY;
+
+        var newHeight = offsetY + value * masterHeight + (value - 1) * margin;
+        this.setProps({ br: this.boundaryRect().withHeight(newHeight) }, mode);
+    }
+
+    get cols() {
         if (this.children.length === 0) {
             return 1;
         }
         var masterWidth = this.children[0].boundaryRect().width;
         var margin = this.props.innerMarginX;
-        var offsetX = this.offsetX();
-
-        if (arguments.length) {
-            var newWidth = offsetX + value * masterWidth + (value - 1) * margin;
-            this.setProps({ br: this.boundaryRect().withWidth(newWidth) }, mode);
-            return value;
-        }
+        var offsetX = this.offsetX;
 
         var cols = masterWidth === 0 ? 1 : Math.ceil((this.boundaryRect().width - offsetX) / (masterWidth + margin));
         return cols < 1 ? 1 : cols;
+    }
+
+    set cols(value) {
+        this._cols(value);
+    }
+
+    _cols(value?, mode?) {
+        var masterWidth = this.children[0].boundaryRect().width;
+        var margin = this.props.innerMarginX;
+        var offsetX = this.offsetX;
+
+        var newWidth = offsetX + value * masterWidth + (value - 1) * margin;
+        this.setProps({ br: this.boundaryRect().withWidth(newWidth) }, mode);
+        return value;
     }
 }
 RepeatContainer.prototype.t = Types.RepeatContainer;

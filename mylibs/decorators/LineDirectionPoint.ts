@@ -27,7 +27,7 @@ export default  {
     capture (frame) {
         delete frame.originalValue;
         if (frame.element.decorators) {
-            frame.element.decorators.forEach(x => x.visible(false));
+            frame.element.decorators.forEach(x => x.visible = (false));
         }
     },
     release (frame, point) {
@@ -42,7 +42,7 @@ export default  {
             r[point.prop] = currentValue;
             frame.element.prepareAndSetProps(r, ChangeMode.Model);
             if (frame.element.decorators) {
-                frame.element.decorators.forEach(x => x.visible(true));
+                frame.element.decorators.forEach(x => x.visible = (true));
             }
         }
     },

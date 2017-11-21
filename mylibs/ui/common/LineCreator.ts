@@ -85,8 +85,8 @@ export default class LineCreator extends Tool {
             Invalidate.requestInteractionOnly();
             var pos = resize.call(this, this._element.x1(), this._element.y1(), this._element.x2(), this._element.y2());
 
-            var w = this._element.width()
-                , h = this._element.height();
+            var w = this._element.width
+                , h = this._element.height;
             if (w === 0 && h === 0) {
                 return;
             }
@@ -144,7 +144,7 @@ export default class LineCreator extends Tool {
             context.save();
             var e = this._element;
             e.applyViewMatrix(context);
-            e.drawSelf(context, e.width(), e.height(), environment);
+            e.drawSelf(context, e.width, e.height, environment);
             context.restore();
         }
         else if (this._startPoint) {

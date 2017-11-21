@@ -126,8 +126,8 @@ class ResizeHint extends UIElement {
     }
 
     updateSizeText() {
-        var w = this._roundDecimal(this._transformationElement.width());
-        var h = this._roundDecimal(this._transformationElement.height());
+        var w = this._roundDecimal(this._transformationElement.width);
+        var h = this._roundDecimal(this._transformationElement.height);
         var text = this._formatDecimal(w) + " x " + this._formatDecimal(h);
 
         if (this._label) {
@@ -138,13 +138,13 @@ class ResizeHint extends UIElement {
     }
 
     updatePositionText() {
-        // var x = this._roundDecimal(this._transformationElement.x());
-        // var y = this._roundDecimal(this._transformationElement.y());
+        // var x = this._roundDecimal(this._transformationElement.x);
+        // var y = this._roundDecimal(this._transformationElement.y);
         // this.updateText("(" + this._formatDecimal(x) + "; " + this._formatDecimal(y) + ")");
     }
 
     updateAngleText() {
-        var angle = this._roundDecimal(this._transformationElement.angle());
+        var angle = this._roundDecimal(this._transformationElement.angle);
         this.updateText(angle + "°");
     }
 
@@ -236,7 +236,7 @@ class SelectionRect extends UIElement {
 
         if (this._element.hasPath()) {
             this._element.applyViewMatrix(context);
-            this._element.drawPath(context, this._element.width(), this._element.height());
+            this._element.drawPath(context, this._element.width, this._element.height);
         }
         else {
             this._element.drawBoundaryPath(context);

@@ -181,9 +181,11 @@ class NullPage extends UIElement implements IPage {
     }
     timeStamp() {
     }
-    name() {
-        return "";
+    get name() {
+        return '';
     }
+    set name(v){}
+
     encodedName() {
     }
     preview() {
@@ -249,7 +251,7 @@ class NullPage extends UIElement implements IPage {
     scrollY() {
         return 0;
     }
-    hitElement() {
+    hitElement(a, b, c?,d?):IUIElement{
         return null;
     }
     hitElementDirect() {
@@ -269,20 +271,30 @@ class NullPage extends UIElement implements IPage {
 
     insertArtboards(artboards: IArtboard[]) {
     }
-    width(): number {
+    get width(): number {
         return 0;
     }
-    height(): number {
+    set width(v) {
+    }
+    get height(): number {
         return 0;
     }
-    x(): number {
+    set height(v) {
+    }
+    get x(): number {
         return 0;
     }
-    y(): number {
+    set x(v) {
+    }
+    get y(): number {
         return 0;
     }
-    angle(): number {
+    set y(v) {
+    }
+    get angle(): number {
         return 0;
+    }
+    set angle(v) {
     }
 
     dropElement(element) {

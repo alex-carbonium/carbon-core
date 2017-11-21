@@ -114,11 +114,11 @@ export default class CompositeElement extends UIElement implements IComposite {
         return border;
     }
 
-    angle() {
+    get angle() {
         if (this.elements.length === 1) {
-            return this.elements[0].angle();
+            return this.elements[0].angle;
         }
-        return super.angle();
+        return super.angle;
     }
 
     hasBadTransform(): boolean {
@@ -203,32 +203,32 @@ export default class CompositeElement extends UIElement implements IComposite {
         this.elements.forEach(e=>e.clearSavedLayoutProps());
     }
 
-    width() {
+    get width() {
         if (this.count() === 1) {
-            return this.elements[0].width();
+            return this.elements[0].width;
         }
-        return super.width();
+        return super.width;
     }
 
-    height() {
+    get height() {
         if (this.count() === 1) {
-            return this.elements[0].height();
+            return this.elements[0].height;
         }
-        return super.height();
+        return super.height;
     }
 
-    x() {
+    get x() {
         if (this.count() === 1) {
-            return this.elements[0].x();
+            return this.elements[0].x;
         }
-        return super.x();
+        return super.x;
     }
 
-    y() {
+    get y() {
         if (this.count() === 1) {
-            return this.elements[0].y();
+            return this.elements[0].y;
         }
-        return super.y();
+        return super.y;
     }
 
     rotationOrigin(global) {

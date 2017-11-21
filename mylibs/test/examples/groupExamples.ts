@@ -30,22 +30,22 @@ registerExample("group: nested, multilevel", function(app, artboard){
     Selection.makeSelection([rect3, rect4]);
     app.actionManager.invoke("group");
     var group2 = Selection.elements[0];
-    group2.name("group 2");
+    group2.name = ("group 2");
 
     var group3 = group2.clone();
-    group3.name("group 3");
+    group3.name = ("group 3");
     group3.translate(0, group3.getBoundingBox().height + 10);
     artboard.add(group3);
 
     Selection.makeSelection([group2, group3]);
     app.actionManager.invoke("group");
     var group4 = Selection.elements[0];
-    group4.name("group 4");
+    group4.name = ("group 4");
 
     Selection.makeSelection([group1, group4]);
     app.actionManager.invoke("group");
     var group5 = Selection.elements[0];
-    group5.name("group 5");
+    group5.name = ("group 5");
 
     var w = window as any;
     w.rect1 = rect1;

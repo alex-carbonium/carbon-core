@@ -101,7 +101,7 @@ export default class RenderPipeline implements IPooledObject {
         if (!cacheItem) {
             if (this.useCache) {
                 context = RenderPipeline.getBufferedContext(this.element, this.environment, true);
-                // debug("caching %s", this.element.name());
+                // debug("caching %s", this.element.name);
                 justCached = true;
 
                 environment = Object.assign({}, environment, {
@@ -109,7 +109,7 @@ export default class RenderPipeline implements IPooledObject {
                 });
             } else if (this.useTempBuffer) {
                 context = RenderPipeline.getBufferedContext(this.element, this.environment, (environment.flags & RenderFlags.DisableCaching));
-                // debug("caching %s", this.element.name());
+                // debug("caching %s", this.element.name);
             }
 
             this.startTime = performance.now();
@@ -166,7 +166,7 @@ export default class RenderPipeline implements IPooledObject {
         var elapsedTime = performance.now() - this.startTime;
 
         if (!justCached && elapsedTime > this.element.runtimeProps.lrt) {
-            // debug("Cache is slower then original %s, new:%s - old:%s", this.element.name(), elapsedTime, this.element.runtimeProps.lrt);
+            // debug("Cache is slower then original %s, new:%s - old:%s", this.element.name, elapsedTime, this.element.runtimeProps.lrt);
         }
 
         if (!justCached) {

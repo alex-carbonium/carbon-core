@@ -347,7 +347,7 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
 
     getVerticalOffset(engine) {
         var offset = 0, h;
-        var height = this.height();
+        var height = this.height;
         var align = this.props.font.valign;
         if (align === TextAlign.middle) {
             h = engine.getActualHeight();

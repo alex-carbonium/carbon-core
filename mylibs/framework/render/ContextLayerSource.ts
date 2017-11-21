@@ -91,11 +91,11 @@ export default class ContextLayerSource extends Context {
             }
         }
         if ((this._context._mask & this.layerRedrawMask) === 0) {
-            // console.log(`element: ${element.name()} ignored, mask ${this.layerRedrawMask}`);
+            // console.log(`element: ${element.name} ignored, mask ${this.layerRedrawMask}`);
             return false;
         }
 
-        // console.log(`element: ${element.name()} on ${this._context._mask}`);
+        // console.log(`element: ${element.name} on ${this._context._mask}`);
 
         if (environment.flags & RenderFlags.UseParentClipping) {
             let parent = element.parent();

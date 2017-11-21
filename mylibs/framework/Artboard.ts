@@ -286,7 +286,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
         context.font = "11 px Arial, Helvetica, sans-serif";
 
-        let width = this.width();
+        let width = this.width;
 
 
         let rect = this.getBoundaryRectGlobal();
@@ -358,7 +358,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         if (scale >= 0.5) {
             context.font = (0 | (10 / scale)) + "px Arial, Helvetica, sans-serif";
             context.beginPath();
-            context.rectPath(x, y - 20 / scale, Math.max(150, this.width()), 20 / scale);
+            context.rectPath(x, y - 20 / scale, Math.max(150, this.width), 20 / scale);
             context.clip();
 
             context.fillStyle = SharedColors.ArtboardText;
@@ -490,7 +490,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
                     properties: ["x", "y", "width", "height", "angle"]
                 },
                 {
-                    label: element.name(),
+                    label: element.name,
                     properties: ['stateId'].concat(properties.map(p => {
                         return 'custom:' + p.controlId + ':' + p.propertyName
                     }))
@@ -622,8 +622,8 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     _convertToIconset() {
         let iconCellSize = 32;// TODO: get form prop
-        let rowsCount = 0 | this.height() / iconCellSize;
-        let colsCount = 0 | this.width() / iconCellSize;
+        let rowsCount = 0 | this.height / iconCellSize;
+        let colsCount = 0 | this.width / iconCellSize;
         let margin = IconCellsMargin;
 
         var children = this.children.slice();
@@ -645,7 +645,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
         for (let i = 0; i < children.length; ++i) {
             let child = children[i];
-            iconCellSize = Math.max(iconCellSize, child.width() + 2, child.height() + 2);
+            iconCellSize = Math.max(iconCellSize, child.width + 2, child.height + 2);
             this.remove(child);
         }
 
@@ -811,7 +811,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
      * If an artboard hits itself and has an extended hit test box, it has to be validated
      * if the artboard is "really" hit by checking the boundary rect.
      */
-    hitElement(position, scale, predicate?, directSelection?) {
+    hitElement(position, scale, predicate?, directSelection?):IUIElement {
         let element = super.hitElement.apply(this, arguments);
         if (!element) {
             return null;
@@ -999,7 +999,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     mousedown(event: IMouseEventData) {
         let scale = Environment.view.scale();
         let pos = this.position();
-        if (Environment.controller.currentTool !== "artboardTool" && !Selection.isElementSelected(this) && isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width(), height: 20 / scale }, event)) {
+        if (Environment.controller.currentTool !== "artboardTool" && !Selection.isElementSelected(this) && isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width, height: 20 / scale }, event)) {
             this.parent().setActiveArtboard(this);
             event.handled = true;
         }
@@ -1051,7 +1051,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             return;
         }
         var Symbol = PropertyMetadata.findAll(Types.Symbol)._class;
-        PropertyMetadata.replaceForNamedType('user:' + this.name(), Symbol, this.buildMetadata(this.props.customProperties));
+        PropertyMetadata.replaceForNamedType('user:' + this.name, Symbol, this.buildMetadata(this.props.customProperties));
     }
 
     duplicateState(name, newName) {
@@ -1414,7 +1414,7 @@ PropertyMetadata.registerForType(Artboard, {
                 size: 3 / 4,
                 items: items.concat(App.Current.getAllFrames().map(framed_artboard => {
                     return {
-                        name: framed_artboard.name(),
+                        name: framed_artboard.name,
                         value: {
                             pageId: framed_artboard.parent().id(),
                             artboardId: framed_artboard.id()

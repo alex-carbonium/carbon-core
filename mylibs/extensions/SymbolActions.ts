@@ -136,7 +136,7 @@ export default class SymbolActions extends CarbonExtension {
                 pageId: page.id(),
                 artboardId: artboard.id()
             },
-            name: artboard.name()
+            name: artboard.name
         });
         App.Current.activePage.nameProvider.assignNewName(symbol);
 

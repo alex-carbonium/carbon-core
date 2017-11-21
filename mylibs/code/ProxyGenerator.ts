@@ -6,11 +6,11 @@ export class ArtboardProxyGenerator {
     getControlType(e) {
         switch (e.t) {
             case Types.Path:
-                return "IPath";
+                return "TPath";
             case Types.Rectangle:
-                return "IRectangle";
+                return "TRectangle";
         }
-        return "IElement";
+        return "TUIElement";
     }
 
     generate(artboard: IArtboard): Promise<string> {
@@ -21,7 +21,7 @@ export class ArtboardProxyGenerator {
                 if (e === artboard) {
                     return;
                 }
-                let name = NameProvider.escapeName(e.name());
+                let name = NameProvider.escapeName(e.name);
                 let type = this.getControlType(e);
                 controlList.push({ name, type });
             });

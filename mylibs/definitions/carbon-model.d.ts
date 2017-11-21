@@ -2,6 +2,7 @@ declare module "carbon-model" {
     import { IPoint, IRect, ICoordinate, IMatrix, ISize, Origin } from "carbon-geometry";
     import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable, ChangeMode, ArtboardType, Font, KeyboardState, Brush, ResizeDimension } from "carbon-basics";
     import { IContext } from "carbon-rendering";
+    import { TUIElement } from "carbon-runtime";
 
     export interface IDataNodeProps {
         [key: string]: any;
@@ -79,10 +80,9 @@ declare module "carbon-model" {
         Icon = 1 << 3
     }
 
-    export interface IUIElement<TProps extends IUIElementProps = IUIElementProps> extends IDataNode<TProps>, IMouseEventHandler, IDecoratable {
-        parent(): IContainer;
-
-        name(value?: string): string;
+    export interface IUIElement<TProps extends IUIElementProps = IUIElementProps> extends TUIElement, IDataNode<TProps>, IMouseEventHandler, IDecoratable {
+        parent(value?:IContainer): IContainer;
+        name:string;
         drawPath?(context: IContext, w: number, h: number);
 
         mode(value?: any): any;
@@ -137,18 +137,12 @@ declare module "carbon-model" {
         canFill(): boolean;
         canStroke(): boolean;
 
-        x(): number;
-        y(): number;
-        width(): number;
-        height(): number;
-        angle(): number;
         zOrder(): number;
         hasFlags(flags: UIElementFlags): boolean;
         addFlags(flags: UIElementFlags): void;
         removeFlags(flags: UIElementFlags): void;
 
         locked(value?: boolean): boolean;
-        visible(value?: boolean): boolean;
 
         constraints(value?: IConstraints): IConstraints;
 
@@ -178,6 +172,8 @@ declare module "carbon-model" {
 
     export interface IContainer<TProps extends IContainerProps = IContainerProps> extends IUIElement<TProps> {
         children: IUIElement[];
+
+        parent(value?:IContainer):IContainer;
 
         canAccept(elements: IUIElement[], autoInsert: boolean, allowMoveIn: boolean): boolean;
 
@@ -379,7 +375,7 @@ declare module "carbon-model" {
         beforeInvoke(method: string, args: any[]): boolean | void;
         afterInvoke(method: string, args: any[]): boolean | void;
         parent(value): any;
-        visible(value: boolean): boolean;
+        visible: boolean;
     }
 
     export const enum TextMode {

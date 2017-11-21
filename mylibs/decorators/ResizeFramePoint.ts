@@ -72,7 +72,7 @@ export default {
         //Environment.view.interactionLayer.add(resizingElement);
         Environment.controller.raiseInteractionStarted(InteractionType.Resizing, event);
         if (frame.element.decorators) {
-            frame.element.decorators.forEach(x => x.visible(false));
+            frame.element.decorators.forEach(x => x.visible = (false));
         }
 
         frame.element.addDecorator(ResizeDecorator);
@@ -92,7 +92,7 @@ export default {
             delete frame.viewMatrix;
             frame.element.removeDecorator(ResizeDecorator);
             if (frame.element.decorators) {
-                frame.element.decorators.forEach(x => x.visible(true));
+                frame.element.decorators.forEach(x => x.visible = (true));
             }
             frame.element.resetGlobalViewCache();
         }

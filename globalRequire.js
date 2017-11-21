@@ -22,4 +22,4 @@ require("ui/common/DockPanel");
 require("ui/common/AlignPanel");
 require("ui/common/StackPanel");
 
-require("svg/SvgPath");
+// require("svg/SvgPath");

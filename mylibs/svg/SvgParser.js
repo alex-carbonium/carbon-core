@@ -57,7 +57,7 @@ define(function () {
         group.setProps(rect);
         for (var i = 0; i < parsedChildren.length; ++i) {
             var child = parsedChildren[i];
-            child.setProps({ x: child.x() - rect.x, y: child.y() - rect.y });
+            child.setProps({ x: child.x - rect.x, y: child.y - rect.y });
             group.add(child);
         }
 

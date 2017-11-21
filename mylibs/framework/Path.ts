@@ -1084,32 +1084,46 @@ class Path extends Shape {
         this.curveToPoint(p, c1, c2);
     }
 
-    currentPointX(value: number, changeMode: ChangeMode): number {
-        if (arguments.length) {
-            this.runtimeProps.currentPointX = this._roundValue(value);
-            this._refreshComputedProps();
-            Invalidate.request();
-        }
-
+    get currentPointX(): number {
         return this.runtimeProps.currentPointX;
     }
 
-    currentPointY(value: number, changeMode: ChangeMode): number {
-        if (arguments.length) {
-            this.runtimeProps.currentPointY = this._roundValue(value);
-            this._refreshComputedProps();
-            Invalidate.request();
-        }
+    set currentPointX(value: number) {
+        this._currentPointX(value);
+    }
+
+    _currentPointX(value: number, changeMode?: ChangeMode) {
+        this.runtimeProps.currentPointX = this._roundValue(value);
+        this._refreshComputedProps();
+        Invalidate.request();
+    }
+
+    get currentPointY(): number {
         return this.runtimeProps.currentPointY;
     }
 
-    currentPointType(value: PointType, changeMode: ChangeMode): PointType {
-        if (arguments.length) {
-            this.runtimeProps.currentPointType = value;
-            this._refreshComputedProps();
-            Invalidate.request();
-        }
+    set currentPointY(value: number) {
+        this._currentPointY(value);
+    }
+
+    _currentPointY(value: number, changeMode?: ChangeMode) {
+        this.runtimeProps.currentPointY = this._roundValue(value);
+        this._refreshComputedProps();
+        Invalidate.request();
+    }
+
+    get currentPointType(): PointType {
         return this.runtimeProps.currentPointType;
+    }
+
+    set currentPointType(value: PointType) {
+        this._currentPointType(value);
+    }
+
+    _currentPointType(value: PointType, changeMode?: ChangeMode) {
+        this.runtimeProps.currentPointType = value;
+        this._refreshComputedProps();
+        Invalidate.request();
     }
 
     fromSvgString(d, matrix) {
@@ -1259,8 +1273,8 @@ class Path extends Shape {
             scaleY = 1,
             tempControlX,
             tempControlY,
-            l = 0,//this.x(),//-((this.width() / 2) + this.pathOffset.x),
-            t = 0;//this.y();//-((this.height() / 2) + this.pathOffset.y);
+            l = 0,
+            t = 0;
 
         let startX, startY, segmentStarted = false;
 
@@ -1576,8 +1590,8 @@ class Path extends Shape {
         // polygon
         if (parsedAttributes.points) {
             let values = parsedAttributes.points.replace('\n', ' ').replace('\r', ' ').replace(',', ' ').split(' ');
-            for (let i = 0; i < values.length; i+=2) {
-                let point = { x: parseFloat(values[i+0]), y: parseFloat(values[i+1]) };
+            for (let i = 0; i < values.length; i += 2) {
+                let point = { x: parseFloat(values[i + 0]), y: parseFloat(values[i + 1]) };
                 point = matrix.transformPoint(point);
                 path.addPoint(point);
             }
@@ -1624,8 +1638,8 @@ class Path extends Shape {
 
         if (parsedAttributes.points) {
             let pairs = parsedAttributes.points.replace('\n', ' ').replace('\r', ' ').replace(',', ' ').split(' ');
-            for (let i = 0; i < pairs.length; i+=2) {
-                path.addPoint(matrix.transformPoint({ x: parseFloat(pairs[i+0]), y: parseFloat(pairs[i+1]) }));
+            for (let i = 0; i < pairs.length; i += 2) {
+                path.addPoint(matrix.transformPoint({ x: parseFloat(pairs[i + 0]), y: parseFloat(pairs[i + 1]) }));
             }
         }
 
@@ -1862,7 +1876,7 @@ function setElementPropertiesFromAttributes(element, parsedAttributes) {
     }
 
     if (parsedAttributes.id) {
-        element.name(parsedAttributes.id);
+        element.name = (parsedAttributes.id);
     }
 }
 

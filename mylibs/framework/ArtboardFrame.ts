@@ -195,8 +195,8 @@ export default class ArtboardFrameControl extends UIElement {
         let scaleX = 1;
         let scaleY = 1;
         if (this.props.content === ContentBehavior.Scale) {
-            scaleX = this.width() / source.width();
-            scaleY = this.height() / source.height();
+            scaleX = this.width / source.width;
+            scaleY = this.height / source.height;
         }
 
         let sourceContext = renderer.elementToContextFromPool(this._artboard, 1, scaleX, scaleY);
@@ -211,7 +211,7 @@ export default class ArtboardFrameControl extends UIElement {
         // this._artboard.runtimeProps.ctxl = this.runtimeProps.ctxl;
         // try {
         //     this._drawing = true;
-        //     this._artboard.drawSelf.call(this._artboard, context, this._artboard.width(), this._artboard.height(), environment);
+        //     this._artboard.drawSelf.call(this._artboard, context, this._artboard.width, this._artboard.height, environment);
         // } finally {
         //     this._artboard.runtimeProps.ctxl = originalCtxl;
         //     this._drawing = false;
@@ -223,8 +223,8 @@ export default class ArtboardFrameControl extends UIElement {
         ContextPool.releaseContext(sourceContext);
         // context.save();
         // if (this.props.content === ContentBehavior.Scale) {
-        //     var scaleX = this.width() / source.width();
-        //     var scaleY = this.height() / source.height();
+        //     var scaleX = this.width / source.width;
+        //     var scaleY = this.height / source.height;
         //     context.scale(scaleX, scaleY);
         // }
         // this._artboard.globalViewMatrixInverted().applyToContext(context);
@@ -235,7 +235,7 @@ export default class ArtboardFrameControl extends UIElement {
         // this._artboard.runtimeProps.ctxl = this.runtimeProps.ctxl;
         // try {
         //     this._drawing = true;
-        //     this._artboard.drawSelf.call(this._artboard, context, this._artboard.width(), this._artboard.height(), environment);
+        //     this._artboard.drawSelf.call(this._artboard, context, this._artboard.width, this._artboard.height, environment);
         // } finally {
         //     this._artboard.runtimeProps.ctxl = originalCtxl;
         //     this._drawing = false;
@@ -272,7 +272,7 @@ PropertyMetadata.registerForType(ArtboardFrameControl, {
             return {
                 items: page.getAllArtboards().map(artboard => {
                     return {
-                        name: artboard.name(),
+                        name: artboard.name,
                         value: {
                             pageId: page.id(),
                             artboardId: artboard.id()

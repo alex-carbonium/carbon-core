@@ -17,7 +17,7 @@ var clearChangedAreas = function (context) {
     //             context.fillRect(rect.x - 1, rect.y - 1, rect.width + 2, rect.height + 2);
     //         });
     //     } else {
-    //         context.fillRect(0, 0, this.width(), this.height());
+    //         context.fillRect(0, 0, this.width, this.height);
     //     }
     // } else {
     //     if (false && this._invalidateAreas.length > 0) {
@@ -211,7 +211,7 @@ class Layer extends Container implements ILayer {
         }
     }
 
-    hitElement(position, scale, predicate?, directSelection?) {
+    hitElement(position, scale, predicate?, directSelection?):IUIElement {
         for (var i = 0; i < this._hitFirstElements.length; ++i) {
             var element = this._hitFirstElements[i].hitElement(position, scale, predicate, directSelection);
             if (element) {

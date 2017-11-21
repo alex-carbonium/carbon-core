@@ -31,10 +31,10 @@ class SectionDecorator {
         this.element = element;
         var baseMatrix = element.globalViewMatrix();
 
-        var cx = element.width()/2 + .5 | 0;
-        var cy = element.height()/2 + .5 | 0;
+        var cx = element.width/2 + .5 | 0;
+        var cy = element.height/2 + .5 | 0;
 
-        var minSide = Math.min(this.element.width(), this.element.height());
+        var minSide = Math.min(this.element.width, this.element.height);
         var ratio = minSide/(handleWidth + handleHeight);
         var handleScale = 1;
         if (ratio < 2){
@@ -213,7 +213,7 @@ class SectionDecorator {
                     name: this.element.dockStyle() === DockStyle.Top ? "Top section" : "Bottom section",
                     dockStyle: this.element.dockStyle(),
                     horizontalAlignment: HorizontalAlignment.Stretch,
-                    height: Math.min(100, parent.height()/2 | 0)
+                    height: Math.min(100, parent.height/2 | 0)
                 });
                 break;
             case HandleTypes.InnerTop:
@@ -221,7 +221,7 @@ class SectionDecorator {
                     name: "Top section",
                     dockStyle: DockStyle.Top,
                     horizontalAlignment: HorizontalAlignment.Stretch,
-                    height: Math.min(100, parent.height()/2 | 0)
+                    height: Math.min(100, parent.height/2 | 0)
                 });
                 break;
             case HandleTypes.OuterBottom:
@@ -231,7 +231,7 @@ class SectionDecorator {
                     name: this.element.dockStyle() === DockStyle.Top ? "Top section" : "Bottom section",
                     dockStyle: this.element.dockStyle(),
                     horizontalAlignment: HorizontalAlignment.Stretch,
-                    height: Math.min(100, parent.height()/2 | 0)
+                    height: Math.min(100, parent.height/2 | 0)
                 });
                 break;
             case HandleTypes.InnerBottom:
@@ -239,7 +239,7 @@ class SectionDecorator {
                     name: "Bottom section",
                     dockStyle: DockStyle.Bottom,
                     horizontalAlignment: HorizontalAlignment.Stretch,
-                    height: Math.min(100, parent.height()/2 | 0)
+                    height: Math.min(100, parent.height/2 | 0)
                 });
                 break;
             case HandleTypes.OuterLeft:
@@ -249,7 +249,7 @@ class SectionDecorator {
                     name: this.element.dockStyle() === DockStyle.Left ? "Left section" : "Right section",
                     dockStyle: this.element.dockStyle(),
                     verticalAlignment: VerticalAlignment.Stretch,
-                    width: Math.min(100, parent.width()/2 | 0)
+                    width: Math.min(100, parent.width/2 | 0)
                 });
                 break;
             case HandleTypes.InnerLeft:
@@ -257,7 +257,7 @@ class SectionDecorator {
                     name: "Left section",
                     dockStyle: DockStyle.Left,
                     verticalAlignment: VerticalAlignment.Stretch,
-                    width: Math.min(100, parent.width()/2 | 0)
+                    width: Math.min(100, parent.width/2 | 0)
                 });
                 break;
             case HandleTypes.OuterRight:
@@ -267,7 +267,7 @@ class SectionDecorator {
                     name: this.element.dockStyle() === DockStyle.Left ? "Left section" : "Right section",
                     dockStyle: this.element.dockStyle(),
                     verticalAlignment: VerticalAlignment.Stretch,
-                    width: Math.min(100, parent.width()/2 | 0)
+                    width: Math.min(100, parent.width/2 | 0)
                 });
                 break;
             case HandleTypes.InnerRight:
@@ -275,7 +275,7 @@ class SectionDecorator {
                     name: "Right section",
                     dockStyle: DockStyle.Right,
                     verticalAlignment: VerticalAlignment.Stretch,
-                    width: Math.min(100, parent.width()/2 | 0)
+                    width: Math.min(100, parent.width/2 | 0)
                 });
                 break;
             case HandleTypes.Fill:

@@ -9,7 +9,7 @@ import { RenderEnvironment, StrokePosition } from "carbon-core";
 
 class Circle extends Shape {
     hitTest(/*Point*/point, scale) {
-        if (!this.visible() || this.hasBadTransform()) {
+        if (!this.visible || this.hasBadTransform()) {
             return false;
         }
 
@@ -115,7 +115,7 @@ class Circle extends Shape {
             fill:this.fill(),
             stroke:this.stroke(),
             styleId:this.styleId(),
-            name:this.name(),
+            name:this.name,
             strokeWidth:this.strokeWidth()
         });
 
@@ -190,7 +190,7 @@ class Circle extends Shape {
         circle.setProps({ pointRounding: 0 });
 
         if (parsedAttributes.id) {
-            circle.name(parsedAttributes.id);
+            circle.name = (parsedAttributes.id);
         }
 
         if (parsedAttributes.fill !== undefined) {

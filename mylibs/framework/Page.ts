@@ -15,7 +15,7 @@ import { createUUID } from "../util";
 function findNextPageName() {
     var maxId = 0;
     each(App.Current.pages, function (page) {
-        var name = page.name();
+        var name = page.name;
         var match = /^Page (\d+)$/.exec(name);
         if (match) {
             var id = parseInt(match[1]);
@@ -228,7 +228,7 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
         if (!container) {
             return 1;
         }
-        return container.width() / container.height();
+        return container.width / container.height;
     }
     getArtboardAtPoint(point){
         return null;
@@ -240,15 +240,15 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
     autoInsert(/*UIElement*/element) {
     }
 
-    name(value?) {
-        if (value !== undefined) {
-            this.setProps({name: value});
-        }
-        return this.props.name;
-    }
+    // name(value?) {
+    //     if (value !== undefined) {
+    //         this.setProps({name: value});
+    //     }
+    //     return this.props.name;
+    // }
 
     encodedName() {
-        var name = this.name();
+        var name = this.name;
         if (name) {
             name = name.replace(pageNameSlugRegex, '');
         }

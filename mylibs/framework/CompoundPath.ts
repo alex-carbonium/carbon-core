@@ -327,7 +327,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
                 path.add(child);
             }
         }
-        path.name(this.displayName());
+        path.name = (this.displayName());
         path.styleId(this.styleId());
 
         let parent = this.parent();
@@ -466,7 +466,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
                 context.save();
                 //quick assignment
                 child.props.m = matrix;
-                child.drawPath(context, child.width(), child.height());
+                child.drawPath(context, child.width, child.height);
                 context.restore();
             }
         }
@@ -489,7 +489,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
                 let child = items[i];
                 context.save();
                 context.beginPath();
-                child.drawPath(context, child.width(), child.height());
+                child.drawPath(context, child.width, child.height);
                 context.stroke();
                 context.restore();
             }

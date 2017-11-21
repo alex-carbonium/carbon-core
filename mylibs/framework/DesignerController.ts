@@ -708,7 +708,7 @@ export default class DesignerController implements IController {
         for (let i = 0; i < elements.length; ++i){
             let e = elements[i];
             e.resetTransform();
-            e.applyTranslation(new Point(Math.round(eventData.x - e.width() / 2), Math.round(eventData.y - e.height() / 2)));
+            e.applyTranslation(new Point(Math.round(eventData.x - e.width / 2), Math.round(eventData.y - e.height / 2)));
             this.view.dropElement(e, ChangeMode.Self);
         }
 

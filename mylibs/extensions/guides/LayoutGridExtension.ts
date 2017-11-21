@@ -103,7 +103,7 @@ export default class LayoutGridExtension {
 
         var settings = artboard.layoutGridSettings();
         if (settings) {
-            var columnWidth = calculateColumnWidth(settings, artboard.width());
+            var columnWidth = calculateColumnWidth(settings, artboard.width);
 
             if (this.app.props.layoutGridStyle.type === "stroke") {
                 var lines = new LayoutGridLines(Environment.view);

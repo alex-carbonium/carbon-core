@@ -60,8 +60,8 @@ export default class LinkingTool extends Tool {
         var artboards = this._app.activePage.getAllArtboards();
         for (var i = 0; i < artboards.length; ++i) {
             let artboard = artboards[i];
-            var x = artboard.x();
-            var y = artboard.y();
+            var x = artboard.x;
+            var y = artboard.y;
             var w = HomeButtonWidth / scale;
             var h = HomeButtonHeight / scale;
             if (isPointInRect({ x: x, y: y - h, width: w, height: h }, event)) {
@@ -532,7 +532,7 @@ export default class LinkingTool extends Tool {
         list.push({
             target: target,
             source: source,
-            size: (target.type & 1) ? element.width() : element.height()
+            size: (target.type & 1) ? element.width : element.height
         });
     }
 
@@ -908,15 +908,15 @@ export default class LinkingTool extends Tool {
     }
 
     _drawButtonForArtboard(artboard, scale, context, page) {
-        var x = artboard.x();
-        var y = artboard.y();
+        var x = artboard.x;
+        var y = artboard.y;
         var w = 7 / scale;
         var h = 5 / scale;
 
         context.save();
         if (this._activeStory && this._activeStory.props.homeScreen && this._activeStory.props.homeScreen[1] === artboard.id()) {
             context.fillStyle = DefaultLinkColor;
-        } else if (artboard == this._hoverArboardHomeButton) {
+        } else if (artboard === this._hoverArboardHomeButton) {
             context.fillStyle = HoverLinkColor;
         } else {
             context.fillStyle = "gray";

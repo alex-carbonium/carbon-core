@@ -137,8 +137,8 @@ export default class RulerGuides {
             return false;
         }
 
-        let x = Math.round(e.x - this._origin.x());
-        let y = Math.round(e.y - this._origin.y());
+        let x = Math.round(e.x - this._origin.x);
+        let y = Math.round(e.y - this._origin.y);
 
         if (isPointInRect(this._rectVertical, e)) {
             this._guideX = { id: "", pos: x };
@@ -177,7 +177,7 @@ export default class RulerGuides {
             }
             else {
                 let pos = e.ctrlKey ? e : SnapController.applySnappingForPoint(e, false, true);
-                this._guideX.pos = Math.round(pos.x) - this._origin.x();
+                this._guideX.pos = Math.round(pos.x) - this._origin.x;
                 this._removingGuide = false;
                 e.cursor = "ew-resize";
             }
@@ -189,7 +189,7 @@ export default class RulerGuides {
             }
             else {
                 let pos = e.ctrlKey ? e : SnapController.applySnappingForPoint(e, true, false);
-                this._guideY.pos = Math.round(pos.y) - this._origin.y();
+                this._guideY.pos = Math.round(pos.y) - this._origin.y;
                 this._removingGuide = false;
                 e.cursor = "ns-resize";
             }
@@ -257,8 +257,8 @@ export default class RulerGuides {
         var react = keyboard.state.ctrlKey;
 
         if (!react) {
-            let x = Math.round(e.x - this._origin.x());
-            let y = Math.round(e.y - this._origin.y());
+            let x = Math.round(e.x - this._origin.x);
+            let y = Math.round(e.y - this._origin.y);
 
             react = isPointInRect(this._rectVertical, e) || isPointInRect(this._rectHorizontal, e);
         }
@@ -328,7 +328,7 @@ export default class RulerGuides {
         var hit = false;
         var items = [];
 
-        var x = Math.round(context.eventData.x) - this._origin.x();
+        var x = Math.round(context.eventData.x) - this._origin.x;
         var gx = this._customGuides.tryCaptureX(x);
         if (gx !== null) {
             items.push({
@@ -340,7 +340,7 @@ export default class RulerGuides {
             hit = true;
         }
         else {
-            var y = Math.round(context.eventData.y) - this._origin.y();
+            var y = Math.round(context.eventData.y) - this._origin.y;
             var gy = this._customGuides.tryCaptureY(y);
             if (gy !== null) {
                 items.push({

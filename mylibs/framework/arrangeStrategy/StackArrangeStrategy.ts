@@ -7,11 +7,11 @@ function getTotalChildrenWidth(container) {
     let res = 0;
     for (let i = 0; i < container.children.length; i++) {
         let child = container.children[i];
-        if (!child.visible()) {
+        if (!child.visible) {
             continue;
         }
 
-        res += child.margin().left + child.width() + child.margin().right;
+        res += child.margin().left + child.width + child.margin().right;
     }
 
     return res;
@@ -21,11 +21,11 @@ function getTotalChildrenHeight(container) {
     let res = 0;
     for (let i = 0; i < container.children.length; i++) {
         let child = container.children[i];
-        if (!child.visible()) {
+        if (!child.visible) {
             continue;
         }
 
-        res += child.margin().top + child.height() + child.margin().bottom;
+        res += child.margin().top + child.height + child.margin().bottom;
     }
 
     return res;
@@ -37,16 +37,16 @@ function calculateHeight(container) {
     let bottomPadding = container.padding().bottom;
 
     for (let child of container.children) {
-        if (!child.visible()) {
+        if (!child.visible) {
             continue;
         }
-        if (!highestChild || child.height() > highestChild.height()) {
+        if (!highestChild || child.height > highestChild.height) {
             highestChild = child;
         }
     }
 
     if (highestChild) {
-        let h = highestChild.height() + topPadding + bottomPadding
+        let h = highestChild.height + topPadding + bottomPadding
             + highestChild.margin().top + highestChild.margin().bottom;
         return h;
     }
@@ -60,16 +60,16 @@ function calculateWidth(container) {
     let rightPadding = container.padding().right;
 
     for (let child of container.children) {
-        if (!child.visible()) {
+        if (!child.visible) {
             continue;
         }
-        if (!widestChild || child.width() > widestChild.width()) {
+        if (!widestChild || child.width > widestChild.width) {
             widestChild = child;
         }
     }
 
     if (widestChild) {
-        let w = widestChild.width() + leftPadding + rightPadding
+        let w = widestChild.width + leftPadding + rightPadding
             + widestChild.margin().left + widestChild.margin().right;
         return w;
     }
@@ -79,8 +79,8 @@ function calculateWidth(container) {
 
 export let HorizontalArrangeStrategy = {
     arrange: function (container: any, e?, changeMode?) {
-        let x = container.x();
-        let y = container.y()
+        let x = container.x;
+        let y = container.y
         let pos = container.padding().left;
         let topPadding = container.padding().top;
         let bottomPadding = container.padding().bottom;
@@ -94,7 +94,7 @@ export let HorizontalArrangeStrategy = {
         }
 
         for (let child of container.children) {
-            if (!child.visible()) {
+            if (!child.visible) {
                 continue;
             }
 
@@ -118,10 +118,10 @@ export let HorizontalArrangeStrategy = {
                     y = topSpace;
                     break;
                 case VerticalAlignment.Middle:
-                    y = ~~(newHeight / 2 - child.height() / 2);
+                    y = ~~(newHeight / 2 - child.height / 2);
                     break;
                 case VerticalAlignment.Bottom:
-                    y = newHeight - bottomSpace - child.height();
+                    y = newHeight - bottomSpace - child.height;
                     break;
             }
 
@@ -132,7 +132,7 @@ export let HorizontalArrangeStrategy = {
                 child.arrange({ oldRect: r, newRect: { x: x, y: y, width: width, height: height } }, changeMode);
             }
 
-            pos += child.width() + child.margin().right;
+            pos += child.width + child.margin().right;
         }
 
         pos += container.padding().right;
@@ -143,7 +143,7 @@ export let HorizontalArrangeStrategy = {
 
 export let VerticalArrangeStrategy = {
     arrange: function (container, e, changeMode) {
-        let x = container.x(), y = container.y();
+        let x = container.x, y = container.y;
         let pos = container.padding().top;
         let leftPadding = container.padding().left;
         let rightPadding = container.padding().right;
@@ -156,7 +156,7 @@ export let VerticalArrangeStrategy = {
         }
 
         for (let child of container.children) {
-            if (!child.visible()) {
+            if (!child.visible) {
                 continue;
             }
             let leftSpace = leftPadding + child.margin().left;
@@ -179,10 +179,10 @@ export let VerticalArrangeStrategy = {
                     x = leftSpace;
                     break;
                 case HorizontalAlignment.Center:
-                    x = ~~(newWidth / 2 - child.width() / 2);
+                    x = ~~(newWidth / 2 - child.width / 2);
                     break;
                 case HorizontalAlignment.Right:
-                    x = newWidth - rightSpace - child.width();
+                    x = newWidth - rightSpace - child.width;
                     break;
             }
 
@@ -194,15 +194,15 @@ export let VerticalArrangeStrategy = {
                 child.arrange({ oldRect: r, newRect: { x: x, y: y, width: width, height: height } }, changeMode);
             }
 
-            pos += child.height() + child.margin().bottom;
+            pos += child.height + child.margin().bottom;
         }
 
         pos += container.padding().bottom;
 
         if (container.autoGrowMode() === 'up') {
-            let delta = pos - container.height();
-            let y = container.y() - delta;
-            let x = container.x();
+            let delta = pos - container.height;
+            let y = container.y - delta;
+            let x = container.x;
             container.applyTranslation({ x, y }, false, changeMode);
         }
 

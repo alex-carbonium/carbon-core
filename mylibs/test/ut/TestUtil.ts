@@ -77,19 +77,19 @@ Util.setupApp = function(options){
 
 export function createArtboard(name: string) {
     let artboard = new Artboard();
-    artboard.name(name);
+    artboard.name = (name);
     return artboard;
 }
 
 export function createElement(name: string) {
     let element = new UIElement();
-    element.name(name);
+    element.name = (name);
     return element;
 }
 
 export function createContainer(name: string) {
     let container = new Container();
-    container.name(name);
+    container.name = (name);
     return container;
 }
 

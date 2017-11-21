@@ -4,15 +4,42 @@ import EventHelper from "framework/EventHelper";
 import DataNode from "framework/DataNode";
 import Matrix from "math/matrix";
 import { IApp, IEvent, IPage, PreviewDisplayMode, ISize, IPageProps, ChangeMode } from "carbon-core";
+import { IPreviewModelProxy } from "carbon-app";
+import { IArtboard } from "carbon-model";
 
-export default class PreviewProxy {
+export default class PreviewProxy implements IPreviewModelProxy {
     app: IApp;
-    navigateToPage: IEvent<any>;
-    activePage: IPage<IPageProps> & { originalSize: ISize };
+    public navigateToPage: IEvent<any>;
+    public onPageChanged:IEvent<IPage>;
+    _activePage: IPage<IPageProps> & { originalSize: ISize };
 
     constructor(app) {
         this.app = app;
         this.navigateToPage = EventHelper.createEvent();
+        this.onPageChanged = EventHelper.createEvent();
+    }
+
+    get activePage() {
+        return this._activePage;
+    }
+
+    set activePage(value:IPage<IPageProps> & { originalSize: ISize }) {
+        if(this._activePage !== value) {
+            this._activePage = value;
+            this.onPageChanged.raise(value);
+        }
+    }
+
+    get activeArtboard(): IArtboard {
+        if (!this.activePage) {
+            return null;
+        }
+
+        if (!this.activePage.children.length) {
+            return null;
+        }
+
+        return this.activePage.children[0] as IArtboard;
     }
 
     _makePageFromArtboard(artboard, screenSize) {
@@ -20,12 +47,7 @@ export default class PreviewProxy {
         var previewClone = artboard.mirrorClone();
         var oldRect = previewClone.boundaryRect();
         previewClone.setTransform(Matrix.Identity);
-        // if (artboard.props.allowVerticalResize || artboard.props.allowHorizontalResize) {
 
-        // previewClone.width(artboard.props.allowHorizontalResize ? screenSize.width : artboard.width());
-        // previewClone.height(artboard.props.allowVerticalResize ? screenSize.height : artboard.height());
-        // previewClone.performArrange({oldRect});
-        // }
 
         page.add(previewClone);
         page.originalSize = oldRect;
@@ -113,7 +135,7 @@ export default class PreviewProxy {
         artboard.performArrange({ oldRect }, ChangeMode.Self);
         artboard.props.m = Matrix.Identity;
 
-        page.maxScrollX(Math.max(0, (artboard.width() * scale - screenSize.width)));
-        page.maxScrollY(Math.max(0, (artboard.height() * scale - screenSize.height)));
+        page.maxScrollX(Math.max(0, (artboard.width * scale - screenSize.width)));
+        page.maxScrollY(Math.max(0, (artboard.height * scale - screenSize.height)));
     }
 }

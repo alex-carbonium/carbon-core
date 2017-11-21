@@ -13,13 +13,13 @@ var SelectionFramePrototype = {
         if (this.captured && this.originalRect){
             return this.originalRect.width;
         }
-        return this.element.width();
+        return this.element.width;
     },
     getHeight: function(){
         if (this.captured && this.originalRect){
             return this.originalRect.height;
         }
-        return this.element.height();
+        return this.element.height;
     }
 };
 
@@ -86,7 +86,7 @@ function onMouseMove(event) {
         var pointIndex = this._frameType.hitPointIndex(this._frame, event);
         if (pointIndex !== -1) {
             var p = this._frame.points[pointIndex];
-            var cursorIndex = p.type.rotateCursorPointer(p.cursor, this._frame.element.angle(), this._frame.element.isFlipped(true));
+            var cursorIndex = p.type.rotateCursorPointer(p.cursor, this._frame.element.angle, this._frame.element.isFlipped(true));
             event.cursor = p.type.cursorSet[cursorIndex];
             this._currentCursor = event.cursor;
         }
@@ -164,7 +164,7 @@ export default class ActiveFrame extends UIElementDecorator {
     }
 
     layerdraw(context) {
-        if (this.visible()){
+        if (this.visible){
             context.save();
             this._frameType.draw(this._frame, context, this._originalPoint);
             context.restore();

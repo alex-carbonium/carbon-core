@@ -76,7 +76,7 @@ export class FileElement extends UIElement implements IFileElement {
                     let bb = result.getBoundingBox();
                     result.setProps(this.selectLayoutProps(true));
                     result.translate(-bb.width/2, -bb.height/2);
-                    result.name(this.getNameWithoutExtension());
+                    result.name = (this.getNameWithoutExtension());
                     Environment.view.fitToViewportIfNeeded(result);
 
                     this.parent().remove(this, ChangeMode.Self);
@@ -100,7 +100,7 @@ export class FileElement extends UIElement implements IFileElement {
             if (!image) {
                 let image = new Image();
                 image.size({ width: Image.NewImageSize, height: Image.NewImageSize });
-                image.name(this.getNameWithoutExtension());
+                image.name=(this.getNameWithoutExtension());
                 image.setProps(this.selectLayoutProps(true));
                 image.resizeOnLoad(Origin.Center);
                 this.registerImageLink(image);
@@ -127,7 +127,7 @@ export class FileElement extends UIElement implements IFileElement {
     }
 
     private getNameWithoutExtension() {
-        var name = this.name();
+        var name = this.name;
         var extPos = name.lastIndexOf('.');
         if (extPos !== -1) {
             name = name.substr(0, extPos);

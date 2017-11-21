@@ -266,7 +266,7 @@ class AppClass extends DataNode implements IApp {
                 pageId:pageId,
                 type:StoryType.Prototype,
                 description:'',
-                pageName:this.activePage.name()
+                pageName:this.activePage.name
             });
         }
 
@@ -330,7 +330,7 @@ class AppClass extends DataNode implements IApp {
                 }
             }
             if (children.length > 0) {
-                res.push({ name: page.name(), id: page.id(), children: children })
+                res.push({ name: page.name, id: page.id(), children: children })
             }
         }
 
@@ -636,7 +636,7 @@ class AppClass extends DataNode implements IApp {
         var page = DataNode.getImmediateChildById(this, pageId, true);
         var newPage = page.clone();
         newPage.initId();
-        newPage.name("Copy of " + page.name());
+        newPage.name = "Copy of " + page.name;
         this.addPage(newPage);
     }
 

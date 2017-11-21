@@ -49,7 +49,7 @@ var CornerRadiusPoint = {
         frame.originalValue = frame.element.cornerRadius();
         frame.onlyCurrentVisible = true;
         if (frame.element.decorators) {
-            frame.element.decorators.forEach(x => x.visible(false));
+            frame.element.decorators.forEach(x => x.visible = (false));
         }
         Environment.controller.raiseInteractionStarted(InteractionType.RadiusChange, event);
     },
@@ -61,7 +61,7 @@ var CornerRadiusPoint = {
             frame.element.setProps({ cornerRadius: newRadius }, ChangeMode.Model);
 
             if (frame.element.decorators) {
-                frame.element.decorators.forEach(x => x.visible(true));
+                frame.element.decorators.forEach(x => x.visible = (true));
             }
             Environment.controller.raiseInteractionStopped(InteractionType.RadiusChange, event);
         }
@@ -197,7 +197,7 @@ class Rectangle extends Shape {
             stroke: this.stroke(),
             styleId: this.styleId(),
             strokeWidth: this.strokeWidth(),
-            name: this.name()
+            name: this.name
         });
 
         path.setTransform(this.viewMatrix());
@@ -214,7 +214,7 @@ class Rectangle extends Shape {
     }
 
     hitTest(/*Point*/point, scale) {
-        if (!this.visible() || this.hasBadTransform()) {
+        if (!this.visible || this.hasBadTransform()) {
             return false;
         }
         var fill = this.fill();
@@ -400,7 +400,7 @@ class Rectangle extends Shape {
         }
 
         if (parsedAttributes.id) {
-            rect.name(parsedAttributes.id);
+            rect.name = (parsedAttributes.id);
         }
 
         rect.setProps({ pointRounding: 0 });

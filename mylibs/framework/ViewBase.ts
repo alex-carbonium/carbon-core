@@ -732,8 +732,12 @@ export default class ViewBase { //TODO: implement IView
         this.invalidate();
     }
 
-    visible() {
+    get visible() {
         return true;
+    }
+
+    set visible(v) {
+
     }
 
     hitVisible() {
@@ -812,7 +816,7 @@ export default class ViewBase { //TODO: implement IView
     fitToViewportIfNeeded(element: IUIElement, origin?: Origin, mode?: ChangeMode) {
         var viewport = this.viewportRect();
         var bounds = new Rect(0, 0, viewport.width * .8, viewport.height * .8);
-        var current = new Rect(0, 0, element.width(), element.height());
+        var current = new Rect(0, 0, element.width, element.height);
         var fit = current.fit(bounds, true);
 
         var artboard = this.page.getActiveArtboard() as IArtboard;

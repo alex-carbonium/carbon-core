@@ -146,8 +146,8 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     _calculateMinSize() {
         var minWidth = 0;
         var minHeight = 0;
-        var width = this.width();
-        var height = this.height();
+        var width = this.width;
+        var height = this.height;
 
         for (var c of this.children) {
             let childMinSize = this._calculateChildMinSize(c, width, height);
@@ -214,7 +214,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
                 mask.globalViewMatrix().applyToContext(context);
             }
 
-            mask.drawPath(context, mask.width(), mask.height());
+            mask.drawPath(context, mask.width, mask.height);
             context.clip("evenodd");
             if (mask.shouldApplyViewMatrix()) {
                 mask.globalViewMatrixInverted().applyToContext(context);
@@ -251,11 +251,11 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         }
         offContext.globalCompositeOperation = "destination-in";
         if (mask.drawPath) {
-            mask.drawPath(offContext, mask.width(), mask.height());
+            mask.drawPath(offContext, mask.width, mask.height);
             offContext.fillStyle = "black";
             offContext.fill2();
         } else {
-            mask.drawSelf(offContext, mask.width(), mask.height(), environment);
+            mask.drawSelf(offContext, mask.width, mask.height, environment);
         }
 
         offContext.restore();
@@ -364,7 +364,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         for (; i < items.length; ++i) {
             let child = items[i];
 
-            if (child.visible()) {
+            if (child.visible) {
                 this.drawChildSafe(child, context, environment);
             }
         }
@@ -408,7 +408,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
                     this.runtimeProps.mask = child;
                     break;
                 }
-                if (child.visible()) {
+                if (child.visible) {
                     this.drawChildSafe(child, context, environment);
                 }
             }
@@ -451,7 +451,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     // }
 
     drawWithMask(context, mask, i, environment: RenderEnvironment) {
-        if (mask.visible()) {
+        if (mask.visible) {
             let b = mask.props.stroke;
             mask.props.stroke = null;
             this.drawChildSafe(mask, context, environment);
@@ -460,7 +460,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         context.save();
         this.renderMaskedElements(context, mask, i, this.children, environment);
         context.restore();
-        if (mask.visible()) {
+        if (mask.visible) {
             let b = mask.fill();
             mask.props.fill = null;//({ fill: null }, ChangeMode.Self);
             this.drawChildSafe(mask, context, environment);
@@ -486,10 +486,10 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
                 logger.error("toJSON error", e2);
                 data = {
                     props: {
-                        width: child.width(),
-                        height: child.height(),
-                        y: child.y(),
-                        x: child.x(),
+                        width: child.width,
+                        height: child.height,
+                        y: child.y,
+                        x: child.x,
                         id: child.id()
                     }
                 }
@@ -516,11 +516,11 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     }
     innerHeight() {
         let padding = this.padding();
-        return this.height() - padding.top - padding.bottom;
+        return this.height - padding.top - padding.bottom;
     }
     innerWidth() {
         let padding = this.padding();
-        return this.width() - padding.left - padding.right;
+        return this.width - padding.left - padding.right;
     }
 
     allowMoveOutChildren(value) {
@@ -678,7 +678,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
         }
     }
-    hitElement(/*Point*/position, scale, predicate?, directSelection?) {
+    hitElement(position, scale: number, predicate?, directSelection?): IUIElement {
         if (!this.hitVisible(directSelection)) {
             return null;
         }
@@ -691,7 +691,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
             return null;
         }
 
-        let hitElement: UIElement = this.hitTransparent() ? null : this;
+        let hitElement: IUIElement = this.hitTransparent() ? null : this;
 
         for (let i = this.children.length - 1; i >= 0; --i) {
             let element = this.children[i];
@@ -837,8 +837,8 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     }
 
     getDropData(pos, element) {
-        let width = this.width(),
-            height = this.height();
+        let width = this.width,
+            height = this.height;
 
         pos = this.global2local(pos);
 
@@ -864,7 +864,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         let dropPositioning = this.dropPositioning();
         if (dropPositioning === DropPositioning.Vertical) {
             for (let _element of this.children) {
-                if(!_element.visible()) {
+                if(!_element.visible) {
                     continue;
                 }
 
@@ -887,11 +887,11 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
                 x2: pt2.x,
                 y2: pt2.y,
                 index: baseLine.insertIndex,
-                angle: 0//this.angle()
+                angle: 0//this.angle
             }
         } else if (dropPositioning === DropPositioning.Horizontal) {
             for (let _element of this.children) {
-                if(!_element.visible()) {
+                if(!_element.visible) {
                     continue;
                 }
 
@@ -929,7 +929,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         let element;
 
         this.applyVisitor(function (el) {
-            if (el.name() === name) {
+            if (el.name === name) {
                 element = el;
                 return false;
             }

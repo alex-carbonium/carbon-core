@@ -61,12 +61,12 @@ export default class SelectComposite extends CompositeElement implements ISelect
     }
 
     hideActiveFrame(permanent: boolean = false) {
-        this._activeFrame.visible(false);
+        this._activeFrame.visible= (false);
         this._activeFrameHiddenPermanently = permanent;
     }
 
     showActiveFrame() {
-        this._activeFrame.visible(true);
+        this._activeFrame.visible = (true);
         this._activeFrameHiddenPermanently = false;
     }
 
@@ -165,7 +165,7 @@ export default class SelectComposite extends CompositeElement implements ISelect
     }
 
     mousemove() {
-        if (!this._activeFrame.visible() && !this._activeFrameHiddenPermanently) {
+        if (!this._activeFrame.visible && !this._activeFrameHiddenPermanently) {
             this.showActiveFrame();
             Invalidate.requestInteractionOnly();
         }

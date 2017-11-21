@@ -14,6 +14,7 @@ import Shape from "./Shape";
 import backend from "../backend";
 import { IApp, IMatrix } from "carbon-core";
 import { Origin } from "carbon-geometry";
+import { IUIElement } from "carbon-model";
 
 class Clipboard {
     [name: string]: any;
@@ -134,7 +135,7 @@ class Clipboard {
             imageData = tryGetClipboardContent(["image/png", "image/jpeg", "image/jpg"], e);
         }
 
-        var bufferElements: UIElement[] = null;
+        var bufferElements: IUIElement[] = null;
         var globalBoundingBoxes = null;
         var globalMatrices = null;
         var rootBoundingBoxes = null;
@@ -161,7 +162,7 @@ class Clipboard {
             if (image){
                 image.resizeOnLoad(Origin.Center);
             }
-            let newElement: UIElement = image;
+            let newElement: IUIElement = image;
             if (newElement === null){
                 newElement = new Text();
                 newElement.prepareAndSetProps({
@@ -174,7 +175,7 @@ class Clipboard {
             this._app.assignNewName(newElement);
 
             bufferElements = [newElement];
-            globalBoundingBoxes = [{x: 0, y: 0, width: newElement.width(), height: newElement.height()}];
+            globalBoundingBoxes = [{x: 0, y: 0, width: newElement.width, height: newElement.height}];
             globalMatrices = [newElement.viewMatrix()];
         }
         else if (this.buffer){
