@@ -2,7 +2,7 @@ import { IContainer, IUIElement } from "carbon-core";
 import { NameProvider } from "./NameProvider";
 import { ElementProxy } from "./ElementProxy";
 
-const skipList = ["eval"]
+const skipList = ["eval", "proxy"]
 const blackList = ["window", "document", "uneval"]
 
 export class ControlNameResolver {

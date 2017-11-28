@@ -19,7 +19,12 @@ export class CompiledCodeProvider implements IDisposable {
         }
 
         let fileName = element.id + ".ts";
-        return Services.compiler.compile(fileName, element.declaration() + '\n' + element.code()).then((result) => {
+        let code = `namespace n${element.id} {
+            ${element.code()}
+        }`
+        Services.compiler.addLib(element.id + ".d.ts", element.declaration(true))
+
+        return Services.compiler.compile(fileName, code).then((result) => {
             this._codeCache.set(element, { version: element.version, text: result });
             return result;
         }).catch(data => {

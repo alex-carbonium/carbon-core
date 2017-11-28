@@ -8,6 +8,6 @@ export class Sandbox {
         let resolverProxy = new Proxy({}, nameResolver);
 
         // with is not supported in TS, so should wrap in eval
-        window["__sandboxEval"](code, resolverProxy);
+        window["__sandboxEval"]("n" + artboard.id, code, resolverProxy);
     }
 }

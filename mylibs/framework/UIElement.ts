@@ -2153,7 +2153,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     animate(properties, duration, options, progressCallback) {
         let animationValues = [];
         options = extend({}, options);
-        options.duration = duration || 0;
+        options.duration = Math.max(duration || 0, 1);
         let that = ElementProxy.unwrap(this);
         for (let propName in properties) {
             let newValue = properties[propName];

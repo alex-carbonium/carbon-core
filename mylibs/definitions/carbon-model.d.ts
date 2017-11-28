@@ -445,7 +445,7 @@ declare module "carbon-model" {
 
     export interface IElementWithCode {
         code():string;
-        declaration():string;
+        declaration(module:boolean):string;
         readonly version:number;
         readonly id:string;
     }

@@ -13,7 +13,7 @@ export class ArtboardProxyGenerator {
         return "TUIElement & MouseEventHandler";
     }
 
-    static generate(artboard: IContainer): string {
+    static generate(artboard: IContainer, module:boolean): string {
         let controlList = [];
 
         artboard.applyVisitorBreadthFirst((e:IUIElement) => {
@@ -28,12 +28,22 @@ export class ArtboardProxyGenerator {
             let type = ArtboardProxyGenerator.getControlType(e);
             controlList.push({ name, type });
         });
-        return `
-        /// <reference path="carbon-runtime.d.ts" />
-declare const artboard:any;
-${
-controlList.map(v => `declare const ${v.name}:${v.type};`).join('\n')
-}
-            `;
+        if(module) {
+            return `
+            /// <reference path="carbon-runtime.d.ts" />
+            declare namespace n${artboard.id} {
+    export const artboard:any;
+    ${
+    controlList.map(v => `export const ${v.name}:${v.type};`).join('\n')
+    }
+    }`;
+        } else {
+            return `
+    declare const artboard:any;
+    ${
+    controlList.map(v => `declare const ${v.name}:${v.type};`).join('\n')
+    }
+    `;
+        }
     }
 }

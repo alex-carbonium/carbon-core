@@ -1301,8 +1301,8 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return this.props.code;
     }
 
-    declaration():string {
-        return ArtboardProxyGenerator.generate(this);
+    declaration(module:boolean):string {
+        return ArtboardProxyGenerator.generate(this, module);
     }
 
     private flattenSymbolInstances(page) {

@@ -46,14 +46,7 @@ export class ElementProxy {
         }
 
         if (this.propertyMap[name] || this.rpropertyMap[name]) {
-            if (typeof this.element[name] === 'function') {
-                return this.element[name]();
-            }
-            if(name === 'props') {
-                return this.element.props;
-            }
-
-            return this.element.props[name];
+            return this.element[name];
         }
 
         if (this.methodMap[name]) {
