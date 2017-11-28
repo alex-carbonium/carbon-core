@@ -104,7 +104,7 @@ export default class PersistentConnection extends StateMachine<ConnectionState> 
     }
 
     private resolveConnectionAddress(app): Promise<string> {
-        return DiscoverProxy.projectHub(app.companyId(), app.id())
+        return DiscoverProxy.projectHub(app.companyId(), app.id)
             .then(data => data.url);
     }
 

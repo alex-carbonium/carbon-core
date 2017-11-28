@@ -72,9 +72,9 @@ class StateBoard extends Artboard implements IStateboard {
 
     transferInsert(masterParent, element, index) {
         this._transfering = true;
-        var parent = this.getElementByMasterId(masterParent.id());
+        var parent = this.getElementByMasterId(masterParent.id);
         var clone = element.clone();
-        clone.setProps({masterId: element.id()})
+        clone.setProps({masterId: element.id})
         parent.insert(clone, index);
 
         this._transfering = false;
@@ -98,7 +98,7 @@ class StateBoard extends Artboard implements IStateboard {
 
     transferDelete(masterElement) {
         this._transfering = true;
-        var target = this.getElementByMasterId(masterElement.id());
+        var target = this.getElementByMasterId(masterElement.id);
         if (target) {
             target.parent().remove(target);
         }
@@ -110,7 +110,7 @@ class StateBoard extends Artboard implements IStateboard {
 
         if (!this._transfering && this.artboard) {
             var clone = element.clone();
-            element.setProps({masterId: clone.id()});
+            element.setProps({masterId: clone.id});
             this.artboard.transferInsert(this.props.stateId, parent.props.masterId, clone, index);
         }
     }
@@ -136,7 +136,7 @@ class StateBoard extends Artboard implements IStateboard {
 
     transferChangePosition(masterElement, index) {
         this._transfering = true;
-        var target = this.getElementByMasterId(masterElement.id());
+        var target = this.getElementByMasterId(masterElement.id);
         if(target) {
             target.parent().changePosition(target, index);
         }

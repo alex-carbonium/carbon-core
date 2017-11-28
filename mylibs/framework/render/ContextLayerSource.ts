@@ -66,7 +66,7 @@ export default class ContextLayerSource extends Context {
     _clipCurrentContext(element) {
         this._context.save();
         let ref = objectPool.allocate();
-        ref.id = element.id();
+        ref.id = element.id;
         ref.context = this._context;
         this._relativeClippingStack.push(ref);
 
@@ -102,7 +102,7 @@ export default class ContextLayerSource extends Context {
             if (parent && parent.runtimeProps && parent.runtimeProps.ctxl !== ctxl) {
                 // potentially we need to clip this element
                 let relativeClip = this._relativeClippingStack[this._relativeClippingStack.length - 1];
-                if (this._relativeClippingStack.length === 0 || relativeClip.id !== parent.id() || relativeClip.context._mask !== ctxl) {
+                if (this._relativeClippingStack.length === 0 || relativeClip.id !== parent.id || relativeClip.context._mask !== ctxl) {
                     this._clipCurrentContext(parent);
                 }
             }
@@ -127,7 +127,7 @@ export default class ContextLayerSource extends Context {
 
         if (this._relativeClippingStack.length) {
             var relativeClipContext = this._relativeClippingStack[this._relativeClippingStack.length - 1];
-            while (relativeClipContext.id === element.id()) {
+            while (relativeClipContext.id === element.id) {
                 relativeClipContext.context.restore();
                 let ref = this._relativeClippingStack.pop();
                 objectPool.free(ref);

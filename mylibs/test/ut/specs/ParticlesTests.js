@@ -42,7 +42,7 @@
 //         var element = new UIElement();
 //         this.app.activePage.add(element);
 //         this.app.relayout();
-//         var id = element.id();
+//         var id = element.id;
 
 //         this.app.actionManager.invoke("undo");
 //         this.app.relayout();
@@ -63,7 +63,7 @@
 //         this.app.activePage.remove(element);
 //         artboard.add(element);
 //         this.app.relayout();
-//         var id = element.id();
+//         var id = element.id;
 
 //         this.app.actionManager.invoke("undo");
 //         this.app.relayout();
@@ -74,7 +74,7 @@
 //         this.app.relayout();
 
 //         var e = this.app.activePage.getElementById(id);
-//         assert.equal(artboard.id(), e.parent().id(), "parent");
+//         assert.equal(artboard.id, e.parent().id, "parent");
 //     });
 // });
 

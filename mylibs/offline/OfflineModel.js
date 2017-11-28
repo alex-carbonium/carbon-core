@@ -23,7 +23,7 @@ OfflineModel.prototype.saveBackup = function (app) {
             delete p.toString;
         }
     }
-    return this._db.put("backups", {appId: app.id(), appVersion: app.version(), changes, date: new Date().valueOf(), used: false});
+    return this._db.put("backups", {appId: app.id, appVersion: app.version(), changes, date: new Date().valueOf(), used: false});
 };
 
 OfflineModel.prototype.clear = function() {

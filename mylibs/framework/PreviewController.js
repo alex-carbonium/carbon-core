@@ -12,10 +12,10 @@ function updateEvent(event) {
 }
 
 export default class PreviewController {
-    constructor(app, view, previewProxy) {
+    constructor(app, view, previewModel) {
         this.app = app;
         this.activeStory = app.activeStory();
-        this.previewProxy = previewProxy;
+        this.previewModel = previewModel;
         this.view = view;
         this.touchHelper = new TouchHelper(view);
         this.onArtboardChanged = EventHelper.createEvent();
@@ -23,7 +23,7 @@ export default class PreviewController {
 
     _invokeAction(action) {
         if (action.props.type === ActionType.GoToPage) {
-            this.previewProxy.navigateToPage.raise(action.props.targetArtboardId, action.props.animation);
+            this.previewModel.navigateToPage.raise(action.props.targetArtboardId, action.props.animation);
             return;
         }
 
@@ -36,7 +36,7 @@ export default class PreviewController {
         }
 
         var action = this.activeStory.children.find(a=>{
-            return (a.props.sourceElementId == element.id() && a.props.event == eventType);
+            return (a.props.sourceElementId == element.id && a.props.event == eventType);
         });
 
         if (action) {
@@ -121,43 +121,43 @@ export default class PreviewController {
 
 
     onscroll(eventData) {
-        var element = this.previewProxy.activePage.hitElementDirect(eventData, this.view.scale());
+        var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
         var delta = {dx: eventData.event.deltaX, dy: eventData.event.deltaY};
         this._propagateScroll(delta, element);
     }
 
     onmousedown(eventData) {
-        var element = this.previewProxy.activePage.hitElementDirect(eventData, this.view.scale());
+        var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(ActionEvents.mousedown, element);
     }
 
     onmousemove(eventData) {
-        var element = this.previewProxy.activePage.hitElementDirect(eventData, this.view.scale());
+        var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(ActionEvents.mousemove, element);
     }
 
     onmouseenter(eventData) {
-        var element = this.previewProxy.activePage.hitElementDirect(eventData, this.view.scale());
+        var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(ActionEvents.mouseenter, element);
     }
 
     onmouseleave(eventData) {
-        var element = this.previewProxy.activePage.hitElementDirect(eventData, this.view.scale());
+        var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(ActionEvents.mouseleave, element);
     }
 
     onmouseup(eventData) {
-        var element = this.previewProxy.activePage.hitElementDirect(eventData, this.view.scale());
+        var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(ActionEvents.mouseup, element);
     }
 
     ondblclick(eventData) {
-        var element = this.previewProxy.activePage.hitElementDirect(eventData, this.view.scale());
+        var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(ActionEvents.dblclick, element);
     }
 
     onclick(eventData) {
-        var element = this.previewProxy.activePage.hitElementDirect(eventData, this.view.scale());
+        var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
         if(!this._propagateAction(ActionEvents.click, element)){
             this.view.displayClickSpots.raise();
         }

@@ -277,7 +277,7 @@ export default class CompositeElement extends UIElement implements IComposite {
     getPropSnapshot() {
         var snapshot = {};
         for (var e of this.children) {
-            snapshot[e.id()] = e.selectLayoutProps();
+            snapshot[e.id] = e.selectLayoutProps();
         }
 
         return snapshot;
@@ -289,7 +289,7 @@ export default class CompositeElement extends UIElement implements IComposite {
         }
     }
     applyElementSnapshot(snapshot, element, mode) {
-        let props = snapshot[element.id()];
+        let props = snapshot[element.id];
         if (props) {
             element.setProps(props, mode);
         }

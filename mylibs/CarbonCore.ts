@@ -25,6 +25,9 @@ if (ext) {
     app.setProps({ extraParameters: ext });
 }
 
+var carbonRuntimeSource:string = require("raw!./definitions/carbon-runtime.d.ts") as any;
+var runtimeTSDefinitionCode = carbonRuntimeSource.substr(0, carbonRuntimeSource.lastIndexOf('}') - 1).replace(/^.+export /gm, "").replace('declare module "carbon-runtime" {', '');
+
 //export * from crashes in babel for some reason...
 export default {
     "jquery": require("jquery/jquery.min"),
@@ -43,7 +46,7 @@ export default {
     "DesignerController": require("./framework/DesignerController"),
     "PreviewView": require("./framework/PreviewView"),
     "PreviewController": require("./framework/PreviewController"),
-    "PreviewProxy": require("./framework/preview/PreviewProxy"),
+    "PreviewModel": require("./framework/preview/PreviewModel"),
     "Clipboard": require("./framework/Clipboard"),
     "Environment": require("./environment"),
     "workspace": require("./environment"),
@@ -96,8 +99,6 @@ export default {
     "StyleManager": require("./framework/style/StyleManager"),
     "Selection": require("./framework/SelectionModel"),
     "QuadAndLock": require("./framework/QuadAndLock"),
-    "AnimationType": Defs.AnimationType,
-    "EasingType": Defs.EasingType,
     "ActionType": Defs.ActionType,
     "Devices": Defs.Devices,
 
@@ -127,10 +128,10 @@ export default {
     "DebugUtil": require("./DebugUtil"),
 
     "SvgParser": require("svg/SvgParser"),
+    "RuntimeTSDefinition": runtimeTSDefinitionCode,
 
     "Story": require("./stories/Story"),
     "StoryAction": require("./stories/StoryAction"),
-    "ArtboardProxyGenerator" : require("./code/ProxyGenerator").ArtboardProxyGenerator,
     "Sandbox" : require("./code/Sandbox").Sandbox,
     "Invalidate": require("./framework/Invalidate"),
     "NameProvider": require("./ui/NameProvider"),
@@ -138,6 +139,9 @@ export default {
     "ContextLayerSource":  require("./framework/render/ContextLayerSource"),
     //TODO: replace with math/rect
     "TextRect": require("./framework/text/primitives/rect"),
+
+    "CompiledCodeProvider": require("./code/CompiledCodeProvider").CompiledCodeProvider,
+    "Services": require("./Services"),
 
     //TODO: move to UI
     "RepeaterActions": require("./framework/repeater/RepeaterActions").RepeaterActions,

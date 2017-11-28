@@ -1,16 +1,16 @@
-import { IArtboard, IUIElement } from "carbon-core";
+import { IContainer, IUIElement } from "carbon-core";
 import { NameProvider } from "./NameProvider";
-import { ControlProxy } from "./ControlProxy";
+import { ElementProxy } from "./ElementProxy";
 
 const skipList = ["eval"]
 const blackList = ["window", "document", "uneval"]
 
 export class ControlNameResolver {
-    private _artboard: IArtboard;
+    private _artboard: IContainer;
     private _proxiesMap: { [name: string]: IUIElement } = {};
     private _skipMap = skipList.reduce((m, v)=>{m[v] = true;return m;}, {})
     private _blackMap = blackList.reduce((m, v)=>{m[v] = true;return m;}, {})
-    constructor(artboard: IArtboard) {
+    constructor(artboard: IContainer) {
         this._artboard = artboard;
     }
 
@@ -21,7 +21,7 @@ export class ControlNameResolver {
             result = null;
             this._artboard.applyVisitor(e => {
                 // it is not supper fast to escapeNames many times,
-                // but expectation is that only small amount of controlls
+                // but expectation is that only small amount of controls
                 // will be used in code, so don't want to build map of all controls
                 // but should be change later if needed
                 if (name === NameProvider.escapeName(e.name)) {
@@ -30,7 +30,7 @@ export class ControlNameResolver {
                 }
             });
             if(result) {
-                result = new Proxy(result, new ControlProxy(result));
+                result = new Proxy(result, new ElementProxy(result));
             }
             this._proxiesMap[name] = result;
         }

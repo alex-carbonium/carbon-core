@@ -19,7 +19,7 @@ class CorruptedElement extends UIElement {
         });
 
         if (data) { //else restoring from json
-            this.id(data.id);
+            this.id = data.id;
         }
 
         setTimeout(function () {

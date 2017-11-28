@@ -25,9 +25,9 @@ class Story extends DataNode {
     }
 
     relayout(oldPropsMap){
-        params.perf && performance.mark("Artboard.Relayout: " + this.id());
+        params.perf && performance.mark("Artboard.Relayout: " + this.id);
         var res = RelayoutEngine.run(this, oldPropsMap);
-        params.perf && performance.measure("Artboard.Relayout: " + this.id(), "Artboard.Relayout: " + this.id());
+        params.perf && performance.measure("Artboard.Relayout: " + this.id, "Artboard.Relayout: " + this.id);
         return res;
     }
 
@@ -48,14 +48,14 @@ class Story extends DataNode {
     primitivePath() {
         var path = this.runtimeProps.primitivePath;
         if (!path) {
-            path = [this.id(), this.id()];
+            path = [this.id, this.id];
             this.runtimeProps.primitivePath = path;
         }
         return path;
     }
 
     primitiveRootKey() {
-        return this.id();
+        return this.id;
     }
 
     insert(/*UIElement*/element, /*int*/index, mode?) {

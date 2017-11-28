@@ -25,6 +25,8 @@ import { createUUID } from "../util";
 import Canvas from "../ui/common/Canvas";
 import { IconsetCell } from "./IconsetCell";
 import PropertyTracker from "framework/PropertyTracker";
+import { IElementWithCode } from "carbon-model";
+import { ArtboardProxyGenerator } from "../code/ProxyGenerator";
 
 
 // TODO: artboard states
@@ -34,7 +36,7 @@ import PropertyTracker from "framework/PropertyTracker";
 // cleanup empty states
 
 const IconCellsMargin = 1;
-class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiveRoot, IIsolatable {
+class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiveRoot, IIsolatable, IElementWithCode {
     constructor() {
         super();
         this.allowArtboardSelection(false);
@@ -152,7 +154,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
             if (this.props.type === ArtboardType.Symbol && element.children !== undefined) {
                 let can = true;
-                let id = this.id();
+                let id = this.id;
                 element.applyVisitor(e => {
                     if (e.props.source && e.props.source.artboardId === id) {
                         can = false;
@@ -526,6 +528,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     propsUpdated(props: Partial<IArtboardProps>, oldProps: Partial<IArtboardProps>, mode: ChangeMode) {
         super.propsUpdated.apply(this, arguments);
+        let hasParent = this.hasParent();
 
         let parent = this.parent() as IArtboardPage | IContainer;
         if (props.state !== undefined) {
@@ -534,7 +537,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             }
         }
 
-        if (oldProps.type !== props.type && oldProps.type !== ArtboardType.Regular) {
+        if (hasParent && oldProps.type !== props.type && oldProps.type !== ArtboardType.Regular) {
             App.Current.resourceDeleted.raise(oldProps.type, this, parent);
 
             if (props.type === ArtboardType.Regular) {
@@ -553,7 +556,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             this._refreshMetadata();
         }
 
-        if (oldProps.type !== props.type) {
+        if (hasParent && oldProps.type !== props.type) {
             if (props.type === ArtboardType.Regular) {
                 if (oldProps.type === ArtboardType.IconSet) {
                     this._restoreFromIconset();
@@ -563,7 +566,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
                     Selection.refreshSelection();
                 }
 
-                if (parent !== NullContainer) {
+                if (hasParent) {
                     if (props.type === ArtboardType.Symbol && !parent.props.symbolGroups.length) {
                         parent.patchProps(PatchType.Insert, "symbolGroups", { id: "default", name: CoreIntl.label("@page.defaultSymbolGroup") });
                     }
@@ -582,7 +585,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
         }
 
-        if (props.rowsCount || props.colsCount || props.iconCellSize) {
+        if (hasParent && (props.rowsCount || props.colsCount || props.iconCellSize)) {
             this._rearrangeIcons(props, oldProps);
         }
 
@@ -590,7 +593,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             delete this._frame;
         }
 
-        if (mode === ChangeMode.Model && props.br) {
+        if (hasParent && (mode === ChangeMode.Model && props.br)) {
             if (props.br.width < oldProps.br.width || props.br.height < oldProps.br.height) {
                 this.spit();
             }
@@ -918,8 +921,8 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         let path = this.runtimeProps.primitivePath;
         if (!path) {
             path = parent.primitivePath().slice();
-            path[path.length - 1] = this.id();
-            path.push(this.id());
+            path[path.length - 1] = this.id;
+            path.push(this.id);
             this.runtimeProps.primitivePath = path;
         }
         return path;
@@ -932,7 +935,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         }
         let s = this.runtimeProps.primitiveRootKey;
         if (!s) {
-            s = parent.id() + this.id();
+            s = parent.id + this.id;
             this.runtimeProps.primitiveRootKey = s;
         }
         return s;
@@ -1025,9 +1028,9 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     //}
 
     relayout(oldPropsMap) {
-        params.perf && performance.mark("Artboard.Relayout: " + this.id());
+        params.perf && performance.mark("Artboard.Relayout: " + this.id);
         let res = RelayoutEngine.run(this, oldPropsMap);
-        params.perf && performance.measure("Artboard.Relayout: " + this.id(), "Artboard.Relayout: " + this.id());
+        params.perf && performance.measure("Artboard.Relayout: " + this.id, "Artboard.Relayout: " + this.id);
         return res;
     }
 
@@ -1068,7 +1071,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         this.extendHitTestBoxIfNeeded(element);
 
         if (this.props.states.length !== 0) {
-            this._recorder.trackSetProps("default", element.id(), props, oldProps);
+            this._recorder.trackSetProps("default", element.id, props, oldProps);
         }
 
         // TODO: move it to stateBoard controller class
@@ -1082,13 +1085,13 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
                     continue;
                 }
 
-                if (!this._recorder.hasStatePropValue(stateBoard.stateId, element.id(), propName)) {
+                if (!this._recorder.hasStatePropValue(stateBoard.stateId, element.id, propName)) {
                     transferProps[propName] = props[propName];
                     hasAnyProps = true;
                 }
             }
             if (hasAnyProps) {
-                stateBoard.transferProps(element.id(), transferProps);
+                stateBoard.transferProps(element.id, transferProps);
             }
         }
     }
@@ -1129,7 +1132,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         let parent = this.getElementById(parentId);
         parent.insert(element, index, ChangeMode.Root);
         ModelStateListener.trackInsert(this, parent, element, index);
-        this._recorder.trackInsert(element.id());
+        this._recorder.trackInsert(element.id);
 
         // TODO: move it to stateBoard controller class
         let stateBoards = this.runtimeProps.stateBoards;
@@ -1175,7 +1178,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     registerDelete(parent, element, index, mode) {
         super.registerDelete(parent, element, index, mode);
         if (this.props.states.length !== 0) {
-            this._recorder.trackDelete(parent, element.id());
+            this._recorder.trackDelete(parent, element.id);
         }
 
         // TODO: move it to stateBoard controller class
@@ -1200,7 +1203,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     registerChangePosition(parent, element, index, oldIndex) {
         super.registerChangePosition(parent, element, index, oldIndex);
         if (this.props.states.length !== 0) {
-            this._recorder.trackChangePosition(parent, element.id(), index, oldIndex);
+            this._recorder.trackChangePosition(parent, element.id, index, oldIndex);
         }
 
         // TODO: move it to stateBoard controller class
@@ -1232,7 +1235,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         let statesCount = this._recorder.statesCount();
 
         stateBoard.setProps({
-            masterId: this.id(),
+            masterId: this.id,
             width: width,
             height: height,
             name: this.props.name
@@ -1242,7 +1245,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         for (let i = 0; i < this.children.length; i++) {
             let e = this.children[i];
             let clone = e.clone();
-            clone.setProps({ masterId: e.id() }, ChangeMode.Self);
+            clone.setProps({ masterId: e.id }, ChangeMode.Self);
             stateBoard.add(clone, ChangeMode.Root);
         }
 
@@ -1259,7 +1262,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     _linkRelatedStateBoards() {
-        let id = this.id();
+        let id = this.id;
         let stateBoards = this.runtimeProps.stateBoards;
         let missingLinks = this.props.states.filter(x => x.id !== "default" && !stateBoards.some(y => x.id === y.props.stateId));
         for (let i = 0; i < missingLinks.length; i++) {
@@ -1290,13 +1293,21 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     onIsolationExited() {
     }
 
-    code():string {
-        return "";
+    code(value?:string):string {
+        if(arguments.length > 0) {
+            this.setProps({code:value})
+        }
+
+        return this.props.code;
+    }
+
+    declaration():string {
+        return ArtboardProxyGenerator.generate(this);
     }
 
     private flattenSymbolInstances(page) {
-        let pageId = page.id();
-        let artboardId = this.id();
+        let pageId = page.id;
+        let artboardId = this.id;
         let app = page.app;
 
         app.applyVisitorDepthFirst(e => {
@@ -1416,8 +1427,8 @@ PropertyMetadata.registerForType(Artboard, {
                     return {
                         name: framed_artboard.name,
                         value: {
-                            pageId: framed_artboard.parent().id(),
-                            artboardId: framed_artboard.id()
+                            pageId: framed_artboard.parent().id,
+                            artboardId: framed_artboard.id
                         }
                     }
                 }))

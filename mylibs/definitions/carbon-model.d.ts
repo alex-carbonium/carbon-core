@@ -21,7 +21,7 @@ declare module "carbon-model" {
         patchProps(patchType, propName, propValue);
         selectProps(names: (keyof TProps)[]): Partial<TProps>;
 
-        id(value?: string): string;
+        id: string;
 
         applyVisitorDepthFirst(callback: (element: IDataNode) => boolean | void);
         applyVisitorBreadthFirst(callback: (element: IDataNode) => boolean | void);
@@ -87,6 +87,8 @@ declare module "carbon-model" {
 
         mode(value?: any): any;
         displayName(): string;
+
+        hasParent():boolean;
 
         viewMatrix(): IMatrix;
         globalViewMatrix(): IMatrix;
@@ -284,10 +286,11 @@ declare module "carbon-model" {
         guidesY: IGuide[];
     }
 
-    export interface IArtboard<TProps extends IArtboardProps = IArtboardProps> extends IContainer<TProps> {
+    export interface IArtboard<TProps extends IArtboardProps = IArtboardProps> extends IContainer<TProps>, IElementWithCode {
         getStateboards(): IStateboard[];
         version:number;
-        code():string;
+        id:string;
+        code(value?:string):string;
     }
 
     export interface IStateboardProps extends IArtboardProps {
@@ -439,6 +442,13 @@ declare module "carbon-model" {
     export interface IPolygon extends IShape<IPolygonProps> {
     }
     export const Polygon: IConstructor<IPolygon>;
+
+    export interface IElementWithCode {
+        code():string;
+        declaration():string;
+        readonly version:number;
+        readonly id:string;
+    }
 
     export type FileType = "image/jpeg" | "image/png" | "image/svg+xml";
     export interface FileProps extends IUIElementProps {

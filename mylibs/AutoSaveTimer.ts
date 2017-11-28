@@ -85,7 +85,7 @@ export default class AutoSaveTimer extends StateMachine<TimerState> {
             try {
                 var saved;
                 var timeLeft = this._lastSaveTime + autoSaveInterval - new Date().valueOf();
-                var isDirty = app.state.isDirty() || (app.id() && !app.isSaved() && !app.isInOfflineMode());
+                var isDirty = app.state.isDirty() || (app.id && !app.isSaved() && !app.isInOfflineMode());
 
                 if ((timeLeft <= 0 && isDirty) || app.syncBroken()) {
                     this.saveInProgress = true;

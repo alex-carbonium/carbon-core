@@ -7,7 +7,7 @@ describe("Relayout engine primitive tests", function () {
         this.app = TestUtil.setupApp();
 
         this.findAgain = element => {
-            return this.app.activePage.getElementById(element.id());
+            return this.app.activePage.getElementById(element.id);
         };
 
         this.app.onLoad(function () {
@@ -23,8 +23,8 @@ describe("Relayout engine primitive tests", function () {
         var container1 = new Container();
         var element = new UIElement();
 
-        container1.id("container1");
-        element.id("element");
+        container1.id = ("container1");
+        element.id = ("element");
 
         this.app.activePage.add(container1);
 
@@ -49,9 +49,9 @@ describe("Relayout engine primitive tests", function () {
         var container2 = new Container();
         var element = new UIElement();
 
-        container1.id("container1");
-        container2.id("container2");
-        element.id("element");
+        container1.id = ("container1");
+        container2.id = ("container2");
+        element.id = ("element");
 
         this.app.activePage.add(container1);
         this.app.activePage.add(container2);
@@ -77,9 +77,9 @@ describe("Relayout engine primitive tests", function () {
         var container2 = new Container();
         var element = new UIElement();
 
-        container1.id("container1");
-        container2.id("container2");
-        element.id("element");
+        container1.id = ("container1");
+        container2.id = ("container2");
+        element.id = ("element");
 
         //act
         var savepoint = this.app.createSavePoint();
@@ -96,7 +96,7 @@ describe("Relayout engine primitive tests", function () {
 
         //assert
         container1 = this.findAgain(container1);
-        assert.equal(container1.getElementById(element.id()).opacity(), 0, 'Primitive is lost for an element');
+        assert.equal(container1.getElementById(element.id).opacity(), 0, 'Primitive is lost for an element');
     });
 
     it("Should find child primitives after changing parent down", function () {
@@ -105,9 +105,9 @@ describe("Relayout engine primitive tests", function () {
         var container2 = new Container();
         var element = new UIElement();
 
-        container1.id("container1");
-        container2.id("container2");
-        element.id("element");
+        container1.id = ("container1");
+        container2.id = ("container2");
+        element.id = ("element");
 
         this.app.activePage.add(container1);
         container1.add(container2);
@@ -123,7 +123,7 @@ describe("Relayout engine primitive tests", function () {
 
         //assert
         container2 = this.findAgain(container2);
-        assert.equal(container2.getElementById(element.id()).opacity(), 0, 'Primitive is lost for an element');
+        assert.equal(container2.getElementById(element.id).opacity(), 0, 'Primitive is lost for an element');
     });
 
     it("Should find child primitives after changing parent from left subtree to right subtree", function () {
@@ -132,9 +132,9 @@ describe("Relayout engine primitive tests", function () {
         var container2 = new Container();
         var element = new UIElement();
 
-        container1.id("container1");
-        container2.id("container2");
-        element.id("element");
+        container1.id = ("container1");
+        container2.id = ("container2");
+        element.id = ("element");
 
         this.app.activePage.add(container1);
         this.app.activePage.add(container2);
@@ -150,7 +150,7 @@ describe("Relayout engine primitive tests", function () {
 
         //assert
         container2 = this.findAgain(container2);
-        assert.equal(container2.getElementById(element.id()).opacity(), 0, 'Primitive is lost for an element');
+        assert.equal(container2.getElementById(element.id).opacity(), 0, 'Primitive is lost for an element');
     });
 
     it("Should find child primitives after changing parent from right subtree to left subtree", function () {
@@ -159,9 +159,9 @@ describe("Relayout engine primitive tests", function () {
         var container2 = new Container();
         var element = new UIElement();
 
-        container1.id("container1");
-        container2.id("container2");
-        element.id("element");
+        container1.id = ("container1");
+        container2.id = ("container2");
+        element.id = ("element");
 
         this.app.activePage.add(container1);
         this.app.activePage.add(container2);
@@ -177,7 +177,7 @@ describe("Relayout engine primitive tests", function () {
 
         //assert
         container1 = this.findAgain(container1);
-        assert.equal(container1.getElementById(element.id()).opacity(), 0, 'Primitive is lost for an element');
+        assert.equal(container1.getElementById(element.id).opacity(), 0, 'Primitive is lost for an element');
     });
 
     it("Should be able to move element from self to container in self", function () {
@@ -186,9 +186,9 @@ describe("Relayout engine primitive tests", function () {
         var container2 = new Container();
         var element = new UIElement();
 
-        container1.id("container1");
-        container2.id("container2");
-        element.id("element");
+        container1.id = ("container1");
+        container2.id = ("container2");
+        element.id = ("element");
 
         this.app.activePage.add(container1);
         container1.add(element);
@@ -215,10 +215,10 @@ describe("Relayout engine primitive tests", function () {
         var container3 = new Container();
         var element = new UIElement();
 
-        container1.id("container1");
-        container2.id("container2");
-        container3.id("container3");
-        element.id("element");
+        container1.id = ("container1");
+        container2.id = ("container2");
+        container3.id = ("container3");
+        element.id = ("element");
 
         this.app.activePage.add(container1);
         container1.add(container2);
@@ -242,7 +242,7 @@ describe("Relayout engine primitive tests", function () {
         container3 = this.findAgain(container3);
 
         assert.equal(container1.children.length, 2, 'Container1 must contain new element and container2');
-        assert.isTrue(container1.children.some(x => x.id() === element.id()), 'Element not moved to correct parent');
+        assert.isTrue(container1.children.some(x => x.id === element.id), 'Element not moved to correct parent');
 
         assert.equal(container2.children.length, 1, 'Container2 must contain container3 only');
         assert.equal(container3.children.length, 0, 'Container3 must be empty');
@@ -255,10 +255,10 @@ describe("Relayout engine primitive tests", function () {
         var container3 = new Container();
         var element = new UIElement();
 
-        container1.id("container1");
-        container2.id("container2");
-        container3.id("container3");
-        element.id("element");
+        container1.id = ("container1");
+        container2.id = ("container2");
+        container3.id = ("container3");
+        element.id = ("element");
 
         this.app.activePage.add(container1);
         container1.add(container2);
@@ -284,6 +284,6 @@ describe("Relayout engine primitive tests", function () {
         assert.equal(container1.children.length, 1, 'Container1 must contain container2 only');
         assert.equal(container2.children.length, 1, 'Container2 must contain container3 only');
         assert.equal(container3.children.length, 1, 'Container3 must contain new element');
-        assert.isTrue(container3.children.some(x => x.id() === element.id()), 'Element not moved to correct parent');
+        assert.isTrue(container3.children.some(x => x.id === element.id), 'Element not moved to correct parent');
     });
 });

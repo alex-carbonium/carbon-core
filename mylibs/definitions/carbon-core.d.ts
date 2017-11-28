@@ -13,8 +13,6 @@ declare module "carbon-core" {
     //TODO: encapsulate or describe
     export var RequestAnimationSettings: any;
     export var ActionType: any;
-    export var AnimationType: any;
-    export var EasingType: any;
     export var StyleManager: any;
     export var PropertyMetadata: any;
     export var Artboard: any;
@@ -43,8 +41,10 @@ declare module "carbon-core" {
     export var CoreIntl:any;
     export var PreviewController:any;
     export var PreviewView:any;
-    export var PreviewProxy:any;
+    export var PreviewModel:any;
     export var ContextLayerSource: any;
+    export var RuntimeTSDefinition: string;
+    export var CompiledCodeProvider: any;
     export class Shape{}
     export function createUUID(): string;
 }

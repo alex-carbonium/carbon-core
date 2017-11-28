@@ -6,7 +6,7 @@ export default class TransformationHelper {
     static getPropSnapshot(elements: IUIElement[]): PropsSnapshot {
         var snapshot = {};
         for (var e of elements) {
-            snapshot[e.id()] = e.selectLayoutProps();
+            snapshot[e.id] = e.selectLayoutProps();
         }
 
         return snapshot;
@@ -14,7 +14,7 @@ export default class TransformationHelper {
 
     static applyPropSnapshot(elements: IUIElement[], snapshot: PropsSnapshot, mode: ChangeMode) {
         for (var e of elements) {
-            let props = snapshot[e.id()];
+            let props = snapshot[e.id];
             if (props) {
                 e.prepareAndSetProps(props, mode);
             }
@@ -25,13 +25,13 @@ export default class TransformationHelper {
         TransformationHelper.applyPropSnapshot(elements, oldSnapshot, ChangeMode.Self);
         for (let i = 0; i < elements.length; ++i){
             let element = elements[i];
-            element.performArrange({oldRect: newSnapshot[element.id()].br}, ChangeMode.Self);
+            element.performArrange({oldRect: newSnapshot[element.id].br}, ChangeMode.Self);
         }
 
         TransformationHelper.applyPropSnapshot(elements, newSnapshot, ChangeMode.Model);
         for (let i = 0; i < elements.length; ++i){
             let element = elements[i];
-            element.performArrange({oldRect: oldSnapshot[element.id()].br}, ChangeMode.Model);
+            element.performArrange({oldRect: oldSnapshot[element.id].br}, ChangeMode.Model);
         }
     }
 }

@@ -1,12 +1,12 @@
 import {ControlNameResolver} from "./ControlNameResolver";
-import { IArtboard } from "carbon-core";
-import { ControlProxy } from "./ControlProxy";
+import { IContainer } from "carbon-core";
+import { ElementProxy } from "./ElementProxy";
 
 export class Sandbox {
-    runOnArtboard(artboard:IArtboard, code:string) {
+    runOnElement(artboard:IContainer, code:string) {
         let nameResolver = new ControlNameResolver(artboard);
         let resolverProxy = new Proxy({}, nameResolver);
-        ControlProxy.clear();
+
         // with is not supported in TS, so should wrap in eval
         window["__sandboxEval"](code, resolverProxy);
     }

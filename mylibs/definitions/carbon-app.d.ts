@@ -160,6 +160,11 @@ declare module "carbon-app" {
         mirroringCode(code?: string) : string;
     }
 
+    export interface ICompilerService {
+        compile(fileName:string, text:string):Promise<string>;
+        clear();
+    }
+
     export interface ILayer<TProps extends IContainerProps = IContainerProps> extends IContainer<TProps> {
         type: LayerType;
         isActive: boolean;
@@ -579,6 +584,10 @@ declare module "carbon-app" {
     export const Selection: ISelection;
     export const Invalidate: IInvalidate;
 
+    export var Services : {
+        compiler:ICompilerService;
+    }
+
     export interface IKeyboard {
         readonly state: KeyboardState;
         readonly changed: IEvent2<KeyboardState, KeyboardState>;
@@ -590,7 +599,7 @@ declare module "carbon-app" {
         reset();
     }
 
-    export interface IPreviewModelProxy {
+    export interface IPreviewModel {
         onPageChanged:IEvent<IPage>;
         activePage:IPage;
         readonly activeArtboard:IArtboard;

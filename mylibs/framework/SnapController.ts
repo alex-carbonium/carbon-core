@@ -489,7 +489,7 @@ function buildHorizontalDistances(distances, snap, b) {
 
 function collectPoints(data, elements, viewportRect, root, excludeElements, element) {
     if (excludeElements) {
-        if (excludeElements[element.id()]) {
+        if (excludeElements[element.id]) {
             return true;
         }
     }
@@ -562,7 +562,7 @@ class SnapController {
         this._parent = parent;
         let viewportRect = Environment.view.viewportRect()
         if(excludeElements) {
-            excludeElements = excludeElements.reduce((acc, cur)=>{acc[cur.id()] = true;return acc;}, {});
+            excludeElements = excludeElements.reduce((acc, cur)=>{acc[cur.id] = true;return acc;}, {});
         }
         this.currentSnappingData = data;
         this.currentSnappingElements = elements;
@@ -577,7 +577,7 @@ class SnapController {
         if (parent.parent() === NullContainer) {
             parent.children.forEach(collectPoints.bind(null, data, elements, viewportRect, parent, excludeElements));
         } else {
-            parent.applyVisitorTLR(collectPoints.bind(null, data, elements, viewportRect, parent, excludeElements), true);
+            parent.applyVisitorBreadthFirst(collectPoints.bind(null, data, elements, viewportRect, parent, excludeElements), true);
         }
         data._snapX.sort(function (x1, x2) {
             return x1.value - x2.value;

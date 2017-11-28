@@ -207,7 +207,7 @@ class ArtboardPage extends Page implements IArtboardPage {
         this._activeArtboard = artboard;
         if (artboard){
             artboard.activate();
-            !doNotTrack && App.Current.setMirrorArtboardId(artboard.parent().id(), artboard.id());
+            !doNotTrack && App.Current.setMirrorArtboardId(artboard.parent().id, artboard.id);
         } else {
             !doNotTrack && App.Current.setMirrorArtboardId(null, null);
         }
@@ -333,11 +333,11 @@ class ArtboardPage extends Page implements IArtboardPage {
 
     saveWorkspaceState(): any{
         let artboard = this.getActiveArtboard();
-        return {artboardId: artboard ? artboard.id() : null};
+        return {artboardId: artboard ? artboard.id : null};
     }
     restoreWorkspaceState(data: any): void{
         if (data.artboardId){
-            let artboard = this.getAllArtboards().find(x => x.id() === data.artboardId);
+            let artboard = this.getAllArtboards().find(x => x.id === data.artboardId);
             if (artboard){
                 this.setActiveArtboard(artboard);
             }

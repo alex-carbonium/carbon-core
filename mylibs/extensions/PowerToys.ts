@@ -1,5 +1,5 @@
 import CarbonExtension from "./CarbonExtesion";
-import { IContributions, ContextBarPosition, IApp, ISelection, ChangeMode, IArtboardProps, ILayer, LayerType, IUIElement, IContainer, IRect, ArtboardType, IText, UIElementFlags, IArtboard } from "carbon-core";
+import { IContributions, ContextBarPosition, IApp, ISelection, ChangeMode, IArtboardProps, ILayer, LayerType, IUIElement, IArtboard, IRect, ArtboardType, IText, UIElementFlags, IContainer } from "carbon-core";
 import Matrix from "../math/matrix";
 import Point from "../math/point";
 import Container from "../framework/Container";

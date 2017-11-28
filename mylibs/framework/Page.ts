@@ -167,7 +167,7 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
     }
 
     initId() {
-        this.id(createUUID());
+        this.id = createUUID();
     }
 
     status(value) {
@@ -270,14 +270,14 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
     primitivePath() {
         var path = this.runtimeProps.primitivePath;
         if (!path) {
-            path = [this.id(), this.id()];
+            path = [this.id, this.id];
             this.runtimeProps.primitivePath = path;
         }
         return path;
     }
 
     primitiveRootKey() {
-        return this.id();
+        return this.id;
     }
 
     isPhoneVisible(visible?) {

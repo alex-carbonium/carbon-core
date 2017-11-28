@@ -6,7 +6,7 @@ import { Overflow, Types } from "./Defs";
 import Selection from "framework/SelectionModel";
 import DataNode from "framework/DataNode";
 import ObjectFactory from "framework/ObjectFactory";
-import { ChangeMode, IArtboard, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp, IUIElement, IUIElementProps, IText, UIElementFlags, ResizeDimension, IContext, ISelection } from "carbon-core";
+import { ChangeMode, IContainer, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp, IUIElement, IUIElementProps, IText, UIElementFlags, ResizeDimension, IContext, ISelection, IArtboard } from "carbon-core";
 import { createUUID } from "../util";
 import Isolate from "../commands/Isolate";
 import Environment from "../environment";
@@ -27,7 +27,7 @@ interface ICustomPropertyDefinition {
     propertyName: string;
 }
 
-export default class Symbol extends Container implements ISymbol, IPrimitiveRoot {
+export default class Symbol extends Container implements ISymbol, IPrimitiveRoot{
     props: ISymbolProps;
     runtimeProps: ISymbolRuntimeProps;
 
@@ -142,14 +142,14 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
     _cloneFromArtboard(artboard) {
         this.clear(ChangeMode.Self);
-        var baseId = this.id();
+        var baseId = this.id;
         let ctxl = this.runtimeProps.ctxl;
         for (var i = 0; i < artboard.children.length; i++) {
             var child = artboard.children[i];
             var clone = child.mirrorClone();
             clone.applyVisitor(x => {
-                x.sourceId(x.id());
-                x.id(baseId + x.id())
+                x.sourceId(x.id);
+                x.id = (baseId + x.id)
                 x.resizeDimensions(ResizeDimension.None);
                 x.runtimeProps.ctxl = ctxl;
             });
@@ -210,6 +210,14 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         }
 
         this.updateCustomProperties(props);
+    }
+
+    get artboard():IArtboard {
+        var artboard = this._artboard;
+        if (!artboard) {
+            return null;
+        }
+        return artboard;
     }
 
     findSourceArtboard(app: IApp): IArtboard | null {
@@ -313,7 +321,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         if (def.controlId === "self") {
             return this;
         }
-        return this.getElementById(this.id() + def.controlId);
+        return this.getElementById(this.id + def.controlId);
     }
 
     private updateCustomProperties(props) {
@@ -423,7 +431,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         var path = this.runtimeProps.primitivePath;
         if (!path) {
             path = nextRoot.primitivePath().slice();
-            path[path.length - 1] = this.id();
+            path[path.length - 1] = this.id;
             this.runtimeProps.primitivePath = path;
         }
         return path;
@@ -473,7 +481,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
         var nextRoot = this.findNextRoot();
 
-        if (element.id() === this.id() && nextRoot) {
+        if (element.id === this.id && nextRoot) {
             nextRoot.registerSetProps(element, props, oldProps, mode);
             return;
         }

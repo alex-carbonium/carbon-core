@@ -45,7 +45,7 @@ export default class RepeatCell extends Container implements IGroupContainer, IR
     }
 
     insert(element: IUIElement, index: number, mode?: ChangeMode) {
-        element.applyVisitorDepthFirst(x => x.prepareAndSetProps({ rid: x.props.rid || x.id() }, mode));
+        element.applyVisitorDepthFirst(x => x.prepareAndSetProps({ rid: x.props.rid || x.id }, mode));
 
         super.insert(element, index, mode);
 

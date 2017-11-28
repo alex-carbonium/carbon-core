@@ -58,7 +58,7 @@ var Strategy = {
                     slave.setProps({
                         pos: [item.props.pos[0], item.props.pos[1] + 1]
                     }, changeMode);
-                    slave.id(container.id() + "_" + slave.props.pos[0] + "_" + slave.props.pos[1]);
+                    slave.id = (container.id + "_" + slave.props.pos[0] + "_" + slave.props.pos[1]);
                     container.insert(slave, i + j + 1, changeMode);
                 }
                 i += rowDiff;
@@ -76,7 +76,7 @@ var Strategy = {
             }
 
             let slave = items[0].clone();
-            slave.id(container.id() + "_" + i + "_" + j);
+            slave.id = (container.id + "_" + i + "_" + j);
             slave.setProps({pos: [i, j]});
             container.insert(slave, items.length, changeMode);
         }

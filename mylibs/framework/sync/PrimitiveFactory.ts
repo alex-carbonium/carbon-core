@@ -80,7 +80,7 @@ class PrimitiveFactory {
             time: new Date().getTime(),
             type: PrimitiveType.DataNodeRemove,
             path: parent.primitivePath(),
-            childId: element.id()
+            childId: element.id
         }
 
         if (!norollback) {
@@ -190,7 +190,7 @@ class PrimitiveFactory {
             time: new Date().getTime(),
             type: PrimitiveType.DataNodeChangePosition,
             path: parent.primitivePath(),
-            childId: element.id(),
+            childId: element.id,
             newPosition
         }
 
@@ -201,7 +201,7 @@ class PrimitiveFactory {
                 time: new Date().getTime(),
                 type: PrimitiveType.DataNodeChangePosition,
                 path: parent.primitivePath(),
-                childId: element.id(),
+                childId: element.id,
                 newPosition: oldPosition
             }
         }

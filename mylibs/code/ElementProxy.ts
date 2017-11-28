@@ -1,7 +1,7 @@
 import { IUIElement } from "carbon-model";
 import PropertyMetadata from "framework/PropertyMetadata";
 
-export class ControlProxy {
+export class ElementProxy {
     private element: IUIElement;
     private methodMap: { [name: string]: boolean } = {};
     private propertyMap: { [name: string]: boolean } = {};
@@ -11,19 +11,19 @@ export class ControlProxy {
 
     static unwrap<T = IUIElement>(proxy:any):T {
         if(proxy.__isProxy) {
-            return ControlProxy.proxyMap[proxy.id]
+            return ElementProxy.proxyMap[proxy.id]
         }
 
         return proxy;
     }
 
     static clear() {
-        ControlProxy.proxyMap = [];
+        ElementProxy.proxyMap = [];
     }
 
     constructor(element: IUIElement) {
         this.element = element;
-        ControlProxy.proxyMap[element.id()] = element;
+        ElementProxy.proxyMap[element.id] = element;
 
         var metadata = PropertyMetadata.findAll(element.systemType());
         if (metadata.proxyDefinition) {

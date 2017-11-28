@@ -50,13 +50,13 @@
 //         target.setProps({width: 10});
 
 //         // act
-//         recorder.trackSetProps("state1", target.id(), {width: 11}, {width: 10});
-//         recorder.trackSetProps("state1", target.id(), {width: 12}, {width: 10});
+//         recorder.trackSetProps("state1", target.id, {width: 11}, {width: 10});
+//         recorder.trackSetProps("state1", target.id, {width: 12}, {width: 10});
 
 //         // assert
-//         var actual = recorder.getValue('default', target.id(), 'width');
+//         var actual = recorder.getValue('default', target.id, 'width');
 //         assert.equal(actual, 10, 'Default value recorded');
-//         actual = recorder.getValue('state1', target.id(), 'width');
+//         actual = recorder.getValue('state1', target.id, 'width');
 //         assert.equal(actual, 12, 'State1 value recorded');
 //     });
 
@@ -74,13 +74,13 @@
 //     //     target.width(2);
 //     //
 //     //     // assert
-//     //     var actual = recorder.getValue('s1', target.id(), 'width');
+//     //     var actual = recorder.getValue('s1', target.id, 'width');
 //     //     assert.equal(actual, null, 'Default value recorded');
 //     //
 //     //     recorder.record();
 //     //     target.width(3);
 //     //
-//     //     var actual = recorder.getValue('s1', target.id(), 'width');
+//     //     var actual = recorder.getValue('s1', target.id, 'width');
 //     //     assert.equal(actual, 3, 'Default value recorded');
 //     // });
 
@@ -100,7 +100,7 @@
 //     //     target.width(2);
 //     //
 //     //     // assert
-//     //     var actual = recorder.getValue('default', target.id(), 'width');
+//     //     var actual = recorder.getValue('default', target.id, 'width');
 //     //     assert.equal(actual, null, 'Default value recorded');
 //     // });
 
@@ -143,7 +143,7 @@
 //     //     target.width(10);
 //     //
 //     //     // assert
-//     //     var actual = recorder.getValue('state1', target.id(), 'width');
+//     //     var actual = recorder.getValue('state1', target.id, 'width');
 //     //     assert.equal(actual, 10, 'State 1 value recorded');
 //     // });
 
@@ -167,7 +167,7 @@
 //         recorder.stop();
 
 //         // assert
-//         var actual = recorder.getValue('state1', target.id(), 'width');
+//         var actual = recorder.getValue('state1', target.id, 'width');
 //         assert.equal(actual, null, 'State 1 value');
 //     });
 

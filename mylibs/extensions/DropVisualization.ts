@@ -406,13 +406,13 @@ export default class DropVisualization extends ExtensionBase {
 
         for (var i = 0; i < this._selection.length; ++i) {
             let element = this._selection[i];
-            let controlData = this._selectionControls[element.id()];
+            let controlData = this._selectionControls[element.id];
             if (controlData) {
                 controlData.iteration = this._selectionIteration;
             } else {
                 var control = new SelectionRect(element);
 
-                this._selectionControls[element.id()] = {
+                this._selectionControls[element.id] = {
                     iteration: this._selectionIteration,
                     control: control
                 };

@@ -3,8 +3,6 @@ import DropVisualization from "../../extensions/DropVisualization";
 import { createUUID } from "../../util";
 import {
     ActionType,
-    AnimationType,
-    EasingType,
     ActionEvents
 } from "framework/Defs";
 import * as ActionHelper from "./ActionHelper";
@@ -18,7 +16,11 @@ import StoryAction from "../../stories/StoryAction";
 import Link from "./Link";
 
 import DataNode from "framework/DataNode";
-import { IUIElement, IMouseEventData, KeyboardState, PrimitiveType, IContext, InteractionType, RenderEnvironment, StoryType } from "carbon-core";
+import {
+    IUIElement, IMouseEventData, KeyboardState, PrimitiveType, IContext, InteractionType, RenderEnvironment, StoryType
+} from "carbon-core";
+
+import {AnimationType, EasingType} from "carbon-runtime";
 import Brush from "../../framework/Brush";
 
 const HandleSize = 14;
@@ -76,7 +78,7 @@ export default class LinkingTool extends Tool {
         var artboard = this._pointToHomeScreenArtboard(event, scale);
 
         if (artboard && this._activeStory) {
-            this._activeStory.setProps({ homeScreen: [this._app.activePage.id(), artboard.id()] });
+            this._activeStory.setProps({ homeScreen: [this._app.activePage.id, artboard.id] });
             Invalidate.requestInteractionOnly();
             return true;
         }
@@ -181,7 +183,7 @@ export default class LinkingTool extends Tool {
             var to = connection.connection.to;
             if (isPointInRect(this._getCupRectForPoint(to, scale), event)) {
                 var artboard = connection.element;
-                var id = artboard.id();
+                var id = artboard.id;
 
                 var action = this._activeStory.children.find(a => a.props.sourceElementId === id);
 
@@ -231,18 +233,18 @@ export default class LinkingTool extends Tool {
                 delete this._modifyingConnection;
             }
 
-            let sourceId = this._sourceElement.id();
+            let sourceId = this._sourceElement.id;
             activeStory.removeFirst(s => s.props.sourceElementId === sourceId);
             this._removeConnection(this._sourceElement);
 
-            var sourceRootId = this._sourceElement.primitiveRoot().id();
+            var sourceRootId = this._sourceElement.primitiveRoot().id;
             var props = {
                 id: createUUID(),
                 sourceRootId: sourceRootId,
                 sourceElementId: sourceId,
                 event: ActionEvents.click,
                 type: ActionType.GoToPage,
-                targetArtboardId: targetArgtboard.id(),
+                targetArtboardId: targetArgtboard.id,
                 animation: {
                     segue: AnimationType.SlideLeft,
                     easing: EasingType.EaseOut,
@@ -258,7 +260,7 @@ export default class LinkingTool extends Tool {
             this._addConnection(this._sourceElement, targetArgtboard);
 
             if (!activeStory.props.homeScreen) {
-                activeStory.setProps({ homeScreen: [page.id(), sourceRootId] });
+                activeStory.setProps({ homeScreen: [page.id, sourceRootId] });
             }
 
             return;
@@ -267,7 +269,7 @@ export default class LinkingTool extends Tool {
         if (this._modifyingConnection) {
             var e = this._modifyingConnection.element;
             if (e) {
-                let sourceId = e.id();
+                let sourceId = e.id;
                 activeStory.removeFirst(s => s.props.sourceElementId === sourceId)
             }
             delete this._modifyingConnection;
@@ -474,7 +476,7 @@ export default class LinkingTool extends Tool {
     }
 
     _getConnectedArtboard(e, page) {
-        var action = this._activeStory.children.find(a => a.props.sourceElementId === e.id());
+        var action = this._activeStory.children.find(a => a.props.sourceElementId === e.id);
 
         if (action) {
             var artboard = DataNode.getImmediateChildById(page, action.targetArtboardId, true);
@@ -584,7 +586,7 @@ export default class LinkingTool extends Tool {
     }
 
     _removeConnection(element) {
-        var i = this.connections.findIndex(c => c.element.id() === element.id());
+        var i = this.connections.findIndex(c => c.element.id === element.id);
         if (i === -1) {
             return;
         }
@@ -616,7 +618,7 @@ export default class LinkingTool extends Tool {
         this._handles = [];
         var scale = this._view.scale();
         if (this._selection && this._activeStory) {
-            var selectionId = this._selection.id();
+            var selectionId = this._selection.id;
             var action = this._activeStory.children.find(a => a.props.sourceElementId === selectionId);
             if (!action || !action.props.targetArtboardId) {
                 this._addHandleOnElement(this._selection, scale);
@@ -639,7 +641,7 @@ export default class LinkingTool extends Tool {
     }
 
     _onAppChanged(primitives) {
-        var activePageId = this._app.activePage.id();
+        var activePageId = this._app.activePage.id;
         var refreshState = false;
 
         var propChanges = primitives.filter(p => p.path[0] === activePageId && p.type === PrimitiveType.DataNodeSetProps);
@@ -652,7 +654,7 @@ export default class LinkingTool extends Tool {
             if (hasLocationProperty(props)) {
                 for (let j = 0; j < this.connections.length; ++j) {
                     var c = this.connections[j];
-                    if (c.element.id() === elementId || c.artboardId === elementId) {
+                    if (c.element.id === elementId || c.artboardId === elementId) {
                         c.connection = ActionHelper.getConnectionPoints(c.element, c.artboard);
                     }
                 }
@@ -842,7 +844,7 @@ export default class LinkingTool extends Tool {
         var x = rect.x + rect.width;
         var y = 0 | rect.y + (rect.height - size) / 2;
 
-        (handles || this._handles).push({ x: x, y: y, id: element.id() });
+        (handles || this._handles).push({ x: x, y: y, id: element.id });
     }
 
     _renderHandle(context, handle, scale) {
@@ -914,7 +916,7 @@ export default class LinkingTool extends Tool {
         var h = 5 / scale;
 
         context.save();
-        if (this._activeStory && this._activeStory.props.homeScreen && this._activeStory.props.homeScreen[1] === artboard.id()) {
+        if (this._activeStory && this._activeStory.props.homeScreen && this._activeStory.props.homeScreen[1] === artboard.id) {
             context.fillStyle = DefaultLinkColor;
         } else if (artboard === this._hoverArboardHomeButton) {
             context.fillStyle = HoverLinkColor;

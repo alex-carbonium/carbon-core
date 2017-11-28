@@ -21,7 +21,7 @@ import ContextPool from "./render/ContextPool";
 import GroupContainer from "./GroupContainer";
 
 function propertyChanged(element, newProps) {
-    if (!this._internalChange && this._itemIds && this._itemIds[element.id()]) {
+    if (!this._internalChange && this._itemIds && this._itemIds[element.id]) {
         if (newProps.width !== undefined || newProps.height !== undefined || newProps.m !== undefined) {
             this.recalculate();
         }
@@ -251,10 +251,10 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
         let items = this.children;
 
         let result = BezierGraph.fromPath(items[0], items[0].viewMatrix());
-        this._itemIds[items[0].id()] = true;
+        this._itemIds[items[0].id] = true;
         for (let i = 1; i < items.length; ++i) {
             let path = items[i];
-            this._itemIds[path.id()] = true;
+            this._itemIds[path.id] = true;
             let otherGraph;
             if (path instanceof CompoundPath) {
                 otherGraph = path.offsetGraph();
@@ -370,7 +370,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
         if (!this._itemIds) {
             return false;
         }
-        return this._itemIds[elements[0].id()];
+        return this._itemIds[elements[0].id];
     }
 
     getHitTestBox() {

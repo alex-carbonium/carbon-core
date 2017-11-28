@@ -12,7 +12,7 @@ var easingFunctions = {
     },
     easeInOutQuad: function (t, b, c, d) {
         t /= d / 2;
-        if (t < 1) return c / 2 * t * t + b;
+        if (t < 1) {return c / 2 * t * t + b};
         t--;
         return -c / 2 * (t * (t - 2) - 1) + b;
     },
@@ -27,7 +27,7 @@ var easingFunctions = {
     },
     easeInOutCubic: function (t, b, c, d) {
         t /= d / 2;
-        if (t < 1) return c / 2 * t * t * t + b;
+        if (t < 1) {return c / 2 * t * t * t + b};
         t -= 2;
         return c / 2 * (t * t * t + 2) + b;
     },
@@ -42,7 +42,7 @@ var easingFunctions = {
     },
     easeInOutQuart: function (t, b, c, d) {
         t /= d / 2;
-        if (t < 1) return c / 2 * t * t * t * t + b;
+        if (t < 1) {return c / 2 * t * t * t * t + b};
         t -= 2;
         return -c / 2 * (t * t * t * t - 2) + b;
     },
@@ -57,7 +57,7 @@ var easingFunctions = {
     },
     easeInOutQuint: function (t, b, c, d) {
         t /= d / 2;
-        if (t < 1) return c / 2 * t * t * t * t * t + b;
+        if (t < 1) {return c / 2 * t * t * t * t * t + b};
         t -= 2;
         return c / 2 * (t * t * t * t * t + 2) + b;
     },
@@ -78,7 +78,7 @@ var easingFunctions = {
     },
     easeInOutExpo: function (t, b, c, d) {
         t /= d / 2;
-        if (t < 1) return c / 2 * Math.pow(2, 10 * (t - 1)) + b;
+        if (t < 1) {return c / 2 * Math.pow(2, 10 * (t - 1)) + b};
         t--;
         return c / 2 * ( -Math.pow(2, -10 * t) + 2 ) + b;
     },
@@ -93,7 +93,7 @@ var easingFunctions = {
     },
     easeInOutCirc: function (t, b, c, d) {
         t /= d / 2;
-        if (t < 1) return -c / 2 * (Math.sqrt(1 - t * t) - 1) + b;
+        if (t < 1) {return -c / 2 * (Math.sqrt(1 - t * t) - 1) + b};
         t -= 2;
         return c / 2 * (Math.sqrt(1 - t * t) + 1) + b;
     }

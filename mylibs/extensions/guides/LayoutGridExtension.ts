@@ -32,7 +32,7 @@ export default class LayoutGridExtension {
     onArtboardBackgroundDrawn(artboard, context) {
         context.save();
 
-        var columns = this._layoutColumns[artboard.id()];
+        var columns = this._layoutColumns[artboard.id];
         if (columns) {
             columns.draw(context);
         }
@@ -42,7 +42,7 @@ export default class LayoutGridExtension {
     onArtboardContentDrawn(artboard, context) {
         context.save();
 
-        var lines = this._layoutLines[artboard.id()];
+        var lines = this._layoutLines[artboard.id];
         if (lines) {
             lines.draw(context);
         }
@@ -99,7 +99,7 @@ export default class LayoutGridExtension {
         }
     }
     _createArtboardLayoutGrid(artboard) {
-        var artboardId = artboard.id();
+        var artboardId = artboard.id;
 
         var settings = artboard.layoutGridSettings();
         if (settings) {
@@ -122,7 +122,7 @@ export default class LayoutGridExtension {
         }
     }
     _updateArtboardLayoutGrid(artboard, newRect, oldRect) {
-        var artboardId = artboard.id();
+        var artboardId = artboard.id;
         var columnWidth;
         if (newRect.width !== undefined) {
             columnWidth = calculateColumnWidth(artboard.props.layoutGridSettings, newRect.width);
@@ -140,7 +140,7 @@ export default class LayoutGridExtension {
         }
     }
     _removeArtboardLayoutGrid(artboard) {
-        var artboardId = artboard.id();
+        var artboardId = artboard.id;
 
         for (var i = SnapController.snapGuides.length - 1; i >= 0; i--) {
             var guide = SnapController.snapGuides[i];
@@ -156,10 +156,10 @@ export default class LayoutGridExtension {
     }
     _attachToArtboard(artboard) {
         artboard.enablePropsTracking();
-        if (this._layoutColumns[artboard.id()]) {
+        if (this._layoutColumns[artboard.id]) {
             artboard.onBackgroundDrawn = this.onArtboardBackgroundDrawnHandler;
         }
-        if (this._layoutLines[artboard.id()]) {
+        if (this._layoutLines[artboard.id]) {
             artboard.onContentDrawn = this.onArtboardContentDrawnHandler;
         }
     }
@@ -200,7 +200,7 @@ function setupLayoutGrid(guides, artboard, actualColumnWidth) {
         settings: settings,
         rect: rect,
         actualColumnWidth: actualColumnWidth,
-        artboardId: artboard.id()
+        artboardId: artboard.id
     };
     guides.prepareProps(props);
     guides.setProps(props);

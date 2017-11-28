@@ -34,7 +34,7 @@ function parentChanged() {
 };
 
 function propertyChanged(element, newProps, oldProps) {
-    if (this._frame && this._frame.captured || this._element.id() !== element.id()) {
+    if (this._frame && this._frame.captured || this._element.id !== element.id) {
         return;
     }
     //TODO: add support for changing parent

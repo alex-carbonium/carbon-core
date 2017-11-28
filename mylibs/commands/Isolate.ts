@@ -14,7 +14,7 @@ const Isolate = {
         var layer = Environment.view.getLayer(LayerType.Isolation) as IIsolationLayer;
 
         // re-read element form the model, since we can try isolate a copy from isolation layer
-        element = App.Current.activePage.getElementById(element.id());
+        element = App.Current.activePage.getElementById(element.id);
         layer.isolateGroup(element, clippingParent);
         layer.invalidate();
     }

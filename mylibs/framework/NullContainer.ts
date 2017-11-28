@@ -40,7 +40,6 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
     }
 
     performArrange() { }
-    applyVisitorTLR(callback: (e: IUIElement) => boolean | void) { }
     allowRearrange() { return false; }
     autoGrow(dw, dh) { }
     selectFrameVisible() {
@@ -56,6 +55,7 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
     hasFlags() {
         return false;
     }
+    hasParent() { return false; }
     addFlags() {
     }
     removeFlags() {
@@ -286,9 +286,11 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
     arrange() {
     }
 
-    id() {
+    get id() {
         return emptyUuid;
     }
+
+    set id(v) { }
 
     add(element) {
         return element;

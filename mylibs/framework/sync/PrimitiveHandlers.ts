@@ -100,7 +100,7 @@ handlers.registerHandler(PrimitiveType.Selection, function (page, p) {
     } else {
         var elements = [];
         page.applyVisitor(e => {
-            if (selectionMap[e.id()]) {
+            if (selectionMap[e.id]) {
                 elements.push(e);
                 if (elements.length === selection.length) {
                     return false;

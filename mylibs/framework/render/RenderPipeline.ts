@@ -207,8 +207,8 @@ export default class RenderPipeline implements IPooledObject {
             p1.y = Math.max(0, p1.y);
         }
 
-        p2.x = 0 | p2.x + .5;
-        p2.y = 0 | p2.y + .5;
+        p2.x = 0 | p2.x + 1;
+        p2.y = 0 | p2.y + 1;
         var sw = (p2.x - p1.x);
         var sh = (p2.y - p1.y);
 

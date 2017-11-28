@@ -222,7 +222,7 @@
 //             this.app.replayFromSavePoint(savepoint);
 
 //             //assert
-//             assert.equal(this.app.activePage.getElementById(element.id()).x(), 10, 'Element changes after arrange are lost');
+//             assert.equal(this.app.activePage.getElementById(element.id).x(), 10, 'Element changes after arrange are lost');
 //         });
 
 //         it("Should restore auto-sized canvas", function () {
@@ -255,7 +255,7 @@
 //             this.app.relayout();
 
 //             //assert
-//             assert.equal(this.app.activePage.getElementById(container1.id()).width(), 200, 'Resized width is lost');
+//             assert.equal(this.app.activePage.getElementById(container1.id).width(), 200, 'Resized width is lost');
 //         });
 //         it("Should restore shifted canvas children", function () {
 //             //arrange
@@ -294,8 +294,8 @@
 //             this.app.relayout();
 
 //             //assert
-//             assert.equal(this.app.activePage.getElementById(element1.id()).x(), 0, 'Shift for element1 is lost');
-//             assert.equal(this.app.activePage.getElementById(element2.id()).x(), 60, 'Shift for element2 is lost');
+//             assert.equal(this.app.activePage.getElementById(element1.id).x(), 0, 'Shift for element1 is lost');
+//             assert.equal(this.app.activePage.getElementById(element2.id).x(), 60, 'Shift for element2 is lost');
 //         });
 //     });
 // });

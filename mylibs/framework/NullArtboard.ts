@@ -6,6 +6,8 @@ class NullArtboard {
         this.props = {} as any;
     }
 
+    hasParent() {return false;}
+
     getCustomProperties(value) {
         return [];
     }
@@ -36,9 +38,11 @@ class NullArtboard {
     arrange() {
     }
 
-    id() {
+    get id() {
         return emptyUuid;
     }
+
+    set id(v) {}
 
     add(element) {
     }

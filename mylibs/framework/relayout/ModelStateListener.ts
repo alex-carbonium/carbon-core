@@ -46,7 +46,7 @@ class ModelStateListener {
         let primitive = primitiveFactory.dataNodeSetProps(element, props, oldProps);
         this.primitives.push(primitive);
 
-        let elementId = element.id();
+        let elementId = element.id;
         let oldPrimitive = this.elementsPropsCache[elementId];
         if (!oldPrimitive){
             oldPrimitive = primitive._rollbackData;

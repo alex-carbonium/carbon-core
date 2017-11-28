@@ -40,7 +40,7 @@ import CoreIntl from "../CoreIntl";
 import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
 import RenderPipeline from "./render/RenderPipeline";
 import ContextCacheManager from "./render/ContextCacheManager";
-import { ControlProxy } from "../code/ControlProxy";
+import { ElementProxy } from "../code/ElementProxy";
 
 require("../migrations/All");
 
@@ -65,10 +65,10 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         //this.stopwatch = new stopwatch();
 
         if (DEBUG) {
-            this.id(createUUID(this.t));
+            this.id = (createUUID(this.t));
         }
         else {
-            this.id(createUUID());
+            this.id = (createUUID());
         }
         this.parent(NullContainer);
         this.runtimeProps.ctxl = 1;
@@ -977,7 +977,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
         let markName;
         if (params.perf) {
-            markName = "draw " + this.displayName() + " - " + this.id();
+            markName = "draw " + this.displayName() + " - " + this.id;
             performance.mark(markName);
         }
 
@@ -1087,7 +1087,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
     primitivePath() {
         let path = this.primitiveRoot().primitivePath().slice();
-        path[path.length - 1] = this.id();
+        path[path.length - 1] = this.id;
         return path;
     }
 
@@ -1603,9 +1603,6 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     applyVisitor(callback, useLogicalChildren?: boolean, parent?: any) {
         return callback(this);
     }
-    applyVisitorTLR(callback, useLogicalChildren?: boolean, parent?: any) {
-        return callback(this);
-    }
     canAccept(elements, autoInsert, allowMoveInOut?: boolean) {
         return false;
     }
@@ -1762,7 +1759,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             path.push(e.parent());
             e = e.parent();
         }
-        return this.id() + ': ' + map(path.reverse(), function (x) {
+        return this.id + ': ' + map(path.reverse(), function (x) {
             return x.t;
         }).join("->");
     }
@@ -1804,6 +1801,12 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
         return this;
     }
+
+    hasParent() {
+        let parent = this.parent();
+        return parent && parent !== NullContainer;
+    }
+
     isAncestor(element) {
         let parent = this.parent();
         while (parent) {
@@ -2151,16 +2154,16 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         let animationValues = [];
         options = extend({}, options);
         options.duration = duration || 0;
-        let that = ControlProxy.unwrap(this);
+        let that = ElementProxy.unwrap(this);
         for (let propName in properties) {
             let newValue = properties[propName];
             let accessor = (function (name) {
-                if (typeof that[name] === 'function') {
+                if (that[name] !== undefined) {
                     return function prop_accessor(value?: any) {
                         if (arguments.length > 0) {
-                            that[name](value);
+                            that[name] = value;
                         }
-                        return that[name]();
+                        return that[name];
                     }
                 }
                 return function prop_accessor(value?: any) {
@@ -2514,8 +2517,8 @@ PropertyMetadata.registerForType(UIElement, {
     },
     proxyDefinition() {
         return {
-            rprops: ["x", "y", "name", "id"], // readonly props
-            props: ["width", "height", "angle", "visible"], // read/write props
+            rprops: ["name", "id"], // readonly props
+            props: ["x", "y", "width", "height", "angle", "visible"], // read/write props
             methods: ["animate", "boundaryRect"]
         }
     },

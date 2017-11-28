@@ -68,10 +68,10 @@ export default class SymbolActions extends CarbonExtension {
         })
     }
 
-    static isInSymbol(selection: ISelection): boolean{
+    static isInSymbol(selection: ISelection): boolean {
         return selection.elements.length && selection.elements.every(x => {
             let artboard = x.findAncestorOfType(Artboard);
-            if (!artboard){
+            if (!artboard) {
                 return false;
             }
             if (artboard.props.type === ArtboardType.Symbol) {
@@ -133,8 +133,8 @@ export default class SymbolActions extends CarbonExtension {
             br: group.props.br,
             m: group.props.m,
             source: {
-                pageId: page.id(),
-                artboardId: artboard.id()
+                pageId: page.id,
+                artboardId: artboard.id
             },
             name: artboard.name
         });
@@ -154,7 +154,7 @@ export default class SymbolActions extends CarbonExtension {
             return;
         }
 
-        let page = this.app.pages.find(x => x.id() === symbol.props.source.pageId);
+        let page = this.app.pages.find(x => x.id === symbol.props.source.pageId);
         this.app.setActivePage(page);
         this.workspace.view.ensureCentered([artboard]);
         selection.makeSelection([artboard]);
@@ -191,7 +191,7 @@ export default class SymbolActions extends CarbonExtension {
             element = parentData.artboard.getElementById(element.sourceId()) as IText;
             element.addFlags(UIElementFlags.SymbolBackground);
             if (i) {
-                element.prepareAndSetProps({fill, stroke});
+                element.prepareAndSetProps({ fill, stroke });
             }
             if (parentData.symbol) {
                 newSelection.push(element.sourceId());
@@ -218,7 +218,7 @@ export default class SymbolActions extends CarbonExtension {
             element = parentData.artboard.getElementById(element.sourceId()) as IText;
             element.addFlags(UIElementFlags.SymbolText);
             if (i) {
-                element.prepareAndSetProps({font});
+                element.prepareAndSetProps({ font });
             }
             if (parentData.symbol) {
                 newSelection.push(element.sourceId());
@@ -232,7 +232,7 @@ export default class SymbolActions extends CarbonExtension {
         }
     }
 
-    private findArtboardAndSymbol(selection: ISelection){
+    private findArtboardAndSymbol(selection: ISelection) {
         var artboard: IArtboard = null;
         var symbol = selection.elements[0].findAncestorOfType(Symbol);
         if (symbol) {
@@ -241,7 +241,7 @@ export default class SymbolActions extends CarbonExtension {
         else {
             artboard = selection.elements[0].findAncestorOfType(Artboard);
         }
-        return {artboard, symbol};
+        return { artboard, symbol };
     }
 
     private clearSymbolFlags(artboard: IArtboard, flags: UIElementFlags) {

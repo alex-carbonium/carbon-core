@@ -21,7 +21,7 @@ function itemSelector(e){
     return {
         label: e.displayName(),
         actionId: "selectElement",
-        actionArg: e.id()
+        actionArg: e.id
     }
 }
 

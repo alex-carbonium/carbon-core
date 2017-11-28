@@ -53,7 +53,7 @@ export default class RepeatContainer extends Container implements IRepeatContain
         var path = this.runtimeProps.primitivePath;
         if (!path) {
             path = nextRoot.primitivePath().slice();
-            path[path.length - 1] = this.id();
+            path[path.length - 1] = this.id;
             this.runtimeProps.primitivePath = path;
         }
         return path;
@@ -101,7 +101,7 @@ export default class RepeatContainer extends Container implements IRepeatContain
     }
 
     seed(): string {
-        return this.id();
+        return this.id;
     }
 
     dblclick(event: IMouseEventData) {
@@ -260,7 +260,7 @@ export default class RepeatContainer extends Container implements IRepeatContain
 
         if (updateCommonId) {
             this.runtimeProps.internalUpdate = true;
-            element.applyVisitorDepthFirst(x => x.setProps({ rid: x.id() }));
+            element.applyVisitorDepthFirst(x => x.setProps({ rid: x.id }));
             this.runtimeProps.internalUpdate = false;
         }
     }
@@ -276,7 +276,7 @@ export default class RepeatContainer extends Container implements IRepeatContain
         matrix = dropTarget.globalMatrixToLocal(matrix);
 
         var cells = this.children;
-        let rid = elements[0].id();
+        let rid = elements[0].id;
         let clone = false;
         for (var i = 0, j = 0; i < this.children.length; i++) {
             var cell = this.children[i];

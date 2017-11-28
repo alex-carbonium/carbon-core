@@ -177,8 +177,8 @@ class AppClass extends DataNode implements IApp {
             if (this.activePage === NullPage) {
                 return;
             }
-            let selectionIds = Selection.selectedElements().map(e => e.id());
-            let oldSelectionIds = oldSelection.map(e => e.id());
+            let selectionIds = Selection.selectedElements().map(e => e.id);
+            let oldSelectionIds = oldSelection.map(e => e.id);
             if (!doNotTrack && (selectionIds.length || oldSelectionIds.length)) {
                 ModelStateListener.trackSelect(
                     this.activePage,
@@ -254,19 +254,19 @@ class AppClass extends DataNode implements IApp {
             }
         }
 
-        let pageId = this.activePage.id();
+        let pageId = this.activePage.id;
 
-        if(!this._activeStory || this._activeStory.props.pageId !== pageId) {
-            this._activeStory = this.stories.find(s=>s.props.pageId === pageId);
+        if (!this._activeStory || this._activeStory.props.pageId !== pageId) {
+            this._activeStory = this.stories.find(s => s.props.pageId === pageId);
         }
 
-        if(!this._activeStory){
+        if (!this._activeStory) {
             this.addStory({
-                name:'default',
-                pageId:pageId,
-                type:StoryType.Prototype,
-                description:'',
-                pageName:this.activePage.name
+                name: 'default',
+                pageId: pageId,
+                type: StoryType.Prototype,
+                description: '',
+                pageName: this.activePage.name
             });
         }
 
@@ -330,7 +330,7 @@ class AppClass extends DataNode implements IApp {
                 }
             }
             if (children.length > 0) {
-                res.push({ name: page.name, id: page.id(), children: children })
+                res.push({ name: page.name, id: page.id, children: children })
             }
         }
 
@@ -367,7 +367,7 @@ class AppClass extends DataNode implements IApp {
             };
 
             if (mode !== ChangeMode.Self) {
-                let primitive = primitiveFactory.projectSettingsChange(this.companyId(), this.id(), settings);
+                let primitive = primitiveFactory.projectSettingsChange(this.companyId(), this.id, settings);
                 ModelStateListener.track(this, primitive);
                 Invalidate.request();
             }
@@ -456,7 +456,7 @@ class AppClass extends DataNode implements IApp {
         //existing apps with id should use ChangeMode.Self since font metadata is stored in json
         //new apps should use ChangeMode.Model to save the initial font
         //serverless apps always use self to avoid duplicate metadata from primitives
-        let mode = this.serverless() ? ChangeMode.Self : this.id() ? ChangeMode.Self : ChangeMode.Model;
+        let mode = this.serverless() ? ChangeMode.Self : this.id ? ChangeMode.Self : ChangeMode.Model;
 
         this.saveFontMetadata({
             name: DefaultFont,
@@ -661,7 +661,7 @@ class AppClass extends DataNode implements IApp {
         this.eachDesignerPage(function (page) {
             var include = true;
             if (pageIdMap) {
-                include = pageIdMap[page.id()];
+                include = pageIdMap[page.id];
             }
             if (include) {
                 var pageData = page.toJSON();
@@ -903,26 +903,28 @@ class AppClass extends DataNode implements IApp {
             parent = parent.parent();
         } while (parent && parent !== NullContainer);
 
-        e.applyVisitorTLR(c => {
-            c.runtimeProps.ctxl = 1 << 1;
-        });
+        if (e && e !== NullContainer) {
+            e.applyVisitorBreadthFirst(c => {
+                c.runtimeProps.ctxl = 1 << 1;
+            });
+        }
     }
 
-    _getArtboardForElement(e:IUIElement) {
-        if(!e) {
+    _getArtboardForElement(e: IUIElement) {
+        if (!e) {
             return null;
         }
 
-        if(e instanceof Artboard) {
+        if (e instanceof Artboard) {
             return e;
         }
 
-        var root:IUIElement = e.primitiveRoot();
-        if(root === e) {
+        var root: IUIElement = e.primitiveRoot();
+        if (root === e) {
             root = e.parent();
         }
 
-        if(root instanceof Artboard) {
+        if (root instanceof Artboard) {
             return root;
         }
 
@@ -936,21 +938,21 @@ class AppClass extends DataNode implements IApp {
         let isArtboardWithSelection = false;
 
         let artboardsMap = Selection.selectedElements()
-            .map(e=>this._getArtboardForElement(e))
-            .reduce((bag, value, index, array)=>{
-                if(value) {
-                    bag[value.id()] = true;
+            .map(e => this._getArtboardForElement(e))
+            .reduce((bag, value, index, array) => {
+                if (value) {
+                    bag[value.id] = true;
                 }
 
                 return bag;
             }, {});
 
-        this.activePage.applyVisitorTLR(e => {
+        this.activePage.applyVisitorBreadthFirst((e: IUIElement) => {
             let isSelected = Selection.isElementSelected(e);
             let isArtboard = e instanceof Artboard;
 
             if (isArtboard) {
-                isArtboardWithSelection = !!artboardsMap[e.id()];
+                isArtboardWithSelection = !!artboardsMap[e.id];
             }
 
             if (count && count === max) {
@@ -965,7 +967,7 @@ class AppClass extends DataNode implements IApp {
             }
 
             if (isArtboard && !isArtboardWithSelection) {
-                e.applyVisitor(child=>{child.runtimeProps.ctxl = 1 << 0})
+                e.applyVisitor(child => { child.runtimeProps.ctxl = 1 << 0 })
                 return true;
             }
 
@@ -1015,9 +1017,9 @@ class AppClass extends DataNode implements IApp {
         this.clear();
         let progress = 10;
 
-        let progressInc = ()=>{
-            if(progress <= 50) {
-                progress+=1;
+        let progressInc = () => {
+            if (progress <= 50) {
+                progress += 1;
                 this.onsplash.raise({ progress: progress });
                 setTimeout(progressInc, 200)
             }
@@ -1030,7 +1032,7 @@ class AppClass extends DataNode implements IApp {
             params.perf && performance.mark("App.setupConnection");
             backend.setupConnection(this);
             //for new apps ensure that the token is not stale, for existing app this will be checked when data is loaded
-            if (!this.id()) {
+            if (!this.id) {
                 loggedIn = backend.ensureLoggedIn(true);
                 loggedIn.then(() => progress += 10);
             }
@@ -1072,7 +1074,7 @@ class AppClass extends DataNode implements IApp {
             logger.trackEvent("AppLoaded", null, stopwatch.getMetrics());
 
             if (this.serverless()) {
-                this.id("serverless");
+                this.id = "serverless";
             }
 
             if (externalPageData) {
@@ -1109,10 +1111,10 @@ class AppClass extends DataNode implements IApp {
     }
 
     loadData() {
-        if (!this.id()) {
+        if (!this.id) {
             return Promise.resolve(null);
         }
-        return backend.projectProxy.getModel(this.companyId(), this.id());
+        return backend.projectProxy.getModel(this.companyId(), this.id);
     }
 
     get pages(): IPage[] {
@@ -1199,7 +1201,7 @@ class AppClass extends DataNode implements IApp {
     }
 
     setActivePageById(pageId) {
-        if (this.activePage.id() !== pageId) {
+        if (this.activePage.id !== pageId) {
             var page = DataNode.getImmediateChildById(this, pageId, true);
             this.setActivePage(page);
         }
@@ -1215,7 +1217,7 @@ class AppClass extends DataNode implements IApp {
     }
 
     isSaved() {
-        return !!this.id();
+        return !!this.id;
     }
 
     isPreviewMode() {
@@ -1261,7 +1263,7 @@ class AppClass extends DataNode implements IApp {
     }
 
     importPage(json: IJsonNode) {
-        let page = this.pages.find(x => x.id() === json.props.id);
+        let page = this.pages.find(x => x.id === json.props.id);
         if (!page) {
             page = this.importNewPage(json);
         }
@@ -1291,7 +1293,7 @@ class AppClass extends DataNode implements IApp {
         let elementsAdded = 0;
         for (let i = 0; i < pageJson.children.length; i++) {
             let elementJson = pageJson.children[i];
-            let element = existingPage.children.find(x => x.id() === elementJson.props.id);
+            let element = existingPage.children.find(x => x.id === elementJson.props.id);
             let primitive: Primitive;
             if (element) {
                 primitive = primitiveFactory.dataNodeChange(element, element.toJSON());
@@ -1370,7 +1372,7 @@ class AppClass extends DataNode implements IApp {
         this.disposed = true;
     }
 
-    addStory(props:IStory) {
+    addStory(props: IStory) {
         var story = new Story();
         story.setProps(props);
         this.insertChild(story, this.children.length);
@@ -1401,15 +1403,15 @@ class AppClass extends DataNode implements IApp {
             scale: Environment.view.scale(),
             scrollX: Environment.view.scrollX(),
             scrollY: Environment.view.scrollY(),
-            pageId: this.activePage.id(),
+            pageId: this.activePage.id,
             pageState: this.activePage.saveWorkspaceState(),
-            selection: Selection.selectedElements().map(x => x.id())
+            selection: Selection.selectedElements().map(x => x.id)
         };
-        localStorage.setItem("workspace:" + this.id(), JSON.stringify(state));
+        localStorage.setItem("workspace:" + this.id, JSON.stringify(state));
     }
     restoreWorkspaceState(): void {
         try {
-            var data = localStorage.getItem("workspace:" + this.id());
+            var data = localStorage.getItem("workspace:" + this.id);
             if (!data) {
                 return;
             }
@@ -1419,7 +1421,7 @@ class AppClass extends DataNode implements IApp {
                 return;
             }
 
-            var page = this.pages.find(x => x.id() === state.pageId);
+            var page = this.pages.find(x => x.id === state.pageId);
             if (page) {
                 this.setActivePage(page);
             }
@@ -1433,7 +1435,7 @@ class AppClass extends DataNode implements IApp {
             }
 
             if (state.selection.length) {
-                var elements = this.activePage.findAllNodesDepthFirst<IUIElement>(x => state.selection.indexOf(x.id()) !== -1);
+                var elements = this.activePage.findAllNodesDepthFirst<IUIElement>(x => state.selection.indexOf(x.id) !== -1);
                 if (elements.length) {
                     Selection.makeSelection(elements);
                 }

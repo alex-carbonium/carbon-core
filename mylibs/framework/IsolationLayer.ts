@@ -47,7 +47,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
 
     private cloneAndFollow(e: IUIElement): IUIElement {
         let clone = e.mirrorClone();
-        this.trackElementIds[e.id()] = clone;
+        this.trackElementIds[e.id] = clone;
 
         return clone;
     }
@@ -213,7 +213,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
             this.restoreMatrix = false;
             this.setProps(this.ownerElement.selectLayoutProps(true), ChangeMode.Self);
             this.ownerElement.applyVisitor(source => {
-                let target = this.getElementById(source.id());
+                let target = this.getElementById(source.id);
                 if (target && target !== this) {
                     target.setProps(source.selectLayoutProps(), ChangeMode.Self);
                 }
@@ -226,7 +226,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
             return;
         }
 
-        let sourceElement = this.ownerElement.getElementById(element.id());
+        let sourceElement = this.ownerElement.getElementById(element.id);
         if (sourceElement) {
             if (props.m) {
                 this.restoreMatrix = true;
@@ -241,7 +241,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
             return;
         }
 
-        let sourceElement = this.ownerElement.getElementById(element.id());
+        let sourceElement = this.ownerElement.getElementById(element.id);
         if (sourceElement) {
             sourceElement.patchProps(patchType, propName, item);
         }
@@ -252,8 +252,8 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
             return;
         }
 
-        let sourceElement = this.ownerElement.getElementById(element.id());
-        let sourceParent = (parent === this) ? this.ownerElement : this.ownerElement.getElementById(parent.id()) as IContainer;
+        let sourceElement = this.ownerElement.getElementById(element.id);
+        let sourceParent = (parent === this) ? this.ownerElement : this.ownerElement.getElementById(parent.id) as IContainer;
         if (sourceElement && sourceParent) {
             sourceParent.remove(sourceElement);
         }
@@ -266,7 +266,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
             return;
         }
 
-        let sourceParent = (parent === this) ? this.ownerElement : this.ownerElement.getElementById(parent.id()) as IContainer;
+        let sourceParent = (parent === this) ? this.ownerElement : this.ownerElement.getElementById(parent.id) as IContainer;
         if (sourceParent) {
             let clone = element.mirrorClone();
             sourceParent.insert(clone, index);
@@ -280,8 +280,8 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
             return;
         }
 
-        let sourceElement = this.ownerElement.getElementById(element.id());
-        let sourceParent = (parent === this) ? this.ownerElement : this.ownerElement.getElementById(parent.id()) as IContainer;
+        let sourceElement = this.ownerElement.getElementById(element.id);
+        let sourceParent = (parent === this) ? this.ownerElement : this.ownerElement.getElementById(parent.id) as IContainer;
         if (sourceElement && sourceParent) {
             sourceParent.changePosition(sourceElement, index);
         }

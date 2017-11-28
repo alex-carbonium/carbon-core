@@ -164,13 +164,8 @@ function getLoaders(settings){
             exclude: excludes
         },
         {
-            test: /\.ts$/,
+            test: /[^\.]\w(?!\.d)\.ts$/,
             loaders: [babelLoader, "awesome-typescript-loader"],
-            exclude: excludes
-        },
-        {
-            test: /^worker!/,
-            loaders: ["worker"],
             exclude: excludes
         }
     ];

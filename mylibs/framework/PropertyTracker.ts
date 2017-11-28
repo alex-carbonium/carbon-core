@@ -16,7 +16,7 @@ var tracker = {
             this.propertyChanged.raise(element, newProps, oldProps);
         }
         else{
-            var elementData = this._propsTrackingData[element.id()];
+            var elementData = this._propsTrackingData[element.id];
             if (elementData){
                 Object.assign(elementData.newProps, newProps);
                 for (var name in oldProps){
@@ -26,7 +26,7 @@ var tracker = {
                 }
             }
             else{
-                this._propsTrackingData[element.id()] = {element, newProps, oldProps};
+                this._propsTrackingData[element.id] = {element, newProps, oldProps};
             }
             this._flushNeeded = true;
         }

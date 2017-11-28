@@ -1,6 +1,7 @@
 import DataNode from "../framework/DataNode";
 import PropertyMetadata from "../framework/PropertyMetadata";
-import {Types, ActionEvents, ActionType, AnimationType, EasingType} from "../framework/Defs";
+import {Types, ActionEvents, ActionType} from "../framework/Defs";
+import { AnimationType, EasingType } from "carbon-runtime";
 
 class StoryAction extends DataNode {
     constructor() {

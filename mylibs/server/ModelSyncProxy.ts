@@ -55,13 +55,13 @@ export default class ModelSyncProxy {
     change(){
         var syncBroken = this._app.syncBroken();
         if (!syncBroken && this._pendingPrimitives.length === 0){
-            return Promise.resolve({id: this._app.id(), version: this._app.version()});
+            return Promise.resolve({id: this._app.id, version: this._app.version()});
         }
 
         var requestTooLong = this._requestStartTime && (new Date() as any) - this._requestStartTime > 120 * 1000;
         if (this._requestInProgress && !requestTooLong){
             logger.warn("Request in progress since " + this._requestStartTime.toISOString());
-            return Promise.resolve({id: this._app.id(), version: this._app.version()});
+            return Promise.resolve({id: this._app.id, version: this._app.version()});
         }
 
         this._requestInProgress = true;
@@ -80,7 +80,7 @@ export default class ModelSyncProxy {
                 if (comparePages){
                     comparePagesDebug(App.Current.toJSON(), response);
                 }
-                if (!this._app.id() && !getFullProjectBackFromServer){
+                if (!this._app.id && !getFullProjectBackFromServer){
                     this._app.setProps(data, ChangeMode.Self);
                 }
 
@@ -98,7 +98,7 @@ export default class ModelSyncProxy {
                     this.resync(data);
                     this._app.syncBroken(false);
                 }
-                return {id: this._app.id(), version: this._app.version()};
+                return {id: this._app.id, version: this._app.version()};
             })
             .finally(() => {
                 this._requestInProgress = false;
@@ -213,7 +213,7 @@ export default class ModelSyncProxy {
         Selection.makeSelection([]);
         this._app.isLoaded = false;
 
-        var pageId = this._app.activePage.id();
+        var pageId = this._app.activePage.id;
         this._app.fromJSON(data);
 
         this._app.isLoaded = true;

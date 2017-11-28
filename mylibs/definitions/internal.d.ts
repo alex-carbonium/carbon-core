@@ -46,7 +46,6 @@ declare module "carbon-model"{
 
         runtimeProps: any;
 
-        applyVisitorTLR(callback:(e:IUIElement)=>boolean|void);
         opacity(value?:number):number;
 
         isDescendantOrSame(other: IUIElement): boolean;
@@ -98,8 +97,6 @@ declare module "carbon-app"{
 
     export interface IPage<TProps extends IPageProps = IPageProps> extends ILayer<IPageProps> {
         incrementVersion();
-
-        applyVisitorTLR(callback:(e:IUIElement)=>boolean|void);
     }
 
     export interface IApp extends IPrimitiveRoot{

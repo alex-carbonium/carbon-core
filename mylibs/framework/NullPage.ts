@@ -25,6 +25,8 @@ class NullPage extends UIElement implements IPage {
     removeAllDecorators():any[] { return null; }
     removeDecoratorByType(type) { }
 
+    hasParent() {return false;}
+
     incrementVersion() {
     }
     maxScrollX(value?:number):number {
@@ -170,9 +172,10 @@ class NullPage extends UIElement implements IPage {
     }
     resize(rect) {
     }
-    id() {
+    get id() {
         return "";
     }
+    set id(v) {}
     toJSON() {
         return {};
     }

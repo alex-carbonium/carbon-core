@@ -104,7 +104,7 @@ class RelayoutEngine {
             CommandManager.registerExecutedCommand(new PrimitiveCommand(
                 this.allPrimitives.slice(),
                 this.rollbacks.slice().reverse(),
-                app.activePage.id(),
+                app.activePage.id,
                 Selection.latestGlobalBoundingBox,
                 inIsolation));
         }
@@ -182,7 +182,7 @@ class RelayoutEngine {
                 }
             }
 
-            // var entry = propsHistoryMap[element.id()];
+            // var entry = propsHistoryMap[element.id];
             // if (entry && entry.props) {
             //     oldRect = entry.props.br;
             // }
@@ -200,7 +200,7 @@ class RelayoutEngine {
         }
 
         if (hasChildren && shouldArrange) {
-            debug("** arrange %s (%s)", element.displayName(), element.id());
+            debug("** arrange %s (%s)", element.displayName(), element.id);
             //some bugs are here with contraints being applied twice, disabling for now
             //this only arranges up, arrange down is done in applyScaling
             element.performArrange(/*{oldRect}, ChangeMode.Model*/);
@@ -212,14 +212,14 @@ class RelayoutEngine {
         if (!primitiveMap) {
             return null;
         }
-        var primitives = primitiveMap[element.id()];
+        var primitives = primitiveMap[element.id];
         if (!primitives) {
             return null;
         }
 
         var newElements = null;
 
-        debug("applyPrimitives for %s (%s)", element.displayName(), element.id());
+        debug("applyPrimitives for %s (%s)", element.displayName(), element.id);
 
         for (var i = 0; i < primitives.length; ++i) {
             var primitive = primitives[i];

@@ -274,8 +274,8 @@ PropertyMetadata.registerForType(ArtboardFrameControl, {
                     return {
                         name: artboard.name,
                         value: {
-                            pageId: page.id(),
-                            artboardId: artboard.id()
+                            pageId: page.id,
+                            artboardId: artboard.id
                         }
                     }
                 })

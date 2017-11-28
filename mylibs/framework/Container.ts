@@ -280,7 +280,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
         let markName;
         if (params.perf) {
-            markName = "draw " + this.displayName() + " - " + this.id();
+            markName = "draw " + this.displayName() + " - " + this.id;
             performance.mark(markName);
         }
 
@@ -490,7 +490,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
                         height: child.height,
                         y: child.y,
                         x: child.x,
-                        id: child.id()
+                        id: child.id
                     }
                 }
             }
@@ -745,29 +745,10 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         return false;
     }
 
-    applyVisitorTLR(/*Visitor*/callback, useLogicalChildren?: boolean, parent?: any) {
-        let stop = callback(this, parent);;
-        if (stop === false) {
-            return false;
-        } else if (stop === true) {
-            return;
-        }
-
-        for (let l = this.children.length, i = 0; i <l; ++i) {
-            let item = this.children[i];
-            if (item.applyVisitorTLR(callback, useLogicalChildren, this) === false) {
-                stop = true;
-                break;
-            }
-        }
-
-        return !stop;
-    }
-
     findActualParentForAncestorById(elementId) {
         let realParrent = null;
         this.applyVisitor(function (e, p) {
-            if (e.id() === elementId) {
+            if (e.id === elementId) {
                 realParrent = p;
                 return false;
             }
@@ -940,11 +921,11 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
     getElementById(id) {
         let res = null;
-        if (this.id() === id) {
+        if (this.id === id) {
             return this;
         }
         this.applyVisitor(function (el) {
-            if (el.id() === id) {
+            if (el.id === id) {
                 res = el;
                 return false;
             }

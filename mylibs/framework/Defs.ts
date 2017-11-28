@@ -90,21 +90,6 @@ export enum ActionType {
     GoBack = 1
 }
 
-export enum AnimationType {
-    SlideLeft = 0,
-    SlideRight = 1,
-    SlideUp = 2,
-    SlideDown = 3,
-    Dissolve = 4
-}
-
-export enum EasingType {
-    None = 0,
-    EaseOut = 2,
-    EaseIn = 3,
-    EaseInOut = 4
-}
-
 export enum ActionEvents {
     click = 0,
     mousemove = 1,

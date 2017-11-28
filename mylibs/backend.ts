@@ -165,7 +165,7 @@ class Backend implements IBackend {
         }
         return this.connection.getModelSyncHub().then(hub => {
             var primitiveStrings = primitives.map(x => JSON.stringify(x));
-            return hub.invoke('changeModel', app.companyId(), app.folderId(), app.id(), primitiveStrings, returnModel);
+            return hub.invoke('changeModel', app.companyId(), app.folderId(), app.id, primitiveStrings, returnModel);
         });
     }
 

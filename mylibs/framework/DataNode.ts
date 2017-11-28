@@ -200,15 +200,16 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
     }
 
 
-    id(value?: string) {
-        if (arguments.length) {
-            this.setProps({ id: value }, ChangeMode.Self);
-        }
+    set id(value: string) {
+        this.setProps({ id: value }, ChangeMode.Self);
+    }
+
+    get id():string {
         return this.props.id;
     }
 
     initId() {
-        this.id(createUUID());
+        this.id = createUUID();
     }
 
     primitiveRoot() {
@@ -362,9 +363,13 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
         let i = -1;
         while (++i !== queue.length) {
             let element = queue[i];
-            if (visitor(element) === false) {
+            let res = visitor(element);
+            if (res === false) {
                 break;
+            } else if(res === true) {
+                continue;
             }
+
             if (element.children) {
                 if (queue.length > 100) {
                     queue.splice(0, i + 1);
@@ -388,7 +393,7 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
     }
 
     findNodeByIdBreadthFirst(id) {
-        return this.findNodeBreadthFirst(x => x.id() === id);
+        return this.findNodeBreadthFirst(x => x.id === id);
     }
     findAllNodesDepthFirst(func) {
         let nodes = [];

@@ -45,7 +45,7 @@ export default class AutoSave extends ExtensionBase {
         viewModel.loadLocalChanges.clearSubscribers();
         viewModel.loadLastSavedVersion.clearSubscribers();
 
-        this.clearAutosavedVersion(this._app.id() || this._app.projectType());
+        this.clearAutosavedVersion(this._app.id || this._app.projectType());
     }
 
     private clearAutosavedVersion(id) {
@@ -68,12 +68,12 @@ export default class AutoSave extends ExtensionBase {
     }
 
     private checkBackups = () => {
-        if (!this._app.id()) {
+        if (!this._app.id) {
             this.initIfEmptyProject();
             return Promise.resolve();
         }
 
-        return this._app.offlineModel.getBackups(this._app.id()).then(backups => {
+        return this._app.offlineModel.getBackups(this._app.id).then(backups => {
             if (!backups.length || this._app.disposed) {
                 return;
             }

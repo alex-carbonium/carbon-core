@@ -178,8 +178,8 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //assert
-            var slaveCircle = repeater.findSingleChildOrDefault(x => x instanceof Circle && x.id() !== circle.id());
-            var slaveRectangle = repeater.findSingleChildOrDefault(x => x instanceof Rectangle && x.id() !== rectangle.id());
+            var slaveCircle = repeater.findSingleChildOrDefault(x => x instanceof Circle && x.id !== circle.id);
+            var slaveRectangle = repeater.findSingleChildOrDefault(x => x instanceof Rectangle && x.id !== rectangle.id);
             assert.isNotNull(slaveCircle, "Circle not repeated")
             assert.isNotNull(slaveRectangle, "Rectangle not repeated")
         });
@@ -253,7 +253,7 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //act
-            var master = repeater.findSingleChildOrDefault(x => x.id() === element.id());
+            var master = repeater.findSingleChildOrDefault(x => x.id === element.id);
 
             master.prepareAndSetProps({ width: 50 });
 
@@ -279,7 +279,7 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //act
-            var slave = repeater.findSingleChildOrDefault(x => x.id() !== element.id());
+            var slave = repeater.findSingleChildOrDefault(x => x.id !== element.id);
 
             slave.prepareAndSetProps({ width: 50 });
             ;
@@ -311,8 +311,8 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //act
-            container = repeater.children[0].getImmediateChildById(container.id());
-            element = container.getImmediateChildById<IUIElement>(element.id());
+            container = repeater.children[0].getImmediateChildById(container.id);
+            element = container.getImmediateChildById<IUIElement>(element.id);
 
             element.prepareAndSetProps({ width: 50 });
             this.app.relayout();
@@ -341,7 +341,7 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //act
-            var slave = repeater.findSingleChildOrDefault(x => x.id() !== label.id() && x instanceof Text);
+            var slave = repeater.findSingleChildOrDefault(x => x.id !== label.id && x instanceof Text);
             slave.prepareAndSetProps({ content: "text 222" });
             this.app.relayout();
 
@@ -370,7 +370,7 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //act
-            var slave = repeater.findSingleChildOrDefault(x => x.id() !== label.id() && x instanceof Text);
+            var slave = repeater.findSingleChildOrDefault(x => x.id !== label.id && x instanceof Text);
             slave.prepareAndSetProps({ content: "text 222" });
             this.app.relayout();
 
@@ -398,7 +398,7 @@ describe("Repeater tests", function () {
             repeater.prepareAndSetProps({ width: label.width * 2 });
             this.app.relayout();
 
-            var slave = repeater.findSingleChildOrDefault(x => x.id() !== label.id() && x instanceof Text);
+            var slave = repeater.findSingleChildOrDefault(x => x.id !== label.id && x instanceof Text);
             slave.prepareAndSetProps({ content: "text 222" });
             this.app.relayout();
 
@@ -433,7 +433,7 @@ describe("Repeater tests", function () {
             var positions = this.mapChildren(repeater, x => x.position());
 
             //act
-            var master = repeater.findSingleChildOrDefault(x => x.id() === element.id());
+            var master = repeater.findSingleChildOrDefault(x => x.id === element.id);
 
             master.prepareAndSetProps({ width: 50, height: 80 });
             this.app.relayout();
@@ -460,7 +460,7 @@ describe("Repeater tests", function () {
             repeater.prepareAndSetProps({ width: 200 });
             this.app.relayout();
 
-            var master = repeater.findSingleChildOrDefault(x => x.id() === element.id());
+            var master = repeater.findSingleChildOrDefault(x => x.id === element.id);
 
             master.prepareAndSetProps({ br: master.boundaryRect().withSize(50, 60) });
             this.app.relayout();
@@ -757,7 +757,7 @@ describe("Repeater tests", function () {
             this.app.replayFromSavePoint(savepoint);
 
             //assert
-            repeater = this.app.activePage.getElementById(repeater.id());
+            repeater = this.app.activePage.getElementById(repeater.id);
             assert.deepEqual(repeater.children.map(x => x.x), [0, 100, 200], "Wrong cell positions");
             assert.deepEqual(this.mapChildren(repeater, x => x.width), [50, 50, 50], "Wrong element width");
         });
@@ -786,7 +786,7 @@ describe("Repeater tests", function () {
             this.app.replayFromSavePoint(savepoint);
 
             //assert
-            repeater = this.app.activePage.getElementById(repeater.id());
+            repeater = this.app.activePage.getElementById(repeater.id);
             assert.deepEqual(this.mapChildren(repeater, x => x.name), ["master", "slave"]);
         });
         it("Should correctly restore repeater from scratch", function () {
@@ -806,7 +806,7 @@ describe("Repeater tests", function () {
             //act
             this.app.replayFromSavePoint(savepoint);
 
-            repeater = this.app.activePage.getElementById(repeater.id());
+            repeater = this.app.activePage.getElementById(repeater.id);
 
             repeater.prepareAndSetProps({ width: 300 });
             this.app.relayout();
@@ -842,7 +842,7 @@ describe("Repeater tests", function () {
             //act
             this.app.replayFromSavePoint(savepoint);
 
-            repeater = this.app.activePage.getElementById(repeater.id());
+            repeater = this.app.activePage.getElementById(repeater.id);
 
             //assert
             var counts = repeater.children.map(x => x.children.length);
@@ -869,7 +869,7 @@ describe("Repeater tests", function () {
             repeater.prepareAndSetProps({ width: 200 });
             this.app.relayout();
 
-            element1 = repeater.getElementById(element1.id());
+            element1 = repeater.getElementById(element1.id);
 
             element1.parent().remove(element1);
             this.app.relayout();
@@ -877,7 +877,7 @@ describe("Repeater tests", function () {
             //act
             this.app.replayFromSavePoint(savepoint);
 
-            repeater = this.app.activePage.getElementById(repeater.id());
+            repeater = this.app.activePage.getElementById(repeater.id);
 
             //assert
             var counts = repeater.children.map(x => x.children.length);
@@ -901,7 +901,7 @@ describe("Repeater tests", function () {
             repeater.prepareAndSetProps({ width: 200 });
             this.app.relayout();
 
-            element2 = repeater.getElementById(element2.id());
+            element2 = repeater.getElementById(element2.id);
 
             element2.parent().changePosition(element2, 0);
             this.app.relayout();
@@ -909,7 +909,7 @@ describe("Repeater tests", function () {
             //act
             this.app.replayFromSavePoint(savepoint);
 
-            repeater = this.app.activePage.getElementById(repeater.id());
+            repeater = this.app.activePage.getElementById(repeater.id);
 
             //assert
             var counts = this.mapChildren(repeater, x => x.name);
@@ -952,7 +952,7 @@ describe("Repeater tests", function () {
             this.app.replayFromSavePoint(savepoint);
 
             //assert
-            repeater = this.app.activePage.getElementById(repeater.id());
+            repeater = this.app.activePage.getElementById(repeater.id);
             assert.deepEqual(repeater.children.length, 16);
         });
         it("Should have symmetric arrange (decrease size)", function () {
@@ -992,7 +992,7 @@ describe("Repeater tests", function () {
             this.app.replayFromSavePoint(savepoint);
 
             //assert
-            repeater = this.app.activePage.getElementById(repeater.id());
+            repeater = this.app.activePage.getElementById(repeater.id);
             assert.deepEqual(repeater.children.length, 4);
         });
     });
@@ -1021,7 +1021,7 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //assert
-            var clone = this.app.activePage.findSingleChildOrDefault(x => x instanceof RepeatContainer && x.id() !== repeater.id());
+            var clone = this.app.activePage.findSingleChildOrDefault(x => x instanceof RepeatContainer && x.id !== repeater.id);
             assert.equal(repeater.children.length, clone.children.length);
         });
     });

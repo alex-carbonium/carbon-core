@@ -39,7 +39,7 @@ describe("Symbol tests", function () {
         var atc = new Symbol();
         var artboard = this.createArtboard();
         // act
-        atc.prepareAndSetProps({ source: { pageId: this.app.activePage.id(), artboardId: artboard.id() } });
+        atc.prepareAndSetProps({ source: { pageId: this.app.activePage.id, artboardId: artboard.id } });
 
         // assert
         assert.equal(atc.width, artboard.width);
@@ -60,7 +60,7 @@ describe("Symbol tests", function () {
         artboard.add(child);
 
         // act
-        atc.prepareAndSetProps({ source: { pageId: this.app.activePage.id(), artboardId: artboard.id() }, width: 200, height: 100 });
+        atc.prepareAndSetProps({ source: { pageId: this.app.activePage.id, artboardId: artboard.id }, width: 200, height: 100 });
         this.app.relayout();
         atc.prepareAndSetProps({ width: atc.width * 2, height: atc.height * 2 })
         this.app.relayout();
@@ -86,7 +86,7 @@ describe("Symbol tests", function () {
         artboard.children[0].constraints(Constraints.StretchAll);
 
         // act
-        var clone = symbol.findClone(child.id());
+        var clone = symbol.findClone(child.id);
         clone.boundaryRect(new Rect(0, 0, 80, 80));
 
         this.app.relayout();
@@ -99,7 +99,7 @@ describe("Symbol tests", function () {
         symbol.draw(new ContextStub(), this.drawContext);
 
         // assert
-        assert.equal(symbol.findClone(child.id()).width, 100 * 1.2);
+        assert.equal(symbol.findClone(child.id).width, 100 * 1.2);
     });
 
     it("Must support undo for changing inner elements", function () {
@@ -114,7 +114,7 @@ describe("Symbol tests", function () {
         this.app.relayout();
 
         // act
-        var clone = symbol.findClone(child.id());
+        var clone = symbol.findClone(child.id);
         clone.prepareAndSetProps({ fill: Brush.createFromColor("green") });
         this.app.relayout();
         symbol.draw(new ContextStub(), this.drawContext);
@@ -123,7 +123,7 @@ describe("Symbol tests", function () {
         this.app.relayout();
 
         // assert
-        clone = symbol.findClone(child.id());
+        clone = symbol.findClone(child.id);
         assert.equal(clone.props.fill.value, "red", "Clone must have original values");
     });
 
@@ -171,7 +171,7 @@ describe("Symbol tests", function () {
             symbol.prepareAndSetProps({ fill: Brush.createFromColor("red"), stroke: Brush.createFromColor("green") });
 
             // assert
-            var clone = symbol.findClone(child.id());
+            var clone = symbol.findClone(child.id);
             assert.equal(clone.props.fill.value, "red", "Fill must change on chosen child");
             assert.equal(clone.props.stroke.value, "green", "Stroke must change on chosen child");
             assert.equal(symbol.props.fill.value, "red", "Own fill must change as well, but not be drawn");
@@ -198,7 +198,7 @@ describe("Symbol tests", function () {
             symbol.draw(new ContextStub(), this.drawContext);
 
             // assert
-            var clone = symbol.findClone(child.id());
+            var clone = symbol.findClone(child.id);
             assert.equal(clone.props.fill.value, "red", "Clone must preserve fill");
             assert.equal(symbol.props.fill.value, "red", "Symbol must preserve fill");
         });
@@ -233,7 +233,7 @@ describe("Symbol tests", function () {
 
             // assert
             assert.equal(symbol.props.fill.value, "red", "Symbol must undo fill");
-            var clone = symbol.findClone(child.id());
+            var clone = symbol.findClone(child.id);
             assert.equal(clone.props.fill.value, "red", "Child must undo fill");
         }
 
@@ -256,7 +256,7 @@ describe("Symbol tests", function () {
             symbol.draw(new ContextStub(), this.drawContext);
 
             // assert
-            var clone = symbol.findClone(child.id());
+            var clone = symbol.findClone(child.id);
             assert.equal(clone.props.fill.value, "green", "Clone must refresh");
             assert.equal(symbol.props.fill.value, "green", "Symbol must refresh");
         });
@@ -278,14 +278,14 @@ describe("Symbol tests", function () {
             symbol.draw(new ContextStub(), this.drawContext);
 
             // act
-            var clone1 = symbol.findClone(child1.id());
+            var clone1 = symbol.findClone(child1.id);
             clone1.prepareAndSetProps({ fill: Brush.createFromColor("green") });
             this.app.relayout();
             symbol.draw(new ContextStub(), this.drawContext);
 
             // assert
-            clone1 = symbol.findClone(child1.id());
-            var clone2 = symbol.findClone(child2.id());
+            clone1 = symbol.findClone(child1.id);
+            var clone2 = symbol.findClone(child2.id);
             assert.equal(clone1.props.fill.value, "green", "Child1 must change");
             assert.equal(clone2.props.fill.value, "green", "Child2 must change");
             assert.equal(symbol.props.fill.value, "green", "Symbol must change");
@@ -316,8 +316,8 @@ describe("Symbol tests", function () {
             assert.equal(child1.props.fill.value, "red", "Color on children should be the same");
             assert.equal(child2.props.fill.value, "red", "Color on children should be the same");
 
-            var clone1 = symbol.findClone(child1.id());
-            var clone2 = symbol.findClone(child2.id());
+            var clone1 = symbol.findClone(child1.id);
+            var clone2 = symbol.findClone(child2.id);
             assert.equal(clone1.props.fill.value, "red", "Color on clones should be the same");
             assert.equal(clone1.props.fill.value, "red", "Color on clones should be the same");
         });
@@ -357,7 +357,7 @@ describe("Symbol tests", function () {
             symbol.draw(new ContextStub(), this.drawContext);
 
             // act
-            var clone2 = symbol.findClone(child2.id());
+            var clone2 = symbol.findClone(child2.id);
             var newContent = [{text:`fasdfasdfjas
 
                         kdl;jfadskjf`}];
@@ -370,7 +370,7 @@ describe("Symbol tests", function () {
             assert.equal(originalHeight+2 + dh, symbol.height, "initial symbol height");
 
             symbol.onArtboardChanged(); // should trigger refresh
-            clone2 = symbol.findClone(child2.id());
+            clone2 = symbol.findClone(child2.id);
             assert.equal(newContent, clone2.content(), "content should restore from custom props");
             assert.equal(cloneHeight, clone2.height, "result text height");
         });

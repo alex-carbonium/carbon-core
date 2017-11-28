@@ -18,7 +18,7 @@ Util.setupApp = function(options){
 
     var app = new AppClass() as any;
     App.Current = app;
-    app.id("10");
+    app.id = ("10");
 
     app.platform = new TestPlatform();
     app.fontManager = new TestFontManager(app);
@@ -39,10 +39,10 @@ Util.setupApp = function(options){
 
     if (options.addPage){
         var page = new ArtboardPage();
-        page.id("Page");
+        page.id = ("Page");
         app.addPage(page);
         app.setActivePage(page);
-        page.children[0].id("Artboard");
+        page.children[0].id = ("Artboard");
     }
 
     app.reload = function(){
@@ -60,7 +60,7 @@ Util.setupApp = function(options){
     app.replayFromSavePoint = function(savepoint){
         this.isLoaded = false;
         this.state.setExternalChange(true);
-        var activePageId = this.activePage.id();
+        var activePageId = this.activePage.id;
         this.fromJSON(savepoint);
         var primitives = this.modelSyncProxy.getPendingChanges();
         RelayoutQueue.enqueueAll(primitives);
