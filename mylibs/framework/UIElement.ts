@@ -2185,6 +2185,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return group.promise();
     }
 
+    registerEventHandler(name, callback:(e:any)=>any) {
+        let events = this.runtimeProps.events =  this.runtimeProps.events || {};
+        events[name] = callback;
+    }
+
     styleId(value?) {
         if (arguments.length > 0) {
             this.setProps({ styleId: value });

@@ -1,9 +1,10 @@
 import domUtil from "utils/dom";
-import {ActionType, ActionEvents} from "framework/Defs";
+import { ActionType, ActionEvents } from "framework/Defs";
 import TouchHelper from "./TouchHelper";
 import Selection from "framework/SelectionModel";
 import EventHelper from "framework/EventHelper";
 import Invalidate from "framework/Invalidate";
+import NullContainer from "framework/NullContainer";
 
 function updateEvent(event) {
     var scale = this.view.scale();
@@ -12,6 +13,8 @@ function updateEvent(event) {
 }
 
 export default class PreviewController {
+    [key: string]: any;
+
     constructor(app, view, previewModel) {
         this.app = app;
         this.activeStory = app.activeStory();
@@ -30,13 +33,43 @@ export default class PreviewController {
         throw "Unknown action";
     }
 
+    _eventTypeToName(eventType: ActionEvents) {
+        switch (eventType) {
+            case ActionEvents.click:
+                return "onclick";
+            case ActionEvents.mousemove:
+                return "onmousemove";
+            case ActionEvents.mousedown:
+                return "onmousedown";
+            case ActionEvents.mouseup:
+                return "onmouseup";
+            case ActionEvents.mouseenter:
+                return "onmouseenter";
+            case ActionEvents.mouseleave:
+                return "onmouseleave";
+            case ActionEvents.dblclick:
+                return "ondblclik";
+        }
+
+        assertNever(eventType);
+    }
+
     _propagateAction(eventType, element) {
-        if (!element) {
+        if (!element || element === NullContainer) {
             return false;
         }
 
-        var action = this.activeStory.children.find(a=>{
-            return (a.props.sourceElementId == element.id && a.props.event == eventType);
+        var events = element.runtimeProps.events;
+        let eventName = this._eventTypeToName(eventType);
+        if (events && events[eventName]) {
+            let res = events[eventName]();
+            if (res === false) {
+                return true;
+            }
+        }
+        // this is default
+        var action = this.activeStory.children.find(a => {
+            return (a.props.sourceElementId === element.id && a.props.event === eventType);
         });
 
         if (action) {
@@ -45,7 +78,7 @@ export default class PreviewController {
         }
 
         var parent = element.parent();
-        if (parent && parent != this.view) {
+        if (parent && parent !== this.view) {
             return this._propagateAction(eventType, parent);
         }
 
@@ -122,7 +155,7 @@ export default class PreviewController {
 
     onscroll(eventData) {
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        var delta = {dx: eventData.event.deltaX, dy: eventData.event.deltaY};
+        var delta = { dx: eventData.event.deltaX, dy: eventData.event.deltaY };
         this._propagateScroll(delta, element);
     }
 
@@ -158,7 +191,7 @@ export default class PreviewController {
 
     onclick(eventData) {
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        if(!this._propagateAction(ActionEvents.click, element)){
+        if (!this._propagateAction(ActionEvents.click, element)) {
             this.view.displayClickSpots.raise();
         }
     }

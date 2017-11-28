@@ -31,13 +31,15 @@ declare module "carbon-runtime" {
         stopPropagation(): void;
     }
 
+    type MouseEventCallback = (e: MouseEvent) => boolean | void;
+
     interface MouseEventHandler {
-        onclick: (e: MouseEvent) => boolean;
-        onmousedown: (e: MouseEvent) => boolean;
-        onmouseup: (e: MouseEvent) => boolean;
-        onmousemove: (e: MouseEvent) => boolean;
-        // onmouseenter:(e:MouseEvent)=>boolean;
-        // onmouseleave:(e:MouseEvent)=>boolean;
+        onclick: MouseEventCallback;
+        onmousedown: MouseEventCallback;
+        onmouseup: MouseEventCallback;
+        onmousemove: MouseEventCallback;
+        onmouseenter: MouseEventCallback;
+        onmouseleave: MouseEventCallback;
     }
 
     export const enum AnimationType {

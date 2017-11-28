@@ -387,7 +387,6 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
                 node = x;
                 return false;
             }
-            return true;
         });
         return node;
     }

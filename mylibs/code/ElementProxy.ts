@@ -1,11 +1,21 @@
 import { IUIElement } from "carbon-model";
 import PropertyMetadata from "framework/PropertyMetadata";
 
+const eventsMap = {
+    "onclick":true,
+    "onmousedown":true,
+    "onmouseup":true,
+    "onmousemove":true,
+    "onmouseenter":true,
+    "onmouseleave":true
+}
+
 export class ElementProxy {
     private element: IUIElement;
     private methodMap: { [name: string]: boolean } = {};
     private propertyMap: { [name: string]: boolean } = {};
     private rpropertyMap: { [name: string]: boolean } = {};
+
 
     private static proxyMap = {};
 
@@ -57,6 +67,10 @@ export class ElementProxy {
     }
 
     set(target: any, name: PropertyKey, value: any) {
+        if(eventsMap[name]) {
+            (this.element as any).registerEventHandler(name, value);
+            return;
+        }
         if (!this.propertyMap[name]) {
             if (this.rpropertyMap[name]) {
                 throw new TypeError(`Readonly property ${name}`);

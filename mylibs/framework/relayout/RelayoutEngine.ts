@@ -97,7 +97,7 @@ class RelayoutEngine {
                 this.rollbacks.push(p._rollbackData);
                 delete p._rollbackData;
             }
-            let isolationLayer =Environment.view.getLayer(LayerType.Isolation);
+            let isolationLayer = Environment.view.getLayer(LayerType.Isolation);
             let inIsolation = isolationLayer && isolationLayer.isActive;
 
             let elements = Selection.elements.length ? Selection.elements : Selection.previousElements;
@@ -121,7 +121,7 @@ class RelayoutEngine {
             app.changed.raise(this.allPrimitives.slice());
 
             this.relayoutFinished.raise();
-          //  Invalidate.request();
+            //  Invalidate.request();
         }
     }
 
@@ -144,7 +144,9 @@ class RelayoutEngine {
         var primitiveRootElement;
         if (!primitiveRootElementEntry) {
             primitiveRootElement = app.findNodeBreadthFirst(x => x.primitiveRootKey() === key);
-            this.primitiveRootCache[key] = { element: primitiveRootElement, hitCount: 1 }
+            if (primitiveRootElement) {
+                this.primitiveRootCache[key] = { element: primitiveRootElement, hitCount: 1 }
+            }
         } else {
             primitiveRootElement = primitiveRootElementEntry.element;
             primitiveRootElementEntry.hitCount++;
