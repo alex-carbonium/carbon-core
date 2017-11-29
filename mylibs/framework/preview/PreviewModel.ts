@@ -127,6 +127,10 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
             artboard = this.app.activePage.getActiveArtboard();
         }
 
+        if(!artboard) {
+            artboard = this.app.activePage.getAllArtboards()[0];
+        }
+
         if (!artboard) {
             return Promise.resolve(NullPage);
         }

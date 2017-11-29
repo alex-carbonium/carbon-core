@@ -26,7 +26,11 @@ if (ext) {
 }
 
 var carbonRuntimeSource:string = require("raw!./definitions/carbon-runtime.d.ts") as any;
-var runtimeTSDefinitionCode = carbonRuntimeSource.substr(0, carbonRuntimeSource.lastIndexOf('}') - 1).replace(/^.+export /gm, "").replace('declare module "carbon-runtime" {', '');
+var runtimeTSDefinitionCode = carbonRuntimeSource
+    .substr(0, carbonRuntimeSource.lastIndexOf('}') - 1)
+    .replace(/^.+export /gm, "")
+    .replace('declare module "carbon-runtime" {', '')
+    .replace(/^.+\/\*declare \*\//gm, "declare ");
 
 //export * from crashes in babel for some reason...
 export default {
@@ -133,6 +137,7 @@ export default {
     "Story": require("./stories/Story"),
     "StoryAction": require("./stories/StoryAction"),
     "Sandbox" : require("./code/Sandbox").Sandbox,
+    "ArtboardProxyGenerator" : require("./code/ProxyGenerator").ArtboardProxyGenerator,
     "Invalidate": require("./framework/Invalidate"),
     "NameProvider": require("./ui/NameProvider"),
 
@@ -141,6 +146,7 @@ export default {
     "TextRect": require("./framework/text/primitives/rect"),
 
     "CompiledCodeProvider": require("./code/CompiledCodeProvider").CompiledCodeProvider,
+    "AutoDisposable": require("./AutoDisposable").AutoDisposable,
     "Services": require("./Services"),
 
     //TODO: move to UI

@@ -1,4 +1,4 @@
-import { IContainer, IUIElement } from "carbon-core";
+import { IContainer, IUIElement, IPage } from "carbon-core";
 import { NameProvider } from "./NameProvider";
 import { Types } from "../framework/Defs";
 
@@ -33,6 +33,7 @@ export class ArtboardProxyGenerator {
             /// <reference path="carbon-runtime.d.ts" />
             declare namespace n${artboard.id} {
     export const artboard:any;
+    export const navigationController:INavigationController;
     ${
     controlList.map(v => `export const ${v.name}:${v.type};`).join('\n')
     }
@@ -40,10 +41,19 @@ export class ArtboardProxyGenerator {
         } else {
             return `
     declare const artboard:any;
+    declare const navigationController:INavigationController;
     ${
     controlList.map(v => `declare const ${v.name}:${v.type};`).join('\n')
     }
     `;
         }
+    }
+
+    public static generateRuntimeNames(page:IPage):string {
+        let artboards = page.getAllArtboards().map(a=>'"' +a.name+ '"');
+
+        return `
+        declare type ArtboardNames = ${artboards.join(" | ")};
+        `
     }
 }

@@ -1,6 +1,7 @@
 import { IElementWithCode } from "carbon-model";
 import Services from "Services";
 import { IDisposable } from "carbon-basics";
+import {ArtboardProxyGenerator} from "./ProxyGenerator";
 
 interface ICodeCacheItem {
     text: string;
@@ -22,6 +23,7 @@ export class CompiledCodeProvider implements IDisposable {
         let code = `namespace n${element.id} {
             ${element.code()}
         }`
+        Services.compiler.addLib("carbon-runtime-names.d.ts", ArtboardProxyGenerator.generateRuntimeNames(App.Current.activePage));
         Services.compiler.addLib(element.id + ".d.ts", element.declaration(true))
 
         return Services.compiler.compile(fileName, code).then((result) => {

@@ -45,6 +45,7 @@ declare module "carbon-core" {
     export var ContextLayerSource: any;
     export var RuntimeTSDefinition: string;
     export var CompiledCodeProvider: any;
+    export var ArtboardProxyGenerator: any;
     export class Shape{}
     export function createUUID(): string;
 }

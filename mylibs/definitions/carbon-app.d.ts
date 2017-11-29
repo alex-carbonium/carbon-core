@@ -426,6 +426,11 @@ declare module "carbon-app" {
         getActionLabel(actionId: string): string;
     }
 
+    export class AutoDisposable implements IDisposable {
+        add(disposable:IDisposable);
+        dispose();
+    }
+
     export interface IShortcutManager {
         actionShortcuts: {
             [action: string]: IShortcut[]

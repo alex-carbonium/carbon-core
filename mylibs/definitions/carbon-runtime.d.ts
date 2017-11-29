@@ -1,4 +1,5 @@
 declare module "carbon-runtime" {
+    /// <reference path="carbon-runtime-names"/>;
     export type AnimationProps = { [name: string]: number };
 
     export interface TUIElement {
@@ -81,5 +82,17 @@ declare module "carbon-runtime" {
         repeat?: number;
         //A string, the model to animate colors in. (Optional)
         //colorModel?:any;
+    }
+
+    type PrimitiveType = string | number;
+
+    type DataBag = PrimitiveType | { [key: string]: PrimitiveType | DataBag };
+
+    /*
+    * Navigation controller
+    */
+    interface INavigationController {
+        navigateTo(artboard: ArtboardNames, animationOptions?: IAnimationOptions, data?:DataBag)
+        navigateBack();
     }
 }
