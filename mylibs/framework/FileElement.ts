@@ -65,6 +65,7 @@ export class FileElement extends UIElement implements IFileElement {
 
     private readSvg(file: File, parent: Container, resolve, reject) {
         var reader = new FileReader();
+        let gm = this.globalViewMatrix();
         reader.onload = () => {
             var text = reader.result;
 
@@ -73,9 +74,10 @@ export class FileElement extends UIElement implements IFileElement {
                     if (result.performArrange) {
                         result.performArrange();
                     }
+                    let br = result.boundaryRect();
                     let bb = result.getBoundingBox();
-                    result.setProps(this.selectLayoutProps(true));
-                    result.translate(-bb.width/2, -bb.height/2);
+                    result.setTransform(gm);
+                    result.translate(-bb.width/2 - br.x, -bb.height/2 - br.y);
                     result.name = (this.getNameWithoutExtension());
                     Environment.view.fitToViewportIfNeeded(result);
 
@@ -92,6 +94,7 @@ export class FileElement extends UIElement implements IFileElement {
     }
 
     private readDataUrl(file: File, parent: Container, resolve, reject) {
+        let gm = this.globalViewMatrix();
         let reader = new FileReader();
         reader.onload = (e) => {
             let dataUrl = reader.result;
@@ -99,9 +102,9 @@ export class FileElement extends UIElement implements IFileElement {
             let image = this.linkedElement;
             if (!image) {
                 let image = new Image();
-                image.size({ width: Image.NewImageSize, height: Image.NewImageSize });
+                image.size({ width: 1, height: 1 });
                 image.name=(this.getNameWithoutExtension());
-                image.setProps(this.selectLayoutProps(true));
+                image.setTransform(gm);
                 image.resizeOnLoad(Origin.Center);
                 this.registerImageLink(image);
 
