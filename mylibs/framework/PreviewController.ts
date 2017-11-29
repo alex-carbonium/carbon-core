@@ -25,12 +25,7 @@ export default class PreviewController {
     }
 
     _invokeAction(action) {
-        if (action.props.type === ActionType.GoToPage) {
-            this.previewModel.navigateToPage.raise(action.props.targetArtboardId, action.props.animation);
-            return;
-        }
-
-        throw "Unknown action";
+        return this.previewModel.invokeAction(action);
     }
 
     _eventTypeToName(eventType: ActionEvents) {
@@ -54,15 +49,20 @@ export default class PreviewController {
         assertNever(eventType);
     }
 
-    _propagateAction(eventType, element) {
+    async _propagateAction(eventType, element):Promise<boolean> {
         if (!element || element === NullContainer) {
             return false;
         }
 
         var events = element.runtimeProps.events;
         let eventName = this._eventTypeToName(eventType);
+
         if (events && events[eventName]) {
             let res = events[eventName]();
+            if(res instanceof Promise) {
+                res = await res;
+            }
+
             if (res === false) {
                 return true;
             }
@@ -79,7 +79,7 @@ export default class PreviewController {
 
         var parent = element.parent();
         if (parent && parent !== this.view) {
-            return this._propagateAction(eventType, parent);
+            return await this._propagateAction(eventType, parent);
         }
 
         return false;
@@ -189,9 +189,9 @@ export default class PreviewController {
         this._propagateAction(ActionEvents.dblclick, element);
     }
 
-    onclick(eventData) {
+    async onclick(eventData) {
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        if (!this._propagateAction(ActionEvents.click, element)) {
+        if (! await this._propagateAction(ActionEvents.click, element)) {
             this.view.displayClickSpots.raise();
         }
     }

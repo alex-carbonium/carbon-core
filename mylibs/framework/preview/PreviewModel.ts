@@ -5,17 +5,18 @@ import DataNode from "framework/DataNode";
 import Matrix from "math/matrix";
 import Artboard from "framework/Artboard";
 import Symbol from "framework/Symbol";
-import { IApp, IEvent, IPage, PreviewDisplayMode, ISize, IPageProps, ChangeMode, IDisposable } from "carbon-core";
+import { IApp, IEvent, IPage, PreviewDisplayMode, ISize, IPageProps, ChangeMode, IDisposable, IEvent2 } from "carbon-core";
 import { IPreviewModel } from "carbon-app";
 import { IArtboard } from "carbon-model";
 import { CompiledCodeProvider } from "../../code/CompiledCodeProvider";
 import { Sandbox } from "../../code/Sandbox";
 import { ElementProxy } from "../../code/ElementProxy";
 import { RuntimeContext } from "../../code/runtime/RuntimeContext";
+import { ActionType } from "../Defs";
 
 export default class PreviewModel implements IPreviewModel, IDisposable {
     app: IApp;
-    public navigateToPage: IEvent<any>;
+    public navigateToPage: IEvent2<string, any>;
     public onPageChanged: IEvent<IPage>;
     private _activePage: IPage<IPageProps> & { originalSize: ISize };
     public codeProvider = new CompiledCodeProvider();
@@ -28,7 +29,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
 
     constructor(app) {
         this.app = app;
-        this.navigateToPage = EventHelper.createEvent(); // todo: move this out
+        this.navigateToPage = EventHelper.createEvent2(); // todo: move this out
         this.onPageChanged = EventHelper.createEvent();
     }
 
@@ -61,7 +62,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         this.sourceArtboard = artboard;
         var oldRect = previewClone.boundaryRect();
         previewClone.setTransform(Matrix.Identity);
-        previewClone.applyVisitor(e=>e.runtimeProps.ctxl = 1);
+        previewClone.applyVisitor(e => e.runtimeProps.ctxl = 1);
 
         page.add(previewClone);
         page.originalSize = oldRect;
@@ -98,7 +99,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
                         try {
                             this.sandbox.runOnElement(this.runtimeContext, artboard, code);
                             this.modelFailed = false;
-                        } catch(e){
+                        } catch (e) {
                             // todo: log to console console.error(e);
                             this.modelFailed = true;
                         }
@@ -131,7 +132,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
             artboard = this.app.activePage.getActiveArtboard();
         }
 
-        if(!artboard) {
+        if (!artboard) {
             artboard = this.app.activePage.getAllArtboards()[0];
         }
 
@@ -176,6 +177,16 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         return res;
     }
 
+    invokeAction(action) {
+        if (action.props.type === ActionType.GoToPage) {
+            //dispatch(PreviewActions.navigateTo(action.props.targetArtboardId, action.props.animation));
+            this.navigateToPage.raise(action.props.targetArtboardId, action.props.animation);
+            return;
+        }
+
+        throw "Unknown action";
+    }
+
     resizeActiveScreen(screenSize: ISize, scale: number, previewDisplayMode: PreviewDisplayMode) {
         var page = this.activePage;
         if ((page as any) === NullPage) {
@@ -208,7 +219,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
             this.codeProvider = null;
         }
 
-        if(this.runtimeContext) {
+        if (this.runtimeContext) {
             this.runtimeContext.dispose();
             this.runtimeContext = null;
         }

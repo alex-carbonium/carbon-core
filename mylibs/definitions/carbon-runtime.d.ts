@@ -39,7 +39,7 @@ declare module "carbon-runtime" {
 
     const Animation:AnimationConstructor;
 
-    type MouseEventCallback = (e: MouseEvent) => boolean | void;
+    type MouseEventCallback = (e?: MouseEvent) => boolean | void | Promise<boolean | void>;
 
     interface MouseEventHandler {
         onclick: MouseEventCallback;

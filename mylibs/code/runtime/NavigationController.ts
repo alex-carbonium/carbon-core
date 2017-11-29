@@ -7,7 +7,7 @@ export class NavigationController implements INavigationController, IDisposable 
     }
 
     navigateTo(artboard:string, animationOptions:IAnimationOptions, data?:DataBag){
-        alert(artboard);
+
     }
 
     dispose() {
