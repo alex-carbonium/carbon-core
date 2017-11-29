@@ -1,14 +1,8 @@
 import { IUIElement } from "carbon-model";
 import PropertyMetadata from "framework/PropertyMetadata";
+import { EventNames } from "./runtime/EventNames";
 
-const eventsMap = {
-    "onclick":true,
-    "onmousedown":true,
-    "onmouseup":true,
-    "onmousemove":true,
-    "onmouseenter":true,
-    "onmouseleave":true
-}
+const eventsMap = EventNames
 
 export class ElementProxy {
     private element: IUIElement;

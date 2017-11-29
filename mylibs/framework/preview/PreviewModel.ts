@@ -11,17 +11,20 @@ import { IArtboard } from "carbon-model";
 import { CompiledCodeProvider } from "../../code/CompiledCodeProvider";
 import { Sandbox } from "../../code/Sandbox";
 import { ElementProxy } from "../../code/ElementProxy";
+import { RuntimeContext } from "../../code/runtime/RuntimeContext";
 
 export default class PreviewModel implements IPreviewModel, IDisposable {
     app: IApp;
     public navigateToPage: IEvent<any>;
     public onPageChanged: IEvent<IPage>;
     private _activePage: IPage<IPageProps> & { originalSize: ISize };
-    public readonly codeProvider = new CompiledCodeProvider();
+    public codeProvider = new CompiledCodeProvider();
     private sandbox = new Sandbox();
 
     public sourceArtboard: IArtboard;
     public modelFailed: boolean = false;
+
+    private runtimeContext = new RuntimeContext();
 
     constructor(app) {
         this.app = app;
@@ -71,6 +74,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
     _runCodeOnPage(page: IPage): Promise<IPage> {
         let promises = [];
         ElementProxy.clear();
+
         page.applyVisitor(e => {
             if (e instanceof Symbol) {
                 let artboard: IArtboard = e.artboard;
@@ -78,7 +82,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
                 if (code) {
                     promises.push(this.codeProvider.getCode(artboard).then((code) => {
                         if (code) {
-                            this.sandbox.runOnElement(e, code);
+                            this.sandbox.runOnElement(this.runtimeContext, e, code);
                         }
                         // todo: think what to do if failed
                     }));
@@ -92,7 +96,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
                 return this.codeProvider.getCode(artboard).then((code) => {
                     if (code) {
                         try {
-                            this.sandbox.runOnElement(artboard, code);
+                            this.sandbox.runOnElement(this.runtimeContext, artboard, code);
                             this.modelFailed = false;
                         } catch(e){
                             // todo: log to console console.error(e);
@@ -202,6 +206,11 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         if (this.codeProvider) {
             this.codeProvider.dispose();
             this.codeProvider = null;
+        }
+
+        if(this.runtimeContext) {
+            this.runtimeContext.dispose();
+            this.runtimeContext = null;
         }
     }
 }

@@ -609,5 +609,6 @@ declare module "carbon-app" {
         onPageChanged:IEvent<IPage>;
         activePage:IPage;
         readonly activeArtboard:IArtboard;
+        readonly codeProvider:any;
     }
 }

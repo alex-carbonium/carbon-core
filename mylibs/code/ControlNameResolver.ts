@@ -1,6 +1,7 @@
 import { IContainer, IUIElement } from "carbon-core";
 import { NameProvider } from "./NameProvider";
 import { ElementProxy } from "./ElementProxy";
+import { RuntimeContext } from "./runtime/RuntimeContext";
 
 const skipList = ["eval", "proxy"]
 const blackList = ["window", "document", "uneval"]
@@ -10,8 +11,10 @@ export class ControlNameResolver {
     private _proxiesMap: { [name: string]: IUIElement } = {};
     private _skipMap = skipList.reduce((m, v)=>{m[v] = true;return m;}, {})
     private _blackMap = blackList.reduce((m, v)=>{m[v] = true;return m;}, {})
-    constructor(artboard: IContainer) {
+    private _context: RuntimeContext;
+    constructor(context:RuntimeContext, artboard: IContainer) {
         this._artboard = artboard;
+        this._context = context;
     }
 
     _findControl(name: string) {
@@ -39,13 +42,13 @@ export class ControlNameResolver {
     }
 
     get(target: any, name: string): any {
-        return this._findControl(name) || undefined;
+        return this._findControl(name) || this._context[name] || undefined;
     }
 
     has(target:any, name:string) {
         if(this._skipMap[name]) {
             return false;
         }
-        return !!this._findControl(name) || this._blackMap[name];
+        return !!this._findControl(name) || this._blackMap[name] || this._context.hasOwnProperty(name);
     }
 }
