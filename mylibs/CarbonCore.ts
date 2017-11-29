@@ -25,13 +25,6 @@ if (ext) {
     app.setProps({ extraParameters: ext });
 }
 
-var carbonRuntimeSource:string = require("raw!./definitions/carbon-runtime.d.ts") as any;
-var runtimeTSDefinitionCode = carbonRuntimeSource
-    .substr(0, carbonRuntimeSource.lastIndexOf('}') - 1)
-    .replace(/^.+export /gm, "")
-    .replace('declare module "carbon-runtime" {', '')
-    .replace(/^.+\/\*declare \*\//gm, "declare ");
-
 //export * from crashes in babel for some reason...
 export default {
     "jquery": require("jquery/jquery.min"),
@@ -132,7 +125,6 @@ export default {
     "DebugUtil": require("./DebugUtil"),
 
     "SvgParser": require("svg/SvgParser"),
-    "RuntimeTSDefinition": runtimeTSDefinitionCode,
 
     "Story": require("./stories/Story"),
     "StoryAction": require("./stories/StoryAction"),

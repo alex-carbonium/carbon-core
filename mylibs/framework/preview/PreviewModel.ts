@@ -17,7 +17,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
     public navigateToPage: IEvent<any>;
     public onPageChanged: IEvent<IPage>;
     private _activePage: IPage<IPageProps> & { originalSize: ISize };
-    private codeProvider = new CompiledCodeProvider();
+    public readonly codeProvider = new CompiledCodeProvider();
     private sandbox = new Sandbox();
 
     public sourceArtboard: IArtboard;

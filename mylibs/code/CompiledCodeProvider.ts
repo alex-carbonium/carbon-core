@@ -1,7 +1,15 @@
 import { IElementWithCode } from "carbon-model";
 import Services from "Services";
 import { IDisposable } from "carbon-basics";
-import {ArtboardProxyGenerator} from "./ProxyGenerator";
+import { ArtboardProxyGenerator } from "./ProxyGenerator";
+
+var platformLib = require("raw-loader!../definitions/runtime-platform.d.ts");
+var carbonRuntimeSource: string = require("raw!../definitions/carbon-runtime.d.ts") as any;
+var runtimeTSDefinitionCode = carbonRuntimeSource
+    .substr(0, carbonRuntimeSource.lastIndexOf('}') - 1)
+    .replace(/^.+export /gm, "")
+    .replace('declare module "carbon-runtime" {', '')
+    .replace(/^.+\/\*declare \*\//gm, "declare ");
 
 interface ICodeCacheItem {
     text: string;
@@ -10,6 +18,32 @@ interface ICodeCacheItem {
 
 export class CompiledCodeProvider implements IDisposable {
     private _codeCache: WeakMap<IElementWithCode, ICodeCacheItem> = new WeakMap<IElementWithCode, ICodeCacheItem>();
+    private static _globalLibs = {
+        "runtime-platform.d.ts": {
+            text: () => platformLib,
+            version: 1
+        },
+        "carbon-runtime.d.ts": {
+            text: () => runtimeTSDefinitionCode,
+            version: 1
+        }
+    }
+    getStaticLibs() {
+        return CompiledCodeProvider._globalLibs;
+    }
+
+    getDynamicLibs(artboard, module) {
+        return {
+            'carbon-runtime-names.d.ts': {
+                text: () => ArtboardProxyGenerator.generateRuntimeNames(App.Current.activePage),
+                version: App.Current.activePage.version
+            },
+            ['n' + artboard.id + ".d.ts"]: {
+                text: () => artboard.declaration(module),
+                version: artboard.version
+            }
+        }
+    }
 
     getCode(element: IElementWithCode): Promise<string | void> {
         if (this._codeCache.has(element)) {

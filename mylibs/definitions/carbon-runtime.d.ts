@@ -32,6 +32,13 @@ declare module "carbon-runtime" {
         stopPropagation(): void;
     }
 
+    interface AnimationConstructor {
+        new(element:TPath, a:number);
+        new(element:TRectangle, a:MouseEvent);
+    }
+
+    const Animation:AnimationConstructor;
+
     type MouseEventCallback = (e: MouseEvent) => boolean | void;
 
     interface MouseEventHandler {
