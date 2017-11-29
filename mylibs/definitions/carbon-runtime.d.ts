@@ -14,6 +14,13 @@ declare module "carbon-runtime" {
         animate(props: AnimationProps, duration?: number, options?: any, progress?: () => void): Promise<void>;
     }
 
+    interface TSymbol extends TUIElement{
+        states:string[];
+        nextState();
+        prevState();
+        changeState();
+    }
+
     export interface TRectangle extends TUIElement {
 
     }
@@ -84,7 +91,7 @@ declare module "carbon-runtime" {
         /**
          * A number, the duration in seconds. (Optional)
          */
-        time?: number;
+        duration?: number;
         /**
          * A number, the delay in seconds of the animation. (Optional)
          */
@@ -97,6 +104,10 @@ declare module "carbon-runtime" {
         //colorModel?:any;
     }
 
+    export interface INavigationAnimationOptions extends IAnimationOptions {
+        type: AnimationType;
+    }
+
     type PrimitiveType = string | number;
 
     type DataBag = PrimitiveType | { [key: string]: PrimitiveType | DataBag };
@@ -105,7 +116,7 @@ declare module "carbon-runtime" {
     * Navigation controller
     */
     interface INavigationController {
-        navigateTo(artboard: ArtboardNames, animationOptions?: IAnimationOptions, data?:DataBag)
+        navigateTo(artboard: ArtboardNames, animationOptions?: INavigationAnimationOptions, data?:DataBag)
         navigateBack();
     }
 }

@@ -20,8 +20,8 @@ PropertyMetadata.registerForType(StoryAction, {
     artboardId: {defaultValue: null},
     animation: {
         defaultValue: {
-            segue: AnimationType.SlideLeft,
-            easing: EasingType.EaseOut,
+            type: AnimationType.SlideLeft,
+            curve: EasingType.EaseOut,
             duration: .2
         }
     }

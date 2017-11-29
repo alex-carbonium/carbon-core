@@ -34,13 +34,13 @@ import ResizeOptions from "../decorators/ResizeOptions";
 import { KeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
-import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps, RenderFlags, RenderEnvironment, IContext, PropDescriptor, Origin, StrokePosition } from "carbon-core";
+import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps, RenderFlags, RenderEnvironment, IContext, PropDescriptor, Origin, StrokePosition, IProxySource } from "carbon-core";
 import ExtensionPoint from "./ExtensionPoint";
 import CoreIntl from "../CoreIntl";
 import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
 import RenderPipeline from "./render/RenderPipeline";
 import ContextCacheManager from "./render/ContextCacheManager";
-import { ElementProxy } from "../code/ElementProxy";
+import { RuntimeProxy } from "../code/runtime/RuntimeProxy";
 
 require("../migrations/All");
 
@@ -54,7 +54,7 @@ const PointDistanceVisibleLevel2 = 15;
 const PointDistanceVisibleLevel1 = 30;
 
 // constructor
-export default class UIElement<TProps extends IUIElementProps = IUIElementProps> extends DataNode<TProps> implements IUIElement<TProps> {
+export default class UIElement<TProps extends IUIElementProps = IUIElementProps> extends DataNode<TProps> implements IUIElement<TProps>, IProxySource {
     [name: string]: any;
     props: TProps;
     decorators: any[];
@@ -2154,7 +2154,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         let animationValues = [];
         options = extend({}, options);
         options.duration = Math.max(duration || 0, 1);
-        let that = ElementProxy.unwrap(this);
+        let that = RuntimeProxy.unwrap<UIElement>(this);
         for (let propName in properties) {
             let newValue = properties[propName];
             let accessor = (function (name) {
@@ -2209,6 +2209,15 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
     propertyMetadata() {
         return PropertyMetadata.findAll(this.t);
+    }
+
+    proxyDefinition(): { props: string[]; rprops: string[]; methods: string[]; } {
+        var metadata = this.propertyMetadata();
+        if (metadata.proxyDefinition) {
+            return metadata.proxyDefinition();
+        }
+
+        return {props:[], rprops:[], methods:[]};
     }
 
     getNonRepeatableProps(newProps?: any) {

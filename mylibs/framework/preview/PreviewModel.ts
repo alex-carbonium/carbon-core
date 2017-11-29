@@ -5,7 +5,7 @@ import DataNode from "framework/DataNode";
 import Matrix from "math/matrix";
 import Artboard from "framework/Artboard";
 import Symbol from "framework/Symbol";
-import { IApp, IEvent, IPage, PreviewDisplayMode, ISize, IPageProps, ChangeMode, IDisposable, IEvent2 } from "carbon-core";
+import { IApp, IEvent, IPage, PreviewDisplayMode, ISize, IPageProps, ChangeMode, IDisposable, IEvent3 } from "carbon-core";
 import { IPreviewModel } from "carbon-app";
 import { IArtboard } from "carbon-model";
 import { CompiledCodeProvider } from "../../code/CompiledCodeProvider";
@@ -13,24 +13,34 @@ import { Sandbox } from "../../code/Sandbox";
 import { ElementProxy } from "../../code/ElementProxy";
 import { RuntimeContext } from "../../code/runtime/RuntimeContext";
 import { ActionType } from "../Defs";
+import { IAnimationOptions, DataBag } from "carbon-runtime";
+import { NavigationController } from "../../code/runtime/NavigationController";
+import { AutoDisposable } from "../../AutoDisposable";
 
 export default class PreviewModel implements IPreviewModel, IDisposable {
-    app: IApp;
-    public navigateToPage: IEvent2<string, any>;
-    public onPageChanged: IEvent<IPage>;
     private _activePage: IPage<IPageProps> & { originalSize: ISize };
-    public codeProvider = new CompiledCodeProvider();
     private sandbox = new Sandbox();
+    private disposables = new AutoDisposable();
+    private runtimeContext:RuntimeContext;
+    private navigationController:NavigationController;
 
+    public app: IApp;
+    public navigateToPage: IEvent3<string, IAnimationOptions, DataBag>;
+    public onPageChanged: IEvent<IPage>;
+    public codeProvider = new CompiledCodeProvider();
     public sourceArtboard: IArtboard;
     public modelFailed: boolean = false;
 
-    private runtimeContext = new RuntimeContext();
-
     constructor(app) {
         this.app = app;
-        this.navigateToPage = EventHelper.createEvent2(); // todo: move this out
+        this.navigationController = new NavigationController(this);
+        this.navigateToPage = EventHelper.createEvent3(); // todo: move this out
         this.onPageChanged = EventHelper.createEvent();
+        this.runtimeContext = new RuntimeContext();
+        this.runtimeContext.register("navigationController", this.navigationController);
+
+        this.disposables.add(this.navigationController);
+        this.disposables.add(this.codeProvider);
     }
 
     get activePage() {
@@ -57,6 +67,10 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
     }
 
     _makePageFromArtboard(artboard, screenSize): Promise<IPage> {
+        if(!artboard) {
+            return Promise.resolve(NullPage);
+        }
+
         var page = new Page();
         var previewClone = artboard.mirrorClone();
         this.sourceArtboard = artboard;
@@ -74,7 +88,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
 
     _runCodeOnPage(page: IPage): Promise<IPage> {
         let promises = [];
-        ElementProxy.clear();
+        // ElementProxy.clear();
 
         page.applyVisitor(e => {
             if (e instanceof Symbol) {
@@ -179,8 +193,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
 
     invokeAction(action) {
         if (action.props.type === ActionType.GoToPage) {
-            //dispatch(PreviewActions.navigateTo(action.props.targetArtboardId, action.props.animation));
-            this.navigateToPage.raise(action.props.targetArtboardId, action.props.animation);
+            this.navigationController.navigateToId(action.props.targetArtboardId, action.props.animation);
             return;
         }
 
@@ -214,14 +227,6 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
     }
 
     dispose() {
-        if (this.codeProvider) {
-            this.codeProvider.dispose();
-            this.codeProvider = null;
-        }
-
-        if (this.runtimeContext) {
-            this.runtimeContext.dispose();
-            this.runtimeContext = null;
-        }
+        this.disposables.dispose();
     }
 }

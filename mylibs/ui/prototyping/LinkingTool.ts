@@ -246,8 +246,8 @@ export default class LinkingTool extends Tool {
                 type: ActionType.GoToPage,
                 targetArtboardId: targetArgtboard.id,
                 animation: {
-                    segue: AnimationType.SlideLeft,
-                    easing: EasingType.EaseOut,
+                    type: AnimationType.SlideLeft,
+                    curve: EasingType.EaseOut,
                     duration: .2
                 }
             }

@@ -3,10 +3,15 @@ declare module "carbon-app" {
     import { IEvent, IEventData, IEvent2, IMouseEventData, KeyboardState, Brush, IEvent3, IConstructor, ViewState, IDisposable, IJsonNode, IPrimitive, ArtboardType, FontStyle, FontWeight, ChangeMode, Primitive } from "carbon-basics";
     import { IRect, ICoordinate, ISize, Origin } from "carbon-geometry";
     import { IContext, IContextPool, RenderEnvironment, RenderFlags } from "carbon-rendering";
+    import { DataBag, IAnimationOptions } from "carbon-runtime";
 
     export interface IPlatform{
         attachEvents(htmlElement: HTMLElement);
         detachEvents();
+    }
+
+    export interface IProxySource {
+        proxyDefinition():{props:string[], rprops:string[], methods:string[]};
     }
 
     export type FontMetadata = {
@@ -607,6 +612,7 @@ declare module "carbon-app" {
 
     export interface IPreviewModel {
         onPageChanged:IEvent<IPage>;
+        navigateToPage: IEvent3<string, IAnimationOptions, DataBag>;
         activePage:IPage;
         readonly activeArtboard:IArtboard;
         readonly codeProvider:any;

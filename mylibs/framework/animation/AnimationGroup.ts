@@ -100,7 +100,7 @@ var easingFunctions = {
 }
 
 var defaultOptions = {
-    easing: 'linear'
+    curve: 'linear'
 }
 
 export default class AnimationGroup {
@@ -111,7 +111,7 @@ export default class AnimationGroup {
         this._options = extend(extend({}, defaultOptions), options);
         this._values = values;
 
-        this._easing = easingFunctions[this._options.easing];
+        this._easing = easingFunctions[this._options.curve];
         this._completed = false;
         this._promise = new Promise(resolve => this._resolve = resolve);
     }

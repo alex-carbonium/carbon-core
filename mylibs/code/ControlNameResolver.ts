@@ -2,6 +2,7 @@ import { IContainer, IUIElement } from "carbon-core";
 import { NameProvider } from "./NameProvider";
 import { ElementProxy } from "./ElementProxy";
 import { RuntimeContext } from "./runtime/RuntimeContext";
+import { RuntimeProxy } from "./runtime/RuntimeProxy";
 
 const skipList = ["eval", "proxy"]
 const blackList = ["window", "document", "uneval"]
@@ -18,12 +19,12 @@ export class ControlNameResolver {
     }
 
     _findControl(name: string) {
-        let result = null;
-        result = this._proxiesMap[name];
-        if (result === undefined) {
-            result = null;
+        let proxy = this._proxiesMap[name];
+        if (proxy === undefined) {
+            let source = null;
+            proxy = null;
             if (name === "artboard") {
-                result = this._artboard;
+                source = this._artboard;
             } else {
                 this._artboard.applyVisitor(e => {
                     // it is not supper fast to escapeNames many times,
@@ -31,28 +32,28 @@ export class ControlNameResolver {
                     // will be used in code, so don't want to build map of all controls
                     // but should be change later if needed
                     if (name === NameProvider.escapeName(e.name)) {
-                        result = e;
+                        source = e;
                         return false;
                     }
                 });
             }
-            if (result) {
-                result = new Proxy(result, new ElementProxy(result));
+            if (source) {
+                proxy = ElementProxy.create(source)
             }
-            this._proxiesMap[name] = result;
+            this._proxiesMap[name] = proxy;
         }
 
-        return result;
+        return proxy;
     }
 
     get(target: any, name: string): any {
-        return this._findControl(name) || this._context[name] || undefined;
+        return this._findControl(name) || this._context.get(name) || undefined;
     }
 
     has(target: any, name: string) {
         if (this._skipMap[name]) {
             return false;
         }
-        return !!this._findControl(name) || this._blackMap[name] || this._context.hasOwnProperty(name);
+        return !!this._findControl(name) || this._blackMap[name] || this._context.get(name);
     }
 }
