@@ -22,6 +22,12 @@ declare module "carbon-runtime" {
 
     }
 
+    export interface TArtboard extends MouseEventHandler {
+        readonly width: number;
+        readonly height: number;
+        readonly name: number;
+    }
+
     interface MouseEvent {
         x: number;
         y: number;

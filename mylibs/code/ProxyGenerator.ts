@@ -32,19 +32,15 @@ export class ArtboardProxyGenerator {
             return `
             /// <reference path="carbon-runtime.d.ts" />
             declare namespace n${artboard.id} {
-    export const artboard:any;
+    export const artboard:TArtboard;
     export const navigationController:INavigationController;
-    ${
-    controlList.map(v => `export const ${v.name}:${v.type};`).join('\n')
-    }
+    ${controlList.map(v => `export const ${v.name}:${v.type};`).join('\n')}
     }`;
         } else {
             return `
-    declare const artboard:any;
+    declare const artboard:TArtboard;
     declare const navigationController:INavigationController;
-    ${
-    controlList.map(v => `declare const ${v.name}:${v.type};`).join('\n')
-    }
+    ${controlList.map(v => `declare const ${v.name}:${v.type};`).join('\n')}
     `;
         }
     }
