@@ -314,6 +314,7 @@ declare module "carbon-model" {
     }
     export interface ISymbol extends IContainer<ISymbolProps> {
         source(value?: SymbolSource): SymbolSource;
+        readonly artboard:IArtboard;
     }
     export const Symbol: IConstructor<ISymbol>;
 
@@ -446,6 +447,7 @@ declare module "carbon-model" {
     export interface IElementWithCode {
         code():string;
         declaration(module:boolean):string;
+        exports:{[key:string]:string};
         readonly version:number;
         readonly id:string;
     }

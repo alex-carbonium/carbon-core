@@ -61,8 +61,10 @@ export class CompiledCodeProvider implements IDisposable {
         Services.compiler.addLib(element.id + ".d.ts", element.declaration(true))
 
         return Services.compiler.compile(fileName, code).then((result) => {
-            this._codeCache.set(element, { version: element.version, text: result });
-            return result;
+            this._codeCache.set(element, { version: element.version, text: result.text });
+            let target = (element as any).runtimeProps.sourceArtboard || element;
+            target.exports = result.exports;
+            return result.text;
         }).catch(data => {
             // TODO: report error to UI
             console.error(data);

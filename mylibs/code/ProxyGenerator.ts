@@ -1,6 +1,7 @@
 import { IContainer, IUIElement, IPage } from "carbon-core";
 import { NameProvider } from "./NameProvider";
 import { Types } from "../framework/Defs";
+import { IElementWithCode, IArtboard } from "carbon-model";
 
 export class ArtboardProxyGenerator {
     static getControlType(e) {
@@ -13,14 +14,48 @@ export class ArtboardProxyGenerator {
         return "TUIElement & MouseEventHandler";
     }
 
-    static generate(artboard: IContainer, module:boolean): string {
-        let controlList = [];
+    static generateSymbolsInfo(modifier, symbolsList: { symbol: any, exports: any }[]) {
+        let res = '';
+        for (var item of symbolsList) {
+            let name = NameProvider.escapeName(item.symbol.name);
+            let type;
+            if (item.exports) {
+                let names = Object.keys(item.exports);
+                let decl = [];
+                for (let name of names) {
+                    let type = item.exports[name];
+                    if (type.startsWith('Property<') | type.startsWith('Event<')) {
+                        decl.push(`${name}: ${type};`)
+                    }
+                }
 
-        artboard.applyVisitorBreadthFirst((e:IUIElement) => {
+                res += `
+            ${modifier} interface T${name} extends TSymbol {
+                ${decl.join('\n')}
+            }
+            `
+                type = 'T' + name;
+            } else {
+                type = 'TSymbol';
+            }
+            res += `${modifier} const ${name}:${type};
+            `
+        }
+
+        return res;
+    }
+
+    static generate(artboard: IContainer, module: boolean): string {
+        let controlList = [];
+        let symbolsList = [];
+
+        artboard.applyVisitorBreadthFirst((e: IUIElement) => {
             if (e === artboard) {
                 return;
             }
-            if(e instanceof Symbol) {
+            if ((e as any).t === Types.Symbol) {
+                let artboard: IArtboard = (e as any).artboard;
+                symbolsList.push({ symbol: e, exports: artboard.exports });
                 return true; // do not parse internals of a symbol
             }
 
@@ -28,25 +63,29 @@ export class ArtboardProxyGenerator {
             let type = ArtboardProxyGenerator.getControlType(e);
             controlList.push({ name, type });
         });
-        if(module) {
+        let modifier = module ? 'export' : 'declare';
+
+        let symbolTypes = ArtboardProxyGenerator.generateSymbolsInfo(modifier, symbolsList);
+
+        let content = `
+${modifier} const artboard:TArtboard;
+${modifier} const navigationController:INavigationController;
+${symbolTypes}
+${controlList.map(v => `${modifier} const ${v.name}:${v.type};`).join('\n')}
+}`;
+        if (module) {
             return `
-            /// <reference path="carbon-runtime.d.ts" />
-            declare namespace n${artboard.id} {
-    export const artboard:TArtboard;
-    export const navigationController:INavigationController;
-    ${controlList.map(v => `export const ${v.name}:${v.type};`).join('\n')}
-    }`;
+/// <reference path="carbon-runtime.d.ts" />
+declare namespace n${artboard.id} {
+${content}
+}`;
         } else {
-            return `
-    declare const artboard:TArtboard;
-    declare const navigationController:INavigationController;
-    ${controlList.map(v => `declare const ${v.name}:${v.type};`).join('\n')}
-    `;
+            return content;
         }
     }
 
-    public static generateRuntimeNames(page:IPage):string {
-        let artboards = page.getAllArtboards().map(a=>'"' +a.name+ '"');
+    public static generateRuntimeNames(page: IPage): string {
+        let artboards = page.getAllArtboards().map(a => '"' + a.name + '"');
 
         return `
         declare type ArtboardNames = ${artboards.join(" | ")};

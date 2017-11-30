@@ -35,6 +35,24 @@ declare module "carbon-runtime" {
         readonly name: number;
     }
 
+    interface Property<T> {
+        get():T;
+        set(value:T):void;
+    }
+
+    interface IDisposable {
+        dispose();
+    }
+
+    interface Event<T> {
+        registerHandler(callback:(data:DataBag)=>void|Promise<void>):IDisposable;
+    }
+
+    class Model {
+        static createProperty<T=number|string|DataBag>(getter:()=>T, setter:(value:T)=>void):Property<T>;
+        static createEvent<T=number|string|DataBag>():Event<T>;
+    }
+
     interface MouseEvent {
         x: number;
         y: number;

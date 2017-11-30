@@ -165,8 +165,9 @@ declare module "carbon-app" {
         mirroringCode(code?: string) : string;
     }
 
+    type CompilationResult = {text:string, exports:{[name:string]:string}};
     export interface ICompilerService {
-        compile(fileName:string, text:string):Promise<string>;
+        compile(fileName:string, text:string):Promise<CompilationResult>;
         addLib(fileName:string, text:string);
         clear();
     }

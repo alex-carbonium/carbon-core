@@ -16,6 +16,7 @@ import { ActionType } from "../Defs";
 import { IAnimationOptions, DataBag } from "carbon-runtime";
 import { NavigationController } from "../../code/runtime/NavigationController";
 import { AutoDisposable } from "../../AutoDisposable";
+import { ModelFactory } from "../../code/runtime/ModelFactory";
 
 export default class PreviewModel implements IPreviewModel, IDisposable {
     private _activePage: IPage<IPageProps> & { originalSize: ISize };
@@ -38,6 +39,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         this.onPageChanged = EventHelper.createEvent();
         this.runtimeContext = new RuntimeContext();
         this.runtimeContext.register("navigationController", this.navigationController);
+        this.runtimeContext.register("Model", ModelFactory);
 
         this.disposables.add(this.navigationController);
         this.disposables.add(this.codeProvider);
@@ -73,6 +75,8 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
 
         var page = new Page();
         var previewClone = artboard.mirrorClone();
+        previewClone.props.temp = true;
+        previewClone.runtimeProps.sourceArtboard = artboard;
         this.sourceArtboard = artboard;
         var oldRect = previewClone.boundaryRect();
         previewClone.setTransform(Matrix.Identity);

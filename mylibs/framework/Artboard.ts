@@ -814,7 +814,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
      * If an artboard hits itself and has an extended hit test box, it has to be validated
      * if the artboard is "really" hit by checking the boundary rect.
      */
-    hitElement(position, scale, predicate?, directSelection?):IUIElement {
+    hitElement(position, scale, predicate?, directSelection?): IUIElement {
         let element = super.hitElement.apply(this, arguments);
         if (!element) {
             return null;
@@ -1293,15 +1293,23 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     onIsolationExited() {
     }
 
-    code(value?:string):string {
-        if(arguments.length > 0) {
-            this.setProps({code:value})
+    code(value?: string): string {
+        if (arguments.length > 0) {
+            this.setProps({ code: value })
         }
 
         return this.props.code;
     }
 
-    declaration(module:boolean):string {
+    get exports(): { [name: string]: string } {
+        return this.runtimeProps.exports;
+    }
+
+    set exports(value: { [name: string]: string }) {
+        this.runtimeProps.exports = value;
+    }
+
+    declaration(module: boolean): string {
         return ArtboardProxyGenerator.generate(this, module);
     }
 
