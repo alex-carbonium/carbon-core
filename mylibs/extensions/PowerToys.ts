@@ -1,5 +1,5 @@
 import CarbonExtension from "./CarbonExtesion";
-import { IContributions, ContextBarPosition, IApp, ISelection, ChangeMode, IArtboardProps, ILayer, LayerType, IUIElement, IArtboard, IRect, ArtboardType, IText, UIElementFlags, IContainer } from "carbon-core";
+import { IContributions, ContextBarPosition, IApp, ISelection, ChangeMode, IArtboardProps, ILayer, LayerType, IUIElement, IArtboard, IRect, ArtboardType, IText, UIElementFlags, IContainer, Origin } from "carbon-core";
 import Matrix from "../math/matrix";
 import Point from "../math/point";
 import Container from "../framework/Container";
@@ -21,12 +21,19 @@ export default class PowerToys extends CarbonExtension {
                 name: "@toys.fitParentToChildren",
                 callback: this.fitParentToChildren,
                 condition: selection => selection.elements.length === 1 && selection.elements[0] instanceof Container
+            },
+            {
+                id: "toys.fitSize",
+                name: "@toys.fitSize",
+                callback: this.fitSize,
+                condition: selection => selection.elements.length > 0
             }
         ]);
 
         contributions.addShortcuts([
             { key: "w g", action: "toys.gridArrange" },
-            { key: "w a", action: "toys.fitParentToChildren" }
+            { key: "w a", action: "toys.fitParentToChildren" },
+            { key: "w f", action: "toys.fitSize" }
         ])
     }
 
@@ -58,6 +65,21 @@ export default class PowerToys extends CarbonExtension {
             }
             else {
                 x += w + GridMargin;
+            }
+        }
+    }
+
+    fitSize = (selection: ISelection) => {
+        const targetSize = 32;
+        for (let i = 0; i < selection.elements.length; i++) {
+            let element = selection.elements[i];
+            let bb = element.getBoundingBoxGlobal();
+            let sx = targetSize/bb.width;
+            let sy = targetSize/bb.height;
+
+            let min = Math.min(sx, sy);
+            if (min < 1) {
+                element.scale(min, min, Origin.Center);
             }
         }
     }
