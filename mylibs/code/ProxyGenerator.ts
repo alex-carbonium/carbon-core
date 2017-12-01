@@ -2,7 +2,7 @@ import { IContainer, IUIElement, IPage } from "carbon-core";
 import { NameProvider } from "./NameProvider";
 import { Types } from "../framework/Defs";
 import { IElementWithCode, IArtboard } from "carbon-model";
-
+let genericMatcher = RegExp(/\w+<(.+)>/);
 export class ArtboardProxyGenerator {
     static getControlType(e) {
         switch (e.t) {
@@ -24,8 +24,12 @@ export class ArtboardProxyGenerator {
                 let decl = [];
                 for (let name of names) {
                     let type = item.exports[name];
-                    if (type.startsWith('Property<') | type.startsWith('Event<')) {
-                        decl.push(`${name}: ${type};`)
+                    if (type.startsWith('Property<')) {
+                        let baseType = genericMatcher.exec(type)[1];
+                        decl.push(`${name}: ${baseType};`)
+                    } else if (type.startsWith('Event<')) {
+                        let baseType = genericMatcher.exec(type)[1];
+                        decl.push(`${name}: EventCallback<${type}>;`)
                     }
                 }
 

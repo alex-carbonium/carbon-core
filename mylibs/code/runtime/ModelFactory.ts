@@ -1,4 +1,5 @@
 import { IProxySource } from "carbon-app";
+import { Property } from "./Property";
 
 export class ModelFactoryClass implements IProxySource {
     proxyDefinition() {
@@ -9,8 +10,8 @@ export class ModelFactoryClass implements IProxySource {
         }
     }
 
-    createProperty() {
-        return {};
+    createProperty<T>(getter:()=>T, setter?:(value:T)=>void) {
+        return Object.freeze(new Property<T>(getter, setter));
     }
 
     createEvent() {

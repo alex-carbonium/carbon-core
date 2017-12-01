@@ -46,10 +46,11 @@ declare module "carbon-runtime" {
 
     interface Event<T> {
         registerHandler(callback:(data:DataBag)=>void|Promise<void>):IDisposable;
+        raise(data?:DataBag):boolean | void | Promise<boolean | void>;
     }
 
     class Model {
-        static createProperty<T=number|string|DataBag>(getter:()=>T, setter:(value:T)=>void):Property<T>;
+        static createProperty<T=number|string|DataBag>(getter:()=>T, setter?:(value:T)=>void):Property<T>;
         static createEvent<T=number|string|DataBag>():Event<T>;
     }
 
@@ -70,7 +71,8 @@ declare module "carbon-runtime" {
 
     const Animation:AnimationConstructor;
 
-    type MouseEventCallback = (e?: MouseEvent) => boolean | void | Promise<boolean | void>;
+    type EventCallback<T> = (e?: T) => boolean | void | Promise<boolean | void>;
+    type MouseEventCallback = EventCallback<MouseEvent>;
 
     interface MouseEventHandler {
         onclick: MouseEventCallback;
@@ -126,7 +128,7 @@ declare module "carbon-runtime" {
         type: AnimationType;
     }
 
-    type PrimitiveType = string | number;
+    type PrimitiveType = string | number | boolean;
 
     type DataBag = PrimitiveType | { [key: string]: PrimitiveType | DataBag };
 

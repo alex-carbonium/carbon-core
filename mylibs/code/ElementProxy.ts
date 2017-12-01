@@ -22,4 +22,13 @@ export class ElementProxy extends RuntimeProxy {
 
         return super.set(target, name, value);
     }
+
+    // has(target:any, name:string) {
+    //     let exports = (this.element as any).exports;
+    //     if(exports && exports[name]) {
+    //         return true;
+    //     }
+
+    //     return super.has(target, name);
+    // }
 }

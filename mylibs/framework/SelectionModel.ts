@@ -304,7 +304,7 @@ class SelectionModel implements ISelection {
             return;
         }
 
-        if (Environment.view.isolationLayer.isActive) {
+        if (Environment.view.isolationLayer && Environment.view.isolationLayer.isActive) {
             this.makeSelection(Environment.view.isolationLayer.children);
             return;
         }
