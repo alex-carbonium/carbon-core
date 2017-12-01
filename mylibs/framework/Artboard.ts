@@ -656,11 +656,13 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         for (let j = 0; j < rowsCount; ++j) {
             for (let i = 0; i < colsCount; ++i) {
                 let cell = this._addIconCell(i, j, colsCount, rowsCount, iconCellSize, margin);
+                let bbCell = cell.getBoundingBoxGlobal();
 
                 if (item < children.length) {
                     let child = children[item];
-                    let rect = child.boundaryRect();
-                    child.setTransform(Matrix.createTranslationMatrix(0 | (iconCellSize - rect.width) / 2 - rect.x, 0 | (iconCellSize - rect.height) / 2 - rect.y));
+                    let bb = child.getBoundingBoxGlobal();
+                    child.translate(bbCell.x - bb.x + (bbCell.width - bb.width)/2 | 0, bbCell.y - bb.y + (bbCell.height - bb.height)/2 | 0);
+                    cell.transferElement(child, cell.children.length);
                     cell.add(child);
                     item++;
                 }
