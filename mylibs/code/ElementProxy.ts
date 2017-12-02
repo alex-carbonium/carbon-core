@@ -31,7 +31,7 @@ export class ElementProxy extends RuntimeProxy {
                     propInstance.set(value);
                 }
             } else if (type.startsWith("Event")) {
-                (this.element as any).runtimeProps.runtimeData[name].registerHandler(type);
+                (this.element as any).runtimeProps.runtimeData[name].registerHandler(value);
             }
 
             return true;

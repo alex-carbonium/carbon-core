@@ -29,7 +29,7 @@ export class ArtboardProxyGenerator {
                         decl.push(`${name}: ${baseType};`)
                     } else if (type.startsWith('Event<')) {
                         let baseType = genericMatcher.exec(type)[1];
-                        decl.push(`${name}: EventCallback<${type}>;`)
+                        decl.push(`${name}: EventCallback<${baseType}>;`)
                     }
                 }
 
