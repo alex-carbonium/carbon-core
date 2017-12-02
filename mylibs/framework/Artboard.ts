@@ -47,6 +47,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         this._recorder.initFromJSON(this.props.states);
 
         this.runtimeProps.version = 0;
+        this.runtimeProps.codeVersion = 0;
         this.customProperties = [];
         this.runtimeProps.stateBoards = [];
         this._externals = null;
@@ -537,6 +538,10 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             }
         }
 
+        if(props.code) {
+            this.runtimeProps.codeVersion = (this.runtimeProps.codeVersion || 0) + 1;
+        }
+
         if (hasParent && oldProps.type !== props.type && oldProps.type !== ArtboardType.Regular) {
             App.Current.resourceDeleted.raise(oldProps.type, this, parent);
 
@@ -999,6 +1004,10 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     get version() {
         return this.runtimeProps.version;
+    }
+
+    get codeVersion() {
+        return this.runtimeProps.codeVersion;
     }
 
     mousedown(event: IMouseEventData) {

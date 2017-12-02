@@ -48,7 +48,7 @@ export class CompiledCodeProvider implements IDisposable {
     getCode(element: IElementWithCode): Promise<string | void> {
         if (this._codeCache.has(element)) {
             let item = this._codeCache.get(element);
-            if (item.version === element.version) {
+            if (item.version === element.codeVersion) {
                 return Promise.resolve(item.text);
             }
         }
@@ -61,7 +61,7 @@ export class CompiledCodeProvider implements IDisposable {
         Services.compiler.addLib(element.id + ".d.ts", element.declaration(true))
 
         return Services.compiler.compile(fileName, code).then((result) => {
-            this._codeCache.set(element, { version: element.version, text: result.text });
+            this._codeCache.set(element, { version: element.codeVersion, text: result.text });
             let target = (element as any).runtimeProps.sourceArtboard || element;
             target.exports = result.exports;
             return result.text;
@@ -72,7 +72,7 @@ export class CompiledCodeProvider implements IDisposable {
     }
 
     setCode(element: IElementWithCode, text: string) {
-        this._codeCache.set(element, { version: element.version, text: text });
+        this._codeCache.set(element, { version: element.codeVersion, text: text });
     }
 
     dispose() {

@@ -18,6 +18,14 @@ export class ControlNameResolver {
         this._context = context;
     }
 
+    set(target:any, name:string, value:any) {
+        // store all exported stuff
+        let runtimeData = this._artboard.runtimeProps.runtimeData = this._artboard.runtimeProps.runtimeData || {};
+        runtimeData[name] = value;
+
+        return true;
+    }
+
     _findControl(name: string) {
         let proxy = this._proxiesMap[name];
         if (proxy === undefined) {

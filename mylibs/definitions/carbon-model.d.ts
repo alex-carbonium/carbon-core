@@ -448,7 +448,7 @@ declare module "carbon-model" {
         code():string;
         declaration(module:boolean):string;
         exports:{[key:string]:string};
-        readonly version:number;
+        readonly codeVersion:number;
         readonly id:string;
     }
 

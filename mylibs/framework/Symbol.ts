@@ -90,6 +90,14 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         return { t: this.t, props: this.cloneProps() };
     }
 
+    get exports() {
+        if(!this.artboard) {
+            return null;
+        }
+
+        return this.artboard.exports;
+    }
+
     _setupCustomProperties(artboard) {
         var res: any = {};
         var properties = artboard.props.customProperties;

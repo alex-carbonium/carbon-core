@@ -36,10 +36,13 @@ with (new Proxy({}, handler)) {
 var sandboxFunc = new Function('__proxy', '__code', source);
 
 export class Sandbox {
-    runOnElement(context:RuntimeContext, artboard:IContainer, code:string) {
-        let nameResolver = new ControlNameResolver(context, artboard);
+    runOnElement(context:RuntimeContext, element:IContainer, code:string) {
+        let nameResolver = new ControlNameResolver(context, element);
         let resolverProxy = new Proxy({}, nameResolver);
-        let name = "n" + artboard.id;
+        let name = "n" + element.id;
+        if((element as any).artboard) {
+            name = 'n' + (element as any).artboard.id
+        }
 
         code = 'var ' + name + ' = __proxy;' + "let eval = null;" + code;
 
