@@ -55,13 +55,19 @@ export class ControlNameResolver {
     }
 
     get(target: any, name: string): any {
-        return this._findControl(name) || this._context.get(name) || undefined;
+        return this._runtimeData(name) || this._findControl(name) || this._context.get(name) || undefined;
+    }
+
+    _runtimeData(name)  {
+        if(this._artboard.runtimeProps && this._artboard.runtimeProps.runtimeData) {
+            return this._artboard.runtimeProps.runtimeData[name];
+        }
     }
 
     has(target: any, name: string) {
         if (this._skipMap[name]) {
             return false;
         }
-        return !!this._findControl(name) || this._blackMap[name] || this._context.get(name);
+        return  this._runtimeData(name) || !!this._findControl(name) || this._blackMap[name] || this._context.get(name);
     }
 }
