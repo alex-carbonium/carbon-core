@@ -2,7 +2,7 @@ declare module "carbon-model" {
     import { IPoint, IRect, ICoordinate, IMatrix, ISize, Origin } from "carbon-geometry";
     import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable, ChangeMode, ArtboardType, Font, KeyboardState, Brush, ResizeDimension } from "carbon-basics";
     import { IContext } from "carbon-rendering";
-    import { TUIElement } from "carbon-runtime";
+    import { TUIElement, TSymbol, AnimationProps } from "carbon-runtime";
 
     export interface IDataNodeProps {
         [key: string]: any;
@@ -159,7 +159,7 @@ declare module "carbon-model" {
         activeGroup(): boolean;
         lockedGroup(): boolean;
 
-        animate(props: object, duration: number, options: object, progress: () => void): Promise<void>;
+        animate(props: AnimationProps, duration?: number, options?: any, progress?: () => void): Promise<void>;
 
         findPropertyDescriptor(propName): PropDescriptor;
 
@@ -312,8 +312,9 @@ declare module "carbon-model" {
         source: SymbolSource;
         stateId?: string;
     }
-    export interface ISymbol extends IContainer<ISymbolProps> {
+    export interface ISymbol extends IContainer<ISymbolProps>, TSymbol {
         source(value?: SymbolSource): SymbolSource;
+        name:string;
         readonly artboard:IArtboard;
     }
     export const Symbol: IConstructor<ISymbol>;

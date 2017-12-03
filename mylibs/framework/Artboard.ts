@@ -1046,7 +1046,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     getStates() {
-        return this._recorder.getStates();
+        return this._recorder.states;
     }
 
     state(value?) {

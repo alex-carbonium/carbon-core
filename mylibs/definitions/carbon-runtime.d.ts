@@ -14,11 +14,11 @@ declare module "carbon-runtime" {
         animate(props: AnimationProps, duration?: number, options?: any, progress?: () => void): Promise<void>;
     }
 
-    interface TSymbol extends TUIElement{
+    export interface TSymbol extends TUIElement{
         states:string[];
-        nextState();
-        prevState();
-        changeState();
+        currentState:string;
+        nextState():boolean;
+        prevState():boolean;
     }
 
     export interface TRectangle extends TUIElement {

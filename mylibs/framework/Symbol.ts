@@ -15,6 +15,7 @@ import Text from "./text/Text";
 import Brush from "./Brush";
 import Font from "./Font";
 import NullContainer from "framework/NullContainer";
+import { RuntimeProxy } from "../code/runtime/RuntimeProxy";
 
 interface ISymbolRuntimeProps extends IUIElementProps {
     artboardVersion: number;
@@ -408,6 +409,71 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         return this._artboard ? this._artboard.getStates() : [];
     }
 
+    get states() {
+        return RuntimeProxy.unwrap(this).getStates().map(s=>s.name);
+    }
+
+    nextState() {
+        let that = RuntimeProxy.unwrap(this);
+        let states = that.getStates();
+        if(!states && !states.length) {
+            return false;
+        }
+
+        if(!that.props.stateId) {
+            that.props.stateId = states[0].id;
+        }
+
+        let index =  states.findIndex(s=>s.id === that.props.stateId);
+        if(index < states.length - 1){
+            that.setProps({stateId:states[index+1].id});
+
+            return true;
+        }
+
+        return false;
+    }
+
+    prevState() {
+        let that = RuntimeProxy.unwrap(this);
+        let states = that.getStates();
+        if(!states && !states.length) {
+            return false;
+        }
+
+        if(!that.props.stateId) {
+            that.props.stateId = states[0].id;
+        }
+
+        let index =  states.findIndex(s=>s.id === that.props.stateId);
+        if(index > 0){
+            that.setProps({stateId:states[index-1].id});
+            return true;
+        }
+
+        return false;
+    }
+
+    get currentState():string {
+        let that = RuntimeProxy.unwrap(this);
+        let states = that.getStates();
+        if(!states && !states.length) {
+            return undefined;
+        }
+        return states.find(s=>s.id === that.props.stateId).name;
+    }
+
+    set currentState(name:string) {
+        let that = RuntimeProxy.unwrap(this);
+        let states = that.getStates();
+        if(!states && !states.length) {
+            return;
+        }
+        let state = states.find(s=>s.name === name);
+
+        that.setProps(state.id);
+    }
+
     canDrag() {
         let root = this.findNextRoot();
         return !root || root.isEditable();
@@ -688,6 +754,15 @@ PropertyMetadata.registerForType(Symbol, {
             stateId: element._artboard && element._artboard.props
             && element._artboard.props.states
             && element._artboard.props.states.length > 1
+        }
+    },
+
+    proxyDefinition:function() {
+        let baseDefinition = PropertyMetadata.findForType(Container).proxyDefinition();
+        return {
+            rprops: ["states"].concat(baseDefinition.rprops), // readonly props
+            props: ["currentState"].concat(baseDefinition.props),
+            methods: ["nextState", "prevState"].concat(baseDefinition.methods)
         }
     },
     groups() {

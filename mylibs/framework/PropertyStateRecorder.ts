@@ -187,10 +187,6 @@ export default class PropertyStateRecorder {
         return null;
     }
 
-    getStates() {
-        return this.states;
-    }
-
     addState(name, id) {
         if (this.states.length === 0){
             var defaultState = {id: "default", name: "Default", data: {}};

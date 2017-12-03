@@ -9,9 +9,9 @@ export class RuntimeProxy {
     private propertyMap: { [name: string]: boolean } = {};
     private rpropertyMap: { [name: string]: boolean } = {};
 
-    static unwrap<T>(proxy:any):T {
-        if(proxy.__isProxy) {
-            return RuntimeProxy.proxyMap.get(proxy);
+    static unwrap<T>(proxy:T):T {
+        if((proxy as any).__isProxy) {
+            return RuntimeProxy.proxyMap.get(proxy as any);
         }
 
         return proxy;

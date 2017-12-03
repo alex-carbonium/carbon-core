@@ -14,6 +14,10 @@ export class ArtboardProxyGenerator {
         return "TUIElement & MouseEventHandler";
     }
 
+    static getGenericParameter(type:string):string {
+        return genericMatcher.exec(type)[1];
+    }
+
     static generateSymbolsInfo(modifier, symbolsList: { symbol: any, exports: any }[]) {
         let res = '';
         for (var item of symbolsList) {
@@ -25,10 +29,10 @@ export class ArtboardProxyGenerator {
                 for (let name of names) {
                     let type = item.exports[name];
                     if (type.startsWith('Property<')) {
-                        let baseType = genericMatcher.exec(type)[1];
+                        let baseType = ArtboardProxyGenerator.getGenericParameter(type);
                         decl.push(`${name}: ${baseType};`)
                     } else if (type.startsWith('Event<')) {
-                        let baseType = genericMatcher.exec(type)[1];
+                        let baseType = ArtboardProxyGenerator.getGenericParameter(type);
                         decl.push(`${name}: EventCallback<${baseType}>;`)
                     }
                 }
@@ -42,7 +46,7 @@ export class ArtboardProxyGenerator {
             } else {
                 type = 'TSymbol';
             }
-            res += `${modifier} const ${name}:${type};
+            res += `${modifier} const ${name}:${type} & MouseEventHandler;
             `
         }
 
