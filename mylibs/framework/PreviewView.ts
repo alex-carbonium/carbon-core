@@ -1,5 +1,6 @@
 import ViewBase from "./ViewBase";
 import EventHelper from "framework/EventHelper";
+import Cursor from "./Cursor";
 import {IContext, ContextType, RenderFlags, RenderEnvironment} from "carbon-core";
 
 export default class PreviewView extends ViewBase {
@@ -18,11 +19,16 @@ export default class PreviewView extends ViewBase {
         this.upperContext = contexts.find(x => x.type === ContextType.Interaction);
     }
 
+    setup(deps) {
+        super.setup(deps);
+        this._cursorChangedToken = Cursor.changed.bind(this, this.updateCursor);
+    }
+
     detach() {
-        // if (this._cursorChangedToken) {
-        //     this._cursorChangedToken.dispose();
-        //     this._cursorChangedToken = null;
-        // }
+        if (this._cursorChangedToken) {
+            this._cursorChangedToken.dispose();
+            this._cursorChangedToken = null;
+        }
 
         // if (this._invalidateRequestedToken) {
         //     this._invalidateRequestedToken.dispose();
@@ -38,5 +44,16 @@ export default class PreviewView extends ViewBase {
         }
 
         return env;
+    }
+
+    updateCursor(value, oldValue) {
+        if (this.viewContainerElement) {
+            if (oldValue) {
+                this.viewContainerElement.classList.remove("c-" + oldValue);
+            }
+            if (value) {
+                this.viewContainerElement.classList.add("c-" + value);
+            }
+        }
     }
 }

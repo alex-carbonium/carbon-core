@@ -5,23 +5,21 @@ import Selection from "framework/SelectionModel";
 import EventHelper from "framework/EventHelper";
 import Invalidate from "framework/Invalidate";
 import NullContainer from "framework/NullContainer";
+import { IText, IController, IMouseEventData } from "carbon-core";
+import { PreviewTextTool } from "./PreviewTextTool";
+import ControllerBase from "./ControllerBase";
+import Cursor from "./Cursor";
 
-function updateEvent(event) {
-    var scale = this.view.scale();
-    domUtil.layerX(event, Math.round((domUtil.layerX(event) + this.view.scrollX()) * 100 / scale) / 100);
-    domUtil.layerY(event, Math.round((domUtil.layerY(event) + this.view.scrollY()) * 100 / scale) / 100);
-}
-
-export default class PreviewController {
+export default class PreviewController extends ControllerBase {
     [key: string]: any;
+    private previewTextTool: PreviewTextTool;
 
     constructor(app, view, previewModel) {
-        this.app = app;
+        super(app, view);
         this.activeStory = app.activeStory();
         this.previewModel = previewModel;
-        this.view = view;
         this.touchHelper = new TouchHelper(view);
-        this.onArtboardChanged = EventHelper.createEvent();
+        this.previewTextTool = new PreviewTextTool(app, this);
     }
 
     _invokeAction(action) {
@@ -115,41 +113,9 @@ export default class PreviewController {
         }
     }
 
-    onpanstart(event) {
-        this.touchHelper.onpanstart(event);
-    }
-
-    onpanmove(event) {
-        this.touchHelper.onpanmove(event);
-    }
-
-    onpanend(event) {
-        this.touchHelper.onpanend(event);
-    }
-
-    resetCurrentTool() {
-
-    }
-
-    ondoubletap() {
-
-    }
-
-    onWindowResize() {
-
-    }
-
     onpinchmove(event) {
-        this.touchHelper.onpinchmove(event);
+        super.onpinchmove(event);
         this.view.invalidate();
-    }
-
-    onpinchstart(event) {
-        this.touchHelper.onpinchstart(event);
-    }
-
-    onpinchend(event) {
-        this.touchHelper.onpinchend(event);
     }
 
 
@@ -160,39 +126,47 @@ export default class PreviewController {
     }
 
     onmousedown(eventData) {
+        super.onmousedown(eventData);
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(ActionEvents.mousedown, element);
     }
 
     onmousemove(eventData) {
+        super.onmousemove(eventData);
+
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(ActionEvents.mousemove, element);
     }
 
     onmouseenter(eventData) {
+        super.onmouseenter(eventData);
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(ActionEvents.mouseenter, element);
     }
 
     onmouseleave(eventData) {
+        super.onmouseleave(eventData);
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(ActionEvents.mouseleave, element);
     }
 
     onmouseup(eventData) {
+        super.onmouseup(eventData);
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(ActionEvents.mouseup, element);
     }
 
     ondblclick(eventData) {
+        super.ondblclick(eventData);
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(ActionEvents.dblclick, element);
     }
 
     async onclick(eventData) {
+        super.onclick(eventData);
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
         if (! await this._propagateAction(ActionEvents.click, element)) {
-            this.view.displayClickSpots.raise();
+            (this.view as any).displayClickSpots.raise();
         }
     }
 
@@ -219,17 +193,15 @@ export default class PreviewController {
         return false;
     }
 
-    createEventData(event) {
-        updateEvent.call(this, event);
-        return {
-            handled: false,
-            x: domUtil.layerX(event),
-            y: domUtil.layerY(event),
-            event: event,
-            ctrlKey: event.ctrlKey || event.metaKey,
-            shiftKey: event.shiftKey,
-            altKey: event.altKey,
-            view: this
+    updateCursor(eventData: IMouseEventData) {
+        if (eventData && eventData.cursor) {
+            if (eventData.cursor) {
+                Cursor.setCursor(eventData.cursor);
+                return;
+            }
+        }
+        else if (!Cursor.hasGlobalCursor()) {
+            Cursor.setCursor(this.defaultCursor());
         }
     }
 }
