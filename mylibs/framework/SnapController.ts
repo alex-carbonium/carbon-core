@@ -574,7 +574,7 @@ class SnapController {
             return;
         }
 
-        if (parent.parent() === NullContainer) {
+        if (parent.parent === NullContainer) {
             parent.children.forEach(collectPoints.bind(null, data, elements, viewportRect, parent, excludeElements));
         } else {
             parent.applyVisitorBreadthFirst(collectPoints.bind(null, data, elements, viewportRect, parent, excludeElements), true);

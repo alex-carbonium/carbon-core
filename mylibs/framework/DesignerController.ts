@@ -257,7 +257,7 @@ export default class DesignerController implements IController {
                 dragOverElement = element;
                 break;
             }
-            element = element.parent();
+            element = element.parent;
         }
 
         if (this._draggingOverElement !== null && this._draggingOverElement !== dragOverElement) {
@@ -739,7 +739,7 @@ export default class DesignerController implements IController {
 
                     // remove element from parent and keep global position to generate less primitives
                     let gm = e.globalViewMatrix();
-                    e.parent().remove(e, ChangeMode.Self);
+                    e.parent.remove(e, ChangeMode.Self);
                     e.setTransform(gm, ChangeMode.Self);
                 }
 
@@ -751,7 +751,7 @@ export default class DesignerController implements IController {
             .catch(e => {
                 for (let i = 0; i < elements.length; ++i){
                     let e = elements[i];
-                    e.parent().remove(e, ChangeMode.Self);
+                    e.parent.remove(e, ChangeMode.Self);
                 }
                 this.cancel();
                 this.raiseInteractionStopped(null, null);
@@ -793,7 +793,7 @@ export default class DesignerController implements IController {
 
     getCurrentDropTarget(): IContainer {
         var parent = this._draggingOverElement;
-        return parent || this._draggingElement.children[0].parent();
+        return parent || this._draggingElement.children[0].parent;
     }
 
     captureMouse(/*UIElement*/element) {

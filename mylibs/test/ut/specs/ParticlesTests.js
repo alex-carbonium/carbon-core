@@ -74,7 +74,7 @@
 //         this.app.relayout();
 
 //         var e = this.app.activePage.getElementById(id);
-//         assert.equal(artboard.id, e.parent().id, "parent");
+//         assert.equal(artboard.id, e.parent.id, "parent");
 //     });
 // });
 

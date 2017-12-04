@@ -352,9 +352,7 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
         return null;
     }
 
-    parent() {
-        return null;
-    }
+    parent = null;
 
     globalViewMatrix() {
         return Matrix.Identity;

@@ -69,7 +69,7 @@ export default class InteractiveContainer extends Container implements IIsolatab
 
     onIsolationExited() {
         if (!this.count()) {
-            this.parent().remove(this);
+            this.parent.remove(this);
         }
     }
 

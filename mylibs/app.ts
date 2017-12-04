@@ -894,13 +894,13 @@ class AppClass extends DataNode implements IApp {
     }
 
     private _updateWithSelectionMask(e) {
-        var parent = e.parent();
+        var parent:any = e.parent;
         do {
             if (parent.opacity() < 1 || parent.runtimeProps.mask || parent.clipSelf()) {
                 e = parent;
                 break;
             }
-            parent = parent.parent();
+            parent = parent.parent;
         } while (parent && parent !== NullContainer);
 
         if (e && e !== NullContainer) {
@@ -921,7 +921,7 @@ class AppClass extends DataNode implements IApp {
 
         var root: IUIElement = e.primitiveRoot();
         if (root === e) {
-            root = e.parent();
+            root = e.parent;
         }
 
         if (root instanceof Artboard) {

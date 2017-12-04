@@ -289,8 +289,8 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
         this.boundaryRect(rect);
         this._updateGraph();
 
-        if (this.parent() instanceof CompoundPath) {
-            this.parent().recalculate();
+        if (this.parent instanceof CompoundPath) {
+            this.parent.recalculate();
         }
 
         delete this._internalChange;
@@ -330,7 +330,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
         path.name = (this.displayName());
         path.styleId(this.styleId());
 
-        let parent = this.parent();
+        let parent:any = this.parent;
         let index = parent.positionOf(this);
         parent.remove(this);
         parent.insert(path, index);
@@ -382,7 +382,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
 
     onIsolationExited(){
         if (!this.count()){
-            this.parent().remove(this);
+            this.parent.remove(this);
         } else {
             this.recalculate();
         }
@@ -412,7 +412,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
         let res = super.hitTest.apply(this, arguments);
 
         if (res) {
-            if (this.parent() !== null) {
+            if (this.parent !== null) {
                 point = this.global2local(point);
             }
 

@@ -74,10 +74,10 @@ export default class SelectComposite extends CompositeElement implements ISelect
         return SelectCompositeFrame;
     }
     resizeDimensions() {
-        var parent = this.first().parent();
+        var parent = this.first().parent;
         var canResize = true;
         this.each(function (e) {
-            if (e.parent() !== parent) {
+            if (e.parent !== parent) {
                 canResize = false;
                 return false;
             }

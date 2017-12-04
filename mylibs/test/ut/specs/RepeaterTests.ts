@@ -664,7 +664,7 @@ describe("Repeater tests", function () {
 
             //act
             var clone3 = repeater.children[1].findElementByName(element3.name);
-            clone3.parent().changePosition(clone3, 1);
+            clone3.parent.changePosition(clone3, 1);
             this.app.relayout();
 
             //assert
@@ -871,7 +871,7 @@ describe("Repeater tests", function () {
 
             element1 = repeater.getElementById(element1.id);
 
-            element1.parent().remove(element1);
+            element1.parent.remove(element1);
             this.app.relayout();
 
             //act
@@ -903,7 +903,7 @@ describe("Repeater tests", function () {
 
             element2 = repeater.getElementById(element2.id);
 
-            element2.parent().changePosition(element2, 0);
+            element2.parent.changePosition(element2, 0);
             this.app.relayout();
 
             //act

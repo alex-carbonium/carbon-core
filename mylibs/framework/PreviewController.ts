@@ -77,7 +77,7 @@ export default class PreviewController {
             return true;
         }
 
-        var parent = element.parent();
+        var parent = element.parent;
         if (parent && parent !== this.view) {
             return await this._propagateAction(eventType, parent);
         }
@@ -109,7 +109,7 @@ export default class PreviewController {
             Invalidate.request();
         }
 
-        var parent = element.parent();
+        var parent = element.parent;
         if (parent) {
             this._propagateScroll(delta, parent);
         }

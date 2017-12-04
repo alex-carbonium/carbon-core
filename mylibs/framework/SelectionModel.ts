@@ -15,7 +15,7 @@ function lockUnlockGroups(newSelectedElements) {
 
     //unlock parents
     for (let i = 0; i < newSelectedElements.length; i++) {
-        let el = newSelectedElements[i].parent();
+        let el = newSelectedElements[i].parent;
         while (el && el.unlockGroup) {
             let unlocked = this._unlockedContainers.indexOf(el) !== -1;
             if (!unlocked) {
@@ -26,7 +26,7 @@ function lockUnlockGroups(newSelectedElements) {
                 el.invalidate();
             }
 
-            el = el.parent();
+            el = el.parent;
         }
     }
 
@@ -131,14 +131,14 @@ class SelectionModel implements ISelection {
     }
 
     completeSelectFrame(eventData) {
-        Selection.selectFrame.parent().remove(Selection.selectFrame);
+        Selection.selectFrame.parent.remove(Selection.selectFrame);
         this._selectFrameStarted = false;
         this.stopSelectionFrameEvent.raise();
         this._selectFrame.complete(eventData);
     }
 
     cancelSelectFrame() {
-        Selection.selectFrame.parent().remove(Selection.selectFrame);
+        Selection.selectFrame.parent.remove(Selection.selectFrame);
         this._selectFrameStarted = false;
         this.stopSelectionFrameEvent.raise();
     }

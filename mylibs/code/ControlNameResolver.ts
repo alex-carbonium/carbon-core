@@ -1,6 +1,6 @@
 import { IContainer, IUIElement } from "carbon-core";
 import { NameProvider } from "./NameProvider";
-import { ElementProxy } from "./ElementProxy";
+import { ElementProxy } from "./runtime/RuntimeProxy";
 import { RuntimeContext } from "./runtime/RuntimeContext";
 import { RuntimeProxy } from "./runtime/RuntimeProxy";
 
@@ -9,7 +9,6 @@ const blackList = ["window", "document", "uneval"]
 
 export class ControlNameResolver {
     private _artboard: IContainer;
-    private _proxiesMap: { [name: string]: IUIElement } = {};
     private _skipMap = skipList.reduce((m, v) => { m[v] = true; return m; }, {})
     private _blackMap = blackList.reduce((m, v) => { m[v] = true; return m; }, {})
     private _context: RuntimeContext;
@@ -27,7 +26,7 @@ export class ControlNameResolver {
     }
 
     _findControl(name: string) {
-        let proxy = this._proxiesMap[name];
+        let proxy = ElementProxy.tryGet(name);
         if (proxy === undefined) {
             let source = null;
             proxy = null;
@@ -46,9 +45,8 @@ export class ControlNameResolver {
                 });
             }
             if (source) {
-                proxy = ElementProxy.create(source)
+                proxy = ElementProxy.createForElement(name, source);
             }
-            this._proxiesMap[name] = proxy;
         }
 
         return proxy;

@@ -81,7 +81,7 @@ class Clipboard {
             this.globalMatrices = [];
             this.rootBoundingBoxes = [];
             this.zOrder = -1;
-            this.originalParent = elements[0].parent();
+            this.originalParent = elements[0].parent;
 
             for (var i = 0; i < elements.length; i++){
                 var element = elements[i];

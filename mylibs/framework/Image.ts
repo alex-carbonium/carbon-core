@@ -228,7 +228,7 @@ export default class Image extends Container<IImageProps> implements IImage {
                 this.runtimeProps.mask = new RectMask();
                 this.runtimeProps.mask.setProps(this.selectLayoutProps(), ChangeMode.Self);
                 //parent needed for finding global context, not adding to children
-                this.runtimeProps.mask.parent(this);
+                this.runtimeProps.mask.parent = this;
             }
         }
         if (this.runtimeProps.mask && (newProps.hasOwnProperty("width") || newProps.hasOwnProperty("height"))) {

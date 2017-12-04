@@ -10,7 +10,7 @@ export default class Section extends Container {
     trackDeleted(parent, index, mode) {
         super.trackDeleted(parent, index, mode);
         Section.spitContent(this);
-        this.parent().remove(this);
+        this.parent.remove(this);
     }
 
     static suckContent(root){
@@ -85,7 +85,7 @@ export default class Section extends Container {
     }
     static spitContent(element){
         var queue = [element];
-        var parent = element.parent();
+        var parent = element.parent;
         while (queue.length){
             var section = queue.pop();
 

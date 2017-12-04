@@ -14,7 +14,7 @@ var GroupArrangeStrategy = {
 
         if (items.length === 1 && container.wrapSingleChild()) {
             var props = items[0].selectLayoutProps(true);
-            props.m = container.parent().globalMatrixToLocal(props.m);
+            props.m = container.parent.globalMatrixToLocal(props.m);
             container.setProps(props, changeMode);
             items[0].resetTransform(changeMode);
             return;

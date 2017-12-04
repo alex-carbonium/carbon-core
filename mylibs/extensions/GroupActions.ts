@@ -105,7 +105,7 @@ export class GroupActions extends CarbonExtension {
 
         var sorted = elements.slice().sort((a, b) => a.zOrder() - b.zOrder());
         var element = elements[0];
-        var parent = element.parent();
+        var parent = element.parent;
         var group = new containerType();
         let childrenTranslationMatrix = null;
 

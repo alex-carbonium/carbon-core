@@ -663,7 +663,7 @@ class Path extends Shape {
                 }
             }
             else {
-                let matrix = this.parent().globalViewMatrixInverted();
+                let matrix = this.parent.globalViewMatrixInverted();
                 point = matrix.transformPoint(point);
 
                 let graph = BezierGraph.fromPath(this, this.viewMatrix());
@@ -709,7 +709,7 @@ class Path extends Shape {
             this.adjustBoundaries();
         }
 
-        if (newProps.mode !== undefined && newProps.mode !== oldProps.mode && this.parent() !== NullContainer) {
+        if (newProps.mode !== undefined && newProps.mode !== oldProps.mode && this.parent !== NullContainer) {
             this.switchToEditMode(newProps.mode === ElementState.Edit);
         }
     }

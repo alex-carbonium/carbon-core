@@ -207,7 +207,7 @@ class ArtboardPage extends Page implements IArtboardPage {
         this._activeArtboard = artboard;
         if (artboard){
             artboard.activate();
-            !doNotTrack && App.Current.setMirrorArtboardId(artboard.parent().id, artboard.id);
+            !doNotTrack && App.Current.setMirrorArtboardId(artboard.parent.id, artboard.id);
         } else {
             !doNotTrack && App.Current.setMirrorArtboardId(null, null);
         }

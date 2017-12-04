@@ -8,7 +8,7 @@ export default class CombinePaths {
             var e = elements[i];
             if (!(e instanceof Path) && !(e instanceof CompoundPath)) {
                 var path = e.convertToPath();
-                var parent = e.parent();
+                var parent = e.parent;
                 parent.replace(e, path);
 
                 elements[i] = path;
@@ -24,7 +24,7 @@ export default class CombinePaths {
         CombinePaths.convertToPaths(elements);
         var path;
         var e0 = elements[0];
-        var parent = e0.parent();
+        var parent = e0.parent;
         if (e0 instanceof CompoundPath) {
             //TODO: (m) check if this is correct
             path = e0;

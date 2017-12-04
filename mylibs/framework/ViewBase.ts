@@ -550,7 +550,7 @@ export default class ViewBase { //TODO: implement IView
         this._requestRedrawCallback && this._requestRedrawCallback();
     }
 
-    parent() {
+    get parent() {
         return null;
     }
 

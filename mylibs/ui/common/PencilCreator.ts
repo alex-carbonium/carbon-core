@@ -105,7 +105,7 @@ export default class PencilCreator extends Tool {
             element.setProps(defaultSettings);
         }
 
-        element.parent().remove(element, ChangeMode.Self);
+        element.parent.remove(element, ChangeMode.Self);
 
         var points = DouglasPeucker(this.points, 1.5 / scale);
 

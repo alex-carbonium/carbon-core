@@ -12,7 +12,7 @@ declare module "carbon-model" {
     export interface IDataNode<TProps extends IDataNodeProps = IDataNodeProps> extends IDisposable {
         props: TProps;
 
-        parent(value?: IDataNode): IDataNode;
+        parent: IDataNode;
         primitiveRootKey(): string;
 
         prepareProps(changes: Partial<TProps>, mode?: ChangeMode);
@@ -81,7 +81,7 @@ declare module "carbon-model" {
     }
 
     export interface IUIElement<TProps extends IUIElementProps = IUIElementProps> extends TUIElement, IDataNode<TProps>, IMouseEventHandler, IDecoratable {
-        parent(value?:IContainer): IContainer;
+        parent: IContainer;
         name:string;
         drawPath?(context: IContext, w: number, h: number);
 
@@ -125,7 +125,7 @@ declare module "carbon-model" {
 
         getMaxOuterBorder(): number;
 
-        invalidate();
+        invalidate(mask?:number);
 
         hitTest(point: IPoint, scale: number, boundaryRectOnly?: boolean): boolean;
         hitTestGlobalRect(rect: IRect, directSelection?: boolean): boolean;
@@ -175,7 +175,7 @@ declare module "carbon-model" {
     export interface IContainer<TProps extends IContainerProps = IContainerProps> extends IUIElement<TProps> {
         children: IUIElement[];
 
-        parent(value?:IContainer):IContainer;
+        parent:IContainer;
 
         canAccept(elements: IUIElement[], autoInsert: boolean, allowMoveIn: boolean): boolean;
 
@@ -314,6 +314,7 @@ declare module "carbon-model" {
     }
     export interface ISymbol extends IContainer<ISymbolProps>, TSymbol {
         source(value?: SymbolSource): SymbolSource;
+        parent:IContainer;
         name:string;
         readonly artboard:IArtboard;
     }
@@ -379,7 +380,7 @@ declare module "carbon-model" {
         detach();
         beforeInvoke(method: string, args: any[]): boolean | void;
         afterInvoke(method: string, args: any[]): boolean | void;
-        parent(value): any;
+        parent: any;
         visible: boolean;
     }
 

@@ -27,13 +27,13 @@ export function choosePasteLocation(elements, rootRelativeBoundingBox = null, al
     var selection = Selection.selectedElements();
     if (bufferRect){
         if (selection.length === 1){
-            var current = selection[0];
+            var current:any = selection[0];
             var allowMoveInCurrent = allowMoveIn;
             do{
                 if (current.canAccept(elements, false, allowMoveInCurrent)){
                     candidates.push(current);
                 }
-                current = current.parent();
+                current = current.parent;
                 allowMoveInCurrent = true;
             } while (current);
         }
@@ -87,7 +87,7 @@ function tryPaste(viewport, parent, bufferRect, rootRelativeBoundingBox, toleran
             height: bufferRect.height
         };
         intersection = intersectRects(centerRect, visibleRect);
-        if (intersection != null){
+        if (intersection){
             intersection = intersectRects(intersection, viewport);
         }
         if (intersection !== null && intersection.width * intersection.height > tolerance){

@@ -51,7 +51,7 @@ export class DraggingElement extends CompositeElement {
         this._initialPosition = this.getBoundingBoxGlobal().topLeft();
         this._translation = new Point(0, 0);
 
-        let snappingTarget = elementOrComposite.first().parent().primitiveRoot()
+        let snappingTarget = elementOrComposite.first().parent.primitiveRoot()
             || Environment.view.page.getActiveArtboard()
             || Environment.view.page;
 
@@ -99,13 +99,13 @@ export class DraggingElement extends CompositeElement {
         SnapController.clearActiveSnapLines();
 
         this.removeDecorator(DraggingDecorator);
-        this.parent().remove(this, ChangeMode.Self);
+        this.parent.remove(this, ChangeMode.Self);
 
         if (this._clones) {
             for (let i = 0; i < this._clones.length; ++i){
                 let clone = this._clones[i];
                 if (clone) {
-                    clone.parent().remove(clone, ChangeMode.Self);
+                    clone.parent.remove(clone, ChangeMode.Self);
                 }
             }
         }
@@ -120,13 +120,13 @@ export class DraggingElement extends CompositeElement {
 
             let topParent = this.findTargetArtboardOrPage(page, artboards, element) as Container;
 
-            let parent: Container = null;
+            let parent: any = null;
             let index = null;
             if (element instanceof Artboard) {
                 parent = page;
             }
             else if (!draggingOverElement) {
-                parent = element.parent();
+                parent = element.parent;
                 if (parent.allowRearrange()) {
                     var dropData = parent.getDropData(event, element);
                     index = dropData.index;
@@ -140,19 +140,19 @@ export class DraggingElement extends CompositeElement {
             }
 
             //the case for elements which cannot be dropped - e.g., ImageContent
-            if (parent !== element.parent() && !parent.canAccept([element], false, event.ctrlKey)) {
+            if (parent !== element.parent && !parent.canAccept([element], false, event.ctrlKey)) {
                 elements.push(element);
                 continue;
             }
 
             if (index === null) {
-                index = parent === element.parent() ? parent.positionOf(element) : parent.count();
+                index = parent === element.parent ? parent.positionOf(element) : parent.count();
             }
 
             let source = element;
             if (event.altKey) {
                 source = this._clones[i];
-                source.parent().remove(source, ChangeMode.Self);
+                source.parent.remove(source, ChangeMode.Self);
                 this._clones[i] = null;
             }
 
@@ -197,8 +197,8 @@ export class DraggingElement extends CompositeElement {
     dropElementOn(event, newParent: IContainer, element: UIElement, globalMatrix: IMatrix, index: number) {
         debug("drop %s on %s[%d]", element.displayName(), newParent.displayName(), index);
 
-        if (newParent !== element.parent()) {
-            element.parent().remove(element);
+        if (newParent !== element.parent) {
+            element.parent.remove(element);
         }
 
         if (!newParent.autoPositionChildren()) {
@@ -206,7 +206,7 @@ export class DraggingElement extends CompositeElement {
             element.setTransform(newParent.globalMatrixToLocal(gm));
         }
 
-        if (newParent !== element.parent()) {
+        if (newParent !== element.parent) {
             var res = newParent.insert(element, index);
             App.Current.mapElementsToLayerMask();
             return res;
@@ -278,7 +278,7 @@ export class DraggingElement extends CompositeElement {
         if(draggingOverElement) {
             var newTarget = draggingOverElement;
             if(!(draggingOverElement instanceof Artboard)) {
-                newTarget = draggingOverElement.parent().primitiveRoot()
+                newTarget = draggingOverElement.parent.primitiveRoot()
                     || Environment.view.page.getActiveArtboard()
                     || Environment.view.page;
             }
@@ -311,11 +311,11 @@ export class DraggingElement extends CompositeElement {
     }
 
     private isSnappingAllowed(pos) {
-        return this.children.every(x => x.allowSnapping() && x.parent().getDropData(x, pos) === null);
+        return this.children.every(x => x.allowSnapping() && (x.parent as any).getDropData(x, pos) === null);
     }
 
     allowMoveOutChildren(event) {
-        return this.children.every(x => x.parent().allowMoveOutChildren(undefined, event));
+        return this.children.every(x => (x.parent as any).allowMoveOutChildren(undefined, event));
     }
 }
 

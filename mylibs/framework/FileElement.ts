@@ -81,7 +81,7 @@ export class FileElement extends UIElement implements IFileElement {
                     result.name = (this.getNameWithoutExtension());
                     Environment.view.fitToViewportIfNeeded(result);
 
-                    this.parent().remove(this, ChangeMode.Self);
+                    this.parent.remove(this, ChangeMode.Self);
                     parent.transferElement(result, parent.children.length);
                     Selection.makeSelection([result]);
                     this.linkedElement = result;
@@ -108,7 +108,7 @@ export class FileElement extends UIElement implements IFileElement {
                 image.resizeOnLoad(Origin.Center);
                 this.registerImageLink(image);
 
-                this.parent().remove(this, ChangeMode.Self);
+                this.parent.remove(this, ChangeMode.Self);
 
                 image.prepareAndSetProps({ source: Image.createLoadingSource(dataUrl) }, ChangeMode.Self);
                 image.load().then(() => {

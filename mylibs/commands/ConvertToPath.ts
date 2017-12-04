@@ -19,7 +19,7 @@ export default {
 
         Promise.all(promises)
             .then(paths => elements.map((e, i) => {
-                var parent = e.parent();
+                var parent = e.parent;
                 var p = paths[i];
                 parent.replace(e, p);
                 return p;

@@ -13,11 +13,11 @@ export default {
             var clone = element.clone();
             App.Current.activePage.nameProvider.assignNewName(clone);
 
-            var originalParent = element.parent();
+            var originalParent = element.parent;
             var current = originalParent;
             var children = [clone];
             while (!current.canAccept(children, false, true)){
-                current = current.parent();
+                current = current.parent;
             }
 
             if (current === originalParent){

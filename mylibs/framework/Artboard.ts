@@ -531,7 +531,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         super.propsUpdated.apply(this, arguments);
         let hasParent = this.hasParent();
 
-        let parent = this.parent() as IArtboardPage | IContainer;
+        let parent = this.parent as IArtboardPage | IContainer;
         if (props.state !== undefined) {
             if (this._recorder && this._recorder.hasState(props.state)) {
                 this._recorder.changeState(props.state);
@@ -889,7 +889,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     spit() {
         let artboardBox = this.getBoundingBoxGlobal();
-        let parent = this.parent() as Container;
+        let parent = this.parent as Container;
         for (let i = this.children.length - 1; i >= 0; --i) {
             let child = this.children[i];
             let childBox = child.getBoundingBoxGlobal();
@@ -900,7 +900,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
     suck() {
         let artboardBox = this.getBoundingBoxGlobal();
-        let parent = this.parent() as IContainer;
+        let parent = this.parent as IContainer;
         for (let i = 0; i < parent.children.length; ++i) {
             let child = parent.children[i];
             if (child instanceof Artboard) {
@@ -914,14 +914,14 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     primitiveRoot(): IPrimitiveRoot & UIElement {
-        if (!this.parent() || !this.parent().primitiveRoot()) {
+        if (!this.parent || !this.parent.primitiveRoot()) {
             return null;
         }
         return this;
     }
 
     primitivePath() {
-        let parent = this.parent();
+        let parent = this.parent;
         if (!parent || !parent.primitiveRoot()) {
             return null;
         }
@@ -936,7 +936,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     primitiveRootKey() {
-        let parent = this.parent();
+        let parent = this.parent;
         if (!parent || !parent.primitiveRoot()) {
             return null;
         }
@@ -992,7 +992,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     incrementVersion() {
         this.runtimeProps.version++;
 
-        let parent = this.parent() as IPage;
+        let parent = this.parent as IPage;
         if (parent) {
             parent.incrementVersion();
 
@@ -1014,7 +1014,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         let scale = Environment.view.scale();
         let pos = this.position();
         if (Environment.controller.currentTool !== "artboardTool" && !Selection.isElementSelected(this) && isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width, height: 20 / scale }, event)) {
-            this.parent().setActiveArtboard(this);
+            (this.parent as any).setActiveArtboard(this);
             event.handled = true;
         }
     }
@@ -1115,7 +1115,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             for (let i = 0; i < stateBoards.length; ++i) {
                 let stateBoard = stateBoards[i];
                 if (stateBoard.stateId === item.id) {
-                    stateBoard.parent().remove(stateBoard);
+                    stateBoard.parent.remove(stateBoard);
                     break;
                 }
             }
@@ -1170,7 +1170,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         let stateBoards = this.runtimeProps.stateBoards;
         for (let i = 0; i < stateBoards.length; ++i) {
             let stateBoard = stateBoards[i];
-            stateBoard.parent().remove(stateBoard);
+            stateBoard.parent.remove(stateBoard);
         }
 
         if (this.props.type === ArtboardType.Symbol) {
@@ -1266,8 +1266,8 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     linkStateBoard(stateBoard) {
         stateBoard.artboard = this;
 
-        if (!stateBoard.parent() || stateBoard.parent() === NullContainer) {
-            this.parent().add(stateBoard);
+        if (!stateBoard.parent || stateBoard.parent === NullContainer) {
+            this.parent.add(stateBoard);
         }
         this.runtimeProps.stateBoards.push(stateBoard);
     }
@@ -1278,7 +1278,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         let missingLinks = this.props.states.filter(x => x.id !== "default" && !stateBoards.some(y => x.id === y.props.stateId));
         for (let i = 0; i < missingLinks.length; i++) {
             let stateId = missingLinks[i].id;
-            let stateBoard = this.parent().findNodeBreadthFirst(x => x.props.masterId === id && x.props.stateId === stateId);
+            let stateBoard = this.parent.findNodeBreadthFirst(x => x.props.masterId === id && x.props.stateId === stateId);
             this.linkStateBoard(stateBoard);
         }
         return stateBoards;
@@ -1446,7 +1446,7 @@ PropertyMetadata.registerForType(Artboard, {
                     return {
                         name: framed_artboard.name,
                         value: {
-                            pageId: framed_artboard.parent().id,
+                            pageId: framed_artboard.parent.id,
                             artboardId: framed_artboard.id
                         }
                     }

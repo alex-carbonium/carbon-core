@@ -492,7 +492,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     }
 
     primitiveRoot(): IPrimitiveRoot & UIElement {
-        if (!this.parent() || !this.parent().primitiveRoot()) {
+        if (!this.parent || !this.parent.primitiveRoot()) {
             return null;
         }
         return this;

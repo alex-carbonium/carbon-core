@@ -74,6 +74,7 @@ declare module "carbon-model"{
     export interface IContainer{
         globalMatrixToLocal(m: any): any;
         getElementById(id:string):IUIElement|IContainer|null;
+        autoGrow(dw:number, dh:number, mode?:ChangeMode, sourceElement?:IUIElement);
     }
 
     export interface IText {

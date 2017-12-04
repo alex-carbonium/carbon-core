@@ -195,7 +195,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
 
     _finalizePath() {
         if (this.path.points.length < 2) {
-            this.path.parent().remove(this.path);
+            this.path.parent.remove(this.path);
             Selection.clearSelection();
         } else {
             this.element.adjustBoundaries();

@@ -98,7 +98,7 @@ export default class CompositeElement extends UIElement implements IComposite {
         for (let i = 0; i < this.elements.length; ++i){
             let element = this.elements[i];
             let localOrigin = Point.allocate(o.x, o.y);
-            element.parent().globalViewMatrixInverted().transformPointMutable(localOrigin);
+            (element.parent as any).globalViewMatrixInverted().transformPointMutable(localOrigin);
             element.applyScaling(s, localOrigin, resizeOptions, changeMode)
             localOrigin.free();
         }
@@ -383,11 +383,11 @@ export default class CompositeElement extends UIElement implements IComposite {
         var parent;
 
         this.each(function (e) {
-            if (parent && e.parent() !== parent) {
+            if (parent && e.parent !== parent) {
                 result = false;
                 return false;
             }
-            parent = e.parent();
+            parent = e.parent;
         });
 
         return result;
@@ -395,7 +395,7 @@ export default class CompositeElement extends UIElement implements IComposite {
     parents() {
         var parents = [];
         for (var i = 0; i < this.elements.length; i++) {
-            var parent = this.elements[i].parent();
+            var parent = this.elements[i].parent;
             if (parents.indexOf(parent) === -1) {
                 parents.push(parent);
             }
@@ -408,10 +408,10 @@ export default class CompositeElement extends UIElement implements IComposite {
         }
 
         let sorted = true;
-        let parent = this.elements[0].parent();
+        let parent = this.elements[0].parent;
         let index = parent.children.indexOf(this.elements[0]);
         for (var i = 1; i < this.elements.length; i++) {
-            if (this.elements[i].parent() !== parent) {
+            if (this.elements[i].parent !== parent) {
                 return;
             }
             let elementIndex = parent.children.indexOf(this.elements[i]);

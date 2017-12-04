@@ -70,7 +70,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         else {
             this.id = (createUUID());
         }
-        this.parent(NullContainer);
+        this.parent = NullContainer;
         this.runtimeProps.ctxl = 1;
     }
     invalidate(layerMask?) {
@@ -78,7 +78,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             layerMask = this.runtimeProps.ctxl;
         }
 
-        let parent = this.parent();
+        let parent = this.parent;
         if (parent) {
             parent.invalidate(layerMask);
         }
@@ -159,7 +159,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         delete this.runtimeProps.minWidth;
         delete this.runtimeProps.minHeight;
 
-        var parent = this.parent();
+        var parent:any = this.parent;
         if (parent && parent !== NullContainer) {
             parent.refreshMinSizeConstraints();
         }
@@ -193,7 +193,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (this.runtimeProps.rc) {
             ContextCacheManager.free(this);
         }
-        var parent = this.parent();
+        var parent:any = this.parent;
         parent && parent.clearRenderingCache();
     }
 
@@ -360,7 +360,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             this.saveOrResetLayoutProps(ChangeMode.Self);
         }
         let m = this.globalViewMatrix().prependedWithTranslation(t.x, t.y);
-        m = this.parent().globalViewMatrixInverted().appended(m);
+        m = this.parent.globalViewMatrixInverted().appended(m);
         this.setTransform(m, changeMode);
     }
 
@@ -1062,7 +1062,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (this.runtimeProps.primitiveRoot) {
             return this.runtimeProps.primitiveRoot;
         }
-        let parent = this.parent();
+        let parent = this.parent;
         let root = parent ? parent.primitiveRoot() : null;
         this.runtimeProps.primitiveRoot = root;
         return root;
@@ -1072,13 +1072,13 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     _findFinalRoot() {
         let root = this.primitiveRoot();
-        while (root && !root.isFinalRoot() && root.parent()) {
-            root = root.parent().primitiveRoot();
+        while (root && !root.isFinalRoot() && root.parent) {
+            root = root.parent.primitiveRoot();
         }
         return root;
     }
-    protected findNextRoot(): IPrimitiveRoot & UIElement {
-        var parent = this.parent();
+    protected findNextRoot(): IPrimitiveRoot & IUIElement {
+        var parent = this.parent;
         if (!parent) {
             return null;
         }
@@ -1093,7 +1093,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
     globalViewMatrix(): IMatrix {
         if (!this.runtimeProps.globalViewMatrix) {
-            let parent = this.parent();
+            let parent = this.parent;
             if (!parent || parent === NullContainer) {
                 return GlobalMatrixModifier.applyToMatrix(this.viewMatrix());
             }
@@ -1117,11 +1117,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (!root || root === this) {
             return this.viewMatrix();
         }
-        let current = this;
+        let current:any = this;
         let matrices = [];
         while (current !== root) {
             matrices.push(current.viewMatrix());
-            current = current.parent();
+            current = current.parent;
         }
 
         let m = matrices[matrices.length - 1];
@@ -1205,7 +1205,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (arguments.length > 0) {
             throw "zOrder is readonly";
         }
-        let parent = this.parent();
+        let parent = this.parent;
         if (!parent || parent === NullContainer) {
             return null;
         }
@@ -1349,7 +1349,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if ((this.locked() && !forceLocked) || !this.visible || this.hasBadTransform()) {
             return false;
         }
-        let parent = this.parent();
+        let parent = this.parent;
         if (!parent) {
             return false;
         }
@@ -1384,7 +1384,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                 return false;
             }
 
-            e = e.parent();
+            e = e.parent;
         }
 
         return true;
@@ -1486,13 +1486,16 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
         return this.props.overflow;
     }
-    parent(value?: IDataNode): any {
-        var parent = super.parent.apply(this, arguments);
-        if (arguments.length) {
-            this.resetGlobalViewCache(true);
-        }
-        return parent;
+
+    get parent(): IContainer {
+        return super.parent as any;
     }
+
+    set parent(value: IContainer) {
+        super.parent = value;
+        this.resetGlobalViewCache(true);
+    }
+
     opacity(value?: number) {
         if (value !== undefined) {
             this.setProps({ opacity: value });
@@ -1635,12 +1638,12 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     isDescendantOrSame(element: IUIElement): boolean {
-        let current = this;
+        let current:any = this;
         do {
             if (current.isSameAs(element)) {
                 return true;
             }
-            current = current.parent();
+            current = current.parent;
         } while (current && current !== NullContainer as DataNode);
 
         return false;
@@ -1667,7 +1670,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.props.dockStyle;
     }
     index() {
-        return this.parent().children.indexOf(this);
+        return this.parent.children.indexOf(this);
     }
     each(callback) {
         each([this], callback);
@@ -1755,9 +1758,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     getPath() {
         let path = [this];
         let e = this;
-        while (typeof e.parent === "function" && e.parent()) {
-            path.push(e.parent());
-            e = e.parent();
+        while (typeof e.parent === "function" && e.parent) {
+            path.push(e.parent);
+            e = e.parent;
         }
         return this.id + ': ' + map(path.reverse(), function (x) {
             return x.t;
@@ -1803,18 +1806,18 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     hasParent() {
-        let parent = this.parent();
+        let parent = this.parent;
         return parent && parent !== NullContainer;
     }
 
     isAncestor(element) {
-        let parent = this.parent();
+        let parent = this.parent;
         while (parent) {
             if (parent === element) {
                 return true;
             }
 
-            parent = parent.parent();
+            parent = parent.parent;
         }
 
         return false;
@@ -1829,10 +1832,10 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
     page() {
         let element;
-        let nextParent = this;
+        let nextParent:any = this;
         do {
             element = nextParent;
-            nextParent = !nextParent.isDisposed() ? nextParent.parent() : null;
+            nextParent = !nextParent.isDisposed() ? nextParent.parent : null;
         } while (nextParent && (nextParent instanceof UIElement) && !(nextParent === NullContainer as DataNode));
 
         if (element && (element.t === Types.ArtboardPage)) {
@@ -1845,7 +1848,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     delete() {
-        this.parent().remove(this);
+        this.parent.remove(this);
     }
     move(rect) {
         this.resize(rect);
@@ -2531,7 +2534,7 @@ PropertyMetadata.registerForType(UIElement, {
     },
     proxyDefinition() {
         return {
-            rprops: ["name", "id"], // readonly props
+            rprops: ["name", "id", "parent"], // readonly props
             props: ["x", "y", "width", "height", "angle", "visible"], // read/write props
             methods: ["animate", "boundaryRect"]
         }
@@ -2574,7 +2577,7 @@ PropertyMetadata.registerForType(UIElement, {
             }
             return res;
         }
-        var parent = element.parent();
+        var parent:any = element.parent;
         var strategy = parent.arrangeStrategy();
         return {
             dockStyle: strategy === ArrangeStrategies.Dock,

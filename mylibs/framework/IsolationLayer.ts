@@ -131,7 +131,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
             this.setProps(this.ownerElement.selectLayoutProps(true), ChangeMode.Self);
 
             // owner element can be removed, we need to exit isolation mode if that happens
-            let parent = this.ownerElement.parent();
+            let parent = this.ownerElement.parent;
             if (parent === NullContainer) {
                 Environment.view.deactivateLayer(this.type);
             }

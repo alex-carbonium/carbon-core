@@ -196,7 +196,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         }
 
         if (dw || dh) {
-            this.parent().autoGrow(dw, dh, mode, this);
+            (this.parent as any).autoGrow(dw, dh, mode, this);
         }
 
         this.setProps({ br: nbr }, mode);
@@ -495,7 +495,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
                 }
             }
             let newChild = new CorruptedElement(data);
-            newChild.parent(child.parent());
+            newChild.parent = child.parent;
             let items = this.children;
             for (let i = 0; i < items.length; ++i) {
                 let c = items[i];
@@ -551,19 +551,19 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     }
 
     acquiredChild(child, mode) {
-        let oldParent = child.parent();
+        let oldParent = child.parent;
         if (oldParent && !(oldParent === NullContainer)) {
             oldParent.remove(child, mode);
         }
 
-        child.parent(this);
+        child.parent = this;
 
         this.clearRenderingCache();
         this.invalidate(this.runtimeProps.ctxl);
     }
 
     flatten() {
-        let parent = this.parent();
+        let parent = this.parent;
         let index = this.index();
 
         for (let i = this.children.length - 1; i >= 0; --i) {
@@ -582,7 +582,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
      */
     transferElement(element: IUIElement, index: number, mode?: ChangeMode) {
         let gm = element.globalViewMatrix();
-        element.parent().remove(element);
+        element.parent.remove(element);
         element.setTransform(this.globalMatrixToLocal(gm));
         this.insert(element, index, mode);
     }
@@ -642,7 +642,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
     releasingChild(child) {
         //child.onresize.unbind(this._childResizeHandler);
-        child.parent(NullContainer);
+        child.parent = NullContainer;
     }
 
     canAccept(elements, autoInsert, allowMoveInOut) {
@@ -768,7 +768,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         }
     }
     global2local(/*Point*/pos) {
-        let parent = this.parent();
+        let parent = this.parent;
         if (parent === null || !this.globalViewMatrix) {
             return pos;
         }
@@ -776,7 +776,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         return matrix.transformPoint(pos);
     }
     local2global(/*Point*/pos) {
-        let parent = this.parent();
+        let parent = this.parent;
         if (parent === null || !this.globalViewMatrix) {
             return pos;
         }
@@ -1043,5 +1043,13 @@ PropertyMetadata.registerForType(Container, {
         useInModel: true,
         editable: true,
         defaultValue: true,
+    },
+    proxyDefinition:function() {
+        let baseDefinition = PropertyMetadata.findForType(UIElement).proxyDefinition();
+        return {
+            rprops: ["children"].concat(baseDefinition.rprops), // readonly props
+            props: [].concat(baseDefinition.props),
+            methods: ["add", "remove", "insert"].concat(baseDefinition.methods)
+        }
     }
 });

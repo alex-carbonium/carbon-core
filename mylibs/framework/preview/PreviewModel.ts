@@ -10,7 +10,6 @@ import { IPreviewModel } from "carbon-app";
 import { IArtboard } from "carbon-model";
 import { CompiledCodeProvider } from "../../code/CompiledCodeProvider";
 import { Sandbox } from "../../code/Sandbox";
-import { ElementProxy } from "../../code/ElementProxy";
 import { RuntimeContext } from "../../code/runtime/RuntimeContext";
 import { ActionType } from "../Defs";
 import { IAnimationOptions, DataBag } from "carbon-runtime";
@@ -92,7 +91,6 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
 
     _runCodeOnPage(page: IPage): Promise<IPage> {
         let promises = [];
-        // ElementProxy.clear();
 
         page.applyVisitor(e => {
             if (e instanceof Symbol) {

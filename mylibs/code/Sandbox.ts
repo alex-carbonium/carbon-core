@@ -1,6 +1,6 @@
 import {ControlNameResolver} from "./ControlNameResolver";
 import { IContainer } from "carbon-core";
-import { ElementProxy } from "./ElementProxy";
+import { ElementProxy } from "./runtime/RuntimeProxy";
 import { RuntimeContext } from "./runtime/RuntimeContext";
 
 

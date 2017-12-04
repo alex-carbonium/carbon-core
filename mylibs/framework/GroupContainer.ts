@@ -213,7 +213,7 @@ export default class GroupContainer extends InteractiveContainer implements IGro
 
         if (mode === ChangeMode.Model && !this.count()) {
             if (!Environment.view.isolationLayer.isActivatedFor(this)) {
-                this.parent().remove(this);
+                this.parent.remove(this);
             }
         }
 
@@ -222,7 +222,7 @@ export default class GroupContainer extends InteractiveContainer implements IGro
 
     onIsolationExited() {
         if (!this.count()) {
-            this.parent().remove(this);
+            this.parent.remove(this);
         }
     }
 

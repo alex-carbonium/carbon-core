@@ -68,6 +68,11 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
 
         textChanges.free();
     }
+
+    autoGrow(dw:number, dh:number) {
+
+    }
+
     propsUpdated(newProps, oldProps, mode) {
         if (newProps.br !== undefined
             || newProps.mode !== undefined
@@ -126,7 +131,7 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
 
         if (dw || dh) {
             // Parent auto grow specifically uses ChangeMode.Model for immediate sync.
-            this.parent().autoGrow(dw, dh, ChangeMode.Model, this);
+            this.parent.autoGrow(dw, dh, ChangeMode.Model, this);
         }
     }
 

@@ -21,11 +21,12 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
         }
     }
 
-    parent(value?: IDataNode): IDataNode {
-        if (arguments.length) {
-            this._parent = value;
-        }
+    get parent(): IDataNode {
         return this._parent;
+    }
+
+    set parent(value: IDataNode) {
+        this._parent = value;
     }
 
     prepareProps(changes: IDataNodeProps, mode?: ChangeMode) {
@@ -204,7 +205,7 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
         this.setProps({ id: value }, ChangeMode.Self);
     }
 
-    get id():string {
+    get id(): string {
         return this.props.id;
     }
 
@@ -366,7 +367,7 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
             let res = visitor(element);
             if (res === false) {
                 break;
-            } else if(res === true) {
+            } else if (res === true) {
                 continue;
             }
 
@@ -404,12 +405,12 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
         return nodes;
     }
     findAncestorOfType<T extends IDataNode>(type: IConstructor<T>): T | null {
-        var current = this.parent();
+        var current = this.parent;
         while (current) {
             if (current instanceof type) {
                 return current as T;
             }
-            current = current.parent();
+            current = current.parent;
         }
         return null;
     }

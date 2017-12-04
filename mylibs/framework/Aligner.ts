@@ -8,7 +8,7 @@ export function align(mode, elements: IUIElement[]) {
     }
 
     var alignMode = elements.length === 1 ? AlignMode.Parent : AlignMode.Selection;
-    var parent = elements[0].parent();
+    var parent = elements[0].parent;
 
     var center, space, leftmost, rightmost, topMost, bottomMost, sum, last, baseX, baseY;
     var baseElement = alignMode === AlignMode.Parent ? parent : elements[0];

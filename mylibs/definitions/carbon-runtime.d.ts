@@ -1,5 +1,6 @@
 declare module "carbon-runtime" {
     /// <reference path="carbon-runtime-names"/>;
+    /// <reference path="runtime-platform"/>;
     export type AnimationProps = { [name: string]: number };
 
     export interface TUIElement {
@@ -12,6 +13,14 @@ declare module "carbon-runtime" {
         angle: number;
 
         animate(props: AnimationProps, duration?: number, options?: any, progress?: () => void): Promise<void>;
+        readonly parent:TContainer;
+    }
+
+    interface TContainer extends TUIElement {
+        readonly children:ReadonlyArray<(TUIElement | TContainer)>;
+        add(element:TUIElement);
+        remove(element:TUIElement);
+        insert(element:TUIElement, index:number);
     }
 
     export interface TSymbol extends TUIElement{

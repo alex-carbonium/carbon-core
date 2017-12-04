@@ -72,7 +72,7 @@ export default class ContextLayerSource extends Context {
 
         while(element && element !== NullContainer) {
             element.clip(this._context);
-            element = element.parent();
+            element = element.parent;
         }
     }
 
@@ -98,7 +98,7 @@ export default class ContextLayerSource extends Context {
         // console.log(`element: ${element.name} on ${this._context._mask}`);
 
         if (environment.flags & RenderFlags.UseParentClipping) {
-            let parent = element.parent();
+            let parent = element.parent;
             if (parent && parent.runtimeProps && parent.runtimeProps.ctxl !== ctxl) {
                 // potentially we need to clip this element
                 let relativeClip = this._relativeClippingStack[this._relativeClippingStack.length - 1];

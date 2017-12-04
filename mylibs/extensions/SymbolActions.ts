@@ -85,7 +85,7 @@ export default class SymbolActions extends CarbonExtension {
         let elements = selection.elements;
         let sorted: IUIElement[] = elements.slice().sort((a, b) => a.zOrder() - b.zOrder());
         let element: IUIElement = elements[0];
-        let parent: IContainer = element.parent();
+        let parent: IContainer = element.parent;
         let group = new MeasuringGroupContainer();
 
         selection.makeSelection([]);
@@ -164,7 +164,7 @@ export default class SymbolActions extends CarbonExtension {
         var symbols = selection.elements as Symbol[];
         var children = [];
         symbols.forEach(symbol => {
-            var parent = symbol.parent()
+            var parent = symbol.parent
             var index = symbol.zOrder();
             for (var i = 0; i < symbol.children.length; i++) {
                 var child = symbol.children[i];

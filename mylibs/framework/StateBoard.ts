@@ -16,11 +16,11 @@ class StateBoard extends Artboard implements IStateboard {
 
     get artboard() {
         if (!this._artboard) {
-            if(this.parent() === NullContainer){
+            if(this.parent === NullContainer){
                 return null;
             }
 
-            this._artboard = DataNode.getImmediateChildById(this.parent(), this.props.masterId, true);
+            this._artboard = DataNode.getImmediateChildById(this.parent, this.props.masterId, true);
             if(this._artboard) {
                 this._artboard.linkStateBoard(this);
             }
@@ -92,7 +92,7 @@ class StateBoard extends Artboard implements IStateboard {
         ModelStateListener.trackDelete(this, parent, element, /*remoteOnly:*/true);
         if (!this._transfering && this.artboard) {
             var masterElement = this.artboard.getElementById(element.props.masterId);
-            masterElement.parent().remove(masterElement);
+            masterElement.parent.remove(masterElement);
         }
     }
 
@@ -100,7 +100,7 @@ class StateBoard extends Artboard implements IStateboard {
         this._transfering = true;
         var target = this.getElementByMasterId(masterElement.id);
         if (target) {
-            target.parent().remove(target);
+            target.parent.remove(target);
         }
         this._transfering = false;
     }
@@ -122,7 +122,7 @@ class StateBoard extends Artboard implements IStateboard {
         if (!this._transfering && this.artboard) {
             var element = this.artboard.getElementById(element.props.masterId);
             if(element) {
-                element.parent().changePosition(element, index);
+                element.parent.changePosition(element, index);
             }
         }
     }
@@ -138,7 +138,7 @@ class StateBoard extends Artboard implements IStateboard {
         this._transfering = true;
         var target = this.getElementByMasterId(masterElement.id);
         if(target) {
-            target.parent().changePosition(target, index);
+            target.parent.changePosition(target, index);
         }
         this._transfering = false;
     }

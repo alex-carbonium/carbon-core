@@ -55,7 +55,7 @@ let StarFrameType = {
             br: clone.boundaryRect(),
             internalRadius: clone.internalRadius(),
             radius: clone.radius(),
-            m: frame.element.parent().globalMatrixToLocal(clone.globalViewMatrix())
+            m: frame.element.parent.globalMatrixToLocal(clone.globalViewMatrix())
         };
         frame.element.setProps(props);
     }

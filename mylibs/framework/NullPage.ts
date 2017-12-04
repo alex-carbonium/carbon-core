@@ -22,17 +22,17 @@ class NullPage extends UIElement implements IPage {
     decorators: any[];
     addDecorator(decorator) { }
     removeDecorator(decorator) { }
-    removeAllDecorators():any[] { return null; }
+    removeAllDecorators(): any[] { return null; }
     removeDecoratorByType(type) { }
 
-    hasParent() {return false;}
+    hasParent() { return false; }
 
     incrementVersion() {
     }
-    maxScrollX(value?:number):number {
+    maxScrollX(value?: number): number {
         return 0;
     }
-    maxScrollY(value?:number):number {
+    maxScrollY(value?: number): number {
         return 0;
     }
     activate() {
@@ -114,10 +114,13 @@ class NullPage extends UIElement implements IPage {
     fill(value?: any) {
     }
 
-    clearRenderingCache(){}
-    parent() {
-        return null;
+    clearRenderingCache() { }
+
+    parent = null;
+
+    autoGrow(dw, dh) {
     }
+
     allowCaching() {
         return false;
     }
@@ -175,7 +178,7 @@ class NullPage extends UIElement implements IPage {
     get id() {
         return "";
     }
-    set id(v) {}
+    set id(v) { }
     toJSON() {
         return {};
     }
@@ -187,7 +190,7 @@ class NullPage extends UIElement implements IPage {
     get name() {
         return '';
     }
-    set name(v){}
+    set name(v) { }
 
     encodedName() {
     }
@@ -254,7 +257,7 @@ class NullPage extends UIElement implements IPage {
     scrollY() {
         return 0;
     }
-    hitElement(a, b, c?,d?):IUIElement{
+    hitElement(a, b, c?, d?): IUIElement {
         return null;
     }
     hitElementDirect() {
@@ -306,7 +309,7 @@ class NullPage extends UIElement implements IPage {
     flatten() {
     }
 
-    export(): Promise<object>{
+    export(): Promise<object> {
         return Promise.reject(new Error());
     }
 

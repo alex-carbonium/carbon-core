@@ -11,34 +11,34 @@ export default class ChangeZOrder {
         switch (mode) {
             case "front":
                 selection.forEach(e => {
-                    let max = e.parent().children.length;
-                    e.parent().changePosition(e, max)
+                    let max = e.parent.children.length;
+                    e.parent.changePosition(e, max)
                 });
                 break;
             case "back":
                 selection.forEach(e => {
                     let min = ChangeZOrder.findMinIndex(e);
-                    e.parent().changePosition(e, min);
+                    e.parent.changePosition(e, min);
                 });
                 break;
             case "forward":
                 selection.forEach(e => {
-                    let max = e.parent().children.length;
-                    var newPos = e.parent().children.indexOf(e) + 1;
+                    let max = e.parent.children.length;
+                    var newPos = e.parent.children.indexOf(e) + 1;
                     if (newPos > max) {
                         newPos = max;
                     }
-                    e.parent().changePosition(e, newPos);
+                    e.parent.changePosition(e, newPos);
                 });
                 break;
             case "backward":
                 selection.forEach(e => {
                     let min = ChangeZOrder.findMinIndex(e);
-                    var newPos = e.parent().children.indexOf(e) - 1;
+                    var newPos = e.parent.children.indexOf(e) - 1;
                     if (newPos < min) {
                         newPos = min;
                     }
-                    e.parent().changePosition(e, newPos);
+                    e.parent.changePosition(e, newPos);
                 });
                 break;
         }
@@ -46,7 +46,7 @@ export default class ChangeZOrder {
     }
 
     private static findMinIndex(e: IUIElement) {
-        let parent = e.parent();
+        let parent = e.parent;
         if (parent instanceof Page) {
             for (let i = parent.children.length - 1; i >= 0; --i) {
                 let child = parent.children[i];

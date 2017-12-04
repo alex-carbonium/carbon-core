@@ -334,7 +334,7 @@ describe("Symbol tests", function () {
             var actions = new SymbolActions(this.app, workspace);
             var symbol = actions.createSymbolFromSelection(Selection);
 
-            var artboard = child1.parent();
+            var artboard = child1.parent;
             var originalHeight = child2.height;
             artboard.prepareAndSetProps({width: 100, height: originalHeight+2});
             child1.prepareAndSetProps({

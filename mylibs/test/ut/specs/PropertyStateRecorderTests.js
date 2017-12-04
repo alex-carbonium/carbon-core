@@ -161,7 +161,7 @@
 //         this.relayout();
 //         target.width(10);
 
-//         target.parent().remove(target);
+//         target.parent.remove(target);
 //         this.relayout();
 
 //         recorder.stop();

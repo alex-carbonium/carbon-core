@@ -88,7 +88,7 @@ export default class RepeatCell extends Container implements IGroupContainer, IR
     }
 
     activeGroup(): boolean {
-        return this.parent().activeGroup();
+        return this.parent.activeGroup();
     }
 
     lockGroup() {
@@ -96,7 +96,7 @@ export default class RepeatCell extends Container implements IGroupContainer, IR
     }
     unlockGroup(): boolean {
         this.runtimeProps.unlocked = true;
-        this.parent().runtimeProps.lastActiveCell = this;
+        this.parent.runtimeProps.lastActiveCell = this;
         return true;
     }
 

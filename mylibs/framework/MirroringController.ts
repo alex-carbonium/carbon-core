@@ -101,7 +101,7 @@ export default class MirroringController implements IController {
             delta.dY -= (oldY - element.scrollY());
         }
 
-        var parent = element.parent();
+        var parent = element.parent;
         if (parent) {
             this._propagateScroll(delta, parent);
         }

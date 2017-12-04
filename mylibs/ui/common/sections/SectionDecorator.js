@@ -207,7 +207,7 @@ class SectionDecorator {
 
         switch (handle.type){
             case HandleTypes.OuterTop:
-                parent = this.element.parent();
+                parent = this.element.parent;
                 index = parent.positionOf(this.element) - 1;
                 newSection.setProps({
                     name: this.element.dockStyle() === DockStyle.Top ? "Top section" : "Bottom section",
@@ -225,7 +225,7 @@ class SectionDecorator {
                 });
                 break;
             case HandleTypes.OuterBottom:
-                parent = this.element.parent();
+                parent = this.element.parent;
                 index = parent.positionOf(this.element) + 1;
                 newSection.setProps({
                     name: this.element.dockStyle() === DockStyle.Top ? "Top section" : "Bottom section",
@@ -243,7 +243,7 @@ class SectionDecorator {
                 });
                 break;
             case HandleTypes.OuterLeft:
-                parent = this.element.parent();
+                parent = this.element.parent;
                 index = parent.positionOf(this.element) - 1;
                 newSection.setProps({
                     name: this.element.dockStyle() === DockStyle.Left ? "Left section" : "Right section",
@@ -261,7 +261,7 @@ class SectionDecorator {
                 });
                 break;
             case HandleTypes.OuterRight:
-                parent = this.element.parent();
+                parent = this.element.parent;
                 index = parent.positionOf(this.element) + 1;
                 newSection.setProps({
                     name: this.element.dockStyle() === DockStyle.Left ? "Left section" : "Right section",

@@ -76,7 +76,7 @@ export class RepeaterActions extends CarbonExtension {
 
         var sorted = elements.slice().sort((a, b) => a.zOrder() - b.zOrder());
         var element = elements[0];
-        var parent = element.parent();
+        var parent = element.parent;
         var repeater = new RepeatContainer();
 
         // calculate position upfront, before parent.children collection changed.
@@ -123,7 +123,7 @@ export class RepeaterActions extends CarbonExtension {
         var elements = selection.elements;
 
         let container = elements[0] as any as RepeatContainer;
-        let parent = container.parent();
+        let parent = container.parent;
         let items = container.children;
         let index = container.index();
         let allChildren = [];

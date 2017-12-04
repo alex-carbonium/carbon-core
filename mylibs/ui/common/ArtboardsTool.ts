@@ -116,7 +116,7 @@ export default class ArtboardsTool extends Tool {
                 this._element.applyTranslation(t);
                 this._element.boundaryRect(rect);
 
-                let parent = this._element.parent() as IContainer;
+                let parent = this._element.parent as IContainer;
                 parent.remove(this._element, ChangeMode.Self);
                 parent.insert(this._element, this.findNewIndex());
                 Selection.refreshSelection([this._element]);
@@ -124,7 +124,7 @@ export default class ArtboardsTool extends Tool {
                 this.artboardAdded(this._element);
             }
             else if (this._element.isInTree()) {
-                this._element.parent().remove(this._element);
+                this._element.parent.remove(this._element);
             }
 
             if (SystemConfiguration.ResetActiveToolToDefault) {

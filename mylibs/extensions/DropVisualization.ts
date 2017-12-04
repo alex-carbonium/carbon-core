@@ -304,7 +304,7 @@ export default class DropVisualization extends ExtensionBase {
         this._dropData = null;
 
         if (target && !(target instanceof Page)) {
-            let targetIsParent = draggingElement.elements.some(x => x.parent() === target);
+            let targetIsParent = draggingElement.elements.some(x => x.parent === target);
             if (!targetIsParent) {
                 this._target = target;
                 this._isDropTarget = true;
@@ -354,8 +354,8 @@ export default class DropVisualization extends ExtensionBase {
 
         if (this._target !== target) {
             //special case - do not highlight children of active group even though they are hit visible
-            if (target && !event.ctrlKey && target.parent() instanceof Container && target.parent().activeGroup()) {
-                target = target.parent();
+            if (target && !event.ctrlKey && target.parent instanceof Container && target.parent.activeGroup()) {
+                target = target.parent;
             }
 
             if (target) {
@@ -425,7 +425,7 @@ export default class DropVisualization extends ExtensionBase {
         for (var id in this._selectionControls) {
             var controlData = this._selectionControls[id];
             if (controlData.iteration !== this._selectionIteration) {
-                controlData.control.parent().remove(controlData.control);
+                controlData.control.parent.remove(controlData.control);
                 delete this._selectionControls[id];
             }
         }
@@ -566,23 +566,23 @@ export default class DropVisualization extends ExtensionBase {
     updateVisualizations() {
         var data = this._dropData;
         if (data) {
-            if (this._dropLine.parent() === NullContainer) {
+            if (this._dropLine.parent === NullContainer) {
                 this.view.interactionLayer.add(this._dropLine);
             }
             this._dropLine.x1(data.x1);
             this._dropLine.x2(data.x2);
             this._dropLine.y1(data.y1);
             this._dropLine.y2(data.y2);
-        } else if (!(this._dropLine.parent() === NullContainer)) {
-            this._dropLine.parent().remove(this._dropLine);
+        } else if (!(this._dropLine.parent === NullContainer)) {
+            this._dropLine.parent.remove(this._dropLine);
         }
 
         if (Environment.controller.interactionActive) {
-            if (this._hint.parent() === NullContainer) {
+            if (this._hint.parent === NullContainer) {
                 this.view.interactionLayer.add(this._hint);
             }
-        } else if (!(this._hint.parent() === NullContainer)) {
-            this._hint.parent().remove(this._hint);
+        } else if (!(this._hint.parent === NullContainer)) {
+            this._hint.parent.remove(this._hint);
         }
 
         Invalidate.requestInteractionOnly();

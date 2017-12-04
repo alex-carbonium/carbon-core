@@ -51,7 +51,7 @@ let PolygonFrameType = {
         let props = {
             br: clone.boundaryRect(),
             radius: clone.radius(),
-            m: frame.element.parent().globalMatrixToLocal(clone.globalViewMatrix())
+            m: frame.element.parent.globalMatrixToLocal(clone.globalViewMatrix())
         };
         frame.element.setProps(props);
     }

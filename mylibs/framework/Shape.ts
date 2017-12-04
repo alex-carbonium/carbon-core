@@ -289,7 +289,7 @@ class Shape extends Container {
     insert(element: IUIElement, index: number, mode?: ChangeMode): IUIElement {
         this.setProps({ clipMask: true });
 
-        var parent = this.parent();
+        var parent = this.parent;
         var idx = parent.children.indexOf(this);
         var group = new GroupContainer();
 
@@ -319,7 +319,7 @@ class Shape extends Container {
         var path = this.convertToPath();
         path.runtimeProps.ctxl = this.runtimeProps.ctxl;
         if (path) {
-            this.parent().replace(this, path);
+            (this.parent as any).replace(this, path);
         }
     }
 }
