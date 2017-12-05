@@ -957,6 +957,8 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
             }
         }
 
+        this.children.length = 0;
+
         super.dispose.apply(this, arguments)
     }
     toString() {
