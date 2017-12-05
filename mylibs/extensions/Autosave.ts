@@ -3,6 +3,8 @@ import RelayoutQueue from "../framework/relayout/RelayoutQueue";
 import CommandManager from "../framework/commands/CommandManager";
 
 export default class AutoSave extends ExtensionBase {
+    private static checked: boolean = false;
+
     constructor(app) {
         super(app);
         this._app = app;
@@ -68,6 +70,12 @@ export default class AutoSave extends ExtensionBase {
     }
 
     private checkBackups = () => {
+        if (AutoSave.checked) {
+            return Promise.resolve();
+        }
+
+        AutoSave.checked = true;
+
         if (!this._app.id) {
             this.initIfEmptyProject();
             return Promise.resolve();
