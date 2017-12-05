@@ -117,6 +117,7 @@ class NullPage extends UIElement implements IPage {
     clearRenderingCache() { }
 
     parent = null;
+    originalSize = null;
 
     autoGrow(dw, dh) {
     }

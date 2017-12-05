@@ -232,17 +232,17 @@ export default class PathManipulationObject extends UIElementDecorator implement
     }
 
     _clearShortSegments() {
-        var points = this.path.points;
-        var endSegment = points.length - 1;
-        for (var i = endSegment; i >= 0; --i) {
-            var pt = points[i];
-            if (pt.moveTo || i === 0) {
-                if (endSegment - i < 2) {
-                    points.splice(i, endSegment - i + 1);
-                }
-                endSegment = i - 1;
-            }
-        }
+        // var points = this.path.points;
+        // var endSegment = points.length - 1;
+        // for (var i = endSegment; i >= 0; --i) {
+        //     var pt = points[i];
+        //     if (pt.moveTo || i === 0) {
+        //         if (endSegment - i < 2) {
+        //             points.splice(i, endSegment - i + 1);
+        //         }
+        //         endSegment = i - 1;
+        //     }
+        // }
     }
 
     cancel() {

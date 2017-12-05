@@ -107,7 +107,7 @@ class Shape extends Container {
         });
 
         if (strokeWidth) {
-            if (!stroke || !stroke.type || strokePosition === StrokePosition.Center) {
+            if (!stroke || !stroke.type || strokePosition === StrokePosition.Center || !this.closed()) {
                 pipeline.out((context, environment) => {
                     context.lineWidth = strokeWidth;
                     this.strokeSelf(context, w, h);

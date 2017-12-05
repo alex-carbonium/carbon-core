@@ -1775,6 +1775,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         //delete this.onresize;
 
         delete this.props;
+        delete this.runtimeProps;
+
+        RuntimeProxy.release(this);
 
         this._isDisposed = true;
     }

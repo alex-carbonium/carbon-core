@@ -21,8 +21,8 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
     private _activePage: IPage<IPageProps> & { originalSize: ISize };
     private sandbox = new Sandbox();
     private disposables = new AutoDisposable();
-    private runtimeContext:RuntimeContext;
-    private navigationController:NavigationController;
+    private runtimeContext: RuntimeContext;
+    private navigationController: NavigationController;
 
     public app: IApp;
     public navigateToPage: IEvent3<string, IAnimationOptions, DataBag>;
@@ -55,6 +55,11 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         }
     }
 
+    recycleCurrentPage() {
+        this.activePage.dispose();
+        this._activePage = NullPage;
+    }
+
     get activeArtboard(): IArtboard {
         if (!this.activePage) {
             return null;
@@ -68,18 +73,20 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
     }
 
     _makePageFromArtboard(artboard, screenSize): Promise<IPage> {
-        if(!artboard) {
+        if (!artboard) {
             return Promise.resolve(NullPage);
         }
 
         var page = new Page();
         var previewClone = artboard.mirrorClone();
-        previewClone.props.temp = true;
+        previewClone.applyVisitor(p => {
+            p.props.__temp = true;
+            p.runtimeProps.ctxl = 1
+        });
         previewClone.runtimeProps.sourceArtboard = artboard;
         this.sourceArtboard = artboard;
         var oldRect = previewClone.boundaryRect();
         previewClone.setTransform(Matrix.Identity);
-        previewClone.applyVisitor(e => e.runtimeProps.ctxl = 1);
 
         page.add(previewClone);
         page.originalSize = oldRect;

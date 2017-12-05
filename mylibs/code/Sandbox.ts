@@ -39,6 +39,7 @@ export class Sandbox {
     runOnElement(context:RuntimeContext, element:IContainer, code:string) {
         let nameResolver = new ControlNameResolver(context, element);
         let resolverProxy = new Proxy({}, nameResolver);
+        ElementProxy.clear();
         let name = "n" + element.id;
         if((element as any).artboard) {
             name = 'n' + (element as any).artboard.id

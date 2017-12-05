@@ -31,6 +31,11 @@ export default class AnimationContrller implements IAnimationController {
             this._cancelRedrawCallback();
         }
     }
+
+    reset() {
+        this._activeGroups  = [];
+    }
+
     registerAnimationGroup(group) {
         this._activeGroups.push(group);
         group.start(new Date().getTime());

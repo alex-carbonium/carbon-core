@@ -420,6 +420,9 @@ declare module "carbon-model" {
     export interface IPath extends IShape<IPathProps> {
     }
 
+    export interface IPathProps extends IShapeProps {
+    }
+
     export interface ILineProps extends IShapeProps {
     }
     export interface ILine extends IShape<ILineProps> {

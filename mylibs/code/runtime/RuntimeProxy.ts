@@ -51,6 +51,14 @@ export class RuntimeProxy {
         RuntimeProxy.sourceMap.set(source, proxy);
     }
 
+    static release(source) {
+        let proxy = RuntimeProxy.sourceMap.get(source);
+        RuntimeProxy.sourceMap.delete(source);
+        if(proxy) {
+            RuntimeProxy.proxyMap.delete(proxy);
+        }
+    }
+
     static create(source:IProxySource) {
         let proxy = new Proxy(source, new RuntimeProxy(source));
         RuntimeProxy.register(source, proxy);
@@ -131,6 +139,10 @@ export class ElementProxy extends RuntimeProxy {
 
     static tryGet(name:string) {
         return proxiesMap[name];
+    }
+
+    static clear() {
+        proxiesMap = {};
     }
 
     set(target: any, name: PropertyKey, value: any) {

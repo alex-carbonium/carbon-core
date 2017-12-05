@@ -95,6 +95,10 @@ export default class Polygon extends Shape {
     }
 
     onRadiusChanged(changes) {
+        if(changes.m) {
+            return;
+        }
+
         let r = changes.radius;
         let dr = this.radius() - r;
 

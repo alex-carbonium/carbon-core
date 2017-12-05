@@ -635,7 +635,7 @@ class Path extends Shape {
         if (value !== undefined) {
             this.setProps({ closed: value });
         }
-        return this.props.closed;
+        return this.props.closed || (this.points.length && this.points[this.points.length - 1].closed);
     }
 
     hitTest(point, scale, boundaryRectOnly = false) {

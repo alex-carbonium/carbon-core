@@ -1,7 +1,8 @@
-import { IModel, IText, ITextProps, IUIElement, IUIElementProps, ISize, ILineProps, ILine, IStarProps, IStar, IRectangle, IRectangleProps, IContainer, IArtboardProps, IArtboard, IStateboard, IStateboardProps, ICircleProps, ICircle, IImageProps, IImage, FileProps, IFileElement } from "carbon-core";
+import { IModel, IText, ITextProps, IUIElement, IUIElementProps, ISize, ILineProps, ILine, IStarProps, IStar, IRectangle, IRectangleProps, IContainer, IArtboardProps, IArtboard, IStateboard, IStateboardProps, ICircleProps, ICircle, IImageProps, IImage, FileProps, IFileElement, IPath, IPathProps } from "carbon-core";
 import UIElement from "./UIElement";
 import Text from "./text/Text";
 import Rect from "../math/rect";
+import Path from "../framework/Path";
 import Image from "./Image";
 import Line from "./Line";
 import Star from "./Star";
@@ -13,6 +14,7 @@ import Artboard from "./Artboard";
 import Stateboard from "./StateBoard";
 import { ArrangeStrategies } from "./Defs";
 import InteractiveContainer from "./InteractiveContainer";
+import { IPathPoint } from "carbon-geometry";
 
 export class Model implements IModel {
     createElement(size?: ISize, props?: Partial<IUIElementProps>): IUIElement {
@@ -49,6 +51,14 @@ export class Model implements IModel {
         let star = new Star();
         this.setSizeAndProps(star, size, props);
         return star;
+    }
+    createPath(points:IPathPoint[], size?: ISize, props?: Partial<IPathProps>): IPath {
+        let path = new Path();
+        points.forEach(p=>path.addPoint(p));
+        this.setSizeAndProps(path, size, props);
+        path.adjustBoundaries();
+
+        return path;
     }
     createLine(props?: Partial<ILineProps>): ILine {
         let line = new Line();

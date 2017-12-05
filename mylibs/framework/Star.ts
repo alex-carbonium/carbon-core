@@ -276,6 +276,14 @@ PropertyMetadata.registerForType(Star, {
             max: 20
         }
     },
+    proxyDefinition:function() {
+        let baseDefinition = PropertyMetadata.findForType(Polygon).proxyDefinition();
+        return {
+            rprops: [].concat(baseDefinition.rprops), // readonly props
+            props: ["radius", "internalRadius", "pointsCount"].concat(baseDefinition.props),
+            methods: [].concat(baseDefinition.methods)
+        }
+    },
     groups(element) {
         let baseType = PropertyMetadata.baseTypeName(Star);
         let groups = PropertyMetadata.findAll(baseType).groups(element).slice();

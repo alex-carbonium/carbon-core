@@ -242,71 +242,71 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
 
     trackSetProps(props, oldProps, mode = ChangeMode.Model) {
         let primitiveRoot = this.primitiveRoot();
-        if (primitiveRoot) {
+        if (primitiveRoot&& !primitiveRoot.props.__temp) {
             primitiveRoot.registerSetProps(this, props, oldProps, mode);
         }
     }
 
     trackPatchProps(patchType, propName, item, mode = ChangeMode.Model) {
         let root = this.primitiveRoot();
-        if (root) {
+        if (root&& !root.props.__temp) {
             root.registerPatchProps(this, patchType, propName, item, mode);
         }
     }
     trackDeleted(parent, index?: number, mode = ChangeMode.Model) {
         let primitiveRoot = parent.primitiveRoot();
-        if (primitiveRoot) {
+        if (primitiveRoot && !primitiveRoot.props.__temp) {
             primitiveRoot.registerDelete(parent, this, index, mode);
         }
     }
 
     trackInserted(parent, index, mode = ChangeMode.Model) {
         let primitiveRoot = parent.primitiveRoot();
-        if (primitiveRoot) {
+        if (primitiveRoot && !primitiveRoot.props.__temp) {
             primitiveRoot.registerInsert(parent, this, index, mode);
         }
     }
 
     trackChangePosition(parent, index, oldIndex, mode = ChangeMode.Model) {
         let primitiveRoot = parent.primitiveRoot();
-        if (primitiveRoot) {
+        if (primitiveRoot && !primitiveRoot.props.__temp) {
             primitiveRoot.registerChangePosition(parent, this, index, oldIndex, mode);
         }
     }
 
     registerSetProps(element, props, oldProps, mode = ChangeMode.Model) {
-        if (mode === ChangeMode.Model) {
+        if (mode === ChangeMode.Model && !element.props.__temp) {
             ModelStateListener.trackSetProps(this, element, props, oldProps);
         }
     }
 
     registerPatchProps(element, patchType, propName, item, mode = ChangeMode.Model) {
-        if (mode === ChangeMode.Model) {
+        if (mode === ChangeMode.Model && !element.props.__temp) {
             ModelStateListener.trackPatchProps(this, element, patchType, propName, item);
         }
     }
 
     registerDelete(parent, element, index, mode = ChangeMode.Model) {
-        if (mode === ChangeMode.Model) {
+        if (mode === ChangeMode.Model && !element.props.__temp) {
             ModelStateListener.trackDelete(this, parent, element, index);
         }
-        if (this.runtimeProps && this.runtimeProps.trackPropsCounter) {
+        if (this.runtimeProps && this.runtimeProps.trackPropsCounter && !element.props.__temp) {
             PropertyTracker.registerDelete(parent, element);
         }
     }
 
     registerInsert(parent, element, index, mode = ChangeMode.Model) {
-        if (mode === ChangeMode.Model) {
+        if (mode === ChangeMode.Model && !element.props.__temp) {
             ModelStateListener.trackInsert(this, parent, element, index);
         }
-        if (this.runtimeProps && this.runtimeProps.trackPropsCounter) {
+        if (this.runtimeProps && this.runtimeProps.trackPropsCounter && !element.props.__temp) {
             PropertyTracker.registerInsert(parent, element);
         }
     }
 
 
     registerChangePosition(parent, element, index, oldIndex, mode = ChangeMode.Model) {
-        if (mode === ChangeMode.Model) {
+        if (mode === ChangeMode.Model && !element.props.__temp) {
             ModelStateListener.trackChangePosition(this, parent, element, index, oldIndex);
         }
     }
