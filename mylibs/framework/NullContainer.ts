@@ -435,6 +435,10 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
     }
     transferElement() {
     }
+
+    registerEventHandler(name, callback){
+        return null;
+    }
 }
 
 export default new NullContainer();

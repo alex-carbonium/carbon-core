@@ -44,6 +44,11 @@ declare module "carbon-runtime" {
 
     interface TDraggable {
         enabled:boolean;
+        horizontal:boolean;
+        vertical:boolean;
+        ondragging:(e:{dx:number, dy:number, target:TUIElement})=>void;
+        onbegindrag:(e:{target:TUIElement})=>void;
+        onenddrag:(e:{target:TUIElement})=>void;
     }
 
     interface TUIElement extends TUIElementProps {

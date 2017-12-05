@@ -3,7 +3,7 @@ import { IDisposable } from "carbon-core";
 
 class EventDisposable implements IDisposable {
     dispose(): void {
-        let index = this.array.findIndex(this.callback);
+        let index = this.array.findIndex(c=>c === this.callback);
         this.array.splice(index, 1);
     }
     constructor(private callback:any, private array:any[]) {

@@ -11,6 +11,7 @@ import { isRectInRect, areRectsIntersecting } from "../math/math";
 import Constraints from "./Constraints";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
 import params from "params";
+import { Event as RuntimeEvent } from "../code/runtime/Event"
 import {
     Types,
     DockStyle,
@@ -34,7 +35,7 @@ import ResizeOptions from "../decorators/ResizeOptions";
 import { KeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
-import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps, RenderFlags, RenderEnvironment, IContext, PropDescriptor, Origin, StrokePosition, IProxySource, ProxyDefinition } from "carbon-core";
+import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps, RenderFlags, RenderEnvironment, IContext, PropDescriptor, Origin, StrokePosition, IProxySource, ProxyDefinition, DataBag, IDisposable } from "carbon-core";
 import ExtensionPoint from "./ExtensionPoint";
 import CoreIntl from "../CoreIntl";
 import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
@@ -103,11 +104,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             extend(changes, styleManager.getStyle(changes.styleId, 1).props);
         }
 
-        if(changes.fill && typeof changes.fill === 'string') {
+        if (changes.fill && typeof changes.fill === 'string') {
             changes.fill = Brush.createFromColor(changes.fill);
         }
 
-        if(changes.stroke && typeof changes.stroke === 'string') {
+        if (changes.stroke && typeof changes.stroke === 'string') {
             changes.stroke = Brush.createFromColor(changes.stroke);
         }
 
@@ -2206,9 +2207,10 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return group.promise();
     }
 
-    registerEventHandler(name, callback: (e: any) => any) {
+    registerEventHandler(name: string, callback: (data: DataBag) => (void | Promise<void>)): IDisposable {
         let events = this.runtimeProps.events = this.runtimeProps.events || {};
-        events[name] = callback;
+        let event: RuntimeEvent = events[name] = events[name] || new RuntimeEvent();
+        return event.registerHandler(callback);
     }
 
     styleId(value?) {
@@ -2238,7 +2240,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return metadata.proxyDefinition();
         }
 
-        return { props: [], rprops: [], methods: [], mixins:[] };
+        return { props: [], rprops: [], methods: [], mixins: [] };
     }
 
     getNonRepeatableProps(newProps?: any) {
@@ -2550,12 +2552,12 @@ PropertyMetadata.registerForType(UIElement, {
     flags: {
         defaultValue: 0
     },
-    proxyDefinition():ProxyDefinition {
+    proxyDefinition(): ProxyDefinition {
         return {
             rprops: ["name", "id", "parent"], // readonly props
             props: ["x", "y", "width", "height", "angle", "visible", "fill", "stroke", "opacity"], // read/write props
             methods: ["animate", "boundaryRect"],
-            mixins:["draggable"]
+            mixins: ["draggable"]
         }
     },
     groups: function () {

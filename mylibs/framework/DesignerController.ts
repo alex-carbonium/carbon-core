@@ -11,7 +11,7 @@ import Page from "./Page";
 import { keyboard } from "../platform/Keyboard";
 import ObjectFactory from "./ObjectFactory";
 import { Types } from "./Defs";
-import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3, WorkspaceTool, InteractionType, LayerType, ChangeMode } from "carbon-core";
+import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3, WorkspaceTool, InteractionType, LayerType, ChangeMode, IEventData } from "carbon-core";
 import UIElement from "./UIElement";
 import Container from "./Container";
 import { choosePasteLocation } from "./PasteLocator";
@@ -28,7 +28,7 @@ export default class DesignerController implements IController {
 
     onArtboardChanged: IEvent2<IArtboard, IArtboard>;
 
-    startDrawingEvent: IEvent<any>;
+    startDrawingEvent: IEvent<IEventData>;
     interactionActive: boolean;
     clickEvent: IEvent<IMouseEventData>;
     dblclickEvent: IEvent<IMouseEventData>;
@@ -175,7 +175,7 @@ export default class DesignerController implements IController {
         this.inlineEditModeChanged.bind(this, this.onInlineEditModeChanged);
         //TODO: dispose?
 
-        this.startDrawingEvent = EventHelper.createEvent();
+        this.startDrawingEvent = EventHelper.createEvent<IEventData>();
 
         this._cancelBinding = this.app.actionManager.subscribe('cancel', this.cancel.bind(this));
 

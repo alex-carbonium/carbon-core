@@ -5,7 +5,7 @@ import Cursor from "./Cursor";
 import TouchHelper from "./TouchHelper";
 import Artboard from "./Artboard";
 import { keyboard } from "../platform/Keyboard";
-import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3, WorkspaceTool, InteractionType, LayerType, ChangeMode, IView, IActionManager } from "carbon-core";
+import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3, WorkspaceTool, InteractionType, LayerType, ChangeMode, IView, IActionManager, IEventData } from "carbon-core";
 import { IArtboard } from "carbon-model";
 
 //TODO: extend DesignerController from base class
@@ -18,7 +18,7 @@ export default class ControllerBase implements IController {
 
     onArtboardChanged = EventHelper.createEvent2<IArtboard, IArtboard>();
 
-    startDrawingEvent = EventHelper.createEvent();
+    startDrawingEvent = EventHelper.createEvent<IEventData>();
     clickEvent = EventHelper.createEvent<IMouseEventData>();
     dblclickEvent = EventHelper.createEvent<IMouseEventData>();
     mousedownEvent = EventHelper.createEvent<IMouseEventData>();

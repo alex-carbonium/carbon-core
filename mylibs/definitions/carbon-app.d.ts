@@ -15,7 +15,7 @@ declare module "carbon-app" {
         proxyDefinition():ProxyDefinition;
     }
 
-    export interface IRuntimeMixin {
+    export interface IRuntimeMixin extends IDisposable {
         set(target: any, name: PropertyKey, value: any):boolean;
         get(target: any, name: PropertyKey):any|undefined;
         has(target:any, name:PropertyKey):boolean;

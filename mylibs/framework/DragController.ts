@@ -36,6 +36,7 @@ export default class DragController {
         }
         return !e.handled;
     }
+
     mouseMove(e: IMouseEventData) {
         //e.handled is not checked on purpose, case: path tool handles events, but ruler guide can overrule
         if (Environment.controller.isDragging()) {
@@ -66,6 +67,7 @@ export default class DragController {
             this.onSearching(e);
         }
     }
+
     dragging(e) {
         if (this._lastDragPoint === null) {
             this._lastDragPoint = this._startDragPoint;
@@ -80,6 +82,7 @@ export default class DragController {
 
         this._lastDragPoint = { x: e.x, y: e.y };
     }
+
     mouseUp(e) {
         if (!this.isDragging && e.handled) {
             return;

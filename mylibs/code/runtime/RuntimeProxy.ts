@@ -1,4 +1,4 @@
-import { IProxySource, IRuntimeMixin } from "carbon-core";
+import { IProxySource, IRuntimeMixin, IDisposable } from "carbon-core";
 import { IUIElement } from "carbon-model";
 import PropertyMetadata from "framework/PropertyMetadata";
 import { EventNames } from "../runtime/EventNames";
@@ -6,7 +6,9 @@ import { Property } from "../runtime/Property";
 import UIElement from "framework/UIElement";
 import { MixinFactory } from "./MixinFactory";
 
-export class RuntimeProxy {
+const eventsMap = EventNames
+
+export class RuntimeProxy implements IDisposable{
     protected element: IProxySource;
     private mixins:IRuntimeMixin[] = [];
     private static proxyMap = new WeakMap();
@@ -14,6 +16,10 @@ export class RuntimeProxy {
     private methodMap: { [name: string]: boolean } = {};
     private propertyMap: { [name: string]: boolean } = {};
     private rpropertyMap: { [name: string]: boolean } = {};
+
+    dispose() {
+        this.mixins.forEach(m=>m.dispose());
+    }
 
     static unwrap<T>(proxy:T):T {
         if((proxy as any).__isProxy) {
@@ -25,6 +31,14 @@ export class RuntimeProxy {
 
     static wrap(source:any):any {
         if(typeof source !== 'object') {
+            return source;
+        }
+
+        if(Array.isArray(source)) {
+            source = source.slice();
+            for(var i = 0; i < source.length; ++i) {
+                source[i] = RuntimeProxy.wrap(source[i]);
+            }
             return source;
         }
 
@@ -57,6 +71,7 @@ export class RuntimeProxy {
         let proxy = RuntimeProxy.sourceMap.get(source);
         RuntimeProxy.sourceMap.delete(source);
         if(proxy) {
+            proxy.dispose();
             RuntimeProxy.proxyMap.delete(proxy);
         }
     }
@@ -90,6 +105,10 @@ export class RuntimeProxy {
     get(target: any, name: string) {
         if(name === '__isProxy') {
             return true;
+        }
+
+        if(name === 'dispose') {
+            return this.dispose.bind(this);
         }
 
         for(var mixin of this.mixins) {
@@ -151,8 +170,6 @@ export class RuntimeProxy {
     }
 }
 
-
-const eventsMap = EventNames
 let proxiesMap: { [name: string]: IUIElement } = {};
 
 export class ElementProxy extends RuntimeProxy {

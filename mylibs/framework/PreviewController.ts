@@ -9,6 +9,7 @@ import { IText, IController, IMouseEventData } from "carbon-core";
 import { PreviewTextTool } from "./PreviewTextTool";
 import ControllerBase from "./ControllerBase";
 import Cursor from "./Cursor";
+import { IMatrix } from "carbon-geometry";
 
 export default class PreviewController extends ControllerBase {
     [key: string]: any;
@@ -47,7 +48,7 @@ export default class PreviewController extends ControllerBase {
         assertNever(eventType);
     }
 
-    async _propagateAction(eventType, element):Promise<boolean> {
+    async _propagateAction(eventData, eventType, element):Promise<boolean> {
         if (!element || element === NullContainer) {
             return false;
         }
@@ -56,7 +57,20 @@ export default class PreviewController extends ControllerBase {
         let eventName = this._eventTypeToName(eventType);
 
         if (events && events[eventName]) {
-            let res = events[eventName]();
+            let m:IMatrix = element.globalViewMatrixInverted();
+            let pos = m.transformPoint2(eventData.x, eventData.y);
+            let event = {
+                x:eventData.x,
+                y:eventData.y,
+                layerX:pos.x,
+                layerY:pos.y,
+                altKey:eventData.altKey,
+                shiftKey:eventData.shiftKey,
+                ctrlKey:eventData.ctrlKey,
+                metaKey:eventData.metaKey
+            }
+
+            let res = events[eventName].raise(event);
             if(res instanceof Promise) {
                 res = await res;
             }
@@ -77,7 +91,7 @@ export default class PreviewController extends ControllerBase {
 
         var parent = element.parent;
         if (parent && parent !== this.view) {
-            return await this._propagateAction(eventType, parent);
+            return await this._propagateAction(eventData, eventType, parent);
         }
 
         return false;
@@ -128,48 +142,47 @@ export default class PreviewController extends ControllerBase {
     onmousedown(eventData) {
         super.onmousedown(eventData);
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        this._propagateAction(ActionEvents.mousedown, element);
+        this._propagateAction(eventData, ActionEvents.mousedown, element);
     }
 
     onmousemove(eventData) {
         super.onmousemove(eventData);
 
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        this._propagateAction(ActionEvents.mousemove, element);
+        this._propagateAction(eventData, ActionEvents.mousemove, element);
     }
 
     onmouseenter(eventData) {
         super.onmouseenter(eventData);
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        this._propagateAction(ActionEvents.mouseenter, element);
+        this._propagateAction(eventData, ActionEvents.mouseenter, element);
     }
 
     onmouseleave(eventData) {
         super.onmouseleave(eventData);
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        this._propagateAction(ActionEvents.mouseleave, element);
+        this._propagateAction(eventData, ActionEvents.mouseleave, element);
     }
 
     onmouseup(eventData) {
         super.onmouseup(eventData);
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        this._propagateAction(ActionEvents.mouseup, element);
+        this._propagateAction(eventData, ActionEvents.mouseup, element);
     }
 
     ondblclick(eventData) {
         super.ondblclick(eventData);
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        this._propagateAction(ActionEvents.dblclick, element);
+        this._propagateAction(eventData, ActionEvents.dblclick, element);
     }
 
     async onclick(eventData) {
         super.onclick(eventData);
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        if (! await this._propagateAction(ActionEvents.click, element)) {
+        if (! await this._propagateAction(eventData, ActionEvents.click, element)) {
             (this.view as any).displayClickSpots.raise();
         }
     }
-
 
     beginDragElements(event, elements, stopDragPromise) {
     }

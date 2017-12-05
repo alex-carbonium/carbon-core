@@ -3,7 +3,7 @@ declare module "carbon-model" {
     import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, ChangeMode, ArtboardType, Font, KeyboardState, ResizeDimension } from "carbon-basics";
 
     import { IContext } from "carbon-rendering";
-    import { AnimationProps, Brush, IDisposable } from "carbon-runtime";
+    import { AnimationProps, Brush, IDisposable, DataBag } from "carbon-runtime";
 
     export interface IDataNodeProps {
         [key: string]: any;
@@ -143,6 +143,8 @@ declare module "carbon-model" {
         hitTestGlobalRect(rect: IRect, directSelection?: boolean): boolean;
 
         showResizeHint(): boolean;
+
+        registerEventHandler(name:string, callback: (data: DataBag) => (void | Promise<void>)): IDisposable;
 
         each(callback: (e: IUIElement, index?: number) => boolean | void);
 
