@@ -762,7 +762,8 @@ PropertyMetadata.registerForType(Symbol, {
         return {
             rprops: ["states"].concat(baseDefinition.rprops), // readonly props
             props: ["currentState"].concat(baseDefinition.props),
-            methods: ["nextState", "prevState"].concat(baseDefinition.methods)
+            methods: ["nextState", "prevState"].concat(baseDefinition.methods),
+            mixins:[].concat(baseDefinition.mixins)
         }
     },
     groups() {

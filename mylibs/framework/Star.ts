@@ -281,7 +281,8 @@ PropertyMetadata.registerForType(Star, {
         return {
             rprops: [].concat(baseDefinition.rprops), // readonly props
             props: ["radius", "internalRadius", "pointsCount"].concat(baseDefinition.props),
-            methods: [].concat(baseDefinition.methods)
+            methods: [].concat(baseDefinition.methods),
+            mixins:[].concat(baseDefinition.mixins)
         }
     },
     groups(element) {

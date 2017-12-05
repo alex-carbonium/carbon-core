@@ -22,7 +22,8 @@ export class ModelFactoryClass implements IProxySource {
                 "createOval",
                 "createStar",
                 "createPath"
-            ]
+            ],
+            mixins:[]
         }
     }
 

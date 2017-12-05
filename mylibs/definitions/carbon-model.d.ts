@@ -3,7 +3,7 @@ declare module "carbon-model" {
     import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, ChangeMode, ArtboardType, Font, KeyboardState, ResizeDimension } from "carbon-basics";
 
     import { IContext } from "carbon-rendering";
-    import { TUIElement, TSymbol, AnimationProps, Brush, IDisposable } from "carbon-runtime";
+    import { AnimationProps, Brush, IDisposable } from "carbon-runtime";
 
     export interface IDataNodeProps {
         [key: string]: any;
@@ -82,12 +82,19 @@ declare module "carbon-model" {
         Icon = 1 << 3
     }
 
-    export interface IUIElement<TProps extends IUIElementProps = IUIElementProps> extends TUIElement, IDataNode<TProps>, IMouseEventHandler, IDecoratable {
+    export interface IUIElement<TProps extends IUIElementProps = IUIElementProps> extends IDataNode<TProps>, IMouseEventHandler, IDecoratable {
         parent: IContainer;
         name:string;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        visible: boolean;
+        angle: number;
         fill:Brush;
         stroke:Brush;
         opacity:number;
+
         drawPath?(context: IContext, w: number, h: number);
 
         mode(value?: any): any;
@@ -318,7 +325,7 @@ declare module "carbon-model" {
         stateId?: string;
     }
 
-    export interface ISymbol extends IContainer<ISymbolProps>, TSymbol {
+    export interface ISymbol extends IContainer<ISymbolProps> {
         source(value?: SymbolSource): SymbolSource;
         fill:Brush;
         stroke:Brush;

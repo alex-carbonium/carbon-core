@@ -17,7 +17,7 @@ import Environment from "environment";
 import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
-import { ChangeMode, PatchType, IPrimitiveRoot, LayerType, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext, IContainer, WorkspaceTool, IMouseEventData, RenderEnvironment, RenderFlags, UIElementFlags } from "carbon-core";
+import { ChangeMode, PatchType, IPrimitiveRoot, LayerType, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext, IContainer, WorkspaceTool, IMouseEventData, RenderEnvironment, RenderFlags, UIElementFlags, ProxyDefinition } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
 import Rect from "../math/rect";
 import CoreIntl from "../CoreIntl";
@@ -1471,6 +1471,14 @@ PropertyMetadata.registerForType(Artboard, {
             colsCount: showAsIconset,
             iconCellSize: showAsIconset,
             states: !showAsIconset
+        }
+    },
+    proxyDefinition():ProxyDefinition {
+        return {
+            rprops: ["width", "height","name", "id", "children"], // readonly props
+            props: ["fill"], // read/write props
+            methods: ["boundaryRect", "add", "remove", "insert"],
+            mixins:[]
         }
     },
     groups: function () {

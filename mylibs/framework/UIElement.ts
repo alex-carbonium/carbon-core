@@ -34,7 +34,7 @@ import ResizeOptions from "../decorators/ResizeOptions";
 import { KeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
-import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps, RenderFlags, RenderEnvironment, IContext, PropDescriptor, Origin, StrokePosition, IProxySource } from "carbon-core";
+import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps, RenderFlags, RenderEnvironment, IContext, PropDescriptor, Origin, StrokePosition, IProxySource, ProxyDefinition } from "carbon-core";
 import ExtensionPoint from "./ExtensionPoint";
 import CoreIntl from "../CoreIntl";
 import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
@@ -2232,13 +2232,13 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return PropertyMetadata.findAll(this.t);
     }
 
-    proxyDefinition(): { props: string[]; rprops: string[]; methods: string[]; } {
+    proxyDefinition(): ProxyDefinition {
         var metadata = this.propertyMetadata();
         if (metadata.proxyDefinition) {
             return metadata.proxyDefinition();
         }
 
-        return { props: [], rprops: [], methods: [] };
+        return { props: [], rprops: [], methods: [], mixins:[] };
     }
 
     getNonRepeatableProps(newProps?: any) {
@@ -2550,11 +2550,12 @@ PropertyMetadata.registerForType(UIElement, {
     flags: {
         defaultValue: 0
     },
-    proxyDefinition() {
+    proxyDefinition():ProxyDefinition {
         return {
             rprops: ["name", "id", "parent"], // readonly props
             props: ["x", "y", "width", "height", "angle", "visible", "fill", "stroke", "opacity"], // read/write props
-            methods: ["animate", "boundaryRect"]
+            methods: ["animate", "boundaryRect"],
+            mixins:["draggable"]
         }
     },
     groups: function () {

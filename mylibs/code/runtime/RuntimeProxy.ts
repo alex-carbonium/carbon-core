@@ -1,12 +1,14 @@
-import { IProxySource } from "carbon-core";
+import { IProxySource, IRuntimeMixin } from "carbon-core";
 import { IUIElement } from "carbon-model";
 import PropertyMetadata from "framework/PropertyMetadata";
 import { EventNames } from "../runtime/EventNames";
 import { Property } from "../runtime/Property";
 import UIElement from "framework/UIElement";
+import { MixinFactory } from "./MixinFactory";
 
 export class RuntimeProxy {
     protected element: IProxySource;
+    private mixins:IRuntimeMixin[] = [];
     private static proxyMap = new WeakMap();
     private static sourceMap = new WeakMap();
     private methodMap: { [name: string]: boolean } = {};
@@ -80,11 +82,21 @@ export class RuntimeProxy {
                 this.rpropertyMap[v] = true;
             });
         }
+        for(var mixin of proxyDef.mixins) {
+            this.mixins.push(MixinFactory.createForElement(mixin, this.element as any));
+        }
     }
 
     get(target: any, name: string) {
         if(name === '__isProxy') {
             return true;
+        }
+
+        for(var mixin of this.mixins) {
+            let res = mixin.get(target, name);
+            if(res){
+                return RuntimeProxy.wrap(res);
+            }
         }
 
         if (this.propertyMap[name] || this.rpropertyMap[name]) {
@@ -107,6 +119,15 @@ export class RuntimeProxy {
     }
 
     set(target: any, name: PropertyKey, value: any) {
+        let unwrappedValue = RuntimeProxy.unwrap(value);
+
+        for(var mixin of this.mixins) {
+            let res = mixin.set(target, name, unwrappedValue);
+            if(res){
+                return true;
+            }
+        }
+
         if (!this.propertyMap[name]) {
             if (this.rpropertyMap[name]) {
                 throw new TypeError(`Readonly property ${name}`);
@@ -115,12 +136,17 @@ export class RuntimeProxy {
             throw new TypeError(`Unknown property ${name}`);
         }
 
-        this.element[name] = RuntimeProxy.unwrap(value);
+        this.element[name] = unwrappedValue;
 
         return true;
     }
 
     has(target: any, name: string) {
+        for(var mixin of this.mixins) {
+            if(mixin.has(target, name)){
+                return true;
+            }
+        }
         return this.methodMap[name] || this.propertyMap[name] || this.rpropertyMap[name];
     }
 }

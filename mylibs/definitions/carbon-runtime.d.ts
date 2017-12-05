@@ -42,9 +42,14 @@ declare module "carbon-runtime" {
         stroke:string|Brush;
     }
 
-    export interface TUIElement extends TUIElementProps {
+    interface TDraggable {
+        enabled:boolean;
+    }
+
+    interface TUIElement extends TUIElementProps {
         animate(props: AnimationProps, duration?: number, options?: any, progress?: () => void): Promise<void>;
         readonly parent: TContainer;
+        readonly draggable: TDraggable;
     }
 
     interface TContainer extends TUIElement {
@@ -54,14 +59,14 @@ declare module "carbon-runtime" {
         insert(element: TUIElement, index: number);
     }
 
-    export interface TSymbol extends TUIElement {
+    interface TSymbol extends TUIElement {
         states: string[];
         currentState: string;
         nextState(): boolean;
         prevState(): boolean;
     }
 
-    export interface TArtboard extends MouseEventHandler {
+    interface TArtboard extends MouseEventHandler {
         readonly width: number;
         readonly height: number;
         readonly name: string;

@@ -12,8 +12,16 @@ declare module "carbon-app" {
     }
 
     export interface IProxySource {
-        proxyDefinition():{props:string[], rprops:string[], methods:string[]};
+        proxyDefinition():ProxyDefinition;
     }
+
+    export interface IRuntimeMixin {
+        set(target: any, name: PropertyKey, value: any):boolean;
+        get(target: any, name: PropertyKey):any|undefined;
+        has(target:any, name:PropertyKey):boolean;
+    }
+
+    export type ProxyDefinition = { props: string[]; rprops: string[]; methods: string[]; mixins:string[]}
 
     export type FontMetadata = {
         name: string;

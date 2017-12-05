@@ -1,4 +1,5 @@
 import { IProxySource } from "carbon-app";
+import { ProxyDefinition } from "carbon-core";
 
 export class Property<T> implements IProxySource {
     constructor(private getter: () => T, private setter: (value: T) => void) {
@@ -12,8 +13,8 @@ export class Property<T> implements IProxySource {
         this.setter(value);
     }
 
-    proxyDefinition(): { props: string[]; rprops: string[]; methods: string[]; } {
-        return { props: [], rprops: [], methods: ["get", "set"] }
+    proxyDefinition(): ProxyDefinition {
+        return { props: [], rprops: [], methods: ["get", "set"], mixins:[] }
     }
 
 }

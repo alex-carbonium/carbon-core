@@ -1051,7 +1051,8 @@ PropertyMetadata.registerForType(Container, {
         return {
             rprops: ["children"].concat(baseDefinition.rprops), // readonly props
             props: [].concat(baseDefinition.props),
-            methods: ["add", "remove", "insert"].concat(baseDefinition.methods)
+            methods: ["add", "remove", "insert"].concat(baseDefinition.methods),
+            mixins:[].concat(baseDefinition.mixins)
         }
     }
 });

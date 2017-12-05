@@ -23,7 +23,8 @@ export class NavigationController implements INavigationController, IDisposable,
         return {
             props:[],
             rprops:[],
-            methods:["navigateBack", "navigateTo"]
+            methods:["navigateBack", "navigateTo"],
+            mixins:[]
         }
     }
 
