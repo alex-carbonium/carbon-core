@@ -40,7 +40,7 @@ describe("Relayout engine primitive tests", function () {
         container1 = this.findAgain(container1);
         element = this.findAgain(element);
         assert.equal(container1.children.length, 1, 'Element not inserted');
-        assert.equal(container1.children[0].opacity(), 0, 'Primitive is lost for an element');
+        assert.equal(container1.children[0].opacity, 0, 'Primitive is lost for an element');
     });
 
     it("Should not duplicate children when moving parent", function () {
@@ -89,14 +89,14 @@ describe("Relayout engine primitive tests", function () {
         container2.add(element);
 
         container1.add(element);
-        element.opacity(0);
+        element.opacity = (0);
 
         this.app.relayout();
         this.app.replayFromSavePoint(savepoint);
 
         //assert
         container1 = this.findAgain(container1);
-        assert.equal(container1.getElementById(element.id).opacity(), 0, 'Primitive is lost for an element');
+        assert.equal(container1.getElementById(element.id).opacity, 0, 'Primitive is lost for an element');
     });
 
     it("Should find child primitives after changing parent down", function () {
@@ -116,14 +116,14 @@ describe("Relayout engine primitive tests", function () {
         //act
         var savepoint = this.app.createSavePoint();
         container2.add(element);
-        element.opacity(0);
+        element.opacity = (0);
 
         this.app.relayout();
         this.app.replayFromSavePoint(savepoint);
 
         //assert
         container2 = this.findAgain(container2);
-        assert.equal(container2.getElementById(element.id).opacity(), 0, 'Primitive is lost for an element');
+        assert.equal(container2.getElementById(element.id).opacity, 0, 'Primitive is lost for an element');
     });
 
     it("Should find child primitives after changing parent from left subtree to right subtree", function () {
@@ -143,14 +143,14 @@ describe("Relayout engine primitive tests", function () {
         //act
         var savepoint = this.app.createSavePoint();
         container2.add(element);
-        element.opacity(0);
+        element.opacity = (0);
 
         this.app.relayout();
         this.app.replayFromSavePoint(savepoint);
 
         //assert
         container2 = this.findAgain(container2);
-        assert.equal(container2.getElementById(element.id).opacity(), 0, 'Primitive is lost for an element');
+        assert.equal(container2.getElementById(element.id).opacity, 0, 'Primitive is lost for an element');
     });
 
     it("Should find child primitives after changing parent from right subtree to left subtree", function () {
@@ -170,14 +170,14 @@ describe("Relayout engine primitive tests", function () {
         //act
         var savepoint = this.app.createSavePoint();
         container1.add(element);
-        element.opacity(0);
+        element.opacity = (0);
 
         this.app.relayout();
         this.app.replayFromSavePoint(savepoint);
 
         //assert
         container1 = this.findAgain(container1);
-        assert.equal(container1.getElementById(element.id).opacity(), 0, 'Primitive is lost for an element');
+        assert.equal(container1.getElementById(element.id).opacity, 0, 'Primitive is lost for an element');
     });
 
     it("Should be able to move element from self to container in self", function () {

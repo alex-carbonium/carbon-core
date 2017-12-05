@@ -179,8 +179,8 @@ export default class SymbolActions extends CarbonExtension {
     }
 
     markAsBackground = (selection: ISelection) => {
-        var fill = selection.elements[0].fill();
-        var stroke = selection.elements[0].stroke();
+        var fill = selection.elements[0].fill;
+        var stroke = selection.elements[0].stroke;
         var newSelection: string[] = [];
 
         var parentData = this.findArtboardAndSymbol(selection);

@@ -3,7 +3,7 @@ import { Rect, Brush, Rectangle, Environment, StrokePosition, renderer, model, I
 
 registerExample("dataUrl: artboard zoomed out", function(app, artboard){
     artboard.boundaryRect(Rect.fromSize(400, 800));
-    artboard.fill(Brush.createFromColor("green"));
+    artboard.fill = (Brush.createFromColor("green"));
     artboard.translate(1000, 0);
 
     var rect1 = new Rectangle();

@@ -1,4 +1,4 @@
-import { IDisposable } from "carbon-basics";
+import { IDisposable } from "carbon-runtime";
 
 export class AutoDisposable implements IDisposable {
     private _items:IDisposable[] = [];

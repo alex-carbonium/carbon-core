@@ -57,17 +57,17 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     }
 
     fillBackground(context, l, t, w, h, environment: RenderEnvironment) {
-        if (Brush.canApply(this.fill())) {
+        if (Brush.canApply(this.fill)) {
             context.save();
             this.globalViewMatrix().applyToContext(context);
             context.beginPath();
             context.rect(l, t, w, h);
-            Brush.fill(this.fill(), context, l, t, w, h);
+            Brush.fill(this.fill, context, l, t, w, h);
             context.restore();
         }
     }
     strokeBorder(context, w, h, environment: RenderEnvironment) {
-        let stroke = this.stroke();
+        let stroke = this.stroke;
         if (Brush.canApply(stroke)) {
             context.save();
             this.globalViewMatrix().applyToContext(context);
@@ -83,7 +83,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
             context.restore();
         }
         else {
-            if (!Brush.canApply(this.fill()) && this.showBoundaryWhenTransparent()) {
+            if (!Brush.canApply(this.fill) && this.showBoundaryWhenTransparent()) {
                 let scale = Environment.view.scale();
                 GlobalMatrixModifier.pushPrependScale();
                 context.save();
@@ -322,11 +322,11 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         }
 
         context.save();
-        context.globalAlpha = this.opacity();
+        context.globalAlpha = this.opacity;
 
         var pipeline = RenderPipeline.createFor(this, context, environment);
 
-        if(this.opacity() !== 1) {
+        if(this.opacity !== 1) {
             pipeline.bufferOutput();
         }
 
@@ -461,7 +461,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         this.renderMaskedElements(context, mask, i, this.children, environment);
         context.restore();
         if (mask.visible) {
-            let b = mask.fill();
+            let b = mask.fill;
             mask.props.fill = null;//({ fill: null }, ChangeMode.Self);
             this.drawChildSafe(mask, context, environment);
             mask.props.fill = b;

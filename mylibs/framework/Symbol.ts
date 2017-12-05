@@ -122,8 +122,8 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
         var backgrounds = this.findBackgrounds();
         if (backgrounds.length) {
-            res.fill = backgrounds[0].fill();
-            res.stroke = backgrounds[0].stroke();
+            res.fill = backgrounds[0].fill;
+            res.stroke = backgrounds[0].stroke;
         }
         this.runtimeProps.hasBg = !!backgrounds.length;
 
@@ -364,7 +364,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     private updateMarkedElements() {
         var backgrounds = this.findBackgrounds();
         if (backgrounds.length) {
-            backgrounds.forEach(x => x.prepareAndSetProps({ fill: this.fill(), stroke: this.stroke() }, ChangeMode.Self));
+            backgrounds.forEach(x => x.prepareAndSetProps({ fill: this.fill, stroke: this.stroke }, ChangeMode.Self));
         }
     }
 

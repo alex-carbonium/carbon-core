@@ -317,10 +317,10 @@ export default class ActionManager implements IActionManager {
             }
 
             selection.each((e: IUIElement) => {
-                let fill = e.fill();
-                let stroke = e.stroke();
-                e.fill(stroke);
-                e.stroke(fill);
+                let fill = e.fill;
+                let stroke = e.stroke;
+                e.fill = (stroke);
+                e.stroke = (fill);
             })
         });
 

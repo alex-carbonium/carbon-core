@@ -12,6 +12,9 @@
     "include": [
         "./mylibs/**/*"
     ],
+    "exclude": [
+        "./mylibs/definitions/runtime-platform.d.ts"
+    ],
     "awesomeTypescriptLoaderOptions": {
         "useBabel": true,
         "useCache": true,

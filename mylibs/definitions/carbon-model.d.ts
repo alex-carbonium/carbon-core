@@ -1,8 +1,9 @@
 declare module "carbon-model" {
     import { IPoint, IRect, ICoordinate, IMatrix, ISize, Origin } from "carbon-geometry";
-    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, IDisposable, ChangeMode, ArtboardType, Font, KeyboardState, Brush, ResizeDimension } from "carbon-basics";
+    import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, ChangeMode, ArtboardType, Font, KeyboardState, ResizeDimension } from "carbon-basics";
+
     import { IContext } from "carbon-rendering";
-    import { TUIElement, TSymbol, AnimationProps } from "carbon-runtime";
+    import { TUIElement, TSymbol, AnimationProps, Brush, IDisposable } from "carbon-runtime";
 
     export interface IDataNodeProps {
         [key: string]: any;
@@ -54,6 +55,7 @@ declare module "carbon-model" {
         visible: boolean;
         constraints: IConstraints;
         flags: UIElementFlags;
+        opacity:number;
     }
 
     export interface IDecoratable {
@@ -83,6 +85,9 @@ declare module "carbon-model" {
     export interface IUIElement<TProps extends IUIElementProps = IUIElementProps> extends TUIElement, IDataNode<TProps>, IMouseEventHandler, IDecoratable {
         parent: IContainer;
         name:string;
+        fill:Brush;
+        stroke:Brush;
+        opacity:number;
         drawPath?(context: IContext, w: number, h: number);
 
         mode(value?: any): any;
@@ -134,8 +139,6 @@ declare module "carbon-model" {
 
         each(callback: (e: IUIElement, index?: number) => boolean | void);
 
-        fill(value?: any): any;
-        stroke(value?: any): any;
         canFill(): boolean;
         canStroke(): boolean;
 
@@ -228,6 +231,8 @@ declare module "carbon-model" {
          * Common ID for repeated elements.
          */
         rid?: string;
+        fill:Brush;
+        stroke:Brush;
     }
 
     export interface IRepeatCell extends IContainer { }
@@ -312,8 +317,11 @@ declare module "carbon-model" {
         source: SymbolSource;
         stateId?: string;
     }
+
     export interface ISymbol extends IContainer<ISymbolProps>, TSymbol {
         source(value?: SymbolSource): SymbolSource;
+        fill:Brush;
+        stroke:Brush;
         parent:IContainer;
         name:string;
         readonly artboard:IArtboard;

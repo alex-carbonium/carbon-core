@@ -46,7 +46,7 @@ describe("Dragging tests", function () {
         assert.equal(group.children.length, 3, "Copied element must be in the group");
 
         let clone = group.children[2];
-        assert.equal(clone.fill().value, "red", "Clone must be top element");
+        assert.equal(clone.fill.value, "red", "Clone must be top element");
 
         assert.deepEqual(rect3.getBoundingBoxGlobal(), { x: 1000, y: 1000, width: 50, height: 50 }, "Original element must keep position");
     });

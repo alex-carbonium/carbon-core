@@ -193,8 +193,8 @@ class Rectangle extends Shape {
         path.closed(true);
         path.setProps({
             shadows: this.props.shadows,
-            fill: this.fill(),
-            stroke: this.stroke(),
+            fill: this.fill,
+            stroke: this.stroke,
             styleId: this.styleId(),
             strokeWidth: this.strokeWidth(),
             name: this.name
@@ -217,8 +217,8 @@ class Rectangle extends Shape {
         if (!this.visible || this.hasBadTransform()) {
             return false;
         }
-        var fill = this.fill();
-        var stroke = this.stroke();
+        var fill = this.fill;
+        var stroke = this.stroke;
 
         if (fill && fill.type) {
             return Shape.prototype.hitTest.apply(this, arguments);
@@ -246,60 +246,6 @@ class Rectangle extends Shape {
         }
         return rectmath.isPointInRect(outerRect, point) && !rectmath.isPointInRect(innerRect, point);
     }
-
-    // shouldApplyViewMatrix() {
-    //     var strokePosition = this.strokePosition();
-    //     var lw = this.strokeWidth();
-    //     var stroke = this.stroke();
-
-    //     return (stroke && stroke.type && lw && strokePosition !== StrokePosition.Center);
-    // }
-
-    // drawSelf(context, w, h, environment: RenderEnvironment) {
-    //     var strokePosition = this.strokePosition();
-    //     var lw = this.strokeWidth();
-    //     var stroke = this.stroke();
-
-    //     if (stroke && stroke.type && lw && strokePosition !== StrokePosition.Center) {
-    //         return super.drawSelf(context, w, h, environment);
-    //     }
-
-    //     this.drawOutsetShadows(context, w, h, environment);
-
-    //     context.save();
-
-    //     var dashPattern = this.dashPattern();
-    //     if (dashPattern) {
-    //         context.setLineDash(dashPattern);
-    //     }
-    //     context.beginPath();
-    //     this.drawPath(context, w, h);
-
-    //     Brush.fill(this.fill(), context, 0, 0, w, h);
-
-    //     this.drawInsetShadows(context, w, h, environment);
-
-    //     context.lineWidth = lw;
-    //     if (stroke && stroke.type && lw) {
-
-    //         Brush.stroke(stroke, context, 0, 0, w, h);
-    //         // }
-    //         // else {
-    //         //     context.beginPath();
-    //         //     var db = lw / 2;
-    //         //     if (strokePosition === StrokePosition.Outside) {
-    //         //         lw = -lw;
-    //         //         db = -db;
-    //         //     }
-    //         //     context.translate(db, db);
-    //         //     this.drawPath(context, w - lw, h - lw);
-    //         //     Brush.stroke(stroke, context, 0, 0, w - lw, h - lw);
-    //         // }
-    //     }
-
-    //     context.restore();
-    // }
-
     drawPath(context, w, h) {
         var cornerRadius = this.cornerRadius();
 
@@ -418,20 +364,20 @@ class Rectangle extends Shape {
 
         if (parsedAttributes.fill !== undefined) {
             if (!parsedAttributes.fill || parsedAttributes.fill === "none") {
-                rect.fill(Brush.Empty);
+                rect.fill = (Brush.Empty);
             } else {
-                rect.fill(Brush.createFromColor(parsedAttributes.fill));
+                rect.fill = (Brush.createFromColor(parsedAttributes.fill));
             }
         }
 
         if (parsedAttributes.stroke) {
-            rect.stroke(Brush.createFromColor(parsedAttributes.stroke));
+            rect.stroke = (Brush.createFromColor(parsedAttributes.stroke));
         } else {
-            rect.stroke(Brush.Empty);
+            rect.stroke = (Brush.Empty);
         }
 
         if (parsedAttributes.opacity) {
-            rect.opacity(parsedAttributes.opacity);
+            rect.opacity = (parsedAttributes.opacity);
         }
 
         var pos = new Point(0, 0);

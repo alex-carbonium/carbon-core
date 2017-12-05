@@ -38,7 +38,7 @@ class Shape extends Container {
     }
 
     _renderDraft(context, w, h, environment: RenderEnvironment) {
-        var stroke = this.stroke();
+        var stroke = this.stroke;
         var strokePosition = this.strokePosition();
 
         context.beginPath();
@@ -78,15 +78,15 @@ class Shape extends Container {
     }
 
     fillSelf(context, w, h) {
-        Brush.fill(this.fill(), context, 0, 0, w, h);
+        Brush.fill(this.fill, context, 0, 0, w, h);
     }
 
     strokeSelf(context, w, h) {
-        Brush.stroke(this.stroke(), context, 0, 0, w, h);
+        Brush.stroke(this.stroke, context, 0, 0, w, h);
     }
 
     _renderFinal(context, w, h, environment: RenderEnvironment) {
-        var stroke = this.stroke();
+        var stroke = this.stroke;
         var strokePosition = this.strokePosition();
         var strokeWidth = this.strokeWidth();
 

@@ -18,7 +18,7 @@ class CustomGuides extends Guide {
         context.save();
 
         var scale = this._view.scale();
-        context.globalAlpha *= this.opacity();
+        context.globalAlpha *= this.opacity;
         context.beginPath();
 
         for (let i = 0; i < this.props.xs.length; ++i) {
@@ -29,7 +29,7 @@ class CustomGuides extends Guide {
             }
         }
 
-        Brush.stroke(this.stroke(), context);
+        Brush.stroke(this.stroke, context);
 
         context.restore();
     }
@@ -38,7 +38,7 @@ class CustomGuides extends Guide {
         context.save();
 
         var scale = this._view.scale();
-        context.globalAlpha *= this.opacity();
+        context.globalAlpha *= this.opacity;
         context.beginPath();
 
         for (let i = 0; i < this.props.ys.length; ++i) {
@@ -49,7 +49,7 @@ class CustomGuides extends Guide {
             }
         }
 
-        Brush.stroke(this.stroke(), context);
+        Brush.stroke(this.stroke, context);
 
         context.restore();
     }

@@ -238,8 +238,8 @@ export default class Polygon extends Shape {
         path.closed(true);
         path.setProps({
             shadows:this.props.shadows,
-            fill:this.fill(),
-            stroke:this.stroke(),
+            fill:this.fill,
+            stroke:this.stroke,
             styleId:this.styleId(),
             name:this.name,
             strokeWidth:this.strokeWidth()

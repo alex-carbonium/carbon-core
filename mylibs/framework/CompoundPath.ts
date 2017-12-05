@@ -111,7 +111,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
     }
 
     _renderDraft(context, w, h) {
-        var stroke = this.stroke();
+        var stroke = this.stroke;
         var strokePosition = this.strokePosition();
 
         context.beginPath();
@@ -145,15 +145,15 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
     }
 
     fillSelf(context, w, h) {
-        Brush.fill(this.fill(), context, 0, 0, w, h);
+        Brush.fill(this.fill, context, 0, 0, w, h);
     }
 
     strokeSelf(context, w, h) {
-        Brush.stroke(this.stroke(), context, 0, 0, w, h);
+        Brush.stroke(this.stroke, context, 0, 0, w, h);
     }
 
     _renderFinal(context, w, h, environment: RenderEnvironment) {
-        var stroke = this.stroke();
+        var stroke = this.stroke;
         var strokePosition = this.strokePosition();
 
         context.beginPath();
@@ -305,8 +305,8 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
         let path;
         if (this.result.length === 1) {
             path = this.result[0].clone();
-            path.fill(this.fill());
-            path.stroke(this.stroke());
+            path.fill = (this.fill);
+            path.stroke = (this.stroke);
             path.setProps(this.selectLayoutProps());
         }
         else {
@@ -314,8 +314,8 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
             for (let i = 0; i < this.result.length; ++i) {
                 let p = this.result[i].clone();
                 p.joinMode("union");
-                p.fill(this.fill());
-                p.stroke(this.stroke());
+                p.fill = (this.fill);
+                p.stroke = (this.stroke);
                 tmppath.add(p);
             }
             tmppath.recalculate();
@@ -416,7 +416,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
                 point = this.global2local(point);
             }
 
-            let brush = this.fill();
+            let brush = this.fill;
             if (this.lockedGroup() && (!brush || !brush.type)) {
                 for (let i = 0; i < this.result.length; i++) {
                     let path = this.result[i];
@@ -500,9 +500,9 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
         if (this.result) {
             this.drawPath(context, w, h);
 
-            Brush.fill(this.fill(), context, 0, 0, w, h);
+            Brush.fill(this.fill, context, 0, 0, w, h);
             context.lineWidth = this.strokeWidth();
-            Brush.stroke(this.stroke(), context, 0, 0, w, h);
+            Brush.stroke(this.stroke, context, 0, 0, w, h);
         }
 
         // if(this.result) {

@@ -22,7 +22,7 @@ import params from "../params";
 import StateMachine from "../StateMachine";
 import DiscoverProxy from "./DiscoverProxy";
 import bluebird from "bluebird";
-import { IDisposable } from "carbon-basics";
+import { IDisposable } from "carbon-runtime";
 import { IBackend, ConnectionState } from "carbon-api";
 
 require<any>("../DebugUtil")("carb:signalr");

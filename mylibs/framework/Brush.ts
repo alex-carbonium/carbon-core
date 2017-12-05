@@ -1,7 +1,7 @@
 ﻿import Invalidate from "./Invalidate";
 import TypeDefaults from "./TypeDefaults";
 import { Types } from "./Defs";
-import { BrushType } from "carbon-basics";
+import { BrushType } from "carbon-runtime";
 
 var brushDefault = TypeDefaults[Types.Brush] = function () {
     return new Brush("black");

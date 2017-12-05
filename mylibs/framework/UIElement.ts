@@ -103,6 +103,14 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             extend(changes, styleManager.getStyle(changes.styleId, 1).props);
         }
 
+        if(changes.fill && typeof changes.fill === 'string') {
+            changes.fill = Brush.createFromColor(changes.fill);
+        }
+
+        if(changes.stroke && typeof changes.stroke === 'string') {
+            changes.stroke = Brush.createFromColor(changes.stroke);
+        }
+
         let hasBr = changes.hasOwnProperty("br");
         if (hasBr && !(changes.br instanceof Rect)) {
             changes.br = Rect.fromObject(changes.br);
@@ -159,7 +167,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         delete this.runtimeProps.minWidth;
         delete this.runtimeProps.minHeight;
 
-        var parent:any = this.parent;
+        var parent: any = this.parent;
         if (parent && parent !== NullContainer) {
             parent.refreshMinSizeConstraints();
         }
@@ -193,7 +201,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (this.runtimeProps.rc) {
             ContextCacheManager.free(this);
         }
-        var parent:any = this.parent;
+        var parent: any = this.parent;
         parent && parent.clearRenderingCache();
     }
 
@@ -811,7 +819,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     getMaxOuterBorder() {
-        if (!this.stroke()) {
+        if (!this.stroke) {
             return 0;
         }
         let strokeWidth = this.strokeWidth();
@@ -1013,7 +1021,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
 
         context.save();
-        context.globalAlpha = this.opacity();
+        context.globalAlpha = this.opacity;
 
         // this.applyViewMatrix(context);
 
@@ -1117,7 +1125,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (!root || root === this) {
             return this.viewMatrix();
         }
-        let current:any = this;
+        let current: any = this;
         let matrices = [];
         while (current !== root) {
             matrices.push(current.viewMatrix());
@@ -1365,16 +1373,16 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.field("_canSelect", value, true);
     }
 
-    get visible():boolean {
+    get visible(): boolean {
         return this.props.visible;
     }
 
-    set visible(value:boolean) {
+    set visible(value: boolean) {
         this._visible(value)
     }
 
     _visible(value?: boolean, mode?: ChangeMode) {
-        this.setProps({ visible: value }, mode);
+        this.prepareAndSetProps({ visible: value }, mode);
     }
 
     visibleInChain() {
@@ -1410,18 +1418,23 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
         return res;
     }
-    fill(value?: Brush) {
-        if (value !== undefined) {
-            this.setProps({ fill: value });
-        }
-        return this.props.fill;
+    get fill(): Brush {
+        return this.props.fill as any;
     }
-    stroke(value?: Brush): Brush {
-        if (value !== undefined) {
-            this.setProps({ stroke: value });
-        }
-        return this.props.stroke;
+
+    set fill(value: Brush) {
+        this.prepareAndSetProps({ fill: value });
     }
+
+    get stroke(): Brush {
+        return this.props.stroke as any;
+    }
+
+    set stroke(value: Brush) {
+        this.prepareAndSetProps({ stroke: value });
+    }
+
+
     strokePosition(value?: StrokePosition): StrokePosition {
         if (value !== undefined) {
             this.setProps({ strokePosition: value });
@@ -1442,7 +1455,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
     dashPattern(value?: any) {
         if (value !== undefined) {
-            this.setProps({ dashPattern: value });
+            this.prepareAndSetProps({ dashPattern: value });
         }
         if (typeof this.props.dashPattern === 'string') {
             switch (this.props.dashPattern) {
@@ -1496,12 +1509,14 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         this.resetGlobalViewCache(true);
     }
 
-    opacity(value?: number) {
-        if (value !== undefined) {
-            this.setProps({ opacity: value });
-        }
+    get opacity(): number {
         return this.props.opacity;
     }
+
+    set opacity(value: number) {
+        this.prepareAndSetProps({ opacity: value });
+    }
+
     minWidth(/*Number*/value: number) {
         if (value !== undefined) {
             this.setProps({ minWidth: value });
@@ -1575,7 +1590,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.props.visibleWhenDrag;
     }
     set name(value: string) {
-        this.setProps({ name: value });
+        this.prepareAndSetProps({ name: value });
     }
 
     get name(): string {
@@ -1638,7 +1653,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     isDescendantOrSame(element: IUIElement): boolean {
-        let current:any = this;
+        let current: any = this;
         do {
             if (current.isSameAs(element)) {
                 return true;
@@ -1835,7 +1850,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
     page() {
         let element;
-        let nextParent:any = this;
+        let nextParent: any = this;
         do {
             element = nextParent;
             nextParent = !nextParent.isDisposed() ? nextParent.parent : null;
@@ -2191,8 +2206,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return group.promise();
     }
 
-    registerEventHandler(name, callback:(e:any)=>any) {
-        let events = this.runtimeProps.events =  this.runtimeProps.events || {};
+    registerEventHandler(name, callback: (e: any) => any) {
+        let events = this.runtimeProps.events = this.runtimeProps.events || {};
         events[name] = callback;
     }
 
@@ -2223,7 +2238,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return metadata.proxyDefinition();
         }
 
-        return {props:[], rprops:[], methods:[]};
+        return { props: [], rprops: [], methods: [] };
     }
 
     getNonRepeatableProps(newProps?: any) {
@@ -2538,7 +2553,7 @@ PropertyMetadata.registerForType(UIElement, {
     proxyDefinition() {
         return {
             rprops: ["name", "id", "parent"], // readonly props
-            props: ["x", "y", "width", "height", "angle", "visible"], // read/write props
+            props: ["x", "y", "width", "height", "angle", "visible", "fill", "stroke", "opacity"], // read/write props
             methods: ["animate", "boundaryRect"]
         }
     },
@@ -2580,7 +2595,7 @@ PropertyMetadata.registerForType(UIElement, {
             }
             return res;
         }
-        var parent:any = element.parent;
+        var parent: any = element.parent;
         var strategy = parent.arrangeStrategy();
         return {
             dockStyle: strategy === ArrangeStrategies.Dock,

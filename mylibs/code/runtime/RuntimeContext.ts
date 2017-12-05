@@ -1,4 +1,4 @@
-import { IDisposable } from "carbon-basics";
+import { IDisposable } from "carbon-runtime";
 import { AutoDisposable } from "../../AutoDisposable";
 import { NavigationController } from "./NavigationController";
 import { IPreviewModel, IProxySource } from "carbon-core";

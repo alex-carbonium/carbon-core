@@ -43,7 +43,7 @@ class CorruptedElement extends UIElement {
 
     drawSelf(context, w, h) {
         context.save();
-        Brush.setStroke(this.stroke(), context, 0, 0, w, h);
+        Brush.setStroke(this.stroke, context, 0, 0, w, h);
         context.linePath(0, 0, 0 + w, 0 + h);
         context.stroke();
         context.linePath(0, 0 + h, 0 + w, 0);

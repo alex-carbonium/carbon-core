@@ -925,8 +925,8 @@ describe("Repeater tests", function () {
 
             this.app.activePage.add(element);
             var repeater = this.makeRepeater([element]);
-            repeater.cols(2);
-            repeater.rows(2);
+            repeater.cols = 2;
+            repeater.rows = 2;
             this.app.relayout();
 
             var savepoint = this.app.createSavePoint();

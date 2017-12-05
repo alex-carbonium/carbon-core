@@ -46,8 +46,6 @@ declare module "carbon-model"{
 
         runtimeProps: any;
 
-        opacity(value?:number):number;
-
         isDescendantOrSame(other: IUIElement): boolean;
         select(multi?: boolean): void;
         unselect(): void;

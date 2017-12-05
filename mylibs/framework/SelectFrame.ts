@@ -51,7 +51,7 @@ export class SelectFrame extends UIElement {
         context.save();
         context.beginPath();
         context.rect(r.x, r.y, r.width, r.height);
-        Brush.fill(this.fill(), context);
+        Brush.fill(this.fill, context);
         context.restore();
     }
 

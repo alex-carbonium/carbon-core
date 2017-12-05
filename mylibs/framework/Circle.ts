@@ -16,7 +16,7 @@ class Circle extends Shape {
         var matrix = this.globalViewMatrixInverted();
         point = matrix.transformPoint(point);
 
-        if (this.fill() && this.fill().type) {
+        if (this.fill && this.fill.type) {
             let rect = this.getHitTestBox(scale);
             return math.isPointInEllipse(rect, point);
         }
@@ -112,8 +112,8 @@ class Circle extends Shape {
         path.closed(true);
         path.setProps({
             shadows:this.props.shadows,
-            fill:this.fill(),
-            stroke:this.stroke(),
+            fill:this.fill,
+            stroke:this.stroke,
             styleId:this.styleId(),
             name:this.name,
             strokeWidth:this.strokeWidth()
@@ -141,13 +141,13 @@ class Circle extends Shape {
 
         context.beginPath();
         this.drawPath(context, w, h);
-        var stroke = this.stroke();
+        var stroke = this.stroke;
 
         if (w < 2 || h < 2) {
             // if the shape is too small we should not use fill brush, since borders are overlap anyway
             Brush.fill(stroke, context, 0, 0, w, h);
         } else {
-            Brush.fill(this.fill(), context, 0, 0, w, h);
+            Brush.fill(this.fill, context, 0, 0, w, h);
         }
         this.drawInsetShadows(context, w, h, environment);
 
@@ -184,7 +184,7 @@ class Circle extends Shape {
         }
 
         if (parsedAttributes.opacity) {
-            circle.opacity(parsedAttributes.opacity);
+            circle.opacity = (parsedAttributes.opacity);
         }
 
         circle.setProps({ pointRounding: 0 });
@@ -195,16 +195,16 @@ class Circle extends Shape {
 
         if (parsedAttributes.fill !== undefined) {
             if (!parsedAttributes.fill || parsedAttributes.fill === "none") {
-                circle.fill(Brush.Empty);
+                circle.fill = (Brush.Empty);
             } else {
-                circle.fill(Brush.createFromColor(parsedAttributes.fill));
+                circle.fill = (Brush.createFromColor(parsedAttributes.fill));
             }
         }
 
         if (parsedAttributes.stroke) {
-            circle.stroke(Brush.createFromColor(parsedAttributes.stroke));
+            circle.stroke = (Brush.createFromColor(parsedAttributes.stroke));
         } else {
-            circle.stroke(Brush.Empty);
+            circle.stroke = (Brush.Empty);
         }
 
         var pos = { x: 0, y: 0 }

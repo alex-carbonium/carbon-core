@@ -16,7 +16,7 @@ class LayoutGridLines extends Guide {
         var scale = this._view.scale();
         context.scale(1 / scale, 1 / scale);
 
-        context.globalAlpha *= this.opacity();
+        context.globalAlpha *= this.opacity;
         context.beginPath();
         for (let i = 0; i < this.props.xs.length; ++i) {
             var x = this.props.xs[i];
@@ -28,7 +28,7 @@ class LayoutGridLines extends Guide {
             context.lineTo(x2, y2);
         }
 
-        Brush.stroke(this.stroke(), context);
+        Brush.stroke(this.stroke, context);
 
         context.restore();
     }

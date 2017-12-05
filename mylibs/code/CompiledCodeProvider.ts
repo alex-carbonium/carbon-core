@@ -1,6 +1,6 @@
 import { IElementWithCode } from "carbon-model";
 import Services from "Services";
-import { IDisposable } from "carbon-basics";
+import { IDisposable } from "carbon-runtime";
 import { ArtboardProxyGenerator } from "./ProxyGenerator";
 
 var platformLib = require("raw-loader!../definitions/runtime-platform.d.ts");

@@ -266,7 +266,7 @@ export default class DropVisualization extends ExtensionBase {
         app.addLoadRef();
         this._dropLine = new DropLine();
         this._dropLine.setProps({
-            fill: Brush.createFromColor("red"),
+            stroke: Brush.createFromColor("red"),
             strokeWidth: 2
         });
         this._dropLine.crazySupported(false);

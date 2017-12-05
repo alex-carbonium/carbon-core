@@ -124,17 +124,26 @@ export default class Section extends Container {
         }
     }
 
-    fill(value){
-        if (arguments.length === 0 && this._isSectionToolActive()){
+    get fill(){
+        if (this._isSectionToolActive()){
             return this.props.highlightFill;
         }
-        return super.fill(value);
+        return super.fill;
     }
-    stroke(value){
-        if (arguments.length === 0 && this._isSectionToolActive()){
+
+    set fill(value){
+        return super.fill = (value);
+    }
+
+    get stroke(){
+        if (this._isSectionToolActive()){
             return this.props.highlightStroke;
         }
-        return super.stroke(value);
+        return super.stroke;
+    }
+
+    set stroke(value){
+        return super.stroke = (value);
     }
 
     canSelect(){

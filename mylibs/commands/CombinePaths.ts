@@ -38,8 +38,8 @@ export default class CombinePaths {
             path = new CompoundPath();
             App.Current.activePage.nameProvider.assignNewName(path);
 
-            path.fill(e0.fill());
-            path.stroke(e0.stroke());
+            path.fill = (e0.fill);
+            path.stroke = (e0.stroke);
             path.name = (e0.displayName());
             path.styleId(e0.styleId());
             path.strokeWidth(e0.strokeWidth());

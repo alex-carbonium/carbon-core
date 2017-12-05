@@ -144,12 +144,8 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
     }
     each(callback: (e: IUIElement, index?: number) => boolean | void) {
     }
-    fill(value?: any) {
-        throw new Error("Method not implemented.");
-    }
-    stroke(value?: any) {
-        throw new Error("Method not implemented.");
-    }
+    fill = null;
+    stroke = null;
 
     set x(v) {
         throw new Error("Method not implemented.");
@@ -383,9 +379,7 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
     drawSelf() {
     }
 
-    opacity(value?: number) {
-        return 0;
-    }
+    opacity = 0;
 
     resetGlobalViewCache() {
 

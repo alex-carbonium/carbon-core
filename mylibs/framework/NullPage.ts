@@ -111,8 +111,9 @@ class NullPage extends UIElement implements IPage {
     }
     each(callback: (e: IUIElement, index?: number) => boolean | void) {
     }
-    fill(value?: any) {
-    }
+
+    fill = null;
+    stroke = null;
 
     clearRenderingCache() { }
 

@@ -93,7 +93,7 @@ describe("Symbol tests", function () {
         symbol.draw(new ContextStub(), this.drawContext);
 
         symbol.applyScaling(new Point(1.2, 1), Point.Zero);
-        symbol.opacity(.5); //anything to trigger custom properties update
+        symbol.opacity = (.5); //anything to trigger custom properties update
 
         this.app.relayout();
         symbol.draw(new ContextStub(), this.drawContext);
@@ -132,8 +132,8 @@ describe("Symbol tests", function () {
             // arrange
             var child = new UIElement();
 
-            child.fill(Brush.createFromColor("red"));
-            child.stroke(Brush.createFromColor("green"));
+            child.fill = (Brush.createFromColor("red"));
+            child.stroke = (Brush.createFromColor("green"));
 
             Selection.makeSelection([child]);
 
@@ -299,8 +299,8 @@ describe("Symbol tests", function () {
             this.app.activePage.add(child2);
 
 
-            child1.fill(Brush.createFromColor("red"));
-            child2.fill(Brush.createFromColor("green"));
+            child1.fill = (Brush.createFromColor("red"));
+            child2.fill = (Brush.createFromColor("green"));
 
             Selection.makeSelection([child1, child2]);
             var actions = new SymbolActions(this.app, workspace);

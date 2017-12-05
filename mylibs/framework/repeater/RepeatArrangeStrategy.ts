@@ -14,8 +14,8 @@ var Strategy = {
 
         this._updateMargins(container, changeMode);
 
-        var cols = container.cols();
-        var rows = container.rows();
+        var cols = container.cols;
+        var rows = container.rows;
 
         this._deleteExcessiveItems(container, rows, cols, changeMode);
         this._insertNewItems(container, rows, cols, changeMode);

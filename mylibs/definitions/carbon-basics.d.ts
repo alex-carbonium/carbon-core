@@ -1,15 +1,12 @@
 declare module "carbon-basics" {
     import { ICoordinate } from "carbon-geometry";
     import { AppSettings } from "carbon-core";
+    import { IDisposable } from "carbon-runtime";
 
     export interface IConstructor<T> {
         prototype: T;
         //TODO: remove constructor and rename to IModelObject
         new (): T;
-    }
-
-    export interface IDisposable {
-        dispose(): void;
     }
 
     export interface IPooledObject {
@@ -90,34 +87,6 @@ declare module "carbon-basics" {
         Vertical,
         Horizontal,
         Both
-    }
-
-    export const enum BrushType {
-        empty,
-        color,
-        lineargradient,
-        resource,
-        pattern
-    }
-
-    export interface LinearGradientData {
-        x1:number;
-        y1:number;
-        x2:number;
-        y2:number;
-        stops:any[];
-    }
-
-    export class Brush {
-        type: BrushType;
-        value: any;
-
-        static createFromColor(color: string): Brush;
-        static createFromLinearGradientObject(value: LinearGradientData): Brush;
-        static toCss(brush: Brush): any;
-        static isValid(brush: Brush): boolean;
-
-        static Empty: Brush;
     }
 
     export const enum TextAlign {

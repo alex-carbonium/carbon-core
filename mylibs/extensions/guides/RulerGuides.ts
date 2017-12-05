@@ -290,7 +290,7 @@ export default class RulerGuides {
             context.beginPath();
             context.moveTo(x + .5, 0);
             context.lineTo(x + .5, viewportHeight);
-            Brush.stroke(this._customGuides.stroke(), context);
+            Brush.stroke(this._customGuides.stroke, context);
             context.globalAlpha = 1;
         }
     }
@@ -315,7 +315,7 @@ export default class RulerGuides {
             context.beginPath();
             context.moveTo(0, y + .5);
             context.lineTo(viewportWidth, y + .5);
-            Brush.stroke(this._customGuides.stroke(), context);
+            Brush.stroke(this._customGuides.stroke, context);
             context.globalAlpha = 1;
         }
     }

@@ -2,8 +2,32 @@ declare module "carbon-runtime" {
     /// <reference path="carbon-runtime-names"/>;
     /// <reference path="runtime-platform"/>;
     export type AnimationProps = { [name: string]: number };
-    interface Brush{
+    export const enum BrushType {
+        empty,
+        color,
+        lineargradient,
+        resource,
+        pattern
+    }
 
+    export interface LinearGradientData {
+        x1:number;
+        y1:number;
+        x2:number;
+        y2:number;
+        stops:any[];
+    }
+
+    export class Brush {
+        type: BrushType;
+        value: any;
+
+        static createFromColor(color: string): Brush;
+        static createFromLinearGradientObject(value: LinearGradientData): Brush;
+        static toCss(brush: Brush): any;
+        static isValid(brush: Brush): boolean;
+
+        static Empty: Brush;
     }
 
     interface TUIElementProps {
@@ -210,9 +234,9 @@ declare module "carbon-runtime" {
         type: AnimationType;
     }
 
-    type PrimitiveType = string | number | boolean;
+    type BasicType = string | number | boolean;
 
-    type DataBag = PrimitiveType | { [key: string]: PrimitiveType | DataBag };
+    type DataBag = BasicType | { [key: string]: BasicType | DataBag };
 
     /*
     * Navigation controller

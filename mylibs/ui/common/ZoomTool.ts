@@ -22,7 +22,7 @@ export default class ZoomTool extends Tool {
         super("zoomTool");
         this._parameters = parameters;
         this._zoomFrame = new SelectFrame();
-        this._zoomFrame.fill(Brush.createFromColor(UserSettings.zoom.frameColor))
+        this._zoomFrame.fill = (Brush.createFromColor(UserSettings.zoom.frameColor))
         this._zoomFrame.onComplete.bind(this, this.onZoomRect);
     }
 

@@ -239,7 +239,7 @@ class Line extends Shape implements ILine {
         path.addPoint({ x: l + x1, y: t + y1 });
         path.addPoint({ x: l + x2, y: t + y2 });
 
-        path.stroke(this.stroke());
+        path.stroke = (this.stroke);
         path.adjustBoundaries();
         path.name = (this.name);
         path.setProps(this.selectLayoutProps());
@@ -259,7 +259,7 @@ class Line extends Shape implements ILine {
         var p1 = m.transformPoint2(x1, y1, true);
         var p2 = m.transformPoint2(x2, y2, true);
 
-        var stroke = this.stroke();
+        var stroke = this.stroke;
         if (stroke) {
             var dw = this.strokeWidth() / 2;
             var vx = p2.x - p1.x;
@@ -297,7 +297,7 @@ class Line extends Shape implements ILine {
 
         this.drawPath(context, w, h);
 
-        Brush.stroke(this.stroke(), context, 0, 0, w, h);
+        Brush.stroke(this.stroke, context, 0, 0, w, h);
 
         context.restore();
     }
@@ -333,14 +333,6 @@ class Line extends Shape implements ILine {
     _roundValue(v) {
         return Math.round(v);
     }
-
-    // strokeSelf(context, w, h) {
-    //     Brush.stroke(this.fill(), context, 0, 0, w, h);
-    // }
-
-    // fillSelf(context, w, h) {
-
-    // }
 
     prepareProps(changes) {
         Shape.prototype.prepareProps.apply(this, arguments);

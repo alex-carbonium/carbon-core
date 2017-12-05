@@ -653,7 +653,7 @@ class Path extends Shape {
                 return true;
             }
 
-            let brush = this.fill();
+            let brush = this.fill;
             if (!brush || !brush.type) {
                 let p = this.getPointIfClose(point, 8);
                 if (p) {
@@ -1844,23 +1844,23 @@ function setElementPropertiesFromAttributes(element, parsedAttributes) {
 
     if (parsedAttributes.fill !== undefined) {
         if (!parsedAttributes.fill || parsedAttributes.fill === "none") {
-            element.fill(Brush.Empty);
+            element.fill = (Brush.Empty);
         } else {
-            element.fill(Brush.createFromColor(parsedAttributes.fill));
+            element.fill = (Brush.createFromColor(parsedAttributes.fill));
         }
     }
     else {
-        element.fill(Brush.Black);
+        element.fill = (Brush.Black);
     }
 
     if (parsedAttributes.stroke) {
-        element.stroke(Brush.createFromColor(parsedAttributes.stroke/*, parsedAttributes.strokeWidth, 0*/));
+        element.stroke = (Brush.createFromColor(parsedAttributes.stroke/*, parsedAttributes.strokeWidth, 0*/));
     } else {
-        element.stroke(Brush.Empty);
+        element.stroke = (Brush.Empty);
     }
 
     if (parsedAttributes.opacity) {
-        element.opacity(parsedAttributes.opacity);
+        element.opacity = (parsedAttributes.opacity);
     }
 
     if (parsedAttributes.miterLimit !== undefined) {

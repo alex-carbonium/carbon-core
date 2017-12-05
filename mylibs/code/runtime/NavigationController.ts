@@ -1,5 +1,5 @@
 import { INavigationController, INavigationAnimationOptions, DataBag, AnimationType, EasingType } from "carbon-runtime";
-import { IDisposable } from "carbon-basics";
+import { IDisposable } from "carbon-runtime";
 import { IPreviewModel, IProxySource } from "carbon-app";
 import DataNode from "../../framework/DataNode";
 import { RuntimeProxy } from "./RuntimeProxy";

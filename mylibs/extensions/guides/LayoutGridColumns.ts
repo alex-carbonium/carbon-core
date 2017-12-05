@@ -8,7 +8,7 @@ class LayoutGridColumns extends Guide {
     draw(context) {
         context.save();
 
-        context.globalAlpha *= this.opacity();
+        context.globalAlpha *= this.opacity;
         context.beginPath();
         for (let i = 0, l = this.props.xs.length; i < l; ++i) {
             var x = this.props.xs[i];
@@ -16,7 +16,7 @@ class LayoutGridColumns extends Guide {
             context.rect(x, 0, w, this.props.rect.height);
         }
 
-        Brush.fill(this.fill(), context);
+        Brush.fill(this.fill, context);
 
         context.restore();
     }
