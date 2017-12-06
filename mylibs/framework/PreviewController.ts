@@ -48,7 +48,7 @@ export default class PreviewController extends ControllerBase {
         assertNever(eventType);
     }
 
-    async _propagateAction(eventData, eventType, element):Promise<boolean> {
+    async _propagateAction(eventData, eventType, element): Promise<boolean> {
         if (!element || element === NullContainer) {
             return false;
         }
@@ -57,21 +57,21 @@ export default class PreviewController extends ControllerBase {
         let eventName = this._eventTypeToName(eventType);
 
         if (events && events[eventName]) {
-            let m:IMatrix = element.globalViewMatrixInverted();
+            let m: IMatrix = element.globalViewMatrixInverted();
             let pos = m.transformPoint2(eventData.x, eventData.y);
             let event = {
-                x:eventData.x,
-                y:eventData.y,
-                layerX:pos.x,
-                layerY:pos.y,
-                altKey:eventData.altKey,
-                shiftKey:eventData.shiftKey,
-                ctrlKey:eventData.ctrlKey,
-                metaKey:eventData.metaKey
+                x: eventData.x,
+                y: eventData.y,
+                layerX: pos.x,
+                layerY: pos.y,
+                altKey: eventData.altKey,
+                shiftKey: eventData.shiftKey,
+                ctrlKey: eventData.ctrlKey,
+                metaKey: eventData.metaKey
             }
 
             let res = events[eventName].raise(event);
-            if(res instanceof Promise) {
+            if (res instanceof Promise) {
                 res = await res;
             }
 
@@ -127,9 +127,41 @@ export default class PreviewController extends ControllerBase {
         }
     }
 
+    // onpinchmove(event) {
+    //     super.onpinchmove(event);
+    //     this.view.invalidate();
+    // }
+
+    onpanstart(eventData) {
+        this._startelement = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
+    }
+
+    onpanmove(eventData) {
+        if (this._startelement) {
+            if (this._olddelta) {
+                this._propagateScroll(this._olddelta, this._startelement);
+            }
+            let scale = this.view.scale();
+            var delta = { dx: -eventData.event.deltaX/scale, dy: -eventData.event.deltaY/scale};
+            this._propagateScroll(delta, this._startelement);
+            this._olddelta = { dx: eventData.event.deltaX/scale, dy: eventData.event.deltaY/scale };
+        }
+    }
+
+    onpanend(event) {
+        if (this._startelement) {
+            this._startelement = null;
+            this._olddelta = null;
+        }
+    }
+
     onpinchmove(event) {
-        super.onpinchmove(event);
-        this.view.invalidate();
+    }
+
+    onpinchstart(event) {
+    }
+
+    onpinchend(event) {
     }
 
 

@@ -87,24 +87,56 @@ export default class ArtboardFrameControl extends UIElement {
             return;
         }
 
+        let size = this.getContentSize();
+        this.setProps({
+            maxScrollX:Math.max(0, size.width - this.width),
+            maxScrollY:Math.max(0, size.height - this.height)
+        });
+
         this.runtimeProps.artboardVersion = artboard.runtimeProps.version;
     }
 
-    scrollX(value?:number):number {
-        if(arguments.length > 0) {
-            this.setProps({offsetX:-value});
+    scrollX(value?: number): number {
+        if (arguments.length > 0) {
+            this.prepareAndSetProps({ offsetX: -value });
         }
 
         return -this.props.offsetX;
     }
 
 
-    scrollY(value?:number):number {
-        if(arguments.length > 0) {
-            this.setProps({offsetY:-value});
+    scrollY(value?: number): number {
+        if (arguments.length > 0) {
+            this.prepareAndSetProps({ offsetY: -value });
         }
 
         return -this.props.offsetY;
+    }
+
+    getContentSize() {
+        let source = this._artboard;
+        if (!source || this.props.content === ContentBehavior.Scale) {
+            return { width: this.width, height: this.height }
+        }
+        else {
+            return { width: source.width, height: source.height };
+        }
+    }
+
+    get minScrollY() {
+        return 0;
+    }
+
+    get maxScrollY() {
+        return this.getContentSize().height - this.height;
+    }
+
+    get minScrollX() {
+        return 0;
+    }
+
+    get maxScrollX() {
+        return this.getContentSize().width - this.width;
     }
 
     resetGlobalViewCache() {
@@ -114,6 +146,34 @@ export default class ArtboardFrameControl extends UIElement {
 
     onArtboardChanged() {
         this._initFromArtboard();
+    }
+
+    prepareProps(props) {
+        if(props.content !== undefined || props.width !== undefined || props.height !== undefined) {
+            let size = this.getContentSize();
+            Object.assign(props, {
+                maxScrollX:Math.max(0, size.width - this.width),
+                maxScrollY:Math.max(0, size.height - this.height)
+            });
+            props.offsetX = props.offsetX || this.props.offsetX;
+            props.offsetY = props.offsetY || this.props.offsetY;
+        }
+
+        if (props.offsetX !== undefined) {
+            if (props.offsetX > -this.minScrollX) {
+                props.offsetX = -this.minScrollX;
+            } else if (props.offsetX < -this.maxScrollX) {
+                props.offsetX = -this.maxScrollX;
+            }
+        }
+
+        if (props.offsetY !== undefined) {
+            if (props.offsetY > -this.minScrollY) {
+                props.offsetY = -this.minScrollY;
+            } else if (props.offsetY < -this.maxScrollY) {
+                props.offsetY = -this.maxScrollY;
+            }
+        }
     }
 
     propsUpdated(props, oldProps) {
@@ -128,6 +188,13 @@ export default class ArtboardFrameControl extends UIElement {
             }
 
             this._initFromArtboard();
+            let size = this.getContentSize();
+            this.setProps({
+                offsetX:0,
+                offsetY:0,
+                maxScrollX:Math.max(0, size.width - this.width),
+                maxScrollY:Math.max(0, size.height - this.height)
+            });
         }
     }
 
@@ -240,6 +307,25 @@ export default class ArtboardFrameControl extends UIElement {
         //     this._artboard.runtimeProps.ctxl = originalCtxl;
         //     this._drawing = false;
         // }
+        // context.restore();// context.save();
+        // if (this.props.content === ContentBehavior.Scale) {
+        //     var scaleX = this.width / source.width;
+        //     var scaleY = this.height / source.height;
+        //     context.scale(scaleX, scaleY);
+        // }
+        // this._artboard.globalViewMatrixInverted().applyToContext(context);
+        // context.translate(this.props.offsetX, this.props.offsetY);
+
+        // let originalCtxl = this._artboard.runtimeProps.ctxl;
+        // this._artboard.applyVisitor(e => e.runtimeProps.ctxl = null);
+        // this._artboard.runtimeProps.ctxl = this.runtimeProps.ctxl;
+        // try {
+        //     this._drawing = true;
+        //     this._artboard.drawSelf.call(this._artboard, context, this._artboard.width, this._artboard.height, environment);
+        // } finally {
+        //     this._artboard.runtimeProps.ctxl = originalCtxl;
+        //     this._drawing = false;
+        // }
         // context.restore();
 
         if (this.mode() === ElementState.Edit) {
@@ -309,6 +395,19 @@ PropertyMetadata.registerForType(ArtboardFrameControl, {
         displayName: "@offsetY",
         defaultValue: 0,
         type: "numeric"
+    },
+
+    minScrollX: {
+        defaultValue:0
+    },
+    minScrollY: {
+        defaultValue:0
+    },
+    maxScrollX: {
+        defaultValue:0
+    },
+    maxScrollY: {
+        defaultValue:0
     },
 
     groups() {

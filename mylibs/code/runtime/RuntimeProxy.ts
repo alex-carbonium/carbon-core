@@ -125,6 +125,8 @@ export class RuntimeProxy implements IDisposable{
 
         if (this.methodMap[name]) {
             const origMethod = this.element[name];
+
+            // interceptor function to unwrap parameters and wrap result
             return function (...args) {
                 for(var i = 0; i < args.length; ++i) {
                     args[i] = RuntimeProxy.unwrap(args[i]);
