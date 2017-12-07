@@ -309,6 +309,7 @@ var onViewFocused = function () {
 };
 var onViewBlurred = function () {
     Environment.view.focused(false);
+    Environment.controller.onblur();
     Invalidate.requestInteractionOnly();
 };
 

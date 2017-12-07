@@ -145,6 +145,9 @@ export default class ControllerBase implements IController {
         this.clickEvent.raise(eventData);
     }
 
+    onblur() {
+    }
+
     selectByClick(eventData) {
     }
 
