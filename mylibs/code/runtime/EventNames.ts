@@ -9,6 +9,7 @@ class EventNamesType implements MouseEventHandler {
     onmousemove (e: MouseEvent) { return false;}
     onmouseenter (e: MouseEvent) { return false;}
     onmouseleave (e: MouseEvent) { return false;}
+    onTextInput (e: MouseEvent) { return false;}
 }
 
 export var EventNames = new EventNamesType();

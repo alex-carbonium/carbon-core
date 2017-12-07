@@ -371,7 +371,7 @@ describe("Symbol tests", function () {
 
             symbol.onArtboardChanged(); // should trigger refresh
             clone2 = symbol.findClone(child2.id);
-            assert.equal(newContent, clone2.content(), "content should restore from custom props");
+            assert.equal(newContent, clone2.content, "content should restore from custom props");
             assert.equal(cloneHeight, clone2.height, "result text height");
         });
     });

@@ -30,6 +30,8 @@ declare module "carbon-runtime" {
         static Empty: Brush;
     }
 
+    export type TextContent = string | any[];//TODO: specify range format
+
     interface TUIElementProps {
         readonly name: string;
         x: number;
@@ -102,11 +104,12 @@ declare module "carbon-runtime" {
     }
 
     interface TTextProps extends TUIElementProps {
-
+        content: TextContent;
     }
 
-    interface TText extends TUIElement {
-
+    type TextInputArgs = {plainText: string, content: TextContent};
+    interface TText extends TUIElement, TTextProps {
+        onTextInput: EventCallback<TextInputArgs>;
     }
 
     interface TImageProps extends TUIElementProps {
@@ -187,7 +190,7 @@ declare module "carbon-runtime" {
 
     // const Animation:AnimationConstructor;
 
-    type EventCallback<T> = (e?: T) => boolean | void | Promise<boolean | void>;
+    type EventCallback<T> = (e: T) => boolean | void | Promise<boolean | void>;
     type MouseEventCallback = EventCallback<MouseEvent>;
 
     interface MouseEventHandler {

@@ -1,4 +1,4 @@
-import { IText, IApp, IMouseEventData, IController, IDisposable } from "carbon-core";
+import { IText, IApp, IMouseEventData, IController, IDisposable, ChangeMode, ITextProps, TextInputArgs } from "carbon-core";
 import InlineTextEditor from "./text/inlinetexteditor";
 import Text from "./text/Text";
 import Invalidate from "./Invalidate";
@@ -31,7 +31,7 @@ export class PreviewTextTool {
             return;
         }
         var hit = this.hitNewElement(e);
-        if (hit instanceof Text && hit !== this.text) {
+        if (hit !== this.text && this.isEditableText(hit)) {
             this.next = { element: hit, event: e };
             e.cursor = 'text';
             Invalidate.requestInteractionOnly();
@@ -56,7 +56,7 @@ export class PreviewTextTool {
         }
 
         var hit = this.hitNewElement(e);
-        if (hit instanceof Text) {
+        if (this.isEditableText(hit)) {
             this.createEditor(hit);
             this.editor.mouseDown(e, e["event"]);
         }
@@ -98,27 +98,49 @@ export class PreviewTextTool {
         return Environment.view.hitElementDirect(e);
     }
 
+    private isEditableText(element: UIElement) {
+        return element instanceof Text && element.props.editable;
+    }
+
     private createEditor(text: Text) {
         this.text = text;
         this.text.runtimeProps.editing = true;
         this.text.runtimeProps.drawSelection = true;
+        this.text.enablePropsTracking();
         //todo: ctxl
+
+        let engine = this.text.engine();
+        engine.contentChanged(this.onContentChanged);
 
         var inlineEditor = new InlineTextEditor();
         inlineEditor.onInvalidate = this.invalidateLayers;
         inlineEditor.onSelectionChanged = () => { };
         inlineEditor.onDeactivated = finalEdit => this.endEdit(finalEdit);
-        inlineEditor.activate(this.text.globalViewMatrix(), this.text.engine(), this.text.props.font, this.app.fontManager);
+        inlineEditor.activate(this.text.globalViewMatrix(), engine, this.text.props.font, this.app.fontManager);
 
         this.editor = inlineEditor;
         Environment.controller.inlineEditModeChanged.raise(true, inlineEditor);
+    }
+
+    private onContentChanged = () => {
+        this.text.prepareAndSetProps({ content: this.editor.engine.save() }, ChangeMode.Self);
+
+        if (this.text.runtimeProps.events && this.text.runtimeProps.events.onTextInput) {
+            let args: TextInputArgs = {
+                plainText: this.text.engine().getDocumentRange().plainText(),
+                content: this.text.props.content
+            }
+            this.text.runtimeProps.events.onTextInput.raise(args);
+        }
     }
 
     private endEdit(finalEdit: boolean) {
         this.text.runtimeProps.engine.unsubscribe();
         this.text.runtimeProps.editing = false;
         this.text.runtimeProps.drawSelection = false;
+        this.text.disablePropsTracking();
         //this.text.runtimeProps.ctxl = undefined;
+
         Environment.controller.inlineEditModeChanged.raise(false, null);
 
         this.editor = null;
@@ -128,6 +150,7 @@ export class PreviewTextTool {
     private invalidateLayers = () => {
         Environment.view.page.invalidate();
         this.text.invalidate();
+        this.text.clearRenderingCache();
     }
 
     dispose() {
