@@ -43,6 +43,17 @@ declare module "carbon-runtime" {
         stroke: string | Brush;
     }
 
+    type DragConstraint = {
+        type:"box";
+        left:number;
+        top:number;
+        right:number;
+        bottom:number;
+    } |
+    {
+        type:"parent"
+    };
+
     interface TDraggable {
         enabled: boolean;
         horizontal: boolean;
@@ -50,6 +61,7 @@ declare module "carbon-runtime" {
         ondragging: (e: { dx: number, dy: number, target: TUIElement }) => void;
         onbegindrag: (e: { target: TUIElement }) => void;
         onenddrag: (e: { target: TUIElement }) => void;
+        constraint:DragConstraint;
     }
 
     interface TUIElement extends TUIElementProps {

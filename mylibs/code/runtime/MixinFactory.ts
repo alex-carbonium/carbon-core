@@ -1,4 +1,4 @@
-import { DraggableMixin } from "./mixins/DraggableMixing";
+import { DraggableMixin } from "./mixins/DraggableMixin";
 import { IUIElement } from "carbon-core";
 
 export class MixinFactory {
