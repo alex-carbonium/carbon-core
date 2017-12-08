@@ -1,8 +1,9 @@
-import { MouseEventHandler, MouseEvent, PointerEvent } from "carbon-runtime";
+import { MouseEventHandler, MouseEvent, PointerEvent, TTextEventHandler } from "carbon-runtime";
 
 // this class is only needed to make sure we expose all event of MouseEventHandler
 // if you add new event to MouseEventhandler it must be implemented here
-class EventNamesType implements MouseEventHandler {
+class EventNamesType implements MouseEventHandler, TTextEventHandler {
+    onTextInput (e: { plainText: string; content: string | any[]; }) :boolean | void | Promise<boolean | void>{return false;}
     onClick(e?: MouseEvent): boolean | void | Promise<boolean | void> { return false; }
     onDblClick(e?: MouseEvent): boolean | void | Promise<boolean | void> { return false; }
     onMouseDown(e?: MouseEvent): boolean | void | Promise<boolean | void> { return false; }
@@ -19,7 +20,7 @@ class EventNamesType implements MouseEventHandler {
     onPinchEnd(e?: PointerEvent): boolean | void | Promise<boolean | void> { return false; }
     onTap(e?: PointerEvent): boolean | void | Promise<boolean | void> { return false; }
     onDoubleTap(e?: PointerEvent): boolean | void | Promise<boolean | void> { return false; }
-    onTextInput (e: MouseEvent) { return false;}
+
 }
 
 export var EventNames = new EventNamesType();

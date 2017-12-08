@@ -108,8 +108,13 @@ declare module "carbon-runtime" {
     }
 
     type TextInputArgs = {plainText: string, content: TextContent};
-    interface TText extends TUIElement, TTextProps {
+
+    interface TTextEventHandler {
         onTextInput: EventCallback<TextInputArgs>;
+    }
+
+    interface TText extends TUIElement, TTextProps, TTextEventHandler {
+
     }
 
     interface TImageProps extends TUIElementProps {
