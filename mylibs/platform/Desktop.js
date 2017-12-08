@@ -21,6 +21,13 @@ const WHEEL_STEP_BIG = 0.5;
 var nonTrackedActions = ["zoomIn", "zoomOut", "copy", "paste", "duplicate", ""];
 
 var onmousewheel = function (e) {
+    let eventData = Environment.controller.createEventData(e);
+    Environment.controller.onmousewheel(eventData);
+    if(eventData._preventDefault === true) {
+        // to avoid browser zoom
+        e.preventDefault();
+        return;
+    }
     try {
         var view = Environment.view;
         if (e.ctrlKey) {
@@ -204,6 +211,15 @@ var ondoubletap = function (event) {
     }
 }
 
+var ontap = function (event) {
+    try {
+        Environment.controller.ontap(Environment.controller.createEventData(event));
+    }
+    catch (e) {
+        Environment.reportFatalErrorAndRethrow(e);
+    }
+}
+
 var mouseOutData = null;
 var onDocumentMouseMove = function (event) {
     try {
@@ -348,8 +364,8 @@ export default class Desktop extends All {
         this._oncontextmenuHandler = oncontextmenu.bind(this);
 
         parentElement.addEventListener('mousewheel', this._onmousewheelHandler, { capture: false, passive: false });
-        parentElement.addEventListener('mousedown', this._onmousedownHandler);
-        parentElement.addEventListener('mousemove', this._onmousemoveHandler);
+        parentElement.addEventListener('mousedown', this._onmousedownHandler, true);
+        parentElement.addEventListener('mousemove', this._onmousemoveHandler, true);
         parentElement.addEventListener('dblclick', this._ondblclickHandler);
         parentElement.addEventListener('click', this._onclickHandler);
         parentElement.addEventListener('mouseenter', this._onmouseenterHandler);
@@ -357,13 +373,13 @@ export default class Desktop extends All {
         parentElement.addEventListener('contextmenu', this._oncontextmenuHandler);
         parentElement.addEventListener('focus', onViewFocused);
         parentElement.addEventListener('blur', onViewBlurred);
-        document.body.addEventListener('mouseup', this._onmouseupHandler);
+        document.body.addEventListener('mouseup', this._onmouseupHandler, true);
 
         window.addEventListener('blur', onWindowBlur);
         window.addEventListener('resize', onWindowResize);
 
 
-        var hammertime = this.hammertime = new Hammer(parentElement, { drag_min_distance: 1 });
+        var hammertime = this.hammertime = new Hammer(parentElement, { drag_min_distance: 1, inputClass:Hammer.TouchInput });
         hammertime.get('pan').set({ direction: Hammer.DIRECTION_ALL });
         hammertime.get('pinch').set({ enable: true });
         hammertime.on("panstart", onpanstart);
@@ -373,7 +389,7 @@ export default class Desktop extends All {
         hammertime.on("pinchmove", onpinchmove);
         hammertime.on("pinchend", onpinchend);
         hammertime.on("doubletap", ondoubletap);
-        hammertime.off("tap");
+        hammertime.on("tap", ontap);
 
         this._parentElement = parentElement;
     }

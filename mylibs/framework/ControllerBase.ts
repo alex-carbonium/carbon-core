@@ -8,6 +8,18 @@ import { keyboard } from "../platform/Keyboard";
 import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3, WorkspaceTool, InteractionType, LayerType, ChangeMode, IView, IActionManager, IEventData } from "carbon-core";
 import { IArtboard } from "carbon-model";
 
+function EventData(props) {
+    Object.assign(this, props);
+}
+
+EventData.prototype.preventDefault = function preventDefault() {
+    this._preventDefault = true;
+}
+
+EventData.prototype.stopPropagation = function stopPropagation() {
+    this._stopPropagation = true;
+}
+
 //TODO: extend DesignerController from base class
 export default class ControllerBase implements IController {
     inlineEditor: any;
@@ -61,12 +73,11 @@ export default class ControllerBase implements IController {
     onWindowResize() {
     }
 
-    ondoubletap() {
-    }
+
 
     createEventData(event: MouseEvent): IMouseEventData {
         var scale = this.view.scale();
-        return {
+        return new EventData({
             handled: false,
             x: Math.round((domUtil.layerX(event) + this.view.scrollX()) * 100 / scale) / 100,
             y: Math.round((domUtil.layerY(event) + this.view.scrollY()) * 100 / scale) / 100,
@@ -74,7 +85,7 @@ export default class ControllerBase implements IController {
             ctrlKey: event.ctrlKey || event.metaKey,
             altKey: event.altKey,
             shiftKey: event.shiftKey
-        };
+        });
     }
 
     onpanstart(event) {
@@ -99,6 +110,15 @@ export default class ControllerBase implements IController {
 
     onpinchend(event) {
         this.touchHelper.onpinchend(event);
+    }
+    ondoubletap(eventData?) {
+    }
+
+    ontap(eventData?) {
+    }
+
+    onmousewheel(eventData?) {
+
     }
 
     isDragging() {

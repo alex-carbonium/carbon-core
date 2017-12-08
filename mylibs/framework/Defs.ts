@@ -90,15 +90,24 @@ export enum ActionType {
     GoBack = 1
 }
 
-export enum ActionEvents {
-    click = 0,
-    mousemove = 1,
-    mousedown = 2,
-    mouseup = 3,
-    mouseenter = 4,
-    mouseleave = 5,
-    dblclick = 6
-}
+export type ActionEvents =
+    "click" |
+    "mousemove" |
+    "mousedown" |
+    "mouseup" |
+    "mouseenter" |
+    "mouseleave" |
+    "mousewheel" |
+    "dblclick" |
+    "panstart" |
+    "panend" |
+    "panmove" |
+    "pinchstart" |
+    "pinch" |
+    "pinchend"|
+    "tap"|
+    "doubletap";
+
 
 export var Devices = [
     { name: "Responsive" },

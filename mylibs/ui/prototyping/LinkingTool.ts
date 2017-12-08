@@ -242,7 +242,7 @@ export default class LinkingTool extends Tool {
                 id: createUUID(),
                 sourceRootId: sourceRootId,
                 sourceElementId: sourceId,
-                event: ActionEvents.click,
+                event: "click",
                 type: ActionType.GoToPage,
                 targetArtboardId: targetArgtboard.id,
                 animation: {

@@ -2209,6 +2209,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
     registerEventHandler(name: string, callback: (data: DataBag) => (void | Promise<void>)): IDisposable {
         let events = this.runtimeProps.events = this.runtimeProps.events || {};
+        name = name.toLowerCase();
         let event: RuntimeEvent = events[name] = events[name] || new RuntimeEvent();
         return event.registerHandler(callback);
     }

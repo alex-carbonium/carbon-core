@@ -124,19 +124,19 @@ export default class ArtboardFrameControl extends UIElement {
     }
 
     get minScrollY() {
-        return 0;
+        return this.props.minScrollY;
     }
 
     get maxScrollY() {
-        return this.getContentSize().height - this.height;
+        return this.props.maxScrollY;
     }
 
     get minScrollX() {
-        return 0;
+        return this.props.minScrollX;
     }
 
     get maxScrollX() {
-        return this.getContentSize().width - this.width;
+        return this.props.maxScrollX;
     }
 
     resetGlobalViewCache() {

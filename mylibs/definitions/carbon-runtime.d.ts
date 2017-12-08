@@ -11,11 +11,11 @@ declare module "carbon-runtime" {
     }
 
     export interface LinearGradientData {
-        x1:number;
-        y1:number;
-        x2:number;
-        y2:number;
-        stops:any[];
+        x1: number;
+        y1: number;
+        x2: number;
+        y2: number;
+        stops: any[];
     }
 
     export class Brush {
@@ -38,17 +38,17 @@ declare module "carbon-runtime" {
         height: number;
         visible: boolean;
         angle: number;
-        fill:string|Brush;
-        stroke:string|Brush;
+        fill: string | Brush;
+        stroke: string | Brush;
     }
 
     interface TDraggable {
-        enabled:boolean;
-        horizontal:boolean;
-        vertical:boolean;
-        ondragging:(e:{dx:number, dy:number, target:TUIElement})=>void;
-        onbegindrag:(e:{target:TUIElement})=>void;
-        onenddrag:(e:{target:TUIElement})=>void;
+        enabled: boolean;
+        horizontal: boolean;
+        vertical: boolean;
+        ondragging: (e: { dx: number, dy: number, target: TUIElement }) => void;
+        onbegindrag: (e: { target: TUIElement }) => void;
+        onenddrag: (e: { target: TUIElement }) => void;
     }
 
     interface TUIElement extends TUIElementProps {
@@ -126,7 +126,7 @@ declare module "carbon-runtime" {
     }
 
     interface TPathProps extends TUIElementProps {
-        readonly points:ReadonlyArray<TPathPoint>;
+        readonly points: ReadonlyArray<TPathPoint>;
     }
 
     interface TPath extends TUIElement {
@@ -142,9 +142,9 @@ declare module "carbon-runtime" {
     }
 
     interface TStarProps extends TUIElementProps {
-        pointsCount:number;
-        radius:number;
-        internalRadius:number;
+        pointsCount: number;
+        radius: number;
+        internalRadius: number;
     }
 
     interface TStar extends TUIElement, TStarProps {
@@ -152,8 +152,8 @@ declare module "carbon-runtime" {
     }
 
     interface TPathPoint {
-        x:number;
-        y:number;
+        x: number;
+        y: number;
 
         // TODO:
     }
@@ -178,6 +178,23 @@ declare module "carbon-runtime" {
         shift: boolean;
         cmd: boolean;
         stopPropagation(): void;
+        preventDefault(): void;
+    }
+
+    interface PointerEvent {
+        pointers: { x: number, y: number }[];
+        alt: boolean;
+        ctrl: boolean;
+        shift: boolean;
+        cmd: boolean;
+        pointerId: any;
+        pressure: number;
+        pointerType: "mouse" | "pen" | "touch";
+        direction: "up" | "down" | "left" | "right";
+        angle:number;
+        isPrimary: boolean;
+        stopPropagation(): void;
+        preventDefault(): void;
     }
 
     // interface AnimationConstructor {
@@ -190,13 +207,25 @@ declare module "carbon-runtime" {
     type EventCallback<T> = (e?: T) => boolean | void | Promise<boolean | void>;
     type MouseEventCallback = EventCallback<MouseEvent>;
 
+    type PointerEventCallback = EventCallback<PointerEvent>;
+
     interface MouseEventHandler {
-        onclick: MouseEventCallback;
-        onmousedown: MouseEventCallback;
-        onmouseup: MouseEventCallback;
-        onmousemove: MouseEventCallback;
-        onmouseenter: MouseEventCallback;
-        onmouseleave: MouseEventCallback;
+        onClick: MouseEventCallback;
+        onDblClick: MouseEventCallback;
+        onMouseDown: MouseEventCallback;
+        onMouseUp: MouseEventCallback;
+        onMouseMove: MouseEventCallback;
+        onMouseEnter: MouseEventCallback;
+        onMouseLeave: MouseEventCallback;
+        onMouseWheel: MouseEventCallback;
+        onPanMove:PointerEventCallback;
+        onPanStart:PointerEventCallback;
+        onPanEnd:PointerEventCallback;
+        onPinch:PointerEventCallback;
+        onPinchStart:PointerEventCallback;
+        onPinchEnd:PointerEventCallback;
+        onTap:PointerEventCallback;
+        onDoubleTap:PointerEventCallback;
     }
 
     export const enum AnimationType {

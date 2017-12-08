@@ -48,8 +48,8 @@ export default {
                 else if (original.layerX !== undefined) {
                     event.__layerX = original.layerX;
                 }
-                else if(original.changedPointers["0"]) {
-                    event.__layerX = original.changedPointers["0"].offsetX;
+                else if(original.center) {
+                    event.__layerX = original.center.x - Environment.view.context.canvas.getBoundingClientRect().left;
                 }
                 else {
                     event.__layerX = original.clientX - Environment.view.viewContainerElement.getBoundingClientRect().left;
@@ -84,8 +84,8 @@ export default {
                 else if (original.layerY !== undefined) {
                     event.__layerY = original.layerY;
                 }
-                else if(original.changedPointers["0"]) {
-                    event.__layerY = original.changedPointers["0"].offsetY;
+                else if(original.center) {
+                    event.__layerY = original.center.y - Environment.view.context.canvas.getBoundingClientRect().top;
                 }
                 else {
                     event.__layerY = original.clientY - Environment.view.viewContainerElement.getBoundingClientRect().top;

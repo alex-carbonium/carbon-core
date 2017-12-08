@@ -28,24 +28,7 @@ export default class PreviewController extends ControllerBase {
     }
 
     _eventTypeToName(eventType: ActionEvents) {
-        switch (eventType) {
-            case ActionEvents.click:
-                return "onclick";
-            case ActionEvents.mousemove:
-                return "onmousemove";
-            case ActionEvents.mousedown:
-                return "onmousedown";
-            case ActionEvents.mouseup:
-                return "onmouseup";
-            case ActionEvents.mouseenter:
-                return "onmouseenter";
-            case ActionEvents.mouseleave:
-                return "onmouseleave";
-            case ActionEvents.dblclick:
-                return "ondblclik";
-        }
-
-        assertNever(eventType);
+        return ("on" + eventType).toLowerCase();
     }
 
     async _propagateAction(eventData, eventType, element): Promise<boolean> {
@@ -64,6 +47,7 @@ export default class PreviewController extends ControllerBase {
                 y: eventData.y,
                 layerX: pos.x,
                 layerY: pos.y,
+                target:element,
                 altKey: eventData.altKey,
                 shiftKey: eventData.shiftKey,
                 ctrlKey: eventData.ctrlKey,
@@ -126,92 +110,135 @@ export default class PreviewController extends ControllerBase {
             this._propagateScroll(delta, parent);
         }
     }
+    /*
+    hammertime.on("panstart", onpanstart);
+        hammertime.on("panend", onpanend);
+        hammertime.on("panmove", onpanmove);
+        hammertime.on("pinchstart", onpinchstart);
+        hammertime.on("pinchmove", onpinchmove);
+        hammertime.on("pinchend", onpinchend);
+        hammertime.on("doubletap", ondoubletap);
+    */
 
-    // onpinchmove(event) {
-    //     super.onpinchmove(event);
-    //     this.view.invalidate();
-    // }
-
-    onpanstart(eventData) {
-        this._startelement = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-    }
-
-    onpanmove(eventData) {
-        if (this._startelement) {
-            if (this._olddelta) {
-                this._propagateScroll(this._olddelta, this._startelement);
-            }
-            let scale = this.view.scale();
-            var delta = { dx: -eventData.event.deltaX/scale, dy: -eventData.event.deltaY/scale};
-            this._propagateScroll(delta, this._startelement);
-            this._olddelta = { dx: eventData.event.deltaX/scale, dy: eventData.event.deltaY/scale };
-        }
-    }
-
-    onpanend(event) {
-        if (this._startelement) {
-            this._startelement = null;
-            this._olddelta = null;
-        }
-    }
-
-    onpinchmove(event) {
-    }
-
-    onpinchstart(event) {
-    }
-
-    onpinchend(event) {
-    }
-
-
-    onscroll(eventData) {
+    async onpanstart(eventData) {
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        var delta = { dx: eventData.event.deltaX, dy: eventData.event.deltaY };
-        this._propagateScroll(delta, element);
+        let res = await this._propagateAction(eventData, "panstart", element);
+        if (res !== false) {
+            this._startelement = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
+        }
+    }
+
+    async onpanmove(eventData) {
+        var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
+        let res = await this._propagateAction(eventData, "panmove", element);
+        if (res !== false) {
+            if (this._startelement) {
+                if (this._olddelta) {
+                    this._propagateScroll(this._olddelta, this._startelement);
+                }
+                let scale = this.view.scale();
+                var delta = { dx: -eventData.event.deltaX / scale, dy: -eventData.event.deltaY / scale };
+                this._propagateScroll(delta, this._startelement);
+                this._olddelta = { dx: eventData.event.deltaX / scale, dy: eventData.event.deltaY / scale };
+            }
+        }
+    }
+
+    async onpanend(eventData) {
+        var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
+        let res = await this._propagateAction(eventData, "panend", element);
+        if (res !== false) {
+            if (this._startelement) {
+                this._startelement = null;
+                this._olddelta = null;
+            }
+        }
+    }
+
+    onpinchmove(eventData) {
+        var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
+        this._propagateAction(eventData, "pinch", element);
+    }
+
+    onpinchstart(eventData) {
+        var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
+        this._propagateAction(eventData, "pinchstart", element);
+    }
+
+    onpinchend(eventData) {
+        var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
+        this._propagateAction(eventData, "pinchend", element);
+    }
+
+    ontap(eventData) {
+        var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
+        this._propagateAction(eventData, "tap", element);
+    }
+
+    ondoubletap(eventData) {
+        var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
+        this._propagateAction(eventData, "doubletap", element);
+    }
+
+    onmousewheel(eventData) {
+        var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
+        this._propagateAction(eventData, "mousewheel", element);
+
+        // to avoid zoom by wheel in preview
+        eventData.preventDefault();
+    }
+
+
+    async onscroll(eventData) {
+        var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
+        let res = await this._propagateAction(eventData, "scroll", element);
+        if (res !== false) {
+            var delta = { dx: eventData.event.deltaX, dy: eventData.event.deltaY };
+            this._propagateScroll(delta, element);
+        }
     }
 
     onmousedown(eventData) {
         super.onmousedown(eventData);
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        this._propagateAction(eventData, ActionEvents.mousedown, element);
+        this._propagateAction(eventData, "mousedown", element);
     }
 
     onmousemove(eventData) {
         super.onmousemove(eventData);
 
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        this._propagateAction(eventData, ActionEvents.mousemove, element);
+        this._propagateAction(eventData, "mousemove", element);
     }
 
     onmouseenter(eventData) {
         super.onmouseenter(eventData);
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        this._propagateAction(eventData, ActionEvents.mouseenter, element);
+        this._propagateAction(eventData, "mouseenter", element);
     }
 
     onmouseleave(eventData) {
         super.onmouseleave(eventData);
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        this._propagateAction(eventData, ActionEvents.mouseleave, element);
+        this._propagateAction(eventData, "mouseleave", element);
     }
 
     onmouseup(eventData) {
         super.onmouseup(eventData);
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        this._propagateAction(eventData, ActionEvents.mouseup, element);
+        this._propagateAction(eventData, "mouseup", element);
     }
 
     ondblclick(eventData) {
         super.ondblclick(eventData);
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        this._propagateAction(eventData, ActionEvents.dblclick, element);
+        this._propagateAction(eventData, "dblclick", element);
     }
 
     async onclick(eventData) {
         super.onclick(eventData);
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        if (! await this._propagateAction(eventData, ActionEvents.click, element)) {
+        if (! await this._propagateAction(eventData, "click", element)) {
             (this.view as any).displayClickSpots.raise();
         }
     }

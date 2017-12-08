@@ -12,7 +12,7 @@ StoryAction.prototype.t = Types.StoryAction;
 
 PropertyMetadata.registerForType(StoryAction, {
     event: {
-        defaultValue: ActionEvents.click
+        defaultValue: "click"
     },
     type: {
         defaultValue: ActionType.GoToPage
