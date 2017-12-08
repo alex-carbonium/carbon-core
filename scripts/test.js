@@ -12,7 +12,7 @@ var settings = {
     coreLoader: argv.coreLoader || "url"
 };
 if (settings.singleRun){
-    settings.reporters = ["trx"];
+    settings.reporters = ["progress", "trx"];
     settings.browsers = ["PhantomJS"];
     settings.browserNoActivityTimeout = 5 * 60 * 1000;
 }
