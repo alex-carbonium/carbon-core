@@ -606,6 +606,9 @@ export default class DesignerController implements IController {
         }
     }
 
+    onblur() {
+    }
+
     _onKeyChanged(newKeys: KeyboardState, oldKeys: KeyboardState) {
         if ((this.currentTool === "pointerTool" || this.currentTool === "pointerDirectTool") && !this.interactionActive) {
             Selection.directSelectionEnabled(newKeys.ctrlKey);

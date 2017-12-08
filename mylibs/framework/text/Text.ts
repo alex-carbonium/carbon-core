@@ -7,7 +7,7 @@ import PropertyMetadata from "../PropertyMetadata";
 import TextEngine from "./textengine";
 import FontManager from "./font/fontmanager";
 import styleManager from "../style/StyleManager";
-import { IContainer, IDataElement, IText, TextAlign, IUIElement, ITextProps, TextContent, HorizontalConstraint, VerticalConstraint, TextMode, IPooledObject, IMatrix, ChangeMode, ResizeDimension, IRect } from "carbon-core";
+import { IContainer, IDataElement, IText, TextAlign, IUIElement, ITextProps, TextContent, HorizontalConstraint, VerticalConstraint, TextMode, IPooledObject, IMatrix, ChangeMode, ResizeDimension, IRect, ProxyDefinition } from "carbon-core";
 import params from "params";
 import ContextCommandCache from "framework/render/ContextCommandCache";
 import Environment from "../../environment";
@@ -512,10 +512,11 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
         return this.props.font;
     }
 
-    content(value?: TextContent) {
-        if (arguments.length) {
-            this.setProps({ content: value });
-        }
+    set content(value: TextContent) {
+        this.prepareAndSetProps({ content: value });
+    }
+
+    get content() {
         return this.props.content;
     }
 
@@ -629,6 +630,14 @@ PropertyMetadata.registerForType(Text, {
         },
         defaultValue: true,
     },
+    editable: {
+        displayName: "@textProp.editable",
+        type: "checkbox",
+        options: {
+            size: 1
+        },
+        defaultValue: false
+    },
     textStyleId: {
         displayName: "Text style",
         type: "textStyleName"
@@ -653,7 +662,11 @@ PropertyMetadata.registerForType(Text, {
                 label: UIElement.displayType(Types.Text),
                 properties: [/*"textStyleId",*/ "mode", "wrap", "font"]
             },
-            baseGroups.find(x => x.label === "Appearance")
+            baseGroups.find(x => x.label === "Appearance"),
+            {
+                label: "@behaviorProps",
+                properties: ["editable"]
+            },
         ];
 
         return ownGroups;
@@ -663,7 +676,16 @@ PropertyMetadata.registerForType(Text, {
             fill: false,
             stroke: false
         };
-    }
+    },
+    proxyDefinition(): ProxyDefinition {
+        let baseDefinition = PropertyMetadata.findForType(UIElement).proxyDefinition();
+        return {
+            rprops: [].concat(baseDefinition.rprops), // readonly props
+            props: ["content"].concat(baseDefinition.props),
+            methods: [].concat(baseDefinition.methods),
+            mixins:[].concat(baseDefinition.mixins)
+        }
+    },
 });
 
 /**

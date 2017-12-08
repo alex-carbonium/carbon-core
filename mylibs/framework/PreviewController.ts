@@ -243,6 +243,12 @@ export default class PreviewController extends ControllerBase {
         }
     }
 
+    onblur() {
+        if (this.isInlineEditMode) {
+            this.inlineEditor.deactivate(true);
+        }
+    }
+
     beginDragElements(event, elements, stopDragPromise) {
     }
 

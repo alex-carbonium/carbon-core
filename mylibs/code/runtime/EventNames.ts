@@ -19,6 +19,7 @@ class EventNamesType implements MouseEventHandler {
     onPinchEnd(e?: PointerEvent): boolean | void | Promise<boolean | void> { return false; }
     onTap(e?: PointerEvent): boolean | void | Promise<boolean | void> { return false; }
     onDoubleTap(e?: PointerEvent): boolean | void | Promise<boolean | void> { return false; }
+    onTextInput (e: MouseEvent) { return false;}
 }
 
 export var EventNames = new EventNamesType();

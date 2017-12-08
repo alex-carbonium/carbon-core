@@ -10,6 +10,8 @@ export class ArtboardProxyGenerator {
                 return "TPath & MouseEventHandler";
             case Types.Rectangle:
                 return "TRectangle & MouseEventHandler";
+            case Types.Text:
+                return "TText & MouseEventHandler";
         }
         return "TUIElement & MouseEventHandler";
     }

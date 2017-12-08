@@ -3,7 +3,7 @@ declare module "carbon-model" {
     import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, ChangeMode, ArtboardType, Font, KeyboardState, ResizeDimension } from "carbon-basics";
 
     import { IContext } from "carbon-rendering";
-    import { AnimationProps, Brush, IDisposable, DataBag } from "carbon-runtime";
+    import { AnimationProps, Brush, IDisposable, DataBag, TextContent } from "carbon-runtime";
 
     export interface IDataNodeProps {
         [key: string]: any;
@@ -405,16 +405,16 @@ declare module "carbon-model" {
         Label = 1,
         Block
     }
-    export type TextContent = string | any[];//TODO: specify range format
+
     export interface ITextProps extends IUIElementProps {
         font: Font;
         content: TextContent;
         mode: TextMode;
         wrap: boolean;
+        editable: boolean;
     }
     export interface IText extends IContainer<ITextProps> {
         font(value?: Font): Font;
-        content(value?: TextContent): TextContent;
 
         markAsDataField(): void;
     }
