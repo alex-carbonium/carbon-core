@@ -1,6 +1,5 @@
 declare module "carbon-runtime" {
     /// <reference path="carbon-runtime-names"/>;
-    /// <reference path="runtime-platform"/>;
     export type AnimationProps = { [name: string]: number };
     export const enum BrushType {
         empty,

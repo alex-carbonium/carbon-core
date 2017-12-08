@@ -3,7 +3,7 @@ import Services from "Services";
 import { IDisposable } from "carbon-runtime";
 import { ArtboardProxyGenerator } from "./ProxyGenerator";
 
-var platformLib = require("raw-loader!../definitions/runtime-platform.d.ts");
+var platformLib = require("raw-loader!../definitions/runtime-platform.d.ts.txt");
 var carbonRuntimeSource: string = require("raw!../definitions/carbon-runtime.d.ts") as any;
 var runtimeTSDefinitionCode = carbonRuntimeSource
     .substr(0, carbonRuntimeSource.lastIndexOf('}') - 1)
