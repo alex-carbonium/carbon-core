@@ -33,7 +33,7 @@ with (new Proxy({}, handler)) {
     }
 }`;
 
-var sandboxFunc = new Function('__proxy', '__code', source);
+var sandboxFunc = null;
 
 export class Sandbox {
     runOnElement(context:RuntimeContext, element:IContainer, code:string) {
@@ -47,6 +47,7 @@ export class Sandbox {
 
         code = 'var ' + name + ' = __proxy;' + "let eval = null;" + code;
 
+        sandboxFunc = sandboxFunc || new Function('__proxy', '__code', source);
         sandboxFunc(resolverProxy, code);
     }
 }
