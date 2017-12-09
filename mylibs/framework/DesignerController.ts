@@ -192,6 +192,10 @@ export default class DesignerController implements IController {
         Selection.onElementSelected.bind(this, this.onSelectionMade);
     }
 
+    onmousewheel(event) {
+
+    }
+
     onpanstart(event) {
         this.touchHelper.onpanstart(event);
     }

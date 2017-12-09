@@ -9,6 +9,7 @@ import ObjectFactory from "../../framework/ObjectFactory";
 import PropertyTracker from "../../framework/PropertyTracker";
 import Rect from "../../math/rect";
 import Point from "../../math/point";
+import ArtboardToolSettings from "ui/ArtboardToolSettings";
 import { KeyboardState, IMouseEventData, IArtboard, ChangeMode, IContainer, IComposite, WorkspaceTool, IArtboardPage } from "carbon-core";
 import Cursors from "Cursors";
 import { PooledPair } from "../../framework/PooledPair";
@@ -17,7 +18,7 @@ export default class ArtboardsTool extends Tool {
     [name: string]: any;
     private _pointPair: PooledPair<Point>;
     private _rectPair: PooledPair<Rect>;
-    private _element: Artboard;;
+    private _element: Artboard;
 
     constructor(parameters?) {
         super("artboardTool");
@@ -32,13 +33,14 @@ export default class ArtboardsTool extends Tool {
         super.attach(app, view, controller, mousePressed);
         SnapController.calculateSnappingPoints(app.activePage);
         this.registerForDisposal(this._app.actionManager.subscribe('cancel', this.onCancelled));
-
+        this._artboardToolSettings = new ArtboardToolSettings(app);
         this._enableArtboardSelection(true);
         this._app.activePage.setActiveArtboard(null);
     }
 
     detach() {
         super.detach.apply(this, arguments);
+        this._artboardToolSettings = null;
         SnapController.clearActiveSnapLines();
         Selection.clearSelection();
         this._enableArtboardSelection(false);
@@ -262,6 +264,8 @@ export default class ArtboardsTool extends Tool {
                 Environment.controller.actionManager.invoke("artboardTool" as WorkspaceTool);
                 Selection.makeSelection(artboards);
             }
+        } else if(this._artboardToolSettings && (!composite || composite.elements.length === 0)) {
+            Selection.makeSelection([this._artboardToolSettings], "new", false, true);
         }
     }
 

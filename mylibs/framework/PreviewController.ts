@@ -33,7 +33,7 @@ export default class PreviewController extends ControllerBase {
 
     async _propagateAction(eventData, eventType, element): Promise<boolean> {
         if (!element || element === NullContainer) {
-            return false;
+            return;
         }
 
         var events = element.runtimeProps.events;
@@ -47,7 +47,7 @@ export default class PreviewController extends ControllerBase {
                 y: eventData.y,
                 layerX: pos.x,
                 layerY: pos.y,
-                target:element,
+                target: element,
                 altKey: eventData.altKey,
                 shiftKey: eventData.shiftKey,
                 ctrlKey: eventData.ctrlKey,
@@ -78,7 +78,7 @@ export default class PreviewController extends ControllerBase {
             return await this._propagateAction(eventData, eventType, parent);
         }
 
-        return false;
+        return;
     }
 
     _propagateScroll(delta, element) {
@@ -184,8 +184,10 @@ export default class PreviewController extends ControllerBase {
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(eventData, "mousewheel", element);
 
-        // to avoid zoom by wheel in preview
-        eventData.preventDefault();
+        if (eventData.ctrlKey || eventData.metaKey) {
+            // to avoid zoom by wheel in preview
+            eventData.preventDefault();
+        }
     }
 
 
