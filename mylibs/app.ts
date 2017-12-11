@@ -248,10 +248,10 @@ class AppClass extends DataNode implements IApp {
             this._activeStory = value;
             this.activeStoryChanged.raise(value);
             Invalidate.requestInteractionOnly();
-            if (value) {
-                var page = this.findNodeByIdBreadthFirst(value.props.pageId);
-                this.setActivePage(page);
-            }
+            // if (value) {
+            //     var page = this.findNodeByIdBreadthFirst(value.props.pageId);
+            //     this.setActivePage(page);
+            // }
         }
 
         let pageId = this.activePage.id;
