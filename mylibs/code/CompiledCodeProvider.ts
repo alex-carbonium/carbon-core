@@ -1,7 +1,7 @@
 import { IElementWithCode } from "carbon-model";
-import Services from "Services";
 import { IDisposable } from "carbon-runtime";
 import { ArtboardProxyGenerator } from "./ProxyGenerator";
+import { ICompilerService } from "carbon-core";
 
 var platformLib = require("raw-loader!../definitions/runtime-platform.d.ts.txt");
 var carbonRuntimeSource: string = require("raw!../definitions/carbon-runtime.d.ts") as any;
@@ -45,6 +45,10 @@ export class CompiledCodeProvider implements IDisposable {
         }
     }
 
+    constructor(private compiler:ICompilerService) {
+
+    }
+
     getCode(element: IElementWithCode): Promise<string | void> {
         if (this._codeCache.has(element)) {
             let item = this._codeCache.get(element);
@@ -57,10 +61,10 @@ export class CompiledCodeProvider implements IDisposable {
         let code = `namespace n${element.id} {
             ${element.code()}
         }`
-        Services.compiler.addLib("carbon-runtime-names.d.ts", ArtboardProxyGenerator.generateRuntimeNames(App.Current.activePage));
-        Services.compiler.addLib(element.id + ".d.ts", element.declaration(true))
+        this.compiler.addLib("carbon-runtime-names.d.ts", ArtboardProxyGenerator.generateRuntimeNames(App.Current.activePage));
+        this.compiler.addLib(element.id + ".d.ts", element.declaration(true))
 
-        return Services.compiler.compile(fileName, code).then((result) => {
+        return this.compiler.compile(fileName, code).then((result) => {
             this._codeCache.set(element, { version: element.codeVersion, text: result.text });
             let target = (element as any).runtimeProps.sourceArtboard || element;
             target.exports = result.exports;

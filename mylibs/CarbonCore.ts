@@ -51,6 +51,7 @@ export default {
     "backend": backend,
     "imageCache": require("./imageCache"),
     "util": require("./util"),
+    "CompilerService": require("./code/compiler/CompilerService"),
     "PropertyMetadata": require("./framework/PropertyMetadata"),
     "PropertyTracker": require("./framework/PropertyTracker"),
     "model": require("./framework/Model").model,
@@ -137,7 +138,6 @@ export default {
     //TODO: replace with math/rect
     "TextRect": require("./framework/text/primitives/rect"),
 
-    "CompiledCodeProvider": require("./code/CompiledCodeProvider").CompiledCodeProvider,
     "AutoDisposable": require("./AutoDisposable").AutoDisposable,
     "Services": require("./Services"),
 

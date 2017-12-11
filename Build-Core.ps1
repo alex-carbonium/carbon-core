@@ -60,6 +60,8 @@ try
         npm install --loglevel=error
     }
 
+    copy .\node_modules\typescript\lib\typescript.js .\target\
+
     $params = @("run", "packCore", "--", "--noColors")
     if ($Debug)
     {

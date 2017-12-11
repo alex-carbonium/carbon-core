@@ -78,9 +78,9 @@
     "oidc-client": "1.1.0",
     "opentype.js": "0.6.4",
     "tinycolor2": "1.1.2",
+    "typescript": "^2.3.2",
     "ua-parser-js": "0.7.12",
-    "webfontloader": "1.6.21",
-    "typescript": "2.3.2"
+    "webfontloader": "1.6.21"
   },
   "types": "./types/-library-.d.ts",
   "main": "-main-"

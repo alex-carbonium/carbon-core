@@ -1,7 +1,8 @@
 import { ICompilerService } from "carbon-app";
+import CompilerService from "./code/compiler/CompilerService";
 
 class Services {
-    compiler:ICompilerService;
+    compiler:ICompilerService = CompilerService;
 }
 
 export default new Services();

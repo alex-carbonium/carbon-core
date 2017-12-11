@@ -42,19 +42,11 @@ export default class PreviewController extends ControllerBase {
         if (events && events[eventName]) {
             let m: IMatrix = element.globalViewMatrixInverted();
             let pos = m.transformPoint2(eventData.x, eventData.y);
-            let event = {
-                x: eventData.x,
-                y: eventData.y,
-                layerX: pos.x,
-                layerY: pos.y,
-                target: element,
-                altKey: eventData.altKey,
-                shiftKey: eventData.shiftKey,
-                ctrlKey: eventData.ctrlKey,
-                metaKey: eventData.metaKey
-            }
+            eventData.layerX = pos.x;
+            eventData.layerY = pos.y;
+            eventData.target = element;
 
-            let res = events[eventName].raise(event);
+            let res = events[eventName].raise(eventData);
             if (res instanceof Promise) {
                 res = await res;
             }
@@ -63,6 +55,7 @@ export default class PreviewController extends ControllerBase {
                 return true;
             }
         }
+
         // this is default
         var action = this.activeStory.children.find(a => {
             return (a.props.sourceElementId === element.id && a.props.event === eventType);

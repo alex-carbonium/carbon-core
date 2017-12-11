@@ -179,6 +179,7 @@ declare module "carbon-app" {
         compile(fileName:string, text:string):Promise<CompilationResult>;
         addLib(fileName:string, text:string);
         clear();
+        codeProvider:any;
     }
 
     export interface ILayer<TProps extends IContainerProps = IContainerProps> extends IContainer<TProps> {
@@ -625,6 +626,5 @@ declare module "carbon-app" {
         navigateToPage: IEvent3<string, IAnimationOptions, DataBag>;
         activePage:IPage;
         readonly activeArtboard:IArtboard;
-        readonly codeProvider:any;
     }
 }

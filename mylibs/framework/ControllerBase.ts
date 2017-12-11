@@ -75,7 +75,7 @@ export default class ControllerBase implements IController {
 
 
 
-    createEventData(event: MouseEvent): IMouseEventData {
+    createEventData(event: PointerEvent): IMouseEventData {
         var scale = this.view.scale();
         return new EventData({
             handled: false,
@@ -84,7 +84,17 @@ export default class ControllerBase implements IController {
             event: event,
             ctrlKey: event.ctrlKey || event.metaKey,
             altKey: event.altKey,
-            shiftKey: event.shiftKey
+            shiftKey: event.shiftKey,
+            scale:(event as any).scale,
+            rotation:event.rotation,
+            velocityX: (event as any).velocityX,
+            velocityY: (event as any).velocityY,
+            pressure: (event as any).pressure,
+            angle: (event as any).angle,
+            deltaX: (event as any).deltaX,
+            deltaY: (event as any).deltaY,
+            direction: (event as any).direction,
+            distance: (event as any).distance,
         });
     }
 

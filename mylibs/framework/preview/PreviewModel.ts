@@ -5,10 +5,9 @@ import DataNode from "framework/DataNode";
 import Matrix from "math/matrix";
 import Artboard from "framework/Artboard";
 import Symbol from "framework/Symbol";
-import { IApp, IEvent, IPage, PreviewDisplayMode, ISize, IPageProps, ChangeMode, IDisposable, IEvent3 } from "carbon-core";
+import { IApp, IEvent, IPage, PreviewDisplayMode, ISize, IPageProps, ChangeMode, IDisposable, IEvent3} from "carbon-core";
 import { IPreviewModel } from "carbon-app";
 import { IArtboard } from "carbon-model";
-import { CompiledCodeProvider } from "../../code/CompiledCodeProvider";
 import { Sandbox } from "../../code/Sandbox";
 import { RuntimeContext } from "../../code/runtime/RuntimeContext";
 import { ActionType } from "../Defs";
@@ -16,6 +15,7 @@ import { IAnimationOptions, DataBag } from "carbon-runtime";
 import { NavigationController } from "../../code/runtime/NavigationController";
 import { AutoDisposable } from "../../AutoDisposable";
 import { ModelFactory } from "../../code/runtime/ModelFactory";
+import Services from "Services";
 
 export default class PreviewModel implements IPreviewModel, IDisposable {
     private _activePage: IPage<IPageProps> & { originalSize: ISize };
@@ -27,7 +27,6 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
     public app: IApp;
     public navigateToPage: IEvent3<string, IAnimationOptions, DataBag>;
     public onPageChanged: IEvent<IPage>;
-    public codeProvider = new CompiledCodeProvider();
     public sourceArtboard: IArtboard;
     public modelFailed: boolean = false;
 
@@ -41,7 +40,6 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         this.runtimeContext.register("Model", ModelFactory);
 
         this.disposables.add(this.navigationController);
-        this.disposables.add(this.codeProvider);
     }
 
     get activePage() {
@@ -104,7 +102,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
                 let artboard: IArtboard = e.artboard;
                 let code = artboard.code();
                 if (code) {
-                    promises.push(this.codeProvider.getCode(artboard).then((code) => {
+                    promises.push(Services.compiler.codeProvider.getCode(artboard).then((code) => {
                         if (code) {
                             this.sandbox.runOnElement(this.runtimeContext, e, code);
                         }
@@ -117,7 +115,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         return Promise.all(promises).then(() => {
             let artboard: IArtboard = page.children[0] as any;
             if (artboard.code()) {
-                return this.codeProvider.getCode(artboard).then((code) => {
+                return Services.compiler.codeProvider.getCode(artboard).then((code) => {
                     if (code) {
                         try {
                             this.sandbox.runOnElement(this.runtimeContext, artboard, code);

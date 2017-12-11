@@ -150,8 +150,10 @@ function getLoaders(settings){
     var babelLoader = "babel?" + JSON.stringify(babelSettings);
 
     var excludedFolders = ["node_modules", "libs", "generated"];
+    var excludedFiles = [ "CompilerWorker.w.js"];
     var excludes = new RegExp(
-        excludedFolders.map(x => "[\/\\\\]" + x + "[\/\\\\]").join("|"));
+        excludedFolders.map(x => "[\/\\\\]" + x + "[\/\\\\]").join("|")
+        + "|" + excludedFiles.join("|"));
     var loaders = [
         {
             test: /\.js$/,
