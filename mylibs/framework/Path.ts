@@ -431,9 +431,9 @@ class Path extends Shape {
     }
 
     switchToEditMode(edit: boolean) {
-        if (this._cancelBinding) {
-            this._cancelBinding.dispose();
-        }
+        // if (this._cancelBinding) {
+        //     this._cancelBinding.dispose();
+        // }
         if (edit) {
             this.addDecorator(new PathManipulationDecorator());
 
@@ -1578,6 +1578,23 @@ class Path extends Shape {
         return res;
     }
 
+    static splitPointsString(points) {
+        let values = points
+            .replace(/\n/g, ' ')
+            .replace(/\r/g, ' ')
+            .replace(/,/g, ' ')
+            .replace(/  /g, ' ')
+            .trim();
+        let oldValues = values;
+        do {
+            oldValues = values;
+            values = values.replace(/  /g, ' ');
+        } while (values !== oldValues);
+        values = values.split(' ');
+
+        return values;
+    }
+
     static fromSvgPathElement(element, parsedAttributes, matrix) {
         // let parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
         let path = new Path();
@@ -1589,7 +1606,8 @@ class Path extends Shape {
 
         // polygon
         if (parsedAttributes.points) {
-            let values = parsedAttributes.points.replace('\n', ' ').replace('\r', ' ').replace(',', ' ').split(' ');
+            let values = Path.splitPointsString(parsedAttributes.points);
+
             for (let i = 0; i < values.length; i += 2) {
                 let point = { x: parseFloat(values[i + 0]), y: parseFloat(values[i + 1]) };
                 point = matrix.transformPoint(point);
@@ -1637,7 +1655,7 @@ class Path extends Shape {
         setElementPropertiesFromAttributes(path, parsedAttributes);
 
         if (parsedAttributes.points) {
-            let pairs = parsedAttributes.points.replace('\n', ' ').replace('\r', ' ').replace(',', ' ').split(' ');
+            let pairs = Path.splitPointsString(parsedAttributes.points);
             for (let i = 0; i < pairs.length; i += 2) {
                 path.addPoint(matrix.transformPoint({ x: parseFloat(pairs[i + 0]), y: parseFloat(pairs[i + 1]) }));
             }

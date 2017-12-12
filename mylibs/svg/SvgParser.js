@@ -338,7 +338,7 @@ define(function () {
                             skewYMatrix(matrix, args);
                             break;
                         case 'matrix':
-                            matrix = new Matrix(args);
+                            matrix = new Matrix(args[0],args[1],args[2], args[3], args[4], args[5]);
                             break;
                     }
                     replaced  = true;
