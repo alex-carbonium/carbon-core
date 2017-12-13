@@ -12,6 +12,7 @@ import Matrix from "math/matrix";
 import { ChangeMode } from "carbon-basics";
 import Environment from "environment";
 import UIElement from "./UIElement";
+import NullContainer from "framework/NullContainer";
 
 export default class ArtboardFrameControl extends Container {
     constructor() {
@@ -210,16 +211,6 @@ export default class ArtboardFrameControl extends Container {
     }
 
     prepareProps(props) {
-        if (props.content !== undefined || props.width !== undefined || props.height !== undefined) {
-            let size = this.getContentSize();
-            Object.assign(props, {
-                maxScrollX: Math.max(0, size.width - this.width),
-                maxScrollY: Math.max(0, size.height - this.height)
-            });
-            props.offsetX = props.offsetX || this.props.offsetX;
-            props.offsetY = props.offsetY || this.props.offsetY;
-        }
-
         if (props.offsetX !== undefined) {
             if (props.offsetX > -this.minScrollX) {
                 props.offsetX = -this.minScrollX;
@@ -237,8 +228,8 @@ export default class ArtboardFrameControl extends Container {
         }
     }
 
-    propsUpdated(props, oldProps) {
-        super.propsUpdated(props, oldProps);
+    propsUpdated(props, oldProps, mode) {
+        super.propsUpdated(props, oldProps, mode);
         if (props.source !== undefined) {
             if (!this._artboard || (props.source.pageId !== oldProps.source.pageId || props.source.artboardId !== oldProps.source.artboardId)) {
                 var page = DataNode.getImmediateChildById(App.Current, props.source.pageId);
@@ -256,6 +247,14 @@ export default class ArtboardFrameControl extends Container {
                 maxScrollX: Math.max(0, size.width - this.width),
                 maxScrollY: Math.max(0, size.height - this.height)
             });
+        }
+
+        if (props.content !== undefined || props.br !== undefined || props.m !== undefined) {
+            let size = this.getContentSize();
+            this.setProps({
+                maxScrollX: Math.max(0, size.width - this.width),
+                maxScrollY: Math.max(0, size.height - this.height)
+            }, mode);
         }
 
         if ((props.hasOwnProperty('offsetX') || props.hasOwnProperty('offsetY')) && this.children.length) {
@@ -358,8 +357,17 @@ PropertyMetadata.registerForType(ArtboardFrameControl, {
         defaultValue: { artboardId: null, pageId: null },
         getOptions: function (element) {
             let page = App.Current.activePage;
+            let parentIds = {};
+            element.each(e=>{
+                let parent = e.parent;
+                while(parent && parent !== NullContainer) {
+                    parentIds[parent.id] = true;
+                    parent = parent.parent;
+                }
+            });
+
             return {
-                items: page.getAllArtboards().map(artboard => {
+                items: page.getAllArtboards().filter(a=>!parentIds[a.id]).map(artboard => {
                     return {
                         name: artboard.name,
                         value: {
