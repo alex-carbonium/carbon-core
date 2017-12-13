@@ -1,5 +1,4 @@
 import PropertyMetadata from "framework/PropertyMetadata";
-import UIElement from "framework/UIElement";
 import { Overflow, Types, ContentBehavior } from "./Defs";
 import Selection from "framework/SelectionModel";
 import DataNode from "framework/DataNode";
@@ -7,8 +6,14 @@ import { ElementState, RenderEnvironment } from "carbon-core";
 import RenderPipeline from "./render/RenderPipeline";
 import ContextPool from "./render/ContextPool";
 import { renderer } from "./render/Renderer";
+import Container from "./Container";
+import Symbol from "framework/Symbol";
+import Matrix from "math/matrix";
+import { ChangeMode } from "carbon-basics";
+import Environment from "environment";
+import UIElement from "./UIElement";
 
-export default class ArtboardFrameControl extends UIElement {
+export default class ArtboardFrameControl extends Container {
     constructor() {
         super();
         this._mode = ElementState.Resize;
@@ -26,17 +31,47 @@ export default class ArtboardFrameControl extends UIElement {
         if (this.mode() !== ElementState.Edit) {
             this.mode(ElementState.Edit);
             this._internalChange = true;
-            Selection.refreshSelection();
+            Selection.makeSelection([]);
+            Selection.makeSelection([this]);
+
             this._internalChange = false;
+            this._cancelBinding = Environment.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
             this.invalidate();
         }
+    }
+
+    mirrorClone() {
+        if (this._cloning) {
+            throw new Error("Can't clone, chain contains recursive references");
+        }
+        this._cloning = true;
+        var clone = UIElement.prototype.mirrorClone.apply(this, arguments);
+
+        delete this._cloning;
+        return clone;
+    }
+
+    clone() {
+        if (this._cloning) {
+            throw new Error("Can't clone, chain contains recursive references");
+        }
+        this._cloning = true;
+        var clone = UIElement.prototype.clone.apply(this, arguments);
+
+        delete this._cloning;
+        return clone;
     }
 
     cancel() {
         this.mode(ElementState.Resize);
         this._internalChange = true;
-        Selection.refreshSelection();
+        Selection.reselect();
+
         this._internalChange = false;
+        if (this._cancelBinding) {
+            this._cancelBinding.dispose();
+            this._cancelBinding = null;
+        }
         this.invalidate();
     }
 
@@ -53,6 +88,10 @@ export default class ArtboardFrameControl extends UIElement {
         if (this._mousePressed) {
             this.releaseMouse();
             this._mousePressed = false;
+            let ox = this.props.offsetX,
+                oy = this.props.offsetY;
+            this.setProps({ offsetX: this._startData.ox, offsetY: this._startData.oy }, ChangeMode.Self);
+            this.setProps({ offsetX: ox, offsetY: oy });
             delete this._startData;
         }
     }
@@ -61,14 +100,16 @@ export default class ArtboardFrameControl extends UIElement {
         if (this._mousePressed) {
             var dx = event.x - this._startData.x;
             var dy = event.y - this._startData.y;
-            this.setProps({ offsetX: Math.round(this._startData.ox + dx), offsetY: Math.round(this._startData.oy + dy) });
+            let ox = Math.round(this._startData.ox + dx);
+            let oy = Math.round(this._startData.oy + dy);
+
+            this.prepareAndSetProps({ offsetX: ox, offsetY: oy }, ChangeMode.Self);
         }
     }
 
     unselect() {
         if (!this._internalChange && this.mode() === ElementState.Edit) {
-            this.mode(ElementState.Resize);
-            this.invalidate();
+            this.cancel();
         }
     }
 
@@ -81,16 +122,36 @@ export default class ArtboardFrameControl extends UIElement {
         return this.mode() !== ElementState.Edit;
     }
 
+    lockedGroup() {
+        return true;
+    }
+
+    canAccept() {
+        return false;
+    }
+
     _initFromArtboard() {
         var artboard = this._artboard;
         if (!artboard) {
             return;
         }
+        this.children.forEach(c => {this.remove(c); c.dispose()});
+        this.children.length = 0;
+        let symbol = new Symbol();
+        symbol.canSelect(false);
+        symbol.setProps({
+            source: {
+                pageId: artboard.parent.id,
+                artboardId: artboard.id
+            }
+        })
+
+        this.add(symbol, ChangeMode.Self);
 
         let size = this.getContentSize();
         this.setProps({
-            maxScrollX:Math.max(0, size.width - this.width),
-            maxScrollY:Math.max(0, size.height - this.height)
+            maxScrollX: Math.max(0, size.width - this.width),
+            maxScrollY: Math.max(0, size.height - this.height)
         });
 
         this.runtimeProps.artboardVersion = artboard.runtimeProps.version;
@@ -149,11 +210,11 @@ export default class ArtboardFrameControl extends UIElement {
     }
 
     prepareProps(props) {
-        if(props.content !== undefined || props.width !== undefined || props.height !== undefined) {
+        if (props.content !== undefined || props.width !== undefined || props.height !== undefined) {
             let size = this.getContentSize();
             Object.assign(props, {
-                maxScrollX:Math.max(0, size.width - this.width),
-                maxScrollY:Math.max(0, size.height - this.height)
+                maxScrollX: Math.max(0, size.width - this.width),
+                maxScrollY: Math.max(0, size.height - this.height)
             });
             props.offsetX = props.offsetX || this.props.offsetX;
             props.offsetY = props.offsetY || this.props.offsetY;
@@ -190,11 +251,15 @@ export default class ArtboardFrameControl extends UIElement {
             this._initFromArtboard();
             let size = this.getContentSize();
             this.setProps({
-                offsetX:0,
-                offsetY:0,
-                maxScrollX:Math.max(0, size.width - this.width),
-                maxScrollY:Math.max(0, size.height - this.height)
+                offsetX: 0,
+                offsetY: 0,
+                maxScrollX: Math.max(0, size.width - this.width),
+                maxScrollY: Math.max(0, size.height - this.height)
             });
+        }
+
+        if ((props.hasOwnProperty('offsetX') || props.hasOwnProperty('offsetY')) && this.children.length) {
+            this.children[0].setProps({ m: Matrix.createTranslationMatrix(this.props.offsetX, this.props.offsetY) }, ChangeMode.Self);
         }
     }
 
@@ -221,14 +286,22 @@ export default class ArtboardFrameControl extends UIElement {
         return null;
     }
 
+    fillBackground() {
+
+    }
+
+    strokeBorder() {
+
+    }
+
     drawSelf(context, w, h, environment: RenderEnvironment) {
         if (this._drawing) {
             return;
         }
         let source = this._artboard;
         if (!source) {
-            super.drawSelf.apply(this, arguments);
             context.save();
+            this.globalViewMatrix().applyToContext(context);
             context.beginPath();
             context.rectPath(0, 0, w, h);
             context.lineWidth = 1 * environment.contextScale;
@@ -257,79 +330,13 @@ export default class ArtboardFrameControl extends UIElement {
 
             context.restore();
             return;
+        } else {
+            super.drawSelf(context, w, h, environment);
         }
-
-        let scaleX = 1;
-        let scaleY = 1;
-        if (this.props.content === ContentBehavior.Scale) {
-            scaleX = this.width / source.width;
-            scaleY = this.height / source.height;
-        }
-
-        let sourceContext = renderer.elementToContextFromPool(this._artboard, 1, scaleX, scaleY);
-
-        context.save();
-
-        // this._artboard.globalViewMatrixInverted().applyToContext(context);
-        context.translate(this.props.offsetX, this.props.offsetY);
-
-        // let originalCtxl = this._artboard.runtimeProps.ctxl;
-        // this._artboard.applyVisitor(e => e.runtimeProps.ctxl = null);
-        // this._artboard.runtimeProps.ctxl = this.runtimeProps.ctxl;
-        // try {
-        //     this._drawing = true;
-        //     this._artboard.drawSelf.call(this._artboard, context, this._artboard.width, this._artboard.height, environment);
-        // } finally {
-        //     this._artboard.runtimeProps.ctxl = originalCtxl;
-        //     this._drawing = false;
-        // }
-        context.drawImage(sourceContext.canvas, 0, 0);
-        context.restore();
-
-
-        ContextPool.releaseContext(sourceContext);
-        // context.save();
-        // if (this.props.content === ContentBehavior.Scale) {
-        //     var scaleX = this.width / source.width;
-        //     var scaleY = this.height / source.height;
-        //     context.scale(scaleX, scaleY);
-        // }
-        // this._artboard.globalViewMatrixInverted().applyToContext(context);
-        // context.translate(this.props.offsetX, this.props.offsetY);
-
-        // let originalCtxl = this._artboard.runtimeProps.ctxl;
-        // this._artboard.applyVisitor(e => e.runtimeProps.ctxl = null);
-        // this._artboard.runtimeProps.ctxl = this.runtimeProps.ctxl;
-        // try {
-        //     this._drawing = true;
-        //     this._artboard.drawSelf.call(this._artboard, context, this._artboard.width, this._artboard.height, environment);
-        // } finally {
-        //     this._artboard.runtimeProps.ctxl = originalCtxl;
-        //     this._drawing = false;
-        // }
-        // context.restore();// context.save();
-        // if (this.props.content === ContentBehavior.Scale) {
-        //     var scaleX = this.width / source.width;
-        //     var scaleY = this.height / source.height;
-        //     context.scale(scaleX, scaleY);
-        // }
-        // this._artboard.globalViewMatrixInverted().applyToContext(context);
-        // context.translate(this.props.offsetX, this.props.offsetY);
-
-        // let originalCtxl = this._artboard.runtimeProps.ctxl;
-        // this._artboard.applyVisitor(e => e.runtimeProps.ctxl = null);
-        // this._artboard.runtimeProps.ctxl = this.runtimeProps.ctxl;
-        // try {
-        //     this._drawing = true;
-        //     this._artboard.drawSelf.call(this._artboard, context, this._artboard.width, this._artboard.height, environment);
-        // } finally {
-        //     this._artboard.runtimeProps.ctxl = originalCtxl;
-        //     this._drawing = false;
-        // }
-        // context.restore();
 
         if (this.mode() === ElementState.Edit) {
             context.save();
+            this.globalViewMatrix().applyToContext(context);
             context.beginPath();
             context.rectPath(0, 0, w, h);
             context.lineWidth = 4 * environment.contextScale;
@@ -338,10 +345,6 @@ export default class ArtboardFrameControl extends UIElement {
             context.stroke();
             context.restore();
         }
-    }
-
-    canAccept() {
-        return false;
     }
 }
 
@@ -398,20 +401,20 @@ PropertyMetadata.registerForType(ArtboardFrameControl, {
     },
 
     minScrollX: {
-        defaultValue:0
+        defaultValue: 0
     },
     minScrollY: {
-        defaultValue:0
+        defaultValue: 0
     },
     maxScrollX: {
-        defaultValue:0
+        defaultValue: 0
     },
     maxScrollY: {
-        defaultValue:0
+        defaultValue: 0
     },
 
     groups() {
-        var baseGroups = PropertyMetadata.findForType(UIElement).groups();
+        var baseGroups = PropertyMetadata.findForType(Container).groups();
 
         return [
             baseGroups.find(x => x.label === "Layout"),

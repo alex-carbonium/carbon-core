@@ -237,6 +237,10 @@ class RelayoutEngine {
         let result = primitives;
         if (newElements) {
             for (let i = 0, l = newElements.length; i < l; ++i) {
+                if(newElements[i].isDisposed()) {
+                    continue;
+                }
+
                 let childResult = this.visitElement(newElements[i], primitiveMap, propsHistoryMap, shouldArrange, filter);
                 if (childResult !== null) {
                     if (result === primitives) {

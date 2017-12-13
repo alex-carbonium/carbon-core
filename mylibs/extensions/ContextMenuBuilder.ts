@@ -11,6 +11,7 @@ import { ContextBarPosition, IActionManager, IView, IApp, ElementState, IComposi
 import InteractiveContainer from "../framework/InteractiveContainer";
 import { RepeaterActions } from "../framework/repeater/RepeaterActions";
 import ImageContent from "../framework/ImageContent";
+import ArtboardFrameControl from "../framework/ArtboardFrame";
 
 function findItemsToSelect(app, eventData) {
     let elements = app.activePage.hitElements(eventData, Environment.view.scale())
@@ -75,7 +76,10 @@ export default class ContextMenuBuilder {
 
         let items = menu.items
 
-        let editingPath = selection.length === 1 && selection[0] instanceof Path && selection[0].mode() === ElementState.Edit;
+        let editingPath = selection.length === 1
+            && (selection[0] instanceof Path
+            || selection[0] instanceof ArtboardFrameControl)
+            && selection[0].mode() === ElementState.Edit;
         let editingImage = selection.length === 1 && selection[0] instanceof ImageContent;
 
         if((editingPath || editingImage) && !context.eventData) {

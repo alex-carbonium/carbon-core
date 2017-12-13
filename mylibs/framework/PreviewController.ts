@@ -89,11 +89,11 @@ export default class PreviewController extends ControllerBase {
         if (typeof element.scrollX === 'function') {
             var oldX = element.scrollX();
             element.scrollX(oldX + delta.dx);
-            delta.dx -= (oldX - element.scrollX());
+            delta.dx -= (element.scrollX() - oldX);
 
             var oldY = element.scrollY();
             element.scrollY(oldY + delta.dy);
-            delta.dy -= (oldY - element.scrollY());
+            delta.dy -= (element.scrollY() - oldY);
             element.invalidate();
             Invalidate.request();
         }
