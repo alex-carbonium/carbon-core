@@ -1401,8 +1401,8 @@ class AppClass extends DataNode implements IApp {
     saveWorkspaceState(): void {
         var state = {
             scale: Environment.view.scale(),
-            scrollX: Environment.view.scrollX(),
-            scrollY: Environment.view.scrollY(),
+            scrollX: Environment.view.scrollX,
+            scrollY: Environment.view.scrollY,
             pageId: this.activePage.id,
             pageState: this.activePage.saveWorkspaceState(),
             selection: Selection.selectedElements().map(x => x.id)
@@ -1427,8 +1427,8 @@ class AppClass extends DataNode implements IApp {
             }
 
             Environment.view.scale(state.scale);
-            Environment.view.scrollX(state.scrollX);
-            Environment.view.scrollY(state.scrollY);
+            Environment.view.scrollX = (state.scrollX);
+            Environment.view.scrollY = (state.scrollY);
 
             if (page && state.pageState) {
                 page.restoreWorkspaceState(state.pageState);

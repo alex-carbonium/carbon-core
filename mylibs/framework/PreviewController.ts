@@ -10,6 +10,7 @@ import { PreviewTextTool } from "./PreviewTextTool";
 import ControllerBase from "./ControllerBase";
 import Cursor from "./Cursor";
 import { IMatrix } from "carbon-geometry";
+import { RuntimeProxy } from "../code/runtime/RuntimeProxy";
 
 export default class PreviewController extends ControllerBase {
     [key: string]: any;
@@ -28,7 +29,7 @@ export default class PreviewController extends ControllerBase {
     }
 
     _eventTypeToName(eventType: ActionEvents) {
-        return ("on" + eventType).toLowerCase();
+        return (eventType).toLowerCase();
     }
 
     async _propagateAction(eventData, eventType, element): Promise<boolean> {
@@ -40,13 +41,22 @@ export default class PreviewController extends ControllerBase {
         let eventName = this._eventTypeToName(eventType);
 
         if (events && events[eventName]) {
-            let m: IMatrix = element.globalViewMatrixInverted();
-            let pos = m.transformPoint2(eventData.x, eventData.y);
-            eventData.layerX = pos.x;
-            eventData.layerY = pos.y;
-            eventData.target = element;
+            let res;
+            if (eventName === "scroll") {
+                res = events[eventName].raise({
+                    scrollX:element.scrollX,
+                    scrollY:element.scrollY,
+                    target: RuntimeProxy.wrap(element)
+                });
+            } else {
+                let m: IMatrix = element.globalViewMatrixInverted();
+                let pos = m.transformPoint2(eventData.x, eventData.y);
+                eventData.layerX = pos.x;
+                eventData.layerY = pos.y;
+                eventData.target = RuntimeProxy.wrap(element);
 
-            let res = events[eventName].raise(eventData);
+                res = events[eventName].raise(eventData);
+            }
             if (res instanceof Promise) {
                 res = await res;
             }
@@ -80,20 +90,20 @@ export default class PreviewController extends ControllerBase {
         }
 
         if (!element || element === this.view) {
-            this.view.scrollX(this.view.scrollX() + delta.dx);
-            this.view.scrollY(this.view.scrollY() + delta.dy);
+            this.view.scrollX = (this.view.scrollX + delta.dx);
+            this.view.scrollY = (this.view.scrollY + delta.dy);
             Invalidate.request();
             return;
         }
 
-        if (typeof element.scrollX === 'function') {
-            var oldX = element.scrollX();
-            element.scrollX(oldX + delta.dx);
-            delta.dx -= (element.scrollX() - oldX);
+        if (element.scrollX !== undefined) {
+            var oldX = element.scrollX;
+            element.scrollX = (oldX + delta.dx);
+            delta.dx -= (element.scrollX - oldX);
 
-            var oldY = element.scrollY();
-            element.scrollY(oldY + delta.dy);
-            delta.dy -= (element.scrollY() - oldY);
+            var oldY = element.scrollY;
+            element.scrollY = (oldY + delta.dy);
+            delta.dy -= (element.scrollY - oldY);
             element.invalidate();
             Invalidate.request();
         }

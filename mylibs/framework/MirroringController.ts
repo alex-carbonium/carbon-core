@@ -11,8 +11,8 @@ import { choosePasteLocation } from "./PasteLocator";
 
 function updateEvent(event) {
     var scale = this.view.scale();
-    domUtil.layerX(event, Math.round((domUtil.layerX(event) + this.view.scrollX()) * 100 / scale) / 100);
-    domUtil.layerY(event, Math.round((domUtil.layerY(event) + this.view.scrollY()) * 100 / scale) / 100);
+    domUtil.layerX(event, Math.round((domUtil.layerX(event) + this.view.scrollX) * 100 / scale) / 100);
+    domUtil.layerY(event, Math.round((domUtil.layerY(event) + this.view.scrollY) * 100 / scale) / 100);
 }
 
 export default class MirroringController implements IController {
@@ -86,19 +86,19 @@ export default class MirroringController implements IController {
         }
 
         if (!element || element === this.view) {
-            this.view.scrollX(this.view.scrollX() + delta.dx);
-            this.view.scrollY(this.view.scrollY() + delta.dy);
+            this.view.scrollX = (this.view.scrollX + delta.dx);
+            this.view.scrollY = (this.view.scrollY + delta.dy);
             return;
         }
 
         if (typeof element.scrollX === 'function') {
-            var oldX = element.scrollX();
-            element.scrollX(oldX + delta.dx);
-            delta.dx -= (oldX - element.scrollX());
+            var oldX = element.scrollX;
+            element.scrollX = (oldX + delta.dx);
+            delta.dx -= (-oldX + element.scrollX);
 
-            var oldY = element.scrollY();
-            element.scrollY(oldY + delta.dy);
-            delta.dY -= (oldY - element.scrollY());
+            var oldY = element.scrollY;
+            element.scrollY = (oldY + delta.dy);
+            delta.dY -= (-oldY + element.scrollY);
         }
 
         var parent = element.parent;

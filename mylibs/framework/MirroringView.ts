@@ -85,8 +85,8 @@ class ArtboardProxyPage extends Page implements IMirroringProxyPage {
         if(!artboard){
             return;
         }
-        this.view.page.scrollX(0);
-        this.view.page.scrollY(0);
+        this.view.page.scrollX = (0);
+        this.view.page.scrollY = (0);
         var rect = clone(artboard.boundaryRect());
         var scale = fitRectToRect(this.view.viewportSize(), rect);
         this.view.scale(scale);
@@ -100,8 +100,8 @@ class ArtboardProxyPage extends Page implements IMirroringProxyPage {
         }
 
         return this.invalidateRequired = (this._version !== artboard.version
-        || this.scrollX() !== this._sX
-        || this.scrollY() !== this._sY
+        || this.scrollX !== this._sX
+        || this.scrollY !== this._sY
         || this.pageScale() !== this._ss);
     }
 
@@ -111,8 +111,8 @@ class ArtboardProxyPage extends Page implements IMirroringProxyPage {
         if(artboard){
             this._version = artboard.version;
         }
-        this._sX = this.scrollX();
-        this._sY = this.scrollY();
+        this._sX = this.scrollX;
+        this._sY = this.scrollY;
         this._ss = this.pageScale();
     }
 

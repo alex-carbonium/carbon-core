@@ -253,12 +253,10 @@ class NullPage extends UIElement implements IPage {
     hitElements() {
         return [];
     }
-    scrollX() {
-        return 0;
-    }
-    scrollY() {
-        return 0;
-    }
+
+    scrollX = 0;
+    scrollY = 0;
+
     hitElement(a, b, c?, d?): IUIElement {
         return null;
     }

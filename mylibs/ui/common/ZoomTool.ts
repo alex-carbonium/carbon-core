@@ -74,8 +74,8 @@ export default class ZoomTool extends Tool {
 
     click(event: IMouseEventData) {
         let view = this.view();
-        var sx = view.scrollX(),
-            sy = view.scrollY();
+        var sx = view.scrollX,
+            sy = view.scrollY;
         var layerX = domUtil.layerX(event.event);
         var layerY = domUtil.layerY(event.event);
         let oldValue = view.scale();
@@ -89,8 +89,8 @@ export default class ZoomTool extends Tool {
         }
         var scroll = App.Current.activePage.pointToScroll({ x: x, y: y }, viewport);
 
-        view.scrollX(scroll.scrollX);
-        view.scrollY(scroll.scrollY);
+        view.scrollX = (scroll.scrollX);
+        view.scrollY = (scroll.scrollY);
     }
 
     mouseup(event: IMouseEventData) {

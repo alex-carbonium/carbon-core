@@ -10,7 +10,7 @@ export default class PixelGrid {
             return;
         }
         var scale = view.scale();
-        if (scale !== this.scale || view.scrollX() !== this.scrollX || view.scrollY() !== this.scrollY) {
+        if (scale !== this.scale || view.scrollX !== this.scrollX || view.scrollY !== this.scrollY) {
             if (scale >= 6) {
                 this.render();
             } else if (!this.clean) {
@@ -18,8 +18,8 @@ export default class PixelGrid {
             }
 
             this.scale = scale;
-            this.scrollX = view.scrollX();
-            this.scrollY = view.scrollY();
+            this.scrollX = view.scrollX;
+            this.scrollY = view.scrollY;
         }
     }
 
@@ -44,12 +44,12 @@ export default class PixelGrid {
         var di = d;
         d *= this.view.contextScale;
         context.translate(0.5, 0.5);
-        for (var i = (di - this.view.scrollX() % di) * this.view.contextScale; i < w; i += d) {
+        for (var i = (di - this.view.scrollX % di) * this.view.contextScale; i < w; i += d) {
             context.moveTo(0 | i + 0.5, 0);
             context.lineTo(0 | i + 0.5, h);
         }
 
-        for (var i = (di - this.view.scrollY() % di) * this.view.contextScale; i < h; i += d) {
+        for (var i = (di - this.view.scrollY % di) * this.view.contextScale; i < h; i += d) {
             context.moveTo(0, 0 | i + 0.5);
             context.lineTo(w, 0 | i + 0.5);
         }

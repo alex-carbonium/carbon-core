@@ -12,8 +12,8 @@ registerExample("zoom in: rect", function(app, artboard){
     artboard.add(rect);
 
     Environment.view.scale(20.5);
-    Environment.view.scrollX(1853);
-    Environment.view.scrollY(1916);
+    Environment.view.scrollX = (1853);
+    Environment.view.scrollY = (1916);
 
     Selection.makeSelection([rect]);
 });
@@ -28,8 +28,8 @@ registerExample("zoom in: path", function(app, artboard){
     artboard.add(path);
 
     Environment.view.scale(20.5);
-    Environment.view.scrollX(1853);
-    Environment.view.scrollY(1916);
+    Environment.view.scrollX = (1853);
+    Environment.view.scrollY = (1916);
 
     Selection.makeSelection([path]);
 
@@ -49,8 +49,8 @@ registerExample("zoom in: group", function(app, artboard){
     artboard.add(rect2);
 
     Environment.view.scale(13);
-    Environment.view.scrollX(1182);
-    Environment.view.scrollY(1098);
+    Environment.view.scrollX = (1182);
+    Environment.view.scrollY = (1098);
 
     Selection.makeSelection([rect1, rect2]);
     app.actionManager.invoke("group");

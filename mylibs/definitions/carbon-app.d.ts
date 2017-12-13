@@ -216,8 +216,8 @@ declare module "carbon-app" {
         saveWorkspaceState(): any;
         restoreWorkspaceState(data: any): void;
 
-        scrollX(value?:number): number;
-        scrollY(value?:number): number;
+        scrollX: number;
+        scrollY: number;
 
         maxScrollX(value?:number):number;
         maxScrollY(value?:number):number;
@@ -297,8 +297,8 @@ declare module "carbon-app" {
         scale(value?: number): number;
         zoom(value? :number, norefresh?: boolean):void;
         zoomToFit(): void;
-        scrollX(value?: number): number;
-        scrollY(value?: number): number;
+        scrollX: number;
+        scrollY: number;
 
         viewportSize(): ISize;
         viewportRect(): IRect;

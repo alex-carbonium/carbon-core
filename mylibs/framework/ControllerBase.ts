@@ -79,8 +79,8 @@ export default class ControllerBase implements IController {
         var scale = this.view.scale();
         return new EventData({
             handled: false,
-            x: Math.round((domUtil.layerX(event) + this.view.scrollX()) * 100 / scale) / 100,
-            y: Math.round((domUtil.layerY(event) + this.view.scrollY()) * 100 / scale) / 100,
+            x: Math.round((domUtil.layerX(event) + this.view.scrollX) * 100 / scale) / 100,
+            y: Math.round((domUtil.layerY(event) + this.view.scrollY) * 100 / scale) / 100,
             event: event,
             ctrlKey: event.ctrlKey || event.metaKey,
             altKey: event.altKey,

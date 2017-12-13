@@ -43,8 +43,8 @@ var onmousewheel = function (e) {
             var delta = e.deltaY;
             var value = oldValue + (delta < 0 ? step : -step);
 
-            var sx = view.scrollX(),
-                sy = view.scrollY();
+            var sx = view.scrollX,
+                sy = view.scrollY;
             var layerX = domUtil.layerX(e);
             var layerY = domUtil.layerY(e);
             var x = (layerX + sx) / oldValue;
@@ -53,8 +53,8 @@ var onmousewheel = function (e) {
             Environment.view.zoom(Math.round(value * 100) / 100);
             var scroll = App.Current.activePage.pointToScroll({ x: x, y: y }, { width: layerX * 2, height: layerY * 2 });
 
-            view.scrollX(scroll.scrollX);
-            view.scrollY(scroll.scrollY);
+            view.scrollX = (scroll.scrollX);
+            view.scrollY = (scroll.scrollY);
         } else {
             Environment.controller.onscroll(Environment.controller.createEventData(e));
         }
@@ -271,12 +271,12 @@ var onmouseleave = function (event) {
                     }
 
                     if (mouseOutData.dxScroll !== 0) {
-                        var scrollX = Environment.view.scrollX() + mouseOutData.dxScroll;
-                        Environment.view.scrollX(scrollX);
+                        var scrollX = Environment.view.scrollX + mouseOutData.dxScroll;
+                        Environment.view.scrollX = (scrollX);
                     }
                     if (mouseOutData.dyScroll !== 0) {
-                        var scrollY = Environment.view.scrollY() + mouseOutData.dyScroll;
-                        Environment.view.scrollY(scrollY);
+                        var scrollY = Environment.view.scrollY + mouseOutData.dyScroll;
+                        Environment.view.scrollY = (scrollY);
                     }
                 }
             });

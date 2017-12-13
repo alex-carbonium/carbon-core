@@ -8,8 +8,8 @@ var debug = require("../../DebugUtil")("carb:handTool");
 var setStartingScroll = function (event) {
     var view = Environment.view;
     this.scrollPoint = { x: event.event.screenX, y: event.event.screenY };
-    this.scrollX = view.scrollX();
-    this.scrollY = view.scrollY();
+    this.scrollX = view.scrollX;
+    this.scrollY = view.scrollY;
 };
 
 var setCursor = function (open, event: IMouseEventData) {
@@ -75,8 +75,8 @@ export default class HandTool extends Tool {
             var dy = this.scrollPoint.y - y;
 
             this.scrollPoint = { x: x, y: y };
-            view.scrollX(view.scrollX() + dx);
-            view.scrollY(view.scrollY() + dy);
+            view.scrollX = (view.scrollX + dx);
+            view.scrollY = (view.scrollY + dy);
         }
         setCursor.call(this, !this._mousepressed, event);
         event.handled = true;

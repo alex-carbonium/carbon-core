@@ -13,6 +13,7 @@ import { ChangeMode } from "carbon-basics";
 import Environment from "environment";
 import UIElement from "./UIElement";
 import NullContainer from "framework/NullContainer";
+import { RuntimeProxy } from "../code/runtime/RuntimeProxy";
 
 export default class ArtboardFrameControl extends Container {
     constructor() {
@@ -136,7 +137,7 @@ export default class ArtboardFrameControl extends Container {
         if (!artboard) {
             return;
         }
-        this.children.forEach(c => {this.remove(c); c.dispose()});
+        this.children.forEach(c => { this.remove(c); c.dispose() });
         this.children.length = 0;
         let symbol = new Symbol();
         symbol.canSelect(false);
@@ -156,28 +157,69 @@ export default class ArtboardFrameControl extends Container {
         });
 
         this.runtimeProps.artboardVersion = artboard.runtimeProps.version;
+        this.invalidate(this.runtimeProps.ctxl);
     }
 
-    scrollX(value?: number): number {
-        if (arguments.length > 0) {
-            this.prepareAndSetProps({ offsetX: -value });
-        }
+    get scrollHorizontal(): boolean {
+        return this.props.scrollHorizontal;
+    }
 
+    set scrollHorizontal(value: boolean) {
+        this.prepareAndSetProps({ scrollHorizontal: value });
+    }
+
+    get scrollVertical(): boolean {
+        return this.props.scrollVertical;
+    }
+
+    set scrollVertical(value: boolean) {
+        this.prepareAndSetProps({ scrollVertical: value });
+    }
+
+    get scrollX(): number {
         return -this.props.offsetX;
     }
 
+    set scrollX(value: number) {
+        this.prepareAndSetProps({ offsetX: -value });
+    }
 
-    scrollY(value?: number): number {
-        if (arguments.length > 0) {
-            this.prepareAndSetProps({ offsetY: -value });
+    get scrollY(): number {
+        return -this.props.offsetY;
+    }
+
+    set scrollY(value: number) {
+        this.prepareAndSetProps({ offsetY: -value });
+    }
+
+    get artboardName() {
+        if (!this._artboard) {
+            return null;
         }
 
-        return -this.props.offsetY;
+        return this._artboard.name;
+    }
+
+    set artboardName(value) {
+        let page = App.Current.activePage;
+        if (page) {
+            let artboard = page.children.find(a => a.name === value);
+            if (artboard) {
+                this.prepareAndSetProps({
+                    source: {
+                        pageId: page.id,
+                        artboardId: artboard.id
+                    }
+                });
+
+                this._initFromArtboard();
+            }
+        }
     }
 
     getContentSize() {
         let source = this._artboard;
-        if (!source || this.props.content === ContentBehavior.Scale) {
+        if (!source || this.props.contentBehavior === ContentBehavior.Scale) {
             return { width: this.width, height: this.height }
         }
         else {
@@ -211,20 +253,38 @@ export default class ArtboardFrameControl extends Container {
     }
 
     prepareProps(props) {
+        let scrollHorizontal = props.scrollHorizontal === undefined ? this.props.scrollHorizontal : props.scrollHorizontal;
+        let scrollVertical = props.scrollVertical === undefined ? this.props.scrollVertical : props.scrollVertical;
         if (props.offsetX !== undefined) {
-            if (props.offsetX > -this.minScrollX) {
-                props.offsetX = -this.minScrollX;
-            } else if (props.offsetX < -this.maxScrollX) {
-                props.offsetX = -this.maxScrollX;
+            if (scrollHorizontal) {
+                if (props.offsetX > -this.minScrollX) {
+                    props.offsetX = -this.minScrollX;
+                } else if (props.offsetX < -this.maxScrollX) {
+                    props.offsetX = -this.maxScrollX;
+                }
+            } else {
+                props.offsetX = 0;
             }
         }
 
         if (props.offsetY !== undefined) {
-            if (props.offsetY > -this.minScrollY) {
-                props.offsetY = -this.minScrollY;
-            } else if (props.offsetY < -this.maxScrollY) {
-                props.offsetY = -this.maxScrollY;
+            if (scrollVertical) {
+                if (props.offsetY > -this.minScrollY) {
+                    props.offsetY = -this.minScrollY;
+                } else if (props.offsetY < -this.maxScrollY) {
+                    props.offsetY = -this.maxScrollY;
+                }
+            } else {
+                props.offsetY = 0;
             }
+        }
+
+        if(props.scrollHorizontal === false) {
+            props.offsetX = 0;
+        }
+
+        if(props.scrollVertical === false) {
+            props.offsetY = 0;
         }
     }
 
@@ -249,7 +309,7 @@ export default class ArtboardFrameControl extends Container {
             });
         }
 
-        if (props.content !== undefined || props.br !== undefined || props.m !== undefined) {
+        if (props.contentBehavior !== undefined || props.br !== undefined || props.m !== undefined) {
             let size = this.getContentSize();
             this.setProps({
                 maxScrollX: Math.max(0, size.width - this.width),
@@ -259,6 +319,14 @@ export default class ArtboardFrameControl extends Container {
 
         if ((props.hasOwnProperty('offsetX') || props.hasOwnProperty('offsetY')) && this.children.length) {
             this.children[0].setProps({ m: Matrix.createTranslationMatrix(this.props.offsetX, this.props.offsetY) }, ChangeMode.Self);
+        }
+
+        if(props.scrollX !== undefined || props.scrollY !== undefined) {
+            this.raiseEvent("scroll", {
+                scrollX:this.scrollX,
+                scrollY:this.scrollY,
+                target:RuntimeProxy.wrap(this)
+            })
         }
     }
 
@@ -358,16 +426,16 @@ PropertyMetadata.registerForType(ArtboardFrameControl, {
         getOptions: function (element) {
             let page = App.Current.activePage;
             let parentIds = {};
-            element.each(e=>{
+            element.each(e => {
                 let parent = e.parent;
-                while(parent && parent !== NullContainer) {
+                while (parent && parent !== NullContainer) {
                     parentIds[parent.id] = true;
                     parent = parent.parent;
                 }
             });
 
             return {
-                items: page.getAllArtboards().filter(a=>!parentIds[a.id]).map(artboard => {
+                items: page.getAllArtboards().filter(a => !parentIds[a.id]).map(artboard => {
                     return {
                         name: artboard.name,
                         value: {
@@ -383,8 +451,8 @@ PropertyMetadata.registerForType(ArtboardFrameControl, {
         defaultValue: Overflow.Clip
     },
 
-    content: {
-        displayName: "@content",
+    contentBehavior: {
+        displayName: "@contentBehavior",
         type: "dropdown",
         options: {
             size: 1,
@@ -420,6 +488,12 @@ PropertyMetadata.registerForType(ArtboardFrameControl, {
     maxScrollY: {
         defaultValue: 0
     },
+    scrollVertical: {
+        defaultValue: true
+    },
+    scrollHorizontal: {
+        defaultValue: true
+    },
 
     groups() {
         var baseGroups = PropertyMetadata.findForType(Container).groups();
@@ -428,13 +502,30 @@ PropertyMetadata.registerForType(ArtboardFrameControl, {
             baseGroups.find(x => x.label === "Layout"),
             {
                 label: "@settings",
-                properties: ["source", "content", "offsetX", "offsetY", "overflow"]
+                properties: ["source", "contentBehavior", "offsetX", "offsetY", "overflow"]
             },
             {
                 label: "Style",
                 properties: ["opacity"]
             }
         ]
+    },
+    proxyDefinition: function () {
+        let baseDefinition = PropertyMetadata.findForType(UIElement).proxyDefinition();
+        return {
+            rprops: [].concat(baseDefinition.rprops), // readonly props
+            props: [
+                "artboardName",
+                "scrollX",
+                "scrollY",
+                "scrollHorizontal",
+                "scrollHorizontal",
+                "verticalSnapPoints",
+                "horizontalSnapPoints",
+            ].concat(baseDefinition.props),
+            methods: [].concat(baseDefinition.methods),
+            mixins: [].concat(baseDefinition.mixins)
+        }
     }
 })
 

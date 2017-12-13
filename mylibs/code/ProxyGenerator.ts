@@ -12,6 +12,8 @@ export class ArtboardProxyGenerator {
                 return "TRectangle & MouseEventHandler";
             case Types.Text:
                 return "TText & MouseEventHandler";
+            case Types.ArtboardFrame:
+                return "TArtboardFrame & MouseEventHandler";
         }
         return "TUIElement & MouseEventHandler";
     }

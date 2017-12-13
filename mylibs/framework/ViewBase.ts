@@ -40,8 +40,8 @@ function setupLayer(layer, context) {
 function onZoomChanged(value, oldValue) {
     var view = this;
 
-    var sx = view.scrollX(),
-        sy = view.scrollY();
+    var sx = view.scrollX,
+        sy = view.scrollY;
 
     if (value < 0.01) {
         value = 0.01;
@@ -49,8 +49,8 @@ function onZoomChanged(value, oldValue) {
     if (this.zoomToPoint) {
         sx += this.zoomToPoint.x * (value - oldValue);
         sy += this.zoomToPoint.y * (value - oldValue);
-        view.scrollX(sx);
-        view.scrollY(sy);
+        view.scrollX = (sx);
+        view.scrollY = (sy);
         view.scale(value);
     }
     else {
@@ -63,8 +63,8 @@ function onZoomChanged(value, oldValue) {
         view.scale(value);
         var scroll = this.app.activePage.pointToScroll({ x: sx, y: sy }, viewport);
 
-        view.scrollX(scroll.scrollX);
-        view.scrollY(scroll.scrollY);
+        view.scrollX = (scroll.scrollX);
+        view.scrollY = (scroll.scrollY);
     }
 
     Invalidate.requestDraftWithDebounce();
@@ -152,9 +152,9 @@ export default class ViewBase { //TODO: implement IView
 
         var matrix = Matrix.create();
 
-        var dx = this.scrollX() % scale;
-        var dy = this.scrollY() % scale;
-        matrix.translate(-(0 | (this.scrollX()) / scale), -(0 | (this.scrollY()) / scale));
+        var dx = this.scrollX % scale;
+        var dy = this.scrollY % scale;
+        matrix.translate(-(0 | (this.scrollX) / scale), -(0 | (this.scrollY) / scale));
 
         var pageMatrix = this._page.pageMatrix;
         this._page.pageMatrix = matrix;
@@ -425,8 +425,8 @@ export default class ViewBase { //TODO: implement IView
         let size = this.viewportSize();
         let scale = this.scale();
 
-        let x = this.scrollX() / scale;
-        let y = this.scrollY() / scale;
+        let x = this.scrollX / scale;
+        let y = this.scrollY / scale;
         let w = size.width / scale;
         let h = size.height / scale;
 
@@ -440,8 +440,8 @@ export default class ViewBase { //TODO: implement IView
     }
 
     get viewState(): ViewState {
-        var sx = this.scrollX();
-        var sy = this.scrollY();
+        var sx = this.scrollX;
+        var sy = this.scrollY;
         var scale = this.scale();
 
         if (sx !== this._viewState.sx || sy !== this._viewState.sy || scale !== this._viewState.scale) {
@@ -464,52 +464,8 @@ export default class ViewBase { //TODO: implement IView
         }
 
         this.scale(newState.scale, silent);
-        this.scrollX(newState.sx, silent);
-        this.scrollY(newState.sy, silent);
-
-        // var animationValues = [];
-        // var options = { duration: 180 };
-        // var oldState = this.viewState;
-
-        // animationValues.push({
-        //     from: this.scrollX(), to: newState.sx, accessor: value => {
-        //         if (arguments.length === 1) {
-        //             return this.scrollX(value);
-        //         }
-
-        //         return this.scrollX();
-        //     }
-        // });
-
-        // animationValues.push({
-        //     from: this.scrollY(), to: newState.sy, accessor: value => {
-        //         if (arguments.length === 1) {
-        //             return this.scrollY(value);
-        //         }
-
-        //         return this.scrollY();
-        //     }
-        // });
-
-        // animationValues.push({
-        //     from: this.scale(), to: newState.scale, accessor: value => {
-        //         if (arguments.length === 1) {
-        //             return this.scale(value);
-        //         }
-
-        //         return this.scale();
-        //     }
-        // });
-
-        // var group = new AnimationGroup(animationValues, options, () => {
-        //     Invalidate.request();
-        // });
-
-        // if (!silent) {
-        //     group.promise().then(() => this.viewStateChanged.raise(newState, oldState));
-        // }
-
-        // this.animationController.registerAnimationGroup(group);
+        this.scrollX = (newState.sx, silent);
+        this.scrollY = (newState.sy, silent);
     }
 
     raiseViewStateChanged() {
@@ -526,8 +482,8 @@ export default class ViewBase { //TODO: implement IView
     pointToScreen(point: ICoordinate) {
         var parentOffset = this.app.platform.containerOffset();
         return {
-            x: parentOffset.left + point.x - this.page.scrollX(),
-            y: parentOffset.top + point.y - this.page.scrollY()
+            x: parentOffset.left + point.x - this.page.scrollX,
+            y: parentOffset.top + point.y - this.page.scrollY
         };
     }
 
@@ -566,54 +522,60 @@ export default class ViewBase { //TODO: implement IView
         return false;
     }
 
-    scrollX(value?, silent?: boolean) {
+    set scrollX(value) {
         var page = this.page;
         if (!page) {
-            return 0;
+            return;
         }
 
-        if (value !== undefined) {
+        value = ~~value;
+        if (page.scrollX !== value) {
+            page.scrollX = (value);
+            this.invalidate();
 
-            value = ~~value;
-            if (page.scrollX() !== value) {
-                page.scrollX(value);
-                this.invalidate();
-
-                if (!silent) {
-                    this.raiseViewStateChanged();
-                }
-            }
+            this.raiseViewStateChanged();
         }
-
-        return page.scrollX();
     }
 
-    scrollY(value?, silent?: boolean) {
+    get scrollX() {
         var page = this.page;
         if (!page) {
             return 0;
         }
 
-        if (value !== undefined) {
-            value = ~~value;
-            if (page.scrollY() !== value) {
-                page.scrollY(value);
-                this.invalidate();
+        return page.scrollX;
+    }
 
-                if (!silent) {
-                    this.raiseViewStateChanged();
-                }
-            }
+    set scrollY(value) {
+        var page = this.page;
+        if (!page) {
+            return;
         }
-        return page.scrollY();
+
+        value = ~~value;
+        if (page.scrollY !== value) {
+            page.scrollY =(value);
+            this.invalidate();
+
+            this.raiseViewStateChanged();
+        }
+    }
+
+    get scrollY() {
+        var page = this.page;
+        if (!page) {
+            return 0;
+        }
+
+        return page.scrollY;
     }
 
     scrollTo(scrollPosition) {
         if (scrollPosition.scrollX) {
-            this.scrollX(scrollPosition.scrollX);
+            this.scrollX = (scrollPosition.scrollX);
         }
         if (scrollPosition.scrollY) {
-            this.scrollY(scrollPosition.scrollY);
+            this.scrollY = (scrollPosition.scrollY);
         }
     }
 
@@ -688,22 +650,22 @@ export default class ViewBase { //TODO: implement IView
     scrollToCenter() {
         var scroll = this.scrollCenterPosition();
         if (scroll.scrollX) {
-            this.scrollX(scroll.scrollX);
+            this.scrollX = (scroll.scrollX);
         }
 
         if (scroll.scrollY) {
-            this.scrollY(scroll.scrollY);
+            this.scrollY = (scroll.scrollY);
         }
     }
 
     scrollToPoint(pt: IPoint) {
         var scroll = this.page.pointToScroll(pt, this.viewportSize());
         if (scroll.scrollX) {
-            this.scrollX(scroll.scrollX);
+            this.scrollX = (scroll.scrollX);
         }
 
         if (scroll.scrollY) {
-            this.scrollY(scroll.scrollY);
+            this.scrollY = (scroll.scrollY);
         }
     }
 
@@ -712,13 +674,13 @@ export default class ViewBase { //TODO: implement IView
     }
 
     scrollPosition() {
-        return { scrollX: this.scrollX(), scrollY: this.scrollY() };
+        return { scrollX: this.scrollX, scrollY: this.scrollY };
     }
 
     logicalCoordinateToScreen(point: ICoordinate): ICoordinate {
         return {
-            x: (point.x * this.scale() - this.scrollX()),
-            y: (point.y * this.scale() - this.scrollY())
+            x: (point.x * this.scale() - this.scrollX),
+            y: (point.y * this.scale() - this.scrollY)
         }
     }
 
@@ -799,16 +761,16 @@ export default class ViewBase { //TODO: implement IView
         if (this._viewportSize !== Rect.Zero) {
             var oldSize = this._viewportSize;
             var scale = this.scale();
-            var sx = this.scrollX(),
-                sy = this.scrollY();
+            var sx = this.scrollX,
+                sy = this.scrollY;
             sx /= scale;
             sy /= scale;
             sx += (oldSize.width / scale) / 2;
             sy += (oldSize.height / scale) / 2;
             var scroll = this.app.activePage.pointToScroll({ x: sx, y: sy }, newSize);
 
-            this.scrollX(scroll.scrollX);
-            this.scrollY(scroll.scrollY);
+            this.scrollX = (scroll.scrollX);
+            this.scrollY = (scroll.scrollY);
         }
         this._viewportSize = this._viewportSize.withSize(newSize.width, newSize.height);
     }

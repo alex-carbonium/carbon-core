@@ -222,8 +222,8 @@ export default class RulerExtension extends RuntimeExtension {
         context.strokeStyle = "gray";
         this._baseMatrix.applyToContext(context);
 
-        this.drawHorizontal(context, this._viewportSize.width, this._viewportSize.height, Environment.view.scrollX() - this._originX, this._originWidth);
-        this.drawVertical(context, this._viewportSize.height, this._viewportSize.width, Environment.view.scrollY() - this._originY, this._originHeight);
+        this.drawHorizontal(context, this._viewportSize.width, this._viewportSize.height, Environment.view.scrollX - this._originX, this._originWidth);
+        this.drawVertical(context, this._viewportSize.height, this._viewportSize.width, Environment.view.scrollY - this._originY, this._originHeight);
 
         //context.clearRect(0, -PADDING_TOP, config.size, PADDING_TOP + config.size);
 

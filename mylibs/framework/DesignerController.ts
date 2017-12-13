@@ -125,8 +125,8 @@ export default class DesignerController implements IController {
 
         return {
             handled: false,
-            x: Math.round((domUtil.layerX(event) + this.view.scrollX()) * 100 / scale) / 100,
-            y: Math.round((domUtil.layerY(event) + this.view.scrollY()) * 100 / scale) / 100,
+            x: Math.round((domUtil.layerX(event) + this.view.scrollX) * 100 / scale) / 100,
+            y: Math.round((domUtil.layerY(event) + this.view.scrollY) * 100 / scale) / 100,
             event: event,
             ctrlKey: event.ctrlKey || event.metaKey,
             altKey: event.altKey,
@@ -700,10 +700,10 @@ export default class DesignerController implements IController {
 
     onscroll(event) {
         if (event.shiftKey && !event.event.deltaX) {
-            this.view.scrollX(this.view.scrollX() + event.event.deltaY);
+            this.view.scrollX = (this.view.scrollX + event.event.deltaY);
         } else {
-            this.view.scrollX(this.view.scrollX() + event.event.deltaX);
-            this.view.scrollY(this.view.scrollY() + event.event.deltaY);
+            this.view.scrollX = (this.view.scrollX + event.event.deltaX);
+            this.view.scrollY = (this.view.scrollY + event.event.deltaY);
         }
         Invalidate.requestDraftWithDebounce();
     }

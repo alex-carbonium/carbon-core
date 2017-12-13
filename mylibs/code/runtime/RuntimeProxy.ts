@@ -192,7 +192,7 @@ export class ElementProxy extends RuntimeProxy {
 
     set(target: any, name: PropertyKey, value: any) {
         if (eventsMap[name.toString().toLowerCase()]) {
-            (this.element as any).registerEventHandler(name, value);
+            (this.element as any).registerEventHandler(name.toString().substr(2), value);
             return true;
         }
 

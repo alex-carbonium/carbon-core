@@ -1,8 +1,8 @@
 import Layer from "./Layer";
 import Container from "./Container";
 import Matrix from "math/matrix";
-import {Types} from "./Defs";
-import {areRectsIntersecting} from "math/math";
+import { Types } from "./Defs";
+import { areRectsIntersecting } from "math/math";
 import Selection from "framework/SelectionModel";
 import PropertyMetadata from "framework/PropertyMetadata";
 import ContextPool from "framework/render/ContextPool";
@@ -39,7 +39,7 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
         super();
         this.app = App.Current;
         this.initId();
-        this.setProps({name: findNextPageName()}, ChangeMode.Self);
+        this.setProps({ name: findNextPageName() }, ChangeMode.Self);
 
         this._scale = 1;
         this._scrollX = 0;
@@ -52,51 +52,55 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
         this._initialized = false;
     }
 
-    get nameProvider(){
-        if(!this._nameProvider){
+    get nameProvider() {
+        if (!this._nameProvider) {
             this._nameProvider = new NameProvider(this);
         }
 
         return this._nameProvider;
     }
 
-    scrollX(value?:number):number {
-        if (arguments.length === 1) {
-            this._scrollX = arguments[0];
+    set scrollX(value: number) {
 
-            if (this._minScrollX != null && this._scrollX < this._minScrollX) {
-                this._scrollX = this._minScrollX;
-            }
-            else if (this._maxScrollX != null && this._scrollX > this._maxScrollX) {
-                this._scrollX = this._maxScrollX;
-            }
+        this._scrollX = value;
 
-            this.updatePageMatrix();
+        if (this._minScrollX !== undefined && this._scrollX < this._minScrollX) {
+            this._scrollX = this._minScrollX;
         }
+        else if (this._maxScrollX !== undefined && this._scrollX > this._maxScrollX) {
+            this._scrollX = this._maxScrollX;
+        }
+
+        this.updatePageMatrix();
+    }
+
+    get scrollX(): number {
         return this._scrollX;
     }
 
-    scrollY(value?:number) {
-        if (arguments.length === 1) {
-            this._scrollY = arguments[0];
 
-            if (this._minScrollY != null && this._scrollY < this._minScrollY) {
-                this._scrollY = this._minScrollY;
-            }
-            else if (this._maxScrollY != null && this._scrollY > this._maxScrollY) {
-                this._scrollY = this._maxScrollY;
-            }
+    set scrollY(value: number) {
+        this._scrollY = value;
 
-            this.updatePageMatrix();
+        if (this._minScrollY !== undefined && this._scrollY < this._minScrollY) {
+            this._scrollY = this._minScrollY;
         }
+        else if (this._maxScrollY !== undefined && this._scrollY > this._maxScrollY) {
+            this._scrollY = this._maxScrollY;
+        }
+
+        this.updatePageMatrix();
+    }
+
+    get scrollY(): number {
         return this._scrollY;
     }
 
     minScrollX(value) {
         if (arguments.length > 0) {
             this._minScrollX = value;
-            if(this.scrollX() < value) {
-                this.scrollX(value);
+            if (this.scrollX < value) {
+                this.scrollX = (value);
             }
         }
 
@@ -106,8 +110,8 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
     maxScrollX(value) {
         if (arguments.length > 0) {
             this._maxScrollX = value;
-            if(this.scrollX() > value) {
-                this.scrollX(value);
+            if (this.scrollX > value) {
+                this.scrollX = (value);
             }
         }
 
@@ -117,8 +121,8 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
     maxScrollY(value) {
         if (arguments.length > 0) {
             this._maxScrollY = value;
-            if(this.scrollY() > value) {
-                this.scrollY(value);
+            if (this.scrollY > value) {
+                this.scrollY = (value);
             }
         }
 
@@ -128,8 +132,8 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
     minScrollY(value) {
         if (arguments.length > 0) {
             this._minScrollY = value;
-            if(this.scrollY() < value) {
-                this.scrollY(value);
+            if (this.scrollY < value) {
+                this.scrollY = (value);
             }
         }
 
@@ -139,7 +143,7 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
     updatePageMatrix() {
         var viewMatrix = this.pageMatrix = Matrix.create();
         var scale = this.pageScale();
-        viewMatrix.translate(-(0 | this.scrollX()), -(0 | this.scrollY()));
+        viewMatrix.translate(-(0 | this.scrollX), -(0 | this.scrollY));
         viewMatrix.scale(scale, scale);
     }
 
@@ -151,14 +155,14 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
 
     scrollTo(scrollPosition) {
         if (scrollPosition.scrollX !== undefined) {
-            this.scrollX(scrollPosition.scrollX);
+            this.scrollX = (scrollPosition.scrollX);
         }
         if (scrollPosition.scrollY !== undefined) {
-            this.scrollY(scrollPosition.scrollY);
+            this.scrollY = (scrollPosition.scrollY);
         }
     }
 
-    pageScale(value?:any) {
+    pageScale(value?: any) {
         if (value !== undefined) {
             this._scale = value;
             this.updatePageMatrix();
@@ -172,28 +176,28 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
 
     status(value) {
         if (value !== undefined) {
-            this.setProps({status: value});
+            this.setProps({ status: value });
         }
         return this.props.status;
     }
 
     background(value) {
         if (value !== undefined) {
-            this.setProps({background: value});
+            this.setProps({ background: value });
         }
         return this.props.background;
     }
 
     groupId(value) {
         if (value !== undefined) {
-            this.setProps({groupId: value});
+            this.setProps({ groupId: value });
         }
         return this.props.groupId;
     }
 
     version(value) {
         if (value !== undefined) {
-            this.setProps({version: value});
+            this.setProps({ version: value });
         }
         return this.props.version;
     }
@@ -214,7 +218,7 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
 
     orientation(value) {
         if (value !== undefined) {
-            this.setProps({orientation: value});
+            this.setProps({ orientation: value });
         }
         return this.props.orientation;
     }
@@ -230,11 +234,11 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
         }
         return container.width / container.height;
     }
-    getArtboardAtPoint(point){
+    getArtboardAtPoint(point) {
         return null;
     }
 
-    insertArtboards(artboards){
+    insertArtboards(artboards) {
     }
 
     autoInsert(/*UIElement*/element) {
@@ -330,11 +334,11 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
 
     scrollCenterPosition(viewportSize, scale) {
         var centerPoint = this.getPagePoint("center", "center");
-        return this.pointToScroll(centerPoint, viewportSize, {scale: scale});
+        return this.pointToScroll(centerPoint, viewportSize, { scale: scale });
     }
 
     pointToScroll(point, viewportSize, options) {
-        options = extend({anchorX: "center", anchorY: "center", gutterX: 0, gutterY: 0}, options);
+        options = extend({ anchorX: "center", anchorY: "center", gutterX: 0, gutterY: 0 }, options);
         var scale = options.scale || this.pageScale();
         //var scroll = this.getMaxScroll(viewportSize, scale);
 
@@ -364,11 +368,11 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
 
         var scrollX = point.x * scale - dx - options.gutterX;
         var scrollY = point.y * scale - dy - options.gutterY;
-        return {scrollX: scrollX, scrollY: scrollY};
+        return { scrollX: scrollX, scrollY: scrollY };
     }
 
     getPagePoint(anchorX, anchorY) {
-        return {x: 0, y: 0};
+        return { x: 0, y: 0 };
     }
 
     scaleToSize(size, options) {
@@ -379,7 +383,7 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
         if (options.addGutters !== false) {
             if (!this.isPhoneVisible()) {
                 //account for resizers + some gutter
-                contentWidth+= 30;
+                contentWidth += 30;
                 contentHeight += 30;
             }
             else {
@@ -409,16 +413,16 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
     }
 
     displaySize() {
-        return {width: 0, height: 0};
+        return { width: 0, height: 0 };
     }
 
     viewportRect() {
-        return {x: 0, y: 0, width: 0, height: 0};
+        return { x: 0, y: 0, width: 0, height: 0 };
     }
 
     isDeleted(value) {
         if (value !== undefined) {
-            this.setProps({isDeleted: value});
+            this.setProps({ isDeleted: value });
         }
         return this.props.isDeleted;
     }
@@ -468,15 +472,15 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
      ModelStateListener.trackChangePosition(this, parent, element, index, oldIndex, oldParent);
      }*/
 
-     saveWorkspaceState(){
+    saveWorkspaceState() {
         return null;
-     }
-     restoreWorkspaceState(data){
-     }
+    }
+    restoreWorkspaceState(data) {
+    }
 
-     isEditable(){
-         return true;
-     }
+    isEditable() {
+        return true;
+    }
 }
 Page.prototype.t = Types.Page;
 
@@ -500,7 +504,7 @@ PropertyMetadata.registerForType(Page, {
         defaultValue: "portrait",
         type: "choice",
         useInModel: true,
-        possibleValues: {portrait: "Portrait", landscape: "Landscape"}
+        possibleValues: { portrait: "Portrait", landscape: "Landscape" }
     },
     groupId: {
         displayName: "Group",

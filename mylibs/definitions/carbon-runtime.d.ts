@@ -144,6 +144,26 @@ declare module "carbon-runtime" {
 
     }
 
+    interface TArtboardFrameProps extends TUIElementProps {
+        artboardName:ArtboardNames;
+    }
+
+    interface ScrollEventHandler {
+        onScroll: EventCallback<{
+            scrollX:number,
+            scrollY:number
+        }>;
+    }
+
+    interface TArtboardFrame extends TUIElement, TArtboardFrameProps, ScrollEventHandler {
+        scrollX:number;
+        scrollY:number;
+        scrollVertical:boolean;
+        scrollHorizontal:boolean;
+        verticalSnapPoints:number[];
+        horizontalSnapPoints:number[];
+    }
+
     interface TPathProps extends TUIElementProps {
         readonly points: ReadonlyArray<TPathPoint>;
     }
@@ -185,8 +205,9 @@ declare module "carbon-runtime" {
         static createImage(props?: Partial<TImageProps>): TImage;
         static createRectangle(props?: Partial<TRectangleProps>): TRectangle;
         static createOval(props?: Partial<TCircleProps>): TCircle;
-        static createStar(props?: Partial<TStarProps>): TStar
-        static createPath(props?: Partial<TPathProps>): TPath
+        static createStar(props?: Partial<TStarProps>): TStar;
+        static createPath(props?: Partial<TPathProps>): TPath;
+        static createArtboardFrame(props?: Partial<TArtboardFrameProps>): TArtboardFrame;
     }
 
     interface MouseEvent {

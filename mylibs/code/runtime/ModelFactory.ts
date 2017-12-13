@@ -21,7 +21,8 @@ export class ModelFactoryClass implements IProxySource {
                 "createRectangle",
                 "createOval",
                 "createStar",
-                "createPath"
+                "createPath",
+                "createArtboardFrame"
             ],
             mixins:[]
         }
@@ -71,6 +72,13 @@ export class ModelFactoryClass implements IProxySource {
         let size = { width: props.width | 0, height:props.height|0 };
         props = ModelFactory._prepareProps(props);
         return model.createPath(props.points, size, props);
+    }
+
+    createArtboardFrame(props?:any) {
+        props = props || {}
+        let size = { width: props.width | 0, height:props.height|0 };
+        props = ModelFactory._prepareProps(props);
+        return model.createArtboardFrame(props.artboardName, size, props);
     }
 
     _prepareProps(props) {

@@ -499,8 +499,8 @@ export default class TextTool extends Tool {
     _pickCaretColor(engine, selection) {
         var coords = engine.getCaretCoords(selection.start);
         var global = this.text.getBoundaryRectGlobal();
-        var x = (coords.l + global.x) * this._view.scale() - this._view.scrollX() + .5 | 0;
-        var y = (coords.t + global.y) * this._view.scale() - this._view.scrollY() + .5 | 0;
+        var x = (coords.l + global.x) * this._view.scale() - this._view.scrollX + .5 | 0;
+        var y = (coords.t + global.y) * this._view.scale() - this._view.scrollY + .5 | 0;
         var contextScale = this._view.contextScale;
         var background = this._view.context.getImageData(
             x * contextScale - 1,

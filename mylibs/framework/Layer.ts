@@ -86,11 +86,11 @@ class Layer extends Container implements ILayer {
         return 1;
     }
 
-    scrollX(value?: number) {
+    get scrollX() {
         return 0;
     }
 
-    scrollY(value?: number) {
+    get scrollY() {
         return 0;
     }
 

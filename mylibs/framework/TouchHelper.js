@@ -8,13 +8,13 @@ export default class TouchHelper
     }
 
     onpanstart(event) {
-        this._scrollX = this.view.scrollX();
-        this._scrollY = this.view.scrollY();
+        this._scrollX = this.view.scrollX;
+        this._scrollY = this.view.scrollY;
     }
 
     onpanmove(event) {
-        this.view.scrollX(this._scrollX - event.event.deltaX);
-        this.view.scrollY(this._scrollY - event.event.deltaY);
+        this.view.scrollX = (this._scrollX - event.event.deltaX);
+        this.view.scrollY = (this._scrollY - event.event.deltaY);
         Invalidate.request();
     }
 
@@ -36,8 +36,8 @@ export default class TouchHelper
 
         var scroll = App.Current.activePage.pointToScroll({x: x, y: y}, {width: center.x * 2, height: center.y * 2});
 
-        this.view.scrollX(scroll.scrollX);
-        this.view.scrollY(scroll.scrollY);
+        this.view.scrollX = (scroll.scrollX);
+        this.view.scrollY = (scroll.scrollY);
 
         Invalidate.request();
     }
@@ -47,8 +47,8 @@ export default class TouchHelper
             this._oldScale = this.view.scale();
             this._centerX = event.event.center.x;
             this._centerY = event.event.center.y;
-            this._scrollX = this.view.scrollX();
-            this._scrollY = this.view.scrollY();
+            this._scrollX = this.view.scrollX;
+            this._scrollY = this.view.scrollY;
         }
     }
 

@@ -437,6 +437,14 @@ declare module "carbon-model" {
     export interface IPath extends IShape<IPathProps> {
     }
 
+    export interface IArtboardFrameControlProps extends IUIElementProps {
+        source?:{pageId:string, artboardId:string}
+    }
+
+    export interface IArtboardFrameControl extends IUIElement {
+
+    }
+
     export interface IPathProps extends IShapeProps {
     }
 

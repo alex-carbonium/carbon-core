@@ -1,4 +1,4 @@
-import { IModel, IText, ITextProps, IUIElement, IUIElementProps, ISize, ILineProps, ILine, IStarProps, IStar, IRectangle, IRectangleProps, IContainer, IArtboardProps, IArtboard, IStateboard, IStateboardProps, ICircleProps, ICircle, IImageProps, IImage, FileProps, IFileElement, IPath, IPathProps } from "carbon-core";
+import { IModel, IText, ITextProps, IUIElement, IUIElementProps, ISize, ILineProps, ILine, IStarProps, IStar, IRectangle, IRectangleProps, IContainer, IArtboardProps, IArtboard, IStateboard, IStateboardProps, ICircleProps, ICircle, IImageProps, IImage, FileProps, IFileElement, IPath, IPathProps, IArtboardFrameControl, IArtboardFrameControlProps } from "carbon-core";
 import UIElement from "./UIElement";
 import Text from "./text/Text";
 import Rect from "../math/rect";
@@ -15,6 +15,7 @@ import Stateboard from "./StateBoard";
 import { ArrangeStrategies } from "./Defs";
 import InteractiveContainer from "./InteractiveContainer";
 import { IPathPoint } from "carbon-geometry";
+import ArtboardFrameControl from "./ArtboardFrame";
 
 export class Model implements IModel {
     createElement(size?: ISize, props?: Partial<IUIElementProps>): IUIElement {
@@ -60,6 +61,14 @@ export class Model implements IModel {
 
         return path;
     }
+
+    createArtboardFrame(artboardName:string, size?: ISize, props?: Partial<IArtboardFrameControlProps>): IArtboardFrameControl {
+        let frame = new ArtboardFrameControl();
+        this.setSizeAndProps(frame, size, props);
+        frame.artboardName = artboardName;
+        return frame;
+    }
+
     createLine(props?: Partial<ILineProps>): ILine {
         let line = new Line();
         this.setSizeAndProps(line, null, props);

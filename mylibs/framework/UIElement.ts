@@ -2207,11 +2207,23 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return group.promise();
     }
 
-    registerEventHandler(name: string, callback: (data: DataBag) => (void | Promise<void>)): IDisposable {
+    registerEventHandler(name: string, callback: (data: DataBag) => (void | boolean | Promise<void|boolean>)): IDisposable {
         let events = this.runtimeProps.events = this.runtimeProps.events || {};
         name = name.toLowerCase();
         let event: RuntimeEvent = events[name] = events[name] || new RuntimeEvent();
         return event.registerHandler(callback);
+    }
+
+    raiseEvent(name: string, data?: DataBag): (void | boolean | Promise<void|boolean>) {
+        let events = this.runtimeProps.events;
+        if(events) {
+            name = name.toLowerCase();
+            let event: RuntimeEvent = events[name];
+            if(event) {
+                return event.raise(data);
+            }
+        }
+        return;
     }
 
     styleId(value?) {
