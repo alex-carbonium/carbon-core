@@ -43,11 +43,7 @@ export default class PreviewController extends ControllerBase {
         if (events && events[eventName]) {
             let res;
             if (eventName === "scroll") {
-                res = events[eventName].raise({
-                    scrollX:element.scrollX,
-                    scrollY:element.scrollY,
-                    target: RuntimeProxy.wrap(element)
-                });
+                res = events[eventName].raise(eventData);
             } else {
                 let m: IMatrix = element.globalViewMatrixInverted();
                 let pos = m.transformPoint2(eventData.x, eventData.y);
@@ -84,7 +80,7 @@ export default class PreviewController extends ControllerBase {
         return;
     }
 
-    _propagateScroll(delta, element) {
+    async _propagateScroll(delta, element) {
         if (delta.dx === 0 && delta.dy === 0) {
             return;
         }
@@ -98,14 +94,25 @@ export default class PreviewController extends ControllerBase {
 
         if (element.scrollX !== undefined) {
             var oldX = element.scrollX;
-            element.scrollX = (oldX + delta.dx);
-            delta.dx -= (element.scrollX - oldX);
-
             var oldY = element.scrollY;
-            element.scrollY = (oldY + delta.dy);
-            delta.dy -= (element.scrollY - oldY);
-            element.invalidate();
-            Invalidate.request();
+            let scroll = {scrollX:Math.round(oldX + delta.dx), scrollY:Math.round(oldY + delta.dy), target:RuntimeProxy.wrap(element)};
+
+            var events = element.runtimeProps.events;
+            let eventName = "scroll";
+
+            let res;
+            if (events && events[eventName]) {
+                res = await events[eventName].raise(scroll);
+            }
+
+            if (res !== false) {
+                element.scrollX = scroll.scrollX;
+                element.scrollY = scroll.scrollY;
+                delta.dx -= (element.scrollX - oldX);
+                delta.dy -= (element.scrollY - oldY);
+                element.invalidate();
+                Invalidate.request();
+            }
         }
 
         var parent = element.parent;
