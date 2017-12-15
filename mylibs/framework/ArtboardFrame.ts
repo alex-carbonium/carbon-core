@@ -14,6 +14,7 @@ import Environment from "environment";
 import UIElement from "./UIElement";
 import NullContainer from "framework/NullContainer";
 import { RuntimeProxy } from "../code/runtime/RuntimeProxy";
+import Rect from "../math/rect";
 
 export default class ArtboardFrameControl extends Container {
     constructor() {
@@ -150,13 +151,25 @@ export default class ArtboardFrameControl extends Container {
 
         this.add(symbol, ChangeMode.Self);
 
-        let size = this.getContentSize();
-        this.setProps({
-            maxScrollX: Math.max(0, size.width - this.width),
-            maxScrollY: Math.max(0, size.height - this.height)
-        });
+        if (this.props.contentBehavior === ContentBehavior.Original) {
+            let size = this.getContentSize();
+            this.setProps({
+                maxScrollX: Math.max(0, size.width - this.width),
+                maxScrollY: Math.max(0, size.height - this.height)
+            });
+        } else if (this.props.contentBehavior === ContentBehavior.Original) {
+            let rect = symbol.boundaryRect();
+            let newRect = this.boundaryRect();
+
+            symbol.setProps({
+                br: newRect,
+                maxScrollX: 0,
+                maxScrollY: 0
+            }, ChangeMode.Self);
+        }
 
         this.runtimeProps.artboardVersion = artboard.runtimeProps.version;
+
         this.invalidate(this.runtimeProps.ctxl);
     }
 
@@ -279,11 +292,13 @@ export default class ArtboardFrameControl extends Container {
             }
         }
 
-        if(props.scrollHorizontal === false) {
+        let contentBehavior = props.contentBehavior || this.props.contentBehavior;
+
+        if (props.scrollHorizontal === false || contentBehavior !== ContentBehavior.Original ) {
             props.offsetX = 0;
         }
 
-        if(props.scrollVertical === false) {
+        if (props.scrollVertical === false || contentBehavior !== ContentBehavior.Original ) {
             props.offsetY = 0;
         }
     }
@@ -315,17 +330,32 @@ export default class ArtboardFrameControl extends Container {
                 maxScrollX: Math.max(0, size.width - this.width),
                 maxScrollY: Math.max(0, size.height - this.height)
             }, mode);
+
+            let contentBehavior = props.contentBehavior || this.props.contentBehavior;
+            if (this.children.length) {
+                let child = this.children[0];
+                let newRect;
+                let newProps;
+                if (contentBehavior === ContentBehavior.Original) {
+                    newRect = Rect.fromSize(child.artboard.width, child.artboard.height);
+                } else {
+                    newRect = Rect.fromSize(this.width, this.height);
+                }
+                let oldRect = child.boundaryRect();
+                child.setProps({ br: newRect }, ChangeMode.Self);
+                child.performArrange({ oldRect: oldRect, newRect: newRect }, ChangeMode.Self);
+            }
         }
 
         if ((props.hasOwnProperty('offsetX') || props.hasOwnProperty('offsetY')) && this.children.length) {
             this.children[0].setProps({ m: Matrix.createTranslationMatrix(this.props.offsetX, this.props.offsetY) }, ChangeMode.Self);
         }
 
-        if(props.scrollX !== undefined || props.scrollY !== undefined) {
+        if (props.scrollX !== undefined || props.scrollY !== undefined) {
             this.raiseEvent("scroll", {
-                scrollX:this.scrollX,
-                scrollY:this.scrollY,
-                target:RuntimeProxy.wrap(this)
+                scrollX: this.scrollX,
+                scrollY: this.scrollY,
+                target: RuntimeProxy.wrap(this)
             })
         }
     }
@@ -458,8 +488,8 @@ PropertyMetadata.registerForType(ArtboardFrameControl, {
             size: 1,
             items: [
                 { name: "@content_original", value: ContentBehavior.Original },
-                // {name: "@content_stretch", value: ContentBehavior.Stretch},
-                { name: "@content_scale", value: ContentBehavior.Scale }
+                { name: "@content_stretch", value: ContentBehavior.Stretch },
+                //{ name: "@content_scale", value: ContentBehavior.Scale }
             ]
         },
         defaultValue: ContentBehavior.Original
