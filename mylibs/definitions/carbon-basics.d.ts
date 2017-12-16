@@ -25,6 +25,11 @@ declare module "carbon-basics" {
         event?:MouseEvent;
     }
 
+    export interface IPointerEventData extends IMouseEventData {
+        distance: number;
+        direction:number;
+    }
+
     export interface IEvent<T> {
         raise(): void;
         raise(data: T): void;

@@ -305,6 +305,8 @@ declare module "carbon-model" {
         version:number;
         id:string;
         code(value?:string):string;
+        screenSize():ISize;
+        isDisposed():boolean;
     }
 
     export interface IStateboardProps extends IArtboardProps {

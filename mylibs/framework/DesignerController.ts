@@ -11,7 +11,7 @@ import Page from "./Page";
 import { keyboard } from "../platform/Keyboard";
 import ObjectFactory from "./ObjectFactory";
 import { Types } from "./Defs";
-import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3, WorkspaceTool, InteractionType, LayerType, ChangeMode, IEventData } from "carbon-core";
+import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3, WorkspaceTool, InteractionType, LayerType, ChangeMode, IEventData, IPointerEventData } from "carbon-core";
 import UIElement from "./UIElement";
 import Container from "./Container";
 import { choosePasteLocation } from "./PasteLocator";
@@ -35,6 +35,15 @@ export default class DesignerController implements IController {
     mousedownEvent: IEvent<IMouseEventData>;
     mousemoveEvent: IEvent<IMouseEventData>;
     mouseupEvent: IEvent<IMouseEventData>;
+
+    panStartEvent: IEvent<IPointerEventData>;
+    panMoveEvent: IEvent<IPointerEventData>;
+    panEndEvent: IEvent<IPointerEventData>;
+    pinchMoveEvent: IEvent<IPointerEventData>;
+    pinchStartEvent: IEvent<IPointerEventData>;
+    pinchEndEvent: IEvent<IPointerEventData>;
+    doubletapEvent: IEvent<IPointerEventData>;
+    tapEvent: IEvent<IPointerEventData>;
 
     onElementDblClicked: IEvent2<IMouseEventData, IUIElement>;
 
@@ -162,6 +171,15 @@ export default class DesignerController implements IController {
         this.mouseupEvent = EventHelper.createEvent<IMouseEventData>();
         this.dblclickEvent = EventHelper.createEvent<IMouseEventData>();
         this.clickEvent = EventHelper.createEvent<IMouseEventData>();
+
+        this.panStartEvent = EventHelper.createEvent<IPointerEventData>();
+        this.panMoveEvent = EventHelper.createEvent<IPointerEventData>();
+        this.panEndEvent = EventHelper.createEvent<IPointerEventData>();
+        this.pinchMoveEvent = EventHelper.createEvent<IPointerEventData>();
+        this.pinchStartEvent = EventHelper.createEvent<IPointerEventData>();
+        this.pinchEndEvent = EventHelper.createEvent<IPointerEventData>();
+        this.doubletapEvent = EventHelper.createEvent<IPointerEventData>();
+        this.tapEvent = EventHelper.createEvent<IPointerEventData>();
 
 
         this.mouseenterEvent = EventHelper.createEvent();

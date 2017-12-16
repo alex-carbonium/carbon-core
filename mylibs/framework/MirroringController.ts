@@ -5,7 +5,7 @@ import PropertyTracker from "framework/PropertyTracker";
 import DataNode from "framework/DataNode";
 import Selection from "./SelectionModel";
 import { MirrorViewMode } from "framework/Defs";
-import { IController, WorkspaceTool, IComposite, IMouseEventData, IArtboard, IUIElement, IEvent2, IActionManager, IApp, IContainer } from "carbon-core";
+import { IController, WorkspaceTool, IComposite, IMouseEventData, IArtboard, IUIElement, IEvent2, IActionManager, IApp, IContainer, IPointerEventData } from "carbon-core";
 import { InteractionType } from "carbon-app";
 import { choosePasteLocation } from "./PasteLocator";
 
@@ -34,6 +34,15 @@ export default class MirroringController implements IController {
     mousemoveEvent = EventHelper.createEvent<IMouseEventData>();
     mouseupEvent = EventHelper.createEvent<IMouseEventData>();
 
+    panStartEvent = EventHelper.createEvent<IPointerEventData>();
+    panMoveEvent = EventHelper.createEvent<IPointerEventData>();
+    panEndEvent = EventHelper.createEvent<IPointerEventData>();
+    pinchMoveEvent = EventHelper.createEvent<IPointerEventData>();
+    pinchStartEvent = EventHelper.createEvent<IPointerEventData>();
+    pinchEndEvent = EventHelper.createEvent<IPointerEventData>();
+    doubletapEvent = EventHelper.createEvent<IPointerEventData>();
+    tapEvent = EventHelper.createEvent<IPointerEventData>();
+
     onElementDblClicked: IEvent2<IMouseEventData, IUIElement>;
 
     inlineEditModeChanged = EventHelper.createEvent2<boolean, any>();
@@ -56,7 +65,7 @@ export default class MirroringController implements IController {
 
     _appPropertyChanged(app: IApp, newProps, oldProps) {
         var artboardId = app.getUserSetting<string>(this.followUserId, 'mirrorArtboardId');
-        if (artboardId != this._currentArtboardId) {
+        if (artboardId !== this._currentArtboardId) {
             var pageId = app.getUserSetting<string>(this.followUserId, 'mirrorPageId');
             var page = DataNode.getImmediateChildById(app, pageId, true);
             if (page) {

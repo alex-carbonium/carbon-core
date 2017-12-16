@@ -16,6 +16,7 @@ import { NavigationController } from "../../code/runtime/NavigationController";
 import { AutoDisposable } from "../../AutoDisposable";
 import { ModelFactory } from "../../code/runtime/ModelFactory";
 import Services from "Services";
+import { RuntimeScreen } from "../../code/runtime/RuntimeScreen";
 
 export default class PreviewModel implements IPreviewModel, IDisposable {
     private _activePage: IPage<IPageProps> & { originalSize: ISize };
@@ -36,6 +37,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         this.navigateToPage = EventHelper.createEvent3(); // todo: move this out
         this.onPageChanged = EventHelper.createEvent();
         this.runtimeContext = new RuntimeContext();
+
         this.runtimeContext.register("navigationController", this.navigationController);
         this.runtimeContext.register("Model", ModelFactory);
 
@@ -82,7 +84,6 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
             p.runtimeProps.ctxl = 1
         });
         previewClone.runtimeProps.sourceArtboard = artboard;
-        this.sourceArtboard = artboard;
         var oldRect = previewClone.boundaryRect();
         previewClone.setTransform(Matrix.Identity);
 

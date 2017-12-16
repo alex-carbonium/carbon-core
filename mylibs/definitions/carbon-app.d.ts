@@ -1,6 +1,6 @@
 declare module "carbon-app" {
     import { IDataNode, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IIsolatable, IMouseEventHandler, IContainerProps, PropDescriptor, StoryType } from "carbon-model";
-    import { IEvent, IEventData, IEvent2, IMouseEventData, KeyboardState, IEvent3, IConstructor, ViewState, IJsonNode, IPrimitive, ArtboardType, FontStyle, FontWeight, ChangeMode, Primitive } from "carbon-basics";
+    import { IEvent, IEventData, IEvent2, IMouseEventData, KeyboardState, IEvent3, IConstructor, ViewState, IJsonNode, IPrimitive, ArtboardType, FontStyle, FontWeight, ChangeMode, Primitive, IPointerEventData } from "carbon-basics";
     import { IRect, ICoordinate, ISize, Origin } from "carbon-geometry";
     import { IContext, IContextPool, RenderEnvironment, RenderFlags } from "carbon-rendering";
     import { DataBag, IAnimationOptions } from "carbon-runtime";
@@ -358,6 +358,17 @@ declare module "carbon-app" {
         mousedownEvent: IEvent<IMouseEventData>;
         mouseupEvent: IEvent<IMouseEventData>;
         mousemoveEvent: IEvent<IMouseEventData>;
+
+        panStartEvent: IEvent<IPointerEventData>;
+        panMoveEvent: IEvent<IPointerEventData>;
+        panEndEvent: IEvent<IPointerEventData>;
+        pinchMoveEvent: IEvent<IPointerEventData>;
+        pinchStartEvent: IEvent<IPointerEventData>;
+        pinchEndEvent: IEvent<IPointerEventData>;
+        doubletapEvent: IEvent<IPointerEventData>;
+        tapEvent: IEvent<IPointerEventData>;
+
+
 
         onElementDblClicked: IEvent2<IMouseEventData, IUIElement>;
 

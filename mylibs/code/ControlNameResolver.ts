@@ -1,8 +1,10 @@
-import { IContainer, IUIElement } from "carbon-core";
+import { IContainer, IUIElement, IArtboard } from "carbon-core";
 import { NameProvider } from "./NameProvider";
 import { ElementProxy } from "./runtime/RuntimeProxy";
 import { RuntimeContext } from "./runtime/RuntimeContext";
 import { RuntimeProxy } from "./runtime/RuntimeProxy";
+import { RuntimeScreen } from "./runtime/RuntimeScreen";
+import { AutoDisposable } from "../AutoDisposable";
 
 const skipList = ["eval", "proxy"]
 const blackList = ["window", "document", "uneval"]
@@ -12,9 +14,13 @@ export class ControlNameResolver {
     private _skipMap = skipList.reduce((m, v) => { m[v] = true; return m; }, {})
     private _blackMap = blackList.reduce((m, v) => { m[v] = true; return m; }, {})
     private _context: RuntimeContext;
+    private _screen: RuntimeScreen;
     constructor(context: RuntimeContext, artboard: IContainer) {
         this._artboard = artboard;
         this._context = context;
+        this._screen = new RuntimeScreen(artboard as IArtboard);
+        artboard.runtimeProps.disposables = artboard.runtimeProps.disposables || new AutoDisposable();
+        this._artboard.runtimeProps.disposables.add(this._screen)
     }
 
     set(target:any, name:string, value:any) {
@@ -32,7 +38,11 @@ export class ControlNameResolver {
             proxy = null;
             if (name === "artboard") {
                 source = this._artboard;
-            } else {
+            }
+            if(name === "DeviceScreen"){
+                source = this._screen;
+            }
+            else {
                 this._artboard.applyVisitor(e => {
                     // it is not supper fast to escapeNames many times,
                     // but expectation is that only small amount of controls

@@ -5,7 +5,7 @@ import Cursor from "./Cursor";
 import TouchHelper from "./TouchHelper";
 import Artboard from "./Artboard";
 import { keyboard } from "../platform/Keyboard";
-import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3, WorkspaceTool, InteractionType, LayerType, ChangeMode, IView, IActionManager, IEventData } from "carbon-core";
+import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3, WorkspaceTool, InteractionType, LayerType, ChangeMode, IView, IActionManager, IEventData, IPointerEventData } from "carbon-core";
 import { IArtboard } from "carbon-model";
 
 function EventData(props) {
@@ -45,6 +45,16 @@ export default class ControllerBase implements IController {
 
     inlineEditModeChanged = EventHelper.createEvent2<boolean, any>();
 
+    panStartEvent = EventHelper.createEvent<IPointerEventData>();
+    panMoveEvent = EventHelper.createEvent<IPointerEventData>();
+    panEndEvent = EventHelper.createEvent<IPointerEventData>();
+    pinchMoveEvent = EventHelper.createEvent<IPointerEventData>();
+    pinchStartEvent = EventHelper.createEvent<IPointerEventData>();
+    pinchEndEvent = EventHelper.createEvent<IPointerEventData>();
+    doubletapEvent = EventHelper.createEvent<IPointerEventData>();
+    tapEvent = EventHelper.createEvent<IPointerEventData>();
+
+
     currentTool: WorkspaceTool = "pointerTool";
     currentToolChanged = EventHelper.createEvent<WorkspaceTool>();
 
@@ -62,6 +72,10 @@ export default class ControllerBase implements IController {
         this.interactionStopped.bind(this, this.onInteractionStopped);
 
         this.touchHelper = new TouchHelper(view);
+    }
+
+    wrapEvent(data) {
+        return new EventData(data);
     }
 
     updateCursor(eventData?) {
@@ -85,8 +99,8 @@ export default class ControllerBase implements IController {
             ctrlKey: event.ctrlKey || event.metaKey,
             altKey: event.altKey,
             shiftKey: event.shiftKey,
-            scale:(event as any).scale,
-            rotation:event.rotation,
+            scale: (event as any).scale,
+            rotation: event.rotation,
             velocityX: (event as any).velocityX,
             velocityY: (event as any).velocityY,
             pressure: (event as any).pressure,
@@ -99,32 +113,52 @@ export default class ControllerBase implements IController {
     }
 
     onpanstart(event) {
-        this.touchHelper.onpanstart(event);
+        this.panStartEvent.raise(event);
+        if (!event.handled) {
+            this.touchHelper.onpanstart(event);
+        }
     }
 
     onpanmove(event) {
-        this.touchHelper.onpanmove(event);
+        this.panMoveEvent.raise(event);
+        if (!event.handled) {
+            this.touchHelper.onpanmove(event);
+        }
     }
 
     onpanend(event) {
-        this.touchHelper.onpanend(event);
+        this.panEndEvent.raise(event);
+        if (!event.handled) {
+            this.touchHelper.onpanend(event);
+        }
     }
 
     onpinchmove(event) {
-        this.touchHelper.onpinchmove(event);
+        this.pinchMoveEvent.raise(event);
+        if (!event.handled) {
+            this.touchHelper.onpinchmove(event);
+        }
     }
 
     onpinchstart(event) {
-        this.touchHelper.onpinchstart(event);
+        this.pinchStartEvent.raise(event);
+        if (!event.handled) {
+            this.touchHelper.onpinchstart(event);
+        }
     }
 
     onpinchend(event) {
-        this.touchHelper.onpinchend(event);
+        this.pinchEndEvent.raise(event);
+        if (!event.handled) {
+            this.touchHelper.onpinchend(event);
+        }
     }
     ondoubletap(eventData?) {
+        this.doubletapEvent.raise(eventData);
     }
 
     ontap(eventData?) {
+        this.tapEvent.raise(eventData);
     }
 
     onmousewheel(eventData?) {

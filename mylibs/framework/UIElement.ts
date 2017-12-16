@@ -1790,6 +1790,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         //this.onresize.clearSubscribers();
         //delete this.onresize;
 
+        if(this.runtimeProps.disposables) {
+            this.runtimeProps.disposables.dispose();
+        }
         delete this.props;
         delete this.runtimeProps;
 

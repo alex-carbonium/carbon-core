@@ -155,6 +155,7 @@ declare module "carbon-app"{
 
         selectByClick(event);
         repeatLastMouseMove();
+        wrapEvent(data);
     }
 
     export interface IActionManager{

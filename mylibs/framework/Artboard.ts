@@ -112,6 +112,15 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return this._frame.runtimeProps.clone;
     }
 
+    screenSize() {
+        let frame = this.frame;
+        if (frame) {
+            return { width: frame.runtimeProps.cloneScreenWidth, height: frame.runtimeProps.cloneScreenHeight }
+        }
+
+        return { width: this.width, height: this.height };
+    }
+
     layoutGridSettings(value) {
         if (value !== undefined) {
             this.setProps({ layoutGridSettings: value });
@@ -538,7 +547,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             }
         }
 
-        if(props.code) {
+        if (props.code) {
             this.runtimeProps.codeVersion = (this.runtimeProps.codeVersion || 0) + 1;
         }
 
@@ -666,7 +675,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
                 if (item < children.length) {
                     let child = children[item];
                     let bb = child.getBoundingBoxGlobal();
-                    child.translate(bbCell.x - bb.x + (bbCell.width - bb.width)/2 | 0, bbCell.y - bb.y + (bbCell.height - bb.height)/2 | 0);
+                    child.translate(bbCell.x - bb.x + (bbCell.width - bb.width) / 2 | 0, bbCell.y - bb.y + (bbCell.height - bb.height) / 2 | 0);
                     cell.transferElement(child, cell.children.length);
                     cell.add(child);
                     item++;
@@ -1473,12 +1482,12 @@ PropertyMetadata.registerForType(Artboard, {
             states: !showAsIconset
         }
     },
-    proxyDefinition():ProxyDefinition {
+    proxyDefinition(): ProxyDefinition {
         return {
-            rprops: ["width", "height","name", "id", "children"], // readonly props
+            rprops: ["width", "height", "name", "id", "children"], // readonly props
             props: ["fill"], // read/write props
             methods: ["boundaryRect", "add", "remove", "insert"],
-            mixins:[]
+            mixins: []
         }
     },
     groups: function () {

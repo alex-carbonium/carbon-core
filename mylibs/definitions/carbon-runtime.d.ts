@@ -9,6 +9,13 @@ declare module "carbon-runtime" {
         pattern
     }
 
+    export const enum ScreenEdge {
+        Top = 0,
+        Right = 1,
+        Bottom = 2,
+        Left = 3
+    }
+
     export interface LinearGradientData {
         x1: number;
         y1: number;
@@ -44,15 +51,15 @@ declare module "carbon-runtime" {
     }
 
     type DragConstraint = {
-        type:"box";
-        left:number;
-        top:number;
-        right:number;
-        bottom:number;
+        type: "box";
+        left: number;
+        top: number;
+        right: number;
+        bottom: number;
     } |
-    {
-        type:"parent"
-    };
+        {
+            type: "parent"
+        };
 
     interface TDraggable {
         enabled: boolean;
@@ -61,7 +68,7 @@ declare module "carbon-runtime" {
         ondragging: (e: { dx: number, dy: number, target: TUIElement }) => void;
         onbegindrag: (e: { target: TUIElement }) => void;
         onenddrag: (e: { target: TUIElement }) => void;
-        constraint:DragConstraint;
+        constraint: DragConstraint;
     }
 
     interface TUIElement extends TUIElementProps {
@@ -118,7 +125,7 @@ declare module "carbon-runtime" {
         content: TextContent;
     }
 
-    type TextInputArgs = {plainText: string, content: TextContent};
+    type TextInputArgs = { plainText: string, content: TextContent };
 
     interface TTextEventHandler {
         onTextInput: EventCallback<TextInputArgs>;
@@ -145,23 +152,23 @@ declare module "carbon-runtime" {
     }
 
     interface TArtboardFrameProps extends TUIElementProps {
-        artboardName:ArtboardNames;
+        artboardName: ArtboardNames;
     }
 
     interface ScrollEventHandler {
         onScroll: EventCallback<{
-            scrollX:number,
-            scrollY:number
+            scrollX: number,
+            scrollY: number
         }>;
     }
 
     interface TArtboardFrame extends TUIElement, TArtboardFrameProps, ScrollEventHandler {
-        scrollX:number;
-        scrollY:number;
-        scrollVertical:boolean;
-        scrollHorizontal:boolean;
-        verticalSnapPoints:number[];
-        horizontalSnapPoints:number[];
+        scrollX: number;
+        scrollY: number;
+        scrollVertical: boolean;
+        scrollHorizontal: boolean;
+        verticalSnapPoints: number[];
+        horizontalSnapPoints: number[];
     }
 
     interface TPathProps extends TUIElementProps {
@@ -210,6 +217,18 @@ declare module "carbon-runtime" {
         static createArtboardFrame(props?: Partial<TArtboardFrameProps>): TArtboardFrame;
     }
 
+
+    var DeviceScreen: {
+        readonly width: number;
+        readonly height: number;
+        // perspective:number;
+        // perspectiveOriginX:number;
+        // perspectiveOriginY:number;
+        onEdgeSwipe: PointerEventCallback;
+        onEdgeSwipeStart: PointerEventCallback;
+        onEdgeSwipeEnd: PointerEventCallback;
+    };
+
     interface MouseEvent {
         x: number;
         y: number;
@@ -231,7 +250,7 @@ declare module "carbon-runtime" {
         pressure: number;
         pointerType: "mouse" | "pen" | "touch";
         direction: "up" | "down" | "left" | "right";
-        angle:number;
+        angle: number;
         isPrimary: boolean;
         stopPropagation(): void;
         preventDefault(): void;
@@ -258,14 +277,14 @@ declare module "carbon-runtime" {
         onMouseEnter: MouseEventCallback;
         onMouseLeave: MouseEventCallback;
         onMouseWheel: MouseEventCallback;
-        onPanMove:PointerEventCallback;
-        onPanStart:PointerEventCallback;
-        onPanEnd:PointerEventCallback;
-        onPinch:PointerEventCallback;
-        onPinchStart:PointerEventCallback;
-        onPinchEnd:PointerEventCallback;
-        onTap:PointerEventCallback;
-        onDoubleTap:PointerEventCallback;
+        onPanMove: PointerEventCallback;
+        onPanStart: PointerEventCallback;
+        onPanEnd: PointerEventCallback;
+        onPinch: PointerEventCallback;
+        onPinchStart: PointerEventCallback;
+        onPinchEnd: PointerEventCallback;
+        onTap: PointerEventCallback;
+        onDoubleTap: PointerEventCallback;
     }
 
     export const enum AnimationType {
