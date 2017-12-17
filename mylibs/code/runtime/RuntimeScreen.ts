@@ -4,7 +4,7 @@ import { AutoDisposable } from "../../AutoDisposable";
 import Environment from "environment";
 import { Event } from "code/runtime/Event";
 
-const EdgeProximity = 20;
+const EdgeProximity = 80;
 export class RuntimeScreen implements IProxySource {
     private disposables = new AutoDisposable();
     private _edgeSwipeStart = new Event()

@@ -217,6 +217,11 @@ declare module "carbon-runtime" {
         static createArtboardFrame(props?: Partial<TArtboardFrameProps>): TArtboardFrame;
     }
 
+    type EdgeSwipeEventCallback = EventCallback<{
+        distance:number;
+        edge:ScreenEdge;
+        event:PointerEvent
+    }>
 
     var DeviceScreen: {
         readonly width: number;
@@ -224,9 +229,9 @@ declare module "carbon-runtime" {
         // perspective:number;
         // perspectiveOriginX:number;
         // perspectiveOriginY:number;
-        onEdgeSwipe: PointerEventCallback;
-        onEdgeSwipeStart: PointerEventCallback;
-        onEdgeSwipeEnd: PointerEventCallback;
+        onEdgeSwipe: EdgeSwipeEventCallback;
+        onEdgeSwipeStart: EdgeSwipeEventCallback;
+        onEdgeSwipeEnd: EdgeSwipeEventCallback;
     };
 
     interface MouseEvent {
