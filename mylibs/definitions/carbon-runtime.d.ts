@@ -48,6 +48,7 @@ declare module "carbon-runtime" {
         angle: number;
         fill: string | Brush;
         stroke: string | Brush;
+        opacity:number;
     }
 
     type DragConstraint = {
