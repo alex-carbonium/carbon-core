@@ -139,7 +139,10 @@ class Draggable implements IProxySource, IDisposable {
         this._enabled = value;
         if (this._enabled) {
             this._disposables.add(
-                this.element.registerEventHandler("onmousedown", this._onmousedown)
+                this.element.registerEventHandler("mousedown", this._onmousedown)
+            );
+            this._disposables.add(
+                this.element.registerEventHandler("panstart", this._onmousedown)
             );
 
             this._disposables.add(
@@ -147,7 +150,15 @@ class Draggable implements IProxySource, IDisposable {
             );
 
             this._disposables.add(
+                Environment.controller.panMoveEvent.bind(this._onmousemove)
+            );
+
+            this._disposables.add(
                 Environment.controller.mouseupEvent.bind(this._onmouseup)
+            );
+
+            this._disposables.add(
+                Environment.controller.panEndEvent.bind(this._onmouseup)
             );
         } else {
             this._disposables.dispose();

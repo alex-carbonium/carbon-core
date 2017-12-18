@@ -77,6 +77,10 @@ export default class MirroringController implements IController {
         }
     }
 
+    wrapEvent(e) {
+        return e;
+    }
+
     onWindowResize() {
         if (this.view.mode === MirrorViewMode.Fit) {
             this.view.page.fitToViewport();

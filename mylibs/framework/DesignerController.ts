@@ -108,6 +108,10 @@ export default class DesignerController implements IController {
 
     }
 
+    wrapEvent(e) {
+        return e;
+    }
+
     ondoubletap() {
 
     }

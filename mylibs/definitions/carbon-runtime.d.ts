@@ -220,7 +220,8 @@ declare module "carbon-runtime" {
     type EdgeSwipeEventCallback = EventCallback<{
         distance:number;
         edge:ScreenEdge;
-        event:PointerEvent
+        event:PointerEvent;
+        stopPropagation():void;
     }>
 
     var DeviceScreen: {
