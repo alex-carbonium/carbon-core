@@ -28,7 +28,7 @@ declare module "carbon-runtime" {
         type: BrushType;
         value: any;
 
-        static createFromColor(color: string): Brush;
+        static createFromCssColor(color: string): Brush;
         static createFromLinearGradientObject(value: LinearGradientData): Brush;
         static toCss(brush: Brush): any;
         static isValid(brush: Brush): boolean;

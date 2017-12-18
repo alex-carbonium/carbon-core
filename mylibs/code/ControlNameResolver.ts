@@ -7,20 +7,33 @@ import { RuntimeScreen } from "./runtime/RuntimeScreen";
 import { AutoDisposable } from "../AutoDisposable";
 
 const skipList = ["eval", "proxy"]
-const blackList = ["window", "document", "uneval"]
+const blackList = ["window", "document", "uneval"];
+
+const system = {
+    'NaN':NaN,
+    'Infinity':Infinity,
+    'parseInt':parseInt,
+    'parseFloat':parseFloat,
+    'isNaN':isNaN,
+    'isFinite':isFinite,
+    'Math':Object.freeze(Math),
+    'RegExp':Object.freeze(RegExp),
+}
 
 export class ControlNameResolver {
     private _artboard: IContainer;
     private _skipMap = skipList.reduce((m, v) => { m[v] = true; return m; }, {})
     private _blackMap = blackList.reduce((m, v) => { m[v] = true; return m; }, {})
     private _context: RuntimeContext;
-    private _screen: RuntimeScreen;
+    private _localContext = {};
     constructor(context: RuntimeContext, artboard: IContainer) {
         this._artboard = artboard;
         this._context = context;
-        this._screen = new RuntimeScreen(artboard as IArtboard);
+        let screen = new RuntimeScreen(artboard as IArtboard);
+        this._localContext["DeviceScreen"] = screen;
+        this._localContext["artboard"] = this._artboard;
         artboard.runtimeProps.disposables = artboard.runtimeProps.disposables || new AutoDisposable();
-        this._artboard.runtimeProps.disposables.add(this._screen)
+        this._artboard.runtimeProps.disposables.add(screen)
     }
 
     set(target:any, name:string, value:any) {
@@ -36,11 +49,9 @@ export class ControlNameResolver {
         if (proxy === undefined) {
             let source = null;
             proxy = null;
-            if (name === "artboard") {
-                source = this._artboard;
-            }
-            if(name === "DeviceScreen"){
-                source = this._screen;
+
+            if(this._localContext.hasOwnProperty(name)) {
+                source = this._localContext[name];
             }
             else {
                 this._artboard.applyVisitor(e => {
@@ -63,6 +74,9 @@ export class ControlNameResolver {
     }
 
     get(target: any, name: string): any {
+        if(system.hasOwnProperty(name)) {
+            return system[name];
+        }
         return this._runtimeData(name) || this._findControl(name) || this._context.get(name) || undefined;
     }
 
@@ -76,6 +90,6 @@ export class ControlNameResolver {
         if (this._skipMap[name]) {
             return false;
         }
-        return  this._runtimeData(name) || !!this._findControl(name) || this._blackMap[name] || this._context.get(name);
+        return  system[name] || this._runtimeData(name) || !!this._findControl(name) || this._blackMap[name] || this._context.get(name);
     }
 }

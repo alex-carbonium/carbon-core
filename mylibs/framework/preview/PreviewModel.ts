@@ -17,6 +17,7 @@ import { AutoDisposable } from "../../AutoDisposable";
 import { ModelFactory } from "../../code/runtime/ModelFactory";
 import Services from "Services";
 import { RuntimeScreen } from "../../code/runtime/RuntimeScreen";
+import { BrushFactory } from "../../code/runtime/BrushFactory";
 
 export default class PreviewModel implements IPreviewModel, IDisposable {
     private _activePage: IPage<IPageProps> & { originalSize: ISize };
@@ -40,6 +41,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
 
         this.runtimeContext.register("navigationController", this.navigationController);
         this.runtimeContext.register("Model", ModelFactory);
+        this.runtimeContext.register("Brush", BrushFactory);
 
         this.disposables.add(this.navigationController);
     }
