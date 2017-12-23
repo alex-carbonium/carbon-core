@@ -2,6 +2,8 @@ import { IElementWithCode } from "carbon-model";
 import { IDisposable } from "carbon-runtime";
 import { ArtboardProxyGenerator } from "./ProxyGenerator";
 import { ICompilerService } from "carbon-core";
+import { NameProvider } from "./NameProvider";
+import Artboard from "framework/Artboard";
 
 var platformLib = require("raw-loader!../definitions/runtime-platform.d.ts.txt");
 var carbonRuntimeSource: string = require("raw!../definitions/carbon-runtime.d.ts") as any;
@@ -15,6 +17,8 @@ interface ICodeCacheItem {
     text: string;
     version: number;
 }
+
+let importMatcher = new RegExp(/import .+? from ['"].+?['"][;\n ]?/gm);
 
 export class CompiledCodeProvider implements IDisposable {
     private _codeCache: WeakMap<IElementWithCode, ICodeCacheItem> = new WeakMap<IElementWithCode, ICodeCacheItem>();
@@ -33,7 +37,7 @@ export class CompiledCodeProvider implements IDisposable {
     }
 
     getDynamicLibs(artboard, module) {
-        return {
+        let libs = {
             'carbon-runtime-names.d.ts': {
                 text: () => ArtboardProxyGenerator.generateRuntimeNames(App.Current.activePage),
                 version: App.Current.activePage.version
@@ -43,13 +47,52 @@ export class CompiledCodeProvider implements IDisposable {
                 version: artboard.version
             }
         }
+
+        return libs;
     }
 
-    constructor(private compiler:ICompilerService) {
+    getGlobalModels(artboard) {
+        let libs = {
+
+        }
+
+        let pageCode = artboard.parent.code();
+        if (pageCode) {
+            libs["./" + NameProvider.escapeName(artboard.parent.name) + '.ts'] = {
+                text: () => pageCode,
+                version: artboard.parent.codeVersion
+            }
+        }
+
+
+        return libs;
+    }
+
+    constructor(private compiler: ICompilerService) {
 
     }
 
-    getCode(element: IElementWithCode): Promise<string | void> {
+    _extractAndRemoveImports(code: string, imports: string[]) {
+        var res = importMatcher.exec(code);
+        if (res) {
+            res.forEach(r => {
+                imports.push(r);
+            })
+        }
+
+        return code.replace(importMatcher, '');
+    }
+
+    getModuleCode(name:string, code?:string): Promise<string | void> {
+        return this.compiler.compile(name, code).then((result) => {
+            return result.text;
+        }).catch(data => {
+            // TODO: report error to UI
+            console.error(data);
+        });
+    }
+
+    getArtobardCode(element: IElementWithCode): Promise<string | void> {
         if (this._codeCache.has(element)) {
             let item = this._codeCache.get(element);
             if (item.version === element.codeVersion) {
@@ -58,10 +101,23 @@ export class CompiledCodeProvider implements IDisposable {
         }
 
         let fileName = element.id + ".ts";
-        let code = `namespace n${element.id} {
-            ${element.code()}
+        let imports = [];
+        let baseCode = this._extractAndRemoveImports(element.code(), imports);
+
+        let code = `
+        ${imports.join('\n')}
+        namespace n${element.id} {
+            ${baseCode}
         }`
         this.compiler.addLib("carbon-runtime-names.d.ts", ArtboardProxyGenerator.generateRuntimeNames(App.Current.activePage));
+
+        if (element instanceof Artboard) {
+            let globals = this.getGlobalModels((element as any).runtimeProps.sourceArtboard || element);
+            for (var key of Object.keys(globals)) {
+                this.compiler.addLib(key, globals[key].text());
+            }
+        }
+
         this.compiler.addLib(element.id + ".d.ts", element.declaration(true))
 
         return this.compiler.compile(fileName, code).then((result) => {

@@ -166,6 +166,13 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         }
     };
 
+    code() {
+        if(this.artboard) {
+            return this.artboard.code();
+        }
+        return null;
+    }
+
     clone() {
         if (this._cloning) {
             throw new Error("Can't clone, chain contains recursive references");

@@ -1864,7 +1864,7 @@ function setElementPropertiesFromAttributes(element, parsedAttributes) {
         if (!parsedAttributes.fill || parsedAttributes.fill === "none") {
             element.fill = (Brush.Empty);
         } else {
-            element.fill = (Brush.createFromColor(parsedAttributes.fill));
+            element.fill = (Brush.createFromCssColor(parsedAttributes.fill));
         }
     }
     else {
@@ -1872,7 +1872,7 @@ function setElementPropertiesFromAttributes(element, parsedAttributes) {
     }
 
     if (parsedAttributes.stroke) {
-        element.stroke = (Brush.createFromColor(parsedAttributes.stroke/*, parsedAttributes.strokeWidth, 0*/));
+        element.stroke = (Brush.createFromCssColor(parsedAttributes.stroke/*, parsedAttributes.strokeWidth, 0*/));
     } else {
         element.stroke = (Brush.Empty);
     }

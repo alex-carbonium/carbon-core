@@ -15,7 +15,7 @@ class CorruptedElement extends UIElement {
             height: (props.height || 100),
             x: (props.x || 0),
             y: (props.y || 0),
-            stroke: (Brush.createFromColor('red'))
+            stroke: (Brush.createFromCssColor('red'))
         });
 
         if (data) { //else restoring from json

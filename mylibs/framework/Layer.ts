@@ -82,7 +82,7 @@ class Layer extends Container implements ILayer {
         removeElement(this._hitFirstElements, element);
     }
 
-    scale(value?: number) {
+    get scale() {
         return 1;
     }
 

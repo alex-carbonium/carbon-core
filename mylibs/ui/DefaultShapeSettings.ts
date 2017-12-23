@@ -52,10 +52,10 @@ DefaultShapeSettings.prototype.t = Types.DefaultShapeSettings;
 
 PropertyMetadata.registerForType(DefaultShapeSettings, {
     fill: {
-        defaultValue: Brush.createFromColor(UserSettings.shapes.defaultFill)
+        defaultValue: Brush.createFromCssColor(UserSettings.shapes.defaultFill)
     },
     stroke: {
-        defaultValue: Brush.createFromColor(UserSettings.shapes.defaultStroke)
+        defaultValue: Brush.createFromCssColor(UserSettings.shapes.defaultStroke)
     },
     groups: function(){
         return [

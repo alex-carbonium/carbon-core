@@ -18,7 +18,7 @@ export default class RangeFormatter extends UIElement {
         this._element = element;
 
         this._internalUpdate = true;
-        this.setProps({ fill: Brush.createFromColor(element.props.font.color), name: element.name }, ChangeMode.Root);
+        this.setProps({ fill: Brush.createFromCssColor(element.props.font.color), name: element.name }, ChangeMode.Root);
         this._internalUpdate = false;
     }
     getFirstFont(){
@@ -37,7 +37,7 @@ export default class RangeFormatter extends UIElement {
             this._internalUpdate = true;
             let props: Partial<ITextProps> = { font };
             if (font.color !== this.props.font.color) {
-                props.fill = Brush.createFromColor(font.color);
+                props.fill = Brush.createFromCssColor(font.color);
             }
             this.setProps(props, ChangeMode.Root);
             this._internalUpdate = false;

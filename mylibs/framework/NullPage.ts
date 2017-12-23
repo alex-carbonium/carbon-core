@@ -228,8 +228,11 @@ class NullPage extends UIElement implements IPage {
     viewportRect() {
         return { x: 0, y: 0, width: 0, height: 0 };
     }
-    scale() {
+    applyScaling2() {
     }
+    scale = 1;
+    scaleX = 1;
+    scaleY = 1;
     pageScale() {
         return 1;
     }

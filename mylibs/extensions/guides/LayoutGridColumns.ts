@@ -46,7 +46,7 @@ class LayoutGridColumns extends Guide {
 
     static setDefaultFillHsl(hsl) {
         var rgb = tinycolor(hsl).toRgbString();
-        var brush = Brush.createFromColor(rgb);
+        var brush = Brush.createFromCssColor(rgb);
         var prototype = PropertyMetadata.getPropsPrototype(LayoutGridColumns.prototype.t);
         prototype.fill = brush;
     }
@@ -66,7 +66,7 @@ PropertyMetadata.registerForType(LayoutGridColumns, {
         defaultValue: Brush.None
     },
     fill: {
-        defaultValue: Brush.createFromColor("cyan")
+        defaultValue: Brush.createFromCssColor("cyan")
     }
 });
 

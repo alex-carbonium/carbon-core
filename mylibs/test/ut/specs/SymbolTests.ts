@@ -105,7 +105,7 @@ describe("Symbol tests", function () {
     it("Must support undo for changing inner elements", function () {
         // arrange
         var child = new UIElement();
-        child.prepareAndSetProps({ fill: Brush.createFromColor("red") });
+        child.prepareAndSetProps({ fill: Brush.createFromCssColor("red") });
         this.app.activePage.add(child);
 
         Selection.makeSelection([child]);
@@ -115,7 +115,7 @@ describe("Symbol tests", function () {
 
         // act
         var clone = symbol.findClone(child.id);
-        clone.prepareAndSetProps({ fill: Brush.createFromColor("green") });
+        clone.prepareAndSetProps({ fill: Brush.createFromCssColor("green") });
         this.app.relayout();
         symbol.draw(new ContextStub(), this.drawContext);
 
@@ -132,8 +132,8 @@ describe("Symbol tests", function () {
             // arrange
             var child = new UIElement();
 
-            child.fill = (Brush.createFromColor("red"));
-            child.stroke = (Brush.createFromColor("green"));
+            child.fill = (Brush.createFromCssColor("red"));
+            child.stroke = (Brush.createFromCssColor("green"));
 
             Selection.makeSelection([child]);
 
@@ -168,7 +168,7 @@ describe("Symbol tests", function () {
             this.app.relayout();
             symbol.draw(new ContextStub(), this.drawContext);
 
-            symbol.prepareAndSetProps({ fill: Brush.createFromColor("red"), stroke: Brush.createFromColor("green") });
+            symbol.prepareAndSetProps({ fill: Brush.createFromCssColor("red"), stroke: Brush.createFromCssColor("green") });
 
             // assert
             var clone = symbol.findClone(child.id);
@@ -192,8 +192,8 @@ describe("Symbol tests", function () {
             symbol.draw(new ContextStub(), this.drawContext);
 
             // act
-            symbol.prepareAndSetProps({ fill: Brush.createFromColor("red") });
-            child.prepareAndSetProps({ fill: Brush.createFromColor("green") });
+            symbol.prepareAndSetProps({ fill: Brush.createFromCssColor("red") });
+            child.prepareAndSetProps({ fill: Brush.createFromCssColor("green") });
             this.app.relayout();
             symbol.draw(new ContextStub(), this.drawContext);
 
@@ -212,7 +212,7 @@ describe("Symbol tests", function () {
         function testUndo(container) {
             // arrange
             var child = new UIElement();
-            child.prepareAndSetProps({ fill: Brush.createFromColor("red") });
+            child.prepareAndSetProps({ fill: Brush.createFromCssColor("red") });
             container.add(child);
 
             Selection.makeSelection([child]);
@@ -225,7 +225,7 @@ describe("Symbol tests", function () {
             symbol.draw(new ContextStub(), this.drawContext);
 
             // act
-            symbol.prepareAndSetProps({ fill: Brush.createFromColor("green") });
+            symbol.prepareAndSetProps({ fill: Brush.createFromCssColor("green") });
             this.app.relayout();
 
             CommandManager.undoPrevious();
@@ -251,7 +251,7 @@ describe("Symbol tests", function () {
             symbol.draw(new ContextStub(), this.drawContext);
 
             // act
-            child.prepareAndSetProps({ fill: Brush.createFromColor("green") });
+            child.prepareAndSetProps({ fill: Brush.createFromCssColor("green") });
             this.app.relayout();
             symbol.draw(new ContextStub(), this.drawContext);
 
@@ -279,7 +279,7 @@ describe("Symbol tests", function () {
 
             // act
             var clone1 = symbol.findClone(child1.id);
-            clone1.prepareAndSetProps({ fill: Brush.createFromColor("green") });
+            clone1.prepareAndSetProps({ fill: Brush.createFromCssColor("green") });
             this.app.relayout();
             symbol.draw(new ContextStub(), this.drawContext);
 
@@ -299,8 +299,8 @@ describe("Symbol tests", function () {
             this.app.activePage.add(child2);
 
 
-            child1.fill = (Brush.createFromColor("red"));
-            child2.fill = (Brush.createFromColor("green"));
+            child1.fill = (Brush.createFromCssColor("red"));
+            child2.fill = (Brush.createFromCssColor("green"));
 
             Selection.makeSelection([child1, child2]);
             var actions = new SymbolActions(this.app, workspace);

@@ -366,12 +366,12 @@ class Rectangle extends Shape {
             if (!parsedAttributes.fill || parsedAttributes.fill === "none") {
                 rect.fill = (Brush.Empty);
             } else {
-                rect.fill = (Brush.createFromColor(parsedAttributes.fill));
+                rect.fill = (Brush.createFromCssColor(parsedAttributes.fill));
             }
         }
 
         if (parsedAttributes.stroke) {
-            rect.stroke = (Brush.createFromColor(parsedAttributes.stroke));
+            rect.stroke = (Brush.createFromCssColor(parsedAttributes.stroke));
         } else {
             rect.stroke = (Brush.Empty);
         }

@@ -209,7 +209,7 @@ export default class Brush {
         return Object.freeze(Object.assign(brushDefault(), parameters));
     }
 
-    static createFromColor(color): Brush {
+    static createFromCssColor(color): Brush {
         var brush = {/*type = color by default*/ value: color }
         return this.createFromObject(brush);
     }
@@ -232,6 +232,6 @@ export default class Brush {
     static None: Brush;
 }
 
-Brush.Black = Object.freeze(Brush.createFromColor('#000'));
-Brush.White = Object.freeze(Brush.createFromColor('#fff'));
+Brush.Black = Object.freeze(Brush.createFromCssColor('#000'));
+Brush.White = Object.freeze(Brush.createFromCssColor('#fff'));
 Brush.Empty = Brush.None = Object.freeze(Brush.createEmptyBrush());

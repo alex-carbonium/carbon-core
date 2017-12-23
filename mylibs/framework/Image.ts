@@ -197,7 +197,7 @@ export default class Image extends Container<IImageProps> implements IImage {
 
         let bb = this.getBoundingBox();
         let changeMode = this.props.source.type === ImageSourceType.Loading ? ChangeMode.Root : ChangeMode.Model;
-        this.scale(realRect.width / bb.width, realRect.height / bb.height, origin, changeMode);
+        this.applyScaling2(realRect.width / bb.width, realRect.height / bb.height, origin, changeMode);
         Environment.view.fitToViewportIfNeeded(this, origin, changeMode);
         this.roundBoundingBoxToPixelEdge(changeMode);
         this.resizeOnLoad(null);
@@ -354,7 +354,7 @@ Image.prototype.t = Types.Image;
 
 PropertyMetadata.registerForType(Image, {
     fill: {
-        defaultValue: Brush.createFromColor("#333")
+        defaultValue: Brush.createFromCssColor("#333")
     },
     source: {
         defaultValue: Image.EmptySource

@@ -21,7 +21,7 @@
 //         it("Should take properties from style manager", function () {
 //             //arrange
 //             var styleProps = {
-//                 backgroundBrush: Brush.createFromColor("#ccc")
+//                 backgroundBrush: Brush.createFromCssColor("#ccc")
 //             };
 //             var style = styleManager.createStyle("style1", 1, styleProps);
 
@@ -42,14 +42,14 @@
 //         it("Should be able to remove style", function () {
 //             //arrange
 //             var styleProps = {
-//                 backgroundBrush: Brush.createFromColor("#ccc")
+//                 backgroundBrush: Brush.createFromCssColor("#ccc")
 //             };
 
 //             var style = styleManager.createStyle("style1", 1, styleProps);
 
 //             var element = new UIElement();
 
-//             var expectedBrush = Brush.createFromColor("#aaa");
+//             var expectedBrush = Brush.createFromCssColor("#aaa");
 
 //             var props = {styleId: style.id,
 //                         backgroundBrush: expectedBrush};
@@ -71,8 +71,8 @@
 //             //arrange
 //             var element = new UIElement();
 
-//             var expectedBackgroundBrush = Brush.createFromColor("#aaa");
-//             var expectedBorderBrush = Brush.createFromColor("#bbb");
+//             var expectedBackgroundBrush = Brush.createFromCssColor("#aaa");
+//             var expectedBorderBrush = Brush.createFromCssColor("#bbb");
 
 //             element.setProps({
 //                 backgroundBrush: expectedBackgroundBrush,
@@ -96,8 +96,8 @@
 //             //arrange
 //             var element = new UIElement();
 
-//             var expectedBackgroundBrush = Brush.createFromColor("#aaa");
-//             var expectedBorderBrush = Brush.createFromColor("#bbb");
+//             var expectedBackgroundBrush = Brush.createFromCssColor("#aaa");
+//             var expectedBorderBrush = Brush.createFromCssColor("#bbb");
 //             var style = styleManager.createStyle("style1", 1, {
 //                 backgroundBrush: expectedBackgroundBrush,
 //                 borderBrush: expectedBorderBrush,
@@ -128,8 +128,8 @@
 //             var element = new UIElement();
 //             this.app.activePage.add(element);
 
-//             var expectedBackgroundBrush = Brush.createFromColor("#aaa");
-//             var expectedBorderBrush = Brush.createFromColor("#bbb");
+//             var expectedBackgroundBrush = Brush.createFromCssColor("#aaa");
+//             var expectedBorderBrush = Brush.createFromCssColor("#bbb");
 //             var style = styleManager.createStyle("style1", 1, {
 //                 backgroundBrush: expectedBackgroundBrush,
 //                 borderBrush: expectedBorderBrush,
@@ -162,8 +162,8 @@
 //             var element = new UIElement();
 //             this.app.activePage.add(element);
 
-//             var expectedBackgroundBrush = Brush.createFromColor("#aaa");
-//             var expectedBorderBrush = Brush.createFromColor("#bbb");
+//             var expectedBackgroundBrush = Brush.createFromCssColor("#aaa");
+//             var expectedBorderBrush = Brush.createFromCssColor("#bbb");
 //             var style = styleManager.createStyle("style1", 1, {
 //                 backgroundBrush: expectedBackgroundBrush,
 //                 borderBrush: expectedBorderBrush,
@@ -175,7 +175,7 @@
 
 //             element.prepareAndSetProps({styleId: style.id});
 //             // make pending style
-//             element.setProps({backgroundBrush:Brush.createFromColor("#eee")});
+//             element.setProps({backgroundBrush:Brush.createFromCssColor("#eee")});
 
 //             //act
 //             assert.equal(element.hasPendingStyle(), true);

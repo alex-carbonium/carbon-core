@@ -105,11 +105,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
 
         if (changes.fill && typeof changes.fill === 'string') {
-            changes.fill = Brush.createFromColor(changes.fill);
+            changes.fill = Brush.createFromCssColor(changes.fill);
         }
 
         if (changes.stroke && typeof changes.stroke === 'string') {
-            changes.stroke = Brush.createFromColor(changes.stroke);
+            changes.stroke = Brush.createFromCssColor(changes.stroke);
         }
 
         let hasBr = changes.hasOwnProperty("br");
@@ -402,13 +402,38 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return root && root.isEditable();
     }
 
-    scale(scaleX: number, scaleY: number, origin: Origin, mode?: ChangeMode) {
+    applyScaling2(scaleX: number, scaleY: number, origin: Origin, mode?: ChangeMode) {
         let vector = Point.allocate(scaleX, scaleY);
         let originPoint = this.allocateOriginPoint(origin);
         this.applyScaling(vector, originPoint, null, mode);
         vector.free();
         originPoint.free();
     }
+
+    get scaleX(): number {
+        return this.props.scaleX;
+    }
+
+    set scaleX(value:number) {
+        this.prepareAndSetProps({scaleX:value});
+    }
+
+    get scaleY(): number {
+        return this.props.scaleY;
+    }
+
+    set scaleY(value:number) {
+        this.prepareAndSetProps({scaleY:value});
+    }
+
+    get scale(): number {
+        return this.props.scaleX;
+    }
+
+    set scale(value:number) {
+        this.prepareAndSetProps({scaleX:value, scaleY:value});
+    }
+
     applyScaling(s, o, options?: ResizeOptions, changeMode?: ChangeMode) {
         options = options || ResizeOptions.Once;
         if (options.reset) {

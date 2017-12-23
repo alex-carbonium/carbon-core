@@ -1,5 +1,5 @@
 declare module "carbon-app" {
-    import { IDataNode, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IIsolatable, IMouseEventHandler, IContainerProps, PropDescriptor, StoryType } from "carbon-model";
+    import { IDataNode, IUIElement, IDataNodeProps, IUIElementProps, IArtboard, IContainer, IComposite, IIsolatable, IMouseEventHandler, IContainerProps, PropDescriptor, StoryType, IElementWithCode } from "carbon-model";
     import { IEvent, IEventData, IEvent2, IMouseEventData, KeyboardState, IEvent3, IConstructor, ViewState, IJsonNode, IPrimitive, ArtboardType, FontStyle, FontWeight, ChangeMode, Primitive, IPointerEventData } from "carbon-basics";
     import { IRect, ICoordinate, ISize, Origin } from "carbon-geometry";
     import { IContext, IContextPool, RenderEnvironment, RenderFlags } from "carbon-rendering";
@@ -176,7 +176,7 @@ declare module "carbon-app" {
 
     type CompilationResult = {text:string, exports:{[name:string]:string}};
     export interface ICompilerService {
-        compile(fileName:string, text:string):Promise<CompilationResult>;
+        compile(fileName:string, text?:string):Promise<CompilationResult>;
         addLib(fileName:string, text:string);
         clear();
         codeProvider:any;

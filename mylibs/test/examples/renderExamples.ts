@@ -3,11 +3,11 @@ import { Rect, Brush, Rectangle, Environment, StrokePosition, renderer, model, I
 
 registerExample("dataUrl: artboard zoomed out", function(app, artboard){
     artboard.boundaryRect(Rect.fromSize(400, 800));
-    artboard.fill = (Brush.createFromColor("green"));
+    artboard.fill = (Brush.createFromCssColor("green"));
     artboard.translate(1000, 0);
 
     var rect1 = new Rectangle();
-    rect1.setProps({width: 100, height: 100, name: 'rect 1', fill: Brush.createFromColor("red")});
+    rect1.setProps({width: 100, height: 100, name: 'rect 1', fill: Brush.createFromCssColor("red")});
     artboard.add(rect1);
 
     var rect2 = rect1.clone();
@@ -23,14 +23,14 @@ registerExample("dataUrl: artboard zoomed out", function(app, artboard){
 
 registerExample("dataUrl: page", function(app, artboard){
     let size = Rect.fromSize(400, 800);
-    let bg = model.createRectangle(size, { fill: Brush.createFromColor("green")});
+    let bg = model.createRectangle(size, { fill: Brush.createFromCssColor("green")});
 
     artboard.boundaryRect(size);
     artboard.add(bg);
     artboard.translate(1000, 0);
 
     bg = bg.clone() as IRectangle;
-    bg.setProps({ fill: Brush.createFromColor("red") });
+    bg.setProps({ fill: Brush.createFromCssColor("red") });
     var artboard2 = artboard.clone();
     artboard2.add(bg);
     artboard2.translate(600, 0);
@@ -46,8 +46,8 @@ registerExample("dataUrl: page", function(app, artboard){
 registerExample("dataUrl: detached element", function(app, artboard){
     var rect1 = new Rectangle();
     rect1.setProps({width: 100, height: 100, name: 'rect 1',
-        fill: Brush.createFromColor("red"),
-        stroke: Brush.createFromColor("black"),
+        fill: Brush.createFromCssColor("red"),
+        stroke: Brush.createFromCssColor("black"),
         strokePosition: StrokePosition.Inside,
         strokeWidth: 5
     });
@@ -61,8 +61,8 @@ registerExample("dataUrl: detached element", function(app, artboard){
 registerExample("dataUrl: sprite", function(app, artboard){
     var rect1 = new Rectangle();
     rect1.setProps({width: 100, height: 100, name: 'rect 1',
-        fill: Brush.createFromColor("red"),
-        stroke: Brush.createFromColor("black"),
+        fill: Brush.createFromCssColor("red"),
+        stroke: Brush.createFromCssColor("black"),
         strokePosition: StrokePosition.Inside,
         strokeWidth: 5
     });
@@ -70,8 +70,8 @@ registerExample("dataUrl: sprite", function(app, artboard){
 
     var rect2 = rect1.clone();
     rect2.setProps({
-        fill: Brush.createFromColor("green"),
-        stroke: Brush.createFromColor("blue"),
+        fill: Brush.createFromCssColor("green"),
+        stroke: Brush.createFromCssColor("blue"),
     });
     rect2.translate(200, 200);
 

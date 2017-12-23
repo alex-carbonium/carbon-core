@@ -34,7 +34,7 @@ describe("Dragging tests", function () {
 
         let group = artboard.children[0] as IGroupContainer;
 
-        let rect3 = model.createRectangle({ width: 50, height: 50 }, { fill: Brush.createFromColor("red") });
+        let rect3 = model.createRectangle({ width: 50, height: 50 }, { fill: Brush.createFromCssColor("red") });
         rect3.translate(1000, 1000);
         artboard.add(rect3);
 

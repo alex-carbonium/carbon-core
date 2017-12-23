@@ -59,7 +59,7 @@ class LayoutGridLines extends Guide {
 
     static setDefaultStrokeHsl(hsl) {
         var strokeRgb = tinycolor(hsl).toRgbString();
-        var strokeBrush = Brush.createFromColor(strokeRgb);
+        var strokeBrush = Brush.createFromCssColor(strokeRgb);
         var prototype = PropertyMetadata.getPropsPrototype(LayoutGridLines.prototype.t);
         prototype.stroke = strokeBrush;
     };

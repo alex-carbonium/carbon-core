@@ -1486,8 +1486,8 @@ PropertyMetadata.registerForType(AppClass, {
     },
     defaultShapeSettings: {
         defaultValue: {
-            fill: Brush.createFromColor(UserSettings.shapes.defaultFill),
-            stroke: Brush.createFromColor(UserSettings.shapes.defaultStroke)
+            fill: Brush.createFromCssColor(UserSettings.shapes.defaultFill),
+            stroke: Brush.createFromCssColor(UserSettings.shapes.defaultStroke)
         }
     },
     defaultLayoutGridSettings: {

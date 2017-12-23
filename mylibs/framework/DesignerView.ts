@@ -33,7 +33,7 @@ class DesignerView extends ViewBase {
         this.guideFont = Font.createFromObject({
             family: "Arial",
             size: 8,
-            color: Brush.createFromColor("red")
+            color: Brush.createFromCssColor("red")
         });
         this.guideFontString = Font.cssString(this.guideFont);
 

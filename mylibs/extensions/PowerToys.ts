@@ -79,7 +79,7 @@ export default class PowerToys extends CarbonExtension {
 
             let min = Math.min(sx, sy);
             if (min < 1) {
-                element.scale(min, min, Origin.Center);
+                element.applyScaling2(min, min, Origin.Center);
             }
         }
     }

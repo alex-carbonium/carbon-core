@@ -5,7 +5,7 @@ import DataNode from "framework/DataNode";
 import Matrix from "math/matrix";
 import Artboard from "framework/Artboard";
 import Symbol from "framework/Symbol";
-import { IApp, IEvent, IPage, PreviewDisplayMode, ISize, IPageProps, ChangeMode, IDisposable, IEvent3} from "carbon-core";
+import { IApp, IEvent, IPage, PreviewDisplayMode, ISize, IPageProps, ChangeMode, IDisposable, IEvent3 } from "carbon-core";
 import { IPreviewModel } from "carbon-app";
 import { IArtboard } from "carbon-model";
 import { Sandbox } from "../../code/Sandbox";
@@ -18,6 +18,8 @@ import { ModelFactory } from "../../code/runtime/ModelFactory";
 import Services from "Services";
 import { RuntimeScreen } from "../../code/runtime/RuntimeScreen";
 import { BrushFactory } from "../../code/runtime/BrushFactory";
+import { CompiledCodeProvider } from "../../code/CompiledCodeProvider";
+import { NameProvider } from "../../code/NameProvider";
 
 export default class PreviewModel implements IPreviewModel, IDisposable {
     private _activePage: IPage<IPageProps> & { originalSize: ISize };
@@ -25,6 +27,8 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
     private disposables = new AutoDisposable();
     private runtimeContext: RuntimeContext;
     private navigationController: NavigationController;
+    private modulesCode = new Map<string, string>();
+    private modules = new Map<string, any>()
 
     public app: IApp;
     public navigateToPage: IEvent3<string, IAnimationOptions, DataBag>;
@@ -57,9 +61,30 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         }
     }
 
+    recycleModules() {
+        this.modules.clear();
+    }
+
     recycleCurrentPage() {
         this.activePage.dispose();
         this._activePage = NullPage;
+    }
+
+    requireModuleInstance(name) {
+        let module = this.modules.get(name);
+        if(module) {
+            return module;
+        }
+
+        let code = this.modulesCode.get(name);
+        if(!code) {
+            throw "unknown module name: " + name;
+        }
+        module = {};
+        this.sandbox.runOnModule(this.runtimeContext, module, code);
+        this.modules.set(name, module);
+
+        return module;
     }
 
     get activeArtboard(): IArtboard {
@@ -80,6 +105,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         }
 
         var page = new Page();
+
         var previewClone = artboard.mirrorClone();
         previewClone.applyVisitor(p => {
             p.props.__temp = true;
@@ -93,6 +119,12 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         page.originalSize = oldRect;
         page.minScrollX(0);
         page.minScrollY(0);
+        let parentCode = artboard.parent.code();
+        if (parentCode) {
+            page.runtimeProps.refs = {
+                ["./" + NameProvider.escapeName(artboard.parent.name) + ".ts"]: parentCode
+            }
+        }
 
         return this._runCodeOnPage(page);
     }
@@ -100,25 +132,97 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
     _runCodeOnPage(page: IPage): Promise<IPage> {
         let promises = [];
 
-        page.applyVisitor(e => {
+        return this._runCodeOnArtboard(page.children[0] as any).then(() => page);
+        // page.applyVisitor(e => {
+        //     if (e instanceof Symbol) {
+        //         let artboard: IArtboard = e.artboard;
+        //         let code = artboard.code();
+        //         if (code) {
+        //             let parent = (artboard.parent as any);
+        //             let parentCode = parent.code();
+        //             let parentPromise;
+        //             if (parentCode) {
+        //                 let name = NameProvider.escapeName('./' + parent.name + '.ts');
+        //                 parentPromise = Services.compiler.codeProvider.getModuleCode(name).
+        //                     then(code => {
+        //                         this.modulesCode[name] = code;
+        //                     })
+        //             } else {
+        //                 parentPromise = Promise.resolve(null);
+        //             }
+
+        //             promises.push(parentPromise.then(() => Services.compiler.codeProvider.getArtobardCode(artboard).then((code) => {
+        //                 if (code) {
+        //                     this.sandbox.runOnElement(this.runtimeContext, e, code);
+        //                 }
+        //                 // todo: think what to do if failed
+        //             })));
+        //         }
+        //     }
+        // });
+        // let sourceArtboard = page.children[0].runtimeProps.sourceArtboard;
+        // let parent = (sourceArtboard.parent as any);
+        // let parentCode = parent.code();
+        // if (parentCode) {
+        //     let name = NameProvider.escapeName('./' + parent.name + '.ts');
+        //     promises.push(Services.compiler.codeProvider.getModuleCode(name).
+        //         then(code => {
+        //             this.modulesCode[name] = code;
+        //         }));
+        // }
+
+        // return Promise.all(promises).then(() => {
+        //     let artboard: IArtboard = page.children[0] as any;
+        //     if (artboard.code()) {
+        //         return Services.compiler.codeProvider.getArtobardCode(artboard).then((code) => {
+        //             if (code) {
+        //                 try {
+        //                     this.sandbox.runOnElement(this.runtimeContext, artboard, code);
+        //                     this.modelFailed = false;
+        //                 } catch (e) {
+        //                     // todo: log to console console.error(e);
+        //                     this.modelFailed = true;
+        //                 }
+        //             } else {
+        //                 this.modelFailed = true;
+        //             }
+        //             // todo: think what to do if failed
+
+        //             return page;
+        //         })
+        //     }
+
+        //     return page as any;
+        // }) as any as Promise<IPage>;
+    }
+
+    _runCodeOnArtboard(artboard: IArtboard): Promise<void> {
+        let promises = [];
+
+        artboard.applyVisitor(e => {
             if (e instanceof Symbol) {
                 let artboard: IArtboard = e.artboard;
                 let code = artboard.code();
                 if (code) {
-                    promises.push(Services.compiler.codeProvider.getCode(artboard).then((code) => {
-                        if (code) {
-                            this.sandbox.runOnElement(this.runtimeContext, e, code);
-                        }
-                        // todo: think what to do if failed
-                    }));
+
+                    promises.push(this._runCodeOnArtboard(e as any));
                 }
             }
         });
 
+        let parent = (artboard.parent as any);
+        if (parent.runtimeProps.refs) {
+            for (var ref of Object.keys(parent.runtimeProps.refs)) {
+                promises.push(Services.compiler.codeProvider.getModuleCode(ref, parent.runtimeProps.refs[ref]).
+                    then(code => {
+                        this.modulesCode.set(ref.substr(0, ref.lastIndexOf('.')), code);
+                    }));
+            }
+        }
+
         return Promise.all(promises).then(() => {
-            let artboard: IArtboard = page.children[0] as any;
             if (artboard.code()) {
-                return Services.compiler.codeProvider.getCode(artboard).then((code) => {
+                return Services.compiler.codeProvider.getArtobardCode(artboard).then((code) => {
                     if (code) {
                         try {
                             this.sandbox.runOnElement(this.runtimeContext, artboard, code);
@@ -131,13 +235,9 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
                         this.modelFailed = true;
                     }
                     // todo: think what to do if failed
-
-                    return page;
                 })
             }
-
-            return page as any;
-        }) as any as Promise<IPage>;
+        });
     }
 
     getCurrentScreen(screenSize): Promise<IPage> {

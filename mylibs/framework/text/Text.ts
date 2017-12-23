@@ -158,7 +158,7 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
             textChanges.font = Font.extend(textChanges.font, { color: textChanges.fill.value });
         }
         else if (textChanges.font.color !== this.props.font.color) {
-            textChanges.fill = Brush.createFromColor(textChanges.font.color);
+            textChanges.fill = Brush.createFromCssColor(textChanges.font.color);
         }
     }
 
@@ -643,7 +643,7 @@ PropertyMetadata.registerForType(Text, {
         type: "textStyleName"
     },
     fill: {
-        defaultValue: Brush.createFromColor(Font.Default.color)
+        defaultValue: Brush.createFromCssColor(Font.Default.color)
     },
     font: {
         displayName: "Font",

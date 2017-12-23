@@ -112,7 +112,7 @@ declare module "carbon-model" {
         translate(deltaX: number, deltaY: number, mode?: ChangeMode);
         translateInWorld(deltaX: number, deltaY: number, mode?: ChangeMode);
         translateInRotationDirection(deltaX: number, deltaY: number, mode?: ChangeMode);
-        scale(scaleX: number, scaleY: number, origin: Origin, mode?: ChangeMode);
+        applyScaling2(scaleX: number, scaleY: number, origin: Origin, mode?: ChangeMode);
         rotate(angle: number, origin: Origin, mode?: ChangeMode);
 
         applyScaling(vector: IPoint, origin: IPoint, options?, mode?: ChangeMode): boolean;
@@ -481,6 +481,7 @@ declare module "carbon-model" {
         declaration(module:boolean):string;
         exports:{[key:string]:string};
         readonly codeVersion:number;
+        readonly version:number;
         readonly id:string;
     }
 

@@ -21,7 +21,7 @@ export class BrushFactoryClass implements IProxySource {
     }
 
     createFromCssColor(color) {
-        return Brush.createFromColor(color);
+        return Brush.createFromCssColor(color);
     }
 
     createFromLinearGradientObject(color) {

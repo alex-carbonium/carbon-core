@@ -146,6 +146,9 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
     }
     fill = null;
     stroke = null;
+    scale = 1;
+    scaleX = 1;
+    scaleY = 1;
 
     set x(v) {
         throw new Error("Method not implemented.");
@@ -358,7 +361,7 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
         return Matrix.Identity;
     }
 
-    scale() {
+    applyScaling2() {
         return 1;
     }
 

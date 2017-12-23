@@ -1012,11 +1012,21 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     get version() {
-        return this.runtimeProps.version;
+        let artboard = this;
+        if(this.runtimeProps.sourceArtboard) {
+            artboard = this.runtimeProps.sourceArtboard;
+        }
+
+        return artboard.runtimeProps.version;
     }
 
     get codeVersion() {
-        return this.runtimeProps.codeVersion;
+        let artboard = this;
+        if(this.runtimeProps.sourceArtboard) {
+            artboard = this.runtimeProps.sourceArtboard;
+        }
+
+        return artboard.runtimeProps.codeVersion;
     }
 
     mousedown(event: IMouseEventData) {
@@ -1314,23 +1324,43 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     code(value?: string): string {
-        if (arguments.length > 0) {
-            this.setProps({ code: value })
+        let artboard = this;
+        if(this.runtimeProps.sourceArtboard) {
+            artboard = this.runtimeProps.sourceArtboard;
         }
 
-        return this.props.code;
+        if (arguments.length > 0) {
+            artboard.setProps({ code: value })
+        }
+
+        return artboard.props.code;
     }
 
     get exports(): { [name: string]: string } {
-        return this.runtimeProps.exports;
+        let artboard = this;
+        if(this.runtimeProps.sourceArtboard) {
+            artboard = this.runtimeProps.sourceArtboard;
+        }
+
+        return artboard.runtimeProps.exports;
     }
 
     set exports(value: { [name: string]: string }) {
-        this.runtimeProps.exports = value;
+        let artboard = this;
+        if(this.runtimeProps.sourceArtboard) {
+            artboard = this.runtimeProps.sourceArtboard;
+        }
+
+        artboard.runtimeProps.exports = value;
     }
 
     declaration(module: boolean): string {
-        return ArtboardProxyGenerator.generate(this, module);
+        let artboard = this;
+        if(this.runtimeProps.sourceArtboard) {
+            artboard = this.runtimeProps.sourceArtboard;
+        }
+
+        return ArtboardProxyGenerator.generate(artboard, module);
     }
 
     private flattenSymbolInstances(page) {

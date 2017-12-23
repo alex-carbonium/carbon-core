@@ -120,7 +120,7 @@ class CustomGuides extends Guide {
 
     static setDefaultStrokeHsl(hsl) {
         var strokeRgb = tinycolor(hsl).toRgbString();
-        var strokeBrush = Brush.createFromColor(strokeRgb);
+        var strokeBrush = Brush.createFromCssColor(strokeRgb);
         var prototype = PropertyMetadata.getPropsPrototype(CustomGuides.prototype.t);
         prototype.stroke = strokeBrush;
     }
@@ -140,7 +140,7 @@ CustomGuides.prototype.t = Types.CustomGuide;
 
 PropertyMetadata.registerForType(CustomGuides, {
     stroke: {
-        defaultValue: Brush.createFromColor(UserSettings.guides.stroke)
+        defaultValue: Brush.createFromCssColor(UserSettings.guides.stroke)
     },
     opacity: {
         defaultValue: 1

@@ -2,6 +2,7 @@ import {ControlNameResolver} from "./ControlNameResolver";
 import { IContainer } from "carbon-core";
 import { ElementProxy } from "./runtime/RuntimeProxy";
 import { RuntimeContext } from "./runtime/RuntimeContext";
+import { ModuleResolver } from "./ModuleResolver";
 
 
 let source = `
@@ -44,8 +45,19 @@ export class Sandbox {
         if((element as any).artboard) {
             name = 'n' + (element as any).artboard.id
         }
-
+        code = code.replace('Object.defineProperty(exports, "__esModule", { value: true });', '');
         code = 'var ' + name + ' = __proxy;' + "let eval = null;" + code;
+
+        sandboxFunc = sandboxFunc || new Function('__proxy', '__code', source);
+        sandboxFunc(resolverProxy, code);
+    }
+
+    runOnModule(context:RuntimeContext, module:any, code:string) {
+        let resolver = new ModuleResolver(context, module);
+        let resolverProxy = new Proxy({}, resolver);
+
+        code = code.replace('Object.defineProperty(exports, "__esModule", { value: true });', '');
+        code = "let eval = null;" + code;
 
         sandboxFunc = sandboxFunc || new Function('__proxy', '__code', source);
         sandboxFunc(resolverProxy, code);

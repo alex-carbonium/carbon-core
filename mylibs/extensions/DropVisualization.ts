@@ -23,7 +23,7 @@ import { LayerType } from "carbon-app";
 import { InteractionType, IUIElement, ChangeMode, IIsolationLayer, IMouseEventData, IController, IComposite, IContainer, TextMode, RenderEnvironment } from "carbon-core";
 import BoundaryPathDecorator, { HighlightKind } from "../decorators/BoundaryPathDecorator";
 
-var HighlightBrush = Brush.createFromColor(SharedColors.Highlight);
+var HighlightBrush = Brush.createFromCssColor(SharedColors.Highlight);
 
 class ResizeHint extends UIElement {
     private _transformationElement: IComposite;
@@ -266,7 +266,7 @@ export default class DropVisualization extends ExtensionBase {
         app.addLoadRef();
         this._dropLine = new DropLine();
         this._dropLine.setProps({
-            stroke: Brush.createFromColor("red"),
+            stroke: Brush.createFromCssColor("red"),
             strokeWidth: 2
         });
         this._dropLine.crazySupported(false);

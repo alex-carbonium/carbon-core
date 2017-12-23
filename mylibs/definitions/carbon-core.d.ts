@@ -45,6 +45,7 @@ declare module "carbon-core" {
     export var PreviewModel:any;
     export var CompilerService:any;
     export var ContextLayerSource: any;
+    export var CodeNameProvider: any;
     export class Shape{}
     export function createUUID(): string;
 }

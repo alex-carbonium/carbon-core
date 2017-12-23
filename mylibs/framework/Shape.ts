@@ -298,7 +298,7 @@ class Shape extends Container {
         element.resetTransform();
         let bbox1 = this.getBoundingBox();
         let bbox2 = element.getBoundingBox();
-        element.scale(bbox1.width / bbox2.width, bbox1.height / bbox2.height, Origin.TopLeft);
+        element.applyScaling2(bbox1.width / bbox2.width, bbox1.height / bbox2.height, Origin.TopLeft);
 
         this.resetTransform();
 

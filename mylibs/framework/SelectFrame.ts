@@ -71,6 +71,6 @@ SelectFrame.prototype.t = Types.SelectFrame;
 
 PropertyMetadata.registerForType(SelectFrame, {
     fill: {
-        defaultValue: Brush.createFromColor(UserSettings.selection.frameColor)
+        defaultValue: Brush.createFromCssColor(UserSettings.selection.frameColor)
     }
 });

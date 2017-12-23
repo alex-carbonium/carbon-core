@@ -117,7 +117,7 @@ RepeatCell.prototype.t = Types.RepeatCell;
 
 PropertyMetadata.registerForType(RepeatCell, {
     // fill: {
-    //     defaultValue: Brush.createFromColor("lightgreen")
+    //     defaultValue: Brush.createFromCssColor("lightgreen")
     // },
     trackChildren: {
         defaultValue: true

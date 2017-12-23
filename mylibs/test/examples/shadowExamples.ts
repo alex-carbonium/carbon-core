@@ -11,7 +11,7 @@ registerExample("shadow: outset", function(app, artboard){
     var rect1s = new Rectangle();
     rect1s.setProps({width: 120, height: 120, name: 'rect 1'});
     rect1s.translate(210, 310);
-    rect1s.setProps({fill: Brush.Empty, stroke: Brush.createFromColor('red')});
+    rect1s.setProps({fill: Brush.Empty, stroke: Brush.createFromCssColor('red')});
     artboard.add(rect1s);
 
     var rect2 = new Rectangle();

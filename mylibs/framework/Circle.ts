@@ -197,12 +197,12 @@ class Circle extends Shape {
             if (!parsedAttributes.fill || parsedAttributes.fill === "none") {
                 circle.fill = (Brush.Empty);
             } else {
-                circle.fill = (Brush.createFromColor(parsedAttributes.fill));
+                circle.fill = (Brush.createFromCssColor(parsedAttributes.fill));
             }
         }
 
         if (parsedAttributes.stroke) {
-            circle.stroke = (Brush.createFromColor(parsedAttributes.stroke));
+            circle.stroke = (Brush.createFromCssColor(parsedAttributes.stroke));
         } else {
             circle.stroke = (Brush.Empty);
         }

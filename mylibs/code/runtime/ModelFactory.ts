@@ -84,10 +84,10 @@ export class ModelFactoryClass implements IProxySource {
     _prepareProps(props) {
         props = Object.assign({}, props);
         if (props.fill && (typeof props.fill === 'string')) {
-            props.fill = Brush.createFromColor(props.fill);
+            props.fill = Brush.createFromCssColor(props.fill);
         }
         if (props.stroke && (typeof props.stroke === 'string')) {
-            props.stroke = Brush.createFromColor(props.stroke);
+            props.stroke = Brush.createFromCssColor(props.stroke);
         }
         props.__temp = true;
         props.m = Matrix.createTranslationMatrix(props.x | 0, props.y | 0);

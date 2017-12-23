@@ -184,12 +184,12 @@ PropertyMetadata.registerForType(Section, {
         defaultValue: [5, 5]
     },
     stroke: {
-        defaultValue: Brush.createFromColor("lightgray")
+        defaultValue: Brush.createFromCssColor("lightgray")
     },
     highlightStroke: {
-        defaultValue: Brush.createFromColor("black")
+        defaultValue: Brush.createFromCssColor("black")
     },
     highlightFill: {
-        defaultValue: Brush.createFromColor("rgba(0, 0, 255, .2)")
+        defaultValue: Brush.createFromCssColor("rgba(0, 0, 255, .2)")
     }
 });

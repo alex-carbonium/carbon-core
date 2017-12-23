@@ -787,7 +787,7 @@ export default class ViewBase { //TODO: implement IView
         }
 
         if (fit.width !== current.width || fit.height !== current.height) {
-            element.scale(fit.width / current.width, fit.height / current.height, origin || Origin.Center, mode);
+            element.applyScaling2(fit.width / current.width, fit.height / current.height, origin || Origin.Center, mode);
             element.roundBoundingBoxToPixelEdge(mode);
         }
     }

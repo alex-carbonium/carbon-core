@@ -4,7 +4,7 @@ var files = {};
 
 var options = {
     target: 1,
-    module: 5,
+    module: 1,
     noLib: true,
     inlineSourceMap: true,
     inlineSources: true,
@@ -45,8 +45,8 @@ var servicesHost = {
 var services;
 var self = this;
 addEventListener('message', function (e) {
-    if(!services) {
-        if(e.data.ts) {
+    if (!services) {
+        if (e.data.ts) {
             eval(e.data.ts);
             services = ts.createLanguageService(servicesHost, ts.createDocumentRegistry());
             self.ts = ts;
@@ -54,12 +54,15 @@ addEventListener('message', function (e) {
         return;
     }
     var fileName = e.data.fileName;
-    if (fileName && e.data.text) {
-        var version = 0;
-        if (files[fileName]) {
-            version = files[fileName].version || 0;
+    if (fileName) {
+        if (e.data.text) {
+            var version = 0;
+            if (files[fileName]) {
+                version = files[fileName].version || 0;
+            }
+            files[fileName] = { text: e.data.text, version: version + 1 };
         }
-        files[fileName] = { text: e.data.text, version: version + 1 };
+
         if (!fileName.endsWith('.d.ts')) {
             emitFile(e.data.fileName);
         }

@@ -195,11 +195,8 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
         return this.props.groupId;
     }
 
-    version(value) {
-        if (value !== undefined) {
-            this.setProps({ version: value });
-        }
-        return this.props.version;
+    get version():number {
+        return this.runtimeProps.version;
     }
 
     incrementVersion() {
@@ -221,6 +218,10 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
             this.setProps({ orientation: value });
         }
         return this.props.orientation;
+    }
+
+    code() {
+        return null;
     }
 
     hitTest() {

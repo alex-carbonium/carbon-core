@@ -18,16 +18,17 @@ import { ArtboardType, IArtboardPage, ChangeMode, IArtboardPageProps, RenderEnvi
 import DataNode from "../../framework/DataNode";
 import Container from "../../framework/Container";
 import UIElement from "../../framework/UIElement";
+import { IElementWithCode } from "carbon-model";
 import { IView } from "carbon-app";
 var debug = require<any>("DebugUtil")("carb:artboardPage");
 
 const ARTBOARD_SPACE = 100;
 
-class ArtboardPage extends Page implements IArtboardPage {
-
+class ArtboardPage extends Page implements IArtboardPage, IElementWithCode {
     constructor() {
         super();
         this._artboardNames = {};
+        this.runtimeProps.codeVersion = 0;
     }
 
     initPage(view) {
@@ -48,6 +49,10 @@ class ArtboardPage extends Page implements IArtboardPage {
 
     propsUpdated(props: Readonly<IArtboardPageProps>, oldProps, mode: ChangeMode) {
         super.propsUpdated(props, oldProps, mode);
+
+        if (props.code) {
+            this.runtimeProps.codeVersion = (this.runtimeProps.codeVersion || 0) + 1;
+        }
 
         if (mode === ChangeMode.Model && props.symbolGroups) {
             App.Current.resourcePageChanged.raise(this);
@@ -368,6 +373,30 @@ class ArtboardPage extends Page implements IArtboardPage {
             element.setTransform(parent.globalMatrixToLocal(element.globalViewMatrix()));
             parent.add(element, mode);
         }
+    }
+
+    code(value?: string): string {
+        if (arguments.length > 0) {
+            this.setProps({ code: value })
+        }
+
+        return this.props.code;
+    }
+
+    declaration(module: boolean): string {
+        return "";//ArtboardProxyGenerator.generate(this, module);
+    }
+
+    get codeVersion() {
+        return this.runtimeProps.codeVersion;
+    }
+
+    get exports(): { [name: string]: string } {
+        return this.runtimeProps.exports;
+    }
+
+    set exports(value: { [name: string]: string }) {
+        this.runtimeProps.exports = value;
     }
 }
 ArtboardPage.prototype.t = Types.ArtboardPage;

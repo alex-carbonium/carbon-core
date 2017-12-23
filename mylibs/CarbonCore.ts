@@ -133,6 +133,7 @@ export default {
     "ArtboardProxyGenerator" : require("./code/ProxyGenerator").ArtboardProxyGenerator,
     "Invalidate": require("./framework/Invalidate"),
     "NameProvider": require("./ui/NameProvider"),
+    "CodeNameProvider": require("./code/NameProvider").NameProvider,
 
     "ContextLayerSource":  require("./framework/render/ContextLayerSource"),
     //TODO: replace with math/rect

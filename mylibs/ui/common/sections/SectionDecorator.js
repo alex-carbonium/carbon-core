@@ -9,7 +9,7 @@ var handleHeight = 40;
 var outerMargin = 25;
 var handleBox = {x: 0, y: 0, width: handleWidth, height: handleHeight};
 
-var brush = Brush.createFromColor("green");
+var brush = Brush.createFromCssColor("green");
 var HandleTypes = {
     InnerLeft: 1,
     InnerTop: 2,

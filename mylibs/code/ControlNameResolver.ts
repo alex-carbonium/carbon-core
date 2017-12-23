@@ -5,9 +5,19 @@ import { RuntimeContext } from "./runtime/RuntimeContext";
 import { RuntimeProxy } from "./runtime/RuntimeProxy";
 import { RuntimeScreen } from "./runtime/RuntimeScreen";
 import { AutoDisposable } from "../AutoDisposable";
+import Environment from "environment";
 
 const skipList = ["eval", "proxy"]
 const blackList = ["window", "document", "uneval"];
+
+function localRequire(name) {
+    let previewModel = (Environment.controller as any).previewModel;
+    if(previewModel) {
+        return previewModel.requireModuleInstance(name);
+    }
+
+    return null;
+}
 
 const system = {
     'NaN':NaN,
@@ -18,6 +28,7 @@ const system = {
     'isFinite':isFinite,
     'Math':Object.freeze(Math),
     'RegExp':Object.freeze(RegExp),
+    'require':localRequire
 }
 
 export class ControlNameResolver {

@@ -323,6 +323,6 @@ DraggingElement.prototype.t = Types.DraggingElement;
 
 PropertyMetadata.registerForType(DraggingElement, {
     stroke: {
-        defaultValue: Brush.createFromColor(UserSettings.frame.stroke)
+        defaultValue: Brush.createFromCssColor(UserSettings.frame.stroke)
     }
 });
