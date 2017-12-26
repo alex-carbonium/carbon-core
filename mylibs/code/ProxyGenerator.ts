@@ -57,6 +57,19 @@ export class ArtboardProxyGenerator {
         return res;
     }
 
+    static generateImport(artboard) {
+        let controlList = ["artboard", "navigationController"];
+
+        artboard.applyVisitorBreadthFirst((e: IUIElement) => {
+            if (e === artboard) {
+                return;
+            }
+            let name = NameProvider.escapeName(e.name);
+            controlList.push(name);
+        });
+        return `import {${controlList.join(', ')}} from "./n${artboard.id}.types"`
+    }
+
     static generate(artboard: IContainer, module: boolean): string {
         let controlList = [];
         let symbolsList = [];
@@ -84,16 +97,18 @@ ${modifier} const artboard:TArtboard;
 ${modifier} const navigationController:INavigationController;
 ${symbolTypes}
 ${controlList.map(v => `${modifier} const ${v.name}:${v.type};`).join('\n')}
-}`;
-        if (module) {
-            return `
-/// <reference path="carbon-runtime.d.ts" />
-declare namespace n${artboard.id} {
-${content}
-}`;
-        } else {
-            return content;
-        }
+`;
+        return content;
+
+//         if (module) {
+//             return `
+// /// <reference path="carbon-runtime.d.ts" />
+// declare namespace n${artboard.id} {
+// ${content}
+// }`;
+//         } else {
+//             return content;
+//         }
     }
 
     public static generateRuntimeNames(page: IPage): string {

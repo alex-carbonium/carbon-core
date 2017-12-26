@@ -1,4 +1,4 @@
-import { IDisposable, CompilationResult} from "carbon-core";
+import { IDisposable, CompilationResult } from "carbon-core";
 import { CompiledCodeProvider } from "../CompiledCodeProvider";
 
 var CompilerWorkerCode: any = require("raw-loader!./CompilerWorker.w");
@@ -9,6 +9,8 @@ class CompilerService implements IDisposable {
     _worker: Worker;
     public codeProvider;
     _tasks = new Map<string, { resolve: (e: any) => void, reject: (e: any) => void }>();
+    _staticCode = new Map<string, string>();
+    _initializePromise: Promise<any>;
 
     _onCompilerMessage = (e: MessageEvent) => {
         let fileName = e.data.fileName;
@@ -19,7 +21,7 @@ class CompilerService implements IDisposable {
                 if (e.data.error) {
                     callbacks.reject(e.data);
                 } else {
-                    callbacks.resolve({text:e.data.text, exports:e.data.exports});
+                    callbacks.resolve({ text: e.data.text, exports: e.data.exports });
                 }
             }
         }
@@ -27,19 +29,34 @@ class CompilerService implements IDisposable {
 
     constructor() {
         this.codeProvider = new CompiledCodeProvider(this);
-        var blob = new Blob([CompilerWorkerCode], {type:'application/javascript'})
+        var blob = new Blob([CompilerWorkerCode], { type: 'application/javascript' })
         this._worker = new Worker(URL.createObjectURL(blob));
-        this._worker.postMessage({ts:typescriptCompiler})
+        this._worker.postMessage({ ts: typescriptCompiler })
 
         this._worker.onmessage = this._onCompilerMessage;
         this._addFile("lib.d.ts", defaultLib);
         let staticLibs = this.codeProvider.getStaticLibs();
         let libNames = Object.keys(staticLibs);
-        for(let libName of libNames) {
-            this._addFile(libName, staticLibs[libName].text());
+        let promises = [];
+        this._initializePromise = Promise.resolve();
+
+        for (let libName of libNames) {
+            if (libName.endsWith('.d.ts')) {
+                this._addFile(libName, staticLibs[libName].text());
+            } else {
+                promises.push(this.compile(libName, staticLibs[libName].text())
+                    .then(({text}) => {
+                        this._staticCode[libName.substr(0, libName.lastIndexOf("."))] = text;
+                    }));
+            }
         }
+        this._initializePromise = Promise.all(promises);
 
         // this._addFile("platform.d.ts", platformLib);
+    }
+
+    getStaticCode(name) {
+        return this._staticCode[name];
     }
 
     private _addFile(fileName, text) {
@@ -51,12 +68,14 @@ class CompilerService implements IDisposable {
     }
 
     compile(fileName: string, text: string): Promise<CompilationResult> {
-        let promise = new Promise<CompilationResult>((resolve, reject) => {
-            this._tasks.set(fileName, { resolve, reject });
-            this._addFile(fileName, text);
-        });
+        return this._initializePromise.then(() => {
+            let promise = new Promise<CompilationResult>((resolve, reject) => {
+                this._tasks.set(fileName, { resolve, reject });
+                this._addFile(fileName, text);
+            });
 
-        return promise;
+            return promise;
+        });
     }
 
     clear() {

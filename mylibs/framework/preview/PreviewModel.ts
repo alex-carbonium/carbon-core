@@ -22,7 +22,7 @@ import { CompiledCodeProvider } from "../../code/CompiledCodeProvider";
 import { NameProvider } from "../../code/NameProvider";
 
 export default class PreviewModel implements IPreviewModel, IDisposable {
-    private _activePage: IPage<IPageProps> & { originalSize: ISize };
+    private _activePage: IPage<IPageProps> & { originalSize: ISize } = NullPage;
     private sandbox = new Sandbox();
     private disposables = new AutoDisposable();
     private runtimeContext: RuntimeContext;
@@ -78,7 +78,10 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
 
         let code = this.modulesCode.get(name);
         if(!code) {
-            throw "unknown module name: " + name;
+            code = Services.compiler.getStaticCode(name);
+            if(!code) {
+                throw "unknown module name: " + name;
+            }
         }
         module = {};
         this.sandbox.runOnModule(this.runtimeContext, module, code);

@@ -217,6 +217,7 @@ class ArtboardPage extends Page implements IArtboardPage, IElementWithCode {
             !doNotTrack && App.Current.setMirrorArtboardId(null, null);
         }
         Environment.controller && Environment.controller.onArtboardChanged && Environment.controller.onArtboardChanged.raise(artboard, oldArtboard);
+
         // redraw content to change artboard header color
         Invalidate.request();
     }

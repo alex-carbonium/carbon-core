@@ -1812,17 +1812,15 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (this._isDisposed) {
             return;
         }
-        //this.onresize.clearSubscribers();
-        //delete this.onresize;
 
         if(this.runtimeProps.disposables) {
             this.runtimeProps.disposables.dispose();
         }
-        delete this.props;
-        delete this.runtimeProps;
 
         RuntimeProxy.release(this);
 
+        delete this.props;
+        delete this.runtimeProps;
         this._isDisposed = true;
     }
     isDisposed() {

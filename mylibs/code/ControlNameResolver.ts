@@ -6,18 +6,11 @@ import { RuntimeProxy } from "./runtime/RuntimeProxy";
 import { RuntimeScreen } from "./runtime/RuntimeScreen";
 import { AutoDisposable } from "../AutoDisposable";
 import Environment from "environment";
+import { Page } from "carbon-app";
 
 const skipList = ["eval", "proxy"]
 const blackList = ["window", "document", "uneval"];
 
-function localRequire(name) {
-    let previewModel = (Environment.controller as any).previewModel;
-    if(previewModel) {
-        return previewModel.requireModuleInstance(name);
-    }
-
-    return null;
-}
 
 const system = {
     'NaN':NaN,
@@ -28,7 +21,7 @@ const system = {
     'isFinite':isFinite,
     'Math':Object.freeze(Math),
     'RegExp':Object.freeze(RegExp),
-    'require':localRequire
+    'require':true
 }
 
 export class ControlNameResolver {
@@ -37,6 +30,8 @@ export class ControlNameResolver {
     private _blackMap = blackList.reduce((m, v) => { m[v] = true; return m; }, {})
     private _context: RuntimeContext;
     private _localContext = {};
+    public readonly proxy:any;
+
     constructor(context: RuntimeContext, artboard: IContainer) {
         this._artboard = artboard;
         this._context = context;
@@ -45,6 +40,21 @@ export class ControlNameResolver {
         this._localContext["artboard"] = this._artboard;
         artboard.runtimeProps.disposables = artboard.runtimeProps.disposables || new AutoDisposable();
         this._artboard.runtimeProps.disposables.add(screen)
+
+        this.proxy = new Proxy({}, this);
+    }
+
+    require = (name) => {
+        if(name === "./n"+this._artboard.id+".types") {
+            return this.proxy;
+        }
+
+        let previewModel = (Environment.controller as any).previewModel;
+        if(previewModel) {
+            return previewModel.requireModuleInstance(name);
+        }
+
+        return null;
     }
 
     set(target:any, name:string, value:any) {
@@ -85,6 +95,9 @@ export class ControlNameResolver {
     }
 
     get(target: any, name: string): any {
+        if(name === "require") {
+            return this.require;
+        }
         if(system.hasOwnProperty(name)) {
             return system[name];
         }

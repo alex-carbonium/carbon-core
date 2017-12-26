@@ -178,6 +178,7 @@ declare module "carbon-app" {
     export interface ICompilerService {
         compile(fileName:string, text?:string):Promise<CompilationResult>;
         addLib(fileName:string, text:string);
+        getStaticCode(fileName:string):string;
         clear();
         codeProvider:any;
     }

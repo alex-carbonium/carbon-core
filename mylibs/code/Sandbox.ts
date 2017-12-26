@@ -39,17 +39,14 @@ var sandboxFunc = null;
 export class Sandbox {
     runOnElement(context:RuntimeContext, element:IContainer, code:string) {
         let nameResolver = new ControlNameResolver(context, element);
-        let resolverProxy = new Proxy({}, nameResolver);
+
         ElementProxy.clear();
-        let name = "n" + element.id;
-        if((element as any).artboard) {
-            name = 'n' + (element as any).artboard.id
-        }
+
         code = code.replace('Object.defineProperty(exports, "__esModule", { value: true });', '');
-        code = 'var ' + name + ' = __proxy;' + "let eval = null;" + code;
+        code = "let eval = null;" + code;
 
         sandboxFunc = sandboxFunc || new Function('__proxy', '__code', source);
-        sandboxFunc(resolverProxy, code);
+        sandboxFunc(nameResolver.proxy, code);
     }
 
     runOnModule(context:RuntimeContext, module:any, code:string) {

@@ -1,0 +1,11 @@
+// import {TArtboard} from "carbon-core";
+
+export class SliderBehavior {
+    constructor(private artboard:TArtboard) {
+
+    }
+
+    foo() {
+        alert('adfadf');
+    }
+}
