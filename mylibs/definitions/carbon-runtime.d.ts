@@ -48,7 +48,7 @@ declare module "carbon-runtime" {
         angle: number;
         fill: string | Brush;
         stroke: string | Brush;
-        opacity:number;
+        opacity: number;
     }
 
     type DragConstraint = {
@@ -66,14 +66,24 @@ declare module "carbon-runtime" {
         enabled: boolean;
         horizontal: boolean;
         vertical: boolean;
-        ondragging: (e: { dx: number, dy: number, target: TUIElement }) => void;
-        onbegindrag: (e: { target: TUIElement }) => void;
-        onenddrag: (e: { target: TUIElement }) => void;
+        onDragging: (e: { dx: number, dy: number, target: TUIElement, preventDefault: () => void, stopPropagation: () => void }) => void;
+        onBeginDrag: (e: { target: TUIElement, preventDefault: () => void, stopPropagation: () => void }) => void;
+        onEndDrag: (e: { target: TUIElement }) => void;
         constraint: DragConstraint;
+    }
+
+    interface TRect {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
     }
 
     interface TUIElement extends TUIElementProps {
         animate(props: AnimationProps, duration?: number, options?: any, progress?: () => void): Promise<void>;
+        boundaryRect(): TRect;
+        clone(): TUIElement;
+        center(): { x: number, y: number };
         readonly parent: TContainer;
         readonly draggable: TDraggable;
     }
@@ -101,6 +111,9 @@ declare module "carbon-runtime" {
         add(element: TUIElement);
         remove(element: TUIElement);
         insert(element: TUIElement, index: number);
+
+        findElementByName(name: string): TUIElement;
+        attachDisposable(disposable: IDisposable);
     }
 
     interface Property<T> {
@@ -219,10 +232,10 @@ declare module "carbon-runtime" {
     }
 
     type EdgeSwipeEventCallback = EventCallback<{
-        distance:number;
-        edge:ScreenEdge;
-        event:PointerEvent;
-        stopPropagation():void;
+        distance: number;
+        edge: ScreenEdge;
+        event: PointerEvent;
+        stopPropagation(): void;
     }>
 
     var DeviceScreen: {

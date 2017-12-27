@@ -20,6 +20,14 @@ EventData.prototype.stopPropagation = function stopPropagation() {
     this._stopPropagation = true;
 }
 
+EventData.prototype.isDefaultPrevented = function isDefaultPrevented() {
+    return !!this._preventDefault;
+}
+
+EventData.prototype.isPropagationStopped = function isPropagationStopped() {
+    return !!this._stopPropagation;
+}
+
 //TODO: extend DesignerController from base class
 export default class ControllerBase implements IController {
     inlineEditor: any;

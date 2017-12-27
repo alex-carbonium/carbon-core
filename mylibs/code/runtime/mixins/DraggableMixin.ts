@@ -14,16 +14,16 @@ class Draggable implements IProxySource, IDisposable {
 
     public horizontal: boolean = true;
     public vertical: boolean = true;
-    public ondragging: any = null;
-    public onbegindrag: any = null;
-    public onenddrag: any = null;
+    public onDragging: any = null;
+    public onBeginDrag: any = null;
+    public onEndDrag: any = null;
     public isDragging = false;
 
     proxyDefinition(): { props: string[]; rprops: string[]; methods: string[]; mixins: string[]; } {
         return {
-            props: ["enabled", "constraint", "horizontal", "vertical", "ondragging", "onbegindrag", "onenddrag"],
+            props: ["enabled", "constraint", "horizontal", "vertical", "onDragging", "onBeginDrag", "onEndDrag"],
             rprops: [],
-            methods: ["ondragging", "onbegindrag", "onenddrag"],
+            methods: ["onDragging", "onBeginDrag", "onEndDrag"],
             mixins: []
         }
     }
@@ -52,27 +52,27 @@ class Draggable implements IProxySource, IDisposable {
         let bbox = this.element.getBoundingBox();
         switch (c.type) {
             case "box":
-                if(bbox.x < c.left) {
+                if (bbox.x < c.left) {
                     this.element.x = c.left;
-                } else if(c.right < (bbox.x + bbox.width)) {
+                } else if (c.right < (bbox.x + bbox.width)) {
                     this.element.x = c.right - bbox.width;
                 }
-                if(bbox.y < c.top) {
+                if (bbox.y < c.top) {
                     this.element.y = c.top;
-                } else if(c.bottom < (bbox.y + bbox.height)) {
+                } else if (c.bottom < (bbox.y + bbox.height)) {
                     this.element.y = c.bottom - bbox.height;
                 }
                 break;
             case "parent":
                 let pbox = this.element.parent.getBoundingBox();
-                if(bbox.x < 0) {
+                if (bbox.x < 0) {
                     this.element.x = 0;
-                } else if(pbox.width< (bbox.x + bbox.width)) {
+                } else if (pbox.width < (bbox.x + bbox.width)) {
                     this.element.x = pbox.width - bbox.width;
                 }
-                if(bbox.y < 0) {
+                if (bbox.y < 0) {
                     this.element.y = 0;
-                } else if(pbox.height < (bbox.y + bbox.height)) {
+                } else if (pbox.height < (bbox.y + bbox.height)) {
                     this.element.y = pbox.height - bbox.height;
                 }
                 break;
@@ -86,8 +86,8 @@ class Draggable implements IProxySource, IDisposable {
     _onmousemove = (e) => {
         if (this._startPosition && !this.isDragging) {
             this.isDragging = true;
-            if (this.onbegindrag) {
-                this.onbegindrag({
+            if (this.onBeginDrag) {
+                this.onBeginDrag({
                     target: RuntimeProxy.wrap(this.element)
                 });
             }
@@ -102,21 +102,26 @@ class Draggable implements IProxySource, IDisposable {
             if (!this.vertical) {
                 dy = 0;
             }
-            if (this.ondragging) {
-                let event = {
-                    dx: dx,
-                    dy: dy,
-                    target: RuntimeProxy.wrap(this.element)
-                }
-                this.ondragging(event);
+
+            let event = Environment.controller.wrapEvent({
+                dx: dx,
+                dy: dy,
+                target: RuntimeProxy.wrap(this.element)
+            });
+
+            if (this.onDragging) {
+                this.onDragging(event);
                 dx = event.dx;
                 dy = event.dy;
             }
 
-            let point = Point.allocate(dx, dy);
-            this.element.applyTranslation(point, true);
+            if (!event.isDefaultPrevented()) {
+                let point = Point.allocate(dx, dy);
+                this.element.applyTranslation(point, true);
+                point.free();
+            }
+
             this._applyConstraint();
-            point.free();
         }
     }
 
@@ -124,8 +129,8 @@ class Draggable implements IProxySource, IDisposable {
         if (this._startPosition) {
             this.element.clearSavedLayoutProps();
 
-            if (this.isDragging && this.onenddrag) {
-                this.onenddrag({
+            if (this.isDragging && this.onEndDrag) {
+                this.onEndDrag({
                     target: RuntimeProxy.wrap(this.element)
                 });
             }

@@ -945,6 +945,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
         return result;
     }
+
     dispose() {
         if (this.isDisposed()) {
             return;

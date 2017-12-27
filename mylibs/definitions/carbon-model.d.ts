@@ -307,6 +307,7 @@ declare module "carbon-model" {
         code(value?:string):string;
         screenSize():ISize;
         isDisposed():boolean;
+        attachDisposable(disposable:IDisposable);
     }
 
     export interface IStateboardProps extends IArtboardProps {

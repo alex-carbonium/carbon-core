@@ -2595,7 +2595,7 @@ PropertyMetadata.registerForType(UIElement, {
         return {
             rprops: ["name", "id", "parent"], // readonly props
             props: ["x", "y", "width", "height", "angle", "visible", "fill", "stroke", "opacity"], // read/write props
-            methods: ["animate", "boundaryRect"],
+            methods: ["animate", "boundaryRect", "clone", "center"],
             mixins: ["draggable"]
         }
     },

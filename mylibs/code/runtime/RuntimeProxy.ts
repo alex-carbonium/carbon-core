@@ -30,6 +30,9 @@ export class RuntimeProxy implements IDisposable {
     }
 
     static wrap(source: any): any {
+        if(!source) {
+            return source;
+        }
         if (typeof source !== 'object') {
             return source;
         }

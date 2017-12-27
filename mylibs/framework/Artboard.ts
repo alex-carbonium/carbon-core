@@ -27,6 +27,8 @@ import { IconsetCell } from "./IconsetCell";
 import PropertyTracker from "framework/PropertyTracker";
 import { IElementWithCode } from "carbon-model";
 import { ArtboardProxyGenerator } from "../code/ProxyGenerator";
+import { IDisposable } from "carbon-runtime";
+import { AutoDisposable } from "../AutoDisposable";
 
 
 // TODO: artboard states
@@ -989,6 +991,11 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         }
     }
 
+    attachDisposable(disposable:IDisposable) {
+        this.runtimeProps.disposables = this.runtimeProps.disposables || new AutoDisposable();
+        this.runtimeProps.disposables.add(disposable)
+    }
+
     private activeLayerChanged(layer: ILayer) {
         if (layer.type !== LayerType.Isolation) {
             this.incrementVersion();
@@ -1516,7 +1523,7 @@ PropertyMetadata.registerForType(Artboard, {
         return {
             rprops: ["width", "height", "name", "id", "children"], // readonly props
             props: ["fill"], // read/write props
-            methods: ["boundaryRect", "add", "remove", "insert"],
+            methods: ["boundaryRect", "add", "remove", "insert", "findElementByName", "attachDisposable"],
             mixins: []
         }
     },

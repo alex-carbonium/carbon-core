@@ -1,11 +1,73 @@
-// import {TArtboard} from "carbon-core";
+export enum Direction {
+    Horizontal= 0,
+    Vertical = 1
+}
 
 export class SliderBehavior {
-    constructor(private artboard:TArtboard) {
+    public readonly value:Property<number>;
+    public readonly onChange:Event<number>;
 
-    }
+    public min:number = 0;
+    public max:number = 100;
+    public step:number = 1;
 
-    foo() {
-        alert('adfadf');
+    constructor(private artboard:TArtboard, private direction = Direction.Horizontal, handleElementName='handle') {
+        let handle = artboard.findElementByName(handleElementName)
+        let value = 0;
+        if(!handle) {
+            throw "Can't find element with name: " + handleElementName;
+        }
+
+        let rect = handle.parent.boundaryRect();
+
+        handle.draggable.enabled = true;
+        handle.draggable.horizontal = direction === Direction.Horizontal;
+        handle.draggable.vertical = direction === Direction.Vertical;
+        handle.draggable.constraint = {
+            type: "parent",
+            bottom: 0, left: 0, right: 0, top: 0
+        }
+
+        this.onChange = Model.createEvent<number>();
+
+        this.value = Model.createProperty(()=>value, v=>{
+            value=v;
+            let range = this.max - this.min;
+            if(direction === Direction.Horizontal) {
+                handle.x = (rect.width - handle.width) * v / range - handle.width /2 ;
+            } else {
+                handle.y = (rect.height - handle.height) * v / range - handle.height /2 ;
+            }
+        });
+
+        let startCenter:{x:number, y:number};
+
+        handle.draggable.onBeginDrag = (e) => {
+            startCenter = handle.center();
+        }
+
+        handle.draggable.onDragging = (e)=> {
+            let value = 0;
+            if(direction === Direction.Horizontal) {
+                let w = rect.width - e.target.width;
+                if(w > 0) {
+                    value = (startCenter.x + e.dx) / w;
+                }
+            } else {
+                let h = rect.height - e.target.height;
+                if(h > 0) {
+                    value = (startCenter.y + e.dy) / h;
+                }
+            }
+
+            let range = this.max - this.min;
+            value = value * range;
+            value = value - value % this.step;
+
+            this.value.set(value);
+            this.onChange.raise(value);
+            e.preventDefault();
+        }
+
     }
 }
