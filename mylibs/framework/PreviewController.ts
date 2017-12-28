@@ -32,7 +32,7 @@ export default class PreviewController extends ControllerBase {
         return (eventType).toLowerCase();
     }
 
-    async _propagateAction(eventData, eventType, element): Promise<boolean> {
+    async _propagateAction(eventData, eventType, element, bubble = true): Promise<boolean> {
         if (!element || element === NullContainer) {
             return;
         }
@@ -72,9 +72,11 @@ export default class PreviewController extends ControllerBase {
             return true;
         }
 
-        var parent = element.parent;
-        if (parent && parent !== this.view) {
-            return await this._propagateAction(eventData, eventType, parent);
+        if (bubble) {
+            var parent = element.parent;
+            if (parent && parent !== this.view) {
+                return await this._propagateAction(eventData, eventType, parent, bubble);
+            }
         }
 
         return;
@@ -95,7 +97,7 @@ export default class PreviewController extends ControllerBase {
         if (element.scrollX !== undefined) {
             var oldX = element.scrollX;
             var oldY = element.scrollY;
-            let scroll = {scrollX:Math.round(oldX + delta.dx), scrollY:Math.round(oldY + delta.dy), target:RuntimeProxy.wrap(element)};
+            let scroll = { scrollX: Math.round(oldX + delta.dx), scrollY: Math.round(oldY + delta.dy), target: RuntimeProxy.wrap(element) };
 
             var events = element.runtimeProps.events;
             let eventName = "scroll";
@@ -123,7 +125,7 @@ export default class PreviewController extends ControllerBase {
 
     async onpanstart(eventData) {
         super.onpanstart(eventData);
-        if(eventData.handled) {
+        if (eventData.handled) {
             return;
         }
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
@@ -135,7 +137,7 @@ export default class PreviewController extends ControllerBase {
 
     async onpanmove(eventData) {
         super.onpanmove(eventData);
-        if(eventData.handled) {
+        if (eventData.handled) {
             return;
         }
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
@@ -155,7 +157,7 @@ export default class PreviewController extends ControllerBase {
 
     async onpanend(eventData) {
         super.onpanend(eventData);
-        if(eventData.handled) {
+        if (eventData.handled) {
             return;
         }
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
@@ -170,7 +172,7 @@ export default class PreviewController extends ControllerBase {
 
     onpinchmove(eventData) {
         super.onpinchmove(eventData);
-        if(eventData.handled) {
+        if (eventData.handled) {
             return;
         }
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
@@ -179,7 +181,7 @@ export default class PreviewController extends ControllerBase {
 
     onpinchstart(eventData) {
         super.onpinchstart(eventData);
-        if(eventData.handled) {
+        if (eventData.handled) {
             return;
         }
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
@@ -188,7 +190,7 @@ export default class PreviewController extends ControllerBase {
 
     onpinchend(eventData) {
         super.onpinchend(eventData);
-        if(eventData.handled) {
+        if (eventData.handled) {
             return;
         }
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
@@ -197,7 +199,7 @@ export default class PreviewController extends ControllerBase {
 
     ontap(eventData) {
         super.ontap(eventData);
-        if(eventData.handled) {
+        if (eventData.handled) {
             return;
         }
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
@@ -206,7 +208,7 @@ export default class PreviewController extends ControllerBase {
 
     ondoubletap(eventData) {
         super.ondoubletap(eventData);
-        if(eventData.handled) {
+        if (eventData.handled) {
             return;
         }
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
@@ -215,7 +217,7 @@ export default class PreviewController extends ControllerBase {
 
     onmousewheel(eventData) {
         super.onmousewheel(eventData);
-        if(eventData.handled) {
+        if (eventData.handled) {
             return;
         }
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
@@ -242,24 +244,42 @@ export default class PreviewController extends ControllerBase {
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
         this._propagateAction(eventData, "mousedown", element);
     }
-
+    _mouseOverElements = [];
     onmousemove(eventData) {
         super.onmousemove(eventData);
 
         var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        this._propagateAction(eventData, "mousemove", element);
+        var alreadyFound = false;
+        for (var i = this._mouseOverElements.length - 1; i >= 0; --i) {
+            var e = this._mouseOverElements[i];
+            if (e.isDisposed()) {
+                this._mouseOverElements.splice(i, 1);
+            } else if (e === element) {
+                alreadyFound = true;
+            } else if (!e.hitTest(eventData)) {
+                this._propagateAction(eventData, "mouseleave", e, false);
+                this._mouseOverElements.splice(i, 1);
+            }
+        }
+        if (element) {
+            if (!alreadyFound) {
+                this._mouseOverElements.push(element);
+                this._propagateAction(eventData, "mouseenter", element);
+            }
+            this._propagateAction(eventData, "mousemove", element);
+        }
     }
 
     onmouseenter(eventData) {
-        super.onmouseenter(eventData);
-        var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        this._propagateAction(eventData, "mouseenter", element);
+        // super.onmouseenter(eventData);
+        // var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
+        // this._propagateAction(eventData, "mouseenter", element);
     }
 
     onmouseleave(eventData) {
-        super.onmouseleave(eventData);
-        var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
-        this._propagateAction(eventData, "mouseleave", element);
+        // super.onmouseleave(eventData);
+        // var element = this.previewModel.activePage.hitElementDirect(eventData, this.view.scale());
+        // this._propagateAction(eventData, "mouseleave", element);
     }
 
     onmouseup(eventData) {

@@ -991,7 +991,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         }
     }
 
-    attachDisposable(disposable:IDisposable) {
+    attachDisposable(disposable: IDisposable) {
         this.runtimeProps.disposables = this.runtimeProps.disposables || new AutoDisposable();
         this.runtimeProps.disposables.add(disposable)
     }
@@ -1020,7 +1020,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     get version() {
         let artboard = this;
-        if(this.runtimeProps.sourceArtboard) {
+        if (this.runtimeProps.sourceArtboard) {
             artboard = this.runtimeProps.sourceArtboard;
         }
 
@@ -1029,7 +1029,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     get codeVersion() {
         let artboard = this;
-        if(this.runtimeProps.sourceArtboard) {
+        if (this.runtimeProps.sourceArtboard) {
             artboard = this.runtimeProps.sourceArtboard;
         }
 
@@ -1332,7 +1332,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     code(value?: string): string {
         let artboard = this;
-        if(this.runtimeProps.sourceArtboard) {
+        if (this.runtimeProps.sourceArtboard) {
             artboard = this.runtimeProps.sourceArtboard;
         }
 
@@ -1345,7 +1345,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     get exports(): { [name: string]: string } {
         let artboard = this;
-        if(this.runtimeProps.sourceArtboard) {
+        if (this.runtimeProps.sourceArtboard) {
             artboard = this.runtimeProps.sourceArtboard;
         }
 
@@ -1354,7 +1354,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     set exports(value: { [name: string]: string }) {
         let artboard = this;
-        if(this.runtimeProps.sourceArtboard) {
+        if (this.runtimeProps.sourceArtboard) {
             artboard = this.runtimeProps.sourceArtboard;
         }
 
@@ -1363,7 +1363,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     declaration(module: boolean): string {
         let artboard = this;
-        if(this.runtimeProps.sourceArtboard) {
+        if (this.runtimeProps.sourceArtboard) {
             artboard = this.runtimeProps.sourceArtboard;
         }
 
@@ -1523,7 +1523,16 @@ PropertyMetadata.registerForType(Artboard, {
         return {
             rprops: ["width", "height", "name", "id", "children"], // readonly props
             props: ["fill"], // read/write props
-            methods: ["boundaryRect", "add", "remove", "insert", "findElementByName", "attachDisposable"],
+            methods: [
+                "boundaryRect",
+                "add",
+                "remove",
+                "insert",
+                "findElementByName",
+                "attachDisposable",
+                "setProperties",
+                "getPropertiesSnapshot",
+                "animate"],
             mixins: []
         }
     },

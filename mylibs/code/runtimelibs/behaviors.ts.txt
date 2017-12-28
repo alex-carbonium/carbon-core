@@ -71,3 +71,33 @@ export class SliderBehavior {
 
     }
 }
+
+export class HoverBehavior {
+    private snapshot:any;
+    private hover = false;
+
+    constructor(element:TArtboard, props:Partial<TArtboardProps>);
+    constructor(element:TUIElement, props:Partial<TUIElementProps>);
+    constructor(element:TSymbol, props:Partial<TSymbolProps>);
+    constructor(element:TStar, props:Partial<TStarProps>);
+    constructor(element:TImage, props:Partial<TImageProps>);
+    constructor(element:TText, props:Partial<TTextProps>);
+    constructor(element:TRectangle, props:Partial<TRectangleProps>);
+    constructor(element:TArtboardFrame, props:Partial<TArtboardFrameProps>);
+
+    constructor(element:any, props:any, duration:number = 0) {
+        element.onMouseEnter = () => {
+            if(this.hover) {
+                return;
+            }
+            this.snapshot = (element as any).getPropertiesSnapshot(props);
+            (element as any).setProperties(props);
+            this.hover = true;
+        }
+
+        element.onMouseLeave = () => {
+            (element as any).setProperties(this.snapshot);
+            this.hover = false;
+        }
+    }
+}

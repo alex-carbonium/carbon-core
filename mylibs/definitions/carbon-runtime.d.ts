@@ -79,7 +79,7 @@ declare module "carbon-runtime" {
         height: number;
     }
 
-    interface TUIElement extends TUIElementProps {
+    interface TUIElement extends TUIElementProps, MouseEventHandler {
         animate(props: AnimationProps, duration?: number, options?: any, progress?: () => void): Promise<void>;
         boundaryRect(): TRect;
         clone(): TUIElement;
@@ -95,18 +95,23 @@ declare module "carbon-runtime" {
         insert(element: TUIElement, index: number);
     }
 
-    interface TSymbol extends TUIElement {
-        states: string[];
+    interface TSymbolProps extends TUIElementProps {
         currentState: string;
+    }
+
+    interface TSymbol extends TUIElement, TSymbolProps {
+        readonly states: string[];
         nextState(): boolean;
         prevState(): boolean;
     }
 
-    interface TArtboard extends MouseEventHandler {
+    interface TArtboardProps extends TUIElementProps{
         readonly width: number;
         readonly height: number;
         readonly name: string;
+    }
 
+    interface TArtboard extends TArtboardProps, MouseEventHandler {
         readonly children: ReadonlyArray<(TUIElement | TContainer)>;
         add(element: TUIElement);
         remove(element: TUIElement);
@@ -167,6 +172,8 @@ declare module "carbon-runtime" {
 
     interface TArtboardFrameProps extends TUIElementProps {
         artboardName: ArtboardNames;
+        scrollX: number;
+        scrollY: number;
     }
 
     interface ScrollEventHandler {
@@ -177,8 +184,6 @@ declare module "carbon-runtime" {
     }
 
     interface TArtboardFrame extends TUIElement, TArtboardFrameProps, ScrollEventHandler {
-        scrollX: number;
-        scrollY: number;
         scrollVertical: boolean;
         scrollHorizontal: boolean;
         verticalSnapPoints: number[];

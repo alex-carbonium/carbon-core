@@ -22,7 +22,7 @@ export class RuntimeProxy implements IDisposable {
     }
 
     static unwrap<T>(proxy: T): T {
-        if ((proxy as any).__isProxy) {
+        if (proxy && (proxy as any).__isProxy) {
             return RuntimeProxy.proxyMap.get(proxy as any);
         }
 
@@ -30,10 +30,7 @@ export class RuntimeProxy implements IDisposable {
     }
 
     static wrap(source: any): any {
-        if(!source) {
-            return source;
-        }
-        if (typeof source !== 'object') {
+        if (!source || typeof source !== 'object') {
             return source;
         }
 

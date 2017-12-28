@@ -7,15 +7,15 @@ export class ArtboardProxyGenerator {
     static getControlType(e) {
         switch (e.t) {
             case Types.Path:
-                return "TPath & MouseEventHandler";
+                return "TPath";
             case Types.Rectangle:
-                return "TRectangle & MouseEventHandler";
+                return "TRectangle ";
             case Types.Text:
-                return "TText & MouseEventHandler";
+                return "TText";
             case Types.ArtboardFrame:
-                return "TArtboardFrame & MouseEventHandler";
+                return "TArtboardFrame";
         }
-        return "TUIElement & MouseEventHandler";
+        return "TUIElement";
     }
 
     static getGenericParameter(type:string):string {

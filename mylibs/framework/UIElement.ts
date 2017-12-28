@@ -118,6 +118,10 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
     }
 
+    setProperties(props) {
+        this.prepareAndSetProps(clone(props), ChangeMode.Self);
+    }
+
     hasPendingStyle() {
         if (!this.props.styleId) {
             return false;
@@ -162,6 +166,16 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             }
         }
         super.setProps.apply(this, arguments);
+    }
+
+    getPropertiesSnapshot(props) {
+        let keys = Object.keys(props);
+        let snapshot = {};
+        for(var key of keys) {
+            snapshot[key] = this.props[key];
+        }
+
+        return snapshot;
     }
 
     refreshMinSizeConstraints() {
@@ -2203,6 +2217,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         options = extend({}, options);
         options.duration = Math.max(duration || 0, 1);
         let that = RuntimeProxy.unwrap<UIElement>(this);
+        properties = clone(properties);
+        this.prepareProps(properties, ChangeMode.Self);
+
         for (let propName in properties) {
             let newValue = properties[propName];
             let accessor = (function (name) {
@@ -2595,7 +2612,7 @@ PropertyMetadata.registerForType(UIElement, {
         return {
             rprops: ["name", "id", "parent"], // readonly props
             props: ["x", "y", "width", "height", "angle", "visible", "fill", "stroke", "opacity"], // read/write props
-            methods: ["animate", "boundaryRect", "clone", "center"],
+            methods: ["animate", "boundaryRect", "clone", "center", "setProperties", "getPropertiesSnapshot"],
             mixins: ["draggable"]
         }
     },
