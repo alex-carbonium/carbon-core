@@ -53,6 +53,7 @@ export default class PreviewController extends ControllerBase {
 
                 res = events[eventName].raise(eventData);
             }
+
             if (res instanceof Promise) {
                 res = await res;
             }
@@ -72,7 +73,7 @@ export default class PreviewController extends ControllerBase {
             return true;
         }
 
-        if (bubble) {
+        if (bubble && !eventData.isPropagationStopped()) {
             var parent = element.parent;
             if (parent && parent !== this.view) {
                 return await this._propagateAction(eventData, eventType, parent, bubble);

@@ -1,11 +1,32 @@
 import { IProxySource } from "carbon-app";
 import { Property } from "./Property";
 import { Event } from "./Event";
-import * as Runtime from "carbon-runtime";
 import { ISize } from "carbon-geometry";
 import { Model } from "../../framework/Model";
 import Brush from "../../framework/Brush";
 import Matrix from "math/matrix";
+import { RuntimeProxy } from "./RuntimeProxy";
+import Environment from "environment";
+
+function EventData(props) {
+    Object.assign(this, props);
+}
+
+EventData.prototype.preventDefault = function preventDefault() {
+    this._preventDefault = true;
+}
+
+EventData.prototype.stopPropagation = function stopPropagation() {
+    this._stopPropagation = true;
+}
+
+EventData.prototype.isDefaultPrevented = function isDefaultPrevented() {
+    return !!this._preventDefault;
+}
+
+EventData.prototype.isPropagationStopped = function isPropagationStopped() {
+    return !!this._stopPropagation;
+}
 
 var model = new Model();
 export class ModelFactoryClass implements IProxySource {
@@ -24,7 +45,7 @@ export class ModelFactoryClass implements IProxySource {
                 "createPath",
                 "createArtboardFrame"
             ],
-            mixins:[]
+            mixins: []
         }
     }
 
@@ -38,47 +59,59 @@ export class ModelFactoryClass implements IProxySource {
 
     createText(props?: any): any {
         props = props || {}
-        let size = { width: props.width | 0, height:props.height|0 };
+        let size = { width: props.width | 0, height: props.height | 0 };
         props = ModelFactory._prepareProps(props);
 
         return model.createText(size, props);
     }
     createImage(props?: any): any {
         props = props || {}
-        let size = { width: props.width | 0, height:props.height|0 };
+        let size = { width: props.width | 0, height: props.height | 0 };
         props = ModelFactory._prepareProps(props);
         return model.createImage(size, props);
     }
     createRectangle(props?: any): any {
         props = props || {}
-        let size = { width: props.width | 0, height:props.height|0 };
+        let size = { width: props.width | 0, height: props.height | 0 };
         props = ModelFactory._prepareProps(props);
         return model.createRectangle(size, props);
     }
     createOval(props?: any): any {
         props = props || {}
-        let size = { width: props.width | 0, height:props.height|0 };
+        let size = { width: props.width | 0, height: props.height | 0 };
         props = ModelFactory._prepareProps(props);
         return model.createOval(size, props);
     }
     createStar(props?: any): any {
         props = props || {}
-        let size = { width: props.width | 0, height:props.height|0 };
+        let size = { width: props.width | 0, height: props.height | 0 };
         props = ModelFactory._prepareProps(props);
         return model.createStar(size, props);
     }
     createPath(props?: any): any {
         props = props || {}
-        let size = { width: props.width | 0, height:props.height|0 };
+        let size = { width: props.width | 0, height: props.height | 0 };
         props = ModelFactory._prepareProps(props);
         return model.createPath(props.points, size, props);
     }
 
-    createArtboardFrame(props?:any) {
+    createEventData(data: any) {
+        return new EventData(data);
+    }
+
+    createArtboardFrame(props?: any): Promise<any> {
         props = props || {}
-        let size = { width: props.width | 0, height:props.height|0 };
+        let size = { width: props.width | 0, height: props.height | 0 };
         props = ModelFactory._prepareProps(props);
-        return model.createArtboardFrame(props.artboardName, size, props);
+        let name = props.artboardName;
+        delete props.artboardName
+        let frame = model.createArtboardFrame(name, size, props);
+        let previewModel = (Environment.controller as any).previewModel;
+        if (previewModel) {
+            return previewModel.runCodeOnArtboard((frame as any).innerElement).then(() => frame);
+        }
+
+        return Promise.resolve(frame);
     }
 
     _prepareProps(props) {

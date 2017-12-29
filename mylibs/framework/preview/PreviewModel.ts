@@ -135,80 +135,18 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
     _runCodeOnPage(page: IPage): Promise<IPage> {
         let promises = [];
 
-        return this._runCodeOnArtboard(page.children[0] as any).then(() => page);
-        // page.applyVisitor(e => {
-        //     if (e instanceof Symbol) {
-        //         let artboard: IArtboard = e.artboard;
-        //         let code = artboard.code();
-        //         if (code) {
-        //             let parent = (artboard.parent as any);
-        //             let parentCode = parent.code();
-        //             let parentPromise;
-        //             if (parentCode) {
-        //                 let name = NameProvider.escapeName('./' + parent.name + '.ts');
-        //                 parentPromise = Services.compiler.codeProvider.getModuleCode(name).
-        //                     then(code => {
-        //                         this.modulesCode[name] = code;
-        //                     })
-        //             } else {
-        //                 parentPromise = Promise.resolve(null);
-        //             }
-
-        //             promises.push(parentPromise.then(() => Services.compiler.codeProvider.getArtobardCode(artboard).then((code) => {
-        //                 if (code) {
-        //                     this.sandbox.runOnElement(this.runtimeContext, e, code);
-        //                 }
-        //                 // todo: think what to do if failed
-        //             })));
-        //         }
-        //     }
-        // });
-        // let sourceArtboard = page.children[0].runtimeProps.sourceArtboard;
-        // let parent = (sourceArtboard.parent as any);
-        // let parentCode = parent.code();
-        // if (parentCode) {
-        //     let name = NameProvider.escapeName('./' + parent.name + '.ts');
-        //     promises.push(Services.compiler.codeProvider.getModuleCode(name).
-        //         then(code => {
-        //             this.modulesCode[name] = code;
-        //         }));
-        // }
-
-        // return Promise.all(promises).then(() => {
-        //     let artboard: IArtboard = page.children[0] as any;
-        //     if (artboard.code()) {
-        //         return Services.compiler.codeProvider.getArtobardCode(artboard).then((code) => {
-        //             if (code) {
-        //                 try {
-        //                     this.sandbox.runOnElement(this.runtimeContext, artboard, code);
-        //                     this.modelFailed = false;
-        //                 } catch (e) {
-        //                     // todo: log to console console.error(e);
-        //                     this.modelFailed = true;
-        //                 }
-        //             } else {
-        //                 this.modelFailed = true;
-        //             }
-        //             // todo: think what to do if failed
-
-        //             return page;
-        //         })
-        //     }
-
-        //     return page as any;
-        // }) as any as Promise<IPage>;
+        return this.runCodeOnArtboard(page.children[0] as any).then(() => page);
     }
 
-    _runCodeOnArtboard(artboard: IArtboard): Promise<void> {
+    runCodeOnArtboard(artboard: IArtboard): Promise<void> {
         let promises = [];
 
         artboard.applyVisitor(e => {
-            if (e instanceof Symbol) {
+            if (e instanceof Symbol && artboard as any !== e) {
                 let artboard: IArtboard = e.artboard;
                 let code = artboard.code();
                 if (code) {
-
-                    promises.push(this._runCodeOnArtboard(e as any));
+                    promises.push(this.runCodeOnArtboard(e as any));
                 }
             }
         });
@@ -225,7 +163,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
 
         return Promise.all(promises).then(() => {
             if (artboard.code()) {
-                return Services.compiler.codeProvider.getArtobardCode(artboard).then((code) => {
+                return Services.compiler.codeProvider.getArtboardCode(artboard).then((code) => {
                     if (code) {
                         try {
                             this.sandbox.runOnElement(this.runtimeContext, artboard, code);

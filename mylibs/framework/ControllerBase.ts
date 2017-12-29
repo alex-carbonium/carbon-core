@@ -7,26 +7,9 @@ import Artboard from "./Artboard";
 import { keyboard } from "../platform/Keyboard";
 import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUIElement, IContainer, IComposite, IEvent3, WorkspaceTool, InteractionType, LayerType, ChangeMode, IView, IActionManager, IEventData, IPointerEventData } from "carbon-core";
 import { IArtboard } from "carbon-model";
+import { ModelFactory } from "../code/runtime/ModelFactory";
 
-function EventData(props) {
-    Object.assign(this, props);
-}
 
-EventData.prototype.preventDefault = function preventDefault() {
-    this._preventDefault = true;
-}
-
-EventData.prototype.stopPropagation = function stopPropagation() {
-    this._stopPropagation = true;
-}
-
-EventData.prototype.isDefaultPrevented = function isDefaultPrevented() {
-    return !!this._preventDefault;
-}
-
-EventData.prototype.isPropagationStopped = function isPropagationStopped() {
-    return !!this._stopPropagation;
-}
 
 //TODO: extend DesignerController from base class
 export default class ControllerBase implements IController {
@@ -83,7 +66,7 @@ export default class ControllerBase implements IController {
     }
 
     wrapEvent(data) {
-        return new EventData(data);
+        return ModelFactory.createEventData(data);
     }
 
     updateCursor(eventData?) {
@@ -95,11 +78,9 @@ export default class ControllerBase implements IController {
     onWindowResize() {
     }
 
-
-
     createEventData(event: PointerEvent): IMouseEventData {
         var scale = this.view.scale();
-        return new EventData({
+        return ModelFactory.createEventData({
             handled: false,
             x: Math.round((domUtil.layerX(event) + this.view.scrollX) * 100 / scale) / 100,
             y: Math.round((domUtil.layerY(event) + this.view.scrollY) * 100 / scale) / 100,

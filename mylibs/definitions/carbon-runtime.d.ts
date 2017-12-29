@@ -84,6 +84,8 @@ declare module "carbon-runtime" {
         boundaryRect(): TRect;
         clone(): TUIElement;
         center(): { x: number, y: number };
+        registerEventHandler(eventName:string, callback:(data?:DataBag) => void | Promise<void|boolean>);
+        raiseEvent(eventName:string, data?:DataBag);
         readonly parent: TContainer;
         readonly draggable: TDraggable;
     }
@@ -119,6 +121,9 @@ declare module "carbon-runtime" {
 
         findElementByName(name: string): TUIElement;
         attachDisposable(disposable: IDisposable);
+
+        registerEventHandler(eventName:string, callback:(data?:DataBag) => void | Promise<void|boolean>);
+        raiseEvent(eventName:string, data?:DataBag);
     }
 
     interface Property<T> {
@@ -188,6 +193,7 @@ declare module "carbon-runtime" {
         scrollHorizontal: boolean;
         verticalSnapPoints: number[];
         horizontalSnapPoints: number[];
+        fitSizeToContent();
     }
 
     interface TPathProps extends TUIElementProps {
@@ -233,7 +239,7 @@ declare module "carbon-runtime" {
         static createOval(props?: Partial<TCircleProps>): TCircle;
         static createStar(props?: Partial<TStarProps>): TStar;
         static createPath(props?: Partial<TPathProps>): TPath;
-        static createArtboardFrame(props?: Partial<TArtboardFrameProps>): TArtboardFrame;
+        static createArtboardFrame(props?: Partial<TArtboardFrameProps>): Promise<TArtboardFrame>;
     }
 
     type EdgeSwipeEventCallback = EventCallback<{

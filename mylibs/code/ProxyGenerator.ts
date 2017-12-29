@@ -58,16 +58,19 @@ export class ArtboardProxyGenerator {
     }
 
     static generateImport(artboard) {
-        let controlList = ["artboard", "navigationController"];
-
+        let set = new Set<string>( ["artboard", "navigationController"]);
         artboard.applyVisitorBreadthFirst((e: IUIElement) => {
             if (e === artboard) {
                 return;
             }
             let name = NameProvider.escapeName(e.name);
-            controlList.push(name);
+            if(name) {
+                set.add(name);
+            }
         });
-        return `import {${controlList.join(', ')}} from "./n${artboard.id}.types"`
+        let controlList = [];
+        set.forEach(c=>controlList.push(c));
+        return `import {${controlList.join(', ')}} from "./n${artboard.compilationUnitId}.types"`
     }
 
     static generate(artboard: IContainer, module: boolean): string {
@@ -99,16 +102,6 @@ ${symbolTypes}
 ${controlList.map(v => `${modifier} const ${v.name}:${v.type};`).join('\n')}
 `;
         return content;
-
-//         if (module) {
-//             return `
-// /// <reference path="carbon-runtime.d.ts" />
-// declare namespace n${artboard.id} {
-// ${content}
-// }`;
-//         } else {
-//             return content;
-//         }
     }
 
     public static generateRuntimeNames(page: IPage): string {

@@ -99,6 +99,14 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         return this.artboard.exports;
     }
 
+    set exports(value) {
+        if(!this.artboard) {
+            return;
+        }
+
+        this.artboard.exports = value;
+    }
+
     _setupCustomProperties(artboard) {
         var res: any = {};
         var properties = artboard.props.customProperties;
@@ -171,6 +179,20 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
             return this.artboard.code();
         }
         return null;
+    }
+
+    declaration() {
+        if(this.artboard) {
+            return this.artboard.declaration(true);
+        }
+        return null;
+    }
+
+    get compilationUnitId() {
+        if(this.artboard) {
+            return this.artboard.id;
+        }
+        return "";
     }
 
     clone() {

@@ -53,6 +53,7 @@ export class Model implements IModel {
         this.setSizeAndProps(star, size, props);
         return star;
     }
+
     createPath(points:IPathPoint[], size?: ISize, props?: Partial<IPathProps>): IPath {
         let path = new Path();
         points.forEach(p=>path.addPoint(p));
@@ -74,6 +75,7 @@ export class Model implements IModel {
         this.setSizeAndProps(line, null, props);
         return line;
     }
+
     createCanvas(size?: ISize, props?: Partial<IUIElementProps>): IContainer {
         let canvas = new InteractiveContainer();
         this.setSizeAndProps(canvas, size, props);
@@ -86,6 +88,7 @@ export class Model implements IModel {
         this.setSizeAndProps(artboard, size, props);
         return artboard;
     }
+
     createStateboard(size?: ISize, props?: Partial<IStateboardProps>): IStateboard {
         let stateboard = new Stateboard();
         this.setSizeAndProps(stateboard, size, props);

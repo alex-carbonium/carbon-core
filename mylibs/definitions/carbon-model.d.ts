@@ -484,6 +484,7 @@ declare module "carbon-model" {
         readonly codeVersion:number;
         readonly version:number;
         readonly id:string;
+        readonly compilationUnitId:string;
     }
 
     export type FileType = "image/jpeg" | "image/png" | "image/svg+xml";

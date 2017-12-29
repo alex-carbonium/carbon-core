@@ -1,3 +1,5 @@
+declare type ArtboardNames = string;
+
 export enum Direction {
     Horizontal= 0,
     Vertical = 1
@@ -30,7 +32,7 @@ export class SliderBehavior {
 
         this.onChange = Model.createEvent<number>();
 
-        this.value = Model.createProperty(()=>value, v=>{
+        this.value = Model.createProperty<number>(()=>value, (v:number)=>{
             value=v;
             let range = this.max - this.min;
             if(direction === Direction.Horizontal) {
@@ -99,5 +101,95 @@ export class HoverBehavior {
             (element as any).setProperties(this.snapshot);
             this.hover = false;
         }
+    }
+}
+
+export enum PopupPosition {
+    Left = 0,
+    Top = 1,
+    Right = 2,
+    Bottom = 3,
+    Center = 4
+}
+
+export class PopupBehavior {
+    private frame:TArtboardFrame;
+    private host:TArtboard;
+    private framePromise:Promise<any>;
+    public visible:boolean = false;
+
+    private _hideProperties() {
+        switch(this.position) {
+            case PopupPosition.Left:
+                return {x: -this.frame.width, y:0}
+            case PopupPosition.Right:
+                return {x: this.host.width, y:0}
+            case PopupPosition.Top:
+                return {x:0, y: -this.frame.height}
+            case PopupPosition.Bottom:
+                return {x:0, y: this.host.height}
+            default:
+                return {x:(this.host.width - this.frame.width)/2|0, y: (this.host.height-this.frame.height)/2|0, opacity:0}
+        }
+    }
+
+    onReady(callback:(frame:TArtboardFrame)=>void) {
+        this.framePromise.then((frame)=>{
+            callback(frame);
+            return frame;
+        })
+    }
+
+    private _showProperties() {
+        switch(this.position) {
+            case PopupPosition.Left:
+                return {x: 0, y:0}
+            case PopupPosition.Right:
+                return {x: this.host.width - this.frame.width, y:0}
+            case PopupPosition.Top:
+                return {x:0, y: 0}
+            case PopupPosition.Bottom:
+                return {x:0, y: this.host.height - this.frame.height}
+            default:
+                return {x:(this.host.width - this.frame.width)/2|0, y: (this.host.height-this.frame.height)/2|0, opacity:1}
+        }
+    }
+
+    constructor(hostArtboard:TArtboard, popupArtboardName: ArtboardNames, private position:PopupPosition = PopupPosition.Left, animationOptions:any  = null) {
+        let props:any = {};
+        this.host = hostArtboard;
+        this.framePromise = Model.createArtboardFrame({
+            artboardName:popupArtboardName
+        }).then((frame)=>{
+            this.frame = frame;
+
+            this.frame.fitSizeToContent();
+            this.frame.width  = Math.min(this.frame.width, hostArtboard.width);
+            this.frame.height = Math.min(this.frame.height, hostArtboard.height);
+            this.frame.animate(this._hideProperties(), 0);
+
+            hostArtboard.add(this.frame);
+            return frame;
+        });
+    }
+
+    hide() {
+        this.framePromise.then((frame)=>{
+            if(this.visible) {
+                frame.animate(this._hideProperties(), 300);
+                this.visible = false;
+            }
+            return frame;
+        })
+    }
+
+    show() {
+        this.framePromise.then((frame)=>{
+            if(!this.visible) {
+                frame.animate(this._showProperties(), 300);
+                this.visible = true;
+            }
+            return frame;
+        });
     }
 }

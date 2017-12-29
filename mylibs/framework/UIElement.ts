@@ -42,6 +42,7 @@ import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
 import RenderPipeline from "./render/RenderPipeline";
 import ContextCacheManager from "./render/ContextCacheManager";
 import { RuntimeProxy } from "../code/runtime/RuntimeProxy";
+import { ModelFactory } from "../code/runtime/ModelFactory";
 
 require("../migrations/All");
 
@@ -1804,12 +1805,15 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     findPropertyDescriptor(propName): PropDescriptor {
         return PropertyMetadata.find(this.systemType(), propName);
     }
+
     quickEditProperty(value) {
         return this.field("_quickEditProperty", value, "");
     }
+
     toString() {
         return this.t;
     }
+
     getPath() {
         let path = [this];
         let e = this;
@@ -2250,22 +2254,39 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return group.promise();
     }
 
-    registerEventHandler(name: string, callback: (data: DataBag) => (void | boolean | Promise<void|boolean>)): IDisposable {
+    get compilationUnitId() {
+        return this.id;
+    }
+
+    registerEventHandler(name: string, callback: (data?:DataBag) => (void | boolean | Promise<void|boolean>)): IDisposable {
         let events = this.runtimeProps.events = this.runtimeProps.events || {};
         name = name.toLowerCase();
         let event: RuntimeEvent = events[name] = events[name] || new RuntimeEvent();
         return event.registerHandler(callback);
     }
 
-    raiseEvent(name: string, data?: DataBag): (void | boolean | Promise<void|boolean>) {
+    raiseEvent(name: string, data?: DataBag): Promise<void|boolean> {
+        return this.raiseEventAsync(name, data);
+    }
+
+    private async raiseEventAsync(name: string, data?: DataBag): Promise<void|boolean> {
         let events = this.runtimeProps.events;
+        let res;
         if(events) {
             name = name.toLowerCase();
             let event: RuntimeEvent = events[name];
             if(event) {
-                return event.raise(data);
+                res = await event.raise(data);
             }
         }
+
+        if(res !== false) {
+            let parent = this.parent;
+            if(parent && parent !== NullContainer){
+                return await (parent as any).raiseEventAsync(name, data);
+            }
+        }
+
         return;
     }
 
@@ -2336,6 +2357,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
         return this.runtimeProps.activeGroup;
     }
+
     lockedGroup() {
         return this.enableGroupLocking() && !this.runtimeProps.unlocked;
     }
@@ -2612,7 +2634,7 @@ PropertyMetadata.registerForType(UIElement, {
         return {
             rprops: ["name", "id", "parent"], // readonly props
             props: ["x", "y", "width", "height", "angle", "visible", "fill", "stroke", "opacity"], // read/write props
-            methods: ["animate", "boundaryRect", "clone", "center", "setProperties", "getPropertiesSnapshot"],
+            methods: ["animate", "boundaryRect", "clone", "center", "setProperties", "getPropertiesSnapshot", "registerEventHandler", "raiseEvent"],
             mixins: ["draggable"]
         }
     },

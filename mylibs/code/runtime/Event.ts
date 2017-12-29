@@ -1,5 +1,5 @@
-import { DataBag } from "carbon-runtime";
-import { IDisposable } from "carbon-core";
+import { DataBag, IDisposable } from "carbon-core";
+import { ModelFactory } from "./ModelFactory";
 
 class EventDisposable implements IDisposable {
     dispose(): void {
@@ -11,9 +11,9 @@ class EventDisposable implements IDisposable {
 }
 
 export class Event implements IDisposable {
-    private _handlers:((data?: DataBag) => void | boolean | Promise<void | boolean>)[] = [];
+    private _handlers:((data?:DataBag) => void | boolean | Promise<void | boolean>)[] = [];
 
-    registerHandler(callback: (data?: DataBag) => void | boolean | Promise<void | boolean>): IDisposable {
+    registerHandler(callback: (data?:DataBag) => void | boolean | Promise<void | boolean>): IDisposable {
         this._handlers.push(callback);
 
         return new EventDisposable(callback, this._handlers);

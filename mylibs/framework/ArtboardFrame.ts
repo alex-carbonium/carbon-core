@@ -30,6 +30,10 @@ export default class ArtboardFrameControl extends Container {
         return this._mode;
     }
 
+    get artboard() {
+        return this._artboard;
+    }
+
     edit() {
         if (this.mode() !== ElementState.Edit) {
             this.mode(ElementState.Edit);
@@ -205,12 +209,12 @@ export default class ArtboardFrameControl extends Container {
         this.prepareAndSetProps({ offsetY: -value });
     }
 
-    get artboardName() {
-        if (!this._artboard) {
+    get innerElement() {
+        if (!this.children.length) {
             return null;
         }
 
-        return this._artboard.name;
+        return this.children[0];
     }
 
     set artboardName(value) {
@@ -224,8 +228,6 @@ export default class ArtboardFrameControl extends Container {
                         artboardId: artboard.id
                     }
                 });
-
-                this._initFromArtboard();
             }
         }
     }
@@ -391,6 +393,13 @@ export default class ArtboardFrameControl extends Container {
 
     }
 
+    fitSizeToContent() {
+        let source = this._artboard;
+        if(source) {
+            this.setProps({br:Rect.fromSize(source.width, source.height)}, ChangeMode.Self);
+        }
+    }
+
     drawSelf(context, w, h, environment: RenderEnvironment) {
         if (this._drawing) {
             return;
@@ -553,7 +562,7 @@ PropertyMetadata.registerForType(ArtboardFrameControl, {
                 "verticalSnapPoints",
                 "horizontalSnapPoints",
             ].concat(baseDefinition.props),
-            methods: [].concat(baseDefinition.methods),
+            methods: ["fitSizeToContent"].concat(baseDefinition.methods),
             mixins: [].concat(baseDefinition.mixins)
         }
     }

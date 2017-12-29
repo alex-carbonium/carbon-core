@@ -50,7 +50,7 @@ export class CompiledCodeProvider implements IDisposable {
                 text: () => ArtboardProxyGenerator.generateRuntimeNames(App.Current.activePage),
                 version: App.Current.activePage.version
             },
-            ['n' + artboard.id + ".types.ts"]: {
+            ['n' + artboard.compilationUnitId + ".types.ts"]: {
                 text: () => artboard.declaration(module),
                 version: artboard.version
             }
@@ -98,7 +98,7 @@ export class CompiledCodeProvider implements IDisposable {
         });
     }
 
-    getArtobardCode(element: IElementWithCode): Promise<string | void> {
+    getArtboardCode(element: IElementWithCode): Promise<string | void> {
         if (this._codeCache.has(element)) {
             let item = this._codeCache.get(element);
             if (item.version === element.codeVersion) {
@@ -106,15 +106,7 @@ export class CompiledCodeProvider implements IDisposable {
             }
         }
 
-        let fileName = element.id + ".ts";
-        // let imports = [];
-        // let baseCode = this._extractAndRemoveImports(element.code(), imports);
-
-        // let code = `
-        // ${imports.join('\n')}
-        // namespace n${element.id} {
-        //     ${baseCode}
-        // }`
+        let fileName = element.compilationUnitId + ".ts";
         let code = ArtboardProxyGenerator.generateImport(element)
             + '\n'
             + element.code();
@@ -128,7 +120,7 @@ export class CompiledCodeProvider implements IDisposable {
             }
         }
 
-        this.compiler.addLib("n" + element.id + ".types.ts", element.declaration(true))
+        this.compiler.addLib("n" + element.compilationUnitId + ".types.ts", element.declaration(true))
 
         return this.compiler.compile(fileName, code).then((result) => {
             this._codeCache.set(element, { version: element.codeVersion, text: result.text });

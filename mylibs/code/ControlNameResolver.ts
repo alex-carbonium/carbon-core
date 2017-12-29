@@ -45,7 +45,7 @@ export class ControlNameResolver {
     }
 
     require = (name) => {
-        if(name === "./n"+this._artboard.id+".types") {
+        if(name === "./n"+(this._artboard as any).compilationUnitId +".types") {
             return this.proxy;
         }
 

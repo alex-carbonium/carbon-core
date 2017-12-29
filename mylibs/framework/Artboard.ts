@@ -1532,7 +1532,10 @@ PropertyMetadata.registerForType(Artboard, {
                 "attachDisposable",
                 "setProperties",
                 "getPropertiesSnapshot",
-                "animate"],
+                "animate",
+                "registerEventHandler",
+                "raiseEvent"
+            ],
             mixins: []
         }
     },
