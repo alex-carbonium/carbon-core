@@ -87,6 +87,10 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         this.endInternalUpdate();
     }
 
+    screenSize() {
+        return {width:this.width, height:this.height}
+    }
+
     toJSON() {
         return { t: this.t, props: this.cloneProps() };
     }
