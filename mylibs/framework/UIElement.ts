@@ -43,6 +43,7 @@ import RenderPipeline from "./render/RenderPipeline";
 import ContextCacheManager from "./render/ContextCacheManager";
 import { RuntimeProxy } from "../code/runtime/RuntimeProxy";
 import { ModelFactory } from "../code/runtime/ModelFactory";
+import { PropertyAnimation } from "./animation/PropertyAnimation";
 
 require("../migrations/All");
 
@@ -2217,41 +2218,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
     // returns deffered object
     animate(properties, duration, options, progressCallback) {
-        let animationValues = [];
-        options = extend({}, options);
-        options.duration = Math.max(duration || 0, 1);
-        let that = RuntimeProxy.unwrap<UIElement>(this);
-        properties = clone(properties);
-        this.prepareProps(properties, ChangeMode.Self);
-
-        for (let propName in properties) {
-            let newValue = properties[propName];
-            let accessor = (function (name) {
-                if (that[name] !== undefined) {
-                    return function prop_accessor(value?: any) {
-                        if (arguments.length > 0) {
-                            that[name] = value;
-                        }
-                        return that[name];
-                    }
-                }
-                return function prop_accessor(value?: any) {
-                    if (arguments.length > 0) {
-                        that.setProps({ [name]: value });
-                    }
-                    return that.props[name];
-                }
-            })(propName);
-
-            let currentValue = accessor();
-
-            animationValues.push({ from: currentValue, to: newValue, accessor: accessor });
-        }
-
-        let group = new AnimationGroup(animationValues, options, progressCallback);
-        Environment.view.animationController.registerAnimationGroup(group);
-
-        return group.promise();
+        let animation = new PropertyAnimation(this, properties, Object.assign({},options, {duration}), progressCallback);
+        return animation.start();
     }
 
     get compilationUnitId() {

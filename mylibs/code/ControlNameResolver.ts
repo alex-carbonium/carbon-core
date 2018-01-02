@@ -7,6 +7,8 @@ import { RuntimeScreen } from "./runtime/RuntimeScreen";
 import { AutoDisposable } from "../AutoDisposable";
 import Environment from "environment";
 import { Page } from "carbon-app";
+import { PropertyAnimation } from "../framework/animation/PropertyAnimation";
+import { Color } from "../framework/Color";
 
 const skipList = ["eval", "proxy"]
 const blackList = ["window", "document", "uneval"];
@@ -21,7 +23,9 @@ const system = {
     'isFinite':isFinite,
     'Math':Object.freeze(Math),
     'RegExp':Object.freeze(RegExp),
-    'require':true
+    'require':true,
+    'PropertyAnimation':Object.freeze(PropertyAnimation),
+    'Color': Object.freeze(Color)
 }
 
 export class ControlNameResolver {

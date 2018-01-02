@@ -256,3 +256,8 @@ declare module "carbon-api" {
         appInsights?: Microsoft.ApplicationInsights.IAppInsights;
     }
 }
+
+declare module "hsluv" {
+    export function hsluvToRgb(hsl:number[]):number[];
+    export function rgbToHsluv(rgb:number[]):number[];
+}

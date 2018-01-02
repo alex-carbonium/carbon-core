@@ -1,4 +1,13 @@
+import { IAnimationOptions } from "carbon-core";
+import { ModelFactory } from "../../code/runtime/ModelFactory";
+
 var easingFunctions = {
+    /*
+    * t - time from 0..1
+    * b - initial value
+    * c - end value
+    * d - duration
+    */
     linear: function (t, b, c, d) {
         return c * t / d + b;
     },
@@ -12,7 +21,7 @@ var easingFunctions = {
     },
     easeInOutQuad: function (t, b, c, d) {
         t /= d / 2;
-        if (t < 1) {return c / 2 * t * t + b};
+        if (t < 1) { return c / 2 * t * t + b };
         t--;
         return -c / 2 * (t * (t - 2) - 1) + b;
     },
@@ -27,7 +36,7 @@ var easingFunctions = {
     },
     easeInOutCubic: function (t, b, c, d) {
         t /= d / 2;
-        if (t < 1) {return c / 2 * t * t * t + b};
+        if (t < 1) { return c / 2 * t * t * t + b };
         t -= 2;
         return c / 2 * (t * t * t + 2) + b;
     },
@@ -42,7 +51,7 @@ var easingFunctions = {
     },
     easeInOutQuart: function (t, b, c, d) {
         t /= d / 2;
-        if (t < 1) {return c / 2 * t * t * t * t + b};
+        if (t < 1) { return c / 2 * t * t * t * t + b };
         t -= 2;
         return -c / 2 * (t * t * t * t - 2) + b;
     },
@@ -57,7 +66,7 @@ var easingFunctions = {
     },
     easeInOutQuint: function (t, b, c, d) {
         t /= d / 2;
-        if (t < 1) {return c / 2 * t * t * t * t * t + b};
+        if (t < 1) { return c / 2 * t * t * t * t * t + b };
         t -= 2;
         return c / 2 * (t * t * t * t * t + 2) + b;
     },
@@ -74,13 +83,13 @@ var easingFunctions = {
         return c * Math.pow(2, 10 * (t / d - 1)) + b;
     },
     easeOutExpo: function (t, b, c, d) {
-        return c * ( -Math.pow(2, -10 * t / d) + 1 ) + b;
+        return c * (-Math.pow(2, -10 * t / d) + 1) + b;
     },
     easeInOutExpo: function (t, b, c, d) {
         t /= d / 2;
-        if (t < 1) {return c / 2 * Math.pow(2, 10 * (t - 1)) + b};
+        if (t < 1) { return c / 2 * Math.pow(2, 10 * (t - 1)) + b };
         t--;
-        return c / 2 * ( -Math.pow(2, -10 * t) + 2 ) + b;
+        return c / 2 * (-Math.pow(2, -10 * t) + 2) + b;
     },
     easeInCirc: function (t, b, c, d) {
         t /= d;
@@ -93,7 +102,7 @@ var easingFunctions = {
     },
     easeInOutCirc: function (t, b, c, d) {
         t /= d / 2;
-        if (t < 1) {return -c / 2 * (Math.sqrt(1 - t * t) - 1) + b};
+        if (t < 1) { return -c / 2 * (Math.sqrt(1 - t * t) - 1) + b };
         t -= 2;
         return c / 2 * (Math.sqrt(1 - t * t) + 1) + b;
     }
@@ -104,61 +113,131 @@ var defaultOptions = {
 }
 
 export default class AnimationGroup {
-    [x: string]: any;
+    _values: any;
+    _easing: any;
+    _completed: boolean;
+    _resolve: any;
+    _startTime: number;
+    _promise: Promise<any>;
+    _doneCallback: any;
+    _progressCallback: any;
+    _stopped: boolean;
+    _lastT: number;
+    _restart: boolean;
+    _count = 0;
+    controller: any;
+    public onAnimationEnd: () => void;
 
-    constructor(values, options, progressCallback) {
-        this._progressCallback = progressCallback;
-        this._options = extend(extend({}, defaultOptions), options);
+    constructor(values, private options: IAnimationOptions, private progressCallback) {
+        this.options = extend(extend({}, defaultOptions), options);
         this._values = values;
 
-        this._easing = easingFunctions[this._options.curve];
+        this._easing = easingFunctions[this.options.curve];
         this._completed = false;
+        this._count = (this.options.repeat === undefined) ? 1 : this.options.repeat;
         this._promise = new Promise(resolve => this._resolve = resolve);
     }
 
-    promise(){
+    promise() {
         return this._promise;
     }
 
-    start(startTime) {
-        this._startTime = startTime;
+    start(controller, startTime) {
+        this.controller = controller;
+        this._startTime = startTime + (this.options.delay || 0);
     }
 
     complete() {
         this._completed = true;
+        this._resolve();
+        if (this.onAnimationEnd) {
+            this.onAnimationEnd();
+        }
     }
 
     dispose() {
         this._completed = true;
-        delete this._doneCallback;
-        delete this._progressCallback;
-        delete this._values;
-        delete this._options;
     }
 
     update(currentTime) {
-        if (this._completed) {
+        if (this._restart) {
+            this._restart = false;
+            this._startTime = currentTime;
+        }
+
+        if (this._completed && this._stopped) {
             return;
         }
+
         var t = currentTime - this._startTime;
-        var duration = this._options.duration;
-        if (t > duration) {
+        if (t < 0) {
+            // skip this update because of delay
+            return;
+        }
+
+        this._updateWithParameter(t);
+    }
+
+    _updateWithParameter(t: number) {
+        var duration = this.options.duration;
+        if (t >= duration) {
             t = duration;
-            this._completed = true;
+            this._count--;
+            this._restart = true;
         }
 
         for (var i = 0; i < this._values.length; ++i) {
             var value = this._values[i];
-            var newValue = this._easing(t, value.from, value.to - value.from, duration);
+            let newValue;
+            if (t === duration) {
+                newValue = value.to;
+            } else {
+                if (value.from instanceof Array) {
+                    newValue = new Array(value.length);//TODO: use from pool
+                    for (var k = 0; k < value.from.length; k++) {
+                        var v = this._easing(t, value.from[k], value.to[k] - value.from[k], duration);
+                        newValue[k] = v;
+                    }
+                } else {
+                    newValue = this._easing(t, value.from, value.to - value.from, duration);
+                }
+            }
             value.accessor(newValue);
         }
         this._progressCallback && this._progressCallback();
-        if (this._completed) {
-            this._resolve();
+        if (this._count <= 0) {
+            this.complete();
         }
+
+        this._lastT = t;
     }
 
     isCompleted() {
         return this._completed;
+    }
+
+    finish() {
+        this._updateWithParameter(this.options.duration);
+    }
+
+    stop() {
+        this._stopped = false;
+    }
+
+    reset() {
+        this._updateWithParameter(0);
+        this._stopped = true;
+    }
+
+    restart() {
+        this._restart = false;
+        this._stopped = false;
+        this._completed = false;
+        this._count = (this.options.repeat === undefined) ? 1 : this.options.repeat;
+        this._promise = new Promise(resolve => this._resolve = resolve);
+
+        this._updateWithParameter(0);
+        this.controller.unregisterAnimationGroup(this);
+        this.controller.registerAnimationGroup(this);
     }
 }

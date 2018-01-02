@@ -1,6 +1,6 @@
 declare module "carbon-runtime" {
     /// <reference path="carbon-runtime-names"/>;
-    export type AnimationProps = { [name: string]: number };
+    export type AnimationProps = { [name: string]: number|Brush };
     export const enum BrushType {
         empty,
         color,
@@ -135,9 +135,9 @@ declare module "carbon-runtime" {
         dispose();
     }
 
-    interface Event<T> {
-        registerHandler(callback: (data: DataBag) => void | Promise<void>): IDisposable;
-        raise(data?: DataBag): boolean | void | Promise<boolean | void>;
+    interface Event<T=DataBag> {
+        registerHandler(callback: (data: T) => void | Promise<void>): IDisposable;
+        raise(data?: T): boolean | void | Promise<boolean | void>;
     }
 
     interface TSize {
@@ -357,6 +357,64 @@ declare module "carbon-runtime" {
         repeat?: number;
         //A string, the model to animate colors in. (Optional)
         //colorModel?:any;
+    }
+
+    export class PropertyAnimation {
+        constructor(element:TUIElement, props:AnimationProps, options:IAnimationOptions);
+        start():Promise<void>;
+        stop();
+        restart();
+        reset();
+        finish();
+        onAnimationEnd:()=>void;
+    }
+
+    export class Color {
+        static fromCssString(value:string):Color;
+        static fromRGB(r:number, g:number, b:number):Color;
+        static fromRGBA(r:number, g:number, b:number, a:number):Color;
+        static fromHSL(h:number, s:number, l:number):Color;
+        static fromHSLA(h:number, s:number, l:number, a:number):Color;
+        static fromHSV(h:number, s:number, v:number):Color;
+        static fromHSVA(h:number, s:number, v:number, a:number):Color;
+        static fromHSLuv(h:number, s:number, v:number):Color;
+        static fromHSLuvA(h:number, s:number, v:number, a:number):Color;
+        static fromBrush(brush:Brush):Color;
+        static random():Color;
+
+        isValid:boolean;
+        getBrightness:number;
+        isLight:boolean;
+        isDark:boolean;
+        readonly luminance:number;
+        alpha:number;
+
+        lighten(amount?:number):Color;
+        brighten(amount?:number):Color;
+        darken(amount?:number):Color;
+        desaturate(amount?:number):Color;
+        saturate(amount?:number):Color;
+        spin(amount?:number):Color;
+        greyscale():Color;
+        analogous(results?:number, slices?:number):Color[];
+        monochromatic(results?:number):Color[];
+        triad():Color[];
+        tetrad():Color[];
+        complement():Color;
+
+        toRGB():{r:number,g:number,b:number};
+        toRGBA():{r:number,g:number,b:number,a:number};
+        toHSL():{h:number,s:number,l:number};
+        toHSLA():{h:number,s:number,l:number,a:number};
+        toHSV():{h:number,s:number,v:number};
+        toHSVA():{h:number,s:number,v:number,a:number};
+        toHSLuv():{h:number,s:number,l:number};
+        toHSLuvA():{h:number,s:number,l:number,a:number};
+
+        toCssString():string;
+        toBrush():Brush;
+
+        clone():Color;
     }
 
     export interface INavigationAnimationOptions extends IAnimationOptions {

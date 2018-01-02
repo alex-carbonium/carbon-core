@@ -1,6 +1,6 @@
 import { IAnimationController } from "carbon-app";
 
-export default class AnimationContrller implements IAnimationController {
+export default class AnimationController implements IAnimationController {
     _cancelRedrawCallback: any;
     _requestRedrawCallback: any;
     _activeGroups: any[];
@@ -10,10 +10,12 @@ export default class AnimationContrller implements IAnimationController {
         this._requestRedrawCallback = requestRedrawCallback;
         this._cancelRedrawCallback = cancelRedrawCallback;
     }
+
     setCallbacks(requestRedrawCallback, cancelRedrawCallback) {
         this._requestRedrawCallback = requestRedrawCallback;
         this._cancelRedrawCallback = cancelRedrawCallback;
     }
+
     update() {
         var time = new Date().getTime();
         var completedAny = false;
@@ -38,8 +40,15 @@ export default class AnimationContrller implements IAnimationController {
 
     registerAnimationGroup(group) {
         this._activeGroups.push(group);
-        group.start(new Date().getTime());
+        group.start(this, new Date().getTime());
         this._requestRedrawCallback(true);
         return group;
+    }
+
+    unregisterAnimationGroup(group) {
+        let index = this._activeGroups.findIndex(g=>g === group);
+        if(index >= 0) {
+            this._activeGroups.splice(index, 1);
+        }
     }
 }
