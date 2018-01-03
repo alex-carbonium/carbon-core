@@ -108,6 +108,23 @@ var easingFunctions = {
     }
 }
 
+var easingTypeMap = [
+    "none",
+    "linear",
+    "easeInQuad",
+    "easeOutQuad",
+    "easeInOutQuad",
+    "easeInCubic",
+    "easeOutCubic",
+    "easeInOutCubic",
+    "easeInSine",
+    "easeOutSine",
+    "easeInOutSine",
+    "easeInCirc",
+    "easeOutCirc",
+    "easeInOutCirc"
+]
+
 var defaultOptions = {
     curve: 'linear'
 }
@@ -132,7 +149,14 @@ export default class AnimationGroup {
         this.options = extend(extend({}, defaultOptions), options);
         this._values = values;
 
-        this._easing = easingFunctions[this.options.curve];
+        if (typeof this.options.curve === 'function') {
+            this._easing = this.options.curve;
+        }
+        else if (typeof this.options.curve === 'number') {
+            let curve = easingTypeMap[this.options.curve];
+            this._easing = easingFunctions[curve];
+        }
+
         this._completed = false;
         this._count = (this.options.repeat === undefined) ? 1 : this.options.repeat;
         this._promise = new Promise(resolve => this._resolve = resolve);

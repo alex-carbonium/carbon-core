@@ -21,7 +21,7 @@ PropertyMetadata.registerForType(StoryAction, {
     animation: {
         defaultValue: {
             type: AnimationType.SlideLeft,
-            curve: EasingType.EaseOut,
+            curve: EasingType.EaseOutQuad,
             duration: .2
         }
     }

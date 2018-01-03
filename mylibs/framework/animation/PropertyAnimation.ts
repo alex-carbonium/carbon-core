@@ -18,11 +18,50 @@ let hsluvConvertor = {
     }
 }
 
+let hslConvertor = {
+    from: function (values: number[]) {
+        return Brush.createFromCssColor(
+            Color.fromHSLA(values[0], values[1], values[2], values[3]).toCssString()
+        );
+    },
+
+    to: function (value: Brush): number[] {
+        let hsl = Color.fromBrush(value).toHSLA();
+        return [hsl.h, hsl.s, hsl.l, hsl.a];
+    }
+}
+
+let hsvConvertor = {
+    from: function (values: number[]) {
+        return Brush.createFromCssColor(
+            Color.fromHSVA(values[0], values[1], values[2], values[3]).toCssString()
+        );
+    },
+
+    to: function (value: Brush): number[] {
+        let hsl = Color.fromBrush(value).toHSVA();
+        return [hsl.h, hsl.s, hsl.v, hsl.a];
+    }
+}
+
+let rgbConvertor = {
+    from: function (values: number[]) {
+        return Brush.createFromCssColor(
+            Color.fromRGBA(values[0], values[1], values[2], values[3]).toCssString()
+        );
+    },
+
+    to: function (value: Brush): number[] {
+        let hsl = Color.fromBrush(value).toRGBA();
+        return [hsl.r, hsl.g, hsl.b, hsl.a];
+    }
+}
+
 export class PropertyAnimation {
     private animationValues: any[];
     private group: AnimationGroup;
 
-    constructor(element: IUIElement, private properties: AnimationProps, private options: IAnimationOptions, progressCallback:()=>void = null) {
+    constructor(element: IUIElement, private properties: AnimationProps, private options: IAnimationOptions, progressCallback: () => void = null) {
         let animationValues = this.animationValues = [];
         options = extend({}, options);
         element = RuntimeProxy.unwrap(element);
@@ -34,7 +73,15 @@ export class PropertyAnimation {
             let newValue = properties[propName];
             let convertor = null;
             if (newValue instanceof Brush) {
-                convertor = hsluvConvertor;
+                if (options.colorModel === "hsl") {
+                    convertor = hsluvConvertor;
+                } else if (options.colorModel === "hsv") {
+                    convertor = hsvConvertor;
+                } else if (options.colorModel === "rgb") {
+                    convertor = rgbConvertor;
+                } else {
+                    convertor = hsluvConvertor;
+                }
             }
 
             let accessor = (function (name) {
@@ -63,7 +110,7 @@ export class PropertyAnimation {
 
             let currentValue = accessor();
 
-            if(convertor) {
+            if (convertor) {
                 newValue = convertor.to(newValue);
             }
 

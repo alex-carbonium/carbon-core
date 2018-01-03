@@ -43,7 +43,7 @@ export class Sandbox {
         ElementProxy.clear();
 
         code = code.replace('Object.defineProperty(exports, "__esModule", { value: true });', '');
-        code = "let eval = null;" + code;
+        code = "let eval = null; (function(){" + code + "\r\n})()";
 
         sandboxFunc = sandboxFunc || new Function('__proxy', '__code', source);
         sandboxFunc(nameResolver.proxy, code);

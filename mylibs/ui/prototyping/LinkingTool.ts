@@ -247,7 +247,7 @@ export default class LinkingTool extends Tool {
                 targetArtboardId: targetArgtboard.id,
                 animation: {
                     type: AnimationType.SlideLeft,
-                    curve: EasingType.EaseOut,
+                    curve: EasingType.EaseOutQuad,
                     duration: .2
                 }
             }

@@ -1,6 +1,6 @@
 declare module "carbon-runtime" {
     /// <reference path="carbon-runtime-names"/>;
-    export type AnimationProps = { [name: string]: number|Brush };
+    export type AnimationProps = { [name: string]: number | Brush };
     export const enum BrushType {
         empty,
         color,
@@ -80,12 +80,12 @@ declare module "carbon-runtime" {
     }
 
     interface TUIElement extends TUIElementProps, MouseEventHandler {
-        animate(props: AnimationProps, duration?: number, options?: any, progress?: () => void): Promise<void>;
+        animate(props: AnimationProps, duration?: number, options?: IAnimationOptions, progress?: () => void): Promise<void>;
         boundaryRect(): TRect;
         clone(): TUIElement;
         center(): { x: number, y: number };
-        registerEventHandler(eventName:string, callback:(data?:DataBag) => void | Promise<void|boolean>);
-        raiseEvent(eventName:string, data?:DataBag);
+        registerEventHandler(eventName: string, callback: (data?: DataBag) => void | Promise<void | boolean>);
+        raiseEvent(eventName: string, data?: DataBag);
         readonly parent: TContainer;
         readonly draggable: TDraggable;
     }
@@ -107,7 +107,7 @@ declare module "carbon-runtime" {
         prevState(): boolean;
     }
 
-    interface TArtboardProps extends TUIElementProps{
+    interface TArtboardProps extends TUIElementProps {
         readonly width: number;
         readonly height: number;
         readonly name: string;
@@ -122,8 +122,8 @@ declare module "carbon-runtime" {
         findElementByName(name: string): TUIElement;
         attachDisposable(disposable: IDisposable);
 
-        registerEventHandler(eventName:string, callback:(data?:DataBag) => void | Promise<void|boolean>);
-        raiseEvent(eventName:string, data?:DataBag);
+        registerEventHandler(eventName: string, callback: (data?: DataBag) => void | Promise<void | boolean>);
+        raiseEvent(eventName: string, data?: DataBag);
     }
 
     interface Property<T> {
@@ -329,20 +329,28 @@ declare module "carbon-runtime" {
 
     export const enum EasingType {
         None = 0,
-        EaseOut = 2,
-        EaseIn = 3,
-        EaseInOut = 4
+        Linear,
+        EaseInQuad,
+        EaseOutQuad,
+        EaseInOutQuad,
+        EaseInCubic,
+        EaseOutCubic,
+        EaseInOutCubic,
+        EaseInSine,
+        EaseOutSine,
+        EaseInOutSine,
+        EaseInCirc,
+        EaseOutCirc,
+        EaseInOutCirc
     }
+
+    export type EasingFunction = (time: number, from: number, to: number, duration: number) => number;
 
     export interface IAnimationOptions {
         /**
          * A string, set to ease by default. (Optional).
          */
-        curve?: EasingType
-        /**
-         * An object with the options of the set curve. (Optional)
-         */
-        curveOptions?: any;
+        curve?: EasingType | EasingFunction
         /**
          * A number, the duration in seconds. (Optional)
          */
@@ -356,65 +364,65 @@ declare module "carbon-runtime" {
          */
         repeat?: number;
         //A string, the model to animate colors in. (Optional)
-        //colorModel?:any;
+        colorModel?:"hsluv"|"rgb"|"hsl"|"hsv";
     }
 
     export class PropertyAnimation {
-        constructor(element:TUIElement, props:AnimationProps, options:IAnimationOptions);
-        start():Promise<void>;
+        constructor(element: TUIElement, props: AnimationProps, options: IAnimationOptions);
+        start(): Promise<void>;
         stop();
         restart();
         reset();
         finish();
-        onAnimationEnd:()=>void;
+        onAnimationEnd: () => void;
     }
 
     export class Color {
-        static fromCssString(value:string):Color;
-        static fromRGB(r:number, g:number, b:number):Color;
-        static fromRGBA(r:number, g:number, b:number, a:number):Color;
-        static fromHSL(h:number, s:number, l:number):Color;
-        static fromHSLA(h:number, s:number, l:number, a:number):Color;
-        static fromHSV(h:number, s:number, v:number):Color;
-        static fromHSVA(h:number, s:number, v:number, a:number):Color;
-        static fromHSLuv(h:number, s:number, v:number):Color;
-        static fromHSLuvA(h:number, s:number, v:number, a:number):Color;
-        static fromBrush(brush:Brush):Color;
-        static random():Color;
+        static fromCssString(value: string): Color;
+        static fromRGB(r: number, g: number, b: number): Color;
+        static fromRGBA(r: number, g: number, b: number, a: number): Color;
+        static fromHSL(h: number, s: number, l: number): Color;
+        static fromHSLA(h: number, s: number, l: number, a: number): Color;
+        static fromHSV(h: number, s: number, v: number): Color;
+        static fromHSVA(h: number, s: number, v: number, a: number): Color;
+        static fromHSLuv(h: number, s: number, v: number): Color;
+        static fromHSLuvA(h: number, s: number, v: number, a: number): Color;
+        static fromBrush(brush: Brush): Color;
+        static random(): Color;
 
-        isValid:boolean;
-        getBrightness:number;
-        isLight:boolean;
-        isDark:boolean;
-        readonly luminance:number;
-        alpha:number;
+        isValid: boolean;
+        getBrightness: number;
+        isLight: boolean;
+        isDark: boolean;
+        readonly luminance: number;
+        alpha: number;
 
-        lighten(amount?:number):Color;
-        brighten(amount?:number):Color;
-        darken(amount?:number):Color;
-        desaturate(amount?:number):Color;
-        saturate(amount?:number):Color;
-        spin(amount?:number):Color;
-        greyscale():Color;
-        analogous(results?:number, slices?:number):Color[];
-        monochromatic(results?:number):Color[];
-        triad():Color[];
-        tetrad():Color[];
-        complement():Color;
+        lighten(amount?: number): Color;
+        brighten(amount?: number): Color;
+        darken(amount?: number): Color;
+        desaturate(amount?: number): Color;
+        saturate(amount?: number): Color;
+        spin(amount?: number): Color;
+        greyscale(): Color;
+        analogous(results?: number, slices?: number): Color[];
+        monochromatic(results?: number): Color[];
+        triad(): Color[];
+        tetrad(): Color[];
+        complement(): Color;
 
-        toRGB():{r:number,g:number,b:number};
-        toRGBA():{r:number,g:number,b:number,a:number};
-        toHSL():{h:number,s:number,l:number};
-        toHSLA():{h:number,s:number,l:number,a:number};
-        toHSV():{h:number,s:number,v:number};
-        toHSVA():{h:number,s:number,v:number,a:number};
-        toHSLuv():{h:number,s:number,l:number};
-        toHSLuvA():{h:number,s:number,l:number,a:number};
+        toRGB(): { r: number, g: number, b: number };
+        toRGBA(): { r: number, g: number, b: number, a: number };
+        toHSL(): { h: number, s: number, l: number };
+        toHSLA(): { h: number, s: number, l: number, a: number };
+        toHSV(): { h: number, s: number, v: number };
+        toHSVA(): { h: number, s: number, v: number, a: number };
+        toHSLuv(): { h: number, s: number, l: number };
+        toHSLuvA(): { h: number, s: number, l: number, a: number };
 
-        toCssString():string;
-        toBrush():Brush;
+        toCssString(): string;
+        toBrush(): Brush;
 
-        clone():Color;
+        clone(): Color;
     }
 
     export interface INavigationAnimationOptions extends IAnimationOptions {
