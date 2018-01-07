@@ -12,6 +12,7 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
     runtimeProps: any;
     children: IDataNode[];
     protected _parent: IDataNode;
+    protected _isDisposed: boolean;
 
     constructor(hasChildren: boolean) {
         this.props = PropertyMetadata.getDefaultProps(this.t);
@@ -452,5 +453,10 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
     }
 
     dispose() {
+        this._isDisposed = true;
+    }
+
+    isDisposed() {
+        return this._isDisposed;
     }
 }
