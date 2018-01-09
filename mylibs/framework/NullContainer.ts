@@ -396,7 +396,7 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
         return false;
     }
 
-    animate(properties, duration, options, progressCallback) {
+    animate(properties, options, progressCallback) {
         return Promise.resolve();
     }
 

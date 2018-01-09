@@ -166,7 +166,7 @@ export class PopupBehavior {
             this.frame.fitSizeToContent();
             this.frame.width  = Math.min(this.frame.width, hostArtboard.width);
             this.frame.height = Math.min(this.frame.height, hostArtboard.height);
-            this.frame.animate(this._hideProperties(), 0);
+            this.frame.animate(this._hideProperties(), {duration:0});
 
             hostArtboard.add(this.frame);
             return frame;
@@ -176,7 +176,7 @@ export class PopupBehavior {
     hide() {
         this.framePromise.then((frame)=>{
             if(this.visible) {
-                frame.animate(this._hideProperties(), 300);
+                frame.animate(this._hideProperties(), {duration:300});
                 this.visible = false;
             }
             return frame;
@@ -186,7 +186,7 @@ export class PopupBehavior {
     show() {
         this.framePromise.then((frame)=>{
             if(!this.visible) {
-                frame.animate(this._showProperties(), 300);
+                frame.animate(this._showProperties(), {duration:300});
                 this.visible = true;
             }
             return frame;

@@ -6,7 +6,7 @@ import { Overflow, Types } from "./Defs";
 import Selection from "framework/SelectionModel";
 import DataNode from "framework/DataNode";
 import ObjectFactory from "framework/ObjectFactory";
-import { ChangeMode, IContainer, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp, IUIElement, IUIElementProps, IText, UIElementFlags, ResizeDimension, IContext, ISelection, IArtboard } from "carbon-core";
+import { ChangeMode, IContainer, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp, IUIElement, IUIElementProps, IText, UIElementFlags, ResizeDimension, IContext, ISelection, IArtboard,IAnimationOptions } from "carbon-core";
 import { createUUID } from "../util";
 import Isolate from "../commands/Isolate";
 import Environment from "../environment";
@@ -55,10 +55,6 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
 
         this._cloneFromArtboard(artboard);
 
-        if (this.props.stateId) {
-            this._changeState(this.props.stateId);
-        }
-
         this._setupCustomProperties(artboard);
 
         if (this._allowHResize || this._allowVResize) {
@@ -83,6 +79,10 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         // if (!this.props.width || !this.props.height) {
         //     this.setProps({width: this._artboard.width, height: this._artboard.height});
         // }
+
+        if (this.props.stateId) {
+            this._changeState(this.props.stateId, "default", false);
+        }
 
         this.endInternalUpdate();
     }
@@ -174,6 +174,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
                 x.resizeDimensions(ResizeDimension.None);
                 x.runtimeProps.ctxl = ctxl;
             });
+            clone.runtimeProps.stateController = this;
             this.add(clone, ChangeMode.Self);
         }
     };
@@ -246,12 +247,12 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
             return;
         }
 
+        this.updateCustomProperties(props);
+
         if (props.stateId !== undefined) {
-            this._initFromArtboard();
+            this._changeState(props.stateId, oldProps.stateId);
             return;
         }
-
-        this.updateCustomProperties(props);
     }
 
     get artboard():IArtboard {
@@ -322,19 +323,21 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         }
     }
 
-    _changeState(stateId) {
-        var defaultState = this._artboard._recorder.getStateById('default');
-        if (!defaultState) {
-            //it can happen that primitives for changing state are applied before the source artboard is initialized
-            return;
+    get stateAnimations() {
+        if(this.runtimeProps.stateAnimations) {
+            return this.runtimeProps.stateAnimations;
         }
 
-        PropertyStateRecorder.applyState(this, defaultState);
-        if (stateId !== 'default') {
-            var newState = this._artboard._recorder.getStateById(stateId);
-            if (newState) {
-                PropertyStateRecorder.applyState(this, newState);
-            }
+        if(this._artboard){
+            return this._artboard.stateAnimations;
+        }
+    }
+
+    _changeState(toStateId, fromStateId, animate=true) {
+        var newState = this._artboard._recorder.getStateById(toStateId);
+        if (newState) {
+            var oldStateName = this._artboard._recorder.getStateNameById(fromStateId) || this._artboard._recorder.getDefaultState().name;
+            PropertyStateRecorder.applyState(this, newState, oldStateName, animate);
         }
     }
 
@@ -504,7 +507,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         }
         let state = states.find(s=>s.name === name);
 
-        that.setProps(state.id);
+        that.setProps({stateId:state.id});
     }
 
     canDrag() {
@@ -720,6 +723,16 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         return result;
     }
 
+    registerStateAnimation(from:string, to:string, defaultAnimationOptions:IAnimationOptions, elementOptions?:{[element:string]:{[prop:string]:IAnimationOptions}}) {
+        let rp = this.runtimeProps;
+        let stateAnimation = rp.stateAnimations = rp.stateAnimations ||{};
+        let fromState = stateAnimation[from] = stateAnimation[from] || {};
+        fromState[to] = {
+            defaultOptions:defaultAnimationOptions,
+            elementOptions:elementOptions
+        };
+    }
+
     dblclick(event: IMouseEventData) {
         var element = this.hitElementDirect(event, Environment.view.scale());
         if (element !== this) {
@@ -793,9 +806,9 @@ PropertyMetadata.registerForType(Symbol, {
     proxyDefinition:function() {
         let baseDefinition = PropertyMetadata.findForType(Container).proxyDefinition();
         return {
-            rprops: ["states"].concat(baseDefinition.rprops), // readonly props
+            rprops: ["states", "stateAnimations"].concat(baseDefinition.rprops), // readonly props
             props: ["currentState"].concat(baseDefinition.props),
-            methods: ["nextState", "prevState"].concat(baseDefinition.methods),
+            methods: ["nextState", "prevState", "registerStateAnimation"].concat(baseDefinition.methods),
             mixins:[].concat(baseDefinition.mixins)
         }
     },

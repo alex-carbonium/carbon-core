@@ -1,8 +1,8 @@
 // TODO: cleanup properties with the same value
 import PropertyTracker from "framework/PropertyTracker";
-import {createUUID, deepEquals} from "../util";
+import { createUUID, deepEquals } from "../util";
 import ObjectFactory from "framework/ObjectFactory";
-import { ChangeMode, PatchType } from "carbon-core";
+import { ChangeMode, PatchType, IUIElement, IState } from "carbon-core";
 
 function removeElement(state, elementId) {
     delete state.data[elementId];
@@ -20,15 +20,58 @@ function eachElementAndProp(state, callback) {
         }
     }
 }
-function apply(state, element) {
-    element.applyVisitor(e=> {
-        var elementData = state.data[e.sourceId()];
-        if (elementData) {
-            ObjectFactory.updatePropsWithPrototype(elementData.props);
-            e.setProps(elementData.props, ChangeMode.Root);
+function apply(toState: IState, fromStateName: string, element: any, animate: boolean) {
+    if (animate) {
+        let stateOptions;
+        var stateAnimations = element.stateAnimations;
+        if (stateAnimations) {
+            let from = stateAnimations[fromStateName];
+            if (from) {
+                stateOptions = from[toState.name];
+            }
         }
-    });
+
+        element.applyVisitor((e:IUIElement) => {
+            var elementData = toState.data[e.sourceId()];
+            if (!elementData) {
+                return;
+            }
+            ObjectFactory.updatePropsWithPrototype(elementData.props);
+            let name = e.name;// ???? do we need to find ref to source element
+            if (!stateOptions) {
+                e.setProps(elementData.props, ChangeMode.Root);
+            } else {
+                if(stateOptions.elementOptions){
+                    var elementOptions = stateOptions.elementOptions[name];
+                }
+                let propNames = Object.keys(elementData.props);
+
+                for (var propName of propNames) {
+                    let props = {};
+                    let propOptions;
+                    if(elementOptions){
+                        propOptions = elementOptions[propName];
+                    }
+                    let options = stateOptions.defaultOptions;
+                    if (propOptions) {
+                        options = extend(extend({}, stateOptions.defaultOptions), propOptions);
+                    }
+                    props[propName] = elementData.props[propName];
+                    e.animate(props, options);
+                }
+            }
+        });
+    } else {
+        element.applyVisitor(e => {
+            var elementData = toState.data[e.sourceId()];
+            if (elementData) {
+                ObjectFactory.updatePropsWithPrototype(elementData.props);
+                e.setProps(elementData.props, ChangeMode.Root);
+            }
+        });
+    }
 }
+
 function removeValue(state, elementId, propertyName) {
     var elementData = state.data[elementId];
     if (elementData) {
@@ -50,8 +93,8 @@ function getValue(state, elementId, propertyName) {
 
 function setProperty(state, elementId, propertyName, value) {
     var elementState = state.data[elementId];
-    if (!elementState){
-        elementState = {props: {}};
+    if (!elementState) {
+        elementState = { props: {} };
         state.data[elementId] = elementState;
     }
     elementState.props[propertyName] = value;
@@ -63,7 +106,7 @@ function cleanUpStates() {
 
 function cleanUpDeadControls() {
     var elementsMap = {};
-    this._element.applyVisitor(e=> {
+    this._element.applyVisitor(e => {
         elementsMap[e.sourceId()] = e;
     });
     for (var state of this.states) {
@@ -73,14 +116,14 @@ function cleanUpDeadControls() {
                 toRemove.push(controlId);
             }
         });
-        for (var id of toRemove){
+        for (var id of toRemove) {
             removeElement(state, id);
         }
     }
 }
 
 function cleanUpDefaultState(defaultState) {
-    if (this.states.length === 0){
+    if (this.states.length === 0) {
         return;
     }
     var states = this.states;
@@ -98,7 +141,7 @@ function cleanUpDefaultState(defaultState) {
         }
     });
 
-    for (var tr of toRemove){
+    for (var tr of toRemove) {
         removeValue(defaultState, tr[0], tr[1]);
     }
 }
@@ -108,7 +151,7 @@ function onPropertyChanged(data, defaultState, elementId, propName, newValue, ol
         setProperty(defaultState, elementId, propName, oldValue);
     } else {
         var currentValue = getValue(defaultState, elementId, propName);
-        if(deepEquals(currentValue, newValue)) {
+        if (deepEquals(currentValue, newValue)) {
             removeValue(data, elementId, propName);
             return;
         }
@@ -121,15 +164,15 @@ function processPropertyChanged(state, defaultState, elementId, newProps, oldPro
         return;
     }
     for (var propName in newProps) {
-        if (propName !== 'name' && propName !== 'state' && propName !== 'states') {
+        if (propName !== 'name' && propName !== 'state' && propName !== 'states'&& propName !== 'code') {
             onPropertyChanged.call(this, state, defaultState, elementId, propName, newProps[propName], oldProps[propName]);
         }
     }
 }
 
-function isEmptyObject(obj){
-    for(var p in obj){
-        if(obj.hasOwnProperty(p)){
+function isEmptyObject(obj) {
+    for (var p in obj) {
+        if (obj.hasOwnProperty(p)) {
             return false;
         }
     }
@@ -150,9 +193,9 @@ function disposeTracker() {
     // PropertyTracker.propertyChanged.unbind(this, processPropertyChanged);
 }
 
-function updateFromState(state) {
-    if (state) {
-        apply(state, this._element);
+function updateFromState(toState, fromState) {
+    if (toState) {
+        apply(toState, fromState, this._element, false);
     }
 }
 
@@ -166,33 +209,86 @@ export default class PropertyStateRecorder {
         this._currentState = null;
     }
 
-    getDefaultState(){
+    getDefaultState() {
         return this.states.find(x => x.id === "default");
     }
+
     getState(stateName) {
+        let defaultState = this.getDefaultState();
+        if (!defaultState) {
+            return null;
+        }
+        let state;
         for (var i = this.states.length - 1; i >= 0; --i) {
             if (this.states[i].name === stateName) {
-                return this.states[i];
+                state = this.states[i];
+                break;
             }
         }
+        if (!state) {
+            return null;
+        }
+
+        return this._mergeStates(defaultState, state);
+    }
+
+    getStateNameById(stateId) {
+        for (var i = this.states.length - 1; i >= 0; --i) {
+            if (this.states[i].id === stateId) {
+                return this.states[i].name;
+            }
+        }
+
         return null;
+    }
+
+    _mergeStates(state1, state2) {
+        var data = {};
+        var state = {name:state2.name, id:state2.id, data:data}
+        let data1 = state1.data;
+        let data2 = state2.data;
+        var keys1 = Object.keys(data1);
+        for(let key1 of keys1) {
+            data[key1] = {props:clone(data1[key1].props)}
+        }
+
+        var keys2 = Object.keys(data2);
+        for(let key2 of keys2) {
+            if(!data[key2]) {
+                data[key2] = {props:clone(data2[key2].props)}
+            } else {
+                Object.assign(data[key2].props, data2[key2].props);
+            }
+        }
+        return state;//extend(true, extend({}, state1), state2);
     }
 
     getStateById(stateId) {
+        let defaultState = this.getDefaultState();
+        if (!defaultState) {
+            return null;
+        }
+        let state, res;
         for (var i = this.states.length - 1; i >= 0; --i) {
             if (this.states[i].id === stateId) {
-                return this.states[i];
+                state = this.states[i];
+                break;
             }
         }
-        return null;
+
+        if (!state) {
+            return null;
+        }
+
+        return this._mergeStates(defaultState, state);
     }
 
     addState(name, id) {
-        if (this.states.length === 0){
-            var defaultState = {id: "default", name: "Default", data: {}};
+        if (this.states.length === 0) {
+            var defaultState = { id: "default", name: "Default", data: {} };
             this._element.patchProps(PatchType.Insert, "states", defaultState);
         }
-        var state = {id: id || createUUID(), name, data: {}};
+        var state = { id: id || createUUID(), name, data: {} };
         this._element.patchProps(PatchType.Insert, "states", state);
         return state;
     }
@@ -212,19 +308,19 @@ export default class PropertyStateRecorder {
     }
 
     removeStateById(stateId) {
-        if(stateId ==='default'){
+        if (stateId === 'default') {
             return;
         }
 
         var state = this.states.find(x => x.id === stateId);
-        if(state) {
+        if (state) {
             this._element.patchProps(PatchType.Remove, "states", state);
         }
     }
 
     renameState(id, newName) {
         var state = this.getStateById(id);
-        if (!state){
+        if (!state) {
             return;
         }
         var newState = clone(state, true);
@@ -241,9 +337,9 @@ export default class PropertyStateRecorder {
         return false;
     }
 
-    hasStatePropValue(stateId, elementId, propName){
+    hasStatePropValue(stateId, elementId, propName) {
         var state = this.getStateById(stateId);
-        if(!state){
+        if (!state) {
             return false;
         }
         return hasValue(state, elementId, propName);
@@ -251,7 +347,6 @@ export default class PropertyStateRecorder {
 
     changeState(stateName) {
         this._changingState = true;
-        updateFromState.call(this, this.getDefaultState());
         this._currentState = this.getState(stateName);
         if (stateName !== 'Default') {
             updateFromState.call(this, this._currentState);
@@ -261,7 +356,7 @@ export default class PropertyStateRecorder {
 
     duplicateState(stateName, newStateName) {
         var state = this.getState(stateName);
-        if(!state){
+        if (!state) {
             return;
         }
         var newState = clone(state, true);
@@ -280,7 +375,7 @@ export default class PropertyStateRecorder {
         disposeTracker.call(this);
     }
 
-    get states(){
+    get states() {
         return this._element.props.states;
     }
 
@@ -298,16 +393,16 @@ export default class PropertyStateRecorder {
 
         this._element.patchProps(PatchType.Change, "states", newState);
 
-        if(newState.id !== defaultState.id) {
+        if (newState.id !== defaultState.id) {
             cleanUpDefaultState.call(this, defaultState);
             this._element.patchProps(PatchType.Change, "states", defaultState);
         }
     }
 
-    getValue(stateId, elementId, propName){
+    getValue(stateId, elementId, propName) {
         var state = this.getStateById(stateId);
         var elementData = state.data[elementId];
-        if (!elementData){
+        if (!elementData) {
             return undefined;
         }
         return elementData.props[propName];
@@ -322,7 +417,7 @@ export default class PropertyStateRecorder {
     trackChangePosition() {
     }
 
-    static applyState(element, state){
-        apply(state, element);
+    static applyState(element: IUIElement, toState: IState, fromStateName: string, animate = false) {
+        apply(toState, fromStateName, element, animate);
     }
 }

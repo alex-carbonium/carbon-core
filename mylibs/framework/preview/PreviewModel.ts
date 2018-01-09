@@ -20,6 +20,7 @@ import { RuntimeScreen } from "../../code/runtime/RuntimeScreen";
 import { BrushFactory } from "../../code/runtime/BrushFactory";
 import { CompiledCodeProvider } from "../../code/CompiledCodeProvider";
 import { NameProvider } from "../../code/NameProvider";
+import StateBoard from "../StateBoard";
 
 export default class PreviewModel implements IPreviewModel, IDisposable {
     private _activePage: IPage<IPageProps> & { originalSize: ISize } = NullPage;
@@ -195,10 +196,13 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
             }
         } else {
             artboard = this.app.activePage.getActiveArtboard();
+            if(artboard instanceof StateBoard) {
+                artboard = artboard.artboard;
+            }
         }
 
         if (!artboard) {
-            artboard = this.app.activePage.getAllArtboards()[0];
+            artboard = this.app.activePage.getAllArtboards(true)[0];
         }
 
         if (!artboard) {

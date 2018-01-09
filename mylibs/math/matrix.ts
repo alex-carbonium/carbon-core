@@ -27,12 +27,7 @@ import ObjectPool from "../framework/ObjectPool";
  * matrix multiplication).
  */
 class Matrix implements IMatrix, IPooledObject {
-    private _a: number;
-    private _b: number;
-    private _c: number;
-    private _d: number;
-    private _tx: number;
-    private _ty: number;
+    private _m = [1,0,0, 0,1,0, 0,0,1];
 
     private static pool = new ObjectPool<Matrix>(() => Matrix.create(), 50);
 
@@ -41,42 +36,42 @@ class Matrix implements IMatrix, IPooledObject {
      *
      */
     constructor(a, b, c, d, tx, ty) {
-        this._a = a;
-        this._b = b;
-        this._c = c;
-        this._d = d;
-        this._tx = tx;
-        this._ty = ty;
+        this.a = a;
+        this.b = b;
+        this.c = c;
+        this.d = d;
+        this.tx = tx;
+        this.ty = ty;
     }
 
-    /**
-     * Sets this transform to the matrix specified by the 6 values.
-     *
-     * @param {Number} a the a property of the transform
-     * @param {Number} b the b property of the transform
-     * @param {Number} c the c property of the transform
-     * @param {Number} d the d property of the transform
-     * @param {Number} tx the tx property of the transform
-     * @param {Number} ty the ty property of the transform
-     * @return {Matrix} this affine transform
-     */
-    set(a, b, c, d, tx, ty) {
-        this._a = a;
-        this._b = b;
-        this._c = c;
-        this._d = d;
-        this._tx = tx;
-        this._ty = ty;
+    // /**
+    //  * Sets this transform to the matrix specified by the 6 values.
+    //  *
+    //  * @param {Number} a the a property of the transform
+    //  * @param {Number} b the b property of the transform
+    //  * @param {Number} c the c property of the transform
+    //  * @param {Number} d the d property of the transform
+    //  * @param {Number} tx the tx property of the transform
+    //  * @param {Number} ty the ty property of the transform
+    //  * @return {Matrix} this affine transform
+    //  */
+    // set(a, b, c, d, tx, ty) {
+    //     this.a = a;
+    //     this.b = b;
+    //     this.c = c;
+    //     this.d = d;
+    //     this.tx = tx;
+    //     this.ty = ty;
 
-        return this;
-    }
+    //     return this;
+    // }
 
     /**
      * @return {Matrix} a copy of this transform
      */
     clone() {
-        return new Matrix(this._a, this._b, this._c, this._d,
-            this._tx, this._ty);
+        return new Matrix(this.a, this.b, this.c, this.d,
+            this.tx, this.ty);
     }
 
     /**
@@ -86,19 +81,19 @@ class Matrix implements IMatrix, IPooledObject {
      * @return {Boolean} {@true if the matrices are equal}
      */
     equals(mx) {
-        return mx === this || mx && this._a === mx._a && this._b === mx._b
-            && this._c === mx._c && this._d === mx._d
-            && this._tx === mx._tx && this._ty === mx._ty;
+        return mx === this || mx && this.a === mx.a && this.b === mx.b
+            && this.c === mx.c && this.d === mx.d
+            && this.tx === mx.tx && this.ty === mx.ty;
     }
 
     /**
      * @return {String} a string representation of this transform
      */
     toString() {
-        return '[[' + [(this._a), (this._c),
-        (this._tx)].join(', ') + '], ['
-            + [(this._b), (this._d),
-            (this._ty)].join(', ') + ']]';
+        return '[[' + [(this.a), (this.c),
+        (this.tx)].join(', ') + '], ['
+            + [(this.b), (this.d),
+            (this.ty)].join(', ') + ']]';
     }
 
     /**
@@ -106,8 +101,7 @@ class Matrix implements IMatrix, IPooledObject {
      * matrix that results in no transformation.
      */
     reset() {
-        this._a = this._d = 1;
-        this._b = this._c = this._tx = this._ty = 0;
+        this._m = [1,0,0,0,1,0,0,0,1];
 
         return this;
     }
@@ -136,15 +130,15 @@ class Matrix implements IMatrix, IPooledObject {
     translatePoint(point) {
         let x = point.x,
             y = point.y;
-        this._tx += x * this._a + y * this._c;
-        this._ty += x * this._b + y * this._d;
+        this.tx += x * this.a + y * this.c;
+        this.ty += x * this.b + y * this.d;
 
         return this;
     }
 
     translate(x, y) {
-        this._tx += x * this._a + y * this._c;
-        this._ty += x * this._b + y * this._d;
+        this.tx += x * this.a + y * this.c;
+        this.ty += x * this.b + y * this.d;
 
         return this;
     }
@@ -154,10 +148,10 @@ class Matrix implements IMatrix, IPooledObject {
             this.translate(ox, oy);
         }
 
-        this._a *= sx;
-        this._b *= sx;
-        this._c *= sy;
-        this._d *= sy;
+        this.a *= sx;
+        this.b *= sx;
+        this.c *= sy;
+        this.d *= sy;
         if (ox || oy) {
             this.translate(-ox, -oy);
         }
@@ -195,16 +189,16 @@ class Matrix implements IMatrix, IPooledObject {
             sin = Math.sin(angle),
             tx = x - x * cos + y * sin,
             ty = y - x * sin - y * cos,
-            a = this._a,
-            b = this._b,
-            c = this._c,
-            d = this._d;
-        this._a = cos * a + sin * c;
-        this._b = cos * b + sin * d;
-        this._c = -sin * a + cos * c;
-        this._d = -sin * b + cos * d;
-        this._tx += tx * a + ty * c;
-        this._ty += tx * b + ty * d;
+            a = this.a,
+            b = this.b,
+            c = this.c,
+            d = this.d;
+        this.a = cos * a + sin * c;
+        this.b = cos * b + sin * d;
+        this.c = -sin * a + cos * c;
+        this.d = -sin * b + cos * d;
+        this.tx += tx * a + ty * c;
+        this.ty += tx * b + ty * d;
 
         return this;
     }
@@ -218,16 +212,16 @@ class Matrix implements IMatrix, IPooledObject {
             sin = Math.sin(angle),
             tx = x - x * cos + y * sin,
             ty = y - x * sin - y * cos,
-            a = this._a,
-            b = this._b,
-            c = this._c,
-            d = this._d;
-        this._a = cos * a + sin * c;
-        this._b = cos * b + sin * d;
-        this._c = -sin * a + cos * c;
-        this._d = -sin * b + cos * d;
-        this._tx += tx * a + ty * c;
-        this._ty += tx * b + ty * d;
+            a = this.a,
+            b = this.b,
+            c = this.c,
+            d = this.d;
+        this.a = cos * a + sin * c;
+        this.b = cos * b + sin * d;
+        this.c = -sin * a + cos * c;
+        this.d = -sin * b + cos * d;
+        this.tx += tx * a + ty * c;
+        this.ty += tx * b + ty * d;
 
         return this;
     }
@@ -256,12 +250,12 @@ class Matrix implements IMatrix, IPooledObject {
             this.translate(center.x, center.y);
         }
 
-        let a = this._a,
-            b = this._b;
-        this._a += shear.y * this._c;
-        this._b += shear.y * this._d;
-        this._c += shear.x * a;
-        this._d += shear.x * b;
+        let a = this.a,
+            b = this.b;
+        this.a += shear.y * this.c;
+        this.b += shear.y * this.d;
+        this.c += shear.x * a;
+        this.d += shear.x * b;
         if (center) {
             let nc = center.negate();
             this.translate(nc.x, nc.y);
@@ -305,22 +299,30 @@ class Matrix implements IMatrix, IPooledObject {
      * @return {Matrix} this matrix, modified
      */
     append(mx) {
-        let a1 = this._a,
-            b1 = this._b,
-            c1 = this._c,
-            d1 = this._d,
-            a2 = mx._a,
-            b2 = mx._c,
-            c2 = mx._b,
-            d2 = mx._d,
-            tx2 = mx._tx,
-            ty2 = mx._ty;
-        this._a = a2 * a1 + c2 * c1;
-        this._c = b2 * a1 + d2 * c1;
-        this._b = a2 * b1 + c2 * d1;
-        this._d = b2 * b1 + d2 * d1;
-        this._tx += tx2 * a1 + ty2 * c1;
-        this._ty += tx2 * b1 + ty2 * d1;
+        let a1 = this.a,
+            b1 = this.b,
+            c1 = this.c,
+            d1 = this.d,
+            a2 = mx.a,
+            b2 = mx.c,
+            c2 = mx.b,
+            d2 = mx.d,
+            tx2 = mx.tx,
+            ty2 = mx.ty;
+        this.a = a2 * a1 + c2 * c1;
+        this.c = b2 * a1 + d2 * c1;
+        this.b = a2 * b1 + c2 * d1;
+        this.d = b2 * b1 + d2 * d1;
+        this.tx += tx2 * a1 + ty2 * c1;
+        this.ty += tx2 * b1 + ty2 * d1;
+
+        return this;
+    }
+
+    add(mx) {
+        for(var i = 0; i < this._m.length; ++i) {
+            this._m[i] += mx._m[i];
+        }
 
         return this;
     }
@@ -345,24 +347,24 @@ class Matrix implements IMatrix, IPooledObject {
      * @return {Matrix} this matrix, modified
      */
     prepend(mx) {
-        let a1 = this._a,
-            b1 = this._b,
-            c1 = this._c,
-            d1 = this._d,
-            tx1 = this._tx,
-            ty1 = this._ty,
-            a2 = mx._a,
-            b2 = mx._c,
-            c2 = mx._b,
-            d2 = mx._d,
-            tx2 = mx._tx,
-            ty2 = mx._ty;
-        this._a = a2 * a1 + b2 * b1;
-        this._c = a2 * c1 + b2 * d1;
-        this._b = c2 * a1 + d2 * b1;
-        this._d = c2 * c1 + d2 * d1;
-        this._tx = a2 * tx1 + b2 * ty1 + tx2;
-        this._ty = c2 * tx1 + d2 * ty1 + ty2;
+        let a1 = this.a,
+            b1 = this.b,
+            c1 = this.c,
+            d1 = this.d,
+            tx1 = this.tx,
+            ty1 = this.ty,
+            a2 = mx.a,
+            b2 = mx.c,
+            c2 = mx.b,
+            d2 = mx.d,
+            tx2 = mx.tx,
+            ty2 = mx.ty;
+        this.a = a2 * a1 + b2 * b1;
+        this.c = a2 * c1 + b2 * d1;
+        this.b = c2 * a1 + d2 * b1;
+        this.d = c2 * c1 + d2 * d1;
+        this.tx = a2 * tx1 + b2 * ty1 + tx2;
+        this.ty = c2 * tx1 + d2 * ty1 + ty2;
 
         return this;
     }
@@ -395,21 +397,21 @@ class Matrix implements IMatrix, IPooledObject {
      * @return {Matrix} this matrix, or `null`, if the matrix is singular.
      */
     invert() {
-        let a = this._a,
-            b = this._b,
-            c = this._c,
-            d = this._d,
-            tx = this._tx,
-            ty = this._ty,
+        let a = this.a,
+            b = this.b,
+            c = this.c,
+            d = this.d,
+            tx = this.tx,
+            ty = this.ty,
             det = a * d - b * c,
             res = null;
         if (det && !isNaN(det) && isFinite(tx) && isFinite(ty)) {
-            this._a = d / det;
-            this._b = -b / det;
-            this._c = -c / det;
-            this._d = a / det;
-            this._tx = (c * ty - d * tx) / det;
-            this._ty = (b * tx - a * ty) / det;
+            this.a = d / det;
+            this.b = -b / det;
+            this.c = -c / det;
+            this.d = a / det;
+            this.tx = (c * ty - d * tx) / det;
+            this.ty = (b * tx - a * ty) / det;
             res = this;
         }
 
@@ -436,7 +438,7 @@ class Matrix implements IMatrix, IPooledObject {
      * set to `0`.
      */
     _shiftless() {
-        return new Matrix(this._a, this._b, this._c, this._d, 0, 0);
+        return new Matrix(this.a, this.b, this.c, this.d, 0, 0);
     }
 
     _orNullIfIdentity() {
@@ -447,8 +449,8 @@ class Matrix implements IMatrix, IPooledObject {
      * @return {Boolean} whether this transform is the identity transform
      */
     isIdentity() {
-        return this._a === 1 && this._b === 0 && this._c === 0 && this._d === 1
-            && this._tx === 0 && this._ty === 0;
+        return this.a === 1 && this.b === 0 && this.c === 0 && this.d === 1
+            && this.tx === 0 && this.ty === 0;
     }
 
     /**
@@ -458,9 +460,9 @@ class Matrix implements IMatrix, IPooledObject {
      * @return {Boolean} whether the transform is invertible
      */
     isInvertible() {
-        let det = this._a * this._d - this._c * this._b;
+        let det = this.a * this.d - this.c * this.b;
 
-        return det && !isNaN(det) && isFinite(this._tx) && isFinite(this._ty);
+        return det && !isNaN(det) && isFinite(this.tx) && isFinite(this.ty);
     }
 
     /**
@@ -474,14 +476,14 @@ class Matrix implements IMatrix, IPooledObject {
     }
 
     isTranslatedOnly() {
-        return (this._a === 1) && this._b === 0 && this._c === 0 && (this._d === 1);
+        return (this.a === 1) && this.b === 0 && this.c === 0 && (this.d === 1);
     }
 
     /**
      * A faster version of transform that only takes one point and does not
      * attempt to convert it.
      */
-    transformPoint(point:ICoordinate, round?: boolean) {
+    transformPoint(point: ICoordinate, round?: boolean) {
         return this.transformPoint2(point.x, point.y, round);
     }
 
@@ -491,9 +493,9 @@ class Matrix implements IMatrix, IPooledObject {
         return this.transformPointMutable(point, round);
     }
 
-    transformPointMutable(point:Point, round?: boolean) {
-        let x = point.x * this._a + point.y * this._c + this._tx;
-        let y = point.x * this._b + point.y * this._d + this._ty;
+    transformPointMutable(point: Point, round?: boolean) {
+        let x = point.x * this.a + point.y * this.c + this.tx;
+        let y = point.x * this.b + point.y * this.d + this.ty;
 
         if (round) {
             x = Math.round(x);
@@ -505,21 +507,21 @@ class Matrix implements IMatrix, IPooledObject {
     }
 
     withTranslation(tx, ty): Matrix {
-        if (tx === this._tx && ty === this._ty) {
+        if (tx === this.tx && ty === this.ty) {
             return this;
         }
 
-        return new Matrix(this._a, this._b, this._c, this._d, tx, ty);
+        return new Matrix(this.a, this.b, this.c, this.d, tx, ty);
     }
     withRoundedTranslation(): Matrix {
-        let ttx = Math.round(this._tx);
-        let tty = Math.round(this._ty);
+        let ttx = Math.round(this.tx);
+        let tty = Math.round(this.ty);
 
-        if (ttx === this._tx && tty === this._ty) {
+        if (ttx === this.tx && tty === this.ty) {
             return this;
         }
 
-        return new Matrix(this._a, this._b, this._c, this._d, ttx, tty);
+        return new Matrix(this.a, this.b, this.c, this.d, ttx, tty);
     }
 
     transformRect(rect) {
@@ -548,10 +550,10 @@ class Matrix implements IMatrix, IPooledObject {
         // http://dev.w3.org/csswg/css3-2d-transforms/#matrix-decomposition
         // http://www.maths-informatique-jeux.com/blog/frederic/?post/2013/12/01/Decomposition-of-2D-transform-matrices
         // https://github.com/wisec/DOMinator/blob/master/layout/style/nsStyleAnimation.cpp#L946
-        let a = this._a,
-            b = this._b,
-            c = this._c,
-            d = this._d,
+        let a = this.a,
+            b = this.b,
+            c = this.c,
+            d = this.d,
             det = a * d - b * c,
             sqrt = Math.sqrt,
             atan2 = Math.atan2,
@@ -639,7 +641,7 @@ class Matrix implements IMatrix, IPooledObject {
      * @type Number[]
      */
     getValues() {
-        return [this._a, this._b, this._c, this._d, this._tx, this._ty];
+        return [this.a, this.b, this.c, this.d, this.tx, this.ty];
     }
 
     /**
@@ -650,7 +652,7 @@ class Matrix implements IMatrix, IPooledObject {
      */
     getTranslation() {
         // No decomposition is required to extract translation.
-        return new Point(this._tx, this._ty);
+        return new Point(this.tx, this.ty);
     }
 
     /**
@@ -682,8 +684,8 @@ class Matrix implements IMatrix, IPooledObject {
      */
     applyToContext(ctx) {
         if (!this.isIdentity()) {
-            ctx.transform(this._a, this._b, this._c, this._d,
-                this._tx, this._ty);
+            ctx.transform(this.a, this.b, this.c, this.d,
+                this.tx, this.ty);
         }
     }
 
@@ -694,9 +696,13 @@ class Matrix implements IMatrix, IPooledObject {
      */
     setToContext(ctx) {
         if (!this.isIdentity()) {
-            ctx.setTransform(this._a, this._b, this._c, this._d,
-                this._tx, this._ty);
+            ctx.setTransform(this.a, this.b, this.c, this.d,
+                this.tx, this.ty);
         }
+    }
+
+    toArray2() {
+        return [[this.a, this.b, this.tx], [this.c, this.d, this.ty], [0, 0, 1]];
     }
 
     static create() {
@@ -708,56 +714,73 @@ class Matrix implements IMatrix, IPooledObject {
     }
 
     get a() {
-        return this._a;
+        return this._m[0];
     }
 
     set a(value) {
-        this._a = value
+        this._m[0] = value
     }
 
     get b() {
-        return this._b;
+        return this._m[3];
     }
 
     set b(value) {
-        this._b = value
+        this._m[3] = value
     }
 
     get c() {
-        return this._c;
+        return this._m[1];
     }
 
     set c(value) {
-        this._c = value
+        this._m[1] = value
     }
 
 
     get d() {
-        return this._d;
+        return this._m[4];
     }
 
     set d(value) {
-        this._d = value
+        this._m[4] = value
     }
 
     get tx() {
-        return this._tx;
+        return this._m[2];
     }
 
     set tx(value) {
-        this._tx = value
+        this._m[2] = value
     }
 
     get ty() {
-        return this._ty;
+        return this._m[5];
     }
 
     set ty(value) {
-        this._ty = value
+        this._m[5] = value
+    }
+
+    get(i,j) {
+        return this._m[i+j*3];
+    }
+
+    set(i,j, value) {
+        this._m[i+j*3] = value;
     }
 
     static fromObject(value): Matrix {
-        return new Matrix(value._a, value._b, value._c, value._d, value._tx, value._ty);
+        if(value.hasOwnProperty("_m")) {
+            var m = new Matrix(value._m[0], value._m[3], value._m[1], value._m[4], value._m[2], value._m[5]);
+            return m;
+        }
+        else if(value.hasOwnProperty("a"))
+        {
+            return new Matrix(value.a, value.b, value.c, value.d, value.tx, value.ty);
+        } else {
+            return new Matrix(value._a,value._b, value._c,value._d, value._tx, value._ty);
+        }
     }
 
     static createTranslationMatrix(tx: number, ty: number) {

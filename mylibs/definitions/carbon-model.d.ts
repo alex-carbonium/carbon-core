@@ -1,9 +1,10 @@
+
 declare module "carbon-model" {
     import { IPoint, IRect, ICoordinate, IMatrix, ISize, Origin } from "carbon-geometry";
     import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, ChangeMode, ArtboardType, Font, KeyboardState, ResizeDimension } from "carbon-basics";
 
     import { IContext } from "carbon-rendering";
-    import { AnimationProps, Brush, IDisposable, DataBag, TextContent } from "carbon-runtime";
+    import { AnimationProps,IAnimationOptions, Brush, IDisposable, DataBag, TextContent } from "carbon-runtime";
 
     export interface IDataNodeProps {
         [key: string]: any;
@@ -80,6 +81,12 @@ declare module "carbon-model" {
         SymbolText = 1 << 1,
         PaletteItem = 1 << 2,
         Icon = 1 << 3
+    }
+
+    export interface IState {
+        name:string;
+        id:string;
+        data:{[prop:string]:any};
     }
 
     export interface IUIElement<TProps extends IUIElementProps = IUIElementProps> extends IDataNode<TProps>, IMouseEventHandler, IDecoratable {
@@ -171,7 +178,7 @@ declare module "carbon-model" {
         activeGroup(): boolean;
         lockedGroup(): boolean;
 
-        animate(props: AnimationProps, duration?: number, options?: any, progress?: () => void): Promise<void>;
+        animate(props: AnimationProps, options?: IAnimationOptions, progress?: () => void): Promise<void>;
 
         findPropertyDescriptor(propName): PropDescriptor;
 

@@ -8,6 +8,14 @@ var easingFunctions = {
     * c - end value
     * d - duration
     */
+    none: function (t, b, c, d) {
+        if (t === 0) {
+            return b;
+        }
+
+        return c;
+    },
+
     linear: function (t, b, c, d) {
         return c * t / d + b;
     },
@@ -105,6 +113,130 @@ var easingFunctions = {
         if (t < 1) { return -c / 2 * (Math.sqrt(1 - t * t) - 1) + b };
         t -= 2;
         return c / 2 * (Math.sqrt(1 - t * t) + 1) + b;
+    },
+    easeInElastic: function (t, b, c, d) {
+        let s = 1.70158;
+        let p = 0;
+        let a = c;
+
+        if (t === 0) {
+            return b;
+        }
+
+        if ((t /= d) === 1) {
+            return b + c;
+        }
+
+        if (!p) {
+            p = d * .3;
+        }
+
+        if (a < Math.abs(c)) {
+            a = c;
+            s = p / 4;
+        } else {
+            s = p / (2 * Math.PI) * Math.asin(c / a);
+        }
+
+        return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;
+    },
+    easeOutElastic: function (t, b, c, d) {
+        var s = 1.70158;
+        var p = 0;
+        var a = c;
+
+        if (t === 0) {
+            return b;
+        }
+
+        if ((t /= d) === 1) {
+            return b + c;
+        }
+
+        if (!p) {
+            p = d * .3;
+        }
+
+        if (a < Math.abs(c)) {
+            a = c;
+            s = p / 4;
+        }
+        else {
+            s = p / (2 * Math.PI) * Math.asin(c / a);
+        }
+
+        return a * Math.pow(2, -10 * t) * Math.sin((t * d - s) * (2 * Math.PI) / p) + c + b;
+    },
+    easeInOutElastic: function (t, b, c, d) {
+        let s = 1.70158;
+        let p = 0;
+        let a = c;
+
+        if (t === 0) {
+            return b;
+        }
+        if ((t /= d / 2) === 2) {
+            return b + c;
+        }
+        if (!p) {
+            p = d * (.3 * 1.5);
+        }
+
+        if (a < Math.abs(c)) {
+            a = c;
+            s = p / 4;
+        }
+        else {
+            s = p / (2 * Math.PI) * Math.asin(c / a);
+        }
+        if (t < 1) {
+            return -.5 * (a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;
+        }
+
+        return a * Math.pow(2, -10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p) * .5 + c + b;
+    },
+    easeInBack: function (t, b, c, d, s) {
+        if (s === undefined) {
+            s = 1.70158
+        };
+
+        return c * (t /= d) * t * ((s + 1) * t - s) + b;
+    },
+    easeOutBack: function (t, b, c, d, s?) {
+        if (s === undefined) {
+            s = 1.70158;
+        }
+        return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
+    },
+    easeInOutBack: function (t, b, c, d, s?) {
+        if (s === undefined) {
+            s = 1.70158;
+        }
+        if ((t /= d / 2) < 1) {
+            return c / 2 * (t * t * (((s *= (1.525)) + 1) * t - s)) + b;
+
+        }
+        return c / 2 * ((t -= 2) * t * (((s *= (1.525)) + 1) * t + s) + 2) + b;
+    },
+    easeInBounce: function (t, b, c, d) {
+        return c - easingFunctions.easeOutBounce(d - t, 0, c, d) + b;
+    },
+    easeOutBounce: function (t, b, c, d) {
+        if ((t /= d) < (1 / 2.75)) {
+            return c * (7.5625 * t * t) + b;
+        } else if (t < (2 / 2.75)) {
+            return c * (7.5625 * (t -= (1.5 / 2.75)) * t + .75) + b;
+        } else if (t < (2.5 / 2.75)) {
+            return c * (7.5625 * (t -= (2.25 / 2.75)) * t + .9375) + b;
+        } else {
+            return c * (7.5625 * (t -= (2.625 / 2.75)) * t + .984375) + b;
+        }
+    },
+    easeInOutBounce: function (t, b, c, d) {
+        if (t < d / 2) {
+            return easingFunctions.easeInBounce(t * 2, 0, c, d) * .5 + b;
+        }
+        return easingFunctions.easeOutBounce(t * 2 - d, 0, c, d) * .5 + c * .5 + b;
     }
 }
 
@@ -117,16 +249,36 @@ var easingTypeMap = [
     "easeInCubic",
     "easeOutCubic",
     "easeInOutCubic",
+    "easeInQuart",
+    "easeOutQuart",
+    "easeInOutQuart",
+    "easeInQuint",
+    "easeOutQuint",
+    "easeInOutQuint",
     "easeInSine",
     "easeOutSine",
     "easeInOutSine",
+    "easeInExpo",
+    "easeOutExpo",
+    "easeInOutExpo",
     "easeInCirc",
     "easeOutCirc",
-    "easeInOutCirc"
+    "easeInOutCirc",
+    "easeInElastic",
+    "easeOutElastic",
+    "easeInOutElastic",
+    "easeInBack",
+    "easeOutBack",
+    "easeInOutBack",
+    "easeInBounce",
+    "easeOutBounce",
+    "easeInOutBounce"
 ]
 
 var defaultOptions = {
-    curve: 'linear'
+    curve: 1,// linear
+    delay:0,
+    duration:0
 }
 
 export default class AnimationGroup {
@@ -207,7 +359,9 @@ export default class AnimationGroup {
         if (t >= duration) {
             t = duration;
             this._count--;
-            this._restart = true;
+            if(this._count) {
+                this._restart = true;
+            }
         }
 
         for (var i = 0; i < this._values.length; ++i) {

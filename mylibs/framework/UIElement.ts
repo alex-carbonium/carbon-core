@@ -2217,8 +2217,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     }
 
     // returns deffered object
-    animate(properties, duration, options, progressCallback) {
-        let animation = new PropertyAnimation(this, properties, Object.assign({},options, {duration}), progressCallback);
+    animate(properties, options, progressCallback) {
+        let animation = new PropertyAnimation(this, properties, options, progressCallback);
         return animation.start();
     }
 

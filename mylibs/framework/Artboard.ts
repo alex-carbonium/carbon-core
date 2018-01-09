@@ -17,7 +17,7 @@ import Environment from "environment";
 import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
-import { ChangeMode, PatchType, IPrimitiveRoot, LayerType, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext, IContainer, WorkspaceTool, IMouseEventData, RenderEnvironment, RenderFlags, UIElementFlags, ProxyDefinition } from "carbon-core";
+import { ChangeMode, PatchType, IPrimitiveRoot, LayerType, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext, IContainer, WorkspaceTool, IMouseEventData, RenderEnvironment, RenderFlags, UIElementFlags, ProxyDefinition, IAnimationOptions } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
 import Rect from "../math/rect";
 import CoreIntl from "../CoreIntl";
@@ -1370,6 +1370,44 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return ArtboardProxyGenerator.generate(artboard, module);
     }
 
+    set currentState(value:string) {
+        if(this.runtimeProps.stateController) {
+            this.runtimeProps.stateController.currentState = value;
+        }
+    }
+
+    get currentState() :string {
+        if(this.runtimeProps.stateController) {
+            return this.runtimeProps.stateController.currentState;
+        }
+    }
+
+    registerStateAnimation(from:string, to:string, defaultAnimationOptions:IAnimationOptions, elementOptions?:{[element:string]:{[prop:string]:IAnimationOptions}}) {
+        let rp = this.runtimeProps;
+        let stateAnimation = rp.stateAnimations = rp.stateAnimations ||{};
+        let fromState = stateAnimation[from] = stateAnimation[from] || {};
+        fromState[to] = {
+            defaultOptions:defaultAnimationOptions,
+            elementOptions:elementOptions
+        };
+    }
+
+    get stateAnimations() {
+        return this.runtimeProps.stateAnimations;
+    }
+
+    nextState() {
+        if(this.runtimeProps.stateController) {
+            this.runtimeProps.stateController.nextState();
+        }
+    }
+
+    prevState() {
+        if(this.runtimeProps.stateController) {
+            this.runtimeProps.stateController.prevState();
+        }
+    }
+
     private flattenSymbolInstances(page) {
         let pageId = page.id;
         let artboardId = this.id;
@@ -1521,8 +1559,8 @@ PropertyMetadata.registerForType(Artboard, {
     },
     proxyDefinition(): ProxyDefinition {
         return {
-            rprops: ["width", "height", "name", "id", "children"], // readonly props
-            props: ["fill"], // read/write props
+            rprops: ["width", "height", "name", "id", "children", "states"], // readonly props
+            props: ["fill", "currentState"], // read/write props
             methods: [
                 "boundaryRect",
                 "add",
@@ -1534,7 +1572,10 @@ PropertyMetadata.registerForType(Artboard, {
                 "getPropertiesSnapshot",
                 "animate",
                 "registerEventHandler",
-                "raiseEvent"
+                "raiseEvent",
+                "nextState",
+                "prevState",
+                "registerStateAnimation"
             ],
             mixins: []
         }

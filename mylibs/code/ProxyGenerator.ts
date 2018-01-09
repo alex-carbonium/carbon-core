@@ -63,10 +63,17 @@ export class ArtboardProxyGenerator {
             if (e === artboard) {
                 return;
             }
+            var ret = undefined;
+            if ((e as any).t === Types.Symbol) {
+                ret = true; // do not parse internals of a symbol
+            }
+
             let name = NameProvider.escapeName(e.name);
             if(name) {
                 set.add(name);
             }
+
+            return ret;
         });
         let controlList = [];
         set.forEach(c=>controlList.push(c));

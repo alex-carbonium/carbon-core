@@ -1,6 +1,7 @@
 declare module "carbon-runtime" {
     /// <reference path="carbon-runtime-names"/>;
-    export type AnimationProps = { [name: string]: number | Brush };
+    type PropNames = "x"|"y"|"angle"|"width"|"height"|"fill"|"stroke"|"strokeWidth"|"opacity"|"visible"|"margin"|"padding"|"cornerRadius"|"dashPattern";
+    export type AnimationProps = { [name: string]: any };
     export const enum BrushType {
         empty,
         color,
@@ -80,7 +81,7 @@ declare module "carbon-runtime" {
     }
 
     interface TUIElement extends TUIElementProps, MouseEventHandler {
-        animate(props: AnimationProps, duration?: number, options?: IAnimationOptions, progress?: () => void): Promise<void>;
+        animate(props: AnimationProps, options?: IAnimationOptions, progress?: () => void): Promise<void>;
         boundaryRect(): TRect;
         clone(): TUIElement;
         center(): { x: number, y: number };
@@ -111,6 +112,7 @@ declare module "carbon-runtime" {
         readonly width: number;
         readonly height: number;
         readonly name: string;
+        currentState:string;
     }
 
     interface TArtboard extends TArtboardProps, MouseEventHandler {
@@ -124,6 +126,14 @@ declare module "carbon-runtime" {
 
         registerEventHandler(eventName: string, callback: (data?: DataBag) => void | Promise<void | boolean>);
         raiseEvent(eventName: string, data?: DataBag);
+
+        readonly states: string[];
+        nextState(): boolean;
+        prevState(): boolean;
+
+        registerStateAnimation(fromState:StateNames, toState:StateNames, defaultAnimationOptions:IAnimationOptions, elementAnimationOptions?:{
+            [element:string]:{[prop:string]:IAnimationOptions}
+        })
     }
 
     interface Property<T> {
@@ -336,12 +346,30 @@ declare module "carbon-runtime" {
         EaseInCubic,
         EaseOutCubic,
         EaseInOutCubic,
+        EaseInQuart,
+        EaseOutQuart,
+        EaseInOutQuart,
+        EaseInQuint,
+        EaseOutQuint,
+        EaseInOutQuint,
         EaseInSine,
         EaseOutSine,
         EaseInOutSine,
+        EaseInExpo,
+        EaseOutExpo,
+        EaseInOutExpo,
         EaseInCirc,
         EaseOutCirc,
-        EaseInOutCirc
+        EaseInOutCirc,
+        EaseInElastic,
+        EaseOutElastic,
+        EaseInOutElastic,
+        EaseInBack,
+        EaseOutBack,
+        EaseInOutBack,
+        EaseInBounce,
+        EaseOutBounce,
+        EaseInOutBounce
     }
 
     export type EasingFunction = (time: number, from: number, to: number, duration: number) => number;

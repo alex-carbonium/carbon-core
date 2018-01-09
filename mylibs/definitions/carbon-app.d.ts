@@ -208,7 +208,7 @@ declare module "carbon-app" {
     }
 
     export interface IPage<TProps extends IPageProps = IPageProps> extends ILayer<IPageProps> {
-        getAllArtboards(): IArtboard[];
+        getAllArtboards(excludeStateboards?): IArtboard[];
         getActiveArtboard(): IArtboard;
         getArtboardAtPoint(point: ICoordinate): IArtboard;
         setActiveArtboard(artboard: IArtboard, doNotTrack?: boolean): void;

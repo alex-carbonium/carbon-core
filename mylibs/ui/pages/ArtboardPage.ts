@@ -259,12 +259,12 @@ class ArtboardPage extends Page implements IArtboardPage, IElementWithCode {
         return this.getContentContainer();
     }
 
-    getAllArtboards() {
+    getAllArtboards(excludeStateboards = false) {
         let items = this.children;
         let res = [];
         //reversing for hit testing
         for (let i = items.length - 1; i >= 0; --i) {
-            if (items[i] instanceof Artboard /*&& !(items[i] instanceof StateBoard)*/) {
+            if (items[i] instanceof Artboard &&(!excludeStateboards || !(items[i] instanceof StateBoard))) {
                 res.push(items[i]);
             }
         }

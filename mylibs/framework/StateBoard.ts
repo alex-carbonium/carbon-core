@@ -1,10 +1,11 @@
 import Artboard from "./Artboard";
 import PropertyMetadata from "framework/PropertyMetadata";
 import ModelStateListener from "framework/relayout/ModelStateListener";
-import {Types} from "./Defs";
+import { Types } from "./Defs";
 import DataNode from "framework/DataNode";
 import NullContainer from "./NullContainer";
 import { IStateboard, IStateboardProps } from "carbon-core";
+import { model } from "./Model";
 
 class StateBoard extends Artboard implements IStateboard {
     props: IStateboardProps;
@@ -16,12 +17,12 @@ class StateBoard extends Artboard implements IStateboard {
 
     get artboard() {
         if (!this._artboard) {
-            if(this.parent === NullContainer){
+            if (this.parent === NullContainer) {
                 return null;
             }
 
             this._artboard = DataNode.getImmediateChildById(this.parent, this.props.masterId, true);
-            if(this._artboard) {
+            if (this._artboard) {
                 this._artboard.linkStateBoard(this);
             }
         }
@@ -36,22 +37,38 @@ class StateBoard extends Artboard implements IStateboard {
         return this.props.stateId;
     }
 
-    headerText(){
-        if(!this.artboard){
+    code(value?) {
+        return this.artboard.code(value);
+    }
+
+    declaration(module?) {
+        return this.artboard.declaration(module);
+    }
+
+    get exports() {
+        return this.artboard.exports;
+    }
+
+    set exports(value) {
+        this.artboard.exports = value;
+    }
+
+    headerText() {
+        if (!this.artboard) {
             return;
         }
         var state = this.artboard._recorder.getStateById(this.stateId);
-        return state?state.name:'';
+        return state ? state.name : '';
     }
 
-    displayName(){
+    displayName() {
         return this.props.name + " (" + this.headerText() + ")";
     }
 
     getElementByMasterId(masterId) {
         var res = null;
 
-        this.applyVisitor(e=> {
+        this.applyVisitor(e => {
             if (e.props.masterId === masterId) {
                 res = e;
                 return false;
@@ -74,7 +91,7 @@ class StateBoard extends Artboard implements IStateboard {
         this._transfering = true;
         var parent = this.getElementByMasterId(masterParent.id);
         var clone = element.clone();
-        clone.setProps({masterId: element.id})
+        clone.setProps({ masterId: element.id })
         parent.insert(clone, index);
 
         this._transfering = false;
@@ -110,7 +127,7 @@ class StateBoard extends Artboard implements IStateboard {
 
         if (!this._transfering && this.artboard) {
             var clone = element.clone();
-            element.setProps({masterId: clone.id});
+            element.setProps({ masterId: clone.id });
             this.artboard.transferInsert(this.props.stateId, parent.props.masterId, clone, index);
         }
     }
@@ -121,7 +138,7 @@ class StateBoard extends Artboard implements IStateboard {
 
         if (!this._transfering && this.artboard) {
             var element = this.artboard.getElementById(element.props.masterId);
-            if(element) {
+            if (element) {
                 element.parent.changePosition(element, index);
             }
         }
@@ -137,7 +154,7 @@ class StateBoard extends Artboard implements IStateboard {
     transferChangePosition(masterElement, index) {
         this._transfering = true;
         var target = this.getElementByMasterId(masterElement.id);
-        if(target) {
+        if (target) {
             target.parent.changePosition(target, index);
         }
         this._transfering = false;
