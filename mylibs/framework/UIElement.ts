@@ -1840,10 +1840,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
         delete this.props;
         delete this.runtimeProps;
-        this._isDisposed = true;
-    }
-    isDisposed() {
-        return this._isDisposed;
+
+        super.dispose();
     }
     rotationOrigin(global) {
         return this.center(global);
