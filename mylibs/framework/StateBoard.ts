@@ -61,6 +61,12 @@ class StateBoard extends Artboard implements IStateboard {
         return state ? state.name : '';
     }
 
+    getStates() {
+        if(this.artboard) {
+            return this.artboard.getStates();
+        }
+    }
+
     displayName() {
         return this.props.name + " (" + this.headerText() + ")";
     }
