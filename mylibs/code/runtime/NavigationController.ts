@@ -51,7 +51,7 @@ export class NavigationController implements INavigationController, IDisposable,
             that.history.push(that.previewModel.activePage);
         }
 
-        that.previewModel.navigateToPage.raise(artboardId, options, data);
+        that.previewModel.navigateToArtboard(artboardId, options, data);
     }
 
     dispose() {

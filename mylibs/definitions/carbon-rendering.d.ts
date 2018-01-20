@@ -81,6 +81,7 @@ declare module "carbon-rendering" {
         Offscreen = 1 << 4,
         CheckViewport = 1 << 5,
         DisableCaching = 1 << 6,
+        Preview = 1 << 7,
         Default = Final | ArtboardFill | UseParentClipping | CheckViewport
     }
 

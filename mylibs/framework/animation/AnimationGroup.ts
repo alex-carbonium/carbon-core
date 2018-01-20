@@ -289,7 +289,6 @@ export default class AnimationGroup {
     _startTime: number;
     _promise: Promise<any>;
     _doneCallback: any;
-    _progressCallback: any;
     _stopped: boolean;
     _lastT: number;
     _restart: boolean;
@@ -382,7 +381,7 @@ export default class AnimationGroup {
             }
             value.accessor(newValue);
         }
-        this._progressCallback && this._progressCallback();
+        this.progressCallback && this.progressCallback();
         if (this._count <= 0) {
             this.complete();
         }

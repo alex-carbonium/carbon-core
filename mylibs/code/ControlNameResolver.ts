@@ -25,7 +25,8 @@ const system = {
     'RegExp':Object.freeze(RegExp),
     'require':true,
     'PropertyAnimation':Object.freeze(PropertyAnimation),
-    'Color': Object.freeze(Color)
+    'Color': Object.freeze(Color),
+    'Promise': Object.freeze(Promise),
 }
 
 export class ControlNameResolver {

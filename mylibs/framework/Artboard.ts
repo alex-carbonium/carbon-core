@@ -218,7 +218,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     drawShadowPath(context, environment: RenderEnvironment) {
-        if (environment.flags & RenderFlags.Offscreen) {
+        if (environment.flags & (RenderFlags.Offscreen | RenderFlags.Preview)) {
             return;
         }
 
@@ -230,7 +230,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     drawFrameRect(context, environment: RenderEnvironment) {
-        if (environment.flags & RenderFlags.Offscreen) {
+        if (environment.flags & (RenderFlags.Offscreen | RenderFlags.Preview)) {
             return;
         }
         context.save();
@@ -257,7 +257,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     drawExtras(context, environment: RenderEnvironment) {
-        if (environment.flags & RenderFlags.Offscreen) {
+        if (environment.flags & (RenderFlags.Offscreen | RenderFlags.Preview)) {
             return;
         }
 
@@ -412,7 +412,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     strokeBorder(context, w, h, environment: RenderEnvironment) {
-        if (environment.flags & RenderFlags.ArtboardFill) {
+        if ((environment.flags & RenderFlags.ArtboardFill && !(environment.flags & RenderFlags.Preview))) {
             super.strokeBorder(context, w, h, environment);
         }
     }

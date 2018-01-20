@@ -124,7 +124,7 @@ declare module "carbon-app"{
         interactionLayer: any;
         scaleMatrix: any;
         context: any;
-
+        updateViewportSize(size:ISize);
 
         focused(value?: boolean): boolean;
 

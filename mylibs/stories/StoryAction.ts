@@ -22,7 +22,7 @@ PropertyMetadata.registerForType(StoryAction, {
         defaultValue: {
             type: AnimationType.SlideLeft,
             curve: EasingType.EaseOutQuad,
-            duration: .2
+            duration: 200
         }
     }
 });

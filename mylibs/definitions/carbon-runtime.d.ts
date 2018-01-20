@@ -80,8 +80,11 @@ declare module "carbon-runtime" {
         height: number;
     }
 
-    interface TUIElement extends TUIElementProps, MouseEventHandler {
+    interface IAnimatable {
         animate(props: AnimationProps, options?: IAnimationOptions, progress?: () => void): Promise<void>;
+    }
+
+    interface TUIElement extends TUIElementProps, IAnimatable, MouseEventHandler {
         boundaryRect(): TRect;
         clone(): TUIElement;
         center(): { x: number, y: number };
@@ -457,6 +460,10 @@ declare module "carbon-runtime" {
         type: AnimationType;
     }
 
+    export interface ICustomTransition {
+        transitionFunction: (oldArtboard: TArtboard & IAnimatable, newArtboard: TArtboard & IAnimatable) => Promise<void>;
+    }
+
     type BasicType = string | number | boolean;
 
     type DataBag = BasicType | { [key: string]: BasicType | DataBag };
@@ -465,7 +472,7 @@ declare module "carbon-runtime" {
     * Navigation controller
     */
     interface INavigationController {
-        navigateTo(artboard: ArtboardNames, animationOptions?: INavigationAnimationOptions, data?: DataBag)
+        navigateTo(artboard: ArtboardNames, animationOptions?: INavigationAnimationOptions|ICustomTransition, data?: DataBag)
         navigateBack();
     }
 }

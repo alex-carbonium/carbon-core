@@ -41,6 +41,7 @@ export default class PreviewView extends ViewBase {
 
         if (env) {
             env.flags &= ~RenderFlags.CheckViewport;
+            env.flags |= RenderFlags.Preview;
         }
 
         return env;

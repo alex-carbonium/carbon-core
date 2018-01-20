@@ -440,6 +440,7 @@ declare module "carbon-app" {
 
     export interface IAnimationController {
         registerAnimationGroup(group: any);
+        reset();
     }
 
     export interface IActionManager {
@@ -635,7 +636,7 @@ declare module "carbon-app" {
 
     export interface IPreviewModel {
         onPageChanged:IEvent<IPage>;
-        navigateToPage: IEvent3<string, IAnimationOptions, DataBag>;
+        navigateToArtboard(artboardId:string, options?:IAnimationOptions, data?:DataBag);
         activePage:IPage;
         readonly activeArtboard:IArtboard;
     }

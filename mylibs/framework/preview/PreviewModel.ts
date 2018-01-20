@@ -5,7 +5,7 @@ import DataNode from "framework/DataNode";
 import Matrix from "math/matrix";
 import Artboard from "framework/Artboard";
 import Symbol from "framework/Symbol";
-import { IApp, IEvent, IPage, PreviewDisplayMode, ISize, IPageProps, ChangeMode, IDisposable, IEvent3 } from "carbon-core";
+import { IApp, IEvent, IPage, PreviewDisplayMode, ISize, IPageProps, ChangeMode, IDisposable, IEvent3, INavigationAnimationOptions, AnimationType, ICustomTransition } from "carbon-core";
 import { IPreviewModel } from "carbon-app";
 import { IArtboard } from "carbon-model";
 import { Sandbox } from "../../code/Sandbox";
@@ -21,6 +21,8 @@ import { BrushFactory } from "../../code/runtime/BrushFactory";
 import { CompiledCodeProvider } from "../../code/CompiledCodeProvider";
 import { NameProvider } from "../../code/NameProvider";
 import StateBoard from "../StateBoard";
+import Environment from "environment";
+import AnimationGroup from "../animation/AnimationGroup";
 
 export default class PreviewModel implements IPreviewModel, IDisposable {
     private _activePage: IPage<IPageProps> & { originalSize: ISize } = NullPage;
@@ -32,15 +34,15 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
     private modules = new Map<string, any>()
 
     public app: IApp;
-    public navigateToPage: IEvent3<string, IAnimationOptions, DataBag>;
     public onPageChanged: IEvent<IPage>;
     public sourceArtboard: IArtboard;
     public modelFailed: boolean = false;
 
+    public refreshVersion = 0;
+
     constructor(app) {
         this.app = app;
         this.navigationController = new NavigationController(this);
-        this.navigateToPage = EventHelper.createEvent3(); // todo: move this out
         this.onPageChanged = EventHelper.createEvent();
         this.runtimeContext = new RuntimeContext();
 
@@ -51,6 +53,103 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         this.disposables.add(this.navigationController);
     }
 
+    _releaseCurrentPage() {
+        if (this.activePage) {
+            Environment.view.animationController.reset();
+            Environment.view.setActivePage(NullPage);
+            this.recycleCurrentPage();
+            this.recycleModules();
+        }
+    }
+
+    navigateToArtboard(artboardId: string, options?: IAnimationOptions, data?: DataBag) {
+        if (!artboardId) {
+            return;
+        }
+
+        this.getScreenById(artboardId).then((nextPage) => {
+            return this._changeActivePage(nextPage, options);
+        })
+    }
+
+    _animateTransition(newPage, animation: INavigationAnimationOptions|ICustomTransition) {
+        // 1. take artboard from newPage, and add it to an oldPage
+        // 2. set initial position
+        // 3. run animation
+        // 4. on end, return to the newPage and resolve promise
+        let oldPage = this.activePage;
+        let newArtboard = newPage.children[0];
+        let oldArtboard = oldPage.children[0];
+        oldPage.add(newArtboard);
+
+        let oldPropsAfter;
+        let newPropsAfter;
+        let promise;
+        if(animation.hasOwnProperty('transitionFunction')) {
+            promise = animation.transitionFunction(oldArtboard as any, newArtboard as any);
+            if(!promise) {
+                promise = Promise.resolve(null);
+            }
+        } else if (animation.type === AnimationType.Dissolve) {
+            oldPropsAfter = { opacity: 1 }
+            newPropsAfter = { opacity: 1 };
+            newArtboard.opacity = 0;
+            promise = Promise.all([
+                oldArtboard.animate(oldPropsAfter, animation),
+                newArtboard.animate(newPropsAfter, animation)
+            ])
+        } else {
+            let progress: () => void;
+
+            if (animation.type === AnimationType.SlideLeft) {
+                oldPropsAfter = { x: -oldArtboard.width }
+                progress = () => {
+                    newArtboard.x = oldArtboard.x + newArtboard.width;
+                }
+            } else if (animation.type === AnimationType.SlideRight) {
+                oldPropsAfter = { x: newArtboard.width }
+                progress = () => {
+                    newArtboard.x = oldArtboard.x - newArtboard.width;
+                }
+            } else if (animation.type === AnimationType.SlideDown) {
+                oldPropsAfter = { y: newArtboard.height }
+                progress = () => {
+                    newArtboard.y = oldArtboard.y - oldArtboard.height;
+                }
+            } else if (animation.type === AnimationType.SlideUp) {
+                oldPropsAfter = { y: -oldArtboard.height }
+                progress = () => {
+                    newArtboard.y = oldArtboard.y + oldArtboard.height;
+                }
+            }
+            progress();
+            promise = Promise.all([
+                oldArtboard.animate(oldPropsAfter, animation, progress)
+            ])
+        }
+
+        return promise.then(() => {
+            newPage.add(newArtboard);
+            return newPage;
+        })
+    }
+
+    _changeActivePage(page, animation?): Promise<any> {
+        let promise;
+        if (this.activePage && animation && animation.hasOwnProperty('type')) {
+            promise = this._animateTransition(page, animation);
+        } else {
+            promise = Promise.resolve(page);
+        }
+
+        return promise.then(() => {
+            this._releaseCurrentPage();
+            this.activePage = page;
+            page.invalidate();
+            return page;
+        })
+    }
+
     get activePage() {
         return this._activePage;
     }
@@ -58,6 +157,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
     set activePage(value: IPage<IPageProps> & { originalSize: ISize }) {
         if (this._activePage !== value) {
             this._activePage = value;
+            Environment.view.setActivePage(value);
             this.onPageChanged.raise(value);
         }
     }
@@ -73,14 +173,14 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
 
     requireModuleInstance(name) {
         let module = this.modules.get(name);
-        if(module) {
+        if (module) {
             return module;
         }
 
         let code = this.modulesCode.get(name);
-        if(!code) {
+        if (!code) {
             code = Services.compiler.getStaticCode(name);
-            if(!code) {
+            if (!code) {
                 throw "unknown module name: " + name;
             }
         }
@@ -103,7 +203,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         return this.activePage.children[0] as IArtboard;
     }
 
-    _makePageFromArtboard(artboard, screenSize): Promise<IPage> {
+    _makePageFromArtboard(artboard): Promise<IPage> {
         if (!artboard) {
             return Promise.resolve(NullPage);
         }
@@ -182,7 +282,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         });
     }
 
-    getCurrentScreen(screenSize): Promise<IPage> {
+    getCurrentScreen(): Promise<IPage> {
         var activeStory = this.app.activeStory();
         if (!activeStory) {
             // TODO: return special page with instruction that you need to create at least on artboard
@@ -196,7 +296,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
             }
         } else {
             artboard = this.app.activePage.getActiveArtboard();
-            if(artboard instanceof StateBoard) {
+            if (artboard instanceof StateBoard) {
                 artboard = artboard.artboard;
             }
         }
@@ -209,13 +309,13 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
             return Promise.resolve(NullPage);
         }
 
-        return this._makePageFromArtboard(artboard, screenSize);
+        return this._makePageFromArtboard(artboard);
     }
 
-    getScreenById(artboardId, screenSize): Promise<IPage> {
+    getScreenById(artboardId): Promise<IPage> {
         var artboard = DataNode.getImmediateChildById(this.app.activePage, artboardId, true);
 
-        return this._makePageFromArtboard(artboard, screenSize);
+        return this._makePageFromArtboard(artboard);
     }
 
     allElementsWithActions() {
@@ -234,7 +334,6 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         });
 
         var res = [];
-
         if (artboard) {
             artboard.applyVisitor(e => {
                 if (elementsMap[e.id]) {
@@ -244,6 +343,32 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         }
 
         return res;
+    }
+
+    initialize() {
+        return this.getCurrentScreen().then(page => {
+            return this._changeActivePage(page);
+        })
+    }
+
+    restart() {
+        let id;
+        if (this.activePage) {
+            id = this.activePage.children[0].id;
+        }
+
+        Environment.view.animationController.reset();
+        Environment.view.setActivePage(NullPage);
+        this.recycleCurrentPage();
+        this.recycleModules();
+
+        if (id) {
+            return this.getScreenById(id).then(page => {
+                return this._changeActivePage(page);
+            })
+        }
+
+        return Promise.resolve(null);
     }
 
     invokeAction(action) {

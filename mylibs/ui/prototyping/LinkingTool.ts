@@ -248,7 +248,7 @@ export default class LinkingTool extends Tool {
                 animation: {
                     type: AnimationType.SlideLeft,
                     curve: EasingType.EaseOutQuad,
-                    duration: .2
+                    duration: 200
                 }
             }
             var storyAction = new StoryAction();
