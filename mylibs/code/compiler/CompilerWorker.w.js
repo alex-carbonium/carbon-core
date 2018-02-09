@@ -63,7 +63,7 @@ addEventListener('message', function (e) {
             files[fileName] = { text: e.data.text, version: version + 1 };
         }
 
-        if (!fileName.endsWith('.d.ts')) {
+        if (!stringEndsWith(fileName, '.d.ts')) {
             emitFile(e.data.fileName);
         }
     }
@@ -81,7 +81,7 @@ function getExportedSymbols(fileName) {
                 var symbol = node.symbol;
                 if (symbol && node.name.text) {
                     var type = checker.typeToString(checker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration))
-                    if (!type.startsWith('typeof ')) {
+                    if (!stringStartsWith(type, 'typeof ')) {
                         exports = exports || {};
                         exports[node.name.text] = type;
                     }
@@ -139,4 +139,13 @@ function logErrors(fileName) {
     });
 
     postMessage({ error: true, fileName: fileName, errors: errors })
+}
+
+//manual polyfill since babel polyfill is not included in workers
+function stringEndsWith(str, end) {
+    return str.substring(str.length - end.length, str.length) === end;
+}
+
+function stringStartsWith(str, start) {
+    return str.substr(0, start.length) === start;
 }
