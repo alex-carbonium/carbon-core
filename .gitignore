@@ -4,7 +4,6 @@
 *.log
 *.trx
 target/*
-package-lock.json
 node_modules/*
 *_LOCAL_*
 *_BASE_*
