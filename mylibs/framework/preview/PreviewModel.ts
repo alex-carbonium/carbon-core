@@ -91,7 +91,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         })
     }
 
-    _animateTransition(newPage, animation: INavigationAnimationOptions|ICustomTransition) {
+    _animateTransition(newPage, animation: INavigationAnimationOptions&ICustomTransition) {
         // 1. take artboard from newPage, and add it to an oldPage
         // 2. set initial position
         // 3. run animation

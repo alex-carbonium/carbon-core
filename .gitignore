@@ -4,9 +4,9 @@
 *.log
 *.trx
 target/*
-package-lock.json
 node_modules/*
 *_LOCAL_*
 *_BASE_*
 *_REMOTE_*
 *_BACKUP_*
+package-lock.json
