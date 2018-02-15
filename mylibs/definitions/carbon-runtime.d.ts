@@ -461,7 +461,7 @@ declare module "carbon-runtime" {
     }
 
     export interface ICustomTransition {
-        transitionFunction: (oldArtboard: TArtboard & IAnimatable, newArtboard: TArtboard & IAnimatable) => Promise<void>;
+        transitionFunction: (oldArtboard: TArtboard & IAnimatable, newArtboard: TArtboard & IAnimatable) => Promise<any>;
     }
 
     type BasicType = string | number | boolean;

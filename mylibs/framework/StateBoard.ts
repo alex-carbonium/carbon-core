@@ -111,6 +111,18 @@ class StateBoard extends Artboard implements IStateboard {
         }
     }
 
+    getStateboardById(artboardId) {
+        if(this.id === artboardId) {
+            return this;
+        }
+
+        if(this.artboard) {
+            return this.artboard.getStateboardById(artboardId);
+        }
+
+        return null;
+    }
+
     registerDelete(parent, element) {
         ModelStateListener.trackDelete(this, parent, element, /*remoteOnly:*/true);
         if (!this._transfering && this.artboard) {

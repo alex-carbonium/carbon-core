@@ -55,15 +55,34 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
 
     _releaseCurrentPage() {
         if (this.activePage) {
-            Environment.view.animationController.reset();
             Environment.view.setActivePage(NullPage);
             this.recycleCurrentPage();
             this.recycleModules();
         }
     }
 
+    _getStateTransition(artboardId) {
+        var artboard = DataNode.getImmediateChildById(this.app.activePage, artboardId, true);
+        if(artboard instanceof StateBoard) {
+            let source = artboard.artboard;
+            let stateId = artboard.stateId;
+
+            return stateId;
+        }
+
+        return null;
+    }
+
     navigateToArtboard(artboardId: string, options?: IAnimationOptions, data?: DataBag) {
         if (!artboardId) {
+            return;
+        }
+
+        Environment.view.animationController.reset();
+        let stateId = this._getStateTransition(artboardId);
+
+        if(stateId) {
+            this.activeArtboard.setProps({stateId:stateId});
             return;
         }
 
@@ -86,37 +105,37 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         let newPropsAfter;
         let promise;
         if(animation.hasOwnProperty('transitionFunction')) {
-            promise = animation.transitionFunction(oldArtboard as any, newArtboard as any);
+            promise = (animation as ICustomTransition).transitionFunction(oldArtboard as any, newArtboard as any);
             if(!promise) {
                 promise = Promise.resolve(null);
             }
-        } else if (animation.type === AnimationType.Dissolve) {
+        } else if ((animation as INavigationAnimationOptions).type === AnimationType.Dissolve) {
             oldPropsAfter = { opacity: 1 }
             newPropsAfter = { opacity: 1 };
             newArtboard.opacity = 0;
             promise = Promise.all([
-                oldArtboard.animate(oldPropsAfter, animation),
-                newArtboard.animate(newPropsAfter, animation)
+                oldArtboard.animate(oldPropsAfter, animation as IAnimationOptions),
+                newArtboard.animate(newPropsAfter, animation as IAnimationOptions)
             ])
         } else {
             let progress: () => void;
 
-            if (animation.type === AnimationType.SlideLeft) {
+            if ((animation as INavigationAnimationOptions).type === AnimationType.SlideLeft) {
                 oldPropsAfter = { x: -oldArtboard.width }
                 progress = () => {
                     newArtboard.x = oldArtboard.x + newArtboard.width;
                 }
-            } else if (animation.type === AnimationType.SlideRight) {
+            } else if ((animation as INavigationAnimationOptions).type === AnimationType.SlideRight) {
                 oldPropsAfter = { x: newArtboard.width }
                 progress = () => {
                     newArtboard.x = oldArtboard.x - newArtboard.width;
                 }
-            } else if (animation.type === AnimationType.SlideDown) {
+            } else if ((animation as INavigationAnimationOptions).type === AnimationType.SlideDown) {
                 oldPropsAfter = { y: newArtboard.height }
                 progress = () => {
                     newArtboard.y = oldArtboard.y - oldArtboard.height;
                 }
-            } else if (animation.type === AnimationType.SlideUp) {
+            } else if ((animation as INavigationAnimationOptions).type === AnimationType.SlideUp) {
                 oldPropsAfter = { y: -oldArtboard.height }
                 progress = () => {
                     newArtboard.y = oldArtboard.y + oldArtboard.height;
@@ -124,7 +143,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
             }
             progress();
             promise = Promise.all([
-                oldArtboard.animate(oldPropsAfter, animation, progress)
+                oldArtboard.animate(oldPropsAfter, animation as IAnimationOptions, progress)
             ])
         }
 
@@ -136,6 +155,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
 
     _changeActivePage(page, animation?): Promise<any> {
         let promise;
+
         if (this.activePage && animation && animation.hasOwnProperty('type')) {
             promise = this._animateTransition(page, animation);
         } else {
@@ -209,8 +229,11 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         }
 
         var page = new Page();
+        var previewClone = new Symbol();
+        previewClone.setProps({source:{pageId:artboard.parent.id, artboardId:artboard.id}});
 
-        var previewClone = artboard.mirrorClone();
+        //var previewClone = artboard.mirrorClone();
+        previewClone.id = artboard.id;
         previewClone.applyVisitor(p => {
             p.props.__temp = true;
             p.runtimeProps.ctxl = 1
@@ -358,9 +381,6 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         }
 
         Environment.view.animationController.reset();
-        Environment.view.setActivePage(NullPage);
-        this.recycleCurrentPage();
-        this.recycleModules();
 
         if (id) {
             return this.getScreenById(id).then(page => {

@@ -153,6 +153,21 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return super.resizeDimensions(value);
     }
 
+    getStateboardById(artboardId) {
+        if(this.id === artboardId) {
+            return this;
+        }
+
+        if(this.runtimeProps.stateBoards)
+        {
+            for(var sb of this.runtimeProps.stateBoards) {
+                if(sb.id === artboardId) {
+                    return sb;
+                }
+            }
+        }
+    }
+
     canAccept(elements: UIElement[], autoInsert, allowMoveIn) {
         // if (this.props.type === ArtboardType.IconSet) {
         //     return false;

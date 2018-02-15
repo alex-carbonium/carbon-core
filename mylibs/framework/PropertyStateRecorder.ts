@@ -20,6 +20,7 @@ function eachElementAndProp(state, callback) {
         }
     }
 }
+
 function apply(toState: IState, fromStateName: string, element: any, animate: boolean) {
     if (animate) {
         let stateOptions;

@@ -490,13 +490,22 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         return false;
     }
 
+    get stateId() {
+        if(this.props.stateId) {
+            return this.props.stateId;
+        }
+
+        return 'default';
+    }
+
     get currentState():string {
         let that = RuntimeProxy.unwrap(this);
         let states = that.getStates();
         if(!states && !states.length) {
             return undefined;
         }
-        return states.find(s=>s.id === that.props.stateId).name;
+
+        return states.find(s=>s.id === this.stateId).name;
     }
 
     set currentState(name:string) {
@@ -505,8 +514,8 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         if(!states && !states.length) {
             return;
         }
-        let state = states.find(s=>s.name === name);
 
+        let state = states.find(s=>s.name === name);
         that.setProps({stateId:state.id});
     }
 
