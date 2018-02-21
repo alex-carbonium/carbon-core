@@ -1,12 +1,12 @@
 import { IUIElement, AnimationProps, IAnimationOptions, ChangeMode } from "carbon-core";
 import AnimationGroup from "./AnimationGroup";
 import Environment from "environment";
-import { RuntimeProxy } from "../../code/runtime/RuntimeProxy";
 import Brush from "../Brush";
 import { Color } from "../Color";
 import Matrix from "math/matrix";
 import Rect from "math/rect";
 import Point from "../../math/point";
+import { RuntimeProxy } from "../../code/runtime/RuntimeProxy";
 
 let hsluvConvertor = {
     from: function (values: number[]) {

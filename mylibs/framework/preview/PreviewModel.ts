@@ -281,6 +281,8 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
                 promises.push(Services.compiler.codeProvider.getModuleCode(ref, parent.runtimeProps.refs[ref]).
                     then(code => {
                         this.modulesCode.set(ref.substr(0, ref.lastIndexOf('.')), code);
+                    }).catch(reason=>{
+                        console.error(reason);
                     }));
             }
         }
@@ -300,8 +302,12 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
                         this.modelFailed = true;
                     }
                     // todo: think what to do if failed
+                }).catch(reason=>{
+                    console.error(reason);
                 })
             }
+        }).catch(reason=>{
+            console.error(reason);
         });
     }
 

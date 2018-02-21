@@ -88,7 +88,7 @@ class Draggable implements IProxySource, IDisposable {
             this.isDragging = true;
             if (this.onBeginDrag) {
                 this.onBeginDrag({
-                    target: RuntimeProxy.wrap(this.element)
+                    target: this.element.runtimeProxy()// RuntimeProxy.wrap(this.element)
                 });
             }
         }
@@ -106,7 +106,7 @@ class Draggable implements IProxySource, IDisposable {
             let event = Environment.controller.wrapEvent({
                 dx: dx,
                 dy: dy,
-                target: RuntimeProxy.wrap(this.element)
+                target: this.element.runtimeProxy()//RuntimeProxy.wrap(this.element)
             });
 
             if (this.onDragging) {
@@ -131,7 +131,7 @@ class Draggable implements IProxySource, IDisposable {
 
             if (this.isDragging && this.onEndDrag) {
                 this.onEndDrag({
-                    target: RuntimeProxy.wrap(this.element)
+                    target: this.element.runtimeProxy()
                 });
             }
 

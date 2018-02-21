@@ -37,6 +37,7 @@ declare module "carbon-model"{
         canSelect(): boolean;
         flatten?():void;
         mirrorClone():IUIElement;
+        runtimeProxy():object;
 
         primitiveRoot(): IPrimitiveRoot & IUIElement;
 

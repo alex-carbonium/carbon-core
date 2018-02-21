@@ -182,6 +182,9 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
     get angle(): number {
         throw new Error("Method not implemented.");
     }
+    runtimeProxy() {
+        return this;
+    }
     constraints(value?: IConstraints): IConstraints {
         return Constraints.Default;
     }

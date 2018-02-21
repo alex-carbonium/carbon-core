@@ -6,7 +6,7 @@ import { Overflow, Types } from "./Defs";
 import Selection from "framework/SelectionModel";
 import DataNode from "framework/DataNode";
 import ObjectFactory from "framework/ObjectFactory";
-import { ChangeMode, IContainer, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp, IUIElement, IUIElementProps, IText, UIElementFlags, ResizeDimension, IContext, ISelection, IArtboard,IAnimationOptions } from "carbon-core";
+import { ChangeMode, IContainer, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp, IUIElement, IUIElementProps, IText, UIElementFlags, ResizeDimension, IContext, ISelection, IArtboard, IAnimationOptions } from "carbon-core";
 import { createUUID } from "../util";
 import Isolate from "../commands/Isolate";
 import Environment from "../environment";
@@ -28,7 +28,7 @@ interface ICustomPropertyDefinition {
     propertyName: string;
 }
 
-export default class Symbol extends Container implements ISymbol, IPrimitiveRoot{
+export default class Symbol extends Container implements ISymbol, IPrimitiveRoot {
     props: ISymbolProps;
     runtimeProps: ISymbolRuntimeProps;
 
@@ -88,7 +88,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     }
 
     screenSize() {
-        return {width:this.width, height:this.height}
+        return { width: this.width, height: this.height }
     }
 
     toJSON() {
@@ -96,7 +96,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     }
 
     get exports() {
-        if(!this.artboard) {
+        if (!this.artboard) {
             return null;
         }
 
@@ -104,7 +104,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     }
 
     set exports(value) {
-        if(!this.artboard) {
+        if (!this.artboard) {
             return;
         }
 
@@ -169,8 +169,10 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
             var child = artboard.children[i];
             var clone = child.mirrorClone();
             clone.applyVisitor(x => {
-                x.sourceId(x.id);
-                x.id = (baseId + x.id)
+                if (x.id === x.sourceId()) {
+                    x.sourceId(x.id);
+                    x.id = (baseId + x.id)
+                }
                 x.resizeDimensions(ResizeDimension.None);
                 x.runtimeProps.ctxl = ctxl;
             });
@@ -180,21 +182,21 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     };
 
     code() {
-        if(this.artboard) {
+        if (this.artboard) {
             return this.artboard.code();
         }
         return null;
     }
 
     declaration() {
-        if(this.artboard) {
+        if (this.artboard) {
             return this.artboard.declaration(true);
         }
         return null;
     }
 
     get compilationUnitId() {
-        if(this.artboard) {
+        if (this.artboard) {
             return this.artboard.id;
         }
         return "";
@@ -255,7 +257,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         }
     }
 
-    get artboard():IArtboard {
+    get artboard(): IArtboard {
         var artboard = this._artboard;
         if (!artboard) {
             return null;
@@ -324,16 +326,16 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     }
 
     get stateAnimations() {
-        if(this.runtimeProps.stateAnimations) {
+        if (this.runtimeProps.stateAnimations) {
             return this.runtimeProps.stateAnimations;
         }
 
-        if(this._artboard){
+        if (this._artboard) {
             return this._artboard.stateAnimations;
         }
     }
 
-    _changeState(toStateId, fromStateId, animate=true) {
+    _changeState(toStateId, fromStateId, animate = true) {
         var newState = this._artboard._recorder.getStateById(toStateId);
         if (newState) {
             var oldStateName = this._artboard._recorder.getStateNameById(fromStateId) || this._artboard._recorder.getDefaultState().name;
@@ -446,23 +448,23 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     }
 
     get states() {
-        return RuntimeProxy.unwrap(this).getStates().map(s=>s.name);
+        return RuntimeProxy.unwrap(this).getStates().map(s => s.name);
     }
 
     nextState() {
         let that = RuntimeProxy.unwrap(this);
         let states = that.getStates();
-        if(!states && !states.length) {
+        if (!states && !states.length) {
             return false;
         }
 
-        if(!that.props.stateId) {
+        if (!that.props.stateId) {
             that.props.stateId = states[0].id;
         }
 
-        let index =  states.findIndex(s=>s.id === that.props.stateId);
-        if(index < states.length - 1){
-            that.setProps({stateId:states[index+1].id});
+        let index = states.findIndex(s => s.id === that.props.stateId);
+        if (index < states.length - 1) {
+            that.setProps({ stateId: states[index + 1].id });
 
             return true;
         }
@@ -473,17 +475,17 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     prevState() {
         let that = RuntimeProxy.unwrap(this);
         let states = that.getStates();
-        if(!states && !states.length) {
+        if (!states && !states.length) {
             return false;
         }
 
-        if(!that.props.stateId) {
+        if (!that.props.stateId) {
             that.props.stateId = states[0].id;
         }
 
-        let index =  states.findIndex(s=>s.id === that.props.stateId);
-        if(index > 0){
-            that.setProps({stateId:states[index-1].id});
+        let index = states.findIndex(s => s.id === that.props.stateId);
+        if (index > 0) {
+            that.setProps({ stateId: states[index - 1].id });
             return true;
         }
 
@@ -491,32 +493,32 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     }
 
     get stateId() {
-        if(this.props.stateId) {
+        if (this.props.stateId) {
             return this.props.stateId;
         }
 
         return 'default';
     }
 
-    get currentState():string {
+    get currentState(): string {
         let that = RuntimeProxy.unwrap(this);
         let states = that.getStates();
-        if(!states && !states.length) {
+        if (!states && !states.length) {
             return undefined;
         }
 
-        return states.find(s=>s.id === this.stateId).name;
+        return states.find(s => s.id === this.stateId).name;
     }
 
-    set currentState(name:string) {
+    set currentState(name: string) {
         let that = RuntimeProxy.unwrap(this);
         let states = that.getStates();
-        if(!states && !states.length) {
+        if (!states && !states.length) {
             return;
         }
 
-        let state = states.find(s=>s.name === name);
-        that.setProps({stateId:state.id});
+        let state = states.find(s => s.name === name);
+        that.setProps({ stateId: state.id });
     }
 
     canDrag() {
@@ -732,13 +734,13 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         return result;
     }
 
-    registerStateAnimation(from:string, to:string, defaultAnimationOptions:IAnimationOptions, elementOptions?:{[element:string]:{[prop:string]:IAnimationOptions}}) {
+    registerStateAnimation(from: string, to: string, defaultAnimationOptions: IAnimationOptions, elementOptions?: { [element: string]: { [prop: string]: IAnimationOptions } }) {
         let rp = this.runtimeProps;
-        let stateAnimation = rp.stateAnimations = rp.stateAnimations ||{};
+        let stateAnimation = rp.stateAnimations = rp.stateAnimations || {};
         let fromState = stateAnimation[from] = stateAnimation[from] || {};
         fromState[to] = {
-            defaultOptions:defaultAnimationOptions,
-            elementOptions:elementOptions
+            defaultOptions: defaultAnimationOptions,
+            elementOptions: elementOptions
         };
     }
 
@@ -807,18 +809,18 @@ PropertyMetadata.registerForType(Symbol, {
     prepareVisibility: function (element: Symbol) {
         return {
             stateId: element._artboard && element._artboard.props
-            && element._artboard.props.states
-            && element._artboard.props.states.length > 1
+                && element._artboard.props.states
+                && element._artboard.props.states.length > 1
         }
     },
 
-    proxyDefinition:function() {
+    proxyDefinition: function () {
         let baseDefinition = PropertyMetadata.findForType(Container).proxyDefinition();
         return {
             rprops: ["states", "stateAnimations"].concat(baseDefinition.rprops), // readonly props
             props: ["currentState"].concat(baseDefinition.props),
             methods: ["nextState", "prevState", "registerStateAnimation"].concat(baseDefinition.methods),
-            mixins:[].concat(baseDefinition.mixins)
+            mixins: [].concat(baseDefinition.mixins)
         }
     },
     groups() {

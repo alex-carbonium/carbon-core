@@ -5,7 +5,6 @@ import { ISize } from "carbon-geometry";
 import { Model } from "../../framework/Model";
 import Brush from "../../framework/Brush";
 import Matrix from "math/matrix";
-import { RuntimeProxy } from "./RuntimeProxy";
 import Environment from "environment";
 
 function EventData(props) {

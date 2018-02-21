@@ -1,6 +1,5 @@
 import {ControlNameResolver} from "./ControlNameResolver";
 import { IContainer } from "carbon-core";
-import { ElementProxy } from "./runtime/RuntimeProxy";
 import { RuntimeContext } from "./runtime/RuntimeContext";
 import { ModuleResolver } from "./ModuleResolver";
 
@@ -40,7 +39,7 @@ export class Sandbox {
     runOnElement(context:RuntimeContext, element:IContainer, code:string) {
         let nameResolver = new ControlNameResolver(context, element);
 
-        ElementProxy.clear();
+        // ElementProxy.clear();
 
         code = code.replace('Object.defineProperty(exports, "__esModule", { value: true });', '');
         code = "let eval = null; (function(){" + code + "\r\n})()";

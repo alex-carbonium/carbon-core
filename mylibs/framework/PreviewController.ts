@@ -49,7 +49,7 @@ export default class PreviewController extends ControllerBase {
                 let pos = m.transformPoint2(eventData.x, eventData.y);
                 eventData.layerX = pos.x;
                 eventData.layerY = pos.y;
-                eventData.target = RuntimeProxy.wrap(element);
+                eventData.target = element.runtimeProxy()//RuntimeProxy.wrap(element);
 
                 res = events[eventName].raise(eventData);
             }
@@ -98,7 +98,7 @@ export default class PreviewController extends ControllerBase {
         if (element.scrollX !== undefined) {
             var oldX = element.scrollX;
             var oldY = element.scrollY;
-            let scroll = { scrollX: Math.round(oldX + delta.dx), scrollY: Math.round(oldY + delta.dy), target: RuntimeProxy.wrap(element) };
+            let scroll = { scrollX: Math.round(oldX + delta.dx), scrollY: Math.round(oldY + delta.dy), target: element.runtimeProxy()/*RuntimeProxy.wrap(element)*/ };
 
             var events = element.runtimeProps.events;
             let eventName = "scroll";

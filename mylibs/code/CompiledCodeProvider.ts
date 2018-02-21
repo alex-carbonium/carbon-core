@@ -4,6 +4,7 @@ import { ArtboardProxyGenerator } from "./ProxyGenerator";
 import { ICompilerService } from "carbon-core";
 import { NameProvider } from "./NameProvider";
 import Artboard from "framework/Artboard";
+import { resolve, reject } from "../../node_modules/@types/bluebird/index";
 
 var platformLib = require("raw-loader!./runtimelibs/runtime-platform.d.ts.txt");
 var carbonRuntimeSource: string = require("raw!../definitions/carbon-runtime.d.ts") as any;
@@ -17,14 +18,14 @@ var runtimeTSDefinitionCode = carbonRuntimeSource
     .replace(/^.+\/\*declare \*\//gm, "declare ");
 
 interface ICodeCacheItem {
-    text: string;
+    result: Promise<string>;
     version: number;
 }
 
 let importMatcher = new RegExp(/import .+? from ['"].+?['"][;\n ]?/gm);
 
 export class CompiledCodeProvider implements IDisposable {
-    private _codeCache: WeakMap<IElementWithCode, ICodeCacheItem> = new WeakMap<IElementWithCode, ICodeCacheItem>();
+    private _codeCache: Map<string, ICodeCacheItem> = new Map<string, ICodeCacheItem>();
     private static _globalLibs = {
         "runtime-platform.d.ts": {
             text: () => platformLib,
@@ -99,12 +100,19 @@ export class CompiledCodeProvider implements IDisposable {
     }
 
     getArtboardCode(element: IElementWithCode): Promise<string | void> {
-        if (this._codeCache.has(element)) {
-            let item = this._codeCache.get(element);
+        if (this._codeCache.has(element.compilationUnitId)) {
+            let item = this._codeCache.get(element.compilationUnitId);
             if (item.version === element.codeVersion) {
-                return Promise.resolve(item.text);
+                return item.result;
             }
         }
+        let resolveCallback;
+        let rejectCallback;
+        let resultPromise = new Promise<string>((resolve, reject)=> {
+            resolveCallback = resolve;
+            rejectCallback = reject;
+        });
+        this._codeCache.set(element.compilationUnitId, { version: element.codeVersion, result: resultPromise });
 
         let fileName = element.compilationUnitId + ".ts";
         let code = ArtboardProxyGenerator.generateImport(element)
@@ -121,20 +129,22 @@ export class CompiledCodeProvider implements IDisposable {
         }
 
         this.compiler.addLib("n" + element.compilationUnitId + ".types.ts", element.declaration(true))
-
-        return this.compiler.compile(fileName, code).then((result) => {
-            this._codeCache.set(element, { version: element.codeVersion, text: result.text });
+        this.compiler.compile(fileName, code).then((result) => {
             let target = (element as any).runtimeProps.sourceArtboard || element;
             target.exports = result.exports;
+            resolveCallback(result.text);
             return result.text;
         }).catch(data => {
             // TODO: report error to UI
+            rejectCallback(data);
             console.error(data);
         });
+
+        return resultPromise;
     }
 
     setCode(element: IElementWithCode, text: string) {
-        this._codeCache.set(element, { version: element.codeVersion, text: text });
+        this._codeCache.set(element.compilationUnitId, { version: element.codeVersion, result: Promise.resolve(text) });
     }
 
     dispose() {

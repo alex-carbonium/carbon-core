@@ -1755,6 +1755,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         clone.runtimeProps.rc = this.runtimeProps.rc;
         return clone;
     }
+
+    runtimeProxy() {
+        return RuntimeProxy.wrap(this);
+    }
+
     cursor() {
         return null;
     }

@@ -35,6 +35,7 @@ export class ControlNameResolver {
     private _blackMap = blackList.reduce((m, v) => { m[v] = true; return m; }, {})
     private _context: RuntimeContext;
     private _localContext = {};
+    private _nameInstanceMap = {}
     public readonly proxy:any;
 
     constructor(context: RuntimeContext, artboard: IContainer) {
@@ -71,7 +72,12 @@ export class ControlNameResolver {
     }
 
     _findControl(name: string) {
-        let proxy = ElementProxy.tryGet(name);
+        let source = this._nameInstanceMap[name];
+        let proxy;
+        if(source) {
+            proxy = RuntimeProxy.wrap(source);
+        }
+
         if (proxy === undefined) {
             let source = null;
             proxy = null;
@@ -87,10 +93,12 @@ export class ControlNameResolver {
                     // but should be change later if needed
                     if (name === NameProvider.escapeName(e.name)) {
                         source = e;
+                        this._nameInstanceMap[name] = e;
                         return false;
                     }
                 });
             }
+
             if (source) {
                 proxy = ElementProxy.createForElement(name, source);
             }

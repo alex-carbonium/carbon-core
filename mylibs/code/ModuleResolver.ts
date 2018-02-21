@@ -1,8 +1,6 @@
 import { IContainer, IUIElement, IArtboard } from "carbon-core";
 import { NameProvider } from "./NameProvider";
-import { ElementProxy } from "./runtime/RuntimeProxy";
 import { RuntimeContext } from "./runtime/RuntimeContext";
-import { RuntimeProxy } from "./runtime/RuntimeProxy";
 import { RuntimeScreen } from "./runtime/RuntimeScreen";
 import { AutoDisposable } from "../AutoDisposable";
 import Environment from "environment";

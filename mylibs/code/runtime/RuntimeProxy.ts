@@ -172,22 +172,12 @@ export class RuntimeProxy implements IDisposable {
     }
 }
 
-let proxiesMap: { [name: string]: IUIElement } = {};
-
 export class ElementProxy extends RuntimeProxy {
     static createForElement(name: string, source: IProxySource) {
         let proxy = new Proxy(source, new ElementProxy(source));
         RuntimeProxy.register(source, proxy);
-        proxiesMap[name] = proxy;
+
         return proxy;
-    }
-
-    static tryGet(name: string) {
-        return proxiesMap[name];
-    }
-
-    static clear() {
-        proxiesMap = {};
     }
 
     set(target: any, name: PropertyKey, value: any) {

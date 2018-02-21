@@ -13,7 +13,6 @@ import { ChangeMode } from "carbon-basics";
 import Environment from "environment";
 import UIElement from "./UIElement";
 import NullContainer from "framework/NullContainer";
-import { RuntimeProxy } from "../code/runtime/RuntimeProxy";
 import Rect from "../math/rect";
 
 export default class ArtboardFrameControl extends Container {
@@ -357,7 +356,7 @@ export default class ArtboardFrameControl extends Container {
             this.raiseEvent("scroll", {
                 scrollX: this.scrollX,
                 scrollY: this.scrollY,
-                target: RuntimeProxy.wrap(this)
+                target: this.runtimeProxy()//RuntimeProxy.wrap(this)
             })
         }
     }
