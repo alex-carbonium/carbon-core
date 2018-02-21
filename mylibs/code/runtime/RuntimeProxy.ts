@@ -190,6 +190,7 @@ export class ElementProxy extends RuntimeProxy {
 
         if (exports && exports[name]) {
             let type = exports[name];
+            (this.element as any).runtimeProps.runtimeData = (this.element as any).runtimeProps.runtimeData || {};
             if (type.startsWith("Property")) {
                 let propInstance = (this.element as any).runtimeProps.runtimeData[name];
                 if (propInstance instanceof Property && Object.isFrozen(propInstance)) {

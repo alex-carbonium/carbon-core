@@ -24,6 +24,7 @@ const system = {
     'Math':Object.freeze(Math),
     'RegExp':Object.freeze(RegExp),
     'require':true,
+    'exports':true,
     'PropertyAnimation':Object.freeze(PropertyAnimation),
     'Color': Object.freeze(Color),
     'Promise': Object.freeze(Promise),
@@ -110,6 +111,10 @@ export class ControlNameResolver {
     get(target: any, name: string): any {
         if(name === "require") {
             return this.require;
+        }
+        if(name === "exports") {
+            this._artboard.runtimeProps.runtimeData = this._artboard.runtimeProps.runtimeData || {};
+            return this._artboard.runtimeProps.runtimeData;
         }
         if(system.hasOwnProperty(name)) {
             return system[name];
