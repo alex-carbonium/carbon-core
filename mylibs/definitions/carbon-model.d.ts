@@ -27,6 +27,7 @@ declare module "carbon-model" {
 
         applyVisitorDepthFirst(callback: (element: IDataNode) => boolean | void);
         applyVisitorBreadthFirst(callback: (element: IDataNode) => boolean | void);
+        childrenIterator<T>() :Iterable<T>;
 
         getImmediateChildById<T extends IDataNode>(id: string, materialize?: boolean): T | null;
         findAllNodesDepthFirst<T extends IDataNode>(predicate: (node: T) => boolean): T[];

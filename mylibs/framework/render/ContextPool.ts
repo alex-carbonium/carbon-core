@@ -7,7 +7,7 @@ var contextPool : Array<Context> = [];
 
 class ContextPool implements IContextPool {
     getContext(width: number, height: number, scale: number, forceExactSize?:boolean) : Context{
-        if(forceExactSize) {
+        if(forceExactSize || true) {
             width = width * scale;
             height = height * scale;
         } else {

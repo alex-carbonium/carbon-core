@@ -360,6 +360,20 @@ export default class DataNode<TProps extends IDataNodeProps = IDataNodeProps> im
         return callback(this) !== false;
     }
 
+    *childrenIterator() {
+        let stack:any[] = [this];
+        while (stack.length) {
+            let element = stack.pop();
+            yield element;
+
+            if (element.children) {
+                for(var i = element.children.length - 1; i>=0; --i) {
+                    stack.push(element.children[i]);
+                }
+            }
+        }
+    }
+
     applyVisitorBreadthFirst(visitor) {
         let queue = [this];
         let i = -1;

@@ -947,7 +947,7 @@ class AppClass extends DataNode implements IApp {
                 return bag;
             }, {});
 
-        this.activePage.applyVisitorBreadthFirst((e: IUIElement) => {
+        for(let e of this.activePage.childrenIterator<IUIElement>()) {
             let isSelected = Selection.isElementSelected(e);
             let isArtboard = e instanceof Artboard;
 
@@ -955,20 +955,21 @@ class AppClass extends DataNode implements IApp {
                 isArtboardWithSelection = !!artboardsMap[e.id];
             }
 
-            if (count && count === max) {
-                if (isArtboard) {
-                    e.runtimeProps.ctxl = 1 << 0;
-                }
-                else {
-                    // if we already marked all selected elements, the rest goes to 1<<2 layer.
-                    e.runtimeProps.ctxl = 1 << 2;
-                }
-                return;
+            // set all elements on artbord without selection to layer 1
+            if (isArtboard || !isArtboardWithSelection) {
+                e.runtimeProps.ctxl = 1 << 0 ;
+                continue;
             }
 
-            if (isArtboard && !isArtboardWithSelection) {
-                e.applyVisitor(child => { child.runtimeProps.ctxl = 1 << 0 })
-                return true;
+            if (count && count === max) {
+                // if we already marked all selected elements, the rest goes to 1<<2 layer.
+                let parent = e.parent;
+                if(parent.runtimeProps.ctxl === 1 << 1) {
+                    e.runtimeProps.ctxl = 1 << 1;
+                } else {
+                    e.runtimeProps.ctxl = 1 << 2;
+                }
+                continue;
             }
 
             if (isSelected || count > 0) {
@@ -978,17 +979,17 @@ class AppClass extends DataNode implements IApp {
                     count++;
                 }
 
-                return true;
+                continue;
             }
 
             e.runtimeProps.ctxl = 1 << 0;
-        })
-
-        if (count !== max) {
-            for (var e of Selection.selectedElements()) {
-                this._updateWithSelectionMask(e);
-            }
         }
+
+        // if (count !== max) {
+        //     for (var e of Selection.selectedElements()) {
+        //         this._updateWithSelectionMask(e);
+        //     }
+        // }
 
         this.updateCacheProperties();
 
