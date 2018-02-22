@@ -10,11 +10,14 @@ class ContextPool implements IContextPool {
         if(forceExactSize || true) {
             width = width * scale;
             height = height * scale;
-        } else {
-            var size = Environment.view.viewportSize();
-            width = Math.min(size.width * scale, width * scale);
-            height = Math.min(size.height * scale, height * scale);
         }
+        // TODO: uncoment and check if it is the reason for rendering artifacts
+        // else {
+        //     var size = Environment.view.viewportSize();
+        //     width = Math.min(size.width * scale, width * scale);
+        //     height = Math.min(size.height * scale, height * scale);
+        // }
+
         if (contextPool.length === 0) {
             let context = new Context(ContextType.Cache);
             context.width = width;
