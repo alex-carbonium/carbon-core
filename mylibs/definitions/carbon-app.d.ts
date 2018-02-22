@@ -319,6 +319,8 @@ declare module "carbon-app" {
         hitElement(eventData, includeInteractionLayer?: boolean): IUIElement;
         hitElementDirect(e?, cb?, includeInteractionLayer?: boolean);
 
+        updateViewportSize(size:ISize);
+
         draw();
         invalidate();
 
