@@ -1,6 +1,6 @@
 import TestUtil, { createArtboard, createElement } from "../TestUtil";
 import { assert } from "chai";
-import { IApp, IUIElement, UIElement, Selection, Artboard, ArtboardPage, IArtboardPage } from "carbon-core";
+import { IApp, IUIElement, UIElement, Selection, Artboard, ArtboardPage, IArtboardPage, Container } from "carbon-core";
 
 describe("Context level tests", function () {
     let app: IApp = null;
@@ -124,6 +124,26 @@ describe("Context level tests", function () {
 
         // assert
         assert.deepEqual(mapLevels([artboard, element]), [2, 2]);
+    });
+
+    it("Must place group elements on the same level as group", function () {
+        // arrange
+        let artboard = app.activePage.getActiveArtboard();
+        let element1 = new UIElement();
+        let element2 = new UIElement();
+        let element3 = new UIElement();
+        let container = new Container();
+        container.add(element1);
+        container.add(element2);
+
+        artboard.add(element3);
+        artboard.add(container);
+
+        // act
+        Selection.makeSelection([container]);
+
+        // assert
+        assert.deepEqual(mapLevels([element3, container, element1, element2]), [1, 2, 2, 2]);
     });
 
     it("Must place selected artboards lower than page elements", function () {
