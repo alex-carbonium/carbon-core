@@ -950,13 +950,14 @@ class AppClass extends DataNode implements IApp {
         for(let e of this.activePage.childrenIterator<IUIElement>()) {
             let isSelected = Selection.isElementSelected(e);
             let isArtboard = e instanceof Artboard;
+            let isOnPage = e.parent === this.activePage;
 
             if (isArtboard) {
                 isArtboardWithSelection = !!artboardsMap[e.id];
             }
 
             // set all elements on artbord without selection to layer 1
-            if (isArtboard || !isArtboardWithSelection) {
+            if (!isArtboardWithSelection && (!isOnPage || isArtboard)) {
                 e.runtimeProps.ctxl = 1 << 0 ;
                 continue;
             }
