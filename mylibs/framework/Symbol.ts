@@ -16,6 +16,8 @@ import Brush from "./Brush";
 import Font from "./Font";
 import NullContainer from "framework/NullContainer";
 import { RuntimeProxy } from "../code/runtime/RuntimeProxy";
+import EventHelper from "./EventHelper";
+import { IEvent } from "carbon-basics";
 
 interface ISymbolRuntimeProps extends IUIElementProps {
     artboardVersion: number;
@@ -31,8 +33,14 @@ interface ICustomPropertyDefinition {
 export default class Symbol extends Container implements ISymbol, IPrimitiveRoot {
     props: ISymbolProps;
     runtimeProps: ISymbolRuntimeProps;
+    stateChanged:IEvent<string>;
 
     private static flattening = false;
+
+    constructor() {
+        super();
+        this.stateChanged = EventHelper.createEvent();
+    }
 
     allowNameTranslation() {
         return false;
@@ -347,6 +355,8 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         if (newState) {
             var oldStateName = this._artboard._recorder.getStateNameById(fromStateId) || this._artboard._recorder.getDefaultState().name;
             PropertyStateRecorder.applyState(this, newState, oldStateName, animate);
+
+            this.stateChanged.raise(toStateId);
         }
     }
 

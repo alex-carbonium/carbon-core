@@ -29,6 +29,7 @@ import { IElementWithCode } from "carbon-model";
 import { ArtboardProxyGenerator } from "../code/ProxyGenerator";
 import { IDisposable } from "carbon-runtime";
 import { AutoDisposable } from "../AutoDisposable";
+import EventHelper from "./EventHelper";
 
 
 // TODO: artboard states
@@ -52,6 +53,9 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         this.runtimeProps.codeVersion = 0;
         this.customProperties = [];
         this.runtimeProps.stateBoards = [];
+
+        this.stateChanged = EventHelper.createEvent();
+
         this._externals = null;
     }
 
@@ -561,6 +565,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         if (props.state !== undefined) {
             if (this._recorder && this._recorder.hasState(props.state)) {
                 this._recorder.changeState(props.state);
+                this.stateChanged.raise(props.state);
             }
         }
 
