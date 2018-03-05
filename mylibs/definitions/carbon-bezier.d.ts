@@ -1,6 +1,5 @@
-import { IRectData, IRange, ICoordinate } from "carbon-geometry";
-
 declare module "carbon-bezier" {
+    import { IRectData, IRange, ICoordinate } from "carbon-geometry";
 
     export interface IBezierGraph {
         contours:IContour[];

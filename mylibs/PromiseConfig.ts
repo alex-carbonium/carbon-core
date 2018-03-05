@@ -7,7 +7,7 @@ bluebird.config({
 });
 
 // NOTE: event name is all lower case as per DOM convention
-window.addEventListener("unhandledrejection", function(e) {
+addEventListener("unhandledrejection", function(e) {
     // NOTE: e.preventDefault() must be manually called to prevent the default
     // action which is currently to log the stack trace to console.warn
     e.preventDefault();

@@ -13,6 +13,7 @@ import { ContentSizing, ImageSource, ImageSourceType, IImage, IImageProps } from
 import { IRect, Origin } from "carbon-geometry";
 import { ChangeMode, IContext, RenderEnvironment, IUIElement, IFileElement } from "carbon-core";
 import { ResolvedPromise } from "./ObjectPool";
+import { loadSVGFromString } from "../svg/SvgParser";
 
 const DefaultSizing = ContentSizing.fill;
 
@@ -279,7 +280,7 @@ export default class Image extends Container<IImageProps> implements IImage {
                 return response.text();
             })
             .then(svg => {
-                return window['svgParser'].loadSVGFromString(svg).then((result) => {
+                return loadSVGFromString(svg).then((result) => {
                     result.setProps({ x: this.x, y: this.y });
                     result.runtimeProps.ctxl = this.runtimeProps.ctxl;
                     return result;

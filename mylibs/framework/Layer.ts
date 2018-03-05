@@ -1,5 +1,4 @@
 ﻿import Container from "framework/Container";
-import math from "math/math";
 import Matrix from "math/matrix";
 import PropertyMetadata from "framework/PropertyMetadata";
 import EventHelper from "framework/EventHelper";

@@ -46,7 +46,7 @@ export default class Context implements IContext {
     }
 
     get contextScale() {
-        var devicePixelRatio = window.devicePixelRatio || 1;
+        var devicePixelRatio = devicePixelRatio || 1;
         var backingStoreRatio = this._context.backingStorePixelRatio
             || this._context.webkitBackingStorePixelRatio
             || this._context.mozBackingStorePixelRatio

@@ -1595,7 +1595,7 @@ class Path extends Shape {
         return values;
     }
 
-    static fromSvgPathElement(element, parsedAttributes, matrix) {
+    static fromSvgPathElement(element, parsedAttributes, matrix?) {
         // let parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
         let path = new Path();
 
@@ -1627,7 +1627,7 @@ class Path extends Shape {
         return path;
     }
 
-    static fromSvgLineElement(element, parsedAttributes, matrix) {
+    static fromSvgLineElement(element, parsedAttributes, matrix?) {
         // let parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
         let path = new Path();
 
@@ -1646,7 +1646,7 @@ class Path extends Shape {
         return path;
     }
 
-    static fromSvgPolylineElement(element, parsedAttributes, matrix) {
+    static fromSvgPolylineElement(element, parsedAttributes, matrix?) {
         // let parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
         let path = new Path();
         App.Current.activePage.nameProvider.assignNewName(path);

@@ -336,7 +336,7 @@ class Rectangle extends Shape {
         return frame;
     }
 
-    static fromSvgElement = function (element, parsedAttributes, matrix) {
+    static fromSvgElement = function (element, parsedAttributes, matrix?) {
         // var parsedAttributes = svgParser.parseAttributes(element, Rectangle.ATTRIBUTE_NAMES);
         var rect = new Rectangle();
 

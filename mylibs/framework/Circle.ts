@@ -172,7 +172,7 @@ class Circle extends Shape {
         context.restore();
     }
 
-    static fromSvgElement(element, parsedAttributes, matrix) {
+    static fromSvgElement(element, parsedAttributes, matrix?) {
         // var parsedAttributes = svgParser.parseAttributes(element, ATTRIBUTE_NAMES);
         let circle = new Circle();
         App.Current.activePage.nameProvider.assignNewName(circle);

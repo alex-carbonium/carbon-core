@@ -5,7 +5,6 @@ import Brush from "./Brush";
 import Shadow from "./Shadow";
 import ContextPool from "./render/ContextPool";
 import { Types } from "./Defs";
-import Image from "./Image";
 import Constraints from "./Constraints";
 import { IImage, IUIElement } from "carbon-model";
 import { ResizeDimension, ElementState, RenderEnvironment, RenderFlags, StrokePosition, LineJoin, LineCap, Origin } from "carbon-core";
@@ -214,7 +213,7 @@ class Shape extends Container {
         if (elements.length !== 1) {
             return false;
         }
-        return this.primitiveRoot().isEditable() && (elements[0] instanceof Image) && allowMoveInOut;
+        return this.primitiveRoot().isEditable() && (elements[0].systemType() === Types.Image) && allowMoveInOut;
     }
 
     lineCap(value?) {
@@ -308,8 +307,8 @@ class Shape extends Container {
         group.add(this);
         group.add(element);
 
-        if (element instanceof Image) {
-            element.resizeOnLoad(null);
+        if (element.systemType() === Types.Image) {
+            (element as IImage).resizeOnLoad(null);
         }
 
         return group;
