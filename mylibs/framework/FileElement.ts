@@ -4,10 +4,10 @@ import { Types } from "./Defs";
 import PropertyMetadata from "./PropertyMetadata";
 import Rect from "../math/rect";
 import Image from "./Image";
-import SvgParser from "../svg/SvgParser";
 import Environment from "../environment";
 import Selection from "./SelectionModel";
 import Container from "./Container";
+import { loadSVGFromString } from "../svg/SvgParser";
 
 export class FileElement extends UIElement implements IFileElement {
     props: FileProps;
@@ -69,7 +69,7 @@ export class FileElement extends UIElement implements IFileElement {
         reader.onload = () => {
             var text = reader.result;
 
-            (SvgParser as any).loadSVGFromString(text)
+            loadSVGFromString(text)
                 .then((result: IGroupContainer) => {
                     if (result.performArrange) {
                         result.performArrange();

@@ -41,7 +41,7 @@ if (!globals.appInsights) {
         globals.appInsights.config.disableTelemetry = true;
     }
 
-    window.onerror = function(message: string, filename?: string, lineno?: number, colno?: number, error?:Error) {
+    onerror = function(message: string, filename?: string, lineno?: number, colno?: number, error?:Error) {
         if (error && !error.message.includes("carbon-handled")) {
             globals.appInsights.trackException(error);
             globals.appInsights.flush();

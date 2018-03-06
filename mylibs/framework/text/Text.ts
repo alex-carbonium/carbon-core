@@ -554,7 +554,7 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
         return true;
     }
 
-    static fromSvgElement(element, parsedAttributes, matrix) {
+    static fromSvgElement(element, parsedAttributes, matrix?) {
         //
         // :
         // "cls-5"

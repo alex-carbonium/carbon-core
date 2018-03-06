@@ -2,7 +2,7 @@ import DesignerView from "../DesignerView";
 import Layer from "../Layer";
 import SelectComposite from "../SelectComposite";
 import NullPage from "../NullPage";
-import SelectFrame from "../SelectFrame";
+import { SelectFrame } from "../SelectFrame";
 import DesignerController from "../DesignerController";
 import Environment from "../../environment";
 import Clipboard from "../Clipboard";
@@ -187,7 +187,7 @@ export default class RenderLoop implements IRenderLoop {
     }
 
     private recalculateContextScale(context) {
-        var devicePixelRatio = window.devicePixelRatio || 1;
+        var devicePixelRatio = devicePixelRatio || 1;
         var backingStoreRatio =
             context.backingStorePixelRatio ||
             context.webkitBackingStorePixelRatio ||

@@ -2,7 +2,6 @@ import All from "platform/All";
 import ActivityMonitor from "ActivityMonitor";
 import AutoSaveTimer from "AutoSaveTimer";
 import PersistentConnection from "server/PersistentConnection";
-//import svgParser from "svg/SvgParser";
 import domUtil from "utils/dom";
 import AnimationGroup from "framework/animation/AnimationGroup";
 import Selection from "framework/SelectionModel";

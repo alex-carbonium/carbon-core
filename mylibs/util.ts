@@ -1,4 +1,4 @@
-export var isBrowser = !!(typeof window !== 'undefined' && (typeof navigator !== 'undefined') && window.document);
+export var isBrowser = !!(typeof window !== 'undefined' && (typeof navigator !== 'undefined') && document);
 
 export function debounce(func, wait, immediate) {
     var timeout;
@@ -42,7 +42,7 @@ export function imageDataPointToCssColor(imageData, x) {
 }
 
 export function contextScale(context) {
-    var devicePixelRatio = window.devicePixelRatio || 1;
+    var devicePixelRatio = devicePixelRatio || 1;
     var backingStoreRatio = context.backingStorePixelRatio ||
         context.webkitBackingStorePixelRatio ||
         context.mozBackingStorePixelRatio ||
@@ -60,7 +60,7 @@ if (DEBUG) {
     useIntegerIds = !!localStorage.getItem("useIntegerIds");
 }
 
-export var createUUID = (typeof (window.crypto) !== 'undefined' && typeof (window.crypto.getRandomValues) !== 'undefined') ?
+export var createUUID = (typeof (crypto) !== 'undefined' && typeof (crypto.getRandomValues) !== 'undefined') ?
     function (debugPrefix?) {
         if (DEBUG) {
             if (useIntegerIds) {
@@ -69,7 +69,7 @@ export var createUUID = (typeof (window.crypto) !== 'undefined' && typeof (windo
             }
         }
         var buf = new Uint16Array(8);
-        window.crypto.getRandomValues(buf);
+        crypto.getRandomValues(buf);
         var S4 = function (num) {
             var ret = num.toString(16);
             while (ret.length < 4) {

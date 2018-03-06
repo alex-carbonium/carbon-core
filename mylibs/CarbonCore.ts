@@ -125,8 +125,6 @@ export default {
 
     "DebugUtil": require("./DebugUtil"),
 
-    "SvgParser": require("svg/SvgParser"),
-
     "Story": require("./stories/Story"),
     "StoryAction": require("./stories/StoryAction"),
     "Sandbox" : require("./code/Sandbox").Sandbox,

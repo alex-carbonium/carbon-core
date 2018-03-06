@@ -61,7 +61,7 @@ function runExample(name){
 window['Matrix'] = Matrix;
 window['Point'] = Point;
 
-window.onload = function(){
+onload = function(){
     var q = location.search.substr(1);
     if (q){
         var example = decodeURIComponent(q);

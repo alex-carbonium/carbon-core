@@ -90,7 +90,7 @@ class Backend implements IBackend {
             response_type: "token",
             scope: "account",
 
-            silent_redirect_uri: window.location.protocol + "//" + window.location.host + "/a/renew",
+            silent_redirect_uri: location.protocol + "//" + location.host + "/a/renew",
             automaticSilentRenew: true,
             silentRequestTimeout: 30000,
             monitorSession: false,
@@ -256,7 +256,7 @@ class Backend implements IBackend {
 
         var url = this.servicesEndpoint + "/idsrv/connect/authorize?" + this.encodeUriData({
             client_id: "implicit",
-            redirect_uri: window.location.protocol + "//" + window.location.host + "/a/external",
+            redirect_uri: location.protocol + "//" + location.host + "/a/external",
             response_type: "token",
             response_mode: "fragment",
             scope: "account",
@@ -404,7 +404,7 @@ class Backend implements IBackend {
         return result;
     }
     navigate(fragment) {
-        window.location.href = fragment;
+        location.href = fragment;
     }
 
     private ajax(method, url: string, data: any, options): any {
