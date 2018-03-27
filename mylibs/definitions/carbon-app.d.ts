@@ -579,7 +579,7 @@ declare module "carbon-app" {
 
         selectComposite(): ISelectComposite;
         clearSelection();
-        refreshSelection();
+        refreshSelection(elements?: IUIElement[], raiseEvents?:boolean);
 
         isElementSelected(element: IUIElement): boolean;
 

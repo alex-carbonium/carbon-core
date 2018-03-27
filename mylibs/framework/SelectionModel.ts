@@ -7,6 +7,7 @@ import { ISelection, IEvent, IEvent2, IUIElement, IComposite, IEvent3, Selection
 import Rect from "../math/rect";
 import ArrayPool from "./ArrayPool";
 import UIElement from "./UIElement";
+import NullContainer from "./NullContainer";
 
 let debug = require("DebugUtil")("carb:selection");
 
@@ -239,7 +240,7 @@ class SelectionModel implements ISelection {
         }
     }
 
-    refreshSelection(elements?: IUIElement[]) {
+    refreshSelection(elements?: IUIElement[], raiseEvents = false) {
         let selection = elements || this.selectedElements();
         this.makeSelection(ArrayPool.EmptyArray, "new", true);
         this.makeSelection(selection, "new", true);
@@ -329,7 +330,6 @@ class SelectionModel implements ISelection {
             let e = elements[i];
             e.prepareAndSetProps({useInCode:value})
         }
-        this.refreshSelection();
     }
 
     lock() {

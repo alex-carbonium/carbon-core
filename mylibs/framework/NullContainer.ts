@@ -8,6 +8,7 @@ import Constraints from "./Constraints";
 
 class NullContainer extends DataNode implements IUIElement, IContainer, IPrimitiveRoot {
     children = [];
+    runtimeProps:any = null;
     props: IContainerProps = null;
 
     constructor() {
@@ -139,6 +140,9 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
     resizeDimensions() {
         return ResizeDimension.None;
     }
+    canSelect() {
+        return false;
+    }
     canDrag() {
         return false;
     }
@@ -197,13 +201,9 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
     systemType(): string {
         return '';
     }
-    canSelect(): boolean {
-        return false;
-    }
     mirrorClone(): IUIElement {
         return null;
     }
-    runtimeProps: any;
     prepareProps(changes: Partial<IContainerProps>) {
     }
     prepareAndSetProps(props: Partial<IContainerProps>, mode?: any) {
