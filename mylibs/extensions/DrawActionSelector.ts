@@ -44,14 +44,14 @@ var registerCommands = function () {
         that._textTool.attach(that.app, that.view, that.controller);
         that._currentAction = that._textTool;
         that.app.allowSelection(false);
-    }, "ui-text");
+    });
 
     actionManager.registerAction("imageTool" as WorkspaceTool, "@tool.image", "Drawing", function () {
         that.detachAll();
         that._imageCreator.attach(that.app, that.view, that.controller);
         that._currentAction = that._imageCreator;
         that.app.allowSelection(false);
-    }, "ui-text");
+    });
 
     actionManager.registerAction("pathTool" as WorkspaceTool, "@tool.pen", "Drawing", function () {
         that.detachAll();
@@ -65,7 +65,7 @@ var registerCommands = function () {
             that._defaultShapeSettings.updateColors();
             Selection.makeSelection([that._defaultShapeSettings], "new", false, true);
         }
-    }, "ui-pen");
+    });
 
     actionManager.registerAction("rectangleTool" as WorkspaceTool, "@tool.rect", "Drawing", function () {
         that.detachAll();
@@ -75,7 +75,7 @@ var registerCommands = function () {
         that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings], "new", false, true);
         Invalidate.request();
-    }, "ui-rectangle");
+    });
 
     actionManager.registerAction("starTool" as WorkspaceTool, "@tool.star", "Drawing", function () {
         that.detachAll();
@@ -85,7 +85,7 @@ var registerCommands = function () {
         that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings], "new", false, true);
 
-    }, "ui-star");
+    });
 
     actionManager.registerAction("triangleTool" as WorkspaceTool, "@tool.triangle", "Drawing", function () {
         that.detachAll();
@@ -95,7 +95,7 @@ var registerCommands = function () {
         that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings], "new", false, true);
 
-    }, "ui-ploygon");
+    });
 
     actionManager.registerAction("polygonTool" as WorkspaceTool, "@tool.polygon", "Drawing", function () {
         that.detachAll();
@@ -105,7 +105,7 @@ var registerCommands = function () {
         that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings], "new", false, true);
 
-    }, "ui-ploygon");
+    });
 
 
     actionManager.registerAction("artboardTool" as WorkspaceTool, "@tool.artboard", "Artboard", function () {
@@ -118,7 +118,7 @@ var registerCommands = function () {
             Selection.makeSelection([that._artboardToolSettings], "new", false, true);
         }
 
-    }, "ui-rectangle");
+    });
 
     actionManager.registerAction("artboardViewerTool" as WorkspaceTool, "@artboardFrameTool", "Artboard", function () {
         that.detachAll();
@@ -126,7 +126,7 @@ var registerCommands = function () {
         that._currentAction = that._artboardViewer;
         that.app.allowSelection(false);
 
-    }, "");
+    });
 
     actionManager.registerAction("sectionTool" as WorkspaceTool, "@tool.section", "Section", function () {
         that.detachAll();
@@ -135,7 +135,7 @@ var registerCommands = function () {
         //re-fire event if artboard is already selected
         Selection.makeSelection([that.app.activePage.getActiveArtboard()], "new", false, true);
 
-    }, "ui-rectangle");
+    });
 
     actionManager.registerAction("circleTool" as WorkspaceTool, "@tool.ellipse", "Drawing", function () {
         that.detachAll();
@@ -144,7 +144,7 @@ var registerCommands = function () {
         that.app.allowSelection(false);
         that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings], "new", false, true);
-    }, "ui-circle");
+    });
 
     actionManager.registerAction("lineTool" as WorkspaceTool, "@tool.line", "Drawing", function () {
         that.detachAll();
@@ -153,7 +153,7 @@ var registerCommands = function () {
         that.app.allowSelection(false);
         that._defaultShapeSettings.updateColors();
         Selection.makeSelection([that._defaultShapeSettings], "new", false, true);
-    }, "ui-line");
+    });
 
     actionManager.registerAction("protoTool" as WorkspaceTool, "@tool.prototyping", "Prototyping", function () {
         that.detachAll();
@@ -161,7 +161,7 @@ var registerCommands = function () {
         that._currentAction = that._prototypingTool;
         that.app.allowSelection(false);
         Selection.refreshSelection();
-    }, "ui-line");
+    });
 
     actionManager.registerAction("pointerTool" as WorkspaceTool, "@tool.selection", "Drawing", function () {
         that.detachAll();
@@ -169,7 +169,7 @@ var registerCommands = function () {
         that.app.allowSelection(true);
         Environment.controller.currentTool = "pointerTool";
         Selection.refreshSelection();
-    }, "ui-arrow");
+    });
 
     actionManager.registerAction("pointerDirectTool" as WorkspaceTool, "@tool.DirectSelection", "Drawing", function () {
         that.detachAll();
@@ -178,7 +178,7 @@ var registerCommands = function () {
         that.app.allowSelection(true);
         Environment.controller.currentTool = "pointerDirectTool";
         Invalidate.requestInteractionOnly();
-    }, "ui-arrow-black");
+    });
 
 
     actionManager.registerAction("pencilTool" as WorkspaceTool, "@tool.pencil", "Drawing", function () {
@@ -187,7 +187,7 @@ var registerCommands = function () {
         that._currentAction = that._pencilCreator;
         that.app.allowSelection(false);
         Selection.makeSelection([that._defaultShapeSettings], "new", false, true);
-    }, "ui-pencil");
+    });
 
     actionManager.registerAction("handToolRelease", "@tool.handRelease", "Drawing utils", function () {
         //User released spacebar

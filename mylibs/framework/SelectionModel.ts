@@ -323,6 +323,15 @@ class SelectionModel implements ISelection {
         return this._selectFrameStarted;
     }
 
+    useInCode(value:boolean) {
+        let elements = this.selectedElements();
+        for (let i = 0; i < elements.length; i++) {
+            let e = elements[i];
+            e.prepareAndSetProps({useInCode:value})
+        }
+        this.refreshSelection();
+    }
+
     lock() {
         let elements = this.selectedElements();
         for (let i = 0; i < elements.length; i++) {
@@ -333,6 +342,7 @@ class SelectionModel implements ISelection {
         }
         this.clearSelection();
     }
+
     unlock() {
         let elements = this.selectedElements();
         for (let i = 0; i < elements.length; i++) {

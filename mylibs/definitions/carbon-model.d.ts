@@ -98,6 +98,7 @@ declare module "carbon-model" {
         width: number;
         height: number;
         visible: boolean;
+        useInCode: boolean;
         angle: number;
         fill:Brush;
         stroke:Brush;

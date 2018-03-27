@@ -448,6 +448,7 @@ declare module "carbon-app" {
     export interface IActionManager {
         actionPerformed: IEvent<any>;
 
+        isEnabled(action:string, selection:ISelection):boolean;
         invoke(action: string, actionArg?: string): Promise<void>;
         subscribe(action: string, cb: (action: string, result: any) => void):IDisposable;
         registerAction(name: string, description: string, category: string, callback: (selection?: ISelection, arg?: string) => any): IAction;
@@ -586,6 +587,7 @@ declare module "carbon-app" {
         unlock();
         show();
         hide();
+        useInCode(value:boolean);
 
         readonly modeChangedEvent: IEvent<boolean>;
         readonly onElementSelected: IEvent3<ISelectComposite, IUIElement[], boolean>;

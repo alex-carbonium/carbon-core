@@ -1427,6 +1427,18 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         this.prepareAndSetProps({ visible: value }, mode);
     }
 
+    get useInCode(): boolean {
+        return this.props.useInCode;
+    }
+
+    set useInCode(value: boolean) {
+        this._useInCode(value)
+    }
+
+    _useInCode(value?: boolean, mode?: ChangeMode) {
+        this.prepareAndSetProps({ useInCode: value }, mode);
+    }
+
     visibleInChain() {
         var e: any = this;
         while (e && e !== NullContainer) {
@@ -2598,6 +2610,11 @@ PropertyMetadata.registerForType(UIElement, {
     bad: {
         defaultValue: false
     },
+    useInCode: {
+        displayName: "@useInCode",
+        type: "checkbox",
+        defaultValue: false
+    },
     flags: {
         defaultValue: 0
     },
@@ -2628,10 +2645,10 @@ PropertyMetadata.registerForType(UIElement, {
                 properties: ["fill", "stroke", "opacity"]
             },
 
-            // {
-            //     label: "@advanced",
-            //     properties: ["clipMask"]
-            // }
+            {
+                label: "@advanced",
+                properties: ["useInCode"]
+            }
             // ,
             // {
             //     label: "Margin",

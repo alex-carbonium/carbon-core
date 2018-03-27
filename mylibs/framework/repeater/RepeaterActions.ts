@@ -71,8 +71,12 @@ export class RepeaterActions extends CarbonExtension {
         return selection.elements.length && selection.elements.every(x => !!RepeatContainer.tryFindRepeaterParent(x));
     }
 
-    group = (selection: ISelection) => {
+    group = (selection: ISelection, dataString?: string) => {
         var elements = selection.elements;
+        var data;
+        if (dataString) {
+            data = JSON.parse(dataString);
+        }
 
         var sorted = elements.slice().sort((a, b) => a.zOrder() - b.zOrder());
         var element = elements[0];
@@ -92,10 +96,10 @@ export class RepeaterActions extends CarbonExtension {
             let element = elements[i];
             let globalRect = element.getBoundingBox();
 
-            if (globalRect.x < x1) {x1 = globalRect.x;}
-            if (globalRect.y < y1) {y1 = globalRect.y;}
-            if (globalRect.x + globalRect.width > x2) {x2 = globalRect.x + globalRect.width;}
-            if (globalRect.y + globalRect.height > y2) {y2 = globalRect.y + globalRect.height;}
+            if (globalRect.x < x1) { x1 = globalRect.x; }
+            if (globalRect.y < y1) { y1 = globalRect.y; }
+            if (globalRect.x + globalRect.width > x2) { x2 = globalRect.x + globalRect.width; }
+            if (globalRect.y + globalRect.height > y2) { y2 = globalRect.y + globalRect.height; }
         }
 
         var cell = new RepeatCell();
@@ -115,6 +119,10 @@ export class RepeaterActions extends CarbonExtension {
         repeater.applyTranslation({ x: pos.x, y: pos.y });
         parent.insert(repeater, insertIndex);
         repeater.insert(cell, 0);
+        if (data) {
+            repeater.cols = data.columns || 1;
+            repeater.rows = data.rows || 1;
+        }
 
         Selection.makeSelection([repeater]);
     }
@@ -160,7 +168,7 @@ export class RepeaterActions extends CarbonExtension {
         Selection.makeSelection(allChildren);
     }
 
-    toggleOthers = (selection : ISelection, show: boolean) => {
+    toggleOthers = (selection: ISelection, show: boolean) => {
         let elements = selection.elements;
         for (let i = 0; i < elements.length; ++i) {
             let element = elements[i];

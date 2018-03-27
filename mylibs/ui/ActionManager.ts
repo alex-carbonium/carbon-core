@@ -11,28 +11,25 @@ import Matrix from "math/matrix";
 import clipboard from "../framework/Clipboard";
 import PropertyTracker from "../framework/PropertyTracker";
 import Duplicate from "../commands/Duplicate";
-// import ChangeColumnType from "../commands/ChangeColumnType";
 import ConvertToPath from "../commands/ConvertToPath";
-// import DeleteCellGroup from "../commands/DeleteCellGroup";
 import Isolate from "../commands/Isolate";
 import { align } from "../framework/Aligner";
-// import InsertColumn from "../commands/InsertColumn";
-// import InsertRow from "../commands/InsertRow";
-// import ResizeColumn from "../commands/ResizeColumn";
-// import ResizeRow from "../commands/ResizeRow";
 import platform from "../platform/Platform";
 import CombinePaths from "../commands/CombinePaths";
 import GroupContainer from "../framework/GroupContainer";
 import InteractiveContainer from "../framework/InteractiveContainer";
 import Selection from "../framework/SelectionModel";
 import EventHelper from "../framework/EventHelper";
-import { IActionManager, IAction, IApp, IUIElement, IEvent, IContainer, IIsolatable, IShortcutManager } from "carbon-core";
+import { IActionManager, IAction, IApp, IUIElement, IEvent, IContainer, IIsolatable, IShortcutManager, ISelection } from "carbon-core";
 import { ArrangeStrategies, DropPositioning } from "../framework/Defs";
 import Rect from "../math/rect";
 import { viewStateStack } from "../framework/ViewStateStack";
 import CoreIntl from "../CoreIntl";
 import { ResolvedPromise } from "../framework/ObjectPool";
 import { TextAlignCommand } from "../commands/TextAlign";
+import Path from "../framework/Path";
+import CompoundPath from "../framework/CompoundPath";
+import Artboard from "../framework/Artboard";
 
 const debug = require("DebugUtil")("carb:actionManager");
 
@@ -42,6 +39,7 @@ function startRepeatableAction(oldPropsSelector) {
     actionStartProps = Selection.selectComposite().map(x => oldPropsSelector(x));
     Selection.hideFrame();
 }
+
 function endRepeatableAction() {
     let flushNeeded = PropertyTracker.resume();
     if (flushNeeded) {
@@ -50,6 +48,43 @@ function endRepeatableAction() {
         }, 0);
     }
     return actionStartProps;
+}
+
+function canDoPathOperations(selection) {
+    if (selection.length < 2) {
+        return false
+    }
+
+    for (let i = 0; i < selection.length; ++i) {
+        let e = selection[i]
+        if (!(e instanceof Path) && !(e instanceof CompoundPath) && (typeof e.convertToPath !== "function")) {
+            return false
+        }
+    }
+    return true
+}
+
+function canFlattenPath(selection) {
+    if (selection.length !== 1) {
+        return false
+    }
+
+    let e = selection[0]
+    return (e instanceof CompoundPath)
+}
+
+function canConvertToPath(selection) {
+    if (selection.length < 1) {
+        return false
+    }
+
+    for (let i = 0; i < selection.length; ++i) {
+        let e = selection[i]
+        if (!e.canConvertToPath()) {
+            return false
+        }
+    }
+    return true
 }
 
 export default class ActionManager implements IActionManager {
@@ -92,11 +127,12 @@ export default class ActionManager implements IActionManager {
     }
 
 
-    registerAction(name: string, description: string, category: string, callback: (selection?: any, arg?: string) => void): IAction {
+    registerAction(name: string, description: string, category: string, callback: (selection?: any, arg?: string) => void, condition?: (selection: ISelection) => boolean): IAction {
         let action: IAction = {
             id: name,
             name: description,
-            callback: callback
+            callback: callback,
+            condition:condition
         };
 
         return this.registerActionInstance(action);
@@ -135,15 +171,23 @@ export default class ActionManager implements IActionManager {
 
         this.registerAction("bringToFront", "@bring to front", "Layering", function () {
             ChangeZOrder.run(that.app, Selection.getSelection(), "front");
+        }, selection=>{
+            return selection.elements.length && !selection.elements.some(x => x instanceof Artboard)
         });
         this.registerAction("sendToBack", "@send to back", "Layering", function () {
             ChangeZOrder.run(that.app, Selection.getSelection(), "back");
+        }, selection=>{
+            return selection.elements.length && !selection.elements.some(x => x instanceof Artboard)
         });
         this.registerAction("bringForward", "@bring forward", "Layering", function () {
             ChangeZOrder.run(that.app, Selection.getSelection(), "forward");
+        }, selection=>{
+            return selection.elements.length && !selection.elements.some(x => x instanceof Artboard)
         });
         this.registerAction("sendBackward", "@send backward", "Layering", function () {
             ChangeZOrder.run(that.app, Selection.getSelection(), "backward");
+        }, selection=>{
+            return selection.elements.length && !selection.elements.some(x => x instanceof Artboard)
         });
 
         this.registerAction("textAlignLeft", "@text.alignLeft", "Text", function () {
@@ -251,52 +295,52 @@ export default class ActionManager implements IActionManager {
 
         this.registerAction("pathUnion", "@path.union", "Combine Paths", function () {
             CombinePaths.run("union", Selection.getSelection());
-        });
+        }, selection=>canDoPathOperations(selection.elements));
 
         this.registerAction("pathSubtract", "@path.join", "Combine Paths", function () {
             CombinePaths.run("xor", Selection.getSelection());
-        });
+        }, selection=>canDoPathOperations(selection.elements));
 
         this.registerAction("pathIntersect", "@path.intersect", "Combine Paths", function () {
             CombinePaths.run("intersect", Selection.getSelection());
-        });
+        }, selection=>canDoPathOperations(selection.elements));
 
         this.registerAction("pathDifference", "@path.difference", "Combine Paths", function () {
             CombinePaths.run("difference", Selection.getSelection());
-        });
+        }, selection=>canDoPathOperations(selection.elements));
 
         this.registerAction("alignLeft", "Align left", "Align", function () {
             align("left", Selection.getSelection());
-        });
+        }, selection => !!selection.elements.length);
         this.registerAction("alignRight", "Align right", "Align", function () {
             align("right", Selection.getSelection());
-        });
+        }, selection => !!selection.elements.length);
         this.registerAction("alignTop", "Align top", "Align", function () {
             align("top", Selection.getSelection());
-        });
+        }, selection => !!selection.elements.length);
         this.registerAction("alignBottom", "Align bottom", "Align", function () {
             align("bottom", Selection.getSelection());
-        });
+        }, selection => !!selection.elements.length);
         this.registerAction("alignMiddle", "Align middle", "Align", function () {
             align("middle", Selection.getSelection());
-        });
+        }, selection => !!selection.elements.length);
         this.registerAction("alignCenter", "Align center", "Align", function () {
             align("center", Selection.getSelection());
-        });
+        }, selection => !!selection.elements.length);
         this.registerAction("distributeHorizontally", "Distribute horizontally", "Distribute", function () {
             align("distributeHorizontally", Selection.getSelection());
-        });
+        }, selection => !!selection.elements.length);
         this.registerAction("distributeVertically", "Distribute vertically", "Distribute", function () {
             align("distributeVertically", Selection.getSelection());
-        });
+        }, selection => !!selection.elements.length);
 
         this.registerAction("lock", "Lock", "Lock", function () {
             Selection.lock();
-        });
+        }, selection => !!selection.elements.length);
 
         this.registerAction("unlock", "Unlock", "Lock", function () {
             Selection.unlock();
-        });
+        }, selection => !!selection.elements.length);
 
         this.registerAction("unlockAllOnArtboard", "Unlock all on page", "Lock", function () {
             let artboard = that.app.activePage.getActiveArtboard();
@@ -464,14 +508,14 @@ export default class ActionManager implements IActionManager {
 
         this.registerAction("convertToPath", "Convert to Path", "Path", function () {
             return ConvertToPath.run(Selection.getSelection());
-        });
+        }, selection=>canConvertToPath(selection.elements));
 
         this.registerAction("pathFlatten", "Flatten path", "Path", function () {
             let elements = Selection.getSelection();
             for (let i = 0; i < elements.length; ++i) {
                 elements[i].flatten();
             }
-        });
+        }, selection=>canFlattenPath(selection.elements));
 
         this.registerAction("cancel", "Cancel", "", function () {
         });
@@ -489,13 +533,15 @@ export default class ActionManager implements IActionManager {
 
         this.registerAction("copy", "", "", function () {
             clipboard.onCopy();
-        });
+        }, selection=> selection && selection.elements.length > 0);
+
         this.registerAction("paste", "", "", function () {
             clipboard.onPaste();
         });
+
         this.registerAction("cut", "", "", function () {
             clipboard.onCut();
-        });
+        }, selection=> selection && selection.elements.length > 0);
 
         this.registerAction("selectElement", "", "", function (selection, id: string) {
             let element = that.app.activePage.findNodeByIdBreadthFirst(id);
@@ -508,6 +554,19 @@ export default class ActionManager implements IActionManager {
         for (let name in this._actions) {
             callback(this._actions[name]);
         }
+    }
+
+    isEnabled(actionName: string, selection:ISelection) {
+        var action = this._actions[actionName];
+        if(!action) {
+            return false;
+        }
+
+        if(!action.condition) {
+            return true;
+        }
+
+        return action.condition(selection);
     }
 
     invoke(actionName: string, actionArg?: string): Promise<void> {

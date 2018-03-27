@@ -149,6 +149,7 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
     scale = 1;
     scaleX = 1;
     scaleY = 1;
+    useInCode = false;
 
     set x(v) {
         throw new Error("Method not implemented.");
