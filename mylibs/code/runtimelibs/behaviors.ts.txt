@@ -26,8 +26,7 @@ export class SliderBehavior {
         handle.draggable.horizontal = direction === Direction.Horizontal;
         handle.draggable.vertical = direction === Direction.Vertical;
         handle.draggable.constraint = {
-            type: "parent",
-            bottom: 0, left: 0, right: 0, top: 0
+            type: "parent"
         }
 
         this.onChange = Model.createEvent<number>();
