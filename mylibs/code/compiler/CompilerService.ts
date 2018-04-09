@@ -1,9 +1,8 @@
 import { IDisposable, CompilationResult } from "carbon-core";
 import { CompiledCodeProvider } from "../CompiledCodeProvider";
+import CompilerWorker from "worker-loader?inline=true!./CompilerWorker.w";
 
-var CompilerWorkerCode: any = require("raw-loader!./CompilerWorker.w");
-var defaultLib = require("raw-loader!../../../node_modules/typescript/lib/lib.d.ts");
-var typescriptCompiler = require("raw-loader!../../../node_modules/typescript/lib/typescript.js");
+var defaultLib = require("raw-loader!typescript/lib/lib.d.ts");
 
 class CompilerService implements IDisposable {
     _worker: Worker;
@@ -29,9 +28,7 @@ class CompilerService implements IDisposable {
 
     constructor() {
         this.codeProvider = new CompiledCodeProvider(this);
-        var blob = new Blob([CompilerWorkerCode], { type: 'application/javascript' })
-        this._worker = new Worker(URL.createObjectURL(blob));
-        this._worker.postMessage({ ts: typescriptCompiler })
+        this._worker = new CompilerWorker();
 
         this._worker.onmessage = this._onCompilerMessage;
         this._addFile("lib.d.ts", defaultLib);

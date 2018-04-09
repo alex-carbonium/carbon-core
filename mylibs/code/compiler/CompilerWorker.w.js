@@ -1,4 +1,4 @@
-// importScripts(['/target/typescript.js']);
+var ts = require('typescript/lib/typescript.js');
 
 var files = {};
 
@@ -42,17 +42,9 @@ var servicesHost = {
 };
 
 // Create the language service files
-var services;
-var self = this;
+var services = ts.createLanguageService(servicesHost, ts.createDocumentRegistry());
+
 addEventListener('message', function (e) {
-    if (!services) {
-        if (e.data.ts) {
-            eval(e.data.ts);
-            services = ts.createLanguageService(servicesHost, ts.createDocumentRegistry());
-            self.ts = ts;
-        }
-        return;
-    }
     var fileName = e.data.fileName;
     if (fileName) {
         if (e.data.text) {

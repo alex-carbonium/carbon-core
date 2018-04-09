@@ -264,3 +264,10 @@ declare module "hsluv" {
     export function hsluvToRgb(hsl:number[]):number[];
     export function rgbToHsluv(rgb:number[]):number[];
 }
+
+declare module "*.w" {
+    class W extends Worker {
+        constructor();
+    }
+    export = W;
+}

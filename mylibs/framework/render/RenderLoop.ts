@@ -187,7 +187,7 @@ export default class RenderLoop implements IRenderLoop {
     }
 
     private recalculateContextScale(context) {
-        var devicePixelRatio = devicePixelRatio || 1;
+        var dpr = devicePixelRatio || 1;
         var backingStoreRatio =
             context.backingStorePixelRatio ||
             context.webkitBackingStorePixelRatio ||
@@ -198,7 +198,7 @@ export default class RenderLoop implements IRenderLoop {
 
         // on some machines it is non integer, it affects rendering
         // browser zoom is also changing this value, so need to make sure it is never 0
-        this._contextScale = Math.max(1, Math.round(devicePixelRatio / backingStoreRatio));
+        this._contextScale = Math.max(1, Math.round(dpr / backingStoreRatio));
         if (this._view) {
             this._view.contextScale = this._contextScale;
         }

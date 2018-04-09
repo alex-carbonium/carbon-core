@@ -10,7 +10,6 @@ var platformLib = require("raw-loader!./runtimelibs/runtime-platform.d.ts.txt");
 var carbonRuntimeSource: string = require("raw!../definitions/carbon-runtime.d.ts") as any;
 var behaviors: string = require("raw!./runtimelibs/behaviors.ts.txt") as any;
 
-
 var runtimeTSDefinitionCode = carbonRuntimeSource
     .substr(0, carbonRuntimeSource.lastIndexOf('}') - 1)
     .replace(/^.+export /gm, "")
