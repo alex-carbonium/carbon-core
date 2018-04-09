@@ -73,7 +73,7 @@ export default class RulerGuides {
             this._customGuides.prepareAndSetProps({
                 guidesX: artboard.props.guidesX,
                 guidesY: artboard.props.guidesY,
-                origin: artboard.position()
+                origin: artboard.position
             });
         }
         else {

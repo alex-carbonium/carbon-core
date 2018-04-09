@@ -80,7 +80,7 @@ export default class Star extends Polygon implements IStar {
             return true;
         }
 
-        this.setProps({internalRadius: this.runtimeProps.origLayout.internalRadius}, mode);
+        this.setProps({ internalRadius: this.runtimeProps.origLayout.internalRadius }, mode);
         return false;
     }
 
@@ -164,12 +164,12 @@ export default class Star extends Polygon implements IStar {
 
         path.closed(true);
         path.setProps({
-            shadows:this.props.shadows,
-            fill:this.fill,
-            stroke:this.stroke,
-            styleId:this.styleId(),
-            name:this.name,
-            strokeWidth:this.strokeWidth()
+            shadows: this.props.shadows,
+            fill: this.fill,
+            stroke: this.stroke,
+            styleId: this.styleId(),
+            name: this.name,
+            strokeWidth: this.strokeWidth()
         });
 
         path.setTransform(this.viewMatrix());
@@ -276,21 +276,22 @@ PropertyMetadata.registerForType(Star, {
             max: 20
         }
     },
-    proxyDefinition:function() {
+    proxyDefinition: function () {
         let baseDefinition = PropertyMetadata.findForType(Polygon).proxyDefinition();
         return {
             rprops: [].concat(baseDefinition.rprops), // readonly props
             props: ["radius", "internalRadius", "pointsCount"].concat(baseDefinition.props),
             methods: [].concat(baseDefinition.methods),
-            mixins:[].concat(baseDefinition.mixins)
+            mixins: [].concat(baseDefinition.mixins)
         }
     },
     groups(element) {
         let baseType = PropertyMetadata.baseTypeName(Star);
         let groups = PropertyMetadata.findAll(baseType).groups(element).slice();
         groups[0] = {
-            label: "Layout",
-            properties: ["x", "y", "radius", "internalRadius", "pointsCount"]
+            label: "",
+            id: "layout",
+            properties: ["position", "size", "radius", "internalRadius", "pointsCount"]
         };
         return groups;
     }

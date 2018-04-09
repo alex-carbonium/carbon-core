@@ -388,11 +388,11 @@ PropertyMetadata.registerForType(Shape, {
         var baseGroups = PropertyMetadata.findAll(Types.Element).groups();
 
         return [
-            baseGroups.find(x => x.label === "Layout"),
+            baseGroups.find(x => x.id === "layout"),
             baseGroups.find(x => x.label === "@constraints"),
             {
                 label: "Appearance",
-                properties: ["fill", "stroke", "strokeWidth", "strokePosition", "dashPattern", "miterLimit", "lineCap", "lineJoin", "opacity"]
+                properties: ["opacity", "fill", "stroke"]
             },
             {
                 label: "@shadow",

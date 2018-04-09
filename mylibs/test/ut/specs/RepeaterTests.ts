@@ -430,7 +430,7 @@ describe("Repeater tests", function () {
 
             repeater.prepareAndSetProps({ width: 200 })
             this.app.relayout();
-            var positions = this.mapChildren(repeater, x => x.position());
+            var positions = this.mapChildren(repeater, x => x.position);
 
             //act
             var master = repeater.findSingleChildOrDefault(x => x.id === element.id);
@@ -439,7 +439,7 @@ describe("Repeater tests", function () {
             this.app.relayout();
 
             //assert
-            assert.deepEqual(this.mapChildren(repeater, x => x.position()), positions, "Elements must keep their positions");
+            assert.deepEqual(this.mapChildren(repeater, x => x.position), positions, "Elements must keep their positions");
             assert.deepEqual(this.mapChildren(repeater, x => x.selectProps(["width", "height"])),
                 [{ width: 50, height: 80 }, { width: 50, height: 80 }]);
         });

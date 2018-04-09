@@ -340,7 +340,7 @@ export default class Image extends Container<IImageProps> implements IImage {
         }
         if (/https?:.*(jpe?g|png)$/gi.test(string)) {
             var image = new Image();
-            image.size({ width: Image.NewImageSize, height: Image.NewImageSize });
+            image.size = { width: Image.NewImageSize, height: Image.NewImageSize };
             image.source(Image.createUrlSource(string));
             return image;
         }

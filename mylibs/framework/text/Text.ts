@@ -656,7 +656,7 @@ PropertyMetadata.registerForType(Text, {
         var baseGroups = PropertyMetadata.findForType(UIElement).groups();
 
         var ownGroups = [
-            baseGroups.find(x => x.label === "Layout"),
+            baseGroups.find(x => x.id === "layout"),
             baseGroups.find(x => x.label === "@constraints"),
             {
                 label: UIElement.displayType(Types.Text),

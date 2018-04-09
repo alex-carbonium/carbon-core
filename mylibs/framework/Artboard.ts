@@ -268,7 +268,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         let frame = this.frame;
 
         context.save();
-        let pos = this.position();
+        let pos = this.position;
         context.translate(pos.x + this.frame.runtimeProps.frameX, pos.y + this.frame.runtimeProps.frameY);
         frame.runtimeProps.ctxl = this.runtimeProps.ctxl;
         frame.draw(context, environment);
@@ -447,7 +447,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         if (frame && (environment.flags & RenderFlags.ShowFrames)) {
             this.drawCustomFrame(context, environment);
             context.beginPath();
-            let pos = this.position();
+            let pos = this.position;
             context.rect(pos.x, pos.y, frame.runtimeProps.cloneScreenWidth, frame.runtimeProps.cloneScreenHeight);
             context.clip();
         }
@@ -519,8 +519,9 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         res['groups'] = function () {
             return [
                 {
-                    label: "Layout",
-                    properties: ["x", "y", "width", "height", "angle"]
+                    label: "",
+                    id:"layout",
+                    properties: ["position", "size", "rotation"]
                 },
                 {
                     label: element.name,
@@ -1058,7 +1059,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     mousedown(event: IMouseEventData) {
         let scale = Environment.view.scale();
-        let pos = this.position();
+        let pos = this.position;
         if (Environment.controller.currentTool !== "artboardTool" && !Selection.isElementSelected(this) && isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width, height: 20 / scale }, event)) {
             (this.parent as any).setActiveArtboard(this);
             event.handled = true;
@@ -1607,8 +1608,9 @@ PropertyMetadata.registerForType(Artboard, {
     groups: function () {
         return [
             {
-                label: "Layout",
-                properties: ["width", "height", "x", "y"],
+                label: "",
+                id:"layout",
+                properties: ["position", "size"],
                 expanded: true
             },
             {

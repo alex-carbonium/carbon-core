@@ -440,8 +440,9 @@ PropertyMetadata.registerForType(Line, {
     groups() {
         return [
             {
-                label: "Layout",
-                properties: ["x", "y", "width", "height"],
+                label: "",
+                id:"layout",
+                properties: ["position", "size"],
                 expanded: true
             },
             {

@@ -407,11 +407,11 @@ PropertyMetadata.registerForType(Rectangle, {
         var baseGroups = PropertyMetadata.findAll(Types.Shape).groups();
 
         return [
-            baseGroups.find(x => x.label === "Layout"),
+            baseGroups.find(x => x.id === "layout"),
             baseGroups.find(x => x.label === "@constraints"),
             {
                 label: "Appearance",
-                properties: ["fill", "stroke", "strokeWidth", "opacity", "strokePosition", "dashPattern", "miterLimit", "lineCap", "lineJoin", "cornerRadius"]
+                properties: ["opacity", "cornerRadius", "fill", "stroke"]
             },
             baseGroups.find(x => x.label === "@shadow"),
             baseGroups.find(x => x.label === "@advanced")

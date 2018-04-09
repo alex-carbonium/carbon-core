@@ -537,7 +537,7 @@ PropertyMetadata.registerForType(ArtboardFrameControl, {
         var baseGroups = PropertyMetadata.findForType(Container).groups();
 
         return [
-            baseGroups.find(x => x.label === "Layout"),
+            baseGroups.find(x => x.id === "layout"),
             {
                 label: "@settings",
                 properties: ["source", "contentBehavior", "offsetX", "offsetY", "overflow"]

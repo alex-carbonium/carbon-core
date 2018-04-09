@@ -102,7 +102,7 @@ export class FileElement extends UIElement implements IFileElement {
             let image = this.linkedElement;
             if (!image) {
                 let image = new Image();
-                image.size({ width: 1, height: 1 });
+                image.size = { width: 1, height: 1 };
                 image.name=(this.getNameWithoutExtension());
                 image.setTransform(gm);
                 image.resizeOnLoad(Origin.Center);

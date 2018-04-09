@@ -17,7 +17,7 @@ require("./arrangeStrategy/GroupArrangeStrategy");
 
 const ownProperties: string[] = PropertyMetadata.findForType(InteractiveContainer)
     .groups()
-    .find(x => x.label === "Layout")
+    .find(x => x.id === "layout")
     .properties
     .concat(["name", "opacity", "locked", "constraints", "arrangeStrategy", "shadows"]);
 

@@ -173,7 +173,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     getPropertiesSnapshot(props) {
         let keys = Object.keys(props);
         let snapshot = {};
-        for(var key of keys) {
+        for (var key of keys) {
             snapshot[key] = this.props[key];
         }
 
@@ -292,20 +292,14 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     getAffectedDisplayProperties(changes): string[] {
         let properties = Object.keys(changes);
         if (changes.hasOwnProperty("br") || changes.hasOwnProperty("m")) {
-            if (properties.indexOf("x") === -1) {
-                properties.push("x");
+            if (properties.indexOf("position") === -1) {
+                properties.push("position");
             }
-            if (properties.indexOf("y") === -1) {
-                properties.push("y");
+            if (properties.indexOf("size") === -1) {
+                properties.push("size");
             }
-            if (properties.indexOf("width") === -1) {
-                properties.push("width");
-            }
-            if (properties.indexOf("height") === -1) {
-                properties.push("height");
-            }
-            if (properties.indexOf("angle") === -1) {
-                properties.push("angle");
+            if (properties.indexOf("rotation") === -1) {
+                properties.push("rotation");
             }
 
             let i = properties.indexOf("br");
@@ -328,6 +322,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             || changes.hasOwnProperty("height")
             || changes.hasOwnProperty("margin")
             || changes.hasOwnProperty("padding")
+            || changes.hasOwnProperty("size")
+            || changes.hasOwnProperty("position")
             || changes.hasOwnProperty("arrangeStrategy")
             || changes.hasOwnProperty("visible");
     }
@@ -430,24 +426,24 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.props.scaleX;
     }
 
-    set scaleX(value:number) {
-        this.prepareAndSetProps({scaleX:value});
+    set scaleX(value: number) {
+        this.prepareAndSetProps({ scaleX: value });
     }
 
     get scaleY(): number {
         return this.props.scaleY;
     }
 
-    set scaleY(value:number) {
-        this.prepareAndSetProps({scaleY:value});
+    set scaleY(value: number) {
+        this.prepareAndSetProps({ scaleY: value });
     }
 
     get scale(): number {
         return this.props.scaleX;
     }
 
-    set scale(value:number) {
-        this.prepareAndSetProps({scaleX:value, scaleY:value});
+    set scale(value: number) {
+        this.prepareAndSetProps({ scaleX: value, scaleY: value });
     }
 
     applyScaling(s, o, options?: ResizeOptions, changeMode?: ChangeMode) {
@@ -739,9 +735,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return false;
     }
 
-    position() {
-        return this.getBoundingBox().topLeft();
-    }
+
 
     centerPositionGlobal() {
         let rect = this.getBoundaryRectGlobal();
@@ -806,16 +800,38 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return true;
     }
 
-    size(value?: ISize): ISize {
-        if (arguments.length) {
-            //TODO: handle for paths based on shouldApplyViewMatrix
-            this.boundaryRect(this.boundaryRect().withSize(value.width, value.height));
-        }
+    get position() {
+        return this.getBoundingBox().topLeft();
+    }
+
+    set position(value: ICoordinate) {
+        this._position(value, ChangeMode.Model);
+    }
+
+    _position(value?: ICoordinate, changeMode?: ChangeMode) {
+        let t = Point.create(value.x - this.x, value.y - this.y);
+        this.applyGlobalTranslation(t, false, changeMode);
+    }
+
+    get size(): ISize {
         return {
             width: this.width,
             height: this.height
         }
     }
+
+    set size(value: ISize) {
+        this._size(value, ChangeMode.Model);
+    }
+
+    _size(value:ISize, changeMode?:ChangeMode) {
+        this.setProps({ br:(this.boundaryRect()
+            .withSize(
+                value.width === undefined ? this.width : value.width,
+                value.height === undefined ? this.height : value.height))
+            }, changeMode);
+    }
+
     getBoundaryRectGlobal(includeMargin = false) {
         return this.getBoundingBoxGlobal(includeMargin);
     }
@@ -1327,6 +1343,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return Math.abs(this.boundaryRect().width * scaling);
     }
 
+
+
     set height(value: number) {
         this._height(value);
     }
@@ -1363,6 +1381,18 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         this.applyRotation(value - this.angle, this.center(), false, changeMode);
     }
 
+    set rotation(value:any) {
+        this._rotation(value, ChangeMode.Model)
+    }
+
+    get rotation() {
+        return {angle:this.angle};
+    }
+
+    _rotation(value:any, changeMode?:ChangeMode) {
+        this._angle(value.angle, changeMode);
+    }
+
     boundaryRect(value?: IRect): IRect {
         if (value !== undefined) {
             this.setProps({ br: value });
@@ -1370,10 +1400,10 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.props.br;
     }
     right() {
-        return this.position().x + this.width;
+        return this.position.x + this.width;
     }
     bottom() {
-        return this.position().y + this.height;
+        return this.position.y + this.height;
     }
     outerHeight() {
         let margin = this.margin();
@@ -1849,7 +1879,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             return;
         }
 
-        if(this.runtimeProps.disposables) {
+        if (this.runtimeProps.disposables) {
             this.runtimeProps.disposables.dispose();
         }
 
@@ -2241,31 +2271,31 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.id;
     }
 
-    registerEventHandler(name: string, callback: (data?:DataBag) => (void | boolean | Promise<void|boolean>)): IDisposable {
+    registerEventHandler(name: string, callback: (data?: DataBag) => (void | boolean | Promise<void | boolean>)): IDisposable {
         let events = this.runtimeProps.events = this.runtimeProps.events || {};
         name = name.toLowerCase();
         let event: RuntimeEvent = events[name] = events[name] || new RuntimeEvent();
         return event.registerHandler(callback);
     }
 
-    raiseEvent(name: string, data?: DataBag): Promise<void|boolean> {
+    raiseEvent(name: string, data?: DataBag): Promise<void | boolean> {
         return this.raiseEventAsync(name, data);
     }
 
-    private async raiseEventAsync(name: string, data?: DataBag): Promise<void|boolean> {
+    private async raiseEventAsync(name: string, data?: DataBag): Promise<void | boolean> {
         let events = this.runtimeProps.events;
         let res;
-        if(events) {
+        if (events) {
             name = name.toLowerCase();
             let event: RuntimeEvent = events[name];
-            if(event) {
+            if (event) {
                 res = await event.raise(data);
             }
         }
 
-        if(res !== false) {
+        if (res !== false) {
             let parent = this.parent;
-            if(parent && parent !== NullContainer){
+            if (parent && parent !== NullContainer) {
                 return await (parent as any).raiseEventAsync(name, data);
             }
         }
@@ -2435,6 +2465,21 @@ PropertyMetadata.registerForType(UIElement, {
     visibleWhenDrag: {
         defaultValue: false
     },
+    position: {
+        displayName: "@position",
+        type: "position",
+        computed: true
+    },
+    size: {
+        displayName: "@size",
+        type: "size",
+        computed: true
+    },
+    rotation: {
+        displayName: "@rotation",
+        type: "rotation",
+        computed: true
+    },
     width: {
         displayName: "Width",
         type: "numeric",
@@ -2498,14 +2543,15 @@ PropertyMetadata.registerForType(UIElement, {
     },
     opacity: {
         displayName: "Opacity",
-        type: "numeric",
+        type: "opacity",
         defaultValue: 1,
         style: 1,
         customizable: true,
         options: {
-            step: .1,
+            step: 0.01,
             min: 0,
-            max: 1
+            max: 1,
+            uom: '%'
         }
     },
     angle: {
@@ -2545,14 +2591,14 @@ PropertyMetadata.registerForType(UIElement, {
     },
     fill: {
         displayName: "Fill",
-        type: "brush",
+        type: "fills",
         defaultValue: Brush.Empty,
         style: 1,
         customizable: true
     },
     stroke: {
         displayName: "Stroke",
-        type: "brush",
+        type: "strokes",
         defaultValue: Brush.Empty,
         style: 1,
         customizable: true
@@ -2629,8 +2675,9 @@ PropertyMetadata.registerForType(UIElement, {
     groups: function () {
         return [
             {
-                label: "Layout",
-                properties: ["x", "y", "width", "height", "angle"]
+                label: "",
+                id: "layout",
+                properties: ["position", "size", "rotation"]
             },
             {
                 label: "@constraints",
@@ -2642,7 +2689,7 @@ PropertyMetadata.registerForType(UIElement, {
             // },
             {
                 label: "Appearance",
-                properties: ["fill", "stroke", "opacity"]
+                properties: ["opacity", "fill", "stroke"]
             },
 
             {

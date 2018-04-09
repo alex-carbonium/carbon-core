@@ -457,7 +457,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
             let items = this.result;
             context.lineCap = this.lineCap();
             context.lineJoin = this.lineJoin();
-            context.mitterLimit = this.props.mitterLimit;
+            context.miterLimit = this.props.miterLimit;
             let matrix = this.globalViewMatrix();
 
             context.beginPath();

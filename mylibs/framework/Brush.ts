@@ -20,9 +20,13 @@ function gradientToCss(gradient) {
 
 export default class Brush {
     public t: string;
+    public e: boolean;//enabled
+    public o: number;//opacity
 
     constructor(public value: any, public type: BrushType = BrushType.color) {
         this.t = Types.Brush;
+        this.e = true;
+        this.o = 1;
     }
 
     static canApply(brushObject) {
@@ -202,7 +206,11 @@ export default class Brush {
     }
 
     static create(type, value) {
-        return this.createFromObject({ type, value });
+        return this.createFromObject({ t:type, value });
+    }
+
+    static extend(brush, obj) {
+        return this.createFromObject(Object.assign({type:brush.type, value:brush.value}, obj));
     }
 
     static createFromObject(parameters): Brush {

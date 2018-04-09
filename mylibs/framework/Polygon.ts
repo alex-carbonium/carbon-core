@@ -95,7 +95,7 @@ export default class Polygon extends Shape {
     }
 
     onRadiusChanged(changes) {
-        if(changes.m) {
+        if (changes.m) {
             return;
         }
 
@@ -112,7 +112,7 @@ export default class Polygon extends Shape {
             return true;
         }
 
-        this.setProps({radius: this.runtimeProps.origLayout.radius}, mode);
+        this.setProps({ radius: this.runtimeProps.origLayout.radius }, mode);
         return false;
     }
 
@@ -145,9 +145,9 @@ export default class Polygon extends Shape {
         return false;
     }
 
-    mousemove(event: IMouseEventData){
-        if (this.isInEditMode()){
-            if (!event.cursor){
+    mousemove(event: IMouseEventData) {
+        if (this.isInEditMode()) {
+            if (!event.cursor) {
                 event.cursor = Cursors.Default;
             }
         }
@@ -237,12 +237,12 @@ export default class Polygon extends Shape {
 
         path.closed(true);
         path.setProps({
-            shadows:this.props.shadows,
-            fill:this.fill,
-            stroke:this.stroke,
-            styleId:this.styleId(),
-            name:this.name,
-            strokeWidth:this.strokeWidth()
+            shadows: this.props.shadows,
+            fill: this.fill,
+            stroke: this.stroke,
+            styleId: this.styleId(),
+            name: this.name,
+            strokeWidth: this.strokeWidth()
         });
 
         path.setTransform(this.viewMatrix());
@@ -319,8 +319,9 @@ PropertyMetadata.registerForType(Polygon, {
         let baseType = PropertyMetadata.baseTypeName(Polygon);
         let groups = PropertyMetadata.findAll(baseType).groups(element).slice();
         groups[0] = {
-            label: "Layout",
-            properties: ["x", "y", "radius", "pointsCount", "angle"]
+            label: "",
+            id: "layout",
+            properties: ["position", "size", "rotation", "radius", "pointsCount"]
         };
         return groups;
     }

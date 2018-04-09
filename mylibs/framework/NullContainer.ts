@@ -119,9 +119,7 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
     getBoundingBoxGlobal(): IRect {
         return Rect.Zero;
     }
-    size(size?: ISize): ISize {
-        return { height: 0, width: 0 };
-    }
+    size = { height: 0, width: 0 };
     center(global?: boolean): IPoint {
         return Point.Zero;
     }

@@ -28,11 +28,16 @@ declare module "carbon-runtime" {
     export class Brush {
         type: BrushType;
         value: any;
+        o:number;
+        e:boolean;
 
         static createFromCssColor(color: string): Brush;
         static createFromLinearGradientObject(value: LinearGradientData): Brush;
         static toCss(brush: Brush): any;
         static isValid(brush: Brush): boolean;
+
+        static clone(brush:Brush):Brush;
+        static extend(brush:Brush, object:any):Brush;
 
         static Empty: Brush;
     }

@@ -185,8 +185,10 @@ PropertyMetadata.registerForType(StateBoard, {
     groups: function () {
         return [
             {
-                label: "Layout",
-                properties: ["width", "height", "x", "y"]
+                label: "",
+                id:"layout",
+                properties: ["position", "size"],
+                expanded: true
             },
             {
                 label: "Appearance",

@@ -103,6 +103,7 @@ declare module "carbon-model" {
         fill:Brush;
         stroke:Brush;
         opacity:number;
+        size: ISize;
 
         drawPath?(context: IContext, w: number, h: number);
 
@@ -140,7 +141,6 @@ declare module "carbon-model" {
         boundaryRect(value?: IRect): IRect;
         getBoundingBox(): IRect;
         getBoundingBoxGlobal(): IRect;
-        size(size?: ISize): ISize;
         center(global?: boolean): ICoordinate;
         roundBoundingBoxToPixelEdge(mode?: ChangeMode): boolean;
 
