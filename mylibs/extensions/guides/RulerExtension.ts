@@ -20,7 +20,7 @@ import { LayerType } from "carbon-app";
 
 const config = UserSettings.ruler;
 const selectionSize = 3;
-const PADDING_TOP = 32; //to match css for top bar
+const PADDING_TOP = 0; //to match css for top bar
 const LABEL_MARGIN_X = 2;
 
 var widthOfL = -1;
