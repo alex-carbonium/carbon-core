@@ -1541,16 +1541,6 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (value !== undefined) {
             this.prepareAndSetProps({ dashPattern: value });
         }
-        if (typeof this.props.dashPattern === 'string') {
-            switch (this.props.dashPattern) {
-                case 'solid':
-                    return null;
-                case 'dotted':
-                    return [1, 1];
-                case 'dashed':
-                    return [4, 2];
-            }
-        }
         return this.props.dashPattern;
     }
     selectFrameVisible(value?) {
@@ -2630,15 +2620,8 @@ PropertyMetadata.registerForType(UIElement, {
         }
     },
     dashPattern: {
-        displayName: "@strokePattern",
-        type: "strokePattern",
-        defaultValue: 'solid',
+        defaultValue: [],
         options: {},
-        items: [
-            { value: 'solid' },
-            { value: 'dashed' },
-            { value: 'dotted' }
-        ],
     },
     clipMask: {
         displayName: "Use as mask",

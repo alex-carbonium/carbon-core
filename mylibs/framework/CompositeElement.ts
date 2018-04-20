@@ -288,6 +288,7 @@ export default class CompositeElement extends UIElement implements IComposite {
             this.applyElementSnapshot(snapshot, e, mode);
         }
     }
+
     applyElementSnapshot(snapshot, element, mode) {
         let props = snapshot[element.id];
         if (props) {

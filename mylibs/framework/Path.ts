@@ -1882,15 +1882,15 @@ function setElementPropertiesFromAttributes(element, parsedAttributes) {
     }
 
     if (parsedAttributes.miterLimit !== undefined) {
-        element.miterLimit(parsedAttributes.miterLimit);
+        element.miterLimit = parsedAttributes.miterLimit;
     }
 
     if (parsedAttributes.lineJoin) {
-        element.lineJoin(parsedAttributes.lineJoin);
+        element.lineJoin = parsedAttributes.lineJoin;
     }
 
     if (parsedAttributes.lineCap) {
-        element.lineCap(parsedAttributes.lineCap);
+        element.lineCap = parsedAttributes.lineCap;
     }
 
     if (parsedAttributes.id) {

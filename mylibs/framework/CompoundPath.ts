@@ -27,7 +27,7 @@ function propertyChanged(element, newProps) {
         }
     }
 }
-class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
+class CompoundPath extends Container implements IGroupContainer, IIsolatable {
 
     static bezierPathsFromGraph(graph) {
         // Convert this graph into a bezier path. This is straightforward, each contour
@@ -66,18 +66,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
         return res;
     }
 
-    lineCap(value?) {
-        if (arguments.length > 0) {
-            if (value === 'round' || value === LineCap.Round) {
-                value = LineCap.Round;
-            } else if (value === 'square' || value === LineCap.Square) {
-                value = LineCap.Square;
-            } else {
-                value = LineCap.Butt;
-            }
-            this.setProps({ lineCap: value });
-        }
-
+    get lineCap() {
         switch (this.props.lineCap) {
             case LineCap.Round:
                 return 'round';
@@ -87,19 +76,31 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
                 return 'butt';
         }
     }
-
-    lineJoin(value?) {
-        if (arguments.length > 0) {
-            if (value === 'round' || value === LineJoin.Round) {
-                value = LineJoin.Round;
-            } else if (value === 'bevel' || value === LineJoin.Bevel) {
-                value = LineJoin.Bevel;
-            } else {
-                value = LineJoin.Miter;
-            }
-            this.setProps({ lineJoin: value });
+    set lineCap(value: LineCap | "round" | "square" | "butt") {
+        let cap;
+        if (value === 'round' || value === LineCap.Round) {
+            cap = LineCap.Round;
+        } else if (value === 'square' || value === LineCap.Square) {
+            cap = LineCap.Square;
+        } else {
+            cap = LineCap.Butt;
         }
 
+        this.setProps({ lineCap: cap });
+    }
+
+    set lineJoin(value: LineJoin | "round" | "bevel" | "miter") {
+        if (value === 'round' || value === LineJoin.Round) {
+            value = LineJoin.Round;
+        } else if (value === 'bevel' || value === LineJoin.Bevel) {
+            value = LineJoin.Bevel;
+        } else {
+            value = LineJoin.Miter;
+        }
+
+        this.setProps({ lineJoin: value });
+    }
+    get lineJoin() {
         switch (this.props.lineJoin) {
             case LineJoin.Round:
                 return 'round';
@@ -310,7 +311,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
             path.setProps(this.selectLayoutProps());
         }
         else {
-            let tmppath:any = new CompoundPath();
+            let tmppath: any = new CompoundPath();
             for (let i = 0; i < this.result.length; ++i) {
                 let p = this.result[i].clone();
                 p.joinMode("union");
@@ -321,7 +322,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
             tmppath.recalculate();
 
             path = new GroupContainer();
-            for(let i = 0, len = tmppath.children.length; i < len; ++i) {
+            for (let i = 0, len = tmppath.children.length; i < len; ++i) {
                 let child = tmppath.children[0];
                 tmppath.remove(child);
                 path.add(child);
@@ -330,7 +331,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
         path.name = (this.displayName());
         path.styleId(this.styleId());
 
-        let parent:any = this.parent;
+        let parent: any = this.parent;
         let index = parent.positionOf(this);
         parent.remove(this);
         parent.insert(path, index);
@@ -380,8 +381,8 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
         return this.runtimeProps.fullBoundaryRect;
     }
 
-    onIsolationExited(){
-        if (!this.count()){
+    onIsolationExited() {
+        if (!this.count()) {
             this.parent.remove(this);
         } else {
             this.recalculate();
@@ -455,8 +456,8 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable  {
     drawPath(context, w, h) {
         if (this.result) {
             let items = this.result;
-            context.lineCap = this.lineCap();
-            context.lineJoin = this.lineJoin();
+            context.lineCap = this.lineCap;
+            context.lineJoin = this.lineJoin;
             context.miterLimit = this.props.miterLimit;
             let matrix = this.globalViewMatrix();
 

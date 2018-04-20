@@ -291,8 +291,8 @@ class Line extends Shape implements ILine {
         }
 
         context.lineWidth = this.strokeWidth();
-        context.lineCap = this.lineCap();
-        context.lineJoin = this.lineJoin();
+        context.lineCap = this.lineCap;
+        context.lineJoin = this.lineJoin;
         context.miterLimit = this.props.miterLimit;
 
         this.drawPath(context, w, h);

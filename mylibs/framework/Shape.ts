@@ -7,7 +7,7 @@ import ContextPool from "./render/ContextPool";
 import { Types } from "./Defs";
 import Constraints from "./Constraints";
 import { IImage, IUIElement } from "carbon-model";
-import { ResizeDimension, ElementState, RenderEnvironment, RenderFlags, StrokePosition, LineJoin, LineCap, Origin } from "carbon-core";
+import { ResizeDimension, ElementState, RenderEnvironment, RenderFlags, StrokePosition, LineJoin, LineCap, Origin, ProxyDefinition } from "carbon-core";
 import RenderPipeline from "./render/RenderPipeline";
 import { ChangeMode } from "carbon-basics";
 
@@ -141,8 +141,8 @@ class Shape extends Container {
 
         context.save();
 
-        context.lineCap = this.lineCap();
-        context.lineJoin = this.lineJoin();
+        context.lineCap = this.lineCap;
+        context.lineJoin = this.lineJoin;
         context.miterLimit = this.props.miterLimit;
 
         var dashPattern = this.dashPattern();
@@ -216,18 +216,7 @@ class Shape extends Container {
         return this.primitiveRoot().isEditable() && (elements[0].systemType() === Types.Image) && allowMoveInOut;
     }
 
-    lineCap(value?) {
-        if (arguments.length > 0) {
-            if (value === 'round' || value === LineCap.Round) {
-                value = LineCap.Round;
-            } else if (value === 'square' || value === LineCap.Square) {
-                value = LineCap.Square;
-            } else {
-                value = LineCap.Butt;
-            }
-            this.setProps({ lineCap: value });
-        }
-
+    get lineCap() {
         switch (this.props.lineCap) {
             case LineCap.Round:
                 return 'round';
@@ -237,19 +226,31 @@ class Shape extends Container {
                 return 'butt';
         }
     }
-
-    lineJoin(value?) {
-        if (arguments.length > 0) {
-            if (value === 'round' || value === LineJoin.Round) {
-                value = LineJoin.Round;
-            } else if (value === 'bevel' || value === LineJoin.Bevel) {
-                value = LineJoin.Bevel;
-            } else {
-                value = LineJoin.Miter;
-            }
-            this.setProps({ lineJoin: value });
+    set lineCap(value: LineCap | "round" | "square" | "butt") {
+        let cap;
+        if (value === 'round' || value === LineCap.Round) {
+            cap = LineCap.Round;
+        } else if (value === 'square' || value === LineCap.Square) {
+            cap = LineCap.Square;
+        } else {
+            cap = LineCap.Butt;
         }
 
+        this.setProps({ lineCap: cap });
+    }
+
+    set lineJoin(value: LineJoin | "round" | "bevel" | "miter") {
+        if (value === 'round' || value === LineJoin.Round) {
+            value = LineJoin.Round;
+        } else if (value === 'bevel' || value === LineJoin.Bevel) {
+            value = LineJoin.Bevel;
+        } else {
+            value = LineJoin.Miter;
+        }
+
+        this.setProps({ lineJoin: value });
+    }
+    get lineJoin() {
         switch (this.props.lineJoin) {
             case LineJoin.Round:
                 return 'round';
@@ -260,14 +261,13 @@ class Shape extends Container {
         }
     }
 
-    miterLimit(value) {
-        if (arguments.length > 0) {
-            this.setProps({ miterLimit: value });
-        }
-
+    get miterLimit() {
         return this.props.miterLimit;
     }
 
+    set miterLimit(value) {
+        this.setProps({ miterLimit: value });
+    }
 
     _roundValue(value) {
         if (this.props.pointRounding === 0) {
@@ -404,6 +404,15 @@ PropertyMetadata.registerForType(Shape, {
             }
         ];
     },
+    proxyDefinition(): ProxyDefinition {
+        let baseDefinition = PropertyMetadata.findForType(Container).proxyDefinition();
+        return {
+            rprops: [].concat(baseDefinition.rprops), // readonly props
+            props: ["lineCap", "lineJoin", "miterLimit"].concat(baseDefinition.props),
+            methods: [].concat(baseDefinition.methods),
+            mixins:[].concat(baseDefinition.mixins)
+        }
+    }
 });
 
 export default Shape;
