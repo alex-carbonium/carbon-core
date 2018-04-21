@@ -30,7 +30,7 @@ export default class Brush {
     }
 
     static canApply(brushObject) {
-        return brushObject && brushObject.type && brushObject.value;
+        return brushObject && brushObject.type && brushObject.value && brushObject.e;
     }
 
     static toString(brushObject) {
