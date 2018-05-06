@@ -6,7 +6,7 @@ import {Types} from "../framework/Defs";
 import UserSettings from "../UserSettings";
 import { ChangeMode } from "carbon-core";
 
-const appearanceProps = ["fill", "stroke", "strokeWidth", "strokePosition", "opacity"];
+const appearanceProps = [ "opacity", "fill", "stroke"];
 
 class DefaultShapeSettings extends UIElement {
     constructor(app){

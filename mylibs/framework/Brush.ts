@@ -117,9 +117,13 @@ export default class Brush {
     static fill(brushObject, context, l?: number, t?: number, w?: number, h?: number) {
         if (Brush.canApply(brushObject)) {
             var brush = Brush.getBrush(brushObject, context, l, t, w, h);
+
             if (brush) {
                 context.fillStyle = brush;
+                var oldOpacity = context.globalAlpha;
+                context.globalAlpha = oldOpacity * brushObject.o;
                 context.fill2();
+                context.globalAlpha = oldOpacity;
             }
             return true;
         }
@@ -131,7 +135,10 @@ export default class Brush {
             var brush = Brush.getBrush(brushObject, context, l, t, w, h);
             if (brush) {
                 context.strokeStyle = brush;
+                var oldOpacity = context.globalAlpha;
+                context.globalAlpha = oldOpacity * brushObject.o;
                 context.stroke();
+                context.globalAlpha = oldOpacity;
             }
             return true;
         }

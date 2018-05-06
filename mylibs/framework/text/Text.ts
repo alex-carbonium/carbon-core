@@ -610,32 +610,23 @@ PropertyMetadata.registerForType(Text, {
     },
     mode: {
         displayName: "@textMode",
-        type: "switch",
+        type: "dropdown",
         options: {
             items: [
-                { label: "@textMode.block", value: TextMode.Block, icon: "type-icon_area-text" },
-                { label: "@textMode.label", value: TextMode.Label, icon: "type-icon_line-text" }
-            ],
-            hasLabels: true,
-            size: 3 / 4
+                { name: "@textMode.block", value: TextMode.Block},
+                { name: "@textMode.label", value: TextMode.Label }
+            ]
         },
         defaultValue: TextMode.Block
     },
     wrap: {
         displayName: "@wrap",
         type: "checkbox",
-        options: {
-            size: 1 / 4,
-            label: false
-        },
         defaultValue: true,
     },
     editable: {
         displayName: "@textProp.editable",
         type: "checkbox",
-        options: {
-            size: 1
-        },
         defaultValue: false
     },
     textStyleId: {
@@ -657,16 +648,12 @@ PropertyMetadata.registerForType(Text, {
 
         var ownGroups = [
             baseGroups.find(x => x.id === "layout"),
+            baseGroups.find(x => x.label === "Appearance"),
             baseGroups.find(x => x.label === "@constraints"),
             {
                 label: UIElement.displayType(Types.Text),
-                properties: [/*"textStyleId",*/ "mode", "wrap", "font"]
-            },
-            baseGroups.find(x => x.label === "Appearance"),
-            {
-                label: "@behaviorProps",
-                properties: ["editable"]
-            },
+                properties: [/*"textStyleId",*/"font", "mode", "wrap", "editable"]
+            }
         ];
 
         return ownGroups;

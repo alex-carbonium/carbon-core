@@ -9,7 +9,7 @@ import Rect from "../math/rect";
 import Point from "../math/point";
 import Environment from "environment";
 import Selection from "../framework/SelectionModel";
-import { IMouseEventData, ElementState } from "carbon-core";
+import { IMouseEventData, ElementState, ChangeMode } from "carbon-core";
 import Cursors from "Cursors";
 
 let PolygonFrameType = {
@@ -178,14 +178,14 @@ export default class Polygon extends Shape {
 
     radius(value?) {
         if (value !== undefined) {
-            this.setProps({ radius: value })
+            this.prepareAndSetProps({ radius: value })
         }
         return this.props.radius;
     }
 
     pointsCount(value?) {
         if (value !== undefined) {
-            this.setProps({ pointsCount: value })
+            this.prepareAndSetProps({ pointsCount: value })
         }
         return this.props.pointsCount;
     }
@@ -251,6 +251,15 @@ export default class Polygon extends Shape {
         return path;
     }
 
+
+    _polygonData(value?: any, changeMode?: ChangeMode) {
+        if (value.pointsCount) {
+            this.pointsCount(value.pointsCount);
+        } else if (value.radius) {
+            this.radius(value.radius);
+        }
+    }
+
     createSelectionFrame(view) {
         let frame;
         if (!this.selectFrameVisible()) {
@@ -302,12 +311,12 @@ Polygon.prototype.t = Types.Polygon;
 
 PropertyMetadata.registerForType(Polygon, {
     radius: {
-        displayName: "Radius",
+        displayName: "@radius",
         defaultValue: 15,
         type: "numeric",
     },
     pointsCount: {
-        displayName: "Points count",
+        displayName: "@points",
         defaultValue: 6,
         type: "numeric",
         options: {
@@ -315,13 +324,18 @@ PropertyMetadata.registerForType(Polygon, {
             max: 20
         }
     },
+    polygonData: {
+        type: "polygonData",
+        displayName: "@shape",
+        computed: true
+    },
     groups(element) {
         let baseType = PropertyMetadata.baseTypeName(Polygon);
         let groups = PropertyMetadata.findAll(baseType).groups(element).slice();
         groups[0] = {
             label: "",
             id: "layout",
-            properties: ["position", "size", "rotation", "radius", "pointsCount"]
+            properties: ["position", "size", "rotation", "polygonData"]
         };
         return groups;
     }
