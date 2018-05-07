@@ -17,7 +17,7 @@ import Box from "framework/Box";
 import { debounce } from "util";
 import { Types } from "framework/Defs";
 import ResizeOptions from "decorators/ResizeOptions";
-import { IMouseEventData, KeyboardState, ChangeMode, IIntersectionRange, ResizeDimension, LayerType, IContainerProps, PointType, IPathPoint, IUIElementProps, ElementState } from "carbon-core";
+import { IMouseEventData, KeyboardState, ChangeMode, IIntersectionRange, ResizeDimension, LayerType, IContainerProps, PointType, IPathPoint, IUIElementProps, ElementState, ICoordinate } from "carbon-core";
 import UserSettings from "UserSettings";
 import Cursors from "Cursors";
 import PathManipulationDecorator from "ui/common/path/PathManipulationDecorator";
@@ -283,8 +283,7 @@ class Path extends Shape {
 
     _refreshComputedProps() {
         this.propsUpdated({
-            currentPointX: this.runtimeProps.currentPointX,
-            currentPointY: this.runtimeProps.currentPointY,
+            currentPointPosition: {x:this.runtimeProps.currentPointX, y: this.runtimeProps.currentPointY},
             currentPointType: this.runtimeProps.currentPointType
         }, {}); // refresh properties
     }
@@ -1112,6 +1111,17 @@ class Path extends Shape {
         Invalidate.request();
     }
 
+    get currentPointPosition() {
+        return { x: this.runtimeProps.currentPointX, y: this.runtimeProps.currentPointY };
+    }
+
+    _currentPointPosition(value: ICoordinate, changeMode?: ChangeMode) {
+        this.runtimeProps.currentPointX = this._roundValue(value.x);
+        this.runtimeProps.currentPointY = this._roundValue(value.y);
+        this._refreshComputedProps();
+        Invalidate.request();
+    }
+
     get currentPointType(): PointType {
         return this.runtimeProps.currentPointType;
     }
@@ -1788,16 +1798,9 @@ PropertyMetadata.registerForType(Path, {
         editable: true,
         displayName: "Closed"
     },
-    currentPointX: {
-        displayName: "X",
-        type: "numeric",
-        defaultValue: 0,
-        computed: true
-    },
-    currentPointY: {
-        displayName: "Y",
-        type: "numeric",
-        defaultValue: 0,
+    currentPointPosition: {
+        displayName: "@position",
+        type: "position",
         computed: true
     },
     currentPointType: {
@@ -1807,10 +1810,10 @@ PropertyMetadata.registerForType(Path, {
         computed: true,
         options: {
             items: [
-                { value: PointType.Straight, icon: "ico-prop_node-straight" },
-                { value: PointType.Mirrored, icon: "ico-prop_node-mirrored" },
-                { value: PointType.Assymetric, icon: "ico-prop_node-assymetric" },
-                { value: PointType.Disconnected, icon: "ico-prop_node-disconnected" }
+                { value: PointType.Straight, icon: "point_straight" },
+                { value: PointType.Mirrored, icon: "point_mirrored" },
+                { value: PointType.Assymetric, icon: "point_assymetric" },
+                { value: PointType.Disconnected, icon: "point_disconnected" }
             ],
             size: 3 / 4
         }
@@ -1829,12 +1832,12 @@ PropertyMetadata.registerForType(Path, {
         if (path && path.mode() === ElementState.Edit) {
             return [
                 {
-                    label: path.displayType(),
-                    properties: ["pointRounding"]
+                    label: "@selectedPoint",
+                    properties: ["currentPointPosition", "currentPointType"]
                 },
                 {
-                    label: "@selectedPoint",
-                    properties: ["currentPointX", "currentPointY", "currentPointType"]
+                    label: path.displayType(),
+                    properties: ["pointRounding"]
                 },
                 baseGroups.find(x => x.label === "Appearance"),
                 baseGroups.find(x => x.label === "@shadow")
@@ -1848,14 +1851,12 @@ PropertyMetadata.registerForType(Path, {
         let editMode = path.props.mode === ElementState.Edit;
         let pointSelected = path.runtimeProps.selectedPointIdx !== -1;
         return {
-            currentPointX: editMode && pointSelected,
-            currentPointY: editMode && pointSelected,
+            currentPointPosition: editMode && pointSelected,
             currentPointType: editMode && pointSelected,
             pointRounding: editMode
         };
     }
 });
-
 
 function setElementPropertiesFromAttributes(element, parsedAttributes) {
     element.setProps({ pointRounding: 0 });

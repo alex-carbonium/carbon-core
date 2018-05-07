@@ -10,6 +10,7 @@ import { IImage, IUIElement } from "carbon-model";
 import { ResizeDimension, ElementState, RenderEnvironment, RenderFlags, StrokePosition, LineJoin, LineCap, Origin, ProxyDefinition } from "carbon-core";
 import RenderPipeline from "./render/RenderPipeline";
 import { ChangeMode } from "carbon-basics";
+import UIElement from "./UIElement";
 
 class Shape extends Container {
     convertToPath() {
@@ -109,6 +110,10 @@ class Shape extends Container {
             if (!stroke || !stroke.type || strokePosition === StrokePosition.Center || !this.closed()) {
                 pipeline.out((context, environment) => {
                     context.lineWidth = strokeWidth;
+                    var dashPattern = this.dashPattern();
+                    if (dashPattern) {
+                        context.setLineDash(dashPattern);
+                    }
                     this.strokeSelf(context, w, h);
                 })
             } else {
@@ -117,6 +122,10 @@ class Shape extends Container {
                     this.drawPath(context, w, h);
 
                     context.lineWidth = strokeWidth * 2;
+                    var dashPattern = this.dashPattern();
+                    if (dashPattern) {
+                        context.setLineDash(dashPattern);
+                    }
                     this.strokeSelf(context, w, h);
                     if (strokePosition === StrokePosition.Inside) {
                         context.globalCompositeOperation = "destination-in";
@@ -145,11 +154,6 @@ class Shape extends Container {
         context.lineJoin = this.lineJoin;
         context.miterLimit = this.props.miterLimit;
 
-        var dashPattern = this.dashPattern();
-        if (dashPattern) {
-            context.setLineDash(dashPattern);
-        }
-
         if (environment.flags & RenderFlags.Final) {
             this._renderFinal(context, w, h, environment);
         } else {
@@ -160,6 +164,10 @@ class Shape extends Container {
     }
 
     drawOutsetShadows(context, w, h, environment: RenderEnvironment) {
+        if (this.clipMask()) {
+            return;
+        }
+
         var shadows = this.props.shadows;
         var hasShadow = false;
         if (shadows && shadows.length) {
@@ -175,6 +183,10 @@ class Shape extends Container {
         return hasShadow;
     }
     drawInsetShadows(context, w, h, environment: RenderEnvironment) {
+        if (this.clipMask()) {
+            return;
+        }
+
         var shadows = this.props.shadows;
         var hasShadow = false;
         if (shadows && shadows.length) {
@@ -384,6 +396,11 @@ PropertyMetadata.registerForType(Shape, {
         useInModel: true,
         editable: true
     },
+    prepareVisibility: function (element: UIElement) {
+        return {
+            shadows: !element.clipMask()
+        };
+    },
     groups() {
         var baseGroups = PropertyMetadata.findAll(Types.Element).groups();
 
@@ -410,7 +427,7 @@ PropertyMetadata.registerForType(Shape, {
             rprops: [].concat(baseDefinition.rprops), // readonly props
             props: ["lineCap", "lineJoin", "miterLimit"].concat(baseDefinition.props),
             methods: [].concat(baseDefinition.methods),
-            mixins:[].concat(baseDefinition.mixins)
+            mixins: [].concat(baseDefinition.mixins)
         }
     }
 });

@@ -38,6 +38,8 @@ declare module "carbon-rendering" {
         scale(x: number, y: number);
         rotate(radians: number): void;
 
+        setLineDash(dash:number[]):void;
+
         moveTo(x: number, y: number): void;
         lineTo(x: number, y: number): void;
         circle(xc: number, yc: number, r: number): void;

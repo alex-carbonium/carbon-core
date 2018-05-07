@@ -1569,6 +1569,7 @@ PropertyMetadata.registerForType(Artboard, {
     prepareVisibility(element: Artboard) {
         let showAsStencil = element.props.type === ArtboardType.Symbol;
         let showAsIconset = element.props.type === ArtboardType.IconSet;
+        let showAsRegular = element.props.type === ArtboardType.Regular;
         return {
             stroke: false,
             tileSize: showAsStencil,
@@ -1579,7 +1580,8 @@ PropertyMetadata.registerForType(Artboard, {
             rowsCount: showAsIconset,
             colsCount: showAsIconset,
             iconCellSize: showAsIconset,
-            states: !showAsIconset
+            states: showAsRegular,
+            frame: showAsRegular
         }
     },
     proxyDefinition(): ProxyDefinition {
