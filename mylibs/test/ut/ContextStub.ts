@@ -15,6 +15,10 @@ export default class ContextStub implements IContext {
     globalCompositeOperation: string;
     saveCount = 0;
 
+    setLineDash(v) {
+
+    }
+
     beginElement(element: any, environment: RenderEnvironment): boolean {
         return true;
     }
