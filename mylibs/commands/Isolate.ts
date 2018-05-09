@@ -1,17 +1,16 @@
 import Selection from "framework/SelectionModel";
-import Environment from "environment";
 import { ILayer, IUIElement, IContainer, IIsolationLayer, IIsolatable } from "carbon-core";
-import { LayerType } from "carbon-app";
+import { LayerType, IView } from "carbon-app";
 
 const Isolate = {
-    run: function(elements:IIsolatable[], clippingParent: IUIElement = null){
+    run: function(view:IView, elements:IIsolatable[], clippingParent: IUIElement = null){
         if(elements.length !== 1 || !((elements[0] as IContainer).children instanceof Array)) {
             return;
         }
 
         var element = elements[0];
 
-        var layer = Environment.view.getLayer(LayerType.Isolation) as IIsolationLayer;
+        var layer = view.getLayer(LayerType.Isolation) as IIsolationLayer;
 
         // re-read element form the model, since we can try isolate a copy from isolation layer
         element = App.Current.activePage.getElementById(element.id);

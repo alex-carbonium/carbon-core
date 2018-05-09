@@ -71,6 +71,7 @@ export default class ControllerBase implements IController {
 
     updateCursor(eventData?) {
     }
+
     defaultCursor(): string {
         return "default_cursor";
     }
@@ -88,6 +89,7 @@ export default class ControllerBase implements IController {
             ctrlKey: event.ctrlKey || event.metaKey,
             altKey: event.altKey,
             shiftKey: event.shiftKey,
+            view:this.view,
             scale: (event as any).scale,
             rotation: event.rotation,
             velocityX: (event as any).velocityX,

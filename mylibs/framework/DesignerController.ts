@@ -143,7 +143,8 @@ export default class DesignerController implements IController {
             event: event,
             ctrlKey: event.ctrlKey || event.metaKey,
             altKey: event.altKey,
-            shiftKey: event.shiftKey
+            shiftKey: event.shiftKey,
+            view:this.view
         };
     }
 
@@ -437,7 +438,8 @@ export default class DesignerController implements IController {
                 cursor: null,
                 altKey: eventData.altKey,
                 ctrlKey: eventData.ctrlKey,
-                shiftKey: eventData.shiftKey
+                shiftKey: eventData.shiftKey,
+                view:eventData.view
             };
         }
 

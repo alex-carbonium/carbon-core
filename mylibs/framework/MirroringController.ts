@@ -220,17 +220,17 @@ export default class MirroringController implements IController {
         return false;
     }
 
-    createEventData(event) {
+    createEventData(event) : IMouseEventData {
         updateEvent.call(this, event);
         return {
             handled: false,
             x: domUtil.layerX(event),
             y: domUtil.layerY(event),
             event: event,
-            ctrlKey: event.ctrlKey || event.metaKey,
+        ctrlKey: event.ctrlKey || event.metaKey,
             shiftKey: event.shiftKey,
             altKey: event.altKey,
-            view: this
+            view: this.view
         }
     }
 

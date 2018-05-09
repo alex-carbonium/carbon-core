@@ -16,7 +16,6 @@ import Shape from "framework/Shape";
 import UserSettings from "UserSettings";
 import Selection from "framework/SelectionModel";
 import Isolate from "commands/Isolate";
-import Environment from "environment";
 import ContextPool from "./render/ContextPool";
 import GroupContainer from "./GroupContainer";
 
@@ -391,14 +390,14 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable {
 
     dblclick(event: IMouseEventData) {
         if (this.primitiveRoot().isEditable()) {
-            if (UserSettings.group.editInIsolationMode && !Environment.view.isolationLayer.isActivatedFor(this)) {
-                Isolate.run([this]);
+            if (UserSettings.group.editInIsolationMode && !event.view.isolationLayer.isActivatedFor(this)) {
+                Isolate.run(event.view, [this]);
                 event.handled = true;
             }
         }
         else {
             this.unlockGroup();
-            let element = this.hitElement(event, Environment.view.scale());
+            let element = this.hitElement(event, event.view.scale());
             if (element && element !== this) {
                 Selection.makeSelection([element]);
             }

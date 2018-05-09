@@ -91,8 +91,6 @@ declare module "carbon-app" {
         setActiveStoryById(id);
         removeStory(story);
 
-        isolationActive():boolean;
-
         isPrototypeMode():boolean;
 
         onBuildMenu: any;

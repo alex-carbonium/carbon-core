@@ -81,14 +81,14 @@ export default class GroupContainer extends InteractiveContainer implements IGro
 
     dblclick(event: IMouseEventData) {
         if (this.primitiveRoot().isEditable()) {
-            if (UserSettings.group.editInIsolationMode && !Environment.view.isolationLayer.isActivatedFor(this)) {
-                Isolate.run([this]);
+            if (UserSettings.group.editInIsolationMode && !event.view.isolationLayer.isActivatedFor(this)) {
+                Isolate.run(event.view, [this]);
                 event.handled = true;
             }
         }
         else {
             this.unlockGroup();
-            var element = this.hitElement(event, Environment.view.scale());
+            var element = this.hitElement(event, event.view.scale());
             if (element && element !== this) {
                 Selection.makeSelection([element]);
             }

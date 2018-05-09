@@ -1,5 +1,5 @@
 import CarbonExtension from "./CarbonExtesion";
-import { IContributions, ContextBarPosition, IApp, ISelection, ChangeMode, IArtboardProps, ILayer, LayerType, IUIElement, IContainer, IRect, ArtboardType, IText, UIElementFlags, IArtboard, IGroupContainer, IIsolatable } from "carbon-core";
+import { IContributions, ContextBarPosition, IApp, ISelection, ChangeMode, IArtboardProps, ILayer, LayerType, IUIElement, IContainer, IRect, ArtboardType, IText, UIElementFlags, IArtboard, IGroupContainer, IIsolatable, IView } from "carbon-core";
 import Constraints from "framework/Constraints";
 import Symbol from "../framework/Symbol";
 import Artboard from "../framework/Artboard";
@@ -16,6 +16,11 @@ import { ArrangeStrategies, DropPositioning } from "../framework/Defs";
 import Isolate from "../commands/Isolate";
 
 export class GroupActions extends CarbonExtension {
+
+    constructor(app, workspace) {
+        super(app, workspace);
+    }
+
     initialize(contributions: IContributions) {
         //TODO: add label registrations
         contributions.addActions([
@@ -93,10 +98,10 @@ export class GroupActions extends CarbonExtension {
         ]);
     }
 
-    static canGroup(selection: ISelection): boolean{
+    static canGroup(selection: ISelection): boolean {
         return selection.elements.length && !selection.elements.some(x => x instanceof Artboard || !x.isInTree());
     }
-    static isGroupContainer(selection: ISelection): boolean{
+    static isGroupContainer(selection: ISelection): boolean {
         return selection.elements.length && selection.elements.every(x => x instanceof InteractiveContainer);
     }
 
@@ -158,6 +163,6 @@ export class GroupActions extends CarbonExtension {
     }
 
     isolate(selection: ISelection) {
-        Isolate.run(selection.elements as IIsolatable[]);
+        Isolate.run(this.workspace.view, selection.elements as IIsolatable[]);
     }
 }

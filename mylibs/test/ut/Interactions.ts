@@ -52,7 +52,8 @@ function createEventData(x: number, y: number, keys: Partial<KeyboardState> = de
         altKey: keys.altKey,
         ctrlKey: keys.ctrlKey,
         shiftKey: keys.shiftKey,
-        cursor: null
+        cursor: null,
+        view:null
     };
     return data;
 }

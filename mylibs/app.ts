@@ -484,10 +484,6 @@ class AppClass extends DataNode implements IApp {
         return this._syncBroken;
     }
 
-    isolationActive(): boolean {
-        return Environment.view.isolationLayer.isActive;
-    }
-
     isInOfflineMode(value?) {
         if (value !== undefined) {
             if (value) {

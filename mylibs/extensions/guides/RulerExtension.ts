@@ -43,6 +43,7 @@ export default class RulerExtension extends RuntimeExtension {
 
         this._rulerGuides = new RulerGuides(app, view, controller);
         this._viewportRect = null;
+        this.view = view;
     }
 
     detach() {
@@ -181,7 +182,7 @@ export default class RulerExtension extends RuntimeExtension {
     }
 
     checkRefreshCache() {
-        var viewportRect = Environment.view.viewportRect();
+        var viewportRect = this.view.viewportRect();
         if (!this._settings || (this._viewportRect && areRectsEqual(this._viewportRect, viewportRect))) {
             return;
         }
@@ -222,8 +223,8 @@ export default class RulerExtension extends RuntimeExtension {
         context.strokeStyle = "gray";
         this._baseMatrix.applyToContext(context);
 
-        this.drawHorizontal(context, this._viewportSize.width, this._viewportSize.height, Environment.view.scrollX - this._originX, this._originWidth);
-        this.drawVertical(context, this._viewportSize.height, this._viewportSize.width, Environment.view.scrollY - this._originY, this._originHeight);
+        this.drawHorizontal(context, this._viewportSize.width, this._viewportSize.height, this.view.scrollX - this._originX, this._originWidth);
+        this.drawVertical(context, this._viewportSize.height, this._viewportSize.width, this.view.scrollY - this._originY, this._originHeight);
 
         //context.clearRect(0, -PADDING_TOP, config.size, PADDING_TOP + config.size);
 

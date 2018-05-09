@@ -49,7 +49,8 @@ export default class DragController {
             y: e.y,
             altKey: e.altKey,
             ctrlKey: e.ctrlKey,
-            shiftKey: e.shiftKey
+            shiftKey: e.shiftKey,
+            view:e.view
         };
 
         if (this.isDragging) {

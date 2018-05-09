@@ -21,7 +21,6 @@ import { IMouseEventData, KeyboardState, ChangeMode, IIntersectionRange, ResizeD
 import UserSettings from "UserSettings";
 import Cursors from "Cursors";
 import PathManipulationDecorator from "ui/common/path/PathManipulationDecorator";
-import EditPath from "commands/EditPath";
 import ExtensionPoint from "./ExtensionPoint";
 import NullContainer from "framework/NullContainer";
 
