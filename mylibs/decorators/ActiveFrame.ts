@@ -5,6 +5,7 @@ import Cursor from "../framework/Cursor";
 import Invalidate from "../framework/Invalidate";
 import Environment from "../environment";
 import UserSettings from "../UserSettings";
+import { IView } from "carbon-core";
 
 //common code for identifying frame size during resize
 //this supports current behavior when selection frame does not move during resize
@@ -25,7 +26,7 @@ var SelectionFramePrototype = {
 
 
 function updatePosition(that) {
-    that._frameType.updateFromElement(that._frame);
+    that._frameType.updateFromElement(that._frame, that.view);
     Invalidate.requestInteractionOnly();
 };
 
@@ -103,7 +104,7 @@ function onClick(event){
 
 export default class ActiveFrame extends UIElementDecorator {
 
-    constructor() {
+    constructor(private view:IView) {
         super();
         this.margin = 0;
         this._captured = false;
@@ -113,18 +114,17 @@ export default class ActiveFrame extends UIElementDecorator {
     attach(element) {
         UIElementDecorator.prototype.attach.call(this, element);
 
-        var view = Environment.view;
-        if(!view.interactionLayer){
+        if(!this.view.interactionLayer){
             return;
         }
 
         this._element = element;
         this._frameType = element.selectionFrameType();
         this._frame = Object.create(SelectionFramePrototype);
-        Object.assign(this._frame, element.createSelectionFrame(view));
-        this._frameType.updateFromElement(this._frame);
+        Object.assign(this._frame, element.createSelectionFrame(this.view));
+        this._frameType.updateFromElement(this._frame, this.view);
 
-        view.scaleChanged.bind(this, parentChanged);
+        this.view.scaleChanged.bind(this, parentChanged);
 
         this.rect = this.element.getBoundaryRectGlobal();
         this._mouseDownHandler = Environment.controller.mousedownEvent.bindHighPriority(this, onMouseDown);
@@ -136,7 +136,7 @@ export default class ActiveFrame extends UIElementDecorator {
         PropertyTracker.propertyChanged.bind(this, propertyChanged);
 
 
-        this._layerdrawHandler = view.interactionLayer.ondraw.bind(this, this.layerdraw);
+        this._layerdrawHandler = this.view.interactionLayer.ondraw.bind(this, this.layerdraw);
 
         Invalidate.requestInteractionOnly();
 
@@ -147,7 +147,7 @@ export default class ActiveFrame extends UIElementDecorator {
 
     detach() {
         UIElementDecorator.prototype.detach.call(this);
-        var view = Environment.view;
+        var view = this.view;
 
         view.scaleChanged.unbind(this, parentChanged);
 
@@ -163,10 +163,10 @@ export default class ActiveFrame extends UIElementDecorator {
         this._environmentBinding.dispose();
     }
 
-    layerdraw(context) {
+    layerdraw(context, env) {
         if (this.visible){
             context.save();
-            this._frameType.draw(this._frame, context, this._originalPoint);
+            this._frameType.draw(this._frame, context, env, this._originalPoint);
             context.restore();
         }
     }

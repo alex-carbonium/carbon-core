@@ -1,4 +1,4 @@
-import { IUIElement } from "carbon-core";
+import { IUIElement, IView } from "carbon-core";
 
 export default class UIElementDecorator {
 	[x: string]: any;

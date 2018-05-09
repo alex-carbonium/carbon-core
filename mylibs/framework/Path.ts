@@ -422,24 +422,23 @@ class Path extends Shape {
         return this.props.mode;
     }
 
-    enter() {
+    enter({view}) {
         if (this.mode() !== ElementState.Edit) {
-            this.edit();
+            this.edit(view);
         }
     }
 
-    switchToEditMode(edit: boolean) {
-        // if (this._cancelBinding) {
-        //     this._cancelBinding.dispose();
-        // }
+    switchToEditMode(edit: boolean, view?) {
         if (edit) {
-            this.addDecorator(new PathManipulationDecorator());
+            this.addDecorator(new PathManipulationDecorator(view));
 
             scalePointsToNewSize.call(this);
+            this.mode(ElementState.Edit);
             this.save();
         } else {
             // this.unregisterForLayerDraw(LayerTypes.Interaction);
             this.removeDecoratorByType(PathManipulationDecorator)
+            this.mode(ElementState.Resize);
         }
 
         Selection.reselect();
@@ -527,13 +526,13 @@ class Path extends Shape {
         return res && this.mode() !== ElementState.Edit;
     }
 
-    edit() {
-        this.mode(ElementState.Edit);
+    edit(view) {
+        this.switchToEditMode(true, view);
     }
 
     dblclick(event, scale?) {
         if (this.mode() !== ElementState.Edit) {
-            this.edit();
+            this.edit(event.view);
         }
     }
 
@@ -705,10 +704,6 @@ class Path extends Shape {
         super.propsUpdated(newProps, oldProps, mode);
         if (newProps.points !== undefined) {
             this.adjustBoundaries();
-        }
-
-        if (newProps.mode !== undefined && newProps.mode !== oldProps.mode && this.parent !== NullContainer) {
-            this.switchToEditMode(newProps.mode === ElementState.Edit);
         }
     }
 

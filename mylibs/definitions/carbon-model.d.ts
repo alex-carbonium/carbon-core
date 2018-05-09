@@ -1,8 +1,6 @@
-
 declare module "carbon-model" {
     import { IPoint, IRect, ICoordinate, IMatrix, ISize, Origin } from "carbon-geometry";
     import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, ChangeMode, ArtboardType, Font, KeyboardState, ResizeDimension } from "carbon-basics";
-
     import { IContext } from "carbon-rendering";
     import { AnimationProps,IAnimationOptions, Brush, IDisposable, DataBag, TextContent } from "carbon-runtime";
 

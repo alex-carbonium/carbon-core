@@ -95,7 +95,7 @@ export default {
     //TODO: remove
     "BasePlatform": require("./platform/All"),
     "StyleManager": require("./framework/style/StyleManager"),
-    "Selection": require("./framework/SelectionModel"),
+    "Selection": require("./framework/SelectionModel").Selection,
     "QuadAndLock": require("./framework/QuadAndLock"),
     "ActionType": Defs.ActionType,
     "Devices": Defs.Devices,

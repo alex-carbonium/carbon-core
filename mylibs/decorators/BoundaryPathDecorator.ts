@@ -1,7 +1,7 @@
 import UIElementDecorator from "../framework/UIElementDecorator";
 import SharedColors from "../ui/SharedColors";
 import Environment from "../environment";
-import { IContext, IRect, IMatrix, IUIElement, RenderEnvironment } from "carbon-core";
+import { IContext, IRect, IMatrix, IUIElement, RenderEnvironment, IView } from "carbon-core";
 import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
 
 export const enum HighlightKind {
@@ -10,7 +10,7 @@ export const enum HighlightKind {
 }
 
 export default class BoundaryPathDecorator extends UIElementDecorator {
-    constructor(private boundaryPath = false, private kind = HighlightKind.Normal) {
+    constructor(private view:IView, private boundaryPath = false, private kind = HighlightKind.Normal) {
         super();
     }
 
@@ -20,14 +20,14 @@ export default class BoundaryPathDecorator extends UIElementDecorator {
             let context = args[0] as IContext;
             context.beginElement(this.element, args[1] as RenderEnvironment);
 
-            BoundaryPathDecorator.highlight(context, this.element, this.boundaryPath, this.kind);
+            BoundaryPathDecorator.highlight(this.view, context, this.element, this.boundaryPath, this.kind);
 
             context.endElement(this.element);
         }
     }
 
-    static highlight(context, element, boundaryPath = false, highlightKind = HighlightKind.Thick, strokeStyle: string = SharedColors.Highlight) {
-        let scale = Environment.view.scale();
+    static highlight(view, context, element, boundaryPath = false, highlightKind = HighlightKind.Thick, strokeStyle: string = SharedColors.Highlight) {
+        let scale = view.scale();
         context.save();
 
         context.beginPath();

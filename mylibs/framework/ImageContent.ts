@@ -1,7 +1,6 @@
 import Environment from "../environment";
 import UIElement from "./UIElement";
 import DefaultFrameType from "../decorators/DefaultFrameType";
-import ActiveFrame from "../decorators/ActiveFrame";
 import PropertyMetadata from "../framework/PropertyMetadata";
 import {Types} from "../framework/Defs";
 import {ContentSizing} from "carbon-model";

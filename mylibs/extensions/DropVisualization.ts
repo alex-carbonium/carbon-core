@@ -282,15 +282,15 @@ export default class DropVisualization extends ExtensionBase {
         super.detach();
     }
 
-    onLayerDraw(layer, context) {
+    onLayerDraw(layer, context, environment) {
         var target = this._target || this.view['_highlightTarget'];
         if (target) {
-            DropVisualization.highlightElement(context, target, this._isDropTarget, SharedColors.Highlight);
+            DropVisualization.highlightElement(environment.view, context, target, this._isDropTarget, SharedColors.Highlight);
         }
     }
 
-    static highlightElement(context, element, boundaryPath = false, strokeStyle: string = null) {
-        BoundaryPathDecorator.highlight(context, element, boundaryPath, HighlightKind.Thick, strokeStyle);
+    static highlightElement(view, context, element, boundaryPath = false, strokeStyle: string = null) {
+        BoundaryPathDecorator.highlight(view, context, element, boundaryPath, HighlightKind.Thick, strokeStyle);
     }
 
     onDraggingElement(event: IMouseEventData, draggingElement: IComposite) {

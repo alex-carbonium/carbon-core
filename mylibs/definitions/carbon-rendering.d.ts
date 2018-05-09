@@ -1,6 +1,6 @@
 declare module "carbon-rendering" {
     import { IMatrix, IRect } from "carbon-geometry";
-    import { IView, IUIElement, Brush } from "carbon-core";
+    import { IUIElement, Brush } from "carbon-core";
 
     export const enum ContextType {
         Content,

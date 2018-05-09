@@ -534,7 +534,7 @@ export default class TextTool extends Tool {
             context.restore();
         }
         if (this._next) {
-            BoundaryPathDecorator.highlight(context, this._next.element);
+            BoundaryPathDecorator.highlight(this.view(), context, this._next.element);
         }
     }
     _getDrawRect(zone) {

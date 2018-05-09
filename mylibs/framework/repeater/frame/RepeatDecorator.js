@@ -1,11 +1,11 @@
-import {PointDirection, FrameCursors} from "framework/Defs";
+import { PointDirection, FrameCursors } from "framework/Defs";
 import UIElementDecorator from "../../UIElementDecorator";
 
 var LineWidth = 2;
 
 export default class RepeatDecorator extends UIElementDecorator {
     afterInvoke(method, args) {
-        if(method === 'draw') {
+        if (method === 'draw') {
             this.draw(args[0], args[1], args[2], args[3]);
         }
     }

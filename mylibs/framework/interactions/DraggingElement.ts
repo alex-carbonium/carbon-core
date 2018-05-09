@@ -20,13 +20,12 @@ import BoundaryPathDecorator from "../../decorators/BoundaryPathDecorator";
 
 var debug = require("DebugUtil")("carb:draggingElement");
 
-const DraggingDecorator = new BoundaryPathDecorator(true);
-
 export class DraggingElement extends CompositeElement {
     private activeDecorators = [];
     private _capturePoint: IPoint;
     private _initialPosition: IPoint;
     private _translation: Point;
+    private _draggingDecorator:any;
 
     constructor(elementOrComposite, event: IMouseEventData) {
         super();
@@ -43,7 +42,8 @@ export class DraggingElement extends CompositeElement {
         }
 
         this.saveDecorators(elementOrComposite);
-        this.addDecorator(DraggingDecorator);
+        this._draggingDecorator = new BoundaryPathDecorator(event.view, true);
+        this.addDecorator(this._draggingDecorator);
 
         this.performArrange();
 
@@ -98,7 +98,8 @@ export class DraggingElement extends CompositeElement {
 
         SnapController.clearActiveSnapLines();
 
-        this.removeDecorator(DraggingDecorator);
+        this.removeDecorator(this._draggingDecorator);
+        this._draggingDecorator = null;
         this.parent.remove(this, ChangeMode.Self);
 
         if (this._clones) {

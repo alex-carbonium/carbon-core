@@ -1,6 +1,6 @@
 import Container from "framework/Container";
 import Path from "framework/Path";
-import { IIsolatable, ChangeMode, LayerType, ElementState, PointType, IMouseEventHandler, KeyboardState, IMouseEventData, IPathPoint, IDisposable, RenderEnvironment } from "carbon-core";
+import { IIsolatable, ChangeMode, LayerType, ElementState, PointType, IMouseEventHandler, KeyboardState, IMouseEventData, IPathPoint, IDisposable, RenderEnvironment, IView } from "carbon-core";
 import UIElementDecorator from "framework/UIElementDecorator";
 import Environment from "environment";
 import Selection from "framework/SelectionModel";
@@ -95,7 +95,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
     private _selectedPoints: any;
     private _selectFrame: SelectFrame;
 
-    constructor(public constructMode: boolean = false) {
+    constructor(protected view:IView, public constructMode: boolean = false) {
         super();
         this._selectedPoints = {};
     }
@@ -180,14 +180,14 @@ export default class PathManipulationObject extends UIElementDecorator implement
             return; // need it for isolation layer
         }
         super.attach(element);
-        Environment.view.registerForLayerDraw(LayerType.Interaction, this);
+        this.view.registerForLayerDraw(LayerType.Interaction, this);
         Environment.controller.captureMouse(this);
         SnapController.calculateSnappingPointsForPath(this.path);
         this._cancelBinding = Environment.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
         this._startSegmentPoint = this._lastSegmentStartPoint();
         this._selectFrame = new SelectFrame();
         this._selectFrame.onComplete.bind(this, this.onselect);
-        Environment.view.interactionLayer.add(this._selectFrame);
+        this.view.interactionLayer.add(this._selectFrame);
         this._selectFrame.setProps({ visible: false });
         this.path.invalidate();
         Invalidate.requestInteractionOnly();
@@ -214,7 +214,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
             this._cancelBinding = null;
         }
 
-        Environment.view.unregisterForLayerDraw(LayerType.Interaction, this);
+        this.view.unregisterForLayerDraw(LayerType.Interaction, this);
         Environment.controller.releaseMouse(this);
         this.path.invalidate();
         Invalidate.requestInteractionOnly();
@@ -225,7 +225,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
 
         SnapController.clearActiveSnapLines();
 
-        Environment.view.interactionLayer.remove(this._selectFrame);
+        this.view.interactionLayer.remove(this._selectFrame);
         this._selectFrame.onComplete.unbind(this, this.onselect);
 
         super.detach();
@@ -247,7 +247,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
 
     cancel() {
         if (this.element) {
-            this.element.mode(ElementState.Resize);
+            this.element.switchToEditMode(false);
         }
         return false; // stop propagation
     }
@@ -416,7 +416,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
     mousemove(event: IMouseEventData) {
         let pos = { x: event.x, y: event.y };
         let path: Path = this.element;
-        let view = Environment.view;
+        let view = event.view;
 
         if (this._selectFrame.visible) {
             this._selectFrame.update(event);

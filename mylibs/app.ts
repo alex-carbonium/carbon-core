@@ -55,7 +55,6 @@ if (DEBUG) {
 
 var platform = require("platform/Platform");
 var Layer = require("framework/Layer");
-var SelectComposite = require("framework/SelectComposite");
 var SelectFrame = require("framework/SelectFrame");
 var extensions = require("extensions/All");
 var domUtil = require("utils/dom");

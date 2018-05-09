@@ -13,8 +13,6 @@ import BoundaryPathDecorator from "./BoundaryPathDecorator";
 const PointSize = 12
      , PointSize2 = PointSize/2;
 
-const RotateDecorator = new BoundaryPathDecorator(true);
-
 export default {
     PointSize: PointSize,
     PointSize2: PointSize2,
@@ -74,7 +72,8 @@ export default {
         if (frame.element.decorators) {
             frame.element.decorators.forEach(x => x.visible = (false));
         }
-        frame.element.addDecorator(RotateDecorator);
+
+        frame.element.addDecorator(frame.rotateDecorator = new BoundaryPathDecorator(event.view, true));
         Invalidate.request();
     },
     release: function (frame, point, event) {
@@ -83,7 +82,7 @@ export default {
             TransformationHelper.applyPropSnapshot(frame.elements, frame.snapshot, ChangeMode.Self);
             TransformationHelper.applyPropSnapshot(frame.elements, newSnapshot, ChangeMode.Model);
             frame.element.clearSavedLayoutProps();
-            frame.element.removeDecorator(RotateDecorator);
+            frame.element.removeDecorator(frame.rotateDecorator);
             if (frame.element.decorators) {
                 frame.element.decorators.forEach(x => x.visible = (true));
             }

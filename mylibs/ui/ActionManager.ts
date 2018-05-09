@@ -569,7 +569,7 @@ export default class ActionManager implements IActionManager {
         return action.condition(selection);
     }
 
-    invoke(actionName: string, actionArg?: string): Promise<void> {
+    invoke(actionName: string, actionArg?: any): Promise<void> {
         try {
             debug("Invoking %s", actionName);
             let that = this;

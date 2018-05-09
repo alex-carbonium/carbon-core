@@ -156,17 +156,34 @@ export default class Polygon extends Shape {
     dblclick(event: IMouseEventData, scale) {
         if (this.isInEditMode()) {
             if (!this.hitTest(event, scale)) {
-                this.mode(ElementState.Resize);
-                this.releaseMouse(this);
-                Selection.refreshSelection();
+                this.changeMode(false);
             }
         }
         else {
+            this.changeMode(true);
+        }
+        Environment.controller.repeatLastMouseMove();
+    }
+
+    cancel() {
+        this.changeMode(false);
+    }
+
+    changeMode(edit) {
+        if (!edit) {
+            this.mode(ElementState.Resize);
+            this.releaseMouse(this);
+            Selection.refreshSelection();
+            if (this._cancelBinding) {
+                this._cancelBinding.dispose();
+                this._cancelBinding = null;
+            }
+        } else {
             this.mode(ElementState.Edit);
             this.captureMouse(this);
             Selection.refreshSelection();
+            this._cancelBinding = Environment.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
         }
-        Environment.controller.repeatLastMouseMove();
     }
 
     selectionFrameType(): any {

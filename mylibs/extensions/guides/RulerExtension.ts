@@ -3,7 +3,6 @@ import PropertyTracker from "../../framework/PropertyTracker";
 import SnapController from "../../framework/SnapController";
 import UIElement from "../../framework/UIElement";
 import Artboard from "../../framework/Artboard";
-import SelectComposite from "../../framework/SelectComposite";
 import NullArtboard from "../../framework/NullArtboard";
 import Selection from "../../framework/SelectionModel";
 

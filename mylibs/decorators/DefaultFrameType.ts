@@ -1,4 +1,3 @@
-import Environment from "environment";
 import UserSettings from "../UserSettings";
 import { keyboard } from "../platform/Keyboard";
 import Point from "../math/point";
@@ -9,24 +8,24 @@ import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
 export default {
     strokeStyle: UserSettings.frame.stroke,
     fillStyle: UserSettings.frame.prototypingFill,
-    hitPointIndex: function (frame, mousePoint) {
+    hitPointIndex: function (frame, event) {
         if (frame.hasBadTransform) {
             return -1;
         }
 
         var gm = frame.element.globalViewMatrix();
         var gmi = frame.element.globalViewMatrixInverted();
-        var scale = Environment.view.scale();
-        var elementPoint = gmi.transformPoint(mousePoint);
+        var scale = event.view.scale();
+        var elementPoint = gmi.transformPoint(event);
 
         for (var i = frame.points.length - 1; i >= 0; --i) {
             let p = frame.points[i];
-            if (p.visible && !p.visible(p, frame, frame.element.width, frame.element.height, scale* Environment.view.contextScale)) {
+            if (p.visible && !p.visible(p, frame, frame.element.width, frame.element.height, scale * event.view.contextScale)) {
                 continue;
             }
 
             let pt = gm.transformPoint(p);
-            if (p.type.hitTest(frame, mousePoint, pt, elementPoint, scale)) {
+            if (p.type.hitTest(frame, event, pt, elementPoint, scale)) {
                 return i;
             }
         }
@@ -34,7 +33,7 @@ export default {
         return -1;
     },
 
-    updateFromElement: function (frame) {
+    updateFromElement: function (frame, view) {
         frame.hasBadTransform = frame.element.hasBadTransform();
         if (frame.hasBadTransform) {
             return;
@@ -43,7 +42,7 @@ export default {
         var e = frame.element;
         var rect = frame.element.boundaryRect();
         var points = frame.points;
-        var scale = Environment.view.scale();
+        var scale = view.scale();
         for (var i = 0; i < points.length; ++i) {
             var update = points[i].update || points[i].type.update;
             update(points[i], rect.x, rect.y, rect.width, rect.height, e, scale);
@@ -52,7 +51,7 @@ export default {
 
     capturePoint: function (frame, point, event) {
         frame._mousePoint = new Point(event.x, event.y);
-        var scale = Environment.view.scale();
+        var scale = event.view.scale();
 
         var matrix = frame.element.globalViewMatrixInverted();
         frame._capturedPt = matrix.transformPoint(frame._mousePoint);
@@ -60,13 +59,13 @@ export default {
         frame.globalViewMatrixInverted = matrix;
         frame.globalViewMatrix = frame.element.globalViewMatrix();
 
-        point.type.capture(frame, point, frame._mousePoint);
+        point.type.capture(frame, point, event);
 
         frame.keyboardToken = keyboard.changed.bind(this, state => this.movePoint(frame, point, frame._mousePoint, state));
     },
 
     movePoint: function (frame, point, event, keys = keyboard.state) {
-        if(!frame._mousePoint) {
+        if (!frame._mousePoint) {
             return;
         }
         frame._mousePoint.set(event.x, event.y);
@@ -74,7 +73,7 @@ export default {
         var pos = frame._mousePoint;
         var snapPos;
         var px = 0, py = 0;
-        var scale = Environment.view.scale();
+        var scale = event.view.scale();
         if (frame.allowSnapping && !keys.ctrlKey) {
             px = frame._offsetPt.x;
             py = frame._offsetPt.y;
@@ -114,8 +113,8 @@ export default {
         delete frame.globalViewMatrix;
     },
 
-    draw: function (frame, context, currentPoint?) {
-        var scale = Environment.view.scale();
+    draw: function (frame, context, environment, currentPoint?) {
+        var scale = environment.view.scale();
 
         context.save();
         context.scale(1 / scale, 1 / scale);
@@ -153,7 +152,7 @@ export default {
             if (!frame.hasBadTransform) {
                 for (var i = frame.points.length - 1; i >= 0; --i) {
                     var p = frame.points[i];
-                    if (!p.visible || p.visible(p, frame, frame.element.width, frame.element.height, scale * Environment.view.contextScale)) {
+                    if (!p.visible || p.visible(p, frame, frame.element.width, frame.element.height, scale * environment.view.contextScale)) {
                         p.type.draw(p, frame, scale, context, matrix);
                     }
                 }

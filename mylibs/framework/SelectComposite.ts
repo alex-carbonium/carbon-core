@@ -5,7 +5,7 @@ import PropertyMetadata from "./PropertyMetadata";
 import { Types } from "./Defs";
 import ActiveFrame from "../decorators/ActiveFrame";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
-import { ISelectComposite } from "carbon-app";
+import { ISelectComposite, IView } from "carbon-app";
 import { ResizeDimension, IUIElement } from "carbon-core";
 import Invalidate from "./Invalidate";
 
@@ -15,8 +15,8 @@ var SelectCompositeFrame = {
     hitPointIndex: function (frame, point) {
         return DefaultFrameType.hitPointIndex(frame, point);
     },
-    updateFromElement: function (frame) {
-        return DefaultFrameType.updateFromElement(frame);
+    updateFromElement: function (frame, view) {
+        return DefaultFrameType.updateFromElement(frame, view);
     },
 
     capturePoint: function (frame, point, event) {
@@ -28,10 +28,10 @@ var SelectCompositeFrame = {
     releasePoint: function (frame, point, event) {
         DefaultFrameType.releasePoint(frame, point, event);
     },
-    draw: function (frame, context) {
-        DefaultFrameType.draw(frame, context);
+    draw: function (frame, context, env) {
+        DefaultFrameType.draw(frame, context, env);
 
-        var scale = Environment.view.scale();
+        var scale = env.scale;
         context.save();
         context.scale(1 / scale, 1 / scale);
         context.strokeStyle = '#22c1ff';
@@ -52,21 +52,26 @@ var SelectCompositeFrame = {
 };
 
 export default class SelectComposite extends CompositeElement implements ISelectComposite {
-    private _activeFrame = new ActiveFrame();
+    private _activeFrame:ActiveFrame;
     private _activeFrameElement: IUIElement = null;
     private _activeFrameHiddenPermanently = false;
+
+    constructor(protected view:IView) {
+        super();
+        this._activeFrame = new ActiveFrame(view);
+    }
 
     displayName() {
         return "Select composite";
     }
 
     hideActiveFrame(permanent: boolean = false) {
-        this._activeFrame.visible= (false);
+        this._activeFrame.visible = false;
         this._activeFrameHiddenPermanently = permanent;
     }
 
     showActiveFrame() {
-        this._activeFrame.visible = (true);
+        this._activeFrame.visible = true;
         this._activeFrameHiddenPermanently = false;
     }
 
@@ -134,7 +139,7 @@ export default class SelectComposite extends CompositeElement implements ISelect
         }
     }
     unregisterAll() {
-        for (let i = 0; i < this.children.length; ++i){
+        for (let i = 0; i < this.children.length; ++i) {
             let element = this.children[i];
             element.unselect();
             this.removeActiveFrame(element);
@@ -171,22 +176,22 @@ export default class SelectComposite extends CompositeElement implements ISelect
         }
     }
 
-    previewDisplayProps(changes){
+    previewDisplayProps(changes) {
         this.restoreLastGoodTransformIfNeeded();
         var affectingLayout = super.previewDisplayProps(changes);
-        if (affectingLayout){
+        if (affectingLayout) {
             this.hideActiveFrame();
         }
         return affectingLayout;
     }
 
-    updateDisplayProps(changes){
+    updateDisplayProps(changes) {
         var hadBadTransform = this.hasBadTransform();
         this.restoreLastGoodTransformIfNeeded();
         super.updateDisplayProps(changes);
         var hasBadTransform = this.hasBadTransform();
 
-        if (hadBadTransform || hasBadTransform){
+        if (hadBadTransform || hasBadTransform) {
             this.showActiveFrame();
         }
     }

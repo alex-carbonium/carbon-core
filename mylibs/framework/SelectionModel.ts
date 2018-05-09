@@ -1,9 +1,9 @@
 import EventHelper from "./EventHelper";
 import SelectComposite from "./SelectComposite";
-import {SelectFrame} from "./SelectFrame";
+import { SelectFrame } from "./SelectFrame";
 import UserSettings from "../UserSettings";
 import Environment from "../environment";
-import { ISelection, IEvent, IEvent2, IUIElement, IComposite, IEvent3, SelectionMode, KeyboardState, ISelectComposite, IRect } from "carbon-core";
+import { ISelection, IEvent, IEvent2, IUIElement, IComposite, IEvent3, SelectionMode, KeyboardState, ISelectComposite, IRect, IView, IUIElementProps } from "carbon-core";
 import Rect from "../math/rect";
 import ArrayPool from "./ArrayPool";
 import UIElement from "./UIElement";
@@ -55,34 +55,38 @@ function lockUnlockGroups(newSelectedElements) {
 function onselect(rect) {
     let selection = App.Current.activePage.getElementsInRect(rect);
 
-    Selection.makeSelection(selection);
+    this.makeSelection(selection);
 }
 
-class SelectionModel implements ISelection {
+export class SelectionModel implements ISelection {
     [name: string]: any;
     private _activeGroup: any;
     private _previousElements: IUIElement[] = ArrayPool.EmptyArray;
     private _selectionMode: SelectionMode = "new";
     private _selectCompositeElement: SelectComposite;
-    private _propertyComposite = new SelectComposite();
+    private _propertyComposite: SelectComposite;
     private _selectFrame = new SelectFrame();
     private _selectFrameStarted = false;
+    private view: IView;
 
     latestGlobalBoundingBox: IRect = Rect.Zero;
     modeChangedEvent: IEvent<boolean>;
     onElementSelected: IEvent3<ISelectComposite, IUIElement[], boolean>;
-    propertiesRequested = EventHelper.createEvent<ISelectComposite>();
+    propertiesRequested:IEvent<ISelectComposite>;
 
-    constructor() {
+    constructor(view: IView) {
         this._unlockedContainers = ArrayPool.EmptyArray;
         this._activeGroup = null;
-        this.onElementSelected = EventHelper.createEvent3<ISelectComposite, IUIElement[], boolean>();
-        this.startSelectionFrameEvent = EventHelper.createEvent();
-        this.onSelectionFrameEvent = EventHelper.createEvent();
-        this.stopSelectionFrameEvent = EventHelper.createEvent();
-        this.modeChangedEvent = EventHelper.createEvent();
+        this.onElementSelected = selectionImpl.onElementSelected;
+        this.startSelectionFrameEvent = selectionImpl.startSelectionFrameEvent;
+        this.onSelectionFrameEvent = selectionImpl.onSelectionFrameEvent;
+        this.stopSelectionFrameEvent = selectionImpl.stopSelectionFrameEvent;
+        this.modeChangedEvent = selectionImpl.modeChangedEvent;
+        this.propertiesRequested = selectionImpl.propertiesRequested;
+        this.view = view;
 
-        this._selectCompositeElement = new SelectComposite();
+        this._selectCompositeElement = new SelectComposite(view);
+        this._propertyComposite = new SelectComposite(view);
 
         this._directSelectionEnabled = false;
         this._invertDirectSelection = false;
@@ -132,14 +136,14 @@ class SelectionModel implements ISelection {
     }
 
     completeSelectFrame(eventData) {
-        Selection.selectFrame.parent.remove(Selection.selectFrame);
+        this.selectFrame.parent.remove(this.selectFrame);
         this._selectFrameStarted = false;
         this.stopSelectionFrameEvent.raise();
         this._selectFrame.complete(eventData);
     }
 
     cancelSelectFrame() {
-        Selection.selectFrame.parent.remove(Selection.selectFrame);
+        this.selectFrame.parent.remove(this.selectFrame);
         this._selectFrameStarted = false;
         this.stopSelectionFrameEvent.raise();
     }
@@ -253,36 +257,10 @@ class SelectionModel implements ISelection {
         this.makeSelection(selection, "new", false, true);
     }
 
-    private onSelectionMade(doNotTrack = false) {
-        lockUnlockGroups.call(this, this.selectedElements());
-        this.calculateGlobalBoundingBox();
-
-        this.onElementSelected.raise(this._selectCompositeElement, this._previousElements, doNotTrack);
-
-        this._propertyComposite.unregisterAll();
-        this.propertiesRequested.raise(this._selectCompositeElement);
-    }
-
     requestProperties(elements: IUIElement[]) {
         this._propertyComposite.unregisterAll();
         this._propertyComposite.registerAll(elements);
         this.propertiesRequested.raise(this._propertyComposite);
-    }
-
-    private calculateGlobalBoundingBox() {
-        if (this.elements.length) {
-            this.latestGlobalBoundingBox = UIElement.getCombinedBoundingBoxGlobal(this.elements);
-        }
-    }
-
-    private unselectAll(refreshOnly = false) {
-        if (!refreshOnly) {
-            this._previousElements = this.elements;
-        }
-
-        let count = this._selectCompositeElement.count();
-        this._selectCompositeElement.unregisterAll();
-        return count !== 0;
     }
 
     clearSelection(doNotTrack: boolean = false) {
@@ -324,11 +302,11 @@ class SelectionModel implements ISelection {
         return this._selectFrameStarted;
     }
 
-    useInCode(value:boolean) {
+    useInCode(value: boolean) {
         let elements = this.selectedElements();
         for (let i = 0; i < elements.length; i++) {
             let e = elements[i];
-            e.prepareAndSetProps({useInCode:value})
+            e.prepareAndSetProps({ useInCode: value })
         }
     }
 
@@ -381,6 +359,32 @@ class SelectionModel implements ISelection {
         this._selectCompositeElement.showActiveFrame();
     }
 
+    private calculateGlobalBoundingBox() {
+        if (this.elements.length) {
+            this.latestGlobalBoundingBox = UIElement.getCombinedBoundingBoxGlobal(this.elements);
+        }
+    }
+
+    private onSelectionMade(doNotTrack = false) {
+        lockUnlockGroups.call(this, this.selectedElements());
+        this.calculateGlobalBoundingBox();
+
+        this.onElementSelected.raise(this._selectCompositeElement, this._previousElements, doNotTrack);
+
+        this._propertyComposite.unregisterAll();
+        this.propertiesRequested.raise(this._selectCompositeElement);
+    }
+
+    private unselectAll(refreshOnly = false) {
+        if (!refreshOnly) {
+            this._previousElements = this.elements;
+        }
+
+        let count = this._selectCompositeElement.count();
+        this._selectCompositeElement.unregisterAll();
+        return count !== 0;
+    }
+
     private areSameArrays(array1, array2) {
         if (array1.length !== array2.length) {
             return false;
@@ -404,6 +408,240 @@ class SelectionModel implements ISelection {
     }
 }
 
-let Selection = new SelectionModel();
+let currentSelection;
 
+export function setSelection(selection) {
+    currentSelection = selection;
+}
+
+const EmptyComposite = new SelectComposite(null);
+
+class SelectionImpl implements ISelection {
+    [any: string]: any;
+    constructor() {
+        this.onElementSelected = EventHelper.createEvent3<ISelectComposite, IUIElement[], boolean>();
+        this.startSelectionFrameEvent = EventHelper.createEvent();
+        this.onSelectionFrameEvent = EventHelper.createEvent();
+        this.stopSelectionFrameEvent = EventHelper.createEvent();
+        this.modeChangedEvent = EventHelper.createEvent();
+    }
+    get elements(): IUIElement[] {
+        if (!currentSelection) {
+            return [];
+        }
+
+        return currentSelection.elements;
+    }
+    get previousElements(): IUIElement[] {
+        if (!currentSelection) {
+            return [];
+        }
+
+        return currentSelection.previousElements;
+    }
+    get latestGlobalBoundingBox(): IRect {
+        if (!currentSelection) {
+            return Rect.Zero;
+        }
+
+        return currentSelection.latestGlobalBoundingBox;
+    }
+
+    get selectFrame() {
+        if (!currentSelection) {
+            return null;
+        }
+
+        return currentSelection.selectFrame;
+    }
+
+    makeSelection(elements: any[], mode?: SelectionMode, refreshOnly?, doNotTrack?) {
+        if (currentSelection) {
+            return currentSelection.makeSelection.apply(currentSelection, arguments);
+        }
+    }
+
+    getSelectionMode(keys: KeyboardState, extended: boolean): SelectionMode {
+        if (currentSelection) {
+            return currentSelection.getSelectionMode.apply(currentSelection, arguments);
+        }
+    }
+    requestProperties(elements: IUIElement[]) {
+        if (currentSelection) {
+            return currentSelection.requestProperties.apply(currentSelection, arguments);
+        }
+    }
+    selectComposite(): SelectComposite {
+        if (currentSelection) {
+            return currentSelection.selectComposite();
+        }
+
+        return EmptyComposite;
+    }
+    clearSelection(doNotTrack?: boolean) {
+        if (currentSelection) {
+            return currentSelection.clearSelection(doNotTrack);
+        }
+    }
+    get view() {
+        if (currentSelection) {
+            return currentSelection.view;
+        }
+    }
+    refreshSelection(elements?: IUIElement[], raiseEvents?: boolean) {
+        if (currentSelection) {
+            return currentSelection.refreshSelection.apply(currentSelection, arguments);
+        }
+    }
+    isElementSelected(element: IUIElement): boolean {
+        if (currentSelection) {
+            return currentSelection.isElementSelected.apply(currentSelection, arguments);
+        }
+
+        return false;
+    }
+    lock() {
+        if (currentSelection) {
+            return currentSelection.lock();
+        }
+    }
+    unlock() {
+        if (currentSelection) {
+            return currentSelection.unlock();
+        }
+    }
+    show() {
+        if (currentSelection) {
+            return currentSelection.show();
+        }
+    }
+    hide() {
+        if (currentSelection) {
+            return currentSelection.hide();
+        }
+    }
+    useInCode(value: boolean) {
+        if (currentSelection) {
+            return currentSelection.useInCode(value);
+        }
+    }
+
+    invertDirectSelection(value) {
+        if (currentSelection) {
+            return currentSelection.invertDirectSelection.apply(currentSelection, arguments);
+        }
+    }
+
+
+    directSelectionEnabled(value?: boolean) {
+        if (currentSelection) {
+            return currentSelection.directSelectionEnabled.apply(currentSelection, arguments);
+        }
+    }
+
+    startSelectFrame(eventData) {
+        if (currentSelection) {
+            return currentSelection.startSelectFrame.apply(currentSelection, arguments);
+        }
+    }
+
+    updateSelectFrame(eventData) {
+        if (currentSelection) {
+            return currentSelection.updateSelectFrame.apply(currentSelection, arguments);
+        }
+    }
+
+    completeSelectFrame(eventData) {
+        if (currentSelection) {
+            return currentSelection.completeSelectFrame.apply(currentSelection, arguments);
+        }
+    }
+
+    cancelSelectFrame() {
+        if (currentSelection) {
+            return currentSelection.cancelSelectFrame.apply(currentSelection, arguments);
+        }
+    }
+
+    areSelected(elements: IUIElement[]) {
+        if (currentSelection) {
+            return currentSelection.areSelected.apply(currentSelection, arguments);
+        }
+    }
+
+    isOnlyElementSelected(el) {
+        if (currentSelection) {
+            return currentSelection.isOnlyElementSelected.apply(currentSelection, arguments);
+        }
+    }
+
+    count() {
+        if (currentSelection) {
+            return currentSelection.count.apply(currentSelection, arguments);
+        }
+    }
+
+    selectedElement() {
+        if (currentSelection) {
+            return currentSelection.selectedElement.apply(currentSelection, arguments);
+        }
+    }
+
+    getSelection(): IUIElement[] {
+        if (currentSelection) {
+            return currentSelection.getSelection.apply(currentSelection, arguments);
+        }
+    }
+
+    selectedElements() {
+        if (currentSelection) {
+            return currentSelection.selectedElements.apply(currentSelection, arguments);
+        }
+    }
+
+    reselect(selection: IUIElement[] = this.selectedElements()) {
+        if (currentSelection) {
+            return currentSelection.reselect.apply(currentSelection, arguments);
+        }
+    }
+
+    clear() {
+        if (currentSelection) {
+            return currentSelection.clear.apply(currentSelection, arguments);
+        }
+    }
+
+    selectAll() {
+        if (currentSelection) {
+            return currentSelection.selectAll.apply(currentSelection, arguments);
+        }
+    }
+
+    hasSelectionFrame() {
+        if (currentSelection) {
+            return currentSelection.hasSelectionFrame.apply(currentSelection, arguments);
+        }
+    }
+
+    hideFrame(permanent = false) {
+        if (currentSelection) {
+            return currentSelection.hideFrame.apply(currentSelection, arguments);
+        }
+    }
+
+    showFrame() {
+        if (currentSelection) {
+            return currentSelection.showFrame.apply(currentSelection, arguments);
+        }
+    }
+
+    modeChangedEvent: IEvent<boolean>;
+    onElementSelected: IEvent3<ISelectComposite, IUIElement[], boolean>;
+    propertiesRequested = EventHelper.createEvent<ISelectComposite>();
+}
+
+// selection now make sense only in the context of a view, so add this temporary wrapper until
+// global usage of Selection is not removed
+const selectionImpl = new SelectionImpl();
+export const Selection = selectionImpl;
 export default Selection;

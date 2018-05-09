@@ -2,7 +2,7 @@ import { areRectsIntersecting } from "math/math";
 import Font from "./Font";
 import Brush from "./Brush";
 import ViewBase from "framework/ViewBase";
-import SelectionModel from "./SelectionModel";
+import {SelectionModel, setSelection} from "./SelectionModel";
 import Cursor from "framework/Cursor";
 import Invalidate from "framework/Invalidate";
 import PixelGrid from "framework/render/PixelGrid"
@@ -22,13 +22,18 @@ function setupLayers(Layer) {
 
     this._registerLayer(this.isolationLayer);
     this._registerLayer(this.interactionLayer);
-    this.interactionLayer.add(SelectionModel.selectComposite()); // TODO: think how to cut this dependency
+    this.interactionLayer.add(this.selection.selectComposite()); // TODO: think how to cut this dependency
     this.interactionLayer.context = this.upperContext;
 }
 
 class DesignerView extends ViewBase {
+    protected selection:SelectionModel;
+
     constructor(app) {
         super(app);
+
+        this.selection = new SelectionModel(this as any);
+        setSelection(this.selection);
 
         this.guideFont = Font.createFromObject({
             family: "Arial",

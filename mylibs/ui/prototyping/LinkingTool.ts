@@ -948,9 +948,9 @@ export default class LinkingTool extends Tool {
         if (this._mousepressed && this._currentPoint) {
             // render new (dragging) arrow
             this._renderNewArrow(context, scale);
-            this._target && DropVisualization.highlightElement(context, this._target, null, HoverLinkColor);
+            this._target && DropVisualization.highlightElement(this.view(), context, this._target, null, HoverLinkColor);
         } else if (this._target) {
-            DropVisualization.highlightElement(context, this._target, null, DefaultLinkColor);
+            DropVisualization.highlightElement(this.view(), context, this._target, null, DefaultLinkColor);
         }
 
         if (this.connections.length) {

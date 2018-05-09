@@ -5,7 +5,7 @@ import ContextPool from "framework/render/ContextPool";
 import EventHelper from "framework/EventHelper";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
-import { LayerType, IView, IAnimationController, ILayer, IUIElement, ViewState, IEvent, ICoordinate, IContext, ISize, IRect, IPoint, RenderEnvironment, RenderFlags, ChangeMode, IArtboard, Origin } from "carbon-core";
+import { LayerType, IView, IAnimationController, ILayer, IUIElement, ViewState, IEvent, ICoordinate, IContext, ISize, IRect, IPoint, RenderEnvironment, RenderFlags, ChangeMode, IArtboard, Origin, IIsolationLayer } from "carbon-core";
 import Rect from "../math/rect";
 import AnimationGroup from "./animation/AnimationGroup";
 import Context from "./render/Context";
@@ -71,8 +71,20 @@ function onZoomChanged(value, oldValue) {
 }
 
 
-export default class ViewBase { //TODO: implement IView
+export default class ViewBase implements IView {
+    gridContext: IContext;
+    interactionLayer: any;
+    scaleMatrix: any;
+    context: any;
+    isolationLayer:IIsolationLayer;
+    attachToDOM(contexts: IContext[], container: any, redrawCallback: any, cancelCallback: any, scheduledCallback: any) {
+        throw new Error("Method not implemented.");
+    }
+    applyGuideFont(context: IContext): void {
+        throw new Error("Method not implemented.");
+    }
     [name: string]: any;
+    public _highlightTarget: any = null;
     //TODO: move to platform
     viewContainerElement: HTMLElement;
     animationController: AnimationController;
@@ -88,6 +100,10 @@ export default class ViewBase { //TODO: implement IView
     private _viewState: ViewState = { scale: 0, sx: 0, sy: 0 };
     private _viewportRect = Rect.Zero;
     private _viewportSize = Rect.Zero;
+
+    showPixelGrid(value?: boolean): boolean {
+        return false;
+    }
 
     constructor(app) {
         this._registredForLayerDraw = [[], [], []];
@@ -190,7 +206,8 @@ export default class ViewBase { //TODO: implement IView
                     setupLayerHandler(context);
                 },
                 fill: null,
-                stroke: null
+                stroke: null,
+                view: this
             };
         }
 
@@ -554,7 +571,7 @@ export default class ViewBase { //TODO: implement IView
 
         value = ~~value;
         if (page.scrollY !== value) {
-            page.scrollY =(value);
+            page.scrollY = (value);
             this.invalidate();
 
             this.raiseViewStateChanged();

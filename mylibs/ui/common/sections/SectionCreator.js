@@ -52,7 +52,7 @@ export default class SectionCreator extends Tool {
         this._detachDecorator();
         var element = selection.singleOrDefault();
         if (element && (element instanceof Artboard || element instanceof Section)) {
-            this._attachDecorator(element);
+            this._attachDecorator(selection.view, element);
         }
     }
 
@@ -100,13 +100,13 @@ export default class SectionCreator extends Tool {
         if (decorator) {
             var element = decorator.element;
             this._detachDecorator();
-            this._attachDecorator(element);
+            this._attachDecorator(view, element);
         }
     }
 
-    _attachDecorator(element) {
+    _attachDecorator(view, element) {
         decorator = new SectionDecorator();
-        decorator.attach(element, this._view.scale());
+        decorator.attach(view, element, this._view.scale());
     }
 
     _detachDecorator() {

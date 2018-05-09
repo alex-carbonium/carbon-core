@@ -287,7 +287,7 @@ declare module "carbon-app" {
         activeLayerChanged: IEvent<ILayer>;
 
         viewState: ViewState;
-        viewStateChanged: IEvent2<ViewState, ViewState>;
+        viewStateChanged: IEvent<ViewState>;
         isAtViewState(state: ViewState): boolean;
         changeViewState(viewState: ViewState, silent?: boolean);
 
@@ -434,7 +434,7 @@ declare module "carbon-app" {
         id: string;
         name: string;
         icon?: string;
-        callback: (selection: ISelection, arg?: string) => any; //TODO: replace with void when action do not return commands
+        callback: (selection: ISelection, arg?: any) => any; //TODO: replace with void when action do not return commands
         condition?: (selection: ISelection) => boolean;
     }
 
@@ -447,7 +447,7 @@ declare module "carbon-app" {
         actionPerformed: IEvent<any>;
 
         isEnabled(action:string, selection:ISelection):boolean;
-        invoke(action: string, actionArg?: string): Promise<void>;
+        invoke(action: string, actionArg?: any): Promise<void>;
         subscribe(action: string, cb: (action: string, result: any) => void):IDisposable;
         registerAction(name: string, description: string, category: string, callback: (selection?: ISelection, arg?: string) => any): IAction;
 

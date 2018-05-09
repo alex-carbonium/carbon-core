@@ -15,7 +15,6 @@ var debug = require("DebugUtil")("carb:resizeFramePoint");
 const PointSize = 6
     , PointSize2 = 3.5;
 
-const ResizeDecorator = new BoundaryPathDecorator(true);
 
 export default {
     cursorSet: FrameCursors,
@@ -75,7 +74,7 @@ export default {
             frame.element.decorators.forEach(x => x.visible = (false));
         }
 
-        frame.element.addDecorator(ResizeDecorator);
+        frame.element.addDecorator(frame.resizeDecorator = new BoundaryPathDecorator(event.view, true));
         frame.element.invalidate();
     },
     release: function (frame, point, event: IMouseEventData) {
@@ -90,7 +89,7 @@ export default {
             frame.element.clearSavedLayoutProps();
             delete frame.globalViewMatrix;
             delete frame.viewMatrix;
-            frame.element.removeDecorator(ResizeDecorator);
+            frame.element.removeDecorator(frame.resizeDecorator);
             if (frame.element.decorators) {
                 frame.element.decorators.forEach(x => x.visible = (true));
             }
