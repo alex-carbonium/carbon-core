@@ -72,7 +72,7 @@ function onZoomChanged(value, oldValue) {
 
 
 export default class ViewBase implements IView {
-    gridContext: IContext;
+    gridContext: IContext;f
     interactionLayer: any;
     scaleMatrix: any;
     context: any;
@@ -205,6 +205,7 @@ export default class ViewBase implements IView {
                 setupContext: function (context) {
                     setupLayerHandler(context);
                 },
+                scaleMatrix:this.scaleMatrix,
                 fill: null,
                 stroke: null,
                 view: this

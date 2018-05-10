@@ -39,7 +39,7 @@ var SelectCompositeFrame = {
         context.setLineDash([1, 1]);
         context.beginPath();
 
-        GlobalMatrixModifier.pushPrependScale()
+        GlobalMatrixModifier.pushPrependScale(env.scaleMatrix)
         try {
             frame.element.each(e => e.drawBoundaryPath(context));
         }

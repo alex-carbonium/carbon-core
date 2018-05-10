@@ -218,7 +218,7 @@ export default class LinkingTool extends Tool {
 
     _linkToArtboard(point) {
         var page = this._app.activePage;
-        var targetArgtboard = page.getArtboardAtPoint(point);
+        var targetArgtboard = page.getArtboardAtPoint(point, this.view().scale());
         var activeStory = this._activeStory;
         if (!activeStory) {
             return;
@@ -437,7 +437,7 @@ export default class LinkingTool extends Tool {
                 if (page) {
                     var artboard = page.findNodeByIdBreadthFirst(this._activeStory.props.homeScreen[1]);
                     if (artboard) {
-                        Environment.view.ensureCentered([artboard]);
+                        this.view().ensureCentered([artboard]);
                     }
                 }
             }
@@ -941,9 +941,9 @@ export default class LinkingTool extends Tool {
         }
 
         context.save();
-        var scale = this._view.scale();
         var view = this._view;
-        this._viewport = Environment.view.viewportRect();
+        var scale = view.scale();
+        this._viewport = view.viewportRect();
 
         if (this._mousepressed && this._currentPoint) {
             // render new (dragging) arrow

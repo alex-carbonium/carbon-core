@@ -63,7 +63,7 @@ export default class ArtboardsTool extends Tool {
             return true;
         }
 
-        var artboard = this._app.activePage.getArtboardAtPoint(event);
+        var artboard = this._app.activePage.getArtboardAtPoint(event, event.view.scale());
         if (artboard) {
             return true;
         }
@@ -141,7 +141,7 @@ export default class ArtboardsTool extends Tool {
     }
 
     click(event: IMouseEventData) {
-        let artboard = this._app.activePage.getArtboardAtPoint(event);
+        let artboard = this._app.activePage.getArtboardAtPoint(event, event.view.scale());
         if (!Selection.isElementSelected(artboard)) {
             this._selectByClick(event);
         }
@@ -158,7 +158,7 @@ export default class ArtboardsTool extends Tool {
             return true;
         }
 
-        var artboard = this._app.activePage.getArtboardAtPoint(event);
+        var artboard = this._app.activePage.getArtboardAtPoint(event, event.view.scale());
         if (!artboard || artboard === this._element) {
             event.cursor = Cursors.ArtboardTool;
         }
@@ -218,7 +218,7 @@ export default class ArtboardsTool extends Tool {
     }
 
     _selectByClick(event: IMouseEventData) {
-        var artboard = this._app.activePage.getArtboardAtPoint(event);
+        var artboard = this._app.activePage.getArtboardAtPoint(event, event.view.scale());
         if (artboard !== null) {
             let mode = Selection.getSelectionMode(event, false);
             Selection.makeSelection([artboard], mode);

@@ -38,7 +38,7 @@ export default class BoundaryPathDecorator extends UIElementDecorator {
             context.lineWidth = highlightKind / scale;
         }
         else {
-            GlobalMatrixModifier.pushPrependScale();
+            GlobalMatrixModifier.pushPrependScale(view.scaleMatrix);
             try {
                 context.scale(1 / scale, 1 / scale);
                 BoundaryPathDecorator.drawBoundaryPath(context, element);

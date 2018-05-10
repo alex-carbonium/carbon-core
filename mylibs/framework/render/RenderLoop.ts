@@ -75,6 +75,10 @@ export default class RenderLoop implements IRenderLoop {
         return this._attached;
     }
 
+    get view() {
+        return this._view;
+    }
+
     private addDesignerHtml(viewport: HTMLElement, append: boolean) {
         let viewContainer = document.createElement("div");
         viewContainer.id = "viewContainer";

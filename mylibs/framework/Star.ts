@@ -12,10 +12,10 @@ import { IStar } from "carbon-core";
 
 let StarFrameType = {
     cursorSet: FrameCursors,
-    draw: function (frame, context, currentPoint) {
+    draw: function (frame, context, environment, currentPoint) {
         let external = frame.element.radius();
         let internal = frame.element.internalRadius();
-        let scale = Environment.view.scale();
+        let scale = environment.scale;
 
         context.save();
         context.scale(1 / scale, 1 / scale);

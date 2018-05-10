@@ -17,12 +17,12 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
     private clippingParent: IUIElement = null;
     private tokens: IDisposable[] = [];
 
-    constructor() {
+    constructor(private view) {
         super();
 
         App.Current.actionManager.subscribe("exitisolation", () => {
             var element = this.ownerElement;
-            Environment.view.deactivateLayer(LayerType.Isolation);
+            view.deactivateLayer(LayerType.Isolation);
             if (element) {
                 Selection.reselect([element]);
             }
@@ -35,7 +35,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
                 let editingPath = selection.length === 1 && selection[0] instanceof Path && selection[0].mode() === ElementState.Edit;
 
                 if (!editingPath) {
-                    Environment.view.deactivateLayer(LayerType.Isolation);
+                    view.deactivateLayer(LayerType.Isolation);
                 }
             }
 
@@ -58,7 +58,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
 
     isolateGroup(owner: IIsolatable, clippingParent: IUIElement = null): void {
         if (this.ownerElement) {
-            Environment.view.deactivateLayer(this.type, true);
+            this.view.deactivateLayer(this.type, true);
         }
 
         this.clippingParent = clippingParent;
@@ -80,7 +80,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         this.tokens.push(RelayoutEngine.rootRelayoutFinished.bind(this, this.onRootRelayoutFinished));
         this.tokens.push(RelayoutEngine.relayoutFinished.bind(this, this.onRelayoutFinished));
 
-        Environment.view.activateLayer(this.type);
+        this.view.activateLayer(this.type);
         setTimeout(()=>Selection.clearSelection(true), 0);
     }
 
@@ -90,7 +90,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
 
     isolateObject(object: IIsolatable): void {
         if (this.ownerElement) {
-            Environment.view.deactivateLayer(this.type, true);
+            this.view.deactivateLayer(this.type, true);
         }
 
 
@@ -105,7 +105,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         this.tokens.push(App.Current.relayoutFinished.bind(this, this.onRelayoutFinished));
         Selection.clearSelection(true);
 
-        Environment.view.activateLayer(this.type);
+        this.view.activateLayer(this.type);
     }
 
     deactivate(): void {
@@ -133,7 +133,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
             // owner element can be removed, we need to exit isolation mode if that happens
             let parent = this.ownerElement.parent;
             if (parent === NullContainer) {
-                Environment.view.deactivateLayer(this.type);
+                this.view.deactivateLayer(this.type);
             }
         }
     }

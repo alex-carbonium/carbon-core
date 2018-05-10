@@ -32,7 +32,7 @@ export default class PolygonTool extends ElementDropTool {
             context.scale(1 / scale, 1 / scale);
 
             context.beginPath();
-            GlobalMatrixModifier.pushPrependScale();
+            GlobalMatrixModifier.pushPrependScale(environment.scaleMatrix);
             this.element.drawBoundaryPath(context);
             GlobalMatrixModifier.pop();
 

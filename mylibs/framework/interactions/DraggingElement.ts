@@ -52,8 +52,8 @@ export class DraggingElement extends CompositeElement {
         this._translation = new Point(0, 0);
 
         let snappingTarget = elementOrComposite.first().parent.primitiveRoot()
-            || Environment.view.page.getActiveArtboard()
-            || Environment.view.page;
+            || event.view.page.getActiveArtboard()
+            || event.view.page;
 
         this._snappingTarget = snappingTarget;
 
@@ -280,8 +280,8 @@ export class DraggingElement extends CompositeElement {
             var newTarget = draggingOverElement;
             if(!(draggingOverElement instanceof Artboard)) {
                 newTarget = draggingOverElement.parent.primitiveRoot()
-                    || Environment.view.page.getActiveArtboard()
-                    || Environment.view.page;
+                    || event.view.page.getActiveArtboard()
+                    || event.view.page;
             }
 
             if(this._snappingTarget !== newTarget) {

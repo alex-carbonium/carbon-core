@@ -4,7 +4,6 @@ import GroupContainer from "framework/GroupContainer";
 import Symbol from "../framework/Symbol";
 import Artboard from "../framework/Artboard";
 import CompoundPath from "framework/CompoundPath";
-import Environment from "environment";
 import Path from "framework/Path";
 import CoreIntl from "../CoreIntl";
 import { ContextBarPosition, IActionManager, IView, IApp, ElementState, IComposite } from "carbon-core";
@@ -13,8 +12,8 @@ import { RepeaterActions } from "../framework/repeater/RepeaterActions";
 import ImageContent from "../framework/ImageContent";
 import ArtboardFrameControl from "../framework/ArtboardFrame";
 
-function findItemsToSelect(app, eventData) {
-    let elements = app.activePage.hitElements(eventData, Environment.view.scale())
+function findItemsToSelect(app, view, eventData) {
+    let elements = app.activePage.hitElements(eventData, view.scale())
     return elements.map(itemSelector)
 };
 
@@ -65,7 +64,7 @@ function canConvertToPath(selection) {
 }
 
 export default class ContextMenuBuilder {
-    static build(app: IApp, context, menu) {
+    static build(app: IApp, view:IView, context, menu) {
         let selectComposite = context.selectComposite as IComposite;
         let selection = selectComposite.elements;
         let actionManager = app.actionManager;
@@ -91,7 +90,7 @@ export default class ContextMenuBuilder {
             return
         }
 
-        if(Environment.view.isolationLayer.isActive && !context.eventData) {
+        if(view.isolationLayer.isActive && !context.eventData) {
             items.push({
                 name: "@action.exitisolation",
                 contextBar: ContextBarPosition.Left | ContextBarPosition.Only,
@@ -100,7 +99,7 @@ export default class ContextMenuBuilder {
         }
 
         if (context.eventData) {
-            let itemsToSelect = findItemsToSelect(app, context.eventData)
+            let itemsToSelect = findItemsToSelect(app, view, context.eventData)
             if (itemsToSelect.length) {
                 items.push({
                     name: "@select",

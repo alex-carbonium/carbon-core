@@ -33,7 +33,7 @@ export default class ZoomTool extends Tool {
     }
 
     onZoomRect(rect, keyboardState) {
-        let view = Environment.view;
+        let view = this.view();
         let scale = view.getScaleToFitRect(rect, 1);
         view.scale(scale);
 

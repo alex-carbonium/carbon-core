@@ -94,7 +94,7 @@ export default class ElementDropTool extends Tool {
 
             Environment.controller.raiseInteractionStopped(InteractionType.Resizing, event);
 
-            Environment.view.dropElement(this._element);
+            this.view().dropElement(this._element);
 
             let artboard = this._element.findAncestorOfType(Artboard);
             if (artboard) {
@@ -118,7 +118,7 @@ export default class ElementDropTool extends Tool {
 
         this._prepareMousePoint(event);
 
-        var artboard = App.Current.activePage.getArtboardAtPoint(event);
+        var artboard = App.Current.activePage.getArtboardAtPoint(event, event.view.scale());
         if (artboard !== this._hoverArtboard) {
             this._hoverArtboard = artboard;
             if (artboard) {

@@ -15,7 +15,7 @@ function setupLayers(Layer) {
     this.interactionLayer.type = LayerType.Interaction;
     this.interactionLayer.hitTransparent(true);
 
-    this.isolationLayer = new IsolationLayer();
+    this.isolationLayer = new IsolationLayer(this);
     this.isolationLayer.type = LayerType.Isolation;
     this.isolationLayer.hitTransparent(true);
     this.isolationLayer.context = this.isolationContext;

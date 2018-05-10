@@ -92,7 +92,7 @@ export default class LineCreator extends Tool {
             }
 
             this._element.applyTranslation(pos);
-            Environment.view.dropElement(this._element);
+            this.view().dropElement(this._element);
             var element = this._element;
             Invalidate.request();
             Selection.makeSelection([element]);
@@ -108,7 +108,7 @@ export default class LineCreator extends Tool {
             event.cursor = Cursors.Pen.Line;
         }
 
-        var artboard = App.Current.activePage.getArtboardAtPoint(event);
+        var artboard = App.Current.activePage.getArtboardAtPoint(event, event.view.scale());
         if (artboard !== this._hoverArtboard) {
             this._hoverArtboard = artboard;
             if (artboard) {
@@ -149,7 +149,7 @@ export default class LineCreator extends Tool {
         }
         else if (this._startPoint) {
             context.save();
-            var scale = Environment.view.scale();
+            var scale = this.view().scale();
             context.fillStyle = UserSettings.path.pointFill;
             context.strokeStyle = UserSettings.path.pointStroke;
             context.lineWidth = 1 / scale;

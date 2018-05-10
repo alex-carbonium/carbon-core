@@ -84,8 +84,8 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         }
         else {
             if (!Brush.canApply(this.fill) && this.showBoundaryWhenTransparent()) {
-                let scale = Environment.view.scale();
-                GlobalMatrixModifier.pushPrependScale();
+                let scale = environment.scale;
+                GlobalMatrixModifier.pushPrependScale(environment.scaleMatrix);
                 context.save();
                 context.scale(1/scale, 1/scale);
                 context.setLineDash(UserSettings.general.boundaryDash);
@@ -669,7 +669,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     delegateToChildren(name, event) {
         for (let i = this.children.length - 1; i >= 0; --i) {
             let element = this.children[i];
-            if (element.hitTest(event, Environment.view.scale())) {
+            if (element.hitTest(event, event.view.scale())) {
                 element[name](event);
                 if (event.handled) {
                     break;

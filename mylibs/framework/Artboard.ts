@@ -284,7 +284,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             this._renderStatesFrame(context, environment);
         }
 
-        this._renderHeader(context);
+        this._renderHeader(context, environment);
     }
 
     fitTextToWidth(context, text, width) {
@@ -304,8 +304,8 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return text;
     }
 
-    _renderHeader(context) {
-        let scale = Environment.view.scale();
+    _renderHeader(context, environment) {
+        let scale = environment.scale;
 
         context.save();
         context.beginPath();
@@ -320,10 +320,8 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         context.font = "11 px Arial, Helvetica, sans-serif";
 
         let width = this.width;
-
-
         let rect = this.getBoundaryRectGlobal();
-
+//TODO: think how to remove it
         let pos = Environment.view.logicalCoordinateToScreen(rect);
         let px = 0;
         if (Environment.view.prototyping()) {
@@ -333,9 +331,9 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         let text = this.fitTextToWidth(context, this.headerText(), (width - px) * scale);
         context.beginPath();
         context.resetTransform();
-        context.scale(Environment.view.contextScale, Environment.view.contextScale);
+        context.scale(environment.contextScale, environment.contextScale);
 
-        context.fillText(text, pos.x + px, pos.y - 2 * Environment.view.contextScale);
+        context.fillText(text, pos.x + px, pos.y - 2 * environment.contextScale);
 
         context.restore();
     };
@@ -1058,7 +1056,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     mousedown(event: IMouseEventData) {
-        let scale = Environment.view.scale();
+        let scale = event.view.scale();
         let pos = this.position;
         if (Environment.controller.currentTool !== "artboardTool" && !Selection.isElementSelected(this) && isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width, height: 20 / scale }, event)) {
             (this.parent as any).setActiveArtboard(this);
@@ -1067,7 +1065,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     dblclick(event: IMouseEventData) {
-        if (this.hitTestHeader(event, Environment.view.scale())) {
+        if (this.hitTestHeader(event, event.view.scale())) {
             Selection.makeSelection([this]);
             event.handled = true;
         }

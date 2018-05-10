@@ -60,7 +60,7 @@ export default class ImageContent extends UIElement{
 
         context.save();
         context.resetTransform();
-        context.scale(Environment.view.contextScale, Environment.view.contextScale);
+        context.scale(environment.contextScale, environment.contextScale);
         environment.pageMatrix.applyToContext(context);
         context.beginPath();
         this._frame.drawBoundaryPath(context);

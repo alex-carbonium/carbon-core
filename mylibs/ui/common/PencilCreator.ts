@@ -128,7 +128,7 @@ export default class PencilCreator extends Tool {
             element.addPoint({ x: points[points.length - 1].x - elementX, y: points[points.length - 1].y - elementY });
 
             element.adjustBoundaries();
-            Environment.view.dropElement(element);
+            this.view().dropElement(element);
             Invalidate.requestInteractionOnly();
             Selection.makeSelection([element]);
         }

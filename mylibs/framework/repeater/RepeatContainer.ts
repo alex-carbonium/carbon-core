@@ -105,7 +105,7 @@ export default class RepeatContainer extends Container implements IRepeatContain
     }
 
     dblclick(event: IMouseEventData) {
-        var scale = Environment.view.scale();
+        var scale = event.view.scale();
         for (var i = 0; i < this.children.length; i++) {
             var cell = this.children[i];
             if (cell.hitTest(event, scale)) {
@@ -402,12 +402,12 @@ export default class RepeatContainer extends Container implements IRepeatContain
             context.save();
             context.strokeStyle = UserSettings.group.active_stroke;
 
-            var scale = Environment.view.scale();
+            var scale = environment.scale;
             context.scale(1 / scale, 1 / scale);
 
             context.beginPath();
             try {
-                GlobalMatrixModifier.pushPrependScale();
+                GlobalMatrixModifier.pushPrependScale(environment.scaleMatrix);
                 super.drawBoundaryPath(context);
                 context.stroke();
             }

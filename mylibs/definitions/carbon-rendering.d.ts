@@ -91,6 +91,7 @@ declare module "carbon-rendering" {
         contextScale: number;
         scale: number;
         pageMatrix: IMatrix;
+        scaleMatrix: IMatrix;
         flags: RenderFlags;
         fill: Brush | null;
         stroke: Brush | null;

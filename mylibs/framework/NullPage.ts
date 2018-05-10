@@ -139,7 +139,7 @@ class NullPage extends UIElement implements IPage {
     getAllArtboards() {
         return [];
     }
-    getArtboardAtPoint(value) {
+    getArtboardAtPoint(value, scale) {
         return null;
     }
     getElementsInRect() {

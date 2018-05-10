@@ -171,7 +171,6 @@ class AppClass extends DataNode implements IApp {
         this.actionManager = new ActionManager(this as IApp, Environment.shortcutManager);
         this.actionManager.registerActions();
 
-
         var token = Selection.onElementSelected.bind((selection, oldSelection, doNotTrack) => {
             if (this.activePage === NullPage) {
                 return;

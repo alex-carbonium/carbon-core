@@ -235,7 +235,7 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
         }
         return container.width / container.height;
     }
-    getArtboardAtPoint(point) {
+    getArtboardAtPoint(point, scale) {
         return null;
     }
 

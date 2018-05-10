@@ -20,23 +20,23 @@ export default class InteractiveContainer extends Container implements IIsolatab
 
     dblclick(event: IMouseEventData) {
         this.unlockGroup();
-        var element = this.hitElement(event, Environment.view.scale());
+        var element = this.hitElement(event, event.view.scale());
         if (element && element !== this) {
             Selection.makeSelection([element]);
         }
     }
 
-    strokeBorder(context, w, h) {
+    strokeBorder(context, w, h, env) {
         if (!this.lockedGroup()) {
             context.save();
             context.strokeStyle = UserSettings.group.active_stroke;
 
-            var scale = Environment.view.scale();
+            var scale = env.scale;
             context.scale(1 / scale, 1 / scale);
 
             context.beginPath();
             try {
-                GlobalMatrixModifier.pushPrependScale();
+                GlobalMatrixModifier.pushPrependScale(env.scaleMatrix);
                 super.drawBoundaryPath(context);
                 context.stroke();
                 context.restore();

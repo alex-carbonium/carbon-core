@@ -294,8 +294,7 @@ class ArtboardPage extends Page implements IArtboardPage, IElementWithCode {
         }
     }
 
-    getArtboardAtPoint(point) {
-        let scale = Environment.view.scale();
+    getArtboardAtPoint(point, scale) {
         for (let artboard of this.getAllArtboards()) {
             if (artboard.hitTestBoundingBox(point, scale)) {
                 return artboard;

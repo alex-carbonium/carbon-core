@@ -39,7 +39,7 @@ export class Contributions implements IContributions {
         })
     }
 
-    private onBuildMenu(context, menu) {
+    private onBuildMenu(context, menu, view) {
         var elements = context.selectComposite.elements;
 
         if (elements.length && !elements[0].contextBarAllowed()) {
@@ -47,7 +47,7 @@ export class Contributions implements IContributions {
         }
 
         var items = menu.items;
-        ContextMenuBuilder.build(this.app, context, menu);
+        ContextMenuBuilder.build(this.app, view, context, menu);
 
         for (let i = 0; i < this._contextMenuItems.length; i++) {
             let item = this._contextMenuItems[i];

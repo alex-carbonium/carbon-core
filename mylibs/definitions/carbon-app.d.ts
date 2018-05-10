@@ -208,7 +208,7 @@ declare module "carbon-app" {
     export interface IPage<TProps extends IPageProps = IPageProps> extends ILayer<IPageProps> {
         getAllArtboards(excludeStateboards?): IArtboard[];
         getActiveArtboard(): IArtboard;
-        getArtboardAtPoint(point: ICoordinate): IArtboard;
+        getArtboardAtPoint(point: ICoordinate, scale:number): IArtboard;
         setActiveArtboard(artboard: IArtboard, doNotTrack?: boolean): void;
         setActiveArtboardById(id: string): void;
 
@@ -454,6 +454,9 @@ declare module "carbon-app" {
         hasAction(action: string): boolean;
         getAction(action:string): IAction;
         getActionLabel(actionId: string): string;
+
+        attach(view:IView);
+        detach();
     }
 
     export class AutoDisposable implements IDisposable {
@@ -600,6 +603,7 @@ declare module "carbon-app" {
         isAttached(): boolean;
 
         viewContainer: HTMLElement;
+        view:IView;
     }
     export const RenderLoop: IConstructor<IRenderLoop>;
 

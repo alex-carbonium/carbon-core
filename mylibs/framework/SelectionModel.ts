@@ -132,7 +132,7 @@ export class SelectionModel implements ISelection {
 
     updateSelectFrame(eventData) {
         let rect = this._selectFrame.update(eventData);
-        this.onSelectionFrameEvent.raise(rect);
+        this.onSelectionFrameEvent.raise(rect, this.view);
     }
 
     completeSelectFrame(eventData) {

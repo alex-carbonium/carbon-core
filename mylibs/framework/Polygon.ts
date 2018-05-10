@@ -14,9 +14,9 @@ import Cursors from "Cursors";
 
 let PolygonFrameType = {
     cursorSet: FrameCursors,
-    draw: function (frame, context, currentPoint) {
+    draw: function (frame, context, environment, currentPoint) {
         let r = frame.element.radius();
-        let scale = Environment.view.scale();
+        let scale = environment.scale;
 
         context.save();
         context.scale(1 / scale, 1 / scale);

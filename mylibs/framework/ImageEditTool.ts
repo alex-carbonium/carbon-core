@@ -19,6 +19,7 @@ export class ImageEditTool {
         this._snapClone = null;
         this._content = null;
     }
+
     attach(frame: IImage, emptySource: ImageSource) {
         this._tokens = [];
         this._frame = frame;
@@ -143,7 +144,7 @@ export class ImageEditTool {
     }
 
     onClicked = e => {
-        if (!this._content.hitTest(e, Environment.view.scale())) {
+        if (!this._content.hitTest(e, e.view.scale())) {
             this.detach();
             e.handled = true;
         }

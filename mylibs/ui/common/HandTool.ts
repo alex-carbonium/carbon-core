@@ -6,7 +6,7 @@ import {IMouseEventData} from "carbon-core";
 var debug = require("../../DebugUtil")("carb:handTool");
 
 var setStartingScroll = function (event) {
-    var view = Environment.view;
+    var view = event.view;
     this.scrollPoint = { x: event.event.screenX, y: event.event.screenY };
     this.scrollX = view.scrollX;
     this.scrollY = view.scrollY;

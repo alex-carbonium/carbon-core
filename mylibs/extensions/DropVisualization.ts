@@ -29,7 +29,7 @@ class ResizeHint extends UIElement {
     private _transformationElement: IComposite;
     private _label: Text = null;
 
-    constructor() {
+    constructor(private view) {
         super();
         this._text = "";
         this._textWidth = -1;
@@ -184,7 +184,7 @@ class ResizeHint extends UIElement {
         var scale = environment.scale;
         var fontStyle = '10px Arial';
 
-        GlobalMatrixModifier.pushPrependScale();
+        GlobalMatrixModifier.pushPrependScale(environment.scaleMatrix);
 
         context.save();
         context.scale(1 / scale, 1 / scale);
@@ -227,8 +227,8 @@ class SelectionRect extends UIElement {
         return false;
     }
 
-    drawSelf(context) {
-        var scale = Environment.view.scale();
+    drawSelf(context, w, h, environment: RenderEnvironment) {
+        var scale = environment.scale;
 
         context.save();
         context.setLineDash([1 / scale, 1 / scale]);
@@ -271,7 +271,7 @@ export default class DropVisualization extends ExtensionBase {
         });
         this._dropLine.crazySupported(false);
 
-        this._hint = new ResizeHint();
+        this._hint = new ResizeHint(view);
         this._hint.crazySupported(false);
 
         view.registerForLayerDraw(LayerType.Interaction, this);
@@ -285,7 +285,7 @@ export default class DropVisualization extends ExtensionBase {
     onLayerDraw(layer, context, environment) {
         var target = this._target || this.view['_highlightTarget'];
         if (target) {
-            DropVisualization.highlightElement(environment.view, context, target, this._isDropTarget, SharedColors.Highlight);
+            DropVisualization.highlightElement(this.view, context, target, this._isDropTarget, SharedColors.Highlight);
         }
     }
 
@@ -387,8 +387,8 @@ export default class DropVisualization extends ExtensionBase {
         }
     }
 
-    onSelectionFrame(rect) {
-        var isolationLayer:any = Environment.view.getLayer(LayerType.Isolation) as IIsolationLayer;
+    onSelectionFrame(rect, view) {
+        var isolationLayer:any = view.getLayer(LayerType.Isolation) as IIsolationLayer;
         if(isolationLayer.isActive) {
             this._selection = isolationLayer.getElementsInRect(rect);
         } else {

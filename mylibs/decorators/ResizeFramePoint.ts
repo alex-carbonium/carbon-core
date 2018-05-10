@@ -68,7 +68,6 @@ export default {
         SnapController.calculateSnappingPoints(frame.element.parent.primitiveRoot(), [frame.element]);
         frame.childrenCount = frame.element.children?frame.element.children.length:-1;
 
-        //Environment.view.interactionLayer.add(resizingElement);
         Environment.controller.raiseInteractionStarted(InteractionType.Resizing, event);
         if (frame.element.decorators) {
             frame.element.decorators.forEach(x => x.visible = (false));

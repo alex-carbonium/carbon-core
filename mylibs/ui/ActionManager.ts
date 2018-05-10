@@ -20,7 +20,7 @@ import GroupContainer from "../framework/GroupContainer";
 import InteractiveContainer from "../framework/InteractiveContainer";
 import Selection from "../framework/SelectionModel";
 import EventHelper from "../framework/EventHelper";
-import { IActionManager, IAction, IApp, IUIElement, IEvent, IContainer, IIsolatable, IShortcutManager, ISelection } from "carbon-core";
+import { IActionManager, IAction, IApp, IUIElement, IEvent, IContainer, IIsolatable, IShortcutManager, ISelection, IView } from "carbon-core";
 import { ArrangeStrategies, DropPositioning } from "../framework/Defs";
 import Rect from "../math/rect";
 import { viewStateStack } from "../framework/ViewStateStack";
@@ -97,6 +97,8 @@ export default class ActionManager implements IActionManager {
         [key: string]: IAction
     }
 
+    private view:IView;
+
     private _events: any[];
     private _actionStartEvents: any[];
     public actionPerformed: IEvent<any>;
@@ -147,6 +149,14 @@ export default class ActionManager implements IActionManager {
         return action;
     }
 
+    attach(view:IView) {
+        this.view = view;
+    }
+
+    detach() {
+        this.view = null;
+    }
+
     registerActions() {
         let that = this;
         let selectionMade = function () {
@@ -154,6 +164,7 @@ export default class ActionManager implements IActionManager {
             return selection && selection.length > 0;
         };
         let moving = null;
+
 
         this.registerActionInstance({
             id: "delete",

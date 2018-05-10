@@ -45,7 +45,6 @@ export default class TextTool extends Tool {
     constructor(app) {
         super("textTool");
         this._app = app;
-        this._view = Environment.view;
         this._controller = Environment.controller;
         this._editor = null;
         this.text = null;
@@ -272,7 +271,7 @@ export default class TextTool extends Tool {
             y -= height / 2;
         }
         text.applyTranslation(Point.create(e.x, y).roundMutable());
-        Environment.view.dropElement(text);
+        this.view().dropElement(text);
 
         this._app.activePage.nameProvider.assignNewName(text);
 

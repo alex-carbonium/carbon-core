@@ -70,6 +70,7 @@ export class Renderer implements IRenderer {
                 pageMatrix.applyToContext(ctx);
             },
             pageMatrix: pageMatrix,
+            scaleMatrix:Matrix.Identity,
             contextScale: contextScale,
             scale: 1,
             fill: null,

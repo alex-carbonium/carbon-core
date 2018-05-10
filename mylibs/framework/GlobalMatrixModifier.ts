@@ -10,8 +10,8 @@ export class GlobalMatrixModifier {
     push(modifier: Modifier){
         this.modifiers.push(modifier);
     }
-    pushPrependScale(){
-        this.push(m => m.prepended(Environment.view.scaleMatrix));
+    pushPrependScale(scaleMatrix){
+        this.push(m => m.prepended(scaleMatrix));
     }
     pushPrependTranslation(tx: number, ty: number){
         let tm = Matrix.createTranslationMatrix(tx, ty);
