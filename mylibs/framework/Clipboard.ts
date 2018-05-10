@@ -12,13 +12,14 @@ import Delete from "../commands/Delete";
 import params from "../params";
 import Shape from "./Shape";
 import backend from "../backend";
-import { IApp, IMatrix } from "carbon-core";
+import { IApp, IMatrix, IView } from "carbon-core";
 import { Origin } from "carbon-geometry";
 import { IUIElement } from "carbon-model";
 
 class Clipboard {
     [name: string]: any;
     _app: IApp;
+    _view: IView;
     globalBoundingBoxes: Rect[];
     rootBoundingBoxes: Rect[];
     globalMatrices: IMatrix[];
@@ -34,9 +35,9 @@ class Clipboard {
 
         this.pastingContent = false;
     }
-    attach(app){
+    attach(app, view){
         this._app = app;
-
+        this._view = view;
         if (this.testNativeSupport()){
             this._htmlElement = document;
             this._htmlElement.addEventListener("copy", this.onCopy);
@@ -192,7 +193,7 @@ class Clipboard {
         if (bufferElements){
             var rootRelativeBoundingBox = rootBoundingBoxes && !this.isCutting ? combineRectArray(rootBoundingBoxes) : null;
             var globalBoundingBox = combineRectArray(globalBoundingBoxes);
-            var location = choosePasteLocation(bufferElements, rootRelativeBoundingBox, this.pastingContent);
+            var location = choosePasteLocation(this._view, bufferElements, rootRelativeBoundingBox, this.pastingContent);
             if (location){
                 Selection.clearSelection();
                 for (var i = 0; i < bufferElements.length; i++){

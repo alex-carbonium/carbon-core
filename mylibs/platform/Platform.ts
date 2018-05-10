@@ -7,7 +7,7 @@ import params from "../params";
 var platform = null;
 
 function isMobile() {
-    return window && window.location && window.location.pathname.startsWith('/m/');
+    return window && (window as any).location && (window as any).location.pathname.startsWith('/m/');
 }
 
 if (!isBrowser) {
@@ -16,16 +16,14 @@ if (!isBrowser) {
 else if (params.basicPlatform) {
     platform = new Basic();
 }
-else {    
-    // if (params.deviceType === "Computer" || params.deviceType === "Tablet") {
-        platform = new Desktop(!isMobile());
-    // }
+else {
+    platform = new Desktop(!isMobile());
 }
 
 if (!platform) {
     throw "Could not initialize app for "
-        + " DeviceType=" + params.deviceType
-        + " DeviceOS=" + params.deviceOS;
+    + " DeviceType=" + params.deviceType
+    + " DeviceOS=" + params.deviceOS;
 }
 
 export default platform;

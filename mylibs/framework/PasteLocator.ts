@@ -1,11 +1,10 @@
 import Page from "./Page";
 import Selection from "./SelectionModel";
 import Container from "./Container";
-import Environment from "../environment";
 import { intersectRects, combineRectArray } from "../math/math";
 import { IContainer } from "carbon-model";
 
-export function choosePasteLocation(elements, rootRelativeBoundingBox = null, allowMoveIn = false): {parent: IContainer, x: number, y: number}{
+export function choosePasteLocation(view, elements, rootRelativeBoundingBox = null, allowMoveIn = false): {parent: IContainer, x: number, y: number}{
     //candidates: selected element and all its parents || artboard
     //1. same position - must be visible on screen and on candidate
     //2. center of visible candidate area
@@ -14,13 +13,13 @@ export function choosePasteLocation(elements, rootRelativeBoundingBox = null, al
     var bufferRect = combineRectArray(elements.map(x => x.getBoundingBox()));
     var tolerance = allowMoveIn ? 0 : bufferRect.width * bufferRect.height * .5;
 
-    var viewport = Environment.view.viewportRect();
-    var fallbackParent: IContainer = Environment.view.isolationLayer.isActive ?
-        Environment.view.isolationLayer :
-        Environment.view.page.getActiveArtboard();
+    var viewport = view.viewportRect();
+    var fallbackParent: IContainer = view.isolationLayer.isActive ?
+        view.isolationLayer :
+        view.page.getActiveArtboard();
 
     if (!fallbackParent) {
-        fallbackParent = Environment.view.page;
+        fallbackParent = view.page;
     }
 
     var candidates = [];
@@ -53,7 +52,7 @@ export function choosePasteLocation(elements, rootRelativeBoundingBox = null, al
         }
     }
     return {
-        parent: Environment.view.page as IContainer,
+        parent: view.page as IContainer,
         x: viewport.x + viewport.width/2 - bufferRect.width/2,
         y: viewport.y + viewport.height/2 - bufferRect.height/2
     };

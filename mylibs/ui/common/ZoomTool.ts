@@ -60,7 +60,7 @@ export default class ZoomTool extends Tool {
         this._mousepressed = false;
         if(this._added) {
             this._added = false;
-            Environment.view.interactionLayer.remove(this._zoomFrame);
+            this.view().interactionLayer.remove(this._zoomFrame);
         }
     }
 
@@ -76,19 +76,19 @@ export default class ZoomTool extends Tool {
         let view = this.view();
         var sx = view.scrollX,
             sy = view.scrollY;
-        var layerX = domUtil.layerX(event.event);
-        var layerY = domUtil.layerY(event.event);
+        var layerX = domUtil.layerX(event.event, view);
+        var layerY = domUtil.layerY(event.event, view);
         let oldValue = view.scale();
         var x = (layerX + sx) / oldValue;
         var y = (layerY + sy) / oldValue;
         var viewport = view.viewportSize();
         if (event.altKey) {
-            Environment.view.zoomOutStep();
+            view.zoomOutStep();
         } else {
-            Environment.view.zoomInStep();
+            view.zoomInStep();
         }
-        var scroll = App.Current.activePage.pointToScroll({ x: x, y: y }, viewport);
 
+        var scroll = App.Current.activePage.pointToScroll({ x: x, y: y }, viewport);
         view.scrollX = (scroll.scrollX);
         view.scrollY = (scroll.scrollY);
     }
@@ -101,7 +101,7 @@ export default class ZoomTool extends Tool {
         if(this._added) {
             this._added = false;
             this._zoomFrame.complete(event);
-            Environment.view.interactionLayer.remove(this._zoomFrame);
+            event.view.interactionLayer.remove(this._zoomFrame);
         }
     }
 
@@ -109,7 +109,7 @@ export default class ZoomTool extends Tool {
         if (this._mousepressed && !event.altKey) {
             if(!this._added) {
                 this._added = true;
-                Environment.view.interactionLayer.add(this._zoomFrame);
+                event.view.interactionLayer.add(this._zoomFrame);
                 this._zoomFrame.init(event);
             } else {
                 this._zoomFrame.update(event);

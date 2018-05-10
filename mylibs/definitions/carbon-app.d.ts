@@ -7,7 +7,7 @@ declare module "carbon-app" {
     import { Brush, IDisposable } from "carbon-runtime";
 
     export interface IPlatform{
-        attachEvents(htmlElement: HTMLElement);
+        attachEvents(htmlElement: HTMLElement, app:IApp, view:IView, controller:IController);
         detachEvents();
     }
 
@@ -605,6 +605,7 @@ declare module "carbon-app" {
 
         viewContainer: HTMLElement;
         view:IView;
+        controller:IController;
     }
     export const RenderLoop: IConstructor<IRenderLoop>;
 

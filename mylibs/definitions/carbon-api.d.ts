@@ -343,6 +343,7 @@ declare module "carbon-api" {
         clearStorage: boolean;
         perf: boolean;
         realCdn: string;
+        basicPlatform?:boolean;
     }
 }
 

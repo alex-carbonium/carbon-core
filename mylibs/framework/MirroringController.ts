@@ -11,8 +11,8 @@ import { choosePasteLocation } from "./PasteLocator";
 
 function updateEvent(event) {
     var scale = this.view.scale();
-    domUtil.layerX(event, Math.round((domUtil.layerX(event) + this.view.scrollX) * 100 / scale) / 100);
-    domUtil.layerY(event, Math.round((domUtil.layerY(event) + this.view.scrollY) * 100 / scale) / 100);
+    domUtil.layerX(event, this.view, Math.round((domUtil.layerX(event, this.view) + this.view.scrollX) * 100 / scale) / 100);
+    domUtil.layerY(event, this.view, Math.round((domUtil.layerY(event, this.view) + this.view.scrollY) * 100 / scale) / 100);
 }
 
 export default class MirroringController implements IController {
@@ -220,14 +220,14 @@ export default class MirroringController implements IController {
         return false;
     }
 
-    createEventData(event) : IMouseEventData {
+    createEventData(event): IMouseEventData {
         updateEvent.call(this, event);
         return {
             handled: false,
-            x: domUtil.layerX(event),
-            y: domUtil.layerY(event),
+            x: domUtil.layerX(event, this.view),
+            y: domUtil.layerY(event, this.view),
             event: event,
-        ctrlKey: event.ctrlKey || event.metaKey,
+            ctrlKey: event.ctrlKey || event.metaKey,
             shiftKey: event.shiftKey,
             altKey: event.altKey,
             view: this.view
@@ -251,7 +251,7 @@ export default class MirroringController implements IController {
     }
 
     choosePasteLocation(elements: IUIElement[], allowMoveIn?: boolean) {
-        return choosePasteLocation(elements, null, allowMoveIn);
+        return choosePasteLocation(this.view, elements, null, allowMoveIn);
     }
 
     insertAndSelect(elements: IUIElement[], parent: IContainer | IComposite) {

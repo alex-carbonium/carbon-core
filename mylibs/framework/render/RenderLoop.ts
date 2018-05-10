@@ -25,6 +25,7 @@ export default class RenderLoop implements IRenderLoop {
     private _attached = false;
     private _app: IApp = null;
     private _view: IView = null;
+    private _controller: IController = null;
     private _scale = 0;
 
     private _suspended = false;
@@ -49,13 +50,14 @@ export default class RenderLoop implements IRenderLoop {
     private finishMounting(app: IApp, view: IView, controller: IController) {
         Environment.set(view, controller);
         app.platform.detachEvents();
-        app.platform.attachEvents(this.viewContainer);
+        app.platform.attachEvents(this.viewContainer, app, view, controller);
 
-        Clipboard.attach(app);
+        Clipboard.attach(app, view);
         keyboard.attach();
 
         this._app = app;
         this._view = view;
+        this._controller = controller;
         this._attached = true;
 
         this.ensureCanvasSize();
@@ -77,6 +79,10 @@ export default class RenderLoop implements IRenderLoop {
 
     get view() {
         return this._view;
+    }
+
+    get controller() {
+        return this._controller;
     }
 
     private addDesignerHtml(viewport: HTMLElement, append: boolean) {

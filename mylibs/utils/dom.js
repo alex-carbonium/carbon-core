@@ -1,5 +1,3 @@
-import Environment from "../environment";
-
 export default {
     offset: function (elem) {
         var docElem, win,
@@ -24,8 +22,8 @@ export default {
         };
     },
 
-    layerX: function (event, value) {
-        if (arguments.length === 2) {
+    layerX: function (event, view, value) {
+        if (arguments.length === 3) {
             event.__layerX = value;
             return value;
         }
@@ -49,10 +47,10 @@ export default {
                     event.__layerX = original.layerX;
                 }
                 else if(original.center) {
-                    event.__layerX = original.center.x - Environment.view.context.canvas.getBoundingClientRect().left;
+                    event.__layerX = original.center.x - view.context.canvas.getBoundingClientRect().left;
                 }
                 else {
-                    event.__layerX = original.clientX - Environment.view.viewContainerElement.getBoundingClientRect().left;
+                    event.__layerX = original.clientX - view.viewContainerElement.getBoundingClientRect().left;
                 }
             }
             return event.__layerX;
@@ -60,8 +58,8 @@ export default {
         return event.offsetX;
     },
 
-    layerY: function (event, value) {
-        if (arguments.length === 2) {
+    layerY: function (event, view, value) {
+        if (arguments.length === 3) {
             event.__layerY = value;
             return value;
         }
@@ -85,10 +83,10 @@ export default {
                     event.__layerY = original.layerY;
                 }
                 else if(original.center) {
-                    event.__layerY = original.center.y - Environment.view.context.canvas.getBoundingClientRect().top;
+                    event.__layerY = original.center.y - view.context.canvas.getBoundingClientRect().top;
                 }
                 else {
-                    event.__layerY = original.clientY - Environment.view.viewContainerElement.getBoundingClientRect().top;
+                    event.__layerY = original.clientY - view.viewContainerElement.getBoundingClientRect().top;
                 }
                 return event.__layerY;
             }

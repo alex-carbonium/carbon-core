@@ -2,6 +2,9 @@ import Invalidate from "framework/Invalidate";
 import All from "./All";
 
 export default class Basic extends All {
+    canvas:any;
+    view:any;
+
     richUI() {
         return false;
     }

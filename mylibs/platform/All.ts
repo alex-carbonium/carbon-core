@@ -32,9 +32,9 @@ var restoreViewState = function () {
 };
 
 export default class PlatformAll {
+    [key:string]:any;
 
-
-    constructor(richUI) {
+    constructor(richUI = false) {
         this._lastPageState = {};
         this.onresized = EventHelper.createEvent();
 
@@ -78,53 +78,8 @@ export default class PlatformAll {
         return $(viewId)[0];
     }
 
-    /* view manager*/
-    setViewMode(value) {
-        this.viewMode = value;
-        var toView = value === "view";
-
-        if (!toView) {
-            saveViewState.call(this);
-        }
-
-
-        if (toView) {
-            switchToView.call(this);
-            restoreViewState.call(this);
-        }
-        else {
-            switchToPreview.call(this);
-        }
-    }
-
-    switchViewMode() {
-        App.Current.actionManager.invoke('cancel');
-        if (this.viewMode == "view") {
-            this.viewMode = "preview";
-
-        } else {
-            this.viewMode = "view";
-        }
-
-        this.setViewMode(this.viewMode);
-    }
-
-    switchToPreview() {
-        switchToPreview.call(this);
-    }
-
-    switchToView() {
-        switchToView.call(this);
-    }
-
-    showContextMenu() {
-
-    }
-
     richUI() {
         return this._richUI !== undefined ? this._richUI : !!window;
     }
 
-    registerClipboardShortcuts(app) {
-    }
 }

@@ -6,7 +6,7 @@ import Matrix from "math/matrix";
 import Artboard from "framework/Artboard";
 import Symbol from "framework/Symbol";
 import { IApp, IEvent, IPage, PreviewDisplayMode, ISize, IPageProps, ChangeMode, IDisposable, IEvent3, INavigationAnimationOptions, AnimationType, ICustomTransition } from "carbon-core";
-import { IPreviewModel } from "carbon-app";
+import { IPreviewModel, IController, IView } from "carbon-app";
 import { IArtboard } from "carbon-model";
 import { Sandbox } from "../../code/Sandbox";
 import { RuntimeContext } from "../../code/runtime/RuntimeContext";
@@ -21,7 +21,6 @@ import { BrushFactory } from "../../code/runtime/BrushFactory";
 import { CompiledCodeProvider } from "../../code/CompiledCodeProvider";
 import { NameProvider } from "../../code/NameProvider";
 import StateBoard from "../StateBoard";
-import Environment from "environment";
 import AnimationGroup from "../animation/AnimationGroup";
 
 export default class PreviewModel implements IPreviewModel, IDisposable {
@@ -40,7 +39,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
 
     public refreshVersion = 0;
 
-    constructor(app) {
+    constructor(app, private view:IView, private controller:IController) {
         this.app = app;
         this.navigationController = new NavigationController(this);
         this.onPageChanged = EventHelper.createEvent();
@@ -55,7 +54,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
 
     _releaseCurrentPage() {
         if (this.activePage) {
-            Environment.view.setActivePage(NullPage);
+            this.view.setActivePage(NullPage);
             this.recycleCurrentPage();
             this.recycleModules();
         }
@@ -78,7 +77,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
             return;
         }
 
-        Environment.view.animationController.reset();
+        this.view.animationController.reset();
         let stateId = this._getStateTransition(artboardId);
 
         if(stateId) {
@@ -177,7 +176,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
     set activePage(value: IPage<IPageProps> & { originalSize: ISize }) {
         if (this._activePage !== value) {
             this._activePage = value;
-            Environment.view.setActivePage(value);
+            this.view.setActivePage(value);
             this.onPageChanged.raise(value);
         }
     }
@@ -386,7 +385,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
             id = this.activePage.children[0].id;
         }
 
-        Environment.view.animationController.reset();
+        this.view.animationController.reset();
 
         if (id) {
             return this.getScreenById(id).then(page => {

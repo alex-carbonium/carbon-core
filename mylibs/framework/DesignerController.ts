@@ -135,11 +135,10 @@ export default class DesignerController implements IController {
 
     createEventData(event: MouseEvent): IMouseEventData {
         var scale = this.view.scale();
-
         return {
             handled: false,
-            x: Math.round((domUtil.layerX(event) + this.view.scrollX) * 100 / scale) / 100,
-            y: Math.round((domUtil.layerY(event) + this.view.scrollY) * 100 / scale) / 100,
+            x: Math.round((domUtil.layerX(event, this.view) + this.view.scrollX) * 100 / scale) / 100,
+            y: Math.round((domUtil.layerY(event, this.view) + this.view.scrollY) * 100 / scale) / 100,
             event: event,
             ctrlKey: event.ctrlKey || event.metaKey,
             altKey: event.altKey,
@@ -892,7 +891,7 @@ export default class DesignerController implements IController {
     }
 
     choosePasteLocation(elements: IUIElement[], allowMoveIn?: boolean) {
-        return choosePasteLocation(elements, null, allowMoveIn);
+        return choosePasteLocation(this.view, elements, null, allowMoveIn);
     }
 
     get currentTool(): WorkspaceTool {
