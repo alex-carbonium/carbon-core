@@ -1,7 +1,6 @@
 import SystemConfiguration from "../../SystemConfiguration";
 import Selection from "../../framework/SelectionModel";
 import Invalidate from "../../framework/Invalidate";
-import SnapController from "../../framework/SnapController";
 import Environment from "../../environment";
 import Tool from "./Tool";
 import Artboard from "../../framework/Artboard";
@@ -31,7 +30,7 @@ export default class ArtboardsTool extends Tool {
 
     attach(app, view, controller, mousePressed) {
         super.attach(app, view, controller, mousePressed);
-        SnapController.calculateSnappingPoints(app.activePage);
+        view.snapController.calculateSnappingPoints(app.activePage);
         this.registerForDisposal(this._app.actionManager.subscribe('cancel', this.onCancelled));
         this._artboardToolSettings = new ArtboardToolSettings(app);
         this._enableArtboardSelection(true);
@@ -41,7 +40,7 @@ export default class ArtboardsTool extends Tool {
     detach() {
         super.detach.apply(this, arguments);
         this._artboardToolSettings = null;
-        SnapController.clearActiveSnapLines();
+        this.view().snapController.clearActiveSnapLines();
         Selection.clearSelection();
         this._enableArtboardSelection(false);
     }
@@ -53,7 +52,7 @@ export default class ArtboardsTool extends Tool {
     private artboardAdded(artboard: Artboard) {
         artboard.suck();
         Selection.reselect();
-        SnapController.calculateSnappingPoints(this._app.activePage);
+        this.view().snapController.calculateSnappingPoints(this._app.activePage);
     }
 
     mousedown(event: IMouseEventData) {
@@ -133,7 +132,7 @@ export default class ArtboardsTool extends Tool {
                 this._controller.resetCurrentTool();
             }
 
-            SnapController.clearActiveSnapLines();
+            this.view().snapController.clearActiveSnapLines();
             Invalidate.requestInteractionOnly();
             PropertyTracker.resumeAndFlush();
             this._element = null;
@@ -230,7 +229,7 @@ export default class ArtboardsTool extends Tool {
     _prepareMousePoint(event: IMouseEventData) {
         this._point.set(event.x, event.y);
         if (!event.ctrlKey) {
-            var snapped = SnapController.applySnappingForPoint(this._point);
+            var snapped = this.view().snapController.applySnappingForPoint(this._point);
             this._point.set(snapped.x, snapped.y);
         }
         this._point.roundMutable();

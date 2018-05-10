@@ -9,6 +9,7 @@ import PixelGrid from "framework/render/PixelGrid"
 import { IsolationLayer } from "framework/IsolationLayer";
 import { LayerType } from "carbon-app";
 import { IContext, ContextType } from "carbon-core";
+import { SnapController } from "./SnapController";
 
 function setupLayers(Layer) {
     this.interactionLayer = new Layer();
@@ -28,10 +29,11 @@ function setupLayers(Layer) {
 
 class DesignerView extends ViewBase {
     protected selection:SelectionModel;
+    public snapController:SnapController;
 
     constructor(app) {
         super(app);
-
+        this.snapController = new SnapController(this);
         this.selection = new SelectionModel(this as any);
         setSelection(this.selection);
 

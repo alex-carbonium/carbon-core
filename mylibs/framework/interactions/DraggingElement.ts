@@ -1,15 +1,13 @@
 import PropertyMetadata from "../PropertyMetadata";
 import { Types } from "../Defs";
-import SnapController from "../SnapController";
 import Artboard from "../Artboard";
 import Invalidate from "../Invalidate";
 import { areRectsIntersecting } from "../../math/math";
 import Point from "../../math/point";
 import Brush from "../Brush";
-import Environment from "../../environment";
 import UserSettings from "../../UserSettings";
 import Matrix from "../../math/matrix";
-import { IUIElement, ChangeMode, IMatrix, IContainer, IMouseEventData, IPoint, IArtboard, IArtboardPage } from "carbon-core";
+import { IUIElement, ChangeMode, IMatrix, IContainer, IMouseEventData, IPoint, IArtboard, IArtboardPage, IView } from "carbon-core";
 import Selection from "framework/SelectionModel";
 import CompositeElement from "../CompositeElement";
 import Duplicate from "commands/Duplicate";
@@ -26,12 +24,14 @@ export class DraggingElement extends CompositeElement {
     private _initialPosition: IPoint;
     private _translation: Point;
     private _draggingDecorator:any;
+    private view:IView;
 
     constructor(elementOrComposite, event: IMouseEventData) {
         super();
 
         var elements: UIElement[] = elementOrComposite instanceof CompositeElement ? elementOrComposite.elements : [elementOrComposite];
         this.children = [];
+        this.view = event.view;
 
         Selection.makeSelection(elements);
 
@@ -58,8 +58,7 @@ export class DraggingElement extends CompositeElement {
         this._snappingTarget = snappingTarget;
 
         var holdPcnt = Math.round((event.x - this.x) * 100 / this.width);
-        this._ownSnapPoints = SnapController.prepareOwnSnapPoints(this, holdPcnt);
-
+        this._ownSnapPoints = event.view.snapController.prepareOwnSnapPoints(this, holdPcnt);
         this._propSnapshot = this.getPropSnapshot();
 
         this.altChanged(event.altKey); // it will also update snapping
@@ -96,7 +95,7 @@ export class DraggingElement extends CompositeElement {
 
         this.elements.forEach(x => x.clearSavedLayoutProps());
 
-        SnapController.clearActiveSnapLines();
+        this.view.snapController.clearActiveSnapLines();
 
         this.removeDecorator(this._draggingDecorator);
         this._draggingDecorator = null;
@@ -233,8 +232,8 @@ export class DraggingElement extends CompositeElement {
             this._clones.forEach(e => e.setProps({visible: alt}, ChangeMode.Self));
         }
 
-        SnapController.clearActiveSnapLines();
-        SnapController.calculateSnappingPoints(this._snappingTarget, this.children);
+        this.view.snapController.clearActiveSnapLines();
+        this.view.snapController.calculateSnappingPoints(this._snappingTarget, this.children);
     }
 
     _updateCurrentPosition(event: IMouseEventData) {
@@ -260,7 +259,7 @@ export class DraggingElement extends CompositeElement {
         let newPosition = Point.allocate(this._initialPosition.x + this._translation.x, this._initialPosition.y + this._translation.y);
 
         if (this.isSnappingAllowed(event) && !event.ctrlKey) {
-            let snapped = SnapController.applySnapping(newPosition, this._ownSnapPoints);
+            let snapped = this.view.snapController.applySnapping(newPosition, this._ownSnapPoints);
             if (!newPosition.equals(snapped)) {
                 this._translation.set(this._translation.x + snapped.x - newPosition.x, this._translation.y + snapped.y - newPosition.y);
                 if (roundToPixels) {
@@ -269,7 +268,7 @@ export class DraggingElement extends CompositeElement {
             }
         }
         else {
-            SnapController.clearActiveSnapLines();
+            this.view.snapController.clearActiveSnapLines();
         }
 
         newPosition.free();
@@ -286,9 +285,9 @@ export class DraggingElement extends CompositeElement {
 
             if(this._snappingTarget !== newTarget) {
                 this._snappingTarget = newTarget
-                SnapController.clearActiveSnapLines();
+                this.view.snapController.clearActiveSnapLines();
                 if(this._snappingTarget){
-                    SnapController.calculateSnappingPoints(this._snappingTarget, this.children);
+                    this.view.snapController.calculateSnappingPoints(this._snappingTarget, this.children);
                 }
             }
         }

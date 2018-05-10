@@ -1,7 +1,6 @@
 import UserSettings from "../UserSettings";
 import { keyboard } from "../platform/Keyboard";
 import Point from "../math/point";
-import SnapController from "../framework/SnapController";
 import { PointDirection } from "../framework/Defs";
 import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
 
@@ -77,10 +76,10 @@ export default {
         if (frame.allowSnapping && !keys.ctrlKey) {
             px = frame._offsetPt.x;
             py = frame._offsetPt.y;
-            pos = SnapController.applySnappingForPoint({ x: frame._mousePoint.x + px, y: frame._mousePoint.y + py });
+            pos = event.view.snapController.applySnappingForPoint({ x: frame._mousePoint.x + px, y: frame._mousePoint.y + py });
         }
         else {
-            SnapController.clearActiveSnapLines();
+            event.view.snapController.clearActiveSnapLines();
         }
 
         var matrix = frame.globalViewMatrixInverted;
@@ -104,7 +103,7 @@ export default {
             frame.keyboardToken.dispose();
             frame.keyboardToken = null;
         }
-        SnapController.clearActiveSnapLines();
+        event.view.snapController.clearActiveSnapLines();
 
         delete frame._mousePoint;
         delete frame._capturedPt;

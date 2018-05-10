@@ -1,7 +1,6 @@
 import Brush from "../../framework/Brush";
 import Invalidate from "../../framework/Invalidate";
 import DragController from "../../framework/DragController";
-import SnapController from "../../framework/SnapController";
 import CustomGuides from "./CustomGuides";
 import UserSettings from "../../UserSettings";
 import { isPointInRect } from "../../math/math";
@@ -42,7 +41,7 @@ export default class RulerGuides {
         this._menuToken = app.onBuildMenu.bind(this, this.onBuildMenu);
 
         this._customGuides = new CustomGuides(view);
-        SnapController.snapGuides.push(this._customGuides);
+        view.snapController.snapGuides.push(this._customGuides);
 
         this._origin = null;
         this._originRect = null;
@@ -157,7 +156,7 @@ export default class RulerGuides {
         var canStart = this._guideX !== null || this._guideY !== null;
         if (canStart) {
             Invalidate.requestInteractionOnly();
-            SnapController.removeGuides(this._customGuides);
+            this._view.snapController.removeGuides(this._customGuides);
         }
         return canStart;
     };
@@ -167,7 +166,7 @@ export default class RulerGuides {
             if (artboard !== this._hoverArtboard) {
                 this._hoverArtboard = artboard;
                 if (artboard) {
-                    SnapController.calculateSnappingPoints(artboard);
+                    this._view.snapController.calculateSnappingPoints(artboard);
                 }
             }
         }
@@ -177,7 +176,7 @@ export default class RulerGuides {
                 this._removingGuide = true;
             }
             else {
-                let pos = e.ctrlKey ? e : SnapController.applySnappingForPoint(e, false, true);
+                let pos = e.ctrlKey ? e : this._view.snapController.applySnappingForPoint(e, false, true);
                 this._guideX.pos = Math.round(pos.x) - this._origin.x;
                 this._removingGuide = false;
                 e.cursor = "ew-resize";
@@ -189,7 +188,7 @@ export default class RulerGuides {
                 this._removingGuide = true;
             }
             else {
-                let pos = e.ctrlKey ? e : SnapController.applySnappingForPoint(e, true, false);
+                let pos = e.ctrlKey ? e : this._view.snapController.applySnappingForPoint(e, true, false);
                 this._guideY.pos = Math.round(pos.y) - this._origin.y;
                 this._removingGuide = false;
                 e.cursor = "ns-resize";
@@ -198,8 +197,8 @@ export default class RulerGuides {
         }
     };
     onDragStopped = e => {
-        SnapController.snapGuides.push(this._customGuides);
-        SnapController.clearActiveSnapLines();
+        this._view.snapController.snapGuides.push(this._customGuides);
+        this._view.snapController.clearActiveSnapLines();
 
         if (this._guideX !== null) {
             let shouldDelete = isPointInRect(this._rectVertical, e);
@@ -415,7 +414,7 @@ export default class RulerGuides {
 
     dispose() {
         this._dragController.unbind();
-        SnapController.removeGuides(this._customGuides);
+        this._view.snapController.removeGuides(this._customGuides);
 
         if (this._menuToken) {
             this._menuToken.dispose();

@@ -70,9 +70,9 @@ function onZoomChanged(value, oldValue) {
     Invalidate.requestDraftWithDebounce();
 }
 
-
 export default class ViewBase implements IView {
-    gridContext: IContext;f
+    gridContext: IContext;
+    snapController:any;
     interactionLayer: any;
     scaleMatrix: any;
     context: any;

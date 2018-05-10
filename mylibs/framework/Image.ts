@@ -237,10 +237,10 @@ export default class Image extends Container<IImageProps> implements IImage {
         }
     }
 
-    dblclick() {
+    dblclick(event) {
         var source = this.source();
         if (ImageSourceHelper.isEditSupported(source)) {
-            ImageEditTool.attach(this, Image.EmptySource);
+            ImageEditTool.attach(event.view, this, Image.EmptySource);
         }
         else if (!ImageSourceHelper.hasValue(source)) {
             var e = { done: null };

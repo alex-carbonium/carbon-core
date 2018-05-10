@@ -1,7 +1,6 @@
-import Environment from "environment";
 import Invalidate from "framework/Invalidate";
 import Point from "math/point";
-import { ICoordinate, VerticalConstraint, HorizontalConstraint } from "carbon-core";
+import { ICoordinate, VerticalConstraint, HorizontalConstraint, IView } from "carbon-core";
 import UserSettings from "UserSettings";
 import { areRectsIntersecting } from "../math/math";
 import NullContainer from "framework/NullContainer";
@@ -284,7 +283,7 @@ function compareSnapLines(lines1, lines2) {
 }
 
 function buildHorizontal(snap, xs): any {
-    var scale = Environment.view.scale();
+    var scale = this.view.scale();
     let snapData = snap.element.getSnapPoints();
     if (snapData.noLine) {
         return null;
@@ -305,7 +304,7 @@ function buildHorizontal(snap, xs): any {
 }
 
 function buildVertical(snap, ys) {
-    var scale = Environment.view.scale();
+    var scale = this.view.scale();
     let snapData = snap.element.getSnapPoints();
     if (snapData.noLine) {
         return null;
@@ -326,7 +325,7 @@ function buildVertical(snap, ys) {
 }
 
 function buildVerticalDistances(distances, snap, b) {
-    var scale = Environment.view.scale();
+    var scale = this.view.scale();
     let snapData = snap.element.getSnapPoints();
     if (snapData.noLine) {
         return;
@@ -407,7 +406,7 @@ function buildVerticalDistances(distances, snap, b) {
 }
 
 function buildHorizontalDistances(distances, snap, b) {
-    var scale = Environment.view.scale();
+    var scale = this.view.scale();
     let snapData = snap.element.getSnapPoints();
     if (snapData.noLine) {
         return null;
@@ -518,7 +517,7 @@ function collectPoints(data, elements, viewportRect, root, excludeElements, elem
     }
 }
 
-class SnapController {
+export class SnapController {
     [name: string]: any;
     calculateSnappingPointsForPath(path) {
         var data: any = {};
@@ -542,7 +541,7 @@ class SnapController {
             return x1.value - x2.value;
         });
 
-        let viewportRect = Environment.view.viewportRect();
+        let viewportRect = this.view.viewportRect();
 
         if (UserSettings.snapTo.guides) {
             this.snapGuides.forEach(x => collectPoints(data, elements, viewportRect, null, null, x));
@@ -560,7 +559,7 @@ class SnapController {
         data._snapXCenter = [];
         data._snapYCenter = [];
         this._parent = parent;
-        let viewportRect = Environment.view.viewportRect()
+        let viewportRect = this.view.viewportRect()
         if(excludeElements) {
             excludeElements = excludeElements.reduce((acc, cur)=>{acc[cur.id] = true;return acc;}, {});
         }
@@ -619,8 +618,6 @@ class SnapController {
         return data;
     }
 
-
-
     applySnapping(pos, target) {
         var data = this.currentSnappingData;
         if (target) {
@@ -641,7 +638,7 @@ class SnapController {
         var snappedPoint = new Point(pos.x, pos.y);
         this.clearActiveSnapLines();
 
-        var scale = Environment.view.scale();
+        var scale = this.view.scale();
         var SNAP_DELTA_SCALE = SNAP_DELTA / scale;
         var delta = SNAP_DELTA_SCALE;
 
@@ -653,7 +650,7 @@ class SnapController {
         if (snaps !== null) {
             let snap = snaps[0];
             for (snap of snaps) {
-                let snapLine = buildVertical(snap, offsetYs);
+                let snapLine = buildVertical.call(this, snap, offsetYs);
                 if (snapLine) {
                     this.snapLines.push(snapLine);
                     verticalSnaps.push(snap);
@@ -669,7 +666,7 @@ class SnapController {
         if (snaps !== null) {
             let snap = snaps[0];
             for (snap of snaps) {
-                let snapLine = buildHorizontal(snap, offsetXs);
+                let snapLine = buildHorizontal.call(this, snap, offsetXs);
                 if (snapLine) {
                     this.snapLines.push(snapLine);
                     horizontalSnaps.push(snap);
@@ -681,14 +678,14 @@ class SnapController {
         if (verticalSnaps.length) {
             let ysv = ys.map(v => v + snappedPoint.y);
             for (let snap of verticalSnaps) {
-                buildVerticalDistances(this.distances, snap, ysv);
+                buildVerticalDistances.call(this, this.distances, snap, ysv);
             }
         }
 
         if (horizontalSnaps.length) {
             let xsv = xs.map(v => v + snappedPoint.x);
             for (let snap of horizontalSnaps) {
-                buildHorizontalDistances(this.distances, snap, xsv);
+                buildHorizontalDistances.call(this, this.distances, snap, xsv);
             }
         }
 
@@ -717,7 +714,7 @@ class SnapController {
         let snappedPoint = new Point(pos.x, pos.y);;
 
         this.clearActiveSnapLines();
-        var scale = Environment.view.scale();
+        var scale = this.view.scale();
         var SNAP_DELTA_SCALE = SNAP_DELTA / scale;
         var delta = SNAP_DELTA_SCALE;
         let verticalSnaps = [];
@@ -730,7 +727,7 @@ class SnapController {
                 snappedPoint = new Point(snap.value, pos.y);
 
                 for (snap of snaps) {
-                    let snapLine = buildVertical(snap, ys);
+                    let snapLine = buildVertical.call(this, snap, ys);
                     if (snapLine) {
                         this.snapLines.push(snapLine);
                         verticalSnaps.push(snap);
@@ -747,7 +744,7 @@ class SnapController {
 
                 snappedPoint.y = snap.value;
                 for (snap of snaps) {
-                    let snapLine = buildHorizontal(snap, xs);
+                    let snapLine = buildHorizontal.call(this, snap, xs);
                     if (snapLine) {
                         this.snapLines.push(snapLine);
                         horizontalSnaps.push(snap);
@@ -761,13 +758,13 @@ class SnapController {
         // build distances
         if (verticalSnaps.length) {
             for (let snap of verticalSnaps) {
-                buildVerticalDistances(this.distances, snap, [snappedPoint.y]);
+                buildVerticalDistances.call(this, this.distances, snap, [snappedPoint.y]);
             }
         }
 
         if (horizontalSnaps.length) {
             for (let snap of horizontalSnaps) {
-                buildHorizontalDistances(this.distances, snap, [snappedPoint.x]);
+                buildHorizontalDistances.call(this, this.distances, snap, [snappedPoint.x]);
             }
         }
 
@@ -780,7 +777,7 @@ class SnapController {
         debug("clear");
     }
 
-    constructor() {
+    constructor(private view:IView) {
         this.snapGuides = [];
         this.clearActiveSnapLines();
     }
@@ -793,5 +790,3 @@ class SnapController {
         }
     }
 }
-
-export default new SnapController();

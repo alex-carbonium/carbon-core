@@ -5,7 +5,6 @@ import UIElementDecorator from "framework/UIElementDecorator";
 import Environment from "environment";
 import Selection from "framework/SelectionModel";
 import UserSettings from "UserSettings";
-import SnapController from "framework/SnapController";
 import Invalidate from "framework/Invalidate";
 import Cursors from "Cursors";
 import PropertyTracker from "framework/PropertyTracker";
@@ -182,7 +181,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         super.attach(element);
         this.view.registerForLayerDraw(LayerType.Interaction, this);
         Environment.controller.captureMouse(this);
-        SnapController.calculateSnappingPointsForPath(this.path);
+        this.view.snapController.calculateSnappingPointsForPath(this.path);
         this._cancelBinding = Environment.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
         this._startSegmentPoint = this._lastSegmentStartPoint();
         this._selectFrame = new SelectFrame();
@@ -223,7 +222,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
 
         this._finalizePath();
 
-        SnapController.clearActiveSnapLines();
+        this.view.snapController.clearActiveSnapLines();
 
         this.view.interactionLayer.remove(this._selectFrame);
         this._selectFrame.onComplete.unbind(this, this.onselect);
@@ -290,7 +289,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
             return;
         }
 
-        SnapController.clearActiveSnapLines();
+        this.view.snapController.clearActiveSnapLines();
 
         if (this._saveOnMouseUp) {
             path.save();
@@ -315,7 +314,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         }
 
         PropertyTracker.resumeAndFlush();
-        SnapController.calculateSnappingPointsForPath(this.path);
+        this.view.snapController.calculateSnappingPointsForPath(this.path);
     }
 
     mousedown(event: IMouseEventData) {
@@ -426,7 +425,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         }
 
         if (!event.ctrlKey) {
-            pos = SnapController.applySnappingForPoint(pos);
+            pos = this.view.snapController.applySnappingForPoint(pos);
         }
         pos = path.globalViewMatrixInverted().transformPoint(pos);
 
@@ -814,7 +813,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         let pos;
 
         if (!event.ctrlKey) {
-            pos = SnapController.applySnappingForPoint(event);
+            pos = this.view.snapController.applySnappingForPoint(event);
         } else {
             pos = event;
         }
@@ -824,7 +823,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
 
         this.path.insertPointAtIndex(pt, this.path.points.length);
 
-        SnapController.calculateSnappingPointsForPath(this.path);
+        this.view.snapController.calculateSnappingPointsForPath(this.path);
         this.path.invalidate();
 
         if (!this._startSegmentPoint) {

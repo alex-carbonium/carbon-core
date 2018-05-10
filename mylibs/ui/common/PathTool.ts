@@ -6,7 +6,6 @@ import SystemConfiguration from "../../SystemConfiguration";
 import Selection from "../../framework/SelectionModel";
 import Cursor from "../../framework/Cursor";
 import Invalidate from "../../framework/Invalidate";
-import SnapController from "../../framework/SnapController";
 import Environment from "../../environment";
 import UserSettings from "UserSettings";
 import { KeyboardState, IMouseEventData, IContext, ElementState, ICoordinate, ChangeMode } from "carbon-core";
@@ -125,8 +124,6 @@ export default class PathTool extends Tool {
     }
 
     _changeMode(element, mode: ElementState) {
-        if (element.mode() !== mode) {
-            element.switchToEditMode(element.mode() === ElementState.Edit, this.view());
-        }
+        element.switchToEditMode(mode === ElementState.Edit, this.view());
     }
 }

@@ -275,6 +275,7 @@ declare module "carbon-app" {
         //TODO encapsulate
         _highlightTarget: any;
 
+        snapController:any;
         viewContainerElement: HTMLElement;
         page: IPage;
         animationController: IAnimationController;

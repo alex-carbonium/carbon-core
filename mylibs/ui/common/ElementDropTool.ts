@@ -2,7 +2,6 @@ import SystemConfiguration from "../../SystemConfiguration";
 import Selection from "../../framework/SelectionModel";
 import Invalidate from "../../framework/Invalidate";
 import ObjectFactory from "../../framework/ObjectFactory";
-import SnapController from "../../framework/SnapController";
 import Environment from "../../environment";
 import Cursor from "../../framework/Cursor";
 import Artboard from "../../framework/Artboard";
@@ -33,7 +32,7 @@ export default class ElementDropTool extends Tool {
     detach() {
         super.detach.apply(this, arguments);
         this._mousepressed = false;
-        SnapController.clearActiveSnapLines();
+        this.view().snapController.clearActiveSnapLines();
         Cursor.removeGlobalCursor();
 
         this.changeMode(ElementState.Resize);
@@ -122,7 +121,7 @@ export default class ElementDropTool extends Tool {
         if (artboard !== this._hoverArtboard) {
             this._hoverArtboard = artboard;
             if (artboard) {
-                SnapController.calculateSnappingPoints(artboard);
+                this.view().snapController.calculateSnappingPoints(artboard);
             }
         }
 
@@ -172,7 +171,7 @@ export default class ElementDropTool extends Tool {
         this._point.set(event.x, event.y);
         var round = true;
         if (!event.ctrlKey) {
-            var snapped = SnapController.applySnappingForPoint(this._point);
+            var snapped = this.view().snapController.applySnappingForPoint(this._point);
             if (snapped.x === this._point.x && snapped.y === this._point.y) {
                 round = true;
             }

@@ -1,6 +1,5 @@
 import ExtensionBase from "./ExtensionBase";
 import DesignerView from "framework/DesignerView";
-import SnapController from "framework/SnapController";
 import { LayerType, IView } from "carbon-app";
 import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
 import Environment from "environment";
@@ -8,7 +7,7 @@ import UserSettings from "UserSettings";
 import { RenderEnvironment } from "carbon-core";
 
 function drawSnapLines(context, environment: RenderEnvironment) {
-    var lines = SnapController.snapLines;
+    var lines = this.view.snapController.snapLines;
     if (!lines.length) {
         return;
     }
@@ -41,8 +40,9 @@ function drawSnapLines(context, environment: RenderEnvironment) {
     context.restore();
 };
 
-function drawSnapDistances(context, environment: RenderEnvironment, view:IView) {
-    var lines = SnapController.distances;
+function drawSnapDistances(context, environment: RenderEnvironment) {
+    var lines = this.view.snapController.distances;
+    var that = this;
     if (!lines.length) {
         return;
     }
@@ -106,7 +106,7 @@ function drawSnapDistances(context, environment: RenderEnvironment, view:IView) 
         }
 
         context.stroke();
-        textDistance(context, line, view, environment.scale);
+        textDistance(context, line, that.view, environment.scale);
     }
 
     context.strokeStyle = UserSettings.snapTo.distanceColor;
@@ -168,7 +168,7 @@ export default class SnapVisualization extends ExtensionBase {
     }
 
     onLayerDraw(layer, context, environment: RenderEnvironment) {
-        drawSnapLines(context, environment);
-        drawSnapDistances(context, environment, this.view);
+        drawSnapLines.call(this, context, environment);
+        drawSnapDistances.call(this, context, environment);
     }
 }

@@ -2,15 +2,15 @@ import Environment from "../environment";
 import { intersectRects } from "../math/math";
 import ImageSourceHelper from "./ImageSourceHelper";
 import ImageContent from "./ImageContent";
-import SnapController from "./SnapController";
 import Rect from "../math/rect";
 import Selection from "./SelectionModel";
 import PropertyTracker from "./PropertyTracker";
 import { ContentSizing, IImage, ImageSource } from "carbon-model";
-import { ChangeMode, RenderEnvironment } from "carbon-core";
+import { ChangeMode, RenderEnvironment, IView } from "carbon-core";
 
 export class ImageEditTool {
     [name: string]: any;
+    view:IView;
 
     constructor() {
         this._frame = null;
@@ -20,9 +20,10 @@ export class ImageEditTool {
         this._content = null;
     }
 
-    attach(frame: IImage, emptySource: ImageSource) {
+    attach(view:IView, frame: IImage, emptySource: ImageSource) {
         this._tokens = [];
         this._frame = frame;
+        this.view = view;
 
         //full source rect {0, 0, 1000, 500}
         var fsr = ImageSourceHelper.boundaryRect(frame.source(), frame.runtimeProps.sourceProps);
@@ -60,19 +61,21 @@ export class ImageEditTool {
             this._frame.decorators.forEach(x => this._frame.removeDecorator(x));
         }
         this._tokens.push(Environment.controller.clickEvent.bind(this.onClicked));
-        this._tokens.push(Environment.view.interactionLayer.ondraw.bindHighPriority(this, this.layerdraw));
+        this._tokens.push(this.view.interactionLayer.ondraw.bindHighPriority(this, this.layerdraw));
 
-        Environment.view.interactionLayer.add(this._content);
+        this.view.interactionLayer.add(this._content);
         if (this._snapClone) {
-            SnapController.snapGuides.push(this._content, this._snapClone);
+            this.view.snapController.snapGuides.push(this._content, this._snapClone);
         }
 
         this._tokens.push(Environment.controller.actionManager.subscribe("cancel", () => {
             this.detach();
         }));
+
         this._tokens.push(Environment.controller.actionManager.subscribe("enter", () => {
             this.detach();
         }));
+
         this._tokens.push(Environment.controller.actionManager.subscribeToActionStart("delete", (a, e) => {
             this.detach(false);
             this._frame.setProps({ source: emptySource });
@@ -88,7 +91,7 @@ export class ImageEditTool {
         }
 
         if (this._snapClone) {
-            SnapController.removeGuides(this._content, this._snapClone);
+            this.view.snapController.removeGuides(this._content, this._snapClone);
         }
 
         if (this._tokens) {
@@ -97,7 +100,7 @@ export class ImageEditTool {
         }
         if (this._content) {
             this._content.deactivate();
-            Environment.view.interactionLayer.remove(this._content);
+            this.view.interactionLayer.remove(this._content);
             //disposed content sometimes is still in the old selection...
             //this._content.dispose();
             this._content = null;

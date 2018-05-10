@@ -1,6 +1,5 @@
 import RuntimeExtension from "../RuntimeExtension";
 import PropertyTracker from "../../framework/PropertyTracker";
-import SnapController from "../../framework/SnapController";
 import UIElement from "../../framework/UIElement";
 import Artboard from "../../framework/Artboard";
 import NullArtboard from "../../framework/NullArtboard";
@@ -91,7 +90,7 @@ export default class RulerExtension extends RuntimeExtension {
             }
             else if (props.guidesX !== undefined || props.guidesY !== undefined) {
                 this._rulerGuides.setGuides(e as Artboard);
-                SnapController.calculateSnappingPoints(e);
+                this.view.snapController.calculateSnappingPoints(e);
             }
         }
         else if (this._selectComposite.has(e)) {

@@ -1,20 +1,27 @@
-import SnapController from "framework/SnapController";
 import PropertyTracker from "framework/PropertyTracker";
 import LayoutGridLines from "./LayoutGridLines";
 import LayoutGridColumns from "./LayoutGridColumns";
-import Environment from "environment";
+import RuntimeExtension from "../RuntimeExtension";
 
 //TODO: handle artboard delete event
 
-export default class LayoutGridExtension {
+export default class LayoutGridExtension extends RuntimeExtension {
     [name: string]: any;
 
-    constructor(app) {
+    constructor(app, view, controller) {
+        super(app, view, controller);
+
         this.app = app;
+        this.view = view;
         this.app.onLoad(() => {this.load()});
         this.onArtboardBackgroundDrawnHandler = this.onArtboardBackgroundDrawn.bind(this);
         this.onArtboardContentDrawnHandler = this.onArtboardContentDrawn.bind(this);
     }
+
+    attach(app, view, controller){
+        super.attach.apply(this, arguments);
+    }
+
     load() {
         this._setupPageGuides(this.app.activePage);
 
@@ -106,16 +113,16 @@ export default class LayoutGridExtension {
             var columnWidth = calculateColumnWidth(settings, artboard.width);
 
             if (this.app.props.layoutGridStyle.type === "stroke") {
-                var lines = new LayoutGridLines(Environment.view);
+                var lines = new LayoutGridLines(this.view);
                 setupLayoutGrid(lines, artboard, columnWidth);
                 this._layoutLines[artboardId] = lines;
-                SnapController.snapGuides.push(lines);
+                this.view.snapController.snapGuides.push(lines);
             }
             else if (this.app.props.layoutGridStyle.type === "fill") {
                 var columns = new LayoutGridColumns();
                 setupLayoutGrid(columns, artboard, columnWidth);
                 this._layoutColumns[artboardId] = columns;
-                SnapController.snapGuides.push(columns);
+                this.view.snapController.snapGuides.push(columns);
             }
 
             this._attachToArtboard(artboard);
@@ -142,11 +149,11 @@ export default class LayoutGridExtension {
     _removeArtboardLayoutGrid(artboard) {
         var artboardId = artboard.id;
 
-        for (var i = SnapController.snapGuides.length - 1; i >= 0; i--) {
-            var guide = SnapController.snapGuides[i];
+        for (var i = this.view.snapController.snapGuides.length - 1; i >= 0; i--) {
+            var guide = this.view.snapController.snapGuides[i];
             var isLayoutGrid = guide instanceof LayoutGridColumns || guide instanceof LayoutGridLines;
             if (isLayoutGrid && guide.props.artboardId === artboardId) {
-                SnapController.snapGuides.splice(i, 1);
+                this.view.snapController.snapGuides.splice(i, 1);
             }
         }
 
@@ -172,11 +179,11 @@ export default class LayoutGridExtension {
         this._layoutLines = {};
         this._layoutColumns = {};
 
-        for (var i = SnapController.snapGuides.length - 1; i >= 0; i--) {
-            var guide = SnapController.snapGuides[i];
+        for (var i = this.view.snapController.snapGuides.length - 1; i >= 0; i--) {
+            var guide = this.view.snapController.snapGuides[i];
             var isLayoutGrid = guide instanceof LayoutGridColumns || guide instanceof LayoutGridLines;
             if (isLayoutGrid) {
-                SnapController.snapGuides.splice(i, 1);
+                this.view.snapController.snapGuides.splice(i, 1);
             }
         }
     }

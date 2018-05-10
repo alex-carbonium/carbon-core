@@ -3,10 +3,8 @@ import Brush from "framework/Brush";
 import Path from "framework/Path";
 import { PointDirection, Types, FrameCursors } from "./Defs";
 import Invalidate from "framework/Invalidate";
-import Environment from "environment";
 import Selection from "framework/SelectionModel";
 import SelectComposite from "framework/SelectComposite";
-import SnapController from "framework/SnapController";
 import angleAdjuster from "math/AngleAdjuster";
 import PropertyMetadata from "./PropertyMetadata";
 import Rect from "../math/rect";
@@ -36,7 +34,7 @@ var LinePoint = {
         context.fill();
         context.stroke();
     },
-    capture(frame, point, mousePoint) {
+    capture(frame, point, event) {
         var resizingElement = frame.element.clone();
         resizingElement.setProps(frame.element.selectLayoutProps(true));
         frame.resizingElement = resizingElement;
@@ -44,29 +42,29 @@ var LinePoint = {
         frame.origPointX = point.x;
         frame.origPointY = point.y;
         let box = frame.element.getBoundaryRectGlobal();
-        frame._offsetX = box.x + point.x - mousePoint.x;
-        frame._offsetY = box.y + point.y - mousePoint.y;
+        frame._offsetX = box.x + point.x - event.x;
+        frame._offsetY = box.y + point.y - event.y;
 
         var container = frame.element.primitiveRoot();
         if (!container && frame.element instanceof SelectComposite) {
             container = frame.element.first().primitiveRoot();
         }
 
-        SnapController.calculateSnappingPoints(container, [frame.element]);
+        event.view.snapController.calculateSnappingPoints(container, [frame.element]);
         frame.element.setProps({visible:false}, ChangeMode.Self);
-
-        Environment.view.interactionLayer.add(resizingElement);
+        frame.view = event.view;
+        event.view.interactionLayer.add(resizingElement);
     },
     release(frame) {
         var e = frame.resizingElement;
-        SnapController.clearActiveSnapLines();
+        frame.view.snapController.clearActiveSnapLines();
 
         if (e) {
             var props = e.selectProps(["x1", "x2", "y1", "y2"]);
             frame.element.prepareAndSetProps(props);
             frame.element.setProps({visible:true}, ChangeMode.Self);
 
-            Environment.view.interactionLayer.remove(e);
+            frame.view.interactionLayer.remove(e);
             e.dispose();
             Selection.refreshSelection();
         }
@@ -74,7 +72,7 @@ var LinePoint = {
     rotateCursorPointer(index, angle) {
         return index;
     },
-    change(frame, dx, dy, point, mousePoint, keys) {
+    change(frame, dx, dy, point, mousePoint, keys, event) {
         if (!frame.resizingElement) {
             return;
         }
@@ -98,7 +96,7 @@ var LinePoint = {
             dy += newPoint.y - oldPointLocal.y;
         }
         else {
-            newPoint = SnapController.applySnappingForPoint({ x: oldx, y: oldy });
+            newPoint = event.view.applySnappingForPoint({ x: oldx, y: oldy });
             dx += newPoint.x - oldx;
             dy += newPoint.y - oldy;
         }

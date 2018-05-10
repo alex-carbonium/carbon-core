@@ -4,7 +4,6 @@ import Line from "../../framework/Line";
 import SystemConfiguration from "../../SystemConfiguration";
 import Selection from "../../framework/SelectionModel";
 import Invalidate from "../../framework/Invalidate";
-import SnapController from "../../framework/SnapController";
 import Brush from "../../framework/Brush";
 import Point from "../../math/point";
 import Environment from "../../environment";
@@ -46,7 +45,7 @@ export default class LineCreator extends Tool {
 
     detach() {
         super.detach.apply(this, arguments);
-        SnapController.clearActiveSnapLines();
+        this.view().snapController.clearActiveSnapLines();
     }
     mousedown(event: IMouseEventData) {
         var eventData = { handled: false, x: event.x, y: event.y };
@@ -61,7 +60,7 @@ export default class LineCreator extends Tool {
             var pos:ICoordinate = event;
         }
         else {
-            pos = SnapController.applySnappingForPoint(event);
+            pos = this.view().snapController.applySnappingForPoint(event);
         }
 
         this._startPoint = { x: pos.x, y: pos.y };
@@ -112,7 +111,7 @@ export default class LineCreator extends Tool {
         if (artboard !== this._hoverArtboard) {
             this._hoverArtboard = artboard;
             if (artboard) {
-                SnapController.calculateSnappingPoints(artboard);
+                this.view().snapController.calculateSnappingPoints(artboard);
             }
         }
 
@@ -120,7 +119,7 @@ export default class LineCreator extends Tool {
             var pos:ICoordinate = event;
         }
         else {
-            pos = SnapController.applySnappingForPoint(event);
+            pos = this.view().snapController.applySnappingForPoint(event);
         }
 
         if (this._mousepressed) {
