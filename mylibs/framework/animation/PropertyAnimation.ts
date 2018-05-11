@@ -7,6 +7,7 @@ import Matrix from "math/matrix";
 import Rect from "math/rect";
 import Point from "../../math/point";
 import { RuntimeProxy } from "../../code/runtime/RuntimeProxy";
+import AnimationController from "./AnimationController";
 
 let hsluvConvertor = {
     from: function (values: number[]) {
@@ -208,7 +209,7 @@ export class PropertyAnimation {
 
     start(): Promise<void> {
         if (this.group) {
-            Environment.view.animationController.registerAnimationGroup(this.group);
+            AnimationController.registerAnimationGroup(this.group);
         }
 
         return this.group.promise();

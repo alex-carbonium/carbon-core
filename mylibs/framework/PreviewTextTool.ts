@@ -91,7 +91,7 @@ export class PreviewTextTool {
         if (!this.editor) {
             return false;
         }
-        return this.text.hitTest(e, Environment.view.scale());
+        return this.text.hitTest(e, Environment.view);
     }
 
     private hitNewElement(e) {

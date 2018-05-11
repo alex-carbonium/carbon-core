@@ -397,14 +397,14 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable {
         }
         else {
             this.unlockGroup();
-            let element = this.hitElement(event, event.view.scale());
+            let element = this.hitElement(event, event.view);
             if (element && element !== this) {
                 Selection.makeSelection([element]);
             }
         }
     }
 
-    hitTest(point, scale) {
+    hitTest(point, view) {
         if (this._activeGroup) {
             return true;
         }

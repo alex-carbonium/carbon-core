@@ -73,7 +73,7 @@ export default class TextTool extends Tool {
         this._detaching = false;
         this._dragController.bindToController(controller);
         this._onElementSelectedToken = Selection.onElementSelected.bind(this, this.onElementSelected);
-
+        this._view = view;
         this._defaultFormatter = new DefaultFormatter();
         this._defaultFormatter.initFormatter(this._app);
         Selection.requestProperties([this._defaultFormatter]);
@@ -454,13 +454,13 @@ export default class TextTool extends Tool {
     }
 
     _hitNewElement(e) {
-        return this._view.hitElementDirect(e)
+        return e.view.hitElementDirect(e)
     }
     _hittingEdited(e) {
         if (!this._editor) {
             return false;
         }
-        return this.text.hitTest(e, this._view.scale());
+        return this.text.hitTest(e, e.view);
     }
     private tryGetSupportedElement() {
         var selection = Selection.elements;

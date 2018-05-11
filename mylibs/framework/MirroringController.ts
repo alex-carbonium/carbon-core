@@ -146,7 +146,7 @@ export default class MirroringController implements IController {
     }
 
     onscroll(eventData) {
-        var element = this.view.page.hitElement(eventData, this.view.scale());
+        var element = this.view.page.hitElement(eventData, this.view);
         var delta = { dx: eventData.event.deltaX, dy: eventData.event.deltaY };
         this._propagateScroll(delta, element);
     }

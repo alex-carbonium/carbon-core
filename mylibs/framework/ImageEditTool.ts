@@ -147,7 +147,7 @@ export class ImageEditTool {
     }
 
     onClicked = e => {
-        if (!this._content.hitTest(e, e.view.scale())) {
+        if (!this._content.hitTest(e, e.view)) {
             this.detach();
             e.handled = true;
         }

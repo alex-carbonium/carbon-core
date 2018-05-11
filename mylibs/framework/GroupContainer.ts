@@ -6,7 +6,7 @@ import InteractiveContainer from "./InteractiveContainer";
 import UIElement from "./UIElement";
 import Point from "../math/point";
 import Environment from "../environment";
-import { IGroupContainer, ChangeMode, IIsolatable, IMouseEventData, PropDescriptor } from "carbon-core";
+import { IGroupContainer, ChangeMode, IIsolatable, IMouseEventData, PropDescriptor, IView } from "carbon-core";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
 import { IPoint } from "carbon-geometry";
 import CommonPropsManager from "./CommonPropsManager";
@@ -28,8 +28,8 @@ interface IGroupContainerRuntimeProps {
 export default class GroupContainer extends InteractiveContainer implements IGroupContainer, IIsolatable {
     runtimeProps: IGroupContainerRuntimeProps;
 
-    hitTest(point: IPoint, scale: number, boundaryRectOnly = false) {
-        if (!super.hitTest(point, scale)) {
+    hitTest(point: IPoint, view: IView, boundaryRectOnly = false) {
+        if (!super.hitTest(point, view)) {
             return false;
         }
         if (boundaryRectOnly) {
@@ -37,7 +37,7 @@ export default class GroupContainer extends InteractiveContainer implements IGro
         }
         for (var i = this.children.length - 1; i >= 0; --i) {
             var el = this.children[i];
-            if (el.hitTest(point, scale)) {
+            if (el.hitTest(point, view)) {
                 return true;
             }
         }
@@ -88,7 +88,7 @@ export default class GroupContainer extends InteractiveContainer implements IGro
         }
         else {
             this.unlockGroup();
-            var element = this.hitElement(event, event.view.scale());
+            var element = this.hitElement(event, event.view);
             if (element && element !== this) {
                 Selection.makeSelection([element]);
             }

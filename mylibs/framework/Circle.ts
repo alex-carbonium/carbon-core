@@ -8,7 +8,7 @@ import { Types } from "./Defs";
 import { RenderEnvironment, StrokePosition } from "carbon-core";
 
 class Circle extends Shape {
-    hitTest(/*Point*/point, scale) {
+    hitTest(/*Point*/point, view) {
         if (!this.visible || this.hasBadTransform()) {
             return false;
         }
@@ -17,11 +17,11 @@ class Circle extends Shape {
         point = matrix.transformPoint(point);
 
         if (this.fill && this.fill.type) {
-            let rect = this.getHitTestBox(scale);
+            let rect = this.getHitTestBox(view);
             return math.isPointInEllipse(rect, point);
         }
 
-        let rect = this.getHitTestBox(scale, false, false);
+        let rect = this.getHitTestBox(view, false, false);
 
         var innerRect, outerRect;
 

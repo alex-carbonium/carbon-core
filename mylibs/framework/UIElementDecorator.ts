@@ -4,6 +4,7 @@ export default class UIElementDecorator {
 	[x: string]: any;
 
 	public visible: boolean;
+	protected element: IUIElement;
 
 	constructor() {
 		this.element = null;

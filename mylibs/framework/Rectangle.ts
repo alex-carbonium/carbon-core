@@ -213,7 +213,7 @@ class Rectangle extends Shape {
         return this.props.cornerRadius;
     }
 
-    hitTest(/*Point*/point, scale) {
+    hitTest(/*Point*/point, view) {
         if (!this.visible || this.hasBadTransform()) {
             return false;
         }
@@ -224,7 +224,7 @@ class Rectangle extends Shape {
             return Shape.prototype.hitTest.apply(this, arguments);
         }
 
-        var rect = this.getHitTestBox(scale, false, false);
+        var rect = this.getHitTestBox(view, false, false);
         var outerRect, innerRect;
 
         var matrix = this.globalViewMatrixInverted();

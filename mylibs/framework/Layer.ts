@@ -210,9 +210,9 @@ class Layer extends Container implements ILayer {
         }
     }
 
-    hitElement(position, scale, predicate?, directSelection?):IUIElement {
+    hitElement(position, view, predicate?, directSelection?):IUIElement {
         for (var i = 0; i < this._hitFirstElements.length; ++i) {
-            var element = this._hitFirstElements[i].hitElement(position, scale, predicate, directSelection);
+            var element = this._hitFirstElements[i].hitElement(position, view, predicate, directSelection);
             if (element) {
                 return element;
             }

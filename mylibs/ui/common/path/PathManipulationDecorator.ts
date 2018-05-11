@@ -93,6 +93,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
     private _cancelBinding: IDisposable;
     private _selectedPoints: any;
     private _selectFrame: SelectFrame;
+    protected element:Path;
 
     constructor(protected view:IView, public constructMode: boolean = false) {
         super();
@@ -171,7 +172,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
     }
 
     get path(): Path {
-        return this.element;
+        return this.element as any;
     }
 
     attach(element: Path) {
@@ -646,7 +647,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
             return;
         }
 
-        if (!this.element.hitTest(event, scale)) {
+        if (!this.element.hitTest(event, event.view)) {
             this.cancel();
         }
     }

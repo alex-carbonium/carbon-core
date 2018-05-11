@@ -1,14 +1,22 @@
 import { IAnimationController } from "carbon-app";
 
-export default class AnimationController implements IAnimationController {
+class AnimationController implements IAnimationController {
     _cancelRedrawCallback: any;
     _requestRedrawCallback: any;
     _activeGroups: any[];
 
-    constructor(requestRedrawCallback, cancelRedrawCallback) {
+    constructor() {
         this._activeGroups = [];
+    }
+
+    attach(requestRedrawCallback, cancelRedrawCallback) {
         this._requestRedrawCallback = requestRedrawCallback;
         this._cancelRedrawCallback = cancelRedrawCallback;
+    }
+
+    detach() {
+        this._requestRedrawCallback = null;
+        this._cancelRedrawCallback = null;
     }
 
     setCallbacks(requestRedrawCallback, cancelRedrawCallback) {
@@ -52,3 +60,5 @@ export default class AnimationController implements IAnimationController {
         }
     }
 }
+
+export default new AnimationController();

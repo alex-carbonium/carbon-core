@@ -257,7 +257,7 @@ export default class PreviewController extends ControllerBase {
                 this._mouseOverElements.splice(i, 1);
             } else if (e === element) {
                 alreadyFound = true;
-            } else if (!e.hitTest(eventData)) {
+            } else if (!e.hitTest(eventData, eventData.view)) {
                 this._propagateAction(eventData, "mouseleave", e, false);
                 this._mouseOverElements.splice(i, 1);
             }

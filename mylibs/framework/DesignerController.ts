@@ -74,14 +74,14 @@ export default class DesignerController implements IController {
             }
 
             var composite = Selection.selectComposite();
-            if (composite.canDrag() && composite.hitTest(eventData, this.view.scale())) {
+            if (composite.canDrag() && composite.hitTest(eventData, this.view)) {
                 Cursor.setCursor(keyboard.state.altKey ? "move_clone" : "move_cursor");
                 return;
             }
 
             for (var i = this.view._layers.length - 1; i >= 0; i--) {
                 var layer = this.view._layers[i];
-                var element = layer.hitElement(eventData, this.view.scale());
+                var element = layer.hitElement(eventData, this.view);
                 if (element !== null) {
                     var cursor = element.cursor(eventData);
                     if (cursor) {
@@ -123,7 +123,7 @@ export default class DesignerController implements IController {
     _bubbleMouseEvent(eventData, method) {
         for (var i = this.view._layers.length - 1; i >= 0; i--) {
             var layer = this.view._layers[i];
-            var e = layer.hitElement(eventData, this.view.scale());
+            var e = layer.hitElement(eventData, this.view);
             if (e && e[method] /*&& e.canSelect()*/ && !e.locked()) {
                 e[method](eventData, keyboard.state);
                 if (eventData.handled) {
@@ -269,9 +269,9 @@ export default class DesignerController implements IController {
     draggingOver(eventData: IMouseEventData) {
         var scale = this.view.scale();
         var dragOverElement = null;
-        var element = this.view.hitElementDirect(eventData, (e: UIElement, position, scale) => {
+        var element = this.view.hitElementDirect(eventData, (e: UIElement, position, view) => {
             var descendantOrSelf = this._draggingElement.elements.some(x => e.isDescendantOrSame(x));
-            if (!descendantOrSelf && e.hitTest(position, scale, true)) {
+            if (!descendantOrSelf && e.hitTest(position, this.view, true)) {
                 return true;
             }
 
@@ -377,7 +377,7 @@ export default class DesignerController implements IController {
         if (!eventData.handled) {
             var composite = Selection.selectComposite();
             // first check current selection
-            if (composite && composite.hitTest(eventData, this.view.scale())) {
+            if (composite && composite.hitTest(eventData, this.view)) {
                 if (composite.canDrag()) {
                     this._startDraggingData = eventData;
                     this._startDraggingElement = composite;
@@ -389,7 +389,7 @@ export default class DesignerController implements IController {
             else {
                 for (var i = this.view._layers.length - 1; i >= 0; i--) {
                     var layer = this.view._layers[i];
-                    var element = layer.hitElement(eventData, this.view.scale(), null, Selection.directSelectionEnabled());
+                    var element = layer.hitElement(eventData, this.view, null, Selection.directSelectionEnabled());
                     if (element !== null) {
                         if (element.canDrag()) {
                             this._startDraggingData = eventData;

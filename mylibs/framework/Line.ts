@@ -141,7 +141,7 @@ class Line extends Shape implements ILine {
         return false;
     }
 
-    hitTest(/*Point*/point, scale) {
+    hitTest(/*Point*/point, view) {
         if (!this.visible || this.hasBadTransform()) {
             return false;
         }
@@ -151,7 +151,7 @@ class Line extends Shape implements ILine {
         var rect = this.boundaryRect();
 
         let dw = 0;
-        if (scale <= 1) {
+        if (view.scale() <= 1) {
             dw = 4;
         }
 

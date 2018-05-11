@@ -22,6 +22,7 @@ import { CompiledCodeProvider } from "../../code/CompiledCodeProvider";
 import { NameProvider } from "../../code/NameProvider";
 import StateBoard from "../StateBoard";
 import AnimationGroup from "../animation/AnimationGroup";
+import AnimationController from "../animation/AnimationController";
 
 export default class PreviewModel implements IPreviewModel, IDisposable {
     private _activePage: IPage<IPageProps> & { originalSize: ISize } = NullPage;
@@ -77,7 +78,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
             return;
         }
 
-        this.view.animationController.reset();
+        AnimationController.reset();
         let stateId = this._getStateTransition(artboardId);
 
         if(stateId) {
@@ -385,7 +386,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
             id = this.activePage.children[0].id;
         }
 
-        this.view.animationController.reset();
+        AnimationController.reset();
 
         if (id) {
             return this.getScreenById(id).then(page => {

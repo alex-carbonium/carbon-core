@@ -155,7 +155,7 @@ export default class Polygon extends Shape {
 
     dblclick(event: IMouseEventData, scale) {
         if (this.isInEditMode()) {
-            if (!this.hitTest(event, scale)) {
+            if (!this.hitTest(event, event.view)) {
                 this.changeMode(false);
             }
         }

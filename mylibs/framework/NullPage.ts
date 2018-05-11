@@ -100,7 +100,7 @@ class NullPage extends UIElement implements IPage {
     getMaxOuterBorder(): number {
         return 0;
     }
-    hitTest(point: IPoint, scale: number, boundaryRectOnly: boolean): boolean {
+    hitTest(point: IPoint, view: any, boundaryRectOnly: boolean): boolean {
         return false;
     }
     hitTestGlobalRect(rect: IRect, directSelection: boolean): boolean {
@@ -139,7 +139,7 @@ class NullPage extends UIElement implements IPage {
     getAllArtboards() {
         return [];
     }
-    getArtboardAtPoint(value, scale) {
+    getArtboardAtPoint(value, view) {
         return null;
     }
     getElementsInRect() {

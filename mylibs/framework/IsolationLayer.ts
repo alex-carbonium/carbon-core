@@ -150,12 +150,12 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         return this.isActive && this.ownerElement === element;
     }
 
-    hitElement(/*Point*/position, scale, predicate?, directSelection?):IUIElement {
+    hitElement(/*Point*/position, view, predicate?, directSelection?):IUIElement {
         if (!this.isActive) {
             return null;
         }
 
-        let element = super.hitElement(position, scale, predicate, directSelection);
+        let element = super.hitElement(position, view, predicate, directSelection);
         return element || this;
     }
 

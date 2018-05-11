@@ -107,7 +107,7 @@ export default class LineCreator extends Tool {
             event.cursor = Cursors.Pen.Line;
         }
 
-        var artboard = App.Current.activePage.getArtboardAtPoint(event, event.view.scale());
+        var artboard = App.Current.activePage.getArtboardAtPoint(event, event.view);
         if (artboard !== this._hoverArtboard) {
             this._hoverArtboard = artboard;
             if (artboard) {

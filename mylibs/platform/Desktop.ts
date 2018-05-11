@@ -11,6 +11,7 @@ import Environment from "environment";
 import backend from "../backend";
 import Hammer from "hammerjs";
 import { IApp, IView, IController } from "carbon-core";
+import AnimationController from "../framework/animation/AnimationController";
 
 var debug = require("DebugUtil")("carb:desktop");
 
@@ -281,7 +282,7 @@ var onmouseleave = function (event) {
                 }
             });
 
-            this.view.animationController.registerAnimationGroup(mouseOutData.animationGroup);
+            AnimationController.registerAnimationGroup(mouseOutData.animationGroup);
             $(document).bind('mousemove', onDocumentMouseMove);
         }
 

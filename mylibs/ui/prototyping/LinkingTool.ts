@@ -218,7 +218,7 @@ export default class LinkingTool extends Tool {
 
     _linkToArtboard(point) {
         var page = this._app.activePage;
-        var targetArgtboard = page.getArtboardAtPoint(point, this.view().scale());
+        var targetArgtboard = page.getArtboardAtPoint(point, this.view());
         var activeStory = this._activeStory;
         if (!activeStory) {
             return;
@@ -359,7 +359,7 @@ export default class LinkingTool extends Tool {
             this._highlightHoverElements(event, scale);
         }
 
-        var target = this._app.activePage.hitElement(event, scale, null, Selection.directSelectionEnabled());
+        var target = this._app.activePage.hitElement(event, this.view(), null, Selection.directSelectionEnabled());
         if (target === this._app.activePage) {
             target = null;
         }

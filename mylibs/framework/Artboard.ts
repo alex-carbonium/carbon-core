@@ -17,7 +17,7 @@ import Environment from "environment";
 import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
-import { ChangeMode, PatchType, IPrimitiveRoot, LayerType, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext, IContainer, WorkspaceTool, IMouseEventData, RenderEnvironment, RenderFlags, UIElementFlags, ProxyDefinition, IAnimationOptions } from "carbon-core";
+import { ChangeMode, PatchType, IPrimitiveRoot, LayerType, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext, IContainer, WorkspaceTool, IMouseEventData, RenderEnvironment, RenderFlags, UIElementFlags, ProxyDefinition, IAnimationOptions, IView, ICoordinate } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
 import Rect from "../math/rect";
 import CoreIntl from "../CoreIntl";
@@ -823,27 +823,28 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
      * - When hitting elements inside the artboard, it is further refined if an element is really hit.
      * - Artboard tool still uses hit testing by bounding box only.
      */
-    hitTest(point, scale) {
-        let res = super.hitTest(point, scale);
+    hitTest(point, view) {
+        let res = super.hitTest(point, view);
         if (res) {
             return res;
         }
         if (this.hasBadTransform()) {
             return false;
         }
-        return this.hitTestHeader(point, scale);
+        return this.hitTestHeader(point, view);
     }
 
-    hitTestBoundingBox(point, scale) {
+    hitTestBoundingBox(point, view) {
         if (this.hasBadTransform()) {
             return false;
         }
-        let rect = super.getHitTestBox(scale);
-        return this.hitTestLocalRect(rect, point, scale) || this.hitTestHeader(point, scale);
+        let rect = super.getHitTestBox(view);
+        return this.hitTestLocalRect(rect, point, view) || this.hitTestHeader(point, view);
     }
 
-    private hitTestHeader(point, scale) {
+    private hitTestHeader(point, view) {
         let bb = this.getBoundingBoxGlobal();
+        let scale = view.scale();
         return isPointInRect({ x: bb.x, y: bb.y - 20 / scale, width: bb.width, height: 20 / scale }, point);
     }
 
@@ -851,7 +852,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
      * If an artboard hits itself and has an extended hit test box, it has to be validated
      * if the artboard is "really" hit by checking the boundary rect.
      */
-    hitElement(position, scale, predicate?, directSelection?): IUIElement {
+    hitElement(position:ICoordinate, view:IView, predicate?, directSelection?): IUIElement {
         let element = super.hitElement.apply(this, arguments);
         if (!element) {
             return null;
@@ -862,7 +863,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         }
 
         if (element === this && this.props.hitTestBox) {
-            if (!this.hitTestBoundingBox(position, scale)) {
+            if (!this.hitTestBoundingBox(position, view)) {
                 return null;
             }
         }

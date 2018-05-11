@@ -146,7 +146,7 @@ declare module "carbon-model" {
 
         invalidate(mask?:number);
 
-        hitTest(point: IPoint, scale: number, boundaryRectOnly?: boolean): boolean;
+        hitTest(point: IPoint, view: any, boundaryRectOnly?: boolean): boolean;
         hitTestGlobalRect(rect: IRect, directSelection?: boolean): boolean;
 
         showResizeHint(): boolean;
@@ -211,7 +211,7 @@ declare module "carbon-model" {
 
         changePosition(element: IUIElement, index: number, mode?: ChangeMode);
 
-        hitElement(event, scale: number, predicate?, directSelection?): IUIElement;
+        hitElement(event, view: IView, predicate?, directSelection?): IUIElement;
 
         autoPositionChildren(): boolean;
 

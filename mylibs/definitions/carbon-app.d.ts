@@ -208,7 +208,7 @@ declare module "carbon-app" {
     export interface IPage<TProps extends IPageProps = IPageProps> extends ILayer<IPageProps> {
         getAllArtboards(excludeStateboards?): IArtboard[];
         getActiveArtboard(): IArtboard;
-        getArtboardAtPoint(point: ICoordinate, scale:number): IArtboard;
+        getArtboardAtPoint(point: ICoordinate, view:IView): IArtboard;
         setActiveArtboard(artboard: IArtboard, doNotTrack?: boolean): void;
         setActiveArtboardById(id: string): void;
 
@@ -278,7 +278,6 @@ declare module "carbon-app" {
         snapController:any;
         viewContainerElement: HTMLElement;
         page: IPage;
-        animationController: IAnimationController;
         contextScale: number;
 
         scaleChanged: IEvent<number>;

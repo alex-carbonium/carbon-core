@@ -20,7 +20,7 @@ export default class InteractiveContainer extends Container implements IIsolatab
 
     dblclick(event: IMouseEventData) {
         this.unlockGroup();
-        var element = this.hitElement(event, event.view.scale());
+        var element = this.hitElement(event, event.view);
         if (element && element !== this) {
             Selection.makeSelection([element]);
         }

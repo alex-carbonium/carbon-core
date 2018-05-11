@@ -117,7 +117,7 @@ export default class ElementDropTool extends Tool {
 
         this._prepareMousePoint(event);
 
-        var artboard = App.Current.activePage.getArtboardAtPoint(event, event.view.scale());
+        var artboard = App.Current.activePage.getArtboardAtPoint(event, event.view);
         if (artboard !== this._hoverArtboard) {
             this._hoverArtboard = artboard;
             if (artboard) {

@@ -35,7 +35,7 @@ import ResizeOptions from "../decorators/ResizeOptions";
 import { KeyboardState, IConstraints } from "carbon-basics";
 import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
-import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps, RenderFlags, RenderEnvironment, IContext, PropDescriptor, Origin, StrokePosition, IProxySource, ProxyDefinition, DataBag, IDisposable } from "carbon-core";
+import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps, RenderFlags, RenderEnvironment, IContext, PropDescriptor, Origin, StrokePosition, IProxySource, ProxyDefinition, DataBag, IDisposable, IView } from "carbon-core";
 import ExtensionPoint from "./ExtensionPoint";
 import CoreIntl from "../CoreIntl";
 import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
@@ -902,8 +902,9 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return rect;
     }
 
-    getHitTestBox(scale: number, includeMargin: boolean = false, includeBorder: boolean = true): IRect {
+    getHitTestBox(view: IView, includeMargin: boolean = false, includeBorder: boolean = true): IRect {
         var rect = this.boundaryRect();
+        let scale = view.scale();
         var goodScaleW = rect.width * scale > 10;
         var goodScaleH = rect.height * scale > 10;
         if (!includeBorder && goodScaleW && goodScaleW) {
@@ -931,18 +932,20 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return new Rect(x, y, width, height);
     }
 
-    hitTest(/*Point*/point, scale, boundaryRectOnly = false) {
+    hitTest(/*Point*/point, view, boundaryRectOnly = false) {
         if (!this.visible || this.hasBadTransform()) {
             return false;
         }
-        let rect = this.getHitTestBox(scale, false);
-        return this.hitTestLocalRect(rect, point, scale);
+        let rect = this.getHitTestBox(view, false);
+        return this.hitTestLocalRect(rect, point, view);
     }
-    protected hitTestLocalRect(rect: IRect, point: IPoint, scale: number) {
+
+    protected hitTestLocalRect(rect: IRect, point: IPoint, view: IView) {
         let matrix = this.globalViewMatrixInverted();
         point = matrix.transformPoint(point);
         return point.x >= rect.x && point.x < rect.x + rect.width && point.y >= rect.y && point.y < rect.y + rect.height;
     }
+
     hitTestGlobalRect(rect: Rect, directSelection: boolean) {
         if (!this.hitVisible(directSelection)) {
             return false;
@@ -1888,16 +1891,16 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return m.transformPoint(this.boundaryRect().center());
     }
 
-    hitElement(position, scale, predicate?, directSelection?): IUIElement {
+    hitElement(position, view, predicate?, directSelection?): IUIElement {
         if (!this.hitVisible(directSelection)) {
             return null;
         }
         if (predicate) {
-            if (!predicate(this, position, scale)) {
+            if (!predicate(this, position, view)) {
                 return null;
             }
         }
-        else if (!this.hitTest(position, scale)) {
+        else if (!this.hitTest(position, view)) {
             return null;
         }
 

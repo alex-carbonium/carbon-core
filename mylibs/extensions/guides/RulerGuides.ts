@@ -162,7 +162,7 @@ export default class RulerGuides {
     };
     onDragging = e => {
         if (this._guideX !== null || this._guideY !== null) {
-            var artboard = this._app.activePage.getArtboardAtPoint(e, this._view.scale());
+            var artboard = this._app.activePage.getArtboardAtPoint(e, this._view);
             if (artboard !== this._hoverArtboard) {
                 this._hoverArtboard = artboard;
                 if (artboard) {

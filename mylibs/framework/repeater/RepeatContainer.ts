@@ -108,8 +108,8 @@ export default class RepeatContainer extends Container implements IRepeatContain
         var scale = event.view.scale();
         for (var i = 0; i < this.children.length; i++) {
             var cell = this.children[i];
-            if (cell.hitTest(event, scale)) {
-                var element = cell.hitElementDirect(event, scale);
+            if (cell.hitTest(event, event.view)) {
+                var element = cell.hitElementDirect(event, event.view);
                 if (element && element !== cell) {
                     Selection.makeSelection([element]);
                 }

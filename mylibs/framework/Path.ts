@@ -67,10 +67,10 @@ function pointsEqual(p1, p2) {
         && p1.cp2x === p2.cp2x && p1.cp2y === p2.cp2y;
 }
 
-function getClickedPoint(x, y) {
+function getClickedPoint(x, y, view) {
     let pos = this.globalViewMatrixInverted().transformPoint2(x, y);
 
-    let zoom = Environment.view.scale();
+    let zoom = view.scale();
     for (let i = 0, len = this.points.length; i < len; ++i) {
         let pt = this.points[i];
         pt.idx = i;
@@ -83,10 +83,10 @@ function getClickedPoint(x, y) {
     return null;
 };
 
-function getClickedHandlePoint(x, y) {
+function getClickedHandlePoint(x, y, view) {
     let pos = this.globalViewMatrixInverted().transformPoint2(x, y);
 
-    let zoom = Environment.view.scale();
+    let zoom = view.scale();
 
     for (let i = 0, len = this.points.length; i < len; ++i) {
         let pt = this.points[i];
@@ -96,18 +96,19 @@ function getClickedHandlePoint(x, y) {
         }
         let x2 = pos.x - pt.cp1x
             , y2 = pos.y - pt.cp1y
-        if (x2 * x2 + y2 * y2 < CP_HANDLE_RADIUS2 * Environment.view.contextScale / (zoom * zoom)) {
+        if (x2 * x2 + y2 * y2 < CP_HANDLE_RADIUS2 * view.contextScale / (zoom * zoom)) {
             pt._selectedHandle = 1;
             return pt;
         }
 
         x2 = pos.x - pt.cp2x
         y2 = pos.y - pt.cp2y
-        if (x2 * x2 + y2 * y2 < CP_HANDLE_RADIUS2 * Environment.view.contextScale / (zoom * zoom)) {
+        if (x2 * x2 + y2 * y2 < CP_HANDLE_RADIUS2 * view.contextScale / (zoom * zoom)) {
             pt._selectedHandle = 2;
             return pt;
         }
     }
+
     return null;
 };
 
@@ -336,12 +337,12 @@ class Path extends Shape {
         this.setProps({ points: value });
     }
 
-    controlPointForPosition(pos) {
-        return getClickedPoint.call(this, pos.x, pos.y);
+    controlPointForPosition(event) {
+        return getClickedPoint.call(this, event.x, event.y, event.view);
     }
 
-    handlePointForPosition(pos) {
-        return getClickedHandlePoint.call(this, pos.x, pos.y);
+    handlePointForPosition(event) {
+        return getClickedHandlePoint.call(this, event.x, event.y, event.view);
     }
 
     pointAtIndex(idx) {
@@ -635,13 +636,13 @@ class Path extends Shape {
         return this.props.closed || (this.points.length && this.points[this.points.length - 1].closed);
     }
 
-    hitTest(point, scale, boundaryRectOnly = false) {
+    hitTest(point, view, boundaryRectOnly = false) {
         if (this.hasBadTransform()) {
             return false;
         }
 
-        if ((getClickedPoint.call(this, point.x, point.y))
-            || (getClickedHandlePoint.call(this, point.x, point.y))) {
+        if ((getClickedPoint.call(this, point.x, point.y, view))
+            || (getClickedHandlePoint.call(this, point.x, point.y, view))) {
             return true;
         }
         let res = UIElement.prototype.hitTest.apply(this, arguments);

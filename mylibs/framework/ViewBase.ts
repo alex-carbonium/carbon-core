@@ -87,7 +87,6 @@ export default class ViewBase implements IView {
     public _highlightTarget: any = null;
     //TODO: move to platform
     viewContainerElement: HTMLElement;
-    animationController: AnimationController;
 
     contextScale: number;
     scaleChanged: IEvent<number>;
@@ -246,11 +245,8 @@ export default class ViewBase implements IView {
 
         this._requestRedrawCallback = requestRedrawCallback;
         this._renderingScheduledCallback = renderingScheduledCallback;
-        if (this.animationController) {
-            this.animationController.setCallbacks(requestRedrawCallback, cancelRedrawCallback);
-        } else {
-            this.animationController = new AnimationController(requestRedrawCallback, cancelRedrawCallback);
-        }
+
+        AnimationController.attach(requestRedrawCallback, cancelRedrawCallback);
 
         this.requestRedraw();
     }
@@ -294,7 +290,7 @@ export default class ViewBase implements IView {
     }
 
     draw() {
-        this.animationController.update();
+        AnimationController.update();
 
         if (this._page.isInvalidateRequired()) {
             if (this._page._placeBeforeRender) {
@@ -728,7 +724,7 @@ export default class ViewBase implements IView {
         var start = includeInteractionLayer ? this._layers.length - 1 : this._layers.length - 2;
         for (var i = start; i >= 0; --i) {
             var layer = this._layers[i] as any;
-            var element = layer.hitElement(eventData, this.scale(), null, Selection.directSelectionEnabled());
+            var element = layer.hitElement(eventData, this, null, Selection.directSelectionEnabled());
             if (element) {
                 return element;
             }
@@ -758,7 +754,7 @@ export default class ViewBase implements IView {
         for (var i = this._layers.length - 1; i >= 0; --i) {
             var layer = this._layers[i] as any;
             if (!layer.hitTransparent()) {
-                var element = layer.hitElementDirect(mousePoint, this.scale(), callback);
+                var element = layer.hitElementDirect(mousePoint, this, callback);
                 if (element) {
                     return element;
                 }

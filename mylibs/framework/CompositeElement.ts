@@ -5,7 +5,7 @@ import { Types } from "./Defs";
 import Brush from "./Brush";
 import Font from "./Font";
 import UIElement from "./UIElement";
-import { IGroupContainer } from "carbon-core";
+import { IGroupContainer, IView } from "carbon-core";
 import Box from "./Box";
 import Rect from "../math/rect";
 import Matrix from "../math/matrix";
@@ -296,19 +296,19 @@ export default class CompositeElement extends UIElement implements IComposite {
         }
     }
 
-    hitTest(point: ICoordinate, scale: number, boundaryRectOnly: boolean = false) {
+    hitTest(point: ICoordinate, view: IView, boundaryRectOnly: boolean = false) {
         var count = this.count();
         if (count === 0) {
             return false;
         }
 
         if (boundaryRectOnly && count > 1) {
-            return super.hitTest(point, scale, boundaryRectOnly);
+            return super.hitTest(point, view, boundaryRectOnly);
         }
 
         for (var i = count - 1; i >= 0; i--) {
             var el = this.elements[i];
-            if (el.hitTest(point, scale)) {
+            if (el.hitTest(point, view)) {
                 return true;
             }
         }

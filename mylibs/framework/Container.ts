@@ -669,7 +669,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
     delegateToChildren(name, event) {
         for (let i = this.children.length - 1; i >= 0; --i) {
             let element = this.children[i];
-            if (element.hitTest(event, event.view.scale())) {
+            if (element.hitTest(event, event.view)) {
                 element[name](event);
                 if (event.handled) {
                     break;
@@ -678,16 +678,16 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
         }
     }
-    hitElement(position, scale: number, predicate?, directSelection?): IUIElement {
+    hitElement(position, view: IView, predicate?, directSelection?): IUIElement {
         if (!this.hitVisible(directSelection)) {
             return null;
         }
         if (predicate) {
-            if (!predicate(this, position, scale)) {
+            if (!predicate(this, position, view)) {
                 return null;
             }
         }
-        else if (!this.hitTest(position, scale)) {
+        else if (!this.hitTest(position, view)) {
             return null;
         }
 
@@ -695,7 +695,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
         for (let i = this.children.length - 1; i >= 0; --i) {
             let element = this.children[i];
-            let newHit = element.hitElement(position, scale, predicate, directSelection);
+            let newHit = element.hitElement(position, view, predicate, directSelection);
             if (newHit) {
                 hitElement = newHit;
                 break;
@@ -704,13 +704,13 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
         return hitElement;
     }
-    hitElements(/*Point*/position, scale) {
+    hitElements(/*Point*/position, view) {
         let that = this;
         let elements = [];
 
         this.applyVisitor(function (element) {
             if (that !== element) {
-                if (element.hitVisible() && element.hitTest(position, scale) && !element.hitTransparent() && element.canSelect() && !element.locked()) {
+                if (element.hitVisible() && element.hitTest(position, view) && !element.hitTransparent() && element.canSelect() && !element.locked()) {
                     elements.push(element);
                 }
             }
@@ -718,8 +718,8 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
 
         return elements;
     }
-    hitElementDirect(position, scale, predicate?) {
-        let result = this.hitElement(position, scale, predicate, true);
+    hitElementDirect(position, view, predicate?) {
+        let result = this.hitElement(position, view, predicate, true);
         return result;
     }
     select(multiselect?) {

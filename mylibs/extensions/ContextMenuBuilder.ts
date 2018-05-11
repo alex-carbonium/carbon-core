@@ -13,7 +13,7 @@ import ImageContent from "../framework/ImageContent";
 import ArtboardFrameControl from "../framework/ArtboardFrame";
 
 function findItemsToSelect(app, view, eventData) {
-    let elements = app.activePage.hitElements(eventData, view.scale())
+    let elements = app.activePage.hitElements(eventData, view)
     return elements.map(itemSelector)
 };
 
