@@ -126,7 +126,7 @@ export default class ActiveFrame extends UIElementDecorator {
 
         this.view.scaleChanged.bind(this, parentChanged);
 
-        this.rect = this.element.getBoundaryRectGlobal();
+        this.rect = (this.element as any).getBoundaryRectGlobal();
         this._mouseDownHandler = Environment.controller.mousedownEvent.bindHighPriority(this, onMouseDown);
         this._mouseUpHandler = Environment.controller.mouseupEvent.bindHighPriority(this, onMouseUp);
         this._mouseMoveHandler = Environment.controller.mousemoveEvent.bindHighPriority(this, onMouseMove);

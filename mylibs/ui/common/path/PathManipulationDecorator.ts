@@ -523,7 +523,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         }
 
         if (!event.handled) {
-            let pt = path.getPointIfClose(event);
+            let pt = path.getPointIfClose(event, event.view);
             if (this._pointOnPath !== pt) {
                 this._pointOnPath = pt;
                 Invalidate.requestInteractionOnly();

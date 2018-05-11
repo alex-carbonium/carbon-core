@@ -21,7 +21,7 @@ import RenderPipeline from "./render/RenderPipeline";
 import params from "params";
 import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
-import { RenderEnvironment, RenderFlags, IContext } from "carbon-core";
+import { RenderEnvironment, RenderFlags, IContext, IView } from "carbon-core";
 
 export default class Container<TProps extends IContainerProps = IContainerProps> extends UIElement<TProps> implements IContainer<IContainerProps> {
     props: TProps;

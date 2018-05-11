@@ -211,7 +211,7 @@ declare module "carbon-model" {
 
         changePosition(element: IUIElement, index: number, mode?: ChangeMode);
 
-        hitElement(event, view: IView, predicate?, directSelection?): IUIElement;
+        hitElement(event, view: any, predicate?, directSelection?): IUIElement;
 
         autoPositionChildren(): boolean;
 

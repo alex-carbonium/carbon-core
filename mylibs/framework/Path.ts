@@ -76,7 +76,7 @@ function getClickedPoint(x, y, view) {
         pt.idx = i;
         let x2 = pos.x - pt.x
             , y2 = pos.y - pt.y
-        if (x2 * x2 + y2 * y2 < CP_RADIUS2 * Environment.view.contextScale / (zoom * zoom)) {
+        if (x2 * x2 + y2 * y2 < CP_RADIUS2 * view.contextScale / (zoom * zoom)) {
             return pt;
         }
     }
@@ -653,7 +653,7 @@ class Path extends Shape {
 
             let brush = this.fill;
             if (!brush || !brush.type) {
-                let p = this.getPointIfClose(point, 8);
+                let p = this.getPointIfClose(point, view, 8);
                 if (p) {
                     return true;
                 } else {
@@ -879,12 +879,12 @@ class Path extends Shape {
         return this.props.joinMode;
     }
 
-    getPointIfClose(pos, dist?) {
+    getPointIfClose(pos, view, dist?) {
         let matrix = this.globalViewMatrixInverted();
         pos = matrix.transformPoint(pos);
         let resPt = null;
         let prevPt = this.points[0];
-        dist = (dist || 4) / Environment.view.scale() * Environment.view.contextScale;
+        dist = (dist || 4) / view.scale() * view.contextScale;
 
         function checkDistance(pt, prevPt, idx) {
             let pr = { x: 0, y: 0, idx: idx, t: undefined };

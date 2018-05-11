@@ -420,7 +420,7 @@ class CompoundPath extends Container implements IGroupContainer, IIsolatable {
             if (this.lockedGroup() && (!brush || !brush.type)) {
                 for (let i = 0; i < this.result.length; i++) {
                     let path = this.result[i];
-                    let p = path.getPointIfClose(point, 8);
+                    let p = path.getPointIfClose(point, view, 8);
                     if (p) {
                         return true;
                     }
