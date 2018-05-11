@@ -455,9 +455,17 @@ declare module "carbon-app" {
         getAction(action:string): IAction;
         getActionLabel(actionId: string): string;
 
-        attach(view:IView);
+        attach(view:IView, controller:IController);
         detach();
     }
+
+    class IsolationContextImpl {
+        readonly isActive:boolean;
+        isActivatedFor(element:IUIElement):boolean;
+        readonly isolationLayer:IIsolationLayer;
+    }
+
+    export const IsolationContext:IsolationContextImpl;
 
     export class AutoDisposable implements IDisposable {
         add(disposable:IDisposable);

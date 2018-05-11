@@ -12,6 +12,7 @@ import { IPoint } from "carbon-geometry";
 import CommonPropsManager from "./CommonPropsManager";
 import Isolate from "../commands/Isolate";
 import Selection from "./SelectionModel";
+import IsolationContext from "../IsolationContext";
 
 require("./arrangeStrategy/GroupArrangeStrategy");
 
@@ -158,8 +159,8 @@ export default class GroupContainer extends InteractiveContainer implements IGro
         return descriptor;
     }
 
-    select(multi: boolean) {
-        super.select(multi);
+    select(multi: boolean, view:IView) {
+        super.select(multi, view);
         if (!multi) {
             PropertyTracker.propertyChanged.bind(this, this.onChildPropsChanged);
             this.children.forEach(x => x.enablePropsTracking());
@@ -212,7 +213,7 @@ export default class GroupContainer extends InteractiveContainer implements IGro
         var res = super.remove(element, mode);
 
         if (mode === ChangeMode.Model && !this.count()) {
-            if (!Environment.view.isolationLayer.isActivatedFor(this)) {
+            if (!IsolationContext.isActivatedFor(this)) {
                 this.parent.remove(this);
             }
         }

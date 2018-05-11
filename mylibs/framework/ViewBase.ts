@@ -5,7 +5,7 @@ import ContextPool from "framework/render/ContextPool";
 import EventHelper from "framework/EventHelper";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
-import { LayerType, IView, IAnimationController, ILayer, IUIElement, ViewState, IEvent, ICoordinate, IContext, ISize, IRect, IPoint, RenderEnvironment, RenderFlags, ChangeMode, IArtboard, Origin, IIsolationLayer } from "carbon-core";
+import { LayerType, IView, IAnimationController, ILayer, IUIElement, ViewState, IEvent, ICoordinate, IContext, ISize, IRect, IPoint, RenderEnvironment, RenderFlags, ChangeMode, IArtboard, Origin, IIsolationLayer, Layer } from "carbon-core";
 import Rect from "../math/rect";
 import AnimationGroup from "./animation/AnimationGroup";
 import Context from "./render/Context";
@@ -13,6 +13,7 @@ import GlobalMatrixModifier from "./GlobalMatrixModifier";
 import ExtensionPoint from "./ExtensionPoint";
 import ContextLayerSource from "framework/render/ContextLayerSource";
 import Point from "../math/point";
+import IsolationContext from "../IsolationContext";
 
 var Stopwatch = require("../Stopwatch");
 var debug = require("DebugUtil")("carb:view");
@@ -205,6 +206,7 @@ export default class ViewBase implements IView {
                     setupLayerHandler(context);
                 },
                 scaleMatrix:this.scaleMatrix,
+                focused:this.focused(),
                 fill: null,
                 stroke: null,
                 view: this
@@ -419,11 +421,17 @@ export default class ViewBase implements IView {
             if (this.activeLayer) {
                 this.activeLayer.deactivate();
                 this.activeLayer.isActive = false;
+                IsolationContext.setIsolationLayer(null);
             }
+
             layer.isActive = true;
             this.activeLayer = layer;
             if (!silent) {
                 this.activeLayerChanged.raise(layer);
+            }
+
+            if(layerType === LayerType.Isolation) {
+                IsolationContext.setIsolationLayer(layer);
             }
         }
     }
@@ -432,6 +440,10 @@ export default class ViewBase implements IView {
         var i = this._layers.findIndex(x => x.type === layerType);
         if (i >= 0) {
             this.activateLayer(this._layers[i - 1].type, silent);
+        }
+
+        if(layerType === LayerType.Isolation) {
+            IsolationContext.setIsolationLayer(null);
         }
     }
 
@@ -764,7 +776,7 @@ export default class ViewBase implements IView {
         return null;
     }
 
-    focused(value) {
+    focused(value?) {
         if (arguments.length === 1) {
             this._focused = value;
         }

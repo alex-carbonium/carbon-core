@@ -518,22 +518,22 @@ TextEngine.prototype.nextInsertFormatting = function () {
 	return this._doc.nextInsertFormatting;
 };
 
-TextEngine.prototype.render = function (context, drawSelection, vtrans, focused) {
+TextEngine.prototype.render = function (context, drawSelection, vtrans, focused, env) {
 	Runs.setDefaultFormatting(this._defaultFormatting);
 	this.ensureContext(context);
 
 	this._verticalShift = -vtrans;
 	if (drawSelection) {
-		this.drawSelection(context, focused);
+		this.drawSelection(context, focused, env);
 	}
 	this._doc.draw(this._renderer, this._rect);
 
 	this._focused = focused;
 };
 
-TextEngine.prototype.drawSelection = function (context, focused) {
+TextEngine.prototype.drawSelection = function (context, focused, env) {
 	Runs.setDefaultFormatting(this._defaultFormatting);
-	this._doc.drawSelection(context, focused, this._lastFormatting);
+	this._doc.drawSelection(context, focused, this._lastFormatting, env);
 }
 
 TextEngine.prototype.focused = function () {

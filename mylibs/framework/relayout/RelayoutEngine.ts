@@ -13,6 +13,7 @@ import PrimitiveCommand from "../commands/PrimitiveCommand";
 import Selection from "../SelectionModel";
 import UIElement from "../UIElement";
 import EventHelper from "../EventHelper";
+import IsolationContext from "../../IsolationContext";
 
 var debug = require("DebugUtil")("carb:relayoutEngine");
 
@@ -97,7 +98,7 @@ class RelayoutEngine {
                 this.rollbacks.push(p._rollbackData);
                 delete p._rollbackData;
             }
-            let isolationLayer = Environment.view.getLayer(LayerType.Isolation);
+            let isolationLayer = IsolationContext.isolationLayer;
             let inIsolation = isolationLayer && isolationLayer.isActive;
 
             let elements = Selection.elements.length ? Selection.elements : Selection.previousElements;

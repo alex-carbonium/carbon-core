@@ -1,7 +1,7 @@
 import {registerExample} from "./example";
 import { Rectangle, Selection, Shadow, Brush } from "carbon-core";
 
-registerExample("shadow: outset", function(app, artboard){
+registerExample("shadow: outset", function(app, view, artboard){
     var rect1 = new Rectangle();
     rect1.setProps({width: 100, height: 100, name: 'rect 1'});
     rect1.translate(200, 300);

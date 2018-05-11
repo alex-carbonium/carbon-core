@@ -371,10 +371,10 @@ export default class RepeatContainer extends Container implements IRepeatContain
         return "Repeater";
     }
 
-    select(multiSelect) {
-        super.select(multiSelect);
+    select(multiSelect, view) {
+        super.select(multiSelect, view);
         if (!multiSelect) {
-            RepeatMarginTool.attach(this);
+            RepeatMarginTool.attach(this, view);
         }
     }
     unselect() {

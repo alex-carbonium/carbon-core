@@ -20,7 +20,7 @@ import GroupContainer from "../framework/GroupContainer";
 import InteractiveContainer from "../framework/InteractiveContainer";
 import Selection from "../framework/SelectionModel";
 import EventHelper from "../framework/EventHelper";
-import { IActionManager, IAction, IApp, IUIElement, IEvent, IContainer, IIsolatable, IShortcutManager, ISelection, IView } from "carbon-core";
+import { IActionManager, IAction, IApp, IUIElement, IEvent, IContainer, IIsolatable, IShortcutManager, ISelection, IView, IController } from "carbon-core";
 import { ArrangeStrategies, DropPositioning } from "../framework/Defs";
 import Rect from "../math/rect";
 import { viewStateStack } from "../framework/ViewStateStack";
@@ -97,7 +97,8 @@ export default class ActionManager implements IActionManager {
         [key: string]: IAction
     }
 
-    private view:IView;
+    private view: IView;
+    private controller: IController;
 
     private _events: any[];
     private _actionStartEvents: any[];
@@ -129,12 +130,12 @@ export default class ActionManager implements IActionManager {
     }
 
 
-    registerAction(name: string, description: string, category: string, callback: (selection?: any, arg?: string) => void, condition?: (selection: ISelection) => boolean): IAction {
+    registerAction(name: string, description: string, category: string, callback: (selection?: any, arg?: any) => void, condition?: (selection: ISelection) => boolean): IAction {
         let action: IAction = {
             id: name,
             name: description,
             callback: callback,
-            condition:condition
+            condition: condition
         };
 
         return this.registerActionInstance(action);
@@ -149,8 +150,9 @@ export default class ActionManager implements IActionManager {
         return action;
     }
 
-    attach(view:IView) {
+    attach(view: IView, controller: IController) {
         this.view = view;
+        this.controller = controller;
     }
 
     detach() {
@@ -182,22 +184,22 @@ export default class ActionManager implements IActionManager {
 
         this.registerAction("bringToFront", "@bring to front", "Layering", function () {
             ChangeZOrder.run(that.app, Selection.getSelection(), "front");
-        }, selection=>{
+        }, selection => {
             return selection.elements.length && !selection.elements.some(x => x instanceof Artboard)
         });
         this.registerAction("sendToBack", "@send to back", "Layering", function () {
             ChangeZOrder.run(that.app, Selection.getSelection(), "back");
-        }, selection=>{
+        }, selection => {
             return selection.elements.length && !selection.elements.some(x => x instanceof Artboard)
         });
         this.registerAction("bringForward", "@bring forward", "Layering", function () {
             ChangeZOrder.run(that.app, Selection.getSelection(), "forward");
-        }, selection=>{
+        }, selection => {
             return selection.elements.length && !selection.elements.some(x => x instanceof Artboard)
         });
         this.registerAction("sendBackward", "@send backward", "Layering", function () {
             ChangeZOrder.run(that.app, Selection.getSelection(), "backward");
-        }, selection=>{
+        }, selection => {
             return selection.elements.length && !selection.elements.some(x => x instanceof Artboard)
         });
 
@@ -306,19 +308,19 @@ export default class ActionManager implements IActionManager {
 
         this.registerAction("pathUnion", "@path.union", "Combine Paths", function () {
             CombinePaths.run("union", Selection.getSelection());
-        }, selection=>canDoPathOperations(selection.elements));
+        }, selection => canDoPathOperations(selection.elements));
 
         this.registerAction("pathSubtract", "@path.join", "Combine Paths", function () {
             CombinePaths.run("xor", Selection.getSelection());
-        }, selection=>canDoPathOperations(selection.elements));
+        }, selection => canDoPathOperations(selection.elements));
 
         this.registerAction("pathIntersect", "@path.intersect", "Combine Paths", function () {
             CombinePaths.run("intersect", Selection.getSelection());
-        }, selection=>canDoPathOperations(selection.elements));
+        }, selection => canDoPathOperations(selection.elements));
 
         this.registerAction("pathDifference", "@path.difference", "Combine Paths", function () {
             CombinePaths.run("difference", Selection.getSelection());
-        }, selection=>canDoPathOperations(selection.elements));
+        }, selection => canDoPathOperations(selection.elements));
 
         this.registerAction("alignLeft", "Align left", "Align", function () {
             align("left", Selection.getSelection());
@@ -417,51 +419,54 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("zoomOut", "Zoom out", "Zoom", function () {
-            Environment.view.zoomOutStep();
+            that.view.zoomOutStep();
         });
 
         this.registerAction("zoomIn", "Zoom in", "Zoom", function () {
-            Environment.view.zoomInStep();
+            that.view.zoomInStep();
         });
 
         this.registerAction("zoom100", "1:1", "Zoom", function () {
-            Environment.view.zoom(1);
+            that.view.zoom(1);
+        });
 
+        this.registerAction("zoom", "zoom", "Zoom", function (selection, value) {
+            that.view.zoom(value);
         });
 
         this.registerAction("zoom8:1", "8:1", "Zoom", function () {
-            Environment.view.zoom(8);
+            that.view.zoom(8);
         });
 
         this.registerAction("zoom4:1", "4:1", "Zoom", function () {
-            Environment.view.zoom(4);
+            that.view.zoom(4);
         });
 
         this.registerAction("zoom2:1", "2:1", "Zoom", function () {
-            Environment.view.zoom(2);
+            that.view.zoom(2);
         });
 
         this.registerAction("zoom1:2", "1:2", "Zoom", function () {
-            Environment.view.zoom(0.5);
+            that.view.zoom(0.5);
         });
 
         this.registerAction("zoom1:4", "1:4", "Zoom", function () {
-            Environment.view.zoom(0.25);
+            that.view.zoom(0.25);
         });
 
         this.registerAction("zoomFit", "Zoom to fit", "Zoom", function () {
-            Environment.view.zoomToFit();
+            that.view.zoomToFit();
         });
 
         this.registerAction("zoomSelection", "Zoom selection", "Zoom", function () {
             let element = Selection.selectedElement() as IUIElement;
             element = element || (that.app.activePage.getActiveArtboard() as IUIElement);
-            Environment.view.ensureScale([element]);
-            Environment.view.ensureCentered([element]);
+            that.view.ensureScale([element]);
+            that.view.ensureCentered([element]);
         });
 
         this.registerAction("pageCenter", "Page center", "Zoom", function () {
-            Environment.view.scrollToCenter();
+            that.view.scrollToCenter();
         });
 
         this.registerAction("refreshZoom", "", "Zoom", function () {
@@ -473,8 +478,8 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("undo", "Undo", "Project actions", function () {
-            if (Environment.controller.isInlineEditMode) {
-                Environment.controller.inlineEditor.undo();
+            if (that.controller.isInlineEditMode) {
+                that.controller.inlineEditor.undo();
             }
             else {
                 CommandManager.undoPrevious();
@@ -482,8 +487,8 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("redo", "Redo", "Project actions", function () {
-            if (Environment.controller.isInlineEditMode) {
-                Environment.controller.inlineEditor.redo();
+            if (that.controller.isInlineEditMode) {
+                that.controller.inlineEditor.redo();
             }
             else {
                 CommandManager.redoNext();
@@ -519,14 +524,14 @@ export default class ActionManager implements IActionManager {
 
         this.registerAction("convertToPath", "Convert to Path", "Path", function () {
             return ConvertToPath.run(Selection.getSelection());
-        }, selection=>canConvertToPath(selection.elements));
+        }, selection => canConvertToPath(selection.elements));
 
         this.registerAction("pathFlatten", "Flatten path", "Path", function () {
             let elements = Selection.getSelection();
             for (let i = 0; i < elements.length; ++i) {
                 elements[i].flatten();
             }
-        }, selection=>canFlattenPath(selection.elements));
+        }, selection => canFlattenPath(selection.elements));
 
         this.registerAction("cancel", "Cancel", "", function () {
         });
@@ -534,17 +539,34 @@ export default class ActionManager implements IActionManager {
         this.registerAction("exitisolation", "Exit isolation", "", function () {
         });
 
+        this.registerAction("changeViewState", "system", "", function (selection, { newState, silent }) {
+            that.view.changeViewState(newState, silent);
+        });
+        this.registerAction("ensureVisibleRect", "system", "", function (selection, rect) {
+            that.view.ensureVisibleRect(rect);
+        });
+        this.registerAction("fitToViewportIfNeeded", "system", "", function (selection, { element, origin, mode }) {
+            that.view.fitToViewportIfNeeded(element, origin, mode);
+        });
+        this.registerAction("highlightTarget", "system", "", function (selection, target) {
+            that.view._highlightTarget = target;
+            Invalidate.requestInteractionOnly();
+        });
+        this.registerAction("ensureScaleAndCentered", "system", "", function (selection, target) {
+            that.view.ensureScale(target);
+            that.view.ensureCentered(target);
+        });
+
         this.registerAction("toggleFrame", "@toggleFrame", "", function () {
             that.app.showFrames(!that.app.showFrames());
         });
-
 
         this.registerAction("enter", "Enter", "", function () {
         });
 
         this.registerAction("copy", "", "", function () {
             clipboard.onCopy();
-        }, selection=> selection && selection.elements.length > 0);
+        }, selection => selection && selection.elements.length > 0);
 
         this.registerAction("paste", "", "", function () {
             clipboard.onPaste();
@@ -552,7 +574,7 @@ export default class ActionManager implements IActionManager {
 
         this.registerAction("cut", "", "", function () {
             clipboard.onCut();
-        }, selection=> selection && selection.elements.length > 0);
+        }, selection => selection && selection.elements.length > 0);
 
         this.registerAction("selectElement", "", "", function (selection, id: string) {
             let element = that.app.activePage.findNodeByIdBreadthFirst(id);
@@ -567,13 +589,13 @@ export default class ActionManager implements IActionManager {
         }
     }
 
-    isEnabled(actionName: string, selection:ISelection) {
+    isEnabled(actionName: string, selection: ISelection) {
         var action = this._actions[actionName];
-        if(!action) {
+        if (!action) {
             return false;
         }
 
-        if(!action.condition) {
+        if (!action.condition) {
             return true;
         }
 

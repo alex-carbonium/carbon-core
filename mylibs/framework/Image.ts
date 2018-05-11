@@ -199,7 +199,7 @@ export default class Image extends Container<IImageProps> implements IImage {
         let bb = this.getBoundingBox();
         let changeMode = this.props.source.type === ImageSourceType.Loading ? ChangeMode.Root : ChangeMode.Model;
         this.applyScaling2(realRect.width / bb.width, realRect.height / bb.height, origin, changeMode);
-        Environment.view.fitToViewportIfNeeded(this, origin, changeMode);
+        App.Current.actionManager.invoke("fitToViewportIfNeeded", {element:this, origin:origin, mode:changeMode});
         this.roundBoundingBoxToPixelEdge(changeMode);
         this.resizeOnLoad(null);
     }

@@ -121,7 +121,7 @@ handlers.registerHandler(PrimitiveType.View, function (page, p) {
         return;
     }
 
-    Environment.view.changeViewState(p.newState);
+    page.app.actionManager.invoke("changeViewState", {newState:p.newState});
 });
 
 

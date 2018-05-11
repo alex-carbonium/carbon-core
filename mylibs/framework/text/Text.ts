@@ -7,7 +7,7 @@ import PropertyMetadata from "../PropertyMetadata";
 import TextEngine from "./textengine";
 import FontManager from "./font/fontmanager";
 import styleManager from "../style/StyleManager";
-import { IContainer, IDataElement, IText, TextAlign, IUIElement, ITextProps, TextContent, HorizontalConstraint, VerticalConstraint, TextMode, IPooledObject, IMatrix, ChangeMode, ResizeDimension, IRect, ProxyDefinition } from "carbon-core";
+import { IContainer, IDataElement, IText, TextAlign, IUIElement, ITextProps, TextContent, HorizontalConstraint, VerticalConstraint, TextMode, IPooledObject, IMatrix, ChangeMode, ResizeDimension, IRect, ProxyDefinition, RenderEnvironment } from "carbon-core";
 import params from "params";
 import ContextCommandCache from "framework/render/ContextCommandCache";
 import Environment from "../../environment";
@@ -323,7 +323,7 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
         }
     }
 
-    drawSelf(context, w, h) {
+    drawSelf(context, w, h, environment:RenderEnvironment) {
         // if(false && !this.runtimeProps.editing) {
         //     if (!this.runtimeProps.commandCache) {
         //         context = new ContextCommandCache(context);
@@ -342,7 +342,7 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
             context.translate(0, verticalOffset);
         }
         params.perf && performance.mark("Text.render");
-        engine.render(context, this.runtimeProps.drawSelection, verticalOffset, Environment.view ? Environment.view.focused() : false);
+        engine.render(context, this.runtimeProps.drawSelection, verticalOffset, environment.focused, environment);
         params.perf && performance.measure("Text.render", "Text.render");
 
         context.restore();

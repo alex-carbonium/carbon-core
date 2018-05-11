@@ -33,7 +33,7 @@ export class ViewStateStack {
 
         var state = this.stack[this.index-- - 1];
         debug("viewState undo %o", state);
-        Environment.view.changeViewState(state, true);
+        App.Current.actionManager.invoke("changeViewState", {newState:state, silent:true});
 
         this.changeState(this.index >= 1, true);
     }
@@ -45,7 +45,7 @@ export class ViewStateStack {
 
         var state = this.stack[++this.index];
         debug("viewState redo %o", state);
-        Environment.view.changeViewState(state, true);
+        App.Current.actionManager.invoke("changeViewState", {newState:state, silent:true});
 
         this.changeState(true, this.index < this.stack.length - 1);
     }

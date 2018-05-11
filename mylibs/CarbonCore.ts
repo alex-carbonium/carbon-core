@@ -101,6 +101,7 @@ export default {
     "Devices": Defs.Devices,
 
     "createUUID": Util.createUUID,
+    "IsolationContext": require("./IsolationContext"),
     "choosePasteLocation": require("./framework/PasteLocator").choosePasteLocation,
 
     "SelectComposite": require("./framework/SelectComposite"),

@@ -95,6 +95,7 @@ declare module "carbon-rendering" {
         flags: RenderFlags;
         fill: Brush | null;
         stroke: Brush | null;
+        focused?:boolean;
         //TODO: check if this can be removed or called on some other class
         setupContext: (context: IContext) => void;
     }

@@ -1,7 +1,7 @@
 import {registerExample} from "./example";
 import { Rectangle, Selection, Origin } from "carbon-core";
 
-registerExample("group: nested, multilevel", function(app, artboard){
+registerExample("group: nested, multilevel", function(app, view, artboard){
     var rect1 = new Rectangle();
     rect1.setProps({width: 100, height: 100, name: 'rect 1'});
     rect1.translate(100, 300);

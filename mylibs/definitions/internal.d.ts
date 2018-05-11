@@ -23,7 +23,7 @@ declare module "carbon-model"{
     import { IRect, IMatrix, ISize } from "carbon-geometry";
     import { RenderEnvironment } from "carbon-rendering";
 
-    import { IAnimationOptions } from "carbon-core";
+    import { IAnimationOptions, IView } from "carbon-core";
 
     export interface IDataNode {
         primitivePath():any;
@@ -49,7 +49,7 @@ declare module "carbon-model"{
         runtimeProps: any;
 
         isDescendantOrSame(other: IUIElement): boolean;
-        select(multi?: boolean): void;
+        select(multi: boolean, view:IView): void;
         unselect(): void;
 
         hitVisible(): boolean;

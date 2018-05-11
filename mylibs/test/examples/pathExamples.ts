@@ -3,7 +3,7 @@ import { Rectangle, Origin, Brush, StrokePosition, Selection, Circle } from "car
 
 let w = window as any;
 
-registerExample("path: simple", function(app, artboard){
+registerExample("path: simple", function(app, view, artboard){
     var rect1 = new Rectangle();
     rect1.setProps({width: 100, height: 100, name: 'rect 1'});
     rect1.rotate(20, Origin.Center);

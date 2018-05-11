@@ -1,7 +1,7 @@
 import {registerExample} from "./example";
-import { Rect, Brush, Rectangle, Environment, StrokePosition, renderer, model, IRectangle, Matrix, Container, Origin } from "carbon-core";
+import { Rect, Brush, Rectangle, StrokePosition, renderer, model, IRectangle, Matrix, Container, Origin } from "carbon-core";
 
-registerExample("dataUrl: artboard zoomed out", function(app, artboard){
+registerExample("dataUrl: artboard zoomed out", function(app, view, artboard){
     artboard.boundaryRect(Rect.fromSize(400, 800));
     artboard.fill = (Brush.createFromCssColor("green"));
     artboard.translate(1000, 0);
@@ -15,13 +15,13 @@ registerExample("dataUrl: artboard zoomed out", function(app, artboard){
     rect2.translate(300, 700);
     artboard.add(rect2);
 
-    Environment.view.draw();
+    view.draw();
 
     var dataUrl = renderer.elementToDataUrlScaled(artboard, Rect.fromSize(300, 300), 4);
     logDataUrl(dataUrl);
 });
 
-registerExample("dataUrl: page", function(app, artboard){
+registerExample("dataUrl: page", function(app, view, artboard){
     let size = Rect.fromSize(400, 800);
     let bg = model.createRectangle(size, { fill: Brush.createFromCssColor("green")});
 
@@ -36,14 +36,14 @@ registerExample("dataUrl: page", function(app, artboard){
     artboard2.translate(600, 0);
     app.activePage.add(artboard2);
 
-    Environment.view.draw();
+    view.draw();
 
     //TODO: does not work
     var dataUrl = renderer.elementToDataUrlScaled(app.activePage, Rect.fromSize(300, 300), 4);
     logDataUrl(dataUrl);
 });
 
-registerExample("dataUrl: detached element", function(app, artboard){
+registerExample("dataUrl: detached element", function(app, view, artboard){
     var rect1 = new Rectangle();
     rect1.setProps({width: 100, height: 100, name: 'rect 1',
         fill: Brush.createFromCssColor("red"),
@@ -52,13 +52,13 @@ registerExample("dataUrl: detached element", function(app, artboard){
         strokeWidth: 5
     });
 
-    Environment.view.draw();
+    view.draw();
 
     var dataUrl = renderer.elementToDataUrlScaled(rect1, Rect.fromSize(300, 300), 4);
     logDataUrl(dataUrl);
 });
 
-registerExample("dataUrl: sprite", function(app, artboard){
+registerExample("dataUrl: sprite", function(app, view, artboard){
     var rect1 = new Rectangle();
     rect1.setProps({width: 100, height: 100, name: 'rect 1',
         fill: Brush.createFromCssColor("red"),

@@ -89,6 +89,7 @@ export default class SelectComposite extends CompositeElement implements ISelect
         });
         return canResize ? ResizeDimension.Both : ResizeDimension.None;
     }
+
     register(element: IUIElement) {
         if (!element.canSelect() && !element.runtimeProps.selectFromLayersPanel) {
             return;
@@ -105,7 +106,7 @@ export default class SelectComposite extends CompositeElement implements ISelect
 
         if (!wasMultiSelection && this.children.length === 1) {
             this.children[0].unselect();
-            this.children[0].select(true);
+            this.children[0].select(true, this.view);
             this.removeActiveFrame(this.children[0]);
         }
 
@@ -115,7 +116,7 @@ export default class SelectComposite extends CompositeElement implements ISelect
         this.showActiveFrame();
 
         let isMultiSelection = this.children.length > 1;
-        element.select(isMultiSelection);
+        element.select(isMultiSelection, this.view);
 
         if (isMultiSelection) {
             this.addActiveFrame(this);

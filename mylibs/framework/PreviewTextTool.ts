@@ -91,11 +91,11 @@ export class PreviewTextTool {
         if (!this.editor) {
             return false;
         }
-        return this.text.hitTest(e, Environment.view);
+        return this.text.hitTest(e, e.view);
     }
 
     private hitNewElement(e) {
-        return Environment.view.hitElementDirect(e);
+        return e.view.hitElementDirect(e);
     }
 
     private isEditableText(element: UIElement) {
@@ -148,7 +148,7 @@ export class PreviewTextTool {
     }
 
     private invalidateLayers = () => {
-        Environment.view.page.invalidate();
+        Invalidate.request();
         this.text.invalidate();
         this.text.clearRenderingCache();
     }

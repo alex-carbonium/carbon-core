@@ -3,7 +3,7 @@ import { Rectangle, Origin, Selection } from "carbon-core";
 
 let w = window as any;
 
-registerExample("skew: simple", function(app, artboard){
+registerExample("skew: simple", function(app, view, artboard){
     var rect1 = new Rectangle();
     rect1.setProps({width: 100, height: 100, name: 'rect 1'});
     rect1.translate(200, 300);

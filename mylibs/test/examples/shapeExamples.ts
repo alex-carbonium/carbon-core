@@ -3,7 +3,7 @@ import { model, Selection } from "carbon-core";
 
 let w = window as any;
 
-registerExample("shape: lines", function(app, artboard){
+registerExample("shape: lines", function(app, view, artboard){
     var line1 = model.createLine();
     line1.prepareAndSetProps({x1: 0, y1: 0, x2: 100, y2: 50, name: 'line 1'});
     line1.translate(100, 300);
@@ -26,7 +26,7 @@ registerExample("shape: lines", function(app, artboard){
     w.line1 = line1;
 });
 
-registerExample("shape: star, polygon", function(app, artboard){
+registerExample("shape: star, polygon", function(app, view, artboard){
     var star = model.createStar();
     star.prepareAndSetProps({externalRadius: 50, name: 'line 1'});
     star.translate(100, 300);

@@ -79,7 +79,8 @@ export class FileElement extends UIElement implements IFileElement {
                     result.setTransform(gm);
                     result.translate(-bb.width/2 - br.x, -bb.height/2 - br.y);
                     result.name = (this.getNameWithoutExtension());
-                    Environment.view.fitToViewportIfNeeded(result);
+
+                    App.Current.actionManager.invoke("fitToViewportIfNeeded", {element:result});
 
                     this.parent.remove(this, ChangeMode.Self);
                     parent.transferElement(result, parent.children.length);

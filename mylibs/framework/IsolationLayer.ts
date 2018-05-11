@@ -106,6 +106,8 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
         Selection.clearSelection(true);
 
         this.view.activateLayer(this.type);
+
+        var layer = this.view.getLayer(LayerType.Isolation);
     }
 
     deactivate(): void {

@@ -1,8 +1,8 @@
 import RelayoutQueue from "../relayout/RelayoutQueue";
-import Environment from "../../environment";
 import { IPrimitive, PrimitiveType, ViewState, ICommand, IRect, LayerType, Primitive } from "carbon-core";
 import { createUUID } from "../../util";
 import Rect from "../../math/rect";
+import IsolationContext from "../../IsolationContext";
 
 export default class PrimitiveCommand implements ICommand {
     constructor(
@@ -27,7 +27,7 @@ export default class PrimitiveCommand implements ICommand {
         App.Current.setActivePageById(this.pageId);
 
         if (this.commandRect !== Rect.Zero) {
-            Environment.view.ensureVisibleRect(this.commandRect);
+            App.Current.actionManager.invoke("ensureVisibleRect", this.commandRect);
         }
 
         var primitives = this.primitives;
@@ -41,12 +41,12 @@ export default class PrimitiveCommand implements ICommand {
     rollback() {
         App.Current.setActivePageById(this.pageId);
 
-        if (Environment.view.getLayer(LayerType.Isolation) && !this.isolation) {
+        if (IsolationContext.isActive && !this.isolation) {
             App.Current.actionManager.invoke("exitisolation");
         }
 
         if (this.commandRect !== Rect.Zero) {
-            Environment.view.ensureVisibleRect(this.commandRect);
+            App.Current.actionManager.invoke("ensureVisibleRect", this.commandRect);
         }
 
         RelayoutQueue.enqueueAll(this.rollbacks);

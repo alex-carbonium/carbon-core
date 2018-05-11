@@ -1,4 +1,4 @@
-import {isPointInRect, adjustRectWidth, adjustRectHeight} from "math/math";
+import { isPointInRect, adjustRectWidth, adjustRectHeight } from "math/math";
 import DragController from "../DragController";
 import CommandManager from "../commands/CommandManager";
 import PropertyTracker from "../PropertyTracker";
@@ -6,20 +6,23 @@ import Cursor from "framework/Cursor";
 import Invalidate from "framework/Invalidate";
 import Environment from "environment";
 import ModelStateListener from "../relayout/ModelStateListener";
-import { LayerType } from "carbon-app";
+import { LayerType, IView } from "carbon-app";
 import Rect from "../../math/rect";
 import UserSettings from "../../UserSettings";
 import { RenderEnvironment, ChangeMode } from "carbon-core";
 
 const MinSize = 4;
 
-export default {
-    _container: null,
-    _margins: null,
-    _activeMargin: null,
-    _dragController: null,
-    _firstDrag: true,
-    attach: function(container){
+class RepeatMarginTool {
+    [key:string]:any;
+    _container: any;
+    _margins: any;
+    _activeMargin: any;
+    _dragController: any;
+    _firstDrag:boolean =  true;
+    _view:IView;
+
+    attach(container, view) {
         this._container = container;
         this._container.enablePropsTracking();
         this._strategy = container.arrangeStrategyInstance();
@@ -32,29 +35,31 @@ export default {
         this._dragController.onStopped = this.onDragStopped.bind(this);
 
         this.createVisualizations();
+        this._view = view;
 
-        var view = Environment.view;
         view.registerForLayerDraw(LayerType.Interaction, this, 0);
         this._dragController.bindToController(Environment.controller);
-    },
-    detach: function(container){
-        if(this._container) {
+    }
+
+    detach(container) {
+        if (this._container) {
             this._container.disablePropsTracking();
         }
         this._container = null;
         this._margins = null;
         this._activeMargin = null;
 
-        var view = Environment.view;
+        var view = this._view;
         view.unregisterForLayerDraw(LayerType.Interaction, this);
-        if (this._dragController){
+        if (this._dragController) {
             this._dragController.unbind();
             this._dragController = null;
         }
-    },
-    createVisualizations: function(){
+    }
+
+    createVisualizations() {
         var container = this._container;
-        if (!container){
+        if (!container) {
             return;
         }
 
@@ -67,13 +72,13 @@ export default {
         var marginX = this._strategy.getActualMarginX(container);
         var marginY = this._strategy.getActualMarginY(container);
 
-        var marginRectX = {x: 0, y: 0, width: marginX, height: containerHeight};
-        var marginRectY = {x: 0, y: 0, width: containerWidth, height: marginY};
+        var marginRectX = { x: 0, y: 0, width: marginX, height: containerHeight };
+        var marginRectY = { x: 0, y: 0, width: containerWidth, height: marginY };
 
         this._margins = [];
-        for (let i = 1; i < cols; i++){
-            let x = itemBox.x + itemBox.width*i + marginX * (i-1);
-            if (x < containerWidth){
+        for (let i = 1; i < cols; i++) {
+            let x = itemBox.x + itemBox.width * i + marginX * (i - 1);
+            if (x < containerWidth) {
                 let matrix = baseMatrix.clone().translate(x, 0);
                 let x2 = x + marginX;
                 let rect = x2 < containerWidth ? marginRectX : adjustRectWidth(marginRectX, containerWidth - x2);
@@ -87,9 +92,9 @@ export default {
                 });
             }
         }
-        for (let i = 1; i < rows; i++){
-            let y = itemBox.y + itemBox.height*i + marginY * (i-1);
-            if (y < containerHeight){
+        for (let i = 1; i < rows; i++) {
+            let y = itemBox.y + itemBox.height * i + marginY * (i - 1);
+            if (y < containerHeight) {
                 let matrix = baseMatrix.clone().translate(0, y);
                 let y2 = y + marginY;
                 let rect = y2 < containerHeight ? marginRectY : adjustRectHeight(marginRectY, containerHeight - y2);
@@ -103,10 +108,10 @@ export default {
                 });
             }
         }
-    },
-    onDragSearching: function(e){
+    }
+    onDragSearching(e) {
         var hit = false;
-        let scale = Environment.view.scale();
+        let scale = this._view.scale();
         for (let i = 0, l = this._margins.length; i < l; ++i) {
             let margin = this._margins[i];
             let point = margin.matrixInverted.transformPoint(e);
@@ -121,7 +126,7 @@ export default {
                 hitRect.y -= hitRect.height / 2;
             }
 
-            if (isPointInRect(hitRect, point)){
+            if (isPointInRect(hitRect, point)) {
                 this._activeMargin = margin;
                 Cursor.setGlobalCursor(margin.cursor);
                 hit = true;
@@ -131,23 +136,23 @@ export default {
 
             hitRect.free();
         }
-        if (hit || this._activeMargin !== null){
-            if (!hit){
+        if (hit || this._activeMargin !== null) {
+            if (!hit) {
                 this._activeMargin = null;
                 Cursor.removeGlobalCursor();
             }
             Invalidate.requestInteractionOnly();
         }
-    },
-    onDragSearchCancelled: function(){
+    }
+    onDragSearchCancelled() {
         this._activeMargin = null;
         Invalidate.requestInteractionOnly();
-    },
-    onDragStarting: function(){
+    }
+    onDragStarting() {
         return this._activeMargin !== null;
-    },
-    onDragging: function(e, dx, dy, ddx, ddy){
-        if (this._firstDrag){
+    }
+    onDragging(e, dx, dy, ddx, ddy) {
+        if (this._firstDrag) {
             PropertyTracker.suspend();
             this._originalProps = this._container.selectGridProps();
             this._firstDrag = false;
@@ -156,7 +161,7 @@ export default {
         ddx = ddx > 0 ? Math.ceil(ddx) : Math.floor(ddx);
         ddy = ddy > 0 ? Math.ceil(ddy) : Math.floor(ddy);
 
-        if (this._activeMargin.vertical){
+        if (this._activeMargin.vertical) {
             ddx = 0;
         }
         else {
@@ -165,8 +170,8 @@ export default {
         this._strategy.updateActualMargins(this._container, ddx, ddy);
         this.createVisualizations();
         Invalidate.request();
-    },
-    onDragStopped: function(e){
+    }
+    onDragStopped(e) {
         var newProps = this._container.selectGridProps();
         this._container.setProps(this._originalProps, ChangeMode.Self);
         this._container.performArrange(null, ChangeMode.Self);
@@ -180,26 +185,27 @@ export default {
 
         Invalidate.request();
         this._firstDrag = true;
-    },
-    updateIfAttached: function(container){
-        if (container === this._container){
+    }
+    updateIfAttached(container) {
+        if (container === this._container) {
             this.createVisualizations();
         }
-    },
-    onLayerDraw: function(layer, context, env){
-        if (this._dragController.isDragging){
+    }
+    onLayerDraw(layer, context, env) {
+        if (this._dragController.isDragging) {
             for (let i = 0, l = this._margins.length; i < l; ++i) {
                 var margin = this._margins[i];
-                if (i !== this._activeMargin && margin.vertical === this._activeMargin.vertical){
+                if (i !== this._activeMargin && margin.vertical === this._activeMargin.vertical) {
                     this.drawMargin(context, margin, env);
                 }
             }
         }
-        else if (this._activeMargin !== null){
+        else if (this._activeMargin !== null) {
             this.drawMargin(context, this._activeMargin, env);
         }
-    },
-    drawMargin: function(context, margin, env: RenderEnvironment){
+    }
+
+    drawMargin(context, margin, env: RenderEnvironment) {
         var scale = env.scale;
 
         context.save();
@@ -210,11 +216,11 @@ export default {
 
         context.save();
         if (margin.rect.width === 0) {
-            context.scale(1/scale, 1/scale);
+            context.scale(1 / scale, 1 / scale);
             context.fillRect(margin.rect.x * scale - MinSize / 2, margin.rect.y * scale, MinSize, margin.rect.height * scale);
         }
         else if (margin.rect.height === 0) {
-            context.scale(1/scale, 1/scale);
+            context.scale(1 / scale, 1 / scale);
             context.fillRect(margin.rect.x * scale, margin.rect.y * scale - MinSize / 2, margin.rect.width * scale, MinSize);
         }
         else {
@@ -222,22 +228,24 @@ export default {
         }
         context.restore();
 
-        Environment.view.applyGuideFont(context);
+        this._view.applyGuideFont(context);
         var text = margin.value + "";
         var w = context.measureText(text).width;
-        if (margin.vertical){
-            var originX = -w/2;
-            var originY = (margin.rect.y + margin.rect.height/2);
+        if (margin.vertical) {
+            var originX = -w / 2;
+            var originY = (margin.rect.y + margin.rect.height / 2);
             context.translate(originX, originY);
-            context.scale(1/scale, 1/scale);
-            context.rotate(-Math.PI/2);
-            context.fillText(text, originX + .5|0, -2);
+            context.scale(1 / scale, 1 / scale);
+            context.rotate(-Math.PI / 2);
+            context.fillText(text, originX + .5 | 0, -2);
         }
-        else{
-            context.scale(1/scale, 1/scale);
-            context.fillText(text, (margin.rect.x + margin.rect.width)/2*scale - w/2 + .5|0, -4);
+        else {
+            context.scale(1 / scale, 1 / scale);
+            context.fillText(text, (margin.rect.x + margin.rect.width) / 2 * scale - w / 2 + .5 | 0, -4);
         }
 
         context.restore();
     }
 }
+
+export default new RepeatMarginTool();

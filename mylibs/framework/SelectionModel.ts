@@ -8,6 +8,7 @@ import Rect from "../math/rect";
 import ArrayPool from "./ArrayPool";
 import UIElement from "./UIElement";
 import NullContainer from "./NullContainer";
+import IsolationContext from "../IsolationContext";
 
 let debug = require("DebugUtil")("carb:selection");
 
@@ -283,8 +284,8 @@ export class SelectionModel implements ISelection {
             return;
         }
 
-        if (Environment.view.isolationLayer && Environment.view.isolationLayer.isActive) {
-            this.makeSelection(Environment.view.isolationLayer.children);
+        if (IsolationContext.isolationLayer && IsolationContext.isolationLayer.isActive) {
+            this.makeSelection(IsolationContext.isolationLayer.children);
             return;
         }
 

@@ -722,7 +722,7 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         let result = this.hitElement(position, view, predicate, true);
         return result;
     }
-    select(multiselect?) {
+    select(multiselect, view) {
     }
     captureMouse(/*UIElement*/element?: any) {
         Environment.controller.captureMouse(element);

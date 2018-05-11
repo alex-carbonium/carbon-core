@@ -53,7 +53,7 @@ function runExample(name){
     window['page'] = page;
     window['artboard'] = artboard;
 
-    fn(app, artboard);
+    fn(app, renderLoop.view, artboard);
 
     history.replaceState({}, document.title, location.pathname + "?" + encodeURIComponent(name));
 }

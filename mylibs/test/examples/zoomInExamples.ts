@@ -1,9 +1,9 @@
 import {registerExample} from "./example";
-import { Rectangle, Selection, Rect, Environment } from "carbon-core";
+import { Rectangle, Selection, Rect } from "carbon-core";
 
 let w = window as any;
 
-registerExample("zoom in: rect", function(app, artboard){
+registerExample("zoom in: rect", function(app, view, artboard){
     app.activePage._placeBeforeRender = false;
 
     var rect = new Rectangle();
@@ -11,14 +11,14 @@ registerExample("zoom in: rect", function(app, artboard){
     rect.translate(100.5, 100.5);
     artboard.add(rect);
 
-    Environment.view.scale(20.5);
-    Environment.view.scrollX = (1853);
-    Environment.view.scrollY = (1916);
+    view.scale(20.5);
+    view.scrollX = (1853);
+    view.scrollY = (1916);
 
     Selection.makeSelection([rect]);
 });
 
-registerExample("zoom in: path", function(app, artboard){
+registerExample("zoom in: path", function(app, view, artboard){
     app.activePage._placeBeforeRender = false;
 
     var rect = new Rectangle();
@@ -27,16 +27,16 @@ registerExample("zoom in: path", function(app, artboard){
     var path = rect.convertToPath();
     artboard.add(path);
 
-    Environment.view.scale(20.5);
-    Environment.view.scrollX = (1853);
-    Environment.view.scrollY = (1916);
+    view.scale(20.5);
+    view.scrollX = (1853);
+    view.scrollY = (1916);
 
     Selection.makeSelection([path]);
 
     w.path = path;
 });
 
-registerExample("zoom in: group", function(app, artboard){
+registerExample("zoom in: group", function(app, view, artboard){
     app.activePage._placeBeforeRender = false;
 
     var rect1 = new Rectangle();
@@ -48,9 +48,9 @@ registerExample("zoom in: group", function(app, artboard){
     rect2.translate(12, 0);
     artboard.add(rect2);
 
-    Environment.view.scale(13);
-    Environment.view.scrollX = (1182);
-    Environment.view.scrollY = (1098);
+    view.scale(13);
+    view.scrollX = (1182);
+    view.scrollY = (1098);
 
     Selection.makeSelection([rect1, rect2]);
     app.actionManager.invoke("group");

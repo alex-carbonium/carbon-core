@@ -30,6 +30,7 @@ import { ArtboardProxyGenerator } from "../code/ProxyGenerator";
 import { IDisposable } from "carbon-runtime";
 import { AutoDisposable } from "../AutoDisposable";
 import EventHelper from "./EventHelper";
+import IsolationContext from "../IsolationContext";
 
 
 // TODO: artboard states
@@ -1003,7 +1004,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     relayoutCompleted() {
         //isolation hides original controls, which would be cloned in symbols
-        if (Environment.view.activeLayer.type !== LayerType.Isolation) {
+        if (!IsolationContext.isActive) {
             this.incrementVersion();
         }
         else if (!this.runtimeProps.layerChangedToken) {

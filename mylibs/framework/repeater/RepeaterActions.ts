@@ -137,12 +137,12 @@ export class RepeaterActions extends CarbonExtension {
         let allChildren = [];
         let cols = container.cols;
         let rows = container.rows;
-
+        let gm;
         for (let x = 0; x < rows; ++x) {
             for (let y = 0; y < cols; ++y) {
                 let e = items[x * cols + y] as Container;
                 if (e.children.length === 1) {
-                    var gm = e.children[0].globalViewMatrix();
+                    gm = e.children[0].globalViewMatrix();
                     e = e.children[0].clone();
                     App.Current.activePage.nameProvider.assignNewName(e);
                 } else {
@@ -154,7 +154,7 @@ export class RepeaterActions extends CarbonExtension {
                         App.Current.activePage.nameProvider.assignNewName(clone);
                         group.add(clone);
                     });
-                    var gm = e.globalViewMatrix();
+                    gm = e.globalViewMatrix();
                     e = group;
                 }
 
