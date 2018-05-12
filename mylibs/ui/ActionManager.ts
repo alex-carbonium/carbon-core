@@ -23,7 +23,6 @@ import EventHelper from "../framework/EventHelper";
 import { IActionManager, IAction, IApp, IUIElement, IEvent, IContainer, IIsolatable, IShortcutManager, ISelection, IView, IController } from "carbon-core";
 import { ArrangeStrategies, DropPositioning } from "../framework/Defs";
 import Rect from "../math/rect";
-import { viewStateStack } from "../framework/ViewStateStack";
 import CoreIntl from "../CoreIntl";
 import { ResolvedPromise } from "../framework/ObjectPool";
 import { TextAlignCommand } from "../commands/TextAlign";
@@ -496,11 +495,11 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("undoViewport", "Undo viewport position", "Project actions", function () {
-            viewStateStack.undo();
+
         });
 
         this.registerAction("redoViewport", "Redo viewport position", "Project actions", function () {
-            viewStateStack.redo();
+
         });
 
         // this.registerAction("newPagePortrait", "New portrait page", "New page", function () {
@@ -555,6 +554,58 @@ export default class ActionManager implements IActionManager {
         this.registerAction("ensureScaleAndCentered", "system", "", function (selection, target) {
             that.view.ensureScale(target);
             that.view.ensureCentered(target);
+        });
+
+        this.registerAction("restoreWorkspaceState", "system", "", function (selection, target) {
+            try {
+                var data = localStorage.getItem("workspace:" + this.id);
+                if (!data) {
+                    return;
+                }
+
+                var state = JSON.parse(data);
+                if (!state) {
+                    return;
+                }
+
+                var page = that.app.pages.find(x => x.id === state.pageId);
+                if (page) {
+                    that.app.setActivePage(page);
+                }
+
+                that.view.scale(state.scale);
+                that.view.scrollX = (state.scrollX);
+                that.view.scrollY = (state.scrollY);
+
+                if (page && state.pageState) {
+                    page.restoreWorkspaceState(state.pageState);
+                }
+
+                if (state.selection.length) {
+                    var elements = that.app.activePage.findAllNodesDepthFirst<IUIElement>(x => state.selection.indexOf(x.id) !== -1);
+                    if (elements.length) {
+                        Selection.makeSelection(elements);
+                    }
+                }
+            }
+            catch (e) {
+                //ignore
+            }
+            finally {
+                this._lastRelayoutView = that.view.viewState;
+            }
+        });
+
+        this.registerAction("saveWorkspaceState", "system", "", function () {
+            var state = {
+                scale: that.view.scale(),
+                scrollX: that.view.scrollX,
+                scrollY: that.view.scrollY,
+                pageId: that.app.activePage.id,
+                pageState: that.app.activePage.saveWorkspaceState(),
+                selection: Selection.selectedElements().map(x => x.id)
+            };
+            localStorage.setItem("workspace:" + this.id, JSON.stringify(state));
         });
 
         this.registerAction("toggleFrame", "@toggleFrame", "", function () {
@@ -677,8 +728,9 @@ export default class ActionManager implements IActionManager {
     getActionLabel(actionId: string) {
         let action = this.getAction(actionId);
         if (!action) {
-            throw new Error("Unknown action " + actionId);
+            return null;
         }
+
         let hotkey = this.shortcutManager.getActionHotkey(actionId);
         let label = CoreIntl.label(action.name);
         if (hotkey) {

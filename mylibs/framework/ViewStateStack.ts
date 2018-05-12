@@ -1,5 +1,5 @@
 import EventHelper from "./EventHelper";
-import { IEvent, ViewState, ICommand, IEvent2 } from "carbon-core";
+import { IEvent, ViewState, ICommand, IEvent2, IDisposable, IView, IApp } from "carbon-core";
 import Environment from "../environment";
 
 var debug = require("DebugUtil")("carb:viewState");
@@ -9,14 +9,26 @@ export class ViewStateStack {
 
     private index: number = -1;
     private stack: ViewState[] = [];
+    private _disposables:IDisposable[] = [];
 
-    constructor() {
-        Environment.attached.bind((view) => view.viewStateChanged.bind(this, this.onViewStateChanged));
-        Environment.detaching.bind((view) => view.viewStateChanged.unbind(this, this.onViewStateChanged));
+    constructor(private app:IApp, private view:IView) {
+    }
 
-        if (Environment.view) {
-            Environment.view.viewStateChanged.bind(this, this.onViewStateChanged);
-        }
+    attach() {
+        this._disposables.push(this.view.viewStateChanged.bind(this, this.onViewStateChanged));
+
+        this._disposables.push(this.app.actionManager.subscribe("undoViewport", ()=>{
+            this.undo();
+        }));
+
+        this._disposables.push(this.app.actionManager.subscribe("redoViewport", ()=>{
+            this.redo();
+        }));
+    }
+
+    detach() {
+        this._disposables.forEach(d=>d.dispose());
+        this._disposables = [];
     }
 
     private onViewStateChanged(newState: ViewState) {
@@ -33,7 +45,7 @@ export class ViewStateStack {
 
         var state = this.stack[this.index-- - 1];
         debug("viewState undo %o", state);
-        App.Current.actionManager.invoke("changeViewState", {newState:state, silent:true});
+        App.Current.actionManager.invoke("changeViewState", { newState: state, silent: true });
 
         this.changeState(this.index >= 1, true);
     }
@@ -45,12 +57,12 @@ export class ViewStateStack {
 
         var state = this.stack[++this.index];
         debug("viewState redo %o", state);
-        App.Current.actionManager.invoke("changeViewState", {newState:state, silent:true});
+        App.Current.actionManager.invoke("changeViewState", { newState: state, silent: true });
 
         this.changeState(true, this.index < this.stack.length - 1);
     }
 
-    clear(){
+    clear() {
         this.stack.length = 0;
         this.index = -1;
         debug("clear");
@@ -60,5 +72,3 @@ export class ViewStateStack {
         this.stateChanged.raise(canRedo, canRedo);
     }
 }
-
-export const viewStateStack = new ViewStateStack();

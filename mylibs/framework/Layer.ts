@@ -5,6 +5,7 @@ import EventHelper from "framework/EventHelper";
 import UIElement from "./UIElement";
 import { Types } from "./Defs";
 import { IContainer, IRect, LayerType, IView, ILayer, RenderEnvironment, RenderFlags, ChangeMode, IUIElement } from "carbon-core";
+import Invalidate from "./Invalidate";
 
 var clearChangedAreas = function (context) {
     // var fillStyle = this.fillStyle();
@@ -139,7 +140,7 @@ class Layer extends Container implements ILayer {
         return this.props.m;
     }
 
-    isInViewport() {
+    isInViewport(viewportRect) {
         return true;
     }
 
@@ -161,18 +162,14 @@ class Layer extends Container implements ILayer {
     invalidate(layerMask?) {
         this.invalidateRequired = true;
 
-        var view = this._view;
-        if (view) {
-            if (layerMask !== undefined) {
-                if (this.layerRedrawMask === null) {
-                    this.layerRedrawMask = layerMask;
-                } else {
-                    this.layerRedrawMask = this.layerRedrawMask | (layerMask);
-                }
+        if (layerMask !== undefined) {
+            if (this.layerRedrawMask === null) {
+                this.layerRedrawMask = layerMask;
+            } else {
+                this.layerRedrawMask = this.layerRedrawMask | (layerMask);
             }
-
-            view.requestRedraw();
         }
+        Invalidate.request(this.type, layerMask);
     }
 
     isInvalidateRequired() {

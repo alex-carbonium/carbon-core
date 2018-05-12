@@ -1,4 +1,5 @@
 import { app, RenderLoop, CoreIntl, Selection, ArtboardPage, Matrix, Point } from "carbon-core";
+import SystemExtensions from "../../SystemExtensions";
 
 app.setProps({noConfirmOnClose: true});
 
@@ -37,7 +38,8 @@ function runExample(name){
         noConfirmOnClose: true
     });
 
-    app.initExtensions();
+    let systemExtensions = new SystemExtensions();
+    systemExtensions.initExtensions(app, renderLoop.view, renderLoop.controller);
 
     var page = new ArtboardPage();
     page.setProps({

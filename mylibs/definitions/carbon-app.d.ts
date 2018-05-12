@@ -52,6 +52,11 @@ declare module "carbon-app" {
         pageId: string
     }
 
+    export class SystemExtensions {
+        initExtensions(app:IApp, view:IView, controller:IController);
+        detachExtensions();
+    }
+
     export interface IApp extends IDataNode<IAppProps> {
         isLoaded: boolean;
         props:IAppProps;
@@ -59,6 +64,7 @@ declare module "carbon-app" {
         changed: IEvent<Primitive[]>;
 
         activePage: IPage;
+        pageChanging: IEvent2<IPage, IPage>;
         pageChanged: IEvent2<IPage, IPage>;
         pageAdded: IEvent<IPage>;
         pageRemoved: IEvent<IPage>;
@@ -106,7 +112,8 @@ declare module "carbon-app" {
         init(): void;
         run(): Promise<void>;
 
-        onLoad(callback: () => void): void;
+        onLoad(callback: () => void, sync?:boolean): void;
+        onUnload(callback: () => void): IDisposable;
         /**
          * Notifies that the app will perform a heavy update, for example, an import of the page, or a restore of the specific version.
          * The typical reaction should be to unsubscribe from frequent events (like resourceAdded, etc).
@@ -131,9 +138,6 @@ declare module "carbon-app" {
          * just to update the UI.
          */
         settingsChanged: IEvent<AppSettings>;
-
-        saveWorkspaceState(): void;
-        restoreWorkspaceState(): void;
 
         showFrames(value?: boolean): boolean;
 

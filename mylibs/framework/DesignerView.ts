@@ -2,19 +2,22 @@ import { areRectsIntersecting } from "math/math";
 import Font from "./Font";
 import Brush from "./Brush";
 import ViewBase from "framework/ViewBase";
-import {SelectionModel, setSelection} from "./SelectionModel";
+import { SelectionModel, setSelection } from "./SelectionModel";
 import Cursor from "framework/Cursor";
 import Invalidate from "framework/Invalidate";
 import PixelGrid from "framework/render/PixelGrid"
 import { IsolationLayer } from "framework/IsolationLayer";
-import { LayerType } from "carbon-app";
-import { IContext, ContextType } from "carbon-core";
+import { LayerType, IApp } from "carbon-app";
+import { IContext, ContextType, IDisposable } from "carbon-core";
 import { SnapController } from "./SnapController";
+import { ViewStateStack } from "../framework/ViewStateStack";
 
 function setupLayers(Layer) {
     this.interactionLayer = new Layer();
     this.interactionLayer.type = LayerType.Interaction;
     this.interactionLayer.hitTransparent(true);
+    this.interactionLayer.add(this.selection.selectComposite()); // TODO: think how to cut this dependency
+    this.interactionLayer.context = this.upperContext;
 
     this.isolationLayer = new IsolationLayer(this);
     this.isolationLayer.type = LayerType.Isolation;
@@ -23,15 +26,15 @@ function setupLayers(Layer) {
 
     this._registerLayer(this.isolationLayer);
     this._registerLayer(this.interactionLayer);
-    this.interactionLayer.add(this.selection.selectComposite()); // TODO: think how to cut this dependency
-    this.interactionLayer.context = this.upperContext;
 }
 
 class DesignerView extends ViewBase {
-    protected selection:SelectionModel;
-    public snapController:SnapController;
+    protected selection: SelectionModel;
+    public snapController: SnapController;
+    private viewStateStack: ViewStateStack;
+    private attachedDisposables:IDisposable[] = [];
 
-    constructor(app) {
+    constructor(private app: IApp) {
         super(app);
         this.snapController = new SnapController(this);
         this.selection = new SelectionModel(this as any);
@@ -46,6 +49,7 @@ class DesignerView extends ViewBase {
 
         this.pixelGrid = new PixelGrid(this);
         this.showPixelGrid(true);
+        this.viewStateStack = new ViewStateStack(this.app, this);
     }
 
     setup(deps) {
@@ -60,24 +64,29 @@ class DesignerView extends ViewBase {
 
         this.setupRendering(contexts, requestRedrawCallback, cancelRedrawCallback, renderingScheduledCallback);
 
-        this._cursorChangedToken = Cursor.changed.bind(this, this.updateCursor);
-        this._invalidateRequestedToken = Invalidate.requested.bind(this, this.invalidate);
+        this.attachedDisposables.push(Cursor.changed.bind(this, this.updateCursor));
+        this.attachedDisposables.push(Invalidate.requested.bind(this, this.invalidate));
 
         if (this.interactionLayer) {
             this.interactionLayer.context = this.upperContext;
         }
+        this.viewStateStack.attach();
+
+        let page:any = this.app.activePage;
+        this.onActivePageChanged(null, page);
+        this.attachedDisposables.push(this.app.pageChanging.bind(this, this.onActivePageChanged));
+    }
+
+    onActivePageChanged(oldPage, newPage) {
+        this.setActivePage(newPage);
+        this.zoom(newPage.pageScale(), true);
     }
 
     detach() {
-        if (this._cursorChangedToken) {
-            this._cursorChangedToken.dispose();
-            this._cursorChangedToken = null;
-        }
+        this.attachedDisposables.forEach(d=>d.dispose());
+        this.attachedDisposables.length = 0;
 
-        if (this._invalidateRequestedToken) {
-            this._invalidateRequestedToken.dispose();
-            this._invalidateRequestedToken = null;
-        }
+        this.viewStateStack.detach();
     }
 
     draw() {
@@ -134,8 +143,6 @@ class DesignerView extends ViewBase {
             }
         }
     }
-
-
 }
 
 

@@ -104,10 +104,6 @@ class NullArtboard {
     }
     set height(value){}
 
-    registerForLayerDraw() {
-
-    }
-
     getBoundaryRect() {
         return {x: 0, y: 0, width: 0, height: 0};
     }

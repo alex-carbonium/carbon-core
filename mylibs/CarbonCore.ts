@@ -103,6 +103,7 @@ export default {
     "createUUID": Util.createUUID,
     "IsolationContext": require("./IsolationContext"),
     "choosePasteLocation": require("./framework/PasteLocator").choosePasteLocation,
+    "SystemExtensions": require("./SystemExtensions"),
 
     "SelectComposite": require("./framework/SelectComposite"),
     "SelectFrame": require("./framework/SelectFrame"),

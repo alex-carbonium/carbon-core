@@ -1,5 +1,5 @@
 import EventHelper from "framework/EventHelper";
-import { IEvent2, IRect, IInvalidate, RenderFlags } from "carbon-core";
+import { IEvent2, IRect, IInvalidate, RenderFlags, IEvent } from "carbon-core";
 import { LayerType } from "carbon-app";
 import { debounce } from "../util";
 
@@ -10,6 +10,7 @@ class Invalidate implements IInvalidate{
 
     constructor(){
         this.requested = EventHelper.createEvent2<LayerType, number>();
+
         this.debouncedRequest = debounce(()=>{
             this.draftMode = false;
             this.request();
@@ -28,7 +29,6 @@ class Invalidate implements IInvalidate{
         this.draftMode = true;
         this.request();
         this.debouncedRequest();
-
     }
 }
 

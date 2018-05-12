@@ -1,5 +1,5 @@
 declare module "carbon-model" {
-    import { IPoint, IRect, ICoordinate, IMatrix, ISize, Origin } from "carbon-geometry";
+    import { IPoint, ICoordinate, IMatrix, ISize, Origin, IRect, IRectData } from "carbon-geometry";
     import { IEventData, IConstructor, IEvent, IConstraints, IMouseEventData, ChangeMode, ArtboardType, Font, KeyboardState, ResizeDimension } from "carbon-basics";
     import { IContext } from "carbon-rendering";
     import { AnimationProps,IAnimationOptions, Brush, IDisposable, DataBag, TextContent } from "carbon-runtime";
@@ -183,7 +183,7 @@ declare module "carbon-model" {
         findPropertyDescriptor(propName): PropDescriptor;
 
         isInTree(): boolean;
-        isInViewport(): boolean;
+        isInViewport(viewport:IRectData): boolean;
     }
 
     export const UIElement: IConstructor<IUIElement>;

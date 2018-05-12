@@ -114,7 +114,6 @@ declare module "carbon-app"{
 
         mapElementsToLayerMask();
 
-        initExtensions();
         raiseLoaded();
     }
 
@@ -128,6 +127,7 @@ declare module "carbon-app"{
         updateViewportSize(size:ISize);
 
         focused(value?: boolean): boolean;
+        requestRedraw():void;
 
         activateLayer(layerType: LayerType, silent?: boolean);
         deactivateLayer(layerType: LayerType, silent?: boolean);

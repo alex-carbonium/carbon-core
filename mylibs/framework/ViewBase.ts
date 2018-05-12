@@ -22,10 +22,13 @@ const ZoomSteps = [0.02, 0.03, 0.06, 0.13, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 12
 const ViewStateChangeTimeout = 1000;
 
 function setupLayers(Layer) {
-    var layer = new Layer(this);
-    this._page = layer;
+    // insert dummy layer, to take space at 0 position for layer
+    // this position will be used later for the active page
+    // var layer = new Layer();
+    // layer.type = LayerType.Content;
+    // this._page = layer;
 
-    this._registerLayer(layer);
+    // this._registerLayer(layer);
 }
 
 function setupLayer(layer, context) {
@@ -73,11 +76,11 @@ function onZoomChanged(value, oldValue) {
 
 export default class ViewBase implements IView {
     gridContext: IContext;
-    snapController:any;
+    snapController: any;
     interactionLayer: any;
     scaleMatrix: any;
     context: any;
-    isolationLayer:IIsolationLayer;
+    isolationLayer: IIsolationLayer;
     attachToDOM(contexts: IContext[], container: any, redrawCallback: any, cancelCallback: any, scheduledCallback: any) {
         throw new Error("Method not implemented.");
     }
@@ -127,7 +130,6 @@ export default class ViewBase implements IView {
 
     _registerLayer(layer) {
         this._layers.push(layer);
-        layer._view = this;
     }
 
     _unregisterLayer(layer) {
@@ -205,8 +207,9 @@ export default class ViewBase implements IView {
                 setupContext: function (context) {
                     setupLayerHandler(context);
                 },
-                scaleMatrix:this.scaleMatrix,
-                focused:this.focused(),
+                scaleMatrix: this.scaleMatrix,
+                focused: this.focused(),
+                viewport: this.viewportRect(),
                 fill: null,
                 stroke: null,
                 view: this
@@ -219,6 +222,7 @@ export default class ViewBase implements IView {
 
         this.updateFlag(env, RenderFlags.ShowFrames, this.app.showFrames());
         this.updateFlag(env, RenderFlags.Final, final);
+        this.updateFlag(env, RenderFlags.Prototyping, this.prototyping());
 
         return env;
     }
@@ -430,7 +434,7 @@ export default class ViewBase implements IView {
                 this.activeLayerChanged.raise(layer);
             }
 
-            if(layerType === LayerType.Isolation) {
+            if (layerType === LayerType.Isolation) {
                 IsolationContext.setIsolationLayer(layer);
             }
         }
@@ -442,7 +446,7 @@ export default class ViewBase implements IView {
             this.activateLayer(this._layers[i - 1].type, silent);
         }
 
-        if(layerType === LayerType.Isolation) {
+        if (layerType === LayerType.Isolation) {
             IsolationContext.setIsolationLayer(null);
         }
     }
@@ -516,15 +520,25 @@ export default class ViewBase implements IView {
     invalidate(layerType?, mask?) {
         if (layerType === undefined) {
             for (var i = 0; i < this._layers.length; i++) {
-                this._layers[i].invalidate(0xffff);
+                const layer = this._layers[i];
+                if (!layer.isInvalidateRequired()) {
+                    layer.invalidate(0xffff);
+                } else {
+                    layer.layerRedrawMask = 0xffff;
+                }
             }
         }
         else {
             var layer = this._layers.find(l => l.type === layerType);
             if (layer) {
-                layer.invalidate(mask || 0xffff);
+                if (!layer.isInvalidateRequired()) {
+                    layer.invalidate(mask || 0xffff);
+                } else {
+                    layer.layerRedrawMask = 0xffff;
+                }
             }
         }
+
         this.requestRedraw();
     }
 
@@ -808,7 +822,7 @@ export default class ViewBase implements IView {
         var fit = current.fit(bounds, true);
 
         var artboard = this.page.getActiveArtboard() as IArtboard;
-        if (artboard && artboard.isInViewport()) {
+        if (artboard && artboard.isInViewport(viewport)) {
             fit = fit.fit(artboard.boundaryRect(), true);
         }
 

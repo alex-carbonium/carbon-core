@@ -17,7 +17,7 @@ import Environment from "environment";
 import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
-import { ChangeMode, PatchType, IPrimitiveRoot, LayerType, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext, IContainer, WorkspaceTool, IMouseEventData, RenderEnvironment, RenderFlags, UIElementFlags, ProxyDefinition, IAnimationOptions, IView, ICoordinate } from "carbon-core";
+import { ChangeMode, PatchType, IPrimitiveRoot, LayerType, ILayer, ArtboardType, IIsolatable, IArtboard, IArtboardProps, ISymbol, IRect, TileSize, IPage, IArtboardPage, IUIElement, IContext, IContainer, WorkspaceTool, IMouseEventData, RenderEnvironment, RenderFlags, UIElementFlags, ProxyDefinition, IAnimationOptions, IView, ICoordinate, IRectData } from "carbon-core";
 import { measureText } from "framework/text/MeasureTextCache";
 import Rect from "../math/rect";
 import CoreIntl from "../CoreIntl";
@@ -307,7 +307,10 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     _renderHeader(context, environment) {
         let scale = environment.scale;
-
+        let view = (environment as any).view;
+        if(!view) {
+            return; // this is hack but has no other options
+        }
         context.save();
         context.beginPath();
 
@@ -322,10 +325,10 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
         let width = this.width;
         let rect = this.getBoundaryRectGlobal();
-//TODO: think how to remove it
-        let pos = Environment.view.logicalCoordinateToScreen(rect);
+
+        let pos = view.logicalCoordinateToScreen(rect);
         let px = 0;
-        if (Environment.view.prototyping()) {
+        if (environment.flags & RenderFlags.Prototyping) {
             px = 14;
         }
 
@@ -801,9 +804,9 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return super.getHitTestBox.apply(this, arguments);
     }
 
-    isInViewport() {
+    isInViewport(viewport:IRectData) {
         if (!this.props.hitTestBox) {
-            return super.isInViewport();
+            return super.isInViewport(viewport);
         }
 
         //artboard can be translated only
@@ -812,7 +815,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         rect.x += gm.tx;
         rect.y += gm.ty;
 
-        let intersects = areRectsIntersecting(rect, Environment.view.viewportRect());
+        let intersects = areRectsIntersecting(rect, viewport);
         rect.free();
 
         return intersects;

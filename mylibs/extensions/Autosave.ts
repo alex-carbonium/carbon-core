@@ -88,7 +88,7 @@ export default class AutoSave extends ExtensionBase {
 
             if (this._app.serverless()) {
                 this.restoreUnsaved(backups[backups.length - 1]);
-                this._app.restoreWorkspaceState();
+                this._app.actionManager.invoke("restoreWorkspaceState");
             }
             else {
                 // var dialog = new Dialog(new LoadUnsavedChangesDialog(), {

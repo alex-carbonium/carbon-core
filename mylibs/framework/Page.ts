@@ -204,8 +204,7 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
         this.runtimeProps.version++;
     }
 
-    initPage(view) {
-        this._view = view;
+    initPage() {
         this._initialized = true;
     }
 
@@ -235,6 +234,7 @@ class Page extends Layer implements IPage, IPrimitiveRoot {
         }
         return container.width / container.height;
     }
+
     getArtboardAtPoint(point, view) {
         return null;
     }

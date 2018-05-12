@@ -21,7 +21,6 @@ import SystemConfiguration from 'SystemConfiguration';
 import Selection from "framework/SelectionModel";
 import Cursor from "framework/Cursor";
 import ExtensionBase from "./ExtensionBase";
-import Environment from "environment";
 import DesignerController from "framework/DesignerController";
 import Invalidate from "framework/Invalidate";
 import { IController, WorkspaceTool } from "carbon-core";
@@ -167,7 +166,7 @@ var registerCommands = function () {
         that.detachAll();
         Selection.directSelectionEnabled(false);
         that.app.allowSelection(true);
-        Environment.controller.currentTool = "pointerTool";
+        that.controller.currentTool = "pointerTool";
         Selection.refreshSelection();
     });
 
@@ -176,7 +175,7 @@ var registerCommands = function () {
         Selection.directSelectionEnabled(true);
         Selection.invertDirectSelection(true);
         that.app.allowSelection(true);
-        Environment.controller.currentTool = "pointerDirectTool";
+        that.controller.currentTool = "pointerDirectTool";
         Invalidate.requestInteractionOnly();
     });
 

@@ -31,8 +31,8 @@ class ArtboardPage extends Page implements IArtboardPage, IElementWithCode {
         this.runtimeProps.codeVersion = 0;
     }
 
-    initPage(view) {
-        super.initPage(view);
+    initPage() {
+        super.initPage();
         let artboard = this.getFirstArtboard();
         if (!artboard) {
             artboard = new Artboard();
@@ -139,7 +139,7 @@ class ArtboardPage extends Page implements IArtboardPage, IElementWithCode {
 
     drawChildSafe(child: UIElement, context, environment: RenderEnvironment) {
         let frame = null;
-        if (!(environment.flags & RenderFlags.CheckViewport) || child.isInViewport()) {
+        if (!(environment.flags & RenderFlags.CheckViewport) || child.isInViewport(environment.viewport)) {
             super.drawChildSafe(child, context, environment);
         } else {
             debug("Skip artboard not in the viewport: %s", this.name);
@@ -340,6 +340,7 @@ class ArtboardPage extends Page implements IArtboardPage, IElementWithCode {
         let artboard = this.getActiveArtboard();
         return {artboardId: artboard ? artboard.id : null};
     }
+
     restoreWorkspaceState(data: any): void{
         if (data.artboardId){
             let artboard = this.getAllArtboards().find(x => x.id === data.artboardId);

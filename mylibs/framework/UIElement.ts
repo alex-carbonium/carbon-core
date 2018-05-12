@@ -1028,13 +1028,19 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     shouldApplyViewMatrix() {
         return true;
     }
+
     applyViewMatrix(context) {
         if (this.shouldApplyViewMatrix()) {
             this.globalViewMatrix().applyToContext(context);
         }
     }
-    isInViewport() {
-        return areRectsIntersecting(Environment.view.viewportRect(), this.getBoundingBoxGlobal(true));
+
+    isInViewport(viewportRect) {
+        if(!viewportRect) {
+            return true;
+        }
+
+        return areRectsIntersecting(viewportRect, this.getBoundingBoxGlobal(true));
     }
 
     drawExtras(context: IContext, environment: RenderEnvironment) {
@@ -1054,7 +1060,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             w = br.width,
             h = br.height;
 
-        if (environment && (environment.flags & RenderFlags.CheckViewport) && !this.isInViewport()) {
+        if (environment && (environment.flags & RenderFlags.CheckViewport) && !this.isInViewport(environment.viewport)) {
             if (params.perf) {
                 performance.measure(markName, markName);
             }
@@ -1716,12 +1722,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     onLayerDraw(layer, context, environment: RenderEnvironment) {
 
     }
-    registerForLayerDraw(layerNum: LayerType) {
-        Environment.view.registerForLayerDraw(layerNum, this);
-    }
-    unregisterForLayerDraw(layerNum: LayerType) {
-        Environment.view.unregisterForLayerDraw(layerNum, this);
-    }
+
     margin(value?: Box) {
         if (value !== undefined) {
             this.setProps({ margin: value });
@@ -2690,13 +2691,13 @@ PropertyMetadata.registerForType(UIElement, {
         ];
     },
     prepareVisibility: function (element: UIElement) {
-        if (Environment.view.prototyping()) {
-            let res = {};
-            for (let name in element.props) {
-                res[name] = false;
-            }
-            return res;
-        }
+        // if (Environment.view.prototyping()) {
+        //     let res = {};
+        //     for (let name in element.props) {
+        //         res[name] = false;
+        //     }
+        //     return res;
+        // }
         var parent: any = element.parent;
         var strategy = parent.arrangeStrategy();
         return {

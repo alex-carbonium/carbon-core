@@ -8,7 +8,7 @@ var bind = function () {
         logger.info("quitting");
 
         that.app.quitting = true;
-        that.app.saveWorkspaceState();
+        that.app.actionManager.invoke("saveWorkspaceState");
 
         if (that.app.state && that.app.state.isDirty()) {
             if (that.app.serverless()){

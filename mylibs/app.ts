@@ -56,7 +56,7 @@ if (DEBUG) {
 var platform = require("platform/Platform");
 var Layer = require("framework/Layer");
 var SelectFrame = require("framework/SelectFrame");
-var extensions = require("extensions/All");
+
 var domUtil = require("utils/dom");
 var Stopwatch = require("./Stopwatch");
 var PropertyMetadata = require("framework/PropertyMetadata");
@@ -112,6 +112,7 @@ class AppClass extends DataNode implements IApp {
     recentColorsChanged = EventHelper.createEvent<any[]>();
 
     private _loaded: IEvent<void>;
+    private _unloaded: IEvent<void>;
     private _clipArtboards: boolean = false;
 
     constructor() {
@@ -134,6 +135,7 @@ class AppClass extends DataNode implements IApp {
 
         //events
         this._loaded = EventHelper.createEvent<void>();
+        this._unloaded = EventHelper.createEvent<void>();
 
         this.pageAdded = EventHelper.createEvent();
         this.pageRemoved = EventHelper.createEvent();
@@ -192,12 +194,6 @@ class AppClass extends DataNode implements IApp {
 
         this.dataManager = new DataManager(this);
 
-        token = Environment.detaching.bind(this, this.detachExtensions);
-        this.registerForDisposal(token);
-
-        token = Environment.attached.bind(this, this.initExtensions);
-        this.registerForDisposal(token);
-
         var contributions = new Contributions(this, this.actionManager, Environment.shortcutManager);
         var extensions = getBuiltInExtensions(this, Environment);
         extensions.forEach(x => x.initialize(contributions));
@@ -226,15 +222,28 @@ class AppClass extends DataNode implements IApp {
         return this._enableRenderCache;
     }
 
-    onLoad(callback: () => void) {
+    onLoad(callback: () => void, sync?: boolean) {
         if (this.isLoaded) {
-            setTimeout(callback, 1);
+            if (sync) {
+                callback();
+            } else {
+                setTimeout(callback, 1);
+            }
             return;
         }
         var token = this._loaded.bind(() => {
             callback();
             token.dispose();
         });
+    }
+
+    onUnload(callback: () => void) {
+        var token = this._unloaded.bind(() => {
+            callback();
+            token.dispose();
+        });
+
+        return token;
     }
 
     userId() {
@@ -545,7 +554,7 @@ class AppClass extends DataNode implements IApp {
 
     initPage(page) {
         if (!page.isInitialized()) {
-            page.initPage(Environment.view);
+            page.initPage();
             page._placeBeforeRender = true;
         }
 
@@ -864,31 +873,8 @@ class AppClass extends DataNode implements IApp {
         return this._userSettings[name];
     }
 
-    detachExtensions() {
-        if (this._extensions && this._extensions.length) {
-            for (var i = 0; i < this._extensions.length; ++i) {
-                this._extensions[i].detach();
-            }
-        }
-        this._extensions = null;
-    }
-
-    initExtensions() {
-        this._extensions = [];
-        for (var i = 0, l = extensions.length; i < l; ++i) {
-            var Extension = extensions[i];
-            var extension = new Extension(this);
-            //TODO: refactor somehow
-            if (extension.attach) {
-                extension.attach(this, Environment.view, Environment.controller);
-            }
-
-            this._extensions.push(extension);
-        }
-    }
-
     private _updateWithSelectionMask(e) {
-        var parent:any = e.parent;
+        var parent: any = e.parent;
         do {
             if (parent.opacity < 1 || parent.runtimeProps.mask || parent.clipSelf()) {
                 e = parent;
@@ -941,7 +927,7 @@ class AppClass extends DataNode implements IApp {
                 return bag;
             }, {});
 
-        for(let e of this.activePage.childrenIterator<IUIElement>()) {
+        for (let e of this.activePage.childrenIterator<IUIElement>()) {
             let isSelected = Selection.isElementSelected(e);
             let isArtboard = e instanceof Artboard;
             let isOnPage = e.parent === this.activePage;
@@ -952,14 +938,14 @@ class AppClass extends DataNode implements IApp {
 
             // set all elements on artbord without selection to layer 1
             if (!isArtboardWithSelection && (!isOnPage || isArtboard)) {
-                e.runtimeProps.ctxl = 1 << 0 ;
+                e.runtimeProps.ctxl = 1 << 0;
                 continue;
             }
 
             if (count && count === max) {
                 // if we already marked all selected elements, the rest goes to 1<<2 layer.
                 let parent = e.parent;
-                if(parent.runtimeProps.ctxl === 1 << 1) {
+                if (parent.runtimeProps.ctxl === 1 << 1) {
                     e.runtimeProps.ctxl = 1 << 1;
                 } else {
                     e.runtimeProps.ctxl = 1 << 2;
@@ -1080,7 +1066,6 @@ class AppClass extends DataNode implements IApp {
             this.raiseLoaded();
             this.endUpdate();
 
-            this.restoreWorkspaceState();
             this.releaseLoadRef();
 
             //that.platform.ensureCanvasSize();
@@ -1181,13 +1166,6 @@ class AppClass extends DataNode implements IApp {
 
         if (oldPage) {
             oldPage.deactivated();
-        }
-
-        var view = Environment.view;
-        if (view) {
-            view.setActivePage(page);
-            //view.resize(page.viewportRect());
-            view.zoom(page.pageScale(), true);
         }
 
         page.activated(oldPage);
@@ -1328,8 +1306,7 @@ class AppClass extends DataNode implements IApp {
 
     unload() {
         this.clear();
-        this.detachExtensions();
-
+        this._unloaded.raise();
         this.props = PropertyMetadata.getDefaultProps(this.t) as IAppProps;
         this.resetRuntimeProps();
 
@@ -1392,57 +1369,6 @@ class AppClass extends DataNode implements IApp {
     removeStoryById(id) {
         var story = this.findNodeByIdBreadthFirst(id);
         this.removeStory(story);
-    }
-
-    saveWorkspaceState(): void {
-        var state = {
-            scale: Environment.view.scale(),
-            scrollX: Environment.view.scrollX,
-            scrollY: Environment.view.scrollY,
-            pageId: this.activePage.id,
-            pageState: this.activePage.saveWorkspaceState(),
-            selection: Selection.selectedElements().map(x => x.id)
-        };
-        localStorage.setItem("workspace:" + this.id, JSON.stringify(state));
-    }
-    restoreWorkspaceState(): void {
-        try {
-            var data = localStorage.getItem("workspace:" + this.id);
-            if (!data) {
-                return;
-            }
-
-            var state = JSON.parse(data);
-            if (!state) {
-                return;
-            }
-
-            var page = this.pages.find(x => x.id === state.pageId);
-            if (page) {
-                this.setActivePage(page);
-            }
-
-            Environment.view.scale(state.scale);
-            Environment.view.scrollX = (state.scrollX);
-            Environment.view.scrollY = (state.scrollY);
-
-            if (page && state.pageState) {
-                page.restoreWorkspaceState(state.pageState);
-            }
-
-            if (state.selection.length) {
-                var elements = this.activePage.findAllNodesDepthFirst<IUIElement>(x => state.selection.indexOf(x.id) !== -1);
-                if (elements.length) {
-                    Selection.makeSelection(elements);
-                }
-            }
-        }
-        catch (e) {
-            //ignore
-        }
-        finally {
-            this._lastRelayoutView = Environment.view.viewState;
-        }
     }
 
     assignNewName(element: IUIElement) {

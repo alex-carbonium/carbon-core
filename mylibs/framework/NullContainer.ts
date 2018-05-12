@@ -329,10 +329,6 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
 
     }
 
-    registerForLayerDraw() {
-
-    }
-
     getBoundaryRect() {
         return Rect.Zero;
     }
@@ -432,7 +428,7 @@ class NullContainer extends DataNode implements IUIElement, IContainer, IPrimiti
     isInTree() {
         return false;
     }
-    isInViewport() {
+    isInViewport(viewportRect) {
         return false;
     }
     roundBoundingBoxToPixelEdge() {

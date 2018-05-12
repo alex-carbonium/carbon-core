@@ -1,6 +1,6 @@
 declare module "carbon-rendering" {
     import { IMatrix, IRect } from "carbon-geometry";
-    import { IUIElement, Brush } from "carbon-core";
+    import { IUIElement, Brush, IRectData } from "carbon-core";
 
     export const enum ContextType {
         Content,
@@ -84,6 +84,7 @@ declare module "carbon-rendering" {
         CheckViewport = 1 << 5,
         DisableCaching = 1 << 6,
         Preview = 1 << 7,
+        Prototyping = 1 << 8,
         Default = Final | ArtboardFill | UseParentClipping | CheckViewport
     }
 
@@ -96,6 +97,7 @@ declare module "carbon-rendering" {
         fill: Brush | null;
         stroke: Brush | null;
         focused?:boolean;
+        viewport?:IRectData;
         //TODO: check if this can be removed or called on some other class
         setupContext: (context: IContext) => void;
     }
