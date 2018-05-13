@@ -21,16 +21,6 @@ var debug = require("DebugUtil")("carb:view");
 const ZoomSteps = [0.02, 0.03, 0.06, 0.13, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256];
 const ViewStateChangeTimeout = 1000;
 
-function setupLayers(Layer) {
-    // insert dummy layer, to take space at 0 position for layer
-    // this position will be used later for the active page
-    // var layer = new Layer();
-    // layer.type = LayerType.Content;
-    // this._page = layer;
-
-    // this._registerLayer(layer);
-}
-
 function setupLayer(layer, context) {
     context.scale(this.contextScale, this.contextScale);
 
@@ -238,7 +228,6 @@ export default class ViewBase implements IView {
 
     setup(deps) {
         this.deps = deps;
-        setupLayers.call(this, deps.Layer);
     }
 
     renderingScheduled() {

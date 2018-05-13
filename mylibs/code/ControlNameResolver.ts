@@ -6,7 +6,7 @@ import { RuntimeProxy } from "./runtime/RuntimeProxy";
 import { RuntimeScreen } from "./runtime/RuntimeScreen";
 import { AutoDisposable } from "../AutoDisposable";
 import Environment from "environment";
-import { Page } from "carbon-app";
+import { Page, IPreviewModel, IModuleResolver } from "carbon-app";
 import { PropertyAnimation } from "../framework/animation/PropertyAnimation";
 import { Color } from "../framework/Color";
 
@@ -31,32 +31,28 @@ const system = {
 }
 
 export class ControlNameResolver {
-    private _artboard: IContainer;
     private _skipMap = skipList.reduce((m, v) => { m[v] = true; return m; }, {})
     private _blackMap = blackList.reduce((m, v) => { m[v] = true; return m; }, {})
-    private _context: RuntimeContext;
     private _localContext = {};
     private _nameInstanceMap = {}
     public readonly proxy:any;
 
-    constructor(context: RuntimeContext, artboard: IContainer) {
-        this._artboard = artboard;
-        this._context = context;
-        let screen = new RuntimeScreen(artboard as IArtboard);
+    constructor(private context: RuntimeContext, private moduleResolver:IModuleResolver, private artboard: IContainer) {
+        let screen = new RuntimeScreen(artboard  as IArtboard);
         this._localContext["DeviceScreen"] = screen;
-        this._localContext["artboard"] = this._artboard;
+        this._localContext["artboard"] = this.artboard;
         artboard.runtimeProps.disposables = artboard.runtimeProps.disposables || new AutoDisposable();
-        this._artboard.runtimeProps.disposables.add(screen)
+        this.artboard.runtimeProps.disposables.add(screen)
 
         this.proxy = new Proxy({}, this);
     }
 
     require = (name) => {
-        if(name === "./n"+(this._artboard as any).compilationUnitId +".types") {
+        if(name === "./n"+(this.artboard as any).compilationUnitId +".types") {
             return this.proxy;
         }
 
-        let previewModel = (Environment.controller as any).previewModel;
+        let previewModel = this.moduleResolver;
         if(previewModel) {
             return previewModel.requireModuleInstance(name);
         }
@@ -66,7 +62,7 @@ export class ControlNameResolver {
 
     set(target:any, name:string, value:any) {
         // store all exported stuff
-        let runtimeData = this._artboard.runtimeProps.runtimeData = this._artboard.runtimeProps.runtimeData || {};
+        let runtimeData = this.artboard.runtimeProps.runtimeData = this.artboard.runtimeProps.runtimeData || {};
         runtimeData[name] = value;
 
         return true;
@@ -87,7 +83,7 @@ export class ControlNameResolver {
                 source = this._localContext[name];
             }
             else {
-                this._artboard.applyVisitor(e => {
+                this.artboard.applyVisitor(e => {
                     // it is not supper fast to escapeNames many times,
                     // but expectation is that only small amount of controls
                     // will be used in code, so don't want to build map of all controls
@@ -113,18 +109,18 @@ export class ControlNameResolver {
             return this.require;
         }
         if(name === "exports") {
-            this._artboard.runtimeProps.runtimeData = this._artboard.runtimeProps.runtimeData || {};
-            return this._artboard.runtimeProps.runtimeData;
+            this.artboard.runtimeProps.runtimeData = this.artboard.runtimeProps.runtimeData || {};
+            return this.artboard.runtimeProps.runtimeData;
         }
         if(system.hasOwnProperty(name)) {
             return system[name];
         }
-        return this._runtimeData(name) || this._findControl(name) || this._context.get(name) || undefined;
+        return this._runtimeData(name) || this._findControl(name) || this.context.get(name) || undefined;
     }
 
     _runtimeData(name)  {
-        if(this._artboard.runtimeProps && this._artboard.runtimeProps.runtimeData) {
-            return this._artboard.runtimeProps.runtimeData[name];
+        if(this.artboard.runtimeProps && this.artboard.runtimeProps.runtimeData) {
+            return this.artboard.runtimeProps.runtimeData[name];
         }
     }
 
@@ -132,6 +128,6 @@ export class ControlNameResolver {
         if (this._skipMap[name]) {
             return false;
         }
-        return  system[name] || this._runtimeData(name) || !!this._findControl(name) || this._blackMap[name] || this._context.get(name);
+        return  system[name] || this._runtimeData(name) || !!this._findControl(name) || this._blackMap[name] || this.context.get(name);
     }
 }

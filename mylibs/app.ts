@@ -75,6 +75,7 @@ class AppClass extends DataNode implements IApp {
 
     activePage: IPage;
     pageChanged: IEvent2<IPage, IPage>;
+    pageChanging: IEvent2<IPage, IPage>;
     pageAdded: IEvent<IPage>;
     pageRemoved: IEvent<IPage>;
 
@@ -140,7 +141,7 @@ class AppClass extends DataNode implements IApp {
         this.pageAdded = EventHelper.createEvent();
         this.pageRemoved = EventHelper.createEvent();
         this.pageChanged = EventHelper.createEvent2();
-        this.pageChanging = EventHelper.createEvent();
+        this.pageChanging = EventHelper.createEvent2();
         this.savedToJson = EventHelper.createEvent();
 
         this.selectionMade = EventHelper.createEvent();

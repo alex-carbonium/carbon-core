@@ -9,8 +9,6 @@ import { IApp, IController, IEvent, IEvent2, IMouseEventData, KeyboardState, IUI
 import { IArtboard } from "carbon-model";
 import { ModelFactory } from "../code/runtime/ModelFactory";
 
-
-
 //TODO: extend DesignerController from base class
 export default class ControllerBase implements IController {
     inlineEditor: any;

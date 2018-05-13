@@ -659,4 +659,8 @@ declare module "carbon-app" {
         activePage:IPage;
         readonly activeArtboard:IArtboard;
     }
+
+    export interface IModuleResolver {
+        requireModuleInstance(name:string):any;
+    }
 }

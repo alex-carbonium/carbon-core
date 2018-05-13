@@ -1,5 +1,4 @@
 import { IAnimationOptions } from "carbon-core";
-import { ModelFactory } from "../../code/runtime/ModelFactory";
 
 var easingFunctions = {
     /*

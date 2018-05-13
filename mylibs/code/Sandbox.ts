@@ -1,7 +1,8 @@
 import {ControlNameResolver} from "./ControlNameResolver";
-import { IContainer } from "carbon-core";
+import { IContainer, IPreviewModel, IModuleResolver } from "carbon-core";
 import { RuntimeContext } from "./runtime/RuntimeContext";
 import { ModuleResolver } from "./ModuleResolver";
+import PreviewModel from "../framework/preview/PreviewModel";
 
 
 let source = `
@@ -36,8 +37,8 @@ with (new Proxy({}, handler)) {
 var sandboxFunc = null;
 
 export class Sandbox {
-    runOnElement(context:RuntimeContext, element:IContainer, code:string) {
-        let nameResolver = new ControlNameResolver(context, element);
+    runOnElement(context:RuntimeContext, moduleResolver:IModuleResolver, element:IContainer, code:string) {
+        let nameResolver = new ControlNameResolver(context, moduleResolver, element);
 
         // ElementProxy.clear();
 
@@ -48,8 +49,8 @@ export class Sandbox {
         sandboxFunc(nameResolver.proxy, code);
     }
 
-    runOnModule(context:RuntimeContext, module:any, code:string) {
-        let resolver = new ModuleResolver(context, module);
+    runOnModule(context:RuntimeContext, moduleResolver:IModuleResolver, module:any, code:string) {
+        let resolver = new ModuleResolver(context, moduleResolver, module);
         let resolverProxy = new Proxy({}, resolver);
 
         code = code.replace('Object.defineProperty(exports, "__esModule", { value: true });', '');

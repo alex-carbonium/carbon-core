@@ -169,7 +169,8 @@ class Layer extends Container implements ILayer {
                 this.layerRedrawMask = this.layerRedrawMask | (layerMask);
             }
         }
-        Invalidate.request(this.type, layerMask);
+
+        Invalidate.requestViewRedraw();
     }
 
     isInvalidateRequired() {

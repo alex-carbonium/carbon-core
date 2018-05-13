@@ -42,7 +42,6 @@ import BoundaryPathDecorator from "../decorators/BoundaryPathDecorator";
 import RenderPipeline from "./render/RenderPipeline";
 import ContextCacheManager from "./render/ContextCacheManager";
 import { RuntimeProxy } from "../code/runtime/RuntimeProxy";
-import { ModelFactory } from "../code/runtime/ModelFactory";
 import { PropertyAnimation } from "./animation/PropertyAnimation";
 
 require("../migrations/All");

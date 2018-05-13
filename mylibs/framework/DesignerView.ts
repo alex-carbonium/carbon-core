@@ -66,6 +66,7 @@ class DesignerView extends ViewBase {
 
         this.attachedDisposables.push(Cursor.changed.bind(this, this.updateCursor));
         this.attachedDisposables.push(Invalidate.requested.bind(this, this.invalidate));
+        this.attachedDisposables.push(Invalidate.requestedViewRedraw.bind(this, this.requestRedraw));
 
         if (this.interactionLayer) {
             this.interactionLayer.context = this.upperContext;

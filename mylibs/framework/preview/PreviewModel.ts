@@ -6,7 +6,7 @@ import Matrix from "math/matrix";
 import Artboard from "framework/Artboard";
 import Symbol from "framework/Symbol";
 import { IApp, IEvent, IPage, PreviewDisplayMode, ISize, IPageProps, ChangeMode, IDisposable, IEvent3, INavigationAnimationOptions, AnimationType, ICustomTransition } from "carbon-core";
-import { IPreviewModel, IController, IView } from "carbon-app";
+import { IPreviewModel, IController, IView, IModuleResolver } from "carbon-app";
 import { IArtboard } from "carbon-model";
 import { Sandbox } from "../../code/Sandbox";
 import { RuntimeContext } from "../../code/runtime/RuntimeContext";
@@ -24,7 +24,7 @@ import StateBoard from "../StateBoard";
 import AnimationGroup from "../animation/AnimationGroup";
 import AnimationController from "../animation/AnimationController";
 
-export default class PreviewModel implements IPreviewModel, IDisposable {
+export default class PreviewModel implements IPreviewModel, IDisposable, IModuleResolver {
     private _activePage: IPage<IPageProps> & { originalSize: ISize } = NullPage;
     private sandbox = new Sandbox();
     private disposables = new AutoDisposable();
@@ -47,7 +47,9 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
         this.runtimeContext = new RuntimeContext();
 
         this.runtimeContext.register("navigationController", this.navigationController);
-        this.runtimeContext.register("Model", ModelFactory);
+        this.runtimeContext.register("Model", new ModelFactory((a)=>{
+            return this.runCodeOnArtboard(a);
+        }));
         this.runtimeContext.register("Brush", BrushFactory);
 
         this.disposables.add(this.navigationController);
@@ -205,7 +207,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
             }
         }
         module = {};
-        this.sandbox.runOnModule(this.runtimeContext, module, code);
+        this.sandbox.runOnModule(this.runtimeContext, this, module, code);
         this.modules.set(name, module);
 
         return module;
@@ -292,7 +294,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable {
                 return Services.compiler.codeProvider.getArtboardCode(artboard).then((code) => {
                     if (code) {
                         try {
-                            this.sandbox.runOnElement(this.runtimeContext, artboard, code);
+                            this.sandbox.runOnElement(this.runtimeContext, this, artboard, code);
                             this.modelFailed = false;
                         } catch (e) {
                             // todo: log to console console.error(e);

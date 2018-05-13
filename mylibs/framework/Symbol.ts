@@ -762,7 +762,7 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
     }
 
     dblclick(event: IMouseEventData) {
-        var element = this.hitElementDirect(event, event.view.scale());
+        var element = this.hitElementDirect(event, event.view);
         if (element !== this) {
             Selection.makeSelection([element]);
         }

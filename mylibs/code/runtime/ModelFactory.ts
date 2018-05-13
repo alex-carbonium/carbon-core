@@ -6,6 +6,7 @@ import { Model } from "../../framework/Model";
 import Brush from "../../framework/Brush";
 import Matrix from "math/matrix";
 import Environment from "environment";
+import { IArtboard } from "carbon-core";
 
 function EventData(props) {
     Object.assign(this, props);
@@ -28,7 +29,7 @@ EventData.prototype.isPropagationStopped = function isPropagationStopped() {
 }
 
 var model = new Model();
-export class ModelFactoryClass implements IProxySource {
+export class ModelFactory implements IProxySource {
     proxyDefinition() {
         return {
             props: [],
@@ -46,6 +47,10 @@ export class ModelFactoryClass implements IProxySource {
             ],
             mixins: []
         }
+    }
+
+    constructor(private runCodeOnArtboardCallback:(a:IArtboard)=>Promise<void>) {
+
     }
 
     createProperty<T>(getter: () => T, setter?: (value: T) => void) {
@@ -95,6 +100,10 @@ export class ModelFactoryClass implements IProxySource {
     }
 
     createEventData(data: any) {
+        return ModelFactory.createEventData(data);
+    }
+
+    static createEventData(data: any) {
         return new EventData(data);
     }
 
@@ -105,15 +114,17 @@ export class ModelFactoryClass implements IProxySource {
         let name = props.artboardName;
         delete props.artboardName
         let frame = model.createArtboardFrame(name, size, props);
-        let previewModel = (Environment.controller as any).previewModel;
-        if (previewModel) {
-            return previewModel.runCodeOnArtboard((frame as any).innerElement).then(() => frame);
-        }
 
-        return Promise.resolve(frame);
+        return this.runCodeOnArtboardCallback((frame as any).innerElement).then(() => frame);
+        // let previewModel = (Environment.controller as any).previewModel;
+        // if (previewModel) {
+        //     return previewModel.runCodeOnArtboard((frame as any).innerElement).then(() => frame);
+        // }
+
+        // return Promise.resolve(frame);
     }
 
-    _prepareProps(props) {
+    static _prepareProps(props) {
         props = Object.assign({}, props);
         if (props.fill && (typeof props.fill === 'string')) {
             props.fill = Brush.createFromCssColor(props.fill);
@@ -132,5 +143,3 @@ export class ModelFactoryClass implements IProxySource {
         return props;
     }
 }
-
-export var ModelFactory = new ModelFactoryClass();

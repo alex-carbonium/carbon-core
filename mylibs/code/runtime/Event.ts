@@ -1,5 +1,4 @@
 import { DataBag, IDisposable } from "carbon-core";
-import { ModelFactory } from "./ModelFactory";
 
 class EventDisposable implements IDisposable {
     dispose(): void {
