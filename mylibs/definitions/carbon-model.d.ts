@@ -511,7 +511,7 @@ declare module "carbon-model" {
         isImage(): boolean;
         isSvg(): boolean;
 
-        drop(file: File): Promise<void>;
+        drop(file: File, controller:any): Promise<void>;
         setExternalUrl(url: string): void;
     }
 

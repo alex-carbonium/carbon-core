@@ -3,7 +3,6 @@ import { NameProvider } from "./NameProvider";
 import { RuntimeContext } from "./runtime/RuntimeContext";
 import { RuntimeScreen } from "./runtime/RuntimeScreen";
 import { AutoDisposable } from "../AutoDisposable";
-import Environment from "environment";
 
 const skipList = ["eval", "proxy"]
 const blackList = ["window", "document", "uneval"];

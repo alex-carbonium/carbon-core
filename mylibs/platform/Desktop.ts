@@ -7,7 +7,7 @@ import AnimationGroup from "framework/animation/AnimationGroup";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
 import { keyboard } from "./Keyboard";
-import Environment from "environment";
+import Workspace from "../Workspace";
 import backend from "../backend";
 import Hammer from "hammerjs";
 import { IApp, IView, IController } from "carbon-core";
@@ -63,7 +63,7 @@ var onmousewheel = function (e) {
         e.preventDefault();
     }
     catch (e) {
-        Environment.reportFatalErrorAndRethrow(e);
+        Workspace.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -80,7 +80,7 @@ var onmousedown = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalErrorAndRethrow(e);
+        Workspace.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -96,7 +96,7 @@ var onmousemove = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalErrorAndRethrow(e);
+        Workspace.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -116,7 +116,7 @@ var onmouseup = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalErrorAndRethrow(e);
+        Workspace.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -125,7 +125,7 @@ var ondblclick = function (event) {
         this.controller.ondblclick(this.controller.createEventData(event));
     }
     catch (e) {
-        Environment.reportFatalErrorAndRethrow(e);
+        Workspace.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -136,7 +136,7 @@ var onpanstart = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalErrorAndRethrow(e);
+        Workspace.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -148,7 +148,7 @@ var onpanend = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalErrorAndRethrow(e);
+        Workspace.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -159,7 +159,7 @@ var onpanmove = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalErrorAndRethrow(e);
+        Workspace.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -170,7 +170,7 @@ var onpinchstart = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalErrorAndRethrow(e);
+        Workspace.reportFatalErrorAndRethrow(e);
     }
 };
 var onpinchend = function (event) {
@@ -180,7 +180,7 @@ var onpinchend = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalErrorAndRethrow(e);
+        Workspace.reportFatalErrorAndRethrow(e);
     }
 };
 var onpinchmove = function (event) {
@@ -190,7 +190,7 @@ var onpinchmove = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalErrorAndRethrow(e);
+        Workspace.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -199,7 +199,7 @@ var onclick = function (event) {
         this.controller.onclick(this.controller.createEventData(event));
     }
     catch (e) {
-        Environment.reportFatalErrorAndRethrow(e);
+        Workspace.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -208,7 +208,7 @@ var ondoubletap = function (event) {
         this.controller.ondoubletap(this.controller.createEventData(event));
     }
     catch (e) {
-        Environment.reportFatalErrorAndRethrow(e);
+        Workspace.reportFatalErrorAndRethrow(e);
     }
 }
 
@@ -217,7 +217,7 @@ var ontap = function (event) {
         this.controller.ontap(this.controller.createEventData(event));
     }
     catch (e) {
-        Environment.reportFatalErrorAndRethrow(e);
+        Workspace.reportFatalErrorAndRethrow(e);
     }
 }
 
@@ -233,7 +233,7 @@ var onDocumentMouseMove = function (event) {
         }
     }
     catch (e) {
-        Environment.reportFatalErrorAndRethrow(e);
+        Workspace.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -289,7 +289,7 @@ var onmouseleave = function (event) {
         this.controller.onmouseleave(this.controller.createEventData(event));
     }
     catch (e) {
-        Environment.reportFatalErrorAndRethrow(e);
+        Workspace.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -307,7 +307,7 @@ var onmouseenter = function (event) {
         this.controller.onmouseenter(this.controller.createEventData(event));
     }
     catch (e) {
-        Environment.reportFatalErrorAndRethrow(e);
+        Workspace.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -316,7 +316,7 @@ var oncontextmenu = function (event) {
         this.controller.showContextMenu(this.controller.createEventData(event));
     }
     catch (e) {
-        Environment.reportFatalErrorAndRethrow(e);
+        Workspace.reportFatalErrorAndRethrow(e);
     }
 };
 
@@ -344,7 +344,7 @@ var onWindowResize = function () {
         this.controller.onWindowResize();
     }
     catch (e) {
-        Environment.reportFatalErrorAndRethrow(e);
+        Workspace.reportFatalErrorAndRethrow(e);
     }
 }
 

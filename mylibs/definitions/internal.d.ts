@@ -23,7 +23,7 @@ declare module "carbon-model"{
     import { IRect, IMatrix, ISize } from "carbon-geometry";
     import { RenderEnvironment } from "carbon-rendering";
 
-    import { IAnimationOptions, IView } from "carbon-core";
+    import { IAnimationOptions, IView, IController } from "carbon-core";
 
     export interface IDataNode {
         primitivePath():any;
@@ -49,7 +49,7 @@ declare module "carbon-model"{
         runtimeProps: any;
 
         isDescendantOrSame(other: IUIElement): boolean;
-        select(multi: boolean, view:IView): void;
+        select(multi: boolean, view:IView, controller:IController): void;
         unselect(): void;
 
         hitVisible(): boolean;
@@ -168,6 +168,7 @@ declare module "carbon-app"{
     export const Layer: any;
     export const ArtboardPage: any;
     export const MirroringView: any;
+    export const ArtboardProxyPage: any;
     export const RelayoutQueue: any;
 
     //TODO: move to UI
@@ -199,6 +200,7 @@ declare module "carbon-model"{
     export interface IArtboard{
         allowArtboardSelection(value?): boolean;
         readonly stateAnimations:{[from:string]:{[to:string]:{[prop:string]:IAnimationOptions}}};
+        incrementVersion();
     }
 
     export interface IPrimitiveRoot {

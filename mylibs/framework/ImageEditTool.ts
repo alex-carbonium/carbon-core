@@ -46,7 +46,7 @@ export class ImageEditTool {
         var content = new ImageContent(frame);
         content.prepareAndSetProps(contentProps, ChangeMode.Self);
         content.applyDirectedTranslation(fsr.topLeft(), ChangeMode.Self);
-        content.activate();
+        content.activate(controller);
         this._content = content;
 
         //TODO: add snapping inside rotated containers

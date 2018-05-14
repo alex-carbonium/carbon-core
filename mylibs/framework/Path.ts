@@ -12,7 +12,6 @@ import { multiplyVectorConst, addVectors, subVectors } from "math/math";
 import Shape from "framework/Shape";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
-import Environment from "environment";
 import Box from "framework/Box";
 import { debounce } from "util";
 import { Types } from "framework/Defs";
@@ -423,15 +422,15 @@ class Path extends Shape {
         return this.props.mode;
     }
 
-    enter({view}) {
+    enter(a,b,c,{view, controller}) {
         if (this.mode() !== ElementState.Edit) {
-            this.edit(view);
+            this.edit(view, controller);
         }
     }
 
-    switchToEditMode(edit: boolean, view?) {
+    switchToEditMode(edit: boolean, view?, controller?) {
         if (edit) {
-            this.addDecorator(new PathManipulationDecorator(view));
+            this.addDecorator(new PathManipulationDecorator(view, controller));
 
             scalePointsToNewSize.call(this);
             this.mode(ElementState.Edit);
@@ -509,9 +508,9 @@ class Path extends Shape {
         return this.points.length;
     }
 
-    select(multiSelect?: boolean) {
+    select(multiSelect: boolean, view, controller) {
         if (!multiSelect) {
-            this._enterBinding = Environment.controller.actionManager.subscribe('enter', this.enter.bind(this));
+            this._enterBinding = controller.actionManager.subscribe('enter', this.enter.bind(this));
         }
     }
 
@@ -527,13 +526,13 @@ class Path extends Shape {
         return res && this.mode() !== ElementState.Edit;
     }
 
-    edit(view) {
-        this.switchToEditMode(true, view);
+    edit(view, controller) {
+        this.switchToEditMode(true, view, controller);
     }
 
     dblclick(event, scale?) {
         if (this.mode() !== ElementState.Edit) {
-            this.edit(event.view);
+            this.edit(event.view, event.controller);
         }
     }
 

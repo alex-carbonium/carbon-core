@@ -2,7 +2,6 @@ import { Types, ArrangeStrategies, Overflow, DropPositioning } from "./Defs";
 import ArrangeStrategy from "./arrangeStrategy/ArrangeStrategy";
 import ContextPool from "./render/ContextPool";
 import CorruptedElement from "./CorruptedElement";
-import Environment from "../environment";
 import PropertyMetadata from "./PropertyMetadata";
 import UIElement from './UIElement';
 import QuadAndLock from './QuadAndLock';
@@ -722,14 +721,9 @@ export default class Container<TProps extends IContainerProps = IContainerProps>
         let result = this.hitElement(position, view, predicate, true);
         return result;
     }
-    select(multiselect, view) {
+    select(multiselect, view, controller) {
     }
-    captureMouse(/*UIElement*/element?: any) {
-        Environment.controller.captureMouse(element);
-    }
-    releaseMouse(/*UIElement*/element?: any) {
-        Environment.controller.releaseMouse(element);
-    }
+
     applyVisitor(callback: (element: IUIElement, parent?: IContainer) => boolean | void, useLogicalChildren?: boolean, parent?: any) {
         let stop = false;
         for (let i = this.children.length - 1; i >= 0; --i) {

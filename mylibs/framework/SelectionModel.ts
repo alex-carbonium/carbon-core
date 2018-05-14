@@ -2,7 +2,6 @@ import EventHelper from "./EventHelper";
 import SelectComposite from "./SelectComposite";
 import { SelectFrame } from "./SelectFrame";
 import UserSettings from "../UserSettings";
-import Environment from "../environment";
 import { ISelection, IEvent, IEvent2, IUIElement, IComposite, IEvent3, SelectionMode, KeyboardState, ISelectComposite, IRect, IView, IUIElementProps, IController, LayerType } from "carbon-core";
 import Rect from "../math/rect";
 import ArrayPool from "./ArrayPool";
@@ -68,14 +67,13 @@ export class SelectionModel implements ISelection {
     private _propertyComposite: SelectComposite;
     private _selectFrame = new SelectFrame();
     private _selectFrameStarted = false;
-    private view: IView;
 
     latestGlobalBoundingBox: IRect = Rect.Zero;
     modeChangedEvent: IEvent<boolean>;
     onElementSelected: IEvent3<ISelectComposite, IUIElement[], boolean>;
     propertiesRequested:IEvent<ISelectComposite>;
 
-    constructor(view: IView, controller:IController) {
+    constructor(private view: IView, private controller:IController) {
         this._unlockedContainers = ArrayPool.EmptyArray;
         this._activeGroup = null;
         this.onElementSelected = selectionImpl.onElementSelected;
@@ -84,7 +82,6 @@ export class SelectionModel implements ISelection {
         this.stopSelectionFrameEvent = selectionImpl.stopSelectionFrameEvent;
         this.modeChangedEvent = selectionImpl.modeChangedEvent;
         this.propertiesRequested = selectionImpl.propertiesRequested;
-        this.view = view;
 
         this._selectCompositeElement = new SelectComposite(view, controller);
         this._propertyComposite = new SelectComposite(view, controller);
@@ -284,7 +281,7 @@ export class SelectionModel implements ISelection {
     selectAll() {
         let page = App.Current.activePage;
 
-        if (Environment.controller.currentTool === "artboardTool") {
+        if (this.controller.currentTool === "artboardTool") {
             this.makeSelection(page.getAllArtboards());
             return;
         }

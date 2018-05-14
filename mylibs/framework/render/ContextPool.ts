@@ -1,7 +1,6 @@
 // @flow
 import Context from "./Context";
 import { IContextPool, ContextType } from "carbon-core";
-import Environment from "../../environment";
 
 var contextPool : Array<Context> = [];
 
@@ -13,7 +12,7 @@ class ContextPool implements IContextPool {
         }
         // TODO: uncoment and check if it is the reason for rendering artifacts
         // else {
-        //     var size = Environment.view.viewportSize();
+        //     var size = Workspace.view.viewportSize();
         //     width = Math.min(size.width * scale, width * scale);
         //     height = Math.min(size.height * scale, height * scale);
         // }

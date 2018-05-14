@@ -1,11 +1,10 @@
 import Layer from './Layer';
 import Context from "./render/Context";
-import { IContainer, IUIElement, IIsolationLayer, ChangeMode, IIsolatable, LayerType, ElementState, RenderEnvironment, NodePrimitivesMap, IDisposable } from "carbon-core";
+import { IContainer, IUIElement, IIsolationLayer, ChangeMode, IIsolatable, LayerType, ElementState, RenderEnvironment, NodePrimitivesMap, IDisposable, Artboard, IArtboard } from "carbon-core";
 import DataNode from "./DataNode";
 import Selection from "framework/SelectionModel";
 import RelayoutEngine from "framework/relayout/RelayoutEngine";
 import UserSettings from "../UserSettings";
-import Environment from "../environment";
 import NullContainer from "./NullContainer";
 import Path from "framework/Path";
 import Matrix from "math/matrix";
@@ -16,6 +15,7 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
     private restoreMatrix: boolean = false;
     private clippingParent: IUIElement = null;
     private tokens: IDisposable[] = [];
+    private refreshArtboardsMap:{[key:string]:IArtboard};
 
     constructor(private view) {
         super();
@@ -43,6 +43,8 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
                 Selection.reselect([element]);
             }
         })
+
+        this.refreshArtboardsMap = {};
     }
 
     private cloneAndFollow(e: IUIElement): IUIElement {
@@ -124,6 +126,11 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
 
         this.tokens.forEach(x => x.dispose());
         this.tokens.length = 0;
+
+        let ids = Object.keys(this.refreshArtboardsMap);
+        for(var id of ids){
+            this.refreshArtboardsMap[id].incrementVersion();
+        }
     }
 
     onRootRelayoutFinished(root, primitiveMap: NodePrimitivesMap) {
@@ -136,6 +143,10 @@ export class IsolationLayer extends Layer implements IIsolationLayer {
             let parent = this.ownerElement.parent;
             if (parent === NullContainer) {
                 this.view.deactivateLayer(this.type);
+            }
+
+            if(root instanceof Artboard) {
+                this.refreshArtboardsMap[root.id] = root;
             }
         }
     }

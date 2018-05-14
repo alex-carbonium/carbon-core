@@ -12,7 +12,6 @@ import Layer from "framework/Layer";
 import Container from "../framework/Container";
 import Page from "../framework/Page";
 import Text from "../framework/text/Text";
-import Environment from "../environment";
 import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
 import { IPoint, KeyboardState } from "carbon-core";
 import UserSettings from "../UserSettings";

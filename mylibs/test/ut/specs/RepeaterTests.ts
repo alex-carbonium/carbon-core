@@ -1,13 +1,13 @@
 import TestUtil from "../TestUtil";
 import { assert } from "chai";
 import {
-    TextMode, Selection, Environment, RepeatContainer, PropertyMetadata, UIElement, RepeaterActions,
-    Rectangle, Circle, Container, Point, Rect, IUIElement, Text, GroupContainer, ChangeMode, model
+    TextMode, Selection, Workspace, RepeatContainer, PropertyMetadata, UIElement, RepeaterActions,
+    Rectangle, Circle, Container, Point, Rect, IUIElement, Text, GroupContainer, ChangeMode, model, IView, IController
 } from "carbon-core";
 
 describe("Repeater tests", function () {
     before(function () {
-        this.repeaterActions = new RepeaterActions(this.app, Environment);
+        this.repeaterActions = new RepeaterActions(this.app, Workspace);
 
         this.makeRepeater = function (elements) {
             Selection.makeSelection(elements);
@@ -37,8 +37,15 @@ describe("Repeater tests", function () {
         var repeaterDefaults = PropertyMetadata.getDefaultTypeProps(RepeatContainer);
         Object.assign(repeaterDefaults, this._origRepeaterDefaults);
     });
+
+    let view: IView = null;
+    let controller: IController = null;
+
     beforeEach(function (done) {
-        this.app = TestUtil.setupApp();
+        let setup = TestUtil.setupApp();
+        this.app = setup.app;
+        view = setup.view;
+        controller = setup.controller;
         this.app.onLoad(function () {
             return done();
         });

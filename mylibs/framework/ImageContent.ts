@@ -1,4 +1,3 @@
-import Environment from "../environment";
 import UIElement from "./UIElement";
 import DefaultFrameType from "../decorators/DefaultFrameType";
 import PropertyMetadata from "../framework/PropertyMetadata";
@@ -36,9 +35,10 @@ export default class ImageContent extends UIElement{
         return clone;
     }
 
-    activate(){
-        this._tokens.push(Environment.controller.interactionStopped.bind(this, this.onInteractionStopped));
+    activate(controller){
+        this._tokens.push(controller.interactionStopped.bind(this, this.onInteractionStopped));
     }
+
     deactivate(){
         this._tokens.forEach(x => x.dispose());
         this._tokens.length = 0;

@@ -6,7 +6,6 @@ import Selection from "../../framework/SelectionModel";
 import Invalidate from "../../framework/Invalidate";
 import Brush from "../../framework/Brush";
 import Point from "../../math/point";
-import Environment from "../../environment";
 import UserSettings from "UserSettings";
 import { KeyboardState, IMouseEventData, ICoordinate, RenderEnvironment } from "carbon-core";
 import Cursors from "Cursors";
@@ -49,7 +48,7 @@ export default class LineCreator extends Tool {
     }
     mousedown(event: IMouseEventData) {
         var eventData = { handled: false, x: event.x, y: event.y };
-        Environment.controller.startDrawingEvent.raise(eventData);
+        this._controller.startDrawingEvent.raise(eventData);
         if (eventData.handled) {
             return true;
         }
@@ -97,7 +96,7 @@ export default class LineCreator extends Tool {
             Selection.makeSelection([element]);
         }
         if (SystemConfiguration.ResetActiveToolToDefault) {
-            Environment.controller.resetCurrentTool();
+            this._controller.resetCurrentTool();
         }
     }
     mousemove(event: IMouseEventData) {

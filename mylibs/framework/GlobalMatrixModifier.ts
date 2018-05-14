@@ -1,5 +1,4 @@
 import Matrix from "../math/matrix";
-import Environment from "../environment";
 import { IMatrix } from "carbon-core";
 
 type Modifier = (m: Matrix) => Matrix;

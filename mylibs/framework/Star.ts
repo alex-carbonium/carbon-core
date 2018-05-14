@@ -7,7 +7,6 @@ import LineDirectionPoint from "decorators/LineDirectionPoint";
 import RotateFramePoint from "decorators/RotateFramePoint";
 import Rect from "../math/rect";
 import Point from "../math/point";
-import Environment from "environment";
 import { IStar } from "carbon-core";
 
 let StarFrameType = {

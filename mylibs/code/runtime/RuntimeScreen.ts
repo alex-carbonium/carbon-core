@@ -1,11 +1,10 @@
-import { IProxySource, IArtboard, IPointerEventData, ScreenEdge } from "carbon-core";
+import * as core from "carbon-core";
 import { RuntimeContext } from "./RuntimeContext";
 import { AutoDisposable } from "../../AutoDisposable";
-import Environment from "environment";
 import { Event } from "code/runtime/Event";
 
 const EdgeProximity = 80;
-export class RuntimeScreen implements IProxySource {
+export class RuntimeScreen implements core.IProxySource {
     private disposables = new AutoDisposable();
     private _edgeSwipeStart = new Event()
     private _edgeSwipeEnd = new Event()
@@ -19,7 +18,7 @@ export class RuntimeScreen implements IProxySource {
             mixins: []
         }
     }
-    constructor(private artboard: IArtboard) {
+    constructor(private artboard: core.IArtboard) {
         this._bindEvents();
     }
 
@@ -34,9 +33,10 @@ export class RuntimeScreen implements IProxySource {
     }
 
     _bindEvents() {
-        this.disposables.add(Environment.controller.panStartEvent.bindHighPriority(this, this.onPanStart))
-        this.disposables.add(Environment.controller.panEndEvent.bindHighPriority(this, this.onPanEnd))
-        this.disposables.add(Environment.controller.panMoveEvent.bindHighPriority(this, this.onPanMove))
+        // TODO: bind to public API objects (availiable in the editor) i.e to artboard instead
+        this.disposables.add(core.PreviewModel.current.controller.panStartEvent.bindHighPriority(this, this.onPanStart))
+        this.disposables.add(core.PreviewModel.current.controller.panEndEvent.bindHighPriority(this, this.onPanEnd))
+        this.disposables.add(core.PreviewModel.current.controller.panMoveEvent.bindHighPriority(this, this.onPanMove))
     }
 
     _moving = false;
@@ -44,7 +44,7 @@ export class RuntimeScreen implements IProxySource {
     _width = 0;
     _height = 0;
 
-    onPanStart(event: IPointerEventData) {
+    onPanStart(event: core.IPointerEventData) {
         let artboard = this.artboard;
         if (!artboard) {
             return;
@@ -54,16 +54,16 @@ export class RuntimeScreen implements IProxySource {
         let moving = false;
         if (event.x < EdgeProximity && event.direction === 4) {
             moving = true;
-            this._edge = ScreenEdge.Left;
+            this._edge = core.ScreenEdge.Left;
         } else if (event.y < EdgeProximity && event.direction === 16) {
             moving = true;
-            this._edge = ScreenEdge.Top;
+            this._edge = core.ScreenEdge.Top;
         } else if ((event.x > size.width - EdgeProximity) && event.direction === 2) {
             moving = true;
-            this._edge = ScreenEdge.Right;
+            this._edge = core.ScreenEdge.Right;
         } else if ((event.y > size.height - EdgeProximity) && event.direction === 8) {
             moving = true;
-            this._edge = ScreenEdge.Bottom;
+            this._edge = core.ScreenEdge.Bottom;
         }
 
         if (moving) {
@@ -82,16 +82,17 @@ export class RuntimeScreen implements IProxySource {
 
     _prepareEvent(event) {
         let distance = 0;
-        if (this._edge === ScreenEdge.Left) {
+        if (this._edge === core.ScreenEdge.Left) {
             distance = event.x;
-        } else if (this._edge === ScreenEdge.Top) {
+        } else if (this._edge === core.ScreenEdge.Top) {
             distance = event.y;
-        } else if (this._edge === ScreenEdge.Right) {
+        } else if (this._edge === core.ScreenEdge.Right) {
             distance = this._width - event.x;
-        } else if (this._edge === ScreenEdge.Bottom) {
+        } else if (this._edge === core.ScreenEdge.Bottom) {
             distance = this._height - event.y;
         }
-        let e = Environment.controller.wrapEvent({ edge: this._edge, distance: distance, event: event });
+
+        let e = core.PreviewModel.current.controller.wrapEvent({ edge: this._edge, distance: distance, event: event });
 
         return e;
     }

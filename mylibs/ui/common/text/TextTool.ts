@@ -17,7 +17,6 @@ import RangeFormatter from "./RangeFormatter";
 import Selection from "../../../framework/SelectionModel";
 import Cursor from "../../../framework/Cursor";
 import Invalidate from "../../../framework/Invalidate";
-import Environment from "../../../environment";
 import { getAverageLuminance } from "../../../math/color";
 import Rect from "../../../math/rect";
 import { IController, ChangeMode, IMouseEventData, VerticalConstraint, HorizontalConstraint, IDisposable, TextMode, IRect, TextAlign, IUIElement } from "carbon-core";
@@ -45,7 +44,6 @@ export default class TextTool extends Tool {
     constructor(app) {
         super("textTool");
         this._app = app;
-        this._controller = Environment.controller;
         this._editor = null;
         this.text = null;
         this._dragZone = null;
@@ -62,10 +60,6 @@ export default class TextTool extends Tool {
         this._dragController.onDragging = this.onDragging;
         this._dragController.onStopped = this.onDragStopped;
 
-        this.globalTokens.push(Environment.controller.dblclickEvent.bind(this, this.onDblClickEvent));
-        this.globalTokens.push(Environment.controller.onElementDblClicked.bind(this, this.onDblClickElement));
-        this.globalTokens.push(this._app.actionManager.subscribe("enter", this.onEditTextAction));
-
         this._onAttached = null;
     }
 
@@ -74,10 +68,15 @@ export default class TextTool extends Tool {
         this._dragController.bindToController(controller);
         this._onElementSelectedToken = Selection.onElementSelected.bind(this, this.onElementSelected);
         this._view = view;
+        this._controller = controller;
         this._defaultFormatter = new DefaultFormatter();
         this._defaultFormatter.initFormatter(this._app);
         Selection.requestProperties([this._defaultFormatter]);
         Cursor.setGlobalCursor("text_tool");
+
+        this.globalTokens.push(controller.dblclickEvent.bind(this, this.onDblClickEvent));
+        this.globalTokens.push(controller.onElementDblClicked.bind(this, this.onDblClickElement));
+        this.globalTokens.push(this._app.actionManager.subscribe("enter", this.onEditTextAction));
 
         if (this._onAttached) {
             this._onAttached();
@@ -127,14 +126,14 @@ export default class TextTool extends Tool {
         if (selection.count()) {
             //handle events after active frame
             this._dragController.unbind();
-            this._dragController.bindToController(Environment.controller);
+            this._dragController.bindToController(this._controller);
         }
     }
     onEditTextAction = () => {
         let text = this.tryGetSupportedElement();
         if (text) {
             text.disableRenderCaching(true);
-            if (Environment.controller.currentTool !== "textTool") {
+            if (this._controller.currentTool !== "textTool") {
                 this._onAttached = () => { this.beginEdit(text); };
                 this._app.actionManager.invoke("textTool");
             }
@@ -313,7 +312,7 @@ export default class TextTool extends Tool {
 
         Cursor.setGlobalCursor("text");
         this.invalidateLayers();
-        Environment.controller.inlineEditModeChanged.raise(true, this._editor);
+        this._controller.inlineEditModeChanged.raise(true, this._editor);
 
         this._next = null;
     }
@@ -415,7 +414,7 @@ export default class TextTool extends Tool {
             setTimeout(() => this._controller.resetCurrentTool());
         }
         if (!next) {
-            Environment.controller.inlineEditModeChanged.raise(false, null);
+            this._controller.inlineEditModeChanged.raise(false, null);
         }
     }
     copyDocumentRangeFont() {

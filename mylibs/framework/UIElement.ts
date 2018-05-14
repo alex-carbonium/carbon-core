@@ -27,7 +27,6 @@ import DefaultFrameType from "../decorators/DefaultFrameType";
 import styleManager from "./style/StyleManager";
 import NullContainer from "./NullContainer";
 import Invalidate from "./Invalidate";
-import Environment from "../environment";
 import DataNode from "./DataNode";
 import { createUUID, deepEquals } from "../util";
 import Rect from "../math/rect";
@@ -1252,17 +1251,12 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
     setDefaultAction(defaultAction) {
         this._defaultAction = defaultAction;
     }
-    select(multiSelect, view?) {
+    select(multiSelect, view?, controller?) {
 
     }
     unselect() {
     }
-    captureMouse() {
-        Environment.controller.captureMouse(this);
-    }
-    releaseMouse() {
-        Environment.controller.releaseMouse(this);
-    }
+
     canMultiSelect() {
         return true;
     }
@@ -2690,7 +2684,7 @@ PropertyMetadata.registerForType(UIElement, {
         ];
     },
     prepareVisibility: function (element: UIElement) {
-        // if (Environment.view.prototyping()) {
+        // if (Workspace.view.prototyping()) {
         //     let res = {};
         //     for (let name in element.props) {
         //         res[name] = false;

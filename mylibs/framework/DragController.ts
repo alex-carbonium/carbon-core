@@ -1,6 +1,5 @@
 import { keyboard } from "../platform/Keyboard";
 import { IMouseEventData } from "carbon-core";
-import Environment from "../environment";
 
 var debug = require("DebugUtil")("carb:dragController");
 
@@ -39,7 +38,7 @@ export default class DragController {
 
     mouseMove(e: IMouseEventData) {
         //e.handled is not checked on purpose, case: path tool handles events, but ruler guide can overrule
-        if (Environment.controller.isDragging()) {
+        if (e.controller.isDragging()) {
             return;
         }
 

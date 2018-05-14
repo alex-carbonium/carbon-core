@@ -4,13 +4,12 @@ import SelectComposite from "../SelectComposite";
 import NullPage from "../NullPage";
 import { SelectFrame } from "../SelectFrame";
 import DesignerController from "../DesignerController";
-import Environment from "../../environment";
+import Workspace from "../../Workspace";
 import Clipboard from "../Clipboard";
 import { keyboard } from "../../platform/Keyboard";
 import Context from "../render/Context";
 import ExtensionPoint from "../ExtensionPoint";
 import { IApp, IView, IRenderLoop, IController, ContextType } from "carbon-core";
-import MirroringView from "../MirroringView";
 import MirroringController from "../MirroringController";
 
 
@@ -48,7 +47,7 @@ export default class RenderLoop implements IRenderLoop {
     }
 
     private finishMounting(app: IApp, view: IView, controller: IController) {
-        Environment.set(view, controller);
+        Workspace.set();
         app.platform.detachEvents();
         app.platform.attachEvents(this.viewContainer, app, view, controller);
 
@@ -193,7 +192,7 @@ export default class RenderLoop implements IRenderLoop {
         }
         catch (e) {
             this._suspended = true;
-            Environment.reportFatalErrorAndRethrow(e);
+            Workspace.reportFatalErrorAndRethrow(e);
         }
     }
 

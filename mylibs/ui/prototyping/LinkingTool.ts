@@ -11,7 +11,6 @@ import { areRectsIntersecting, adjustRectSize, isPointInRect } from "../../math/
 import Selection from "framework/SelectionModel"
 import Invalidate from "framework/Invalidate";
 import RequestAnimationSettings from "./RequestAnimationSettings";
-import Environment from "../../environment";
 import StoryAction from "../../stories/StoryAction";
 import Link from "./Link";
 

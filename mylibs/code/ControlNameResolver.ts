@@ -5,7 +5,6 @@ import { RuntimeContext } from "./runtime/RuntimeContext";
 import { RuntimeProxy } from "./runtime/RuntimeProxy";
 import { RuntimeScreen } from "./runtime/RuntimeScreen";
 import { AutoDisposable } from "../AutoDisposable";
-import Environment from "environment";
 import { Page, IPreviewModel, IModuleResolver } from "carbon-app";
 import { PropertyAnimation } from "../framework/animation/PropertyAnimation";
 import { Color } from "../framework/Color";

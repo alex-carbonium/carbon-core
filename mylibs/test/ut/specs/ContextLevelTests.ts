@@ -1,12 +1,18 @@
 import TestUtil, { createArtboard, createElement } from "../TestUtil";
 import { assert } from "chai";
-import { IApp, IUIElement, UIElement, Selection, Artboard, ArtboardPage, IArtboardPage, Container } from "carbon-core";
+import { IApp, IUIElement, UIElement, Selection, Artboard, ArtboardPage, IArtboardPage, Container, IView, IController } from "carbon-core";
 
 describe("Context level tests", function () {
     let app: IApp = null;
+    let view: IView = null;
+    let controller: IController = null;
 
     beforeEach(function (done) {
-        app = TestUtil.setupApp();
+        let setup = TestUtil.setupApp();
+        app = setup.app;
+        view = setup.view;
+        controller = setup.controller;
+
         app.onLoad(function () {
             return done();
         });

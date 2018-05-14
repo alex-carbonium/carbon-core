@@ -2,7 +2,6 @@ import ExtensionBase from "./ExtensionBase";
 import DesignerView from "framework/DesignerView";
 import { LayerType, IView } from "carbon-app";
 import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
-import Environment from "environment";
 import UserSettings from "UserSettings";
 import { RenderEnvironment } from "carbon-core";
 

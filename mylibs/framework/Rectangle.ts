@@ -10,7 +10,6 @@ import commandManager from "framework/commands/CommandManager";
 import Path from "framework/Path";
 import UIElement from "framework/UIElement";
 import Invalidate from "framework/Invalidate";
-import Environment from "environment";
 import Point from "../math/point";
 import { ResizeDimension, ChangeMode, InteractionType, IMouseEventData, RenderEnvironment, StrokePosition } from "carbon-core";
 import Rect from "../math/rect";
@@ -51,7 +50,7 @@ var CornerRadiusPoint = {
         if (frame.element.decorators) {
             frame.element.decorators.forEach(x => x.visible = (false));
         }
-        Environment.controller.raiseInteractionStarted(InteractionType.RadiusChange, event);
+        event.controller.raiseInteractionStarted(InteractionType.RadiusChange, event);
     },
     release(frame, point, event: IMouseEventData) {
         if (frame.element) {
@@ -63,7 +62,7 @@ var CornerRadiusPoint = {
             if (frame.element.decorators) {
                 frame.element.decorators.forEach(x => x.visible = (true));
             }
-            Environment.controller.raiseInteractionStopped(InteractionType.RadiusChange, event);
+            event.controller.raiseInteractionStopped(InteractionType.RadiusChange, event);
         }
     },
     rotateCursorPointer(index, angle) {
@@ -137,7 +136,7 @@ var CornerRadiusPoint = {
         frame.element.setProps({ cornerRadius: r }, ChangeMode.Self);
         Invalidate.requestInteractionOnly();
 
-        Environment.controller.raiseInteractionProgress(InteractionType.RadiusChange, event);
+        event.controller.raiseInteractionProgress(InteractionType.RadiusChange, event);
     }
 }
 

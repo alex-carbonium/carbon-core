@@ -6,7 +6,6 @@ import UserSettings from "../../UserSettings";
 import { isPointInRect } from "../../math/math";
 import { createUUID } from "../../util";
 import NullArtboard from "../../framework/NullArtboard";
-import Environment from "../../environment";
 import Artboard from "../../framework/Artboard";
 import { keyboard } from "../../platform/Keyboard";
 import { IApp, IView, IController, IDisposable, IRect, IMouseEventData, PatchType } from "carbon-core";

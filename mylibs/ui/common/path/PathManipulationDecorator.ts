@@ -1,8 +1,7 @@
 import Container from "framework/Container";
 import Path from "framework/Path";
-import { IIsolatable, ChangeMode, LayerType, ElementState, PointType, IMouseEventHandler, KeyboardState, IMouseEventData, IPathPoint, IDisposable, RenderEnvironment, IView } from "carbon-core";
+import { IIsolatable, ChangeMode, LayerType, ElementState, PointType, IMouseEventHandler, KeyboardState, IMouseEventData, IPathPoint, IDisposable, RenderEnvironment, IView, IController } from "carbon-core";
 import UIElementDecorator from "framework/UIElementDecorator";
-import Environment from "environment";
 import Selection from "framework/SelectionModel";
 import UserSettings from "UserSettings";
 import Invalidate from "framework/Invalidate";
@@ -95,7 +94,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
     private _selectFrame: SelectFrame;
     protected element:Path;
 
-    constructor(protected view:IView, public constructMode: boolean = false) {
+    constructor(protected view:IView, private controller:IController, public constructMode: boolean = false) {
         super();
         this._selectedPoints = {};
     }
@@ -181,9 +180,9 @@ export default class PathManipulationObject extends UIElementDecorator implement
         }
         super.attach(element);
         this.view.registerForLayerDraw(LayerType.Interaction, this);
-        Environment.controller.captureMouse(this);
+        this.controller.captureMouse(this);
         this.view.snapController.calculateSnappingPointsForPath(this.path);
-        this._cancelBinding = Environment.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
+        this._cancelBinding = this.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
         this._startSegmentPoint = this._lastSegmentStartPoint();
         this._selectFrame = new SelectFrame();
         this._selectFrame.onComplete.bind(this, this.onselect);
@@ -215,7 +214,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         }
 
         this.view.unregisterForLayerDraw(LayerType.Interaction, this);
-        Environment.controller.releaseMouse(this);
+        this.controller.releaseMouse(this);
         this.path.invalidate();
         Invalidate.requestInteractionOnly();
 
@@ -393,7 +392,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
 
         if (!event.handled && this.constructMode) {
             let eventData = { handled: false, x: event.x, y: event.y };
-            Environment.controller.startDrawingEvent.raise(eventData);
+            this.controller.startDrawingEvent.raise(eventData);
             if (eventData.handled) {
                 return true;
             }
@@ -610,7 +609,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
             event.cursor = Cursors.Pen.AddPoint;
         }
         else {
-            event.cursor = Environment.controller.defaultCursor();
+            event.cursor = this.controller.defaultCursor();
         }
     }
 

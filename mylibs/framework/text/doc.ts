@@ -11,7 +11,6 @@ import Per from "./util/per";
 import { inherit, event, deCRLFify } from "./util/util";
 
 import { TextAlign } from "carbon-basics";
-import Environment from "../../environment";
 
 const EmptyContents = [];
 

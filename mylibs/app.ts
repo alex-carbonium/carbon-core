@@ -22,7 +22,7 @@ import { createUUID } from "./util";
 import DesignerController from "framework/DesignerController";
 import Selection from "framework/SelectionModel";
 import Invalidate from "framework/Invalidate";
-import Environment from "environment";
+import Workspace from "./Workspace";
 import ModelSyncProxy from "./server/ModelSyncProxy";
 import DataNode from "./framework/DataNode";
 import DataManager from "./framework/data/DataManager";
@@ -39,7 +39,7 @@ import backend from "./backend";
 import logger from "./logger";
 import params from "./params";
 import ArtboardFrame from "framework/ArtboardFrame";
-import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IEnvironment, ChangeMode, PatchType, ArtboardType, IPrimitiveRoot, ViewState, IJsonNode, IFontManager, IStyleManager, StyleType, IArtboard, FontMetadata, AppSettings, Primitive, IStory, StoryType } from "carbon-core";
+import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IWorkspace, ChangeMode, PatchType, ArtboardType, IPrimitiveRoot, ViewState, IJsonNode, IFontManager, IStyleManager, StyleType, IArtboard, FontMetadata, AppSettings, Primitive, IStory, StoryType } from "carbon-core";
 import { Contributions } from "./extensions/Contributions";
 import { getBuiltInExtensions } from "./extensions/BuiltInExtensions";
 import UIElement from "./framework/UIElement";
@@ -49,7 +49,7 @@ import { deepEquals } from "util";
 import { primitiveFactory } from "./framework/sync/PrimitiveFactory";
 
 if (DEBUG) {
-    window['env'] = Environment;
+    window['env'] = Workspace;
     window['Selection'] = Selection;
 }
 
@@ -88,8 +88,6 @@ class AppClass extends DataNode implements IApp {
 
     offlineModel: any;
     platform: any;
-
-    environment: IEnvironment = Environment;
 
     shortcutManager: ShortcutManager;
     actionManager: ActionManager;
@@ -171,7 +169,7 @@ class AppClass extends DataNode implements IApp {
         this.state = new AppState(this);
         this.offlineModel = new OfflineModel();
 
-        this.actionManager = new ActionManager(this as IApp, Environment.shortcutManager);
+        this.actionManager = new ActionManager(this as IApp, Workspace.shortcutManager);
         this.actionManager.registerActions();
 
         var token = Selection.onElementSelected.bind((selection, oldSelection, doNotTrack) => {
@@ -194,10 +192,6 @@ class AppClass extends DataNode implements IApp {
         this.fontManager.registerAsDefault();
 
         this.dataManager = new DataManager(this);
-
-        var contributions = new Contributions(this, this.actionManager, Environment.shortcutManager);
-        var extensions = getBuiltInExtensions(this, Environment);
-        extensions.forEach(x => x.initialize(contributions));
     }
 
     init() {
@@ -1039,7 +1033,7 @@ class AppClass extends DataNode implements IApp {
             //TODO: handle error for non-existing resources
         }
 
-        return Promise.all([dataLoaded, importInitialResource, defaultFontLoaded, Environment.loaded, loggedIn]).then(result => {
+        return Promise.all([dataLoaded, importInitialResource, defaultFontLoaded, Workspace.loaded, loggedIn]).then(result => {
             progress += 10;
             this.onsplash.raise({ progress: progress, message: '@load.prepareenv' });
             var data = result[0];
@@ -1321,7 +1315,7 @@ class AppClass extends DataNode implements IApp {
 
     dispose() {
         this.unload();
-        Environment.dispose();
+        Workspace.dispose();
 
         if (this.platform) {
             this.platform.dispose();

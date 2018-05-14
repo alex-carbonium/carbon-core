@@ -2,7 +2,6 @@ import ObjectFactory from "../ObjectFactory";
 import UIElement from "framework/UIElement";
 import Invalidate from "framework/Invalidate";
 import Selection from "framework/SelectionModel";
-import Environment from "environment";
 import AnimationGroup from "framework/animation/AnimationGroup";
 import backend from "backend";
 import { PrimitiveType, IPrimitive, IDataNode, ChangeMode, Primitive } from "carbon-core";

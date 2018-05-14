@@ -9,7 +9,6 @@ import { IGroupContainer, IView } from "carbon-core";
 import Box from "./Box";
 import Rect from "../math/rect";
 import Matrix from "../math/matrix";
-import Environment from "../environment";
 import Selection from "./SelectionModel";
 import { IUIElementProps, IPoint, IRect, IComposite, ChangeMode, PatchType, ICoordinate, RenderEnvironment, PropDescriptor, IUIElement } from "carbon-core";
 import CommonPropsManager from "./CommonPropsManager";

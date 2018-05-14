@@ -1,6 +1,5 @@
 import UIElementDecorator from "../framework/UIElementDecorator";
 import SharedColors from "../ui/SharedColors";
-import Environment from "../environment";
 import { IContext, IRect, IMatrix, IUIElement, RenderEnvironment, IView } from "carbon-core";
 import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
 

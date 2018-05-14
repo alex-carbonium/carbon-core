@@ -7,7 +7,6 @@ import Selection from "../../framework/SelectionModel";
 
 import Matrix from "../../math/matrix";
 import { areRectsEqual } from "../../math/math";
-import Environment from "../../environment";
 import DesignerView from "../../framework/DesignerView";
 import NullPage from "../../framework/NullPage";
 import UserSettings from "../../UserSettings";

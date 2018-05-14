@@ -1,5 +1,4 @@
 import Cursor from "../../framework/Cursor";
-import Environment from "../../environment";
 import Tool from "./Tool";
 import {IMouseEventData} from "carbon-core";
 

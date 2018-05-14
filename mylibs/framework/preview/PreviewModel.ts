@@ -40,7 +40,9 @@ export default class PreviewModel implements IPreviewModel, IDisposable, IModule
 
     public refreshVersion = 0;
 
-    constructor(app, private view:IView, private controller:IController) {
+    public static current:PreviewModel;
+
+    constructor(app, public view:IView, public controller:IController) {
         this.app = app;
         this.navigationController = new NavigationController(this);
         this.onPageChanged = EventHelper.createEvent();
@@ -53,6 +55,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable, IModule
         this.runtimeContext.register("Brush", BrushFactory);
 
         this.disposables.add(this.navigationController);
+        PreviewModel.current = this;
     }
 
     _releaseCurrentPage() {
@@ -436,5 +439,6 @@ export default class PreviewModel implements IPreviewModel, IDisposable, IModule
 
     dispose() {
         this.disposables.dispose();
+        PreviewModel.current = null;
     }
 }

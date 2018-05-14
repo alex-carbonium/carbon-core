@@ -4,7 +4,6 @@ import Brush from "./Brush";
 import PropertyMetadata from "./PropertyMetadata";
 import {Overflow, Types} from "./Defs";
 import {isRectInRect, calculateRectIntersectionArea} from "math/math";
-import Environment from "../environment";
 
 export default class Section extends Container {
     trackDeleted(parent, index, mode) {
@@ -163,7 +162,7 @@ export default class Section extends Container {
     }
 
     _isSectionToolActive(){
-        return Environment.controller.currentTool === "sectionTool";
+        return false;//Workspace.controller.currentTool === "sectionTool";
     }
 
 

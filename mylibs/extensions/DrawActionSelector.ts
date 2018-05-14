@@ -59,7 +59,7 @@ var registerCommands = function () {
         that.app.allowSelection(false);
         var element = Selection.selectedElement();
         if(element instanceof Path) {
-            element.edit(that.view);
+            element.edit(that.view, that.controller);
         } else {
             that._defaultShapeSettings.updateColors();
             Selection.makeSelection([that._defaultShapeSettings], "new", false, true);

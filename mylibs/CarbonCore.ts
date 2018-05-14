@@ -45,8 +45,7 @@ export default {
     "PreviewController": require("./framework/PreviewController"),
     "PreviewModel": require("./framework/preview/PreviewModel"),
     "Clipboard": require("./framework/Clipboard"),
-    "Environment": require("./environment"),
-    "workspace": require("./environment"),
+    "Workspace": require("./Workspace"),
     "UserSettings": require("./UserSettings"),
     "backend": backend,
     "imageCache": require("./imageCache"),
@@ -80,7 +79,8 @@ export default {
     "UIElementDecorator": require("./framework/UIElementDecorator"),
 
     "MirroringController": require("./framework/MirroringController"),
-    "MirroringView": require("./framework/MirroringView"),
+    "MirroringView": require("./framework/MirroringView").MirroringView,
+    "ArtboardProxyPage": require("./framework/MirroringView").ArtboardProxyPage,
 
     "ActionManager": app.actionManager,
     "Text": require("./framework/text/Text"),

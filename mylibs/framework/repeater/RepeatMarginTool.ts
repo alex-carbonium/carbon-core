@@ -4,7 +4,6 @@ import CommandManager from "../commands/CommandManager";
 import PropertyTracker from "../PropertyTracker";
 import Cursor from "framework/Cursor";
 import Invalidate from "framework/Invalidate";
-import Environment from "environment";
 import ModelStateListener from "../relayout/ModelStateListener";
 import { LayerType, IView } from "carbon-app";
 import Rect from "../../math/rect";
@@ -22,7 +21,7 @@ class RepeatMarginTool {
     _firstDrag:boolean =  true;
     _view:IView;
 
-    attach(container, view) {
+    attach(container, view, controller) {
         this._container = container;
         this._container.enablePropsTracking();
         this._strategy = container.arrangeStrategyInstance();
@@ -38,7 +37,7 @@ class RepeatMarginTool {
         this._view = view;
 
         view.registerForLayerDraw(LayerType.Interaction, this, 0);
-        this._dragController.bindToController(Environment.controller);
+        this._dragController.bindToController(controller);
     }
 
     detach(container) {

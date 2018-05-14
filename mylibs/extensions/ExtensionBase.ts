@@ -1,4 +1,3 @@
-import Environment from "environment";
 import {IApp, IView, IController} from "carbon-core";
 
 export default class ExtensionBase {

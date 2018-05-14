@@ -1,12 +1,11 @@
-import { IUIElement, IRuntimeMixin, IProxySource, IDisposable } from "carbon-core";
+import * as core from "carbon-core";
 import { AutoDisposable } from "../../../AutoDisposable";
 import { ICoordinate } from "carbon-geometry";
 import Point from "../../../math/point";
-import Environment from "environment";
 import { RuntimeProxy } from "../RuntimeProxy";
 import { DragConstraint } from "carbon-runtime";
 
-class Draggable implements IProxySource, IDisposable {
+class Draggable implements core.IProxySource, core.IDisposable {
     private _enabled: boolean = false;
     private _disposables = new AutoDisposable();
     private _startPosition: ICoordinate;
@@ -28,7 +27,7 @@ class Draggable implements IProxySource, IDisposable {
         }
     }
 
-    constructor(private element: IUIElement) {
+    constructor(private element: core.IUIElement) {
 
     }
 
@@ -103,7 +102,7 @@ class Draggable implements IProxySource, IDisposable {
                 dy = 0;
             }
 
-            let event = Environment.controller.wrapEvent({
+            let event = core.PreviewModel.current.controller.wrapEvent({
                 dx: dx,
                 dy: dy,
                 target: this.element.runtimeProxy()//RuntimeProxy.wrap(this.element)
@@ -149,21 +148,21 @@ class Draggable implements IProxySource, IDisposable {
             this._disposables.add(
                 this.element.registerEventHandler("panstart", this._onmousedown)
             );
-
+            // TODO: bind to public API objects (availiable in the editor) i.e to artboard instead
             this._disposables.add(
-                Environment.controller.mousemoveEvent.bind(this._onmousemove)
+                core.PreviewModel.current.controller.mousemoveEvent.bind(this._onmousemove)
             );
 
             this._disposables.add(
-                Environment.controller.panMoveEvent.bind(this._onmousemove)
+                core.PreviewModel.current.controller.panMoveEvent.bind(this._onmousemove)
             );
 
             this._disposables.add(
-                Environment.controller.mouseupEvent.bind(this._onmouseup)
+                core.PreviewModel.current.controller.mouseupEvent.bind(this._onmouseup)
             );
 
             this._disposables.add(
-                Environment.controller.panEndEvent.bind(this._onmouseup)
+                core.PreviewModel.current.controller.panEndEvent.bind(this._onmouseup)
             );
         } else {
             this._disposables.dispose();
@@ -175,10 +174,10 @@ class Draggable implements IProxySource, IDisposable {
     }
 }
 
-export class DraggableMixin implements IRuntimeMixin, IDisposable {
+export class DraggableMixin implements core.IRuntimeMixin, core.IDisposable {
     public static type: string = "draggable";
     private _draggable: Draggable;
-    constructor(private element: IUIElement) {
+    constructor(private element: core.IUIElement) {
     }
 
     set(target: any, name: PropertyKey, value: any) {

@@ -1,3 +1,7 @@
+import Workspace from "./Workspace";
+import { Contributions } from "./extensions/Contributions";
+import { getBuiltInExtensions } from "./extensions/BuiltInExtensions";
+
 var extensions = require("extensions/All");
 
 export default class SystemExtensions {
@@ -24,5 +28,9 @@ export default class SystemExtensions {
 
             this._extensions.push(extension);
         }
+
+        var contributions = new Contributions(app, app.actionManager, Workspace.shortcutManager);
+        var builtinExtensions = getBuiltInExtensions(app, view, controller);
+        builtinExtensions.forEach(x => x.initialize(contributions));
     }
 }

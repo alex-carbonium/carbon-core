@@ -107,7 +107,6 @@ declare module "carbon-app" {
 
         modelSyncProxy: any;
         platform: IPlatform;
-        environment: IEnvironment;
 
         init(): void;
         run(): Promise<void>;
@@ -411,22 +410,16 @@ declare module "carbon-app" {
     }
 
     //TODO: rename to Workspace
-    export interface IEnvironment {
-        view: IView;
-        controller: IController;
-        detaching: IEvent2<IView, IController>;
-        attached: IEvent2<IView, IController>;
-
+    export interface IWorkspace {
         fatalErrorOccurred: IEvent<void>;
 
         shortcutManager: IShortcutManager;
         settings: WorkspaceSettings;
         keyboard: IKeyboard;
 
-        set(view: IView, controller: IController);
+        set();
     }
-    export const Environment: IEnvironment;
-    export const workspace: IEnvironment;
+    export const Workspace: IWorkspace;
 
     export interface ICommand {
         flushRedoStack();

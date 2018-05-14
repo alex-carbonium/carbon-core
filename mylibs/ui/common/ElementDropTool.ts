@@ -2,7 +2,6 @@ import SystemConfiguration from "../../SystemConfiguration";
 import Selection from "../../framework/SelectionModel";
 import Invalidate from "../../framework/Invalidate";
 import ObjectFactory from "../../framework/ObjectFactory";
-import Environment from "../../environment";
 import Cursor from "../../framework/Cursor";
 import Artboard from "../../framework/Artboard";
 import Brush from "../../framework/Brush";

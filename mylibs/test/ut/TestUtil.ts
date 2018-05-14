@@ -1,4 +1,4 @@
-import { app, Artboard, Layer, Context, Environment, logger, RelayoutQueue, ArtboardPage, AppClass, CoreIntl, backend, SelectFrame, SelectComposite, Container, UIElement, DesignerView, DesignerController, ContextType } from "carbon-core";
+import { app, Artboard, Layer, Context, Workspace, logger, RelayoutQueue, ArtboardPage, AppClass, CoreIntl, backend, SelectFrame, SelectComposite, Container, UIElement, DesignerView, DesignerController, ContextType } from "carbon-core";
 
 import TestPlatform from "./TestPlatform";
 import TestFontManager from "./TestFontManager";
@@ -35,7 +35,7 @@ Util.setupApp = function(options){
     view.setup({Layer, SelectComposite, SelectFrame});
     view.attachToDOM([mainContext, isolationContext, interactionContext], viewContainer, x => {}, x => {}, x=> {});
     var controller = new DesignerController(app, view);
-    Environment.set(view, controller);
+    Workspace.set();
 
     if (options.addPage){
         var page = new ArtboardPage();
@@ -72,7 +72,7 @@ Util.setupApp = function(options){
 
     app.raiseLoaded();
 
-    return app;
+    return {app, view, controller};
 };
 
 export function createArtboard(name: string) {

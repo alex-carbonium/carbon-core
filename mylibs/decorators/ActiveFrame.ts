@@ -3,7 +3,6 @@ import UIElementDecorator from "../framework/UIElementDecorator";
 import PropertyTracker from "../framework/PropertyTracker";
 import Cursor from "../framework/Cursor";
 import Invalidate from "../framework/Invalidate";
-import Environment from "../environment";
 import UserSettings from "../UserSettings";
 import { IView, IController } from "carbon-core";
 
@@ -139,10 +138,6 @@ export default class ActiveFrame extends UIElementDecorator {
         this._layerdrawHandler = this.view.interactionLayer.ondraw.bind(this, this.layerdraw);
 
         Invalidate.requestInteractionOnly();
-
-        this._environmentBinding = Environment.detaching.bind(this, function(){
-            this.detach();
-        })
     }
 
     detach() {
@@ -160,7 +155,6 @@ export default class ActiveFrame extends UIElementDecorator {
         this._mouseUpHandler.dispose();
         this._mouseMoveHandler.dispose();
         this._clickHandler.dispose();
-        this._environmentBinding.dispose();
     }
 
     layerdraw(context, env) {

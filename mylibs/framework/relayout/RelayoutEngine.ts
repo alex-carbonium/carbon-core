@@ -7,7 +7,6 @@ import params from "../../params";
 import CommandManager from "../commands/CommandManager";
 import Invalidate from "../Invalidate";
 import NullPage from "../NullPage";
-import Environment from "../../environment";
 import { pushAll } from "../../util";
 import PrimitiveCommand from "../commands/PrimitiveCommand";
 import Selection from "../SelectionModel";

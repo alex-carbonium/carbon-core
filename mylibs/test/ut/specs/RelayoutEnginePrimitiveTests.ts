@@ -1,10 +1,16 @@
 import TestUtil from "../TestUtil";
-import { Container, UIElement } from "carbon-core";
+import { Container, UIElement, IView, IController } from "carbon-core";
 import { assert } from "chai";
 
 describe("Relayout engine primitive tests", function () {
+    let view: IView = null;
+    let controller: IController = null;
+
     beforeEach(function (done) {
-        this.app = TestUtil.setupApp();
+        let setup = TestUtil.setupApp();
+        this.app = setup.app;
+        view = setup.view;
+        controller = setup.controller;
 
         this.findAgain = element => {
             return this.app.activePage.getElementById(element.id);

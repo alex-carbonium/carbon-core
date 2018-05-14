@@ -7,7 +7,6 @@ import LineDirectionPoint from "decorators/LineDirectionPoint";
 import RotateFramePoint from "decorators/RotateFramePoint";
 import Rect from "../math/rect";
 import Point from "../math/point";
-import Environment from "environment";
 import Selection from "../framework/SelectionModel";
 import { IMouseEventData, ElementState, ChangeMode } from "carbon-core";
 import Cursors from "Cursors";
@@ -156,23 +155,26 @@ export default class Polygon extends Shape {
     dblclick(event: IMouseEventData, scale) {
         if (this.isInEditMode()) {
             if (!this.hitTest(event, event.view)) {
-                this.changeMode(false);
+                this.changeMode(false, event);
             }
         }
         else {
-            this.changeMode(true);
+            this.changeMode(true, event);
         }
-        Environment.controller.repeatLastMouseMove();
+        event.controller.repeatLastMouseMove();
     }
 
     cancel() {
         this.changeMode(false);
     }
 
-    changeMode(edit) {
+    changeMode(edit, event?) {
         if (!edit) {
             this.mode(ElementState.Resize);
-            this.releaseMouse(this);
+            if (this._controller) {
+                this._controller.releaseMouse(this);
+                this._controller = null;
+            }
             Selection.refreshSelection();
             if (this._cancelBinding) {
                 this._cancelBinding.dispose();
@@ -180,9 +182,10 @@ export default class Polygon extends Shape {
             }
         } else {
             this.mode(ElementState.Edit);
-            this.captureMouse(this);
+            event.controller.captureMouse(this);
+            this._controller = event.controller;
             Selection.refreshSelection();
-            this._cancelBinding = Environment.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
+            this._cancelBinding = event.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
         }
     }
 

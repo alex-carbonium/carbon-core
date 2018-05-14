@@ -6,7 +6,6 @@ import SystemConfiguration from "../../SystemConfiguration";
 import Selection from "../../framework/SelectionModel";
 import Cursor from "../../framework/Cursor";
 import Invalidate from "../../framework/Invalidate";
-import Environment from "../../environment";
 import UserSettings from "UserSettings";
 import { KeyboardState, IMouseEventData, IContext, ElementState, ICoordinate, ChangeMode } from "carbon-core";
 import { IPathPoint } from "carbon-geometry";
@@ -35,10 +34,10 @@ export default class PathTool extends Tool {
     onEditAction() {
         var element = Selection.selectedElement();
         if (element instanceof Path) {
-            element.edit(this.view());
+            element.edit(this.view(), this._controller);
             if (!element.closed()) {
                 this._pathElement = element;
-                this._pathElement.addDecorator(new PathManipulationDecorator(this.view()));
+                this._pathElement.addDecorator(new PathManipulationDecorator(this.view(), this._controller));
             }
         }
     }
@@ -78,12 +77,12 @@ export default class PathTool extends Tool {
 
     _attach() {
         super._attach.apply(this, arguments);
-        this._cancelBinding = Environment.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
+        this._cancelBinding = this._controller.actionManager.subscribe('cancel', this.cancel.bind(this));
         var element = Selection.selectedElement();
         if (element instanceof Path && element.mode() === ElementState.Edit) {
             this._pathElement = element;
             this._pathElement.removeDecoratorByType(PathManipulationDecorator);
-            this._pathElement.addDecorator(new PathManipulationDecorator(this.view(), true));
+            this._pathElement.addDecorator(new PathManipulationDecorator(this.view(), this._controller, true));
         } else {
             this._createNewPath();
         }
@@ -120,10 +119,10 @@ export default class PathTool extends Tool {
 
         this._changeMode(this._pathElement, ElementState.Edit);
         this._pathElement.removeDecoratorByType(PathManipulationDecorator);
-        this._pathElement.addDecorator(new PathManipulationDecorator(this.view(), true));
+        this._pathElement.addDecorator(new PathManipulationDecorator(this.view(), this._controller, true));
     }
 
     _changeMode(element, mode: ElementState) {
-        element.switchToEditMode(mode === ElementState.Edit, this.view());
+        element.switchToEditMode(mode === ElementState.Edit, this.view(), this._controller);
     }
 }

@@ -1,10 +1,9 @@
 import ViewBase from "./ViewBase"
-import Environment from "environment";
 import Invalidate from "framework/Invalidate"
 import Page from "framework/Page";
-import {Types, MirrorViewMode} from "framework/Defs";
+import { Types, MirrorViewMode } from "framework/Defs";
 import PropertyMetadata from "framework/PropertyMetadata";
-import {IMirroringProxyPage} from "carbon-app";
+import { IMirroringProxyPage } from "carbon-app";
 import { ChangeMode } from "carbon-core";
 
 function fitRectToRect(outer, inner) {
@@ -18,23 +17,23 @@ function fitRectToRect(outer, inner) {
     return Math.min(1, scale);
 }
 
-class ArtboardProxyPage extends Page implements IMirroringProxyPage {
-    constructor(app, view){
+export class ArtboardProxyPage extends Page implements IMirroringProxyPage {
+    constructor(app, view, controller) {
         super();
         this.view = view;
         this.fitMode = MirrorViewMode.Fit;
         this._pageChnagedToken = null;
         this._onArtboardChangedToken = null;
 
-        this._pageChnagedToken = app.pageChanged.bind(this, ()=>{
+        this._pageChnagedToken = app.pageChanged.bind(this, () => {
             this._onArtboardChanged(app.activePage.getActiveArtboard());
         });
 
-        this._onArtboardChangedToken = Environment.controller.onArtboardChanged.bind(this, ()=>{
+        this._onArtboardChangedToken = controller.onArtboardChanged.bind(this, () => {
             this._onArtboardChanged(app.activePage.getActiveArtboard());
         })
 
-        view.scaleChanged.bind(()=>{
+        view.scaleChanged.bind(() => {
             this.updateScrollRanges();
         })
 
@@ -46,23 +45,23 @@ class ArtboardProxyPage extends Page implements IMirroringProxyPage {
         this.minScrollY(0);
     }
 
-    resetVersion():void {
+    resetVersion(): void {
         this._version = null;
     }
 
-    _onArtboardChanged(artboard){
+    _onArtboardChanged(artboard) {
         this._artboard = artboard;
-        if(artboard) {
+        if (artboard) {
             this.children = [artboard];
             artboard.resetTransform(ChangeMode.Self);
-            this.setProps({br:artboard.props.br});
+            this.setProps({ br: artboard.props.br });
 
             this.updateScrollRanges();
         }
         this._version = null;
         this.view.setActivePage(this);
 
-        if(this.view.fitMode === 1) {
+        if (this.view.fitMode === 1) {
             this.fitToViewport();
         } else {
             this.view.scale(1);
@@ -71,18 +70,18 @@ class ArtboardProxyPage extends Page implements IMirroringProxyPage {
 
     updateScrollRanges() {
         let artboard = this.children[0];
-        if(!artboard){
+        if (!artboard) {
             return;
         }
         let screenSize = this.view.viewportSize();
         let scale = this.view.scale();
-        this.maxScrollX(Math.max(0, (artboard.width* scale - screenSize.width) ));
-        this.maxScrollY(Math.max(0, (artboard.height* scale - screenSize.height)));
+        this.maxScrollX(Math.max(0, (artboard.width * scale - screenSize.width)));
+        this.maxScrollY(Math.max(0, (artboard.height * scale - screenSize.height)));
     }
 
-    fitToViewport(){
+    fitToViewport() {
         let artboard = this.view.page.children[0];
-        if(!artboard){
+        if (!artboard) {
             return;
         }
         this.view.page.scrollX = (0);
@@ -92,23 +91,22 @@ class ArtboardProxyPage extends Page implements IMirroringProxyPage {
         this.view.scale(scale);
     }
 
-    isInvalidateRequired()
-    {
+    isInvalidateRequired() {
         let artboard = this.children[0];
-        if(!artboard){
+        if (!artboard) {
             return false;
         }
 
         return this.invalidateRequired = (this._version !== artboard.version
-        || this.scrollX !== this._sX
-        || this.scrollY !== this._sY
-        || this.pageScale() !== this._ss);
+            || this.scrollX !== this._sX
+            || this.scrollY !== this._sY
+            || this.pageScale() !== this._ss);
     }
 
-    draw(){
+    draw() {
         super.draw.apply(this, arguments);
         let artboard = this.children[0];
-        if(artboard){
+        if (artboard) {
             this._version = artboard.version;
         }
         this._sX = this.scrollX;
@@ -116,13 +114,13 @@ class ArtboardProxyPage extends Page implements IMirroringProxyPage {
         this._ss = this.pageScale();
     }
 
-    dispose(){
-        if(this._pageChnagedToken){
+    dispose() {
+        if (this._pageChnagedToken) {
             this._pageChnagedToken.dispose();
             this._pageChnagedToken = null;
         }
 
-        if(this._onArtboardChangedToken){
+        if (this._onArtboardChangedToken) {
             this._onArtboardChangedToken.dispose();
             this._onArtboardChangedToken = null;
         }
@@ -132,27 +130,25 @@ ArtboardProxyPage.prototype.t = Types.ArtboardProxyPage;
 
 PropertyMetadata.registerForType(ArtboardProxyPage, {});
 
-export default class MirroringView extends ViewBase{
-    constructor(app){
+export class MirroringView extends ViewBase {
+    constructor(app) {
         super(app);
         this._invalidateRequestedToken = Invalidate.requested.bind(this, this.invalidate);
     }
 
-    setup(deps){
+    setup(deps) {
         super.setup(deps);
-        this._proxyPage = new ArtboardProxyPage(this.app, this);
-        this.setActivePage(this._proxyPage);
     }
 
-    invalidate(){
+    invalidate() {
         this.requestRedraw();
     }
 
-    detach(){
+    detach() {
         super.detach();
         this._page.dispose();
 
-        if(this._invalidateRequestedToken) {
+        if (this._invalidateRequestedToken) {
             this._invalidateRequestedToken.dispose();
             this._invalidateRequestedToken = null;
         }

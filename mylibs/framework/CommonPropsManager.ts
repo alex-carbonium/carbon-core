@@ -1,6 +1,5 @@
 import PropertyMetadata from "./PropertyMetadata";
 import UIElement from "./UIElement";
-import Environment from "../environment";
 import PropertyTracker from "./PropertyTracker";
 import { leaveCommonProps } from "../util";
 import { ChangeMode, PatchType, PropDescriptor } from "carbon-core";

@@ -10,7 +10,6 @@ import styleManager from "../style/StyleManager";
 import { IContainer, IDataElement, IText, TextAlign, IUIElement, ITextProps, TextContent, HorizontalConstraint, VerticalConstraint, TextMode, IPooledObject, IMatrix, ChangeMode, ResizeDimension, IRect, ProxyDefinition, RenderEnvironment } from "carbon-core";
 import params from "params";
 import ContextCommandCache from "framework/render/ContextCommandCache";
-import Environment from "../../environment";
 import Rect from "../../math/rect";
 import Matrix from "../../math/matrix";
 import ObjectPool from "../ObjectPool";

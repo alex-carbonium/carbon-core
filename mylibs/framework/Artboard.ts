@@ -13,7 +13,6 @@ import ModelStateListener from "framework/relayout/ModelStateListener";
 import Point from "math/point";
 import Selection from "framework/SelectionModel";
 import NullContainer from "./NullContainer";
-import Environment from "environment";
 import Matrix from "math/matrix";
 import params from "params";
 import DataNode from "framework/DataNode";
@@ -866,7 +865,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             return null;
         }
 
-        if (Environment.controller.currentTool === "artboardTool") {
+        if (this.canSelect()) {
             element = this;
         }
 
@@ -1014,23 +1013,11 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         if (!IsolationContext.isActive) {
             this.incrementVersion();
         }
-        else if (!this.runtimeProps.layerChangedToken) {
-            this.runtimeProps.layerChangedToken = Environment.view.activeLayerChanged.bind(this, this.activeLayerChanged);
-        }
     }
 
     attachDisposable(disposable: IDisposable) {
         this.runtimeProps.disposables = this.runtimeProps.disposables || new AutoDisposable();
         this.runtimeProps.disposables.add(disposable)
-    }
-
-    private activeLayerChanged(layer: ILayer) {
-        if (layer.type !== LayerType.Isolation) {
-            this.incrementVersion();
-
-            this.runtimeProps.layerChangedToken.dispose();
-            delete this.runtimeProps.layerChangedToken;
-        }
     }
 
     incrementVersion() {
@@ -1067,7 +1054,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     mousedown(event: IMouseEventData) {
         let scale = event.view.scale();
         let pos = this.position;
-        if (Environment.controller.currentTool !== "artboardTool" && !Selection.isElementSelected(this) && isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width, height: 20 / scale }, event)) {
+        if (!this.canSelect() && !Selection.isElementSelected(this) && isPointInRect({ x: pos.x, y: pos.y - 20 / scale, width: this.width, height: 20 / scale }, event)) {
             (this.parent as any).setActiveArtboard(this);
             event.handled = true;
         }

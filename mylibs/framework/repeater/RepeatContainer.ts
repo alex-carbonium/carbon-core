@@ -7,7 +7,6 @@ import RepeatCell from "./RepeatCell";
 import RepeatMarginTool from "./RepeatMarginTool";
 import RepeatFrameType from "./frame/RepeatFrameType";
 import UserSettings from "../../UserSettings";
-import Environment from "../../environment";
 import GlobalMatrixModifier from "../GlobalMatrixModifier";
 import Brush from "../Brush";
 import Point from "../../math/point";
@@ -371,10 +370,10 @@ export default class RepeatContainer extends Container implements IRepeatContain
         return "Repeater";
     }
 
-    select(multiSelect, view) {
-        super.select(multiSelect, view);
+    select(multiSelect, view, controller) {
+        super.select(multiSelect, view, controller);
         if (!multiSelect) {
-            RepeatMarginTool.attach(this, view);
+            RepeatMarginTool.attach(this, view, controller);
         }
     }
     unselect() {

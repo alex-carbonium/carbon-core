@@ -1,45 +1,33 @@
 import EventHelper from "./framework/EventHelper";
-import { IView, IController, IEnvironment, IEvent2 } from "carbon-core";
+import { IView, IController, IWorkspace, IEvent2 } from "carbon-core";
 import ShortcutManager from "./ui/ShortcutManager";
 import { keyboard } from "./platform/Keyboard";
 import UserSettings from "./UserSettings";
 import logger from "./logger";
 
-class Environment implements IEnvironment {
-    attached: IEvent2<IView, IController>;
-    detaching: IEvent2<IView, IController>;
-    view: IView;
-    controller: IController;
+class Workspace implements IWorkspace {
     shortcutManager = new ShortcutManager();
     keyboard = keyboard;
     settings = UserSettings;
     fatalErrorOccurred = EventHelper.createEvent<void>();
+    firstTime = true;
 
     loaded: Promise<void>;
     resolveLoaded: () => void;
 
     constructor() {
-        this.detaching = EventHelper.createEvent2<IView, IController>();
-        this.attached = EventHelper.createEvent2<IView, IController>();
         this.loaded = new Promise<void>(resolve => this.resolveLoaded = resolve);
     }
 
-    set(view: IView, controller: IController) {
-        if (!this.view) {
+    set() {
+        if (this.firstTime) {
             this.resolveLoaded();
+            this.firstTime = true;
         }
-        else {
-            this.detaching.raise(this.view, this.controller);
-        }
-        this.view = view;
-        this.controller = controller;
-        this.attached.raise(view, controller);
     }
 
     dispose() {
-        if (this.view) {
-            this.view.dispose();
-        }
+
     }
 
     reportFatalErrorAndRethrow(e: Error) {
@@ -54,4 +42,4 @@ class Environment implements IEnvironment {
     }
 }
 
-export default new Environment();
+export default new Workspace();

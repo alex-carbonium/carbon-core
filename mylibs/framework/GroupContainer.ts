@@ -5,8 +5,7 @@ import UserSettings from "../UserSettings";
 import InteractiveContainer from "./InteractiveContainer";
 import UIElement from "./UIElement";
 import Point from "../math/point";
-import Environment from "../environment";
-import { IGroupContainer, ChangeMode, IIsolatable, IMouseEventData, PropDescriptor, IView } from "carbon-core";
+import { IGroupContainer, ChangeMode, IIsolatable, IMouseEventData, PropDescriptor, IView, IController } from "carbon-core";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
 import { IPoint } from "carbon-geometry";
 import CommonPropsManager from "./CommonPropsManager";
@@ -159,8 +158,8 @@ export default class GroupContainer extends InteractiveContainer implements IGro
         return descriptor;
     }
 
-    select(multi: boolean, view:IView) {
-        super.select(multi, view);
+    select(multi: boolean, view:IView, controller:IController) {
+        super.select(multi, view, controller);
         if (!multi) {
             PropertyTracker.propertyChanged.bind(this, this.onChildPropsChanged);
             this.children.forEach(x => x.enablePropsTracking());

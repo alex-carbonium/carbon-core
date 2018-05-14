@@ -1,6 +1,5 @@
 import EventHelper from "./EventHelper";
 import { IEvent, ViewState, ICommand, IEvent2, IDisposable, IView, IApp } from "carbon-core";
-import Environment from "../environment";
 
 var debug = require("DebugUtil")("carb:viewState");
 

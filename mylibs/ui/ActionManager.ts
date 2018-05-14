@@ -2,7 +2,7 @@ import CommandManager from "../framework/commands/CommandManager";
 import ChangeZOrder from "../commands/ChangeZOrder";
 import Delete from "../commands/Delete";
 import Move from "../commands/Move";
-import Environment from "../environment";
+import Workspace from "../Workspace";
 import Invalidate from "../framework/Invalidate";
 import FontHelper from "../framework/FontHelper";
 import Brush from "../framework/Brush";
@@ -120,11 +120,11 @@ export default class ActionManager implements IActionManager {
         }
     }
 
-    notifyActionCompleted(actionName: string, result?: any, ret?: any) {
+    notifyActionCompleted(actionName: string, result?: any, ret?: any, arg?:any) {
         this.actionPerformed.raise(actionName/*, result, ret*/);
         let event = this._events[actionName];
         if (event) {
-            event.raise(actionName, result, ret);
+            event.raise(actionName, result, ret, arg);
         }
     }
 
@@ -555,6 +555,15 @@ export default class ActionManager implements IActionManager {
             that.view.ensureScale(target);
             that.view.ensureCentered(target);
         });
+        this.registerAction("resetCurrentTool", "system", "", function (selection, target) {
+            that.controller.resetCurrentTool();
+        });
+
+        this.registerAction("onArtboardChanged", "system", "", function (selection, data) {
+            that.controller.onArtboardChanged.raise(data.newArtboard, data.oldArtboard);
+        });
+
+
 
         this.registerAction("restoreWorkspaceState", "system", "", function (selection, target) {
             try {
@@ -678,12 +687,12 @@ export default class ActionManager implements IActionManager {
             if (res && res.then) {
                 res = res.then(() => this.notifyActionCompleted(actionName, true, res))
                     .catch(e => {
-                        this.notifyActionCompleted(actionName, false, e);
+                        this.notifyActionCompleted(actionName, false, e, actionArg);
                         throw e;
                     });
             }
             else {
-                this.notifyActionCompleted(actionName, true);
+                this.notifyActionCompleted(actionName, true, null, actionArg);
             }
 
             Invalidate.request();
@@ -691,7 +700,7 @@ export default class ActionManager implements IActionManager {
             return res || ResolvedPromise;
         }
         catch (e) {
-            Environment.reportFatalErrorAndRethrow(e);
+            Workspace.reportFatalErrorAndRethrow(e);
         }
     }
     getAction(name) {

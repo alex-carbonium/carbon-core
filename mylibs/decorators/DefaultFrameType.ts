@@ -113,7 +113,7 @@ export default {
     },
 
     draw: function (frame, context, environment, currentPoint?) {
-        var scale = environment.view.scale();
+        var scale = environment.scale;
 
         context.save();
         context.scale(1 / scale, 1 / scale);
@@ -151,7 +151,7 @@ export default {
             if (!frame.hasBadTransform) {
                 for (var i = frame.points.length - 1; i >= 0; --i) {
                     var p = frame.points[i];
-                    if (!p.visible || p.visible(p, frame, frame.element.width, frame.element.height, scale * environment.view.contextScale)) {
+                    if (!p.visible || p.visible(p, frame, frame.element.width, frame.element.height, scale * environment.contextScale)) {
                         p.type.draw(p, frame, scale, context, matrix);
                     }
                 }

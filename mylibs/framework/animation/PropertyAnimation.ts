@@ -1,6 +1,5 @@
 import { IUIElement, AnimationProps, IAnimationOptions, ChangeMode } from "carbon-core";
 import AnimationGroup from "./AnimationGroup";
-import Environment from "environment";
 import Brush from "../Brush";
 import { Color } from "../Color";
 import Matrix from "math/matrix";

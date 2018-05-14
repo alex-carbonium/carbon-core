@@ -3,7 +3,6 @@ import InlineTextEditor from "./text/inlinetexteditor";
 import Text from "./text/Text";
 import Invalidate from "./Invalidate";
 import UIElement from "./UIElement";
-import Environment from "../environment";
 import DragController from "./DragController";
 import Cursor from "./Cursor";
 
@@ -119,7 +118,7 @@ export class PreviewTextTool {
         inlineEditor.activate(this.text.globalViewMatrix(), engine, this.text.props.font, this.app.fontManager);
 
         this.editor = inlineEditor;
-        Environment.controller.inlineEditModeChanged.raise(true, inlineEditor);
+        this.controller.inlineEditModeChanged.raise(true, inlineEditor);
     }
 
     private onContentChanged = () => {
@@ -139,9 +138,8 @@ export class PreviewTextTool {
         this.text.runtimeProps.editing = false;
         this.text.runtimeProps.drawSelection = false;
         this.text.disablePropsTracking();
-        //this.text.runtimeProps.ctxl = undefined;
 
-        Environment.controller.inlineEditModeChanged.raise(false, null);
+        this.controller.inlineEditModeChanged.raise(false, null);
 
         this.editor = null;
         this.text = null;

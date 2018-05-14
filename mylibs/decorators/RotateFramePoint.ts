@@ -1,7 +1,6 @@
 import CrazyScope from "../framework/CrazyManager";
 import UIElement from "../framework/UIElement";
 import Invalidate from "../framework/Invalidate";
-import Environment from "../environment";
 import {Types, RotationCursors} from "../framework/Defs";
 import Point from "../math/point";
 import {isPointInRect} from "../math/math";

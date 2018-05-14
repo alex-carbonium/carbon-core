@@ -5,7 +5,6 @@ import UserSettings from "../UserSettings";
 import Container from "./Container";
 import UIElement from "./UIElement";
 import Point from "../math/point";
-import Environment from "../environment";
 import { IGroupContainer, ChangeMode, IIsolatable, IMouseEventData } from "carbon-core";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
 import { IPoint } from "carbon-geometry";

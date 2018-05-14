@@ -1,6 +1,5 @@
 import DefaultFrameType from "decorators/DefaultFrameType";
 import CompositeElement from "./CompositeElement";
-import Environment from "environment";
 import PropertyMetadata from "./PropertyMetadata";
 import { Types } from "./Defs";
 import ActiveFrame from "../decorators/ActiveFrame";
@@ -106,7 +105,7 @@ export default class SelectComposite extends CompositeElement implements ISelect
 
         if (!wasMultiSelection && this.children.length === 1) {
             this.children[0].unselect();
-            this.children[0].select(true, this.view);
+            this.children[0].select(true, this.view, this.controller);
             this.removeActiveFrame(this.children[0]);
         }
 
@@ -116,7 +115,7 @@ export default class SelectComposite extends CompositeElement implements ISelect
         this.showActiveFrame();
 
         let isMultiSelection = this.children.length > 1;
-        element.select(isMultiSelection, this.view);
+        element.select(isMultiSelection, this.view, this.controller);
 
         if (isMultiSelection) {
             this.addActiveFrame(this);

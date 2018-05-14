@@ -22,6 +22,7 @@ declare module "carbon-core" {
     export var MirroringController: any;
     export var Layer: any;
     export var MirroringView: any;
+    export var ArtboardProxyPage: any;
     export var Types: any;
     export var NullPage: any;
     export var CompositeElement: any;

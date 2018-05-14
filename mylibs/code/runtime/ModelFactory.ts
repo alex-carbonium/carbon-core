@@ -5,7 +5,6 @@ import { ISize } from "carbon-geometry";
 import { Model } from "../../framework/Model";
 import Brush from "../../framework/Brush";
 import Matrix from "math/matrix";
-import Environment from "environment";
 import { IArtboard } from "carbon-core";
 
 function EventData(props) {
@@ -116,12 +115,6 @@ export class ModelFactory implements IProxySource {
         let frame = model.createArtboardFrame(name, size, props);
 
         return this.runCodeOnArtboardCallback((frame as any).innerElement).then(() => frame);
-        // let previewModel = (Environment .controller as any).previewModel;
-        // if (previewModel) {
-        //     return previewModel.runCodeOnArtboard((frame as any).innerElement).then(() => frame);
-        // }
-
-        // return Promise.resolve(frame);
     }
 
     static _prepareProps(props) {

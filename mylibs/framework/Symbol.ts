@@ -9,7 +9,6 @@ import ObjectFactory from "framework/ObjectFactory";
 import { ChangeMode, IContainer, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp, IUIElement, IUIElementProps, IText, UIElementFlags, ResizeDimension, IContext, ISelection, IArtboard, IAnimationOptions } from "carbon-core";
 import { createUUID } from "../util";
 import Isolate from "../commands/Isolate";
-import Environment from "../environment";
 import UserSettings from "../UserSettings";
 import Text from "./text/Text";
 import Brush from "./Brush";

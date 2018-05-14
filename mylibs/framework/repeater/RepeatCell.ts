@@ -4,7 +4,6 @@ import Brush from "../Brush";
 import { Overflow, Types, ArrangeStrategies } from "../Defs";
 import { IGroupContainer, IIsolatable, IUIElement, ChangeMode, IRepeatCell } from "carbon-core";
 import UserSettings from "../../UserSettings";
-import Environment from "../../environment";
 import GlobalMatrixModifier from "../GlobalMatrixModifier";
 import { createUUID } from "../../util";
 

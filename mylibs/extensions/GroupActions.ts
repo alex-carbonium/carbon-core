@@ -8,7 +8,6 @@ import GroupArrangeStrategy from "../framework/arrangeStrategy/GroupArrangeStrat
 import Matrix from "../math/matrix";
 import Rect from "../math/rect";
 import Container from "../framework/Container";
-import ImageContent from "../framework/ImageContent";
 import { unionRect } from "../math/geometry";
 import GroupContainer from "../framework/GroupContainer";
 import InteractiveContainer from "../framework/InteractiveContainer";
@@ -17,8 +16,8 @@ import Isolate from "../commands/Isolate";
 
 export class GroupActions extends CarbonExtension {
 
-    constructor(app, workspace) {
-        super(app, workspace);
+    constructor(app, view, controller) {
+        super(app, view, controller);
     }
 
     initialize(contributions: IContributions) {
@@ -163,6 +162,6 @@ export class GroupActions extends CarbonExtension {
     }
 
     isolate(selection: ISelection) {
-        Isolate.run(this.workspace.view, selection.elements as IIsolatable[]);
+        Isolate.run(this.view, selection.elements as IIsolatable[]);
     }
 }

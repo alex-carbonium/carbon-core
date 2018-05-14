@@ -1,6 +1,5 @@
 import EventHelper from "../EventHelper";
 import { IEvent, ICommand } from "carbon-core";
-import Environment from "../../environment";
 
 var debug = require("DebugUtil")("carb:commands");
 

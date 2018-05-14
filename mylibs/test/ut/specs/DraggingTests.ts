@@ -1,14 +1,19 @@
 import TestUtil from "../TestUtil";
-import { IApp, IArtboard, model, IGroupContainer, Selection, Brush } from "carbon-core";
+import { IApp, IArtboard, model, IGroupContainer, Selection, Brush, IView, IController } from "carbon-core";
 import { dragElementOnElement } from "../Interactions";
 import { assert } from "chai";
 
 describe("Dragging tests", function () {
     let app: IApp = null;
+    let view: IView = null;
+    let controller: IController = null;
     let artboard: IArtboard = null;
 
     beforeEach(function (done) {
-        app = TestUtil.setupApp();
+        let setup = TestUtil.setupApp();
+        app = setup.app;
+        view = setup.view;
+        controller = setup.controller;
         app.onLoad(function () {
             artboard = app.activePage.getActiveArtboard();
             return done();
@@ -39,7 +44,7 @@ describe("Dragging tests", function () {
         artboard.add(rect3);
 
         // act
-        dragElementOnElement(rect3, group, { ctrlKey: true, altKey: true });
+        dragElementOnElement(controller, rect3, group, { ctrlKey: true, altKey: true });
 
         // assert
         assert.equal(artboard.children.length, 2, "Group and other element must still remain");
@@ -63,7 +68,7 @@ describe("Dragging tests", function () {
         artboard.add(image);
 
         // act
-        dragElementOnElement(image, oval, { ctrlKey: true });
+        dragElementOnElement(controller, image, oval, { ctrlKey: true });
 
         // assert
         assert.equal(artboard.children.length, 1);

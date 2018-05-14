@@ -3,7 +3,6 @@ import Selection from "../../framework/SelectionModel";
 import Invalidate from "../../framework/Invalidate";
 import Point from "../../math/point";
 import Path from "framework/Path";
-import Environment from "../../environment";
 import Tool from "./Tool";
 import {KeyboardState, IMouseEventData, ChangeMode} from "carbon-core";
 
@@ -72,7 +71,7 @@ export default class PencilCreator extends Tool {
 
     mousedown(event) {
         var eventData = { handled: false, x: event.x, y: event.y };
-        Environment.controller.startDrawingEvent.raise(eventData);
+        this._controller.startDrawingEvent.raise(eventData);
         if (eventData.handled) {
             return true;
         }

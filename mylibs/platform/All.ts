@@ -1,5 +1,4 @@
 import Invalidate from "framework/Invalidate";
-import Environment from "environment";
 import DataNode from "framework/DataNode";
 import Matrix from "math/matrix";
 import EventHelper from "framework/EventHelper";

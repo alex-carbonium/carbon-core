@@ -3,7 +3,6 @@ import nearestPoint from "math/NearestPoint";
 import Invalidate from "framework/Invalidate";
 import {Types, FrameCursors} from "../framework/Defs";
 import Brush from "../framework/Brush";
-import Environment from "environment";
 import { ChangeMode } from "carbon-core";
 
 const PointSize = 4;

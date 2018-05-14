@@ -10,7 +10,6 @@ import NullArtboard from "framework/NullArtboard";
 import RelayoutEngine from "framework/relayout/RelayoutEngine";
 import SystemConfiguration from "SystemConfiguration";
 import Invalidate from "framework/Invalidate";
-import Environment from "environment";
 import { Types } from "../../framework/Defs";
 import Rect from "../../math/rect";
 import { IArtboard } from "carbon-model";
@@ -186,7 +185,7 @@ class ArtboardPage extends Page implements IArtboardPage, IElementWithCode {
         }
 
         if(SystemConfiguration.ResetActiveToolToDefault) {
-            Environment.controller.resetCurrentTool();
+            App.Current.actionManager.invoke("resetCurrentTool");
         }
     }
 
@@ -198,6 +197,7 @@ class ArtboardPage extends Page implements IArtboardPage, IElementWithCode {
         }
     }
 
+    // TODO: move this code to controller
     setActiveArtboard(artboard, doNotTrack?) {
         let oldArtboard: IArtboard = this._activeArtboard;
 
@@ -216,7 +216,8 @@ class ArtboardPage extends Page implements IArtboardPage, IElementWithCode {
         } else {
             !doNotTrack && App.Current.setMirrorArtboardId(null, null);
         }
-        Environment.controller && Environment.controller.onArtboardChanged && Environment.controller.onArtboardChanged.raise(artboard, oldArtboard);
+
+        App.Current.actionManager.invoke("onArtboardChanged", {newArtboard:artboard, oldArtboard:oldArtboard});
 
         // redraw content to change artboard header color
         Invalidate.request();

@@ -2,7 +2,6 @@ import { IContributions, IAction, ContextBarPosition, IActionManager, IApp, ISel
 import ActionManager from "../ui/ActionManager";
 import CoreIntl from "../CoreIntl";
 import ContextMenuBuilder from "./ContextMenuBuilder";
-import Environment from "../environment";
 import ShortcutManager from "../ui/ShortcutManager";
 
 export class Contributions implements IContributions {

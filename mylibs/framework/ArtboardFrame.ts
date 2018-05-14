@@ -2,7 +2,7 @@ import PropertyMetadata from "framework/PropertyMetadata";
 import { Overflow, Types, ContentBehavior } from "./Defs";
 import Selection from "framework/SelectionModel";
 import DataNode from "framework/DataNode";
-import { ElementState, RenderEnvironment } from "carbon-core";
+import { ElementState, RenderEnvironment, IMouseEventData } from "carbon-core";
 import RenderPipeline from "./render/RenderPipeline";
 import ContextPool from "./render/ContextPool";
 import { renderer } from "./render/Renderer";
@@ -10,7 +10,6 @@ import Container from "./Container";
 import Symbol from "framework/Symbol";
 import Matrix from "math/matrix";
 import { ChangeMode } from "carbon-basics";
-import Environment from "environment";
 import UIElement from "./UIElement";
 import NullContainer from "framework/NullContainer";
 import Rect from "../math/rect";
@@ -33,7 +32,7 @@ export default class ArtboardFrameControl extends Container {
         return this._artboard;
     }
 
-    edit() {
+    private edit(view, controller) {
         if (this.mode() !== ElementState.Edit) {
             this.mode(ElementState.Edit);
             this._internalChange = true;
@@ -41,7 +40,7 @@ export default class ArtboardFrameControl extends Container {
             Selection.makeSelection([this]);
 
             this._internalChange = false;
-            this._cancelBinding = Environment.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
+            this._cancelBinding = controller.actionManager.subscribe('cancel', this.cancel.bind(this));
             this.invalidate();
         }
     }
@@ -81,18 +80,18 @@ export default class ArtboardFrameControl extends Container {
         this.invalidate();
     }
 
-    mousedown(event) {
+    mousedown(event:IMouseEventData) {
         if (this.mode() === ElementState.Edit) {
-            this.captureMouse();
+            event.controller.captureMouse(this);
             this._mousePressed = true;
             event.handled = true;
             this._startData = { x: event.x, y: event.y, ox: this.props.offsetX, oy: this.props.offsetY };
         }
     }
 
-    mouseup(event) {
+    mouseup(event:IMouseEventData) {
         if (this._mousePressed) {
-            this.releaseMouse();
+            event.controller.releaseMouse(this);
             this._mousePressed = false;
             let ox = this.props.offsetX,
                 oy = this.props.offsetY;
@@ -120,7 +119,7 @@ export default class ArtboardFrameControl extends Container {
     }
 
     dblclick(event) {
-        this.edit();
+        this.edit(event.view, event.controller);
         event.handled = true;
     }
 

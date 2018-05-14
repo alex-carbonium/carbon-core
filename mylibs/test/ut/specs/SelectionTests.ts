@@ -1,12 +1,17 @@
 import TestUtil, { createArtboard, createElement } from "../TestUtil";
 import { assert } from "chai";
-import { IApp, IUIElement, UIElement, workspace, Selection } from "carbon-core";
+import { IApp, IUIElement, UIElement, Selection, IView, IController } from "carbon-core";
 
 describe("Selection tests", function () {
     let app: IApp = null;
+    let view: IView = null;
+    let controller: IController = null;
 
     beforeEach(function (done) {
-        app = TestUtil.setupApp();
+        let setup = TestUtil.setupApp();
+        app = setup.app;
+        view = setup.view;
+        controller = setup.controller;
         app.onLoad(function () {
             return done();
         });
@@ -28,7 +33,7 @@ describe("Selection tests", function () {
         // assert
         assert.equal(Selection.elements.length, 1);
         assert.strictEqual(Selection.elements[0], artboard);
-        assert.equal(workspace.controller.currentTool, "artboardTool");
+        assert.equal(controller.currentTool, "artboardTool");
     });
 
     it("Must not select artboards together with other elements (add to selection)", function () {

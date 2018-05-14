@@ -1,7 +1,6 @@
 import SystemConfiguration from "../../SystemConfiguration";
 import Selection from "../../framework/SelectionModel";
 import Invalidate from "../../framework/Invalidate";
-import Environment from "../../environment";
 import Tool from "./Tool";
 import Artboard from "../../framework/Artboard";
 import ObjectFactory from "../../framework/ObjectFactory";
@@ -23,9 +22,6 @@ export default class ArtboardsTool extends Tool {
         super("artboardTool");
         this._parameters = parameters;
         this._point = new Point(0, 0);
-
-        //not disposed
-        Selection.onElementSelected.bind(this, this.onSelection);
     }
 
     attach(app, view, controller, mousePressed) {
@@ -250,36 +246,11 @@ export default class ArtboardsTool extends Tool {
         return 0;
     }
 
-    private onSelection(composite: IComposite) {
-        if (Environment.controller.currentTool !== "artboardTool") {
-            let reselect = false;
-            let hasArtboards = false;
-            for (let i = 0; i < composite.elements.length; ++i) {
-                let isArtboard = composite.elements[i] instanceof Artboard;
-                hasArtboards = hasArtboards || isArtboard;
-                if (hasArtboards && !isArtboard) {
-                    reselect = true;
-                    break;
-                }
-            }
-
-            if (reselect || hasArtboards) {
-                let artboards = composite.elements.filter(x => x instanceof Artboard);
-                Environment.controller.actionManager.invoke("artboardTool" as WorkspaceTool);
-                Selection.makeSelection(artboards);
-            }
-        } else if(this._artboardToolSettings && (!composite || composite.elements.length === 0)) {
-            Selection.makeSelection([this._artboardToolSettings], "new", false, true);
-        }
-    }
-
     private onCancelled = () => {
-        Environment.controller.resetCurrentTool();
+        this._controller.resetCurrentTool();
     }
 
     dispose() {
-        Selection.onElementSelected.unbind(this, this.onSelection);
-
         super.dispose();
     }
 }

@@ -8,7 +8,6 @@ import Invalidate from "./Invalidate";
 import ImageEditTool from "./ImageEditTool";
 import EventHelper from "./EventHelper";
 import RectMask from "./RectMask";
-import Environment from "../environment";
 import { ContentSizing, ImageSource, ImageSourceType, IImage, IImageProps } from "carbon-model";
 import { IRect, Origin } from "carbon-geometry";
 import { ChangeMode, IContext, RenderEnvironment, IUIElement, IFileElement } from "carbon-core";

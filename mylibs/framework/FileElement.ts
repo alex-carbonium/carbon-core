@@ -1,10 +1,9 @@
 import UIElement from "./UIElement";
-import { FileProps, IFileElement, IImage, ChangeMode, IUIElement, IGroupContainer, Origin, IContainer } from "carbon-core";
+import { FileProps, IFileElement, IImage, ChangeMode, IUIElement, IGroupContainer, Origin, IContainer, IController } from "carbon-core";
 import { Types } from "./Defs";
 import PropertyMetadata from "./PropertyMetadata";
 import Rect from "../math/rect";
 import Image from "./Image";
-import Environment from "../environment";
 import Selection from "./SelectionModel";
 import Container from "./Container";
 import { loadSVGFromString } from "../svg/SvgParser";
@@ -21,10 +20,10 @@ export class FileElement extends UIElement implements IFileElement {
         this.linkedElement = value;
     }
 
-    drop(file: File): Promise<void> {
+    drop(file: File, controller:IController): Promise<void> {
         this.setProps({ name: file.name }, ChangeMode.Self);
 
-        let parent = Environment.controller.getCurrentDropTarget() as Container;
+        let parent = controller.getCurrentDropTarget() as Container;
 
         return new Promise<void>((resolve, reject) => {
             if (this.isSvg()) {

@@ -1,5 +1,4 @@
 import UIElement from "framework/UIElement";
-import Environment from "environment";
 import ResizeOptions from "./ResizeOptions";
 import { Types, FrameCursors } from "../framework/Defs";
 import Point from "../math/point";
