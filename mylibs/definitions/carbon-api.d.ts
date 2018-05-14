@@ -328,6 +328,7 @@ declare module "carbon-api" {
             major: string;
         };
     }
+
     export const platform: Platform;
 
     export interface StartupParams {

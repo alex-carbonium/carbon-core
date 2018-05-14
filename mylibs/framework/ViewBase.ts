@@ -500,14 +500,6 @@ export default class ViewBase implements IView {
         this.viewStateTimer = 0;
     }
 
-    pointToScreen(point: ICoordinate) {
-        var parentOffset = this.app.platform.containerOffset();
-        return {
-            x: parentOffset.left + point.x - this.page.scrollX,
-            y: parentOffset.top + point.y - this.page.scrollY
-        };
-    }
-
     invalidate(layerType?, mask?) {
         if (layerType === undefined) {
             for (var i = 0; i < this._layers.length; i++) {

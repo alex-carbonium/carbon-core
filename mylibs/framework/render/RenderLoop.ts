@@ -9,8 +9,9 @@ import Clipboard from "../Clipboard";
 import { keyboard } from "../../platform/Keyboard";
 import Context from "../render/Context";
 import ExtensionPoint from "../ExtensionPoint";
-import { IApp, IView, IRenderLoop, IController, ContextType } from "carbon-core";
+import { IApp, IView, IRenderLoop, IController, ContextType, Platform, IPlatformSpecificHandler } from "carbon-core";
 import MirroringController from "../MirroringController";
+import { createPlatformHandler } from "../../platform/PlatformSpecificHandler";
 
 
 export default class RenderLoop implements IRenderLoop {
@@ -45,11 +46,11 @@ export default class RenderLoop implements IRenderLoop {
 
         this.finishMounting(app, view, controller);
     }
-
+    platformHandler:IPlatformSpecificHandler;
     private finishMounting(app: IApp, view: IView, controller: IController) {
         Workspace.set();
-        app.platform.detachEvents();
-        app.platform.attachEvents(this.viewContainer, app, view, controller);
+        this.platformHandler = createPlatformHandler();
+        this.platformHandler.attachEvents(this.viewContainer, app, view, controller);
 
         Clipboard.attach(app, view, controller);
         keyboard.attach();
@@ -68,7 +69,8 @@ export default class RenderLoop implements IRenderLoop {
         if (this._view) {
             this._view.detach();
         }
-        this._app.platform.detachEvents();
+        this.platformHandler.detachEvents();
+        this.platformHandler.dispose();
         keyboard.detach();
         Clipboard.dispose();
     }

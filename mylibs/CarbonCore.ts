@@ -91,7 +91,7 @@ export default {
     "RenderLoop": require("./framework/render/RenderLoop"),
     "renderer": require("./framework/render/Renderer").renderer,
     "RelayoutQueue": require("./framework/relayout/RelayoutQueue"),
-    "Platform": require("./platform/Platform"),
+    "createPlatformHandler": require("./platform/PlatformSpecificHandler").createPlatformHandler,
     //TODO: remove
     "BasePlatform": require("./platform/All"),
     "StyleManager": require("./framework/style/StyleManager"),

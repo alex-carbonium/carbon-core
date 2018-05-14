@@ -106,7 +106,6 @@ declare module "carbon-app" {
         styleManager: IStyleManager;
 
         modelSyncProxy: any;
-        platform: IPlatform;
 
         init(): void;
         run(): Promise<void>;
@@ -304,7 +303,6 @@ declare module "carbon-app" {
 
         viewportSize(): ISize;
         viewportRect(): IRect;
-        pointToScreen(point: ICoordinate): ICoordinate;
         logicalCoordinateToScreen(point: ICoordinate) : ICoordinate;
         fitToViewportIfNeeded(element: IUIElement, origin?: Origin, mode?: ChangeMode);
 
@@ -409,7 +407,6 @@ declare module "carbon-app" {
         }
     }
 
-    //TODO: rename to Workspace
     export interface IWorkspace {
         fatalErrorOccurred: IEvent<void>;
 
@@ -420,6 +417,13 @@ declare module "carbon-app" {
         set();
     }
     export const Workspace: IWorkspace;
+
+    export interface IPlatformSpecificHandler extends IDisposable {
+        attachEvents(container:HTMLElement, app:IApp, view:IView, controller:IController);
+        detachEvents();
+    }
+
+    export function createPlatformHandler():IPlatformSpecificHandler;
 
     export interface ICommand {
         flushRedoStack();

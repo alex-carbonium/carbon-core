@@ -1,5 +1,6 @@
 import ExtensionBase from "./ExtensionBase";
 import logger from "../logger";
+import Workspace from "../Workspace";
 
 var bind = function () {
     var that = this;
@@ -28,7 +29,7 @@ export default class ClosePageDialog extends ExtensionBase {
     attach(app) {
         super.attach.apply(this, arguments);
 
-        if (app.platform.richUI() && !app.props.noConfirmOnClose) {
+        if (Workspace.richUI && !app.props.noConfirmOnClose) {
             bind.call(this);
         }
     }

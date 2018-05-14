@@ -73,10 +73,6 @@ export default class PlatformAll {
         return new Image();
     }
 
-    viewContainerElement() {
-        return $(viewId)[0];
-    }
-
     richUI() {
         return this._richUI !== undefined ? this._richUI : !!window;
     }

@@ -1,4 +1,5 @@
 import ExtensionBase from "./ExtensionBase";
+import Workspace from "../Workspace";
 
 function onStateChanged() {
     //this.app.isInOfflineMode(!App.Current.isOnline());
@@ -10,7 +11,7 @@ export default class OfflineWatcher extends ExtensionBase{
     }
 
     attach(app) {
-        if (!app.platform.richUI()) {
+        if (!Workspace.richUI) {
             return;
         }
 

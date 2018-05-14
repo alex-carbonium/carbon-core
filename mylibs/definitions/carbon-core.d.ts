@@ -40,6 +40,7 @@ declare module "carbon-core" {
     export var UserSettings:any;
     export var ContextPool:any;
     export var CoreIntl:any;
+    export var domUtil:any;
     export var PreviewController:any;
     export var PreviewView:any;
     export var PreviewModel:any;

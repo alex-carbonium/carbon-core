@@ -20,7 +20,7 @@ Util.setupApp = function(options){
     App.Current = app;
     app.id = ("10");
 
-    app.platform = new TestPlatform();
+    // app.platform = new TestPlatform();
     app.fontManager = new TestFontManager(app);
     app.fontManager.registerAsDefault();
 

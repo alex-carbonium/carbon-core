@@ -53,7 +53,6 @@ if (DEBUG) {
     window['Selection'] = Selection;
 }
 
-var platform = require("platform/Platform");
 var Layer = require("framework/Layer");
 var SelectFrame = require("framework/SelectFrame");
 
@@ -87,7 +86,6 @@ class AppClass extends DataNode implements IApp {
     state: any;
 
     offlineModel: any;
-    platform: any;
 
     shortcutManager: ShortcutManager;
     actionManager: ActionManager;
@@ -161,8 +159,6 @@ class AppClass extends DataNode implements IApp {
         this._userSettings = JSON.parse(localStorage["_userSettings"] || '{}');
 
         this.migrationUpgradeNotifications = [];
-
-        this.platform = platform;
 
         this.modelSyncProxy = new ModelSyncProxy(this);
 
@@ -1063,8 +1059,6 @@ class AppClass extends DataNode implements IApp {
 
             this.releaseLoadRef();
 
-            //that.platform.ensureCanvasSize();
-
             backend.enableLoginTimer();
             params.perf && performance.measure("App.run", "App.run");
         }).catch(function (e) {
@@ -1315,12 +1309,7 @@ class AppClass extends DataNode implements IApp {
 
     dispose() {
         this.unload();
-        Workspace.dispose();
 
-        if (this.platform) {
-            this.platform.dispose();
-            this.platform = null;
-        }
         if (this.state) {
             this.state.dispose();
             this.state = null;

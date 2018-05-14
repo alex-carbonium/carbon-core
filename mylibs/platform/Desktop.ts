@@ -353,6 +353,7 @@ export default class Desktop extends All {
 
     constructor(richUI: boolean) {
         super(richUI);
+        Workspace.richUI = richUI;
         this._mouseButtonPressed = false;
     }
 
@@ -459,10 +460,5 @@ export default class Desktop extends All {
         delete this._onpinchend;
         delete this._ondoubletap;
         delete this._ontap;
-    }
-
-    containerOffset() {
-        var htmlParent = this.viewContainerElement();
-        return domUtil.offset(htmlParent);
     }
 }

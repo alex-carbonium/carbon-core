@@ -14,7 +14,6 @@ import Duplicate from "../commands/Duplicate";
 import ConvertToPath from "../commands/ConvertToPath";
 import Isolate from "../commands/Isolate";
 import { align } from "../framework/Aligner";
-import platform from "../platform/Platform";
 import CombinePaths from "../commands/CombinePaths";
 import GroupContainer from "../framework/GroupContainer";
 import InteractiveContainer from "../framework/InteractiveContainer";
