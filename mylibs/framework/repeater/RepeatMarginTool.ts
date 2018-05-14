@@ -135,7 +135,7 @@ class RepeatMarginTool {
 
             hitRect.free();
         }
-        if (hit || this._activeMargin !== null) {
+        if (hit || this._activeMargin) {
             if (!hit) {
                 this._activeMargin = null;
                 Cursor.removeGlobalCursor();
@@ -148,7 +148,7 @@ class RepeatMarginTool {
         Invalidate.requestInteractionOnly();
     }
     onDragStarting() {
-        return this._activeMargin !== null;
+        return !!this._activeMargin;
     }
     onDragging(e, dx, dy, ddx, ddy) {
         if (this._firstDrag) {
@@ -199,7 +199,7 @@ class RepeatMarginTool {
                 }
             }
         }
-        else if (this._activeMargin !== null) {
+        else if (this._activeMargin) {
             this.drawMargin(context, this._activeMargin, env);
         }
     }

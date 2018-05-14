@@ -122,6 +122,8 @@ export class RepeaterActions extends CarbonExtension {
         if (data) {
             repeater.cols = data.columns || 1;
             repeater.rows = data.rows || 1;
+
+            repeater.prepareAndSetProps({innerMarginY:data.innerMarginY||20, innerMarginX:data.innerMarginX||20});
         }
 
         Selection.makeSelection([repeater]);
