@@ -5,7 +5,7 @@ import PropertyMetadata from "./PropertyMetadata";
 import { Types } from "./Defs";
 import ActiveFrame from "../decorators/ActiveFrame";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
-import { ISelectComposite, IView } from "carbon-app";
+import { ISelectComposite, IView, IController } from "carbon-app";
 import { ResizeDimension, IUIElement } from "carbon-core";
 import Invalidate from "./Invalidate";
 
@@ -56,9 +56,9 @@ export default class SelectComposite extends CompositeElement implements ISelect
     private _activeFrameElement: IUIElement = null;
     private _activeFrameHiddenPermanently = false;
 
-    constructor(protected view:IView) {
+    constructor(protected view:IView, private controller:IController) {
         super();
-        this._activeFrame = new ActiveFrame(view);
+        this._activeFrame = new ActiveFrame(view, controller);
     }
 
     displayName() {

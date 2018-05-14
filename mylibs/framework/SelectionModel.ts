@@ -3,7 +3,7 @@ import SelectComposite from "./SelectComposite";
 import { SelectFrame } from "./SelectFrame";
 import UserSettings from "../UserSettings";
 import Environment from "../environment";
-import { ISelection, IEvent, IEvent2, IUIElement, IComposite, IEvent3, SelectionMode, KeyboardState, ISelectComposite, IRect, IView, IUIElementProps } from "carbon-core";
+import { ISelection, IEvent, IEvent2, IUIElement, IComposite, IEvent3, SelectionMode, KeyboardState, ISelectComposite, IRect, IView, IUIElementProps, IController, LayerType } from "carbon-core";
 import Rect from "../math/rect";
 import ArrayPool from "./ArrayPool";
 import UIElement from "./UIElement";
@@ -75,7 +75,7 @@ export class SelectionModel implements ISelection {
     onElementSelected: IEvent3<ISelectComposite, IUIElement[], boolean>;
     propertiesRequested:IEvent<ISelectComposite>;
 
-    constructor(view: IView) {
+    constructor(view: IView, controller:IController) {
         this._unlockedContainers = ArrayPool.EmptyArray;
         this._activeGroup = null;
         this.onElementSelected = selectionImpl.onElementSelected;
@@ -86,11 +86,16 @@ export class SelectionModel implements ISelection {
         this.propertiesRequested = selectionImpl.propertiesRequested;
         this.view = view;
 
-        this._selectCompositeElement = new SelectComposite(view);
-        this._propertyComposite = new SelectComposite(view);
+        this._selectCompositeElement = new SelectComposite(view, controller);
+        this._propertyComposite = new SelectComposite(view, controller);
 
         this._directSelectionEnabled = false;
         this._invertDirectSelection = false;
+
+        var interactionLayer = view.getLayer(LayerType.Interaction);
+        if(interactionLayer) {
+            interactionLayer.add(this.selectComposite());
+        }
     }
 
     get elements(): IUIElement[] {
@@ -415,7 +420,7 @@ export function setSelection(selection) {
     currentSelection = selection;
 }
 
-const EmptyComposite = new SelectComposite(null);
+const EmptyComposite = new SelectComposite(null, null);
 
 class SelectionImpl implements ISelection {
     [any: string]: any;
@@ -426,6 +431,7 @@ class SelectionImpl implements ISelection {
         this.stopSelectionFrameEvent = EventHelper.createEvent();
         this.modeChangedEvent = EventHelper.createEvent();
     }
+
     get elements(): IUIElement[] {
         if (!currentSelection) {
             return [];

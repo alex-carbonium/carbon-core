@@ -5,7 +5,7 @@ import Cursor from "../framework/Cursor";
 import Invalidate from "../framework/Invalidate";
 import Environment from "../environment";
 import UserSettings from "../UserSettings";
-import { IView } from "carbon-core";
+import { IView, IController } from "carbon-core";
 
 //common code for identifying frame size during resize
 //this supports current behavior when selection frame does not move during resize
@@ -69,7 +69,7 @@ function onMouseUp(event) {
 
         //specific to rotation, but generalized - when releasing mouse, cursor could be over another point, so update it
         onMouseMove.call(this, event);
-        Environment.controller.updateCursor(event);
+        this.controller.updateCursor(event);
 
         event.handled = true;
         return false;
@@ -104,7 +104,7 @@ function onClick(event){
 
 export default class ActiveFrame extends UIElementDecorator {
 
-    constructor(private view:IView) {
+    constructor(private view:IView, private controller:IController) {
         super();
         this.margin = 0;
         this._captured = false;
@@ -127,10 +127,10 @@ export default class ActiveFrame extends UIElementDecorator {
         this.view.scaleChanged.bind(this, parentChanged);
 
         this.rect = (this.element as any).getBoundaryRectGlobal();
-        this._mouseDownHandler = Environment.controller.mousedownEvent.bindHighPriority(this, onMouseDown);
-        this._mouseUpHandler = Environment.controller.mouseupEvent.bindHighPriority(this, onMouseUp);
-        this._mouseMoveHandler = Environment.controller.mousemoveEvent.bindHighPriority(this, onMouseMove);
-        this._clickHandler = Environment.controller.clickEvent.bindHighPriority(this, onClick);
+        this._mouseDownHandler = this.controller.mousedownEvent.bindHighPriority(this, onMouseDown);
+        this._mouseUpHandler = this.controller.mouseupEvent.bindHighPriority(this, onMouseUp);
+        this._mouseMoveHandler = this.controller.mousemoveEvent.bindHighPriority(this, onMouseMove);
+        this._clickHandler = this.controller.clickEvent.bindHighPriority(this, onClick);
 
         element.enablePropsTracking();
         PropertyTracker.propertyChanged.bind(this, propertyChanged);

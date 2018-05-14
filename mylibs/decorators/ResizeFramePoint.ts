@@ -67,7 +67,7 @@ export default {
         event.view.snapController.calculateSnappingPoints(frame.element.parent.primitiveRoot(), [frame.element]);
         frame.childrenCount = frame.element.children?frame.element.children.length:-1;
 
-        Environment.controller.raiseInteractionStarted(InteractionType.Resizing, event);
+        event.controller.raiseInteractionStarted(InteractionType.Resizing, event);
         if (frame.element.decorators) {
             frame.element.decorators.forEach(x => x.visible = (false));
         }
@@ -82,7 +82,7 @@ export default {
                 frame.element.applyScaling(frame.scalingVector, frame.origin, finalOptions, ChangeMode.Model);
             }
 
-            Environment.controller.raiseInteractionStopped(InteractionType.Resizing, event);
+            event.controller.raiseInteractionStopped(InteractionType.Resizing, event);
 
             frame.element.clearSavedLayoutProps();
             delete frame.globalViewMatrix;
@@ -173,6 +173,6 @@ export default {
             event.view.snapController.calculateSnappingPoints(frame.element.parent.primitiveRoot(), [frame.element]);
         }
 
-        Environment.controller.raiseInteractionProgress(InteractionType.Resizing, event);
+        event.controller.raiseInteractionProgress(InteractionType.Resizing, event);
     }
 }

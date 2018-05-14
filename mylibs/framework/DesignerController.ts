@@ -20,6 +20,7 @@ import Point from "../math/point";
 import Cursors from "Cursors";
 import PropertyTracker from "./PropertyTracker";
 import { DraggingElement } from "./interactions/DraggingElement";
+import { SelectionModel, setSelection } from "./SelectionModel";
 
 export default class DesignerController implements IController {
     [name: string]: any;
@@ -143,7 +144,8 @@ export default class DesignerController implements IController {
             ctrlKey: event.ctrlKey || event.metaKey,
             altKey: event.altKey,
             shiftKey: event.shiftKey,
-            view:this.view
+            view:this.view,
+            controller:this
         };
     }
 
@@ -157,6 +159,9 @@ export default class DesignerController implements IController {
         this._startDraggingElement = null;
         this._noActionsBeforeClick = false;
         this.touchHelper = new TouchHelper(view);
+
+        this.selection = new SelectionModel(view, this);
+        setSelection(this.selection);
 
         if(this.app.isPrototypeMode()) {
             this._currentTool = "protoTool";
@@ -438,7 +443,8 @@ export default class DesignerController implements IController {
                 altKey: eventData.altKey,
                 ctrlKey: eventData.ctrlKey,
                 shiftKey: eventData.shiftKey,
-                view:eventData.view
+                view:eventData.view,
+                controller:this
             };
         }
 

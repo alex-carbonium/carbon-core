@@ -53,7 +53,8 @@ function createEventData(x: number, y: number, keys: Partial<KeyboardState> = de
         ctrlKey: keys.ctrlKey,
         shiftKey: keys.shiftKey,
         cursor: null,
-        view:{scale:()=>1} as any
+        view:{scale:()=>1} as any,
+        controller:null
     };
     return data;
 }

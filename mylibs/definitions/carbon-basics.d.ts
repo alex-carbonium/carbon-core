@@ -1,6 +1,6 @@
 declare module "carbon-basics" {
     import { ICoordinate } from "carbon-geometry";
-    import { AppSettings, IView } from "carbon-core";
+    import { AppSettings, IView, IController } from "carbon-core";
     import { IDisposable } from "carbon-runtime";
 
     export interface IConstructor<T> {
@@ -24,6 +24,7 @@ declare module "carbon-basics" {
         cursor?: string;
         event?:MouseEvent;
         view:IView;
+        controller:IController;
     }
 
     export interface IPointerEventData extends IMouseEventData {

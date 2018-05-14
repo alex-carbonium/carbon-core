@@ -2,12 +2,11 @@ import { areRectsIntersecting } from "math/math";
 import Font from "./Font";
 import Brush from "./Brush";
 import ViewBase from "framework/ViewBase";
-import { SelectionModel, setSelection } from "./SelectionModel";
 import Cursor from "framework/Cursor";
 import Invalidate from "framework/Invalidate";
 import PixelGrid from "framework/render/PixelGrid"
 import { IsolationLayer } from "framework/IsolationLayer";
-import { LayerType, IApp } from "carbon-app";
+import { LayerType, IApp, IController } from "carbon-app";
 import { IContext, ContextType, IDisposable } from "carbon-core";
 import { SnapController } from "./SnapController";
 import { ViewStateStack } from "../framework/ViewStateStack";
@@ -16,7 +15,6 @@ function setupLayers(Layer) {
     this.interactionLayer = new Layer();
     this.interactionLayer.type = LayerType.Interaction;
     this.interactionLayer.hitTransparent(true);
-    this.interactionLayer.add(this.selection.selectComposite()); // TODO: think how to cut this dependency
     this.interactionLayer.context = this.upperContext;
 
     this.isolationLayer = new IsolationLayer(this);
@@ -29,16 +27,14 @@ function setupLayers(Layer) {
 }
 
 class DesignerView extends ViewBase {
-    protected selection: SelectionModel;
     public snapController: SnapController;
     private viewStateStack: ViewStateStack;
     private attachedDisposables:IDisposable[] = [];
+    public controller:IController;
 
     constructor(private app: IApp) {
         super(app);
         this.snapController = new SnapController(this);
-        this.selection = new SelectionModel(this as any);
-        setSelection(this.selection);
 
         this.guideFont = Font.createFromObject({
             family: "Arial",

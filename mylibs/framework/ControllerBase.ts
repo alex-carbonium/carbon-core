@@ -88,6 +88,7 @@ export default class ControllerBase implements IController {
             altKey: event.altKey,
             shiftKey: event.shiftKey,
             view:this.view,
+            controller:this,
             scale: (event as any).scale,
             rotation: event.rotation,
             velocityX: (event as any).velocityX,

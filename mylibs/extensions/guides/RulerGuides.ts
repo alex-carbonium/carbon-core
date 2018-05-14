@@ -23,6 +23,7 @@ export default class RulerGuides {
     _rectVertical: IRect;
     _app: IApp;
     _view:IView;
+    _controller:IController;
 
     //TODO: move out ruler to extension
     private static registered = false;
@@ -52,6 +53,7 @@ export default class RulerGuides {
 
         this._app = app;
         this._view = view;
+        this._controller = controller;
 
         this._hoverArtboard = null;
         this._removingGuide = false;
@@ -95,7 +97,7 @@ export default class RulerGuides {
         return false;
     }
     canCapture(): boolean {
-        return keyboard.state.ctrlKey || Environment.controller.currentTool === "pointerTool" || Environment.controller.currentTool === "pointerDirectTool";
+        return keyboard.state.ctrlKey || this._controller.currentTool === "pointerTool" || this._controller.currentTool === "pointerDirectTool";
     }
 
     onDragSearching = (e: IMouseEventData) => {

@@ -116,7 +116,7 @@ export class ModelFactory implements IProxySource {
         let frame = model.createArtboardFrame(name, size, props);
 
         return this.runCodeOnArtboardCallback((frame as any).innerElement).then(() => frame);
-        // let previewModel = (Environment.controller as any).previewModel;
+        // let previewModel = (Environment .controller as any).previewModel;
         // if (previewModel) {
         //     return previewModel.runCodeOnArtboard((frame as any).innerElement).then(() => frame);
         // }

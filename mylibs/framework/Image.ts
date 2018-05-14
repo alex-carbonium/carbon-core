@@ -240,7 +240,7 @@ export default class Image extends Container<IImageProps> implements IImage {
     dblclick(event) {
         var source = this.source();
         if (ImageSourceHelper.isEditSupported(source)) {
-            ImageEditTool.attach(event.view, this, Image.EmptySource);
+            ImageEditTool.attach(event.view, event.controller, this, Image.EmptySource);
         }
         else if (!ImageSourceHelper.hasValue(source)) {
             var e = { done: null };

@@ -68,7 +68,7 @@ export default {
         frame.elements = elements;
         frame.snapshot = TransformationHelper.getPropSnapshot(elements);
 
-        Environment.controller.raiseInteractionStarted(InteractionType.Rotation, event);
+        event.controller.raiseInteractionStarted(InteractionType.Rotation, event);
         if (frame.element.decorators) {
             frame.element.decorators.forEach(x => x.visible = (false));
         }
@@ -87,7 +87,7 @@ export default {
                 frame.element.decorators.forEach(x => x.visible = (true));
             }
 
-            Environment.controller.raiseInteractionStopped(InteractionType.Rotation, event);
+            event.controller.raiseInteractionStopped(InteractionType.Rotation, event);
         }
     },
     change: function (frame, dx, dy, point, mousePoint, keys, event: IMouseEventData) {
@@ -111,7 +111,7 @@ export default {
         Invalidate.requestInteractionOnly();
 
         var newAngle = frame.element.angle;
-        Environment.controller.interactionProgress.raise(InteractionType.Rotation, event, frame.element);
+        event.controller.interactionProgress.raise(InteractionType.Rotation, event, frame.element);
         event.cursor = this._getCursor(point, newAngle, frame.flipped);
     },
     _getCursor: function(point, angle, flipped){

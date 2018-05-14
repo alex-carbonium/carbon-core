@@ -2,7 +2,6 @@ import UIElement from "./UIElement";
 import Selection from "./SelectionModel";
 import Text from "./text/Text";
 import Image from "./Image";
-import Environment from "../environment";
 import {combineRectArray} from "../math/math";
 import Rect from "../math/rect";
 import Matrix from "../math/matrix";
@@ -12,7 +11,7 @@ import Delete from "../commands/Delete";
 import params from "../params";
 import Shape from "./Shape";
 import backend from "../backend";
-import { IApp, IMatrix, IView } from "carbon-core";
+import { IApp, IMatrix, IView, IController } from "carbon-core";
 import { Origin } from "carbon-geometry";
 import { IUIElement } from "carbon-model";
 
@@ -20,6 +19,7 @@ class Clipboard {
     [name: string]: any;
     _app: IApp;
     _view: IView;
+    _controller:IController;
     globalBoundingBoxes: Rect[];
     rootBoundingBoxes: Rect[];
     globalMatrices: IMatrix[];
@@ -35,9 +35,10 @@ class Clipboard {
 
         this.pastingContent = false;
     }
-    attach(app, view){
+    attach(app, view, controller){
         this._app = app;
         this._view = view;
+        this._controller = controller;
         if (this.testNativeSupport()){
             this._htmlElement = document;
             this._htmlElement.addEventListener("copy", this.onCopy);
@@ -64,9 +65,9 @@ class Clipboard {
 
         e && e.preventDefault();
 
-        var controller = Environment.controller;
-        if (e && Environment.controller.isInlineEditMode){
-            var engine = Environment.controller.inlineEditor.engine;
+        var controller = this._controller;
+        if (e && controller.isInlineEditMode){
+            var engine = controller.inlineEditor.engine;
             var selection = engine.getSelection();
             if (selection.end !== selection.start){
                 var range = engine.getRange(selection.start, selection.end);
@@ -117,13 +118,13 @@ class Clipboard {
             e.preventDefault();
             textData = tryGetClipboardContent(["text/plain", "text"], e);
 
-            if (Environment.controller.isInlineEditMode){
+            if (this._controller.isInlineEditMode){
                 if (!textData){
                     this.buffer = null;
                     return;
                 }
 
-                var engine = Environment.controller.inlineEditor.engine;
+                var engine = this._controller.inlineEditor.engine;
                 var selection = engine.getSelection();
                 var range = engine.getRange(selection.start, selection.end);
                 range.setText(textData);
@@ -236,8 +237,8 @@ class Clipboard {
 
         this.onCopy(e);
 
-        if (Environment.controller.isInlineEditMode){
-            var engine = Environment.controller.inlineEditor.engine;
+        if (this._controller.isInlineEditMode){
+            var engine = this._controller.inlineEditor.engine;
             var selection = engine.getSelection();
             if (selection.end !== selection.start){
                 var range = engine.getRange(selection.start, selection.end);

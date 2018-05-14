@@ -64,6 +64,10 @@ export default class ArtboardsTool extends Tool {
 
         var artboard = this._app.activePage.getArtboardAtPoint(event, event.view);
         if (artboard) {
+            if (!Selection.isElementSelected(artboard)) {
+                this._selectByClick(event);
+            }
+
             return true;
         }
 
@@ -91,6 +95,7 @@ export default class ArtboardsTool extends Tool {
 
         event.handled = true;
         PropertyTracker.suspend();
+
         return false;
     }
 
@@ -140,11 +145,11 @@ export default class ArtboardsTool extends Tool {
     }
 
     click(event: IMouseEventData) {
-        let artboard = this._app.activePage.getArtboardAtPoint(event, event.view);
-        if (!Selection.isElementSelected(artboard)) {
-            this._selectByClick(event);
-        }
-        event.handled = true;
+        // let artboard = this._app.activePage.getArtboardAtPoint(event, event.view);
+        // if (!Selection.isElementSelected(artboard)) {
+        //     this._selectByClick(event);
+        // }
+        // event.handled = true;
     }
 
     mousemove(event: IMouseEventData) {

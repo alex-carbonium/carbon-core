@@ -19,7 +19,7 @@ import UserSettings from "../UserSettings";
 import Point from "../math/point";
 import Matrix from "../math/matrix";
 import { FloatingPointPrecision, ArrangeStrategies } from "../framework/Defs";
-import { LayerType } from "carbon-app";
+import { LayerType, IView } from "carbon-app";
 import { InteractionType, IUIElement, ChangeMode, IIsolationLayer, IMouseEventData, IController, IComposite, IContainer, TextMode, RenderEnvironment } from "carbon-core";
 import BoundaryPathDecorator, { HighlightKind } from "../decorators/BoundaryPathDecorator";
 
@@ -29,7 +29,7 @@ class ResizeHint extends UIElement {
     private _transformationElement: IComposite;
     private _label: Text = null;
 
-    constructor(private view) {
+    constructor(private view:IView, private controller:IController) {
         super();
         this._text = "";
         this._textWidth = -1;
@@ -271,7 +271,7 @@ export default class DropVisualization extends ExtensionBase {
         });
         this._dropLine.crazySupported(false);
 
-        this._hint = new ResizeHint(view);
+        this._hint = new ResizeHint(view, controller);
         this._hint.crazySupported(false);
 
         view.registerForLayerDraw(LayerType.Interaction, this);
@@ -294,7 +294,7 @@ export default class DropVisualization extends ExtensionBase {
     }
 
     onDraggingElement(event: IMouseEventData, draggingElement: IComposite) {
-        let target = Environment.controller.getCurrentDropTarget();
+        let target = event.controller.getCurrentDropTarget();
 
         if (draggingElement.showResizeHint()) {
             this._hint.updatePositionText();
@@ -338,7 +338,7 @@ export default class DropVisualization extends ExtensionBase {
     };
 
     onMouseMove(event: IMouseEventData) {
-        if (Environment.controller.interactionActive || !App.Current.allowSelection() || this._selection !== undefined) {
+        if (event.controller.interactionActive || !App.Current.allowSelection() || this._selection !== undefined) {
             return;
         }
 
@@ -577,7 +577,7 @@ export default class DropVisualization extends ExtensionBase {
             this._dropLine.parent.remove(this._dropLine);
         }
 
-        if (Environment.controller.interactionActive) {
+        if (this.controller.interactionActive) {
             if (this._hint.parent === NullContainer) {
                 this.view.interactionLayer.add(this._hint);
             }

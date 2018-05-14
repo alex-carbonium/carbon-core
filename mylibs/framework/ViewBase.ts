@@ -209,6 +209,8 @@ export default class ViewBase implements IView {
         env.pageMatrix = layer.pageMatrix;
         env.scale = this.scale();
         env.contextScale = this.contextScale;
+        env.viewport = this.viewportRect();
+        env.focused = this.focused();
 
         this.updateFlag(env, RenderFlags.ShowFrames, this.app.showFrames());
         this.updateFlag(env, RenderFlags.Final, final);

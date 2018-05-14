@@ -40,7 +40,7 @@ export default class ElementDropTool extends Tool {
     }
     mousedown(event: IMouseEventData) {
         var eventData = { handled: false, x: event.x, y: event.y };
-        Environment.controller.startDrawingEvent.raise(eventData);
+        event.controller.startDrawingEvent.raise(eventData);
         if (eventData.handled) {
             return true;
         }
@@ -85,13 +85,13 @@ export default class ElementDropTool extends Tool {
 
             Invalidate.requestInteractionOnly();
             if (this._cursorNotMoved) {
-                Environment.controller.selectByClick(event);
-                Environment.controller.resetCurrentTool();
+                event.controller.selectByClick(event);
+                event.controller.resetCurrentTool();
                 event.handled = true;
                 return;
             }
 
-            Environment.controller.raiseInteractionStopped(InteractionType.Resizing, event);
+            event.controller.raiseInteractionStopped(InteractionType.Resizing, event);
 
             this.view().dropElement(this._element);
 
@@ -106,7 +106,7 @@ export default class ElementDropTool extends Tool {
             this._hoverArtboard = null;// need to rebuild snapping data TODO: consider to just add data for a new element
         }
         if (SystemConfiguration.ResetActiveToolToDefault) {
-            Environment.controller.resetCurrentTool();
+            event.controller.resetCurrentTool();
         }
         event.handled = true;
     }
@@ -134,7 +134,7 @@ export default class ElementDropTool extends Tool {
                     return false;
                 }
 
-                Environment.controller.raiseInteractionStarted(InteractionType.Resizing, event);
+                event.controller.raiseInteractionStarted(InteractionType.Resizing, event);
             }
 
             var endPoint = this._point;
@@ -148,7 +148,7 @@ export default class ElementDropTool extends Tool {
             }
 
             this.updateElement(this._element, this._startPoint, endPoint);
-            Environment.controller.raiseInteractionProgress(InteractionType.Resizing, event);
+            event.controller.raiseInteractionProgress(InteractionType.Resizing, event);
 
             Invalidate.requestInteractionOnly();
             event.handled = true;

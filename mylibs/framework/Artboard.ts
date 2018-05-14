@@ -58,6 +58,8 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         this.stateChanged = EventHelper.createEvent();
 
         this._externals = null;
+        this.canSelect(false);
+        this.canDrag(false);
     }
 
     allowArtboardSelection(value: boolean) {
@@ -68,14 +70,6 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
 
     canRotate(): boolean {
         return false;
-    }
-
-    canSelect() {
-        return Environment.controller.currentTool === "artboardTool";
-    }
-
-    canDrag() {
-        return Environment.controller.currentTool === "artboardTool";
     }
 
     get frame() {
@@ -846,7 +840,17 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return this.hitTestLocalRect(rect, point, view) || this.hitTestHeader(point, view);
     }
 
-    private hitTestHeader(point, view) {
+    select(mode, view) {
+        this.canSelect(true);
+        this.canDrag(true);
+    }
+
+    unselect() {
+        this.canSelect(false);
+        this.canDrag(false);
+    }
+
+    private hitTestHeader(point, view:IView) {
         let bb = this.getBoundingBoxGlobal();
         let scale = view.scale();
         return isPointInRect({ x: bb.x, y: bb.y - 20 / scale, width: bb.width, height: 20 / scale }, point);
@@ -1070,7 +1074,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     dblclick(event: IMouseEventData) {
-        if (this.hitTestHeader(event, event.view.scale())) {
+        if (this.hitTestHeader(event, event.view)) {
             Selection.makeSelection([this]);
             event.handled = true;
         }
@@ -1352,7 +1356,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     isEditable() {
-        return this.multiselectTransparent;
+        return this.canSelect() || this.multiselectTransparent;
     }
 
     onIsolationExited() {

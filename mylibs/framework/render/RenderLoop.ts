@@ -52,13 +52,14 @@ export default class RenderLoop implements IRenderLoop {
         app.platform.detachEvents();
         app.platform.attachEvents(this.viewContainer, app, view, controller);
 
-        Clipboard.attach(app, view);
+        Clipboard.attach(app, view, controller);
         keyboard.attach();
 
         this._app = app;
         this._view = view;
         this._controller = controller;
         this._attached = true;
+        (view as any).controller = controller;
 
         this.ensureCanvasSize();
     }

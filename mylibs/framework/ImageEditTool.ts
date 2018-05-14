@@ -1,4 +1,3 @@
-import Environment from "../environment";
 import { intersectRects } from "../math/math";
 import ImageSourceHelper from "./ImageSourceHelper";
 import ImageContent from "./ImageContent";
@@ -6,11 +5,12 @@ import Rect from "../math/rect";
 import Selection from "./SelectionModel";
 import PropertyTracker from "./PropertyTracker";
 import { ContentSizing, IImage, ImageSource } from "carbon-model";
-import { ChangeMode, RenderEnvironment, IView } from "carbon-core";
+import { ChangeMode, RenderEnvironment, IView, IController } from "carbon-core";
 
 export class ImageEditTool {
     [name: string]: any;
     view:IView;
+    controller:IController;
 
     constructor() {
         this._frame = null;
@@ -20,10 +20,11 @@ export class ImageEditTool {
         this._content = null;
     }
 
-    attach(view:IView, frame: IImage, emptySource: ImageSource) {
+    attach(view:IView, controller:IController, frame: IImage, emptySource: ImageSource) {
         this._tokens = [];
         this._frame = frame;
         this.view = view;
+        this.controller = controller;
 
         //full source rect {0, 0, 1000, 500}
         var fsr = ImageSourceHelper.boundaryRect(frame.source(), frame.runtimeProps.sourceProps);
@@ -60,7 +61,7 @@ export class ImageEditTool {
         if (this._frame.decorators && this._frame.decorators.length) {
             this._frame.decorators.forEach(x => this._frame.removeDecorator(x));
         }
-        this._tokens.push(Environment.controller.clickEvent.bind(this.onClicked));
+        this._tokens.push(this.controller.clickEvent.bind(this.onClicked));
         this._tokens.push(this.view.interactionLayer.ondraw.bindHighPriority(this, this.layerdraw));
 
         this.view.interactionLayer.add(this._content);
@@ -68,15 +69,15 @@ export class ImageEditTool {
             this.view.snapController.snapGuides.push(this._content, this._snapClone);
         }
 
-        this._tokens.push(Environment.controller.actionManager.subscribe("cancel", () => {
+        this._tokens.push(this.controller.actionManager.subscribe("cancel", () => {
             this.detach();
         }));
 
-        this._tokens.push(Environment.controller.actionManager.subscribe("enter", () => {
+        this._tokens.push(this.controller.actionManager.subscribe("enter", () => {
             this.detach();
         }));
 
-        this._tokens.push(Environment.controller.actionManager.subscribeToActionStart("delete", (a, e) => {
+        this._tokens.push(this.controller.actionManager.subscribeToActionStart("delete", (a, e) => {
             this.detach(false);
             this._frame.setProps({ source: emptySource });
             e.handled = true;

@@ -230,7 +230,8 @@ export default class MirroringController implements IController {
             ctrlKey: event.ctrlKey || event.metaKey,
             shiftKey: event.shiftKey,
             altKey: event.altKey,
-            view: this.view
+            view: this.view,
+            controller:this
         }
     }
 
