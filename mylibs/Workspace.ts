@@ -10,7 +10,6 @@ class Workspace implements IWorkspace {
     keyboard = keyboard;
     settings = UserSettings;
     fatalErrorOccurred = EventHelper.createEvent<void>();
-    private firstTime = true;
     public richUI = false;
 
     loaded: Promise<void>;
@@ -18,13 +17,6 @@ class Workspace implements IWorkspace {
 
     constructor() {
         this.loaded = new Promise<void>(resolve => this.resolveLoaded = resolve);
-    }
-
-    set() {
-        if (this.firstTime) {
-            this.resolveLoaded();
-            this.firstTime = true;
-        }
     }
 
     reportFatalErrorAndRethrow(e: Error) {

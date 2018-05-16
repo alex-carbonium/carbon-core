@@ -413,8 +413,6 @@ declare module "carbon-app" {
         shortcutManager: IShortcutManager;
         settings: WorkspaceSettings;
         keyboard: IKeyboard;
-
-        set();
     }
     export const Workspace: IWorkspace;
 
@@ -564,6 +562,7 @@ declare module "carbon-app" {
 
     export interface IInvalidate {
         requested:IEvent2<LayerType, number>;
+        requestedViewRedraw:IEvent<void>;
         draftMode:boolean;
         request(layer?, mask?);
         requestInteractionOnly(mask?);

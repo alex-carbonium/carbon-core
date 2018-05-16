@@ -237,7 +237,6 @@ export default class PreviewModel implements IPreviewModel, IDisposable, IModule
         var previewClone = new Symbol();
         previewClone.setProps({source:{pageId:artboard.parent.id, artboardId:artboard.id}});
 
-        //var previewClone = artboard.mirrorClone();
         previewClone.id = artboard.id;
         previewClone.applyVisitor(p => {
             p.props.__temp = true;
@@ -298,6 +297,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable, IModule
                     if (code) {
                         try {
                             this.sandbox.runOnElement(this.runtimeContext, this, artboard, code);
+                            // artboard.invalidate();
                             this.modelFailed = false;
                         } catch (e) {
                             // todo: log to console console.error(e);

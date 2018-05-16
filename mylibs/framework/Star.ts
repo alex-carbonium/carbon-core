@@ -245,8 +245,8 @@ export default class Star extends Polygon implements IStar {
                         p.from = { x: external, y: external };
                         p.to = { x: external, y: 0 };
                     },
-                    change: function (frame, dx, dy, point, mousePoint, keys) {
-                        LineDirectionPoint.change(frame, dx, dy, point, mousePoint, keys);
+                    change: function (frame, dx, dy, point, mousePoint, keys, event) {
+                        LineDirectionPoint.change(frame, dx, dy, point, mousePoint, keys, event);
                     }
                 }
             ]

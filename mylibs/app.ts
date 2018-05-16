@@ -1029,7 +1029,7 @@ class AppClass extends DataNode implements IApp {
             //TODO: handle error for non-existing resources
         }
 
-        return Promise.all([dataLoaded, importInitialResource, defaultFontLoaded, Workspace.loaded, loggedIn]).then(result => {
+        return Promise.all([dataLoaded, importInitialResource, defaultFontLoaded, loggedIn]).then(result => {
             progress += 10;
             this.onsplash.raise({ progress: progress, message: '@load.prepareenv' });
             var data = result[0];

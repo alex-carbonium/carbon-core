@@ -96,7 +96,7 @@ var LinePoint = {
             dy += newPoint.y - oldPointLocal.y;
         }
         else {
-            newPoint = event.view.applySnappingForPoint({ x: oldx, y: oldy });
+            newPoint = event.view.snapController.applySnappingForPoint({ x: oldx, y: oldy });
             dx += newPoint.x - oldx;
             dy += newPoint.y - oldy;
         }

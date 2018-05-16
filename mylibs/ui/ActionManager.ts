@@ -119,7 +119,7 @@ export default class ActionManager implements IActionManager {
         }
     }
 
-    notifyActionCompleted(actionName: string, result?: any, ret?: any, arg?:any) {
+    notifyActionCompleted(actionName: string, result?: any, ret?: any, arg?: any) {
         this.actionPerformed.raise(actionName/*, result, ret*/);
         let event = this._events[actionName];
         if (event) {
@@ -417,46 +417,90 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("zoomOut", "Zoom out", "Zoom", function () {
+            if (!that.view) {
+                return;
+            }
+
             that.view.zoomOutStep();
         });
 
         this.registerAction("zoomIn", "Zoom in", "Zoom", function () {
+            if (!that.view) {
+                return;
+            }
+
             that.view.zoomInStep();
         });
 
         this.registerAction("zoom100", "1:1", "Zoom", function () {
+            if (!that.view) {
+                return;
+            }
+
             that.view.zoom(1);
         });
 
         this.registerAction("zoom", "zoom", "Zoom", function (selection, value) {
+            if (!that.view) {
+                return;
+            }
+
             that.view.zoom(value);
         });
 
         this.registerAction("zoom8:1", "8:1", "Zoom", function () {
+            if (!that.view) {
+                return;
+            }
+
             that.view.zoom(8);
         });
 
         this.registerAction("zoom4:1", "4:1", "Zoom", function () {
+            if (!that.view) {
+                return;
+            }
+
             that.view.zoom(4);
         });
 
         this.registerAction("zoom2:1", "2:1", "Zoom", function () {
+            if (!that.view) {
+                return;
+            }
+
             that.view.zoom(2);
         });
 
         this.registerAction("zoom1:2", "1:2", "Zoom", function () {
+            if (!that.view) {
+                return;
+            }
+
             that.view.zoom(0.5);
         });
 
         this.registerAction("zoom1:4", "1:4", "Zoom", function () {
+            if (!that.view) {
+                return;
+            }
+
             that.view.zoom(0.25);
         });
 
         this.registerAction("zoomFit", "Zoom to fit", "Zoom", function () {
+            if (!that.view) {
+                return;
+            }
+
             that.view.zoomToFit();
         });
 
         this.registerAction("zoomSelection", "Zoom selection", "Zoom", function () {
+            if (!that.view) {
+                return;
+            }
+
             let element = Selection.selectedElement() as IUIElement;
             element = element || (that.app.activePage.getActiveArtboard() as IUIElement);
             that.view.ensureScale([element]);
@@ -464,6 +508,10 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("pageCenter", "Page center", "Zoom", function () {
+            if (!that.view) {
+                return;
+            }
+
             that.view.scrollToCenter();
         });
 
@@ -476,6 +524,9 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("undo", "Undo", "Project actions", function () {
+            if (!that.controller) {
+                return;
+            }
             if (that.controller.isInlineEditMode) {
                 that.controller.inlineEditor.undo();
             }
@@ -485,6 +536,10 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("redo", "Redo", "Project actions", function () {
+            if (!that.controller) {
+                return;
+            }
+
             if (that.controller.isInlineEditMode) {
                 that.controller.inlineEditor.redo();
             }
@@ -538,33 +593,62 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("changeViewState", "system", "", function (selection, { newState, silent }) {
+            if (!that.view) {
+                return;
+            }
+
             that.view.changeViewState(newState, silent);
         });
         this.registerAction("ensureVisibleRect", "system", "", function (selection, rect) {
+            if (!that.view) {
+                return;
+            }
+
             that.view.ensureVisibleRect(rect);
         });
         this.registerAction("fitToViewportIfNeeded", "system", "", function (selection, { element, origin, mode }) {
+            if (!that.view) {
+                return;
+            }
+
             that.view.fitToViewportIfNeeded(element, origin, mode);
         });
         this.registerAction("highlightTarget", "system", "", function (selection, target) {
+            if (!that.view) {
+                return;
+            }
             that.view._highlightTarget = target;
             Invalidate.requestInteractionOnly();
+
         });
         this.registerAction("ensureScaleAndCentered", "system", "", function (selection, target) {
+            if (!that.view) {
+                return;
+            }
+
             that.view.ensureScale(target);
             that.view.ensureCentered(target);
         });
         this.registerAction("resetCurrentTool", "system", "", function (selection, target) {
+            if (!that.controller) {
+                return;
+            }
+
             that.controller.resetCurrentTool();
         });
 
         this.registerAction("onArtboardChanged", "system", "", function (selection, data) {
+            if (!that.controller) {
+                return;
+            }
             that.controller.onArtboardChanged.raise(data.newArtboard, data.oldArtboard);
         });
 
-
-
         this.registerAction("restoreWorkspaceState", "system", "", function (selection, target) {
+            if (!that.view) {
+                return;
+            }
+
             try {
                 var data = localStorage.getItem("workspace:" + this.id);
                 if (!data) {
@@ -605,6 +689,10 @@ export default class ActionManager implements IActionManager {
         });
 
         this.registerAction("saveWorkspaceState", "system", "", function () {
+            if (!that.view) {
+                return;
+            }
+
             var state = {
                 scale: that.view.scale(),
                 scrollX: that.view.scrollX,

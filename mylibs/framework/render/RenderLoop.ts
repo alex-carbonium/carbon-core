@@ -48,7 +48,6 @@ export default class RenderLoop implements IRenderLoop {
     }
     platformHandler:IPlatformSpecificHandler;
     private finishMounting(app: IApp, view: IView, controller: IController) {
-        Workspace.set();
         this.platformHandler = createPlatformHandler();
         this.platformHandler.attachEvents(this.viewContainer, app, view, controller);
 

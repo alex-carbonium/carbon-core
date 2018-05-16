@@ -50,7 +50,7 @@ export default {
 
     capturePoint: function (frame, point, event) {
         frame._mousePoint = new Point(event.x, event.y);
-        var scale = event.view.scale();
+        var scale = (event.view || frame.view).scale();
 
         var matrix = frame.element.globalViewMatrixInverted();
         frame._capturedPt = matrix.transformPoint(frame._mousePoint);

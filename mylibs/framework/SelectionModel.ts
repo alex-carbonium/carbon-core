@@ -601,6 +601,7 @@ class SelectionImpl implements ISelection {
         if (currentSelection) {
             return currentSelection.selectedElements.apply(currentSelection, arguments);
         }
+        return [];
     }
 
     reselect(selection: IUIElement[] = this.selectedElements()) {

@@ -78,7 +78,7 @@ var CornerRadiusPoint = {
         p.x = x + w * rv[0] + rv[1] * offset.x;
         p.y = y + h * rv[2] + rv[3] * offset.y;
     },
-    change(frame, dx, dy, point, event: IMouseEventData, keys) {
+    change(frame, dx, dy, point, mousePoint, keys, event:IMouseEventData) {
         if (!frame.element) {
             return;
         }
@@ -87,7 +87,7 @@ var CornerRadiusPoint = {
         var w2 = rect.width / 2;
         var h2 = rect.height / 2;
 
-        var mousePosition = frame.element.globalViewMatrixInverted().transformPoint(event);
+        var mousePosition = frame.element.globalViewMatrixInverted().transformPoint(mousePoint);
 
         // p1, p2, gives us line equation
         var p1 = { x: rect.width * rv[0], y: rect.height * rv[2] };
@@ -136,7 +136,7 @@ var CornerRadiusPoint = {
         frame.element.setProps({ cornerRadius: r }, ChangeMode.Self);
         Invalidate.requestInteractionOnly();
 
-        event.controller.raiseInteractionProgress(InteractionType.RadiusChange, event);
+        event.controller.raiseInteractionProgress(InteractionType.RadiusChange, mousePoint);
     }
 }
 

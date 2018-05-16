@@ -35,7 +35,6 @@ Util.setupApp = function(options){
     view.setup({Layer, SelectComposite, SelectFrame});
     view.attachToDOM([mainContext, isolationContext, interactionContext], viewContainer, x => {}, x => {}, x=> {});
     var controller = new DesignerController(app, view);
-    Workspace.set();
 
     if (options.addPage){
         var page = new ArtboardPage();

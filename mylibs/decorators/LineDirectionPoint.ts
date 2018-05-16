@@ -54,7 +54,7 @@ export default  {
         p.x = w / 2 + value;
         p.y = h / 2;
     },
-    change (frame, dx, dy, point, mousePoint, keys) {
+    change (frame, dx, dy, point, mousePoint, keys, event) {
         if (!frame.element) {
             return;
         }
