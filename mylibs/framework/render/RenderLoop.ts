@@ -32,17 +32,26 @@ export default class RenderLoop implements IRenderLoop {
 
     public viewContainer: HTMLElement;
 
+
+
     mountDesignerView(app: IApp, viewport: HTMLElement, append = false) {
         let html = this.addDesignerHtml(viewport, append);
 
-        let view = new DesignerView(app) as any;
+        let view = this._view;
+        if(!view) {
+            view = new DesignerView(app) as any;
+        }
 
         view.attachToDOM(this._contexts, this.viewContainer, this.redrawCallback, this.cancelRedrawCallback, this.renderingScheduledCallback);
         view.setup({ Layer, SelectComposite, SelectFrame });
         view.setActivePage(app.activePage);
         view.gridContext = html.gridContext;
 
-        var controller = new DesignerController(app, view);
+        let controller = this._controller;
+        if(!controller)
+        {
+            controller = new DesignerController(app, view);
+        }
 
         this.finishMounting(app, view, controller);
     }
