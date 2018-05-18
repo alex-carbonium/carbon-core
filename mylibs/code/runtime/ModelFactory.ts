@@ -6,26 +6,7 @@ import { Model } from "../../framework/Model";
 import Brush from "../../framework/Brush";
 import Matrix from "math/matrix";
 import { IArtboard } from "carbon-core";
-
-function EventData(props) {
-    Object.assign(this, props);
-}
-
-EventData.prototype.preventDefault = function preventDefault() {
-    this._preventDefault = true;
-}
-
-EventData.prototype.stopPropagation = function stopPropagation() {
-    this._stopPropagation = true;
-}
-
-EventData.prototype.isDefaultPrevented = function isDefaultPrevented() {
-    return !!this._preventDefault;
-}
-
-EventData.prototype.isPropagationStopped = function isPropagationStopped() {
-    return !!this._stopPropagation;
-}
+import { EventData } from "./EventData";
 
 var model = new Model();
 export class ModelFactory implements IProxySource {

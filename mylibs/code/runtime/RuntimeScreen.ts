@@ -37,9 +37,9 @@ export class RuntimeScreen implements core.IProxySource {
         this.artboard.registerEventHandler("panStartEvent", this.onPanStart.bind(this));
         this.artboard.registerEventHandler("panEndEvent", this.onPanEnd.bind(this));
         this.artboard.registerEventHandler("panMoveEvent", this.onPanMove.bind(this));
-        // this.disposables.add(core.PreviewModel.current.controller.panStartEvent.bindHighPriority(this, this.onPanStart))
-        // this.disposables.add(core.PreviewModel.current.controller.panEndEvent.bindHighPriority(this, this.onPanEnd))
-        // this.disposables.add(core.PreviewModel.current.controller.panMoveEvent.bindHighPriority(this, this.onPanMove))
+        // this.disposables.add(PreviewModel.current.controller.panStartEvent.bindHighPriority(this, this.onPanStart))
+        // this.disposables.add(PreviewModel.current.controller.panEndEvent.bindHighPriority(this, this.onPanEnd))
+        // this.disposables.add(PreviewModel.current.controller.panMoveEvent.bindHighPriority(this, this.onPanMove))
     }
 
     _moving = false;

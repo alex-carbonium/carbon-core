@@ -85,7 +85,7 @@ export class ArtboardProxyGenerator {
         let symbolsList = [];
 
         artboard.applyVisitorBreadthFirst((e: IUIElement) => {
-            if (e === artboard) {
+            if (e === artboard || !e.useInCode) {
                 return;
             }
             if ((e as any).t === Types.Symbol) {

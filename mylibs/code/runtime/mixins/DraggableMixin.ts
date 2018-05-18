@@ -4,6 +4,7 @@ import { ICoordinate } from "carbon-geometry";
 import Point from "../../../math/point";
 import { RuntimeProxy } from "../RuntimeProxy";
 import { DragConstraint } from "carbon-runtime";
+import { EventData } from "../EventData";
 
 class Draggable implements core.IProxySource, core.IDisposable {
     private _enabled: boolean = false;
@@ -102,10 +103,10 @@ class Draggable implements core.IProxySource, core.IDisposable {
                 dy = 0;
             }
 
-            let event = core.PreviewModel.current.controller.wrapEvent({
+            let event = new EventData({
                 dx: dx,
                 dy: dy,
-                target: this.element.runtimeProxy()//RuntimeProxy.wrap(this.element)
+                target: this.element.runtimeProxy()
             });
 
             if (this.onDragging) {
@@ -148,22 +149,23 @@ class Draggable implements core.IProxySource, core.IDisposable {
             this._disposables.add(
                 this.element.registerEventHandler("panstart", this._onmousedown)
             );
+            var parent = this.element.parent;
             // TODO: bind to public API objects (availiable in the editor) i.e to artboard instead
-            this._disposables.add(
-                core.PreviewModel.current.controller.mousemoveEvent.bind(this._onmousemove)
-            );
+            // this._disposables.add(
+            //     PreviewModel.current.controller.mousemoveEvent.bind(this._onmousemove)
+            // );
 
-            this._disposables.add(
-                core.PreviewModel.current.controller.panMoveEvent.bind(this._onmousemove)
-            );
+            // this._disposables.add(
+            //     PreviewModel.current.controller.panMoveEvent.bind(this._onmousemove)
+            // );
 
-            this._disposables.add(
-                core.PreviewModel.current.controller.mouseupEvent.bind(this._onmouseup)
-            );
+            // this._disposables.add(
+            //     PreviewModel.current.controller.mouseupEvent.bind(this._onmouseup)
+            // );
 
-            this._disposables.add(
-                core.PreviewModel.current.controller.panEndEvent.bind(this._onmouseup)
-            );
+            // this._disposables.add(
+            //     PreviewModel.current.controller.panEndEvent.bind(this._onmouseup)
+            // );
         } else {
             this._disposables.dispose();
         }
