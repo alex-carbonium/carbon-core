@@ -19,7 +19,7 @@ import GroupContainer from "../framework/GroupContainer";
 import InteractiveContainer from "../framework/InteractiveContainer";
 import Selection from "../framework/SelectionModel";
 import EventHelper from "../framework/EventHelper";
-import { IActionManager, IAction, IApp, IUIElement, IEvent, IContainer, IIsolatable, IShortcutManager, ISelection, IView, IController } from "carbon-core";
+import { IActionManager, IAction, IApp, IUIElement, IEvent, IContainer, IIsolatable, IShortcutManager, ISelection, IView, IController, IArtboardPage } from "carbon-core";
 import { ArrangeStrategies, DropPositioning } from "../framework/Defs";
 import Rect from "../math/rect";
 import CoreIntl from "../CoreIntl";
@@ -155,6 +155,7 @@ export default class ActionManager implements IActionManager {
 
     detach() {
         this.view = null;
+        this.controller = null;
     }
 
     registerActions() {
@@ -163,8 +164,8 @@ export default class ActionManager implements IActionManager {
             let selection = Selection.getSelection();
             return selection && selection.length > 0;
         };
-        let moving = null;
 
+        let moving = null;
 
         this.registerActionInstance({
             id: "delete",
@@ -642,6 +643,14 @@ export default class ActionManager implements IActionManager {
                 return;
             }
             that.controller.onArtboardChanged.raise(data.newArtboard, data.oldArtboard);
+        });
+
+        this.registerAction("setActiveArtboardById", "system", "", function (selection, id) {
+            if (!that.app.activePage) {
+                return;
+            }
+
+            (that.app.activePage as IArtboardPage).setActiveArtboardById(id);
         });
 
         this.registerAction("restoreWorkspaceState", "system", "", function (selection, target) {

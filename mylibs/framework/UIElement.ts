@@ -200,12 +200,26 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             this.refreshMinSizeConstraints();
         }
 
+        if(newProps.useInCode) {
+            this.incrementVersion();
+        }
+
         this.clearRenderingCache();
 
         //raise events after all caches are updated
         super.propsUpdated.apply(this, arguments);
         this.invalidate(this.runtimeProps.ctxl);
     }
+
+    incrementVersion() {
+        this.runtimeProps.version = (this.runtimeProps.version || 0) + 1;
+
+        let parent:any = this.parent;
+        if (parent) {
+            parent.incrementVersion();
+        }
+    }
+
     propsPatched(patchType, propName, item) {
         super.propsPatched.apply(this, arguments);
         this.clearRenderingCache();

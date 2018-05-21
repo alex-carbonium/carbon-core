@@ -386,7 +386,7 @@ class ArtboardPage extends Page implements IArtboardPage, IElementWithCode {
     }
 
     declaration(module: boolean): string {
-        return "";//ArtboardProxyGenerator.generate(this, module);
+        return "";
     }
 
     get codeVersion() {

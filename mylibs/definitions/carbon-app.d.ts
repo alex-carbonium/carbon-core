@@ -447,7 +447,7 @@ declare module "carbon-app" {
 
         isEnabled(action:string, selection:ISelection):boolean;
         invoke(action: string, actionArg?: any): Promise<void>;
-        subscribe(action: string, cb: (action: string, result: any) => void):IDisposable;
+        subscribe(action: string, cb: (action: string, result: any, reserved:any, args:any) => void):IDisposable;
         registerAction(name: string, description: string, category: string, callback: (selection?: ISelection, arg?: string) => any): IAction;
 
         hasAction(action: string): boolean;

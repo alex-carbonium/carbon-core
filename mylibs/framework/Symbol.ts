@@ -202,6 +202,13 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         return -1;
     }
 
+    get version() {
+        if (this.artboard) {
+            return this.artboard.version;
+        }
+        return -1;
+    }
+
     declaration() {
         if (this.artboard) {
             return this.artboard.declaration(true);
