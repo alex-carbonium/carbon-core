@@ -1,6 +1,6 @@
 import TestUtil, { createArtboard, createElement } from "../TestUtil";
 import { assert } from "chai";
-import { IApp, IUIElement, UIElement, Selection, Artboard, ArtboardPage, IArtboardPage, Container, IView, IController } from "carbon-core";
+import { SystemExtensions,  IApp, IUIElement, UIElement, Selection, Artboard, ArtboardPage, IArtboardPage, Container, IView, IController } from "carbon-core";
 
 describe("Context level tests", function () {
     let app: IApp = null;

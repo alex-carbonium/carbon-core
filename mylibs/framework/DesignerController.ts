@@ -21,11 +21,13 @@ import Cursors from "Cursors";
 import PropertyTracker from "./PropertyTracker";
 import { DraggingElement } from "./interactions/DraggingElement";
 import { SelectionModel, setSelection } from "./SelectionModel";
+import IsolationContext from "../IsolationContext";
 
 export default class DesignerController implements IController {
     [name: string]: any;
     app: IApp;
     actionManager: any;
+    public readonly id = "designer";
 
     onArtboardChanged: IEvent2<IArtboard, IArtboard>;
 
@@ -332,7 +334,8 @@ export default class DesignerController implements IController {
         if (!selectedElements.length) {
             return;
         }
-        if (this.view.getLayer(LayerType.Isolation).isActive) {
+
+        if (IsolationContext.isActive) {
             return;
         }
         //when moving helper elements (ImageContent), artboard should not change

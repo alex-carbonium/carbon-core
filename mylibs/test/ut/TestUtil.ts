@@ -1,7 +1,8 @@
-import { app, Artboard, Layer, Context, Workspace, logger, RelayoutQueue, ArtboardPage, AppClass, CoreIntl, backend, SelectFrame, SelectComposite, Container, UIElement, DesignerView, DesignerController, ContextType } from "carbon-core";
+import { app, SystemExtensions, Artboard, Layer, Context, Workspace, logger, RelayoutQueue, ArtboardPage, AppClass, CoreIntl, backend, SelectFrame, SelectComposite, Container, UIElement, DesignerView, DesignerController, ContextType } from "carbon-core";
 
 import TestPlatform from "./TestPlatform";
 import TestFontManager from "./TestFontManager";
+
 
 var defaults = {
     offlineEnabled: false,
@@ -70,6 +71,8 @@ Util.setupApp = function(options){
     };
 
     app.raiseLoaded();
+    new SystemExtensions().initExtensions(app, view, controller);
+    app.actionManager.attach(view, controller);
 
     return {app, view, controller};
 };

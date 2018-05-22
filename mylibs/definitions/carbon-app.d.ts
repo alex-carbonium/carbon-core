@@ -340,6 +340,7 @@ declare module "carbon-app" {
     }
 
     export interface IController {
+        readonly id?:string;
         onmousedown(eventData: IMouseEventData);
         onmousemove(eventData: IMouseEventData);
         onmouseup(eventData: IMouseEventData);

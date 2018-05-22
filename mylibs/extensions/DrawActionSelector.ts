@@ -13,7 +13,7 @@ import Artboard from "framework/Artboard";
 import DefaultShapeSettings from "ui/DefaultShapeSettings";
 import ArtboardToolSettings from "ui/ArtboardToolSettings";
 import ArtboardFrame from "framework/ArtboardFrame";
-import {Types} from "../framework/Defs";
+import { Types } from "../framework/Defs";
 import Path from "framework/Path";
 import Star from "framework/Star";
 import Polygon from "framework/Polygon";
@@ -58,7 +58,7 @@ var registerCommands = function () {
         that._currentAction = that._polylineCreator;
         that.app.allowSelection(false);
         var element = Selection.selectedElement();
-        if(element instanceof Path) {
+        if (element instanceof Path) {
             element.edit(that.view, that.controller);
         } else {
             that._defaultShapeSettings.updateColors();
@@ -194,10 +194,10 @@ var registerCommands = function () {
             //deattach hand tool
             that._currentAction.detach();
             //if it is possible to resume
-            if (that._previousAction && that._previousAction.resume){
+            if (that._previousAction && that._previousAction.resume) {
                 that._previousAction.resume();
             }
-            else{
+            else {
                 actionManager.invoke((Selection.directSelectionEnabled() ? "pointerDirectTool" : "pointerTool") as WorkspaceTool);
             }
             //restore action
@@ -215,7 +215,7 @@ var registerCommands = function () {
             return;
         }
 
-        if (that._currentAction && that._currentAction.pause){
+        if (that._currentAction && that._currentAction.pause) {
             that._currentAction.pause();
         }
 
@@ -233,7 +233,7 @@ var registerCommands = function () {
             return;
         }
 
-        if (that._currentAction && that._currentAction.pause){
+        if (that._currentAction && that._currentAction.pause) {
             that._currentAction.pause();
         }
 
@@ -249,7 +249,7 @@ export default class DrawActionSelector extends ExtensionBase {
     attach(app, view, controller: IController) {
         super.attach.apply(this, arguments);
 
-        if(!(controller instanceof  DesignerController)){
+        if (!controller || controller.id !== "designer") {
             return;
         }
 
@@ -277,7 +277,7 @@ export default class DrawActionSelector extends ExtensionBase {
         this._polygonCreator = new PolygonTool("polygonTool", Types.Polygon);
         this._tools.push(this._polygonCreator);
 
-        this._triangleCreator = new PolygonTool("triangleTool", Types.Polygon, {pointsCount: 3});
+        this._triangleCreator = new PolygonTool("triangleTool", Types.Polygon, { pointsCount: 3 });
         this._tools.push(this._triangleCreator);
 
         this._artboardViewer = new ElementDropTool("artboardViewerTool", Types.ArtboardFrame);
@@ -322,20 +322,20 @@ export default class DrawActionSelector extends ExtensionBase {
         }
     }
 
-    detach(){
+    detach() {
         super.detach();
 
         this.detachAll();
 
-        if(this._pageChangedToken) {
+        if (this._pageChangedToken) {
             this._pageChangedToken.dispose();
         }
 
-        if(this._mouseDownSubscription) {
+        if (this._mouseDownSubscription) {
             this._mouseDownSubscription.dispose();
         }
 
-        if(this._mouseUpSubscription) {
+        if (this._mouseUpSubscription) {
             this._mouseUpSubscription.dispose();
         }
 
@@ -345,7 +345,7 @@ export default class DrawActionSelector extends ExtensionBase {
 
     load() {
         var controller = this.controller;
-        if(controller) {
+        if (controller) {
             this._mouseDownSubscription = controller.mousedownEvent.bind(this, mousedown);
             this._mouseUpSubscription = controller.mouseupEvent.bind(this, mouseup);
         }

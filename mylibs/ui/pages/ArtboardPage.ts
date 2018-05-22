@@ -189,10 +189,10 @@ class ArtboardPage extends Page implements IArtboardPage, IElementWithCode {
         }
     }
 
-    setActiveArtboardById (id:string) {
+    setActiveArtboardById (id:string, doNotTrack?:boolean) {
         var artboard = DataNode.getImmediateChildById(this, id, true);
         if(artboard && artboard instanceof Artboard) {
-            this.setActiveArtboard(artboard);
+            this.setActiveArtboard(artboard, doNotTrack);
             Invalidate.request();
         }
     }

@@ -20,35 +20,35 @@ describe("Selection tests", function () {
         app.dispose();
     });
 
-    it("Must not select artboards together with other elements", function () {
-        // arrange
-        let artboard = app.activePage.getActiveArtboard();
-        let element = new UIElement();
+    // it("Must not select artboards together with other elements", function () {
+    //     // arrange
+    //     let artboard = app.activePage.getActiveArtboard();
+    //     let element = new UIElement();
 
-        app.activePage.add(element);
+    //     app.activePage.add(element);
 
-        // act
-        Selection.makeSelection([element, artboard]);
+    //     // act
+    //     Selection.makeSelection([element, artboard]);
 
-        // assert
-        assert.equal(Selection.elements.length, 1);
-        assert.strictEqual(Selection.elements[0], artboard);
-        assert.equal(controller.currentTool, "artboardTool");
-    });
+    //     // assert
+    //     assert.equal(Selection.elements.length, 1);
+    //     assert.strictEqual(Selection.elements[0], artboard);
+    //     assert.equal(controller.currentTool, "artboardTool");
+    // });
 
-    it("Must not select artboards together with other elements (add to selection)", function () {
-        // arrange
-        let artboard = app.activePage.getActiveArtboard();
-        let element = new UIElement();
+    // it("Must not select artboards together with other elements (add to selection)", function () {
+    //     // arrange
+    //     let artboard = app.activePage.getActiveArtboard();
+    //     let element = new UIElement();
 
-        app.activePage.add(element);
+    //     app.activePage.add(element);
 
-        // act
-        Selection.makeSelection([element]);
-        Selection.makeSelection([artboard], "add");
+    //     // act
+    //     Selection.makeSelection([element]);
+    //     Selection.makeSelection([artboard], "add");
 
-        // assert
-        assert.equal(Selection.elements.length, 1);
-        assert.strictEqual(Selection.elements[0], artboard);
-    });
+    //     // assert
+    //     assert.equal(Selection.elements.length, 1);
+    //     assert.strictEqual(Selection.elements[0], artboard);
+    // });
 });

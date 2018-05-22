@@ -44,7 +44,7 @@ describe("Dragging tests", function () {
         artboard.add(rect3);
 
         // act
-        dragElementOnElement(controller, rect3, group, { ctrlKey: true, altKey: true });
+        dragElementOnElement(view, controller, rect3, group, { ctrlKey: true, altKey: true });
 
         // assert
         assert.equal(artboard.children.length, 2, "Group and other element must still remain");
@@ -68,7 +68,7 @@ describe("Dragging tests", function () {
         artboard.add(image);
 
         // act
-        dragElementOnElement(controller, image, oval, { ctrlKey: true });
+        dragElementOnElement(view, controller, image, oval, { ctrlKey: true });
 
         // assert
         assert.equal(artboard.children.length, 1);

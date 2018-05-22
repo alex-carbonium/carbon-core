@@ -217,7 +217,7 @@ describe("Repeater tests", function () {
                     y: repeater.y + element.height / 2
                 });
             }
-            assert.deepEqual(this.mapChildren(repeater, (x, i) => x.hitTest(points[i], {view:()=>1})), [true, true, true, true], "All elements should be hit testable");
+            assert.deepEqual(this.mapChildren(repeater, (x, i) => x.hitTest(points[i], {scale:()=>1})), [true, true, true, true], "All elements should be hit testable");
         });
     });
 
