@@ -26,7 +26,7 @@ const HandleSize = 14;
 const HomeButtonWidth = 14;
 const HomeButtonHeight = 16;
 
-const DefaultLinkColor = "#1592E6";
+const DefaultLinkColor = "#ff3d7d";
 const HoverLinkColor = "#662d8f";
 const InactiveLinkColor = '#808284';
 
