@@ -1,28 +1,35 @@
-import { IContributions, IAction, ContextBarPosition, IActionManager, IApp, ISelection, IShortcut, IShortcutScheme } from "carbon-core";
+import { IContributions, IAction, ContextBarPosition, IActionManager, IApp, ISelection, IShortcut, IShortcutScheme, IDisposable } from "carbon-core";
 import ActionManager from "../ui/ActionManager";
 import CoreIntl from "../CoreIntl";
 import ContextMenuBuilder from "./ContextMenuBuilder";
 import ShortcutManager from "../ui/ShortcutManager";
 
-export class Contributions implements IContributions {
+export class Contributions implements IContributions, IDisposable {
+    dispose() {
+        if (this._onBuildMenuToken) {
+            this._onBuildMenuToken.dispose();
+            this._onBuildMenuToken = null;
+        }
+    }
     private _contextMenuGroups: { groupName: string, actions: IAction[], contextBarPosition?: ContextBarPosition }[] = [];
     private _contextMenuItems: { actionId: string, contextBarPosition?: ContextBarPosition }[] = [];
-
+    private _onBuildMenuToken: IDisposable;
     constructor(private app: IApp, private actionManager: ActionManager, private shortcutManager: ShortcutManager) {
-        app.onBuildMenu.bind(this, this.onBuildMenu);
+        this._onBuildMenuToken = app.onBuildMenu.bind(this, this.onBuildMenu);
     }
 
     addActions(actions: IAction[]) {
         actions.forEach(action => this.actionManager.registerActionInstance(action));
     }
-    addShortcuts(scheme: IShortcutScheme | IShortcut[]){
+
+    addShortcuts(scheme: IShortcutScheme | IShortcut[]) {
         if (Array.isArray(scheme)) {
             scheme = { windows: scheme, mac: scheme };
         }
         this.shortcutManager.mapScheme(scheme);
     }
     addContextMenuItem(actionId: string, contextBarPosition?: ContextBarPosition) {
-        this._contextMenuItems.push({actionId, contextBarPosition});
+        this._contextMenuItems.push({ actionId, contextBarPosition });
     }
     addContextMenuGroup(groupName: string, actionIds: string[], contextBarPosition?: ContextBarPosition) {
         this._contextMenuGroups.push({

@@ -40,7 +40,6 @@ import logger from "./logger";
 import params from "./params";
 import ArtboardFrame from "framework/ArtboardFrame";
 import { IEvent2, IPage, IUIElement, IApp, IAppProps, IEvent, IWorkspace, ChangeMode, PatchType, ArtboardType, IPrimitiveRoot, ViewState, IJsonNode, IFontManager, IStyleManager, StyleType, IArtboard, FontMetadata, AppSettings, Primitive, IStory, StoryType } from "carbon-core";
-import { Contributions } from "./extensions/Contributions";
 import { getBuiltInExtensions } from "./extensions/BuiltInExtensions";
 import UIElement from "./framework/UIElement";
 import RelayoutEngine from "./framework/relayout/RelayoutEngine";
@@ -189,6 +188,7 @@ class AppClass extends DataNode implements IApp {
 
         this.dataManager = new DataManager(this);
     }
+
 
     init() {
         params.perf && performance.mark("App.Init");

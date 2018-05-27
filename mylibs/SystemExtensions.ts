@@ -6,8 +6,10 @@ var extensions = require("extensions/All");
 
 export default class SystemExtensions {
     private _extensions:any[];
+    private _contributions;
 
     detachExtensions() {
+        this._contributions.dispose();
         if (this._extensions && this._extensions.length) {
             for (var i = 0; i < this._extensions.length; ++i) {
                 this._extensions[i].detach();
@@ -29,8 +31,8 @@ export default class SystemExtensions {
             this._extensions.push(extension);
         }
 
-        var contributions = new Contributions(app, app.actionManager, Workspace.shortcutManager);
+        this._contributions = new Contributions(app, app.actionManager, Workspace.shortcutManager);
         var builtinExtensions = getBuiltInExtensions(app, view, controller);
-        builtinExtensions.forEach(x => x.initialize(contributions));
+        builtinExtensions.forEach(x => x.initialize(this._contributions));
     }
 }
