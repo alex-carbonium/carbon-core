@@ -65,7 +65,7 @@ export default class PreviewController extends ControllerBase {
 
         // this is default
         var action = this.activeStory.children.find(a => {
-            return (a.props.sourceElementId === element.id && a.props.event === eventType);
+            return ((a.props.sourceElementId === element.id || a.props.sourceElementId === element.props.sourceId) && a.props.event === eventType);
         });
 
         if (action) {
