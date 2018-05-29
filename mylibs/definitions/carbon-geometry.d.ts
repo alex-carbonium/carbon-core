@@ -61,6 +61,8 @@ declare module "carbon-geometry" {
         withSize(width: number, height: number): IRect;
         clone(): IRect;
 
+        withMargins(l:number, t:number, r:number, b:number):IRect;
+
         reset(): void;
 
         isValid(): boolean;

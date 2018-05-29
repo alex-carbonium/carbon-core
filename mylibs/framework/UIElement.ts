@@ -903,7 +903,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (strokePosition === StrokePosition.Inside) {
             return 0;
         }
-        return strokeWidth;
+        var miterLimit = this.props.miterLimit || 10;
+        return strokeWidth + miterLimit;
     }
 
     expandRectWithBorder(rect) {
@@ -911,6 +912,10 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (border !== 0) {
             return rect.expand(border);
         }
+        return rect;
+    }
+
+    expandRectWithShadow(rect) {
         return rect;
     }
 

@@ -27,6 +27,11 @@ export default class Rect implements IRect, IPooledObject {
     expand(d) {
         return new Rect(this.x - d, this.y - d, this.width + 2 * d, this.height + 2 * d);
     }
+
+    withMargins(l, t, r, b) {
+        return new Rect(this.x - l, this.y - t, this.width + l + r, this.height + t + b);
+    }
+
     translate(dx, dy) {
         if (dx === 0 && dy === 0) {
             return this;

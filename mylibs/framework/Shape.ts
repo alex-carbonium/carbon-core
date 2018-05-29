@@ -163,6 +163,49 @@ class Shape extends Container {
         context.restore();
     }
 
+    expandRectWithShadow(rect) {
+        var shadows = this.props.shadows;
+        var hasShadow = false;
+        let maxl = 0, maxt = 0, maxb = 0, maxr = 0;
+        if (shadows && shadows.length) {
+            for (var i = 0; i < shadows.length; ++i) {
+                var shadow = shadows[i];
+                if (!shadow.inset && shadow.enabled) {
+                    let l = 0, r = 0, t = 0, b = 0;
+                    if (shadow.x > 0) {
+                        r += shadow.x;
+                    } else {
+                        l -= shadow.x;
+                    }
+
+                    if (shadow.y > 0) {
+                        b += shadow.y;
+                    } else {
+                        t -= shadow.x;
+                    }
+
+                    let s = shadow.spread / 2 + shadow.blur;
+                    l += s;
+                    t += s;
+                    r += s;
+                    b += s;
+
+                    maxl = Math.max(maxl, l);
+                    maxt = Math.max(maxt, t);
+                    maxr = Math.max(maxr, r);
+                    maxb = Math.max(maxb, b);
+                }
+            }
+        }
+
+        if (maxl || maxt || maxb || maxr) {
+            return rect.withMargins(maxl, maxt, maxr, maxb);
+        }
+
+        return rect;
+    }
+
+
     drawOutsetShadows(context, w, h, environment: RenderEnvironment) {
         if (this.clipMask()) {
             return;

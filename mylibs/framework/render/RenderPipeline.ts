@@ -177,9 +177,11 @@ export default class RenderPipeline implements IPooledObject {
     }
 
     private static getCacheRectGlobal(element) {
-        let bbox = element.getBoundingBoxGlobal();
+        var bbox = element.boundaryRect();
+        bbox = element.expandRectWithBorder(bbox);
+        bbox = element.expandRectWithShadow(bbox);
+        bbox = element.transformBoundingRect(bbox, element.globalViewMatrix());
         let clippingRect = bbox;
-        clippingRect = element.expandRectWithBorder(clippingRect);
 
         if (element.props.hitTestBox) {
             var rect = Rect.allocateFromRect(element.props.hitTestBox);
@@ -199,8 +201,8 @@ export default class RenderPipeline implements IPooledObject {
 
         var p1 = environment.pageMatrix.transformPoint2(clippingRect.x, clippingRect.y);
         var p2 = environment.pageMatrix.transformPoint2(clippingRect.x + clippingRect.width, clippingRect.y + clippingRect.height);
-        p1.x = 0 | p1.x;// * environment.contextScale;
-        p1.y = 0 | p1.y;// * environment.contextScale;
+        p1.x = 0 | p1.x;
+        p1.y = 0 | p1.y;
 
         if (!forCache) {
             p1.x = Math.max(0, p1.x);
