@@ -60,7 +60,7 @@ export class ArtboardProxyGenerator {
     static generateImport(artboard) {
         let set = new Set<string>( ["artboard", "navigationController"]);
         artboard.applyVisitorBreadthFirst((e: IUIElement) => {
-            if (e === artboard) {
+            if (e === artboard || !e.useInCode) {
                 return;
             }
             var ret = undefined;
