@@ -60,7 +60,7 @@ export default {
 
         point.type.capture(frame, point, event);
 
-        frame.keyboardToken = keyboard.changed.bind(this, state => this.movePoint(frame, point, frame._mousePoint, state));
+        frame.keyboardToken = keyboard.changed.bind(this, state => this.movePoint(frame, point, event, state));
     },
 
     movePoint: function (frame, point, event, keys = keyboard.state) {
