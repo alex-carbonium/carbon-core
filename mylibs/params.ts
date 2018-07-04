@@ -39,6 +39,15 @@ if (DEBUG){
             error: 'https://carbon-functions-qa1.azurewebsites.net/api/trackError'
         }
     }
+    else if (qs.backend === "prod"){
+        endpoints = {
+            services: '//carbonium.io',
+            storage: '//carbonium.io:9100',
+            cdn: RealCdn,
+            file: '//carbonstorageqa1.blob.core.windows.net/',
+            error: 'https://carbon-functions-qa1.azurewebsites.net/api/trackError'
+        }
+    }
     else{
         if (!endpoints){
             endpoints = {};
