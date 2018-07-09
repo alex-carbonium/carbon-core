@@ -206,7 +206,7 @@ export default class Image extends Container<IImageProps> implements IImage {
     clip(context: IContext) {
         //TODO: add back if necessary
         //if (this.globalViewMatrix().isTranslatedOnly())
-        if (ImageSourceHelper.shouldClip(this.source, this.width, this.height, this.runtimeProps.sourceProps)) {
+        if (ImageSourceHelper.shouldClip(this.source(), this.width, this.height, this.runtimeProps.sourceProps)) {
             context.beginPath();
             let br = this.boundaryRect();
             context.rect(br.x, br.y, br.width, br.height);
