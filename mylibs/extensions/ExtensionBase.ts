@@ -1,12 +1,12 @@
 import {IApp, IView, IController} from "carbon-core";
 
 export default class ExtensionBase {
-    [name: string]: any;
-    app: IApp;
     view: IView;
     controller: IController;
+    
+    private _subscriptions: any[];
 
-    constructor(app){
+    constructor(public app: IApp){
         this._subscriptions = [];
     }
 

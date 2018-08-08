@@ -106,6 +106,7 @@ class AppClass extends DataNode implements IApp {
     resourcePageChanged = EventHelper.createEvent<IPage>();
 
     recentColorsChanged = EventHelper.createEvent<any[]>();
+    disposed: boolean;
 
     private _loaded: IEvent<void>;
     private _unloaded: IEvent<void>;

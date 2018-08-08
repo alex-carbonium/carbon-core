@@ -1,9 +1,7 @@
 import ElementDropTool from "./ElementDropTool";
-import { Types } from "../../framework/Defs";
 import Polygon from "../../framework/Polygon";
 import GlobalMatrixModifier from "../../framework/GlobalMatrixModifier";
 import Point from "../../math/point";
-import Matrix from "../../math/matrix";
 import UserSettings from "../../UserSettings";
 import { ChangeMode, RenderEnvironment } from "carbon-core";
 

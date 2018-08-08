@@ -106,6 +106,7 @@ declare module "carbon-app"{
         defaultShapeSettings: any;
         changedLocally: IEvent<IPrimitive[]>;
         state: any;
+        disposed: boolean;
 
         isInOfflineMode(): boolean;
         isNew(): boolean;
@@ -115,6 +116,10 @@ declare module "carbon-app"{
         mapElementsToLayerMask();
 
         raiseLoaded();
+        clear();
+        isEmpty(): boolean;
+        
+        allowSelection(allow?: boolean);
     }
 
     export const AppClass: IConstructor<IApp>;

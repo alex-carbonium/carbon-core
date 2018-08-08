@@ -254,6 +254,13 @@ class SelectionRect extends UIElement {
 
 export default class DropVisualization extends ExtensionBase {
     private _hint: ResizeHint = null;
+    private _dropLine: DropLine;
+    private _target: any;
+    private _isDropTarget: any;
+    private _dropData: any;
+    private _selection: any;
+    private _selectionIteration: any;
+    private _selectionControls: any;
 
     attach(app, view, controller) {
         if (!(view instanceof DesignerView)) {
@@ -318,7 +325,6 @@ export default class DropVisualization extends ExtensionBase {
     }
 
     onStartDragging(event: IMouseEventData, element: IComposite) {
-        this._dragging = true;
         this._target = null;
         if (element.showResizeHint()) {
             this._hint.start(element);
@@ -330,7 +336,6 @@ export default class DropVisualization extends ExtensionBase {
         this._dropData = null;
         this._target = null;
         this._isDropTarget = false;
-        this._dragging = false;
         this._hint.stop();
         this.updateVisualizations();
         Invalidate.requestInteractionOnly();

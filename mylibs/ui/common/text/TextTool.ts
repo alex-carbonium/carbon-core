@@ -3,13 +3,9 @@
 //TODO: strikethrough is too high due to too high ascent, why?
 
 import Tool from "../Tool";
-import DropVisualization from "../../../extensions/DropVisualization";
 import DragController from "../../../framework/DragController";
 import Text from "../../../framework/text/Text";
-import TextEngine from "../../../framework/text/textengine";
 import Font from "../../../framework/Font";
-import Brush from "../../../framework/Brush";
-import NameProvider from "../../NameProvider";
 import InlineTextEditor from "../../../framework/text/inlinetexteditor";
 import SharedColors from "../../SharedColors";
 import DefaultFormatter from "./DefaultFormatter";
@@ -19,7 +15,7 @@ import Cursor from "../../../framework/Cursor";
 import Invalidate from "../../../framework/Invalidate";
 import { getAverageLuminance } from "../../../math/color";
 import Rect from "../../../math/rect";
-import { IController, ChangeMode, IMouseEventData, VerticalConstraint, HorizontalConstraint, IDisposable, TextMode, IRect, TextAlign, IUIElement } from "carbon-core";
+import { IController, IMouseEventData, VerticalConstraint, HorizontalConstraint, IDisposable, TextMode, IRect, TextAlign, IUIElement, IView, IApp } from "carbon-core";
 import UserSettings from "../../../UserSettings";
 import Point from "../../../math/point";
 import Symbol from "../../../framework/Symbol";
@@ -29,7 +25,6 @@ const CursorInvertThreshold = .4;
 const UpdateTimeout = 1000;
 
 export default class TextTool extends Tool {
-    [name: string]: any;
     private globalTokens: IDisposable[] = [];
     private text: Text;
     /**
@@ -40,10 +35,19 @@ export default class TextTool extends Tool {
 
     private _rangeFormatter: RangeFormatter = null;
     private _defaultFormatter: DefaultFormatter = null;
+    //TODO: use type
+    private _editor: any;
+    private _dragZone: any;
+    private _next: { element: Text, event: IMouseEventData };
+    private _detaching: boolean;
+    private _backgroundCache: object;
+    private _dragController: DragController;
+    private _onAttached: any;
+    private _onElementSelectedToken: IDisposable;
+    private _drawBinding: IDisposable;
 
-    constructor(app) {
-        super("textTool");
-        this._app = app;
+    constructor(app: IApp, view: IView, controller: IController) {
+        super("textTool", app, view, controller);
         this._editor = null;
         this.text = null;
         this._dragZone = null;
@@ -60,34 +64,32 @@ export default class TextTool extends Tool {
         this._dragController.onDragging = this.onDragging;
         this._dragController.onStopped = this.onDragStopped;
 
+        this.globalTokens.push(controller.dblclickEvent.bind(this, this.onDblClickEvent));
+        this.globalTokens.push(controller.onElementDblClicked.bind(this, this.onDblClickElement));
+        this.globalTokens.push(this.app.actionManager.subscribe("enter", this.onEditTextAction));
+
         this._onAttached = null;
     }
 
-    attach(app, view, controller: IController) {
+    attach() {
         this._detaching = false;
-        this._dragController.bindToController(controller);
+        this._dragController.bindToController(this.controller);
         this._onElementSelectedToken = Selection.onElementSelected.bind(this, this.onElementSelected);
-        this._view = view;
-        this._controller = controller;
         this._defaultFormatter = new DefaultFormatter();
-        this._defaultFormatter.initFormatter(this._app);
+        this._defaultFormatter.initFormatter(this.app);
         Selection.requestProperties([this._defaultFormatter]);
         Cursor.setGlobalCursor("text_tool");
-
-        this.globalTokens.push(controller.dblclickEvent.bind(this, this.onDblClickEvent));
-        this.globalTokens.push(controller.onElementDblClicked.bind(this, this.onDblClickElement));
-        this.globalTokens.push(this._app.actionManager.subscribe("enter", this.onEditTextAction));
 
         if (this._onAttached) {
             this._onAttached();
             this._onAttached = null;
         }
 
-        if (view.interactionLayer) {
-            this._drawBinding = view.interactionLayer.ondraw.bindHighPriority(this, this.layerdraw);
+        if (this.view.interactionLayer) {
+            this._drawBinding = this.view.interactionLayer.ondraw.bindHighPriority(this, this.layerdraw);
         }
 
-        controller.currentTool = "textTool";
+        this.controller.currentTool = "textTool";
     }
 
     detach() {
@@ -126,16 +128,16 @@ export default class TextTool extends Tool {
         if (selection.count()) {
             //handle events after active frame
             this._dragController.unbind();
-            this._dragController.bindToController(this._controller);
+            this._dragController.bindToController(this.controller);
         }
     }
     onEditTextAction = () => {
         let text = this.tryGetSupportedElement();
         if (text) {
             text.disableRenderCaching(true);
-            if (this._controller.currentTool !== "textTool") {
+            if (this.controller.currentTool !== "textTool") {
                 this._onAttached = () => { this.beginEdit(text); };
-                this._app.actionManager.invoke("textTool");
+                this.app.actionManager.invoke("textTool");
             }
             else {
                 this.beginEdit(text);
@@ -243,16 +245,16 @@ export default class TextTool extends Tool {
     //occurs in the end to start editing dblclicked element
     onDblClickElement = (e: IMouseEventData, element: IUIElement) => {
         var hit = element;
-        if (hit instanceof Text && this._controller.currentTool !== "textTool") {
+        if (hit instanceof Text && this.controller.currentTool !== "textTool") {
             this._onAttached = () => { this.beginEdit(hit as Text, e); };
-            this._app.actionManager.invoke("textTool");
+            this.app.actionManager.invoke("textTool");
             e.handled = true;
         }
     };
 
     insertText(e, p = {}, fixedSize?: boolean) {
         var text = new Text();
-        this._app.activePage.nameProvider.assignNewName(text);
+        this.app.activePage.nameProvider.assignNewName(text);
 
         var props = {
             content: UserSettings.text.defaultText,
@@ -270,9 +272,9 @@ export default class TextTool extends Tool {
             y -= height / 2;
         }
         text.applyTranslation(Point.create(e.x, y).roundMutable());
-        this.view().dropElement(text);
+        this.view.dropElement(text);
 
-        this._app.activePage.nameProvider.assignNewName(text);
+        this.app.activePage.nameProvider.assignNewName(text);
 
         Selection.makeSelection([text], "new", false, true);
         this.beginEdit(text);
@@ -290,7 +292,7 @@ export default class TextTool extends Tool {
         engine.contentChanged(this.contentChanged);
 
         this._rangeFormatter = new RangeFormatter();
-        this._rangeFormatter.initFormatter(this._app, engine, text);
+        this._rangeFormatter.initFormatter(this.app, engine, text);
         Selection.requestProperties([this._rangeFormatter]);
         Selection.hideFrame(true);
 
@@ -312,7 +314,7 @@ export default class TextTool extends Tool {
 
         Cursor.setGlobalCursor("text");
         this.invalidateLayers();
-        this._controller.inlineEditModeChanged.raise(true, this._editor);
+        this.controller.inlineEditModeChanged.raise(true, this._editor);
 
         this._next = null;
     }
@@ -411,10 +413,10 @@ export default class TextTool extends Tool {
         }
         else if (finalEdit) {
             this._detaching = true;
-            setTimeout(() => this._controller.resetCurrentTool());
+            setTimeout(() => this.controller.resetCurrentTool());
         }
         if (!next) {
-            this._controller.inlineEditModeChanged.raise(false, null);
+            this.controller.inlineEditModeChanged.raise(false, null);
         }
     }
     copyDocumentRangeFont() {
@@ -434,7 +436,7 @@ export default class TextTool extends Tool {
 
         if (fontExtension) {
             var newFont = Font.extend(this.text.props.font, fontExtension);
-            this.text.prepareAndSetProps({font: newFont});
+            this.text.prepareAndSetProps({ font: newFont });
         }
     }
 
@@ -444,7 +446,7 @@ export default class TextTool extends Tool {
         inlineEditor.onRangeFormattingChanged = this._rangeFormatter.onRangeFormattingChanged;
         inlineEditor.onSelectionChanged = this._onSelectionChanged;
         inlineEditor.onDeactivated = finalEdit => this.endEdit(finalEdit);
-        inlineEditor.activate(element.globalViewMatrix(), engine, element.props.font, this._app.fontManager);
+        inlineEditor.activate(element.globalViewMatrix(), engine, element.props.font, this.app.fontManager);
         return inlineEditor;
     }
     private invalidateLayers = () => {
@@ -497,10 +499,10 @@ export default class TextTool extends Tool {
     _pickCaretColor(engine, selection) {
         var coords = engine.getCaretCoords(selection.start);
         var global = this.text.getBoundaryRectGlobal();
-        var x = (coords.l + global.x) * this._view.scale() - this._view.scrollX + .5 | 0;
-        var y = (coords.t + global.y) * this._view.scale() - this._view.scrollY + .5 | 0;
-        var contextScale = this._view.contextScale;
-        var background = this._view.context.getImageData(
+        var x = (coords.l + global.x) * this.view.scale() - this.view.scrollX + .5 | 0;
+        var y = (coords.t + global.y) * this.view.scale() - this.view.scrollY + .5 | 0;
+        var contextScale = this.view.contextScale;
+        var background = this.view.context.getImageData(
             x * contextScale - 1,
             y * contextScale,
             coords.w * contextScale + 2.5 | 0,
@@ -519,7 +521,7 @@ export default class TextTool extends Tool {
 
             var r = this._getDrawRect(this._dragZone);
             context.strokeStyle = SharedColors.Highlight;
-            context.lineWidth = 1 / this._view.scale();
+            context.lineWidth = 1 / this.view.scale();
             context.strokeRect(r.x + .5, r.y + .5, r.width - 1, r.height - 1);
             context.restore();
         }
@@ -532,7 +534,7 @@ export default class TextTool extends Tool {
             context.restore();
         }
         if (this._next) {
-            BoundaryPathDecorator.highlight(this.view(), context, this._next.element);
+            BoundaryPathDecorator.highlight(this.view, context, this._next.element);
         }
     }
     _getDrawRect(zone) {

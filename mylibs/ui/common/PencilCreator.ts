@@ -4,7 +4,7 @@ import Invalidate from "../../framework/Invalidate";
 import Point from "../../math/point";
 import Path from "framework/Path";
 import Tool from "./Tool";
-import {KeyboardState, IMouseEventData, ChangeMode} from "carbon-core";
+import {KeyboardState, IMouseEventData, ChangeMode, IController, IView, IApp} from "carbon-core";
 
 var Line = function (p1, p2) {
     return {
@@ -54,11 +54,13 @@ function DouglasPeucker(PointList, epsilon) {
 };
 
 export default class PencilCreator extends Tool {
-    [name: string]: any;
-    _element: Path;
+    private _element: Path;
+    private points: {x: number, y: number}[];
+    private _position: Point;
+    private _mousepressed: boolean;
 
-    constructor() {
-        super("pencilTool");
+    constructor(app: IApp, view: IView, controller: IController) {
+        super("pencilTool", app, view, controller);
 
         this.points = [];
         this._element = null;
@@ -71,7 +73,7 @@ export default class PencilCreator extends Tool {
 
     mousedown(event) {
         var eventData = { handled: false, x: event.x, y: event.y };
-        this._controller.startDrawingEvent.raise(eventData);
+        this.controller.startDrawingEvent.raise(eventData);
         if (eventData.handled) {
             return true;
         }
@@ -82,8 +84,8 @@ export default class PencilCreator extends Tool {
         event.handled = true;
 
         var element = new Path();
-        this._app.activePage.nameProvider.assignNewName(element);
-        this._app.activePage.add(element, ChangeMode.Self);
+        this.app.activePage.nameProvider.assignNewName(element);
+        this.app.activePage.add(element, ChangeMode.Self);
 
         this._element = element;
 
@@ -92,7 +94,7 @@ export default class PencilCreator extends Tool {
     mouseup(event) {
         this._mousepressed = false;
         event.handled = true;
-        var view = this.view();
+        var view = this.view;
         var scale = view.scale();
 
         var element = this._element;
@@ -127,14 +129,14 @@ export default class PencilCreator extends Tool {
             element.addPoint({ x: points[points.length - 1].x - elementX, y: points[points.length - 1].y - elementY });
 
             element.adjustBoundaries();
-            this.view().dropElement(element);
+            this.view.dropElement(element);
             Invalidate.requestInteractionOnly();
             Selection.makeSelection([element]);
         }
 
         this.points = [];
         if (SystemConfiguration.ResetActiveToolToDefault) {
-            this._controller.resetCurrentTool();
+            this.controller.resetCurrentTool();
         }
     }
     mousemove(event: IMouseEventData) {

@@ -7,7 +7,7 @@ import Invalidate from "../../framework/Invalidate";
 import Brush from "../../framework/Brush";
 import Point from "../../math/point";
 import UserSettings from "UserSettings";
-import { KeyboardState, IMouseEventData, ICoordinate, RenderEnvironment } from "carbon-core";
+import { KeyboardState, IMouseEventData, ICoordinate, RenderEnvironment, IController, IView, IApp, IArtboard } from "carbon-core";
 import Cursors from "Cursors";
 
 function update(x1, y1, x2, y2) {
@@ -36,19 +36,22 @@ function resize(x1, y1, x2, y2) {
 }
 
 export default class LineCreator extends Tool {
-    [name: string]: any;
+    private _mousepressed: boolean;
+    private _startPoint: { x: number; y: number; };
+    private _element: Line;
+    private _hoverArtboard: IArtboard;
 
-    constructor() {
-        super("lineTool");
+    constructor(app: IApp, view: IView, controller: IController) {
+        super("lineTool", app, view, controller);
     }
 
     detach() {
         super.detach.apply(this, arguments);
-        this.view().snapController.clearActiveSnapLines();
+        this.view.snapController.clearActiveSnapLines();
     }
     mousedown(event: IMouseEventData) {
         var eventData = { handled: false, x: event.x, y: event.y };
-        this._controller.startDrawingEvent.raise(eventData);
+        this.controller.startDrawingEvent.raise(eventData);
         if (eventData.handled) {
             return true;
         }
@@ -59,7 +62,7 @@ export default class LineCreator extends Tool {
             var pos:ICoordinate = event;
         }
         else {
-            pos = this.view().snapController.applySnappingForPoint(event);
+            pos = this.view.snapController.applySnappingForPoint(event);
         }
 
         this._startPoint = { x: pos.x, y: pos.y };
@@ -90,13 +93,13 @@ export default class LineCreator extends Tool {
             }
 
             this._element.applyTranslation(pos);
-            this.view().dropElement(this._element);
+            this.view.dropElement(this._element);
             var element = this._element;
             Invalidate.request();
             Selection.makeSelection([element]);
         }
         if (SystemConfiguration.ResetActiveToolToDefault) {
-            this._controller.resetCurrentTool();
+            this.controller.resetCurrentTool();
         }
     }
     mousemove(event: IMouseEventData) {
@@ -110,7 +113,7 @@ export default class LineCreator extends Tool {
         if (artboard !== this._hoverArtboard) {
             this._hoverArtboard = artboard;
             if (artboard) {
-                this.view().snapController.calculateSnappingPoints(artboard);
+                this.view.snapController.calculateSnappingPoints(artboard);
             }
         }
 
@@ -118,7 +121,7 @@ export default class LineCreator extends Tool {
             var pos:ICoordinate = event;
         }
         else {
-            pos = this.view().snapController.applySnappingForPoint(event);
+            pos = this.view.snapController.applySnappingForPoint(event);
         }
 
         if (this._mousepressed) {
@@ -147,7 +150,7 @@ export default class LineCreator extends Tool {
         }
         else if (this._startPoint) {
             context.save();
-            var scale = this.view().scale();
+            var scale = this.view.scale();
             context.fillStyle = UserSettings.path.pointFill;
             context.strokeStyle = UserSettings.path.pointStroke;
             context.lineWidth = 1 / scale;

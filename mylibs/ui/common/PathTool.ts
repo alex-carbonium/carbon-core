@@ -1,15 +1,10 @@
 import Tool from "./Tool";
-import angleAdjuster from "../../math/AngleAdjuster";
 import UIElement from "../../framework/UIElement";
 import Path from "framework/Path";
 import SystemConfiguration from "../../SystemConfiguration";
 import Selection from "../../framework/SelectionModel";
 import Cursor from "../../framework/Cursor";
-import Invalidate from "../../framework/Invalidate";
-import UserSettings from "UserSettings";
-import { KeyboardState, IMouseEventData, IContext, ElementState, ICoordinate, ChangeMode } from "carbon-core";
-import { IPathPoint } from "carbon-geometry";
-import Cursors from "Cursors";
+import { IMouseEventData, ElementState, IApp, IController, IView } from "carbon-core";
 import PathManipulationDecorator from "ui/common/path/PathManipulationDecorator";
 import NullContainer from "framework/NullContainer";
 import Point from "../../math/point";
@@ -22,8 +17,8 @@ export default class PathTool extends Tool {
     _editTextToken: any;
     _cancelBinding: any;
 
-    constructor(app, type, parameters?) {
-        super("pathTool");
+    constructor(app: IApp, view: IView, controller: IController, type: string, parameters?: object) {
+        super("pathTool", app, view, controller);
 
         this._type = type;
         this._parameters = parameters;
@@ -34,10 +29,10 @@ export default class PathTool extends Tool {
     onEditAction() {
         var element = Selection.selectedElement();
         if (element instanceof Path) {
-            element.edit(this.view(), this._controller);
+            element.edit(this.view, this.controller);
             if (!element.closed()) {
                 this._pathElement = element;
-                this._pathElement.addDecorator(new PathManipulationDecorator(this.view(), this._controller));
+                this._pathElement.addDecorator(new PathManipulationDecorator(this.view, this.controller));
             }
         }
     }
@@ -63,7 +58,7 @@ export default class PathTool extends Tool {
 
         setTimeout(() => {
             if (SystemConfiguration.ResetActiveToolToDefault) {
-                this._controller.resetCurrentTool();
+                this.controller.resetCurrentTool();
             }
         }, 0);
     }
@@ -77,12 +72,12 @@ export default class PathTool extends Tool {
 
     _attach() {
         super._attach.apply(this, arguments);
-        this._cancelBinding = this._controller.actionManager.subscribe('cancel', this.cancel.bind(this));
+        this._cancelBinding = this.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
         var element = Selection.selectedElement();
         if (element instanceof Path && element.mode() === ElementState.Edit) {
             this._pathElement = element;
             this._pathElement.removeDecoratorByType(PathManipulationDecorator);
-            this._pathElement.addDecorator(new PathManipulationDecorator(this.view(), this._controller, true));
+            this._pathElement.addDecorator(new PathManipulationDecorator(this.view, this.controller, true));
         } else {
             this._createNewPath();
         }
@@ -111,18 +106,18 @@ export default class PathTool extends Tool {
 
     _createNewPath() {
         this._pathElement = UIElement.fromType(this._type, this._parameters);
-        this._app.activePage.nameProvider.assignNewName(this._pathElement);
-        var defaultSettings = this._app.defaultShapeSettings();
+        this.app.activePage.nameProvider.assignNewName(this._pathElement);
+        var defaultSettings = this.app.defaultShapeSettings();
         if (defaultSettings) {
             this._pathElement.setProps(defaultSettings);
         }
 
         this._changeMode(this._pathElement, ElementState.Edit);
         this._pathElement.removeDecoratorByType(PathManipulationDecorator);
-        this._pathElement.addDecorator(new PathManipulationDecorator(this.view(), this._controller, true));
+        this._pathElement.addDecorator(new PathManipulationDecorator(this.view, this.controller, true));
     }
 
     _changeMode(element, mode: ElementState) {
-        element.switchToEditMode(mode === ElementState.Edit, this.view(), this._controller);
+        element.switchToEditMode(mode === ElementState.Edit, this.view, this.controller);
     }
 }

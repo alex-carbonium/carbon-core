@@ -1,6 +1,5 @@
-import Cursor from "../../framework/Cursor";
 import Tool from "./Tool";
-import { IMouseEventData } from "carbon-core";
+import { IMouseEventData, IController, IView, IApp } from "carbon-core";
 import domUtil from "utils/dom";
 import { SelectFrame } from "../../framework/SelectFrame";
 import Brush from "../../framework/Brush";
@@ -15,11 +14,12 @@ var setCursor = function (zoomout, event: IMouseEventData) {
 };
 
 export default class ZoomTool extends Tool {
-    [name: string]: any;
+    private _zoomFrame: SelectFrame;
+    private _mousepressed: boolean;
+    private _added: boolean;
 
-    constructor(parameters?) {
-        super("zoomTool");
-        this._parameters = parameters;
+    constructor(app: IApp, view: IView, controller: IController) {
+        super("zoomTool", app, view, controller);
         this._zoomFrame = new SelectFrame();
         this._zoomFrame.fill = (Brush.createFromCssColor(UserSettings.zoom.frameColor))
         this._zoomFrame.onComplete.bind(this, this.onZoomRect);
@@ -32,7 +32,7 @@ export default class ZoomTool extends Tool {
     }
 
     onZoomRect(rect, keyboardState) {
-        let view = this.view();
+        let view = this.view;
         let scale = view.getScaleToFitRect(rect, 1);
         view.scale(scale);
 
@@ -41,25 +41,19 @@ export default class ZoomTool extends Tool {
         pt.free();
     }
 
-    attach(app, view, controller, mousePressed) {
-        this._app = app;
-        this._view = view;
-        this._controller = controller;
+    attach(mousePressed?: boolean) {
         this._attach();
         this._mousepressed = mousePressed;
 
-        this._controller.currentTool = "zoomTool";
+        this.controller.currentTool = "zoomTool";
     }
 
     detach() {
         this._detach();
-        this.scrollPoint = null;
-        this.scrollX = null;
-        this.scrollY = null;
         this._mousepressed = false;
-        if(this._added) {
+        if (this._added) {
             this._added = false;
-            this.view().interactionLayer.remove(this._zoomFrame);
+            this.view.interactionLayer.remove(this._zoomFrame);
         }
     }
 
@@ -72,7 +66,7 @@ export default class ZoomTool extends Tool {
     }
 
     click(event: IMouseEventData) {
-        let view = this.view();
+        let view = this.view;
         var sx = view.scrollX,
             sy = view.scrollY;
         var layerX = domUtil.layerX(event.event, view);
@@ -95,7 +89,6 @@ export default class ZoomTool extends Tool {
     mouseup(event: IMouseEventData) {
         event.handled = true;
         this._mousepressed = false;
-        this.scrollPoint = null;
         debug("Released on mouse up");
         if(this._added) {
             this._added = false;
