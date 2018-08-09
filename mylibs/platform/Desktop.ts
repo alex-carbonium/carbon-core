@@ -18,9 +18,6 @@ var debug = require("DebugUtil")("carb:desktop");
 const WHEEL_STEP = 0.05;
 const WHEEL_STEP_BIG = 0.5;
 
-//we know that these are used anyway so no need to spam with requests
-var nonTrackedActions = ["zoomIn", "zoomOut", "copy", "paste", "duplicate", ""];
-
 var onmousewheel = function (e) {
     let eventData = this.controller.createEventData(e);
     this.controller.onmousewheel(eventData);
@@ -375,8 +372,8 @@ export default class Desktop extends All {
         this._onViewBlurred = onViewBlurred.bind(this);
         this._onWindowBlur = onWindowBlur.bind(this);
         this._onWindowResize = onWindowResize.bind(this);
-
-        parentElement.addEventListener('mousewheel', this._onmousewheelHandler, { capture: false, passive: false });
+        
+        parentElement.addEventListener('wheel', this._onmousewheelHandler, { capture: false, passive: false });
         parentElement.addEventListener('mousedown', this._onmousedownHandler, true);
         parentElement.addEventListener('mousemove', this._onmousemoveHandler, true);
         parentElement.addEventListener('dblclick', this._ondblclickHandler);
