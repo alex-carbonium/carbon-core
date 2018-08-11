@@ -1,10 +1,7 @@
 import Tool from "../common/Tool";
 import DropVisualization from "../../extensions/DropVisualization";
 import { createUUID } from "../../util";
-import {
-    ActionType,
-    ActionEvents
-} from "framework/Defs";
+import { ActionType} from "framework/Defs";
 import * as ActionHelper from "./ActionHelper";
 import Matrix from "../../math/matrix";
 import { areRectsIntersecting, adjustRectSize, isPointInRect } from "../../math/math";
@@ -13,14 +10,10 @@ import Invalidate from "framework/Invalidate";
 import RequestAnimationSettings from "./RequestAnimationSettings";
 import StoryAction from "../../stories/StoryAction";
 import Link from "./Link";
-
 import DataNode from "framework/DataNode";
-import {
-    IUIElement, IMouseEventData, KeyboardState, PrimitiveType, IContext, InteractionType, RenderEnvironment, StoryType
-} from "carbon-core";
-
-import {AnimationType, EasingType} from "carbon-runtime";
-import Brush from "../../framework/Brush";
+import { IUIElement, PrimitiveType, InteractionType, StoryType, IApp, IView, IController } from "carbon-core";
+import {AnimationType, EasingType, IDisposable} from "carbon-runtime";
+import Story from "../../stories/Story";
 
 const HandleSize = 14;
 const HomeButtonWidth = 14;
@@ -51,14 +44,33 @@ function isVerticalPoint(point) {
 }
 
 export default class LinkingTool extends Tool {
-    [name: string]: any;
-
-    constructor() {
-        super("protoTool");
+    private _activeStory: Story;
+    private connections: any;
+    private _currentPoint: { _x?: any; _y?: any; x: any; y: any; };
+    private _mousepressed: boolean;
+    private _startPoint: { _x?: any; _y?: any; x: any; y: any; };
+    private _modifyingConnection: any;
+    private _sourceElement: any;
+    private _onFirstMove: () => void;
+    private _selection: any;
+    private _handles: any;
+    private _hoverArboardHomeButton: any;
+    private _hoverHandle: any;
+    private _hoverConnectionTo: any;
+    private _target: IUIElement;
+    private _currentArtboard: any;
+    private _activeStoryChangedToken: any;
+    private _changedToken: any;
+    private _elementSelectedToken: IDisposable;
+    private _draggingElement: boolean;
+    private _viewport: any;
+    
+    constructor(app: IApp, view: IView, controller: IController) {
+        super("protoTool", app, view, controller);
     }
 
     _pointToHomeScreenArtboard(event, scale) {
-        var artboards = this._app.activePage.getAllArtboards();
+        var artboards = this.app.activePage.getAllArtboards();
         for (var i = 0; i < artboards.length; ++i) {
             let artboard = artboards[i];
             var x = artboard.x;
@@ -77,7 +89,7 @@ export default class LinkingTool extends Tool {
         var artboard = this._pointToHomeScreenArtboard(event, scale);
 
         if (artboard && this._activeStory) {
-            this._activeStory.setProps({ homeScreen: [this._app.activePage.id, artboard.id] });
+            this._activeStory.setProps({ homeScreen: [this.app.activePage.id, artboard.id] });
             Invalidate.requestInteractionOnly();
             return true;
         }
@@ -90,7 +102,7 @@ export default class LinkingTool extends Tool {
             return;
         }
 
-        var scale = this._view.scale();
+        var scale = this.view.scale();
         if (this._activeStory.props.type === StoryType.Prototype) {
             this._handlePrototypeMouseDownEvent(scale, event);
         } else {
@@ -103,7 +115,6 @@ export default class LinkingTool extends Tool {
                 var connection = c.connection;
                 var from = connection.from;
                 var to = connection.to;
-                var index = i;
                 if (isPointInRect(this._getCupRectForPoint(from, scale), event)
                     || isPointInRect(this._getCupRectForPoint(to, scale), event)) {
                     this._currentPoint = { x: event.x, y: event.y };
@@ -151,8 +162,7 @@ export default class LinkingTool extends Tool {
     }
 
     _handleFlowMouseDownEvent(scale: number, event: any) {
-        var size = HandleSize / scale;
-        var page = this._app.activePage;
+        var page = this.app.activePage;
         var artboards = page.getAllArtboards();
         for (var i = 0; i < artboards.length; ++i) {
             let artboard = artboards[i];
@@ -167,7 +177,7 @@ export default class LinkingTool extends Tool {
         }
     }
 
-    click(event: IMouseEventData) {
+    click() {
         // this method should be empty
     }
 
@@ -176,7 +186,7 @@ export default class LinkingTool extends Tool {
         if (!this._activeStory) {
             return;
         }
-        var scale = this._view.scale();
+        var scale = this.view.scale();
         for (var i = this.connections.length - 1; i >= 0; --i) {
             var connection = this.connections[i];
             var to = connection.connection.to;
@@ -216,8 +226,8 @@ export default class LinkingTool extends Tool {
     }
 
     _linkToArtboard(point) {
-        var page = this._app.activePage;
-        var targetArgtboard = page.getArtboardAtPoint(point, this.view());
+        var page = this.app.activePage;
+        var targetArgtboard = page.getArtboardAtPoint(point, this.view);
         var activeStory = this._activeStory;
         if (!activeStory) {
             return;
@@ -346,7 +356,7 @@ export default class LinkingTool extends Tool {
                 delete this._onFirstMove;
             }
         }
-        var scale = this._view.scale();
+        var scale = this.view.scale();
 
         if (this._mousepressed) {
             this._currentPoint = { _x: x, _y: y, x: x, y: y };
@@ -358,8 +368,8 @@ export default class LinkingTool extends Tool {
             this._highlightHoverElements(event, scale);
         }
 
-        var target = this._app.activePage.hitElement(event, this.view(), null, Selection.directSelectionEnabled());
-        if (target === this._app.activePage) {
+        var target = this.app.activePage.hitElement(event, this.view, null, Selection.directSelectionEnabled());
+        if (target === this.app.activePage) {
             target = null;
         }
 
@@ -383,7 +393,7 @@ export default class LinkingTool extends Tool {
     }
 
     _findNearByHandles(event: any, scale: number) {
-        var page = this._app.activePage;
+        var page = this.app.activePage;
         var artboards = page.getAllArtboards();
         var handles = [];
 
@@ -419,24 +429,24 @@ export default class LinkingTool extends Tool {
         }
     }
 
-    attach(view, controller) {
-        super.attach.apply(this, arguments);
+    attach() {
+        super.attach();
         this._handles = [];
-        this._view.prototyping(true);
+        this.view.prototyping(true);
         this._currentArtboard = null;
 
-        this._activeStory = this._app.activeStory();
-        this._activeStoryChangedToken = this._app.activeStoryChanged.bind(this, () => {
-            this._activeStory = this._app.activeStory();
+        this._activeStory = this.app.activeStory();
+        this._activeStoryChangedToken = this.app.activeStoryChanged.bind(this, () => {
+            this._activeStory = this.app.activeStory();
             this._refreshConnections();
             Invalidate.requestInteractionOnly();
 
             if (this._activeStory && this._activeStory.props.homeScreen) {
-                var page = this._app.setActivePageById(this._activeStory.props.homeScreen[0]);
+                var page = this.app.setActivePageById(this._activeStory.props.homeScreen[0]);
                 if (page) {
                     var artboard = page.findNodeByIdBreadthFirst(this._activeStory.props.homeScreen[1]);
                     if (artboard) {
-                        this.view().ensureCentered([artboard]);
+                        this.view.ensureCentered([artboard]);
                     }
                 }
             }
@@ -447,7 +457,7 @@ export default class LinkingTool extends Tool {
             this._currentArtboard = selectedElement.primitiveRoot();
         }
 
-        this._changedToken = this._app.changed.bind(this, this._onAppChanged)
+        this._changedToken = this.app.changed.bind(this, this._onAppChanged)
         Selection.refreshSelection();
         this._elementSelected(Selection.selectComposite());
         this._elementSelectedToken = Selection.onElementSelected.bind(this, this._elementSelected);
@@ -458,7 +468,7 @@ export default class LinkingTool extends Tool {
 
     detach() {
         super.detach();
-        this._view.prototyping(false);
+        this.view.prototyping(false);
         if (this._changedToken) {
             this._changedToken.dispose();
             this._changedToken = null;
@@ -478,7 +488,8 @@ export default class LinkingTool extends Tool {
         var action = this._activeStory.children.find(a => a.props.sourceElementId === e.id);
 
         if (action) {
-            var artboard = DataNode.getImmediateChildById(page, action.targetArtboardId, true);
+            //TODO: strong typing
+            var artboard = DataNode.getImmediateChildById(page, action['targetArtboardId'], true);
             return artboard;
         }
     }
@@ -495,11 +506,11 @@ export default class LinkingTool extends Tool {
             return;
         }
 
-        var page = this._app.activePage;
+        var page = this.app.activePage;
 
         activeStory.children.forEach(action => {
             var targetArtboard = DataNode.getImmediateChildById(page, action.props.targetArtboardId, true);
-            var root = this._app.findNodeByIdBreadthFirst(action.props.sourceRootId);
+            var root = this.app.findNodeByIdBreadthFirst(action.props.sourceRootId);
             if (root) {
                 var sourceElement = root.findNodeByIdBreadthFirst(action.props.sourceElementId);
                 if (targetArtboard && sourceElement) {
@@ -539,7 +550,6 @@ export default class LinkingTool extends Tool {
 
     _rebalanceConnections() {
         var pointsMap = {};
-        let BalanceMargin = 50;
         for (var c of this.connections) {
             var from = c.connection.from;
             var to = c.connection.to;
@@ -615,7 +625,7 @@ export default class LinkingTool extends Tool {
 
     _addHandleToSelectedElement() {
         this._handles = [];
-        var scale = this._view.scale();
+        var scale = this.view.scale();
         if (this._selection && this._activeStory) {
             var selectionId = this._selection.id;
             var action = this._activeStory.children.find(a => a.props.sourceElementId === selectionId);
@@ -640,8 +650,7 @@ export default class LinkingTool extends Tool {
     }
 
     _onAppChanged(primitives) {
-        var activePageId = this._app.activePage.id;
-        var refreshState = false;
+        var activePageId = this.app.activePage.id;
 
         var propChanges = primitives.filter(p => p.path[0] === activePageId && p.type === PrimitiveType.DataNodeSetProps);
 
@@ -898,17 +907,17 @@ export default class LinkingTool extends Tool {
     }
 
     _renderHomeScreenButton(context, scale) {
-        var page = this._app.activePage;
+        var page = this.app.activePage;
         var artboards = page.getAllArtboards();
         for (var i = 0; i < artboards.length; ++i) {
             let artboard = artboards[i];
             if (areRectsIntersecting(this._viewport, artboard.getBoundingBoxGlobal())) {
-                this._drawButtonForArtboard(artboard, scale, context, page);
+                this._drawButtonForArtboard(artboard, scale, context);
             }
         }
     }
 
-    _drawButtonForArtboard(artboard, scale, context, page) {
+    _drawButtonForArtboard(artboard, scale, context) {
         var x = artboard.x;
         var y = artboard.y;
         var w = 7 / scale;
@@ -934,22 +943,22 @@ export default class LinkingTool extends Tool {
         context.restore();
     };
 
-    layerdraw(context, environment: RenderEnvironment) {
+    layerdraw(context) {
         if (!this._activeStory || this._draggingElement) {
             return;
         }
 
         context.save();
-        var view = this._view;
+        var view = this.view;
         var scale = view.scale();
         this._viewport = view.viewportRect();
 
         if (this._mousepressed && this._currentPoint) {
             // render new (dragging) arrow
             this._renderNewArrow(context, scale);
-            this._target && DropVisualization.highlightElement(this.view(), context, this._target, null, HoverLinkColor);
+            this._target && DropVisualization.highlightElement(this.view, context, this._target, null, HoverLinkColor);
         } else if (this._target) {
-            DropVisualization.highlightElement(this.view(), context, this._target, null, DefaultLinkColor);
+            DropVisualization.highlightElement(this.view, context, this._target, null, DefaultLinkColor);
         }
 
         if (this.connections.length) {

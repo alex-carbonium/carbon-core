@@ -1,6 +1,5 @@
-import Cursor from "../../framework/Cursor";
 import Tool from "./Tool";
-import {IMouseEventData} from "carbon-core";
+import {IMouseEventData, IController, IView, IApp} from "carbon-core";
 
 var debug = require("../../DebugUtil")("carb:handTool");
 
@@ -17,32 +16,32 @@ var setCursor = function (open, event: IMouseEventData) {
 };
 
 export default class HandTool extends Tool {
-    [name: string]: any;
+    private _mousepressed: boolean;
+    private scrollPoint: { x: number; y: number; };
 
-    constructor(parameters?) {
-        super("handTool");
-        this._parameters = parameters;
+    constructor(app: IApp, view: IView, controller: IController) {
+        super("handTool", app, view, controller);
     }
     pause() {
     }
     resume() {
     }
 
-    attach(app, view, controller, mousePressed) {
-        this._app = app;
-        this._view = view;
-        this._controller = controller;
-        this._attach();
-        this._mousepressed = mousePressed;
-        setCursor.call(this, !mousePressed, event);
-
-        this._controller.currentTool = "handTool";
+    updateMousePressed() {                
     }
+
+    attach(mousePressed?: boolean) {
+        this._attach();        
+
+        this._mousepressed = mousePressed;
+        this.controller.currentTool = "handTool";
+        
+        //TODO: event missing
+        //setCursor.call(this, !mousePressed, event);
+    }    
     detach() {
         this._detach();
         this.scrollPoint = null;
-        this.scrollX = null;
-        this.scrollY = null;
         this._mousepressed = false;
     }
     mousedown(event: IMouseEventData) {
@@ -64,9 +63,7 @@ export default class HandTool extends Tool {
         if (this._mousepressed) {
             if (!this.scrollPoint) { //if tool is used with other tool. should be here
                 setStartingScroll.call(this, event);
-            }
-
-            var view = this.view();
+            }        
 
             var x = event['event'].screenX;
             var y = event['event'].screenY;
@@ -74,8 +71,8 @@ export default class HandTool extends Tool {
             var dy = this.scrollPoint.y - y;
 
             this.scrollPoint = { x: x, y: y };
-            view.scrollX = (view.scrollX + dx);
-            view.scrollY = (view.scrollY + dy);
+            this.view.scrollX = (this.view.scrollX + dx);
+            this.view.scrollY = (this.view.scrollY + dy);
         }
         setCursor.call(this, !this._mousepressed, event);
         event.handled = true;

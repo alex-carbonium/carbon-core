@@ -1,18 +1,18 @@
 import ExtensionBase from "./ExtensionBase";
 import RelayoutQueue from "../framework/relayout/RelayoutQueue";
 import CommandManager from "../framework/commands/CommandManager";
+import { IApp } from "carbon-core";
 
 export default class AutoSave extends ExtensionBase {
     private static checked: boolean = false;
 
-    constructor(app) {
+    constructor(app: IApp) {
         super(app);
-        this._app = app;
-        this._app.onLoad(this.checkBackups);
+        this.app.onLoad(this.checkBackups);
     }
 
     private restoreUnsaved(backup) {
-        var app = this._app;
+        var app = this.app;
         app.beginUpdate();
 
         app.state.setExternalChange(true);
@@ -47,25 +47,25 @@ export default class AutoSave extends ExtensionBase {
         viewModel.loadLocalChanges.clearSubscribers();
         viewModel.loadLastSavedVersion.clearSubscribers();
 
-        this.clearAutosavedVersion(this._app.id || this._app.projectType());
+        this.clearAutosavedVersion(this.app.id);
     }
 
     private clearAutosavedVersion(id) {
-        this._app.offlineModel.clearSyncLogForProject(id);
+        this.app.offlineModel.clearSyncLogForProject(id);
     }
 
     private initIfEmptyProject() {
-        if (this._app.isEmpty()) {
-            this._app.addNewPage();
-            this._app.state.isDirty(false);
+        if (this.app.isEmpty()) {
+            this.app.addNewPage();
+            this.app.state.isDirty(false);
         }
 
-        if (!this._app.activePage) {
-            var page = this._app.pages[0];
-            this._app.setActivePage(page);
+        if (!this.app.activePage) {
+            var page = this.app.pages[0];
+            this.app.setActivePage(page);
         }
 
-        this._app.relayout();
+        this.app.relayout();
         CommandManager.clear();
     }
 
@@ -76,19 +76,19 @@ export default class AutoSave extends ExtensionBase {
 
         AutoSave.checked = true;
 
-        if (!this._app.id) {
+        if (!this.app.id) {
             this.initIfEmptyProject();
             return Promise.resolve();
         }
 
-        return this._app.offlineModel.getBackups(this._app.id).then(backups => {
-            if (!backups.length || this._app.disposed) {
+        return this.app.offlineModel.getBackups(this.app.id).then(backups => {
+            if (!backups.length || this.app.disposed) {
                 return;
             }
 
-            if (this._app.serverless()) {
+            if (this.app.serverless()) {
                 this.restoreUnsaved(backups[backups.length - 1]);
-                this._app.actionManager.invoke("restoreWorkspaceState");
+                this.app.actionManager.invoke("restoreWorkspaceState");
             }
             else {
                 // var dialog = new Dialog(new LoadUnsavedChangesDialog(), {
@@ -105,7 +105,7 @@ export default class AutoSave extends ExtensionBase {
                 // });
             }
         }).finally(() => {
-            if (!this._app.disposed) {
+            if (!this.app.disposed) {
                 this.initIfEmptyProject();
             }
         });

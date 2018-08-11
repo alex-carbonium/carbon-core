@@ -4,24 +4,25 @@ import Invalidate from "../../framework/Invalidate";
 import ObjectFactory from "../../framework/ObjectFactory";
 import Cursor from "../../framework/Cursor";
 import Artboard from "../../framework/Artboard";
-import Brush from "../../framework/Brush";
 import Rect from "../../math/rect";
 import Point from "../../math/point";
-import Matrix from "../../math/matrix";
 import UIElement from "../../framework/UIElement";
 import Tool from "./Tool";
-import { IMouseEventData, KeyboardState, ElementState, WorkspaceTool, InteractionType, RenderEnvironment } from "carbon-core";
+import { IMouseEventData, ElementState, WorkspaceTool, InteractionType, RenderEnvironment, IController, IView, IApp } from "carbon-core";
 
 require("framework/ArtboardFrame");// don't remove from here even if not used
 
 export default class ElementDropTool extends Tool {
-    [name: string]: any;
+    private _point: Point;
+    private _mousepressed: boolean;
+    private _hoverArtboard: any;
+    private _element: any;
+    private _startPoint: Readonly<Point>;
+    private _cursorNotMoved: boolean;
+    
+    constructor(toolId: WorkspaceTool, app: IApp, view: IView, controller: IController, private type: string, private parameters?: object) {
+        super(toolId, app, view, controller);
 
-    constructor(toolId: WorkspaceTool, type, parameters?) {
-        super(toolId);
-
-        this._type = type;
-        this._parameters = parameters;
         this._point = new Point(0, 0);
     }
     attach() {
@@ -31,7 +32,7 @@ export default class ElementDropTool extends Tool {
     detach() {
         super.detach.apply(this, arguments);
         this._mousepressed = false;
-        this.view().snapController.clearActiveSnapLines();
+        this.view.snapController.clearActiveSnapLines();
         Cursor.removeGlobalCursor();
 
         this.changeMode(ElementState.Resize);
@@ -51,10 +52,9 @@ export default class ElementDropTool extends Tool {
         this._mousepressed = true;
         this._prepareMousePoint(event);
 
-        this._startPoint = { x: this._point.x, y: this._point.y };
-        this._nextPoint = { x: this._point.x, y: this._point.y };
+        this._startPoint = Point.create(this._point.x, this._point.y);
         event.handled = true;
-        this._element = ObjectFactory.fromType(this._type);
+        this._element = ObjectFactory.fromType(this.type);
         App.Current.activePage.nameProvider.assignNewName(this._element);
         this._cursorNotMoved = true;
 
@@ -63,8 +63,8 @@ export default class ElementDropTool extends Tool {
             this._element.setProps(defaultSettings);
         }
 
-        if (this._parameters) {
-            this._element.setProps(this._parameters);
+        if (this.parameters) {
+            this._element.setProps(this.parameters);
         }
 
         Selection.makeSelection([this._element]);
@@ -92,11 +92,11 @@ export default class ElementDropTool extends Tool {
 
             event.controller.raiseInteractionStopped(InteractionType.Resizing, event);
 
-            this.view().dropElement(this._element);
+            this.view.dropElement(this._element);
 
             let artboard = this._element.findAncestorOfType(Artboard);
             if (artboard) {
-                this._app.activePage.setActiveArtboard(artboard);
+                this.app.activePage.setActiveArtboard(artboard);
             }
 
             this.changeMode(ElementState.Edit);
@@ -120,7 +120,7 @@ export default class ElementDropTool extends Tool {
         if (artboard !== this._hoverArtboard) {
             this._hoverArtboard = artboard;
             if (artboard) {
-                this.view().snapController.calculateSnappingPoints(artboard);
+                this.view.snapController.calculateSnappingPoints(artboard);
             }
         }
 
@@ -155,7 +155,7 @@ export default class ElementDropTool extends Tool {
         }
     }
 
-    updateElement(element, startPoint: Point, endPoint: Point){
+    updateElement(element, startPoint: Readonly<Point>, endPoint: Point){
         var x = Math.min(startPoint.x, endPoint.x),
             y = Math.min(startPoint.y, endPoint.y),
             w = Math.abs(startPoint.x - endPoint.x),
@@ -170,7 +170,7 @@ export default class ElementDropTool extends Tool {
         this._point.set(event.x, event.y);
         var round = true;
         if (!event.ctrlKey) {
-            var snapped = this.view().snapController.applySnappingForPoint(this._point);
+            var snapped = this.view.snapController.applySnappingForPoint(this._point);
             if (snapped.x === this._point.x && snapped.y === this._point.y) {
                 round = true;
             }

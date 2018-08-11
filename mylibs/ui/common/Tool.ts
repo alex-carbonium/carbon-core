@@ -1,26 +1,18 @@
-import Selection from "../../framework/SelectionModel"
-import Invalidate from "../../framework/Invalidate";
-import { IApp, IView, IController, IMouseEventData, KeyboardState, IDisposable, WorkspaceTool, InteractionType, IComposite, RenderEnvironment } from "carbon-core";
+import { IApp, IView, IController, IMouseEventData, IDisposable, WorkspaceTool, InteractionType, IComposite, RenderEnvironment } from "carbon-core";
 
 //TODO: if selection is made in layers after tool is set, active frame starts to react to mouse events before the tool
 export default class Tool {
-    protected _app: IApp;
-    protected _view: IView;
-    protected _controller: IController;
     _toolId: WorkspaceTool;
     _disposables: IDisposable[];
 
-    constructor(toolId: WorkspaceTool) {
+    constructor(toolId: WorkspaceTool, public app: IApp, public view: IView, public controller: IController) {
         this._toolId = toolId;
         this._disposables = [];
     }
 
-    attach(app, view, controller: IController, mousePressed) {
-        this._app = app;
-        this._view = view;
-        this._controller = controller;
+    attach() {
         this._attach();
-        this._controller.currentTool = this._toolId;
+        this.controller.currentTool = this._toolId;
     }
     detach() {
         this._detach();
@@ -30,10 +22,10 @@ export default class Tool {
     }
     resume() {
         this._attach();
-        this._controller.currentTool = this._toolId;
+        this.controller.currentTool = this._toolId;
     }
     _attach() {
-        var controller = this._controller;
+        var controller = this.controller;
         if (controller) {
             this.registerForDisposal(controller.mousedownEvent.bindHighPriority(this, this.mousedown));
             this.registerForDisposal(controller.mouseupEvent.bindHighPriority(this, this.mouseup));
@@ -43,8 +35,8 @@ export default class Tool {
             this.registerForDisposal(controller.interactionStarted.bindHighPriority(this, this.onInteractionStarted));
             this.registerForDisposal(controller.interactionStopped.bindHighPriority(this, this.onInteractionStopped));
         }
-        if (this._view.interactionLayer) {
-            this.registerForDisposal(this._view.interactionLayer.ondraw.bind(this, this.layerdraw));
+        if (this.view.interactionLayer) {
+            this.registerForDisposal(this.view.interactionLayer.ondraw.bind(this, this.layerdraw));
         }
 
         //allow the tool to update cursor immediately
@@ -59,9 +51,6 @@ export default class Tool {
         this._disposables.push(disposable);
     }
 
-    view() {
-        return this._view;
-    }
     mousedown(event: IMouseEventData) {
     }
     mouseup(event: IMouseEventData) {
