@@ -10,7 +10,7 @@ import { isRectInRect, areRectsIntersecting } from "../math/math";
 //import stopwatch from "../Stopwatch";
 import Constraints from "./Constraints";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
-import params from "params";
+import params from "../params";
 import { Event as RuntimeEvent } from "../code/runtime/Event"
 import {
     Types,

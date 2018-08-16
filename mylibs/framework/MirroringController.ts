@@ -1,10 +1,10 @@
-import EventHelper from "framework/EventHelper";
-import domUtil from "utils/dom";
+import EventHelper from "./EventHelper";
+import domUtil from "../utils/dom";
 import TouchHelper from "./TouchHelper";
-import PropertyTracker from "framework/PropertyTracker";
-import DataNode from "framework/DataNode";
+import PropertyTracker from "./PropertyTracker";
+import DataNode from "./DataNode";
 import Selection from "./SelectionModel";
-import { MirrorViewMode } from "framework/Defs";
+import { MirrorViewMode } from "./Defs";
 import { IController, WorkspaceTool, IComposite, IMouseEventData, IArtboard, IUIElement, IEvent2, IActionManager, IApp, IContainer, IPointerEventData } from "carbon-core";
 import { InteractionType } from "carbon-app";
 import { choosePasteLocation } from "./PasteLocator";

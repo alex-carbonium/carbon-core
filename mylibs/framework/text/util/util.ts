@@ -1,27 +1,4 @@
-import FontInfo from "../font/fontinfo";
-
 import { FontStyle } from "carbon-basics";
-
-export function event() {
-    var handlers = [];
-
-    var subscribe: any = function (handler) {
-        handlers.push(handler);
-    };
-
-    subscribe.fire = function() {
-        var args = Array.prototype.slice.call(arguments, 0);
-        handlers = handlers.filter(function(handler) {
-            return handler.apply(null, args) !== false;
-        });
-    };
-
-    subscribe.clearHandlers = function () {
-        handlers = [];
-    }
-
-    return subscribe;
-};
 
 export function cssProperty(string, prop, numeric?: boolean) {
     var regex = new RegExp('\\b(?:' + prop + '\\s*?:\\s*([^;>]*?)(?=[;">}]|$))');
@@ -130,14 +107,6 @@ export function deCRLFify(text) {
     text = text.replace('\r\n', '\n');
     text = text.replace('\r', '\n'); // <- by doing so, we don't add or lose any newlines
     return text;
-};
-
-export function derive(prototype, methods) {
-    var properties = {};
-    Object.keys(methods).forEach(function(name) {
-        properties[name] = { value: methods[name] };
-    });
-    return Object.create(prototype, properties);
 }
 
 export function inherit(target, base) {

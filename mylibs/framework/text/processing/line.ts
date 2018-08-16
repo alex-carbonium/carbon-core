@@ -1,26 +1,46 @@
-import Node from "../primitives/node";
-import Rect from "../primitives/rect";
-import PositionedWord from "./positionedword";
-import {inherit} from "../util/util";
+import { TextNode } from "../primitives/node";
+import { TextAlign } from "carbon-basics";
+import Rect from "../../../math/rect";
+import { PositionedWord } from "./positionedword";
+import { ITextLine } from "carbon-text";
 
-import {TextAlign} from "carbon-basics";
+/*  A Line is returned by the wrap function. It contains an array of PositionedWord objects that are
+all on the same physical line in the wrapped text.
 
-    /*  A Line is returned by the wrap function. It contains an array of PositionedWord objects that are
-    all on the same physical line in the wrapped text.
+ It has a width (which is actually the same for all lines returned by the same wrap). It also has
+ coordinates for baseline, ascent and descent. The ascent and descent have the maximum values of
+ the individual words' ascent and descent coordinates.
 
-     It has a width (which is actually the same for all lines returned by the same wrap). It also has
-     coordinates for baseline, ascent and descent. The ascent and descent have the maximum values of
-     the individual words' ascent and descent coordinates.
+It has methods:
 
-    It has methods:
+    draw(ctx, x, y)
+              - Draw all the words in the line applying the specified (x, y) offset.
+    bounds()
+              - Returns a Rect for the bounding box.
+*/
 
-        draw(ctx, x, y)
-                  - Draw all the words in the line applying the specified (x, y) offset.
-        bounds()
-                  - Returns a Rect for the bounding box.
- */
 
-    function Line(doc, left, width, baseline, ascent, descent, words, ordinal) {
+export class Line extends TextNode implements ITextLine {
+    doc = null;
+    left = null;
+    width = NaN;
+    baseline = 0;
+    ascent = 0;
+    descent = 0;
+    minY = Number.MAX_VALUE;
+    maxY = -Number.MAX_VALUE;
+    minX = Number.MAX_VALUE;
+    maxX = -Number.MAX_VALUE;
+    ordinal = 0;
+    align = null;
+    lineSpacing = 1;
+    positionedWords: any;
+    actualWidth: number;
+    length: number;
+
+    constructor(doc, left, width, baseline, ascent, descent, words, ordinal) {
+        super('line', doc, left)
+
         var align = words[0].align();
 
         this.doc = doc; // should be called frame, or else switch to using parent on all nodes
@@ -35,13 +55,13 @@ import {TextAlign} from "carbon-basics";
 
         var actualWidth = 0;
 
-        words.forEach(function(word) {
+        words.forEach((word) => {
             this.minX = Math.min(word.minX + actualWidth, this.minX);
             this.maxX = Math.max(word.maxX + actualWidth, this.maxX);
             actualWidth += word.width;
-            this.maxY = Math.max(word.maxY,this.maxY);
-            this.minY = Math.min(word.minY,this.minY);
-        }.bind(this));
+            this.maxY = Math.max(word.maxY, this.maxY);
+            this.minY = Math.min(word.minY, this.minY);
+        });
         actualWidth -= words[words.length - 1].space.width;
 
         var x = 0, spacing = 0;
@@ -66,62 +86,38 @@ import {TextAlign} from "carbon-basics";
         if (this.maxX !== -Number.MAX_VALUE)
             this.maxX += x;
 
-        Object.defineProperty(this, 'positionedWords', {
-            value: words.map(function(word) {
-                var wordLeft = x;
-                x += (word.width + spacing);
-                var wordOrdinal = ordinal;
-                ordinal += (word.text.length + word.space.length);
-                return new PositionedWord(word, this, wordLeft, wordOrdinal, word.width + spacing);
-            }.bind(this))
+        this.positionedWords = words.map(word => {
+            var wordLeft = x;
+            x += (word.width + spacing);
+            var wordOrdinal = ordinal;
+            ordinal += (word.text.length + word.space.length);
+            return new PositionedWord(word, this, wordLeft, wordOrdinal, word.width + spacing);
         });
 
-        Object.defineProperty(this, 'actualWidth', { value: actualWidth });
-        Object.defineProperty(this, 'length', { value: ordinal - this.ordinal });
-    };
+        this.actualWidth =  actualWidth;
+        this.length =  ordinal - this.ordinal;
+    }    
 
-    inherit(Line, Node);
-
-    Line.prototype.bounds = function(minimal) {
+    bounds(minimal?) {
         if (minimal) {
             var firstWord = this.first().bounds(),
                 lastWord = this.last().bounds();
+
             return new Rect(
-                firstWord.l,
+                firstWord.x,
                 this.baseline - this.ascent,
-                (lastWord.l + lastWord.w) - firstWord.l,
+                (lastWord.x + lastWord.width) - firstWord.x,
                 this.ascent + this.descent);
         }
         return new Rect(this.left, this.baseline - this.ascent,
             this.width, this.ascent + this.descent);
-    };
+    }
 
-    Line.prototype.parent = function() {
-        return this.doc;
-    };
-
-    Line.prototype.children = function() {
+    children() {
         return this.positionedWords;
-    };
+    }
 
-    Line.prototype.isWrapped = function() {
+    isWrapped() {
         return !this.positionedWords[this.positionedWords.length - 1].word.isNewLine();
-    };
-
-    Line.prototype.type = 'line';
-
-    Line.prototype.doc = null;
-    Line.prototype.left = null;
-    Line.prototype.width = NaN;
-    Line.prototype.baseline = 0;
-    Line.prototype.ascent = 0;
-    Line.prototype.descent = 0;
-    Line.prototype.minY = Number.MAX_VALUE;
-    Line.prototype.maxY = -Number.MAX_VALUE;
-    Line.prototype.minX = Number.MAX_VALUE;
-    Line.prototype.maxX = -Number.MAX_VALUE;
-    Line.prototype.ordinal = 0;
-    Line.prototype.align = null;
-    Line.prototype.lineSpacing = 1;
-
-    export default Line;
+    }
+}

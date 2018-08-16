@@ -1,14 +1,12 @@
-import Runs from "./runs";
-import OpenTypeMeasure from "../measure/opentypemeasure";
-
 import { FontStyle, FontScript, UnderlineStyle } from "carbon-basics";
+import { OpenTypeFontMeasure } from "../measure/OpenTypeFontMeasure";
+import { Runs } from "./runs";
+import { FontMetrics } from "../measure/FontMetrics";
 
-    /* TODO: cache keys should be hashes instead of these stupid strings */
-    var TextRender: any = function() {
+export class PartRenderer {
+    private measurer = new OpenTypeFontMeasure();
 
-    }
-
-    TextRender.getFontString = function(run) {
+    getFontString(run) {
         var size = (run && run.size) || Runs.defaultFormatting.size;
         var script = run && run.script !== undefined ? run.script : Runs.defaultFormatting.script;
 
@@ -26,28 +24,25 @@ import { FontStyle, FontScript, UnderlineStyle } from "carbon-basics";
                ((run && run.weight) || Runs.defaultFormatting.weight) + " " +
                 size + 'px ' +
               ((run && run.family) || Runs.defaultFormatting.family);
-    };
+    }
 
-    /*
-    Applies the style of a run to the canvas context
-     */
-    TextRender.applyRunStyle = function(ctx, run) {
+    applyRunStyle(ctx, run) {
         ctx.fillStyle = (run && run.color) || Runs.defaultFormatting.color;
-        ctx.font = TextRender.getFontString(run);
+        ctx.font = this.getFontString(run);
 
         ctx.charSpacing = run.charSpacing || Runs.defaultFormatting.charSpacing;
-    };
+    }
 
-    TextRender.prepareContext = function(ctx) {
+    prepareContext(ctx) {
         ctx.textAlign = 'left';
         ctx.textBaseline = 'alphabetic';
-    };
+    }
 
     /* Generates the value for a CSS style attribute
      */
-    TextRender.getRunStyle = function(run, ignoreColor) {
+    getRunStyle(run, ignoreColor) {
         var parts = [
-            'font: ', TextRender.getFontString(run)
+            'font: ', this.getFontString(run)
         ];
 
         if (!ignoreColor) {
@@ -65,9 +60,9 @@ import { FontStyle, FontScript, UnderlineStyle } from "carbon-basics";
         }
 
         return parts.join('');
-    };
+    }
 
-    TextRender.getAdditionalProps = function (run) {
+    getAdditionalProps(run) {
         if (run) {
             var addProps = {charSpacing:0};
             var charSpacing = run.charSpacing || Runs.defaultFormatting.charSpacing;
@@ -79,44 +74,43 @@ import { FontStyle, FontScript, UnderlineStyle } from "carbon-basics";
         return null;
     }
 
-    TextRender.NBSP = String.fromCharCode(160);
-    TextRender.ENTER = TextRender.NBSP;
+    static readonly NBSP = String.fromCharCode(160);    
 
-    TextRender.measureText = function(text, style, additional) {
-        return OpenTypeMeasure(text, style, additional);
-    };
-
-    TextRender.cache = {};
-
-    TextRender.clearCache = function() {
-        TextRender.cache = {};
+    measureText(text, style, additional): FontMetrics {
+        return this.measurer.calcualteMetrics(text, style, additional);
     }
 
-    TextRender.cachedMeasureText = function(text, style, additional) {
+    cache: {[key: string]: FontMetrics} = {};
+
+    clearCache() {
+        this.cache = {};
+    }
+
+    cachedMeasureText(text, style, additional) {
         var key = style + '<>!&%' + text;
         if (additional) {
             key += '<>!&%' + JSON.stringify(additional);
         }
-        var result = TextRender.cache[key];
+        var result = this.cache[key];
         if (!result) {
-            result = TextRender.measureText(text, style, additional);
+            result = this.measureText(text, style, additional);
             if (result) {
-                TextRender.cache[key] = result;
+                this.cache[key] = result;
             }
             else {
                 result = null;
             }
         }
         return result;
-    };
+    }
 
-    TextRender.measure = function(str, formatting) {
-        return TextRender.cachedMeasureText(str, TextRender.getRunStyle(formatting, true), TextRender.getAdditionalProps(formatting));
-    };
+    measure(str, formatting) {
+        return this.cachedMeasureText(str, this.getRunStyle(formatting, true), this.getAdditionalProps(formatting));
+    }
 
-    TextRender.draw = function(ctx, str, formatting, left, baseline, width, ascent, descent) {
-        TextRender.prepareContext(ctx);
-        TextRender.applyRunStyle(ctx, formatting);
+    draw(ctx, str, formatting, left, baseline, width, ascent, descent) {
+        this.prepareContext(ctx);
+        this.applyRunStyle(ctx, formatting);
 
         var underline = formatting.underline !== undefined ? formatting.underline : Runs.defaultFormatting.underline;
         var strikeout = formatting.strikeout !== undefined ? formatting.strikeout : Runs.defaultFormatting.strikeout;
@@ -131,7 +125,7 @@ import { FontStyle, FontScript, UnderlineStyle } from "carbon-basics";
                 break;
         }
         baseline = baseline + .5|0;
-        ctx.drawText(str === '\n' ? TextRender.NBSP : str, left, baseline);
+        ctx.drawText(str === '\n' ? PartRenderer.NBSP : str, left, baseline);
         if (underline) {
             var dash = null;
             switch (underline){
@@ -147,6 +141,7 @@ import { FontStyle, FontScript, UnderlineStyle } from "carbon-basics";
         if (strikeout) {
             ctx.lineH(left, baseline - ascent/2 -.5|0, width + .5|0);
         }
-    };
+    }
+}
 
-export default TextRender;
+export const partRenderer = new PartRenderer();

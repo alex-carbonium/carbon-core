@@ -1,6 +1,6 @@
 import Point from "./point";
 import LineSegment from "./lineSegment";
-import { isRectInRect, isPointInRect, areRectsIntersecting } from "./math";
+import { isRectInRect, isPointInRect, areRectsIntersecting, areCoordinatesInRect } from "./math";
 import { IRect, ICoordinate, Origin, IPooledObject, IRectData } from "carbon-core";
 import ObjectPool from "../framework/ObjectPool";
 import { PooledPair } from "../framework/PooledPair";
@@ -91,8 +91,12 @@ export default class Rect implements IRect, IPooledObject {
         return isRectInRect(other, this);
     }
 
-    containsPoint(point:ICoordinate) {
+    containsPoint(point: ICoordinate) {
         return isPointInRect(this, point);
+    }
+
+    containsCoordinates(x: number, y: number) {
+        return areCoordinatesInRect(this, x, y);
     }
 
     equals(other) {

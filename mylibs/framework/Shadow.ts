@@ -1,5 +1,5 @@
 import { Types } from "./Defs";
-import Matrix from "math/matrix";
+import Matrix from "../math/matrix";
 import { RenderEnvironment } from "carbon-core";
 
 // var onAngleDistanceChanged = function (angle) {

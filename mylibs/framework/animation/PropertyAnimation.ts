@@ -2,8 +2,8 @@ import { IUIElement, AnimationProps, IAnimationOptions, ChangeMode } from "carbo
 import AnimationGroup from "./AnimationGroup";
 import Brush from "../Brush";
 import { Color } from "../Color";
-import Matrix from "math/matrix";
-import Rect from "math/rect";
+import Matrix from "../../math/matrix";
+import Rect from "../../math/rect";
 import Point from "../../math/point";
 import { RuntimeProxy } from "../../code/runtime/RuntimeProxy";
 import AnimationController from "./AnimationController";

@@ -3,7 +3,7 @@ import Box from "./Box";
 import Brush from "./Brush";
 import PropertyMetadata from "./PropertyMetadata";
 import {Overflow, Types} from "./Defs";
-import {isRectInRect, calculateRectIntersectionArea} from "math/math";
+import {isRectInRect, calculateRectIntersectionArea} from "../math/math";
 
 export default class Section extends Container {
     trackDeleted(parent, index, mode) {

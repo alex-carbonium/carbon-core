@@ -1,6 +1,6 @@
-import UIElement from "framework/UIElement";
-import nearestPoint from "math/NearestPoint";
-import Invalidate from "framework/Invalidate";
+import UIElement from "../framework/UIElement";
+import nearestPoint from "../math/NearestPoint";
+import Invalidate from "../framework/Invalidate";
 import {Types, FrameCursors} from "../framework/Defs";
 import Brush from "../framework/Brush";
 import { ChangeMode } from "carbon-core";

@@ -1,6 +1,6 @@
 let debug = require("DebugUtil")("carb:canvasArrangeStrategy");
 import {HorizontalConstraint, VerticalConstraint} from "carbon-basics";
-import Point from "math/point";
+import Point from "../../math/point";
 import { IContainer } from "carbon-model";
 import ResizeOptions from "../../decorators/ResizeOptions";
 

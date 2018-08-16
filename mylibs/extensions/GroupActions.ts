@@ -1,6 +1,6 @@
 import CarbonExtension from "./CarbonExtesion";
 import { IContributions, ContextBarPosition, IApp, ISelection, ChangeMode, IArtboardProps, ILayer, LayerType, IUIElement, IContainer, IRect, ArtboardType, IText, UIElementFlags, IArtboard, IGroupContainer, IIsolatable, IView } from "carbon-core";
-import Constraints from "framework/Constraints";
+import Constraints from "../framework/Constraints";
 import Symbol from "../framework/Symbol";
 import Artboard from "../framework/Artboard";
 import Text from "../framework/text/Text";

@@ -1,15 +1,15 @@
-import { areRectsIntersecting } from "math/math";
+import { areRectsIntersecting } from "../math/math";
 import Font from "./Font";
 import Brush from "./Brush";
-import ViewBase from "framework/ViewBase";
-import Cursor from "framework/Cursor";
-import Invalidate from "framework/Invalidate";
-import PixelGrid from "framework/render/PixelGrid"
-import { IsolationLayer } from "framework/IsolationLayer";
+import ViewBase from "./ViewBase";
+import Cursor from "./Cursor";
+import Invalidate from "./Invalidate";
+import PixelGrid from "./render/PixelGrid"
+import { IsolationLayer } from "./IsolationLayer";
 import { LayerType, IApp, IController } from "carbon-app";
 import { IContext, ContextType, IDisposable } from "carbon-core";
 import { SnapController } from "./SnapController";
-import { ViewStateStack } from "../framework/ViewStateStack";
+import { ViewStateStack } from "./ViewStateStack";
 
 function setupLayers(Layer) {
     this.interactionLayer = new Layer();

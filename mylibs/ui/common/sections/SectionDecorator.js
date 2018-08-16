@@ -1,8 +1,8 @@
-import Section from "framework/Section";
-import Brush from "framework/Brush";
-import {isPointInRect} from "math/math";
-import {DockStyle, ArrangeStrategies, Overflow, HorizontalAlignment, VerticalAlignment} from "framework/Defs";
-import Cursor from "framework/Cursor";
+import Section from "../../../framework/Section";
+import Brush from "../../../framework/Brush";
+import {isPointInRect} from "../../../math/math";
+import {DockStyle, ArrangeStrategies, Overflow, HorizontalAlignment, VerticalAlignment} from "../../../framework/Defs";
+import Cursor from "../../../framework/Cursor";
 
 var handleWidth = 150;
 var handleHeight = 40;

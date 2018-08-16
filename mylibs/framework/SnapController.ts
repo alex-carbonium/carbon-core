@@ -1,9 +1,9 @@
-import Invalidate from "framework/Invalidate";
-import Point from "math/point";
+import Invalidate from "./Invalidate";
+import Point from "../math/point";
 import { ICoordinate, VerticalConstraint, HorizontalConstraint, IView } from "carbon-core";
-import UserSettings from "UserSettings";
+import UserSettings from "../UserSettings";
 import { areRectsIntersecting } from "../math/math";
-import NullContainer from "framework/NullContainer";
+import NullContainer from "./NullContainer";
 
 var debug = require("DebugUtil")("carb:snapController");
 

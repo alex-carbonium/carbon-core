@@ -1,5 +1,5 @@
-import PropertyMetadata from "framework/PropertyMetadata";
-import Brush from "framework/Brush";
+import PropertyMetadata from "../../framework/PropertyMetadata";
+import Brush from "../../framework/Brush";
 import tinycolor from "tinycolor2";
 import Guide from "./Guide";
 import { Types } from "../../framework/Defs";

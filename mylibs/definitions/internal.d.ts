@@ -180,15 +180,9 @@ declare module "carbon-app"{
     export const RepeaterActions: any;
     export const SymbolActions: any;
 
-    //TODO: replace with math/rect
-    export const TextRect: any;
-
     //TODO: remove
     export const BasePlatform: any;
-
-    export interface IFontManager {
-        add(fontInfo: any);
-    }
+    
     export interface IFontManagerConstructor {
         new (app): IFontManager;
     }

@@ -2,7 +2,7 @@ import SystemConfiguration from "../../SystemConfiguration";
 import Selection from "../../framework/SelectionModel";
 import Invalidate from "../../framework/Invalidate";
 import Point from "../../math/point";
-import Path from "framework/Path";
+import Path from "../../framework/Path";
 import Tool from "./Tool";
 import {KeyboardState, IMouseEventData, ChangeMode, IController, IView, IApp} from "carbon-core";
 

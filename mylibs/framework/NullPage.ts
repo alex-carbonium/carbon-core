@@ -1,4 +1,4 @@
-import PropertyMetadata from "framework/PropertyMetadata";
+import PropertyMetadata from "./PropertyMetadata";
 import { Types } from "./Defs";
 import Rect from "../math/rect";
 import UIElement from "./UIElement";

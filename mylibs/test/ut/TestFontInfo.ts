@@ -1,6 +1,10 @@
-import { Font, TextRect } from "carbon-core";
+import { Font, Rect, IFontInfo, FontStyle, FontWeight } from "carbon-core";
 
-export default class TestFontInfo {
+export class TestFontInfo implements IFontInfo {
+    family = 'test';
+    style = FontStyle.Normal;
+    weight = FontWeight.Regular;
+
     toFontFaceSrc() {
         return '';
     }
@@ -15,7 +19,7 @@ export default class TestFontInfo {
         return Font.Default.weight;
     }
 
-    getScale(){
+    getFontScale(){
         return 1;
     }
     getAscender(){
@@ -30,15 +34,11 @@ export default class TestFontInfo {
     }
 
     getGlyphBoundingRect(size, glyph) {
-        return new TextRect(1, 1, 10, size);
+        return new Rect(1, 1, 10, size);
     }
 
     getGlyphOutline(size, x, y, char) {
         return null;
-    }
-
-    getLeftSideBearing(fontSize, char) {
-        return 1;
     }
 
     getMaxFontHeight(fontSize) {

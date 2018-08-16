@@ -1,8 +1,8 @@
 import DataNode from "../framework/DataNode";
 import PropertyMetadata from "../framework/PropertyMetadata";
-import RelayoutEngine from "framework/relayout/RelayoutEngine";
+import RelayoutEngine from "../framework/relayout/RelayoutEngine";
 import {Types} from "../framework/Defs";
-import params from "params";
+import params from "../params";
 
 class Story extends DataNode {
     _parent:any;

@@ -1,7 +1,7 @@
-import UIElement from "framework/UIElement";
-import PropertyMetadata from "framework/PropertyMetadata";
-import {Types} from "framework/Defs";
-import Font from "framework/Font";
+import UIElement from "../../../framework/UIElement";
+import PropertyMetadata from "../../../framework/PropertyMetadata";
+import {Types} from "../../../framework/Defs";
+import Font from "../../../framework/Font";
 import { ChangeMode, IText, ITextProps } from "carbon-core";
 import Brush from "../../../framework/Brush";
 
@@ -42,7 +42,28 @@ export default class RangeFormatter extends UIElement {
             this.setProps(props, ChangeMode.Root);
             this._internalUpdate = false;
         }
-    };
+    }
+    onRangeFormattingChanged = (range) => {
+        if (range.isDocumentRange()) {
+            let fontExtension = null;
+            let rangeFormatting = range.getFormatting();
+            for (let prop in rangeFormatting) {
+                if (prop === "text") {
+                    continue;
+                }
+                let value = rangeFormatting[prop];
+                if (value !== undefined) {
+                    fontExtension = fontExtension || {};
+                    fontExtension[prop] = value;
+                }
+            }
+
+            if (fontExtension) {
+                var newFont = Font.extend(this._element.props.font, fontExtension);
+                this._element.setProps({font: newFont});
+            }
+        }
+    }
     setProps(changes, mode){
         if (mode === ChangeMode.Model && !this._internalUpdate) {
             if (changes.font || changes.fill) {

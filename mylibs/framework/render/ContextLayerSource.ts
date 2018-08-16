@@ -1,10 +1,10 @@
 import ContextPool from "./ContextPool";
 import { IContext, IPooledObject, ContextType, RenderEnvironment, RenderFlags } from "carbon-core";
-import Selection from "framework/SelectionModel";
+import Selection from "../SelectionModel";
 import Context from "./Context";
-import Invalidate from "framework/Invalidate";
+import Invalidate from "../Invalidate";
 import ObjectPool from "../ObjectPool";
-import NullContainer from "framework/NullContainer";
+import NullContainer from "../NullContainer";
 
 class ClipReference implements IPooledObject {
 

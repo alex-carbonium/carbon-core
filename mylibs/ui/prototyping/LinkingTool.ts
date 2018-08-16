@@ -1,16 +1,16 @@
 import Tool from "../common/Tool";
 import DropVisualization from "../../extensions/DropVisualization";
 import { createUUID } from "../../util";
-import { ActionType} from "framework/Defs";
+import { ActionType} from "../../framework/Defs";
 import * as ActionHelper from "./ActionHelper";
 import Matrix from "../../math/matrix";
 import { areRectsIntersecting, adjustRectSize, isPointInRect } from "../../math/math";
-import Selection from "framework/SelectionModel"
-import Invalidate from "framework/Invalidate";
+import Selection from "../../framework/SelectionModel"
+import Invalidate from "../../framework/Invalidate";
 import RequestAnimationSettings from "./RequestAnimationSettings";
 import StoryAction from "../../stories/StoryAction";
 import Link from "./Link";
-import DataNode from "framework/DataNode";
+import DataNode from "../../framework/DataNode";
 import { IUIElement, PrimitiveType, InteractionType, StoryType, IApp, IView, IController } from "carbon-core";
 import {AnimationType, EasingType, IDisposable} from "carbon-runtime";
 import Story from "../../stories/Story";

@@ -1,4 +1,4 @@
-import Selection from "framework/SelectionModel";
+import Selection from "../framework/SelectionModel";
 import UIElement from "../framework/UIElement";
 
 export default {

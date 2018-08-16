@@ -1,4 +1,4 @@
-import Point from "math/point";
+import Point from "../math/point";
 import { ChangeMode, IUIElement } from "carbon-core";
 
 export default {

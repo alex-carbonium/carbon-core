@@ -1,8 +1,8 @@
-import UIElement from "./../UIElement";
-import Container from "./../Container";
-import PropertyTracker from "./../PropertyTracker";
-import PropertyMetadata from "./../PropertyMetadata";
-import { ArrangeStrategies, Overflow, Types } from "./../Defs";
+import UIElement from "../UIElement";
+import Container from "../Container";
+import PropertyTracker from "../PropertyTracker";
+import PropertyMetadata from "../PropertyMetadata";
+import { ArrangeStrategies, Overflow, Types } from "../Defs";
 import RepeatCell from "./RepeatCell";
 import RepeatMarginTool from "./RepeatMarginTool";
 import RepeatFrameType from "./frame/RepeatFrameType";

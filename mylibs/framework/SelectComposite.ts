@@ -1,4 +1,4 @@
-import DefaultFrameType from "decorators/DefaultFrameType";
+import DefaultFrameType from "../decorators/DefaultFrameType";
 import CompositeElement from "./CompositeElement";
 import PropertyMetadata from "./PropertyMetadata";
 import { Types } from "./Defs";

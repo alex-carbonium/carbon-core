@@ -1,7 +1,11 @@
-import Runs from "../static/runs";
-import Per from "../util/per";
+import { Per } from "../util/per";
+import { Runs } from "../static/runs";
+import { TextNode } from "./node";
+import { PositionedWord } from "../processing/positionedword";
+import { ITextRange, ITextDoc, ITextNode, Emitter } from "carbon-text";
 
-function Range(doc, start, end) {
+export class Range implements ITextRange {
+    constructor(private doc: ITextDoc, public start, public end) {
         this.doc = doc;
         this.start = start;
         this.end = end;
@@ -11,11 +15,11 @@ function Range(doc, start, end) {
         }
     }
 
-    Range.prototype.parts = function(emit, list) {
+    parts(emit?: Emitter<PositionedWord>, list?: ITextNode[]) {
         list = list || this.doc.children();
         var self = this;
 
-        list.some(function(item) {
+        list.some(function (item) {
             if (item.ordinal + item.length <= self.start) {
                 return false;
             }
@@ -24,38 +28,38 @@ function Range(doc, start, end) {
             }
             if (item.ordinal >= self.start &&
                 item.ordinal + item.length <= self.end) {
-                emit(item);
+                emit(item as PositionedWord);
             } else {
                 self.parts(emit, item.children());
             }
         });
     };
 
-    Range.prototype.clear = function() {
+    clear() {
         return this.setText([]);
     };
 
-    Range.prototype.setText = function(text) {
+    setText(text) {
         return this.doc.splice(this.start, this.end, text);
     };
 
-    Range.prototype.runs = function(emit) {
+    runs(emit) {
         this.doc.runs(emit, this);
     };
 
-    Range.prototype.isDocumentRange = function() {
+    isDocumentRange() {
         return this.start === 0 && this.end === this.doc.frame.length - 1;
     };
 
-    Range.prototype.plainText = function() {
+    plainText() {
         return Per.create(this.runs, this).map(Runs.getPlainText).all().join('');
     };
 
-    Range.prototype.save = function() {
+    save() {
         return Per.create(this.runs, this).per(Runs.consolidate()).all();
     };
 
-    Range.prototype.getFormatting = function() {
+    getFormatting() {
         var range = this;
         if (range.start === range.end) {
             var pos = range.start;
@@ -70,7 +74,7 @@ function Range(doc, start, end) {
         return Per.create(range.runs, range).reduce(Runs.merge).last() || Runs.getCurrentFormatting();
     };
 
-    Range.prototype._setSingleFormatting = function (attribute, value) {
+    private _setSingleFormatting(attribute, value) {
         var range = this;
 
         if (range.start === range.end) {
@@ -84,14 +88,14 @@ function Range(doc, start, end) {
         }
     }
 
-    Range.prototype.setFormatting = function(attributes, values) {
+    setFormatting(attributes, values) {
         var range = this;
         if (!(attributes instanceof Array)) {
             attributes = [attributes];
             values = [values];
         }
 
-        var saved, template, paragraphRange;
+        var saved, template, paragraphRange: Range;
 
         for (var i = 0; i < attributes.length; i++) {
             var attribute = attributes[i],
@@ -99,7 +103,7 @@ function Range(doc, start, end) {
 
             if (attribute === 'align' || attribute === 'lineSpacing') {
                 // Special case: expand selection to surrounding paragraphs
-                paragraphRange = range.doc.paragraphRange(range.start, range.end);
+                paragraphRange = range.doc.paragraphRange(range.start, range.end) as Range;
                 paragraphRange._setSingleFormatting(attribute, value);
             } else {
                 if (range.start === range.end) {
@@ -120,4 +124,4 @@ function Range(doc, start, end) {
             range.setText(saved);
         }
     };
-export default Range;
+}

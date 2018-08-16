@@ -1,4 +1,4 @@
-import eventHelper from "framework/EventHelper";
+import eventHelper from "./framework/EventHelper";
 import { IApp, IEvent } from "carbon-core";
 
 export default class AppState {

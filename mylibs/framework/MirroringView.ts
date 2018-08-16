@@ -1,8 +1,8 @@
 import ViewBase from "./ViewBase"
-import Invalidate from "framework/Invalidate"
-import Page from "framework/Page";
-import { Types, MirrorViewMode } from "framework/Defs";
-import PropertyMetadata from "framework/PropertyMetadata";
+import Invalidate from "./Invalidate"
+import Page from "./Page";
+import { Types, MirrorViewMode } from "./Defs";
+import PropertyMetadata from "./PropertyMetadata";
 import { IMirroringProxyPage } from "carbon-app";
 import { ChangeMode } from "carbon-core";
 

@@ -1,12 +1,12 @@
 import Tool from "./Tool";
 import UIElement from "../../framework/UIElement";
-import Path from "framework/Path";
+import Path from "../../framework/Path";
 import SystemConfiguration from "../../SystemConfiguration";
 import Selection from "../../framework/SelectionModel";
 import Cursor from "../../framework/Cursor";
 import { IMouseEventData, ElementState, IApp, IController, IView } from "carbon-core";
-import PathManipulationDecorator from "ui/common/path/PathManipulationDecorator";
-import NullContainer from "framework/NullContainer";
+import PathManipulationDecorator from "./path/PathManipulationDecorator";
+import NullContainer from "../../framework/NullContainer";
 import Point from "../../math/point";
 
 

@@ -1,36 +1,30 @@
-import FontInfo from "./fontinfo";
+import { FontInfo } from "./fontinfo";
+import { IFontManager } from "carbon-app";
 
-class FontManager {
-    _defaultFont: any;
-    _fonts: any[];
+export class FontManager implements IFontManager {    
+    defaultFont: FontInfo;
+    protected fonts: FontInfo[];
 
-    constructor(){
-        this._fonts = [];
-        this._defaultFont = null;
+    constructor() {
+        this.fonts = [];
+        this.defaultFont = null;
     }
 
-    registerAsDefault(){
+    registerAsDefault() {
         FontManager.registerInstance(this);
     }
 
-    getDefaultFont(){
-        return this._defaultFont;
-    }
-    setDefaultFont(defaultFont){
-        this._defaultFont = defaultFont;
-    }
-
-    add(font){
-        this._fonts.push(font);
-        if (this._fonts.length === 1){
-            this.setDefaultFont(font);
+    add(font) {
+        this.fonts.push(font);
+        if (this.fonts.length === 1) {
+            this.defaultFont = font;
         }
     }
 
-    getFont(family, style, weight){
-        for (var i = 0; i < this._fonts.length; ++i){
-            var font = this._fonts[i];
-            if (font.getFamily() === family && font.getStyle() === style && font.getWeight() === weight){
+    getFont(family, style, weight) {
+        for (let i = 0; i < this.fonts.length; ++i) {
+            let font = this.fonts[i];
+            if (font.family === family && font.style === style && font.weight === weight) {
                 return font;
             }
         }
@@ -38,13 +32,21 @@ class FontManager {
         return null;
     }
 
-    static instance: FontManager
+    getDefaultFont() {
+        return this.defaultFont;
+    }
 
-    static registerInstance = function(fontManager){
+    tryLoad(family, style, weight): Promise<boolean> {
+        return Promise.resolve(false);
+    }
+
+    getPendingTasks(): Promise<boolean>[] {
+        return [];
+    }
+
+    static instance: FontManager = null;
+
+    static registerInstance(fontManager: FontManager) {
         FontManager.instance = fontManager;
-    };
+    }
 }
-
-FontManager.instance = null;
-
-export default FontManager;

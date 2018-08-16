@@ -1,10 +1,10 @@
-import domUtil from "utils/dom";
-import { ActionType, ActionEvents } from "framework/Defs";
+import domUtil from "../utils/dom";
+import { ActionType, ActionEvents } from "./Defs";
 import TouchHelper from "./TouchHelper";
-import Selection from "framework/SelectionModel";
-import EventHelper from "framework/EventHelper";
-import Invalidate from "framework/Invalidate";
-import NullContainer from "framework/NullContainer";
+import Selection from "./SelectionModel";
+import EventHelper from "./EventHelper";
+import Invalidate from "./Invalidate";
+import NullContainer from "./NullContainer";
 import { IText, IController, IMouseEventData } from "carbon-core";
 import { PreviewTextTool } from "./PreviewTextTool";
 import ControllerBase from "./ControllerBase";

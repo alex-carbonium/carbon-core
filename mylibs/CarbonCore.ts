@@ -4,7 +4,7 @@
 * This library can only be used in software components owned by Carbon Design. Any form of other use is strictly prohibited.
 */
 
-import domUtil from "utils/dom";
+import domUtil from "./utils/dom";
 import logger from "./logger";
 import { backend } from "./CarbonApi";
 import Symbol from "./framework/Symbol";
@@ -67,7 +67,7 @@ export default {
     "CommandManager": require("./framework/commands/CommandManager"),
     "Brush": require("./framework/Brush"),
     "Font": require("./framework/Font"),
-    "OpenTypeFontManager": require("./OpenTypeFontManager").default,
+    "OpenTypeFontManager": require("./OpenTypeFontManager").OpenTypeFontManager,
     "Shadow": require("./framework/Shadow"),
     "Constraints": require("./framework/Constraints"),
     "NullPage": require("./framework/NullPage"),
@@ -136,8 +136,6 @@ export default {
     "CodeNameProvider": require("./code/NameProvider").NameProvider,
 
     "ContextLayerSource":  require("./framework/render/ContextLayerSource"),
-    //TODO: replace with math/rect
-    "TextRect": require("./framework/text/primitives/rect"),
 
     "AutoDisposable": require("./AutoDisposable").AutoDisposable,
     "Services": require("./Services"),

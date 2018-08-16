@@ -1,4 +1,4 @@
-import Selection from "framework/SelectionModel";
+import Selection from "../framework/SelectionModel";
 import { ILayer, IUIElement, IContainer, IIsolationLayer, IIsolatable } from "carbon-core";
 import { LayerType, IView } from "carbon-app";
 

@@ -1,16 +1,17 @@
-    function Split (codes) {
+export class Split {
+    _codes = null;
+    _word = null;
+    _trailingSpaces = null;
+    _newLine = true;
+
+    constructor(codes) {
         this._word = null;
         this._codes = codes;
         this._trailingSpaces = null;
         this._newLine = true;
-    }
+    }    
 
-    Split.prototype._codes = null;
-    Split.prototype._word = null;
-    Split.prototype._trailingSpaces = null;
-    Split.prototype._newLine = true;
-
-    Split.prototype.split = function (emit, inputChar) {
+    split(emit, inputChar) {
         var endOfWord;
         if (inputChar.char === null) {
             endOfWord = true;
@@ -60,6 +61,5 @@
 
             this._word = inputChar;
         }
-    };
-
-    export default Split;
+    }  
+}

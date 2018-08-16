@@ -1,14 +1,14 @@
 import Layer from "./Layer";
 import Container from "./Container";
-import Matrix from "math/matrix";
+import Matrix from "../math/matrix";
 import { Types } from "./Defs";
-import { areRectsIntersecting } from "math/math";
-import Selection from "framework/SelectionModel";
-import PropertyMetadata from "framework/PropertyMetadata";
-import ContextPool from "framework/render/ContextPool";
+import { areRectsIntersecting } from "../math/math";
+import Selection from "./SelectionModel";
+import PropertyMetadata from "./PropertyMetadata";
+import ContextPool from "./render/ContextPool";
 import EventHelper from "./EventHelper";
 import Brush from "./Brush";
-import NameProvider from "ui/NameProvider";
+import NameProvider from "../ui/NameProvider";
 import { IContainer, IRect, IPage, IArtboard, ChangeMode, IPrimitiveRoot, IApp } from "carbon-core";
 import { createUUID } from "../util";
 

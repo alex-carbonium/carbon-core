@@ -496,8 +496,17 @@ declare module "carbon-app" {
         mac: IShortcut[]
     }
 
+    export interface IFontInfo {
+        readonly family: string;
+        readonly style: FontStyle;
+        readonly weight: FontWeight;
+
+        getFontScale(size: number): number;
+    }    
     export interface IFontManager {
+        add(fontInfo: IFontInfo);
         getPendingTasks(): Promise<boolean>[];
+        tryLoad(family: string, style: FontStyle, weight: FontWeight): Promise<boolean>;
     }
 
     export interface IAreaConstraint {

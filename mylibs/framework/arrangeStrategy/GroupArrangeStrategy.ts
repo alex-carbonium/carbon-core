@@ -1,8 +1,8 @@
 import ArrangeStrategy from "./ArrangeStrategy";
 import { ArrangeStrategies } from "../Defs";
-import Rect from "math/rect";
-import Point from "math/point";
-import Matrix from "math/matrix";
+import Rect from "../../math/rect";
+import Point from "../../math/point";
+import Matrix from "../../math/matrix";
 import { IGroupContainer } from "carbon-core";
 
 var GroupArrangeStrategy = {

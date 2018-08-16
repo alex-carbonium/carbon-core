@@ -1,5 +1,5 @@
-import {ActionType} from "framework/Defs";
-import {distanceBetweenPoints} from "math/geometry";
+import {ActionType} from "../../framework/Defs";
+import {distanceBetweenPoints} from "../../math/geometry";
 
 
 export function getConnectionPoints(from, to) {

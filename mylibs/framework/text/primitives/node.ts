@@ -1,20 +1,37 @@
-import Rect from "./rect";
+import Rect from "../../../math/rect";
+import { IRect } from "carbon-core";
 
-    function Node () {
+export class TextNode {
+    ordinal: number;    
+    length: number;
+    block: boolean;
+    newLine: boolean;    
+
+    constructor(
+        public readonly type: string, 
+        public readonly parent: TextNode,                 
+        public left: number = Number.MAX_VALUE,
+        public top: number = Number.MAX_VALUE
+    ) {        
     }
 
-    Node.prototype.first = function() {
+    children(): TextNode[] {
+        return [];
+    }
+
+    first() {
         return this.children()[0];
-    };
+    }
 
-    Node.prototype.last = function() {
-        return this.children()[this.children().length - 1];
-    };
+    last(){
+        let children = this.children();
+        return children[children.length - 1];
+    }
 
-    Node.prototype.next = function() {
-        var self = this;
+    next(){
+        var self: TextNode = this;
         for (;;) {
-            var parent = self.parent();
+            var parent = self.parent;
             if (!parent) {
                 return null;
             }
@@ -35,10 +52,10 @@ import Rect from "./rect";
             }
             self = parent;
         }
-    };
+    }
 
-    Node.prototype.previous = function() {
-        var parent = this.parent();
+    previous() {
+        var parent = this.parent;
         if (!parent) {
             return null;
         }
@@ -49,9 +66,9 @@ import Rect from "./rect";
         }
         var prevParent = parent.previous();
         return !prevParent ? null : prevParent.last();
-    };
+    }
 
-    Node.prototype.byOrdinal = function(index) {
+    byOrdinal(index): TextNode {
         var found = null;
         if (this.children().some(function(child) {
             if (index >= child.ordinal && index < child.ordinal + child.length) {
@@ -64,13 +81,13 @@ import Rect from "./rect";
             return found;
         }
         return this;
-    };
+    }
 
-    Node.prototype.byCoordinate = function(x, y) {
+    byCoordinate(x, y) {
         var found;
         this.children().some(function(child) {
             var b = child.bounds();
-            if (b.contains(x, y)) {
+            if (b.containsCoordinates(x, y)) {
                 found = child.byCoordinate(x, y);
                 if (found) {
                     return true;
@@ -93,37 +110,28 @@ import Rect from "./rect";
             }
         }
         return found;
-    };
+    }
 
-    Node.prototype.draw = function(ctx, viewPort) {
+    draw(ctx, viewPort) {
         this.children().forEach(function(child) {
             child.draw(ctx, viewPort);
         });
-    };
+    }
 
-    Node.prototype.parentOfType = function(type) {
-        var p = this.parent();
+    parentOfType(type) {
+        var p = this.parent;
         return p && (p.type === type ? p : p.parentOfType(type));
-    };
+    }
 
-    Node.prototype.bounds = function() {
-        var l = this._left, t = this._top, r = 0, b = 0;
+    bounds(): IRect {
+        var l = this.left, t = this.top, r = 0, b = 0;
         this.children().forEach(function(child) {
             var cb = child.bounds();
-            l = Math.min(l, cb.l);
-            t = Math.min(t, cb.t);
-            r = Math.max(r, cb.l + cb.w);
-            b = Math.max(b, cb.t + cb.h);
+            l = Math.min(l, cb.x);
+            t = Math.min(t, cb.y);
+            r = Math.max(r, cb.x + cb.width);
+            b = Math.max(b, cb.y + cb.height);
         });
         return new Rect(l, t, r - l, b - t);
-    };
-
-    Node.prototype.children = function() {
-        return [];
-    };
-
-    Node.prototype.parent = function() {
-        return null;
-    };
-
-    export default Node;
+    }  
+}    

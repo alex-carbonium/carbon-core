@@ -1,10 +1,10 @@
-import Rectangle from "framework/Rectangle";
-import Circle from "framework/Circle";
-import Text from "framework/text/Text";
-import Path from "framework/Path";
-import GroupContainer from "framework/GroupContainer";
-import Matrix from "math/matrix";
-import { combineRects } from "math/math";
+import Rectangle from "../framework/Rectangle";
+import Circle from "../framework/Circle";
+import Text from "../framework/text/Text";
+import Path from "../framework/Path";
+import GroupContainer from "../framework/GroupContainer";
+import Matrix from "../math/matrix";
+import { combineRects } from "../math/math";
 import logger from "../logger";
 import { IGroupContainer } from "carbon-core";
 

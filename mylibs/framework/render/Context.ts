@@ -1,7 +1,7 @@
 import CrazyScope from "../CrazyManager";
 import Point from "../../math/point";
 import { IContext, LayerType, ContextType, RenderEnvironment } from "carbon-core";
-import Matrix from "math/matrix";
+import Matrix from "../../math/matrix";
 
 export default class Context implements IContext {
     [name: string]: any;

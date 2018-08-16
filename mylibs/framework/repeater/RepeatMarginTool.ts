@@ -1,9 +1,9 @@
-import { isPointInRect, adjustRectWidth, adjustRectHeight } from "math/math";
+import { isPointInRect, adjustRectWidth, adjustRectHeight } from "../../math/math";
 import DragController from "../DragController";
 import CommandManager from "../commands/CommandManager";
 import PropertyTracker from "../PropertyTracker";
-import Cursor from "framework/Cursor";
-import Invalidate from "framework/Invalidate";
+import Cursor from "../Cursor";
+import Invalidate from "../Invalidate";
 import ModelStateListener from "../relayout/ModelStateListener";
 import { LayerType, IView } from "carbon-app";
 import Rect from "../../math/rect";

@@ -5,7 +5,7 @@ import * as Runtime from "carbon-runtime";
 import { ISize } from "carbon-geometry";
 import { Model } from "../../framework/Model";
 import Brush from "../../framework/Brush";
-import Matrix from "math/matrix";
+import Matrix from "../../math/matrix";
 
 export class BrushFactoryClass implements IProxySource {
     proxyDefinition() {

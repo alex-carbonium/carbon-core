@@ -1,7 +1,7 @@
 import { IUIElement } from "carbon-model";
 import { IContext, RenderEnvironment, RenderFlags, IRect } from "carbon-core";
 import ContextPool from "./ContextPool";
-import Matrix from "math/matrix";
+import Matrix from "../../math/matrix";
 import { IPooledObject } from "carbon-basics";
 import ObjectPool from "../ObjectPool";
 import ContextCacheManager from "./ContextCacheManager";

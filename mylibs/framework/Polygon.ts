@@ -1,15 +1,15 @@
-import Shape from "framework/Shape";
-import PropertyMetadata from "framework/PropertyMetadata";
-import DefaultFrameType from "decorators/DefaultFrameType";
-import UIElement from "framework/UIElement";
-import { PointDirection, Types, FrameCursors } from "framework/Defs";
-import LineDirectionPoint from "decorators/LineDirectionPoint";
-import RotateFramePoint from "decorators/RotateFramePoint";
+import Shape from "./Shape";
+import PropertyMetadata from "./PropertyMetadata";
+import DefaultFrameType from "../decorators/DefaultFrameType";
+import UIElement from "./UIElement";
+import { PointDirection, Types, FrameCursors } from "./Defs";
+import LineDirectionPoint from "../decorators/LineDirectionPoint";
+import RotateFramePoint from "../decorators/RotateFramePoint";
 import Rect from "../math/rect";
 import Point from "../math/point";
-import Selection from "../framework/SelectionModel";
+import Selection from "./SelectionModel";
 import { IMouseEventData, ElementState, ChangeMode } from "carbon-core";
-import Cursors from "Cursors";
+import Cursors from "../Cursors";
 
 let PolygonFrameType = {
     cursorSet: FrameCursors,

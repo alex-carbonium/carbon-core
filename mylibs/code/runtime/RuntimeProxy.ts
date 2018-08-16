@@ -1,9 +1,9 @@
 import { IProxySource, IRuntimeMixin, IDisposable } from "carbon-core";
 import { IUIElement } from "carbon-model";
-import PropertyMetadata from "framework/PropertyMetadata";
-import { EventNames } from "../runtime/EventNames";
-import { Property } from "../runtime/Property";
-import UIElement from "framework/UIElement";
+import PropertyMetadata from "../../framework/PropertyMetadata";
+import { EventNames } from "./EventNames";
+import { Property } from "./Property";
+import UIElement from "../../framework/UIElement";
 import { MixinFactory } from "./MixinFactory";
 
 const eventsMap = Object.getOwnPropertyNames(Object.getPrototypeOf(EventNames)).reduce((t, p) => { t[p.toLowerCase()] = true; return t; }, {});

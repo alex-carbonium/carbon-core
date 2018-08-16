@@ -6,7 +6,7 @@ import Workspace from "../Workspace";
 import Invalidate from "../framework/Invalidate";
 import FontHelper from "../framework/FontHelper";
 import Brush from "../framework/Brush";
-import Matrix from "math/matrix";
+import Matrix from "../math/matrix";
 
 import clipboard from "../framework/Clipboard";
 import PropertyTracker from "../framework/PropertyTracker";

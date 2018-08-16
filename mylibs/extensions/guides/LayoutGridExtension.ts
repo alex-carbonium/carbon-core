@@ -1,4 +1,4 @@
-import PropertyTracker from "framework/PropertyTracker";
+import PropertyTracker from "../../framework/PropertyTracker";
 import LayoutGridLines from "./LayoutGridLines";
 import LayoutGridColumns from "./LayoutGridColumns";
 import RuntimeExtension from "../RuntimeExtension";

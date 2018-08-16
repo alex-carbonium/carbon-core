@@ -6,7 +6,7 @@ import Tool from "../Tool";
 import DragController from "../../../framework/DragController";
 import Text from "../../../framework/text/Text";
 import Font from "../../../framework/Font";
-import InlineTextEditor from "../../../framework/text/inlinetexteditor";
+import { InlineTextEditor } from "../../../framework/text/inlinetexteditor";
 import SharedColors from "../../SharedColors";
 import DefaultFormatter from "./DefaultFormatter";
 import RangeFormatter from "./RangeFormatter";
@@ -26,6 +26,7 @@ const UpdateTimeout = 1000;
 
 export default class TextTool extends Tool {
     private globalTokens: IDisposable[] = [];
+    private editorTokens: IDisposable[] = [];
     private text: Text;
     /**
      * Contains the most recent boundary rect since content is not always immediately updated.
@@ -35,8 +36,7 @@ export default class TextTool extends Tool {
 
     private _rangeFormatter: RangeFormatter = null;
     private _defaultFormatter: DefaultFormatter = null;
-    //TODO: use type
-    private _editor: any;
+    private _editor: InlineTextEditor;
     private _dragZone: any;
     private _next: { element: Text, event: IMouseEventData };
     private _detaching: boolean;
@@ -216,7 +216,7 @@ export default class TextTool extends Tool {
     onClicked = (e: IMouseEventData) => {
         if (this._hittingEdited(e)) {
             this._editor.mouseDown(e, e["event"]);
-            this._editor.mouseUp(e, e["event"]);
+            this._editor.mouseUp(e);
         }
         else {
             var hit = this._hitNewElement(e);
@@ -289,7 +289,8 @@ export default class TextTool extends Tool {
         this.text.disableRenderCaching(true);
 
         var engine = text.engine();
-        engine.contentChanged(this.contentChanged);
+        //unsubscribed in engine.unsubscribe()
+        engine.contentChanged().bind(this.contentChanged);
 
         this._rangeFormatter = new RangeFormatter();
         this._rangeFormatter.initFormatter(this.app, engine, text);
@@ -401,6 +402,8 @@ export default class TextTool extends Tool {
         Selection.makeSelection([this.text], "new", false, true);
         Selection.showFrame();
 
+        this.editorTokens.forEach(x => x.dispose());
+        this.editorTokens.length = 0;
         this._editor = null;
         this.text = null;
         this._rangeFormatter = null;
@@ -442,10 +445,10 @@ export default class TextTool extends Tool {
 
     _createEditor(engine, element) {
         var inlineEditor = new InlineTextEditor();
-        inlineEditor.onInvalidate = this.invalidateLayers;
-        inlineEditor.onRangeFormattingChanged = this._rangeFormatter.onRangeFormattingChanged;
-        inlineEditor.onSelectionChanged = this._onSelectionChanged;
-        inlineEditor.onDeactivated = finalEdit => this.endEdit(finalEdit);
+        this.editorTokens.push(inlineEditor.onInvalidate.bind(this.invalidateLayers));
+        this.editorTokens.push(inlineEditor.onRangeFormattingChanged.bind(this._rangeFormatter.onRangeFormattingChanged));
+        this.editorTokens.push(inlineEditor.onSelectionChanged.bind(this._onSelectionChanged));
+        this.editorTokens.push(inlineEditor.onDeactivated.bind(finalEdit => this.endEdit(finalEdit)));
         inlineEditor.activate(element.globalViewMatrix(), engine, element.props.font, this.app.fontManager);
         return inlineEditor;
     }

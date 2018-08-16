@@ -1,5 +1,5 @@
-import { IText, IApp, IMouseEventData, IController, IDisposable, ChangeMode, ITextProps, TextInputArgs } from "carbon-core";
-import InlineTextEditor from "./text/inlinetexteditor";
+import { IApp, IMouseEventData, IController, IDisposable, ChangeMode, ITextProps, TextInputArgs } from "carbon-core";
+import {InlineTextEditor} from "./text/inlinetexteditor";
 import Text from "./text/Text";
 import Invalidate from "./Invalidate";
 import UIElement from "./UIElement";
@@ -8,6 +8,7 @@ import Cursor from "./Cursor";
 
 export class PreviewTextTool {
     private tokens: IDisposable[] = [];
+    private editorTokens: IDisposable[] = [];
     private dragController: DragController;
     private text: Text;
     private editor: any;
@@ -109,12 +110,12 @@ export class PreviewTextTool {
         //todo: ctxl
 
         let engine = this.text.engine();
-        engine.contentChanged(this.onContentChanged);
+        //unsubscribed in engine.unsubscribe()
+        engine.contentChanged().bind(this.onContentChanged);
 
         var inlineEditor = new InlineTextEditor();
-        inlineEditor.onInvalidate = this.invalidateLayers;
-        inlineEditor.onSelectionChanged = () => { };
-        inlineEditor.onDeactivated = finalEdit => this.endEdit(finalEdit);
+        this.editorTokens.push(inlineEditor.onInvalidate.bind(this.invalidateLayers));
+        this.editorTokens.push(inlineEditor.onDeactivated.bind(finalEdit => this.endEdit(finalEdit)));
         inlineEditor.activate(this.text.globalViewMatrix(), engine, this.text.props.font, this.app.fontManager);
 
         this.editor = inlineEditor;
@@ -141,6 +142,8 @@ export class PreviewTextTool {
 
         this.controller.inlineEditModeChanged.raise(false, null);
 
+        this.editorTokens.forEach(x => x.dispose());
+        this.editorTokens.length = 0;
         this.editor = null;
         this.text = null;
     }

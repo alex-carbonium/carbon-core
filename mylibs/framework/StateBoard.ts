@@ -1,8 +1,8 @@
 import Artboard from "./Artboard";
-import PropertyMetadata from "framework/PropertyMetadata";
-import ModelStateListener from "framework/relayout/ModelStateListener";
+import PropertyMetadata from "./PropertyMetadata";
+import ModelStateListener from "./relayout/ModelStateListener";
 import { Types } from "./Defs";
-import DataNode from "framework/DataNode";
+import DataNode from "./DataNode";
 import NullContainer from "./NullContainer";
 import { IStateboard, IStateboardProps } from "carbon-core";
 import { model } from "./Model";

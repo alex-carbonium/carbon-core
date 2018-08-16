@@ -1,7 +1,7 @@
-import Invalidate from "framework/Invalidate";
-import DataNode from "framework/DataNode";
-import Matrix from "math/matrix";
-import EventHelper from "framework/EventHelper";
+import Invalidate from "../framework/Invalidate";
+import DataNode from "../framework/DataNode";
+import Matrix from "../math/matrix";
+import EventHelper from "../framework/EventHelper";
 
 var viewId = "#viewContainer";
 

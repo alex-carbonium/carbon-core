@@ -7,7 +7,7 @@ import PropertyTracker from "../../framework/PropertyTracker";
 import Rect from "../../math/rect";
 import Point from "../../math/point";
 import { IMouseEventData, ChangeMode, IContainer, IController, IView, IApp } from "carbon-core";
-import Cursors from "Cursors";
+import Cursors from "../../Cursors";
 import { PooledPair } from "../../framework/PooledPair";
 
 export default class ArtboardsTool extends Tool {

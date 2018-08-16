@@ -4,17 +4,16 @@ import Font from "../Font";
 import { Types } from "../Defs";
 import { deepEquals } from "../../util";
 import PropertyMetadata from "../PropertyMetadata";
-import TextEngine from "./textengine";
-import FontManager from "./font/fontmanager";
 import styleManager from "../style/StyleManager";
 import { IContainer, IDataElement, IText, TextAlign, IUIElement, ITextProps, TextContent, HorizontalConstraint, VerticalConstraint, TextMode, IPooledObject, IMatrix, ChangeMode, ResizeDimension, IRect, ProxyDefinition, RenderEnvironment } from "carbon-core";
-import params from "params";
-import ContextCommandCache from "framework/render/ContextCommandCache";
+import params from "../../params";
 import Rect from "../../math/rect";
 import Matrix from "../../math/matrix";
 import ObjectPool from "../ObjectPool";
 import Selection from "../SelectionModel";
 import Constraints from "../Constraints";
+import { FontManager } from "./font/fontmanager";
+import { TextEngine } from "./textengine";
 
 export default class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElement {
     prepareProps(changes, mode?) {
@@ -363,7 +362,7 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
         return offset;
     }
 
-    engine() {
+    engine(): TextEngine {
         if (!this.runtimeProps.engine) {
             params.perf && performance.mark("Text.createEngine");
             this.runtimeProps.engine = this.getOrCreateEngine(this.props);

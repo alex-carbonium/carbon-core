@@ -1,7 +1,7 @@
-﻿import Container from "framework/Container";
-import Matrix from "math/matrix";
-import PropertyMetadata from "framework/PropertyMetadata";
-import EventHelper from "framework/EventHelper";
+﻿import Container from "./Container";
+import Matrix from "../math/matrix";
+import PropertyMetadata from "./PropertyMetadata";
+import EventHelper from "./EventHelper";
 import UIElement from "./UIElement";
 import { Types } from "./Defs";
 import { IContainer, IRect, LayerType, IView, ILayer, RenderEnvironment, RenderFlags, ChangeMode, IUIElement } from "carbon-core";

@@ -1,8 +1,8 @@
 import ExtensionBase from "./ExtensionBase";
-import DesignerView from "framework/DesignerView";
+import DesignerView from "../framework/DesignerView";
 import { LayerType, IView } from "carbon-app";
 import GlobalMatrixModifier from "../framework/GlobalMatrixModifier";
-import UserSettings from "UserSettings";
+import UserSettings from "../UserSettings";
 import { RenderEnvironment } from "carbon-core";
 
 function drawSnapLines(context, environment: RenderEnvironment) {

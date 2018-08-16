@@ -1,5 +1,5 @@
-import Invalidate from "framework/Invalidate";
-import domUtil from "utils/dom";
+import Invalidate from "./Invalidate";
+import domUtil from "../utils/dom";
 
 export default class TouchHelper
 {

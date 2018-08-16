@@ -1,7 +1,7 @@
 import * as core from "carbon-core";
 import { RuntimeContext } from "./RuntimeContext";
 import { AutoDisposable } from "../../AutoDisposable";
-import { Event } from "code/runtime/Event";
+import { Event } from "./Event";
 
 const EdgeProximity = 80;
 export class RuntimeScreen implements core.IProxySource {

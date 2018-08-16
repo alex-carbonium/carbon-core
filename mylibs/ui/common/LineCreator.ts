@@ -6,9 +6,9 @@ import Selection from "../../framework/SelectionModel";
 import Invalidate from "../../framework/Invalidate";
 import Brush from "../../framework/Brush";
 import Point from "../../math/point";
-import UserSettings from "UserSettings";
+import UserSettings from "../../UserSettings";
 import { KeyboardState, IMouseEventData, ICoordinate, RenderEnvironment, IController, IView, IApp, IArtboard } from "carbon-core";
-import Cursors from "Cursors";
+import Cursors from "../../Cursors";
 
 function update(x1, y1, x2, y2) {
     var props = {

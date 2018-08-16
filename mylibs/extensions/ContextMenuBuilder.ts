@@ -1,10 +1,10 @@
-import RepeatContainer from "framework/repeater/RepeatContainer";
-import Selection from "framework/SelectionModel";
-import GroupContainer from "framework/GroupContainer";
+import RepeatContainer from "../framework/repeater/RepeatContainer";
+import Selection from "../framework/SelectionModel";
+import GroupContainer from "../framework/GroupContainer";
 import Symbol from "../framework/Symbol";
 import Artboard from "../framework/Artboard";
-import CompoundPath from "framework/CompoundPath";
-import Path from "framework/Path";
+import CompoundPath from "../framework/CompoundPath";
+import Path from "../framework/Path";
 import CoreIntl from "../CoreIntl";
 import { ContextBarPosition, IActionManager, IView, IApp, ElementState, IComposite } from "carbon-core";
 import InteractiveContainer from "../framework/InteractiveContainer";

@@ -1,6 +1,6 @@
 import EventHelper from "./EventHelper";
 import CompositeElement from "./CompositeElement";
-import domUtil from "utils/dom";
+import domUtil from "../utils/dom";
 import Cursor from "./Cursor";
 import TouchHelper from "./TouchHelper";
 import Artboard from "./Artboard";

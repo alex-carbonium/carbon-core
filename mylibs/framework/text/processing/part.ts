@@ -1,7 +1,33 @@
-import TextRender from "../static/textrender";
-import MeasureResult from "../measure/measureresult";
+import { PartRenderer } from "../static/PartRenderer";
+import { FontMetrics } from "../measure/FontMetrics";
 
-    /*  A Part is a section of a word with its own run, because a Word can span the
+class DefaultInline {
+    measure(formatting) {
+        var text = partRenderer.measure('?', formatting);
+        return {
+            width: text.width + 4,
+            ascent: text.width + 2,
+            descent: text.width + 2,
+            minY: -text.width - 2,
+            maxY: text.width + text.width + 4,
+            minX: 0,
+            maxX: text.width + 4
+        }
+    }
+
+    draw(ctx, x, y, width, ascent, descent) {
+        ctx.fillStyle = 'silver';
+        ctx.fillRect(x, y - ascent, width, ascent + descent);
+        ctx.strokeRect(x, y - ascent, width, ascent + descent);
+        ctx.fillStyle = 'black';
+        ctx.fillText('?', x + 2, y);
+    }
+}
+
+const partRenderer = new PartRenderer();
+const defaultInline = new DefaultInline();
+
+/*  A Part is a section of a word with its own run, because a Word can span the
         boundaries between runs, so it may have several parts in its text or space
         arrays.
 
@@ -20,8 +46,21 @@ import MeasureResult from "../measure/measureresult";
                             coordinate is assumed to be the baseline. The call
                             prepareContext(ctx) will set the canvas up appropriately.
      */
-    var Part: any = function(run, codes) {
-        var m, isNewLine, isSpace, code;
+
+export class Part {
+    run: any = null;
+    isNewLine = false;
+    width = 0;
+    ascent = 0;
+    descent = 0;
+    minY = 0;
+    maxY = 0;
+    minX = 0;
+    maxX = 0;
+    code = null;
+
+    constructor(run, codes) {
+        var m: FontMetrics, isNewLine, isSpace, code;
         if (typeof run.text === 'string') {
             if (run.text.length === 1) {
                 if (run.text[0] === '\n') {
@@ -32,10 +71,10 @@ import MeasureResult from "../measure/measureresult";
                     isSpace = true;
                 } else isSpace = false;
             }
-            m = TextRender.measure(isNewLine ? TextRender.NBSP : run.text, run);
+            m = partRenderer.measure(isNewLine ? PartRenderer.NBSP : run.text, run);
         } else {
-            code = codes(run.text) || Part.DefaultInline;
-            m = code.measure ? code.measure(run) : new MeasureResult();
+            code = codes(run.text) || defaultInline;
+            m = code.measure ? code.measure(run) : new TextMetrics();
         }
 
         if (!m) {
@@ -53,59 +92,21 @@ import MeasureResult from "../measure/measureresult";
         this.descent = m.descent;
         this.minY = m.minY;
         this.maxY = m.maxY;
-        this.minX = m.minX;
+        this.minX = m.maxY;
         this.maxX = m.maxX;
 
         if (code) {
             this.code = code;
         }
-    }
+    }    
 
-    Part.prototype.run = null;
-    Part.prototype.isNewLine = false;
-    Part.prototype.width = 0;
-    Part.prototype.ascent = 0;
-    Part.prototype.descent = 0;
-    Part.prototype.minY = 0;
-    Part.prototype.maxY = 0;
-    Part.prototype.minX = 0;
-    Part.prototype.maxX = 0;
-    Part.prototype.code = null;
-
-    Part.prototype.draw = function(ctx, x, y) {
+    draw(ctx, x, y) {
         if (typeof this.run.text === 'string') {
-            TextRender.draw(ctx, this.run.text, this.run, x, y, this.width, this.ascent, this.descent);
+            partRenderer.draw(ctx, this.run.text, this.run, x, y, this.width, this.ascent, this.descent);
         } else if (this.code && this.code.draw) {
             ctx.save();
             this.code.draw(ctx, x, y, this.width, this.ascent, this.descent, this.run);
             ctx.restore();
         }
     }
-
-    Part.DefaultInline = function() {
-
-    }
-
-    Part.DefaultInline.measure = function(formatting) {
-        var text = TextRender.measure('?', formatting);
-        return {
-            width: text.width + 4,
-            ascent: text.width + 2,
-            descent: text.width + 2,
-            minY: -text.width-2,
-            maxY: text.width+text.width+4,
-            minX: 0,
-            maxX: text.width+4
-        };
-    };
-
-    Part.DefaultInline.draw = function(ctx, x, y, width, ascent, descent) {
-        ctx.fillStyle = 'silver';
-        ctx.fillRect(x, y - ascent, width, ascent + descent);
-        ctx.strokeRect(x, y - ascent, width, ascent + descent);
-        ctx.fillStyle = 'black';
-        ctx.fillText('?', x + 2, y);
-    };
-
-    export default Part;
-
+}

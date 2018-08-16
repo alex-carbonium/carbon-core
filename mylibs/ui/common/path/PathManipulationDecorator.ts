@@ -1,16 +1,16 @@
-import Container from "framework/Container";
-import Path from "framework/Path";
+import Container from "../../../framework/Container";
+import Path from "../../../framework/Path";
 import { IIsolatable, ChangeMode, LayerType, ElementState, PointType, IMouseEventHandler, KeyboardState, IMouseEventData, IPathPoint, IDisposable, RenderEnvironment, IView, IController } from "carbon-core";
-import UIElementDecorator from "framework/UIElementDecorator";
-import Selection from "framework/SelectionModel";
-import UserSettings from "UserSettings";
-import Invalidate from "framework/Invalidate";
-import Cursors from "Cursors";
-import PropertyTracker from "framework/PropertyTracker";
-import UIElement from "framework/UIElement";
-import angleAdjuster from "math/AngleAdjuster";
-import {SelectFrame} from "framework/SelectFrame";
-import Rect from "math/rect";
+import UIElementDecorator from "../../../framework/UIElementDecorator";
+import Selection from "../../../framework/SelectionModel";
+import UserSettings from "../../../UserSettings";
+import Invalidate from "../../../framework/Invalidate";
+import Cursors from "../../../Cursors";
+import PropertyTracker from "../../../framework/PropertyTracker";
+import UIElement from "../../../framework/UIElement";
+import angleAdjuster from "../../../math/AngleAdjuster";
+import {SelectFrame} from "../../../framework/SelectFrame";
+import Rect from "../../../math/rect";
 
 export const enum PathManipulationMode {
     Create = 0,

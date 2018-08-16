@@ -1,9 +1,9 @@
 import Tool from "./Tool";
 import { IMouseEventData, IController, IView, IApp } from "carbon-core";
-import domUtil from "utils/dom";
+import domUtil from "../../utils/dom";
 import { SelectFrame } from "../../framework/SelectFrame";
 import Brush from "../../framework/Brush";
-import UserSettings from "UserSettings";
+import UserSettings from "../../UserSettings";
 import Point from "../../math/point";
 
 var debug = require("../../DebugUtil")("carb:zoomTool");

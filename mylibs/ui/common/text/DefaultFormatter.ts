@@ -1,7 +1,7 @@
-import UIElement from "framework/UIElement";
-import PropertyMetadata from "framework/PropertyMetadata";
-import {Types} from "framework/Defs";
-import Font from "framework/Font";
+import UIElement from "../../../framework/UIElement";
+import PropertyMetadata from "../../../framework/PropertyMetadata";
+import {Types} from "../../../framework/Defs";
+import Font from "../../../framework/Font";
 
 export default class DefaultFormatter extends UIElement {
     initFormatter(app){

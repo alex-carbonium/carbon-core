@@ -1,9 +1,9 @@
-﻿import Shape from "framework/Shape";
-import Brush from "framework/Brush";
-import PropertyMetadata from "framework/PropertyMetadata";
-import Path from "framework/Path";
-import * as math from "math/math";
-import Rect from "math/rect";
+﻿import Shape from "./Shape";
+import Brush from "./Brush";
+import PropertyMetadata from "./PropertyMetadata";
+import Path from "./Path";
+import * as math from "../math/math";
+import Rect from "../math/rect";
 import { Types } from "./Defs";
 import { RenderEnvironment, StrokePosition } from "carbon-core";
 

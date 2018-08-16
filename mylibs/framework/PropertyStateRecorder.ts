@@ -1,7 +1,7 @@
 // TODO: cleanup properties with the same value
-import PropertyTracker from "framework/PropertyTracker";
+import PropertyTracker from "./PropertyTracker";
 import { createUUID, deepEquals } from "../util";
-import ObjectFactory from "framework/ObjectFactory";
+import ObjectFactory from "./ObjectFactory";
 import { ChangeMode, PatchType, IUIElement, IState } from "carbon-core";
 
 function removeElement(state, elementId) {

@@ -9,7 +9,7 @@ import DataNode from "./DataNode";
 import { ChangeMode, RenderEnvironment, RenderFlags } from "carbon-core";
 import UserSettings from "../UserSettings";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
-import NullContainer from "framework/NullContainer";
+import NullContainer from "./NullContainer";
 
 export default class ImageSourceHelper {
     static draw(source: ImageSource, context, w, h, sourceElement, environment: RenderEnvironment) {

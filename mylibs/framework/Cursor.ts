@@ -1,4 +1,4 @@
-import EventHelper from "framework/EventHelper";
+import EventHelper from "./EventHelper";
 
 class Cursor {
     [name: string]: any;

@@ -1,4 +1,4 @@
-import {HorizontalAlignment, VerticalAlignment} from "framework/Defs";
+import {HorizontalAlignment, VerticalAlignment} from "../Defs";
 
 export default {
     arrange: function(container, event, changeMode){

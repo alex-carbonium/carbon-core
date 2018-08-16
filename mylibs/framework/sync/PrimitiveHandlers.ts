@@ -1,9 +1,9 @@
 import ObjectFactory from "../ObjectFactory";
-import UIElement from "framework/UIElement";
-import Invalidate from "framework/Invalidate";
-import Selection from "framework/SelectionModel";
-import AnimationGroup from "framework/animation/AnimationGroup";
-import backend from "backend";
+import UIElement from "../UIElement";
+import Invalidate from "../Invalidate";
+import Selection from "../SelectionModel";
+import AnimationGroup from "../animation/AnimationGroup";
+import backend from "../../backend";
 import { PrimitiveType, IPrimitive, IDataNode, ChangeMode, Primitive } from "carbon-core";
 import ArrayPool from "../ArrayPool";
 

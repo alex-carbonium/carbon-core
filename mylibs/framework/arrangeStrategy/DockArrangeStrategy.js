@@ -1,5 +1,5 @@
-import {DockStyle, HorizontalAlignment, VerticalAlignment} from "framework/Defs";
-import * as margins from "math/boxMargins";
+import {DockStyle, HorizontalAlignment, VerticalAlignment} from "../Defs";
+import * as margins from "../../math/boxMargins";
 
 export default {
     arrange: function(container, e, changeMode){

@@ -1,9 +1,8 @@
 import RepeatContainer from "../repeater/RepeatContainer";
 import RepeatCell from "../repeater/RepeatCell";
 import PropertyTracker from "../PropertyTracker";
-import { createUUID } from "../../util";
 import Selection from "../SelectionModel";
-import { IDisposable, PatchType, IDataManager, IApp } from "carbon-core";
+import { IDisposable, IDataManager, IApp } from "carbon-core";
 import Promise from "bluebird";
 
 export default class DataManager implements IDataManager, IDisposable {

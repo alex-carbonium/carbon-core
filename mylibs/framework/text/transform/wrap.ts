@@ -1,7 +1,26 @@
-import Line from "../processing/line";
+import { Line } from "../processing/line";
+import { TextNode } from "../primitives/node";
 
-    function Wrap(left, top, width, ordinal, parent,
-                          includeTerminator, initialAscent, initialDescent, noWrap) {
+export class Wrap {
+    _lineBuffer = null;
+    _lineWidth = 0;
+    _maxAscent = 0;
+    _maxDescent = 0;
+    _quit = false;
+    _lastNewLineHeight = 0;
+    _tempLastAscent = 0;
+    _tempLastDescent = 0;
+    _y = 0;
+    _top = 0;
+    _consumer = null;
+    _parent = null;
+    _ordinal = 0;
+    _width = 0;
+    _noWrap = false;
+    _left = 0;
+    _includeTerminator = undefined;
+    
+    constructor(left, top, width, ordinal, parent, includeTerminator, initialAscent, initialDescent, noWrap) {
         this._lineBuffer = [];
         this._maxAscent = initialAscent || 0;
         this._maxDescent = initialDescent || 0;
@@ -13,28 +32,9 @@ import Line from "../processing/line";
         this._width = width;
         this._noWrap = noWrap;
         this._includeTerminator = includeTerminator;
-
     }
 
-    Wrap.prototype._lineBuffer = null;
-    Wrap.prototype._lineWidth = 0;
-    Wrap.prototype._maxAscent = 0;
-    Wrap.prototype._maxDescent = 0;
-    Wrap.prototype._quit = false;
-    Wrap.prototype._lastNewLineHeight = 0;
-    Wrap.prototype._tempLastAscent = 0;
-    Wrap.prototype._tempLastDescent = 0;
-    Wrap.prototype._y = 0;
-    Wrap.prototype._top = 0;
-    Wrap.prototype._consumer = null;
-    Wrap.prototype._parent = null;
-    Wrap.prototype._ordinal = 0;
-    Wrap.prototype._width = 0;
-    Wrap.prototype._noWrap = false;
-    Wrap.prototype._left = 0;
-    Wrap.prototype._includeTerminator = undefined;
-
-    Wrap.prototype._store  = function(word, emit) {
+    _store(word, emit) {
         this._lineBuffer.push(word);
         this._lineWidth += word.width;
 
@@ -52,7 +52,7 @@ import Line from "../processing/line";
             var ls = this._lineBuffer[0].lineSpacing();
             this._send(emit);
             if (word.eof) {
-                this._lastNewLineHeight = (this._tempLastAscent+this._tempLastDescent);
+                this._lastNewLineHeight = (this._tempLastAscent + this._tempLastDescent);
             } else {
                 this._lastNewLineHeight = (word.ascent + word.descent);
             }
@@ -65,7 +65,7 @@ import Line from "../processing/line";
         }
     };
 
-    Wrap.prototype._send = function(emit) {
+    _send(emit) {
         if (this._quit || this._lineBuffer.length === 0) {
             return;
         }
@@ -74,25 +74,25 @@ import Line from "../processing/line";
         this._quit = emit(l);
         var lh = (this._maxAscent + this._maxDescent);
         if (typeof l.lineSpacing === "number") {
-            lh *= l.lineSpacing;   
+            lh *= l.lineSpacing;
         } else {
             lh += parseFloat(l.lineSpacing);
         }
-         
+
         this._y += lh;
         this._lineBuffer.length = 0;
         this._lineWidth = this._maxAscent = this._maxDescent = 0;
     };
 
-    Wrap.prototype.wrap = function(emit, inputWord) {
+    wrap(emit, inputWord) {
         if (this._consumer) {
             this._lastNewLineHeight = 0;
-            var node = this._consumer(inputWord);
+            var node: TextNode = this._consumer(inputWord);
             if (node) {
                 this._consumer = null;
                 this._ordinal += node.length;
-                this._y += node.bounds().h;
-                Object.defineProperty(node, 'block', { value: true });
+                this._y += node.bounds().height;
+                node.block = true;
                 emit(node);
             }
         } else {
@@ -101,9 +101,9 @@ import Line from "../processing/line";
                 if (this._lineBuffer.length) {
                     this._send(emit);
                 } else {
-                    this._y += this.lastNewLineHeight;
+                    this._y += this._lastNewLineHeight;
                 }
-                this._consumer = code.block(this._left, this._y, this._width, 
+                this._consumer = code.block(this._left, this._y, this._width,
                     this._ordinal, this._parent, inputWord.codeFormatting(), this._noWrap);
                 this._lastNewLineHeight = 0;
             }
@@ -133,4 +133,4 @@ import Line from "../processing/line";
         return this._quit;
     }
 
-export default Wrap;
+}

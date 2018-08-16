@@ -2,7 +2,7 @@ import { IModel, IText, ITextProps, IUIElement, IUIElementProps, ISize, ILinePro
 import UIElement from "./UIElement";
 import Text from "./text/Text";
 import Rect from "../math/rect";
-import Path from "../framework/Path";
+import Path from "./Path";
 import Image from "./Image";
 import Line from "./Line";
 import Star from "./Star";

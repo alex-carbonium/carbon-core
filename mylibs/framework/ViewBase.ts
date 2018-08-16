@@ -1,17 +1,17 @@
-import AnimationController from "framework/animation/AnimationController";
-import { areRectsIntersecting, combineRects } from "math/math";
-import Matrix from "math/matrix";
-import ContextPool from "framework/render/ContextPool";
-import EventHelper from "framework/EventHelper";
-import Selection from "framework/SelectionModel";
-import Invalidate from "framework/Invalidate";
+import AnimationController from "./animation/AnimationController";
+import { areRectsIntersecting, combineRects } from "../math/math";
+import Matrix from "../math/matrix";
+import ContextPool from "./render/ContextPool";
+import EventHelper from "./EventHelper";
+import Selection from "./SelectionModel";
+import Invalidate from "./Invalidate";
 import { LayerType, IView, IAnimationController, ILayer, IUIElement, ViewState, IEvent, ICoordinate, IContext, ISize, IRect, IPoint, RenderEnvironment, RenderFlags, ChangeMode, IArtboard, Origin, IIsolationLayer, Layer } from "carbon-core";
 import Rect from "../math/rect";
 import AnimationGroup from "./animation/AnimationGroup";
 import Context from "./render/Context";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
 import ExtensionPoint from "./ExtensionPoint";
-import ContextLayerSource from "framework/render/ContextLayerSource";
+import ContextLayerSource from "./render/ContextLayerSource";
 import Point from "../math/point";
 import IsolationContext from "../IsolationContext";
 

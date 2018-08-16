@@ -7,7 +7,7 @@ import DesignerController from "../DesignerController";
 import Workspace from "../../Workspace";
 import Clipboard from "../Clipboard";
 import { keyboard } from "../../platform/Keyboard";
-import Context from "../render/Context";
+import Context from "./Context";
 import ExtensionPoint from "../ExtensionPoint";
 import { IApp, IView, IRenderLoop, IController, ContextType, Platform, IPlatformSpecificHandler } from "carbon-core";
 import MirroringController from "../MirroringController";

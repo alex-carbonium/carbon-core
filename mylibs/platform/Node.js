@@ -1,6 +1,6 @@
 import { isBrowser } from "../util";
 import All from "./All";
-import Context from "framework/render/Context";
+import Context from "../framework/render/Context";
 
 //var Canvas = require('canvas');
 var Canvas = null;

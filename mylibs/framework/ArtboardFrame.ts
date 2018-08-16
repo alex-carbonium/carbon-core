@@ -1,17 +1,17 @@
-import PropertyMetadata from "framework/PropertyMetadata";
+import PropertyMetadata from "./PropertyMetadata";
 import { Overflow, Types, ContentBehavior } from "./Defs";
-import Selection from "framework/SelectionModel";
-import DataNode from "framework/DataNode";
+import Selection from "./SelectionModel";
+import DataNode from "./DataNode";
 import { ElementState, RenderEnvironment, IMouseEventData } from "carbon-core";
 import RenderPipeline from "./render/RenderPipeline";
 import ContextPool from "./render/ContextPool";
 import { renderer } from "./render/Renderer";
 import Container from "./Container";
-import Symbol from "framework/Symbol";
-import Matrix from "math/matrix";
+import Symbol from "./Symbol";
+import Matrix from "../math/matrix";
 import { ChangeMode } from "carbon-basics";
 import UIElement from "./UIElement";
-import NullContainer from "framework/NullContainer";
+import NullContainer from "./NullContainer";
 import Rect from "../math/rect";
 
 export default class ArtboardFrameControl extends Container {

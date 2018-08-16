@@ -1,6 +1,6 @@
 import { IRenderer, IUIElement, RenderEnvironment, RenderFlags, IRect, IContext, IMatrix } from "carbon-core";
 import ContextPool from "./ContextPool";
-import Matrix from "math/matrix";
+import Matrix from "../../math/matrix";
 import RenderPipeline from "./RenderPipeline";
 import Page from "../Page";
 import Rect from "../../math/rect";

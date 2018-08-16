@@ -485,7 +485,10 @@ export function adjustRectHeight(rect: IRectData, delta: number): IRectData {
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height + delta };
 }
 export function isPointInRect(rect: IRectData, point: ICoordinate): boolean {
-    return point.x >= rect.x && point.x < rect.x + rect.width && point.y >= rect.y && point.y < rect.y + rect.height;
+    return areCoordinatesInRect(rect, point.x, point.y);
+}
+export function areCoordinatesInRect(rect: IRectData, x: number, y: number): boolean {
+    return x >= rect.x && x < rect.x + rect.width && y >= rect.y && y < rect.y + rect.height;
 }
 
 export function isPointInEllipse(rect: IRectData, point: ICoordinate): boolean {

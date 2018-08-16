@@ -1,5 +1,5 @@
 import CoreIntl from "../../CoreIntl";
-import EventHelper from "framework/EventHelper";
+import EventHelper from "../EventHelper";
 import {createUUID} from "../../util";
 import { IStyleManager } from "carbon-core";
 

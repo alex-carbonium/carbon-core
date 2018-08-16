@@ -1,4 +1,4 @@
-import UIElement from "framework/UIElement";
+import UIElement from "./UIElement";
 
 export default class RectMask extends UIElement {
     constructor() {

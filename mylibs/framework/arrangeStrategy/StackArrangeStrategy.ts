@@ -1,7 +1,7 @@
 import {
     HorizontalAlignment,
     VerticalAlignment
-} from "framework/Defs";
+} from "../Defs";
 
 function getTotalChildrenWidth(container) {
     let res = 0;

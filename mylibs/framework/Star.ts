@@ -1,10 +1,10 @@
 import Polygon from "./Polygon";
-import PropertyMetadata from "framework/PropertyMetadata";
-import DefaultFrameType from "decorators/DefaultFrameType";
-import UIElement from "framework/UIElement";
-import { PointDirection, Types, FrameCursors } from "framework/Defs";
-import LineDirectionPoint from "decorators/LineDirectionPoint";
-import RotateFramePoint from "decorators/RotateFramePoint";
+import PropertyMetadata from "./PropertyMetadata";
+import DefaultFrameType from "../decorators/DefaultFrameType";
+import UIElement from "./UIElement";
+import { PointDirection, Types, FrameCursors } from "./Defs";
+import LineDirectionPoint from "../decorators/LineDirectionPoint";
+import RotateFramePoint from "../decorators/RotateFramePoint";
 import Rect from "../math/rect";
 import Point from "../math/point";
 import { IStar } from "carbon-core";

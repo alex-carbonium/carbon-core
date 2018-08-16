@@ -1,4 +1,4 @@
-import Invalidate from "framework/Invalidate";
+import Invalidate from "../framework/Invalidate";
 import All from "./All";
 
 export default class Basic extends All {

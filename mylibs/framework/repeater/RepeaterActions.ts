@@ -1,9 +1,9 @@
 import { IUIElement, IRepeatContainer, UIElementFlags, IContributions, ContextBarPosition, ISelection } from "carbon-core";
 import RepeatContainer from "./RepeatContainer";
 import RepeatCell from "./RepeatCell";
-import Selection from "framework/SelectionModel";
-import { combineRects } from "math/math";
-import Rect from "math/rect";
+import Selection from "../SelectionModel";
+import { combineRects } from "../../math/math";
+import Rect from "../../math/rect";
 import Point from "../../math/point";
 import GroupContainer from "../GroupContainer";
 import Artboard from "../Artboard";

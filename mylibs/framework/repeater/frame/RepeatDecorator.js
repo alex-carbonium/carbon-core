@@ -1,4 +1,4 @@
-import { PointDirection, FrameCursors } from "framework/Defs";
+import { PointDirection, FrameCursors } from "../../Defs";
 import UIElementDecorator from "../../UIElementDecorator";
 
 var LineWidth = 2;

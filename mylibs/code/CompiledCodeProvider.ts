@@ -3,8 +3,7 @@ import { IDisposable } from "carbon-runtime";
 import { ArtboardProxyGenerator } from "./ProxyGenerator";
 import { ICompilerService } from "carbon-core";
 import { NameProvider } from "./NameProvider";
-import Artboard from "framework/Artboard";
-import { resolve, reject } from "../../node_modules/@types/bluebird/index";
+import Artboard from "../framework/Artboard";
 
 var platformLib = require("raw-loader!./runtimelibs/runtime-platform.d.ts.txt");
 var carbonRuntimeSource: string = require("raw!../definitions/carbon-runtime.d.ts") as any;

@@ -1,32 +1,49 @@
-import Runs from "../static/runs";
 import Per from "../util/per";
-import Part from "../processing/part";
+import { TextNode } from "../primitives/node";
+import { Part } from "./part";
+import { Runs } from "../static/runs";
 
-    /*  A Word has the following properties:
+/*  A Word has the following properties:
 
-            text      - Section (see below) for non-space portion of word.
-            space     - Section for trailing space portion of word.
-            ascent    - Ascent (distance from baseline to top) for whole word
-            descent   - Descent (distance from baseline to bottom) for whole word
-            width     - Width of the whole word (including trailing space)
+        text      - Section (see below) for non-space portion of word.
+        space     - Section for trailing space portion of word.
+        ascent    - Ascent (distance from baseline to top) for whole word
+        descent   - Descent (distance from baseline to bottom) for whole word
+        width     - Width of the whole word (including trailing space)
 
-        It has methods:
+    It has methods:
 
-            isNewLine()
-                      - Returns true if the Word represents a newline. Newlines are
-                        always represented by separate words.
+        isNewLine()
+                  - Returns true if the Word represents a newline. Newlines are
+                    always represented by separate words.
 
-            draw(ctx, x, y)
-                      - Draws the Word at x, y on the canvas context ctx.
+        draw(ctx, x, y)
+                  - Draws the Word at x, y on the canvas context ctx.
 
-        Note: a section (i.e. text and space) is an object containing:
+    Note: a section (i.e. text and space) is an object containing:
 
-            parts     - array of Parts
-            ascent    - Ascent (distance from baseline to top) for whole section
-            descent   - Descent (distance from baseline to bottom) for whole section
-            width     - Width of the whole section
-     */
-    var Word: any = function(coords, codes) {
+        parts     - array of Parts
+        ascent    - Ascent (distance from baseline to top) for whole section
+        descent   - Descent (distance from baseline to bottom) for whole section
+        width     - Width of the whole section
+ */
+
+export class Word extends TextNode {
+    text = null;
+    space = null;
+    ascent = 0;
+    descent = 0;
+    minY = 0;
+    maxY = 0;
+    minX = 0;
+    maxX = 0;
+    width = 0;
+    length = 0;
+    eof = false;
+
+    constructor(coords, codes) {
+        super('word', null);
+
         var text, space;
         if (!coords) {
             // special end-of-document marker, mostly like a newline with no formatting
@@ -62,65 +79,53 @@ import Part from "../processing/part";
 
         this.width = text.width + space.width;
         this.length = text.length + space.length;
-    };
+    }
 
-    Word.prototype.text = null;
-    Word.prototype.space = null;
-    Word.prototype.ascent = 0;
-    Word.prototype.descent = 0;
-    Word.prototype.minY = 0;
-    Word.prototype.maxY = 0;
-    Word.prototype.minX = 0;
-    Word.prototype.maxX = 0;
-    Word.prototype.width = 0;
-    Word.prototype.length = 0;
-    Word.prototype.eof = false;
-
-    Word.prototype.isNewLine = function() {
+    isNewLine () {
         return this.text.parts.length == 1 && this.text.parts[0].isNewLine;
-    };
+    }
 
-    Word.prototype.code = function() {
+    code() {
         return this.text.parts.length == 1 && this.text.parts[0].code;
-    };
+    }
 
-    Word.prototype.codeFormatting = function() {
+    codeFormatting() {
         return this.text.parts.length == 1 && this.text.parts[0].run;
-    };
+    }
 
-    Word.prototype.draw = function(ctx, x, y) {
-        Per.create(this.text.parts).concat(this.space.parts).forEach(function(part) {
+    drawWord(ctx, x, y) {
+        Per.create(this.text.parts).concat(this.space.parts).forEach(function (part: any) {
             part.draw(ctx, x, y);
             x += part.width;
         });
-    };
+    }
 
-    Word.prototype.plainText = function() {
+    plainText() {
         return this.text.plainText + this.space.plainText;
-    };
+    }
 
-    Word.prototype.align = function() {
+    align() {
         var first = this.text.parts[0];
         return first && first.run.align ? first.run.align : Runs.defaultFormatting.align;
-    };
+    }
 
-    Word.prototype.lineSpacing = function() {
+    lineSpacing() {
         var first = this.text.parts[0];
         return first && first.run.lineSpacing ? first.run.lineSpacing : Runs.defaultFormatting.lineSpacing;
-    };
+    }
 
-    Word.prototype.getActualHeight = function() {
+    getActualHeight() {
         return (this.ascent + this.descent) * this.lineSpacing();
-    };
+    }
 
-    Word.prototype.runs = function(emit, range) {
+    runs(emit, range) {
         var start = range && range.start || 0,
             end = range && range.end;
         if (typeof end !== 'number') {
             end = Number.MAX_VALUE;
         }
-        [this.text, this.space].forEach(function(section) {
-            section.parts.some(function(part) {
+        [this.text, this.space].forEach(function (section) {
+            section.parts.some(function (part) {
                 if (start >= end || end <= 0) {
                     return true;
                 }
@@ -150,14 +155,14 @@ import Part from "../processing/part";
         });
     }
 
-    Word.section = function(runEmitter, codes) {
+    static section(runEmitter, codes) {
         var sParts;
         try {
-            sParts = Per.create(runEmitter).map(function(p) {
+            sParts = Per.create(runEmitter).map(function (p) {
                 var part = new Part(p, codes);
                 return part;
             }).all();
-        } catch (e){
+        } catch (e) {
             return null;
         }
 
@@ -173,7 +178,7 @@ import Part from "../processing/part";
             length: 0,
             plainText: ''
         };
-        s.parts.forEach(function(p) {
+        s.parts.forEach(function (p) {
             s.ascent = Math.max(s.ascent, p.ascent);
             s.descent = Math.max(s.descent, p.descent);
             s.minY = Math.min(s.minY, p.minY);
@@ -186,6 +191,5 @@ import Part from "../processing/part";
         });
 
         return s;
-    };
-
-    export default Word;
+    }
+}

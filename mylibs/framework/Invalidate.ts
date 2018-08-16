@@ -1,4 +1,4 @@
-import EventHelper from "framework/EventHelper";
+import EventHelper from "./EventHelper";
 import { IEvent2, IRect, IInvalidate, RenderFlags, IEvent } from "carbon-core";
 import { LayerType } from "carbon-app";
 import { debounce } from "../util";

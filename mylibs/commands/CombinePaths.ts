@@ -1,5 +1,5 @@
-import CompoundPath from "framework/CompoundPath";
-import Path from "framework/Path";
+import CompoundPath from "../framework/CompoundPath";
+import Path from "../framework/Path";
 import Selection from "../framework/SelectionModel";
 
 export default class CombinePaths {

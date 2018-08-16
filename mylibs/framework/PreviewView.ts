@@ -1,5 +1,5 @@
 import ViewBase from "./ViewBase";
-import EventHelper from "framework/EventHelper";
+import EventHelper from "./EventHelper";
 import Cursor from "./Cursor";
 import {IContext, ContextType, RenderFlags, RenderEnvironment, IDisposable} from "carbon-core";
 import Invalidate from "./Invalidate";
