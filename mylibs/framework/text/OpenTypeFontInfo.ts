@@ -1,7 +1,7 @@
 import { FontInfo } from "./fontinfo";
 import { FontWeight, FontStyle, IRect } from "carbon-core";
-import { Font } from "opentype.js";
-import Rect from "../../../math/rect";
+import { Font } from "../../../node_modules/@types/opentype.js/index";
+import Rect from "../../math/rect";
 
 export class OpenTypeFontInfo extends FontInfo {
     constructor(family: string, style: FontStyle, weight: FontWeight, private url: string, private openTypeFont: Font) {

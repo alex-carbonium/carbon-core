@@ -1,15 +1,15 @@
 import OpenType from "opentype.js";
 import WebFontLoader from "webfontloader";
-import Invalidate from "./framework/Invalidate";
-import Text from "./framework/text/Text";
-import {partRenderer} from "./framework/text/static/PartRenderer";
+import Invalidate from "../Invalidate";
+import Text from "./Text";
+import {partRenderer} from "./TextPartRenderer";
 import { FontWeight, FontStyle } from "carbon-basics";
-import backend from "./backend";
+import backend from "../../backend";
 import bluebird from "bluebird";
 import { IFontManager, FontMetadata, IApp } from "carbon-core";
-import params from "./params";
-import { FontManager } from "./framework/text/font/fontmanager";
-import { OpenTypeFontInfo } from "./framework/text/font/opentypefontinfo";
+import params from "../../params";
+import { FontManager } from "./fontmanager";
+import { OpenTypeFontInfo } from "./OpenTypeFontInfo";
 
 var load = bluebird.promisify(OpenType.load);
 
@@ -91,7 +91,7 @@ export class OpenTypeFontManager extends FontManager implements IFontManager {
                 && element.props.font.style === style
                 && element.props.font.weight === weight
             ) {
-                element.resetEngine();
+                element.resetAdapter();
             }
         });
         partRenderer.clearCache();

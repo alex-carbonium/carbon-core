@@ -4,17 +4,20 @@ import {Types} from "../../../framework/Defs";
 import Font from "../../../framework/Font";
 import { ChangeMode, IText, ITextProps } from "carbon-core";
 import Brush from "../../../framework/Brush";
+import { TextAdapter } from "../../../framework/text/TextAdapter";
+import { LazyFormatting } from "carbon-text";
 
 var debug = require("DebugUtil")("carb:rangeFormatter");
 
 export default class RangeFormatter extends UIElement {
     private _element: IText;
     private _internalUpdate: boolean;
+    private _adapter: TextAdapter;
 
-    initFormatter(app, engine, element){
+    initFormatter(app, adapter: TextAdapter, element){
         this._app = app;
-        this._engine = engine;
-        this._engine.selectionChanged(this.selectionChanged);
+        this._adapter = adapter;
+        this._adapter.selectionChanged().bind(this.selectionChanged);
         this._element = element;
 
         this._internalUpdate = true;
@@ -22,15 +25,15 @@ export default class RangeFormatter extends UIElement {
         this._internalUpdate = false;
     }
     getFirstFont(){
-        var range = this._engine.getRange(0, 0);
+        var range = this._adapter.getRange(0, 0);
         var formatting = range.getFormatting();
         return this._formattingToFont(formatting);
     }
-    selectionChanged = formatting => {
-        var modifyingInsert = this._engine.isModifyingInsertFormatting();
-        var f = modifyingInsert ? this._engine.nextInsertFormatting() : formatting();
-        if (modifyingInsert || this._isFormattingChanged(f, this._engine.lastFormatting())){
-            this._engine.lastFormatting(f);
+    selectionChanged = (formatting: LazyFormatting) => {
+        var modifyingInsert = this._adapter.isModifyingInsertFormatting();
+        var f = modifyingInsert ? this._adapter.nextInsertFormatting() : formatting();
+        if (modifyingInsert || this._isFormattingChanged(f, this._adapter.lastFormatting())){
+            this._adapter.lastFormatting(f);
             var font = this._formattingToFont(f);
             debug("set font %o", font);
 
@@ -92,7 +95,7 @@ export default class RangeFormatter extends UIElement {
     }
 
     _fontChanged(font: Font){
-        var range = this._engine.selectedRange();
+        var range = this._adapter.selectedRange();
 
         var formatting = this._fontToFormatting(font);
         debug("set formatting %s", JSON.stringify(formatting.keys.map((x, i) => {return {[x]: formatting.values[i]}})));

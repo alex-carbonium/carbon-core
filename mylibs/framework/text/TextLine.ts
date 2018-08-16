@@ -1,7 +1,7 @@
-import { TextNode } from "../primitives/node";
+import { TextNode } from "./TextNode";
 import { TextAlign } from "carbon-basics";
-import Rect from "../../../math/rect";
-import { PositionedWord } from "./positionedword";
+import Rect from "../../math/rect";
+import { TextPositionedWord } from "./TextPositionedWord";
 import { ITextLine } from "carbon-text";
 
 /*  A Line is returned by the wrap function. It contains an array of PositionedWord objects that are
@@ -20,7 +20,7 @@ It has methods:
 */
 
 
-export class Line extends TextNode implements ITextLine {
+export class TextLine extends TextNode implements ITextLine {
     doc = null;
     left = null;
     width = NaN;
@@ -91,7 +91,7 @@ export class Line extends TextNode implements ITextLine {
             x += (word.width + spacing);
             var wordOrdinal = ordinal;
             ordinal += (word.text.length + word.space.length);
-            return new PositionedWord(word, this, wordLeft, wordOrdinal, word.width + spacing);
+            return new TextPositionedWord(word, this, wordLeft, wordOrdinal, word.width + spacing);
         });
 
         this.actualWidth =  actualWidth;

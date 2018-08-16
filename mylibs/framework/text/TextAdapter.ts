@@ -1,12 +1,13 @@
-import { deCRLFify } from "./util/util";
+import { deCRLFify } from "./TextUtil";
 import Rect from "../../math/rect";
-import { Range } from "./primitives/range";
-import { Doc } from "./doc";
-import { Runs } from "./static/runs";
-import { Renderer } from "./renderer";
+import { TextRange } from "./TextRange";
+import { TextDoc } from "./TextDoc";
+import { TextRuns } from "./TextRuns";
+import { Renderer } from "./TextRenderer";
+import { TextFormatting } from "carbon-text";
 
-export class TextEngine {
-	_doc: Doc = null;
+export class TextAdapter {
+	_doc: TextDoc = null;
 	_changeParam = 0;
 	_renderer = null;
 	_maxWidth = 0;
@@ -14,17 +15,17 @@ export class TextEngine {
 	_height = 1;
 	_verticalShift = 0;
 	_focused = true;
-	_defaultFormatting: any;
-	_lastFormatting: any;
+	_defaultFormatting: TextFormatting;
+	_lastFormatting: TextFormatting;
 	_rect: Rect;
 
-	constructor(defaultFormatting) {
+	constructor(defaultFormatting: TextFormatting) {
 		this.setDefaultFormatting(defaultFormatting);
-		this._doc = new Doc();
+		this._doc = new TextDoc();
 	}
 
 	updateSize(w, h) {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		this._width = w || 1;
 		this._doc.width(this._width);
 		this._height = h || 1;
@@ -41,14 +42,8 @@ export class TextEngine {
 		}
 	}
 
-	// Core.prototype.requireFont(font) {
-	// 	if (this._fontCallback) {
-	// 		this._fontCallback(font);
-	// 	}
-	// }
-
 	setText(txt) {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		var runs = null;
 		if (typeof txt === "string") {
 			var prevFormatting = this.getDocumentRange().getFormatting();
@@ -62,9 +57,6 @@ export class TextEngine {
 			}
 			runs = [runs];
 		} else if (txt instanceof Array) {
-			// if (txt.length && txt[0].valign){
-			// 	this.verticalAlignment(txt[0].valign);
-			// }
 			runs = txt;
 		} else {
 			runs = [txt];
@@ -74,42 +66,38 @@ export class TextEngine {
 	}
 
 	save() {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		return this._doc.save();
 	}
 
-	// Core.prototype.setFont(font) {
-	// 	this._currentFont = font;
-	// }
-
 	insert(ch) {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		this._doc.insert(ch);
 	}
 
 	setWrap(enable) {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		this._doc.wrap(enable);
 	}
 
 	setWidth(width) {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		this._width = width;
 		if (width === undefined) {
-			this._doc.width(this.getWidth() || this._maxWidth); // if doc width small, text wraps in auto mode
+			this._doc.width(this.getWidth() || this._maxWidth);
 		} else {
 			this._doc.width(width);
 		}
 	}
 
 	getRealBounds() {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		var bounds = this._doc.frame.realBounds();
 		return bounds;
 	}
 
 	getTopMargin() {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		var margin = this._doc.frame.topMargin();
 		if (Number.isNaN(margin)) {
 			return 0;
@@ -118,7 +106,7 @@ export class TextEngine {
 	}
 
 	getBottomMargin() {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		var margin = this._doc.frame.bottomMargin();
 		if (Number.isNaN(margin)) {
 			return 0;
@@ -131,7 +119,7 @@ export class TextEngine {
 	}
 
 	getActualWidth() {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		if (!this._doc.frame) {
 			return 0;
 		}
@@ -143,7 +131,7 @@ export class TextEngine {
 	}
 
 	getActualHeight() {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		if (!this._doc.frame) {
 			return 0;
 		}
@@ -192,7 +180,7 @@ export class TextEngine {
 	}
 
 	getActualWidthWithoutWrap() {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		if (!this._doc.frame) {
 			return 0;
 		}
@@ -211,7 +199,7 @@ export class TextEngine {
 	}
 
 	getCaretCoords(ord) {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		return this._doc.getCaretCoords(ord);
 	}
 
@@ -224,48 +212,48 @@ export class TextEngine {
 	}
 
 	wordContainingOrdinal(ord) {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		return this._doc.wordContainingOrdinal(ord);
 	}
 
 	wordOrdinal(ord) {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		return this._doc.wordOrdinal(ord);
 	}
 
 	select(start, end, direction?) {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		return this._doc.select(start, end, false, direction);
 	}
 
 	undo() {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		return this._doc.performUndo();
 	}
 
 	redo() {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		return this._doc.performUndo(true);
 	}
 
 	getRange(start, end) {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		return this._doc.range(start, end);
 	}
 
-	selectedRange(): Range {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+	selectedRange(): TextRange {
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		return this._doc.selectedRange();
 	}
 
 	selectedParagraphRange() {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		var sel = this._doc.selectedRange();
 		return this._doc.paragraphRange(sel.start, sel.end);
 	}
 
 	selectAll() {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		return this.select(0, this.getLength() - 1);
 	}
 
@@ -282,22 +270,22 @@ export class TextEngine {
 	}
 
 	getDocument() {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		return this._doc;
 	}
 
-	getDocumentRange(): Range {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+	getDocumentRange(): TextRange {
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		return this._doc.documentRange();
 	}
 
 	byCoordinate(x, y) {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		return this._doc.byCoordinate(x, y + this._verticalShift);
 	}
 
 	toggleCaret() {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		return this._doc.toggleCaret();
 	}
 
@@ -315,12 +303,12 @@ export class TextEngine {
 		return false;
 	}
 
-	nextInsertFormatting() {
+	nextInsertFormatting(): Partial<TextFormatting> {
 		return this._doc.nextInsertFormatting;
 	}
 
 	render(context, drawSelection, vtrans, focused, env) {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		this.ensureContext(context);
 
 		this._verticalShift = -vtrans;
@@ -333,7 +321,7 @@ export class TextEngine {
 	}
 
 	drawSelection(context, focused, env) {
-		Runs.setDefaultFormatting(this._defaultFormatting);
+		TextRuns.setDefaultFormatting(this._defaultFormatting);
 		this._doc.drawSelection(context, focused, this._lastFormatting, env);
 	}
 
@@ -348,10 +336,10 @@ export class TextEngine {
 
 	setDefaultFormatting(formatting) {
 		this._defaultFormatting = formatting;
-		Runs.setDefaultFormatting(formatting);
+		TextRuns.setDefaultFormatting(formatting);
 	}
 
-	lastFormatting(value) {
+	lastFormatting(value?): TextFormatting {
 		if (arguments.length === 1) {
 			this._lastFormatting = value;
 		}

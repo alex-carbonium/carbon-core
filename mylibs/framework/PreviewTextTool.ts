@@ -1,5 +1,5 @@
 import { IApp, IMouseEventData, IController, IDisposable, ChangeMode, ITextProps, TextInputArgs } from "carbon-core";
-import {InlineTextEditor} from "./text/inlinetexteditor";
+import {TextEditor} from "./text/TextEditor";
 import Text from "./text/Text";
 import Invalidate from "./Invalidate";
 import UIElement from "./UIElement";
@@ -11,7 +11,7 @@ export class PreviewTextTool {
     private editorTokens: IDisposable[] = [];
     private dragController: DragController;
     private text: Text;
-    private editor: any;
+    private editor: TextEditor;
     private next: { element: Text; event: IMouseEventData };
 
     constructor(private app: IApp, private controller: IController) {
@@ -109,25 +109,25 @@ export class PreviewTextTool {
         this.text.enablePropsTracking();
         //todo: ctxl
 
-        let engine = this.text.engine();
-        //unsubscribed in engine.unsubscribe()
-        engine.contentChanged().bind(this.onContentChanged);
+        let adapter = this.text.adapter();
+        //unsubscribed in adapter.unsubscribe()
+        adapter.contentChanged().bind(this.onContentChanged);
 
-        var inlineEditor = new InlineTextEditor();
+        var inlineEditor = new TextEditor();
         this.editorTokens.push(inlineEditor.onInvalidate.bind(this.invalidateLayers));
         this.editorTokens.push(inlineEditor.onDeactivated.bind(finalEdit => this.endEdit(finalEdit)));
-        inlineEditor.activate(this.text.globalViewMatrix(), engine, this.text.props.font, this.app.fontManager);
+        inlineEditor.activate(this.text.globalViewMatrix(), adapter, this.text.props.font, this.app.fontManager);
 
         this.editor = inlineEditor;
         this.controller.inlineEditModeChanged.raise(true, inlineEditor);
     }
 
     private onContentChanged = () => {
-        this.text.prepareAndSetProps({ content: this.editor.engine.save() }, ChangeMode.Self);
+        this.text.prepareAndSetProps({ content: this.editor.adapter.save() }, ChangeMode.Self);
 
         if (this.text.runtimeProps.events && this.text.runtimeProps.events.onTextInput) {
             let args: TextInputArgs = {
-                plainText: this.text.engine().getDocumentRange().plainText(),
+                plainText: this.text.adapter().getDocumentRange().plainText(),
                 content: this.text.props.content
             }
             this.text.runtimeProps.events.onTextInput.raise(args);
@@ -135,7 +135,7 @@ export class PreviewTextTool {
     }
 
     private endEdit(finalEdit: boolean) {
-        this.text.runtimeProps.engine.unsubscribe();
+        this.text.runtimeProps.adapter.unsubscribe();
         this.text.runtimeProps.editing = false;
         this.text.runtimeProps.drawSelection = false;
         this.text.disablePropsTracking();

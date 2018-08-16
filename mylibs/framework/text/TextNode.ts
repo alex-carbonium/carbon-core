@@ -1,7 +1,8 @@
-import Rect from "../../../math/rect";
+import Rect from "../../math/rect";
 import { IRect } from "carbon-core";
+import { ITextNode } from "carbon-text";
 
-export class TextNode {
+export class TextNode implements ITextNode {
     ordinal: number;    
     length: number;
     block: boolean;

@@ -5,7 +5,7 @@ import Brush from "./framework/Brush";
 import EventHelper from "./framework/EventHelper";
 import Page from "./framework/Page";
 import StyleManager from "./framework/style/StyleManager";
-import { DefaultFont, OpenTypeFontManager } from "./OpenTypeFontManager";
+import { DefaultFont, OpenTypeFontManager } from "./framework/text/OpenTypeFontManager";
 import {
     Types
 } from "./framework/Defs";

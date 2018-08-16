@@ -1,7 +1,7 @@
-import { Line } from "../processing/line";
-import { TextNode } from "../primitives/node";
+import { TextLine } from "./TextLine";
+import { TextNode } from "./TextNode";
 
-export class Wrap {
+export class TextWrap {
     _lineBuffer = null;
     _lineWidth = 0;
     _maxAscent = 0;
@@ -69,7 +69,7 @@ export class Wrap {
         if (this._quit || this._lineBuffer.length === 0) {
             return;
         }
-        var l = new Line(this._parent, this._left, this._width, this._y + this._maxAscent, this._maxAscent, this._maxDescent, this._lineBuffer, this._ordinal);
+        var l = new TextLine(this._parent, this._left, this._width, this._y + this._maxAscent, this._maxAscent, this._maxDescent, this._lineBuffer, this._ordinal);
         this._ordinal += l.length;
         this._quit = emit(l);
         var lh = (this._maxAscent + this._maxDescent);

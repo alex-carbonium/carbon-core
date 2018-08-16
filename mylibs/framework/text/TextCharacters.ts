@@ -1,12 +1,12 @@
-import { Runs } from "../static/runs";
+import { TextRuns } from "./TextRuns";
 
-export class Characters {
+export class TextCharacters {
     constructor(private runArray) {
     }
     emit(emit) {
         var c = this.firstNonEmpty(this.runArray, 0);
         while (!emit(c) && (c.char !== null)) {
-            c = (c.offset + 1 < Runs.getTextLength(this.runArray[c.run].text))
+            c = (c.offset + 1 < TextRuns.getTextLength(this.runArray[c.run].text))
                 ? new Character(this.runArray, c.run, c.offset + 1)
                 : this.firstNonEmpty(this.runArray, c.run + 1);
         }
@@ -14,7 +14,7 @@ export class Characters {
 
     firstNonEmpty(runArray, n): Character {
         for (; n < runArray.length; n++) {
-            if (Runs.getTextLength(runArray[n].text) != 0) {
+            if (TextRuns.getTextLength(runArray[n].text) != 0) {
                 return new Character(runArray, n, 0);
             }
         }
@@ -27,7 +27,7 @@ class Character {
     
     constructor(public runArray, public run, public offset) {
         this.char = run >= runArray.length ? null :
-            runArray[run].text ? Runs.getTextChar(runArray[run].text, offset) :
+            runArray[run].text ? TextRuns.getTextChar(runArray[run].text, offset) :
             null;
     }
 
@@ -50,9 +50,9 @@ class Character {
                 var run = this.runArray[runIndex];
                 if (run) {
                     var start = (runIndex === this.run) ? this.offset : 0;
-                    var stop = (runIndex === upTo.run) ? upTo.offset : Runs.getTextLength(run.text);
+                    var stop = (runIndex === upTo.run) ? upTo.offset : TextRuns.getTextLength(run.text);
                     if (start < stop) {
-                        Runs.getSubText((piece) => {
+                        TextRuns.getSubText((piece) => {
                             var pieceRun = Object.create(run);
                             pieceRun.text = piece;
                             eachRun(pieceRun);

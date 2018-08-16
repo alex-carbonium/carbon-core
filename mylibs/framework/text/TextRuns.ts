@@ -1,11 +1,12 @@
 import { TextAlign, UnderlineStyle, FontScript } from "carbon-basics";
+import { TextFormatting } from "carbon-text";
 
-export class Runs {
+export class TextRuns {
     static formattingKeys = ['weight', 'style', 'underline', 'strikeout', 'color',
         'family', 'size', 'align', 'valign', 'script', 'transformation', 'charSpacing', 'wordSpacing',
         'lineSpacing'];
 
-    static defaultFormatting = {
+    static defaultFormatting: TextFormatting = {
         size: 10,
         family: null,
         weight: null,
@@ -21,35 +22,35 @@ export class Runs {
         valign: TextAlign.top
     };
 
-    static _currentFormatting = null;
+    static _currentFormatting: TextFormatting = null;
 
     static readonly multipleValues = undefined;
 
-    static setDefaultFormatting(formatting) {
-        Runs._currentFormatting = null;
-        Runs.defaultFormatting = formatting;
+    static setDefaultFormatting(formatting: TextFormatting) {
+        TextRuns._currentFormatting = null;
+        TextRuns.defaultFormatting = formatting;
     }
 
-    static getCurrentFormatting = function () {
-        if (Runs._currentFormatting === null) {
-            Runs._currentFormatting = {};
-            Object.assign(Runs._currentFormatting, Object.getPrototypeOf(Runs.defaultFormatting));
-            Object.assign(Runs._currentFormatting, Runs.defaultFormatting);
+    static getCurrentFormatting(): TextFormatting {
+        if (TextRuns._currentFormatting === null) {
+            TextRuns._currentFormatting = {} as TextFormatting;
+            Object.assign(TextRuns._currentFormatting, Object.getPrototypeOf(TextRuns.defaultFormatting));
+            Object.assign(TextRuns._currentFormatting, TextRuns.defaultFormatting);
         }
-        return Runs._currentFormatting;
+        return TextRuns._currentFormatting;
     }
 
     static sameFormatting(run1, run2) {
-        return Runs.formattingKeys.every(function (key) {
+        return TextRuns.formattingKeys.every(function (key) {
             return run1[key] === run2[key];
         })
     }
 
     static clone(run) {
         var result = { text: run.text };
-        Runs.formattingKeys.forEach(function (key) {
+        TextRuns.formattingKeys.forEach(function (key) {
             var val = run[key];
-            if (val && val !== Runs.defaultFormatting[key]) {
+            if (val && val !== TextRuns.defaultFormatting[key]) {
                 result[key] = val;
             }
         });
@@ -58,14 +59,14 @@ export class Runs {
 
     static merge(run1, run2?) {
         if (arguments.length === 1) {
-            return Array.isArray(run1) ? run1.reduce(Runs.merge) : run1;
+            return Array.isArray(run1) ? run1.reduce(TextRuns.merge) : run1;
         }
         if (arguments.length > 2) {
-            return Runs.merge(Array.prototype.slice.call(arguments, 0));
+            return TextRuns.merge(Array.prototype.slice.call(arguments, 0));
         }
         
         var merged = {};
-        var keys = Runs.formattingKeys;
+        var keys = TextRuns.formattingKeys;
         
         for (var i = keys.length - 1; i >= 0; i--) {
             var key = keys[i];
@@ -76,7 +77,7 @@ export class Runs {
                 if (r1 === r2) {
                     merged[key] = r1;
                 } else {
-                    merged[key] = Runs.multipleValues;
+                    merged[key] = TextRuns.multipleValues;
                 }
             }
         }
@@ -87,11 +88,11 @@ export class Runs {
     static format(run, template) {
         if (Array.isArray(run)) {
             run.forEach(function (r) {
-                Runs.format(r, template);
+                TextRuns.format(r, template);
             });
         } else {
             Object.keys(template).forEach(function (key) {
-                if (template[key] !== Runs.multipleValues) {
+                if (template[key] !== TextRuns.multipleValues) {
                     run[key] = template[key];
                 }
             });
@@ -101,10 +102,10 @@ export class Runs {
     static consolidate() {
         var current;
         return function (emit, run) {
-            if (!current || !Runs.sameFormatting(current, run) ||
+            if (!current || !TextRuns.sameFormatting(current, run) ||
                 (typeof current.text != 'string') ||
                 (typeof run.text != 'string')) {
-                current = Runs.clone(run);
+                current = TextRuns.clone(run);
                 emit(current);
             } else {
                 current.text += run.text;
@@ -119,7 +120,7 @@ export class Runs {
         if (Array.isArray(run.text)) {
             var str = [];
             run.text.forEach(function (piece) {
-                str.push(Runs.getPiecePlainText(piece));
+                str.push(TextRuns.getPiecePlainText(piece));
             });
             return str.join('');
         }
@@ -141,7 +142,7 @@ export class Runs {
         if (Array.isArray(text)) {
             var length = 0;
             text.forEach(function (piece) {
-                length += Runs.getPieceLength(piece);
+                length += TextRuns.getPieceLength(piece);
             });
             return length;
         }
@@ -162,7 +163,7 @@ export class Runs {
                 if (count <= 0) {
                     return true;
                 }
-                var pieceLength = Runs.getPieceLength(piece);
+                var pieceLength = TextRuns.getPieceLength(piece);
                 if (pos + pieceLength > start) {
                     if (pieceLength === 1) {
                         emit(piece);
@@ -182,7 +183,7 @@ export class Runs {
 
     static getTextChar(text, offset) {
         var result;
-        Runs.getSubText(function (c) {
+        TextRuns.getSubText(function (c) {
             result = c;
         }, text, offset, 1);
         return result;

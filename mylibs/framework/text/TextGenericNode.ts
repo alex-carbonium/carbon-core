@@ -1,6 +1,6 @@
-import { TextNode } from "./node";
+import { TextNode } from "./TextNode";
 
-export class GenericNode extends TextNode {
+export class TextGenericNode extends TextNode {
     constructor(type, parent, left: number = Number.MAX_VALUE, top: number = Number.MAX_VALUE) {
         super(parent, type, left, top);
     }

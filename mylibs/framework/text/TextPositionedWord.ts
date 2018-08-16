@@ -1,26 +1,26 @@
-import { TextNode } from "../primitives/node";
-import { partRenderer, PartRenderer } from "../static/PartRenderer";
-import { Line } from "./line";
-import Rect from "../../../math/rect";
-import { Part } from "./part";
-import { Runs } from "../static/runs";
-import { Word } from "./word";
-import { IPositionedWord } from "carbon-text";
+import { TextNode } from "./TextNode";
+import { partRenderer, TextPartRenderer } from "./TextPartRenderer";
+import { TextLine } from "./TextLine";
+import Rect from "../../math/rect";
+import { TextPart } from "./TextPart";
+import { TextRuns } from "./TextRuns";
+import { TextWord } from "./TextWord";
+import { ITextPositionedWord } from "carbon-text";
 
 var newLineWidth = function (run) {
-    return partRenderer.measure(PartRenderer.NBSP, run).width;
+    return partRenderer.measure(TextPartRenderer.NBSP, run).width;
 }
 
-export class PositionedWord extends TextNode implements IPositionedWord {
+export class TextPositionedWord extends TextNode implements ITextPositionedWord {
     word: any = null;
-    line: Line = null;
+    line: TextLine = null;
     left = NaN;
     width = NaN;
     ordinal = null;
     length = NaN;
     _characters: PositionedChar[];
 
-    constructor(word: Word, line, left, ordinal, width) {
+    constructor(word: TextWord, line, left, ordinal, width) {
         super('word', line, left);
 
         this.word = word;
@@ -69,10 +69,10 @@ export class PositionedWord extends TextNode implements IPositionedWord {
             var x = 0, self = this, ordinal = this.ordinal,
                 codes = this.parentOfType('document').codes;
             this.parts(function (wordPart) {
-                Runs.pieceCharacters(function (char) {
+                TextRuns.pieceCharacters(function (char) {
                     var charRun = Object.create(wordPart.run);
                     charRun.text = char;
-                    var p = new Part(charRun, codes);
+                    var p = new TextPart(charRun, codes);
                     cache.push(new PositionedChar(x, p, self, ordinal, 1));
                     x += p.width;
                     ordinal++;
@@ -105,7 +105,7 @@ export class PositionedChar extends TextNode {
     width = 0;
     newLine = false;
 
-    constructor(left, part, private word: PositionedWord, ordinal, length) {
+    constructor(left, part, private word: TextPositionedWord, ordinal, length) {
         super('character', word, left);
         
         this.left = left;

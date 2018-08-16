@@ -1,23 +1,23 @@
-import { TextNode } from "./primitives/node";
-import { deCRLFify } from "./util/util";
+import { TextNode } from "./TextNode";
+import { deCRLFify } from "./TextUtil";
 import { TextAlign } from "carbon-basics";
-import { Codes } from "./processing/codes";
-import { Characters } from "./processing/characters";
-import { Split } from "./transform/split";
-import { Per } from "./util/per";
-import { Word } from "./processing/word";
-import { Frame } from "./processing/frame";
-import { Range } from "./primitives/range";
-import { Runs } from "./static/runs";
+import { TextCodes } from "./TextCodes";
+import { TextCharacters } from "./TextCharacters";
+import { TextSplit } from "./TextSplit";
+import { Per } from "./Per";
+import { TextWord } from "./TextWord";
+import { TextFrame } from "./TextFrame";
+import { TextRange } from "./TextRange";
+import { TextRuns } from "./TextRuns";
 import Rect from "../../math/rect";
 import { IRect } from "carbon-core";
-import { PositionedWord } from "./processing/positionedword";
-import { ITextDoc } from "carbon-text";
+import { TextPositionedWord } from "./TextPositionedWord";
+import { ITextDoc, LazyFormatting, TextFormatting } from "carbon-text";
 import EventHelper from "../EventHelper";
 
 const EmptyContents = [];
 
-export class Doc extends TextNode implements ITextDoc {
+export class TextDoc extends TextNode implements ITextDoc {
     _width = 0;
     _noWrap = false;
     _wordOrdinals = null;
@@ -25,15 +25,15 @@ export class Doc extends TextNode implements ITextDoc {
     caretVisible = true;
     customCodes = null;
     codes = null;
-    selectionChanged = EventHelper.createEvent();
+    selectionChanged = EventHelper.createEvent<LazyFormatting>();
     contentChanged = EventHelper.createEvent<boolean>();
     editFilters = null;
-    nextInsertFormatting = {};
+    nextInsertFormatting: Partial<TextFormatting> = {};
     _nextSelection = null;
     words = null;
     undo = null;
     redo = null;
-    frame: Frame = null;
+    frame: TextFrame = null;
     selectionJustChanged = false;
     _currentTransaction = null;
     _caretColor: any;
@@ -47,10 +47,10 @@ export class Doc extends TextNode implements ITextDoc {
         this.nextInsertFormatting = {};
         this.customCodes = function (code, data, allCodes) { };
         this.codes = function (code, data) {
-            var instance = Codes.codeFactory(code, data, this.codes);
+            var instance = TextCodes.codeFactory(code, data, this.codes);
             return instance || this.customCodes(code, data, this.codes);
         }.bind(this);
-        this.editFilters = [Codes.editFilter];
+        this.editFilters = [TextCodes.editFilter];
         this.load(EmptyContents);
     }
 
@@ -93,11 +93,11 @@ export class Doc extends TextNode implements ITextDoc {
         this.undo = [];
         this.redo = [];
         this._wordOrdinals = [];
-        var charObj = new Characters(runs);
-        var splitObj = new Split(self.codes);
+        var charObj = new TextCharacters(runs);
+        var splitObj = new TextSplit(self.codes);
         try {
             this.words = Per.create((charObj).emit, charObj).per((splitObj).split, splitObj).map(function (w) {
-                return new Word(w, self.codes);
+                return new TextWord(w, self.codes);
             }).all();
         } catch (e) {
             console.error(e);
@@ -114,7 +114,7 @@ export class Doc extends TextNode implements ITextDoc {
     layout() {
         this.frame = null;
         try {
-            var frameObj = new Frame(0, 0, this._width, 0, this,
+            var frameObj = new TextFrame(0, 0, this._width, 0, this,
                 undefined, undefined, undefined, this._noWrap);
             this.frame = Per.create(this.words).per((frameObj).frame, frameObj).first();
         } catch (x) {
@@ -138,13 +138,13 @@ export class Doc extends TextNode implements ITextDoc {
     }
 
     range(start, end) {
-        return new Range(this, start, end);
+        return new TextRange(this, start, end);
     }
 
     documentRange() {
         return this.range(0, this.frame ? this.frame.length - 1 : 0);
     }
-    selectedRange(): Range {
+    selectedRange(): TextRange {
         return this.range(this.selection.start, this.selection.end);
     }
     save() {
@@ -158,7 +158,7 @@ export class Doc extends TextNode implements ITextDoc {
         start = 0;
         if (startInfo) {
             for (i = startInfo.index; i > 0; i--) {
-                if (Doc.isBreaker(this.words[i - 1])) {
+                if (TextDoc.isBreaker(this.words[i - 1])) {
                     start = this.wordOrdinal(i);
                     break;
                 }
@@ -169,11 +169,11 @@ export class Doc extends TextNode implements ITextDoc {
         var endInfo = this.wordContainingOrdinal(end);
         end = this.frame ? this.frame.length - 1 : 0;
         if (endInfo) {
-            if (Doc.isBreaker(endInfo.word)) {
+            if (TextDoc.isBreaker(endInfo.word)) {
                 end = this.wordOrdinal(endInfo.index);
             } else {
                 for (i = endInfo.index; i < this.words.length; i++) {
-                    if (Doc.isBreaker(this.words[i])) {
+                    if (TextDoc.isBreaker(this.words[i])) {
                         end = this.wordOrdinal(i);
                         break;
                     }
@@ -258,8 +258,8 @@ export class Doc extends TextNode implements ITextDoc {
     }
 
     spliceWordsWithRuns(wordIndex, count, runs) {
-        var charObj = new Characters(runs);
-        var splitObj = new Split(this.codes);
+        var charObj = new TextCharacters(runs);
+        var splitObj = new TextSplit(this.codes);
         var newWords;
         try {
             newWords = Per.create((charObj).emit, charObj)
@@ -272,7 +272,7 @@ export class Doc extends TextNode implements ITextDoc {
                     // }catch(e){
                     //     word = null;
                     // }
-                    return new Word(w, this.codes);
+                    return new TextWord(w, this.codes);
                 })
                 .all();
         } catch (e) {
@@ -343,7 +343,7 @@ export class Doc extends TextNode implements ITextDoc {
 
         var prefix;
         if (start === startWord.ordinal) {
-            if (startWord.index > 0 && !Doc.isBreaker(this.words[startWord.index - 1])) {
+            if (startWord.index > 0 && !TextDoc.isBreaker(this.words[startWord.index - 1])) {
                 startWord.index--;
                 var previousWord = this.words[startWord.index];
                 prefix = Per.create({}).per(previousWord.runs, previousWord).all();
@@ -358,7 +358,7 @@ export class Doc extends TextNode implements ITextDoc {
 
         var suffix;
         if (end === endWord.ordinal) {
-            if ((end === (this.frame ? this.frame.length - 1 : 0)) || Doc.isBreaker(endWord.word)) {
+            if ((end === (this.frame ? this.frame.length - 1 : 0)) || TextDoc.isBreaker(endWord.word)) {
                 suffix = [];
                 endWord.index--;
             } else {
@@ -373,7 +373,7 @@ export class Doc extends TextNode implements ITextDoc {
         var oldLength = this.frame ? this.frame.length : 0;
 
         this.spliceWordsWithRuns(startWord.index, (endWord.index - startWord.index) + 1,
-            Per.create(prefix).concat(text).concat(suffix).per(Runs.consolidate()).all());
+            Per.create(prefix).concat(text).concat(suffix).per(TextRuns.consolidate()).all());
 
         return this.frame ? (this.frame.length - oldLength) : 0;
     }
@@ -411,7 +411,7 @@ export class Doc extends TextNode implements ITextDoc {
         var node = this.byOrdinal(ordinal), b: IRect;
         if (node) {
             var nodeBefore: TextNode;
-            if (node instanceof Word && node.block && ordinal > 0) {
+            if (node instanceof TextWord && node.block && ordinal > 0) {
                 nodeBefore = this.byOrdinal(ordinal - 1);
                 if (nodeBefore.newLine) {
                     var newLineBounds = nodeBefore.bounds();
@@ -446,7 +446,7 @@ export class Doc extends TextNode implements ITextDoc {
             }
 
             if (lastFormatting) {
-                if (node instanceof PositionedWord && node.word && node.word.line.length === 1) {
+                if (node instanceof TextPositionedWord && node.word && node.word.line.length === 1) {
                     if (lastFormatting.align === TextAlign.center) {
                         b.x = this._width / 2 + .5 | 0;
                     }
@@ -499,16 +499,24 @@ export class Doc extends TextNode implements ITextDoc {
             ctx.save();
             ctx.fillStyle = hasFocus ? 'rgba(0, 100, 200, 0.3)' : 'rgba(160, 160, 160, 0.3)';
             this.selectedRange().parts(function (part) {
-                let bounds = part.bounds();                
+                let bounds = part.bounds();
                 ctx.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
             });
             ctx.restore();
         }
     }
-    notifySelectionChanged(takeFocus?) {
+    notifySelectionChanged() {
         // When firing selectionChanged, we pass a function can be used
         // to obtain the formatting, as this highly likely to be needed
-        this.selectionChanged.raise();
+        var cachedFormatting: TextFormatting = null;        
+        var getFormatting: LazyFormatting = () => {
+            if (!cachedFormatting) {
+                cachedFormatting = this.selectedRange().getFormatting();
+                return cachedFormatting;
+            };
+        }
+
+        this.selectionChanged.raise(getFormatting);
     }
     select(ordinal, ordinalEnd, takeFocus?, direction = "right") {
         if (!this.frame) {
@@ -530,7 +538,7 @@ export class Doc extends TextNode implements ITextDoc {
             (which can happen either by moving the selection range or by
             altering the formatting)
         */
-        this.notifySelectionChanged(takeFocus);
+        this.notifySelectionChanged();
     }
     performUndo(redo?) {
         var fromStack = redo ? this.redo : this.undo,

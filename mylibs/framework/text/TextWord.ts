@@ -1,7 +1,7 @@
-import Per from "../util/per";
-import { TextNode } from "../primitives/node";
-import { Part } from "./part";
-import { Runs } from "../static/runs";
+import Per from "./Per";
+import { TextNode } from "./TextNode";
+import { TextPart } from "./TextPart";
+import { TextRuns } from "./TextRuns";
 
 /*  A Word has the following properties:
 
@@ -28,7 +28,7 @@ import { Runs } from "../static/runs";
         width     - Width of the whole section
  */
 
-export class Word extends TextNode {
+export class TextWord extends TextNode {
     text = null;
     space = null;
     ascent = 0;
@@ -54,12 +54,12 @@ export class Word extends TextNode {
             space = coords.spaces.cut(coords.end);
         }
 
-        text = Word.section(text, codes);
+        text = TextWord.section(text, codes);
         if (!text) {
             throw new Error("Couldn't measure text");
         }
 
-        space = Word.section(space, codes);
+        space = TextWord.section(space, codes);
         if (!space) {
             throw new Error("Couldn't measure space");
         }
@@ -106,12 +106,12 @@ export class Word extends TextNode {
 
     align() {
         var first = this.text.parts[0];
-        return first && first.run.align ? first.run.align : Runs.defaultFormatting.align;
+        return first && first.run.align ? first.run.align : TextRuns.defaultFormatting.align;
     }
 
     lineSpacing() {
         var first = this.text.parts[0];
-        return first && first.run.lineSpacing ? first.run.lineSpacing : Runs.defaultFormatting.lineSpacing;
+        return first && first.run.lineSpacing ? first.run.lineSpacing : TextRuns.defaultFormatting.lineSpacing;
     }
 
     getActualHeight() {
@@ -159,7 +159,7 @@ export class Word extends TextNode {
         var sParts;
         try {
             sParts = Per.create(runEmitter).map(function (p) {
-                var part = new Part(p, codes);
+                var part = new TextPart(p, codes);
                 return part;
             }).all();
         } catch (e) {
@@ -186,8 +186,8 @@ export class Word extends TextNode {
             s.minX = Math.min(s.minX, p.minX + s.width);
             s.maxX = Math.max(s.maxX, p.maxX + s.width);
             s.width += p.width;
-            s.length += Runs.getPieceLength(p.run.text);
-            s.plainText += Runs.getPiecePlainText(p.run.text);
+            s.length += TextRuns.getPieceLength(p.run.text);
+            s.plainText += TextRuns.getPiecePlainText(p.run.text);
         });
 
         return s;

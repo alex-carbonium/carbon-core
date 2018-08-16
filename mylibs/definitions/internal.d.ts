@@ -78,7 +78,7 @@ declare module "carbon-model"{
     }
 
     export interface IText {
-        resetEngine(): void;
+        resetAdapter(): void;
     }
 
     interface IModel {

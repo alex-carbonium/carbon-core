@@ -67,7 +67,7 @@ export default {
     "CommandManager": require("./framework/commands/CommandManager"),
     "Brush": require("./framework/Brush"),
     "Font": require("./framework/Font"),
-    "OpenTypeFontManager": require("./OpenTypeFontManager").OpenTypeFontManager,
+    "OpenTypeFontManager": require("./framework/text/OpenTypeFontManager").OpenTypeFontManager,
     "Shadow": require("./framework/Shadow"),
     "Constraints": require("./framework/Constraints"),
     "NullPage": require("./framework/NullPage"),

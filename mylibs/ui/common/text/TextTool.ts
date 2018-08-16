@@ -6,7 +6,7 @@ import Tool from "../Tool";
 import DragController from "../../../framework/DragController";
 import Text from "../../../framework/text/Text";
 import Font from "../../../framework/Font";
-import { InlineTextEditor } from "../../../framework/text/inlinetexteditor";
+import { TextEditor } from "../../../framework/text/TextEditor";
 import SharedColors from "../../SharedColors";
 import DefaultFormatter from "./DefaultFormatter";
 import RangeFormatter from "./RangeFormatter";
@@ -36,7 +36,7 @@ export default class TextTool extends Tool {
 
     private _rangeFormatter: RangeFormatter = null;
     private _defaultFormatter: DefaultFormatter = null;
-    private _editor: InlineTextEditor;
+    private _editor: TextEditor;
     private _dragZone: any;
     private _next: { element: Text, event: IMouseEventData };
     private _detaching: boolean;
@@ -267,8 +267,8 @@ export default class TextTool extends Tool {
         text.prepareAndSetProps(props);
         var y = e.y;
         if (!fixedSize) {
-            var engine = text.engine();
-            var height = engine.getActualHeight();
+            var adapter = text.adapter();
+            var height = adapter.getActualHeight();
             y -= height / 2;
         }
         text.applyTranslation(Point.create(e.x, y).roundMutable());
@@ -288,16 +288,16 @@ export default class TextTool extends Tool {
         this.text = text;
         this.text.disableRenderCaching(true);
 
-        var engine = text.engine();
-        //unsubscribed in engine.unsubscribe()
-        engine.contentChanged().bind(this.contentChanged);
+        var adapter = text.adapter();
+        //unsubscribed in adapter.unsubscribe()
+        adapter.contentChanged().bind(this.contentChanged);
 
         this._rangeFormatter = new RangeFormatter();
-        this._rangeFormatter.initFormatter(this.app, engine, text);
+        this._rangeFormatter.initFormatter(this.app, adapter, text);
         Selection.requestProperties([this._rangeFormatter]);
         Selection.hideFrame(true);
 
-        this._editor = this._createEditor(engine, text);
+        this._editor = this._createEditor(adapter, text);
         this.boundaryRect = text.boundaryRect();
 
         text.runtimeProps.editing = true;
@@ -305,12 +305,12 @@ export default class TextTool extends Tool {
         text.runtimeProps.ctxl = 2;
 
         if (e && !selectText) {
-            e.y -= text.getVerticalOffset(engine);
+            e.y -= text.getVerticalOffset(adapter);
             this._editor.mouseDown(e);
             this._editor.mouseUp(e);
         }
         else {
-            engine.select(0, engine.getLength() - 1);
+            adapter.select(0, adapter.getLength() - 1);
         }
 
         Cursor.setGlobalCursor("text");
@@ -320,9 +320,9 @@ export default class TextTool extends Tool {
         this._next = null;
     }
     contentChanged = () => {
-        let engine = this._editor.engine;
-        let actualWidth = engine.getActualWidth();
-        let actualHeight = engine.getActualHeight();
+        let adapter = this._editor.adapter;
+        let actualWidth = adapter.getActualWidth();
+        let actualHeight = adapter.getActualHeight();
         let constraints = this.text.constraints();
         let font = this.text.font();
         let br = this.text.boundaryRect();
@@ -340,7 +340,7 @@ export default class TextTool extends Tool {
         let moving = (overflow || isLabel) && canMove;
 
         if (autoGrowing || moving) {
-            this.text.prepareAndSetProps({ content: engine.save() });
+            this.text.prepareAndSetProps({ content: adapter.save() });
 
             if (this.updateTimer) {
                 clearTimeout(this.updateTimer);
@@ -354,23 +354,23 @@ export default class TextTool extends Tool {
             this.updateTimer = setTimeout(this.updateOriginalDebounced, UpdateTimeout);
         }
 
-        // Height is kept as actual since vertical offset is handled by translating the entire engine.
+        // Height is kept as actual since vertical offset is handled by translating the entire adapter.
         // When position is affected by the width, document layout needs to be recalculated.
         let newBr = this.text.boundaryRect();
-        if (newBr.width !== engine.getWidth() && (autoGrowing || moving)) {
-            engine.updateSize(newBr.width, actualHeight);
-            engine.getDocument().layout();
+        if (newBr.width !== adapter.getWidth() && (autoGrowing || moving)) {
+            adapter.updateSize(newBr.width, actualHeight);
+            adapter.getDocument().layout();
         }
         else if (!this.text.props.wrap) {
-            let maxWidth = engine.getActualWidthWithoutWrap();
-            let relayout = maxWidth > engine.getWidth();
-            engine.updateSize(Math.max(maxWidth, engine.getWidth()), actualHeight);
+            let maxWidth = adapter.getActualWidthWithoutWrap();
+            let relayout = maxWidth > adapter.getWidth();
+            adapter.updateSize(Math.max(maxWidth, adapter.getWidth()), actualHeight);
             if (relayout) {
-                engine.getDocument().layout();
+                adapter.getDocument().layout();
             }
         }
         else {
-            engine.updateSize(engine.getWidth(), actualHeight);
+            adapter.updateSize(adapter.getWidth(), actualHeight);
         }
 
         if (this.text.props.mode === TextMode.Label) {
@@ -381,7 +381,7 @@ export default class TextTool extends Tool {
         }
     }
     updateOriginalDebounced = () => {
-        this.text.prepareAndSetProps({ content: this._editor.engine.save() });
+        this.text.prepareAndSetProps({ content: this._editor.adapter.save() });
         this.updateTimer = 0;
     }
     endEdit(finalEdit: boolean) {
@@ -393,11 +393,11 @@ export default class TextTool extends Tool {
 
         this.copyDocumentRangeFont();
         this.text.disableRenderCaching(false);
-        this.text.runtimeProps.engine.unsubscribe();
+        this.text.runtimeProps.adapter.unsubscribe();
         this.text.runtimeProps.editing = false;
         this.text.runtimeProps.drawSelection = false;
         this.text.runtimeProps.ctxl = undefined;
-        this.text.resetEngine();
+        this.text.resetAdapter();
 
         Selection.makeSelection([this.text], "new", false, true);
         Selection.showFrame();
@@ -423,7 +423,7 @@ export default class TextTool extends Tool {
         }
     }
     copyDocumentRangeFont() {
-        let range = this._editor.engine.getDocumentRange();
+        let range = this._editor.adapter.getDocumentRange();
         let fontExtension = null;
         let rangeFormatting = range.getFormatting();
         for (let prop in rangeFormatting) {
@@ -443,13 +443,13 @@ export default class TextTool extends Tool {
         }
     }
 
-    _createEditor(engine, element) {
-        var inlineEditor = new InlineTextEditor();
+    _createEditor(adapter, element) {
+        var inlineEditor = new TextEditor();
         this.editorTokens.push(inlineEditor.onInvalidate.bind(this.invalidateLayers));
         this.editorTokens.push(inlineEditor.onRangeFormattingChanged.bind(this._rangeFormatter.onRangeFormattingChanged));
         this.editorTokens.push(inlineEditor.onSelectionChanged.bind(this._onSelectionChanged));
         this.editorTokens.push(inlineEditor.onDeactivated.bind(finalEdit => this.endEdit(finalEdit)));
-        inlineEditor.activate(element.globalViewMatrix(), engine, element.props.font, this.app.fontManager);
+        inlineEditor.activate(element.globalViewMatrix(), adapter, element.props.font, this.app.fontManager);
         return inlineEditor;
     }
     private invalidateLayers = () => {
@@ -484,23 +484,23 @@ export default class TextTool extends Tool {
     };
 
     _onSelectionChanged = () => {
-        var engine = this._editor.engine;
-        var selection = engine.getSelection();
+        var adapter = this._editor.adapter;
+        var selection = adapter.getSelection();
         if (selection.start === selection.end) {
             if (!this._backgroundCache) {
                 this._backgroundCache = {};
             }
             var color = this._backgroundCache[selection.start];
             if (color === undefined) {
-                color = this._pickCaretColor(engine, selection);
+                color = this._pickCaretColor(adapter, selection);
                 this._backgroundCache[selection.start] = color;
             }
-            engine.caretColor(color);
+            adapter.caretColor(color);
         }
     };
     //does not support rotation, can be added later if needed
-    _pickCaretColor(engine, selection) {
-        var coords = engine.getCaretCoords(selection.start);
+    _pickCaretColor(adapter, selection) {
+        var coords = adapter.getCaretCoords(selection.start);
         var global = this.text.getBoundaryRectGlobal();
         var x = (coords.l + global.x) * this.view.scale() - this.view.scrollX + .5 | 0;
         var y = (coords.t + global.y) * this.view.scale() - this.view.scrollY + .5 | 0;

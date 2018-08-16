@@ -1,9 +1,10 @@
-import { parseFont } from "./util/util";
-import { Runs } from "./static/runs";
-import { FontManager } from "./font/fontmanager";
+import { parseFont } from "./TextUtil";
+import { TextRuns } from "./TextRuns";
+import { FontManager } from "./fontmanager";
 
 export class Renderer {
 	static RGBREGEX = /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*(\d+(?:\.\d+)?))?\s*\)$/;
+	
 	defaultFill = null;
 	_currentFont = null;
 	_contextFont = null;
@@ -57,65 +58,38 @@ export class Renderer {
 		this._canvasContext.stroke();
 	}
 	
-	/*
-		Gets current font.
-		If current font is unavailable, returns last available font.
-		If this fails, returns default font.
-	*/
 	getCurrentFont() {
 		var fontString = this.font;
-		var fp = parseFont(fontString, Runs.defaultFormatting);
+		var fp = parseFont(fontString, TextRuns.defaultFormatting);
 		var cf = this._currentFont;
 	
-		// current font is null, so either default one is unavailable or first wasn't available
 		if (cf === null) {
-			// try to get the font again
 			cf = this._getFont(fp.family, fp.style, fp.weight);
 			if (cf == null) {
 				this._currentFont = FontManager.instance.getDefaultFont();
 				return this._currentFont;
-			} // else -> standard handling
+			}
 		}
 	
 		if (fp.family !== cf.getFamily() || fp.weight !== cf.getWeight() || fp.style !== cf.getStyle()) {
-			// context font different than currently loaded font
-			// try to load again
 			cf = this._getFont(fp.family, fp.style, fp.weight);
 	
 			if (cf === null) {
-				// not success. return current font
 				return this._currentFont;
 			}
 	
-			// success. Replace current font
 			this._currentFont = cf;
 			return cf;
 		}
 	
-		// all ok and available
 		return cf;
 	}
 	
-	/*
-		Returns null if requested font is unavailable.
-		Also sends a request for unavailable font.
-	*/
 	_getFont(fontFamily, fontStyle, fontWeight) {
-		//var fontFamily, fontStyle, fontWeight;
 		var font = FontManager.instance.getFont(fontFamily, fontStyle, fontWeight);
-		//var retValue = font;
 		if (!font) {
 			font = FontManager.instance.getDefaultFont();
 		}
-	
-		// if (font && (!font.isResolved())) {
-		//     this._core.requireFont(font);
-		//     font = fontMan.getDefaultFont();
-		//     retValue = null;
-		//     if (!font.isResolved()) {
-		//         this._core.requireFont(font);
-		//     }
-		//}
 		return font;
 	}
 	

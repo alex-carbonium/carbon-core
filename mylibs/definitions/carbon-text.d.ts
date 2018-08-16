@@ -1,5 +1,6 @@
 declare module "carbon-text" {
     import { IRect } from "carbon-geometry";
+    import { FontWeight, FontStyle, UnderlineStyle, TextAlign, FontScript } from "carbon-basics";
 
     export type Emitter<T> = (p: T) => void;
     export type Functor = (f: Functor, val?: any) => void;
@@ -18,11 +19,11 @@ declare module "carbon-text" {
     export interface ITextRange {
     }
 
-    export interface IWord extends ITextNode {
+    export interface ITextWord extends ITextNode {
     }
 
-    export interface IPositionedWord extends ITextNode {
-        word: IWord;
+    export interface ITextPositionedWord extends ITextNode {
+        word: ITextWord;
     }
 
     export interface ITextLine extends ITextNode {
@@ -42,4 +43,22 @@ declare module "carbon-text" {
 
         modifyInsertFormatting(attribute, value);        
     }
+
+    export interface TextFormatting {
+        size: number;
+        family: string;
+        weight: FontWeight;
+        style: FontStyle;
+        color: string;
+        underline: UnderlineStyle;
+        strikeout: boolean;
+        align: TextAlign;
+        script: FontScript;
+        charSpacing: number;
+        lineSpacing: number;
+        wordSpacing: number
+        valign: TextAlign;
+    }
+
+    export type LazyFormatting = () => TextFormatting;
 }

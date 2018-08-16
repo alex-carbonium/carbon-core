@@ -1,10 +1,9 @@
-import { Per } from "../util/per";
-import { Runs } from "../static/runs";
-import { TextNode } from "./node";
-import { PositionedWord } from "../processing/positionedword";
+import { Per } from "./Per";
+import { TextRuns } from "./TextRuns";
+import { TextPositionedWord } from "./TextPositionedWord";
 import { ITextRange, ITextDoc, ITextNode, Emitter } from "carbon-text";
 
-export class Range implements ITextRange {
+export class TextRange implements ITextRange {
     constructor(private doc: ITextDoc, public start, public end) {
         this.doc = doc;
         this.start = start;
@@ -15,7 +14,7 @@ export class Range implements ITextRange {
         }
     }
 
-    parts(emit?: Emitter<PositionedWord>, list?: ITextNode[]) {
+    parts(emit?: Emitter<TextPositionedWord>, list?: ITextNode[]) {
         list = list || this.doc.children();
         var self = this;
 
@@ -28,7 +27,7 @@ export class Range implements ITextRange {
             }
             if (item.ordinal >= self.start &&
                 item.ordinal + item.length <= self.end) {
-                emit(item as PositionedWord);
+                emit(item as TextPositionedWord);
             } else {
                 self.parts(emit, item.children());
             }
@@ -52,11 +51,11 @@ export class Range implements ITextRange {
     };
 
     plainText() {
-        return Per.create(this.runs, this).map(Runs.getPlainText).all().join('');
+        return Per.create(this.runs, this).map(TextRuns.getPlainText).all().join('');
     };
 
     save() {
-        return Per.create(this.runs, this).per(Runs.consolidate()).all();
+        return Per.create(this.runs, this).per(TextRuns.consolidate()).all();
     };
 
     getFormatting() {
@@ -71,7 +70,7 @@ export class Range implements ITextRange {
             range.start = pos;
             range.end = pos + 1;
         }
-        return Per.create(range.runs, range).reduce(Runs.merge).last() || Runs.getCurrentFormatting();
+        return Per.create(range.runs, range).reduce(TextRuns.merge).last() || TextRuns.getCurrentFormatting();
     };
 
     private _setSingleFormatting(attribute, value) {
@@ -83,7 +82,7 @@ export class Range implements ITextRange {
             var saved = range.save();
             var template = {};
             template[attribute] = value;
-            Runs.format(saved, template);
+            TextRuns.format(saved, template);
             range.setText(saved);
         }
     }
@@ -95,7 +94,7 @@ export class Range implements ITextRange {
             values = [values];
         }
 
-        var saved, template, paragraphRange: Range;
+        var saved, template, paragraphRange: TextRange;
 
         for (var i = 0; i < attributes.length; i++) {
             var attribute = attributes[i],
@@ -103,7 +102,7 @@ export class Range implements ITextRange {
 
             if (attribute === 'align' || attribute === 'lineSpacing') {
                 // Special case: expand selection to surrounding paragraphs
-                paragraphRange = range.doc.paragraphRange(range.start, range.end) as Range;
+                paragraphRange = range.doc.paragraphRange(range.start, range.end) as TextRange;
                 paragraphRange._setSingleFormatting(attribute, value);
             } else {
                 if (range.start === range.end) {
@@ -120,7 +119,7 @@ export class Range implements ITextRange {
         }
 
         if (saved) {
-            Runs.format(saved, template);
+            TextRuns.format(saved, template);
             range.setText(saved);
         }
     };

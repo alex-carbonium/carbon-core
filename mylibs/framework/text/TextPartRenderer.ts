@@ -1,14 +1,14 @@
 import { FontStyle, FontScript, UnderlineStyle } from "carbon-basics";
-import { OpenTypeFontMeasure } from "../measure/OpenTypeFontMeasure";
-import { Runs } from "./runs";
-import { FontMetrics } from "../measure/FontMetrics";
+import { OpenTypeFontMeasure } from "./OpenTypeFontMeasure";
+import { TextRuns } from "./TextRuns";
+import { FontMetrics } from "./FontMetrics";
 
-export class PartRenderer {
+export class TextPartRenderer {
     private measurer = new OpenTypeFontMeasure();
 
     getFontString(run) {
-        var size = (run && run.size) || Runs.defaultFormatting.size;
-        var script = run && run.script !== undefined ? run.script : Runs.defaultFormatting.script;
+        var size = (run && run.size) || TextRuns.defaultFormatting.size;
+        var script = run && run.script !== undefined ? run.script : TextRuns.defaultFormatting.script;
 
         switch (script) {
             case FontScript.Super:
@@ -17,20 +17,20 @@ export class PartRenderer {
                 break;
         }
 
-        var styleId = ((run && run.style) || Runs.defaultFormatting.style);
+        var styleId = ((run && run.style) || TextRuns.defaultFormatting.style);
         var style = styleId === FontStyle.Normal ? "normal" : "italic";
 
         return style  + " " +
-               ((run && run.weight) || Runs.defaultFormatting.weight) + " " +
+               ((run && run.weight) || TextRuns.defaultFormatting.weight) + " " +
                 size + 'px ' +
-              ((run && run.family) || Runs.defaultFormatting.family);
+              ((run && run.family) || TextRuns.defaultFormatting.family);
     }
 
     applyRunStyle(ctx, run) {
-        ctx.fillStyle = (run && run.color) || Runs.defaultFormatting.color;
+        ctx.fillStyle = (run && run.color) || TextRuns.defaultFormatting.color;
         ctx.font = this.getFontString(run);
 
-        ctx.charSpacing = run.charSpacing || Runs.defaultFormatting.charSpacing;
+        ctx.charSpacing = run.charSpacing || TextRuns.defaultFormatting.charSpacing;
     }
 
     prepareContext(ctx) {
@@ -46,10 +46,10 @@ export class PartRenderer {
         ];
 
         if (!ignoreColor) {
-            parts.push( '; color: ', ((run && run.color) || Runs.defaultFormatting.color) );
+            parts.push( '; color: ', ((run && run.color) || TextRuns.defaultFormatting.color) );
         }
 
-        var script = run && run.script !== undefined ? run.script : Runs.defaultFormatting.script;
+        var script = run && run.script !== undefined ? run.script : TextRuns.defaultFormatting.script;
         switch (script) {
             case FontScript.Super:
                 parts.push('; vertical-align: super');
@@ -65,7 +65,7 @@ export class PartRenderer {
     getAdditionalProps(run) {
         if (run) {
             var addProps = {charSpacing:0};
-            var charSpacing = run.charSpacing || Runs.defaultFormatting.charSpacing;
+            var charSpacing = run.charSpacing || TextRuns.defaultFormatting.charSpacing;
             if (charSpacing) {
                 addProps.charSpacing = run.charSpacing;
             }
@@ -112,9 +112,9 @@ export class PartRenderer {
         this.prepareContext(ctx);
         this.applyRunStyle(ctx, formatting);
 
-        var underline = formatting.underline !== undefined ? formatting.underline : Runs.defaultFormatting.underline;
-        var strikeout = formatting.strikeout !== undefined ? formatting.strikeout : Runs.defaultFormatting.strikeout;
-        var script = formatting.script !== undefined ? formatting.script : Runs.defaultFormatting.script;
+        var underline = formatting.underline !== undefined ? formatting.underline : TextRuns.defaultFormatting.underline;
+        var strikeout = formatting.strikeout !== undefined ? formatting.strikeout : TextRuns.defaultFormatting.strikeout;
+        var script = formatting.script !== undefined ? formatting.script : TextRuns.defaultFormatting.script;
 
         switch (script) {
             case FontScript.Super:
@@ -125,7 +125,7 @@ export class PartRenderer {
                 break;
         }
         baseline = baseline + .5|0;
-        ctx.drawText(str === '\n' ? PartRenderer.NBSP : str, left, baseline);
+        ctx.drawText(str === '\n' ? TextPartRenderer.NBSP : str, left, baseline);
         if (underline) {
             var dash = null;
             switch (underline){
@@ -144,4 +144,4 @@ export class PartRenderer {
     }
 }
 
-export const partRenderer = new PartRenderer();
+export const partRenderer = new TextPartRenderer();

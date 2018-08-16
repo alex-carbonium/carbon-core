@@ -1,18 +1,18 @@
-import { inherit } from "../util/util";
-import { TextNode } from "../primitives/node";
-import Rect from "../../../math/rect";
-import { PartRenderer } from "../static/PartRenderer";
-import { GenericNode } from "../primitives/genericnode";
-import { Frame } from "./frame";
+import { inherit } from "./TextUtil";
+import { TextNode } from "./TextNode";
+import Rect from "../../math/rect";
+import { TextPartRenderer } from "./TextPartRenderer";
+import { TextGenericNode } from "./TextGenericNode";
+import { TextFrame } from "./TextFrame";
 import { IRect } from "carbon-core";
 import { ITextNode } from "carbon-text";
-import { Line } from "./line";
+import { TextLine } from "./TextLine";
 
-const partRenderer = new PartRenderer();
+const partRenderer = new TextPartRenderer();
 
-export abstract class Codes {
+export abstract class TextCodes {
     static codeFactory(obj, number, allCodes) {
-        var Impl = Codes[obj.$];
+        var Impl = TextCodes[obj.$];
         if (Impl) {
             return new Impl(obj, number, allCodes);
         }
@@ -63,7 +63,7 @@ export abstract class Codes {
     }
 }
 
-class InlineNode extends TextNode {
+class TextInlineNode extends TextNode {
     inline = null;
     _parent = null;
     ordinal = null;
@@ -118,7 +118,7 @@ class InlineNode extends TextNode {
     }
 }
 
-class NumberCode {
+class TextNumberCode {
     formattedNumber = null;
 
     constructor(obj, number) {
@@ -150,9 +150,9 @@ class ListEnd {
     }
 }
 
-class ListNext extends ListEnd {}
+class TextListNext extends ListEnd {}
 
-class ListStart {
+class TextListStart {
     constructor(obj, data, allCodes) {
         this.obj = obj;
         this.data = data;
@@ -167,7 +167,7 @@ class ListStart {
     data = null;
     allCodes = null;
     block(left, top, width, ordinal, parent, formatting, noWrap) {
-        var list = new GenericNode('list', parent, left, top),
+        var list = new TextGenericNode('list', parent, left, top),
             itemNode,
             itemFrame,
             itemMarker;
@@ -175,11 +175,11 @@ class ListStart {
         var indent = 50, spacing = 10;
     
         var startItem = (code, formatting) => {
-            itemNode = new GenericNode('item', list);
+            itemNode = new TextGenericNode('item', list);
             var marker = this.allCodes(code.marker || { $: 'Number' }, list.children.length);
-            itemMarker = new InlineNode(marker, itemNode, ordinal, 1, formatting);
+            itemMarker = new TextInlineNode(marker, itemNode, ordinal, 1, formatting);
             itemMarker.block = true;
-            itemFrame = new Frame(
+            itemFrame = new TextFrame(
                 left + indent, top, width - indent, ordinal + 1, itemNode,
                 function (terminatorCode) {
                     return terminatorCode.$ === 'ListEnd';
@@ -202,7 +202,7 @@ class ListStart {
                     var firstLine = finishedFrame.first();
                     var markerLeft = left + indent - spacing - itemMarker.measured.width;
                     var markerBounds = new Rect(left, top, indent, frameBounds.height);
-                    if (firstLine instanceof Line && firstLine.baseline) {
+                    if (firstLine instanceof TextLine && firstLine.baseline) {
                         itemMarker.position(markerLeft, firstLine.baseline, markerBounds);
                     } else {
                         itemMarker.position(markerLeft, top + itemMarker.measured.ascent, markerBounds);

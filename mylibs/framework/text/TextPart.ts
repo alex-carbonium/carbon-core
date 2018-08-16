@@ -1,5 +1,5 @@
-import { PartRenderer } from "../static/PartRenderer";
-import { FontMetrics } from "../measure/FontMetrics";
+import { TextPartRenderer } from "./TextPartRenderer";
+import { FontMetrics } from "./FontMetrics";
 
 class DefaultInline {
     measure(formatting) {
@@ -24,7 +24,7 @@ class DefaultInline {
     }
 }
 
-const partRenderer = new PartRenderer();
+const partRenderer = new TextPartRenderer();
 const defaultInline = new DefaultInline();
 
 /*  A Part is a section of a word with its own run, because a Word can span the
@@ -47,7 +47,7 @@ const defaultInline = new DefaultInline();
                             prepareContext(ctx) will set the canvas up appropriately.
      */
 
-export class Part {
+export class TextPart {
     run: any = null;
     isNewLine = false;
     width = 0;
@@ -71,7 +71,7 @@ export class Part {
                     isSpace = true;
                 } else isSpace = false;
             }
-            m = partRenderer.measure(isNewLine ? PartRenderer.NBSP : run.text, run);
+            m = partRenderer.measure(isNewLine ? TextPartRenderer.NBSP : run.text, run);
         } else {
             code = codes(run.text) || defaultInline;
             m = code.measure ? code.measure(run) : new TextMetrics();

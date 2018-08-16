@@ -1,15 +1,15 @@
-import { TextNode } from "../primitives/node";
-import Rect from "../../../math/rect";
-import { Wrap } from "../transform/wrap";
-import { Line } from "./line";
+import { TextNode } from "./TextNode";
+import Rect from "../../math/rect";
+import { TextWrap } from "./TextWrap";
+import { TextLine } from "./TextLine";
 
-export class Frame extends TextNode {
+export class TextFrame extends TextNode {
     _bounds: Rect;
     _actualWidth: any;
-    _wrapper: Wrap;
+    _wrapper: TextWrap;
     _currLength = 0;
     _currHeight = 0;
-    lines: Line[]  = null;
+    lines: TextLine[]  = null;
     wrapper = null;
     _parent = null;
     ordinal = 0;
@@ -26,7 +26,7 @@ export class Frame extends TextNode {
         this.ordinal = ordinal;
         this._currLength = 0;
         this._currHeight = 0;
-        this._wrapper = new Wrap(left, top, width, ordinal, this, includeTerminator, initialAscent, initialDescent, noWrap);
+        this._wrapper = new TextWrap(left, top, width, ordinal, this, includeTerminator, initialAscent, initialDescent, noWrap);
     }
 
     frame(emit, word) {

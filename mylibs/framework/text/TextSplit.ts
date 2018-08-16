@@ -1,4 +1,4 @@
-export class Split {
+export class TextSplit {
     _codes = null;
     _word = null;
     _trailingSpaces = null;

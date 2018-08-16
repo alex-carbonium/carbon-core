@@ -1,14 +1,14 @@
-import { cssProperty, parseFont } from "../util/util";
-import { FontManager } from "../font/fontmanager";
+import { cssProperty, parseFont } from "./TextUtil";
+import { FontManager } from "./fontmanager";
 import { FontMetrics } from "./FontMetrics";
 import { FontStyle } from "carbon-core";
-import { OpenTypeFontInfo } from "../font/opentypefontinfo";
-import { Runs } from "../static/runs";
+import { OpenTypeFontInfo } from "./OpenTypeFontInfo";
+import { TextRuns } from "./TextRuns";
 
 export class OpenTypeFontMeasure {
     calcualteMetrics(text: string, style: FontStyle, additional?: any): FontMetrics {
         let fontString = cssProperty(style, "font");
-        let fontParams = parseFont(fontString, Runs.defaultFormatting);
+        let fontParams = parseFont(fontString, TextRuns.defaultFormatting);
 
         let font = FontManager.instance.getFont(fontParams.family, fontParams.style, fontParams.weight) as OpenTypeFontInfo;
         if (!font) {

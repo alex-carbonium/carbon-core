@@ -12,8 +12,8 @@ import Matrix from "../../math/matrix";
 import ObjectPool from "../ObjectPool";
 import Selection from "../SelectionModel";
 import Constraints from "../Constraints";
-import { FontManager } from "./font/fontmanager";
-import { TextEngine } from "./textengine";
+import { FontManager } from "./fontmanager";
+import { TextAdapter } from "./TextAdapter";
 
 export default class Text extends UIElement<ITextProps> implements IText, IContainer, IDataElement {
     prepareProps(changes, mode?) {
@@ -80,7 +80,7 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
             || newProps.wrap !== undefined
         ) {
             if (!this.runtimeProps.editing) {
-                delete this.runtimeProps.engine;
+                delete this.runtimeProps.adapter;
             }
 
             this.refreshMinSizeConstraints();
@@ -162,7 +162,7 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
 
     private fitFontSizeToHeight(textChanges: TextChanges) {
         let lineHeight = textChanges.br.height;
-        let lineCount = this.engine().getDocument().frame.lines.length;
+        let lineCount = this.adapter().getDocument().frame.lines.length;
         if (lineCount > 1) {
             lineHeight = textChanges.br.height / (1 + (lineCount - 1) * textChanges.font.lineSpacing);
         }
@@ -176,15 +176,15 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
             textChanges.font = Font.extend(textChanges.font, { size: newFontSize });
         }
 
-        let engine = this.getOrCreateEngine(textChanges);
-        let actualWidth = engine.getActualWidth() + .5 | 0;
+        let adapter = this.getOrCreateAdapter(textChanges);
+        let actualWidth = adapter.getActualWidth() + .5 | 0;
         textChanges.br = textChanges.br.withWidth(actualWidth);
     }
 
     private fitBrToFont(textChanges: TextChanges) {
-        let engine = this.getOrCreateEngine(textChanges);
-        let actualWidth = engine.getActualWidth() + .5 | 0;
-        let actualHeight = engine.getActualHeight() + .5 | 0;
+        let adapter = this.getOrCreateAdapter(textChanges);
+        let actualWidth = adapter.getActualWidth() + .5 | 0;
+        let actualHeight = adapter.getActualHeight() + .5 | 0;
         textChanges.br = textChanges.br.withSize(actualWidth, actualHeight);
     }
 
@@ -258,10 +258,10 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
     }
 
     private ensureNotSmallerThanText(textChanges: TextChanges) {
-        let engine = this.getOrCreateEngine(textChanges);
+        let adapter = this.getOrCreateAdapter(textChanges);
 
-        var actualWidth = engine.getActualWidth();
-        var actualHeight = engine.getActualHeight();
+        var actualWidth = adapter.getActualWidth();
+        var actualHeight = adapter.getActualHeight();
 
         var br = textChanges.br;
         var newWidth = br.width;
@@ -333,14 +333,14 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
 
         context.save();
 
-        let engine = this.engine();
+        let adapter = this.adapter();
 
-        var verticalOffset = this.getVerticalOffset(this.runtimeProps.engine);
+        var verticalOffset = this.getVerticalOffset(this.runtimeProps.adapter);
         if (verticalOffset !== 0) {
             context.translate(0, verticalOffset);
         }
         params.perf && performance.mark("Text.render");
-        engine.render(context, this.runtimeProps.drawSelection, verticalOffset, environment.focused, environment);
+        adapter.render(context, this.runtimeProps.drawSelection, verticalOffset, environment.focused, environment);
         params.perf && performance.measure("Text.render", "Text.render");
 
         context.restore();
@@ -348,44 +348,44 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
         this.runtimeProps.commandCache = context.commands;
     }
 
-    getVerticalOffset(engine) {
+    getVerticalOffset(adapter) {
         var offset = 0, h;
         var height = this.height;
         var align = this.props.font.valign;
         if (align === TextAlign.middle) {
-            h = engine.getActualHeight();
+            h = adapter.getActualHeight();
             offset = (height - h) / 2;
         } else if (align === TextAlign.bottom) {
-            h = engine.getActualHeight();
+            h = adapter.getActualHeight();
             offset = height - h;
         }
         return offset;
     }
 
-    engine(): TextEngine {
-        if (!this.runtimeProps.engine) {
-            params.perf && performance.mark("Text.createEngine");
-            this.runtimeProps.engine = this.getOrCreateEngine(this.props);
-            params.perf && performance.measure("Text.createEngine", "Text.createEngine");
+    adapter(): TextAdapter {
+        if (!this.runtimeProps.adapter) {
+            params.perf && performance.mark("Text.adapter");
+            this.runtimeProps.adapter = this.getOrCreateAdapter(this.props);
+            params.perf && performance.measure("Text.adapter", "Text.adapter");
         }
 
-        return this.runtimeProps.engine;
+        return this.runtimeProps.adapter;
     }
 
-    private getOrCreateEngine(props: EngineProps) {
-        if (this.runtimeProps.editing && this.runtimeProps.engine) {
-            return this.runtimeProps.engine;
+    private getOrCreateAdapter(props: AdapterProps) {
+        if (this.runtimeProps.editing && this.runtimeProps.adapter) {
+            return this.runtimeProps.adapter;
         }
 
-        var engine = new TextEngine(props.font);
-        engine.updateSize(props.br.width, props.br.height);
-        engine.setWrap(props.wrap);
-        engine.setText(props.content);
+        var adapter = new TextAdapter(props.font);
+        adapter.updateSize(props.br.width, props.br.height);
+        adapter.setWrap(props.wrap);
+        adapter.setText(props.content);
 
-        return engine;
+        return adapter;
     }
-    resetEngine() {
-        delete this.runtimeProps.engine;
+    resetAdapter() {
+        delete this.runtimeProps.adapter;
     }
 
     minWidth() {
@@ -404,14 +404,14 @@ export default class Text extends UIElement<ITextProps> implements IText, IConta
     }
 
     calculateMinSize() {
-        var engine = this.getOrCreateEngine(this.props);
+        var adapter = this.getOrCreateAdapter(this.props);
         if (this.props.wrap) {
-            this.runtimeProps.minWidth = engine.calculateMaxWordWidth();
-            this.runtimeProps.minHeight = engine.calculateMinPossibleHeight();
+            this.runtimeProps.minWidth = adapter.calculateMaxWordWidth();
+            this.runtimeProps.minHeight = adapter.calculateMinPossibleHeight();
         }
         else {
-            this.runtimeProps.minWidth = engine.getActualWidth();
-            this.runtimeProps.minHeight = engine.getActualHeight();
+            this.runtimeProps.minWidth = adapter.getActualWidth();
+            this.runtimeProps.minHeight = adapter.getActualHeight();
         }
     }
 
@@ -700,4 +700,4 @@ class TextChanges implements IPooledObject {
     }
 }
 
-type EngineProps = Pick<ITextProps, "br" | "content" | "font" | "mode" | "wrap">;
+type AdapterProps = Pick<ITextProps, "br" | "content" | "font" | "mode" | "wrap">;
