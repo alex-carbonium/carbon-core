@@ -1,13 +1,13 @@
 import Layer from './Layer';
 import Context from "./render/Context";
-import { IContainer, IUIElement, IIsolationLayer, ChangeMode, IIsolatable, LayerType, ElementState, RenderEnvironment, NodePrimitivesMap, IDisposable, Artboard, IArtboard } from "carbon-core";
-import DataNode from "./DataNode";
+import { IContainer, IUIElement, IIsolationLayer, ChangeMode, IIsolatable, LayerType, ElementState, RenderEnvironment, NodePrimitivesMap, IDisposable, IArtboard } from "carbon-core";
 import Selection from "./SelectionModel";
 import RelayoutEngine from "./relayout/RelayoutEngine";
 import UserSettings from "../UserSettings";
 import NullContainer from "./NullContainer";
 import Path from "./Path";
 import Matrix from "../math/matrix";
+import Artboard from './Artboard';
 
 export class IsolationLayer extends Layer implements IIsolationLayer {
     private ownerElement: IIsolatable = null;
