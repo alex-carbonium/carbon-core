@@ -633,41 +633,18 @@ export default class ViewBase implements IView {
     }
 
     ensureVisibleRect(rect: IRect) {
-        let viewport = this.viewportRect();
-        if (viewport.containsRect(rect)) {
-            return;
-        }
+        //TODO: this is buggy, add an easy way to zoom/scroll to a given global point
+        // let viewport = this.viewportRect();
+        // if (viewport.isIntersecting(rect)) {
+        //     return;
+        // }
+        
+        // let cx = rect.centerX();        
+        // let cy = rect.centerY();        
 
-        let newState: ViewState = Object.assign({}, this.viewState);
-        let fitScale = this.getScaleToFitRect(rect);
-        if (fitScale < newState.scale) {
-            newState.scale = fitScale;
-
-            let size = this.viewportSize();
-            viewport = new Rect(newState.sx / newState.scale, newState.sy / newState.scale, size.width / newState.scale, size.height / newState.scale)
-        }
-
-        let union = viewport.combine(rect);
-        let pt = Point.allocate(
-            union.x < viewport.x ? union.x - viewport.x : union.x + union.width - viewport.x - viewport.width,
-            union.y < viewport.y ? union.y - viewport.y : union.y + union.height - viewport.y - viewport.height);
-
-        pt.x = pt.x * newState.scale;
-        pt.y = pt.y * newState.scale;
-
-        //add margins for tools, rulers, etc
-        if (pt.x) {
-            pt.x += Math.sign(pt.x) < 0 ? -80 : 10
-        }
-        if (pt.y) {
-            pt.y += Math.sign(pt.y) < 0 ? -60 : 40;
-        }
-
-        newState.sx += pt.x;
-        newState.sy += pt.y;
-        this.changeViewState(newState);
-
-        pt.free();
+        // let pt = Point.allocate(cx, cy);
+        // this.scrollToPoint(pt);
+        // pt.free();
     }
 
     scrollToCenter() {
