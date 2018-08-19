@@ -184,6 +184,7 @@ export default class PreviewModel implements IPreviewModel, IDisposable, IModule
             this._activePage = value;
             this.view.setActivePage(value);
             this.onPageChanged.raise(value);
+
         }
     }
 

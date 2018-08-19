@@ -200,7 +200,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             this.refreshMinSizeConstraints();
         }
 
-        if(newProps.useInCode) {
+        if(newProps.hasOwnProperty("useInCode")) {
             this.incrementVersion();
         }
 
