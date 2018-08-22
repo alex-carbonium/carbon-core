@@ -112,6 +112,10 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             changes.stroke = Brush.createFromCssColor(changes.stroke);
         }
 
+        if (changes.name && changes.name !== this.displayName()) {
+            changes.useInCode = true;
+        }
+
         let hasBr = changes.hasOwnProperty("br");
         if (hasBr && !(changes.br instanceof Rect)) {
             changes.br = Rect.fromObject(changes.br);

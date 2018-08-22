@@ -6,7 +6,7 @@ import { Overflow, Types } from "./Defs";
 import Selection from "./SelectionModel";
 import DataNode from "./DataNode";
 import ObjectFactory from "./ObjectFactory";
-import { ChangeMode, IContainer, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp, IUIElement, IUIElementProps, IText, UIElementFlags, ResizeDimension, IContext, ISelection, IArtboard, IAnimationOptions } from "carbon-core";
+import { ChangeMode, IContainer, IMouseEventData, IIsolatable, IPrimitiveRoot, ISymbol, ISymbolProps, IApp, IUIElement, IUIElementProps, IText, UIElementFlags, ResizeDimension, IContext, ISelection, IArtboard, IAnimationOptions, IDisposable } from "carbon-core";
 import { createUUID } from "../util";
 import Isolate from "../commands/Isolate";
 import UserSettings from "../UserSettings";
@@ -17,6 +17,7 @@ import NullContainer from "./NullContainer";
 import { RuntimeProxy } from "../code/runtime/RuntimeProxy";
 import EventHelper from "./EventHelper";
 import { IEvent } from "carbon-basics";
+import { AutoDisposable } from "../AutoDisposable";
 
 interface ISymbolRuntimeProps extends IUIElementProps {
     artboardVersion: number;
@@ -777,6 +778,11 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
         event.handled = false;
     }
 
+    attachDisposable(disposable: IDisposable) {
+        this.runtimeProps.disposables = this.runtimeProps.disposables || new AutoDisposable();
+        this.runtimeProps.disposables.add(disposable)
+    }
+
     flatten() {
         Symbol.flattening = true;
         this.applyVisitor(x => {
@@ -842,7 +848,16 @@ PropertyMetadata.registerForType(Symbol, {
         return {
             rprops: ["states", "stateAnimations"].concat(baseDefinition.rprops), // readonly props
             props: ["currentState"].concat(baseDefinition.props),
-            methods: ["nextState", "prevState", "registerStateAnimation"].concat(baseDefinition.methods),
+            methods: [
+                "nextState",
+                "prevState",
+                "registerStateAnimation",
+                "attachDisposable",
+                "setProperties",
+                "getPropertiesSnapshot",
+                "registerEventHandler",
+                "raiseEvent",
+                "findElementByName"].concat(baseDefinition.methods),
             mixins: [].concat(baseDefinition.mixins)
         }
     },
