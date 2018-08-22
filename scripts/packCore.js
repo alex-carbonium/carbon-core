@@ -20,27 +20,10 @@ function pack(webpackConfig) {
             //console.log("Writing stats", statsPath);
             //fs.writeFileSync(statsPath, JSON.stringify(json, null, '  '), 'utf-8');
 
-            if (!argv.sourceMaps){
-                dropSourceMapReferences(webpackConfig.output.path);
-            }
-
             if (argv.copyToUi){
                 updateFiles(webpackConfig.output.path, fullPath("../../carbon-ui/target"));
             }
         });
-}
-
-function dropSourceMapReferences(outPath){
-    var files = fs.readdirSync(outPath);
-    for (var i = 0; i < files.length; i++){
-        var file = path.join(outPath, files[i]);
-        if (file.endsWith(".js") || file.endsWith(".css")){
-            var content = fs.readFileSync(file, "utf-8");
-            content = content.replace(/#\ssourceMappingURL=/g, '//');
-            console.log("Clearing sourcemaps in", file);
-            fs.writeFileSync(file, content, "utf-8");
-        }
-    }
 }
 
 function updateFiles(sourceDir, targetDir){

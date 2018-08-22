@@ -21,6 +21,7 @@ function PublishPackage($Library)
     New-Item ".\target\$Library\lib" -ItemType Directory -ErrorAction Ignore
     Copy-Item ".\mylibs\definitions\carbon-*.d.ts" ".\target\$Library\types"
     Copy-Item ".\target\$main" ".\target\$Library\lib"
+    Copy-Item ".\target\$main.map" ".\target\$Library\lib"
     Copy-Item ".\LICENSE" ".\target\$Library"
 
     $package = (gc .\package.json) -replace '-main-',$main -replace '-library-',$Library | ConvertFrom-Json
