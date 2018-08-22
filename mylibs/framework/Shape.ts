@@ -460,7 +460,7 @@ PropertyMetadata.registerForType(Shape, {
             },
             {
                 label: "@advanced",
-                properties: ["clipMask"]
+                properties: ["useInCode", "clipMask"]
             }
         ];
     },
