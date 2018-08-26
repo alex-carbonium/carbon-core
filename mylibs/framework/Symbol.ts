@@ -187,6 +187,10 @@ export default class Symbol extends Container implements ISymbol, IPrimitiveRoot
             clone.runtimeProps.stateController = this;
             this.add(clone, ChangeMode.Self);
         }
+
+        if(artboard.props.renderBackground) {
+            this.fill = artboard.fill;
+        }
     };
 
     code() {

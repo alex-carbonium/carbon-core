@@ -152,14 +152,13 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     getStateboardById(artboardId) {
-        if(this.id === artboardId) {
+        if (this.id === artboardId) {
             return this;
         }
 
-        if(this.runtimeProps.stateBoards)
-        {
-            for(var sb of this.runtimeProps.stateBoards) {
-                if(sb.id === artboardId) {
+        if (this.runtimeProps.stateBoards) {
+            for (var sb of this.runtimeProps.stateBoards) {
+                if (sb.id === artboardId) {
                     return sb;
                 }
             }
@@ -301,7 +300,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     _renderHeader(context, environment) {
         let scale = environment.scale;
         let view = (environment as any).view;
-        if(!view) {
+        if (!view) {
             return; // this is hack but has no other options
         }
         context.save();
@@ -419,14 +418,14 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     fillBackground(context, l, t, w, h, environment: RenderEnvironment) {
-        if (environment.flags & RenderFlags.ArtboardFill) {
+        if (environment.flags & RenderFlags.ArtboardFill || this.props.renderBackground) {
             super.fillBackground(context, l, t, w, h, environment);
             this.onBackgroundDrawn && this.onBackgroundDrawn(this, context);
         }
     }
 
     strokeBorder(context, w, h, environment: RenderEnvironment) {
-        if ((environment.flags & RenderFlags.ArtboardFill && !(environment.flags & RenderFlags.Preview))) {
+        if (((environment.flags & RenderFlags.ArtboardFill && !(environment.flags & RenderFlags.Preview))) || this.props.renderBackground) {
             super.strokeBorder(context, w, h, environment);
         }
     }
@@ -515,7 +514,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
             return [
                 {
                     label: "",
-                    id:"layout",
+                    id: "layout",
                     properties: ["position", "size", "rotation"]
                 },
                 {
@@ -797,7 +796,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return super.getHitTestBox.apply(this, arguments);
     }
 
-    isInViewport(viewport:IRectData) {
+    isInViewport(viewport: IRectData) {
         if (!this.props.hitTestBox) {
             return super.isInViewport(viewport);
         }
@@ -849,7 +848,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         this.canDrag(false);
     }
 
-    private hitTestHeader(point, view:IView) {
+    private hitTestHeader(point, view: IView) {
         let bb = this.getBoundingBoxGlobal();
         let scale = view.scale();
         return isPointInRect({ x: bb.x, y: bb.y - 20 / scale, width: bb.width, height: 20 / scale }, point);
@@ -859,7 +858,7 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
      * If an artboard hits itself and has an extended hit test box, it has to be validated
      * if the artboard is "really" hit by checking the boundary rect.
      */
-    hitElement(position:ICoordinate, view:IView, predicate?, directSelection?): IUIElement {
+    hitElement(position: ICoordinate, view: IView, predicate?, directSelection?): IUIElement {
         let element = super.hitElement.apply(this, arguments);
         if (!element) {
             return null;
@@ -1389,25 +1388,25 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
         return ArtboardProxyGenerator.generate(artboard, module);
     }
 
-    set currentState(value:string) {
-        if(this.runtimeProps.stateController) {
+    set currentState(value: string) {
+        if (this.runtimeProps.stateController) {
             this.runtimeProps.stateController.currentState = value;
         }
     }
 
-    get currentState() :string {
-        if(this.runtimeProps.stateController) {
+    get currentState(): string {
+        if (this.runtimeProps.stateController) {
             return this.runtimeProps.stateController.currentState;
         }
     }
 
-    registerStateAnimation(from:string, to:string, defaultAnimationOptions:IAnimationOptions, elementOptions?:{[element:string]:{[prop:string]:IAnimationOptions}}) {
+    registerStateAnimation(from: string, to: string, defaultAnimationOptions: IAnimationOptions, elementOptions?: { [element: string]: { [prop: string]: IAnimationOptions } }) {
         let rp = this.runtimeProps;
-        let stateAnimation = rp.stateAnimations = rp.stateAnimations ||{};
+        let stateAnimation = rp.stateAnimations = rp.stateAnimations || {};
         let fromState = stateAnimation[from] = stateAnimation[from] || {};
         fromState[to] = {
-            defaultOptions:defaultAnimationOptions,
-            elementOptions:elementOptions
+            defaultOptions: defaultAnimationOptions,
+            elementOptions: elementOptions
         };
     }
 
@@ -1416,13 +1415,13 @@ class Artboard extends Container<IArtboardProps> implements IArtboard, IPrimitiv
     }
 
     nextState() {
-        if(this.runtimeProps.stateController) {
+        if (this.runtimeProps.stateController) {
             this.runtimeProps.stateController.nextState();
         }
     }
 
     prevState() {
-        if(this.runtimeProps.stateController) {
+        if (this.runtimeProps.stateController) {
             this.runtimeProps.stateController.prevState();
         }
     }
@@ -1450,6 +1449,11 @@ PropertyMetadata.registerForType(Artboard, {
         options: {
             size: 1 / 4
         }
+    },
+    renderBackground: {
+        displayName: "@display.background.preview",
+        type: "checkbox",
+        defaultValue: true
     },
     masterPageId: {
         displayName: "Master page",
@@ -1605,7 +1609,7 @@ PropertyMetadata.registerForType(Artboard, {
         return [
             {
                 label: "",
-                id:"layout",
+                id: "layout",
                 properties: ["position", "size"],
                 expanded: true
             },
@@ -1621,7 +1625,7 @@ PropertyMetadata.registerForType(Artboard, {
             },
             {
                 label: "@advanced",
-                properties: ["type", "tileSize", "symbolGroup", "insertAsContent", "allowHorizontalResize", "allowVerticalResize", "rowsCount", "colsCount", "iconCellSize"],
+                properties: ["renderBackground", "type", "tileSize", "symbolGroup", "insertAsContent", "allowHorizontalResize", "allowVerticalResize", "rowsCount", "colsCount", "iconCellSize"],
                 expanded: true
             }
             // ,{
