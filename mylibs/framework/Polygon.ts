@@ -164,6 +164,16 @@ export default class Polygon extends Shape {
         event.controller.repeatLastMouseMove();
     }
 
+    getMaxOuterBorder() {
+        var outerBorder = super.getMaxOuterBorder();
+        if(!outerBorder) {
+            return outerBorder;
+        }
+
+        var miterLimit = this.props.miterLimit || 10;
+        return outerBorder + miterLimit;
+    }
+
     cancel() {
         this.changeMode(false);
     }

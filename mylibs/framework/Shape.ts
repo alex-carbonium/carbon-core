@@ -152,13 +152,14 @@ class Shape extends Container {
 
         context.lineCap = this.lineCap;
         context.lineJoin = this.lineJoin;
-        context.miterLimit = this.props.miterLimit;
+        context.miterLimit = this.strokeWidth()*1.5//this.props.miterLimit;
 
-        if (environment.flags & RenderFlags.Final) {
-            this._renderFinal(context, w, h, environment);
-        } else {
-            this._renderDraft(context, w, h, environment);
-        }
+        // if (environment.flags & RenderFlags.Final) {
+        //     this._renderFinal(context, w, h, environment);
+        // } else {
+        //     this._renderDraft(context, w, h, environment);
+        // }
+        this._renderFinal(context, w, h, environment);
 
         context.restore();
     }

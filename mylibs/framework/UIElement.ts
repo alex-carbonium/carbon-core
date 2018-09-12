@@ -85,7 +85,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
     }
     resetRuntimeProps() {
-        this.runtimeProps = {
+        this.runtimeProps = this.runtimeProps || {};
+        Object.assign(this.runtimeProps, {
             boundaryRectGlobal: null,
             globalViewMatrix: null,
             globalViewMatrixInverted: null,
@@ -93,7 +94,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             primitiveRoot: null,
             snapPoints: null,
             ctxl: 1
-        }
+        })
     }
     _roundValue(value) {
         return Math.round(value);
@@ -907,8 +908,8 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         if (strokePosition === StrokePosition.Inside) {
             return 0;
         }
-        var miterLimit = this.props.miterLimit || 10;
-        return strokeWidth + miterLimit;
+
+        return strokeWidth;
     }
 
     expandRectWithBorder(rect) {

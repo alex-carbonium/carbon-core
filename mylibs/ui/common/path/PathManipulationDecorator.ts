@@ -1,13 +1,11 @@
-import Container from "../../../framework/Container";
 import Path from "../../../framework/Path";
-import { IIsolatable, ChangeMode, LayerType, ElementState, PointType, IMouseEventHandler, KeyboardState, IMouseEventData, IPathPoint, IDisposable, RenderEnvironment, IView, IController } from "carbon-core";
+import { ChangeMode, LayerType, ElementState, PointType, IMouseEventHandler, IMouseEventData, IPathPoint, IDisposable, RenderEnvironment, IView, IController } from "carbon-core";
 import UIElementDecorator from "../../../framework/UIElementDecorator";
 import Selection from "../../../framework/SelectionModel";
 import UserSettings from "../../../UserSettings";
 import Invalidate from "../../../framework/Invalidate";
 import Cursors from "../../../Cursors";
 import PropertyTracker from "../../../framework/PropertyTracker";
-import UIElement from "../../../framework/UIElement";
 import angleAdjuster from "../../../math/AngleAdjuster";
 import {SelectFrame} from "../../../framework/SelectFrame";
 import Rect from "../../../math/rect";
@@ -282,6 +280,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
         delete this._altPressed;
         let path: Path = this.element;
 
+        PropertyTracker.resumeAndFlush();
 
         if (this._selectFrame.visible) {
             this._selectFrame.visible = (false);
@@ -312,8 +311,6 @@ export default class PathManipulationObject extends UIElementDecorator implement
         if (!event.handled && pt) {
             this._finalizePointMoveOperation(pt);
         }
-
-        PropertyTracker.resumeAndFlush();
         this.view.snapController.calculateSnappingPointsForPath(this.path);
     }
 
@@ -329,9 +326,10 @@ export default class PathManipulationObject extends UIElementDecorator implement
 
         if (pt && event.shiftKey) {
             this.addToSelectedPoints(pt);
-        } else if (!pt || !this._selectedPoints[pt.idx]) {
-            this.clearSelectedPoints();
         }
+        // else if (!pt || !this._selectedPoints[pt.idx]) {
+        //     this.clearSelectedPoints();
+        // }
 
         if (!event.handled && pt && !this._selectedPoints[pt.idx]) {
             this.selectedPoint = pt;

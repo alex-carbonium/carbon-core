@@ -9,7 +9,6 @@ import PathManipulationDecorator from "./path/PathManipulationDecorator";
 import NullContainer from "../../framework/NullContainer";
 import Point from "../../math/point";
 
-
 export default class PathTool extends Tool {
     _pathElement: Path;
     _type: any;
@@ -76,6 +75,7 @@ export default class PathTool extends Tool {
         var element = Selection.selectedElement();
         if (element instanceof Path && element.mode() === ElementState.Edit) {
             this._pathElement = element;
+            element.enablePropsTracking();
             this._pathElement.removeDecoratorByType(PathManipulationDecorator);
             this._pathElement.addDecorator(new PathManipulationDecorator(this.view, this.controller, true));
         } else {
@@ -87,6 +87,7 @@ export default class PathTool extends Tool {
         super._detach.apply(this, arguments);
         Cursor.removeGlobalCursor();
         if(this._pathElement) {
+            this._pathElement.disablePropsTracking();
             this._pathElement.removeDecoratorByType(PathManipulationDecorator);
         }
     }
@@ -97,7 +98,7 @@ export default class PathTool extends Tool {
         }
 
         if (!this._pathElement.runtimeProps.inserted) {
-            this._pathElement.applyGlobalTranslation(new Point(event.x, event.y));
+            this._pathElement.applyGlobalTranslation(this._pathElement._roundPoint(new Point(event.x, event.y)));
             event.view.dropElement(this._pathElement);
             Selection.makeSelection([this._pathElement]);
             this._pathElement.runtimeProps.inserted = true;

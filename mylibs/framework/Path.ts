@@ -282,7 +282,7 @@ class Path extends Shape {
 
     _refreshComputedProps() {
         this.propsUpdated({
-            currentPointPosition: {x:this.runtimeProps.currentPointX, y: this.runtimeProps.currentPointY},
+            currentPointPosition: { x: this.runtimeProps.currentPointX, y: this.runtimeProps.currentPointY },
             currentPointType: this.runtimeProps.currentPointType
         }, {}); // refresh properties
     }
@@ -355,6 +355,27 @@ class Path extends Shape {
         return this.points[this.points.length - 1];
     }
 
+    expandRectWithBorder(rect) {
+        let border = this.getMaxOuterBorder() * 1.5;
+        if (border !== 0) {
+            return rect.expand(border);
+        }
+        return rect;
+    }
+
+    expandWidthMitterLimits() {
+        for (let i = 1; i < this.points.length - 1; ++i) {
+            var p1 = this.points[i - 1];
+            var p2 = this.points[i];
+            var p3 = this.points[i + 1];
+            var v1 = Point.allocate(p2.x - p1.x, p2.y - p1.y);
+            var v2 = Point.allocate(p2.x - p3.x, p2.y - p3.y);
+
+            v1.free();
+            v2.free();
+        }
+    }
+
     removeControlPoint(pt) {
         for (let i = 0; i < this.points.length; ++i) {
             if (this.points[i] === pt) {
@@ -388,6 +409,8 @@ class Path extends Shape {
 
         pt.x = x;
         pt.y = y;
+
+        return pt;
     }
 
     indexOfPoint(pt) {
@@ -422,7 +445,7 @@ class Path extends Shape {
         return this.props.mode;
     }
 
-    enter(a,b,c,{view, controller}) {
+    enter(a, b, c, { view, controller }) {
         if (this.mode() !== ElementState.Edit) {
             this.edit(view, controller);
         }
@@ -436,10 +459,11 @@ class Path extends Shape {
             this.mode(ElementState.Edit);
             this.save();
         } else {
-            // this.unregisterForLayerDraw(LayerTypes.Interaction);
             this.removeDecoratorByType(PathManipulationDecorator)
             this.mode(ElementState.Resize);
         }
+
+        this.runtimeProps.selectedPointIdx = -1;
 
         Selection.reselect();
     }
@@ -1112,6 +1136,14 @@ class Path extends Shape {
     _currentPointPosition(value: ICoordinate, changeMode?: ChangeMode) {
         this.runtimeProps.currentPointX = this._roundValue(value.x);
         this.runtimeProps.currentPointY = this._roundValue(value.y);
+        var pt = this.points[this.runtimeProps.selectedPointIdx];
+        if (pt) {
+            var newPt = Object.assign({}, pt);
+            newPt.x = this.runtimeProps.currentPointX;
+            newPt.y = this.runtimeProps.currentPointY;
+            this.changePointAtIndex(newPt, this.runtimeProps.selectedPointIdx, changeMode);
+        }
+
         this._refreshComputedProps();
         Invalidate.request();
     }
@@ -1126,6 +1158,12 @@ class Path extends Shape {
 
     _currentPointType(value: PointType, changeMode?: ChangeMode) {
         this.runtimeProps.currentPointType = value;
+        var pt = this.points[this.runtimeProps.selectedPointIdx];
+        if (pt) {
+            var newPt = Object.assign({}, pt);
+            newPt.type = this.runtimeProps.currentPointType;
+            this.changePointAtIndex(newPt, this.runtimeProps.selectedPointIdx, changeMode);
+        }
         this._refreshComputedProps();
         Invalidate.request();
     }
