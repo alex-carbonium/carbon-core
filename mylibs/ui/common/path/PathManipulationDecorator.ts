@@ -7,7 +7,7 @@ import Invalidate from "../../../framework/Invalidate";
 import Cursors from "../../../Cursors";
 import PropertyTracker from "../../../framework/PropertyTracker";
 import angleAdjuster from "../../../math/AngleAdjuster";
-import {SelectFrame} from "../../../framework/SelectFrame";
+import { SelectFrame } from "../../../framework/SelectFrame";
 import Rect from "../../../math/rect";
 
 export const enum PathManipulationMode {
@@ -90,9 +90,9 @@ export default class PathManipulationObject extends UIElementDecorator implement
     private _cancelBinding: IDisposable;
     private _selectedPoints: any;
     private _selectFrame: SelectFrame;
-    protected element:Path;
+    protected element: Path;
 
-    constructor(protected view:IView, private controller:IController, public constructMode: boolean = false) {
+    constructor(protected view: IView, private controller: IController, public constructMode: boolean = false) {
         super();
         this._selectedPoints = {};
     }
@@ -173,7 +173,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
     }
 
     attach(element: Path) {
-        if(!element.visibleInChain()) {
+        if (!element.visibleInChain()) {
             return; // need it for isolation layer
         }
         super.attach(element);
@@ -181,13 +181,22 @@ export default class PathManipulationObject extends UIElementDecorator implement
         this.controller.captureMouse(this);
         this.view.snapController.calculateSnappingPointsForPath(this.path);
         this._cancelBinding = this.controller.actionManager.subscribe('cancel', this.cancel.bind(this));
-        this._startSegmentPoint = this._lastSegmentStartPoint();
         this._selectFrame = new SelectFrame();
         this._selectFrame.onComplete.bind(this, this.onselect);
         this.view.interactionLayer.add(this._selectFrame);
         this._selectFrame.setProps({ visible: false });
         this.path.invalidate();
         Invalidate.requestInteractionOnly();
+    }
+
+    get lastSegmentStartPoint() {
+        // path.points can change when we undo/redo, this will change _startSegmentPoint reference
+        if(this._pointsRef !== this.path.points || !this._startSegmentPoint) {
+            this._startSegmentPoint = this.path.lastSegmentStartPoint();
+            this._pointsRef = this.path.points;
+        }
+
+        return this._startSegmentPoint;
     }
 
     _finalizePath() {
@@ -202,7 +211,7 @@ export default class PathManipulationObject extends UIElementDecorator implement
     }
 
     detach() {
-        if(!this.path) {
+        if (!this.path) {
             return;
         }
 
@@ -336,7 +345,8 @@ export default class PathManipulationObject extends UIElementDecorator implement
         }
 
         if (!event.handled && pt) {
-            if (!event.handled && this.constructMode && (!this.path.closed() && pt === this._startSegmentPoint)) {
+            let startSegmentPoint = this.lastSegmentStartPoint;
+            if (this.constructMode && (!this.path.closed() && pt && startSegmentPoint && pt.idx === startSegmentPoint.idx)) {
                 this._closeCurrentPath(pt);
             } else if (event.altKey) {
                 this._altPressed = true;
@@ -370,8 +380,6 @@ export default class PathManipulationObject extends UIElementDecorator implement
                     path.changePointAtIndex(data[1], data[1].idx);
                     newPoint = path.insertPointAtIndex(data[2], data[2].idx);
                 }
-
-                this._startSegmentPoint = this._lastSegmentStartPoint();
 
                 this._currentPoint = newPoint;
                 this._originalPoint = clone(newPoint);
@@ -509,7 +517,8 @@ export default class PathManipulationObject extends UIElementDecorator implement
         }
 
         if (!event.handled && this.constructMode) {
-            if (!this._startSegmentPoint) {
+            let startSegmentPoint = this.lastSegmentStartPoint;
+            if (!startSegmentPoint) {
                 this._startPoint = { x: event.x, y: event.y };
                 path._roundPoint(this._startPoint);
             } else {
@@ -530,8 +539,8 @@ export default class PathManipulationObject extends UIElementDecorator implement
         this._updateCursor(event);
     }
 
-    beforeInvoke(method:string, args:any[]) {
-        switch(method) {
+    beforeInvoke(method: string, args: any[]) {
+        switch (method) {
             case 'delete': {
                 return this.delete.apply(this, args);
             }
@@ -585,7 +594,8 @@ export default class PathManipulationObject extends UIElementDecorator implement
             updateHoverHandlePoint.call(this, pt);
         }
 
-        if (this.constructMode && !this.path.closed() && (this.hoverPoint === this._startSegmentPoint)) {
+        let startSegmentPoint = this.lastSegmentStartPoint;
+        if (this.constructMode && !this.path.closed() && (this.hoverPoint && startSegmentPoint && this.hoverPoint.idx === startSegmentPoint.idx)) {
             event.cursor = Cursors.Pen.ClosePath;
         }
         else if (this.isHoveringOverHandle() || (this.isHoveringOverPoint() && event.altKey)) {
@@ -609,22 +619,6 @@ export default class PathManipulationObject extends UIElementDecorator implement
         else {
             event.cursor = this.controller.defaultCursor();
         }
-    }
-
-    _lastSegmentStartPoint() {
-        var points = this.path.points;
-        if (!points.length) {
-            return null;
-        }
-
-        for (var i = points.length - 1; i > 0; i--) {
-            var p = points[i];
-            if (p.moveTo) {
-                break;
-            }
-        }
-
-        return points[i];
     }
 
     dblclick(event, scale: number) {
@@ -817,16 +811,14 @@ export default class PathManipulationObject extends UIElementDecorator implement
         }
 
         pos = this.path.globalViewMatrixInverted().transformPoint(pos);
-        let pt = { x: pos.x, y: pos.y, moveTo: this._startSegmentPoint === null, idx:this.path.points.length };
+
+        let pt = { x: pos.x, y: pos.y, moveTo: this.path.closed() || !this.path.points.length, idx: this.path.points.length };
 
         this.path.insertPointAtIndex(pt, this.path.points.length);
+        this._startSegmentPoint = null;
 
         this.view.snapController.calculateSnappingPointsForPath(this.path);
         this.path.invalidate();
-
-        if (!this._startSegmentPoint) {
-            this._startSegmentPoint = pt;
-        }
 
         this._handlePoint = pt;
         this._originalPoint = clone(pt);
@@ -837,7 +829,8 @@ export default class PathManipulationObject extends UIElementDecorator implement
     }
 
     _closePathOrSelectPoint(pt) {
-        if (!this.path.closed() && pt === this._startSegmentPoint) {
+        let startSegmentPoint = this.lastSegmentStartPoint;
+        if (!this.path.closed() && pt && startSegmentPoint && pt.idx === startSegmentPoint.idx) {
             this._closeCurrentPath(pt);
         }
         else {
@@ -853,11 +846,10 @@ export default class PathManipulationObject extends UIElementDecorator implement
         var lastPoint = points[points.length - 1];
         lastPoint.closed = true;
         this.path.changePointAtIndex(lastPoint, points.length - 1);
-        this._startSegmentPoint = null;
         this._clearShortSegments();
     }
 
-    currentPointValue(prop:string, value: PointType, changeMode: ChangeMode) {
+    currentPointValue(prop: string, value: PointType, changeMode: ChangeMode) {
         let points = this._selectedPoints;
         var keys = Object.keys(points);
         if (keys.length === 0) {

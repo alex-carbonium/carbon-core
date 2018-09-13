@@ -316,10 +316,25 @@ class Path extends Shape {
         this.props.m = this._lastM;
         this.setProps({ points: newPoints, br: newBr, m: newM });
         this.adjustBoundaries();
-        this._lastPoints = this.points.map(p => clone(p));
         this._lastBr = this.props.br.clone();
         this._lastM = this.props.m.clone();
         this._saving = false;
+    }
+
+    lastSegmentStartPoint() {
+        var points = this.points;
+        if (!points.length) {
+            return null;
+        }
+
+        for (var i = points.length - 1; i > 0; i--) {
+            var p = points[i];
+            if (p.moveTo) {
+                break;
+            }
+        }
+
+        return points[i];
     }
 
     cloneProps() {

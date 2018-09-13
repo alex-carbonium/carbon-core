@@ -170,6 +170,11 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
                 props.br = br.withSize(w, h);
             }
         }
+
+        if(props.hasOwnProperty("points")) {
+            this._lastPoints = props.points.map(p => clone(p));
+        }
+
         super.setProps.apply(this, arguments);
     }
 
