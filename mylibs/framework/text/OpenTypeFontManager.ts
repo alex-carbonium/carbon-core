@@ -87,7 +87,7 @@ export class OpenTypeFontManager extends FontManager implements IFontManager {
 
     private resetTexts(family: string, style: FontStyle, weight: FontWeight) {
         this.app.applyVisitorDepthFirst(element => {
-            if (element instanceof Text && element.props.font.family == family
+            if (element instanceof Text && element.props.font.family === family
                 && element.props.font.style === style
                 && element.props.font.weight === weight
             ) {
