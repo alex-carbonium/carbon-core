@@ -26,7 +26,7 @@ function parseQueryString(): IQueryStringParams{
 
 var parser = new UAParser(navigator.userAgent);
 
-const RealCdn = '//carbonstatic.azureedge.net';
+const RealCdn = '//carbonstatic3.azureedge.net';
 var endpoints = window['endpoints'];
 var qs = parseQueryString();
 if (DEBUG){
@@ -35,8 +35,8 @@ if (DEBUG){
             services: '//dev.carbonium.io',
             storage: '//dev.carbonium.io:9100',
             cdn: RealCdn,
-            file: '//carbonstorageqa1.blob.core.windows.net/',
-            error: 'https://carbon-functions-qa1.azurewebsites.net/api/trackError'
+            file: '//carbonstorageqa3.blob.core.windows.net/',
+            error: 'https://carbon-functions-qa3.azurewebsites.net/api/trackError'
         }
     }
     else if (qs.backend === "prod"){
@@ -44,8 +44,8 @@ if (DEBUG){
             services: '//carbonium.io',
             storage: '//carbonium.io:9100',
             cdn: RealCdn,
-            file: '//carbonstorageqa1.blob.core.windows.net/',
-            error: 'https://carbon-functions-qa1.azurewebsites.net/api/trackError'
+            file: '//carbonstorageqa3.blob.core.windows.net/',
+            error: 'https://carbon-functions-qa3.azurewebsites.net/api/trackError'
         }
     }
     else{

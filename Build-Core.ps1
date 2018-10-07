@@ -85,7 +85,7 @@ try
 
     if ($Branch -eq "master" -or $Branch.StartsWith("releases"))
     {
-        node .\scripts\uploadSourceMaps.js --accountName carbonstatic --accountKey $CdnKey
+        node .\scripts\uploadSourceMaps.js --accountName carbonstatic3 --accountKey $CdnKey
         PublishPackage -Library "carbon-core"
         PublishPackage -Library "carbon-api"
     }
