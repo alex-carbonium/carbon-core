@@ -21,7 +21,7 @@ export default class ArtboardsTool extends Tool {
 
     constructor(app: IApp, view: IView, controller: IController) {
         super("artboardTool", app, view, controller);
-        this._point = new Point(0, 0);        
+        this._point = new Point(0, 0);
     }
 
     attach() {

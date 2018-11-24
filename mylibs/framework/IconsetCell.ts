@@ -1,9 +1,8 @@
 import Canvas from "../ui/common/Canvas";
-
 import PropertyMetadata from "./PropertyMetadata";
 import {Types, Overflow} from "./Defs";
 import Brush from "./Brush";
-import { RenderEnvironment, RenderFlags } from "carbon-core";
+import { RenderEnvironment } from "carbon-core";
 
 export class IconsetCell extends Canvas {
     canAlign() {

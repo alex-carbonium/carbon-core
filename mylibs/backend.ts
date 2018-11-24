@@ -557,4 +557,6 @@ if (!backend) {
     debug("created backend, session %s", backend.sessionId);
     globals.backend = backend;
 }
+
+
 export default backend as Backend;

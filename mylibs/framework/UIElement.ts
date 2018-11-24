@@ -1,13 +1,10 @@
-import TypeDefaults from "./TypeDefaults";
 import ObjectFactory from "./ObjectFactory";
 import PropertyMetadata from "./PropertyMetadata";
 import Box from "./Box";
 import Brush from "./Brush";
-import AnimationGroup from "./animation/AnimationGroup";
 import Matrix from "../math/matrix";
 import Point from "../math/point";
 import { isRectInRect, areRectsIntersecting } from "../math/math";
-//import stopwatch from "../Stopwatch";
 import Constraints from "./Constraints";
 import GlobalMatrixModifier from "./GlobalMatrixModifier";
 import params from "../params";
@@ -31,7 +28,7 @@ import DataNode from "./DataNode";
 import { createUUID, deepEquals } from "../util";
 import Rect from "../math/rect";
 import ResizeOptions from "../decorators/ResizeOptions";
-import { KeyboardState, IConstraints } from "carbon-basics";
+import {  IConstraints } from "carbon-basics";
 import { IUIElementProps, IUIElement, IContainer } from "carbon-model";
 import { ICoordinate, ISize } from "carbon-geometry";
 import { ChangeMode, LayerType, IPrimitiveRoot, IRect, IMatrix, ResizeDimension, IDataNode, IPoint, UIElementFlags, LayoutProps, RenderFlags, RenderEnvironment, IContext, PropDescriptor, Origin, StrokePosition, IProxySource, ProxyDefinition, DataBag, IDisposable, IView } from "carbon-core";
@@ -42,8 +39,6 @@ import RenderPipeline from "./render/RenderPipeline";
 import ContextCacheManager from "./render/ContextCacheManager";
 import { RuntimeProxy } from "../code/runtime/RuntimeProxy";
 import { PropertyAnimation } from "./animation/PropertyAnimation";
-
-require("../migrations/All");
 
 export interface IUIElementRuntimeProps {
     ctxl: number;
@@ -62,8 +57,6 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
 
     constructor() {
         super(false);
-
-        //this.stopwatch = new stopwatch();
 
         if (DEBUG) {
             this.id = (createUUID(this.t));
@@ -1825,13 +1818,6 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         return this.field("_resizeDimensions", value, ResizeDimension.Both);
     }
     fromJSON(data) {
-        //TODO: bring back migrations when necessary
-        // if (data.props.version !== this.__version__) {
-        //     if (!Migrations.runMigrations(this.t, data, this.__version__)) {
-        //         throw "Migration not successful: " + this.t + " from " + data.props.version + " to " + this.__version__;
-        //     }
-        //     App.Current.migrationUpgradeNotifications.push(this);
-        // }
         this.__state = 1;
 
         super.fromJSON.apply(this, arguments);

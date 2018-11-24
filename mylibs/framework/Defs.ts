@@ -178,7 +178,6 @@ export var Types = {
     'ArtboardPage': 'P',
     'ArtboardProxyPage': 'z',
     'NullPage': 'X',
-    'ClickSpot': 'Y',
     'QuadAndLock': 'q',
     'Box': 'B',
     'Shadow': 'i',

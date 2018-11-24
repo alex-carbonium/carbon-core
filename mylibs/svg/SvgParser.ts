@@ -8,17 +8,17 @@ import { combineRects } from "../math/math";
 import logger from "../logger";
 import { IGroupContainer } from "carbon-core";
 
-var reAllowedSVGTagNames = /^(path|circle|polygon|polyline|ellipse|rect|line|image|text|g)$/;
+const reAllowedSVGTagNames = /^(path|circle|polygon|polyline|ellipse|rect|line|image|text|g)$/;
 
 // http://www.w3.org/TR/SVG/coords.html#ViewBoxAttribute
 // \d doesn't quite cut it (as we need to match an actual float number)
 
 // matches, e.g.: +14.56e-12, etc.
-var reNum = '(?:[-+]?\\d+(?:\\.\\d+)?(?:e[-+]?\\d+)?)';
+const reNum = '(?:[-+]?\\d+(?:\\.\\d+)?(?:e[-+]?\\d+)?)';
 var cssRules;
 var gradientDefs;
 
-var reViewBoxAttrValue = new RegExp(
+const reViewBoxAttrValue = new RegExp(
     '^' +
     '\\s*(' + reNum + '+)\\s*,?' +
     '\\s*(' + reNum + '+)\\s*,?' +
@@ -36,27 +36,27 @@ function hasAncestorWithNodeName(element, nodeName) {
     return false;
 }
 
-var toArray = function (arrayLike) {
+const toArray = function (arrayLike) {
     return Array.prototype.slice.call(arrayLike, 0);
 };
 
 function parseGroupElement(element, options, matrix?) {
-    var group = new GroupContainer();
+    let group = new GroupContainer();
 
     App.Current.activePage.nameProvider.assignNewName(group);
-    var parsedChildren = visitElements(element.children, options, matrix); // TODO: update matrix
+    let parsedChildren = visitElements(element.children, options, matrix);
 
-    if (parsedChildren.length == 0) {
+    if (parsedChildren.length === 0) {
         return null;
     }
-    var rect = parsedChildren[0].boundaryRect();
-    for (var i = 1; i < parsedChildren.length; ++i) {
+    let rect = parsedChildren[0].boundaryRect();
+    for (let i = 1; i < parsedChildren.length; ++i) {
         var e = parsedChildren[i];
         rect = combineRects(rect, e.boundaryRect());
     }
 
     group.setProps(rect);
-    for (var i = 0; i < parsedChildren.length; ++i) {
+    for (let i = 0; i < parsedChildren.length; ++i) {
         var child = parsedChildren[i];
         child.setProps({ x: child.x - rect.x, y: child.y - rect.y });
         group.add(child);
@@ -317,7 +317,7 @@ function parseTransformAttribute(...args) {
             attributeValue = attributeValue.replace(reTransform, function (match) {
 
                 var m = new RegExp(transform).exec(match).filter(function (match) {
-                    return (match !== '' && match != null);
+                    return (match !== '' && match !== null);
                 }),
                     operation = m[1],
                     args = m.slice(2).map(parseFloat);
@@ -361,7 +361,7 @@ function parseTransformAttribute(...args) {
 function parsePointsAttribute(points) {
 
     // points attribute is required and must not be empty
-    if (!points) return null;
+    if (!points) { return null; }
 
     points = points.trim();
     var asPairs = points.indexOf(',') > -1;
@@ -406,7 +406,7 @@ function parseStyleAttribute(element) {
     var oStyle = {},
         style = element.getAttribute('style');
 
-    if (!style) return oStyle;
+    if (!style) { return oStyle; }
 
     if (typeof style === 'string') {
         style = style.replace(/;$/, '').split(';').forEach(function (current) {
@@ -422,7 +422,7 @@ function parseStyleAttribute(element) {
     }
     else {
         for (var prop in style) {
-            if (typeof style[prop] === 'undefined') continue;
+            if (typeof style[prop] === 'undefined') { continue; }
 
             var parsed = parseFloat(style[prop]);
             oStyle[normalizeAttr(prop.toLowerCase())] = isNaN(parsed) ? style[prop] : parsed;
@@ -477,7 +477,7 @@ function parseElements(elements, callback, options, reviver) {
     }
 
     instances = instances.filter(function (el) {
-        return el != null;
+        return !!el;
     });
 
     resolveGradients(instances);
@@ -567,10 +567,10 @@ function getGlobalStylesForElement(element) {
  * @param {Function} callback Callback to call when parsing is finished; It's being passed an array of elements (parsed from a document).
  * @param {Function} [reviver] Method for further parsing of SVG elements, called after each fabric object created.
  */
-function parseSVGDocument(...args){
+function parseSVGDocument(...args) {
 
     return function (doc, callback, reviver) {
-        if (!doc) return;
+        if (!doc) { return };
 
         var startTime = new Date(),
             descendants = toArray(doc.getElementsByTagName('*'));
@@ -578,22 +578,12 @@ function parseSVGDocument(...args){
         var matrix = Matrix.create();
 
 
-        // if (descendants.length === 0) {
-        //     // we're likely in node, where "o3-xml" library fails to gEBTN("*")
-        //     // https://github.com/ajaxorg/node-o3-xml/issues/21
-        //     descendants = doc.selectNodes("//*[name(.)!='svg']");
-        //     var arr = [];
-        //     for (var i = 0, len = descendants.length; i < len; i++) {
-        //         arr[i] = descendants[i];
-        //     }
-        //     descendants = arr;
-        // }
 
         var elements = descendants.filter(function (el) {
             return reAllowedSVGTagNames.test(el.tagName) && !hasAncestorWithNodeName(el, /^(?:pattern|defs)$/); // http://www.w3.org/TR/SVG/struct.html#DefsElement
         });
 
-        if (!elements || (elements && !elements.length)) return;
+        if (!elements || (elements && !elements.length)) { return; }
 
         var viewBoxAttr = doc.getAttribute('viewBox'),
             widthAttr = doc.getAttribute('width'),
@@ -655,18 +645,20 @@ export function loadSVGFromString(string, r?): Promise<IGroupContainer> {
             if (results.length === 1) {
                 resolve(results[0]);
             }
-            var group = new GroupContainer();
+
+            let group = new GroupContainer();
             App.Current.activePage.nameProvider.assignNewName(group);
 
-            var right = 0;
-            var bottom = 0;
-            for (var i = 0; i < results.length; ++i) {
-                var rect = results[i].boundaryRect();
-                var r = rect.x + rect.width;
+            let right = 0;
+            let bottom = 0;
+            for (let i = 0; i < results.length; ++i) {
+                let rect = results[i].boundaryRect();
+                let r = rect.x + rect.width;
                 if (r > right) {
                     right = r;
                 }
-                var b = rect.y + rect.height;
+
+                let b = rect.y + rect.height;
                 if (b > bottom) {
                     bottom = b;
                 }
@@ -674,7 +666,7 @@ export function loadSVGFromString(string, r?): Promise<IGroupContainer> {
 
             group.setProps({ width: right, height: bottom });
 
-            for (var i = 0; i < results.length; ++i) {
+            for (let i = 0; i < results.length; ++i) {
                 group.add(results[i]);
             }
 
