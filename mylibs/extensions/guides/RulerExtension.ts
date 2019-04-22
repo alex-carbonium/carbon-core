@@ -32,15 +32,16 @@ export default class RulerExtension extends RuntimeExtension {
     }
 
     attach(app: IApp, view: IView, controller: IController) {
-        if (!(view instanceof DesignerView)) {
-            return;
-        }
+        return;
+        // if (!(view instanceof DesignerView)) {
+        //     return;
+        // }
 
-        super.attach.apply(this, arguments);
+        // super.attach.apply(this, arguments);
 
-        this._rulerGuides = new RulerGuides(app, view, controller);
-        this._viewportRect = null;
-        this.view = view;
+        // this._rulerGuides = new RulerGuides(app, view, controller);
+        // this._viewportRect = null;
+        // this.view = view;
     }
 
     detach() {

@@ -651,7 +651,8 @@ PropertyMetadata.registerForType(Text, {
             {
                 label: UIElement.displayType(Types.Text),
                 properties: [/*"textStyleId",*/"font", "mode", "wrap", "editable"]
-            }
+            },
+            baseGroups.find(x => x.label === "@advanced")
         ];
 
         return ownGroups;

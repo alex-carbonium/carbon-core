@@ -338,6 +338,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
             || changes.hasOwnProperty("margin")
             || changes.hasOwnProperty("padding")
             || changes.hasOwnProperty("size")
+            || changes.hasOwnProperty("angle")
             || changes.hasOwnProperty("position")
             || changes.hasOwnProperty("arrangeStrategy")
             || changes.hasOwnProperty("visible");
@@ -1621,6 +1622,7 @@ export default class UIElement<TProps extends IUIElementProps = IUIElementProps>
         }
         return this.props.minWidth;
     }
+
     minHeight(/*Number*/value: number) {
         if (value !== undefined) {
             this.setProps({ minHeight: value });

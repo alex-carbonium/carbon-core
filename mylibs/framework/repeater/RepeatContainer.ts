@@ -60,8 +60,8 @@ export default class RepeatContainer extends Container implements IRepeatContain
 
     getAffectedDisplayProperties(changes): string[] {
         var result = super.getAffectedDisplayProperties(changes);
-        if (changes.hasOwnProperty("br") || changes.hasOwnProperty("innerMarginX") || changes.hasOwnProperty("innerMarginY")
-            || changes.hasOwnProperty("offsetX") || changes.hasOwnProperty("offsetY")
+        if (changes.hasOwnProperty("br") || changes.hasOwnProperty("innerMarginX") || changes.hasOwnProperty("innerMarginY")|| changes.hasOwnProperty("innerMargin")
+            || changes.hasOwnProperty("offsetX") || changes.hasOwnProperty("offsetY") || changes.hasOwnProperty("offset")|| changes.hasOwnProperty("copies")
         ) {
             if (result.indexOf("rows") === -1) {
                 result.push("rows");
@@ -78,7 +78,7 @@ export default class RepeatContainer extends Container implements IRepeatContain
             return result;
         }
 
-        if (displayChanges.hasOwnProperty("rows") || displayChanges.hasOwnProperty("cols")) {
+        if (displayChanges.hasOwnProperty("rows") || displayChanges.hasOwnProperty("cols")|| displayChanges.hasOwnProperty("copies")) {
             result.push("br");
         }
         return result;
@@ -88,7 +88,7 @@ export default class RepeatContainer extends Container implements IRepeatContain
         if (res) {
             return res;
         }
-        return changes.hasOwnProperty("innerMarginX") || changes.hasOwnProperty("innerMarginY");
+        return changes.hasOwnProperty("innerMarginX") || changes.hasOwnProperty("innerMarginY")  || changes.hasOwnProperty("innerMargin");
     }
 
     saveOrResetLayoutProps(mode: ChangeMode) {
@@ -376,10 +376,12 @@ export default class RepeatContainer extends Container implements IRepeatContain
             RepeatMarginTool.attach(this, view, controller);
         }
     }
+
     unselect() {
         super.unselect();
         RepeatMarginTool.detach(this);
     }
+
     selectionFrameType() {
         return RepeatFrameType;
     }
@@ -431,6 +433,21 @@ export default class RepeatContainer extends Container implements IRepeatContain
         this.children[0].applyTranslation(t, false, mode);
     }
 
+    get offset() {
+        return this.children[0].getBoundingBox();
+    }
+
+    set offset(value) {
+        this._offset(value);
+    }
+
+    _offset(value?, mode?) {
+        var diffX = value.x - this.offsetX;
+        var diffY = value.y - this.offsetY;
+        var t = new Point(diffX, diffY)
+        this.children[0].applyTranslation(t, false, mode);
+    }
+
     get offsetY() {
         return this.children[0].getBoundingBox().y;
     }
@@ -443,6 +460,18 @@ export default class RepeatContainer extends Container implements IRepeatContain
         var diff = value - this.offsetY;
         var t = new Point(0, diff)
         this.children[0].applyTranslation(t, false, mode);
+    }
+
+    get innerMargin() {
+        return {x:this.props.innerMarginX, y:this.props.innerMarginY};
+    }
+
+    set innerMargin(value) {
+        this._innerMargin(value);
+    }
+
+    _innerMargin(value?, mode?) {
+        this.prepareAndSetProps({innerMarginX:value.x, innerMarginY:value.y}, mode);
     }
 
     get rows() {
@@ -495,36 +524,77 @@ export default class RepeatContainer extends Container implements IRepeatContain
         this.setProps({ br: this.boundaryRect().withWidth(newWidth) }, mode);
         return value;
     }
+
+    get copies() {
+        return {x:this.cols, y: this.rows};
+    }
+
+    set copies(value) {
+        this._copies(value);
+    }
+
+    _copies(value?, mode?) {
+        if(value.x !=- this.cols) {
+            this._cols(value.x, mode);
+        }
+
+        if(value.y !== this.rows) {
+            this._rows(value.y, mode);
+        }
+    }
 }
 RepeatContainer.prototype.t = Types.RepeatContainer;
 
 PropertyMetadata.registerForType(RepeatContainer, {
-    offsetX: {
-        displayName: "@repeater.offsetX",
-        defaultValue: 0,
+    offset : {
+        type: "tuple",
+        displayName: "@repeater.offset",
         computed: true,
-        type: "numeric"
+        options: {
+            name1:"x",
+            name2: "y",
+            displayName1: "@x",
+            displayName2: "@y"
+        }
     },
-    offsetY: {
-        displayName: "@repeater.offsetY",
-        defaultValue: 0,
-        type: "numeric",
-        computed: true
+    copies: {
+        displayName: "@repeater.copies",
+        type : "tuple",
+        computed: true,
+        options : {
+            name1: "x",
+            name2: "y",
+            displayName1: "@horizontal",
+            displayName2: "@vertical",
+            options1: {
+                min: 1,
+                max: 100
+            },
+            options2: {
+                min: 1,
+                max: 100
+            }
+        }
     },
-    rows: {
-        displayName: "@repeater.copiesY",
-        defaultValue: 0,
-        type: "numeric",
-        computed: true
-    },
-    cols: {
-        displayName: "@repeater.copiesX",
-        defaultValue: 0,
-        type: "numeric",
-        computed: true
+    innerMargin: {
+        displayName: "@repeater.margin",
+        defaultValue: {x:20, y:20},
+        computed: true,
+        type: "tuple",
+        options: {
+            name1:"x",
+            name2:"y",
+            displayName1:"@horizontal",
+            displayName2:"@vertical",
+            options1: {
+                min: 0
+            },
+            options2: {
+                min: 0
+            }
+        }
     },
     innerMarginX: {
-        displayName: "@repeater.marginX",
         defaultValue: 20,
         type: "numeric",
         options: {
@@ -532,7 +602,6 @@ PropertyMetadata.registerForType(RepeatContainer, {
         }
     },
     innerMarginY: {
-        displayName: "@repeater.marginY",
         defaultValue: 20,
         type: "numeric",
         options: {
@@ -549,7 +618,7 @@ PropertyMetadata.registerForType(RepeatContainer, {
         var groups = PropertyMetadata.findAll(Types.Container).groups();
         groups.splice(1, 0, {
             label: "Repeater",
-            properties: ["cols", "rows", "innerMarginX", "innerMarginY", "offsetX", "offsetY"]
+            properties: ["copies", "innerMargin", "offset"]
         });
 
         return groups;
