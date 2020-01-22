@@ -108,6 +108,10 @@ class Backend implements IBackend {
 
         Logger.context.userId = this.getUserId();
         Logger.context.sessionId = this.sessionId;
+
+        if(DEBUG && params.loggedin){
+            this.loginAsUser({email:"debug@carbonium.io", password:"no"});
+        }
     }
 
     raiseLoginNeeded() {
@@ -204,7 +208,7 @@ class Backend implements IBackend {
         this._userManager.signinSilentCallback();
     }
     isLoggedIn() {
-        return !!this.getAccessToken() && !!this.getUserId();
+        return (!!this.getAccessToken() && !!this.getUserId()) || (DEBUG && params.loggedin);
     }
     loginAsGuest() {
         return this.login("trial", "trial", true);
@@ -227,6 +231,23 @@ class Backend implements IBackend {
             defaultHeaders: false,
             contentType: contentTypes.urlEncoded
         };
+        if(DEBUG && params.loggedin)
+        {
+            this.setAccessToken("fake");
+
+            this.setUserId("userId");
+            this.setUserName("userName");
+            this.setUserAvatar("");
+            this.setCompanyName("companyName");
+            this.setIsGuest(false);
+            return Promise.resolve(<Response<ILoginModel, ILoginResult>>{
+                ok: true,
+                result: {
+                    userId: "userId",
+                    companyName: "companyName"
+                }
+            });
+        }
         return this.post(this.servicesEndpoint + "/idsrv/connect/token", data, options)
             .then(data => this.setAccessToken(data.access_token))
             .then(() => this.postAuthenticate(isGuest))
@@ -294,9 +315,9 @@ class Backend implements IBackend {
             });
     }
 
-    logout() {
+    logout() {        
         return this.post(this.servicesEndpoint + "/idsrv/ext/logout", null, { credentials: DEBUG ? "include" : "same-origin" })
-            .then(() => {
+            .finally(() => {
                 localStorage.removeItem("accessToken");
                 localStorage.removeItem("userId");
                 localStorage.removeItem("isGuest");

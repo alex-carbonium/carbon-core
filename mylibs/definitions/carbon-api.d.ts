@@ -345,6 +345,7 @@ declare module "carbon-api" {
         perf: boolean;
         realCdn: string;
         basicPlatform?:boolean;
+        loggedin?:boolean;
     }
 }
 

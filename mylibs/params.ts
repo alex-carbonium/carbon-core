@@ -7,6 +7,7 @@ interface IQueryStringParams{
     cls?: boolean;
     serverless?: boolean;
     perf?:boolean;
+    loggedin?:boolean;
 }
 
 function parseQueryString(): IQueryStringParams{
@@ -71,6 +72,7 @@ export default {
     transport: "auto",
     endpoints: endpoints,
     serveless: qs.serverless,
+    loggedin: qs.loggedin,
     clearStorage: qs.cls,
     perf: qs.perf,
     realCdn: RealCdn
