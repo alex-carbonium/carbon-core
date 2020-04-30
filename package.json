@@ -78,7 +78,7 @@
     "bluebird": "3.4.1",
     "hammerjs": "2.0.8",
     "hsluv": "0.0.1",
-    "jquery": "1.9.1",
+    "jquery": "3.5.0",
     "oidc-client": "1.1.0",
     "opentype.js": "0.6.4",
     "tinycolor2": "1.1.2",
